@@ -1,5 +1,5 @@
 # ═══════════════════════════════════════════════════════════
-# Release-check fixes: ihcheterogeneity (OncoPath release check, 2026-09-18)
+# Release-check fixes: ihcheterogeneity (showInterpretation = TRUE, OncoPath release check, 2026-09-18)
 # ═══════════════════════════════════════════════════════════
 #
 # One block per defect found by the release-profile check (finding IDs I00-I36,
@@ -13,7 +13,7 @@ verdict_of <- function(res) {
     regmatches(t, regexpr(
         "(AGREEMENT THRESHOLDS MET, NOT CONFIRMED|AGREEMENT THRESHOLDS MET|MODERATE SAMPLING|INADEQUATE SAMPLING|NOT ADEQUATE FOR SUBSTITUTION|INSUFFICIENT DATA)", t))
 }
-ihc <- function(d, ...) ClinicoPath::ihcheterogeneity(data = d, ...)
+ihc <- function(d, ...) ClinicoPath::ihcheterogeneity(showInterpretation = TRUE, data = d, ...)
 note_text <- function(tbl) paste(vapply(tbl$notes, function(n) n$note, ""), collapse = " | ")
 
 # 30 cases: region b1 over-reads the reference by ~11 %, region b2 under-reads by
@@ -603,7 +603,7 @@ test_that("a region name containing ' [' does not cut its table note short (R20)
 
 test_that("the biopsy plot draws a reference-design state saved without ref_label (R22) and a repeated variable is analysed once (R24)", {
     d <- clean(20)
-    o <- ClinicoPath:::ihcheterogeneityOptions$new(wholesection = "whole", biopsy1 = "b1", biopsy2 = "b2",
+    o <- ClinicoPath:::ihcheterogeneityOptions$new(showInterpretation = TRUE, wholesection = "whole", biopsy1 = "b1", biopsy2 = "b2",
                                                   show_variability_plots = TRUE)
     an <- ClinicoPath:::ihcheterogeneityClass$new(options = o, data = d)
     an$results$biopsyplot$setState(list(whole_section = d$whole, biopsy_data = d[, c("b1", "b2")],
@@ -702,7 +702,7 @@ test_that("the spatial plot does not print 'CV: NA%' (R31)", {
     set.seed(3); w <- c(runif(20, 0, 0.3), runif(20, 20, 60))
     d <- data.frame(whole = w, b1 = w + runif(40, 0, 0.2), b2 = w + runif(40, 0, 0.2),
                     comp = factor(rep(c("A", "B"), each = 20)))
-    o <- ClinicoPath:::ihcheterogeneityOptions$new(wholesection = "whole", biopsy1 = "b1", biopsy2 = "b2",
+    o <- ClinicoPath:::ihcheterogeneityOptions$new(showInterpretation = TRUE, wholesection = "whole", biopsy1 = "b1", biopsy2 = "b2",
                                                   spatial_id = "comp", show_variability_plots = TRUE)
     an <- ClinicoPath:::ihcheterogeneityClass$new(options = o, data = d); an$run()
     grDevices::png(tempfile(fileext = ".png")); on.exit(grDevices::dev.off(), add = TRUE)
@@ -805,7 +805,7 @@ test_that("the reference selected again as a region is analysed once, as the ref
 
 test_that("an all-zero marker gets a truthful CV note, no 'robust' label and no empty plot (S21)", {
     d <- data.frame(whole = rep(0, 10), b1 = rep(0, 10), b2 = rep(0, 10))
-    o <- ClinicoPath:::ihcheterogeneityOptions$new(wholesection = "whole", biopsy1 = "b1", biopsy2 = "b2",
+    o <- ClinicoPath:::ihcheterogeneityOptions$new(showInterpretation = TRUE, wholesection = "whole", biopsy1 = "b1", biopsy2 = "b2",
                                                   show_variability_plots = TRUE)
     an <- ClinicoPath:::ihcheterogeneityClass$new(options = o, data = d); an$run()
     tab <- an$results$reproducibilitytable
@@ -876,7 +876,7 @@ test_that("a measurement in slot 2 starts the analysis; without one only the wel
     expect_equal(res$reproducibilitytable$asDF,
                  ihc(d, wholesection = "whole", biopsy1 = "b1", biopsy2 = "b2")$reproducibilitytable$asDF)
     # the R wrapper cannot run with no variable at all, so use the class
-    an <- ClinicoPath:::ihcheterogeneityClass$new(options = ClinicoPath:::ihcheterogeneityOptions$new(wholesection = "whole"), data = d)
+    an <- ClinicoPath:::ihcheterogeneityClass$new(options = ClinicoPath:::ihcheterogeneityOptions$new(showInterpretation = TRUE, wholesection = "whole"), data = d)
     an$init()
     r <- an$results
     expect_true(r$welcome$visible)
@@ -890,7 +890,7 @@ test_that("plot styling survives jamovi's theme and compartments keep the level 
     comp <- factor(sample(c("peripheral", "central", "front"), n, TRUE), levels = c("front", "peripheral", "central"))
     d <- data.frame(whole = w, b1 = w * (1 + rnorm(n, 0, 0.05)), b2 = w * (1 + rnorm(n, 0, 0.05)), comp = comp)
     expect_false(identical(unique(as.character(comp)), levels(comp)))     # appearance order differs
-    o <- ClinicoPath:::ihcheterogeneityOptions$new(wholesection = "whole", biopsy1 = "b1", biopsy2 = "b2", spatial_id = "comp",
+    o <- ClinicoPath:::ihcheterogeneityOptions$new(showInterpretation = TRUE, wholesection = "whole", biopsy1 = "b1", biopsy2 = "b2", spatial_id = "comp",
                                                   compareCompartments = TRUE, show_variability_plots = TRUE)
     an <- ClinicoPath:::ihcheterogeneityClass$new(options = o, data = d); an$run()
     expect_equal(an$results$spatialanalysistable$asDF$region, levels(comp))
@@ -958,7 +958,7 @@ test_that("a compartment without an ICC is shown and explained, not dropped (RC3
 test_that("hidden plots get no state, visible ones do (RC8)", {
     d <- clean(30)
     run <- function(...) {
-        o <- ClinicoPath:::ihcheterogeneityOptions$new(wholesection = "whole", biopsy1 = "b1", biopsy2 = "b2", ...)
+        o <- ClinicoPath:::ihcheterogeneityOptions$new(showInterpretation = TRUE, wholesection = "whole", biopsy1 = "b1", biopsy2 = "b2", ...)
         an <- ClinicoPath:::ihcheterogeneityClass$new(options = o, data = d); an$run(); an$results
     }
     hidden <- run(analysis_type = "reproducibility")
@@ -1053,7 +1053,7 @@ test_that("the help-page example runs", {
 test_that("Additional Analyses toggles are inert under a focus that already includes them", {
     d <- clean(30)
     run <- function(...) {
-        o <- ClinicoPath:::ihcheterogeneityOptions$new(wholesection = "whole", biopsy1 = "b1",
+        o <- ClinicoPath:::ihcheterogeneityOptions$new(showInterpretation = TRUE, wholesection = "whole", biopsy1 = "b1",
                                                        biopsy2 = "b2", ...)
         an <- ClinicoPath:::ihcheterogeneityClass$new(options = o, data = d); an$run(); an$results
     }

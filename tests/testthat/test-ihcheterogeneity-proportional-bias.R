@@ -13,7 +13,7 @@ verdict_of <- function(res) {
     regmatches(t, regexpr(
         "(AGREEMENT THRESHOLDS MET, NOT CONFIRMED|AGREEMENT THRESHOLDS MET|MODERATE SAMPLING|INADEQUATE SAMPLING|NOT ADEQUATE FOR SUBSTITUTION|INSUFFICIENT DATA)", t))
 }
-ihc <- function(d, ...) ClinicoPath::ihcheterogeneity(data = d, ...)
+ihc <- function(d, ...) ClinicoPath::ihcheterogeneity(showInterpretation = TRUE, data = d, ...)
 note_text <- function(tbl) paste(vapply(tbl$notes, function(n) n$note, ""), collapse = " | ")
 
 # One region that compresses the scale around the mean.
@@ -128,7 +128,7 @@ test_that("a sparse second region cannot make the level check weaker (A3-P6)", {
 
 test_that("levels differing only in rounding residue give a blank slope, not a crash (A3-P1)", {
     priv <- ClinicoPath:::ihcheterogeneityClass$new(
-        options = ClinicoPath:::ihcheterogeneityOptions$new(biopsy1 = "a"),
+        options = ClinicoPath:::ihcheterogeneityOptions$new(showInterpretation = TRUE, biopsy1 = "a"),
         data = data.frame(a = 1:5))$.__enclos_env__$private
     # 0.45 written four ways (5 distinct doubles, 1 value) plus one case at 0.9
     L <- c(rep(c(0.45, (0.84 + 0.06) / 2, (0.56 + 0.34) / 2, (0.68 + 0.56 + 0.11) / 3), 5), 0.9)
@@ -162,7 +162,7 @@ test_that("the mean of all regions gets its own sentence when its difference cha
 
 test_that("the slope test holds its size when the error grows with the level (HC3)", {
     priv <- ClinicoPath:::ihcheterogeneityClass$new(
-        options = ClinicoPath:::ihcheterogeneityOptions$new(biopsy1 = "a"),
+        options = ClinicoPath:::ihcheterogeneityOptions$new(showInterpretation = TRUE, biopsy1 = "a"),
         data = data.frame(a = 1:5))$.__enclos_env__$private
     set.seed(9)
     p <- replicate(400, {

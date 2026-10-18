@@ -38,6 +38,8 @@ waterfall(
   showClinicalSignificance = FALSE,
   showConfidenceIntervals = TRUE,
   enableGuidedMode = FALSE,
+  showClinicalSummary = FALSE,
+  showAboutAnalysis = FALSE,
   showExplanations = FALSE,
   showResponseDuration = FALSE,
   seed = 123
@@ -167,6 +169,10 @@ interval) and a sample-size note.}
 confidence intervals for ORR and DCR}
 
 \item{enableGuidedMode}{Enable step-by-step guidance for new users}
+
+\item{showClinicalSummary}{.}
+
+\item{showAboutAnalysis}{.}
 
 \item{showExplanations}{Display comprehensive explanation of what this
 analysis does, when to use it, data requirements, and key

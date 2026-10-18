@@ -172,7 +172,7 @@ options:
             waterfall layout.
 
     - name: showBaseline
-      title: Baseline (Y = 0) line
+      title: Baseline (y = 0) line
       type: Bool
       default: true
       description:
@@ -202,7 +202,7 @@ options:
             ORR and DCR are not changed (use the category override for that).
 
     - name: ongoingVar
-      title: On-Treatment / Ongoing (optional)
+      title: On-Treatment / ongoing (optional)
       type: Variable
       suggested: [nominal]
       permitted: [factor, numeric]
@@ -530,6 +530,16 @@ options:
             - Provides contextual help and best practice recommendations
             - Includes misuse detection and warnings
             Recommended for new users or complex analyses
+
+    - name: showClinicalSummary
+      title: Clinical summary
+      type: Bool
+      default: false
+
+    - name: showAboutAnalysis
+      title: About this analysis
+      type: Bool
+      default: false
 
     - name: showExplanations
       title: Analysis explanations

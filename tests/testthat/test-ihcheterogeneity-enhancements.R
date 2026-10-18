@@ -9,7 +9,7 @@ test_that("escapeVar handles variables with special characters", {
   names(test_data)[2:6] <- c("whole section", "region-1", "region.2", "region_3", "region 4")
 
   # Test analysis with special characters in variable names
-  result <- ihcheterogeneity(
+  result <- ihcheterogeneity(showInterpretation = TRUE,
     data = test_data,
     wholesection = "whole section",
     biopsy1 = "region-1",
@@ -31,7 +31,7 @@ test_that("a small cohort is rejected, and a constant region still yields a real
   )
 
   expect_error(
-    ihcheterogeneity(
+    ihcheterogeneity(showInterpretation = TRUE,
       data = small_data,
       wholesection = "whole",
       biopsy1 = "reg1",
@@ -49,7 +49,7 @@ test_that("a small cohort is rejected, and a constant region still yields a real
     reg1  = rep(50, 6),                       # zero variance
     reg2  = c(52, 56, 61, 44, 51, 59)
   )
-  res <- ihcheterogeneity(
+  res <- ihcheterogeneity(showInterpretation = TRUE,
     data = fb_data, wholesection = "whole",
     biopsy1 = "reg1", biopsy2 = "reg2"
   )
@@ -77,7 +77,7 @@ test_that("reference-based vs inter-regional analysis modes work", {
                                     package = "ClinicoPath"))
 
   # Test reference-based mode
-  result_ref <- ihcheterogeneity(
+  result_ref <- ihcheterogeneity(showInterpretation = TRUE,
     data = test_data,
     wholesection = "ki67_wholesection",
     biopsy1 = "ki67_region1",
@@ -85,7 +85,7 @@ test_that("reference-based vs inter-regional analysis modes work", {
   )
 
   # Test inter-regional mode (no reference)
-  result_inter <- ihcheterogeneity(
+  result_inter <- ihcheterogeneity(showInterpretation = TRUE,
     data = test_data,
     biopsy1 = "ki67_region1",
     biopsy2 = "ki67_region2",
@@ -104,14 +104,14 @@ test_that("spatial analysis activates with spatial_id", {
                                     package = "ClinicoPath"))
 
   # Without spatial_id
-  result_no_spatial <- ihcheterogeneity(
+  result_no_spatial <- ihcheterogeneity(showInterpretation = TRUE,
     data = test_data,
     biopsy1 = "ki67_region1",
     biopsy2 = "ki67_region2"
   )
 
   # With spatial_id
-  result_spatial <- ihcheterogeneity(
+  result_spatial <- ihcheterogeneity(showInterpretation = TRUE,
     data = test_data,
     biopsy1 = "ki67_region1",
     biopsy2 = "ki67_region2",
@@ -128,7 +128,7 @@ test_that("analysis type changes behavior", {
                                     package = "ClinicoPath"))
 
   # Comprehensive analysis
-  result_comp <- ihcheterogeneity(
+  result_comp <- ihcheterogeneity(showInterpretation = TRUE,
     data = test_data,
     wholesection = "ki67_wholesection",
     biopsy1 = "ki67_region1",
@@ -137,7 +137,7 @@ test_that("analysis type changes behavior", {
   )
 
   # Reproducibility focus
-  result_repro <- ihcheterogeneity(
+  result_repro <- ihcheterogeneity(showInterpretation = TRUE,
     data = test_data,
     wholesection = "ki67_wholesection",
     biopsy1 = "ki67_region1",
@@ -160,7 +160,7 @@ test_that("threshold parameters affect interpretation", {
                                     package = "ClinicoPath"))
 
   # Low CV threshold (strict)
-  result_strict <- ihcheterogeneity(
+  result_strict <- ihcheterogeneity(showInterpretation = TRUE,
     data = test_data,
     wholesection = "ki67_wholesection",
     biopsy1 = "ki67_region1",
@@ -170,7 +170,7 @@ test_that("threshold parameters affect interpretation", {
   )
 
   # High CV threshold (lenient)
-  result_lenient <- ihcheterogeneity(
+  result_lenient <- ihcheterogeneity(showInterpretation = TRUE,
     data = test_data,
     wholesection = "ki67_wholesection",
     biopsy1 = "ki67_region1",

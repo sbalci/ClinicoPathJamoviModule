@@ -14,42 +14,42 @@ children:
         stretchFactor: 1
         children:
           - type: TargetLayoutBox
-            label: "Patient ID (Required)"
+            label: "Patient ID (required)"
             children:
               - type: VariablesListBox
                 name: patientID
                 maxItemCount: 1
                 isTarget: true
           - type: TargetLayoutBox
-            label: "Start Time (Required)"
+            label: "Start time (required)"
             children:
               - type: VariablesListBox
                 name: startTime
                 maxItemCount: 1
                 isTarget: true
           - type: TargetLayoutBox
-            label: "End Time (Required)"
+            label: "End time (required)"
             children:
               - type: VariablesListBox
                 name: endTime
                 maxItemCount: 1
                 isTarget: true
           - type: TargetLayoutBox
-            label: "Response/Status Variable (Optional)"
+            label: "Response/Status variable (optional)"
             children:
               - type: VariablesListBox
                 name: responseVar
                 maxItemCount: 1
                 isTarget: true
           - type: TargetLayoutBox
-            label: "Censoring/Event Status (Optional)"
+            label: "Censoring/Event status (optional)"
             children:
               - type: VariablesListBox
                 name: censorVar
                 maxItemCount: 1
                 isTarget: true
           - type: TargetLayoutBox
-            label: "Grouping Variable (Optional)"
+            label: "Grouping variable (optional)"
             children:
               - type: VariablesListBox
                 name: groupVar
@@ -118,7 +118,7 @@ children:
         margin: large
         children:
           - type: Label
-            label: "Milestone Times/Dates"
+            label: "Milestone times/dates"
             fitToGrid: true
             stretchFactor: 1
       - type: VariableSupplier
@@ -127,35 +127,35 @@ children:
         fitToGrid: true
         children:
           - type: TargetLayoutBox
-            label: "Milestone 1 Date"
+            label: "Milestone 1 date"
             children:
               - type: VariablesListBox
                 name: milestone1Date
                 maxItemCount: 1
                 isTarget: true
           - type: TargetLayoutBox
-            label: "Milestone 2 Date"
+            label: "Milestone 2 date"
             children:
               - type: VariablesListBox
                 name: milestone2Date
                 maxItemCount: 1
                 isTarget: true
           - type: TargetLayoutBox
-            label: "Milestone 3 Date"
+            label: "Milestone 3 date"
             children:
               - type: VariablesListBox
                 name: milestone3Date
                 maxItemCount: 1
                 isTarget: true
           - type: TargetLayoutBox
-            label: "Milestone 4 Date"
+            label: "Milestone 4 date"
             children:
               - type: VariablesListBox
                 name: milestone4Date
                 maxItemCount: 1
                 isTarget: true
           - type: TargetLayoutBox
-            label: "Milestone 5 Date"
+            label: "Milestone 5 date"
             children:
               - type: VariablesListBox
                 name: milestone5Date
@@ -177,7 +177,7 @@ children:
         stretchFactor: 1
         children:
           - type: TargetLayoutBox
-            label: "Event Type Variable"
+            label: "Event type variable"
             children:
               - type: VariablesListBox
                 name: eventVar
@@ -185,7 +185,7 @@ children:
                 isTarget: true
                 enable: (showEventMarkers)
           - type: TargetLayoutBox
-            label: "Event Time Variable"
+            label: "Event time variable"
             children:
               - type: VariablesListBox
                 name: eventTimeVar
@@ -249,7 +249,7 @@ children:
         stretchFactor: 1
         children:
           - type: TargetLayoutBox
-            label: "Sort By Variable (Optional)"
+            label: "Sort by variable (optional)"
             children:
               - type: VariablesListBox
                 name: sortVariable

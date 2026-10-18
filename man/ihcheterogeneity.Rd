@@ -24,6 +24,7 @@ ihcheterogeneity(
   variance_components = FALSE,
   sample_size_planning = FALSE,
   generate_recommendations = FALSE,
+  showInterpretation = FALSE,
   showSummary = FALSE,
   showGlossary = FALSE,
   showReportSentences = FALSE,
@@ -125,6 +126,8 @@ shown under the Comprehensive focus.}
 \item{generate_recommendations}{Recommendations on regions per case,
 calibration of systematic differences and quality control, derived from the
 results of this analysis.}
+
+\item{showInterpretation}{.}
 
 \item{showSummary}{Display natural-language summary of heterogeneity
 analysis results}

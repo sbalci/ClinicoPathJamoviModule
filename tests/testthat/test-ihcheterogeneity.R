@@ -26,7 +26,7 @@ sample_data <- read.csv(get_data_path("ihc_heterogeneity.csv"), stringsAsFactors
 
 test_that("ihcheterogeneity runs with default options", {
   skip_if_not_installed('jmvReadWrite')
-    results <- ClinicoPath::ihcheterogeneity(
+    results <- ClinicoPath::ihcheterogeneity(showInterpretation = TRUE,
         data = sample_data,
         wholesection = "ki67_wholesection",
         biopsy1 = "ki67_region1",
@@ -50,7 +50,7 @@ test_that("ihcheterogeneity runs with default options", {
 })
 
 test_that("ihcheterogeneity handles inter-regional analysis", {
-    results <- ClinicoPath::ihcheterogeneity(
+    results <- ClinicoPath::ihcheterogeneity(showInterpretation = TRUE,
         data = sample_data,
         biopsy1 = "ki67_region1",
         biopsy2 = "ki67_region2",
@@ -79,7 +79,7 @@ test_that("ihcheterogeneity handles missing data", {
 
     # The function should run without errors with missing data
     expect_error({
-        ClinicoPath::ihcheterogeneity(
+        ClinicoPath::ihcheterogeneity(showInterpretation = TRUE,
             data = sample_data_missing,
             wholesection = "ki67_wholesection",
             biopsy1 = "ki67_region1",
@@ -91,7 +91,7 @@ test_that("ihcheterogeneity handles missing data", {
 test_that("ihcheterogeneity misuse detection works", {
     # Test with a small sample size
     small_data <- sample_data[1:5, ]
-    results <- ClinicoPath::ihcheterogeneity(
+    results <- ClinicoPath::ihcheterogeneity(showInterpretation = TRUE,
         data = small_data,
         wholesection = "ki67_wholesection",
         biopsy1 = "ki67_region1"
@@ -103,7 +103,7 @@ test_that("ihcheterogeneity misuse detection works", {
     # Test with constant values
     constant_data <- sample_data
     constant_data$ki67_region1 <- 100
-    results <- ClinicoPath::ihcheterogeneity(
+    results <- ClinicoPath::ihcheterogeneity(showInterpretation = TRUE,
         data = constant_data,
         wholesection = "ki67_wholesection",
         biopsy1 = "ki67_region1"
@@ -113,7 +113,7 @@ test_that("ihcheterogeneity misuse detection works", {
 })
 
 test_that("ihcheterogeneity plain language summary works", {
-    results <- ClinicoPath::ihcheterogeneity(
+    results <- ClinicoPath::ihcheterogeneity(showInterpretation = TRUE,
         data = sample_data,
         wholesection = "ki67_wholesection",
         biopsy1 = "ki67_region1",
@@ -124,7 +124,7 @@ test_that("ihcheterogeneity plain language summary works", {
 })
 
 test_that("ihcheterogeneity glossary works", {
-    results <- ClinicoPath::ihcheterogeneity(
+    results <- ClinicoPath::ihcheterogeneity(showInterpretation = TRUE,
         data = sample_data,
         wholesection = "ki67_wholesection",
         biopsy1 = "ki67_region1",
@@ -143,7 +143,7 @@ test_that("ihcheterogeneity omits opposite-direction calibration wording without
         core2 = base + rnorm(n, 0, 1),
         core3 = base + rnorm(n, 0, 1)
     )
-    res <- ClinicoPath::ihcheterogeneity(
+    res <- ClinicoPath::ihcheterogeneity(showInterpretation = TRUE,
         data = df_inter,
         biopsy1 = "core1",
         biopsy2 = "core2",

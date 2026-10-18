@@ -871,6 +871,17 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         }
 
 
+        for (variable in unique(c(responseVar, timeVar))) {
+          if (!variable %in% names(df)) next
+          values <- jmvcore::toNumeric(df[[variable]])
+          bad_rows <- which(is.infinite(values))
+          if (length(bad_rows)) {
+            jmvcore::reject("{}", code = "nonfinite_measurements", msg = sprintf(
+              .("Infinite response or time values in variable '%s', analysis row(s) %s. Enter finite values or mark unavailable values as missing."),
+              variable, paste(utils::head(bad_rows, 10), collapse = ", ")))
+          }
+        }
+
         # Check minimum number of patients
         if (patientID %in% names(df)) {
           n_patients <- length(unique(df[[patientID]]))
@@ -2287,7 +2298,9 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         }
 
         # Generate clinical summary ----
-        private$.generateClinicalSummary(processed_data, metrics, person_time_metrics)
+        self$results$clinicalSummary$setContent("")
+        if (isTRUE(self$options$showClinicalSummary))
+          private$.generateClinicalSummary(processed_data, metrics, person_time_metrics)
 
 
         # Generate group comparison analysis ----
@@ -2295,7 +2308,8 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
 
         # Generate about analysis panel ----
-        private$.generateAboutAnalysis()
+        self$results$aboutAnalysis$setContent("")
+        if (isTRUE(self$options$showAboutAnalysis)) private$.generateAboutAnalysis()
 
         return(list(metrics = metrics, person_time_metrics = person_time_metrics))
       },
@@ -3630,7 +3644,21 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
       ,
       # Generate group comparison analysis ----
+        .tryFisherTest = function(contingency, outcome) {
+            result <- tryCatch(stats::fisher.test(contingency), error = function(e) e)
+            if (inherits(result, "error")) {
+                message <- sprintf(
+                    .("Fisher's exact test for %s could not be computed: %s. No p-value is reported. Review the group counts or combine groups only when clinically justified."),
+                    outcome, gsub("[\r\n]+", " ", conditionMessage(result)))
+                private$.addNotice("WARNING", .("Group comparison could not be computed"), message)
+                self$results$groupComparisonTest$setNote(paste0("fisher_error_", outcome), message)
+            }
+            result
+        },
+
       .generateGroupComparison = function(processed_data) {
+        for (key in c("fisher_error_ORR", "fisher_error_DCR", "skipped"))
+          self$results$groupComparisonTest$setNote(key, NULL)
         if (is.null(self$options$groupVar) || !"patient_group" %in% names(processed_data$waterfall)) {
           return()
         }
@@ -3712,13 +3740,9 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             dplyr::select(patient_group, responder) %>%
             table()
 
-          orr_test <- tryCatch({
-            if (nrow(orr_contingency) >= 2 && ncol(orr_contingency) >= 2) {
-              fisher.test(orr_contingency)
-            } else {
-              NULL
-            }
-          }, error = function(e) NULL)
+          orr_test <- if (nrow(orr_contingency) >= 2 && ncol(orr_contingency) >= 2) {
+            private$.tryFisherTest(orr_contingency, "ORR")
+          } else NULL
 
           # Fisher's exact test for DCR comparison
           dcr_contingency <- df %>%
@@ -3728,13 +3752,9 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             dplyr::select(patient_group, disease_control) %>%
             table()
 
-          dcr_test <- tryCatch({
-            if (nrow(dcr_contingency) >= 2 && ncol(dcr_contingency) >= 2) {
-              fisher.test(dcr_contingency)
-            } else {
-              NULL
-            }
-          }, error = function(e) NULL)
+          dcr_test <- if (nrow(dcr_contingency) >= 2 && ncol(dcr_contingency) >= 2) {
+            private$.tryFisherTest(dcr_contingency, "DCR")
+          } else NULL
 
           # The odds ratio of a 2x2 table (rows = groups, columns = no/yes) is the
           # odds of the outcome in the SECOND group over the FIRST. Printed bare
@@ -3751,7 +3771,7 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
           # Add test results to table
           row_count <- 1
 
-          if (!is.null(orr_test)) {
+          if (inherits(orr_test, "htest")) {
             orr_interpretation <- if (orr_test$p.value < 0.05) {
               .("Statistically significant difference in response rates between groups")
             } else {
@@ -3769,7 +3789,7 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             row_count <- row_count + 1
           }
 
-          if (!is.null(dcr_test)) {
+          if (inherits(dcr_test, "htest")) {
             dcr_interpretation <- if (dcr_test$p.value < 0.05) {
               .("Statistically significant difference in disease control rates between groups")
             } else {

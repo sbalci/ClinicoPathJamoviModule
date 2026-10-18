@@ -24,6 +24,7 @@ ihcheterogeneityOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
             variance_components = FALSE,
             sample_size_planning = FALSE,
             generate_recommendations = FALSE,
+            showInterpretation = FALSE,
             showSummary = FALSE,
             showGlossary = FALSE,
             showReportSentences = FALSE,
@@ -150,6 +151,10 @@ ihcheterogeneityOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
                 "generate_recommendations",
                 generate_recommendations,
                 default=FALSE)
+            private$..showInterpretation <- jmvcore::OptionBool$new(
+                "showInterpretation",
+                showInterpretation,
+                default=FALSE)
             private$..showSummary <- jmvcore::OptionBool$new(
                 "showSummary",
                 showSummary,
@@ -185,6 +190,7 @@ ihcheterogeneityOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
             self$.addOption(private$..variance_components)
             self$.addOption(private$..sample_size_planning)
             self$.addOption(private$..generate_recommendations)
+            self$.addOption(private$..showInterpretation)
             self$.addOption(private$..showSummary)
             self$.addOption(private$..showGlossary)
             self$.addOption(private$..showReportSentences)
@@ -209,6 +215,7 @@ ihcheterogeneityOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
         variance_components = function() private$..variance_components$value,
         sample_size_planning = function() private$..sample_size_planning$value,
         generate_recommendations = function() private$..generate_recommendations$value,
+        showInterpretation = function() private$..showInterpretation$value,
         showSummary = function() private$..showSummary$value,
         showGlossary = function() private$..showGlossary$value,
         showReportSentences = function() private$..showReportSentences$value,
@@ -232,6 +239,7 @@ ihcheterogeneityOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
         ..variance_components = NA,
         ..sample_size_planning = NA,
         ..generate_recommendations = NA,
+        ..showInterpretation = NA,
         ..showSummary = NA,
         ..showGlossary = NA,
         ..showReportSentences = NA,
@@ -301,8 +309,9 @@ ihcheterogeneityResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
                 options=options,
                 name="interpretation",
                 title="Clinical Interpretation and Analysis Summary",
-                visible=TRUE,
+                visible="(showInterpretation)",
                 clearWith=list(
+                    "showInterpretation",
                     "wholesection",
                     "biopsy1",
                     "biopsy2",
@@ -888,6 +897,7 @@ ihcheterogeneityBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
 #' @param generate_recommendations Recommendations on regions per case,
 #'   calibration of systematic differences and quality control, derived from the
 #'   results of this analysis.
+#' @param showInterpretation .
 #' @param showSummary Display natural-language summary of heterogeneity
 #'   analysis results
 #' @param showGlossary Display definitions of statistical terms (ICC, CV,
@@ -944,6 +954,7 @@ ihcheterogeneity <- function(
     variance_components = FALSE,
     sample_size_planning = FALSE,
     generate_recommendations = FALSE,
+    showInterpretation = FALSE,
     showSummary = FALSE,
     showGlossary = FALSE,
     showReportSentences = FALSE,
@@ -991,6 +1002,7 @@ ihcheterogeneity <- function(
         variance_components = variance_components,
         sample_size_planning = sample_size_planning,
         generate_recommendations = generate_recommendations,
+        showInterpretation = showInterpretation,
         showSummary = showSummary,
         showGlossary = showGlossary,
         showReportSentences = showReportSentences,

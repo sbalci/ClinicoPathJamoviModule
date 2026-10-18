@@ -16,15 +16,10 @@ test_that("ihcheterogeneity function exists and is accessible", {
   expect_type(ihcheterogeneity, "closure")
 })
 
-test_that("minimal configurations: 1 region alone rejects, reference + 1 region runs", {
-  # A single region with no reference has nothing to compare against
-  expect_error(
-    ihcheterogeneity(
-      data = ihcheterogeneity_test,
-      biopsy1 = "biopsy1"
-    ),
-    "At least 2 regional measurements"
-  )
+test_that("minimal configurations: 1 region guides, reference + 1 region runs", {
+  partial <- ihcheterogeneity(data = ihcheterogeneity_test, biopsy1 = "biopsy1")
+  expect_match(partial$notices$content, "second distinct regional measurement", fixed = TRUE)
+  expect_equal(partial$reproducibilitytable$rowCount, 0)
 
   # Reference + one region is the classic agreement design and must run
   result <- ihcheterogeneity(

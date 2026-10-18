@@ -457,7 +457,7 @@ test_that("R2-counts: one cohort count across notices, summaries and copy-ready 
   d <- rbind(raw4,
              data.frame(pid = c("P5", "P5"), time = c(0, 6), size = c(50, NA)),   # Unknown (no measured follow-up)
              data.frame(pid = c("P6", "P6"), time = c(0, 6), size = c(0, 10)))    # excluded (zero baseline)
-  res <- wf_run(d, patientID = "pid", responseVar = "size", timeVar = "time", inputType = "raw",
+  res <- wf_run(d, showClinicalSummary = TRUE, patientID = "pid", responseVar = "size", timeVar = "time", inputType = "raw",
                 generateCopyReadyReport = TRUE, showExplanations = TRUE)
   txt <- wf_notices(res)
   expect_match(txt, "computed over the 4 evaluable patients")

@@ -16,7 +16,7 @@ children:
             maxItemCount: 1
             isTarget: true
       - type: TargetLayoutBox
-        label: Response Value (Raw or Percentage Measurement)
+        label: Response value (raw or percentage measurement)
         children:
           - type: VariablesListBox
             name: responseVar
@@ -30,14 +30,14 @@ children:
                 events:
                   change: './waterfall.events::onChange_inputType'
       - type: TargetLayoutBox
-        label: Time Variable (raw input, visits, spider plot)
+        label: Time variable (raw input, visits, spider plot)
         children:
           - type: VariablesListBox
             name: timeVar
             maxItemCount: 1
             isTarget: true
       - type: TargetLayoutBox
-        label: Group Variable
+        label: Group variable
         children:
           - type: VariablesListBox
             name: groupVar
@@ -46,21 +46,21 @@ children:
             events:
               change: './waterfall.events::onChange_groupVar'
       - type: TargetLayoutBox
-        label: Confirmation Status (optional)
+        label: Confirmation status (optional)
         children:
           - type: VariablesListBox
             name: confirmationVar
             maxItemCount: 1
             isTarget: true
       - type: TargetLayoutBox
-        label: On-Treatment / Ongoing (optional)
+        label: On-Treatment / ongoing (optional)
         children:
           - type: VariablesListBox
             name: ongoingVar
             maxItemCount: 1
             isTarget: true
       - type: TargetLayoutBox
-        label: Response Category Override (optional)
+        label: Response category override (optional)
         children:
           - type: VariablesListBox
             name: responseCategoryVar
@@ -109,7 +109,7 @@ children:
                 name: showCategoryLabels
                 enable: (showWaterfallPlot)
               - type: TargetLayoutBox
-                label: Annotation Tracks
+                label: Annotation tracks
                 children:
                   - type: VariablesListBox
                     name: annotationVars
@@ -198,6 +198,10 @@ children:
       - type: LayoutBox
         margin: large
         children:
+          - type: CheckBox
+            name: showClinicalSummary
+          - type: CheckBox
+            name: showAboutAnalysis
           - type: CheckBox
             name: generateCopyReadyReport
           - type: CheckBox

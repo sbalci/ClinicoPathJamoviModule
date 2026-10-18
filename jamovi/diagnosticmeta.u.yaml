@@ -21,7 +21,7 @@ children:
       - type: TargetLayoutBox
         children:
           - type: Label
-            label: True Positives (Disease+, Test+)
+            label: True positives (disease+, test+)
             fitToGrid: true
           - type: VariablesListBox
             name: true_positives
@@ -31,7 +31,7 @@ children:
       - type: TargetLayoutBox
         children:
           - type: Label
-            label: False Positives (Disease-, Test+)
+            label: False positives (disease-, test+)
             fitToGrid: true
           - type: VariablesListBox
             name: false_positives
@@ -41,7 +41,7 @@ children:
       - type: TargetLayoutBox
         children:
           - type: Label
-            label: False Negatives (Disease+, Test-)
+            label: False negatives (disease+, test-)
             fitToGrid: true
           - type: VariablesListBox
             name: false_negatives
@@ -51,7 +51,7 @@ children:
       - type: TargetLayoutBox
         children:
           - type: Label
-            label: True Negatives (Disease-, Test-)
+            label: True negatives (disease-, test-)
             fitToGrid: true
           - type: VariablesListBox
             name: true_negatives

@@ -460,6 +460,19 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
                 return(patient_data)
             }
             
+            for (variable in c(self$options$startTime, self$options$endTime)) {
+                values <- df[[variable]]
+                numeric_values <- if (inherits(values, c("Date", "POSIXt"))) {
+                    as.numeric(values)
+                } else suppressWarnings(as.numeric(as.character(values)))
+                bad_rows <- which(is.infinite(numeric_values))
+                if (length(bad_rows)) {
+                    jmvcore::reject("{}", code = "nonfinite_times", msg = sprintf(
+                        .("Infinite time values in variable '%s', analysis row(s) %s. Enter finite start and end times or mark unavailable values as missing."),
+                        variable, paste(utils::head(bad_rows, 10), collapse = ", ")))
+                }
+            }
+
             # Enhanced time processing
             if (self$options$timeType != "datetime") {
                 private$.addNotice("INFO", .("Time units"), sprintf(
@@ -3089,9 +3102,24 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
                     g2, g1, est_txt, fmt(ci[1]), fmt(ci[2]))
         },
 
+        .tryFisherTest = function(contingency, outcome) {
+            result <- tryCatch(stats::fisher.test(contingency), error = function(e) e)
+            if (inherits(result, "error")) {
+                message <- sprintf(
+                    .("Fisher's exact test for %s could not be computed: %s. No p-value is reported. Review the group counts or combine groups only when clinically justified."),
+                    outcome, gsub("[\r\n]+", " ", conditionMessage(result)))
+                private$.addNotice("WARNING", .("Group comparison could not be computed"), message)
+                self$results$groupComparisonTest$setNote(paste0("fisher_error_", outcome), message)
+            }
+            result
+        },
+
         .updateGroupComparisonTests = function(patient_data, stats) {
             # Clear FIRST so a run without a group variable does not keep stale rows
             .deleteTableRows(self$results$groupComparisonTest)
+            for (key in c("fisher_error_ORR", "fisher_error_DCR", "not_testable",
+                          "orr_not_testable", "dcr_not_testable", "skipped"))
+                self$results$groupComparisonTest$setNote(key, NULL)
 
             if (is.null(self$options$groupVar)) return()
 
@@ -3215,12 +3243,11 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
             }, error = function(e) NULL)
 
             orr_ran <- FALSE
+            orr_test <- NULL
             if (private$.groupTableIsTestable(orr_contingency)) {
-                orr_test <- tryCatch({
-                    fisher.test(orr_contingency)
-                }, error = function(e) NULL)
+                orr_test <- private$.tryFisherTest(orr_contingency, "ORR")
 
-                if (!is.null(orr_test)) {
+                if (inherits(orr_test, "htest")) {
                     orr_interpretation <- if (orr_test$p.value < 0.05) {
                         .("Statistically significant difference in response rates between groups (p < 0.05)")
                     } else {
@@ -3246,12 +3273,11 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
             }, error = function(e) NULL)
 
             dcr_ran <- FALSE
+            dcr_test <- NULL
             if (private$.groupTableIsTestable(dcr_contingency)) {
-                dcr_test <- tryCatch({
-                    fisher.test(dcr_contingency)
-                }, error = function(e) NULL)
+                dcr_test <- private$.tryFisherTest(dcr_contingency, "DCR")
 
-                if (!is.null(dcr_test)) {
+                if (inherits(dcr_test, "htest")) {
                     dcr_interpretation <- if (dcr_test$p.value < 0.05) {
                         .("Statistically significant difference in disease control rates between groups (p < 0.05)")
                     } else {
@@ -3275,13 +3301,13 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
 
             # S34: a table that is visible and empty, or missing one of its two
             # rows, must say why rather than leaving the reader to guess.
-            if (!orr_ran && !dcr_ran) {
+            if (is.null(orr_test) && is.null(dcr_test)) {
                 self$results$groupComparisonTest$setNote("not_testable",
                     .("No group comparison could be run. Fisher's exact test needs at least two groups and both outcomes present: here every patient in the comparison had the same outcome (all responders or none, and likewise for disease control), so there is nothing to compare. The per-group counts are in the note above."))
-            } else if (!orr_ran) {
+            } else if (is.null(orr_test)) {
                 self$results$groupComparisonTest$setNote("orr_not_testable",
                     .("The objective-response row is absent because every patient in the comparison had the same response status - all responders or none - so Fisher's exact test has nothing to compare on that outcome."))
-            } else if (!dcr_ran) {
+            } else if (is.null(dcr_test)) {
                 self$results$groupComparisonTest$setNote("dcr_not_testable",
                     .("The disease-control row is absent because every patient in the comparison had the same disease-control status, so Fisher's exact test has nothing to compare on that outcome."))
             }
@@ -4084,7 +4110,7 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
                     binom.test(orr_count, n_eval, conf.level = 0.95)
                 }, error = function(e) NULL)
 
-                if (!is.null(orr_test)) {
+                if (inherits(orr_test, "htest")) {
                     orr_ci_text <- sprintf("; 95%% CI: %.1f%%-%.1f%%",
                                           orr_test$conf.int[1] * 100,
                                           orr_test$conf.int[2] * 100)
@@ -4094,7 +4120,7 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
                     binom.test(dcr_count, n_eval, conf.level = 0.95)
                 }, error = function(e) NULL)
 
-                if (!is.null(dcr_test)) {
+                if (inherits(dcr_test, "htest")) {
                     dcr_ci_text <- sprintf("; 95%% CI: %.1f%%-%.1f%%",
                                           dcr_test$conf.int[1] * 100,
                                           dcr_test$conf.int[2] * 100)

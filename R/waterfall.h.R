@@ -38,6 +38,8 @@ waterfallOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             showClinicalSignificance = FALSE,
             showConfidenceIntervals = TRUE,
             enableGuidedMode = FALSE,
+            showClinicalSummary = FALSE,
+            showAboutAnalysis = FALSE,
             showExplanations = FALSE,
             showResponseDuration = FALSE,
             seed = 123, ...) {
@@ -248,6 +250,14 @@ waterfallOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 "enableGuidedMode",
                 enableGuidedMode,
                 default=FALSE)
+            private$..showClinicalSummary <- jmvcore::OptionBool$new(
+                "showClinicalSummary",
+                showClinicalSummary,
+                default=FALSE)
+            private$..showAboutAnalysis <- jmvcore::OptionBool$new(
+                "showAboutAnalysis",
+                showAboutAnalysis,
+                default=FALSE)
             private$..showExplanations <- jmvcore::OptionBool$new(
                 "showExplanations",
                 showExplanations,
@@ -295,6 +305,8 @@ waterfallOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..showClinicalSignificance)
             self$.addOption(private$..showConfidenceIntervals)
             self$.addOption(private$..enableGuidedMode)
+            self$.addOption(private$..showClinicalSummary)
+            self$.addOption(private$..showAboutAnalysis)
             self$.addOption(private$..showExplanations)
             self$.addOption(private$..showResponseDuration)
             self$.addOption(private$..addResponseCategory)
@@ -333,6 +345,8 @@ waterfallOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         showClinicalSignificance = function() private$..showClinicalSignificance$value,
         showConfidenceIntervals = function() private$..showConfidenceIntervals$value,
         enableGuidedMode = function() private$..enableGuidedMode$value,
+        showClinicalSummary = function() private$..showClinicalSummary$value,
+        showAboutAnalysis = function() private$..showAboutAnalysis$value,
         showExplanations = function() private$..showExplanations$value,
         showResponseDuration = function() private$..showResponseDuration$value,
         addResponseCategory = function() private$..addResponseCategory$value,
@@ -370,6 +384,8 @@ waterfallOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..showClinicalSignificance = NA,
         ..showConfidenceIntervals = NA,
         ..enableGuidedMode = NA,
+        ..showClinicalSummary = NA,
+        ..showAboutAnalysis = NA,
         ..showExplanations = NA,
         ..showResponseDuration = NA,
         ..addResponseCategory = NA,
@@ -452,7 +468,9 @@ waterfallResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 options=options,
                 name="clinicalSummary",
                 title="Clinical Summary",
+                visible="(showClinicalSummary)",
                 clearWith=list(
+                    "showClinicalSummary",
                     "patientID",
                     "responseVar",
                     "timeVar",
@@ -464,13 +482,14 @@ waterfallResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 options=options,
                 name="aboutAnalysis",
                 title="About This Analysis",
+                visible="(showAboutAnalysis)",
                 clearWith=list(
+                    "showAboutAnalysis",
                     "patientID",
                     "responseVar",
                     "timeVar",
                     "inputType",
-                    "enableGuidedMode"),
-                visible="(enableGuidedMode:FALSE)"))
+                    "enableGuidedMode")))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="summaryTable",
@@ -956,6 +975,8 @@ waterfallBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param showConfidenceIntervals Calculate and display exact binomial
 #'   confidence intervals for ORR and DCR
 #' @param enableGuidedMode Enable step-by-step guidance for new users
+#' @param showClinicalSummary .
+#' @param showAboutAnalysis .
 #' @param showExplanations Display comprehensive explanation of what this
 #'   analysis does, when to use it, data requirements, and key
 #'   assumptions/limitations
@@ -1033,6 +1054,8 @@ waterfall <- function(
     showClinicalSignificance = FALSE,
     showConfidenceIntervals = TRUE,
     enableGuidedMode = FALSE,
+    showClinicalSummary = FALSE,
+    showAboutAnalysis = FALSE,
     showExplanations = FALSE,
     showResponseDuration = FALSE,
     seed = 123) {
@@ -1096,6 +1119,8 @@ waterfall <- function(
         showClinicalSignificance = showClinicalSignificance,
         showConfidenceIntervals = showConfidenceIntervals,
         enableGuidedMode = enableGuidedMode,
+        showClinicalSummary = showClinicalSummary,
+        showAboutAnalysis = showAboutAnalysis,
         showExplanations = showExplanations,
         showResponseDuration = showResponseDuration,
         seed = seed)

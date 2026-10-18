@@ -40,7 +40,7 @@ options:
           R: the data as a data frame
 
     - name: wholesection
-      title: "Overall / Whole Slide / HotSpot (Optional)"
+      title: "Overall / whole slide / hotspot (optional)"
       type: Variable
       suggested:
         - continuous
@@ -53,7 +53,7 @@ options:
             Example: Ki67 proliferation index (0-100 percent), ER H-score (0-300), PR percentage (0-100 percent).
       default: NULL
     - name: biopsy1
-      title: Regional Measurement 1
+      title: Regional measurement 1
       type: Variable
       default: NULL
       suggested:
@@ -67,7 +67,7 @@ options:
             Example: Ki67  percent from tumor periphery, ER H-score from invasive front.
 
     - name: biopsy2
-      title: Regional Measurement 2 (Optional)
+      title: Regional measurement 2 (optional)
       type: Variable
       suggested:
         - continuous
@@ -79,7 +79,7 @@ options:
       default: NULL
 
     - name: biopsy3
-      title: Regional Measurement 3 (Optional)
+      title: Regional measurement 3 (optional)
       type: Variable
       suggested:
         - continuous
@@ -91,7 +91,7 @@ options:
       default: NULL
 
     - name: biopsy4
-      title: Regional Measurement 4 (Optional)
+      title: Regional measurement 4 (optional)
       type: Variable
       suggested:
         - continuous
@@ -115,7 +115,7 @@ options:
       default: NULL
 
     - name: spatial_id
-      title: Spatial Region ID (Optional)
+      title: Spatial region ID (optional)
       type: Variable
       suggested:
         - nominal
@@ -158,11 +158,11 @@ options:
       type: List
       options:
         - name: reproducibility
-          title: 'Reproducibility & Bias Assessment'
+          title: 'Reproducibility & bias assessment'
         - name: variability
           title: "Variance component analysis"
         - name: comprehensive
-          title: 'Comprehensive Analysis'
+          title: 'Comprehensive analysis'
       default: comprehensive
       description:
           R: >
@@ -176,11 +176,11 @@ options:
       type: List
       options:
         - name: random
-          title: 'Random Sampling'
+          title: 'Random sampling'
         - name: systematic
-          title: 'Systematic Sampling'
+          title: 'Systematic sampling'
         - name: stratified
-          title: 'Stratified Sampling'
+          title: 'Stratified sampling'
         - name: unknown
           title: 'Not specified'
       default: unknown
@@ -190,7 +190,7 @@ options:
             and systematic or stratified sampling adds a note on how to read the estimates.
 
     - name: cv_threshold
-      title: CV Threshold for Acceptable Variability
+      title: CV threshold for acceptable variability
       type: Number
       min: 5.0
       max: 50.0
@@ -273,6 +273,11 @@ options:
           R: >
             Recommendations on regions per case, calibration of systematic differences and
             quality control, derived from the results of this analysis.
+
+    - name: showInterpretation
+      title: Clinical interpretation
+      type: Bool
+      default: false
 
     - name: showSummary
       title: Plain-language summary

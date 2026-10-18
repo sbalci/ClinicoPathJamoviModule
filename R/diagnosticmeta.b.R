@@ -770,7 +770,7 @@ diagnosticmetaClass <- R6::R6Class(
             sparse_rows <- rowSums(mada_data[, c("TP", "FP", "FN", "TN"), drop = FALSE] <= 1) > 0
             if (sum(sparse_rows) > 0 && sum(sparse_rows) / nrow(mada_data) >= 0.25) {
                 private$.addNotice("WARNING", .("Sparse data: pooled estimates may be biased"), sprintf(
-                    .("%d of %d studies have a cell below 5. The bivariate model used here approximates the logit sensitivity and specificity as normal, which is biased when cells are that small, and any zero cell additionally needs a continuity correction. Published comparisons put the gap against an exact binomial (generalised linear mixed) model at several percentage points on data like this. Treat the pooled pair as approximate, and confirm it in software offering a binomial bivariate model before relying on it."),
+                    .("%d of %d studies have a cell of 0 or 1. The bivariate model used here approximates the logit sensitivity and specificity as normal, which is biased when cells are that small, and any zero cell additionally needs a continuity correction. Published comparisons put the gap against an exact binomial (generalised linear mixed) model at several percentage points on data like this. Treat the pooled pair as approximate, and confirm it in software offering a binomial bivariate model before relying on it."),
                     sum(sparse_rows), nrow(mada_data)))
             }
 
@@ -2061,6 +2061,20 @@ diagnosticmetaClass <- R6::R6Class(
             }
         },
         
+        # Deeks ESS uses study group sizes before the additional continuity
+        # correction needed for finite log DORs. Both the table and renderer use
+        # this preparation, including when the model-level correction is none.
+        .prepareDeeksData = function(data) {
+            n_diseased <- data$tp + data$fn
+            n_healthy <- data$fp + data$tn
+            data$ess <- 4 * n_diseased * n_healthy / (n_diseased + n_healthy)
+            cells <- c("tp", "fp", "fn", "tn")
+            if (any(data[, cells] == 0)) data[, cells] <- data[, cells] + 0.5
+            data$log_dor <- log((data$tp * data$tn) / (data$fp * data$fn))
+            data$inv_root_ess <- 1 / sqrt(data$ess)
+            data
+        },
+
         .performPublicationBiasAssessment = function(analysis_data) {
 
             # Blank first, before any early return. The Deeks row is scaffolded in
@@ -2087,59 +2101,8 @@ diagnosticmetaClass <- R6::R6Class(
                         nrow(analysis_data)))
                 }
 
-                # Effective sample size for Deeks' test (Deeks, Macaskill & Irwig
-                # 2005, J Clin Epidemiol 58:882-93):
-                #
-                #     ESS = 4 * n1 * n0 / (n1 + n0)
-                #
-                # where n1 = TP + FN (diseased) and n0 = FP + TN (non-diseased) -
-                # i.e. twice the harmonic mean of the two GROUP sizes.
-                #
-                # This previously used 4 / (1/TP + 1/FN + 1/FP + 1/TN), the
-                # harmonic mean of the four CELL counts, which is a different and
-                # non-monotone function of the table: two studies with identical
-                # ESS under Deeks' definition can get different values here, and
-                # the ranking of studies by ESS changes (Spearman ~0.3 on a
-                # realistic set). Since 1/sqrt(ESS) is the regression predictor,
-                # the asymmetry test statistic is materially wrong - on a 10-study
-                # example the correct test gives z = -8.25, p < 0.0001 while this
-                # gave z = +1.58, p = 0.11, i.e. "No significant asymmetry"
-                # reported for strongly asymmetric data, with the sign reversed.
-                n_diseased <- analysis_data$tp + analysis_data$fn
-                n_healthy  <- analysis_data$fp + analysis_data$tn
-                analysis_data$ess <- 4 * n_diseased * n_healthy / (n_diseased + n_healthy)
-
-                # Deeks' test needs finite log DOR, so a zero cell must be handled
-                # here regardless of the user's model-level choice. With the
-                # default ("none") a single zero made log_dor and se_log_dor
-                # infinite and the whole test returned NaN with no explanation.
-                #
-                # The correction goes on EVERY study, not only the zero-cell ones.
-                # Correcting only the studies that need it shrinks their log DOR
-                # while leaving the rest untouched, and the studies that need it
-                # are the small, near-perfect ones - exactly the low-ESS end of
-                # the regression. That builds a size-related trend into the test's
-                # own outcome variable. With no publication bias whatsoever (every
-                # simulated study kept), 400-run null simulations gave p < 0.05 in
-                # 12% of meta-analyses at 39% zero-cell studies and 60% at 80%,
-                # against a nominal 5%; the uniform correction brings those to 7%
-                # and 42% (Sweeting, Sutton & Lambert 2004, Stat Med 23:1351-75,
-                # make the same point for odds ratios).
-                #
-                # 42% is still not a test, which is why the verdict below is
-                # withheld once more than a quarter of the studies were corrected:
-                # the simulations stay at or under the nominal rate up to about
-                # that share and deteriorate past it.
-                cells <- c("tp", "fp", "fn", "tn")
-                zero_rows <- rowSums(analysis_data[, cells] == 0) > 0
-                n_zero <- sum(zero_rows)
-                if (n_zero > 0) {
-                    analysis_data[, cells] <- analysis_data[, cells] + 0.5
-                }
-
-                analysis_data$log_dor <- log((analysis_data$tp * analysis_data$tn) /
-                                              (analysis_data$fp * analysis_data$fn))
-                analysis_data$inv_root_ess <- 1 / sqrt(analysis_data$ess)
+                n_zero <- sum(rowSums(analysis_data[, c("tp", "fp", "fn", "tn")] == 0) > 0)
+                analysis_data <- private$.prepareDeeksData(analysis_data)
 
                 # Deeks, Macaskill & Irwig (2005, J Clin Epidemiol 58:882-93):
                 # regress log DOR on 1/sqrt(ESS), WEIGHTED BY ESS, and refer the
@@ -2843,35 +2806,8 @@ diagnosticmetaClass <- R6::R6Class(
                 # Ensure meta_data is a proper data frame
                 meta_data <- as.data.frame(meta_data)
 
-                # Match Deeks' test: the test applies +0.5 so zero-cell studies
-                # have a finite log DOR, but the plot previously computed log DOR
-                # on raw counts, so those same studies became Inf and were
-                # silently dropped by ggplot - plot and test disagreed on which
-                # studies they describe. The correction goes on every study here
-                # too, for the reason given in .performPublicationBiasAssessment.
-                cells <- c("tp", "fp", "fn", "tn")
-                zero_rows <- rowSums(meta_data[, cells] == 0) > 0
-                n_zero_plot <- sum(zero_rows)
-                if (n_zero_plot > 0) {
-                    meta_data[, cells] <- meta_data[, cells] + 0.5
-                }
-
-                # Deeks' funnel plot: log DOR against 1/sqrt(ESS).
-                #
-                # This previously plotted precision = 1/SE(log DOR) on the y axis,
-                # the conventional Egger-style funnel. Deeks, Macaskill & Irwig
-                # (2005) showed that is misleading for diagnostic accuracy data
-                # precisely because log DOR and its standard error are
-                # intrinsically correlated, which induces asymmetry even with no
-                # publication bias - that is why the accompanying test regresses
-                # on 1/sqrt(ESS). Plot and test must use the same x/y, otherwise a
-                # visibly symmetric funnel sits beside a significant asymmetry
-                # p-value (or the reverse).
-                meta_data$log_dor <- log((meta_data$tp * meta_data$tn) / (meta_data$fp * meta_data$fn))
-                n_diseased <- meta_data$tp + meta_data$fn
-                n_healthy  <- meta_data$fp + meta_data$tn
-                meta_data$ess <- 4 * n_diseased * n_healthy / (n_diseased + n_healthy)
-                meta_data$inv_root_ess <- 1 / sqrt(meta_data$ess)
+                n_zero_plot <- sum(rowSums(meta_data[, c("tp", "fp", "fn", "tn")] == 0) > 0)
+                meta_data <- private$.prepareDeeksData(meta_data)
 
                 # Get color palette for accessibility
                 colors <- private$.getColorPalette(theme)
@@ -2952,100 +2888,103 @@ diagnosticmetaClass <- R6::R6Class(
         # appended here.
         .populateInstructions = function() {
             
-            html <- "
-            <h2>Diagnostic Test Meta-Analysis for Pathology</h2>
-            
-            <h3>Purpose</h3>
-            <p>This module performs comprehensive meta-analysis of diagnostic test accuracy studies, specifically designed for pathology research including AI algorithm validation and biomarker diagnostic accuracy synthesis.</p>
-            
-            <h3>Required Data Structure</h3>
-            <p><strong>Essential Variables (Required):</strong></p>
-            <ul>
-                <li><strong>Study identifier:</strong> Unique name or ID for each study (e.g., 'Smith_2020', 'Study_1')</li>
-                <li><strong>True positives (TP):</strong> Number correctly identified as positive</li>
-                <li><strong>False positives (FP):</strong> Number incorrectly identified as positive</li>
-                <li><strong>False negatives (FN):</strong> Number incorrectly identified as negative</li>
-                <li><strong>True negatives (TN):</strong> Number correctly identified as negative</li>
-            </ul>
-            
-            <p><strong>Optional Variables for Meta-Regression:</strong></p>
-            <ul>
-                <li><strong>Patient population:</strong> Disease stage, demographics (e.g., 'early_stage', 'advanced', 'mixed')</li>
-                <li><strong>Technical method:</strong> Staining protocol (e.g., 'automated', 'manual')</li>
-                <li><strong>Geographic region:</strong> Study location for population analysis</li>
-                <li><strong>Publication year:</strong> For temporal trend investigation</li>
-            </ul>
-            
-            <h3>Data Preparation Checklist</h3>
-            <div style='background-color: rgba(138, 155, 172, 0.06); padding: 15px; border-left: 4px solid #007bff; margin: 10px 0; color: inherit;'>
-                <p><strong>Before running analysis, verify:</strong></p>
-                <ul>
-                    <li> No missing values in TP, FP, FN, TN columns</li>
-                    <li> All values are non-negative integers</li>
-                    <li> At least 3 studies with complete data</li>
-                    <li> Study identifiers are unique</li>
-                    <li> Sample sizes are realistic (TP+FP+FN+TN = total cases per study)</li>
-                </ul>
-            </div>
-            
-            <h3>Example Data Format</h3>
-            <table style='border-collapse: collapse; width: 100%; margin: 10px 0;'>
-                <tr style='background-color: rgba(33, 33, 33, 0.06); color: inherit;'>
-                    <th style='border: 1px solid #ddd; padding: 8px;'>study_name</th>
-                    <th style='border: 1px solid #ddd; padding: 8px;'>true_positives</th>
-                    <th style='border: 1px solid #ddd; padding: 8px;'>false_positives</th>
-                    <th style='border: 1px solid #ddd; padding: 8px;'>false_negatives</th>
-                    <th style='border: 1px solid #ddd; padding: 8px;'>true_negatives</th>
-                    <th style='border: 1px solid #ddd; padding: 8px;'>population</th>
-                </tr>
-                <tr>
-                    <td style='border: 1px solid #ddd; padding: 8px;'>Smith_2020</td>
-                    <td style='border: 1px solid #ddd; padding: 8px;'>47</td>
-                    <td style='border: 1px solid #ddd; padding: 8px;'>101</td>
-                    <td style='border: 1px solid #ddd; padding: 8px;'>9</td>
-                    <td style='border: 1px solid #ddd; padding: 8px;'>738</td>
-                    <td style='border: 1px solid #ddd; padding: 8px;'>mixed</td>
-                </tr>
-                <tr>
-                    <td style='border: 1px solid #ddd; padding: 8px;'>Johnson_2021</td>
-                    <td style='border: 1px solid #ddd; padding: 8px;'>126</td>
-                    <td style='border: 1px solid #ddd; padding: 8px;'>272</td>
-                    <td style='border: 1px solid #ddd; padding: 8px;'>51</td>
-                    <td style='border: 1px solid #ddd; padding: 8px;'>1543</td>
-                    <td style='border: 1px solid #ddd; padding: 8px;'>early_stage</td>
-                </tr>
-            </table>
-            
-            <h3>Analysis Methods</h3>
-            <ul>
-                <li><strong>Bivariate Random-Effects Model (Recommended):</strong> Jointly analyzes sensitivity and specificity accounting for correlation</li>
-                <li><strong>Proportional-Hazards SROC Analysis:</strong> Holling model estimated by adjusted profile maximum likelihood</li>
-                <li><strong>Meta-Regression:</strong> Investigates sources of heterogeneity using study-level covariates</li>
-                <li><strong>Publication Bias Assessment:</strong> Deeks' funnel plot asymmetry test</li>
-            </ul>
-
-            <h3>Statistical Method Selection Guide</h3>
-            <div style='background-color: rgba(138, 155, 172, 0.06); padding: 15px; border-left: 4px solid #28a745; margin: 10px 0; color: inherit;'>
-                <p><strong>Choose the appropriate estimation method for your meta-analysis:</strong></p>
-                <ul>
-                    <li><strong>REML (Recommended):</strong> Default choice for most diagnostic meta-analyses. Most robust for random effects modeling with good performance across different scenarios.</li>
-                    <li><strong>Maximum Likelihood:</strong> Alternative estimation approach when maximum likelihood estimation is specifically preferred or required by study protocol.</li>
-                    <li><strong>Fixed Effects:</strong> Use when between-study heterogeneity is minimal or you want to assume all studies estimate the same underlying effect size.</li>
-                    <li><strong>Method of Moments:</strong> Classical moment-based estimation method, useful for comparison with older meta-analyses or when computational resources are limited.</li>
-                    <li><strong>Variance Components:</strong> Specialized approach for variance component estimation, typically used in advanced methodological research.</li>
-                </ul>
-                <p><strong> Recommendation:</strong> Start with REML unless you have specific methodological requirements. It provides the best balance of statistical properties and computational stability for diagnostic test meta-analysis.</p>
-            </div>
-            
-            <h3>Clinical Applications</h3>
-            <ul>
-                <li>IHC marker validation across multiple pathology studies</li>
-                <li>AI algorithm performance meta-analysis for clinical implementation</li>
-                <li>Biomarker diagnostic accuracy synthesis for guideline development</li>
-                <li>Cross-population comparison of diagnostic test performance</li>
-                <li>Assessment of test performance heterogeneity and variation sources</li>
-            </ul>
-            "
+            html <- paste0(
+                "\n            <h2>",
+                .("Diagnostic Test Meta-Analysis for Pathology"),
+                "</h2>\n            \n            <h3>",
+                .("Purpose"),
+                "</h3>\n            <p>",
+                .("This module performs comprehensive meta-analysis of diagnostic test accuracy studies, specifically designed for pathology research including AI algorithm validation and biomarker diagnostic accuracy synthesis."),
+                "</p>\n            \n            <h3>",
+                .("Required Data Structure"),
+                "</h3>\n            <p>",
+                .("<strong>Essential Variables (Required):</strong>"),
+                "</p>\n            <ul>\n                <li>",
+                .("<strong>Study identifier:</strong> Unique name or ID for each study (e.g., 'Smith_2020', 'Study_1')"),
+                "</li>\n                <li>",
+                .("<strong>True positives (TP):</strong> Number correctly identified as positive"),
+                "</li>\n                <li>",
+                .("<strong>False positives (FP):</strong> Number incorrectly identified as positive"),
+                "</li>\n                <li>",
+                .("<strong>False negatives (FN):</strong> Number incorrectly identified as negative"),
+                "</li>\n                <li>",
+                .("<strong>True negatives (TN):</strong> Number correctly identified as negative"),
+                "</li>\n            </ul>\n            \n            <p>",
+                .("<strong>Optional Variables for Meta-Regression:</strong>"),
+                "</p>\n            <ul>\n                <li>",
+                .("<strong>Patient population:</strong> Disease stage, demographics (e.g., 'early_stage', 'advanced', 'mixed')"),
+                "</li>\n                <li>",
+                .("<strong>Technical method:</strong> Staining protocol (e.g., 'automated', 'manual')"),
+                "</li>\n                <li>",
+                .("<strong>Geographic region:</strong> Study location for population analysis"),
+                "</li>\n                <li>",
+                .("<strong>Publication year:</strong> For temporal trend investigation"),
+                "</li>\n            </ul>\n            \n            <h3>",
+                .("Data Preparation Checklist"),
+                "</h3>\n            <div style='background-color: rgba(138, 155, 172, 0.06); padding: 15px; border-left: 4px solid #007bff; margin: 10px 0; color: inherit;'>\n                <p>",
+                .("<strong>Before running analysis, verify:</strong>"),
+                "</p>\n                <ul>\n                    <li>",
+                .("No missing values in TP, FP, FN, TN columns"),
+                "</li>\n                    <li>",
+                .("All values are non-negative integers"),
+                "</li>\n                    <li>",
+                .("At least 3 studies with complete data"),
+                "</li>\n                    <li>",
+                .("Study identifiers are unique"),
+                "</li>\n                    <li>",
+                .("Sample sizes are realistic (TP+FP+FN+TN = total cases per study)"),
+                "</li>\n                </ul>\n            </div>\n            \n            <h3>",
+                .("Example Data Format"),
+                "</h3>\n            <table style='border-collapse: collapse; width: 100%; margin: 10px 0;'>\n                <tr style='background-color: rgba(33, 33, 33, 0.06); color: inherit;'>\n                    <th style='border: 1px solid #ddd; padding: 8px;'>",
+                .("study_name"),
+                "</th>\n                    <th style='border: 1px solid #ddd; padding: 8px;'>",
+                .("true_positives"),
+                "</th>\n                    <th style='border: 1px solid #ddd; padding: 8px;'>",
+                .("false_positives"),
+                "</th>\n                    <th style='border: 1px solid #ddd; padding: 8px;'>",
+                .("false_negatives"),
+                "</th>\n                    <th style='border: 1px solid #ddd; padding: 8px;'>",
+                .("true_negatives"),
+                "</th>\n                    <th style='border: 1px solid #ddd; padding: 8px;'>population</th>\n                </tr>\n                <tr>\n                    <td style='border: 1px solid #ddd; padding: 8px;'>Smith_2020</td>\n                    <td style='border: 1px solid #ddd; padding: 8px;'>47</td>\n                    <td style='border: 1px solid #ddd; padding: 8px;'>101</td>\n                    <td style='border: 1px solid #ddd; padding: 8px;'>9</td>\n                    <td style='border: 1px solid #ddd; padding: 8px;'>738</td>\n                    <td style='border: 1px solid #ddd; padding: 8px;'>mixed</td>\n                </tr>\n                <tr>\n                    <td style='border: 1px solid #ddd; padding: 8px;'>Johnson_2021</td>\n                    <td style='border: 1px solid #ddd; padding: 8px;'>126</td>\n                    <td style='border: 1px solid #ddd; padding: 8px;'>272</td>\n                    <td style='border: 1px solid #ddd; padding: 8px;'>51</td>\n                    <td style='border: 1px solid #ddd; padding: 8px;'>1543</td>\n                    <td style='border: 1px solid #ddd; padding: 8px;'>early_stage</td>\n                </tr>\n            </table>\n            \n            <h3>",
+                .("Analysis Methods"),
+                "</h3>\n            <ul>\n                <li>",
+                .("<strong>Bivariate Random-Effects Model (Recommended):</strong> Jointly analyzes sensitivity and specificity accounting for correlation"),
+                "</li>\n                <li>",
+                .("<strong>Proportional-Hazards SROC Analysis:</strong> Holling model estimated by adjusted profile maximum likelihood"),
+                "</li>\n                <li>",
+                .("<strong>Meta-Regression:</strong> Investigates sources of heterogeneity using study-level covariates"),
+                "</li>\n                <li>",
+                .("<strong>Publication Bias Assessment:</strong> Deeks' funnel plot asymmetry test"),
+                "</li>\n            </ul>\n\n            <h3>",
+                .("Statistical Method Selection Guide"),
+                "</h3>\n            <div style='background-color: rgba(138, 155, 172, 0.06); padding: 15px; border-left: 4px solid #28a745; margin: 10px 0; color: inherit;'>\n                <p>",
+                .("<strong>Choose the appropriate estimation method for your meta-analysis:</strong>"),
+                "</p>\n                <ul>\n                    <li>",
+                .("<strong>REML (Recommended):</strong> Default choice for most diagnostic meta-analyses. Most robust for random effects modeling with good performance across different scenarios."),
+                "</li>\n                    <li>",
+                .("<strong>Maximum Likelihood:</strong> Alternative estimation approach when maximum likelihood estimation is specifically preferred or required by study protocol."),
+                "</li>\n                    <li>",
+                .("<strong>Fixed Effects:</strong> Use when between-study heterogeneity is minimal or you want to assume all studies estimate the same underlying effect size."),
+                "</li>\n                    <li>",
+                .("<strong>Method of Moments:</strong> Classical moment-based estimation method, useful for comparison with older meta-analyses or when computational resources are limited."),
+                "</li>\n                    <li>",
+                .("<strong>Variance Components:</strong> Specialized approach for variance component estimation, typically used in advanced methodological research."),
+                "</li>\n                </ul>\n                <p>",
+                .("<strong> Recommendation:</strong> Start with REML unless you have specific methodological requirements. It provides the best balance of statistical properties and computational stability for diagnostic test meta-analysis."),
+                "</p>\n            </div>\n            \n            <h3>",
+                .("Clinical Applications"),
+                "</h3>\n            <ul>\n                <li>",
+                .("IHC marker validation across multiple pathology studies"),
+                "</li>\n                <li>",
+                .("AI algorithm performance meta-analysis for clinical implementation"),
+                "</li>\n                <li>",
+                .("Biomarker diagnostic accuracy synthesis for guideline development"),
+                "</li>\n                <li>",
+                .("Cross-population comparison of diagnostic test performance"),
+                "</li>\n                <li>",
+                .("Assessment of test performance heterogeneity and variation sources"),
+                "</li>\n            </ul>\n            "
+            )
             
             self$results$instructions$setContent(html)
         },
@@ -3106,123 +3045,133 @@ diagnosticmetaClass <- R6::R6Class(
 
         .populateInterpretation = function() {
             
-            html <- "
-            <h2>Clinical Interpretation Guidelines</h2>
-            
-            <h3> Primary Results Interpretation</h3>
-            
-            <h4>Pooled Sensitivity and Specificity</h4>
-            <ul>
-                <li><strong>Pooled Sensitivity:</strong> Proportion of diseased cases correctly identified
-                    <ul>
-                        <li>Excellent sensitivity ([[GE]]90%): few diseased cases missed</li>
-                        <li>Good sensitivity (80-89%): acceptable miss rate for screening</li>
-                        <li>Moderate sensitivity (70-79%): appreciable number of cases missed</li>
-                        <li>Limited sensitivity (&lt;70%): many cases missed</li>
-                    </ul>
-                </li>
-                <li><strong>Pooled Specificity:</strong> Proportion of non-diseased cases correctly identified
-                    <ul>
-                        <li>Excellent specificity ([[GE]]90%): few false alarms</li>
-                        <li>Good specificity (80-89%): some false positives</li>
-                        <li>Moderate specificity (70-79%): appreciable false-positive rate</li>
-                        <li>Limited specificity (&lt;70%): many false alarms</li>
-                    </ul>
-                </li>
-            </ul>
-            
-            <h4>Likelihood Ratios for Clinical Decision-Making</h4>
-            <p>Refer to the <em>Likelihood Ratios for Clinical Decision-Making</em> table below for standard interpretation ranges for positive and negative likelihood ratios.</p>
-            
-            <h4>Diagnostic Odds Ratio (DOR)</h4>
-            <ul>
-                <li><strong>DOR > 25:</strong> Excellent overall discriminative ability</li>
-                <li><strong>DOR 10-25:</strong> Good discriminative ability</li>
-                <li><strong>DOR 5-10:</strong> Moderate discriminative ability</li>
-                <li><strong>DOR &lt; 5:</strong> Limited discriminative ability</li>
-            </ul>
-            
-            <h3> Heterogeneity Assessment</h3>
-            
-            <div style='background-color: rgba(255, 202, 33, 0.23); padding: 15px; border-left: 4px solid #ffc107; margin: 10px 0; color: inherit;'>
-                <h4>I[[SUP2]] Statistic Interpretation:</h4>
-                <p><em>The bands below are Higgins' conventional cut-points from intervention
-                meta-analysis. They are not established thresholds for diagnostic accuracy, where a
-                high I[[SUP2]] commonly reflects studies using different positivity thresholds - the
-                situation the SROC curve exists to model - rather than a reason to abandon the
-                analysis. Treat them as rough orientation, and prefer the prediction region.</em></p>
-                <ul>
-                    <li><strong>I[[SUP2]] < 25%:</strong> Little heterogeneity detected on this margin. I[[SUP2]] is imprecisely estimated when few studies are pooled and does not describe the bivariate model, so on its own it does not establish that pooling is appropriate - inspect the prediction region and check that positivity thresholds, patient spectrum and reference standards are comparable</li>
-                    <li><strong>I[[SUP2]] 25-50%:</strong> Moderate heterogeneity - investigate potential sources</li>
-                    <li><strong>I[[SUP2]] 50-75%:</strong> Substantial heterogeneity - pooling questionable</li>
-                    <li><strong>I[[SUP2]] &gt; 75%:</strong> Considerable heterogeneity - a single pooled point is unlikely to describe the evidence; investigate thresholds, spectrum and reference standards, and report the SROC curve and prediction region</li>
-                </ul>
-            </div>
-            
-            <h4>Common Sources of Heterogeneity:</h4>
-            <ul>
-                <li><strong>Patient Population:</strong> Disease stage, severity, demographics</li>
-                <li><strong>Technical Factors:</strong> Staining protocols, antibody sources, automation</li>
-                <li><strong>Methodological:</strong> Reference standards, blinding, cut-off thresholds</li>
-                <li><strong>Geographic/Temporal:</strong> Population differences, technology evolution</li>
-            </ul>
-            
-            <h3> Publication Bias Assessment</h3>
-            
-            <h4>Deeks' Funnel Plot Test:</h4>
-            <ul>
-                <li><strong>p [[GE]] 0.05:</strong> No statistically significant funnel-plot asymmetry was detected. This does NOT indicate that publication bias is unlikely: Deeks' test has low power and is unreliable with fewer than 10 studies, so a non-significant result is uninformative when few studies are pooled</li>
-                <li><strong>p < 0.05:</strong> The funnel plot is asymmetric - small studies report systematically different accuracy from large ones. Publication bias is one explanation; heterogeneity, a threshold effect, and a genuine relation between study size and accuracy (smaller studies often use narrower spectra) are others. The test cannot tell them apart, so a significant result is a prompt to investigate, not a finding of publication bias</li>
-                <li>With the default zero-cell setting (no correction), where more than a quarter of the studies have a zero cell, no verdict is reported at all: the continuity correction the test needs produces asymmetry by itself. Choosing any Zero-Cell Correction leaves no zero cell for this test, so a verdict is always given</li>
-            </ul>
-            
-            <div style='background-color: rgba(216, 33, 50, 0.18); padding: 15px; border-left: 4px solid #dc3545; margin: 10px 0; color: inherit;'>
-                <p><strong> When the Funnel Plot is Asymmetric:</strong></p>
-                <ul>
-                    <li>Ask first whether the small studies differ clinically from the large ones - spectrum, setting, threshold, reference standard</li>
-                    <li>Search for unpublished studies or negative results</li>
-                    <li>Consider contacting study authors for additional data</li>
-                    <li>If no other explanation fits, pooled estimates may be overoptimistic</li>
-                    <li>Report the asymmetry as a limitation and interpret results cautiously</li>
-                </ul>
-            </div>
-            
-            <h3> Clinical Application Guidance</h3>
-            
-            <h4>IHC Marker Validation:</h4>
-            <ul>
-                <li><strong>Screening Applications:</strong> Prioritize high sensitivity ([[GE]]90%)</li>
-                <li><strong>Confirmatory Testing:</strong> Prioritize high specificity ([[GE]]90%)</li>
-                <li><strong>Balanced Performance:</strong> Consider clinical costs of false positives vs false negatives</li>
-            </ul>
-            
-            <h4>AI Algorithm Implementation:</h4>
-            <ul>
-                <li><strong>Consistent Performance:</strong> low measured heterogeneity means the included studies produced similar estimates; with few studies it is imprecisely estimated and does not by itself show that performance transfers to a new setting</li>
-                <li><strong>Variable Performance:</strong> high heterogeneity indicates that accuracy differed across the included populations and protocols</li>
-                <li><strong>Not external validation:</strong> a meta-analysis summarises existing published evidence and inherits any publication, spectrum or reference-standard bias of the included studies; it is not a prospective evaluation in an intended-use population with a pre-specified threshold</li>
-            </ul>
-            
-            <h4>Predictive Values in Clinical Practice:</h4>
-            <p><strong>Important:</strong> Sensitivity and specificity are test characteristics, but clinicians need predictive values that depend on disease prevalence in their population. See the <em>Predictive Values by Prevalence</em> table below for estimated PPV and NPV across typical prevalence settings based on the pooled accuracy of this meta-analysis.</p>
-            
-            <h3> Reporting Recommendations</h3>
-            
-            <p>When reporting your meta-analysis results, include:</p>
-            <ul>
-                <li> <strong>Study Selection:</strong> Number of studies included and excluded</li>
-                <li> <strong>Pooled Estimates:</strong> Sensitivity and specificity with confidence intervals at the level chosen in Advanced Options</li>
-                <li> <strong>Likelihood Ratios:</strong> For clinical decision-making context</li>
-                <li> <strong>Heterogeneity:</strong> I[[SUP2]] values and potential sources investigated</li>
-                <li> <strong>Publication Bias:</strong> Deeks' test results and visual assessment</li>
-                <li> <strong>Clinical Implications:</strong> Population-specific predictive values</li>
-                <li> <strong>Limitations:</strong> Study quality, missing data, generalizability</li>
-            </ul>
-            
-            <div style='background-color: rgba(33, 163, 188, 0.21); padding: 15px; border-left: 4px solid #17a2b8; margin: 10px 0; color: inherit;'>
-                <p><strong> Pro Tip:</strong> Always interpret meta-analysis results in the context of your specific clinical population and intended use. A test excellent for one application may be inappropriate for another.</p>
-            </div>
-            "
+            html <- paste0(
+                "\n            <h2>",
+                .("Clinical Interpretation Guidelines"),
+                "</h2>\n            \n            <h3>",
+                .("Primary Results Interpretation"),
+                "</h3>\n            \n            <h4>",
+                .("Pooled Sensitivity and Specificity"),
+                "</h4>\n            <ul>\n                <li>",
+                .("<strong>Pooled Sensitivity:</strong> Proportion of diseased cases correctly identified <ul> <li>Excellent sensitivity (\u226590%): few diseased cases missed"),
+                "</li>\n                        <li>",
+                .("Good sensitivity (80-89%): acceptable miss rate for screening"),
+                "</li>\n                        <li>",
+                .("Moderate sensitivity (70-79%): appreciable number of cases missed"),
+                "</li>\n                        <li>",
+                .("Limited sensitivity (&lt;70%): many cases missed"),
+                "</li>\n                    </ul>\n                </li>\n                <li>",
+                .("<strong>Pooled Specificity:</strong> Proportion of non-diseased cases correctly identified <ul> <li>Excellent specificity (\u226590%): few false alarms"),
+                "</li>\n                        <li>",
+                .("Good specificity (80-89%): some false positives"),
+                "</li>\n                        <li>",
+                .("Moderate specificity (70-79%): appreciable false-positive rate"),
+                "</li>\n                        <li>",
+                .("Limited specificity (&lt;70%): many false alarms"),
+                "</li>\n                    </ul>\n                </li>\n            </ul>\n            \n            <h4>",
+                .("Likelihood Ratios for Clinical Decision-Making"),
+                "</h4>\n            <p>",
+                .("Refer to the <em>Likelihood Ratios for Clinical Decision-Making</em> table below for standard interpretation ranges for positive and negative likelihood ratios."),
+                "</p>\n            \n            <h4>",
+                .("Diagnostic Odds Ratio (DOR)"),
+                "</h4>\n            <ul>\n                <li>",
+                .("<strong>DOR > 25:</strong> Excellent overall discriminative ability"),
+                "</li>\n                <li>",
+                .("<strong>DOR 10-25:</strong> Good discriminative ability"),
+                "</li>\n                <li>",
+                .("<strong>DOR 5-10:</strong> Moderate discriminative ability"),
+                "</li>\n                <li>",
+                .("<strong>DOR &lt; 5:</strong> Limited discriminative ability"),
+                "</li>\n            </ul>\n            \n            <h3>",
+                .("Heterogeneity Assessment"),
+                "</h3>\n            \n            <div style='background-color: rgba(255, 202, 33, 0.23); padding: 15px; border-left: 4px solid #ffc107; margin: 10px 0; color: inherit;'>\n                <h4>",
+                .("I[[SUP2]] Statistic Interpretation:"),
+                "</h4>\n                <p>",
+                .("<em>The bands below are Higgins' conventional cut-points from intervention meta-analysis. They are not established thresholds for diagnostic accuracy, where a high I[[SUP2]] commonly reflects studies using different positivity thresholds - the situation the SROC curve exists to model - rather than a reason to abandon the analysis. Treat them as rough orientation, and prefer the prediction region.</em>"),
+                "</p>\n                <ul>\n                    <li>",
+                .("<strong>I[[SUP2]] < 25%:</strong> Little heterogeneity detected on this margin. I[[SUP2]] is imprecisely estimated when few studies are pooled and does not describe the bivariate model, so on its own it does not establish that pooling is appropriate - inspect the prediction region and check that positivity thresholds, patient spectrum and reference standards are comparable"),
+                "</li>\n                    <li>",
+                .("<strong>I[[SUP2]] 25-50%:</strong> Moderate heterogeneity - investigate potential sources"),
+                "</li>\n                    <li>",
+                .("<strong>I[[SUP2]] 50-75%:</strong> Substantial heterogeneity - pooling questionable"),
+                "</li>\n                    <li>",
+                .("<strong>I[[SUP2]] &gt; 75%:</strong> Considerable heterogeneity - a single pooled point is unlikely to describe the evidence; investigate thresholds, spectrum and reference standards, and report the SROC curve and prediction region"),
+                "</li>\n                </ul>\n            </div>\n            \n            <h4>",
+                .("Common Sources of Heterogeneity:"),
+                "</h4>\n            <ul>\n                <li>",
+                .("<strong>Patient Population:</strong> Disease stage, severity, demographics"),
+                "</li>\n                <li>",
+                .("<strong>Technical Factors:</strong> Staining protocols, antibody sources, automation"),
+                "</li>\n                <li>",
+                .("<strong>Methodological:</strong> Reference standards, blinding, cut-off thresholds"),
+                "</li>\n                <li>",
+                .("<strong>Geographic/Temporal:</strong> Population differences, technology evolution"),
+                "</li>\n            </ul>\n            \n            <h3>",
+                .("Publication Bias Assessment"),
+                "</h3>\n            \n            <h4>",
+                .("Deeks' Funnel Plot Test:"),
+                "</h4>\n            <ul>\n                <li>",
+                .("<strong>p \u2265 0.05:</strong> No statistically significant funnel-plot asymmetry was detected. This does NOT indicate that publication bias is unlikely: Deeks' test has low power and is unreliable with fewer than 10 studies, so a non-significant result is uninformative when few studies are pooled"),
+                "</li>\n                <li>",
+                .("<strong>p < 0.05:</strong> The funnel plot is asymmetric - small studies report systematically different accuracy from large ones. Publication bias is one explanation; heterogeneity, a threshold effect, and a genuine relation between study size and accuracy (smaller studies often use narrower spectra) are others. The test cannot tell them apart, so a significant result is a prompt to investigate, not a finding of publication bias"),
+                "</li>\n                <li>",
+                .("With the default zero-cell setting (no correction), where more than a quarter of the studies have a zero cell, no verdict is reported at all: the continuity correction the test needs produces asymmetry by itself. Choosing any Zero-Cell Correction leaves no zero cell for this test, so a verdict is always given"),
+                "</li>\n            </ul>\n            \n            <div style='background-color: rgba(216, 33, 50, 0.18); padding: 15px; border-left: 4px solid #dc3545; margin: 10px 0; color: inherit;'>\n                <p>",
+                .("<strong> When the Funnel Plot is Asymmetric:</strong>"),
+                "</p>\n                <ul>\n                    <li>",
+                .("Ask first whether the small studies differ clinically from the large ones - spectrum, setting, threshold, reference standard"),
+                "</li>\n                    <li>",
+                .("Search for unpublished studies or negative results"),
+                "</li>\n                    <li>",
+                .("Consider contacting study authors for additional data"),
+                "</li>\n                    <li>",
+                .("If no other explanation fits, pooled estimates may be overoptimistic"),
+                "</li>\n                    <li>",
+                .("Report the asymmetry as a limitation and interpret results cautiously"),
+                "</li>\n                </ul>\n            </div>\n            \n            <h3>",
+                .("Clinical Application Guidance"),
+                "</h3>\n            \n            <h4>",
+                .("IHC Marker Validation:"),
+                "</h4>\n            <ul>\n                <li>",
+                .("<strong>Screening Applications:</strong> Prioritize high sensitivity (\u226590%)"),
+                "</li>\n                <li>",
+                .("<strong>Confirmatory Testing:</strong> Prioritize high specificity (\u226590%)"),
+                "</li>\n                <li>",
+                .("<strong>Balanced Performance:</strong> Consider clinical costs of false positives vs false negatives"),
+                "</li>\n            </ul>\n            \n            <h4>",
+                .("AI Algorithm Implementation:"),
+                "</h4>\n            <ul>\n                <li>",
+                .("<strong>Consistent Performance:</strong> low measured heterogeneity means the included studies produced similar estimates; with few studies it is imprecisely estimated and does not by itself show that performance transfers to a new setting"),
+                "</li>\n                <li>",
+                .("<strong>Variable Performance:</strong> high heterogeneity indicates that accuracy differed across the included populations and protocols"),
+                "</li>\n                <li>",
+                .("<strong>Not external validation:</strong> a meta-analysis summarises existing published evidence and inherits any publication, spectrum or reference-standard bias of the included studies; it is not a prospective evaluation in an intended-use population with a pre-specified threshold"),
+                "</li>\n            </ul>\n            \n            <h4>",
+                .("Predictive Values in Clinical Practice:"),
+                "</h4>\n            <p>",
+                .("<strong>Important:</strong> Sensitivity and specificity are test characteristics, but clinicians need predictive values that depend on disease prevalence in their population. See the <em>Predictive Values by Prevalence</em> table below for estimated PPV and NPV across typical prevalence settings based on the pooled accuracy of this meta-analysis."),
+                "</p>\n            \n            <h3>",
+                .("Reporting Recommendations"),
+                "</h3>\n            \n            <p>",
+                .("When reporting your meta-analysis results, include:"),
+                "</p>\n            <ul>\n                <li>",
+                .("<strong>Study Selection:</strong> Number of studies included and excluded"),
+                "</li>\n                <li>",
+                .("<strong>Pooled Estimates:</strong> Sensitivity and specificity with confidence intervals at the level chosen in Advanced Options"),
+                "</li>\n                <li>",
+                .("<strong>Likelihood Ratios:</strong> For clinical decision-making context"),
+                "</li>\n                <li>",
+                .("<strong>Heterogeneity:</strong> I[[SUP2]] values and potential sources investigated"),
+                "</li>\n                <li>",
+                .("<strong>Publication Bias:</strong> Deeks' test results and visual assessment"),
+                "</li>\n                <li>",
+                .("<strong>Clinical Implications:</strong> Population-specific predictive values"),
+                "</li>\n                <li>",
+                .("<strong>Limitations:</strong> Study quality, missing data, generalizability"),
+                "</li>\n            </ul>\n            \n            <div style='background-color: rgba(33, 163, 188, 0.21); padding: 15px; border-left: 4px solid #17a2b8; margin: 10px 0; color: inherit;'>\n                <p>",
+                .("<strong> Pro Tip:</strong> Always interpret meta-analysis results in the context of your specific clinical population and intended use. A test excellent for one application may be inappropriate for another."),
+                "</p>\n            </div>\n            "
+            )
             
             self$results$interpretation$setContent(private$.renderSymbols(html))
         },
@@ -3744,82 +3693,87 @@ diagnosticmetaClass <- R6::R6Class(
         # Populate About This Analysis panel
         .populateAboutPanel = function() {
 
-            html <- "
-            <div class='about-panel' style='background-color: rgba(138, 155, 172, 0.06); padding: 20px; border-radius: 8px; margin: 10px 0; color: inherit;'>
-                <h4> About Diagnostic Test Meta-Analysis</h4>
-
-                <div style='margin: 15px 0;'>
-                    <h5>What This Analysis Does</h5>
-                    <p>Combines results from multiple diagnostic accuracy studies to estimate overall test performance through:</p>
-                    <ul>
-                        <li> <strong>Bivariate modeling</strong> - Jointly analyzes sensitivity and specificity</li>
-                        <li> <strong>Proportional-hazards SROC modeling</strong> - Models the trade-off between sensitivity and false-positive rate</li>
-                        <li> <strong>Heterogeneity assessment</strong> - Evaluates consistency across studies</li>
-                        <li> <strong>Publication bias</strong> - Checks for selective reporting</li>
-                    </ul>
-                </div>
-
-                <div style='margin: 15px 0; background-color: rgba(33, 152, 239, 0.13); padding: 15px; border-radius: 5px; border-left: 4px solid #2196F3; color: inherit;'>
-                    <h5> Understanding Bivariate and Proportional-Hazards SROC Models</h5>
-                    <p><strong>These models answer related questions using different parameterizations:</strong></p>
-
-                    <p><strong>Bivariate Random-Effects Model (Recommended Primary Approach):</strong></p>
-                    <ul>
-                        <li> Provides <em>intuitive</em> pooled sensitivity and specificity estimates</li>
-                        <li> Accounts for correlation between sensitivity and specificity</li>
-                        <li> Directly interpretable for clinical decision-making</li>
-                        <li> Preferred for meta-analyses with <em>homogeneous thresholds</em></li>
-                        <li> <strong>Use this when:</strong> Studies use the same diagnostic threshold</li>
-                    </ul>
-
-                    <p><strong>Holling Proportional-Hazards SROC Model:</strong></p>
-                    <ul>
-                        <li> Relates sensitivity (<em>p</em>) and false-positive rate (<em>u</em>) through <em>u</em><sup>theta</sup> = <em>p</em></li>
-                        <li> Reports theta as the diagnostic accuracy parameter</li>
-                        <li> Reports tau<sup>2</sup> as between-study variation in diagnostic accuracy</li>
-                        <li> Uses adjusted profile maximum likelihood and is suitable for smaller study sets</li>
-                        <li> Is distinct from the Rutter-Gatsonis HSROC model</li>
-                    </ul>
-
-                    <p><strong> Clinical Insight:</strong> The plotted SROC curve is derived from the <em>bivariate model</em>. The proportional-hazards SROC table is a separate compact model of diagnostic accuracy and between-study variation; it should not be interpreted as a Rutter-Gatsonis HSROC threshold/accuracy table.</p>
-                </div>
-
-                <div style='margin: 15px 0;'>
-                    <h5>When to Use This Analysis</h5>
-                    <ul>
-                        <li> Evaluating AI algorithms for pathology diagnosis</li>
-                        <li> Assessing biomarker diagnostic accuracy</li>
-                        <li> Comparing imaging modalities</li>
-                        <li> Synthesizing evidence for clinical guidelines</li>
-                    </ul>
-                </div>
-
-                <div style='margin: 15px 0; background-color: rgba(255, 202, 33, 0.23); padding: 15px; border-radius: 5px; color: inherit;'>
-                    <h5> Key Requirements & Assumptions</h5>
-                    <ul>
-                        <li>Minimum 3 studies with 2[[TIMES]]2 diagnostic data</li>
-                        <li>Studies should evaluate the same test and target condition</li>
-                        <li>Reference standard should be consistent across studies</li>
-                        <li>Patient spectrum should be clinically relevant</li>
-                    </ul>
-                </div>
-
-                <div style='margin: 15px 0;'>
-                    <h5> Quick Start Guide</h5>
-                    <ol>
-                        <li><strong>Step 1:</strong> Select your study identifier variable</li>
-                        <li><strong>Step 2:</strong> Assign TP, FP, FN, TN count variables</li>
-                        <li><strong>Step 3:</strong> Choose analysis options (bivariate recommended)</li>
-                        <li><strong>Step 4:</strong> Review pooled estimates and heterogeneity</li>
-                        <li><strong>Step 5:</strong> Interpret in your clinical context</li>
-                    </ol>
-                </div>
-
-                <div style='background-color: rgba(33, 163, 188, 0.21); padding: 15px; border-radius: 5px; margin: 15px 0; color: inherit;'>
-                    <p><strong> Tip:</strong> Start with the bivariate model and forest plot to understand overall performance, then explore heterogeneity sources with meta-regression if needed.</p>
-                </div>
-            </div>
-            "
+            html <- paste0(
+                "\n            <div class='about-panel' style='background-color: rgba(138, 155, 172, 0.06); padding: 20px; border-radius: 8px; margin: 10px 0; color: inherit;'>\n                <h4>",
+                .("About Diagnostic Test Meta-Analysis"),
+                "</h4>\n\n                <div style='margin: 15px 0;'>\n                    <h5>",
+                .("What This Analysis Does"),
+                "</h5>\n                    <p>",
+                .("Combines results from multiple diagnostic accuracy studies to estimate overall test performance through:"),
+                "</p>\n                    <ul>\n                        <li>",
+                .("<strong>Bivariate modeling</strong> - Jointly analyzes sensitivity and specificity"),
+                "</li>\n                        <li>",
+                .("<strong>Proportional-hazards SROC modeling</strong> - Models the trade-off between sensitivity and false-positive rate"),
+                "</li>\n                        <li>",
+                .("<strong>Heterogeneity assessment</strong> - Evaluates consistency across studies"),
+                "</li>\n                        <li>",
+                .("<strong>Publication bias</strong> - Checks for selective reporting"),
+                "</li>\n                    </ul>\n                </div>\n\n                <div style='margin: 15px 0; background-color: rgba(33, 152, 239, 0.13); padding: 15px; border-radius: 5px; border-left: 4px solid #2196F3; color: inherit;'>\n                    <h5>",
+                .("Understanding Bivariate and Proportional-Hazards SROC Models"),
+                "</h5>\n                    <p>",
+                .("<strong>These models answer related questions using different parameterizations:</strong>"),
+                "</p>\n\n                    <p>",
+                .("<strong>Bivariate Random-Effects Model (Recommended Primary Approach):</strong>"),
+                "</p>\n                    <ul>\n                        <li>",
+                .("Provides <em>intuitive</em> pooled sensitivity and specificity estimates"),
+                "</li>\n                        <li>",
+                .("Accounts for correlation between sensitivity and specificity"),
+                "</li>\n                        <li>",
+                .("Directly interpretable for clinical decision-making"),
+                "</li>\n                        <li>",
+                .("Preferred for meta-analyses with <em>homogeneous thresholds</em>"),
+                "</li>\n                        <li>",
+                .("<strong>Use this when:</strong> Studies use the same diagnostic threshold"),
+                "</li>\n                    </ul>\n\n                    <p>",
+                .("<strong>Holling Proportional-Hazards SROC Model:</strong>"),
+                "</p>\n                    <ul>\n                        <li>",
+                .("Relates sensitivity (<em>p</em>) and false-positive rate (<em>u</em>) through <em>u</em><sup>theta</sup> = <em>p</em>"),
+                "</li>\n                        <li>",
+                .("Reports theta as the diagnostic accuracy parameter"),
+                "</li>\n                        <li>",
+                .("Reports tau<sup>2</sup> as between-study variation in diagnostic accuracy"),
+                "</li>\n                        <li>",
+                .("Uses adjusted profile maximum likelihood and is suitable for smaller study sets"),
+                "</li>\n                        <li>",
+                .("Is distinct from the Rutter-Gatsonis HSROC model"),
+                "</li>\n                    </ul>\n\n                    <p>",
+                .("<strong> Clinical Insight:</strong> The plotted SROC curve is derived from the <em>bivariate model</em>. The proportional-hazards SROC table is a separate compact model of diagnostic accuracy and between-study variation; it should not be interpreted as a Rutter-Gatsonis HSROC threshold/accuracy table."),
+                "</p>\n                </div>\n\n                <div style='margin: 15px 0;'>\n                    <h5>",
+                .("When to Use This Analysis"),
+                "</h5>\n                    <ul>\n                        <li>",
+                .("Evaluating AI algorithms for pathology diagnosis"),
+                "</li>\n                        <li>",
+                .("Assessing biomarker diagnostic accuracy"),
+                "</li>\n                        <li>",
+                .("Comparing imaging modalities"),
+                "</li>\n                        <li>",
+                .("Synthesizing evidence for clinical guidelines"),
+                "</li>\n                    </ul>\n                </div>\n\n                <div style='margin: 15px 0; background-color: rgba(255, 202, 33, 0.23); padding: 15px; border-radius: 5px; color: inherit;'>\n                    <h5>",
+                .("Key Requirements & Assumptions"),
+                "</h5>\n                    <ul>\n                        <li>",
+                .("Minimum 3 studies with 2[[TIMES]]2 diagnostic data"),
+                "</li>\n                        <li>",
+                .("Studies should evaluate the same test and target condition"),
+                "</li>\n                        <li>",
+                .("Reference standard should be consistent across studies"),
+                "</li>\n                        <li>",
+                .("Patient spectrum should be clinically relevant"),
+                "</li>\n                    </ul>\n                </div>\n\n                <div style='margin: 15px 0;'>\n                    <h5>",
+                .("Quick Start Guide"),
+                "</h5>\n                    <ol>\n                        <li>",
+                .("<strong>Step 1:</strong> Select your study identifier variable"),
+                "</li>\n                        <li>",
+                .("<strong>Step 2:</strong> Assign TP, FP, FN, TN count variables"),
+                "</li>\n                        <li>",
+                .("<strong>Step 3:</strong> Choose analysis options (bivariate recommended)"),
+                "</li>\n                        <li>",
+                .("<strong>Step 4:</strong> Review pooled estimates and heterogeneity"),
+                "</li>\n                        <li>",
+                .("<strong>Step 5:</strong> Interpret in your clinical context"),
+                "</li>\n                    </ol>\n                </div>\n\n                <div style='background-color: rgba(33, 163, 188, 0.21); padding: 15px; border-radius: 5px; margin: 15px 0; color: inherit;'>\n                    <p>",
+                .("<strong> Tip:</strong> Start with the bivariate model and forest plot to understand overall performance, then explore heterogeneity sources with meta-regression if needed."),
+                "</p>\n                </div>\n            </div>\n            "
+            )
 
             self$results$about$setContent(private$.renderSymbols(html))
         },
@@ -3919,162 +3873,155 @@ diagnosticmetaClass <- R6::R6Class(
 
         # Plot explanation functions
         .populateForestPlotExplanation = function() {
-            html <- "
-            <div class='plot-explanation' style='background-color: rgba(138, 155, 172, 0.06); padding: 20px; border-radius: 8px; margin: 10px 0; color: inherit;'>
-                <h4> Forest Plot Interpretation Guide</h4>
-
-                <div style='background-color: rgba(255, 255, 255, 0.06); color: inherit; padding: 15px; border-radius: 5px; margin: 10px 0;'>
-                    <h5>What This Plot Shows</h5>
-                    <p><strong>Forest Plot:</strong> Displays individual study results for sensitivity and specificity with confidence intervals. Each study is represented by a point (estimate) with horizontal lines (confidence intervals).</p>
-
-                    <ul>
-                        <li><strong>Left Panel (Sensitivity):</strong> Proportion of diseased cases correctly identified</li>
-                        <li><strong>Right Panel (Specificity):</strong> Proportion of healthy cases correctly identified</li>
-                        <li><strong>Horizontal Lines:</strong> Wilson score confidence intervals (at the chosen confidence level) showing precision of estimates</li>
-                        <li><strong>Row order:</strong> studies are sorted by their mean of sensitivity and specificity, so each study keeps the same row in both panels and can be read across. Within one panel the rows are therefore <em>not</em> ranked by that panel's own metric</li>
-                        <li><strong>Scale:</strong> both panels run from 0 to 1; the tables report the same quantities as percentages</li>
-                    </ul>
-                </div>
-
-                <div style='background-color: rgba(33, 159, 33, 0.1); padding: 15px; border-radius: 5px; margin: 10px 0; color: inherit;'>
-                    <h5>Clinical Interpretation</h5>
-                    <ul>
-                        <li><strong>Consistent Results:</strong> Points clustered together = low heterogeneity</li>
-                        <li><strong>Wide Spread:</strong> Points scattered = high heterogeneity (investigate sources)</li>
-                        <li><strong>Narrow CIs:</strong> Large studies with precise estimates</li>
-                        <li><strong>Wide CIs:</strong> Small studies with less precise estimates</li>
-                    </ul>
-                </div>
-
-                <div style='background-color: rgba(255, 202, 33, 0.23); padding: 15px; border-radius: 5px; margin: 10px 0; color: inherit;'>
-                    <h5> Quick Assessment Tips</h5>
-                    <ul>
-                        <li>Look for outlier studies (points far from others)</li>
-                        <li>Check if confidence intervals overlap substantially</li>
-                        <li>Consider whether variation reflects true differences or chance</li>
-                        <li>Use this plot to identify studies for sensitivity analysis</li>
-                    </ul>
-                </div>
-            </div>
-            "
+            html <- paste0(
+                "\n            <div class='plot-explanation' style='background-color: rgba(138, 155, 172, 0.06); padding: 20px; border-radius: 8px; margin: 10px 0; color: inherit;'>\n                <h4>",
+                .("Forest Plot Interpretation Guide"),
+                "</h4>\n\n                <div style='background-color: rgba(255, 255, 255, 0.06); color: inherit; padding: 15px; border-radius: 5px; margin: 10px 0;'>\n                    <h5>",
+                .("What This Plot Shows"),
+                "</h5>\n                    <p>",
+                .("<strong>Forest Plot:</strong> Displays individual study results for sensitivity and specificity with confidence intervals. Each study is represented by a point (estimate) with horizontal lines (confidence intervals)."),
+                "</p>\n\n                    <ul>\n                        <li>",
+                .("<strong>Left Panel (Sensitivity):</strong> Proportion of diseased cases correctly identified"),
+                "</li>\n                        <li>",
+                .("<strong>Right Panel (Specificity):</strong> Proportion of healthy cases correctly identified"),
+                "</li>\n                        <li>",
+                .("<strong>Horizontal Lines:</strong> Wilson score confidence intervals (at the chosen confidence level) showing precision of estimates"),
+                "</li>\n                        <li>",
+                .("<strong>Row order:</strong> studies are sorted by their mean of sensitivity and specificity, so each study keeps the same row in both panels and can be read across. Within one panel the rows are therefore <em>not</em> ranked by that panel's own metric"),
+                "</li>\n                        <li>",
+                .("<strong>Scale:</strong> both panels run from 0 to 1; the tables report the same quantities as percentages"),
+                "</li>\n                    </ul>\n                </div>\n\n                <div style='background-color: rgba(33, 159, 33, 0.1); padding: 15px; border-radius: 5px; margin: 10px 0; color: inherit;'>\n                    <h5>",
+                .("Clinical Interpretation"),
+                "</h5>\n                    <ul>\n                        <li>",
+                .("<strong>Consistent Results:</strong> Points clustered together = low heterogeneity"),
+                "</li>\n                        <li>",
+                .("<strong>Wide Spread:</strong> Points scattered = high heterogeneity (investigate sources)"),
+                "</li>\n                        <li>",
+                .("<strong>Narrow CIs:</strong> Large studies with precise estimates"),
+                "</li>\n                        <li>",
+                .("<strong>Wide CIs:</strong> Small studies with less precise estimates"),
+                "</li>\n                    </ul>\n                </div>\n\n                <div style='background-color: rgba(255, 202, 33, 0.23); padding: 15px; border-radius: 5px; margin: 10px 0; color: inherit;'>\n                    <h5>",
+                .("Quick Assessment Tips"),
+                "</h5>\n                    <ul>\n                        <li>",
+                .("Look for outlier studies (points far from others)"),
+                "</li>\n                        <li>",
+                .("Check if confidence intervals overlap substantially"),
+                "</li>\n                        <li>",
+                .("Consider whether variation reflects true differences or chance"),
+                "</li>\n                        <li>",
+                .("Use this plot to identify studies for sensitivity analysis"),
+                "</li>\n                    </ul>\n                </div>\n            </div>\n            "
+            )
 
             self$results$forestplot_explanation$setContent(html)
         },
 
         .populateSROCPlotExplanation = function() {
-            html <- "
-            <div class='plot-explanation' style='background-color: rgba(138, 155, 172, 0.06); padding: 20px; border-radius: 8px; margin: 10px 0; color: inherit;'>
-                <h4> Summary ROC Plot Interpretation Guide</h4>
-
-                <div style='background-color: rgba(255, 255, 255, 0.06); color: inherit; padding: 15px; border-radius: 5px; margin: 10px 0;'>
-                    <h5>What This Plot Shows</h5>
-                    <p><strong>SROC Plot:</strong> Summary Receiver Operating Characteristic curve showing the trade-off between sensitivity and specificity across all studies.</p>
-
-                    <ul>
-                        <li><strong>X-axis:</strong> False Positive Rate (1 - Specificity) - lower is better</li>
-                        <li><strong>Y-axis:</strong> True Positive Rate (Sensitivity) - higher is better</li>
-                        <li><strong>Individual Studies:</strong> Circles sized by sample size</li>
-                        <li><strong>Pooled Estimate:</strong> Large triangle showing meta-analytic summary</li>
-                        <li><strong>Confidence region (dashed):</strong> how precisely the POOLED point is estimated. It shrinks as more studies are added.</li>
-                        <li><strong>Prediction region (dotted):</strong> where the accuracy of a FUTURE study in a new setting is expected to fall. It includes between-study heterogeneity and does NOT shrink with more studies.</li>
-                    </ul>
-                </div>
-
-                <div style='background-color: rgba(33, 99, 235, 0.08); padding: 15px; border-radius: 5px; margin: 10px 0; color: inherit;'>
-                    <h5>Model Choice: Random vs Fixed Effects</h5>
-                    <p><strong>REML (Random Effects, Default):</strong> Estimates between-study variance (\u03C4\u00B2) to construct the SROC regression curve and prediction region. Recommended for diagnostic meta-analysis because test thresholds and patient populations inherently vary across studies.</p>
-                    <p><strong>Fixed Effects:</strong> Assumes every study shares the exact same sensitivity and specificity (\u03C4\u00B2 = 0). Under this assumption, the SROC curve and prediction region are undefined, and confidence intervals are narrower by construction.</p>
-                </div>
-
-                <div style='background-color: rgba(255, 202, 33, 0.23); padding: 15px; border-radius: 5px; margin: 10px 0; color: inherit;'>
-                    <h5>Confidence region vs prediction region</h5>
-                    <p>These answer different questions and are routinely confused. A tight
-                    <strong>confidence</strong> region means the pooled estimate is well determined; it says
-                    nothing about whether the assay will perform consistently. A wide
-                    <strong>prediction</strong> region means that even though the average is known precisely,
-                    the next study - or your laboratory - could see materially different sensitivity and
-                    specificity. <strong>For deciding whether to adopt an assay, the prediction region is the
-                    relevant one.</strong> When the two differ greatly, between-study heterogeneity dominates
-                    and the pooled point alone should not drive the decision.</p>
-                </div>
-
-                <div style='background-color: rgba(33, 159, 33, 0.1); padding: 15px; border-radius: 5px; margin: 10px 0; color: inherit;'>
-                    <h5>Clinical Interpretation</h5>
-                    <ul>
-                        <li><strong>Upper Left Corner:</strong> Ideal performance (high sensitivity, low false positive rate)</li>
-                        <li><strong>Diagonal Line:</strong> Represents random chance (no discriminative ability)</li>
-                        <li><strong>Above Diagonal:</strong> Better than chance performance</li>
-                        <li><strong>Point Scatter:</strong> Studies clustered tightly = consistent test performance</li>
-                    </ul>
-                </div>
-
-                <div style='background-color: rgba(255, 202, 33, 0.23); padding: 15px; border-radius: 5px; margin: 10px 0; color: inherit;'>
-                    <h5> Quick Assessment Tips</h5>
-                    <ul>
-                        <li>Closer to upper-left corner = better overall diagnostic accuracy</li>
-                        <li>Wide scatter of points = substantial between-study heterogeneity</li>
-                        <li>Triangle position shows where your pooled test performance lies</li>
-                        <li>Compare triangle position to individual studies for consistency</li>
-                    </ul>
-                </div>
-
-                <div style='background-color: rgba(33, 163, 188, 0.21); padding: 15px; border-radius: 5px; margin: 10px 0; color: inherit;'>
-                    <h5> Clinical Decision Making</h5>
-                    <p><strong>Use this plot to:</strong> Visualize test performance trade-offs, identify optimal operating points, and assess consistency across different study populations and settings.</p>
-                </div>
-            </div>
-            "
+            html <- paste0(
+                "\n            <div class='plot-explanation' style='background-color: rgba(138, 155, 172, 0.06); padding: 20px; border-radius: 8px; margin: 10px 0; color: inherit;'>\n                <h4>",
+                .("Summary ROC Plot Interpretation Guide"),
+                "</h4>\n\n                <div style='background-color: rgba(255, 255, 255, 0.06); color: inherit; padding: 15px; border-radius: 5px; margin: 10px 0;'>\n                    <h5>",
+                .("What This Plot Shows"),
+                "</h5>\n                    <p>",
+                .("<strong>SROC Plot:</strong> Summary Receiver Operating Characteristic curve showing the trade-off between sensitivity and specificity across all studies."),
+                "</p>\n\n                    <ul>\n                        <li>",
+                .("<strong>X-axis:</strong> False Positive Rate (1 - Specificity) - lower is better"),
+                "</li>\n                        <li>",
+                .("<strong>Y-axis:</strong> True Positive Rate (Sensitivity) - higher is better"),
+                "</li>\n                        <li>",
+                .("<strong>Individual Studies:</strong> Circles sized by sample size"),
+                "</li>\n                        <li>",
+                .("<strong>Pooled Estimate:</strong> Large triangle showing meta-analytic summary"),
+                "</li>\n                        <li>",
+                .("<strong>Confidence region (dashed):</strong> how precisely the POOLED point is estimated. It shrinks as more studies are added."),
+                "</li>\n                        <li>",
+                .("<strong>Prediction region (dotted):</strong> where the accuracy of a FUTURE study in a new setting is expected to fall. It includes between-study heterogeneity and does NOT shrink with more studies."),
+                "</li>\n                    </ul>\n                </div>\n\n                <div style='background-color: rgba(33, 99, 235, 0.08); padding: 15px; border-radius: 5px; margin: 10px 0; color: inherit;'>\n                    <h5>",
+                .("Model Choice: Random vs Fixed Effects"),
+                "</h5>\n                    <p>",
+                .("<strong>REML (Random Effects, Default):</strong> Estimates between-study variance (\u03c4\u00b2) to construct the SROC regression curve and prediction region. Recommended for diagnostic meta-analysis because test thresholds and patient populations inherently vary across studies."),
+                "</p>\n                    <p>",
+                .("<strong>Fixed Effects:</strong> Assumes every study shares the exact same sensitivity and specificity (\u03c4\u00b2 = 0). Under this assumption, the SROC curve and prediction region are undefined, and confidence intervals are narrower by construction."),
+                "</p>\n                </div>\n\n                <div style='background-color: rgba(255, 202, 33, 0.23); padding: 15px; border-radius: 5px; margin: 10px 0; color: inherit;'>\n                    <h5>",
+                .("Confidence region vs prediction region"),
+                "</h5>\n                    <p>",
+                .("These answer different questions and are routinely confused. A tight <strong>confidence</strong> region means the pooled estimate is well determined; it says nothing about whether the assay will perform consistently. A wide <strong>prediction</strong> region means that even though the average is known precisely, the next study - or your laboratory - could see materially different sensitivity and specificity. <strong>For deciding whether to adopt an assay, the prediction region is the relevant one.</strong> When the two differ greatly, between-study heterogeneity dominates and the pooled point alone should not drive the decision."),
+                "</p>\n                </div>\n\n                <div style='background-color: rgba(33, 159, 33, 0.1); padding: 15px; border-radius: 5px; margin: 10px 0; color: inherit;'>\n                    <h5>",
+                .("Clinical Interpretation"),
+                "</h5>\n                    <ul>\n                        <li>",
+                .("<strong>Upper Left Corner:</strong> Ideal performance (high sensitivity, low false positive rate)"),
+                "</li>\n                        <li>",
+                .("<strong>Diagonal Line:</strong> Represents random chance (no discriminative ability)"),
+                "</li>\n                        <li>",
+                .("<strong>Above Diagonal:</strong> Better than chance performance"),
+                "</li>\n                        <li>",
+                .("<strong>Point Scatter:</strong> Studies clustered tightly = consistent test performance"),
+                "</li>\n                    </ul>\n                </div>\n\n                <div style='background-color: rgba(255, 202, 33, 0.23); padding: 15px; border-radius: 5px; margin: 10px 0; color: inherit;'>\n                    <h5>",
+                .("Quick Assessment Tips"),
+                "</h5>\n                    <ul>\n                        <li>",
+                .("Closer to upper-left corner = better overall diagnostic accuracy"),
+                "</li>\n                        <li>",
+                .("Wide scatter of points = substantial between-study heterogeneity"),
+                "</li>\n                        <li>",
+                .("Triangle position shows where your pooled test performance lies"),
+                "</li>\n                        <li>",
+                .("Compare triangle position to individual studies for consistency"),
+                "</li>\n                    </ul>\n                </div>\n\n                <div style='background-color: rgba(33, 163, 188, 0.21); padding: 15px; border-radius: 5px; margin: 10px 0; color: inherit;'>\n                    <h5>",
+                .("Clinical Decision Making"),
+                "</h5>\n                    <p>",
+                .("<strong>Use this plot to:</strong> Visualize test performance trade-offs, identify optimal operating points, and assess consistency across different study populations and settings."),
+                "</p>\n                </div>\n            </div>\n            "
+            )
 
             self$results$srocplot_explanation$setContent(html)
         },
 
         .populateFunnelPlotExplanation = function() {
-            html <- "
-            <div class='plot-explanation' style='background-color: rgba(138, 155, 172, 0.06); padding: 20px; border-radius: 8px; margin: 10px 0; color: inherit;'>
-                <h4> Funnel Plot Interpretation Guide</h4>
-
-                <div style='background-color: rgba(255, 255, 255, 0.06); color: inherit; padding: 15px; border-radius: 5px; margin: 10px 0;'>
-                    <h5>What This Plot Shows</h5>
-                    <p><strong>Funnel Plot:</strong> Assesses publication bias by plotting study precision against effect size (log diagnostic odds ratio).</p>
-
-                    <ul>
-                        <li><strong>X-axis:</strong> Log Diagnostic Odds Ratio (effect size)</li>
-                        <li><strong>Y-axis:</strong> 1/\u221A(effective sample size), reversed so the most precise studies sit at the top (Deeks' funnel plot)</li>
-                        <li><strong>Each Point:</strong> One study in your meta-analysis</li>
-                        <li><strong>Expected Pattern:</strong> Inverted funnel shape if no bias present</li>
-                    </ul>
-                </div>
-
-                <div style='background-color: rgba(216, 33, 50, 0.18); padding: 15px; border-radius: 5px; margin: 10px 0; color: inherit;'>
-                    <h5> Funnel Asymmetry Indicators</h5>
-                    <ul>
-                        <li><strong>Asymmetric Funnel:</strong> Studies concentrated on one side at the imprecise end of the plot</li>
-                        <li><strong>Gap in Lower Region:</strong> Small studies with low accuracy absent</li>
-                        <li><strong>Deeks' Test p < 0.05:</strong> Statistical evidence of funnel plot asymmetry - evidence of asymmetry, not of publication bias; see the causes listed below</li>
-                    </ul>
-                </div>
-
-                <div style='background-color: rgba(33, 162, 64, 0.19); padding: 15px; border-radius: 5px; margin: 10px 0; color: inherit;'>
-                    <h5> Features Consistent With a Symmetric Funnel</h5>
-                    <ul>
-                        <li><strong>Symmetric Funnel:</strong> Studies distributed evenly on both sides</li>
-                        <li><strong>Deeks' Test p [[GE]] 0.05:</strong> No statistical evidence of asymmetry</li>
-                        <li><strong>Small Studies Present:</strong> Range of precision levels represented</li>
-                        <li><em>These features do not establish that publication bias is absent: asymmetry tests have low power, and are unreliable with fewer than 10 studies.</em></li>
-                    </ul>
-                </div>
-
-                <div style='background-color: rgba(255, 202, 33, 0.23); padding: 15px; border-radius: 5px; margin: 10px 0; color: inherit;'>
-                    <h5> Interpretation Caveats</h5>
-                    <ul>
-                        <li><strong>Small Sample:</strong> Funnel plot unreliable with &lt;10 studies</li>
-                        <li><strong>Heterogeneity:</strong> Clinical differences can mimic publication bias</li>
-                        <li><strong>Other Causes:</strong> Different thresholds, narrower patient spectra in small studies, language or database bias, or chance</li>
-                        <li><strong>Action Needed:</strong> If the funnel is asymmetric, look for a clinical explanation first, then for unpublished studies</li>
-                    </ul>
-                </div>
-            </div>
-            "
+            html <- paste0(
+                "\n            <div class='plot-explanation' style='background-color: rgba(138, 155, 172, 0.06); padding: 20px; border-radius: 8px; margin: 10px 0; color: inherit;'>\n                <h4>",
+                .("Funnel Plot Interpretation Guide"),
+                "</h4>\n\n                <div style='background-color: rgba(255, 255, 255, 0.06); color: inherit; padding: 15px; border-radius: 5px; margin: 10px 0;'>\n                    <h5>",
+                .("What This Plot Shows"),
+                "</h5>\n                    <p>",
+                .("<strong>Funnel Plot:</strong> Assesses publication bias by plotting study precision against effect size (log diagnostic odds ratio)."),
+                "</p>\n\n                    <ul>\n                        <li>",
+                .("<strong>X-axis:</strong> Log Diagnostic Odds Ratio (effect size)"),
+                "</li>\n                        <li>",
+                .("<strong>Y-axis:</strong> 1/\u221a(effective sample size), reversed so the most precise studies sit at the top (Deeks' funnel plot)"),
+                "</li>\n                        <li>",
+                .("<strong>Each Point:</strong> One study in your meta-analysis"),
+                "</li>\n                        <li>",
+                .("<strong>Expected Pattern:</strong> Inverted funnel shape if no bias present"),
+                "</li>\n                    </ul>\n                </div>\n\n                <div style='background-color: rgba(216, 33, 50, 0.18); padding: 15px; border-radius: 5px; margin: 10px 0; color: inherit;'>\n                    <h5>",
+                .("Funnel Asymmetry Indicators"),
+                "</h5>\n                    <ul>\n                        <li>",
+                .("<strong>Asymmetric Funnel:</strong> Studies concentrated on one side at the imprecise end of the plot"),
+                "</li>\n                        <li>",
+                .("<strong>Gap in Lower Region:</strong> Small studies with low accuracy absent"),
+                "</li>\n                        <li>",
+                .("<strong>Deeks' Test p < 0.05:</strong> Statistical evidence of funnel plot asymmetry - evidence of asymmetry, not of publication bias; see the causes listed below"),
+                "</li>\n                    </ul>\n                </div>\n\n                <div style='background-color: rgba(33, 162, 64, 0.19); padding: 15px; border-radius: 5px; margin: 10px 0; color: inherit;'>\n                    <h5>",
+                .("Features Consistent With a Symmetric Funnel"),
+                "</h5>\n                    <ul>\n                        <li>",
+                .("<strong>Symmetric Funnel:</strong> Studies distributed evenly on both sides"),
+                "</li>\n                        <li>",
+                .("<strong>Deeks' Test p \u2265 0.05:</strong> No statistical evidence of asymmetry"),
+                "</li>\n                        <li>",
+                .("<strong>Small Studies Present:</strong> Range of precision levels represented"),
+                "</li>\n                        <li>",
+                .("<em>These features do not establish that publication bias is absent: asymmetry tests have low power, and are unreliable with fewer than 10 studies.</em>"),
+                "</li>\n                    </ul>\n                </div>\n\n                <div style='background-color: rgba(255, 202, 33, 0.23); padding: 15px; border-radius: 5px; margin: 10px 0; color: inherit;'>\n                    <h5>",
+                .("Interpretation Caveats"),
+                "</h5>\n                    <ul>\n                        <li>",
+                .("<strong>Small Sample:</strong> Funnel plot unreliable with &lt;10 studies"),
+                "</li>\n                        <li>",
+                .("<strong>Heterogeneity:</strong> Clinical differences can mimic publication bias"),
+                "</li>\n                        <li>",
+                .("<strong>Other Causes:</strong> Different thresholds, narrower patient spectra in small studies, language or database bias, or chance"),
+                "</li>\n                        <li>",
+                .("<strong>Action Needed:</strong> If the funnel is asymmetric, look for a clinical explanation first, then for unpublished studies"),
+                "</li>\n                    </ul>\n                </div>\n            </div>\n            "
+            )
 
             self$results$funnelplot_explanation$setContent(
                 private$.renderSymbols(html)

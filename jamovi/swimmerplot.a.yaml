@@ -66,7 +66,7 @@ options:
             Time/date when observation/treatment ended.
 
     - name: responseVar
-      title: "Response/Status Variable"
+      title: "Response/Status variable"
       type: Variable
       suggested: [nominal, ordinal]
       permitted: [factor]
@@ -77,7 +77,7 @@ options:
             Optional variable for response types (e.g., CR, PR, SD, PD) to color lanes.
 
     - name: censorVar
-      title: "Censoring/Event Status Variable"
+      title: "Censoring/Event status variable"
       type: Variable
       suggested: [nominal, ordinal]
       permitted: [factor, numeric]
@@ -119,7 +119,7 @@ options:
             Select whether time values are raw numbers or dates/times.
 
     - name: dateFormat
-      title: "Date Format in Data"
+      title: "Date format in data"
       type: List
       options:
         - title: "YYYY-MM-DD HH:MM:SS"
@@ -142,7 +142,7 @@ options:
             Select the date/time format in your data (only used when Time Input Type is Date/Time).
 
     - name: timeUnit
-      title: "Time Unit for Display"
+      title: "Time unit for display"
       type: List
       options:
         - title: "Days"
@@ -183,7 +183,7 @@ options:
             Maximum number of milestone events to support (milestone slots 1-5 are defined).
 
     - name: milestone1Name
-      title: "Milestone 1 Name"
+      title: "Milestone 1 name"
       type: String
       default: "Surgery"
       description:
@@ -191,7 +191,7 @@ options:
             Name for the first milestone event (e.g., Surgery, Treatment Start).
 
     - name: milestone1Date
-      title: "Milestone 1 Date"
+      title: "Milestone 1 date"
       type: Variable
       suggested: [continuous, nominal, ordinal]
       required: false
@@ -201,7 +201,7 @@ options:
       default: NULL
 
     - name: milestone2Name
-      title: "Milestone 2 Name"
+      title: "Milestone 2 name"
       type: String
       default: "Treatment Start"
       description:
@@ -209,7 +209,7 @@ options:
             Name for the second milestone event.
 
     - name: milestone2Date
-      title: "Milestone 2 Date"
+      title: "Milestone 2 date"
       type: Variable
       suggested: [continuous, nominal, ordinal]
       required: false
@@ -219,7 +219,7 @@ options:
       default: NULL
 
     - name: milestone3Name
-      title: "Milestone 3 Name"
+      title: "Milestone 3 name"
       type: String
       default: "Response Assessment"
       description:
@@ -227,7 +227,7 @@ options:
             Name for the third milestone event.
 
     - name: milestone3Date
-      title: "Milestone 3 Date"
+      title: "Milestone 3 date"
       type: Variable
       suggested: [continuous, nominal, ordinal]
       required: false
@@ -237,7 +237,7 @@ options:
       default: NULL
 
     - name: milestone4Name
-      title: "Milestone 4 Name"
+      title: "Milestone 4 name"
       type: String
       default: "Progression"
       description:
@@ -245,7 +245,7 @@ options:
             Name for the fourth milestone event.
 
     - name: milestone4Date
-      title: "Milestone 4 Date"
+      title: "Milestone 4 date"
       type: Variable
       suggested: [continuous, nominal, ordinal]
       required: false
@@ -255,7 +255,7 @@ options:
       default: NULL
 
     - name: milestone5Name
-      title: "Milestone 5 Name"
+      title: "Milestone 5 name"
       type: String
       default: "Death/Last Follow-up"
       description:
@@ -263,7 +263,7 @@ options:
             Name for the fifth milestone event.
 
     - name: milestone5Date
-      title: "Milestone 5 Date"
+      title: "Milestone 5 date"
       type: Variable
       suggested: [continuous, nominal, ordinal]
       required: false

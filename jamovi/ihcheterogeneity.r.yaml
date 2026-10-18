@@ -29,8 +29,9 @@ items:
     - name: interpretation
       title: Clinical Interpretation and Analysis Summary
       type: Html
-      visible: true
+      visible: (showInterpretation)
       clearWith:
+        - showInterpretation
         - wholesection
         - biopsy1
         - biopsy2

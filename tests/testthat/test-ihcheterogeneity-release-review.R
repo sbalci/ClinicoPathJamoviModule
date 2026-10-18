@@ -26,7 +26,7 @@ clean_data <- function() {
 }
 
 run_ihc <- function(d, ...) {
-    ClinicoPath::ihcheterogeneity(data = d, wholesection = "whole",
+    ClinicoPath::ihcheterogeneity(showInterpretation = TRUE, data = d, wholesection = "whole",
                                   biopsy1 = "b1", biopsy2 = "b2", ...)
 }
 
@@ -88,7 +88,7 @@ test_that("variance components sum to the total variance", {
     d <- data.frame(whole = truth + rnorm(n, 0, 2), b1 = truth + rnorm(n, 0, 6),
                     b2 = truth + rnorm(n, 0, 6), b3 = truth + rnorm(n, 0, 6))
 
-    vt <- ClinicoPath::ihcheterogeneity(data = d, wholesection = "whole",
+    vt <- ClinicoPath::ihcheterogeneity(showInterpretation = TRUE, data = d, wholesection = "whole",
             biopsy1 = "b1", biopsy2 = "b2", biopsy3 = "b3",
             variance_components = TRUE)$variancetable$asDF
 
@@ -184,7 +184,7 @@ test_that("spatial heterogeneity measures within-case, not between-patient, spre
         b2 = c(a + rnorm(5, 0, 0.5), b + c(18, -17, 20, -19, 16)),
         comp = factor(rep(c("A", "B"), each = 5)))
 
-    st <- ClinicoPath::ihcheterogeneity(data = d, wholesection = "whole",
+    st <- ClinicoPath::ihcheterogeneity(showInterpretation = TRUE, data = d, wholesection = "whole",
             biopsy1 = "b1", biopsy2 = "b2", spatial_id = "comp")$spatialanalysistable$asDF
 
     # Pooling every case's measurements made A (wide patient range) look the most
@@ -212,7 +212,7 @@ test_that("Levene's test for compartment differences actually reports a result",
                     b1 = whole + rnorm(n, 0, 4), b2 = whole + rnorm(n, 0, 4),
                     comp = factor(rep(c("A", "B", "C"), each = 4)))
 
-    res <- ClinicoPath::ihcheterogeneity(data = d, wholesection = "whole",
+    res <- ClinicoPath::ihcheterogeneity(showInterpretation = TRUE, data = d, wholesection = "whole",
             biopsy1 = "b1", biopsy2 = "b2", spatial_id = "comp",
             compareCompartments = TRUE, compartmentTests = TRUE)
 
@@ -237,7 +237,7 @@ test_that("Levene's test for compartment differences actually reports a result",
 
 test_that("tables do not duplicate rows when .run() re-executes on one instance", {
   d <- read.csv("../../data/ihc_heterogeneity.csv")
-  options <- ClinicoPath:::ihcheterogeneityOptions$new(
+  options <- ClinicoPath:::ihcheterogeneityOptions$new(showInterpretation = TRUE,
     wholesection = "ki67_wholesection",
     biopsy1 = "ki67_region1", biopsy2 = "ki67_region2")
   analysis <- ClinicoPath:::ihcheterogeneityClass$new(options = options, data = d)
@@ -252,7 +252,7 @@ test_that("tables do not duplicate rows when .run() re-executes on one instance"
 test_that("compartment Kruskal-Wallis uses one per-case summary value, not pooled measurements", {
   skip_if_not_installed("psych")
   d <- read.csv("../../data/ihc_heterogeneity.csv")
-  res <- ihcheterogeneity(
+  res <- ihcheterogeneity(showInterpretation = TRUE,
     data = d, wholesection = "ki67_wholesection",
     biopsy1 = "ki67_region1", biopsy2 = "ki67_region2",
     spatial_id = "spatial_region",
@@ -301,7 +301,7 @@ test_that("every panel grades the within-case CV with the same user-threshold ba
   d <- read.csv("../../data/ihc_heterogeneity.csv")
   grade_word <- function(x) regmatches(x, regexpr("Low|Moderate|High", x))
   for (thr in c(5, 20, 50)) {
-    res <- ihcheterogeneity(
+    res <- ihcheterogeneity(showInterpretation = TRUE,
       data = d, wholesection = "ki67_wholesection",
       biopsy1 = "ki67_region1", biopsy2 = "ki67_region2",
       cv_threshold = thr, showSummary = TRUE)
@@ -338,7 +338,7 @@ test_that("the variability plot does not error when no case has two values to co
     # Image$.render() reports TRUE whatever the renderer does, so call the
     # renderer itself: it used to die on max(numeric(0)) and a 0-row frame.
     d <- data.frame(b1 = c(10, 20, 30, 40, 50, 60), b2 = NA_real_)
-    o <- ClinicoPath:::ihcheterogeneityOptions$new(biopsy1 = "b1", biopsy2 = "b2",
+    o <- ClinicoPath:::ihcheterogeneityOptions$new(showInterpretation = TRUE, biopsy1 = "b1", biopsy2 = "b2",
                                                   show_variability_plots = TRUE)
     an <- ClinicoPath:::ihcheterogeneityClass$new(options = o, data = d)
     # Since 2026-09-18 the gate counts cases with two regions, so .run() rejects

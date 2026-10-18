@@ -9,48 +9,48 @@ children:
     stretchFactor: 1
     children:
       - type: TargetLayoutBox
-        label: Overall / Whole Slide / HotSpot (Optional)
+        label: Overall / whole slide / hotspot (optional)
         children:
           - type: VariablesListBox
             name: wholesection
             maxItemCount: 1
             isTarget: true
       - type: TargetLayoutBox
-        label: Regional Measurement 1
+        label: Regional measurement 1
         children:
           - type: VariablesListBox
             name: biopsy1
             maxItemCount: 1
             isTarget: true
       - type: TargetLayoutBox
-        label: Regional Measurement 2 (Optional)
+        label: Regional measurement 2 (optional)
         children:
           - type: VariablesListBox
             name: biopsy2
             maxItemCount: 1
             isTarget: true
       - type: TargetLayoutBox
-        label: Regional Measurement 3 (Optional)
+        label: Regional measurement 3 (optional)
         children:
           - type: VariablesListBox
             name: biopsy3
             maxItemCount: 1
             isTarget: true
       - type: TargetLayoutBox
-        label: Regional Measurement 4 (Optional)
+        label: Regional measurement 4 (optional)
         children:
           - type: VariablesListBox
             name: biopsy4
             maxItemCount: 1
             isTarget: true
       - type: TargetLayoutBox
-        label: Additional Regional Measurements
+        label: Additional regional measurements
         children:
           - type: VariablesListBox
             name: biopsies
             isTarget: true
       - type: TargetLayoutBox
-        label: Spatial Region ID (Optional)
+        label: Spatial region ID (optional)
         children:
           - type: VariablesListBox
             name: spatial_id
@@ -113,8 +113,11 @@ children:
     collapsed: true
     children:
       - type: CheckBox
+        name: showInterpretation
+      - type: CheckBox
         name: generate_recommendations
         label: Clinical recommendations
+        enable: (showInterpretation)
       - type: CheckBox
         name: showSummary
         label: Plain-language summary

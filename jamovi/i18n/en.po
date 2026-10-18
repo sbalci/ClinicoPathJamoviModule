@@ -198,6 +198,20 @@ msgid ""
 "Competing Risks or Multistate."
 msgstr ""
 
+#: R/agepyramid.b.R
+msgid ""
+"'{level}' is set as the female level. Select the level of '{gender}' that "
+"identifies male subjects under 'Male level'; it is never filled in from the "
+"remaining levels."
+msgstr ""
+
+#: R/agepyramid.b.R
+msgid ""
+"'{level}' is set as the male level. Select the level of '{gender}' that "
+"identifies female subjects under 'Female level'; it is never filled in from "
+"the remaining levels."
+msgstr ""
+
 #: R/vartree.b.R
 msgid ""
 "'{name}' is selected as a prune-below or follow-below variable, but it is "
@@ -246,6 +260,10 @@ msgstr ""
 msgid ""
 "'{weight}' must be numeric (current type: {type}). Select a numeric variable "
 "containing counts, frequencies, or sampling weights."
+msgstr ""
+
+#: R/ihcheterogeneity.b.R
+msgid "'%s' (r = %s, 95%% CI %s to %s)"
 msgstr ""
 
 #: R/chisqposttest.b.R
@@ -1022,6 +1040,15 @@ msgid ""
 "would be with larger expected counts. Turn on the Assumptions check panel "
 "for the per-cell detail, or use Fisher's exact test if the sparse cells "
 "matter to the conclusion."
+msgstr ""
+
+#: R/chisqposttest.b.R
+msgid ""
+"{k} of {m} cells have an expected count below 5. The overall p-value is from "
+"Fisher's exact test, so the large-sample limits of the chi-square "
+"approximation do not apply to it. The standardized residuals and Cramér's V "
+"still come from the chi-square statistic and are approximate for a table "
+"this sparse."
 msgstr ""
 
 #: R/chisqposttest.b.R
@@ -3497,7 +3524,7 @@ msgstr ""
 
 #: R/diagnosticmeta.b.R
 msgid ""
-"%d of %d studies have a cell below 5. The bivariate model used here "
+"%d of %d studies have a cell of 0 or 1. The bivariate model used here "
 "approximates the logit sensitivity and specificity as normal, which is "
 "biased when cells are that small, and any zero cell additionally needs a "
 "continuity correction. Published comparisons put the gap against an exact "
@@ -3844,6 +3871,18 @@ msgstr ""
 
 #: R/dataquality.b.R
 msgid "%Duplicates"
+msgstr ""
+
+#: R/chisqposttest.b.R
+msgid ""
+"%g observations in a %d x %d table; Fisher's exact test (Monte Carlo, B = "
+"2000), p %s at alpha = %g; %s."
+msgstr ""
+
+#: R/chisqposttest.b.R
+msgid ""
+"%g observations in a %d x %d table; Fisher's exact test, p %s at alpha = %g; "
+"%s."
 msgstr ""
 
 #: R/chisqposttest.b.R
@@ -4798,8 +4837,11 @@ msgid "+0.5 to the zero cells only"
 msgstr ""
 
 #: R/diagnosticmeta.b.R
-#: diagnosticmeta/options/zero_cell_correction/reciprocal_n.title
 msgid "+1/N to all cells (N = study size)"
+msgstr ""
+
+#: diagnosticmeta/options/zero_cell_correction/reciprocal_n.title
+msgid "+1/N to all cells (n = study size)"
 msgstr ""
 
 #: decisionpanel/results/individualTests.columns.title
@@ -5854,6 +5896,23 @@ msgstr ""
 msgid ""
 "<em>Note:</em> Zero-cell corrections can introduce bias, especially in large "
 "studies. Results should be interpreted with caution."
+msgstr ""
+
+#: R/diagnosticmeta.b.R
+msgid ""
+"<em>The bands below are Higgins' conventional cut-points from intervention "
+"meta-analysis. They are not established thresholds for diagnostic accuracy, "
+"where a high I[[SUP2]] commonly reflects studies using different positivity "
+"thresholds - the situation the SROC curve exists to model - rather than a "
+"reason to abandon the analysis. Treat them as rough orientation, and prefer "
+"the prediction region.</em>"
+msgstr ""
+
+#: R/diagnosticmeta.b.R
+msgid ""
+"<em>These features do not establish that publication bias is absent: "
+"asymmetry tests have low power, and are unreliable with fewer than 10 "
+"studies.</em>"
 msgstr ""
 
 #: R/pathagreement.b.R
@@ -9032,6 +9091,40 @@ msgid ""
 "sensitivity/specificity balance.</p>"
 msgstr ""
 
+#: R/diagnosticmeta.b.R
+msgid ""
+"<strong> Clinical Insight:</strong> The plotted SROC curve is derived from "
+"the <em>bivariate model</em>. The proportional-hazards SROC table is a "
+"separate compact model of diagnostic accuracy and between-study variation; "
+"it should not be interpreted as a Rutter-Gatsonis HSROC threshold/accuracy "
+"table."
+msgstr ""
+
+#: R/diagnosticmeta.b.R
+msgid ""
+"<strong> Pro Tip:</strong> Always interpret meta-analysis results in the "
+"context of your specific clinical population and intended use. A test "
+"excellent for one application may be inappropriate for another."
+msgstr ""
+
+#: R/diagnosticmeta.b.R
+msgid ""
+"<strong> Recommendation:</strong> Start with REML unless you have specific "
+"methodological requirements. It provides the best balance of statistical "
+"properties and computational stability for diagnostic test meta-analysis."
+msgstr ""
+
+#: R/diagnosticmeta.b.R
+msgid ""
+"<strong> Tip:</strong> Start with the bivariate model and forest plot to "
+"understand overall performance, then explore heterogeneity sources with "
+"meta-regression if needed."
+msgstr ""
+
+#: R/diagnosticmeta.b.R
+msgid "<strong> When the Funnel Plot is Asymmetric:</strong>"
+msgstr ""
+
 #: R/jjhistostats.b.R
 msgid ""
 "<strong>'{var}' is not normally distributed</strong> (Shapiro-Wilk p = {p}), "
@@ -9056,8 +9149,18 @@ msgid ""
 "maximum: {maximum})."
 msgstr ""
 
+#: R/diagnosticmeta.b.R
+msgid "<strong>Above Diagonal:</strong> Better than chance performance"
+msgstr ""
+
 #: R/checkdata.b.R
 msgid "<strong>Accuracy:</strong> Outlier detection and range validation"
+msgstr ""
+
+#: R/diagnosticmeta.b.R
+msgid ""
+"<strong>Action Needed:</strong> If the funnel is asymmetric, look for a "
+"clinical explanation first, then for unpublished studies"
 msgstr ""
 
 #: R/pathagreement.b.R
@@ -9066,6 +9169,18 @@ msgstr ""
 
 #: R/jjwithinstats.b.R
 msgid "<strong>Analysis:</strong> %s with %d measurements per subject"
+msgstr ""
+
+#: R/diagnosticmeta.b.R
+msgid ""
+"<strong>Asymmetric Funnel:</strong> Studies concentrated on one side at the "
+"imprecise end of the plot"
+msgstr ""
+
+#: R/diagnosticmeta.b.R
+msgid ""
+"<strong>Balanced Performance:</strong> Consider clinical costs of false "
+"positives vs false negatives"
 msgstr ""
 
 #: R/jjhistostats.b.R
@@ -9090,6 +9205,10 @@ msgid ""
 "strength."
 msgstr ""
 
+#: R/diagnosticmeta.b.R
+msgid "<strong>Before running analysis, verify:</strong>"
+msgstr ""
+
 #: R/pathagreement.b.R
 msgid "<strong>Best practices:</strong>"
 msgstr ""
@@ -9105,6 +9224,24 @@ msgid ""
 "<strong>Biomarker tracking (guidance only):</strong> Optimized for "
 "laboratory values. Please manually ensure 'Nonparametric' is selected if "
 "data is skewed.<br>"
+msgstr ""
+
+#: R/diagnosticmeta.b.R
+msgid ""
+"<strong>Bivariate modeling</strong> - Jointly analyzes sensitivity and "
+"specificity"
+msgstr ""
+
+#: R/diagnosticmeta.b.R
+msgid ""
+"<strong>Bivariate Random-Effects Model (Recommended Primary "
+"Approach):</strong>"
+msgstr ""
+
+#: R/diagnosticmeta.b.R
+msgid ""
+"<strong>Bivariate Random-Effects Model (Recommended):</strong> Jointly "
+"analyzes sensitivity and specificity accounting for correlation"
 msgstr ""
 
 #: R/jjbetweenstats.b.R
@@ -9161,6 +9298,16 @@ msgid ""
 "statistical options yourself."
 msgstr ""
 
+#: R/diagnosticmeta.b.R
+msgid ""
+"<strong>Choose the appropriate estimation method for your "
+"meta-analysis:</strong>"
+msgstr ""
+
+#: R/diagnosticmeta.b.R
+msgid "<strong>Clinical Implications:</strong> Population-specific predictive values"
+msgstr ""
+
 #: R/pathagreement.b.R
 msgid "<strong>Clinical interpretation:</strong>"
 msgstr ""
@@ -9197,8 +9344,32 @@ msgstr ""
 msgid "<strong>Completeness:</strong> Missing data evaluation and impact assessment"
 msgstr ""
 
+#: R/diagnosticmeta.b.R
+msgid ""
+"<strong>Confidence region (dashed):</strong> how precisely the POOLED point "
+"is estimated. It shrinks as more studies are added."
+msgstr ""
+
+#: R/diagnosticmeta.b.R
+msgid "<strong>Confirmatory Testing:</strong> Prioritize high specificity (≥90%)"
+msgstr ""
+
 #: R/checkdata.b.R
 msgid "<strong>Consistency:</strong> Pattern recognition and systematic issues"
+msgstr ""
+
+#: R/diagnosticmeta.b.R
+msgid ""
+"<strong>Consistent Performance:</strong> low measured heterogeneity means "
+"the included studies produced similar estimates; with few studies it is "
+"imprecisely estimated and does not by itself show that performance transfers "
+"to a new setting"
+msgstr ""
+
+#: R/diagnosticmeta.b.R
+msgid ""
+"<strong>Consistent Results:</strong> Points clustered together = low "
+"heterogeneity"
 msgstr ""
 
 #: R/linechart.b.R
@@ -9219,6 +9390,23 @@ msgid ""
 "approximately %.1f%%.<br><strong>RECOMMENDATION:</strong> Select a "
 "correction method to see guidance, or interpret all p-values cautiously "
 "acknowledging this inflated error rate."
+msgstr ""
+
+#: R/diagnosticmeta.b.R
+msgid ""
+"<strong>Deeks' Test p < 0.05:</strong> Statistical evidence of funnel plot "
+"asymmetry - evidence of asymmetry, not of publication bias; see the causes "
+"listed below"
+msgstr ""
+
+#: R/diagnosticmeta.b.R
+msgid "<strong>Deeks' Test p ≥ 0.05:</strong> No statistical evidence of asymmetry"
+msgstr ""
+
+#: R/diagnosticmeta.b.R
+msgid ""
+"<strong>Diagonal Line:</strong> Represents random chance (no discriminative "
+"ability)"
 msgstr ""
 
 #: R/pathagreement.b.R
@@ -9242,12 +9430,52 @@ msgid ""
 "spread (MAD, IQR), coefficient of variation and skewness"
 msgstr ""
 
+#: R/diagnosticmeta.b.R
+msgid "<strong>DOR &lt; 5:</strong> Limited discriminative ability"
+msgstr ""
+
+#: R/diagnosticmeta.b.R
+msgid "<strong>DOR > 25:</strong> Excellent overall discriminative ability"
+msgstr ""
+
+#: R/diagnosticmeta.b.R
+msgid "<strong>DOR 10-25:</strong> Good discriminative ability"
+msgstr ""
+
+#: R/diagnosticmeta.b.R
+msgid "<strong>DOR 5-10:</strong> Moderate discriminative ability"
+msgstr ""
+
 #: R/checkdata.b.R
 msgid "<strong>Duplicate Analysis:</strong> Identify repeated values and patterns"
 msgstr ""
 
+#: R/diagnosticmeta.b.R
+msgid "<strong>Each Point:</strong> One study in your meta-analysis"
+msgstr ""
+
 #: R/mageeequation.b.R
 msgid "<strong>ER H-Score</strong> (0-300) or Percentage (0-100)"
+msgstr ""
+
+#: R/diagnosticmeta.b.R
+msgid "<strong>Essential Variables (Required):</strong>"
+msgstr ""
+
+#: R/diagnosticmeta.b.R
+msgid "<strong>Expected Pattern:</strong> Inverted funnel shape if no bias present"
+msgstr ""
+
+#: R/diagnosticmeta.b.R
+msgid ""
+"<strong>False negatives (FN):</strong> Number incorrectly identified as "
+"negative"
+msgstr ""
+
+#: R/diagnosticmeta.b.R
+msgid ""
+"<strong>False positives (FP):</strong> Number incorrectly identified as "
+"positive"
 msgstr ""
 
 #: R/jjhistostats.b.R
@@ -9267,6 +9495,49 @@ msgid ""
 "from plots below and apply this procedure in external software (e.g., R's "
 "p.adjust() function)<br> <strong>IMPORTANT:</strong> FDR correction requires "
 "manual calculation. This analysis does not automatically adjust p-values."
+msgstr ""
+
+#: R/diagnosticmeta.b.R
+msgid ""
+"<strong>Fixed Effects:</strong> Assumes every study shares the exact same "
+"sensitivity and specificity (τ² = 0). Under this assumption, the SROC curve "
+"and prediction region are undefined, and confidence intervals are narrower "
+"by construction."
+msgstr ""
+
+#: R/diagnosticmeta.b.R
+msgid ""
+"<strong>Fixed Effects:</strong> Use when between-study heterogeneity is "
+"minimal or you want to assume all studies estimate the same underlying "
+"effect size."
+msgstr ""
+
+#: R/diagnosticmeta.b.R
+msgid ""
+"<strong>Forest Plot:</strong> Displays individual study results for "
+"sensitivity and specificity with confidence intervals. Each study is "
+"represented by a point (estimate) with horizontal lines (confidence "
+"intervals)."
+msgstr ""
+
+#: R/diagnosticmeta.b.R
+msgid ""
+"<strong>Funnel Plot:</strong> Assesses publication bias by plotting study "
+"precision against effect size (log diagnostic odds ratio)."
+msgstr ""
+
+#: R/diagnosticmeta.b.R
+msgid "<strong>Gap in Lower Region:</strong> Small studies with low accuracy absent"
+msgstr ""
+
+#: R/diagnosticmeta.b.R
+msgid "<strong>Geographic region:</strong> Study location for population analysis"
+msgstr ""
+
+#: R/diagnosticmeta.b.R
+msgid ""
+"<strong>Geographic/Temporal:</strong> Population differences, technology "
+"evolution"
 msgstr ""
 
 #: R/checkdata.b.R
@@ -9299,6 +9570,28 @@ msgstr ""
 msgid "<strong>HER2 Status</strong> (positive/negative)"
 msgstr ""
 
+#: R/diagnosticmeta.b.R
+msgid ""
+"<strong>Heterogeneity assessment</strong> - Evaluates consistency across "
+"studies"
+msgstr ""
+
+#: R/diagnosticmeta.b.R
+msgid ""
+"<strong>Heterogeneity:</strong> Clinical differences can mimic publication "
+"bias"
+msgstr ""
+
+#: R/diagnosticmeta.b.R
+msgid ""
+"<strong>Heterogeneity:</strong> I[[SUP2]] values and potential sources "
+"investigated"
+msgstr ""
+
+#: R/diagnosticmeta.b.R
+msgid "<strong>Holling Proportional-Hazards SROC Model:</strong>"
+msgstr ""
+
 #: R/jjbetweenstats.b.R
 msgid ""
 "<strong>Holm Correction Guidance (Manual Application "
@@ -9318,6 +9611,12 @@ msgid ""
 "fitted values."
 msgstr ""
 
+#: R/diagnosticmeta.b.R
+msgid ""
+"<strong>Horizontal Lines:</strong> Wilson score confidence intervals (at the "
+"chosen confidence level) showing precision of estimates"
+msgstr ""
+
 #: R/outlierdetection.b.R
 msgid ""
 "<strong>How many values this method can flag:</strong> the %s places its "
@@ -9329,12 +9628,51 @@ msgid ""
 "responds to how far out the values are."
 msgstr ""
 
+#: R/diagnosticmeta.b.R
+msgid ""
+"<strong>I[[SUP2]] &gt; 75%:</strong> Considerable heterogeneity - a single "
+"pooled point is unlikely to describe the evidence; investigate thresholds, "
+"spectrum and reference standards, and report the SROC curve and prediction "
+"region"
+msgstr ""
+
+#: R/diagnosticmeta.b.R
+msgid ""
+"<strong>I[[SUP2]] < 25%:</strong> Little heterogeneity detected on this "
+"margin. I[[SUP2]] is imprecisely estimated when few studies are pooled and "
+"does not describe the bivariate model, so on its own it does not establish "
+"that pooling is appropriate - inspect the prediction region and check that "
+"positivity thresholds, patient spectrum and reference standards are "
+"comparable"
+msgstr ""
+
+#: R/diagnosticmeta.b.R
+msgid ""
+"<strong>I[[SUP2]] 25-50%:</strong> Moderate heterogeneity - investigate "
+"potential sources"
+msgstr ""
+
+#: R/diagnosticmeta.b.R
+msgid ""
+"<strong>I[[SUP2]] 50-75%:</strong> Substantial heterogeneity - pooling "
+"questionable"
+msgstr ""
+
 #: R/checkdata.b.R
 msgid ""
 "<strong>IMPORTANT:</strong> Outlier detection uses a <strong>consensus "
 "approach</strong> - points are only flagged if detected by {ge}2 of 3 "
 "methods (Z-score, IQR, Modified Z-score). Points flagged by only 1 method "
 "are <strong>not shown</strong>, even if they exceed |z|>3."
+msgstr ""
+
+#: R/diagnosticmeta.b.R
+msgid ""
+"<strong>Important:</strong> Sensitivity and specificity are test "
+"characteristics, but clinicians need predictive values that depend on "
+"disease prevalence in their population. See the <em>Predictive Values by "
+"Prevalence</em> table below for estimated PPV and NPV across typical "
+"prevalence settings based on the pooled accuracy of this meta-analysis."
 msgstr ""
 
 #: R/linechart.b.R
@@ -9345,6 +9683,10 @@ msgstr ""
 msgid ""
 "<strong>Independence:</strong> Observations should be independent unless "
 "using appropriate methods for correlated data."
+msgstr ""
+
+#: R/diagnosticmeta.b.R
+msgid "<strong>Individual Studies:</strong> Circles sized by sample size"
 msgstr ""
 
 #: R/diagnosticmeta.b.R
@@ -9393,6 +9735,20 @@ msgid ""
 "plot generation and statistical calculation."
 msgstr ""
 
+#: R/diagnosticmeta.b.R
+msgid ""
+"<strong>Left Panel (Sensitivity):</strong> Proportion of diseased cases "
+"correctly identified"
+msgstr ""
+
+#: R/diagnosticmeta.b.R
+msgid "<strong>Likelihood Ratios:</strong> For clinical decision-making context"
+msgstr ""
+
+#: R/diagnosticmeta.b.R
+msgid "<strong>Limitations:</strong> Study quality, missing data, generalizability"
+msgstr ""
+
 #: R/linechart.b.R
 msgid ""
 "<strong>Linearity:</strong> The relationship between variables is "
@@ -9404,11 +9760,41 @@ msgid "<strong>Marginal distributions</strong> on both axes"
 msgstr ""
 
 #: R/diagnosticmeta.b.R
+msgid ""
+"<strong>Maximum Likelihood:</strong> Alternative estimation approach when "
+"maximum likelihood estimation is specifically preferred or required by study "
+"protocol."
+msgstr ""
+
+#: R/diagnosticmeta.b.R
+msgid ""
+"<strong>Meta-Regression:</strong> Investigates sources of heterogeneity "
+"using study-level covariates"
+msgstr ""
+
+#: R/diagnosticmeta.b.R
+msgid ""
+"<strong>Method of Moments:</strong> Classical moment-based estimation "
+"method, useful for comparison with older meta-analyses or when computational "
+"resources are limited."
+msgstr ""
+
+#: R/diagnosticmeta.b.R
 msgid "<strong>Method:</strong> %s"
+msgstr ""
+
+#: R/diagnosticmeta.b.R
+msgid ""
+"<strong>Methodological:</strong> Reference standards, blinding, cut-off "
+"thresholds"
 msgstr ""
 
 #: R/mageeequation.b.R
 msgid "<strong>Mitotic Score</strong> (1-3)"
+msgstr ""
+
+#: R/diagnosticmeta.b.R
+msgid "<strong>Narrow CIs:</strong> Large studies with precise estimates"
 msgstr ""
 
 #: R/diagnosticmeta.b.R
@@ -9465,6 +9851,14 @@ msgstr ""
 
 #: R/diagnosticmeta.b.R
 msgid ""
+"<strong>Not external validation:</strong> a meta-analysis summarises "
+"existing published evidence and inherits any publication, spectrum or "
+"reference-standard bias of the included studies; it is not a prospective "
+"evaluation in an intended-use population with a pre-specified threshold"
+msgstr ""
+
+#: R/diagnosticmeta.b.R
+msgid ""
 "<strong>Note:</strong> the confidence interval spans more than one "
 "performance category, so this classification is not firmly established by "
 "the pooled data."
@@ -9506,16 +9900,45 @@ msgid ""
 "distributions between groups."
 msgstr ""
 
+#: R/diagnosticmeta.b.R
+msgid "<strong>Optional Variables for Meta-Regression:</strong>"
+msgstr ""
+
 #: R/linechart.b.R
 msgid ""
 "<strong>Ordered X-variable:</strong> Time points or sequence should have "
 "meaningful order."
 msgstr ""
 
+#: R/diagnosticmeta.b.R
+msgid ""
+"<strong>Other Causes:</strong> Different thresholds, narrower patient "
+"spectra in small studies, language or database bias, or chance"
+msgstr ""
+
 #: R/checkdata.b.R
 msgid ""
 "<strong>Outlier Analysis:</strong> Consensus-based detection ({ge}2 of 3 "
 "methods: Z-score |z|>3, IQR 1.5{times}rule, Modified Z-score |z|>3.5)"
+msgstr ""
+
+#: R/diagnosticmeta.b.R
+msgid ""
+"<strong>p < 0.05:</strong> The funnel plot is asymmetric - small studies "
+"report systematically different accuracy from large ones. Publication bias "
+"is one explanation; heterogeneity, a threshold effect, and a genuine "
+"relation between study size and accuracy (smaller studies often use narrower "
+"spectra) are others. The test cannot tell them apart, so a significant "
+"result is a prompt to investigate, not a finding of publication bias"
+msgstr ""
+
+#: R/diagnosticmeta.b.R
+msgid ""
+"<strong>p ≥ 0.05:</strong> No statistically significant funnel-plot "
+"asymmetry was detected. This does NOT indicate that publication bias is "
+"unlikely: Deeks' test has low power and is unreliable with fewer than 10 "
+"studies, so a non-significant result is uninformative when few studies are "
+"pooled"
 msgstr ""
 
 #: R/pathagreement.b.R
@@ -9540,6 +9963,16 @@ msgstr ""
 msgid "<strong>Patient characteristics:</strong> age distribution, BMI, vital signs."
 msgstr ""
 
+#: R/diagnosticmeta.b.R
+msgid ""
+"<strong>Patient population:</strong> Disease stage, demographics (e.g., "
+"'early_stage', 'advanced', 'mixed')"
+msgstr ""
+
+#: R/diagnosticmeta.b.R
+msgid "<strong>Patient Population:</strong> Disease stage, severity, demographics"
+msgstr ""
+
 #: R/checkdata.b.R
 msgid ""
 "<strong>Pattern Analysis:</strong> Missing data mechanisms and systematic "
@@ -9554,6 +9987,36 @@ msgstr ""
 msgid ""
 "<strong>Performance note:</strong> a Bayesian analysis of {n} rows may take "
 "30 to 60 seconds. Wait for it, or switch to a faster method."
+msgstr ""
+
+#: R/diagnosticmeta.b.R
+msgid ""
+"<strong>Point Scatter:</strong> Studies clustered tightly = consistent test "
+"performance"
+msgstr ""
+
+#: R/diagnosticmeta.b.R
+msgid ""
+"<strong>Pooled Estimate:</strong> Large triangle showing meta-analytic "
+"summary"
+msgstr ""
+
+#: R/diagnosticmeta.b.R
+msgid ""
+"<strong>Pooled Estimates:</strong> Sensitivity and specificity with "
+"confidence intervals at the level chosen in Advanced Options"
+msgstr ""
+
+#: R/diagnosticmeta.b.R
+msgid ""
+"<strong>Pooled Sensitivity:</strong> Proportion of diseased cases correctly "
+"identified <ul> <li>Excellent sensitivity (≥90%): few diseased cases missed"
+msgstr ""
+
+#: R/diagnosticmeta.b.R
+msgid ""
+"<strong>Pooled Specificity:</strong> Proportion of non-diseased cases "
+"correctly identified <ul> <li>Excellent specificity (≥90%): few false alarms"
 msgstr ""
 
 #: R/diagnosticmeta.b.R
@@ -9579,8 +10042,45 @@ msgid ""
 "study."
 msgstr ""
 
+#: R/diagnosticmeta.b.R
+msgid ""
+"<strong>Prediction region (dotted):</strong> where the accuracy of a FUTURE "
+"study in a new setting is expected to fall. It includes between-study "
+"heterogeneity and does NOT shrink with more studies."
+msgstr ""
+
+#: R/diagnosticmeta.b.R
+msgid ""
+"<strong>Proportional-Hazards SROC Analysis:</strong> Holling model estimated "
+"by adjusted profile maximum likelihood"
+msgstr ""
+
+#: R/diagnosticmeta.b.R
+msgid ""
+"<strong>Proportional-hazards SROC modeling</strong> - Models the trade-off "
+"between sensitivity and false-positive rate"
+msgstr ""
+
+#: R/diagnosticmeta.b.R
+msgid ""
+"<strong>Publication Bias Assessment:</strong> Deeks' funnel plot asymmetry "
+"test"
+msgstr ""
+
+#: R/diagnosticmeta.b.R
+msgid "<strong>Publication Bias:</strong> Deeks' test results and visual assessment"
+msgstr ""
+
+#: R/diagnosticmeta.b.R
+msgid "<strong>Publication bias</strong> - Checks for selective reporting"
+msgstr ""
+
 #: R/checkdata.b.R
 msgid "<strong>Publication Preparation:</strong> Data quality documentation"
+msgstr ""
+
+#: R/diagnosticmeta.b.R
+msgid "<strong>Publication year:</strong> For temporal trend investigation"
 msgstr ""
 
 #: R/jjscatterstats.b.R
@@ -9621,6 +10121,27 @@ msgid ""
 "accounted for"
 msgstr ""
 
+#: R/diagnosticmeta.b.R
+msgid ""
+"<strong>REML (Random Effects, Default):</strong> Estimates between-study "
+"variance (τ²) to construct the SROC regression curve and prediction region. "
+"Recommended for diagnostic meta-analysis because test thresholds and patient "
+"populations inherently vary across studies."
+msgstr ""
+
+#: R/diagnosticmeta.b.R
+msgid ""
+"<strong>REML (Recommended):</strong> Default choice for most diagnostic "
+"meta-analyses. Most robust for random effects modeling with good performance "
+"across different scenarios."
+msgstr ""
+
+#: R/diagnosticmeta.b.R
+msgid ""
+"<strong>Right Panel (Specificity):</strong> Proportion of healthy cases "
+"correctly identified"
+msgstr ""
+
 #: R/jjscatterstats.b.R
 msgid ""
 "<strong>Robust (Winsorized Pearson):</strong> pulls extreme values in before "
@@ -9636,6 +10157,14 @@ msgid ""
 "proportion or use the nonparametric test instead."
 msgstr ""
 
+#: R/diagnosticmeta.b.R
+msgid ""
+"<strong>Row order:</strong> studies are sorted by their mean of sensitivity "
+"and specificity, so each study keeps the same row in both panels and can be "
+"read across. Within one panel the rows are therefore <em>not</em> ranked by "
+"that panel's own metric"
+msgstr ""
+
 #: R/jjhistostats.b.R
 msgid ""
 "<strong>Rows with missing values were excluded.</strong> Every statistic and "
@@ -9646,8 +10175,18 @@ msgstr ""
 msgid "<strong>Sample size:</strong> {n} observations"
 msgstr ""
 
+#: R/diagnosticmeta.b.R
+msgid ""
+"<strong>Scale:</strong> both panels run from 0 to 1; the tables report the "
+"same quantities as percentages"
+msgstr ""
+
 #: R/jjscatterstats.b.R
 msgid "<strong>Scatter plot</strong> with a fitted trend line and confidence band"
+msgstr ""
+
+#: R/diagnosticmeta.b.R
+msgid "<strong>Screening Applications:</strong> Prioritize high sensitivity (≥90%)"
 msgstr ""
 
 #: R/jjhistostats.b.R
@@ -9663,12 +10202,72 @@ msgid ""
 "results."
 msgstr ""
 
+#: R/diagnosticmeta.b.R
+msgid "<strong>Small Sample:</strong> Funnel plot unreliable with &lt;10 studies"
+msgstr ""
+
+#: R/diagnosticmeta.b.R
+msgid "<strong>Small Studies Present:</strong> Range of precision levels represented"
+msgstr ""
+
+#: R/diagnosticmeta.b.R
+msgid ""
+"<strong>SROC Plot:</strong> Summary Receiver Operating Characteristic curve "
+"showing the trade-off between sensitivity and specificity across all studies."
+msgstr ""
+
 #: R/pathagreement.b.R
 msgid "<strong>Statistical assumptions:</strong>"
 msgstr ""
 
 #: R/diagnosticmeta.b.R
+msgid "<strong>Step 1:</strong> Select your study identifier variable"
+msgstr ""
+
+#: R/diagnosticmeta.b.R
+msgid "<strong>Step 2:</strong> Assign TP, FP, FN, TN count variables"
+msgstr ""
+
+#: R/diagnosticmeta.b.R
+msgid "<strong>Step 3:</strong> Choose analysis options (bivariate recommended)"
+msgstr ""
+
+#: R/diagnosticmeta.b.R
+msgid "<strong>Step 4:</strong> Review pooled estimates and heterogeneity"
+msgstr ""
+
+#: R/diagnosticmeta.b.R
+msgid "<strong>Step 5:</strong> Interpret in your clinical context"
+msgstr ""
+
+#: R/diagnosticmeta.b.R
 msgid "<strong>Studies corrected:</strong> %d of %d (%s)"
+msgstr ""
+
+#: R/diagnosticmeta.b.R
+msgid ""
+"<strong>Study identifier:</strong> Unique name or ID for each study (e.g., "
+"'Smith_2020', 'Study_1')"
+msgstr ""
+
+#: R/diagnosticmeta.b.R
+msgid "<strong>Study Selection:</strong> Number of studies included and excluded"
+msgstr ""
+
+#: R/diagnosticmeta.b.R
+msgid "<strong>Symmetric Funnel:</strong> Studies distributed evenly on both sides"
+msgstr ""
+
+#: R/diagnosticmeta.b.R
+msgid ""
+"<strong>Technical Factors:</strong> Staining protocols, antibody sources, "
+"automation"
+msgstr ""
+
+#: R/diagnosticmeta.b.R
+msgid ""
+"<strong>Technical method:</strong> Staining protocol (e.g., 'automated', "
+"'manual')"
 msgstr ""
 
 #: R/jjhistostats.b.R
@@ -9686,6 +10285,12 @@ msgid ""
 "test and on the clinical cost of a false negative versus a false positive - "
 "none of which this analysis knows. Read the prediction interval alongside "
 "the pooled pair before applying either to practice."
+msgstr ""
+
+#: R/diagnosticmeta.b.R
+msgid ""
+"<strong>These models answer related questions using different "
+"parameterizations:</strong>"
 msgstr ""
 
 #: R/pathagreement.b.R
@@ -9707,6 +10312,31 @@ msgid ""
 "monitoring<br>"
 msgstr ""
 
+#: R/diagnosticmeta.b.R
+msgid "<strong>True negatives (TN):</strong> Number correctly identified as negative"
+msgstr ""
+
+#: R/diagnosticmeta.b.R
+msgid "<strong>True positives (TP):</strong> Number correctly identified as positive"
+msgstr ""
+
+#: R/diagnosticmeta.b.R
+msgid ""
+"<strong>Upper Left Corner:</strong> Ideal performance (high sensitivity, low "
+"false positive rate)"
+msgstr ""
+
+#: R/diagnosticmeta.b.R
+msgid ""
+"<strong>Use this plot to:</strong> Visualize test performance trade-offs, "
+"identify optimal operating points, and assess consistency across different "
+"study populations and settings."
+msgstr ""
+
+#: R/diagnosticmeta.b.R
+msgid "<strong>Use this when:</strong> Studies use the same diagnostic threshold"
+msgstr ""
+
 #: R/jjhistostats.b.R
 msgid "<strong>Variability:</strong> SD = {sd}"
 msgstr ""
@@ -9718,10 +10348,22 @@ msgid ""
 "will be empty. Check the variable selection and any active row filters."
 msgstr ""
 
+#: R/diagnosticmeta.b.R
+msgid ""
+"<strong>Variable Performance:</strong> high heterogeneity indicates that "
+"accuracy differed across the included populations and protocols"
+msgstr ""
+
 #: R/checkdata.b.R
 msgid ""
 "<strong>Variable to Check:</strong> Select any variable for quality "
 "assessment"
+msgstr ""
+
+#: R/diagnosticmeta.b.R
+msgid ""
+"<strong>Variance Components:</strong> Specialized approach for variance "
+"component estimation, typically used in advanced methodological research."
 msgstr ""
 
 #: R/jjwithinstats.b.R
@@ -9736,6 +10378,36 @@ msgstr ""
 
 #: R/pathagreement.b.R
 msgid "<strong>Why agreement matters:</strong>"
+msgstr ""
+
+#: R/diagnosticmeta.b.R
+msgid "<strong>Wide CIs:</strong> Small studies with less precise estimates"
+msgstr ""
+
+#: R/diagnosticmeta.b.R
+msgid ""
+"<strong>Wide Spread:</strong> Points scattered = high heterogeneity "
+"(investigate sources)"
+msgstr ""
+
+#: R/diagnosticmeta.b.R
+msgid ""
+"<strong>X-axis:</strong> False Positive Rate (1 - Specificity) - lower is "
+"better"
+msgstr ""
+
+#: R/diagnosticmeta.b.R
+msgid "<strong>X-axis:</strong> Log Diagnostic Odds Ratio (effect size)"
+msgstr ""
+
+#: R/diagnosticmeta.b.R
+msgid ""
+"<strong>Y-axis:</strong> 1/√(effective sample size), reversed so the most "
+"precise studies sit at the top (Deeks' funnel plot)"
+msgstr ""
+
+#: R/diagnosticmeta.b.R
+msgid "<strong>Y-axis:</strong> True Positive Rate (Sensitivity) - higher is better"
 msgstr ""
 
 #: R/jjhistostats.b.R
@@ -13017,6 +13689,10 @@ msgstr ""
 msgid "About Diagnostic Test Evaluation"
 msgstr ""
 
+#: R/diagnosticmeta.b.R
+msgid "About Diagnostic Test Meta-Analysis"
+msgstr ""
+
 #: R/decisioncalculator.b.R
 msgid "About diagnostic-test evaluation"
 msgstr ""
@@ -13210,6 +13886,7 @@ msgstr ""
 #: swimmerplot/options/showAbout.title
 #: tableone/options/showAbout.title
 #: venn/options/aboutAnalysis.title
+#: waterfall/options/showAboutAnalysis.title
 msgid "About this analysis"
 msgstr ""
 
@@ -13528,6 +14205,10 @@ msgstr ""
 
 #: decisiongraph/ui[4][3]/correlatedParameters.label
 msgid "Account for Parameter Correlations"
+msgstr ""
+
+#: R/diagnosticmeta.b.R
+msgid "Accounts for correlation between sensitivity and specificity"
 msgstr ""
 
 #: R/decisiongraph.b.R
@@ -14857,11 +15538,8 @@ msgstr ""
 msgid "Additional random effects beyond frailty"
 msgstr ""
 
-#: ihcheterogeneity/ui[0][5].label
-msgid "Additional Regional Measurements"
-msgstr ""
-
 #: ihcheterogeneity/options/biopsies.title
+#: ihcheterogeneity/ui[0][5].label
 msgid "Additional regional measurements"
 msgstr ""
 
@@ -17319,6 +17997,14 @@ msgstr ""
 msgid "AI & Machine Learning"
 msgstr ""
 
+#: R/diagnosticmeta.b.R
+msgid "AI Algorithm Implementation:"
+msgstr ""
+
+#: R/diagnosticmeta.b.R
+msgid "AI algorithm performance meta-analysis for clinical implementation"
+msgstr ""
+
 #: pathologyagreement/options/clinical_preset/ai_pathologist.title
 msgid "AI Algorithm vs Pathologist Agreement"
 msgstr ""
@@ -17996,6 +18682,10 @@ msgstr ""
 
 #: R/checkdata.b.R
 msgid "All values are integers (whole numbers)"
+msgstr ""
+
+#: R/diagnosticmeta.b.R
+msgid "All values are non-negative integers"
 msgstr ""
 
 #: R/decisioncalculator.b.R
@@ -19253,6 +19943,10 @@ msgstr ""
 msgid "Analysis method: currently \"{current}\", example \"{example}\""
 msgstr ""
 
+#: R/diagnosticmeta.b.R
+msgid "Analysis Methods"
+msgstr ""
+
 #: R/advancedraincloud.b.R
 #: R/lassocox.b.R
 #: advancedraincloud/results/analysisNotes.title
@@ -20168,7 +20862,7 @@ msgid "Annotation Summary"
 msgstr ""
 
 #: waterfall/ui[2][1][1][1].label
-msgid "Annotation Tracks"
+msgid "Annotation tracks"
 msgstr ""
 
 #: waterfall/options/annotationVars.title
@@ -20893,6 +21587,12 @@ msgstr ""
 msgid "Ascending"
 msgstr ""
 
+#: R/diagnosticmeta.b.R
+msgid ""
+"Ask first whether the small studies differ clinically from the large ones - "
+"spectrum, setting, threshold, reference standard"
+msgstr ""
+
 #: clinicalprediction/results/clinical_interpretation.columns.title
 msgid "Aspect"
 msgstr ""
@@ -21040,6 +21740,10 @@ msgid ""
 "(e.g., Ki-67 visual estimation, morphologic grading, IHC scoring)."
 msgstr ""
 
+#: R/diagnosticmeta.b.R
+msgid "Assessing biomarker diagnostic accuracy"
+msgstr ""
+
 #: R/reportcat.b.R
 msgid "Assessing data quality and completeness before main analysis"
 msgstr ""
@@ -21076,6 +21780,10 @@ msgstr ""
 
 #: R/survival.b.R
 msgid "Assessment of Proportional Hazards Assumption"
+msgstr ""
+
+#: R/diagnosticmeta.b.R
+msgid "Assessment of test performance heterogeneity and variation sources"
 msgstr ""
 
 #: irecist/options/assessmentTime.title
@@ -21529,13 +22237,6 @@ msgstr ""
 msgid "At least 2 rating categories are needed for a confusion matrix."
 msgstr ""
 
-#: R/ihcheterogeneity.b.R
-msgid ""
-"At least 2 regional measurements are required for inter-regional "
-"heterogeneity analysis. With a reference (whole section) measurement "
-"selected, a single regional measurement is sufficient."
-msgstr ""
-
 #: R/riverplot.b.R
 msgid "At least 2 rows of data required"
 msgstr ""
@@ -21557,6 +22258,10 @@ msgstr ""
 
 #: R/agreement.b.R
 msgid "At least 3 raters required for multi-annotator concordance."
+msgstr ""
+
+#: R/diagnosticmeta.b.R
+msgid "At least 3 studies with complete data"
 msgstr ""
 
 #: R/diagnosticmeta.b.R
@@ -23794,7 +24499,7 @@ msgid "Baseline (Prevalence) = {b}"
 msgstr ""
 
 #: waterfall/options/showBaseline.title
-msgid "Baseline (Y = 0) line"
+msgid "Baseline (y = 0) line"
 msgstr ""
 
 #: decisionpanel/results/panelBuilding.columns.title
@@ -26179,6 +26884,10 @@ msgstr ""
 msgid "Biomarker Cutoff Selection"
 msgstr ""
 
+#: R/diagnosticmeta.b.R
+msgid "Biomarker diagnostic accuracy synthesis for guideline development"
+msgstr ""
+
 #: package/analyses/biomarkerdiscovery.menuTitle
 #: biomarkerdiscovery/options.menuTitle
 #: jjsyndromicplot/options/clinicalPreset/biomarker_discovery.title
@@ -26795,17 +27504,6 @@ msgstr ""
 
 #: jjtreemap/options/labelFontFace/bolditalic.title
 msgid "Bold-Italic"
-msgstr ""
-
-#: R/ihcheterogeneity.b.R
-msgid ""
-"Bonett (2002) planning for the consistency ICC, ICC(3,1), with k = %d "
-"measurements per case and a 95%% confidence interval; this analysis has %d "
-"complete cases. The widths are expected values, so about half of the studies "
-"of that size obtain a wider interval. A systematic offset between the "
-"measurements widens the interval of the absolute-agreement ICC(2,1), which "
-"then needs more cases. The number of cases is never shown below the 5 this "
-"analysis requires. This is precision planning, not a hypothesis test."
 msgstr ""
 
 #: R/agreement.b.R
@@ -32263,11 +32961,11 @@ msgid ""
 msgstr ""
 
 #: swimmerplot/ui[0][0][4].label
-msgid "Censoring/Event Status (Optional)"
+msgid "Censoring/Event status (optional)"
 msgstr ""
 
 #: swimmerplot/options/censorVar.title
-msgid "Censoring/Event Status Variable"
+msgid "Censoring/Event status variable"
 msgstr ""
 
 #: jjtreemap/options/labelAlignH/center.title
@@ -32808,6 +33506,10 @@ msgstr ""
 
 #: R/waterfall.b.R
 msgid "Check if baseline measurements are correct"
+msgstr ""
+
+#: R/diagnosticmeta.b.R
+msgid "Check if confidence intervals overlap substantially"
 msgstr ""
 
 #: R/stagemigration-part3.R
@@ -33617,6 +34319,10 @@ msgstr ""
 msgid "Choose the diagnostic test you want to evaluate"
 msgstr ""
 
+#: R/decisioncombine.b.R
+msgid "Choose the Disease Present Level"
+msgstr ""
+
 #: R/lassologistic.b.R
 msgid "Choose the event level"
 msgstr ""
@@ -33630,6 +34336,14 @@ msgstr ""
 
 #: R/jjridges.b.R
 msgid "Choose the export resolution in jamovi's Save Image As dialog"
+msgstr ""
+
+#: R/agepyramid.b.R
+msgid "Choose the Female and Male levels"
+msgstr ""
+
+#: R/agepyramid.b.R
+msgid "Choose the Female level"
 msgstr ""
 
 #: stagemigration/options/preferredLanguage.description
@@ -33658,6 +34372,10 @@ msgstr ""
 
 #: venn/options/edgeLineType.description.jamovi
 msgid "Choose the line style for set boundaries."
+msgstr ""
+
+#: R/agepyramid.b.R
+msgid "Choose the Male level"
 msgstr ""
 
 #: R/decisioncalculator.b.R
@@ -33711,6 +34429,10 @@ msgstr ""
 msgid "Choose the positive class"
 msgstr ""
 
+#: R/decisioncombine.b.R
+msgid "Choose the Positive Level for {test}"
+msgstr ""
+
 #: R/nogoldstandard.b.R
 msgid ""
 "Choose the positive level for {tests}. A test enters the analysis only after "
@@ -33719,6 +34441,10 @@ msgstr ""
 
 #: R/decisioncurve.b.R
 msgid "Choose the Positive Outcome Level"
+msgstr ""
+
+#: R/decision.b.R
+msgid "Choose the Reference Positive Level"
 msgstr ""
 
 #: R/decision.b.R
@@ -33751,10 +34477,21 @@ msgid ""
 "tests."
 msgstr ""
 
+#: R/decision.b.R
+msgid "Choose the Test Positive Level"
+msgstr ""
+
 #: waterfall/options/timeUnitLabel.description.jamovi
 msgid ""
 "Choose the time unit label for the spider plot x-axis (for display only). "
 "Does not change your data values."
+msgstr ""
+
+#: R/venn.b.R
+msgid ""
+"Choose the true level for '{var}'; it is never taken from the order of the "
+"levels. Observed levels: {levels}. Nothing is drawn or counted until the "
+"level is chosen."
 msgstr ""
 
 #: basegraphics/options/plot_type.description.jamovi
@@ -33846,6 +34583,16 @@ msgstr ""
 #: R/decision.b.R
 #: R/decisioncombine.b.R
 msgid "Choose which level indicates disease is present"
+msgstr ""
+
+#: oddsratio/options/predictorLevel.description.main
+msgid ""
+"Choose which level of the diagnostic predictor is the positive test result "
+"(e.g., \"Present\", \"Test+\", \"Yes\"). The diagnostic metrics "
+"(sensitivity, specificity, likelihood ratios) need this choice; it is never "
+"taken from the level names or their order. While it is empty the diagnostic "
+"metrics wait for it and list the observed levels, and the logistic model, "
+"odds ratios, forest plot and nomogram still run."
 msgstr ""
 
 #: R/decision.b.R
@@ -34911,6 +35658,7 @@ msgstr ""
 msgid "Clinical application context for interpretation"
 msgstr ""
 
+#: R/diagnosticmeta.b.R
 #: R/enhancedROC.b.R
 #: effectsize/results/results/clinicalGuidance.title
 #: enhancedROC/results/results/clinicalInterpretationGuide.title
@@ -34930,6 +35678,7 @@ msgstr ""
 msgid "Clinical Application:"
 msgstr ""
 
+#: R/diagnosticmeta.b.R
 #: R/reportcat.b.R
 #: R/summarydata.b.R
 msgid "Clinical Applications"
@@ -35182,6 +35931,10 @@ msgstr ""
 
 #: digitalvalidation/results/thresholdtable.title
 msgid "Clinical Decision Impact"
+msgstr ""
+
+#: R/diagnosticmeta.b.R
+msgid "Clinical Decision Making"
 msgstr ""
 
 #: clinicalprediction/options/clinical_metrics.title
@@ -35573,6 +36326,7 @@ msgstr ""
 
 #: R/decision.b.R
 #: R/decisioncurve.b.R
+#: R/diagnosticmeta.b.R
 #: R/enhancedROC.b.R
 #: R/jjhistostats.b.R
 #: R/lassologistic.b.R
@@ -35719,6 +36473,7 @@ msgstr ""
 #: diagnosticmeta/options/show_interpretation.title
 #: diagnosticmeta/ui[1][3][0]/show_interpretation.label
 #: enhancedROC/options/clinical_interpretation.title
+#: ihcheterogeneity/options/showInterpretation.title
 #: jjhistostats/options/showInterpretation.title
 #: stagemigration/ui[11][0][0]/showClinicalInterpretation.label
 #: swimmerplot/options/showInterpretation.title
@@ -35841,6 +36596,7 @@ msgid "Clinical interpretation guide"
 msgstr ""
 
 #: R/decision.b.R
+#: R/diagnosticmeta.b.R
 #: R/linechart.b.R
 #: clinicalalerts/results/interpretationGuide.title
 #: cohenskappa/results/interpretationGuide.title
@@ -36526,6 +37282,7 @@ msgstr ""
 #: decision/ui[5]/showNaturalLanguage.label
 #: pathagreement/ui[6][0]/showClinicalSummary.label
 #: venn/options/clinicalSummary.title
+#: waterfall/options/showClinicalSummary.title
 msgid "Clinical summary"
 msgstr ""
 
@@ -37317,6 +38074,10 @@ msgid ""
 "closeness to the top-left corner of the ROC plot, the point of perfect "
 "sensitivity and specificity; the Optimization Metric setting is not used by "
 "this method"
+msgstr ""
+
+#: R/diagnosticmeta.b.R
+msgid "Closer to upper-left corner = better overall diagnostic accuracy"
 msgstr ""
 
 #: greyzoneroc/options/optimal_threshold/topleft.title
@@ -38793,9 +39554,12 @@ msgstr ""
 msgid "Color-blind accessible palettes"
 msgstr ""
 
-#: diagnosticmeta/options/color_palette/colorblind_safe.title
 #: riverplot/options/colorScheme/colorblind_safe.title
 msgid "Color-Blind Safe"
+msgstr ""
+
+#: diagnosticmeta/options/color_palette/colorblind_safe.title
+msgid "Color-Blind safe"
 msgstr ""
 
 #: R/jjridges.b.R
@@ -39281,6 +40045,12 @@ msgstr ""
 msgid "Combined Weight"
 msgstr ""
 
+#: R/diagnosticmeta.b.R
+msgid ""
+"Combines results from multiple diagnostic accuracy studies to estimate "
+"overall test performance through:"
+msgstr ""
+
 #: advancedimputation/ui[3][0]/delta_values.suffix
 #: qualityoflife/ui[3][0]/mid_values.suffix
 #: simonmakuch/ui[2][0]/landmarkTimes.suffix
@@ -39563,6 +40333,10 @@ msgstr ""
 
 #: R/linechart.b.R
 msgid "Common Solutions"
+msgstr ""
+
+#: R/diagnosticmeta.b.R
+msgid "Common Sources of Heterogeneity:"
 msgstr ""
 
 #: clinicaltrialdesign/options/common_sd.title
@@ -40058,6 +40832,10 @@ msgstr ""
 msgid "Compare to Unadjusted ROC"
 msgstr ""
 
+#: R/diagnosticmeta.b.R
+msgid "Compare triangle position to individual studies for consistency"
+msgstr ""
+
 #: agreementintro/options/purpose/paired.title
 msgid "Compare two conditions or modalities"
 msgstr "Compare two conditions or modalities"
@@ -40178,6 +40956,10 @@ msgstr ""
 
 #: R/jjpiestats.b.R
 msgid "Comparing across groups:"
+msgstr ""
+
+#: R/diagnosticmeta.b.R
+msgid "Comparing imaging modalities"
 msgstr ""
 
 #: package/analyses/comparingSurvival.title
@@ -40986,6 +41768,10 @@ msgstr ""
 msgid "Complete response: n = %d (%.1f%%)"
 msgstr ""
 
+#: R/ihcheterogeneity.b.R
+msgid "Complete the measurement selection"
+msgstr ""
+
 #: digitalvalidation/results/validationreport.description
 msgid "Complete validation report with regulatory framework"
 msgstr ""
@@ -41386,7 +42172,6 @@ msgstr ""
 
 #: featurequality/options/analysis_scope/comprehensive.title
 #: haralicktexture/options/analysis_focus/comprehensive.title
-#: ihcheterogeneity/options/analysis_type/comprehensive.title
 #: labinterpret/options/interpretation_level/comprehensive.title
 #: multiplexanalysis/options/analysis_focus/comprehensive.title
 #: populationhealth/options/analysis_scope/comprehensive.title
@@ -41394,6 +42179,10 @@ msgstr ""
 #: spatialautocorrelation/options/autocorr_method/comprehensive.title
 #: stagemigration/options/shapAnalysisType/comprehensive.title
 msgid "Comprehensive Analysis"
+msgstr ""
+
+#: ihcheterogeneity/options/analysis_type/comprehensive.title
+msgid "Comprehensive analysis"
 msgstr ""
 
 #: stagemigration/options/analysisType/comprehensive.title
@@ -43839,6 +44628,10 @@ msgid ""
 "meeting the reference rule."
 msgstr ""
 
+#: R/diagnosticmeta.b.R
+msgid "Confidence region vs prediction region"
+msgstr ""
+
 #: ihcpredict/results/predictions.columns.title
 #: ihcpredict/results/alternativeDiagnoses.columns.title
 #: ihcpredict/results/lowConfidenceCases.columns.title
@@ -43965,11 +44758,8 @@ msgstr ""
 msgid "Confirmation Settings"
 msgstr ""
 
-#: waterfall/ui[0][4].label
-msgid "Confirmation Status (optional)"
-msgstr ""
-
 #: waterfall/options/confirmationVar.title
+#: waterfall/ui[0][4].label
 msgid "Confirmation status (optional)"
 msgstr ""
 
@@ -44411,6 +45201,10 @@ msgstr ""
 msgid "Consider combining small categories or collecting more data."
 msgstr ""
 
+#: R/diagnosticmeta.b.R
+msgid "Consider contacting study authors for additional data"
+msgstr ""
+
 #: R/checkdata.b.R
 msgid "Consider data transformation or non-parametric methods"
 msgstr ""
@@ -44544,6 +45338,10 @@ msgstr ""
 msgid ""
 "Consider whether the sample represents the target clinical population; "
 "results may not generalize to populations with different event rates."
+msgstr ""
+
+#: R/diagnosticmeta.b.R
+msgid "Consider whether variation reflects true differences or chance"
 msgstr ""
 
 #: functionalsampling/results/nnd_table.columns.title
@@ -48722,6 +49520,10 @@ msgstr ""
 msgid "Cross-marker p-value adjustment"
 msgstr ""
 
+#: R/diagnosticmeta.b.R
+msgid "Cross-population comparison of diagnostic test performance"
+msgstr ""
+
 #: R/riverplot.b.R
 msgid "Cross-Reference Error"
 msgstr ""
@@ -51105,7 +51907,7 @@ msgid "CV threshold (%)"
 msgstr ""
 
 #: ihcheterogeneity/options/cv_threshold.title
-msgid "CV Threshold for Acceptable Variability"
+msgid "CV threshold for acceptable variability"
 msgstr ""
 
 #: R/ihcheterogeneity.b.R
@@ -51620,6 +52422,10 @@ msgstr ""
 msgid "Data preparation"
 msgstr ""
 
+#: R/diagnosticmeta.b.R
+msgid "Data Preparation Checklist"
+msgstr ""
+
 #: R/clinicalscore.b.R
 #: R/lassologistic.b.R
 msgid "Data preparation failed: %s"
@@ -51962,10 +52768,6 @@ msgstr ""
 msgid "Data Type Match"
 msgstr ""
 
-#: R/swimmerplot.b.R
-msgid "Data type mismatch"
-msgstr ""
-
 #: R/swimmerplot-html.R
 msgid "Data Type Mismatch"
 msgstr ""
@@ -51990,10 +52792,6 @@ msgstr ""
 
 #: R/swimmerplot.b.R
 msgid "Data Validation Error"
-msgstr ""
-
-#: R/swimmerplot.b.R
-msgid "Data validation error"
 msgstr ""
 
 #: R/enhancedROC.b.R
@@ -52181,8 +52979,11 @@ msgid "Date format does not match the data"
 msgstr ""
 
 #: survivalcont/ui[2][0][0][2].label
-#: swimmerplot/options/dateFormat.title
 msgid "Date Format in Data"
+msgstr ""
+
+#: swimmerplot/options/dateFormat.title
+msgid "Date format in data"
 msgstr ""
 
 #: groupsummary/ui[2].label
@@ -52276,10 +53077,6 @@ msgstr ""
 
 #: R/survivalcont.b.R
 msgid "Dates could not be read"
-msgstr ""
-
-#: R/swimmerplot.b.R
-msgid "Dates found on a raw numeric timeline"
 msgstr ""
 
 #: R/datetimeconverter.b.R
@@ -53237,6 +54034,10 @@ msgstr ""
 
 #: R/diagnosticmeta.b.R
 msgid "Deeks' Funnel Plot Asymmetry Test"
+msgstr ""
+
+#: R/diagnosticmeta.b.R
+msgid "Deeks' Funnel Plot Test:"
 msgstr ""
 
 #: R/diagnosticmeta.b.R
@@ -55423,6 +56224,14 @@ msgstr ""
 
 #: R/oddsratio.b.R
 msgid ""
+"Diagnostic metrics are waiting for the Predictor Positive Level. Choose "
+"which level of '{variable}' is the positive test result. Observed levels: "
+"{levels}. The logistic model, odds ratios, forest plot and nomogram are not "
+"affected."
+msgstr ""
+
+#: R/oddsratio.b.R
+msgid ""
 "Diagnostic metrics for '{variable}' require paired complete observations "
 "with exactly two observed predictor levels and two observed outcome levels. "
 "The prediction nomogram is unaffected."
@@ -55472,6 +56281,10 @@ msgstr ""
 #: likelihoodratio/ui[6]/showDiagnosticOdds.label
 #: psychopdaROC/options/metric/odds_ratio.title
 msgid "Diagnostic odds ratio"
+msgstr ""
+
+#: R/diagnosticmeta.b.R
+msgid "Diagnostic Odds Ratio (DOR)"
 msgstr ""
 
 #: R/decisioncalculator.b.R
@@ -55725,6 +56538,7 @@ msgstr ""
 msgid "Diagnostic Test Evaluation"
 msgstr ""
 
+#: R/diagnosticmeta.b.R
 #: package/analyses/diagnosticmeta.title
 #: package/analyses/diagnosticmeta.menuTitle
 #: diagnosticmeta/options.title
@@ -56442,6 +57256,10 @@ msgstr ""
 msgid ""
 "Directly from the single interaction model, not from separate subgroup Cox "
 "fits."
+msgstr ""
+
+#: R/diagnosticmeta.b.R
+msgid "Directly interpretable for clinical decision-making"
 msgstr ""
 
 #: decisiongraph/options/psa_distributions/dirichlet.title
@@ -62318,7 +63136,7 @@ msgid "End time"
 msgstr ""
 
 #: swimmerplot/ui[0][0][2].label
-msgid "End Time (Required)"
+msgid "End time (required)"
 msgstr ""
 
 #: R/swimmerplot.b.R
@@ -64697,6 +65515,10 @@ msgid ""
 "where randomization is not possible."
 msgstr ""
 
+#: R/diagnosticmeta.b.R
+msgid "Evaluating AI algorithms for pathology diagnosis"
+msgstr ""
+
 #: R/decision.b.R
 msgid ""
 "Evaluating one test. To compare two tests done on the same cases, use "
@@ -65291,11 +66113,8 @@ msgstr ""
 msgid "Event Time Distribution"
 msgstr ""
 
-#: swimmerplot/ui[3][1][1].label
-msgid "Event Time Variable"
-msgstr ""
-
 #: swimmerplot/options/eventTimeVar.title
+#: swimmerplot/ui[3][1][1].label
 msgid "Event time variable"
 msgstr ""
 
@@ -65322,11 +66141,8 @@ msgstr ""
 msgid "Event type"
 msgstr ""
 
-#: swimmerplot/ui[3][1][0].label
-msgid "Event Type Variable"
-msgstr ""
-
 #: swimmerplot/options/eventVar.title
+#: swimmerplot/ui[3][1][0].label
 msgid "Event type variable"
 msgstr ""
 
@@ -66293,6 +67109,10 @@ msgstr ""
 
 #: R/nogoldstandard.b.R
 msgid "Example context: exploring several cancer biomarkers or prognostic tests"
+msgstr ""
+
+#: R/diagnosticmeta.b.R
+msgid "Example Data Format"
 msgstr ""
 
 #: R/waterfall.b.R
@@ -69378,11 +70198,11 @@ msgid "False negatives"
 msgstr ""
 
 #: diagnosticmeta/ui[0][3][0].label
-msgid "False Negatives (Disease+, Test-)"
+msgid "False negatives (disease+, test-)"
 msgstr ""
 
 #: diagnosticmeta/options/false_negatives.title
-msgid "False Negatives (FN)"
+msgid "False negatives (FN)"
 msgstr ""
 
 #: R/diagnosticmeta.b.R
@@ -69455,11 +70275,11 @@ msgid "False positives"
 msgstr ""
 
 #: diagnosticmeta/ui[0][2][0].label
-msgid "False Positives (Disease-, Test+)"
+msgid "False positives (disease-, test+)"
 msgstr ""
 
 #: diagnosticmeta/options/false_positives.title
-msgid "False Positives (FP)"
+msgid "False positives (FP)"
 msgstr ""
 
 #: R/decision.b.R
@@ -69472,6 +70292,14 @@ msgstr ""
 
 #: R/decision.b.R
 msgid "False positives outnumbered false negatives in this sample."
+msgstr ""
+
+#: R/diagnosticmeta.b.R
+msgid "false_negatives"
+msgstr ""
+
+#: R/diagnosticmeta.b.R
+msgid "false_positives"
 msgstr ""
 
 #: R/decisioncalculator.b.R
@@ -69845,6 +70673,10 @@ msgid ""
 "greater impact on model predictions."
 msgstr ""
 
+#: R/diagnosticmeta.b.R
+msgid "Features Consistent With a Symmetric Funnel"
+msgstr ""
+
 #: variablebiplot/options/features.title
 #: variablebiplot/ui[0][1].label
 msgid "Features for Analysis"
@@ -69898,6 +70730,7 @@ msgstr ""
 msgid "Female color"
 msgstr ""
 
+#: R/agepyramid.b.R
 #: agepyramid/options/female.title
 msgid "Female level"
 msgstr ""
@@ -70781,12 +71614,32 @@ msgstr ""
 msgid "Fisher's exact test (Monte Carlo)"
 msgstr ""
 
+#: R/swimmerplot.b.R
+#: R/waterfall.b.R
+msgid ""
+"Fisher's exact test for %s could not be computed: %s. No p-value is "
+"reported. Review the group counts or combine groups only when clinically "
+"justified."
+msgstr ""
+
 #: R/jjpiestats.b.R
 msgid "Fisher's exact test for the sparse two-way chart"
 msgstr ""
 
 #: R/stagemigration.b.R
 msgid "Fisher's exact test not computed"
+msgstr ""
+
+#: R/chisqposttest.b.R
+msgid ""
+"Fisher's exact test was performed to examine the relationship between two "
+"binary categorical variables."
+msgstr ""
+
+#: R/chisqposttest.b.R
+msgid ""
+"Fisher's exact test was performed to examine the relationship between two "
+"categorical variables."
 msgstr ""
 
 #: R/chisqposttest.b.R
@@ -70810,6 +71663,13 @@ msgstr ""
 
 #: R/swimmerplot.b.R
 msgid "Fisher's exact test, OR (%s vs %s) = %s, 95%% CI %s to %s"
+msgstr ""
+
+#: R/chisqposttest.b.R
+msgid ""
+"Fisher's exact test, with its p-value estimated from 2,000 Monte Carlo "
+"simulated tables, was performed to examine the relationship between two "
+"categorical variables."
 msgstr ""
 
 #: R/waterfall.b.R
@@ -72069,6 +72929,12 @@ msgid ""
 "prediction interval above and the prediction region on the SROC plot."
 msgstr ""
 
+#: R/agepyramid.b.R
+msgid ""
+"For a single-gender cohort, choosing that one level under its own selector "
+"is enough."
+msgstr ""
+
 #: R/multisurvival.b.R
 msgid ""
 "For a term A \\u{00D7} B the subgroups are formed by whichever variable is "
@@ -72601,6 +73467,10 @@ msgstr ""
 msgid "Forest Plot Interpretation"
 msgstr ""
 
+#: R/diagnosticmeta.b.R
+msgid "Forest Plot Interpretation Guide"
+msgstr ""
+
 #: R/decisioncombine.b.R
 msgid "Forest Plot Not Available for Selected Statistic"
 msgstr ""
@@ -72791,7 +73661,7 @@ msgid "Forward selection"
 msgstr ""
 
 #: R/swimmerplot-html.R
-msgid "Found date format:"
+msgid "Found date format {format} in your time variables."
 msgstr ""
 
 #: multisurvival/options/numRiskGroups/four.title
@@ -73502,6 +74372,10 @@ msgstr ""
 msgid "Functional/\"Catalyst\" Cell Assessment"
 msgstr ""
 
+#: R/diagnosticmeta.b.R
+msgid "Funnel Asymmetry Indicators"
+msgstr ""
+
 #: mendelianrandomization/options/plot_funnel.title
 #: metaanalysis/results/funnelPlot.title
 #: treatmentmeta/options/funnel_plot.title
@@ -73532,6 +74406,10 @@ msgstr ""
 #: betabinomialdiagnostic/results/funnelPlot.title
 #: diagnosticmeta/results/funnelplot.title
 msgid "Funnel Plot for Publication Bias"
+msgstr ""
+
+#: R/diagnosticmeta.b.R
+msgid "Funnel Plot Interpretation Guide"
 msgstr ""
 
 #: R/psychopdaROC.b.R
@@ -73922,6 +74800,10 @@ msgstr ""
 #: agepyramid/options/gender.title
 #: agepyramid/ui[0][1].label
 msgid "Gender"
+msgstr ""
+
+#: R/agepyramid.b.R
+msgid "Gender level not found"
 msgstr ""
 
 #: R/agepyramid.b.R
@@ -75496,6 +76378,14 @@ msgstr ""
 msgid "Good reliability band (ICC = %.2f)."
 msgstr ""
 
+#: R/diagnosticmeta.b.R
+msgid "Good sensitivity (80-89%): acceptable miss rate for screening"
+msgstr ""
+
+#: R/diagnosticmeta.b.R
+msgid "Good specificity (80-89%): some false positives"
+msgstr ""
+
 #: segmentationmetrics/ui/qualityThresholds/dice_threshold_good.label
 msgid "Good Threshold"
 msgstr ""
@@ -76262,6 +77152,11 @@ msgstr ""
 msgid "Group Comparison Boxplots"
 msgstr ""
 
+#: R/swimmerplot.b.R
+#: R/waterfall.b.R
+msgid "Group comparison could not be computed"
+msgstr ""
+
 #: patientreported/results/group_comparison_plot.title
 #: qualityoflife/results/group_comparison_plot.title
 msgid "Group Comparison Plot"
@@ -76584,13 +77479,13 @@ msgstr ""
 #: summarydata2/ui[3][0].label
 #: tidyplots/options/group.title
 #: tidyplots/ui[0][3].label
-#: waterfall/ui[0][3].label
 #: weightedlogrank/options/explanatory.title
 #: weightedlogrank/ui[0][2].label
 msgid "Group Variable"
 msgstr ""
 
 #: waterfall/options/groupVar.title
+#: waterfall/ui[0][3].label
 msgid "Group variable"
 msgstr ""
 
@@ -76860,7 +77755,6 @@ msgstr ""
 #: missingdataexplorer/options/group_var.title
 #: missingdataexplorer/ui[0][1].label
 #: stereology/options/groupVar.title
-#: swimmerplot/ui[0][0][5].label
 #: tinytable/options/group_var.title
 #: tinytable/ui[0][1].label
 msgid "Grouping Variable (Optional)"
@@ -76873,6 +77767,10 @@ msgstr ""
 #: tumorbudding/options/group.title
 #: tumorbudding/ui[0][2].label
 msgid "Grouping Variable (optional)"
+msgstr ""
+
+#: swimmerplot/ui[0][0][5].label
+msgid "Grouping variable (optional)"
 msgstr ""
 
 #: ggprism/ui[0][2].label
@@ -78300,6 +79198,7 @@ msgstr ""
 msgid "Heterogeneity analysis error: %s"
 msgstr ""
 
+#: R/diagnosticmeta.b.R
 #: betabinomialdiagnostic/results/heterogeneityTests.title
 #: diagnosticmeta/results/heterogeneity.title
 #: emfrailty/results/heterogeneityAnalysis.title
@@ -80467,6 +81366,10 @@ msgstr ""
 msgid "I(X;Y)"
 msgstr ""
 
+#: R/diagnosticmeta.b.R
+msgid "I[[SUP2]] Statistic Interpretation:"
+msgstr ""
+
 #: bayesiandiagnostic/results/heterogeneityAssessment.columns.title
 #: betabinomialdiagnostic/results/heterogeneityTests.columns.title
 #: hierarchicalbayes/results/heterogeneityAssessment.columns.title
@@ -81241,6 +82144,10 @@ msgid ""
 "cases."
 msgstr ""
 
+#: R/diagnosticmeta.b.R
+msgid "If no other explanation fits, pooled estimates may be overoptimistic"
+msgstr ""
+
 #: R/decisioncombine.b.R
 msgid ""
 "If one of the tests being evaluated also contributed to establishing the "
@@ -81489,6 +82396,14 @@ msgstr ""
 #: ihcimmune/ui.title
 #: ihcimmune/results.title
 msgid "IHC Immune Analysis"
+msgstr ""
+
+#: R/diagnosticmeta.b.R
+msgid "IHC marker validation across multiple pathology studies"
+msgstr ""
+
+#: R/diagnosticmeta.b.R
+msgid "IHC Marker Validation:"
 msgstr ""
 
 #: ihcbasic/options/markers.title
@@ -82526,10 +83441,6 @@ msgstr ""
 
 #: ihcpredict/results/validationResults.columns.title
 msgid "In Training Set"
-msgstr ""
-
-#: R/swimmerplot-html.R
-msgid "in your time variables"
 msgstr ""
 
 #: R/multisurvival.b.R
@@ -84037,6 +84948,30 @@ msgstr ""
 
 #: R/oddsratio.b.R
 msgid "infinite (zero false results in this cell)"
+msgstr ""
+
+#: R/ihcheterogeneity.b.R
+msgid ""
+"Infinite biomarker measurements in variable(s) %s, analysis row(s) %s. Enter "
+"finite measurements or mark unavailable values as missing."
+msgstr ""
+
+#: R/diagnosticmeta.b.R
+msgid ""
+"Infinite diagnostic counts in variable(s) %s, analysis row(s) %s. Enter "
+"finite whole-number counts or mark unavailable values as missing."
+msgstr ""
+
+#: R/waterfall.b.R
+msgid ""
+"Infinite response or time values in variable '%s', analysis row(s) %s. Enter "
+"finite values or mark unavailable values as missing."
+msgstr ""
+
+#: R/swimmerplot.b.R
+msgid ""
+"Infinite time values in variable '%s', analysis row(s) %s. Enter finite "
+"start and end times or mark unavailable values as missing."
 msgstr ""
 
 #: R/categorize.b.R
@@ -85897,6 +86832,10 @@ msgstr ""
 msgid "Interpretation caveat"
 msgstr ""
 
+#: R/diagnosticmeta.b.R
+msgid "Interpretation Caveats"
+msgstr ""
+
 #: labinterpret/options/interpretation_level.title
 msgid "Interpretation Detail Level"
 msgstr ""
@@ -86947,6 +87886,10 @@ msgstr ""
 msgid "IRT-Based Scoring"
 msgstr ""
 
+#: R/diagnosticmeta.b.R
+msgid "Is distinct from the Rutter-Gatsonis HSROC model"
+msgstr ""
+
 #: agreementintro/options/categoryOrder.title
 #: agreementintro/ui[1][0].label
 msgid "Is one common category order established?"
@@ -87427,6 +88370,7 @@ msgstr ""
 #: package/analyses/jjcorrmat.menuGroup
 #: package/analyses/jjdotplotstats.menuGroup
 #: package/analyses/jjbetweenstats.menuGroup
+#: package/analyses/jjwithinstats.menuGroup
 #: package/analyses/jjbarstats.menuGroup
 #: package/analyses/jjpiestats.menuGroup
 #: package/analyses/jwaffle.menuGroup
@@ -87450,6 +88394,7 @@ msgstr ""
 #: jjridges/options.menuGroup
 #: jjscatterstats/options.menuGroup
 #: jjsegmentedtotalbar/options.menuGroup
+#: jjwithinstats/options.menuGroup
 #: jwaffle/options.menuGroup
 #: linechart/options.menuGroup
 #: lollipop/options.menuGroup
@@ -87509,11 +88454,6 @@ msgstr ""
 #: pcaloadingheatmap/options.menuGroup
 #: tidyplots/options.menuGroup
 msgid "JJStatsPlotD"
-msgstr ""
-
-#: package/analyses/jjwithinstats.menuGroup
-#: jjwithinstats/options.menuGroup
-msgid "JJStatsPlotT"
 msgstr ""
 
 #: R/jointmodeling.b.R
@@ -88559,6 +89499,10 @@ msgstr ""
 
 #: qtwist/results/keyReferences.title
 msgid "Key References for Q-TWiST Analysis"
+msgstr ""
+
+#: R/diagnosticmeta.b.R
+msgid "Key Requirements & Assumptions"
 msgstr ""
 
 #: pathsampling/results/keyResults.title
@@ -90633,6 +91577,9 @@ msgstr ""
 msgid "Levels found:"
 msgstr ""
 
+#: R/agepyramid.b.R
+#: R/decision.b.R
+#: R/decisioncombine.b.R
 #: R/decisioncurve.b.R
 msgid "Levels found: {levels}."
 msgstr ""
@@ -90877,6 +91824,7 @@ msgstr ""
 msgid "Likelihood ratios describe how a test result changes pre-test odds."
 msgstr ""
 
+#: R/diagnosticmeta.b.R
 #: diagnosticmeta/results/likelihoodRatioGuide.title
 msgid "Likelihood Ratios for Clinical Decision-Making"
 msgstr ""
@@ -91043,6 +91991,14 @@ msgstr ""
 
 #: treatmenteffects/options/iv_method/limited_information.title
 msgid "Limited Information Maximum Likelihood"
+msgstr ""
+
+#: R/diagnosticmeta.b.R
+msgid "Limited sensitivity (&lt;70%): many cases missed"
+msgstr ""
+
+#: R/diagnosticmeta.b.R
+msgid "Limited specificity (&lt;70%): many false alarms"
 msgstr ""
 
 #: R/survivalcont.b.R
@@ -92558,6 +93514,10 @@ msgstr ""
 msgid "LOOIC"
 msgstr ""
 
+#: R/diagnosticmeta.b.R
+msgid "Look for outlier studies (points far from others)"
+msgstr ""
+
 #: R/jjdotplotstats.b.R
 msgid ""
 "Looking for a Cleveland dot chart - one summary point per group, tested "
@@ -93887,6 +94847,7 @@ msgstr ""
 msgid "Male color"
 msgstr ""
 
+#: R/agepyramid.b.R
 #: agepyramid/options/male.title
 msgid "Male level"
 msgstr ""
@@ -98514,9 +99475,12 @@ msgid ""
 msgstr ""
 
 #: betabinomialdiagnostic/options/estimation_method/method_of_moments.title
-#: diagnosticmeta/options/method/mm.title
 #: semimarkov/options/estimationMethod/mm.title
 msgid "Method of Moments"
+msgstr ""
+
+#: diagnosticmeta/options/method/mm.title
+msgid "Method of moments"
 msgstr ""
 
 #: lassointro/options/showOverview.title
@@ -99203,47 +100167,47 @@ msgstr ""
 
 #: swimmerplot/options/milestone1Date.title
 #: swimmerplot/ui[2][3][0].label
-msgid "Milestone 1 Date"
+msgid "Milestone 1 date"
 msgstr ""
 
 #: swimmerplot/options/milestone1Name.title
-msgid "Milestone 1 Name"
+msgid "Milestone 1 name"
 msgstr ""
 
 #: swimmerplot/options/milestone2Date.title
 #: swimmerplot/ui[2][3][1].label
-msgid "Milestone 2 Date"
+msgid "Milestone 2 date"
 msgstr ""
 
 #: swimmerplot/options/milestone2Name.title
-msgid "Milestone 2 Name"
+msgid "Milestone 2 name"
 msgstr ""
 
 #: swimmerplot/options/milestone3Date.title
 #: swimmerplot/ui[2][3][2].label
-msgid "Milestone 3 Date"
+msgid "Milestone 3 date"
 msgstr ""
 
 #: swimmerplot/options/milestone3Name.title
-msgid "Milestone 3 Name"
+msgid "Milestone 3 name"
 msgstr ""
 
 #: swimmerplot/options/milestone4Date.title
 #: swimmerplot/ui[2][3][3].label
-msgid "Milestone 4 Date"
+msgid "Milestone 4 date"
 msgstr ""
 
 #: swimmerplot/options/milestone4Name.title
-msgid "Milestone 4 Name"
+msgid "Milestone 4 name"
 msgstr ""
 
 #: swimmerplot/options/milestone5Date.title
 #: swimmerplot/ui[2][3][4].label
-msgid "Milestone 5 Date"
+msgid "Milestone 5 date"
 msgstr ""
 
 #: swimmerplot/options/milestone5Name.title
-msgid "Milestone 5 Name"
+msgid "Milestone 5 name"
 msgstr ""
 
 #: survivalendpoints/ui[4][0][6].label
@@ -99319,7 +100283,7 @@ msgid "Milestone Times (comma-separated)"
 msgstr ""
 
 #: swimmerplot/ui[2][2][0].label
-msgid "Milestone Times/Dates"
+msgid "Milestone times/dates"
 msgstr ""
 
 #: R/swimmerplot-html.R
@@ -99616,6 +100580,10 @@ msgstr ""
 
 #: R/benford.b.R
 msgid "Minimum 100-1000 observations recommended for reliable results"
+msgstr ""
+
+#: R/diagnosticmeta.b.R
+msgid "Minimum 3 studies with 2[[TIMES]]2 diagnostic data"
 msgstr ""
 
 #: R/linechart.b.R
@@ -101484,6 +102452,10 @@ msgstr ""
 msgid "Model calibration metrics and tests"
 msgstr ""
 
+#: R/diagnosticmeta.b.R
+msgid "Model Choice: Random vs Fixed Effects"
+msgstr ""
+
 #: clinicalscore/results/coefficients.title
 #: conditionalgee/results/coefficients.title
 #: excessmortality/results/coefficients.title
@@ -102917,8 +103889,16 @@ msgstr ""
 msgid "Moderate sampling:"
 msgstr ""
 
+#: R/diagnosticmeta.b.R
+msgid "Moderate sensitivity (70-79%): appreciable number of cases missed"
+msgstr ""
+
 #: R/ihcheterogeneity.b.R
 msgid "Moderate share of total variance"
+msgstr ""
+
+#: R/diagnosticmeta.b.R
+msgid "Moderate specificity (70-79%): appreciable false-positive rate"
 msgstr ""
 
 #: R/checkdata.b.R
@@ -107791,6 +108771,10 @@ msgstr ""
 msgid "No missing values in any of the selected variables."
 msgstr ""
 
+#: R/diagnosticmeta.b.R
+msgid "No missing values in TP, FP, FN, TN columns"
+msgstr ""
+
 #: R/waterfall.b.R
 msgid "NO NEGATIVE CHANGES"
 msgstr ""
@@ -109527,7 +110511,10 @@ msgstr ""
 msgid "None"
 msgstr ""
 
+#: R/agepyramid.b.R
 #: R/agreement.b.R
+#: R/decision.b.R
+#: R/decisioncombine.b.R
 #: R/lassocox.b.R
 #: jjbetweenstats/options/padjustmethod/none.title
 #: jjwithinstats/options/padjustmethod/none.title
@@ -110905,6 +111892,19 @@ msgstr ""
 
 #: R/decisioncurve.b.R
 msgid "Nothing about the clinical rule is shown until then."
+msgstr ""
+
+#: R/decision.b.R
+#: R/decisioncombine.b.R
+msgid "Nothing is computed until it is chosen."
+msgstr ""
+
+#: R/agepyramid.b.R
+msgid "Nothing is drawn until it is chosen."
+msgstr ""
+
+#: R/agepyramid.b.R
+msgid "Nothing is drawn until they are chosen."
 msgstr ""
 
 #: R/crosstable.b.R
@@ -113679,7 +114679,7 @@ msgstr ""
 
 #: waterfall/options/ongoingVar.title
 #: waterfall/ui[0][5].label
-msgid "On-Treatment / Ongoing (optional)"
+msgid "On-Treatment / ongoing (optional)"
 msgstr ""
 
 #: R/decisioncombine.b.R
@@ -113696,17 +114696,6 @@ msgstr ""
 
 #: adaptivetrialdesign/options/clinical_context/oncology.title
 msgid "Oncology Trial"
-msgstr ""
-
-#: package/analyses/waterfall.menuGroup
-#: package/analyses/swimmerplot.menuGroup
-#: package/analyses/ihcheterogeneity.menuGroup
-#: package/analyses/diagnosticmeta.menuGroup
-#: diagnosticmeta/options.menuGroup
-#: ihcheterogeneity/options.menuGroup
-#: swimmerplot/options.menuGroup
-#: waterfall/options.menuGroup
-msgid "OncoPath"
 msgstr ""
 
 #: package/analyses/geemodel.menuGroup
@@ -113836,8 +114825,16 @@ msgstr ""
 msgid "OncoPathP"
 msgstr ""
 
+#: package/analyses/waterfall.menuGroup
+#: package/analyses/swimmerplot.menuGroup
+#: package/analyses/ihcheterogeneity.menuGroup
+#: package/analyses/diagnosticmeta.menuGroup
 #: package/analyses/pathagreement.menuGroup
+#: diagnosticmeta/options.menuGroup
+#: ihcheterogeneity/options.menuGroup
 #: pathagreement/options.menuGroup
+#: swimmerplot/options.menuGroup
+#: waterfall/options.menuGroup
 msgid "OncoPathT"
 msgstr ""
 
@@ -116272,6 +117269,10 @@ msgstr ""
 msgid "Other level"
 msgstr ""
 
+#: R/agepyramid.b.R
+msgid "Other levels found: {levels}."
+msgstr ""
+
 #: decisioncompare/results/levelMapping.columns.title
 msgid "Other n"
 msgstr ""
@@ -117519,7 +118520,7 @@ msgstr ""
 
 #: ihcheterogeneity/options/wholesection.title
 #: ihcheterogeneity/ui[0][0].label
-msgid "Overall / Whole Slide / HotSpot (Optional)"
+msgid "Overall / whole slide / hotspot (optional)"
 msgstr ""
 
 #: psychopdaROC/options/metric/accuracy.title
@@ -118493,6 +119494,14 @@ msgstr ""
 
 #: mendelianrandomization/results/selectedSNPs.columns.title
 msgid "P-value (Exp)"
+msgstr ""
+
+#: R/chisqposttest.b.R
+msgid "P-value (Fisher's exact test, Monte Carlo)"
+msgstr ""
+
+#: R/chisqposttest.b.R
+msgid "P-value (Fisher's exact test)"
 msgstr ""
 
 #: spatialautocorrelation/results/robustnessAnalysis.columns.title
@@ -120859,7 +121868,7 @@ msgid "Patient ID (Optional)"
 msgstr ""
 
 #: swimmerplot/ui[0][0][0].label
-msgid "Patient ID (Required)"
+msgid "Patient ID (required)"
 msgstr ""
 
 #: R/waterfall.b.R
@@ -121058,6 +122067,10 @@ msgstr ""
 
 #: jjarcdiagram/options/analysisPreset/patient_network.title
 msgid "Patient similarity network (clinical)"
+msgstr ""
+
+#: R/diagnosticmeta.b.R
+msgid "Patient spectrum should be clinically relevant"
 msgstr ""
 
 #: R/psychopdaROC.b.R
@@ -124519,6 +125532,19 @@ msgstr ""
 msgid "Planned N"
 msgstr ""
 
+#: R/ihcheterogeneity.b.R
+msgid ""
+"Planning for the consistency ICC, ICC(3,1), with k = %d measurements per "
+"case and a 95%% confidence interval; this analysis has %d complete cases. "
+"Bonett (2002) provides the starting approximation, refined here by numerical "
+"integration of the exact F-interval width under a balanced normal ANOVA "
+"model. The required size is the smallest number of cases, at least 5, whose "
+"expected interval width meets the target. Some studies will obtain wider "
+"intervals: this is expected-width planning, not an assurance calculation or "
+"a hypothesis test. Systematic offsets affect the absolute-agreement "
+"ICC(2,1), whose precision needs separate planning."
+msgstr ""
+
 #: ihcheterogeneity/results/samplesizetable.columns.title
 msgid "Planning ICC"
 msgstr ""
@@ -124557,7 +125583,7 @@ msgid "Plasma (Purple-Pink-Yellow)"
 msgstr ""
 
 #: diagnosticmeta/options/color_palette/plasma.title
-msgid "Plasma (Purple-Pink)"
+msgid "Plasma (purple-pink)"
 msgstr ""
 
 #: stagemigration/options/curePlateauThreshold.title
@@ -126425,6 +127451,10 @@ msgid "Pooled Sensitivity"
 msgstr ""
 
 #: R/diagnosticmeta.b.R
+msgid "Pooled Sensitivity and Specificity"
+msgstr ""
+
+#: R/diagnosticmeta.b.R
 msgid ""
 "Pooled sensitivity and specificity estimates are unavailable; predictive "
 "values cannot be computed."
@@ -127907,12 +128937,14 @@ msgstr ""
 
 #: R/gsdesign.b.R
 #: package/analyses/kappaSizeCI.menuGroup
+#: package/analyses/kappaSizeFixedN.menuGroup
 #: package/analyses/kappaSizePower.menuGroup
 #: adaptivetrialdesign/results/operatingCharacteristics.columns.title
 #: advancedSurvivalPower/options/calc_type/power.title
 #: competingRisksPower/results/powerCurveTable.columns.title
 #: comprehensiveSurvivalPower/results/methodComparison.columns.title
 #: kappaSizeCI/options.menuGroup
+#: kappaSizeFixedN/options.menuGroup
 #: kappaSizePower/options.menuGroup
 #: kappaSizePower/ui[3][1][0]/power.label
 msgid "Power"
@@ -128210,11 +129242,6 @@ msgstr ""
 #: package/analyses/survivalPower.menuGroup
 #: survivalPower/options.menuGroup
 msgid "PowerP"
-msgstr ""
-
-#: package/analyses/kappaSizeFixedN.menuGroup
-#: kappaSizeFixedN/options.menuGroup
-msgid "PowerT"
 msgstr ""
 
 #: R/pathagreement.b.R
@@ -129638,6 +130665,10 @@ msgstr ""
 msgid "Predictive values depend on disease prevalence in your population"
 msgstr ""
 
+#: R/diagnosticmeta.b.R
+msgid "Predictive Values in Clinical Practice:"
+msgstr ""
+
 #: R/enhancedROC.b.R
 msgid ""
 "Predictive values use Bayes' theorem at the prevalence shown in the table; "
@@ -129986,6 +131017,10 @@ msgstr ""
 
 #: stagemigration/results/intervalCensoringComparison.columns.title
 msgid "Preferred"
+msgstr ""
+
+#: R/diagnosticmeta.b.R
+msgid "Preferred for meta-analyses with <em>homogeneous thresholds</em>"
 msgstr ""
 
 #: bayesiannetworkma/results/modelComparison.columns.title
@@ -130469,6 +131504,10 @@ msgstr ""
 msgid ""
 "Primary Rate = Primary events / Total; Competing Rate = Competing events / "
 "Total. Higher primary event rates in later stages suggest poor prognosis."
+msgstr ""
+
+#: R/diagnosticmeta.b.R
+msgid "Primary Results Interpretation"
 msgstr ""
 
 #: populationhealth/results/riskStratificationTable.columns.title
@@ -132323,6 +133362,10 @@ msgstr ""
 msgid "Provide recommendations based on analysis results"
 msgstr ""
 
+#: R/diagnosticmeta.b.R
+msgid "Provides <em>intuitive</em> pooled sensitivity and specificity estimates"
+msgstr ""
+
 #: R/oddsratio.b.R
 msgid "Provides exact p-values regardless of sample size"
 msgstr ""
@@ -132638,6 +133681,7 @@ msgstr ""
 msgid "Publication bias analysis error: %s"
 msgstr ""
 
+#: R/diagnosticmeta.b.R
 #: bayesiandiagnostic/options/publication_bias.title
 #: bayesianmetaanalysis/options/publicationBias.title
 #: bayesianmetaanalysis/results/publicationBiasResults.title
@@ -132809,6 +133853,7 @@ msgstr ""
 msgid "Purple"
 msgstr ""
 
+#: R/diagnosticmeta.b.R
 #: R/enhancedROC.b.R
 msgid "Purpose"
 msgstr ""
@@ -133650,6 +134695,10 @@ msgstr ""
 msgid "Questionnaire/Survey"
 msgstr ""
 
+#: R/diagnosticmeta.b.R
+msgid "Quick Assessment Tips"
+msgstr ""
+
 #: jjbarstats/ui[1].label
 #: jjpiestats/ui[0].label
 msgid "Quick Clinical Setup"
@@ -133671,6 +134720,10 @@ msgstr ""
 
 #: pathsampling/results/guidedInstructions.title
 msgid "Quick Start Checklist"
+msgstr ""
+
+#: R/diagnosticmeta.b.R
+msgid "Quick Start Guide"
 msgstr ""
 
 #: R/linechart.b.R
@@ -134150,7 +135203,7 @@ msgid "Random Resolution"
 msgstr ""
 
 #: ihcheterogeneity/options/sampling_strategy/random.title
-msgid "Random Sampling"
+msgid "Random sampling"
 msgstr ""
 
 #: clinicalprediction/options/tuning_method/random_search.title
@@ -136403,6 +137456,13 @@ msgstr ""
 msgid "Redundant With"
 msgstr ""
 
+#: R/diagnosticmeta.b.R
+msgid ""
+"Refer to the <em>Likelihood Ratios for Clinical Decision-Making</em> table "
+"below for standard interpretation ranges for positive and negative "
+"likelihood ratios."
+msgstr ""
+
 #: R/agreement.b.R
 #: R/clinicalscore.b.R
 #: R/decisioncompare.b.R
@@ -136864,6 +137924,10 @@ msgstr ""
 msgid "Reference standard and blinding"
 msgstr ""
 
+#: R/diagnosticmeta.b.R
+msgid "Reference standard should be consistent across studies"
+msgstr ""
+
 #: R/enhancedROC.b.R
 msgid "Reference status is inconsistent within a patient."
 msgstr ""
@@ -137199,22 +138263,22 @@ msgstr ""
 
 #: ihcheterogeneity/options/biopsy1.title
 #: ihcheterogeneity/ui[0][1].label
-msgid "Regional Measurement 1"
+msgid "Regional measurement 1"
 msgstr ""
 
 #: ihcheterogeneity/options/biopsy2.title
 #: ihcheterogeneity/ui[0][2].label
-msgid "Regional Measurement 2 (Optional)"
+msgid "Regional measurement 2 (optional)"
 msgstr ""
 
 #: ihcheterogeneity/options/biopsy3.title
 #: ihcheterogeneity/ui[0][3].label
-msgid "Regional Measurement 3 (Optional)"
+msgid "Regional measurement 3 (optional)"
 msgstr ""
 
 #: ihcheterogeneity/options/biopsy4.title
 #: ihcheterogeneity/ui[0][4].label
-msgid "Regional Measurement 4 (Optional)"
+msgid "Regional measurement 4 (optional)"
 msgstr ""
 
 #: R/ihcheterogeneity.b.R
@@ -137608,6 +138672,12 @@ msgstr ""
 msgid "Relate RCB Class to Survival"
 msgstr ""
 
+#: R/diagnosticmeta.b.R
+msgid ""
+"Relates sensitivity (<em>p</em>) and false-positive rate (<em>u</em>) "
+"through <em>u</em><sup>theta</sup> = <em>p</em>"
+msgstr ""
+
 #: swimmerplot/options/timeDisplay/relative.title
 msgid "Relative (all start from 0)"
 msgstr ""
@@ -137925,7 +138995,7 @@ msgid "REML"
 msgstr ""
 
 #: diagnosticmeta/options/method/reml.title
-msgid "REML (Recommended)"
+msgid "REML (recommended)"
 msgstr ""
 
 #: mixedmodelanova/options/estimation_method/reml.title
@@ -138339,6 +139409,10 @@ msgstr ""
 msgid "Report Summary (Copy-Ready)"
 msgstr ""
 
+#: R/diagnosticmeta.b.R
+msgid "Report the asymmetry as a limitation and interpret results cautiously"
+msgstr ""
+
 #: R/lassocox.b.R
 msgid ""
 "Report the endpoint, candidate parameters, exclusions, coding, penalty rule, "
@@ -138413,12 +139487,24 @@ msgstr ""
 msgid "Reporting Options"
 msgstr ""
 
+#: R/diagnosticmeta.b.R
+msgid "Reporting Recommendations"
+msgstr ""
+
 #: classicalSurvivalPower/results/export_summary.title
 msgid "Reporting Summary"
 msgstr ""
 
 #: synopticcompleteness/results/byGroupTable.columns.title
 msgid "Reports"
+msgstr ""
+
+#: R/diagnosticmeta.b.R
+msgid "Reports tau<sup>2</sup> as between-study variation in diagnostic accuracy"
+msgstr ""
+
+#: R/diagnosticmeta.b.R
+msgid "Reports theta as the diagnostic accuracy parameter"
 msgstr ""
 
 #: R/riverplot.b.R
@@ -138441,7 +139527,7 @@ msgid "Reproducibility"
 msgstr ""
 
 #: ihcheterogeneity/options/analysis_type/reproducibility.title
-msgid "Reproducibility & Bias Assessment"
+msgid "Reproducibility & bias assessment"
 msgstr ""
 
 #: nonparametric/ui[11].label
@@ -138543,6 +139629,10 @@ msgstr ""
 
 #: R/riverplot.b.R
 msgid "Required Data Setup:"
+msgstr ""
+
+#: R/diagnosticmeta.b.R
+msgid "Required Data Structure"
 msgstr ""
 
 #: R/decision.b.R
@@ -139167,11 +140257,8 @@ msgstr ""
 msgid "Response Category Distribution"
 msgstr ""
 
-#: waterfall/ui[0][6].label
-msgid "Response Category Override (optional)"
-msgstr ""
-
 #: waterfall/options/responseCategoryVar.title
+#: waterfall/ui[0][6].label
 msgid "Response category override (optional)"
 msgstr ""
 
@@ -139362,7 +140449,7 @@ msgid "Response Type"
 msgstr ""
 
 #: waterfall/ui[0][1].label
-msgid "Response Value (Raw or Percentage Measurement)"
+msgid "Response value (raw or percentage measurement)"
 msgstr ""
 
 #: waterfall/options/responseVar.title
@@ -139402,11 +140489,11 @@ msgid ""
 msgstr ""
 
 #: swimmerplot/options/responseVar.title
-msgid "Response/Status Variable"
+msgid "Response/Status variable"
 msgstr ""
 
 #: swimmerplot/ui[0][0][3].label
-msgid "Response/Status Variable (Optional)"
+msgid "Response/Status variable (optional)"
 msgstr ""
 
 #: labcontrolcharts/results/correctiveActions.columns.title
@@ -142873,6 +143960,10 @@ msgstr ""
 msgid "Sample sizes and summary statistics by class"
 msgstr ""
 
+#: R/diagnosticmeta.b.R
+msgid "Sample sizes are realistic (TP+FP+FN+TN = total cases per study)"
+msgstr ""
+
 #: groupedforest/results/sample_sizes.title
 msgid "Sample Sizes by Group"
 msgstr ""
@@ -144483,6 +145574,10 @@ msgstr ""
 msgid "Seamless Phase II/III"
 msgstr ""
 
+#: R/diagnosticmeta.b.R
+msgid "Search for unpublished studies or negative results"
+msgstr ""
+
 #: clinicalprediction/results/hyperparameter_results.columns.title
 msgid "Search Range"
 msgstr ""
@@ -144883,6 +145978,12 @@ msgid ""
 "level."
 msgstr ""
 
+#: R/ihcheterogeneity.b.R
+msgid ""
+"Select a reference measurement or a second distinct regional measurement to "
+"start the analysis."
+msgstr ""
+
 #: decisioncompare/options/test2.description.ui
 msgid ""
 "Select a second diagnostic test to compare with Test 1. This enables "
@@ -144953,6 +146054,10 @@ msgstr ""
 
 #: R/ihcheterogeneity.b.R
 msgid "Select at least one regional measurement other than the reference."
+msgstr ""
+
+#: R/ihcheterogeneity.b.R
+msgid "Select at least one regional measurement to compare with the reference."
 msgstr ""
 
 #: bbcplots/options/bbc_colors.description.ui
@@ -145252,10 +146357,49 @@ msgstr ""
 msgid "Select the HER2 Positive level to identify HER2-positive cases."
 msgstr ""
 
+#: decisioncombine/options/goldPositive.description.ui
+msgid ""
+"Select the level indicating disease presence (e.g., \"1\", \"positive\", "
+"\"malignant\"). It must be chosen: it is never taken from the order of the "
+"levels, and until it is chosen the analysis lists the levels found and "
+"computes nothing."
+msgstr ""
+
+#: R/agepyramid.b.R
+msgid ""
+"Select the level of '{gender}' that identifies female subjects under 'Female "
+"level', and the one that identifies male subjects under 'Male level'. They "
+"are never read from the level names or their order."
+msgstr ""
+
+#: R/decision.b.R
+msgid ""
+"Select the level of {var} that counts as positive, under \"Reference "
+"positive level\"."
+msgstr ""
+
+#: R/decisioncombine.b.R
+msgid ""
+"Select the level of {var} that is a positive result for {test}, under "
+"\"Positive level\"."
+msgstr ""
+
+#: R/decision.b.R
+msgid ""
+"Select the level of {var} that is a positive test result, under \"Test "
+"positive level\"."
+msgstr ""
+
 #: R/decisioncurve.b.R
 msgid ""
 "Select the level of {var} that is the event the models predict, under "
 "\"Positive Outcome\"."
+msgstr ""
+
+#: R/decisioncombine.b.R
+msgid ""
+"Select the level of {var} that means disease is present, under \"Disease "
+"present level\"."
 msgstr ""
 
 #: singlearm/options/awd.description
@@ -145293,6 +146437,13 @@ msgid ""
 "levels \"Alive\" and \"Dead\", select \"Dead\" as the event level."
 msgstr ""
 
+#: decisioncombine/options/test1Positive.description.ui
+msgid ""
+"Select the level representing a positive result for Test 1. It must be "
+"chosen: it is never taken from the order of the levels, and until it is "
+"chosen the analysis lists the levels found and computes nothing."
+msgstr ""
+
 #: decision/options/goldNegative.description.ui
 msgid ""
 "Select the level that indicates disease is absent in your gold standard "
@@ -145323,6 +146474,14 @@ msgstr ""
 
 #: decisioncompare/options/test3Positive.description.ui
 msgid "Select the level that represents a POSITIVE result for Test 3."
+msgstr ""
+
+#: decision/options/testPositive.description.ui
+msgid ""
+"Select the level that represents a positive test result. This should "
+"correspond to the level indicating suspected disease presence. It must be "
+"chosen: it is never taken from the order of the levels, and until it is "
+"chosen the analysis lists the levels found and computes nothing."
 msgstr ""
 
 #: survivalcont/options/awod.description
@@ -145370,6 +146529,14 @@ msgstr ""
 msgid ""
 "Select the positive reference level (e.g., \"positive\", \"malignant\", "
 "\"1\"). This represents the condition you want to detect."
+msgstr ""
+
+#: decision/options/goldPositive.description.ui
+msgid ""
+"Select the positive reference level. This represents the condition you want "
+"to detect or diagnose. It must be chosen: it is never taken from the order "
+"of the levels, and until it is chosen the analysis lists the levels found "
+"and computes nothing."
 msgstr ""
 
 #: bbcplots/options/y_var.description.ui
@@ -153255,7 +154422,7 @@ msgid "Sort by variable"
 msgstr ""
 
 #: swimmerplot/ui[5][1][0].label
-msgid "Sort By Variable (Optional)"
+msgid "Sort by variable (optional)"
 msgstr ""
 
 #: jjsegmentedtotalbar/options/sort_categories.title
@@ -153787,7 +154954,7 @@ msgstr ""
 
 #: ihcheterogeneity/options/spatial_id.title
 #: ihcheterogeneity/ui[0][6].label
-msgid "Spatial Region ID (Optional)"
+msgid "Spatial region ID (optional)"
 msgstr ""
 
 #: package/analyses/spatialanalysis.title
@@ -155929,7 +157096,7 @@ msgid "Start time"
 msgstr ""
 
 #: swimmerplot/ui[0][0][1].label
-msgid "Start Time (Required)"
+msgid "Start time (required)"
 msgstr ""
 
 #: timedependent/options/start_time.description.ui
@@ -156664,6 +157831,10 @@ msgstr ""
 
 #: pathagreement/ui[5][0][0].label
 msgid "Statistical method selection"
+msgstr ""
+
+#: R/diagnosticmeta.b.R
+msgid "Statistical Method Selection Guide"
 msgstr ""
 
 #: grafify/options/stat_method.description
@@ -158234,11 +159405,14 @@ msgstr ""
 #: clinicalvalidation/options/stratified_sampling.title
 #: clinicalvalidationinteractive/options/stratified_sampling.title
 #: epidemiosurvival/options/sampling_method/stratified.title
-#: ihcheterogeneity/options/sampling_strategy/stratified.title
 #: treeadvanced/options/stratified_sampling.title
 #: treecompare/options/stratified_sampling.title
 #: treemedical/options/stratified_sampling.title
 msgid "Stratified Sampling"
+msgstr ""
+
+#: ihcheterogeneity/options/sampling_strategy/stratified.title
+msgid "Stratified sampling"
 msgstr ""
 
 #: emfrailty/results/survivalPlots.title
@@ -158610,6 +159784,10 @@ msgstr ""
 msgid "Studies excluded"
 msgstr ""
 
+#: R/diagnosticmeta.b.R
+msgid "Studies should evaluate the same test and target condition"
+msgstr ""
+
 #: R/nogoldstandard.b.R
 msgid ""
 "Studies with at least three tests whose errors are plausibly independent "
@@ -158791,6 +159969,10 @@ msgstr ""
 msgid "Study identifiers are not unique"
 msgstr ""
 
+#: R/diagnosticmeta.b.R
+msgid "Study identifiers are unique"
+msgstr ""
+
 #: R/swimmerplot.b.R
 msgid ""
 "Study included %d patients with %d timeline observations. Median observed "
@@ -158871,6 +160053,10 @@ msgstr ""
 #: effectsize/options/study_weights.title
 #: effectsize/ui[16][0].label
 msgid "Study Weights Variable"
+msgstr ""
+
+#: R/diagnosticmeta.b.R
+msgid "study_name"
 msgstr ""
 
 #: epidemiosurvival/options/reference_population.default
@@ -159881,6 +161067,10 @@ msgstr ""
 msgid "Summary ROC plot"
 msgstr ""
 
+#: R/diagnosticmeta.b.R
+msgid "Summary ROC Plot Interpretation Guide"
+msgstr ""
+
 #: qualityoflife/results/summary_scores.columns.title
 msgid "Summary Score"
 msgstr ""
@@ -160384,6 +161574,8 @@ msgstr ""
 msgid "Survey-Weighted Survival Summary"
 msgstr ""
 
+#: package/analyses/singlearm.menuGroup
+#: package/analyses/survival.menuGroup
 #: package/analyses/survivalcont.menuGroup
 #: package/analyses/multisurvival.menuGroup
 #: package/analyses/oddsratio.menuGroup
@@ -160401,6 +161593,8 @@ msgstr ""
 #: outcomeorganizer/options.menuGroup
 #: semimarkov/results/reliabilityAnalysis.columns.title
 #: simonmakuch/results/survivalEstimates.columns.title
+#: singlearm/options.menuGroup
+#: survival/options.menuGroup
 #: survival/results/survTable.columns.title
 #: survivalcont/options.menuGroup
 #: survivalcont/results/survTable.columns.title
@@ -161735,6 +162929,10 @@ msgstr ""
 msgid "Synoptic Report Completeness"
 msgstr ""
 
+#: R/diagnosticmeta.b.R
+msgid "Synthesizing evidence for clinical guidelines"
+msgstr ""
+
 #: groomecompare/results/detailedmetrics/consistency.columns.title
 #: groomecompare/results/detailedmetrics/discrimination.columns.title
 #: groomecompare/results/samplesize.columns.title
@@ -161887,7 +163085,7 @@ msgid "Systematic Randomization"
 msgstr ""
 
 #: ihcheterogeneity/options/sampling_strategy/systematic.title
-msgid "Systematic Sampling"
+msgid "Systematic sampling"
 msgstr ""
 
 #: pathagreement/results/raterBiasTable.columns.title
@@ -164831,6 +166029,19 @@ msgid ""
 "%s). The effect size was %s (Cram\\u{E9}r's V = %.3f)."
 msgstr ""
 
+#: R/chisqposttest.b.R
+msgid ""
+"The association between %s was %s (Fisher's exact test, Monte Carlo p %s "
+"from 2,000 simulated tables, n = %s). The effect size was %s (Cramér's V = "
+"%.3f)."
+msgstr ""
+
+#: R/chisqposttest.b.R
+msgid ""
+"The association between %s was %s (Fisher's exact test, p %s, n = %s). The "
+"effect size was %s (Cramér's V = %.3f)."
+msgstr ""
+
 #: R/survivalPower.b.R
 msgid "The assumed HR is below the NI margin; calculated power is {power}%."
 msgstr ""
@@ -167440,12 +168651,25 @@ msgid ""
 "identify a cause."
 msgstr ""
 
+#: R/agepyramid.b.R
+msgid ""
+"The level '{level}' chosen under '{control}' is not a level of '{gender}'. "
+"Levels available: {levels}."
+msgstr ""
+
 #: R/vartree.b.R
 msgid ""
 "The level '{level}' contains characters that cannot be used in a tree "
 "summary; only letters, digits and the symbols ~ @ # ( ) _ | , . are accepted "
 "there. No reference-level percentage is drawn in the nodes. Recode that "
 "level to a name without '+', '-', '/' or '=' to display it."
+msgstr ""
+
+#: R/agepyramid.b.R
+msgid ""
+"The level '{level}' is selected for BOTH the female and the male side, so "
+"there is nothing to compare and no pyramid was drawn. Choose two different "
+"levels of '{gender}'."
 msgstr ""
 
 #: R/oddsratio.b.R
@@ -167456,6 +168680,48 @@ msgstr ""
 msgid ""
 "The level {level} does not occur in the grouping variable, so nothing is "
 "highlighted; pick a level that is present in the data."
+msgstr ""
+
+#: venn/options/var1true.description.jamovi
+msgid ""
+"The level in `var1` that represents the true condition. It must be chosen "
+"whenever `var1` is selected and is never taken from the order of the levels."
+msgstr ""
+
+#: venn/options/var2true.description.jamovi
+msgid ""
+"The level in `var2` that represents the true condition. It must be chosen "
+"whenever `var2` is selected and is never taken from the order of the levels."
+msgstr ""
+
+#: venn/options/var3true.description.jamovi
+msgid ""
+"The level in `var3` that represents the true condition. It must be chosen "
+"whenever `var3` is selected and is never taken from the order of the levels."
+msgstr ""
+
+#: venn/options/var4true.description.jamovi
+msgid ""
+"The level in `var4` that represents the true condition. It must be chosen "
+"whenever `var4` is selected and is never taken from the order of the levels."
+msgstr ""
+
+#: venn/options/var5true.description.jamovi
+msgid ""
+"The level in `var5` that represents the true condition. It must be chosen "
+"whenever `var5` is selected and is never taken from the order of the levels."
+msgstr ""
+
+#: venn/options/var6true.description.jamovi
+msgid ""
+"The level in `var6` that represents the true condition. It must be chosen "
+"whenever `var6` is selected and is never taken from the order of the levels."
+msgstr ""
+
+#: venn/options/var7true.description.jamovi
+msgid ""
+"The level in `var7` that represents the true condition. It must be chosen "
+"whenever `var7` is selected and is never taken from the order of the levels."
 msgstr ""
 
 #: qtwist/options/event_os_level.description
@@ -167473,8 +168739,30 @@ msgstr ""
 msgid "The level indicating progression or death when using factor variables."
 msgstr ""
 
+#: agepyramid/options/female.description.jamovi
+msgid ""
+"The level of the gender variable that identifies female subjects. It must be "
+"chosen: it is never read from the level names or their order. While it is "
+"empty the levels found are listed and nothing is drawn, unless Male level is "
+"set and the data hold no other level, in which case the male-only cohort is "
+"drawn."
+msgstr ""
+
+#: agepyramid/options/male.description.jamovi
+msgid ""
+"The level of the gender variable that identifies male subjects. It must be "
+"chosen: it is never read from the level names or their order. While it is "
+"empty the levels found are listed and nothing is drawn, unless Female level "
+"is set and the data hold no other level, in which case the female-only "
+"cohort is drawn."
+msgstr ""
+
 #: survivalcont/options/outcomeLevel.description
-msgid "The level of the outcome variable that represents the event of interest. Required for a factor outcome, and never taken from the order of the levels: without it the analysis stops and lists the levels. A numeric 0/1 outcome is read as 1 = event."
+msgid ""
+"The level of the outcome variable that represents the event of interest. "
+"Required for a factor outcome, and never taken from the order of the levels: "
+"without it the analysis stops and lists the levels. A numeric 0/1 outcome is "
+"read as 1 = event."
 msgstr ""
 
 #: simonmakuch/options/exposedLevel.description
@@ -168454,6 +169742,18 @@ msgid ""
 "Post-hoc pairwise comparisons are only valid when the overall test is "
 "significant: running them after a non-significant omnibus test inflates the "
 "Type I error rate and constitutes data dredging."
+msgstr ""
+
+#: R/chisqposttest.b.R
+msgid ""
+"The overall Fisher's exact test is not significant (p = %s ≥ %g). Post-hoc "
+"pairwise comparisons are only valid when the overall test is significant: "
+"running them after a non-significant omnibus test inflates the Type I error "
+"rate and constitutes data dredging."
+msgstr ""
+
+#: R/chisqposttest.b.R
+msgid "The overall p-value is from Fisher's exact test"
 msgstr ""
 
 #: advancedSurvivalPower/options/prob_event.description
@@ -170931,6 +172231,19 @@ msgstr ""
 msgid "there is only one complete pair of values"
 msgstr ""
 
+#: R/diagnosticmeta.b.R
+msgid ""
+"These answer different questions and are routinely confused. A tight "
+"<strong>confidence</strong> region means the pooled estimate is well "
+"determined; it says nothing about whether the assay will perform "
+"consistently. A wide <strong>prediction</strong> region means that even "
+"though the average is known precisely, the next study - or your laboratory - "
+"could see materially different sensitivity and specificity. <strong>For "
+"deciding whether to adopt an assay, the prediction region is the relevant "
+"one.</strong> When the two differ greatly, between-study heterogeneity "
+"dominates and the pooled point alone should not drive the decision."
+msgstr ""
+
 #: R/multisurvival.b.R
 msgid "These are apparent (in-sample) estimates."
 msgstr ""
@@ -172253,6 +173566,13 @@ msgid ""
 "It provides both a textual summary and a visually appealing summary table.\n"
 "Optionally, you can enable distribution diagnostics to examine normality, "
 "skewness, and kurtosis."
+msgstr ""
+
+#: R/diagnosticmeta.b.R
+msgid ""
+"This module performs comprehensive meta-analysis of diagnostic test accuracy "
+"studies, specifically designed for pathology research including AI algorithm "
+"validation and biomarker diagnostic accuracy synthesis."
 msgstr ""
 
 #: package/analyses/dataquality.description
@@ -174160,7 +175480,7 @@ msgid "Time Unit"
 msgstr ""
 
 #: swimmerplot/options/timeUnit.title
-msgid "Time Unit for Display"
+msgid "Time unit for display"
 msgstr ""
 
 #: timeinterval/options/output_unit.title
@@ -174405,7 +175725,7 @@ msgid "Time Variable (optional)"
 msgstr ""
 
 #: waterfall/ui[0][2].label
-msgid "Time Variable (raw input, visits, spider plot)"
+msgid "Time variable (raw input, visits, spider plot)"
 msgstr ""
 
 #: waterfall/options/timeVar.title
@@ -175248,6 +176568,10 @@ msgstr ""
 #: riverplot/results/flowTable.columns.title
 #: riverplot/results/transitionMatrix.columns.title
 msgid "To Category"
+msgstr ""
+
+#: R/oddsratio.b.R
+msgid "To choose a level, first put '{variable}' in the Diagnostic Predictor box."
 msgstr ""
 
 #: R/multisurvival.b.R
@@ -177613,6 +178937,10 @@ msgstr ""
 msgid "Triangle"
 msgstr ""
 
+#: R/diagnosticmeta.b.R
+msgid "Triangle position shows where your pooled test performance lies"
+msgstr ""
+
 #: nonparametricregression/options/kernel_type/triangular.title
 #: smoothhazard/options/kernel_type/triangular.title
 msgid "Triangular"
@@ -177848,11 +179176,11 @@ msgid "True negatives"
 msgstr ""
 
 #: diagnosticmeta/ui[0][4][0].label
-msgid "True Negatives (Disease-, Test-)"
+msgid "True negatives (disease-, test-)"
 msgstr ""
 
 #: diagnosticmeta/options/true_negatives.title
-msgid "True Negatives (TN)"
+msgid "True negatives (TN)"
 msgstr ""
 
 #: R/diagnosticmeta.b.R
@@ -177902,11 +179230,11 @@ msgid "True positives"
 msgstr ""
 
 #: diagnosticmeta/ui[0][1][0].label
-msgid "True Positives (Disease+, Test+)"
+msgid "True positives (disease+, test+)"
 msgstr ""
 
 #: diagnosticmeta/options/true_positives.title
-msgid "True Positives (TP)"
+msgid "True positives (TP)"
 msgstr ""
 
 #: R/diagnosticmeta.b.R
@@ -177928,6 +179256,14 @@ msgstr ""
 
 #: misclassificationbias/results/correctedTable.columns.title
 msgid "True Unexposed"
+msgstr ""
+
+#: R/diagnosticmeta.b.R
+msgid "true_negatives"
+msgstr ""
+
+#: R/diagnosticmeta.b.R
+msgid "true_positives"
 msgstr ""
 
 #: R/decisioncalculator.b.R
@@ -179440,6 +180776,10 @@ msgstr ""
 
 #: R/benford.b.R
 msgid "Understanding Benford's Law Analysis"
+msgstr ""
+
+#: R/diagnosticmeta.b.R
+msgid "Understanding Bivariate and Proportional-Hazards SROC Models"
 msgstr ""
 
 #: stagemigration/results/bootstrapValidationExplanation.title
@@ -181402,6 +182742,10 @@ msgid ""
 "0. Turn off 'Statistical Results' for a purely descriptive histogram."
 msgstr ""
 
+#: R/diagnosticmeta.b.R
+msgid "Use this plot to identify studies for sensitivity analysis"
+msgstr ""
+
 #: R/summarydata.b.R
 msgid ""
 "Use this text as a draft only. Add the measurement units, study population, "
@@ -181612,6 +182956,12 @@ msgstr "User-specified probability"
 
 #: qtwist/options/tau_selection/user_specified.title
 msgid "User-Specified Value"
+msgstr ""
+
+#: R/diagnosticmeta.b.R
+msgid ""
+"Uses adjusted profile maximum likelihood and is suitable for smaller study "
+"sets"
 msgstr ""
 
 #: R/nogoldstandard.b.R
@@ -185194,7 +186544,7 @@ msgid "Viridis (Blue-Purple-Yellow)"
 msgstr ""
 
 #: diagnosticmeta/options/color_palette/viridis.title
-msgid "Viridis (Blue-Purple)"
+msgid "Viridis (blue-purple)"
 msgstr ""
 
 #: jjoncoplot/options/colorScheme/viridis.title
@@ -185678,6 +187028,10 @@ msgstr ""
 #: bayesiannetworkma/options/model_comparison_criteria/waic.title
 #: spatialbayesiansurvival/options/model_selection_criteria/waic.title
 msgid "WAIC (Widely Applicable Information Criterion)"
+msgstr ""
+
+#: R/venn.b.R
+msgid "Waiting for a True Level"
 msgstr ""
 
 #: conditionalgee/results/coefficients.columns.title
@@ -186984,6 +188338,7 @@ msgstr ""
 
 #: R/decision.b.R
 #: R/decisioncompare.b.R
+#: R/diagnosticmeta.b.R
 #: R/reportcat.b.R
 #: R/waterfall.b.R
 msgid "What This Analysis Does"
@@ -187007,6 +188362,10 @@ msgstr ""
 
 #: R/benford.b.R
 msgid "WHAT THIS LIST IS:"
+msgstr ""
+
+#: R/diagnosticmeta.b.R
+msgid "What This Plot Shows"
 msgstr ""
 
 #: R/agreement.b.R
@@ -187140,6 +188499,10 @@ msgstr ""
 msgid ""
 "When proportional hazards testing (cox.zph) shows a violation for a "
 "variable, or when you know hazards cross over time."
+msgstr ""
+
+#: R/diagnosticmeta.b.R
+msgid "When reporting your meta-analysis results, include:"
 msgstr ""
 
 #: R/chisqposttest.b.R
@@ -187351,6 +188714,7 @@ msgstr ""
 
 #: R/decision.b.R
 #: R/decisioncompare.b.R
+#: R/diagnosticmeta.b.R
 #: R/reportcat.b.R
 msgid "When to Use This Analysis"
 msgstr ""
@@ -187702,6 +189066,10 @@ msgstr ""
 
 #: R/jjridges.b.R
 msgid "Wide ridges = high variability; narrow ridges = consistent values"
+msgstr ""
+
+#: R/diagnosticmeta.b.R
+msgid "Wide scatter of points = substantial between-study heterogeneity"
 msgstr ""
 
 #: R/lassologistic.b.R
@@ -188264,6 +189632,15 @@ msgstr ""
 
 #: stagemigration/options/rfSamplingType/swr.title
 msgid "With Replacement"
+msgstr ""
+
+#: R/diagnosticmeta.b.R
+msgid ""
+"With the default zero-cell setting (no correction), where more than a "
+"quarter of the studies have a zero cell, no verdict is reported at all: the "
+"continuity correction the test needs produces asymmetry by itself. Choosing "
+"any Zero-Cell Correction leaves no zero cell for this test, so a verdict is "
+"always given"
 msgstr ""
 
 #: R/kappaSizeFixedN.b.R
@@ -190089,213 +191466,4 @@ msgstr ""
 
 #: contTables/results/chiSq.title
 msgid "χ² Tests"
-msgstr ""
-
-#: R/decision.b.R
-msgid "Choose the Reference Positive Level"
-msgstr ""
-
-#: R/decision.b.R
-msgid "Select the level of {var} that counts as positive, under \"Reference positive level\"."
-msgstr ""
-
-#: R/decision.b.R
-msgid "Choose the Test Positive Level"
-msgstr ""
-
-#: R/decision.b.R
-msgid "Select the level of {var} that is a positive test result, under \"Test positive level\"."
-msgstr ""
-
-#: R/decision.b.R
-#: R/decisioncombine.b.R
-msgid "Nothing is computed until it is chosen."
-msgstr ""
-
-#: R/decisioncombine.b.R
-msgid "Choose the Disease Present Level"
-msgstr ""
-
-#: R/decisioncombine.b.R
-msgid "Select the level of {var} that means disease is present, under \"Disease present level\"."
-msgstr ""
-
-#: R/decisioncombine.b.R
-msgid "Choose the Positive Level for {test}"
-msgstr ""
-
-#: R/decisioncombine.b.R
-msgid "Select the level of {var} that is a positive result for {test}, under \"Positive level\"."
-msgstr ""
-
-#: R/chisqposttest.b.R
-msgid "The association between %s was %s (Fisher's exact test, p %s, n = %s). The effect size was %s (Cramér's V = %.3f)."
-msgstr ""
-
-#: R/chisqposttest.b.R
-msgid "The association between %s was %s (Fisher's exact test, Monte Carlo p %s from 2,000 simulated tables, n = %s). The effect size was %s (Cramér's V = %.3f)."
-msgstr ""
-
-#: R/chisqposttest.b.R
-msgid "Fisher's exact test was performed to examine the relationship between two binary categorical variables."
-msgstr ""
-
-#: R/chisqposttest.b.R
-msgid "Fisher's exact test was performed to examine the relationship between two categorical variables."
-msgstr ""
-
-#: R/chisqposttest.b.R
-msgid "Fisher's exact test, with its p-value estimated from 2,000 Monte Carlo simulated tables, was performed to examine the relationship between two categorical variables."
-msgstr ""
-
-#: R/chisqposttest.b.R
-msgid "The overall Fisher's exact test is not significant (p = %s ≥ %g). Post-hoc pairwise comparisons are only valid when the overall test is significant: running them after a non-significant omnibus test inflates the Type I error rate and constitutes data dredging."
-msgstr ""
-
-#: R/chisqposttest.b.R
-msgid "P-value (Fisher's exact test)"
-msgstr ""
-
-#: R/chisqposttest.b.R
-msgid "P-value (Fisher's exact test, Monte Carlo)"
-msgstr ""
-
-#: R/chisqposttest.b.R
-msgid "%g observations in a %d x %d table; Fisher's exact test, p %s at alpha = %g; %s."
-msgstr ""
-
-#: R/chisqposttest.b.R
-msgid "%g observations in a %d x %d table; Fisher's exact test (Monte Carlo, B = 2000), p %s at alpha = %g; %s."
-msgstr ""
-
-#: R/chisqposttest.b.R
-msgid "The overall p-value is from Fisher's exact test"
-msgstr ""
-
-#: R/chisqposttest.b.R
-msgid "{k} of {m} cells have an expected count below 5. The overall p-value is from Fisher's exact test, so the large-sample limits of the chi-square approximation do not apply to it. The standardized residuals and Cramér's V still come from the chi-square statistic and are approximate for a table this sparse."
-msgstr ""
-
-#: decision/options/goldPositive.description
-msgid "Select the positive reference level. This represents the condition you want to detect or diagnose. It must be chosen: it is never taken from the order of the levels, and until it is chosen the analysis lists the levels found and computes nothing."
-msgstr ""
-
-#: decision/options/testPositive.description
-msgid "Select the level that represents a positive test result. This should correspond to the level indicating suspected disease presence. It must be chosen: it is never taken from the order of the levels, and until it is chosen the analysis lists the levels found and computes nothing."
-msgstr ""
-
-#: decisioncombine/options/goldPositive.description
-msgid "Select the level indicating disease presence (e.g., \"1\", \"positive\", \"malignant\"). It must be chosen: it is never taken from the order of the levels, and until it is chosen the analysis lists the levels found and computes nothing."
-msgstr ""
-
-#: decisioncombine/options/test1Positive.description
-msgid "Select the level representing a positive result for Test 1. It must be chosen: it is never taken from the order of the levels, and until it is chosen the analysis lists the levels found and computes nothing."
-msgstr ""
-
-#: R/oddsratio.b.R
-msgid "Diagnostic metrics are waiting for the Predictor Positive Level. Choose which level of '{variable}' is the positive test result. Observed levels: {levels}. The logistic model, odds ratios, forest plot and nomogram are not affected."
-msgstr ""
-
-#: R/oddsratio.b.R
-msgid "To choose a level, first put '{variable}' in the Diagnostic Predictor box."
-msgstr ""
-
-#: R/venn.b.R
-msgid "Waiting for a True Level"
-msgstr ""
-
-#: R/venn.b.R
-msgid "Choose the true level for '{var}'; it is never taken from the order of the levels. Observed levels: {levels}. Nothing is drawn or counted until the level is chosen."
-msgstr ""
-
-#: R/agepyramid.b.R
-msgid "Choose the Female and Male levels"
-msgstr ""
-
-#: R/agepyramid.b.R
-msgid "Select the level of '{gender}' that identifies female subjects under 'Female level', and the one that identifies male subjects under 'Male level'. They are never read from the level names or their order."
-msgstr ""
-
-#: R/agepyramid.b.R
-msgid "For a single-gender cohort, choosing that one level under its own selector is enough."
-msgstr ""
-
-#: R/agepyramid.b.R
-msgid "Nothing is drawn until it is chosen."
-msgstr ""
-
-#: R/agepyramid.b.R
-msgid "Nothing is drawn until they are chosen."
-msgstr ""
-
-#: R/agepyramid.b.R
-msgid "Choose the Male level"
-msgstr ""
-
-#: R/agepyramid.b.R
-msgid "Choose the Female level"
-msgstr ""
-
-#: R/agepyramid.b.R
-msgid "'{level}' is set as the female level. Select the level of '{gender}' that identifies male subjects under 'Male level'; it is never filled in from the remaining levels."
-msgstr ""
-
-#: R/agepyramid.b.R
-msgid "'{level}' is set as the male level. Select the level of '{gender}' that identifies female subjects under 'Female level'; it is never filled in from the remaining levels."
-msgstr ""
-
-#: R/agepyramid.b.R
-msgid "Other levels found: {levels}."
-msgstr ""
-
-#: R/agepyramid.b.R
-msgid "The level '{level}' is selected for BOTH the female and the male side, so there is nothing to compare and no pyramid was drawn. Choose two different levels of '{gender}'."
-msgstr ""
-
-#: oddsratio/options/predictorLevel.description
-msgid "Choose which level of the diagnostic predictor is the positive test result (e.g., \"Present\", \"Test+\", \"Yes\"). The diagnostic metrics (sensitivity, specificity, likelihood ratios) need this choice; it is never taken from the level names or their order. While it is empty the diagnostic metrics wait for it and list the observed levels, and the logistic model, odds ratios, forest plot and nomogram still run."
-msgstr ""
-
-#: venn/options/var1true.description
-msgid "The level in `var1` that represents the true condition. It must be chosen whenever `var1` is selected and is never taken from the order of the levels."
-msgstr ""
-
-#: venn/options/var2true.description
-msgid "The level in `var2` that represents the true condition. It must be chosen whenever `var2` is selected and is never taken from the order of the levels."
-msgstr ""
-
-#: venn/options/var3true.description
-msgid "The level in `var3` that represents the true condition. It must be chosen whenever `var3` is selected and is never taken from the order of the levels."
-msgstr ""
-
-#: venn/options/var4true.description
-msgid "The level in `var4` that represents the true condition. It must be chosen whenever `var4` is selected and is never taken from the order of the levels."
-msgstr ""
-
-#: venn/options/var5true.description
-msgid "The level in `var5` that represents the true condition. It must be chosen whenever `var5` is selected and is never taken from the order of the levels."
-msgstr ""
-
-#: venn/options/var6true.description
-msgid "The level in `var6` that represents the true condition. It must be chosen whenever `var6` is selected and is never taken from the order of the levels."
-msgstr ""
-
-#: venn/options/var7true.description
-msgid "The level in `var7` that represents the true condition. It must be chosen whenever `var7` is selected and is never taken from the order of the levels."
-msgstr ""
-
-#: agepyramid/options/female.description
-msgid "The level of the gender variable that identifies female subjects. It must be chosen: it is never read from the level names or their order. While it is empty the levels found are listed and nothing is drawn, unless Male level is set and the data hold no other level, in which case the male-only cohort is drawn."
-msgstr ""
-
-#: agepyramid/options/male.description
-msgid "The level of the gender variable that identifies male subjects. It must be chosen: it is never read from the level names or their order. While it is empty the levels found are listed and nothing is drawn, unless Female level is set and the data hold no other level, in which case the female-only cohort is drawn."
-msgstr ""
-
-#: R/agepyramid.b.R
-msgid "Gender level not found"
-msgstr ""
-
-#: R/agepyramid.b.R
-msgid "The level '{level}' chosen under '{control}' is not a level of '{gender}'. Levels available: {levels}."
 msgstr ""

@@ -43,7 +43,7 @@ options:
           R: Variable containing unique study identifiers
 
     - name: true_positives
-      title: True Positives (TP)
+      title: True positives (TP)
       type: Variable
       default: NULL
       suggested:
@@ -54,7 +54,7 @@ options:
           R: Number of true positive results in each study
 
     - name: false_positives
-      title: False Positives (FP)
+      title: False positives (FP)
       type: Variable
       default: NULL
       suggested:
@@ -65,7 +65,7 @@ options:
           R: Number of false positive results in each study
 
     - name: false_negatives
-      title: False Negatives (FN)
+      title: False negatives (FN)
       type: Variable
       default: NULL
       suggested:
@@ -76,7 +76,7 @@ options:
           R: Number of false negative results in each study
 
     - name: true_negatives
-      title: True Negatives (TN)
+      title: True negatives (TN)
       type: Variable
       default: NULL
       suggested:
@@ -149,13 +149,13 @@ options:
       type: List
       options:
           - name: 'reml'
-            title: REML (Recommended)
+            title: REML (recommended)
           - name: 'ml'
             title: Maximum likelihood
           - name: 'fixed'
             title: Fixed effects
           - name: 'mm'
-            title: Method of Moments
+            title: Method of moments
           - name: 'vc'
             title: Variance components
       default: reml
@@ -174,7 +174,7 @@ options:
           - name: 'zero_cells'
             title: +0.5 to the zero cells only
           - name: 'reciprocal_n'
-            title: +1/N to all cells (N = study size)
+            title: +1/N to all cells (n = study size)
       default: none
       description:
           R: |
@@ -236,13 +236,13 @@ options:
           - name: 'standard'
             title: Standard colors
           - name: 'colorblind_safe'
-            title: Color-Blind Safe
+            title: Color-Blind safe
           - name: 'high_contrast'
             title: High contrast
           - name: 'viridis'
-            title: Viridis (Blue-Purple)
+            title: Viridis (blue-purple)
           - name: 'plasma'
-            title: Plasma (Purple-Pink)
+            title: Plasma (purple-pink)
           - name: 'jamovi'
             title: jamovi (follow global)
       default: standard

@@ -567,12 +567,21 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
                 self$results$variancetable$addRow(
                     rowKey = r, values = list(component = variance_components[r]))
 
+            private$.syncOutputVisibility()
+        },
+
+        .syncOutputVisibility = function() {
+            has_regional <- private$.hasRegionalMeasurement()
+            has_regional <- has_regional && (!is.null(self$options$wholesection) ||
+                length(unique(c(self$options$biopsy1, self$options$biopsy2,
+                    self$options$biopsy3, self$options$biopsy4, self$options$biopsies))) >= 2)
+
             # Set conditional visibility based on options and analysis type.
             # Until a regional measurement is selected only the welcome panel
             # shows (empty tables and plot frames used to sit beneath it).
             analysis_type <- self$options$analysis_type
             self$results$notices$setVisible(FALSE)
-            self$results$interpretation$setVisible(has_regional)
+            self$results$interpretation$setVisible(has_regional && self$options$showInterpretation)
             self$results$reproducibilitytable$setVisible(has_regional)
             self$results$samplingbiastable$setVisible(has_regional)
             show_plots <- has_regional && (self$options$show_variability_plots ||
@@ -608,7 +617,39 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
             }
         },
 
+        .clearIncompleteResults = function() {
+            self$results$interpretation$setContent("")
+            self$results$interpretation$setVisible(FALSE)
+            self$results$report_sentences$setContent("")
+            self$results$report_sentences$setVisible(FALSE)
+            self$results$assumptions$setContent("")
+            self$results$assumptions$setVisible(FALSE)
+            self$results$summary$setContent("")
+            self$results$summary$setVisible(FALSE)
+            .deleteTableRows(self$results$reproducibilitytable)
+            self$results$reproducibilitytable$setVisible(FALSE)
+            .deleteTableRows(self$results$samplingbiastable)
+            self$results$samplingbiastable$setVisible(FALSE)
+            .deleteTableRows(self$results$variancetable)
+            self$results$variancetable$setVisible(FALSE)
+            .deleteTableRows(self$results$samplesizetable)
+            self$results$samplesizetable$setVisible(FALSE)
+            .deleteTableRows(self$results$spatialanalysistable)
+            self$results$spatialanalysistable$setVisible(FALSE)
+            .deleteTableRows(self$results$compartmentComparison)
+            self$results$compartmentComparison$setVisible(FALSE)
+            .deleteTableRows(self$results$compartmentTests)
+            self$results$compartmentTests$setVisible(FALSE)
+            self$results$biopsyplot$setState(NULL)
+            self$results$biopsyplot$setVisible(FALSE)
+            self$results$variabilityplot$setState(NULL)
+            self$results$variabilityplot$setVisible(FALSE)
+            self$results$spatialplot$setState(NULL)
+            self$results$spatialplot$setVisible(FALSE)
+        },
+
         .run = function() {
+            private$.syncOutputVisibility()
             private$.noticeList <- list()
             on.exit(private$.renderNotices(), add = TRUE)
             # Unset Variable options cannot be tested reliably with a leading `!`
@@ -627,7 +668,10 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
             private$.ss_done <- FALSE
 
             if (!has_regional_measurement) {
-                self$results$interpretation$setVisible(FALSE)
+                private$.clearIncompleteResults()
+                if (!is.null(self$options$wholesection))
+                    private$.addNotice("INFO", .("Complete the measurement selection"),
+                        .("Select at least one regional measurement to compare with the reference."))
                 return()
             }
 
@@ -642,7 +686,10 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
             # single region: one biopsy against the whole section is the classic
             # agreement/bias design.
             if (is.null(self$options$wholesection) && regional_count < 2) {
-                jmvcore::reject(.("At least 2 regional measurements are required for inter-regional heterogeneity analysis. With a reference (whole section) measurement selected, a single regional measurement is sufficient."))
+                private$.clearIncompleteResults()
+                private$.addNotice("INFO", .("Complete the measurement selection"),
+                    .("Select a reference measurement or a second distinct regional measurement to start the analysis."))
+                return()
             }
 
             data <- self$data
@@ -674,7 +721,10 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
             # A variable selected twice is analysed once, which can leave an
             # inter-regional design with a single region.
             if (!has_reference && ncol(biopsy_data) < 2) {
-                jmvcore::reject(.("At least 2 regional measurements are required for inter-regional heterogeneity analysis. With a reference (whole section) measurement selected, a single regional measurement is sufficient."))
+                private$.clearIncompleteResults()
+                private$.addNotice("INFO", .("Complete the measurement selection"),
+                    .("Select a reference measurement or a second distinct regional measurement to start the analysis."))
+                return()
             }
             min_cases <- private$.CLINICAL_CONSTANTS$MIN_CASES_ANALYSIS
 
@@ -1314,6 +1364,12 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
             # which sum to the total variance, so the percentages sum to 100.
             has_reference <- !is.null(whole_section)
             variance_table <- self$results$variancetable
+            .deleteTableRows(variance_table)
+            components <- c(.("Between-Case Variance"), .("Within-Case Variance (Sampling)"),
+                if (has_reference) .("Method Variance") else .("Regional Method Variance"),
+                .("Total Variance"))
+            for (r in 1:4)
+                variance_table$addRow(rowKey = r, values = list(component = components[r]))
 
             info <- private$.icc_info
             if (is.null(info)) info <- private$.calculateICC(whole_section, biopsy_data)
@@ -1910,7 +1966,7 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
                 li(.("Representativeness:"), .("Correlation could not be estimated with the available data."))
             } else if (metrics$has_reference && length(ref_corr) > 1) {
                 below <- ref_corr[ref_corr < correlation_threshold]
-                with_ci <- function(nm) sprintf("'%s' (r = %s, 95%% CI %s to %s)", nm, f3(ref_corr[[nm]]),
+                with_ci <- function(nm) sprintf(.("'%s' (r = %s, 95%% CI %s to %s)"), nm, f3(ref_corr[[nm]]),
                                                f3(metrics$ref_ci[[nm]][1]), f3(metrics$ref_ci[[nm]][2]))
                 shown <- metrics$shown_below
                 point_only <- setdiff(names(below), shown)
@@ -2360,8 +2416,9 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
                     private$.strategy_notes, "</div>")
             }
 
-            self$results$interpretation$setContent(interpretation)
-            self$results$interpretation$setVisible(TRUE)
+            self$results$interpretation$setContent(
+                if (isTRUE(self$options$showInterpretation)) interpretation else "")
+            self$results$interpretation$setVisible(isTRUE(self$options$showInterpretation))
             self$results$report_sentences$setContent(report_sentences)
             self$results$assumptions$setContent(
                 if (isTRUE(self$options$showAssumptions)) private$.generateAssumptionsContent(metrics) else "")
