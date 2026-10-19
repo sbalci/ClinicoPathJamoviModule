@@ -11,21 +11,22 @@ swimmerplot(
   endTime,
   responseVar = NULL,
   censorVar = NULL,
+  censorCoding = "auto",
   groupVar = NULL,
   timeType = "raw",
   dateFormat = "ymd",
   timeUnit = "months",
   timeDisplay = "relative",
   maxMilestones = 5,
-  milestone1Name = "Surgery",
+  milestone1Name = "",
   milestone1Date = NULL,
-  milestone2Name = "Treatment Start",
+  milestone2Name = "",
   milestone2Date = NULL,
-  milestone3Name = "Response Assessment",
+  milestone3Name = "",
   milestone3Date = NULL,
-  milestone4Name = "Progression",
+  milestone4Name = "",
   milestone4Date = NULL,
-  milestone5Name = "Death/Last Follow-up",
+  milestone5Name = "",
   milestone5Date = NULL,
   showEventMarkers = FALSE,
   eventVar = NULL,
@@ -65,10 +66,21 @@ PD) to color lanes.}
 
 \item{censorVar}{Optional variable giving each patient's status. A censored
 / still-at-risk value draws a status arrow at the end of that patient's
-lane and is also what the reverse Kaplan-Meier median follow-up uses. Use
-0/FALSE/"censored"/"alive" for ongoing patients (shows arrow), or
-1/TRUE/"event"/"dead" for completed follow-up (no arrow). Without a
-censoring variable no arrows are drawn and an information notice says so.}
+lane and is also what the reverse Kaplan-Meier median follow-up uses.
+Numeric 0/1 is read as 0 = censored (arrow), 1 = event (follow-up
+completed), and the words "censored"/"alive"/"ongoing" and
+"event"/"dead"/"died"/"death" are read as named. Any other coding, such as
+Yes/No, TRUE/FALSE or 1/2, is not guessed: choose it in censorCoding.
+Without a censoring variable no arrows are drawn and an information notice
+says so.}
+
+\item{censorCoding}{How the censoring variable is read. Automatic reads
+numeric 0/1 as 0 = censored, 1 = event (choose "0/1: 1 = censored" for a
+column such as Censored = 1), and the words censored/alive/ongoing and
+event/dead/died/death as named. Yes/No, TRUE/FALSE, 1/2 and a column with a
+single value (all 0 or all 1) are never guessed: choose the coding that
+matches the data. While a column cannot be read, no status arrows are drawn
+and median follow-up is the plain median of observed durations.}
 
 \item{groupVar}{Optional grouping variable for comparing response rates
 between patient groups (e.g., treatment arms, disease subtypes). When
@@ -80,7 +92,9 @@ colors reflect the response variable, not the group.}
 \item{dateFormat}{Select the date/time format in your data (only used when
 Time Input Type is Date/Time).}
 
-\item{timeUnit}{Time unit to use for display and calculations.}
+\item{timeUnit}{With Raw Values input, the unit your start and end times
+are already recorded in; the values are not rescaled. With Date/Time input,
+the unit durations are calculated in.}
 
 \item{timeDisplay}{Choose whether to align all start times to 0 or use
 absolute start times.}
@@ -89,23 +103,27 @@ absolute start times.}
 (milestone slots 1-5 are defined).}
 
 \item{milestone1Name}{Name for the first milestone event (e.g., Surgery,
-Treatment Start).}
+Treatment Start). Leave blank to use the variable's name.}
 
 \item{milestone1Date}{Date/time variable when milestone 1 occurred.}
 
-\item{milestone2Name}{Name for the second milestone event.}
+\item{milestone2Name}{Name for the second milestone event. Leave blank to
+use the variable's name.}
 
 \item{milestone2Date}{Date/time variable when milestone 2 occurred.}
 
-\item{milestone3Name}{Name for the third milestone event.}
+\item{milestone3Name}{Name for the third milestone event. Leave blank to
+use the variable's name.}
 
 \item{milestone3Date}{Date/time variable when milestone 3 occurred.}
 
-\item{milestone4Name}{Name for the fourth milestone event.}
+\item{milestone4Name}{Name for the fourth milestone event. Leave blank to
+use the variable's name.}
 
 \item{milestone4Date}{Date/time variable when milestone 4 occurred.}
 
-\item{milestone5Name}{Name for the fifth milestone event.}
+\item{milestone5Name}{Name for the fifth milestone event. Leave blank to
+use the variable's name.}
 
 \item{milestone5Date}{Date/time variable when milestone 5 occurred.}
 

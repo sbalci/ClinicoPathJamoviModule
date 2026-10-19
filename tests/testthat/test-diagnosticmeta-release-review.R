@@ -144,8 +144,8 @@ test_that("excluded studies are disclosed rather than silently dropped", {
   # written into a panel that .run() had already hidden
   expect_match(txt, "Studies excluded")
   expect_match(txt, "3 of 10")
-  expect_match(txt, "missing counts")
-  expect_match(txt, "negative counts")
+  expect_match(txt, "Missing counts")   # whole-sentence reasons since the 2026-10-19 audit
+  expect_match(txt, "Negative counts")
   # and the analysis must still produce results from the remaining studies
   expect_gt(res$bivariateresults$rowCount, 0)
 })

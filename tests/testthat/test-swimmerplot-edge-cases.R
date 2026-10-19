@@ -105,34 +105,44 @@ test_that("swimmerplot handles identical duration for all patients", {
 
 test_that("swimmerplot handles all patients censored", {
   # Create dataset where all patients are censored
+  # 0/1 is read as 0 = censored, 1 = event (the fixture used to set 1, i.e. all events).
   test_data_censored <- swimmerplot_test
-  test_data_censored$Censored <- 1
+  test_data_censored$Censored <- 0
 
   result <- swimmerplot(
     data = test_data_censored,
     patientID = "PatientID",
     startTime = "StartTime",
     endTime = "EndTime",
-    censorVar = "Censored"
+    censorVar = "Censored",
+    censorCoding = "one_event_01"   # a single-valued column waits for a coding (SW-7)
   )
 
   expect_s3_class(result, "swimmerplotResults")
+  expect_equal(NROW(result$plot$state$arrow_data),
+               length(unique(test_data_censored$PatientID)))
 })
 
 test_that("swimmerplot handles all patients with events", {
   # Create dataset where all patients have events (no censoring)
   test_data_events <- swimmerplot_test
-  test_data_events$Censored <- 0
+  test_data_events$Censored <- 1
 
   result <- swimmerplot(
     data = test_data_events,
     patientID = "PatientID",
     startTime = "StartTime",
     endTime = "EndTime",
-    censorVar = "Censored"
+    censorVar = "Censored",
+    censorCoding = "one_event_01",   # a single-valued column waits for a coding (SW-7)
+    personTimeAnalysis = TRUE
   )
 
   expect_s3_class(result, "swimmerplotResults")
+  expect_equal(NROW(result$plot$state$arrow_data), 0)
+  fu <- result$advancedMetrics$asDF
+  expect_match(fu$metric_name[1], "reverse Kaplan-Meier not estimable", fixed = TRUE)
+  expect_match(fu$clinical_interpretation[1], "because no patient was censored", fixed = TRUE)
 })
 
 test_that("swimmerplot handles uniform response (all same)", {

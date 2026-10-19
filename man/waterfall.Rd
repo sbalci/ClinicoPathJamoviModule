@@ -11,6 +11,7 @@ waterfall(
   timeVar = NULL,
   groupVar = NULL,
   inputType = "percentage",
+  measurementUnit = "unspecified",
   sortBy = "response",
   sortDirection = "conventional",
   showBaseline = TRUE,
@@ -64,12 +65,20 @@ from treatment start). Required for spider plot and raw measurement
 processing. Baseline should be time = 0.}
 
 \item{groupVar}{Optional grouping variable for coloring bars by patient
-groups (e.g., treatment arms, disease subtypes). When specified, overrides
-RECIST category coloring to show group-based colors.}
+groups (e.g., treatment arms, disease subtypes). Bars are coloured by group
+when Color by is set to Patient Groups (jamovi sets it when a group is
+chosen; from R, set colorBy = "group").}
 
 \item{inputType}{Specify data format: 'raw' for actual tumor measurements
 (requires time variable) or 'percentage' for pre-calculated percentage
 changes from baseline}
+
+\item{measurementUnit}{Unit of the raw tumour measurements (raw input
+only). When stated, progression also requires the RECIST v1.1 absolute
+increase of at least 5 mm over the nadir, for the PD category and for
+progression in time to response and duration of response. Without it a
+small sum can be called progression on the 20 percent rule alone.
+Percentage input carries no size, so the rule cannot apply there.}
 
 \item{sortBy}{Sort the waterfall plot by best response or patient ID.}
 
@@ -91,13 +100,17 @@ override. One value per patient (the first non-missing value is used).}
 \item{ongoingVar}{Optional variable flagging patients still on treatment /
 with an ongoing response. Truthy values (TRUE, non-zero, or text matching
 yes/y/true/on/ongoing/1) draw an arrow pointing away from the bar tip. One
-value per patient (the first non-missing value is used).}
+value per patient: the latest recorded value (status at the last
+assessment) is used.}
 
 \item{responseCategoryVar}{Optional per-patient RECIST category
 (CR/PR/SD/PD). When supplied it overrides the category computed from the
 percentage value, so a patient with target-lesion shrinkage can still be
 classified PD (e.g., a new lesion). Affects bar coloring, response metrics
-(ORR/DCR), time to response and duration of response. One value per
+(ORR/DCR), time to response and duration of response. A patient with no
+measured value but a supplied category (e.g. PD for clinical progression or
+death before the first scan) is counted with that category. NE, "not
+evaluable" and UNK are read as Unknown (not evaluable). One value per
 patient: the first non-missing value is used and conflicting values are
 reported.}
 
@@ -121,10 +134,11 @@ identify Progressive Disease (PD) and Partial Response (PR) cutoffs.}
 
 \item{labelOutliers}{Label responses exceeding the specified threshold.}
 
-\item{showMedian}{Show the median response as a horizontal line on the
-waterfall plot and as a median trajectory on the spider plot.}
+\item{showMedian}{Show the median best response as a horizontal line on the
+waterfall plot.}
 
-\item{showCI}{Show confidence interval around median response.}
+\item{showCI}{Show a bootstrap confidence interval around the median best
+response on the waterfall plot.}
 
 \item{minResponseForLabel}{Minimum response value for labels to be
 displayed.}
@@ -149,14 +163,15 @@ for each patient.}
 \item{showSpiderPlot}{Display spider plot showing response trajectories
 over time (requires time variable).}
 
-\item{spiderColorBy}{Coloring method for spider plot: Response status or
-patient groups. For backward compatibility, defaults to response status
-coloring.}
+\item{spiderColorBy}{Colouring for the spider plot: each point by its own
+change from baseline (-30 percent or less vs above -30 percent), or each
+patient by group.}
 
 \item{spiderColorScheme}{Color scheme for spider plot lines and points.}
 
-\item{timeUnitLabel}{Label to use for the spider plot time axis. Does not
-rescale data; only affects axis labeling.}
+\item{timeUnitLabel}{The unit the time variable is recorded in. It labels
+the spider plot axis and the time to response and duration of response
+rows; values are not rescaled.}
 
 \item{generateCopyReadyReport}{Generate publication-ready result sentences
 with statistical details}
@@ -165,18 +180,20 @@ with statistical details}
 ORR and DCR: the range of rates compatible with the data (exact confidence
 interval) and a sample-size note.}
 
-\item{showConfidenceIntervals}{Calculate and display exact binomial
-confidence intervals for ORR and DCR}
+\item{showConfidenceIntervals}{Show a table of ORR and DCR with exact
+binomial confidence intervals. The intervals in Clinical Response Metrics
+and the very-wide-interval warning do not depend on it.}
 
 \item{enableGuidedMode}{Enable step-by-step guidance for new users}
 
-\item{showClinicalSummary}{.}
+\item{showClinicalSummary}{Show a plain-language summary of the response
+results (ORR, DCR and the category counts).}
 
-\item{showAboutAnalysis}{.}
+\item{showAboutAnalysis}{Show what the analysis does, when to use it, the
+data it needs and its key assumptions.}
 
-\item{showExplanations}{Display comprehensive explanation of what this
-analysis does, when to use it, data requirements, and key
-assumptions/limitations}
+\item{showExplanations}{Show both the clinical summary and the About panel
+(the same panels as Clinical summary and About this analysis).}
 
 \item{showResponseDuration}{Show a censoring-aware time-to-response (TTR)
 and duration-of-response (DoR) table. DoR is summarized with the
@@ -194,6 +211,7 @@ A results object containing:
 \code{results$guidedAnalysis} \tab \tab \tab \tab \tab a html \cr
 \code{results$todo} \tab \tab \tab \tab \tab a html \cr
 \code{results$todo2} \tab \tab \tab \tab \tab a html \cr
+\code{results$notices} \tab \tab \tab \tab \tab a html \cr
 \code{results$clinicalSummary} \tab \tab \tab \tab \tab a html \cr
 \code{results$aboutAnalysis} \tab \tab \tab \tab \tab a html \cr
 \code{results$summaryTable} \tab \tab \tab \tab \tab a table \cr
@@ -207,11 +225,8 @@ A results object containing:
 \code{results$groupComparisonTable} \tab \tab \tab \tab \tab a table \cr
 \code{results$groupComparisonTest} \tab \tab \tab \tab \tab a table \cr
 \code{results$spiderplot} \tab \tab \tab \tab \tab an image \cr
-\code{results$naturalLanguageSummary} \tab \tab \tab \tab \tab a html \cr
-\code{results$explanations} \tab \tab \tab \tab \tab a html \cr
 \code{results$responseDurationTable} \tab \tab \tab \tab \tab a table \cr
 \code{results$addResponseCategory} \tab \tab \tab \tab \tab an output \cr
-\code{results$notices} \tab \tab \tab \tab \tab a html \cr
 }
 
 Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
@@ -225,17 +240,18 @@ Use this when you have one tumour burden number per patient: either a
 percent change from baseline you have already calculated (one row per
 patient), or a single measurement recorded at each visit (one row per
 patient per visit). It draws waterfall and spider plots, assigns each
-patient a best response from their largest shrinkage from baseline, and
-reports ORR and DCR with exact binomial confidence intervals, group
-comparison, time to response and duration of response. When a time variable
-is supplied, progression is measured against the patient's smallest
-recorded burden (nadir), not against baseline. Categories are named CR, PR,
-SD and PD and the thresholds are adapted from RECIST v1.1, but this is NOT
-a RECIST v1.1 implementation: because it never sees individual lesions it
-cannot sum target lesions, detect a new lesion, or judge non-target
-progression, and it cannot apply the 4-week confirmation rule (a
-confirmation column only adds markers to the plot; to count confirmed
-responses, supply confirmed categories through the category override). If
-your data list each lesion separately, use the lesion-level RECIST v1.1
-analysis. It will be available in upcoming releases.
+patient a best response from their largest shrinkage from baseline (with a
+time variable, up to the first progression), and reports ORR and DCR with
+exact binomial confidence intervals, group comparison, time to response and
+duration of response. When a time variable is supplied, progression is
+measured against the patient's smallest recorded burden (nadir), not
+against baseline. Categories are named CR, PR, SD and PD and the thresholds
+are adapted from RECIST v1.1, but this is NOT a RECIST v1.1 implementation:
+because it never sees individual lesions it cannot sum target lesions,
+detect a new lesion, or judge non-target progression, and it cannot apply
+the 4-week confirmation rule (a confirmation column only adds markers to
+the plot; to count confirmed responses, supply confirmed categories through
+the category override). If your data list each lesion separately, use the
+lesion-level RECIST v1.1 analysis. It will be available in upcoming
+releases.
 }

@@ -129,15 +129,14 @@ test_that("W11: a patient-level override on a later row is used, not only the fi
   expect_equal(as.character(w$recist_category[w$pid == "P2"]), "PD")
 })
 
-test_that("W33: a cohort with no evaluable patient gets one clear notice, no n = 0 sample-size notices", {
+test_that("W33: a cohort with no evaluable patient stops with one clear message", {
+  # Since 2026-10-19 (module audit) this is a fatal stop, not an ERROR banner over a run
+  # that went on to show zero-count tables; the message is the former notice text.
   d <- data.frame(pid = rep(paste0("P", 1:4), each = 2), time = rep(c(0, 6), 4),
                   size = c(50, NA, 40, NA, 30, NA, 20, NA))
-  res <- wf_run(d, patientID = "pid", responseVar = "size", timeVar = "time",
-                inputType = "raw", showConfidenceIntervals = TRUE)
-  txt <- wf_notices(res)
-  expect_match(txt, "NO EVALUABLE PATIENTS")
-  expect_false(grepl("SMALL SAMPLE", txt))
-  expect_false(grepl("VERY WIDE CONFIDENCE INTERVAL", txt))
+  expect_error(wf_run(d, patientID = "pid", responseVar = "size", timeVar = "time",
+                      inputType = "raw", showConfidenceIntervals = TRUE),
+               "None of the 4 patients supplied could be evaluated for response", fixed = TRUE)
 })
 
 test_that("W34/W35: with percentage input the exclusion reason is the missing value, not the baseline", {
@@ -267,10 +266,12 @@ test_that("GW02: partly proportion-scaled entry is flagged", {
   expect_match(wf_notices(wf_run(d, patientID = "pid", responseVar = "chg")), "PROPORTIONS")
 })
 
-test_that("W04: raw measurements under the default percentage input are flagged", {
+test_that("W04: raw measurements under the default percentage input stop the run", {
+  # 2026-10-19 release review (WF-5): a warning beside ORR 0.0% was not enough;
+  # the run now stops with the reason.
   d <- raw4                                            # sizes 40-70 mm, time 0 rows are not 0%
-  expect_match(wf_notices(wf_run(d, patientID = "pid", responseVar = "size", timeVar = "time")),
-               "RAW MEASUREMENTS")
+  expect_error(wf_run(d, patientID = "pid", responseVar = "size", timeVar = "time"),
+               "these look like raw tumour measurements", fixed = TRUE)
 })
 
 test_that("GW08: percent change multiplied by 100 is flagged", {
@@ -278,11 +279,15 @@ test_that("GW08: percent change multiplied by 100 is flagged", {
   expect_match(wf_notices(wf_run(d, patientID = "pid", responseVar = "chg")), "MULTIPLIED BY 100")
 })
 
-test_that("GW09: both validation warnings survive when shrinkage and growth outliers occur together", {
+test_that("GW09: shrinkage and growth outliers are each reported once when they occur together", {
+  # 2026-10-19 (R89): the shrinkage value used to be reported twice, by the
+  # validation panel and by the capping notice; only the capping notice remains.
   d <- data.frame(pid = paste0("P", 1:10), chg = c(-150, 250, -30, 20, -10, 5, -45, 60, -70, 15))
   txt <- wf_notices(wf_run(d, patientID = "pid", responseVar = "chg"))
-  expect_match(txt, "Invalid Tumor Shrinkage Values Detected")
+  expect_match(txt, "IMPOSSIBLE SHRINKAGE CAPPED")
+  expect_false(grepl("Invalid Tumor Shrinkage Values Detected", txt, fixed = TRUE))
   expect_match(txt, "Unusually Large Growth Values Detected")
+  expect_false(grepl("EXTREME VALUES DETECTED", txt, fixed = TRUE))
 })
 
 test_that("well-scaled percent change raises no scale warning", {
@@ -371,7 +376,8 @@ test_that("W24/W30: copy-ready text and summary report CIs, the evaluable count 
   dref <- stats::binom.test(8, 8)$conf.int * 100                  # DCR 8/8 = 100%
   expect_match(cr, sprintf("87\\.5%% \\(95%% CI %.1f-%.1f", oref[1], oref[2]))
   expect_match(cr, sprintf("100\\.0%% \\(95%% CI %.1f-%.1f", dref[1], dref[2]))
-  expect_match(res$naturalLanguageSummary$content, "87\\.5%")    # one decimal, not "88%"
+  # showExplanations shows the canonical summary panel (R89; the duplicate is retired)
+  expect_match(res$clinicalSummary$content, "87\\.5%")    # one decimal, not "88%"
 })
 
 test_that("GT07: the welcome text does not name another product", {
@@ -462,7 +468,6 @@ test_that("R2-counts: one cohort count across notices, summaries and copy-ready 
   txt <- wf_notices(res)
   expect_match(txt, "computed over the 4 evaluable patients")
   expect_match(res$clinicalSummary$content, "6 patients \\(4 evaluable\\)")
-  expect_match(res$naturalLanguageSummary$content, "6 patients \\(4 evaluable\\)")
   expect_match(res$copyReadyReport$content, "Of 6 patients, 4 were evaluable")
 })
 
@@ -497,11 +502,12 @@ test_that("R2-benchmarks: the clinical significance panel has no unsourced ORR b
   expect_false(grepl("conventionally cited|15-30%|ORR <15%", res$clinicalSignificance$content))
 })
 
-test_that("R2-zero: with nobody evaluable the category percentages are empty, not 0%", {
+test_that("R2-zero: with nobody evaluable no 0% category table is produced", {
+  # (2026-10-19: the run now stops; before, the percentages were left empty.)
   d <- data.frame(pid = rep(paste0("P", 1:4), each = 2), time = rep(c(0, 6), 4),
                   size = c(50, NA, 40, NA, 30, NA, 20, NA))
-  res <- wf_run(d, patientID = "pid", responseVar = "size", timeVar = "time", inputType = "raw")
-  expect_true(all(is.na(res$summaryTable$asDF$percent[1:4])))
+  expect_error(wf_run(d, patientID = "pid", responseVar = "size", timeVar = "time", inputType = "raw"),
+               "could be evaluated for response", fixed = TRUE)
 })
 
 test_that("R2-person-time: override-only and single responders do not get a DoR median", {
@@ -516,8 +522,9 @@ test_that("R2-person-time: override-only and single responders do not get a DoR 
 
 test_that("R2-notices: processing errors appear once; plot-only notices follow the plot option", {
   d <- data.frame(pid = paste0("P", 1:6), time = 0, size = c(50, 40, 30, 20, 10, 60))
-  res <- wf_run(d, patientID = "pid", responseVar = "size", timeVar = "time", inputType = "raw")
-  expect_false(isTRUE(res$todo2$visible) && grepl("No patients", res$todo2$content))
+  # baseline-only cohort: one fatal message (2026-10-19), not a panel plus notices
+  expect_error(wf_run(d, patientID = "pid", responseVar = "size", timeVar = "time", inputType = "raw"),
+               "could be evaluated for response", fixed = TRUE)
   d2 <- grp_data(); d2$conf <- rep(letters[1:7], length.out = 20)
   txt <- wf_notices(wf_run(d2, patientID = "pid", responseVar = "chg", confirmationVar = "conf",
                            showWaterfallPlot = FALSE, showCI = TRUE))

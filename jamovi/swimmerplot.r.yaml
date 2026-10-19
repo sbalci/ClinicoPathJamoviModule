@@ -13,6 +13,7 @@ items:
           - endTime
           - responseVar
           - censorVar
+          - censorCoding
           - timeUnit
           - groupVar
           - eventVar
@@ -43,6 +44,7 @@ items:
           - endTime
           - responseVar
           - censorVar
+          - censorCoding
           - timeType
           - dateFormat
           - timeUnit
@@ -89,6 +91,7 @@ items:
           - endTime
           - responseVar
           - censorVar
+          - censorCoding
           - timeType
           - dateFormat
           - timeUnit
@@ -112,6 +115,7 @@ items:
           - timeDisplay
           - showInterpretation
           - censorVar
+          - censorCoding
           - personTimeAnalysis
           - responseAnalysis
 
@@ -146,6 +150,7 @@ items:
           - timeDisplay
           - timeUnit
           - personTimeAnalysis
+          - responseAnalysis
 
     - name: milestoneTable
       title: "Milestone Event Summary"
@@ -255,6 +260,8 @@ items:
           - timeUnit
           - timeDisplay
           - dateFormat
+          - sortOrder
+          - sortVariable
 
     - name: summaryData
       title: "Export Summary Statistics"
@@ -317,6 +324,7 @@ items:
           - endTime
           - responseVar
           - censorVar
+          - censorCoding
           - timeType
           - dateFormat
           - timeDisplay
@@ -349,6 +357,7 @@ items:
           - startTime
           - endTime
           - timeType
+          - dateFormat
           - responseVar
           - groupVar
           - responseAnalysis
@@ -375,6 +384,7 @@ items:
           # the manuscript text switches its follow-up estimator on the
           # censoring classification and its ORR/DCR sentence on responseAnalysis
           - censorVar
+          - censorCoding
           - responseAnalysis
           - timeUnit
           - showCopyReady

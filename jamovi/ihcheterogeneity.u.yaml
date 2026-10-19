@@ -67,6 +67,7 @@ children:
         label: Sampling strategy
   - type: CollapseBox
     label: Spatial Compartments
+    collapsed: true
     children:
       - type: CheckBox
         name: compareCompartments
@@ -78,6 +79,7 @@ children:
         enable: (spatial_id)
   - type: CollapseBox
     label: Clinical Thresholds
+    collapsed: true
     children:
       - type: TextBox
         name: cv_threshold
@@ -93,6 +95,7 @@ children:
         label: Systematic difference margin (%)
   - type: CollapseBox
     label: Additional Analyses
+    collapsed: true
     children:
       - type: Label
         label: Greyed out when the analysis focus above already includes them.
@@ -117,7 +120,6 @@ children:
       - type: CheckBox
         name: generate_recommendations
         label: Clinical recommendations
-        enable: (showInterpretation)
       - type: CheckBox
         name: showSummary
         label: Plain-language summary

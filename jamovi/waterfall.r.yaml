@@ -1,6 +1,6 @@
 ---
 name:  waterfall
-title: Treatment Response Analysis
+title: "Treatment Response: Patient-Level Burden"
 jrs:   '1.1'
 
 items:
@@ -15,6 +15,7 @@ items:
          - responseVar
          - timeVar
          - inputType
+         - measurementUnit
          - enableGuidedMode
 
 
@@ -26,6 +27,7 @@ items:
          - responseVar
          - timeVar
          - inputType
+         - measurementUnit
          - enableGuidedMode
       visible: (enableGuidedMode:FALSE)
 
@@ -37,19 +39,38 @@ items:
          - responseVar
          - timeVar
          - inputType
+         - measurementUnit
          - enableGuidedMode
       visible: (enableGuidedMode:FALSE)
+
+    - name: notices
+      title: Important Information
+      type: Html
+      clearWith:
+         - patientID
+         - responseVar
+         - timeVar
+         - inputType
+         - measurementUnit
+         - groupVar
+         - responseCategoryVar
+         - showSpiderPlot
+         - showConfidenceIntervals
+         - showResponseDuration
+         - showCI
+
 
     - name: clinicalSummary
       title: Clinical Summary
       type: Html
-      visible: (showClinicalSummary)
+      visible: (showClinicalSummary || showExplanations)
       clearWith:
          - showClinicalSummary
          - patientID
          - responseVar
          - timeVar
          - inputType
+         - measurementUnit
          - colorScheme
          - groupVar
          - responseCategoryVar
@@ -57,13 +78,14 @@ items:
     - name: aboutAnalysis
       title: About This Analysis
       type: Html
-      visible: (showAboutAnalysis)
+      visible: (showAboutAnalysis || showExplanations)
       clearWith:
          - showAboutAnalysis
          - patientID
          - responseVar
          - timeVar
          - inputType
+         - measurementUnit
          - enableGuidedMode
 
     - name: summaryTable
@@ -86,16 +108,16 @@ items:
          - responseVar
          - timeVar
          - inputType
+         - measurementUnit
          - responseCategoryVar
 
     - name: personTimeTable
       title: Person-Time Analysis
       type: Table
       rows: 0
-      # Shown procedurally (option-driven): requires a time variable AND raw
-      # per-visit input; declared hidden so the empty shell never renders in the
-      # welcome state or in percentage mode, where it can never be populated.
-      visible: false
+      # Requires a time variable AND raw per-visit input; declarative, so the
+      # empty shell never renders in the welcome state or in percentage mode.
+      visible: (length(timeVar) > 0 && inputType:raw)
       columns:
         - name: category
           title: "Response Category"
@@ -123,6 +145,7 @@ items:
          - responseVar
          - timeVar
          - inputType
+         - measurementUnit
          - responseCategoryVar
 
 
@@ -142,6 +165,7 @@ items:
          - responseVar
          - timeVar
          - inputType
+         - measurementUnit
          - responseCategoryVar
 
     - name: waterfallplot
@@ -179,6 +203,7 @@ items:
         - seed
         - groupVar
         - inputType
+        - measurementUnit
         # timeVar changes how percent change is derived, so it changes the bars
         - timeVar
         - annotationVars
@@ -193,6 +218,7 @@ items:
          - responseVar
          - timeVar
          - inputType
+         - measurementUnit
          - generateCopyReadyReport
          - responseCategoryVar
 
@@ -207,6 +233,7 @@ items:
          # derived; without them the significance text goes stale.
          - timeVar
          - inputType
+         - measurementUnit
          - showClinicalSignificance
          - responseCategoryVar
 
@@ -218,6 +245,9 @@ items:
          - patientID
          - responseVar
          - showClinicalSignificance
+         - timeVar
+         - inputType
+         - measurementUnit
 
 
 
@@ -247,6 +277,7 @@ items:
          - responseVar
          - timeVar
          - inputType
+         - measurementUnit
          - showConfidenceIntervals
          - responseCategoryVar
 
@@ -279,6 +310,7 @@ items:
          - responseVar
          - groupVar
          - inputType
+         - measurementUnit
          # with raw input the per-group responses derive from the timeVar==0
          # baseline, so a changed time variable changes every group rate
          - timeVar
@@ -308,6 +340,7 @@ items:
          - responseVar
          - groupVar
          - inputType
+         - measurementUnit
          - timeVar
          - responseCategoryVar
 
@@ -325,6 +358,7 @@ items:
         - responseVar
         - timeVar
         - inputType
+        - measurementUnit
         - sortBy
         - groupVar
         - showThresholds
@@ -342,26 +376,6 @@ items:
 
 
 
-    - name: naturalLanguageSummary
-      title: Treatment Response Summary
-      type: Html
-      visible: (showExplanations)
-      clearWith:
-         - patientID
-         - responseVar
-         - timeVar
-         - inputType
-         - groupVar
-         - showExplanations
-         - responseCategoryVar
-
-    - name: explanations
-      title: Analysis Guide
-      type: Html
-      visible: (showExplanations)
-      clearWith:
-         - showExplanations
-
     - name: responseDurationTable
       title: Time-to-Response & Duration of Response
       type: Table
@@ -371,6 +385,7 @@ items:
          - responseVar
          - timeVar
          - inputType
+         - measurementUnit
          - responseCategoryVar
       columns:
          - name: metric
@@ -394,26 +409,13 @@ items:
          - responseVar
          - timeVar
          - inputType
+         - measurementUnit
          # the override rewrites exported categories; without this entry the
          # isNotFilled() guard keeps a stale column after the override changes
          - responseCategoryVar
 
 
     # Notice outputs converted to HTML to avoid serialization errors
-    - name: notices
-      title: Important Information
-      type: Html
-      clearWith:
-         - patientID
-         - responseVar
-         - timeVar
-         - inputType
-         - groupVar
-         - responseCategoryVar
-         - showSpiderPlot
-         - showConfidenceIntervals
-         - showResponseDuration
-         - showCI
 
 
 refs:

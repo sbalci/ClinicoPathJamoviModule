@@ -140,12 +140,15 @@ longitudinal_list <- list(
 )
 
 waterfall_raw_longitudinal <- bind_rows(longitudinal_list)
+# Not saved from here: this random draw overwrote the deterministic values of
+# data-raw/waterfall_comprehensive_test_data.R, which OncoPath's .csv/.omv example carries, so R and
+# jamovi users got different data under one name (2026-10-19 release review, MOD-12).
 
-write.csv(waterfall_raw_longitudinal,
-          "data/waterfall_raw_longitudinal.csv",
-          row.names = FALSE)
-save(waterfall_raw_longitudinal,
-     file = "data/waterfall_raw_longitudinal.rda")
+# write.csv(waterfall_raw_longitudinal,
+#           "data/waterfall_raw_longitudinal.csv",
+#           row.names = FALSE)
+# save(waterfall_raw_longitudinal,
+#      file = "data/waterfall_raw_longitudinal.rda")
 
 cat("✅ Created: waterfall_raw_longitudinal\n")
 cat("   - 15 patients\n")

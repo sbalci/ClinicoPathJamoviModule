@@ -234,7 +234,8 @@ test_that("D01 100% events (0% censored) falls back honestly to observed median 
     )
 
     r <- q(swimmerplot(data = df, patientID = "id", startTime = "start", endTime = "end",
-                       censorVar = "censor", responseVar = "resp"))
+                       censorVar = "censor", censorCoding = "one_event_01",   # all-1: SW-7
+                       responseVar = "resp"))
 
     am <- r$advancedMetrics$asDF
     row <- am[gsub('^"|"$', "", rownames(am)) == "median_followup", ]
@@ -507,13 +508,18 @@ test_that("E01-E08 High-risk option pairs behave consistently", {
     expect_equal(as.numeric(r_dt_rel$timelineData$asDF$start_time[1]), 0.0)
     expect_equal(as.numeric(r_dt_rel$timelineData$asDF$duration), as.numeric(r_dt_abs$timelineData$asDF$duration), tolerance = 1e-6)
 
-    # E03: censorVar with 1/2 encoding
+    # E03: censorVar with 1/2 encoding. Read only as the user says (2026-10-19, R45):
+    # with the coding chosen it is the 0/1 answer; unchosen, no reverse-KM.
     df_censor_12 <- df_hand
     df_censor_12$censor <- df_hand$censor + 1
     r_censor_12 <- q(swimmerplot(data = df_censor_12, patientID = "id", startTime = "start",
-                                 endTime = "end", censorVar = "censor", responseVar = "resp"))
+                                 endTime = "end", censorVar = "censor", responseVar = "resp",
+                                 censorCoding = "two_event"))
     expect_equal(val_adv(r_censor_12$advancedMetrics$asDF, "median_followup"), 30.0)
-    expect_true(grepl("contains only the values 1 and 2", r_censor_12$notices$content))
+    expect_true(grepl("chosen Censoring coding", r_censor_12$notices$content))
+    r_censor_12u <- q(swimmerplot(data = df_censor_12, patientID = "id", startTime = "start",
+                                  endTime = "end", censorVar = "censor", responseVar = "resp"))
+    expect_true(grepl("Choose the censoring coding", r_censor_12u$notices$content))
 
     # E04: sortOrder duration_desc vs duration_asc
     r_sort_desc <- q(swimmerplot(data = df_hand, patientID = "id", startTime = "start", endTime = "end",

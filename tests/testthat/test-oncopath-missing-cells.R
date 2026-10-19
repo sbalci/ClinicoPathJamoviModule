@@ -1,6 +1,6 @@
-# Unavailable values reach jamovi as empty cells, never "NaN" (2026-10-18 check-module findings 1-3).
-# jamovi shows a numeric cell that holds a double NA or NaN as the text "NaN"; an unavailable statistic is
-# written as NULL and the reason is given once (note, detail column or notice).
+# Unavailable values reach jamovi as missing cells, never "NaN" (2026-10-18 check-module findings 1-3).
+# jamovi shows a numeric cell that holds a double NA or NaN as the text "NaN" and a NULL cell as "."; an
+# unavailable statistic is written as NULL and the reason is given once (note, detail column or notice).
 
 missing_cells <- function(results) {
   tables <- list()
@@ -91,7 +91,7 @@ test_that("waterfall with zero rows stays idle and says why", {
                   responseVar = "Response", inputType = "percentage")
   expect_identical(a$status, "complete")
   expect_match(notice_text(a), "The dataset contains no rows")
-  expect_match(paste(a$results$todo$content, collapse = " "), "Treatment Response Analysis")
+  expect_match(paste(a$results$todo$content, collapse = " "), "Treatment Response: Patient-Level Burden")
 
   guided <- engine_run("waterfall", waterfall_percentage_basic[0, ], patientID = "PatientID",
                        responseVar = "Response", inputType = "percentage", enableGuidedMode = TRUE)

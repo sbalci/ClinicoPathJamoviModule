@@ -95,7 +95,9 @@ test_that("C14: Proportional bias test agrees with HC3 robust standard errors fr
                         biopsy1 = "biopsy1", biopsy2 = "biopsy2", biopsy3 = "biopsy3")
   st <- r$samplingbiastable$asDF
 
-  fit <- lm(I(biopsy1 - wholesection) ~ wholesection, data = d)
+  # On the mean of the two measurements (Bland & Altman 1995) since audit 2026-10-19;
+  # it was the reference value, whose own error builds in a slope.
+  fit <- lm(I(biopsy1 - wholesection) ~ I((biopsy1 + wholesection) / 2), data = d)
   V_hc3 <- sandwich::vcovHC(fit, type = "HC3")
   se_hc3 <- sqrt(diag(V_hc3))[2]
   p_hc3 <- 2 * pt(-abs(coef(fit)[2] / se_hc3), df.residual(fit))

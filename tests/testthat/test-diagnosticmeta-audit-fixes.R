@@ -36,7 +36,11 @@ test_that("switching everything off explains itself instead of showing a blank p
 
 test_that("the Notices panel is hidden when there is nothing to say", {
   # Was: an empty titled "Notices" box rendered on every clean run.
-  clean <- af_run()
+  # Revised 2026-10-19 (review DM-1): af_data() has a cell of 2-4 in 3 of 12
+  # studies, which now raises the small-cell sparse-data warning, so the clean
+  # run lifts those cells to 5.
+  d <- af_data(); d$fn[c(4, 6, 10)] <- 5; d$fp[6] <- 5
+  clean <- af_run(d)
   expect_equal(nchar(paste(clean$notices$content, collapse = "")), 0)
   expect_false(isTRUE(clean$notices$visible))
 
@@ -311,7 +315,9 @@ test_that("study labels cannot inject formatting into the zero-cell table note",
   d2 <- d; d2$study[1:3] <- c("Smith 2019 (a<b)", "Jones & Lee", "O'Brien \"2020\"")
   note2 <- af_notes(af_run(d2, zero_cell_correction = "constant")$bivariateresults)
   note2 <- note2[grepl("Zero-cell correction applied", note2, fixed = TRUE)]
-  for (txt in c("a<b", "Jones & Lee", "O'Brien"))
+  # "<" before a letter is broken to "< " (2026-10-19 audit): the client would
+  # read "<b)..." as a tag and blank the rest of the note.
+  for (txt in c("a< b", "Jones & Lee", "O'Brien"))
     expect_match(note2, txt, fixed = TRUE)
 })
 
@@ -353,8 +359,12 @@ test_that("sparse data raises the normal-approximation caveat, ordinary data doe
                        fp = c(1, 0, 1, 1, 0, 1, 0, 1), fn = c(1, 0, 1, 0, 1, 0, 1, 0),
                        tn = c(12, 11, 10, 13, 12, 11, 10, 13))
   expect_match(af_notice(af_run(sparse)), "Sparse data", fixed = TRUE)
-  # must not fire on ordinary data - cells of 2-4 are common and tolerable
-  expect_false(grepl("Sparse data", af_notice(af_run()), fixed = TRUE))
+  # Revised 2026-10-19 (review DM-1): cells of 2-4 are NOT tolerable - with 2-8
+  # false negatives per study the nominal 95% CI covered about 80% - so a
+  # quarter of studies with a cell below 5 now warns; cells of 5 or more do not.
+  expect_match(af_notice(af_run()), "3 of 12 studies have a cell smaller than 5", fixed = TRUE)
+  d <- af_data(); d$fn[c(4, 6, 10)] <- 5; d$fp[6] <- 5
+  expect_false(grepl("Sparse data", af_notice(af_run(d)), fixed = TRUE))
 })
 
 
@@ -394,11 +404,13 @@ test_that("heterogeneity and PHM rows are scaffolded, not rebuilt each run", {
   expect_equal(r$hsrocresults$asDF$parameter[3],
                "Area under the SROC curve (AUC = 1/(1 + theta))")
 
-  # a margin that cannot be fitted leaves BLANK cells, not stale ones or a
-  # missing row
+  # every study has FN = 0: the sensitivity margin is no longer dropped but
+  # fitted on the +0.5-corrected counts, as the bivariate model is, and says so
   d <- af_data(); d$fn <- 0
-  h <- af_run(d, heterogeneity_analysis = TRUE)$heterogeneity$asDF
+  r0 <- af_run(d, heterogeneity_analysis = TRUE)
+  h <- r0$heterogeneity$asDF
   expect_equal(nrow(h), 2)
-  expect_true(is.na(h$q_statistic[1]))
+  expect_false(is.na(h$q_statistic[1]))
   expect_false(is.na(h$q_statistic[2]))
+  expect_true(any(grepl("with a zero cell were kept", af_notes(r0$heterogeneity), fixed = TRUE)))
 })

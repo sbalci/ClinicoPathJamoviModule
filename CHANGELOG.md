@@ -5,11 +5,197 @@ prevents them. Newest first. Release notes for users live in `NEWS.md`.
 
 ---
 
+## 2026-10-19 — OncoPath release review: a morning fix that only moved the artefact, and a state with no exit
+
+- **Failure mode 1 (ihcheterogeneity, IH-1).** The module-audit fix moved the proportional-bias
+  slope from the reference to the pair mean, and it was validated in one regime only: equal error
+  in both measurements. With a precise reference and a noisy core, the pair-mean slope flagged an
+  unbiased core in 32% of studies at n = 100 and 64% at n = 300. The release review's proposed
+  repair (reference + mean) was in turn rejected by its implementer: it flagged 37-72% when the
+  core was the precise one. Only agreement on all three regressors holds (0-2%).
+- **Failure mode 2 (swimmerplot, SW-7).** I added a "pending: choose a coding" state for a
+  single-valued status column without checking that some option could resolve it. No option read
+  0 as censored with 1 as event, so an all-censored 0 column could never be read. In the same edit
+  I widened "choosable" to 0/1/2, a set that no single coding reads.
+- **Detection.** For failure mode 1, the release reviewer's Monte Carlo varied which measurement
+  carries the error. For failure mode 2, the existing suites (`R48/R57`, "values no coding reads",
+  `R53`) went red on the first full run. A test fixture that used "NE" as the
+  "unrecognised" category went red once NE became valid (WF-2).
+- **Rules:**
+  - Validate an error-artefact fix in every error regime: reference noisy, region noisy, both
+    equal. One regime proves nothing about the others.
+  - Every "waiting for the user" state needs an option that resolves it, for every value set that
+    reaches it. Enumerate the value sets that reach it and the options that read them.
+  - A fixture standing for "invalid input" should be obviously invalid ("x"), not a domain value
+    that a later fix may legitimately accept.
+
+---
+
+## 2026-10-19 — OncoPath audit: the fix rounds left findings a different lens could see
+
+- **Failure mode:** four `/fix-function` passes, each with its own adversarial review, still left 4
+  MEDIUM findings for the module audit to find.
+  - **Regressor choice (ihcheterogeneity):** the slope was taken on the reference, so its error
+    produced a slope. The fix rounds had tuned the decision rule built on that slope, never the
+    regressor under it.
+  - **Word list (swimmerplot):** "completed" and "progressed" were read automatically. My own R45 fix
+    closed Yes/No and kept these.
+  - **Banner-versus-reject (waterfall, guide §25).**
+  - **Note truncation (diagnosticmeta).**
+- **Detection:** `/audit-module`, one auditor per analysis, each with a different checklist (security
+  sinks, notice severity, statistical design) from the per-finding reviews.
+- **My mistake in this pass:** following the audit, I split swimmerplot's error template into a
+  separate `.("Error:")` fragment. A recorded decision, with a test, keeps that template whole.
+  The test caught it and I reverted. The rule: check a finding against recorded house decisions
+  before applying it. An audit reads the code, not the history.
+- **Verification:**
+  - 62 test files, 996 tests green.
+  - 65 Turkish strings added; sweeps 0; gate 0 blocking.
+  - Updater dry run clean.
+- **Rules:**
+  - When a statistic is regressed on a measured variable, ask what that variable's error does to
+    the slope.
+  - A word list that maps free text to an outcome must contain only words with one reading.
+
+---
+
+## 2026-10-19 — waterfall: rows the computation skipped, and texts that described another computation
+
+- **Failure mode:** two classes of the same defect.
+  - **Rows that the computation filtered out without counting them.** A measured scan with a blank time
+    failed `!is.na(tv)` in four places and vanished (R80, release-blocking). Two rows at one visit were
+    compared with each other in file order (R74). Numeric IDs were grouped through `as.character()`
+    (R76).
+  - **Descriptions written for an earlier version of the computation.** The Methods text, the notice and the
+    glossary described the smallest change over all scans after a first-progression cut-off had been
+    added. They ignored supplied categories (R69). They also said that the missing 5 mm rule makes
+    progression under-detected, when it over-calls it (R68).
+- **Detection:** the release-profile repros. The judge for R80 noticed that no notice title anywhere in
+  the analysis mentions a missing time.
+- **Repair:**
+  - Every filter that drops measured rows now reports its count.
+  - Ties at one visit are ordered largest value first.
+  - Patients are grouped with exact-value `match()`.
+  - The best-response rule is generated from the options by one helper (`.bestResponseRule()`), so the
+    text and the computation share one source.
+  - The 5 mm rule is an opt-in option (unit stated), so default results do not move.
+- **Verification:**
+  - 20 new tests, 18 red on the backup backend; the yaml/JS test fails on every backup element.
+  - 322 suite tests green after revising 10 old-behaviour assertions.
+  - Battery 15/15, including an independent RECIST oracle on 40 simulated patients that agrees with and
+    without the 5 mm rule (the rule moves 3 of the 40).
+  - NaN sweep 0, which needed one more fix: a Fisher OR printed as "Inf".
+  - Turkish smoke clean; gate 0 blocking.
+  - A 10-agent review confirmed 14 items. The medium one was my own: round 1 counted overrides to "Unknown" as supplied
+    categories, so Main Results dropped "unconfirmed" for rates that were all threshold-derived. A count must count what the
+    sentence that uses it talks about. Here that is evaluable patients after every reset.
+- **Rules:**
+  - Every `filter`/`!is.na()` that drops a measured observation needs a count that reaches the user.
+  - Descriptions of an estimator must be generated from the same options that select the
+    estimator, not written as static prose next to it.
+  - A test that compares sets of colours cannot catch a wrong group-to-colour mapping. Compare
+    the mapping.
+
+---
+
+## 2026-10-19 — swimmerplot: guards that were all-or-nothing, and a reading inferred twice
+
+- **Failure mode:** three of the blockers came from checks that judge the whole input by one part of it.
+  - The RECIST guard withheld ORR only when *no* label was recognised, so Response/Stable/Progression
+    passed and published ORR 0.0% beside "Response Rate 41.7%" (R46).
+  - The censoring coder inferred its convention from whatever vector it was given. It was called on
+    the per-patient values for the follow-up and on all rows for the arrows, so one 1 could be read
+    as censored and as an event in the same run (R48). Yes/No was read with a fixed polarity that was
+    never shown (R45).
+  - Best response over several rows was a derived quantity presented under RECIST citations (R44).
+- **My mistake on the way:** the project rule for an event value is a Level option with
+  `allowNone`. I added `censorLevel` and all 168 existing `swimmerplot()` calls in the suites failed
+  with `argument "censorLevel" is missing`. A Level is always a required wrapper argument; the
+  memory note said so, and I applied the rule without checking it. Replaced with a `List` option
+  (`censorCoding`, default `auto`) that refuses the ambiguous codings until chosen.
+- **Detection:** the release-profile repros (R44-R67), then the full suites the moment the yaml changed.
+- **Repair:**
+  - Any non-RECIST value, at row level, withholds the rates.
+  - One censoring coding per run, from every analysed row; every coding is disclosed.
+  - A stated best-response rule, with a tie order of (start, end, PD first).
+  - A full-cohort fallback median; pure checks where a notice-posting helper was used as a guard.
+- **Verification:**
+  - 26 new tests, 25 red on the backup backend.
+  - 16 suites, 279 tests, green after revising the old-behaviour assertions.
+  - Battery 21/21: 9 checks from 1.1.0 unchanged, 12 new oracle checks against survfit.
+  - NaN sweep 0; Turkish smoke 0; gate 0 blocking.
+  - A 10-agent review confirmed 13 items. The medium one: a mismatched coding was labelled "not chosen" although the user
+    had chosen one. It also found that a "pending" notice sent 0/1/2 or Alive/Dead/Lost codings to an option that cannot read
+    them. Both were fixed, along with blank group/milestone cells, a summary note describing withheld rates, and
+    edge-case fixtures whose 0/1 polarity was backwards.
+- **Rules:**
+  - A guard must fail on the first invalid part, not pass on the first valid one.
+  - Infer a data convention once, from the superset, and hand the result to every consumer.
+  - Before adding a `type: Level` to an analysis that already has callers, run its suites; prefer a
+    defaulted `List` when the wrapper signature must not change.
+
+---
+
+## 2026-10-19 — ihcheterogeneity: a contrast that answered a different question from the verdict
+
+- **Failure mode:** without a reference, each region was compared with the mean of the others,
+  while the verdict and the advice spoke about pairs: "regions agree with one another", "calibrate
+  region A". The contrast row x_j minus mean(others) equals k/(k-1)(x_j - xbar). It spreads one
+  region's offset onto every row (R24, release-blocking) and hides pairwise gaps up to 2(k-1)/k
+  times the margin (R31). Two quieter versions of the same class: dividing by the first region's
+  mean made the verdict depend on slot order (R34), and dividing a CI by an estimated mean treated
+  that mean as known (R33).
+- **Detection:** executed repros and Monte Carlo runs from the release-profile run. No default
+  battery value changed, because the battery has a reference.
+- **Repair:**
+  - Pairwise rows relative to the pair mean, with a Fieller interval (the paired ratio TOST).
+  - The Bonferroni family counts the planned comparisons, including any too sparse to make.
+  - A single region is named only when the whole pattern implicates it.
+  - Rows with identical differences get no interval.
+- **Verification:**
+  - 21 red-first tests fail on the old backend.
+  - The ratio oracle is independent (root-finding on the transformed t statistic).
+  - Battery 20/20.
+  - Error rates are now nominal: the ratio TOST 4.4%/5.1% (was 10%), the CV tests 5.0%/5.0% (was 39%/61%).
+  - A 10-agent review found a regression I had introduced: a skipped pair was blamed on "a
+    comparison mean near zero". It also found that a region named "reference" collided with the
+    comparator sentinel. Both were fixed with a `pair` flag.
+- **Rule:** the unit of the test must be the unit of the claim. If the text says regions agree with
+  one another, the statistic must compare regions with one another. If the advice names a region,
+  the rule must be able to single it out. Never use a data value (a comparator name) as a type tag.
+
+---
+
+## 2026-10-19 — diagnosticmeta: each model was handed a different copy of the data
+
+- **Failure mode:** one analysis fed four different data frames to its models, and nobody wrote down which
+  went where. The bivariate and PHM fits got mada's single-study +0.5. The univariate heterogeneity and
+  meta-regression models got the uncorrected counts and dropped the zero-cell studies, which are the most
+  accurate ones (R02). Deeks' test got the user-corrected counts, so its own sparse-data rule never fired:
+  false asymmetry in 55-73% of null meta-analyses (R01, release-blocking). The same pattern hid two
+  unconverged fits: a library warning was the only sign, and R warnings never reach the jamovi user (R13,
+  R19).
+- **Detection:** the release-profile run's executed repros (a 200-replicate null simulation for R01, and
+  `maxiter = 1` forced through `assignInNamespace` for R13), not the default-option battery. All 64
+  battery cells matched. Every defect needed a non-default option or an ordinary zero cell.
+- **Repair:** each call site names its frame in a comment, with the reason. Raw `meta_data` goes to Deeks and
+  the funnel plot. `model_data`, with +0.5 on the zero-cell studies, goes to heterogeneity and
+  meta-regression. Both iterative fits go through a helper that captures the convergence signal, retries
+  once and withholds every number it cannot stand behind. Sixteen red-first tests: 15 fail on the old
+  backend, and R23 fails on the old yaml. The R13 repro's own wrapper broke when the module began passing
+  `control=` itself; a mock should override an argument, never add one.
+- **Rule:** when two sections of one output show the same studies, they must fit the same study set.
+  Assert it: the Deeks statistic must not change with the Zero-Cell Correction setting, and every model
+  must report k studies. Any fit that can stop early must turn that into a notice and blank cells, never
+  into a bare `warning()`.
+
+---
+
 ## 2026-10-18 — "Empty" table cells that rendered as NaN: waterfall, swimmerplot, diagnosticmeta
 
 - **Failure mode:** code meant to leave a cell empty wrote `NA_real_` or `NaN` into it; several sites
   carried comments saying "leaves empty cells". jmvcore serializes a double NA as NaN, and jamovi prints
-  "NaN". The baseline sweep found 27 such cells in 9 of 19 scenarios; one was the bundled longitudinal
+  "NaN". The baseline sweep found 27 such cells in 8 of 19 scenarios; one was the bundled longitudinal
   waterfall example, with only Response duration ticked. A second defect: waterfall's zero-row
   message sat behind an earlier `nrow(self$data) == 0` return and could never run; diagnosticmeta had
   no message at all.
@@ -20,8 +206,9 @@ prevents them. Newest first. Release notes for users live in `NEWS.md`.
   script routed every one of the 74 `setRow`/`addRow` value lists through it, and the result was checked
   byte for byte against the original with the wrappers removed. The zero-row checks moved after the
   variable check and now add a WARNING built from two existing, translated msgids. The analysis stays
-  idle, which is the policy `test-waterfall-basic.R` encodes. Nine red-first tests failed 35
-  expectations on the old code. The sweep went from 27 cells to 0.
+  idle, which is the policy `test-waterfall-basic.R` encodes. The nine red-first test blocks fail 37
+  expectations on the old code. The sweep went from 27 cells to 0. A NULL cell shows as jamovi's
+  missing-value mark ".", not as a blank (jamovi 28.13 client: `d.o===0 ? "." : "NaN"`).
 - **Rule:** never write a literal NA into a numeric cell to mean "empty". Route table writes through
   `.tableValues()` (NULL is jamovi's missing cell), and sweep the cells at run time after any change to
   a table writer.

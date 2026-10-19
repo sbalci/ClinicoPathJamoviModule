@@ -68,7 +68,9 @@ test_that("duplicate or missing study identifiers are made unique and disclosed"
   # Was: two rows labelled "S1" were shown as one study's results twice.
   d <- dm_data(); d$study[2] <- "S1"; d$study[4] <- "S3"; d$study[6] <- NA
   r <- dm_run(d, show_individual_studies = TRUE)
-  expect_match(notice_text(r), "not unique")
+  expect_match(notice_text(r), "Repeated study identifiers", fixed = TRUE)
+  expect_match(notice_text(r), "4 rows share 2 study identifier(s) (S1, S3)", fixed = TRUE)
+  expect_match(notice_text(r), "1 study/studies have no identifier", fixed = TRUE)
   lab <- r$individualstudies$asDF$study
   expect_equal(anyDuplicated(lab), 0L)
 })
@@ -86,11 +88,12 @@ test_that("studies dropped for a missing covariate are disclosed", {
 
 test_that("zero-cell handling says which models keep those studies and which drop them", {
   # Was: the notice claimed the 0.5 correction was applied "inside the models"
-  # while the univariate models silently excluded the zero-cell studies.
+  # while the univariate models silently excluded the zero-cell studies. Since
+  # 2026-10-19 every model keeps them with the same +0.5, and says so.
   d <- dm_data(); d$fn[2] <- 0; d$fp[5] <- 0; d$fn[9] <- 0
   r <- dm_run(d, heterogeneity_analysis = TRUE)
-  expect_match(notice_text(r), "bivariate model only", fixed = TRUE)
-  expect_true(any(grepl("zero cell", notes_of(r$heterogeneity), fixed = TRUE)))
+  expect_match(notice_text(r), "every model (bivariate, proportional-hazards SROC, heterogeneity and meta-regression) adds 0.5", fixed = TRUE)
+  expect_true(any(grepl("3 study/studies with a zero cell were kept", notes_of(r$heterogeneity), fixed = TRUE)))
 })
 
 

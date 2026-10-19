@@ -9,7 +9,7 @@ A data frame (data.frame) with 60 rows and 3 variables:
 \describe{
   \item{\code{PatientID}}{character; 15 distinct values}
   \item{\code{Time}}{numeric, 0 to 6}
-  \item{\code{Measurement}}{numeric, 0 to 91.3}
+  \item{\code{Measurement}}{numeric, 0 to 90}
 }
 }
 \source{

@@ -6,7 +6,7 @@ stage: 0
 compilerMode: tame
 children:
   - type: CollapseBox
-    label: Reference interpretation
+    label: Reference Interpretation
     collapsed: false
     children:
       - type: ComboBox

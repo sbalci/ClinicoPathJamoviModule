@@ -40,9 +40,11 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
         # library-audit 2026-09-22 OncoPath [LOW] REJECTED: Notice renders single-line plain text;
         #   Preformatted avoids HTML and accumulates safely across run cycles (guide section 13)
         .noticeList = list(),
-        # Which numeric censoring convention the data turned out to use, so the
-        # run can state the assumption instead of making it silently.
+        # The censoring coding decided once per run by .censorCoding().
         .censor_coding = NULL,
+        # Row-level response values that are not RECIST categories, including
+        # those a recognised best response hides.
+        .nonRecistRowLabels = character(0),
 
         .addNotice = function(type, title, content) {
             # Skip exact duplicates: shared helpers (.responseRates) run once per
@@ -114,6 +116,17 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
         # stacked episodes, silently corrupting total person-time, mean/median
         # duration, follow-up density and the reverse-KM median in the DEFAULT
         # configuration.
+        # Starts that may anchor a patient: only rows that survive the validity
+        # filter below (an end, not before the start). A row (0, NA) used to set
+        # the anchor and was then dropped, so the lane began at 5 while the
+        # reference lines were drawn from 0.
+        .anchorStarts = function(patient_data) {
+            st <- patient_data$start_time
+            en <- patient_data$end_time
+            st[is.na(en) | (!is.na(st) & en < st)] <- NA
+            st
+        },
+
         .patientAnchorIndex = function(patient_id, start_vals) {
             v <- as.numeric(start_vals)
             stats::ave(
@@ -150,7 +163,9 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
                 return(TRUE)
             s <- suppressWarnings(as.numeric(patient_data$start_time))
             s <- s[is.finite(s)]
-            length(s) == 0 || isTRUE(all.equal(min(s), max(s)))
+            # A common start of 0 only: lanes that all start at 100 put a
+            # "median 13" line at 13, off every lane (release review SW-1).
+            length(s) == 0 || (isTRUE(all.equal(min(s), max(s))) && isTRUE(all.equal(min(s), 0)))
         },
 
         # Single source of truth for ORR/DCR.
@@ -162,6 +177,19 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
         # The guard lived only in .updateAdvancedMetrics, so the copy-ready
         # manuscript text went on asserting 0.0% in the same output that the
         # metrics table refused to make the claim in. Both call this now.
+        #
+        # The guard is not all-or-nothing. A coding that is only PARTLY RECIST
+        # (Response / Stable / Progression) passed it, every "Response" patient
+        # became a non-responder, and the page published "ORR 0.0% (95% CI
+        # 0.0-26.5)" beside "Response Rate 41.7%". A label that is not a RECIST
+        # category cannot be scored as either, so any such label withholds the
+        # rates. Labels that are not RECIST categories (NE included as one).
+        # Pure - it posts no notice - so a guard can call it.
+        .nonRecistLabels = function(response_counts) {
+            union(setdiff(names(response_counts), c("CR", "PR", "SD", "PD", "NE")),
+                  private$.nonRecistRowLabels)
+        },
+
         .responseRates = function(response_counts, n_patients = NULL) {
             if (is.null(response_counts)) return(NULL)
 
@@ -169,6 +197,7 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
             total <- sum(response_counts)
             recist_n <- sum(response_counts[nm %in% c("CR", "PR", "SD", "PD")])
             n_excluded <- total - recist_n
+            unrec <- private$.nonRecistLabels(response_counts)
 
             # Everyone in the analysis, including patients whose response is
             # missing entirely (they have no row in `response_counts`).
@@ -176,10 +205,20 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
                          n_patients < total) total else n_patients
             n_missing <- n_all - total
 
-            if (!is.finite(total) || total <= 0 || recist_n == 0) {
+            if (!is.finite(total) || total <= 0 || recist_n == 0 || length(unrec) > 0) {
+                if (length(unrec) > 0) {
+                    shown <- utils::head(unrec, 5)
+                    private$.addNotice(
+                        "WARNING",
+                        .("Response rates not calculated"),
+                        sprintf(
+                            .("The response variable has values that are not RECIST categories (CR, PR, SD, PD or NE): %s. Objective Response Rate and Disease Control Rate are withheld, because a patient with such a value cannot be counted as a responder or as a non-responder. Recode these values to CR, PR, SD, PD or NE, or leave the cell empty for no recorded response."),
+                            paste0(paste0("'", shown, "'", collapse = ", "),
+                                   if (length(unrec) > 5) ", ..." else "")))
+                }
                 return(list(evaluable = FALSE, n = total, n_all = n_all,
                             n_evaluable = 0L, n_excluded = n_excluded,
-                            n_missing = n_missing,
+                            n_missing = n_missing, unrecognised = unrec,
                             orr_count = NA_integer_, dcr_count = NA_integer_,
                             orr = NA_real_, dcr = NA_real_,
                             orr_evaluable = NA_real_, dcr_evaluable = NA_real_))
@@ -207,7 +246,7 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
                     "INFO",
                     .("How ORR and DCR are counted"),
                     sprintf(
-                        .("ORR and DCR are computed over all %d patients, as RECIST 1.1 section 4.9.1 requires: %d with a response that is not CR/PR/SD/PD (for example NE) and %d with no recorded response count as non-responders rather than being dropped. Over the %d CR/PR/SD/PD patients alone the rates would be ORR %.1f%% and DCR %.1f%%; those are per-protocol figures and are not what the tables report."),
+                        .("ORR and DCR are computed over all %d patients, as RECIST 1.1 section 4.9.1 requires: %d recorded as NE (not evaluable) and %d with no recorded response count as non-responders rather than being dropped. Over the %d CR/PR/SD/PD patients alone the rates would be ORR %.1f%% and DCR %.1f%%; those are per-protocol figures and are not what the tables report."),
                         n_all, n_excluded, n_missing, recist_n,
                         if (recist_n > 0) orr_count / recist_n * 100 else NA_real_,
                         if (recist_n > 0) dcr_count / recist_n * 100 else NA_real_))
@@ -226,9 +265,11 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
         # TRUE when the first few non-missing values look like ISO calendar
         # dates (YYYY-MM-DD...). Shared by the milestone and event raw-mode
         # refusal checks so the two cannot drift.
+        # Compact YYYYMMDD dates count too, over every value, not a sample.
         .looksLikeIsoDates = function(x) {
-            smp <- as.character(utils::head(x[!is.na(x)], 3))
-            any(grepl("^\\d{4}-\\d{2}-\\d{2}", smp))
+            smp <- as.character(x[!is.na(x)])
+            any(grepl("^\\d{4}-\\d{2}-\\d{2}", smp)) ||
+                any(grepl("^(19|20)\\d{2}(0[1-9]|1[0-2])(0[1-9]|[12]\\d|3[01])$", smp))
         },
 
         # Enhanced clinical date parsing with contextual guidance
@@ -240,25 +281,30 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
             # Check if data appears to be numeric when Date/Time is selected
             sample_data <- as.character(utils::head(dates[!is.na(dates)], 5))
             is_numeric_like <- length(sample_data) > 0 && all(grepl("^-?\\d*\\.?\\d+$", sample_data))
+            # Compact 8-digit dates (20230115) look numeric but are dates, and
+            # lubridate reads them with the selected format. Refusing them sent
+            # the user to Raw Values, where they were subtracted as numbers.
+            is_compact <- is_numeric_like && all(grepl("^\\d{8}$", sample_data))
 
-            if (is_numeric_like) {
+            if (is_numeric_like && !is_compact) {
                 # User selected Date/Time but data is numeric - provide guidance
+                ex <- paste(sample_data[seq_len(min(3, length(sample_data)))], collapse = ", ")
                 return(list(
                     value = NULL,
                     error = TRUE,
                     data_type_mismatch = TRUE,
                     detected_type = "numeric",
                     examples = sample_data[seq_len(min(3, length(sample_data)))],
-                    message = paste(
-                        "Data type mismatch detected:",
-                        paste0("Your ", variable_type, " variables contain numeric values (",
-                               paste(sample_data[seq_len(min(3, length(sample_data)))], collapse = ", "), ")"),
-                        "but you have selected 'Date/Time' as the Time Input Type."
-                    )
+                    message = switch(variable_type,
+                        milestone = sprintf(.("The milestone values are numbers (%s), but Time Input Type is Date/Time."), ex),
+                        event = sprintf(.("The event time values are numbers (%s), but Time Input Type is Date/Time."), ex),
+                        sprintf(.("The start or end values are numbers (%s), but Time Input Type is Date/Time."), ex))
                 ))
             }
 
-            parsed <- tryCatch({
+            # lubridate warns, never errors, on values it cannot read; callers
+            # count those NAs and say so, so the R warning is noise.
+            parsed <- tryCatch(suppressWarnings({
                 switch(format,
                     "ymdhms" = lubridate::ymd_hms(dates),
                     "ymd"    = lubridate::ymd(dates),
@@ -269,7 +315,7 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
                     "dym"    = lubridate::dym(dates),
                     lubridate::ymd(dates)
                 )
-            }, error = function(e) NULL)
+            }), error = function(e) NULL)
 
             if (is.null(parsed)) {
                 clinical_guidance <- switch(variable_type,
@@ -289,7 +335,12 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
                     value = na_value,
                     error = TRUE,
                     message = paste(
-                        sprintf(.("Error parsing %s dates with format %s."), variable_type, format),
+                        # whole sentences with the format as the dropdown shows
+                        # it; the internal keys (start, ymd) were spliced before
+                        switch(variable_type,
+                            milestone = sprintf(.("The milestone dates could not be read with the Date Format %s."), private$.dateFormatWord(format)),
+                            event = sprintf(.("The event dates could not be read with the Date Format %s."), private$.dateFormatWord(format)),
+                            sprintf(.("The start or end dates could not be read with the Date Format %s."), private$.dateFormatWord(format))),
                         clinical_guidance
                     )
                 ))
@@ -323,7 +374,6 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
         # Comprehensive clinical data validation
         .validateClinicalData = function(patient_data) {
             warnings <- list()
-            errors <- list()
             
             # Check for realistic time ranges.
             # Compute durations in the SELECTED time unit. For Date/POSIXct input a raw
@@ -353,10 +403,14 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
             pid <- .patientIDLabels(patient_data$patient_id)
             by_patient <- function(f) vapply(split(seq_along(pid), pid), f, 0)
             n_patients <- length(unique(pid))
+            # The patient's span, first start to last end: summing rows counted
+            # duplicated or overlapping episodes twice and raised a false
+            # "> 10 years" warning (release review SW-5). Gaps between episodes
+            # are part of follow-up, as in the Mean Duration row.
             spans <- by_patient(function(ix) {
-                d <- durations[ix]
-                d <- d[is.finite(d)]
-                if (length(d) == 0) NA_real_ else sum(d)
+                st <- patient_data$start_time[ix]; en <- patient_data$end_time[ix]
+                if (all(is.na(st)) || all(is.na(en))) return(NA_real_)
+                private$.calculateFollowUp(st, en)
             })
 
             # Check for extremely long follow-up periods
@@ -369,8 +423,11 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
                                  NA_real_)
             if (is.finite(long_limit)) {
                 n_long <- sum(spans > long_limit, na.rm = TRUE)
+                # A WARNING of its own: in the INFO block it sorted below every
+                # warning, beside "multiple episodes ... is normal". It is how a
+                # day-valued column left at "months" shows itself.
                 if (n_long > 0) {
-                    warnings <- append(warnings, sprintf(
+                    private$.addNotice("WARNING", .("Implausible follow-up"), sprintf(
                         .("Total follow-up exceeds 10 years for %d of %d patients. Consider checking data accuracy or using different time units."),
                         n_long, n_patients
                     ))
@@ -380,7 +437,7 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
             # Check for zero-duration events
             n_zero <- sum(spans == 0, na.rm = TRUE)
             if (n_zero > 0) {
-                warnings <- append(warnings, sprintf(
+                private$.addNotice("WARNING", .("Implausible follow-up"), sprintf(
                     .("Zero follow-up time for %d of %d patients. These may represent same-day events."),
                     n_zero, n_patients
                 ))
@@ -417,7 +474,7 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
                     if (length(keep) == 0) return(NA_character_)
                     private$.normalizeResponse(private$.getBestResponse(
                         as.character(patient_data$response[keep]),
-                        patient_data$start_time[keep]))
+                        patient_data$start_time[keep], patient_data$end_time[keep]))
                 }, "")
                 response_counts <- table(best, useNA = "no")
                 if (length(response_counts) > 0 && min(response_counts) < 3) {
@@ -427,10 +484,10 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
                 }
             }
             
+            # Warnings only: every fatal condition is refused earlier, in
+            # .validateAndProcessData(), so there is no error branch here.
             return(list(
-                errors = errors,
                 warnings = warnings,
-                has_errors = length(errors) > 0,
                 has_warnings = length(warnings) > 0
             ))
         },
@@ -546,7 +603,7 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
                     patient_data$original_end <- patient_data$end_time
 
                     aidx <- private$.patientAnchorIndex(patient_data$patient_id,
-                                                        patient_data$start_time)
+                                                        private$.anchorStarts(patient_data))
                     anchor <- patient_data$original_start[aidx]
                     patient_data$anchor_start <- anchor
 
@@ -558,8 +615,13 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
                         unit = self$options$timeUnit)
                 }
             } else {
-                # Enhanced date format detection
-                start_sample <- as.character(patient_data$start_time[seq_len(min(3, nrow(patient_data)))])
+                # Enhanced date format detection, over every start AND end value:
+                # a sample of three starts missed dates further down or in End
+                # only, and compact YYYYMMDD dates (20230115, common in registry
+                # and LIS exports) were not recognised at all, so they were
+                # subtracted as plain numbers - 8909 "months" of follow-up.
+                start_sample <- as.character(c(patient_data$start_time, patient_data$end_time))
+                start_sample <- start_sample[!is.na(start_sample)]
 
                 # Detect various date formats. The two-digit/two-digit/four-digit
                 # shape is genuinely ambiguous (12/01/2023 could be Dec 1 or
@@ -569,14 +631,17 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
                 date_patterns <- list(
                     "YYYY-MM-DD" = "^\\d{4}-\\d{2}-\\d{2}",
                     "MM/DD/YYYY or DD/MM/YYYY (choose the one matching your data)" = "^\\d{2}/\\d{2}/\\d{4}",
-                    "YYYY/MM/DD" = "^\\d{4}/\\d{2}/\\d{2}"
+                    "YYYY/MM/DD" = "^\\d{4}/\\d{2}/\\d{2}",
+                    "YYYYMMDD (choose YYYY-MM-DD)" = "^(19|20)\\d{2}(0[1-9]|1[0-2])(0[1-9]|[12]\\d|3[01])$"
                 )
 
                 detected_format <- NULL
 
                 for (format_name in names(date_patterns)) {
-                    if (any(grepl(date_patterns[[format_name]], start_sample))) {
+                    hit <- grepl(date_patterns[[format_name]], start_sample)
+                    if (any(hit)) {
                         detected_format <- format_name
+                        start_sample <- start_sample[hit]
                         break
                     }
                 }
@@ -638,7 +703,7 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
                         patient_data$original_end   <- patient_data$end_time
 
                         aidx <- private$.patientAnchorIndex(patient_data$patient_id,
-                                                            patient_data$start_time)
+                                                            private$.anchorStarts(patient_data))
                         anchor <- patient_data$original_start[aidx]
                         patient_data$anchor_start <- anchor
 
@@ -650,7 +715,11 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
             
             # Add response/status variable if provided
             if (!is.null(self$options$responseVar)) {
-                patient_data$response <- as.factor(df[[self$options$responseVar]])
+                # A blank cell is a missing response, not a category: it would
+                # otherwise be a non-RECIST value and withhold the rates.
+                resp <- as.factor(df[[self$options$responseVar]])
+                resp[!is.na(resp) & !nzchar(trimws(as.character(resp)))] <- NA
+                patient_data$response <- droplevels(resp)
 
                 # A second, NORMALISED column for the figure. The lanes were
                 # coloured by the raw factor while every table tabulated the
@@ -673,7 +742,10 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
 
             # Add grouping variable if provided
             if (!is.null(self$options$groupVar)) {
-                patient_data$patient_group <- as.factor(df[[self$options$groupVar]])
+                # A blank cell is a missing group, not an unnamed group of its own.
+                grp <- as.factor(df[[self$options$groupVar]])
+                grp[!is.na(grp) & !nzchar(trimws(as.character(grp)))] <- NA
+                patient_data$patient_group <- droplevels(grp)
             }
 
             # Data validation
@@ -745,8 +817,27 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
 
             patient_data <- patient_data[valid_rows, ]
 
+            # One censoring coding per run, from every analysed row; every
+            # consumer reads the classified column ("censored"/"event"/NA).
+            if ("censor_status" %in% names(patient_data)) {
+                coding <- private$.censorCoding(patient_data$censor_status)
+                private$.censor_coding <- coding
+                private$.censorCodingNotice(coding)
+                patient_data$censor_status <- coding$status
+            }
+
             # Group is a patient-level attribute for the ORR/DCR comparisons.
             # Do not choose a group by file order when treatment episodes differ.
+            # The group only feeds those comparisons, so episode-varying values
+            # are refused only when the comparison would run; otherwise the
+            # whole analysis used to fail for a variable nothing would use.
+            uses_group <- isTRUE(self$options$responseAnalysis) &&
+                          !is.null(self$options$responseVar)
+            if ("patient_group" %in% names(patient_data) && !uses_group) {
+                private$.addNotice("INFO", .("Grouping variable not used"),
+                    .("The grouping variable is used only to compare objective response and disease control between groups, which needs a Response/Status variable and Response analysis ticked. It is ignored in this run."))
+                patient_data$patient_group <- NULL
+            }
             if ("patient_group" %in% names(patient_data)) {
                 groups <- split(as.character(patient_data$patient_group),
                                 patient_data$patient_id)
@@ -766,14 +857,9 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
             patient_data_with_validation <- list(
                 data = patient_data,
                 validation = validation_result,
-                error = validation_result$has_errors,
-                message = if (validation_result$has_errors) paste(validation_result$errors, collapse = " ") else NULL
+                error = FALSE,
+                message = NULL
             )
-            
-            # Return error if critical issues found
-            if (validation_result$has_errors) {
-                return(patient_data_with_validation)
-            }
             
             # If only warnings, continue but store them for display
             if (validation_result$has_warnings) {
@@ -796,6 +882,11 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
             # attached to the later episode was re-based on that episode's start
             # and emerged negative. Multi-episode input is explicitly supported -
             # the module detects it and says so - so it has to be handled here.
+            # The outside-the-timeline check below needs each patient's whole
+            # span, earliest start to latest end; the de-duplicated frame holds
+            # only the first episode, and a milestone in a later episode was
+            # reported as outside the patient's timeline.
+            episodes <- patient_data
             patient_data <- patient_data[
                 !duplicated(.patientIDLabels(patient_data$patient_id)), , drop = FALSE]
             
@@ -818,7 +909,10 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
                 if (is.null(v)) "" else as.character(v)
             }, "")
 
-            # A blank name falls back to the variable's own name.
+            # A blank name - the default - falls back to the variable's own
+            # name. The defaults used to be clinical names (Surgery, Treatment
+            # Start, ...), so whatever column went into slot 1 was published
+            # as "Surgery".
             blank <- assigned & !nzchar(slot_names)
             slot_names[blank] <- slot_vars[blank]
 
@@ -837,14 +931,6 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
                     sprintf(
                         .("Milestone slot(s) %s have a variable assigned but 'Maximum milestones' is set to %d, so they are not shown. Raise it to include them."),
                         paste(ignored, collapse = ", "), max_ms))
-            }
-            if (any(blank)) {
-                private$.addNotice(
-                    "INFO",
-                    .("Milestone name taken from the variable"),
-                    sprintf(
-                        .("Milestone slot(s) %s have no name, so the variable name is used instead."),
-                        paste(which(blank), collapse = ", ")))
             }
             if (any(dup)) {
                 private$.addNotice(
@@ -874,7 +960,10 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
                     if (!is.null(self$options$patientID) &&
                         self$options$patientID %in% names(self$data)) {
                         src_ids <- .patientIDLabels(self$data[[self$options$patientID]])
-                        nn <- which(!is.na(milestone_dates))
+                        # A blank cell is not a value: it hid a later episode's
+                        # real milestone, which was then dropped unannounced.
+                        nn <- which(!is.na(milestone_dates) &
+                                    nzchar(trimws(as.character(milestone_dates))))
                         first_nn <- nn[!duplicated(src_ids[nn])]
                         lookup <- stats::setNames(first_nn, src_ids[first_nn])
                         align <- unname(lookup[.patientIDLabels(patient_data$patient_id)])
@@ -883,6 +972,13 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
 
                     # Skip if all NA
                     if (all(is.na(milestone_dates))) next
+
+                    # What was recorded before conversion, so a value that the
+                    # conversion turns into NA is counted and named rather than
+                    # dropped in silence (lubridate returns NA, it does not
+                    # error, so the parse-error branch below never saw it).
+                    ms_raw <- as.character(milestone_dates)
+                    ms_pre <- !is.na(ms_raw) & nzchar(trimws(ms_raw))
                     
                     # Process dates
                     if (self$options$timeType == "datetime") {
@@ -947,6 +1043,20 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
                         }
                     }
                     
+                    ms_lost <- ms_pre & is.na(milestone_dates)
+                    if (any(ms_lost)) {
+                        ex <- ms_raw[ms_lost][1]
+                        private$.addNotice(
+                            "WARNING",
+                            .("Milestone values could not be read"),
+                            if (self$options$timeType == "datetime")
+                                sprintf(.("Milestone '%s': %d of %d recorded values could not be read with the selected Date Format (%s), for example '%s'. They are not drawn and not counted in the Milestone Event Summary."),
+                                        milestone_label, sum(ms_lost), sum(ms_pre), private$.dateFormatWord(), ex)
+                            else
+                                sprintf(.("Milestone '%s': %d of %d recorded values are not numbers, for example '%s'. They are not drawn and not counted in the Milestone Event Summary."),
+                                        milestone_label, sum(ms_lost), sum(ms_pre), ex))
+                    }
+
                     # Create milestone dataframe - ensure consistent lengths
                     # Handle case where milestone_dates might have different length than patient_data
                     max_length <- min(length(milestone_dates), nrow(patient_data))
@@ -991,11 +1101,11 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
             # end of the lane and the Milestone Event Summary pooled them into
             # its median. The markers are kept - a progression recorded after the
             # last follow-up line is real - but the reader is told.
-            if (nrow(milestone_data) > 0 && nrow(patient_data) > 0) {
-                pid_chr <- .patientIDLabels(patient_data$patient_id)
-                win_lo <- tapply(private$.asNumericTime(patient_data$start_time),
+            if (nrow(milestone_data) > 0 && nrow(episodes) > 0) {
+                pid_chr <- .patientIDLabels(episodes$patient_id)
+                win_lo <- tapply(private$.asNumericTime(episodes$start_time),
                                  pid_chr, min, na.rm = TRUE)
-                win_hi <- tapply(private$.asNumericTime(patient_data$end_time),
+                win_hi <- tapply(private$.asNumericTime(episodes$end_time),
                                  pid_chr, max, na.rm = TRUE)
                 ms_t  <- private$.asNumericTime(milestone_data$time)
                 ms_lo <- win_lo[.patientIDLabels(milestone_data$patient_id)]
@@ -1034,21 +1144,9 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
                 # whichever episode row happened to be coded censored, and could
                 # disagree with the estimator for multi-episode patients.
                 pid <- .patientIDLabels(patient_data$patient_id)
-                status <- private$.classifyCensoring(patient_data$censor_status)
-
-                # State the convention that was inferred. Reading a censoring
-                # column is a guess about which value means "event", and getting
-                # it backwards halves the median follow-up; the user has to be
-                # able to see which way it was read.
-                if (identical(private$.censor_coding, "surv12")) {
-                    private$.addNotice("WARNING", .("Censoring coded 1/2"), sprintf(
-                        .("The censoring variable '%s' contains only the values 1 and 2, so it was read using the survival package's convention: 1 = censored (still at risk), 2 = event. If your data instead codes 1 as the event, recode it to 0 = censored and 1 = event, because every follow-up figure below depends on which way round this is."),
-                        self$options$censorVar))
-                } else if (identical(private$.censor_coding, "zero_one")) {
-                    private$.addNotice("INFO", .("Censoring coding"), sprintf(
-                        .("The censoring variable '%s' was read as 0 = censored (still at risk), 1 = event."),
-                        self$options$censorVar))
-                }
+                # Already classified, once, by .censorCoding(); the notice saying
+                # how was written there too.
+                status <- patient_data$censor_status
 
                 ongoing_by_pt <- vapply(split(seq_along(status), pid), function(ix) {
                     identical(private$.valueAtLastEpisode(status[ix], end_numeric[ix]),
@@ -1080,7 +1178,7 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
                 private$.addNotice(
                     "INFO",
                     .("Status arrows not drawn"),
-                    .("Status arrows mark patients who were censored / still at risk at the data cutoff, which requires a censoring/event status variable. Without one that cannot be determined from the timeline alone, so no arrows are drawn. Supply a censoring variable (0/FALSE/no/censored/alive for still at risk, 1/TRUE/yes/event/dead for completed) to show them.")
+                    .("Status arrows mark patients who were censored / still at risk at the data cutoff, which requires a censoring/event status variable. Without one that cannot be determined from the timeline alone, so no arrows are drawn. Supply a censoring variable (0, censored or alive for still at risk; 1, event or dead for completed follow-up; for Yes/No or 1/2 choose the Censoring coding) to show them.")
                 )
                 return(NULL)
             }
@@ -1144,12 +1242,16 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
                     })
                     
                     if (!is.null(event_data)) {
+                        # What was recorded before conversion: an unreadable time
+                        # is reported as unreadable, not as missing.
+                        ev_raw <- as.character(event_data$time)
+                        ev_pre <- !is.na(ev_raw) & nzchar(trimws(ev_raw))
                         # Process event times
                         if (self$options$timeType == "datetime") {
                             parsed_event_times <- private$.parseDatesWithClinicalContext(
                                 event_data$time,
                                 self$options$dateFormat,
-                                "milestone"
+                                "event"
                             )
                             if (isTRUE(parsed_event_times$error)) {
                                 private$.addNotice(
@@ -1235,9 +1337,28 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
                         ev_t <- private$.asNumericTime(event_data$time)
                         ev_lo <- win_lo[.patientIDLabels(event_data$patient_id)]
                         ev_hi <- win_hi[.patientIDLabels(event_data$patient_id)]
-                        keep <- !is.na(ev_t) & !is.na(event_data$label) &
+                        # A marker is a row that names an event. With a sparse
+                        # event column most rows name none, and those rows were
+                        # counted as hidden markers: "8 of 10 event markers are
+                        # not shown (8 with no event type)" for 2 events that
+                        # were both drawn.
+                        has_ev <- !is.na(event_data$label) & nzchar(trimws(event_data$label))
+                        keep <- !is.na(ev_t) & has_ev &
                                 !is.na(ev_lo) & !is.na(ev_hi) &
                                 ev_t >= ev_lo & ev_t <= ev_hi
+
+                        # A DEDICATED event-time column holding a time on a row
+                        # with no event type is a marker that lost its label.
+                        # (Without one the time falls back to Start Time, which
+                        # every row has and which says nothing about an event.)
+                        n_no_label <- if (is.null(self$options$eventTimeVar)) 0L else
+                            sum(!has_ev & !is.na(ev_t))
+                        if (n_no_label > 0)
+                            private$.addNotice(
+                                "INFO",
+                                .("Event times without an event type"),
+                                sprintf(.("%d rows have an event time but no event type, so no marker is drawn for them."),
+                                        n_no_label))
 
                         # Say what was discarded. A death recorded after the last
                         # follow-up line ends - which is the normal way a death is
@@ -1246,33 +1367,39 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
                         # percentages were then computed over the survivors only:
                         # 10 events became "Scan 4 (80%), Toxicity 1 (20%)" with
                         # all three Deaths gone and nothing said.
-                        n_drop <- sum(!keep)
+                        n_drop <- sum(has_ev & !keep)
                         if (n_drop > 0) {
                             reasons <- character(0)
-                            n_no_time  <- sum(is.na(ev_t))
-                            n_no_label <- sum(!is.na(ev_t) & is.na(event_data$label))
-                            n_no_pt    <- sum(!is.na(ev_t) & !is.na(event_data$label) &
-                                              (is.na(ev_lo) | is.na(ev_hi)))
-                            inwin      <- !is.na(ev_t) & !is.na(event_data$label) &
+                            # A patient outside the analysis is that, whatever
+                            # the time: relative date display leaves their event
+                            # time NA, which was reported as "no event time".
+                            no_pt      <- has_ev & (is.na(ev_lo) | is.na(ev_hi))
+                            missing_t  <- has_ev & !no_pt & is.na(ev_t)
+                            n_no_time  <- sum(missing_t & !ev_pre)
+                            n_unread   <- sum(missing_t & ev_pre)
+                            n_no_pt    <- sum(no_pt)
+                            inwin      <- !is.na(ev_t) & has_ev &
                                           !is.na(ev_lo) & !is.na(ev_hi)
                             n_before   <- sum(inwin & ev_t < ev_lo)
                             n_after    <- sum(inwin & ev_t > ev_hi)
-                            if (n_no_time > 0)
-                                reasons <- c(reasons, sprintf(.("%d with no event time"), n_no_time))
-                            if (n_no_label > 0)
-                                reasons <- c(reasons, sprintf(.("%d with no event type"), n_no_label))
-                            if (n_no_pt > 0)
-                                reasons <- c(reasons, sprintf(.("%d for patients not in the analysis"), n_no_pt))
-                            if (n_before > 0)
-                                reasons <- c(reasons, sprintf(.("%d before the patient's first start"), n_before))
-                            if (n_after > 0)
-                                reasons <- c(reasons, sprintf(.("%d after the patient's last end"), n_after))
+                            # One complete sentence per reason (a translator
+                            # cannot order fragments spliced into a parenthesis).
+                            reasons <- c(
+                                if (n_no_time > 0) sprintf(.("%d have no event time."), n_no_time),
+                                if (n_unread > 0) sprintf(.("%d have an event time that could not be read, for example '%s'."),
+                                                          n_unread, ev_raw[missing_t & ev_pre][1]),
+                                if (n_no_pt > 0) sprintf(.("%d belong to patients not in the analysis."), n_no_pt),
+                                if (n_before > 0) sprintf(.("%d fall before the patient's first start."), n_before),
+                                if (n_after > 0) sprintf(.("%d fall after the patient's last end."), n_after))
                             private$.addNotice(
                                 "WARNING",
                                 .("Event markers outside the patient timeline"),
-                                sprintf(
-                                    .("%d of %d event markers are not shown (%s). The Event Marker Summary counts and percentages below describe only the %d markers that fall inside a patient's timeline. Events recorded after follow-up ends, such as death, need an end time that covers them."),
-                                    n_drop, length(keep), paste(reasons, collapse = "; "), sum(keep)))
+                                paste(c(
+                                    sprintf(.("%d of %d event markers are not shown."), n_drop, sum(has_ev)),
+                                    reasons,
+                                    sprintf(.("The Event Marker Summary counts and percentages below describe only the %d markers that fall inside a patient's timeline. Events recorded after follow-up ends, such as death, need an end time that covers them."),
+                                            sum(keep))),
+                                    collapse = " "))
                         }
 
                         event_data <- event_data[keep, c("patient_id", "time", "label"), drop = FALSE]
@@ -1365,7 +1492,8 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
                             # contradicted every other table on the page.
                             response_value <- private$.normalizeResponse(
                                 private$.getBestResponse(non_missing,
-                                                         start_time[keep_resp]))
+                                                         start_time[keep_resp],
+                                                         end_time[keep_resp]))
                         }
                     }
 
@@ -1450,7 +1578,8 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
                         # Normalised at the source - see the data.table path above.
                         response_value <- private$.normalizeResponse(
                             private$.getBestResponse(non_missing,
-                                                     df$start_time[keep_resp]))
+                                                     df$start_time[keep_resp],
+                                                     df$end_time[keep_resp]))
                     }
                 }
 
@@ -1598,7 +1727,9 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
         .responseSynonymMap = function() {
             c(
                 "cr" = "CR", "complete response" = "CR", "complete" = "CR",
+                "complete remission" = "CR",
                 "pr" = "PR", "partial response" = "PR", "partial" = "PR",
+                "partial remission" = "PR",
                 "sd" = "SD", "stable disease" = "SD", "stable" = "SD",
                 "pd" = "PD", "progressive disease" = "PD", "progression" = "PD", "progressive" = "PD",
                 "ne" = "NE", "not evaluable" = "NE", "na" = "NE"
@@ -1607,7 +1738,7 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
 
         # Get best response based on oncology hierarchy
         # CR (Complete Response) > PR (Partial Response) > SD (Stable Disease) > PD (Progressive Disease) > Other
-        .getBestResponse = function(responses, order_by = NULL) {
+        .getBestResponse = function(responses, order_by = NULL, end_by = NULL) {
             if (length(responses) == 0) return(NA_character_)
 
             syn <- private$.responseSynonymMap()
@@ -1626,14 +1757,24 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
             # chronological rather than whatever order the rows arrived in.
             # Without it the truncation would depend on row order, which is the
             # same class of defect.
+            #
+            # Start time alone left ties in file order: rows [0,6] PR and
+            # [0,12] PD gave PD or PR by which came first, moving ORR between 0%
+            # and 50%. Ties break on end time, then PD first, so a progression
+            # recorded at the same time as a response is never read as
+            # following it.
+            responses_lower <- tolower(trimws(responses))
+            std_all <- unname(syn[responses_lower])
             if (!is.null(order_by) && length(order_by) == length(responses)) {
-                ord <- order(order_by, na.last = TRUE)
+                if (is.null(end_by) || length(end_by) != length(responses))
+                    end_by <- rep(NA_real_, length(responses))
+                pd_last <- as.integer(is.na(std_all) | std_all != "PD")
+                ord <- order(order_by, end_by, pd_last, na.last = TRUE)
                 responses <- responses[ord]
+                responses_lower <- responses_lower[ord]
+                std_all <- std_all[ord]
             }
 
-            responses_lower <- tolower(trimws(responses))
-
-            std_all <- unname(syn[responses_lower])
             pd_at <- which(!is.na(std_all) & std_all == "PD")
             if (length(pd_at) > 0) {
                 keep <- seq_len(pd_at[1])
@@ -1831,56 +1972,38 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
             fu <- follow_up_times[valid_idx]
             observed <- list(value = stats::median(fu), method = "observed")
 
-            if (!("censor_status" %in% names(patient_summary))) return(observed)
+            if (is.null(self$options$censorVar)) return(observed)
 
-            status <- private$.classifyCensoring(patient_summary$censor_status[valid_idx])
+            # Every fallback below reports `observed`, the median over ALL
+            # patients - the same cohort as the Summary row. The missing-status
+            # path used to recompute it over the patients with a status only,
+            # so the page showed two different "observed" medians.
+            #
+            # A coding that is not usable (not chosen, not matching, or the
+            # column empty) was disclosed by .censorCodingNotice().
+            kind <- private$.censor_coding$kind %||% "empty"
+            if (kind %in% c("pending", "mismatch", "unreadable"))
+                return(list(value = observed$value,
+                            method = if (identical(kind, "pending")) "pending" else "unusable"))
+            if (identical(kind, "empty") || !("censor_status" %in% names(patient_summary)))
+                return(observed)
 
-            # A PARTIALLY unrecognised coding is disclosed too: unclassifiable
-            # patients are treated as completed follow-up (reverse-KM events),
-            # which biases median follow-up downward if they were in fact
-            # ongoing - previously only the all-unrecognised case said anything.
-            raw_vals <- patient_summary$censor_status[valid_idx]
-            n_unrec <- sum(is.na(status) & !is.na(raw_vals))
+            status <- patient_summary$censor_status[valid_idx]
 
-            # A patient with NO censoring value at all is a different case from
-            # an unrecognised one, and it used to be counted by neither check:
-            # `status %in% "censored"` is FALSE for NA, so as.numeric() made
-            # them 0 - a terminal event - which drags the reverse Kaplan-Meier
-            # median downward exactly as if they had completed follow-up. They
-            # are excluded from the estimate instead, and the exclusion is said
-            # out loud.
-            n_missing_status <- sum(is.na(raw_vals))
+            # A patient with NO censoring value is left out of the reverse
+            # Kaplan-Meier estimate, never coded as either status, and the
+            # exclusion is said out loud.
+            n_missing_status <- sum(is.na(status))
             if (n_missing_status > 0) {
                 private$.addNotice(
                     "WARNING",
                     .("Censoring status missing for some patients"),
                     sprintf(
-                        .("%d of %d patients have no censoring/event value. They are excluded from the reverse Kaplan-Meier median follow-up rather than counted as completed follow-up, which would bias it downward. Their timelines are still drawn, without a status arrow."),
+                        .("%d of %d patients have no censoring/event value. The reverse Kaplan-Meier median follow-up uses only the patients whose status is known; these patients are not counted as either censored or completed. Their timelines are still drawn, without a status arrow."),
                         n_missing_status, length(status)))
-                keep_status <- !is.na(raw_vals)
-                fu <- fu[keep_status]
-                status <- status[keep_status]
-                raw_vals <- raw_vals[keep_status]
-                if (length(fu) == 0) return(none)
-                observed <- list(value = stats::median(fu), method = "observed")
-            }
-            if (n_unrec > 0 && !all(is.na(status))) {
-                private$.addNotice(
-                    "WARNING",
-                    .("Some censoring values not recognised"),
-                    sprintf(
-                        .("%d of %d censoring/event values could not be interpreted; those patients are treated as completed follow-up (events) in the reverse Kaplan-Meier estimate and receive no status arrow. Use 0/FALSE/no/censored/alive for ongoing and 1/TRUE/yes/event/dead for completed."),
-                        n_unrec, length(status)))
-            }
-
-            # Nothing classifiable -> say so rather than silently degrading.
-            if (all(is.na(status))) {
-                private$.addNotice(
-                    "WARNING",
-                    .("Censoring variable not recognised"),
-                    .("None of the values in the censoring/event status variable could be interpreted as censored or event. Median follow-up is therefore the plain median of observed durations, not the reverse Kaplan-Meier estimate, and ongoing-status arrows may be wrong. Use 0/FALSE/no/censored/alive for ongoing patients and 1/TRUE/yes/event/dead for completed follow-up.")
-                )
-                return(list(value = observed$value, method = "unrecognised"))
+                fu <- fu[!is.na(status)]
+                status <- status[!is.na(status)]
+                if (length(fu) == 0) return(observed)
             }
 
             # Reverse KM: censored patients become the "events". The estimator
@@ -1896,9 +2019,12 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
                 # information" told the reader the opposite of what happened,
                 # and mfu$reason, which says which of the two it was, had no
                 # consumer anywhere in the module.
+                code <- mfu$reason_code %||% ""
+                if (n_missing_status > 0 && identical(code, "no_censoring"))
+                    code <- "no_censoring_known"
                 return(list(value = observed$value, method = "not_estimable",
                             reason = mfu$reason %||% "",
-                            reason_code = mfu$reason_code %||% ""))
+                            reason_code = code))
             }
 
             list(value = mfu$value, method = "reverse_km",
@@ -1907,60 +2033,167 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
                  reason = "", reason_code = "")
         },
 
-        # Map a censoring/event status value to "censored", "event", or NA.
-        # Shared by median follow-up and the ongoing-status arrows so the two
-        # cannot disagree about what a given coding means.
         # A patient's status is whatever was true at their LAST episode, which
         # is the one with the greatest end time - not whichever row the file
         # happened to list last. Reading it by row order meant re-sorting the
         # same data changed the ongoing-treatment arrows and the reverse
         # Kaplan-Meier median follow-up, while the arrow's POSITION was already
-        # (correctly) taken from which.max(end_time). Returns a typed NA when
-        # the patient has no non-missing value at all.
+        # (correctly) taken from which.max(end_time). Two rows tied at that
+        # end time used to resolve by file order too; "event" now wins the
+        # tie, since a completed follow-up recorded at the cutoff is not
+        # undone by a "still at risk" row at the same moment. `values` are the
+        # classified statuses. Returns a typed NA when the patient has no
+        # non-missing value at all.
         .valueAtLastEpisode = function(values, times) {
             keep <- !is.na(values)
             if (!any(keep)) return(values[NA_integer_])
             v <- values[keep]
             t <- if (length(times) == length(values)) times[keep] else rep(NA_real_, length(v))
             if (all(is.na(t))) return(v[length(v)])
-            v[which.max(t)]
+            t <- private$.asNumericTime(t)
+            at_last <- v[!is.na(t) & t == max(t, na.rm = TRUE)]
+            if ("event" %in% at_last) "event" else at_last[1]
         },
 
-        .classifyCensoring = function(x) {
-            private$.censor_coding <- NULL
-            v <- tolower(trimws(as.character(x)))
-            num <- suppressWarnings(as.numeric(v))
+        # The censoring/event coding, decided ONCE per run from every analysed
+        # row and applied to every consumer (status arrows and the reverse
+        # Kaplan-Meier follow-up).
+        #
+        # It used to be inferred twice - from each patient's last value for the
+        # follow-up and from every row for the arrows - so a column holding
+        # 0/1/2 could read 1 as censored in one and as an event in the other.
+        # And Yes/No and TRUE/FALSE were read with a fixed polarity that was
+        # never shown: a "Censored: Yes/No" or "Ongoing: Yes/No" column put the
+        # arrows on the patients who had stopped and halved the reverse
+        # Kaplan-Meier follow-up. Which value is the event is now never
+        # guessed: numeric 0/1 is the one default (1 = event), words that name
+        # a state (alive, censored, dead, event) are read as named and listed,
+        # and anything else - Yes/No, TRUE/FALSE, 1/2 - waits for the user to
+        # choose `censorCoding`. (An option, not a Level on the variable: a
+        # Level is a required argument of the generated R function, which
+        # would break every existing swimmerplot() call.)
+        #
+        # Returns kind ("chosen", "zero_one", "words", "pending", "mismatch",
+        # "unreadable", "empty"), the classified status per row ("censored"/"event"/NA) and
+        # the values read each way.
+        .censorCoding = function(x) {
+            raw <- as.character(x)
+            raw[!is.na(raw) & !nzchar(trimws(raw))] <- NA_character_
+            vals <- sort(unique(raw[!is.na(raw)]))
+            status <- rep(NA_character_, length(raw))
+            done <- function(kind, status) list(
+                kind = kind, status = status, values = vals,
+                event_values = sort(unique(raw[!is.na(status) & status == "event"])),
+                censored_values = sort(unique(raw[!is.na(status) & status == "censored"])))
+            if (length(vals) == 0) return(done("empty", status))
 
-            out <- rep(NA_character_, length(v))
-            out[v %in% c("0", "false", "f", "no", "n", "censored", "cens",
-                         "alive", "ongoing", "active", "continuing")] <- "censored"
-            out[v %in% c("1", "true", "t", "yes", "y", "event", "dead", "died",
-                         "death", "progressed", "progression", "completed")] <- "event"
-
-            # Numeric coding. 0/1 is the documented default and the only one
-            # this analysis may assume silently.
-            #
-            # {1, 2} is survival::Surv's convention (1 = censored, 2 = event).
-            # The old rule sent every non-zero value to "event", so a 1/2 column
-            # became ALL events: no arrows were drawn, the reverse Kaplan-Meier
-            # was abandoned for "observed durations; no censoring information",
-            # and the reported median follow-up came out about half the true
-            # value with nothing said. Recognise that coding and record it, so
-            # the run can disclose the assumption it made.
-            obs <- num[!is.na(num)]
-            surv_coding <- length(obs) > 0 && all(obs %in% c(1, 2)) && any(obs == 2)
-            if (surv_coding) {
-                out[!is.na(num) & num == 1] <- "censored"
-                out[!is.na(num) & num == 2] <- "event"
-                private$.censor_coding <- "surv12"
-            } else {
-                out[is.na(out) & !is.na(num) & num == 0] <- "censored"
-                out[is.na(out) & !is.na(num) & num != 0] <- "event"
-                if (length(obs) > 0 && all(obs %in% c(0, 1)))
-                    private$.censor_coding <- "zero_one"
+            # An explicit coding: Yes/No, TRUE/FALSE and 1/2 are read only the
+            # way the user said. Values the chosen coding does not cover are
+            # not forced into it.
+            mode <- self$options$censorCoding %||% "auto"
+            lvals <- tolower(trimws(vals))
+            low <- tolower(trimws(raw))
+            yes <- c("yes", "y", "true", "t")
+            no <- c("no", "n", "false", "f")
+            if (mode %in% c("yes_event", "yes_censored")) {
+                if (!all(lvals %in% c(yes, no))) return(done("mismatch", status))
+                ev <- if (identical(mode, "yes_event")) yes else no
+                status[!is.na(low)] <- ifelse(low[!is.na(low)] %in% ev, "event", "censored")
+                return(done("chosen", status))
             }
-            out[is.na(v)] <- NA_character_
-            out
+            if (mode %in% c("one_event_01", "one_censored")) {
+                # 0/1 either way. "1 = censored" is how a column named "Censored"
+                # is usually coded (release review SW-3); "1 = event" pins the
+                # automatic reading, which a single-valued column needs (SW-7).
+                num <- suppressWarnings(as.numeric(vals))
+                if (anyNA(num) || !all(num %in% c(0, 1))) return(done("mismatch", status))
+                n <- suppressWarnings(as.numeric(raw))
+                one <- if (identical(mode, "one_event_01")) "event" else "censored"
+                other <- if (identical(mode, "one_event_01")) "censored" else "event"
+                status[!is.na(n)] <- ifelse(n[!is.na(n)] == 1, one, other)
+                return(done("chosen", status))
+            }
+            if (mode %in% c("two_event", "one_event")) {
+                num <- suppressWarnings(as.numeric(vals))
+                if (anyNA(num) || !all(num %in% c(1, 2))) return(done("mismatch", status))
+                n <- suppressWarnings(as.numeric(raw))
+                ev <- if (identical(mode, "two_event")) 2 else 1
+                status[!is.na(n)] <- ifelse(n[!is.na(n)] == ev, "event", "censored")
+                return(done("chosen", status))
+            }
+
+            num <- suppressWarnings(as.numeric(vals))
+            # One distinct number cannot show its coding: an all-1 column is all
+            # events under 0/1 and all censored under 1/2 (release review SW-7).
+            if (!anyNA(num) && length(vals) == 1) return(done("pending", status))
+            if (!anyNA(num) && all(num %in% c(0, 1))) {
+                n <- suppressWarnings(as.numeric(raw))
+                status[!is.na(n)] <- ifelse(n[!is.na(n)] == 1, "event", "censored")
+                return(done("zero_one", status))
+            }
+
+            # Only words with one reading. "Completed" (treatment completed,
+            # patient alive?), "progressed", "active" and "continuing" name a
+            # treatment or disease state, not follow-up status, so they are not
+            # guessed: an Ongoing/Completed column read Completed as the event
+            # and moved the reverse Kaplan-Meier median from 9 to 14.
+            cens_words <- c("censored", "cens", "alive", "ongoing")
+            event_words <- c("event", "dead", "died", "death")
+            if (all(lvals %in% c(cens_words, event_words))) {
+                status[!is.na(low) & low %in% cens_words] <- "censored"
+                status[!is.na(low) & low %in% event_words] <- "event"
+                return(done("words", status))
+            }
+            # Values that one of the explicit codings can read wait for the
+            # user's choice; anything else (0/1/2, Alive/Dead/Lost) can only be
+            # recoded, and the notice must not send the user to an option that
+            # cannot help.
+            choosable <- all(lvals %in% c(yes, no)) ||
+                (!anyNA(num) && (all(num %in% c(0, 1)) || all(num %in% c(1, 2))))
+            done(if (choosable) "pending" else "unreadable", status)
+        },
+
+        # The one notice that says how the censoring column was read. Every
+        # coding is disclosed, the 0/1 default included.
+        .censorCodingNotice = function(coding) {
+            var <- self$options$censorVar
+            none <- .("none")
+            q <- function(v) if (length(v) == 0) none else
+                paste0("'", utils::head(v, 8), "'", collapse = ", ")
+            switch(coding$kind,
+                # A name that says "censored" (or alive/ongoing) suggests 1 may
+                # mean censored, the reverse of the 0/1 default: say so loudly.
+                zero_one = if (grepl("cens|alive|ongoing|living", tolower(var)))
+                    private$.addNotice("WARNING", .("Check the censoring coding"), sprintf(
+                        .("The censoring variable '%s' was read as 0 = censored (still at risk), 1 = event, but its name suggests that 1 may mean censored. If so, choose the Censoring coding '0/1: 1 = censored, 0 = event': otherwise the follow-up estimate and the status arrows are reversed."),
+                        var))
+                else private$.addNotice("INFO", .("Censoring coding"), sprintf(
+                    .("The censoring variable '%s' was read as 0 = censored (still at risk), 1 = event."),
+                    var)),
+                words = private$.addNotice("INFO", .("Censoring coding"), sprintf(
+                    .("The censoring variable '%s' was read by its words: %s as censored (still at risk); %s as the event (follow-up completed)."),
+                    var, q(coding$censored_values), q(coding$event_values))),
+                chosen = private$.addNotice("INFO", .("Censoring coding"), sprintf(
+                    .("The censoring variable '%s' was read with the chosen Censoring coding: %s as the event (follow-up completed); %s as censored (still at risk)."),
+                    var, q(coding$event_values), q(coding$censored_values))),
+                pending = if (length(coding$values) == 1)
+                    private$.addNotice("WARNING", .("Choose the censoring coding"), sprintf(
+                        .("The censoring variable '%s' has only the value %s, which can mean that every patient had the event or that every patient was censored. Choose which under Censoring coding. Until then no status arrows are drawn and median follow-up is the plain median of observed durations."),
+                        var, q(coding$values)))
+                else private$.addNotice("WARNING", .("Choose the censoring coding"), sprintf(
+                    .("The censoring variable '%s' has the values %s. Which of them means the event (follow-up completed) cannot be read from the values: Yes may mean died in one dataset and still on study in another, and 1/2 is coded both ways. Choose it under Censoring coding, or recode the variable to 0 = censored and 1 = event. Until then no status arrows are drawn and median follow-up is the plain median of observed durations."),
+                    var, q(coding$values))),
+                mismatch = private$.addNotice("WARNING", .("Censoring coding does not match the data"), sprintf(
+                    .("The censoring variable '%s' has the values %s, which the chosen Censoring coding does not cover. Choose the coding that matches the data, or Automatic, or recode the variable to 0 = censored and 1 = event. Until then no status arrows are drawn and median follow-up is the plain median of observed durations."),
+                    var, q(coding$values))),
+                unreadable = private$.addNotice("WARNING", .("Censoring variable not readable"), sprintf(
+                    .("The censoring variable '%s' has the values %s, and no Censoring coding reads them. Recode it to 0 = censored and 1 = event, or to the words censored/alive and event/dead. Until then no status arrows are drawn and median follow-up is the plain median of observed durations."),
+                    var, q(coding$values))),
+                empty = private$.addNotice("WARNING", .("Censoring variable has no values"), sprintf(
+                    .("The censoring variable '%s' has no value for any analysed row, so no status arrows are drawn and median follow-up is the plain median of observed durations."),
+                    var)),
+                NULL)
+            invisible(NULL)
         },
 
         # Calculate comprehensive summary statistics using patient-level data
@@ -2012,6 +2245,19 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
 
             # Response analysis if available
             if (self$options$responseAnalysis && "response" %in% names(patient_summary)) {
+                # Every recorded row, not only each patient's best: a value that
+                # is not a RECIST category stays unscored even when a recognised
+                # response on another row outranks it. And the number of
+                # patients whose category was DERIVED from several rows, which
+                # is when the best-response rule has to be stated.
+                if ("response" %in% names(patient_data)) {
+                    has_r <- !is.na(patient_data$response)
+                    row_lab <- private$.normalizeResponses(patient_data$response[has_r])
+                    private$.nonRecistRowLabels <- setdiff(unique(row_lab),
+                                                           c("CR", "PR", "SD", "PD", "NE"))
+                    rows_per_pt <- table(.patientIDLabels(patient_data$patient_id[has_r]))
+                    stats$n_response_derived <- sum(rows_per_pt > 1)
+                }
                 # Normalize response categories to standard abbreviations (CR, PR, SD, PD)
                 # This ensures case-insensitive matching and handles various input formats
                 normalized_responses <- private$.normalizeResponses(patient_summary$response)
@@ -2129,7 +2375,8 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
             switch(
                 method %||% "observed",
                 reverse_km = .("Median Follow-up Time (reverse Kaplan-Meier)"),
-                unrecognised = .("Median Follow-up Time (observed durations; censoring not recognised)"),
+                pending = .("Median Follow-up Time (observed durations; censoring coding not chosen)"),
+                unusable = .("Median Follow-up Time (observed durations; censoring variable not readable with this coding)"),
                 not_estimable = .("Median Follow-up Time (observed durations; reverse Kaplan-Meier not estimable)"),
                 .("Median Follow-up Time (observed durations; no censoring information)")
             )
@@ -2179,6 +2426,7 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
         .followUpReasonText = function(code, fallback_text = "") {
             switch(as.character(code),
                 no_censoring = .("No patient was censored, so the reversed curve has no events and never reaches 50%. Every patient was observed to the terminal outcome, so the observed times are the complete follow-up."),
+                no_censoring_known = .("No patient with a recorded censoring status was censored, so the reversed curve has no events and never reaches 50%. The observed median shown covers every patient, including those with no recorded status."),
                 never_reaches_50 = .("The reversed Kaplan-Meier curve never falls to 50%, so its median is undefined. That depends on WHEN patients were still under observation, not merely how many: a few censored late can make the median estimable while many censored early cannot."),
                 fallback_text)
         },
@@ -2221,8 +2469,6 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
                     dcr = .("Disease Control Rate (DCR)"))
             labels
         },
-
-        # Apply clinical preset configurations with context
 
         # The five fixed summary rows, in order. Factored out of .init() so that
         # .updateSummaryTable() can rebuild them when it has to prune a stale
@@ -2299,6 +2545,7 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
             # only .addNotice() used to do.
             private$.noticeList <- list()
             private$.censor_coding <- NULL
+            private$.nonRecistRowLabels <- character(0)
             private$.renderNotices()
             self$results$plot$setState(NULL)
 
@@ -2320,6 +2567,7 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
                 .deleteTableRows(self$results[[tbl]])
             self$results$interpretation$setContent('<div></div>')
             self$results$copyReadyReport$setContent('<div></div>')
+            self$results$exportInfo$setContent('<div></div>')
 
             # summary keeps its five scaffolded rows (setRow rejects a missing key)
             # but must not keep their values, nor any response row from last time.
@@ -2617,6 +2865,7 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
                     try(.deleteTableRows(self$results[[tbl]]), silent = TRUE)
                 try(self$results$interpretation$setContent('<div></div>'), silent = TRUE)
                 try(self$results$copyReadyReport$setContent('<div></div>'), silent = TRUE)
+                try(self$results$exportInfo$setContent('<div></div>'), silent = TRUE)
                 try(private$.resetSummaryTable(), silent = TRUE)
                 try(self$results$plot$setState(NULL), silent = TRUE)
 
@@ -2688,8 +2937,9 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
                 for (response in names(stats$response_counts)) {
                     row_key <- paste0("response_", response)
                     row_values <- list(
+                        # cells parse HTML: a "<LOD" level would render blank
                         metric = .fmt(.("{response} Rate ({n}/{N})"),
-                                      response = response,
+                                      response = .rocLabel(response, note = FALSE),
                                       n = stats$response_counts[[response]],
                                       N = stats$response_denominator),
                         value = round(stats$response_percentages[[response]], 1)
@@ -2719,9 +2969,17 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
                         summary_table$addRow(rowKey = "no_recorded_response", values = private$.tableValues(miss_values))
                 }
 
-                # Name the denominator once, beside the rows that use it.
-                summary_table$setNote("response_denominator", sprintf(
-                    .("Each row shows the count over all %d patients in the analysis, the same denominator as the Objective and Disease Control Rates. RECIST 1.1 section 4.9.1 requires rates over every patient rather than over a selected evaluable subset, so patients recorded as NE, with an unrecognised label, or with no response at all remain in the denominator and count as non-responders. The percentages are each rounded independently, so they need not add to exactly 100; the counts do."),
+                # Name the denominator once, beside the rows that use it. When
+                # ORR/DCR are withheld the rows are plain category counts, and
+                # the note must not describe rates that are not there.
+                rc <- stats$response_counts
+                withheld <- length(private$.nonRecistLabels(rc)) > 0 ||
+                    !any(names(rc) %in% c("CR", "PR", "SD", "PD"))
+                if (withheld) summary_table$setNote("response_denominator", sprintf(
+                    .("Each row shows the count of a response value over all %d patients in the analysis. Objective Response and Disease Control Rates are not reported for this response variable; see the notices."),
+                    stats$response_denominator))
+                else summary_table$setNote("response_denominator", sprintf(
+                    .("Each row shows the count over all %d patients in the analysis, the same denominator as the Objective and Disease Control Rates. RECIST 1.1 section 4.9.1 requires rates over every patient rather than over a selected evaluable subset, so patients recorded as NE or with no response at all remain in the denominator and count as non-responders. The percentages are each rounded independently, so they need not add to exactly 100; the counts do."),
                     stats$response_denominator))
             }
         },
@@ -2797,7 +3055,7 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
             # as a responder, so responders have longer follow-up by
             # construction, whatever the treatment does.
             self$results$personTimeTable$setNote("guarantee_time",
-                .("Descriptive only. Time is split by BEST overall response, which a patient can only achieve by living long enough to be assessed, so responders accumulate more follow-up by construction (guarantee-time bias). These rows must not be read as a survival benefit of responding: use a landmark analysis or treat response as a time-dependent covariate."))
+                .("Descriptive only. Time is split by best recorded response (unconfirmed; see the notices), which a patient can only achieve by living long enough to be assessed, so responders accumulate more follow-up by construction (guarantee-time bias). These rows must not be read as a survival benefit of responding: use a landmark analysis or treat response as a time-dependent covariate."))
         },
         
         # Milestone table population
@@ -2930,6 +3188,7 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
             want_pt <- isTRUE(self$options$personTimeAnalysis)
             want_resp <- isTRUE(self$options$responseAnalysis) &&
                          !is.null(self$options$responseVar)
+            self$results$advancedMetrics$setNote("bor_rule", NULL)
             if (!want_pt && !want_resp) return()
 
             patient_summary <- stats$patient_summary
@@ -2955,8 +3214,14 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
                         # 50%. That string previously had no consumer anywhere
                         # in the module, so the user saw the fallback without
                         # ever being told which of the two had happened.
+                        # With no patient censored the observed times ARE the
+                        # complete follow-up, so the "not follow-up" lead would
+                        # contradict the reason printed after it.
                         paste(
-                            .("Plain median of the observed durations, because the reverse Kaplan-Meier estimate was not available. Read it as the median time to event-or-censoring, not as the length of follow-up."),
+                            if (identical(stats$median_followup_reason_code, "no_censoring"))
+                                .("Plain median of the observed durations, because no patient was censored.")
+                            else
+                                .("Plain median of the observed durations, because the reverse Kaplan-Meier estimate was not available. Read it as the median time to event-or-censoring, not as the length of follow-up."),
                             private$.followUpReasonText(
                                 stats$median_followup_reason_code %||% "",
                                 stats$median_followup_reason %||% ""))
@@ -2985,6 +3250,11 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
             )
             
             # Add response-specific metrics if available
+            # A response variable with no value for any patient left the ORR and
+            # DCR rows blank with nothing said (the all-NE case has its own text).
+            if (want_resp && is.null(stats$response_counts))
+                private$.addNotice("WARNING", .("Response rates not calculated"),
+                    .("No patient has a recorded value in the response variable, so Objective Response Rate and Disease Control Rate are not reported."))
             if (want_resp && !is.null(stats$response_counts)) {
                 response_counts <- stats$response_counts
                 total_responses <- sum(response_counts)
@@ -2992,11 +3262,28 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
                 if (total_responses > 0) {
                     rates <- private$.responseRates(response_counts, n_patients_summary)
 
-                    if (!rates$evaluable) {
+                    # The rule behind the category, stated wherever it was
+                    # derived from several rows. The rates are RECIST-style
+                    # (all-patient denominator) but the category is not a RECIST
+                    # best overall response: no confirmation, no minimum SD
+                    # duration. Nothing said so, while the notes cited RECIST 1.1
+                    # (waterfall states the same limits on every run).
+                    n_der <- stats$n_response_derived %||% 0
+                    if (isTRUE(rates$evaluable) && n_der > 0) {
+                        bor_text <- sprintf(
+                            .("%d of %d patients have more than one response row. Their category, and so ORR, DCR and every response row, is the best response recorded up to and including the first PD, in time order: CR and PR are not confirmed, SD has no minimum duration, and rows after the first PD, later treatment lines included, are ignored. These are unconfirmed best responses, not a RECIST 1.1 best overall response; supply one adjudicated response per patient when the endpoint requires it."),
+                            as.integer(n_der), as.integer(n_patients_summary))
+                        private$.addNotice("WARNING", .("Unconfirmed best response"), bor_text)
+                        self$results$advancedMetrics$setNote("bor_rule", bor_text)
+                    }
+
+                    # A non-RECIST label is reported, by name, inside
+                    # .responseRates(); what is left is a column of NE only.
+                    if (!rates$evaluable && length(rates$unrecognised) == 0) {
                         private$.addNotice(
                             "WARNING",
                             .("Response rates not calculated"),
-                            .("None of the values in the response variable could be recognised as RECIST categories (CR, PR, SD, PD). Objective Response Rate and Disease Control Rate are defined only for RECIST-coded responses and have been omitted rather than reported as 0%. Recode the response variable to CR/PR/SD/PD to obtain ORR and DCR.")
+                            .("No patient has a CR, PR, SD or PD response, so there is no assessed response to base Objective Response Rate and Disease Control Rate on, and both are omitted rather than reported as 0%.")
                         )
                     }
 
@@ -3004,7 +3291,7 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
                     dcr_count <- rates$dcr_count
                     orr <- rates$orr
                     dcr <- rates$dcr
-                    # SAME denominator as the point estimates (RECIST-evaluable):
+                    # SAME denominator as the point estimates (all patients):
                     # computing the CI over all responses while the rate used the
                     # evaluable count printed an estimate outside its own interval.
                     n_eval <- rates$n_all
@@ -3174,7 +3461,11 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
                 explain(.("No comparison was run: the group tests compare objective response and disease control between groups, and no Response/Status variable is selected."))
                 return()
             }
-            if (!"patient_group" %in% names(patient_summary)) return()
+            # The column is dropped when no patient has a group value at all.
+            if (!"patient_group" %in% names(patient_summary)) {
+                explain(.("No comparison was run: no patient has a value in the group variable."))
+                return()
+            }
 
             # Keep every patient who has a GROUP. A patient with no recorded
             # response is a non-responder, not an exclusion - `NA %in% c("CR",
@@ -3193,22 +3484,22 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
             # censoring path discloses its exclusions; this one did not, so the
             # note could say "over all 24 patients" while the ORR above was over
             # 30, with nothing connecting the two.
+            # Posted below, once a comparison is actually run: before the guards
+            # it claimed "response rates reported above" for withheld rates.
             n_no_group <- sum(is.na(patient_summary$patient_group))
-            if (n_no_group > 0)
-                private$.addNotice("WARNING", .("Patients excluded from the group comparison"), sprintf(
-                    .("%d of %d patients have no value in the grouping variable and are excluded from this comparison only. The response rates reported above still cover all %d patients, so the two denominators differ."),
-                    n_no_group, nrow(patient_summary), nrow(patient_summary)))
 
             # A3: the same RECIST guard .updateAdvancedMetrics uses. Without it
             # this table published "Arm A: 0 of 19 responded (0.0%)" for a
             # response variable the notices panel had just refused to score,
             # directly contradicting the warning printed above it.
-            if (!is.null(stats$response_counts)) {
-                rates_chk <- private$.responseRates(stats$response_counts, nrow(df))
-                if (!is.null(rates_chk) && !isTRUE(rates_chk$evaluable)) {
-                    explain(.("No comparison was run: objective response and disease control are defined only for RECIST-coded responses (CR, PR, SD, PD), and none of the values in the response variable could be recognised as one. Recode the response variable to compare groups."))
-                    return()
-                }
+            # A pure check: .responseRates() posts the "How ORR and DCR are
+            # counted" notice, and calling it here with the group cohort's size
+            # printed a second copy with counts that matched neither table.
+            rc <- stats$response_counts
+            if (!is.null(rc) && (length(private$.nonRecistLabels(rc)) > 0 ||
+                                 !any(names(rc) %in% c("CR", "PR", "SD", "PD")))) {
+                explain(.("No comparison was run: objective response and disease control are defined only for RECIST-coded responses (CR, PR, SD, PD, NE), and the response variable has values that are not, or no assessed response at all. Recode the response variable to compare groups."))
+                return()
             }
 
             # Normalize responses (should already be normalized, but ensure consistency)
@@ -3231,6 +3522,10 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
                     length(groups)))
                 return()
             }
+            if (n_no_group > 0)
+                private$.addNotice("WARNING", .("Patients excluded from the group comparison"), sprintf(
+                    .("%d of %d patients have no value in the grouping variable and are excluded from this comparison only. The response rates reported above still cover all %d patients, so the two denominators differ."),
+                    n_no_group, nrow(patient_summary), nrow(patient_summary)))
 
             # A4: a grouping variable with one level per patient is almost always
             # a continuous column chosen by mistake - the option permits numeric,
@@ -3255,7 +3550,7 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
             }, character(1))
             self$results$groupComparisonTest$setNote("denominator", paste(
                 sprintf(
-                    .("Rates are over all %d patients in the comparison who have a group value, split by group below: not-evaluable, unrecognised and unrecorded responses count as non-responders, the same rule the Objective Response Rate uses. This is what lets the test and the rate above it be read together."),
+                    .("Rates are over all %d patients in the comparison who have a group value, split by group below: not-evaluable and unrecorded responses count as non-responders, the same rule the Objective Response Rate uses. This is what lets the test and the rate above it be read together."),
                     nrow(df)),
                 sprintf(.("Objective response by group - %s."), paste(per_group, collapse = "; "))))
 
@@ -3414,12 +3709,12 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
                     n_export <- min(nrow(per_patient), export_cap)
                     for (i in seq_len(n_export)) {
                         tbl$addRow(rowKey = i, values = private$.tableValues(list(
-                            patient_id = as.character(per_patient$patient_id[i]),
+                            patient_id = .rocLabel(.patientIDLabels(per_patient$patient_id[i]), note = FALSE),
                             start_time = st_exp[i],
                             end_time   = en_exp[i],
                             duration   = per_patient$follow_up[i],
                             response   = if (has_response)
-                                as.character(per_patient$response[i]) else ""
+                                .rocLabel(per_patient$response[i], note = FALSE) else ""
                         )))
                     }
                     if (nrow(per_patient) > export_cap)
@@ -3445,7 +3740,7 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
                 if (!is.null(stats$response_counts)) {
                     for (response in names(stats$response_counts)) {
                         summary_export <- rbind(summary_export, data.frame(
-                            metric = paste0(response, "_count"),
+                            metric = .rocLabel(paste0(response, "_count"), note = FALSE),
                             value = stats$response_counts[[response]],
                             stringsAsFactors = FALSE
                         ))
@@ -3472,12 +3767,12 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
                 export_info <- paste0(
                     "<div style='background-color: rgba(33, 152, 255, 0.07); padding: 15px; border-radius: 5px; margin: 10px 0; color: inherit;'>",
                     "<h4>", .("Export Information"), "</h4>",
-                    "<p>", .("Data has been exported to the following outputs:"), "</p>",
+                    "<p>", .("The tables below hold the data for copying; nothing is written to the data set or to a file."), "</p>",
                     "<ul>",
-                    if (self$options$exportTimeline) paste0("<li><strong>", .("Timeline Data:"), "</strong> ", .("Complete patient timeline dataset with processed variables"), "</li>") else "",
-                    if (self$options$exportSummary) paste0("<li><strong>", .("Summary Statistics:"), "</strong> ", .("Comprehensive summary metrics and clinical indicators"), "</li>") else "",
+                    if (self$options$exportTimeline) paste0("<li><strong>", .("Timeline Data:"), "</strong> ", .("one row per patient with the plotted start, end, duration and response, for the first 500 patients in plot order"), "</li>") else "",
+                    if (self$options$exportSummary) paste0("<li><strong>", .("Summary Statistics:"), "</strong> ", .("the counts, durations and response-category shares shown in the summary"), "</li>") else "",
                     "</ul>",
-                    "<p><em>", .("Note: Exported data can be accessed through the Output panel and used for external analysis."), "</em></p>",
+                    "<p><em>", .("To use them elsewhere, right-click a table and choose Copy."), "</em></p>",
                     "</div>"
                 )
                 self$results$exportInfo$setContent(export_info)
@@ -3782,7 +4077,7 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
                 # image. It is also not "still on treatment" - ANY censored or
                 # still-at-risk status draws one.
                 caption = if (!is.null(arrow_data) && nrow(arrow_data) > 0)
-                    .("Arrow: patient still at risk (censored / alive) at the data cutoff.")
+                    .("Arrow: censored - follow-up ended without the event (alive at the data cutoff, or lost to follow-up).")
                 else NULL
             )
             
@@ -3922,8 +4217,18 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
             } else if (self$options$sortOrder == "response" && "response" %in% names(patient_data)) {
                 # Clinical hierarchy (CR > PR > SD > PD > NE), not alphabetical
                 # factor order, which interleaved PD between PR and SD.
-                rank <- match(private$.normalizeResponses(patient_data$response),
-                              c("CR", "PR", "SD", "PD", "NE"))
+                # Each patient's BEST response (the one every table reports),
+                # not each row's: a CR recorded after a PD put a PD patient at
+                # the top (release review SW-4).
+                pid_s <- .patientIDLabels(patient_data$patient_id)
+                best <- vapply(split(seq_along(pid_s), pid_s), function(ix) {
+                    keep <- ix[!is.na(patient_data$response[ix])]
+                    if (length(keep) == 0) return(NA_character_)
+                    private$.normalizeResponse(private$.getBestResponse(
+                        as.character(patient_data$response[keep]),
+                        patient_data$start_time[keep], patient_data$end_time[keep]))
+                }, "")
+                rank <- match(best[pid_s], c("CR", "PR", "SD", "PD", "NE"))
                 ord <- order(rank, patient_data$patient_id, na.last = TRUE, method = "auto")
             } else {
                 if (self$options$sortOrder == "response") {
@@ -4073,10 +4378,18 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
                 stats$median_followup_km else stats$median_duration
             # library-audit 2026-09-16 OncoPath [LOW] DEFERRED: the follow-up label is spliced into sentences via %s;
             #   revisit when these sentences are next rewritten or translated (guide section 9)
+            # A reverse-KM median that could not be estimated is not follow-up:
+            # the pasted text must not call the observed median "follow-up"
+            # (release review SW-2). With no patient censored it is.
+            if (identical(fu_method, "not_estimable") &&
+                !identical(stats$median_followup_reason_code, "no_censoring"))
+                fu_method <- "not_estimable_fu"
             fu_label  <- switch(
                 fu_method,
+                not_estimable_fu = .("median observed time (the reverse Kaplan-Meier median follow-up could not be estimated, so this is not the length of follow-up)"),
                 reverse_km   = .("median follow-up (reverse Kaplan-Meier)"),
-                unrecognised = .("median observed follow-up duration (censoring coding not recognised)"),
+                pending      = .("median observed follow-up duration (censoring coding not chosen)"),
+                unusable     = .("median observed follow-up duration (censoring variable not readable with this coding)"),
                 .("median observed follow-up duration")
             )
 
@@ -4149,17 +4462,22 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
                                           dcr_test$conf.int[2] * 100)
                 }
 
-                response_text <- if (!rates$evaluable) {
-                    .("Response categories were not RECIST-coded, so objective response and disease control rates were not calculated.")
+                response_text <- if (!rates$evaluable && length(rates$unrecognised) > 0) {
+                    .("Not every response value was a RECIST category (CR, PR, SD, PD, NE), so objective response and disease control rates were not calculated.")
+                } else if (!rates$evaluable) {
+                    .("No patient had a CR, PR, SD or PD response, so objective response and disease control rates were not calculated.")
                 } else {
                     # sprintf, NOT jmvcore::format: format() silently leaves
                     # underscored placeholder names ({orr_n}) unreplaced, so this
                     # sentence used to paste literal "{orr_n}"/"{orr_ci}" into
                     # manuscripts.
-                    sprintf(
+                    trimws(paste(sprintf(
                         .("Response evaluation showed an objective response rate (ORR) of %.1f%% (%d/%d patients%s) and a disease control rate (DCR) of %.1f%% (%d/%d patients%s). Rates are over all patients analysed, with not-evaluable and unrecorded responses counted as non-responders (RECIST 1.1 section 4.9.1)."),
                         orr_pct, orr_count, n_eval, orr_ci_text,
-                        dcr_pct, dcr_count, n_eval, dcr_ci_text)
+                        dcr_pct, dcr_count, n_eval, dcr_ci_text),
+                        if (isTRUE((stats$n_response_derived %||% 0) > 0))
+                            .("For patients with more than one assessment, best response was the best category recorded up to and including the first progression; responses were not confirmed and no minimum duration was required for stable disease.")
+                        else ""))
                 }
             }
 
@@ -4170,7 +4488,9 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
             # not travel with text the user copies into a manuscript, so an n=1
             # cohort produced "ORR 100.0% (1/1 patients; 95% CI 2.5%-100.0%)"
             # under the heading "formatted for direct use". Carry the caveat.
-            caveat_text <- if (isTRUE(stats$n_patients < 10))
+            caveat_text <- if (isTRUE(stats$n_patients == 1))
+                .("With only 1 patient these estimates are exploratory: the confidence intervals are wide and the rates should not be read as precise.")
+            else if (isTRUE(stats$n_patients < 10))
                 sprintf(.("With only %d patients these estimates are exploratory: the confidence intervals are wide and the rates should not be read as precise."),
                         stats$n_patients) else ""
 
@@ -4241,6 +4561,12 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
                     if (!is.null(val) && length(val) > 0)
                         args <- c(args, paste0(option$name, ' = ',
                                                paste0(deparse(val), collapse = '')))
+                } else if (inherits(option, 'OptionString') || inherits(option, 'OptionLevel')) {
+                    # Same trap for free text: a milestone name such as
+                    # Death/Last "FU" was emitted unquoted and did not parse.
+                    val <- option$value
+                    if (!is.null(val) && length(val) == 1 && !identical(val, option$default))
+                        args <- c(args, paste0(option$name, ' = ', deparse(as.character(val))))
                 } else {
                     as <- private$.sourcifyOption(option)
                     if (!identical(as, ''))

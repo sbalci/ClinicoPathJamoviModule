@@ -46,11 +46,11 @@ test_that("censoring coded 1/2 is read as survival's convention, not as all even
                   stringsAsFactors = FALSE)
   ev01 <- c(0, 0, 0, 1, 0, 1, 1, 1, 1, 1)      # 0 = censored, 1 = event
 
-  fu <- function(censor) {
+  fu <- function(censor, ...) {
     d$Censor <- censor
     a <- suppressWarnings(ClinicoPath::swimmerplot(
       data = d, patientID = "PatientID", startTime = "Start", endTime = "End",
-      censorVar = "Censor", personTimeAnalysis = TRUE))$advancedMetrics$asDF
+      censorVar = "Censor", personTimeAnalysis = TRUE, ...))$advancedMetrics$asDF
     a[grepl("Follow-up", a[[1]]), , drop = FALSE]
   }
 
@@ -58,11 +58,16 @@ test_that("censoring coded 1/2 is read as survival's convention, not as all even
   km <- survival::survfit(survival::Surv(d$End, 1 - ev01) ~ 1)
   target <- unname(summary(km)$table[["median"]])
 
-  for (coding in list(`0/1` = ev01, `1/2` = ev01 + 1)) {
-    row <- fu(coding)
+  # 0/1 is the one silent default; 1/2 is read only as the user says
+  # (2026-10-19, R45: 1/2 is coded both ways, so it is never guessed).
+  for (row in list(fu(ev01), fu(ev01 + 1, censorCoding = "two_event"),
+                   fu(2 - ev01, censorCoding = "one_event"))) {
     expect_match(row[[1]][1], "reverse Kaplan-Meier", fixed = TRUE)
     expect_equal(as.numeric(row[[2]][1]), target)
   }
+  row <- fu(ev01 + 1)
+  expect_match(row[[1]][1], "censoring coding not chosen", fixed = TRUE)
+  expect_equal(as.numeric(row[[2]][1]), stats::median(d$End))
 })
 
 
@@ -79,8 +84,12 @@ test_that("the inferred censoring convention is disclosed, never assumed silentl
   n12 <- sw_strip(suppressWarnings(ClinicoPath::swimmerplot(
     data = d, patientID = "PatientID", startTime = "Start", endTime = "End",
     censorVar = "Censor"))$notices$content)
-  expect_match(n12, "only the values 1 and 2", fixed = TRUE)
-  expect_match(n12, "1 = censored", fixed = TRUE)
+  expect_match(n12, "Choose the censoring coding", fixed = TRUE)
+  expect_match(n12, "has the values '1', '2'", fixed = TRUE)
+  n12c <- sw_strip(suppressWarnings(ClinicoPath::swimmerplot(
+    data = d, patientID = "PatientID", startTime = "Start", endTime = "End",
+    censorVar = "Censor", censorCoding = "two_event"))$notices$content)
+  expect_match(n12c, "'2' as the event (follow-up completed); '1' as censored", fixed = TRUE)
 
   d$Censor <- ev01
   n01 <- sw_strip(suppressWarnings(ClinicoPath::swimmerplot(
@@ -294,7 +303,7 @@ test_that("patients with no censoring value are excluded, not counted as events"
     censorVar = "Censor", personTimeAnalysis = TRUE))
   nt <- gsub("\\s+", " ", gsub("<[^>]+>", " ", paste(r$notices$content, collapse = " ")))
   expect_match(nt, "2 of 8 patients have no censoring/event value", fixed = TRUE)
-  expect_match(nt, "excluded from the reverse Kaplan-Meier", fixed = TRUE)
+  expect_match(nt, "uses only the patients whose status is known", fixed = TRUE)
 })
 
 
@@ -307,7 +316,8 @@ test_that("an inestimable reverse KM says so, instead of 'no censoring informati
                   Censor = c(1, 1, 1, 1), stringsAsFactors = FALSE)
   r <- suppressWarnings(ClinicoPath::swimmerplot(
     data = d, patientID = "PatientID", startTime = "Start", endTime = "End",
-    censorVar = "Censor", personTimeAnalysis = TRUE))
+    censorVar = "Censor", censorCoding = "one_event_01", personTimeAnalysis = TRUE))
+  # (an all-1 column waits for a coding since the 2026-10-19 release review, SW-7)
   a <- r$advancedMetrics$asDF
   row <- a[grepl("Follow-up", a[[1]]), ]
   expect_match(row[[1]][1], "reverse Kaplan-Meier not estimable", fixed = TRUE)
@@ -510,8 +520,8 @@ test_that("event markers dropped outside the timeline are reported", {
 
   notes <- sw_strip(r$notices$content)
   expect_match(notes, "4 of 10 event markers are not shown")
-  expect_match(notes, "1 before the patient's first start", fixed = TRUE)
-  expect_match(notes, "3 after the patient's last end", fixed = TRUE)
+  expect_match(notes, "1 fall before the patient's first start.", fixed = TRUE)
+  expect_match(notes, "3 fall after the patient's last end.", fixed = TRUE)
   # and the table is explicitly scoped to what survived
   expect_match(notes, "only the 6 markers", fixed = TRUE)
   expect_equal(sum(r$eventMarkerTable$asDF$n_events), 6)
@@ -544,7 +554,8 @@ test_that("milestone slots that are ignored, unnamed or duplicated say so", {
 
   r <- run(milestone1Name = "", milestone1Date = "ms1")
   expect_equal(as.character(r$milestoneTable$asDF$milestone_name), "ms1")
-  expect_match(sw_strip(r$notices$content), "the variable name is used instead")
+  # a blank name is now the default, so the fallback is no longer announced (R65)
+  expect_equal(as.character(run(milestone1Date = "ms1")$milestoneTable$asDF$milestone_name), "ms1")
 
   r <- run(milestone1Name = "Surgery", milestone1Date = "ms1",
            milestone2Name = "Surgery", milestone2Date = "ms2")
@@ -732,7 +743,7 @@ test_that("the status arrow explains itself on the figure", {
                   resp = rep(c("CR", "PR", "PD"), 2),
                   cens = c(0, 0, 1, 1, 1, 1), stringsAsFactors = FALSE)
   cap <- sw_build(d, censorVar = "cens")$p$labels$caption
-  expect_match(cap, "still at risk")
+  expect_match(cap, "follow-up ended without the event")   # SW-9 wording
   expect_false(grepl("still on treatment", cap, fixed = TRUE))
   # no arrows, no caption
   expect_null(sw_build(d[, setdiff(names(d), "cens")])$p$labels$caption)

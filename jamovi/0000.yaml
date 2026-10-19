@@ -157,19 +157,20 @@ analyses:
       percent change from baseline you have already calculated (one row per
       patient), or a single measurement recorded at each visit (one row per
       patient per visit). It draws waterfall and spider plots, assigns each
-      patient a best response from their largest shrinkage from baseline, and
-      reports ORR and DCR with exact binomial confidence intervals, group
-      comparison, time to response and duration of response. When a time
-      variable is supplied, progression is measured against the patient's
-      smallest recorded burden (nadir), not against baseline. Categories are
-      named CR, PR, SD and PD and the thresholds are adapted from RECIST v1.1,
-      but this is NOT a RECIST v1.1 implementation: because it never sees
-      individual lesions it cannot sum target lesions, detect a new lesion, or
-      judge non-target progression, and it cannot apply the 4-week confirmation
-      rule (a confirmation column only adds markers to the plot; to count
-      confirmed responses, supply confirmed categories through the category
-      override). If your data list each lesion separately, use the lesion-level
-      RECIST v1.1 analysis. It will be available in upcoming releases.
+      patient a best response from their largest shrinkage from baseline (with a
+      time variable, up to the first progression), and reports ORR and DCR with
+      exact binomial confidence intervals, group comparison, time to response
+      and duration of response. When a time variable is supplied, progression is
+      measured against the patient's smallest recorded burden (nadir), not
+      against baseline. Categories are named CR, PR, SD and PD and the
+      thresholds are adapted from RECIST v1.1, but this is NOT a RECIST v1.1
+      implementation: because it never sees individual lesions it cannot sum
+      target lesions, detect a new lesion, or judge non-target progression, and
+      it cannot apply the 4-week confirmation rule (a confirmation column only
+      adds markers to the plot; to count confirmed responses, supply confirmed
+      categories through the category override). If your data list each lesion
+      separately, use the lesion-level RECIST v1.1 analysis. It will be
+      available in upcoming releases.
     menuSubtitle: 'Waterfall and SpiderPlot: One burden value per patient or visit'
     ribbon: analyses
     category: analyses
@@ -1112,7 +1113,7 @@ analyses:
   - title: Odds Ratio Table and Plot
     name: oddsratio
     ns: ClinicoPath
-    menuGroup: Survival
+    menuGroup: SurvivalT
     menuSubgroup: General Statistics
     menuTitle: Odds Ratio Table and Plot
     menuSubtitle: Odds Ratio for Binary Outcomes

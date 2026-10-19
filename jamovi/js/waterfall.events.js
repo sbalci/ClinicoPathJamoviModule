@@ -16,14 +16,12 @@ const events = {
     onChange_colorBy: function(ui) {
         let colorBy = ui.colorBy.value();
 
+        // The colour SCHEME is the user's choice: switching to group colouring
+        // used to replace a chosen colour-blind or jamovi palette with rainbow.
         if (colorBy === "group") {
-            ui.colorScheme.setValue("colorful");
             ui.spiderColorBy.setValue("group");
-            ui.spiderColorScheme.setValue("colorful");
         } else if (colorBy === "recist") {
-            ui.colorScheme.setValue("recist");
             ui.spiderColorBy.setValue("response");
-            ui.spiderColorScheme.setValue("classic");
         }
     },
 
@@ -31,9 +29,7 @@ const events = {
     onChange_groupVar: function(ui) {
         if (ui.groupVar.value()) {
             ui.colorBy.setValue("group");
-            ui.colorScheme.setValue("colorful");
             ui.spiderColorBy.setValue("group");
-            ui.spiderColorScheme.setValue("colorful");
         }
     }
 };

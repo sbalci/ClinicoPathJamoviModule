@@ -150,7 +150,9 @@ test_that("narrative switches are valid result-cache dependencies", {
     for (name in names(toggles)) {
       result <- results[[which(vapply(results, function(x) identical(x$name, name), TRUE))]]
       expect_true(toggles[[name]] %in% result$clearWith)
-      expect_identical(result$visible, paste0("(", toggles[[name]], ")"))
+      # waterfall: "Analysis explanations" shows the same two panels (2026-10-19, R89)
+      expect_identical(result$visible, if (fn == "waterfall")
+        paste0("(", toggles[[name]], " || showExplanations)") else paste0("(", toggles[[name]], ")"))
     }
   }
 })

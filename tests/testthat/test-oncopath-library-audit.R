@@ -229,7 +229,7 @@ test_that("auxiliary meta-analysis honors options and guards infinite values", {
   expect_match(source, "method = rma_method", fixed = TRUE)
   expect_match(source, "is.finite(analysis_data$var_logit_sens)", fixed = TRUE)
   expect_match(source, "is.finite(analysis_data$var_logit_spec)", fixed = TRUE)
-  expect_match(source, "Choose a zero-cell correction", fixed = TRUE)
+  expect_match(source, "were kept by adding 0.5 to all four of their cells", fixed = TRUE)
 })
 
 test_that("diagnostic source remains ASCII-clean and renders real symbols", {
@@ -535,8 +535,15 @@ test_that("report sentences translate as whole sentences", {
     bias_row <- function(name, pooled, rel, material, equivalent, constant = FALSE)
       list(name = name, pooled = pooled, mean_diff = rel / 2, rel = rel, ci = c(rel / 2 - 1, rel / 2 + 1),
            rel_ci = c(rel - 2, rel + 2), rel_ci90 = c(rel - 1.5, rel + 1.5), loa = c(-8, 9), p_holm = 0.002,
+           rel_ci_material = c(rel - 2.5, rel + 2.5), level_material = 1 - 0.10 / 3,
            adjusted = TRUE, material = material, equivalent = equivalent, constant = constant,
            comparator = "reference")
+    # without a reference the rows are pairs of regions (2026-10-19)
+    pair_row <- function(name, comparator, rel, material, equivalent)
+      modifyList(bias_row(name, FALSE, rel, material, equivalent), list(comparator = comparator))
+    pair_sets <- list(
+      list(pair_row("B", "A", 0.2, FALSE, TRUE), pair_row("C", "A", 7, TRUE, FALSE), pair_row("C", "B", 6.8, TRUE, FALSE)),
+      list(pair_row("B", "A", 6, TRUE, FALSE), pair_row("C", "A", 1, FALSE, FALSE), pair_row("C", "B", -5.5, TRUE, FALSE)))
     # a difference shown to change with the level (proportional bias), material or not
     level_row <- function(name, material)
       modifyList(bias_row(name, FALSE, 1, material, FALSE),
@@ -557,8 +564,8 @@ test_that("report sentences translate as whole sentences", {
                           icc_dropped = if (ref) "b4 (n = 3)" else character(0),
                           overall_ci = c(r - 0.1, min(r + 0.03, 0.99)), verdict_corr = r - 0.05,
                           ref_corr = if (ref) c(b1 = r, b2 = r - 0.05) else NULL, min_ref_name = "b2",
-                          bias_rows = if (ref) rows else list(),
-                          bias_material = ref && any(vapply(rows, function(x) x$material, TRUE)),
+                          bias_rows = if (ref) rows else pair_sets[[1 + (r < 0.8)]],
+                          bias_material = any(vapply(if (ref) rows else pair_sets[[1 + (r < 0.8)]], function(x) x$material, TRUE)),
                           bias_equivalent = FALSE, reference_constant = FALSE))
         outputs <- c(outputs, ip$.generateReportSentences(full, 20, 0.90),
                      ip$.generateRecommendations(full, 20))
@@ -775,7 +782,8 @@ test_that("a fatal waterfall processing failure rejects rather than drawing a ba
     "if \\(!is\\.null\\(processed_data\\$error\\) && processed_data\\$error\\) \\{(?s).{0,600}?\\n        \\}",
     src, perl = TRUE))
   expect_length(branch, 1L)
-  expect_true(grepl("jmvcore::reject", branch, fixed = TRUE),
+  # (since 2026-10-19 through .rejectRun(), which redraws the guided panel and then rejects)
+  expect_true(grepl("jmvcore::reject|private\\$\\.rejectRun", branch),
               info = "the fatal branch still reports through .addNotice() instead of jmvcore::reject()")
   expect_false(grepl('.addNotice("ERROR", .("DATA PROCESSING ERROR")', branch, fixed = TRUE))
 })

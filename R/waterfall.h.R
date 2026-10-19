@@ -11,6 +11,7 @@ waterfallOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             timeVar = NULL,
             groupVar = NULL,
             inputType = "percentage",
+            measurementUnit = "unspecified",
             sortBy = "response",
             sortDirection = "conventional",
             showBaseline = TRUE,
@@ -93,6 +94,14 @@ waterfallOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "percentage",
                     "raw"),
                 default="percentage")
+            private$..measurementUnit <- jmvcore::OptionList$new(
+                "measurementUnit",
+                measurementUnit,
+                options=list(
+                    "unspecified",
+                    "mm",
+                    "cm"),
+                default="unspecified")
             private$..sortBy <- jmvcore::OptionList$new(
                 "sortBy",
                 sortBy,
@@ -278,6 +287,7 @@ waterfallOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..timeVar)
             self$.addOption(private$..groupVar)
             self$.addOption(private$..inputType)
+            self$.addOption(private$..measurementUnit)
             self$.addOption(private$..sortBy)
             self$.addOption(private$..sortDirection)
             self$.addOption(private$..showBaseline)
@@ -318,6 +328,7 @@ waterfallOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         timeVar = function() private$..timeVar$value,
         groupVar = function() private$..groupVar$value,
         inputType = function() private$..inputType$value,
+        measurementUnit = function() private$..measurementUnit$value,
         sortBy = function() private$..sortBy$value,
         sortDirection = function() private$..sortDirection$value,
         showBaseline = function() private$..showBaseline$value,
@@ -357,6 +368,7 @@ waterfallOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..timeVar = NA,
         ..groupVar = NA,
         ..inputType = NA,
+        ..measurementUnit = NA,
         ..sortBy = NA,
         ..sortDirection = NA,
         ..showBaseline = NA,
@@ -399,6 +411,7 @@ waterfallResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         guidedAnalysis = function() private$.items[["guidedAnalysis"]],
         todo = function() private$.items[["todo"]],
         todo2 = function() private$.items[["todo2"]],
+        notices = function() private$.items[["notices"]],
         clinicalSummary = function() private$.items[["clinicalSummary"]],
         aboutAnalysis = function() private$.items[["aboutAnalysis"]],
         summaryTable = function() private$.items[["summaryTable"]],
@@ -412,18 +425,15 @@ waterfallResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         groupComparisonTable = function() private$.items[["groupComparisonTable"]],
         groupComparisonTest = function() private$.items[["groupComparisonTest"]],
         spiderplot = function() private$.items[["spiderplot"]],
-        naturalLanguageSummary = function() private$.items[["naturalLanguageSummary"]],
-        explanations = function() private$.items[["explanations"]],
         responseDurationTable = function() private$.items[["responseDurationTable"]],
-        addResponseCategory = function() private$.items[["addResponseCategory"]],
-        notices = function() private$.items[["notices"]]),
+        addResponseCategory = function() private$.items[["addResponseCategory"]]),
     private = list(),
     public=list(
         initialize=function(options) {
             super$initialize(
                 options=options,
                 name="",
-                title="Treatment Response Analysis",
+                title="Treatment Response: Patient-Level Burden",
                 refs=list(
                     "ClinicoPathJamoviModule",
                     "recist",
@@ -441,6 +451,7 @@ waterfallResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "responseVar",
                     "timeVar",
                     "inputType",
+                    "measurementUnit",
                     "enableGuidedMode")))
             self$add(jmvcore::Html$new(
                 options=options,
@@ -451,6 +462,7 @@ waterfallResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "responseVar",
                     "timeVar",
                     "inputType",
+                    "measurementUnit",
                     "enableGuidedMode"),
                 visible="(enableGuidedMode:FALSE)"))
             self$add(jmvcore::Html$new(
@@ -462,19 +474,37 @@ waterfallResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "responseVar",
                     "timeVar",
                     "inputType",
+                    "measurementUnit",
                     "enableGuidedMode"),
                 visible="(enableGuidedMode:FALSE)"))
             self$add(jmvcore::Html$new(
                 options=options,
+                name="notices",
+                title="Important Information",
+                clearWith=list(
+                    "patientID",
+                    "responseVar",
+                    "timeVar",
+                    "inputType",
+                    "measurementUnit",
+                    "groupVar",
+                    "responseCategoryVar",
+                    "showSpiderPlot",
+                    "showConfidenceIntervals",
+                    "showResponseDuration",
+                    "showCI")))
+            self$add(jmvcore::Html$new(
+                options=options,
                 name="clinicalSummary",
                 title="Clinical Summary",
-                visible="(showClinicalSummary)",
+                visible="(showClinicalSummary || showExplanations)",
                 clearWith=list(
                     "showClinicalSummary",
                     "patientID",
                     "responseVar",
                     "timeVar",
                     "inputType",
+                    "measurementUnit",
                     "colorScheme",
                     "groupVar",
                     "responseCategoryVar")))
@@ -482,13 +512,14 @@ waterfallResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 options=options,
                 name="aboutAnalysis",
                 title="About This Analysis",
-                visible="(showAboutAnalysis)",
+                visible="(showAboutAnalysis || showExplanations)",
                 clearWith=list(
                     "showAboutAnalysis",
                     "patientID",
                     "responseVar",
                     "timeVar",
                     "inputType",
+                    "measurementUnit",
                     "enableGuidedMode")))
             self$add(jmvcore::Table$new(
                 options=options,
@@ -514,13 +545,14 @@ waterfallResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "responseVar",
                     "timeVar",
                     "inputType",
+                    "measurementUnit",
                     "responseCategoryVar")))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="personTimeTable",
                 title="Person-Time Analysis",
                 rows=0,
-                visible=FALSE,
+                visible="(length(timeVar) > 0 && inputType:raw)",
                 columns=list(
                     list(
                         `name`="category", 
@@ -555,6 +587,7 @@ waterfallResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "responseVar",
                     "timeVar",
                     "inputType",
+                    "measurementUnit",
                     "responseCategoryVar")))
             self$add(jmvcore::Table$new(
                 options=options,
@@ -575,6 +608,7 @@ waterfallResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "responseVar",
                     "timeVar",
                     "inputType",
+                    "measurementUnit",
                     "responseCategoryVar")))
             self$add(jmvcore::Image$new(
                 options=options,
@@ -606,6 +640,7 @@ waterfallResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "seed",
                     "groupVar",
                     "inputType",
+                    "measurementUnit",
                     "timeVar",
                     "annotationVars",
                     "showCategoryLabels")))
@@ -619,6 +654,7 @@ waterfallResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "responseVar",
                     "timeVar",
                     "inputType",
+                    "measurementUnit",
                     "generateCopyReadyReport",
                     "responseCategoryVar")))
             self$add(jmvcore::Html$new(
@@ -631,6 +667,7 @@ waterfallResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "responseVar",
                     "timeVar",
                     "inputType",
+                    "measurementUnit",
                     "showClinicalSignificance",
                     "responseCategoryVar")))
             self$add(jmvcore::Html$new(
@@ -641,7 +678,10 @@ waterfallResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 clearWith=list(
                     "patientID",
                     "responseVar",
-                    "showClinicalSignificance")))
+                    "showClinicalSignificance",
+                    "timeVar",
+                    "inputType",
+                    "measurementUnit")))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="enhancedClinicalMetrics",
@@ -674,6 +714,7 @@ waterfallResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "responseVar",
                     "timeVar",
                     "inputType",
+                    "measurementUnit",
                     "showConfidenceIntervals",
                     "responseCategoryVar")))
             self$add(jmvcore::Table$new(
@@ -712,6 +753,7 @@ waterfallResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "responseVar",
                     "groupVar",
                     "inputType",
+                    "measurementUnit",
                     "timeVar",
                     "responseCategoryVar")))
             self$add(jmvcore::Table$new(
@@ -743,6 +785,7 @@ waterfallResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "responseVar",
                     "groupVar",
                     "inputType",
+                    "measurementUnit",
                     "timeVar",
                     "responseCategoryVar")))
             self$add(jmvcore::Image$new(
@@ -758,6 +801,7 @@ waterfallResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "responseVar",
                     "timeVar",
                     "inputType",
+                    "measurementUnit",
                     "sortBy",
                     "groupVar",
                     "showThresholds",
@@ -770,26 +814,6 @@ waterfallResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "showMedian",
                     "showCI",
                     "showSpiderLabels")))
-            self$add(jmvcore::Html$new(
-                options=options,
-                name="naturalLanguageSummary",
-                title="Treatment Response Summary",
-                visible="(showExplanations)",
-                clearWith=list(
-                    "patientID",
-                    "responseVar",
-                    "timeVar",
-                    "inputType",
-                    "groupVar",
-                    "showExplanations",
-                    "responseCategoryVar")))
-            self$add(jmvcore::Html$new(
-                options=options,
-                name="explanations",
-                title="Analysis Guide",
-                visible="(showExplanations)",
-                clearWith=list(
-                    "showExplanations")))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="responseDurationTable",
@@ -800,6 +824,7 @@ waterfallResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "responseVar",
                     "timeVar",
                     "inputType",
+                    "measurementUnit",
                     "responseCategoryVar"),
                 columns=list(
                     list(
@@ -826,22 +851,8 @@ waterfallResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "responseVar",
                     "timeVar",
                     "inputType",
-                    "responseCategoryVar")))
-            self$add(jmvcore::Html$new(
-                options=options,
-                name="notices",
-                title="Important Information",
-                clearWith=list(
-                    "patientID",
-                    "responseVar",
-                    "timeVar",
-                    "inputType",
-                    "groupVar",
-                    "responseCategoryVar",
-                    "showSpiderPlot",
-                    "showConfidenceIntervals",
-                    "showResponseDuration",
-                    "showCI")))}))
+                    "measurementUnit",
+                    "responseCategoryVar")))}))
 
 waterfallBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "waterfallBase",
@@ -870,19 +881,20 @@ waterfallBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' percent change from baseline you have already calculated (one row per 
 #' patient), or a single measurement recorded at each visit (one row per 
 #' patient per visit). It draws waterfall and spider plots, assigns each 
-#' patient a best response from their largest shrinkage from baseline, and 
-#' reports ORR and DCR with exact binomial confidence intervals, group 
-#' comparison, time to response and duration of response. When a time variable 
-#' is supplied, progression is measured against the patient's smallest 
-#' recorded burden (nadir), not against baseline. Categories are named CR, PR, 
-#' SD and PD and the thresholds are adapted from RECIST v1.1, but this is NOT 
-#' a RECIST v1.1 implementation: because it never sees individual lesions it 
-#' cannot sum target lesions, detect a new lesion, or judge non-target 
-#' progression, and it cannot apply the 4-week confirmation rule (a 
-#' confirmation column only adds markers to the plot; to count confirmed 
-#' responses, supply confirmed categories through the category override). If 
-#' your data list each lesion separately, use the lesion-level RECIST v1.1 
-#' analysis. It will be available in upcoming releases.
+#' patient a best response from their largest shrinkage from baseline (with a 
+#' time variable, up to the first progression), and reports ORR and DCR with 
+#' exact binomial confidence intervals, group comparison, time to response and 
+#' duration of response. When a time variable is supplied, progression is 
+#' measured against the patient's smallest recorded burden (nadir), not 
+#' against baseline. Categories are named CR, PR, SD and PD and the thresholds 
+#' are adapted from RECIST v1.1, but this is NOT a RECIST v1.1 implementation: 
+#' because it never sees individual lesions it cannot sum target lesions, 
+#' detect a new lesion, or judge non-target progression, and it cannot apply 
+#' the 4-week confirmation rule (a confirmation column only adds markers to 
+#' the plot; to count confirmed responses, supply confirmed categories through 
+#' the category override). If your data list each lesion separately, use the 
+#' lesion-level RECIST v1.1 analysis. It will be available in upcoming 
+#' releases.
 #' 
 #' @param data The data as a data frame.
 #' @param patientID Variable containing patient identifiers (e.g., PT001,
@@ -898,11 +910,18 @@ waterfallBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   from treatment start). Required for spider plot and raw measurement
 #'   processing. Baseline should be time = 0.
 #' @param groupVar Optional grouping variable for coloring bars by patient
-#'   groups (e.g., treatment arms, disease subtypes). When specified, overrides
-#'   RECIST category coloring to show group-based colors.
+#'   groups (e.g., treatment arms, disease subtypes). Bars are coloured by group
+#'   when Color by is set to Patient Groups (jamovi sets it when a group is
+#'   chosen; from R, set colorBy = "group").
 #' @param inputType Specify data format: 'raw' for actual tumor measurements
 #'   (requires time variable) or 'percentage' for pre-calculated percentage
 #'   changes from baseline
+#' @param measurementUnit Unit of the raw tumour measurements (raw input
+#'   only). When stated, progression also requires the RECIST v1.1 absolute
+#'   increase of at least 5 mm over the nadir, for the PD category and for
+#'   progression in time to response and duration of response. Without it a
+#'   small sum can be called progression on the 20 percent rule alone.
+#'   Percentage input carries no size, so the rule cannot apply there.
 #' @param sortBy Sort the waterfall plot by best response or patient ID.
 #' @param sortDirection Direction for the response sort. 'conventional' places
 #'   the highest (worst) response on the left and the lowest (best, most
@@ -919,12 +938,16 @@ waterfallBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param ongoingVar Optional variable flagging patients still on treatment /
 #'   with an ongoing response. Truthy values (TRUE, non-zero, or text matching
 #'   yes/y/true/on/ongoing/1) draw an arrow pointing away from the bar tip. One
-#'   value per patient (the first non-missing value is used).
+#'   value per patient: the latest recorded value (status at the last
+#'   assessment) is used.
 #' @param responseCategoryVar Optional per-patient RECIST category
 #'   (CR/PR/SD/PD). When supplied it overrides the category computed from the
 #'   percentage value, so a patient with target-lesion shrinkage can still be
 #'   classified PD (e.g., a new lesion). Affects bar coloring, response metrics
-#'   (ORR/DCR), time to response and duration of response. One value per
+#'   (ORR/DCR), time to response and duration of response. A patient with no
+#'   measured value but a supplied category (e.g. PD for clinical progression or
+#'   death before the first scan) is counted with that category. NE, "not
+#'   evaluable" and UNK are read as Unknown (not evaluable). One value per
 #'   patient: the first non-missing value is used and conflicting values are
 #'   reported.
 #' @param showCategoryLabels Print the response category (CR, PR, SD, PD)
@@ -942,9 +965,10 @@ waterfallBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   thresholds as dashed lines on the waterfall and spider plots. Helps
 #'   identify Progressive Disease (PD) and Partial Response (PR) cutoffs.
 #' @param labelOutliers Label responses exceeding the specified threshold.
-#' @param showMedian Show the median response as a horizontal line on the
-#'   waterfall plot and as a median trajectory on the spider plot.
-#' @param showCI Show confidence interval around median response.
+#' @param showMedian Show the median best response as a horizontal line on the
+#'   waterfall plot.
+#' @param showCI Show a bootstrap confidence interval around the median best
+#'   response on the waterfall plot.
 #' @param minResponseForLabel Minimum response value for labels to be
 #'   displayed.
 #' @param colorBy Coloring method: RECIST categories or patient groups
@@ -961,25 +985,28 @@ waterfallBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   for each patient.
 #' @param showSpiderPlot Display spider plot showing response trajectories
 #'   over time (requires time variable).
-#' @param spiderColorBy Coloring method for spider plot: Response status or
-#'   patient groups. For backward compatibility, defaults to response status
-#'   coloring.
+#' @param spiderColorBy Colouring for the spider plot: each point by its own
+#'   change from baseline (-30 percent or less vs above -30 percent), or each
+#'   patient by group.
 #' @param spiderColorScheme Color scheme for spider plot lines and points.
-#' @param timeUnitLabel Label to use for the spider plot time axis. Does not
-#'   rescale data; only affects axis labeling.
+#' @param timeUnitLabel The unit the time variable is recorded in. It labels
+#'   the spider plot axis and the time to response and duration of response
+#'   rows; values are not rescaled.
 #' @param generateCopyReadyReport Generate publication-ready result sentences
 #'   with statistical details
 #' @param showClinicalSignificance Display clinical significance context for
 #'   ORR and DCR: the range of rates compatible with the data (exact confidence
 #'   interval) and a sample-size note.
-#' @param showConfidenceIntervals Calculate and display exact binomial
-#'   confidence intervals for ORR and DCR
+#' @param showConfidenceIntervals Show a table of ORR and DCR with exact
+#'   binomial confidence intervals. The intervals in Clinical Response Metrics
+#'   and the very-wide-interval warning do not depend on it.
 #' @param enableGuidedMode Enable step-by-step guidance for new users
-#' @param showClinicalSummary .
-#' @param showAboutAnalysis .
-#' @param showExplanations Display comprehensive explanation of what this
-#'   analysis does, when to use it, data requirements, and key
-#'   assumptions/limitations
+#' @param showClinicalSummary Show a plain-language summary of the response
+#'   results (ORR, DCR and the category counts).
+#' @param showAboutAnalysis Show what the analysis does, when to use it, the
+#'   data it needs and its key assumptions.
+#' @param showExplanations Show both the clinical summary and the About panel
+#'   (the same panels as Clinical summary and About this analysis).
 #' @param showResponseDuration Show a censoring-aware time-to-response (TTR)
 #'   and duration-of-response (DoR) table. DoR is summarized with the
 #'   Kaplan-Meier median (accounting for responders still in response at last
@@ -993,6 +1020,7 @@ waterfallBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   \code{results$guidedAnalysis} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$todo2} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$notices} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$clinicalSummary} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$aboutAnalysis} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$summaryTable} \tab \tab \tab \tab \tab a table \cr
@@ -1006,11 +1034,8 @@ waterfallBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   \code{results$groupComparisonTable} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$groupComparisonTest} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$spiderplot} \tab \tab \tab \tab \tab an image \cr
-#'   \code{results$naturalLanguageSummary} \tab \tab \tab \tab \tab a html \cr
-#'   \code{results$explanations} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$responseDurationTable} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$addResponseCategory} \tab \tab \tab \tab \tab an output \cr
-#'   \code{results$notices} \tab \tab \tab \tab \tab a html \cr
 #' }
 #'
 #' Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
@@ -1027,6 +1052,7 @@ waterfall <- function(
     timeVar = NULL,
     groupVar = NULL,
     inputType = "percentage",
+    measurementUnit = "unspecified",
     sortBy = "response",
     sortDirection = "conventional",
     showBaseline = TRUE,
@@ -1092,6 +1118,7 @@ waterfall <- function(
         timeVar = timeVar,
         groupVar = groupVar,
         inputType = inputType,
+        measurementUnit = measurementUnit,
         sortBy = sortBy,
         sortDirection = sortDirection,
         showBaseline = showBaseline,

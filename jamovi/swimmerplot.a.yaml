@@ -85,10 +85,39 @@ options:
       description:
           R: >
             Optional variable giving each patient's status. A censored / still-at-risk value draws a status arrow at the end of that patient's lane and is also what the reverse Kaplan-Meier median follow-up uses.
-            Use 0/FALSE/"censored"/"alive" for ongoing patients (shows arrow),
-            or 1/TRUE/"event"/"dead" for completed follow-up (no arrow).
+            Numeric 0/1 is read as 0 = censored (arrow), 1 = event (follow-up completed), and the words
+            "censored"/"alive"/"ongoing" and "event"/"dead"/"died"/"death" are read as named. Any other coding,
+            such as Yes/No, TRUE/FALSE or 1/2, is not guessed: choose it in censorCoding.
             Without a censoring variable no arrows are drawn and an information notice says so.
       default: NULL
+
+    - name: censorCoding
+      title: "Censoring coding"
+      type: List
+      options:
+        - title: "Automatic (0/1, or words such as alive/dead)"
+          name: auto
+        - title: "Yes/TRUE = event, No/FALSE = censored"
+          name: yes_event
+        - title: "Yes/TRUE = censored, No/FALSE = event"
+          name: yes_censored
+        - title: "0/1: 1 = event, 0 = censored"
+          name: one_event_01
+        - title: "0/1: 1 = censored, 0 = event"
+          name: one_censored
+        - title: "1/2: 2 = event, 1 = censored"
+          name: two_event
+        - title: "1/2: 1 = event, 2 = censored"
+          name: one_event
+      default: auto
+      description:
+          R: >
+            How the censoring variable is read. Automatic reads numeric 0/1 as 0 = censored,
+            1 = event (choose "0/1: 1 = censored" for a column such as Censored = 1), and the words
+            censored/alive/ongoing and event/dead/died/death as named. Yes/No, TRUE/FALSE, 1/2 and a
+            column with a single value (all 0 or all 1) are never guessed: choose the coding that
+            matches the data. While a column cannot be read, no status arrows are
+            drawn and median follow-up is the plain median of observed durations.
 
     - name: groupVar
       title: "Grouping variable"
@@ -142,7 +171,7 @@ options:
             Select the date/time format in your data (only used when Time Input Type is Date/Time).
 
     - name: timeUnit
-      title: "Time unit for display"
+      title: "Time unit"
       type: List
       options:
         - title: "Days"
@@ -156,7 +185,8 @@ options:
       default: months
       description:
           R: >
-            Time unit to use for display and calculations.
+            With Raw Values input, the unit your start and end times are already recorded in;
+            the values are not rescaled. With Date/Time input, the unit durations are calculated in.
 
     - name: timeDisplay
       title: "Time display mode"
@@ -185,10 +215,10 @@ options:
     - name: milestone1Name
       title: "Milestone 1 name"
       type: String
-      default: "Surgery"
+      default: ""
       description:
           R: >
-            Name for the first milestone event (e.g., Surgery, Treatment Start).
+            Name for the first milestone event (e.g., Surgery, Treatment Start). Leave blank to use the variable's name.
 
     - name: milestone1Date
       title: "Milestone 1 date"
@@ -203,10 +233,10 @@ options:
     - name: milestone2Name
       title: "Milestone 2 name"
       type: String
-      default: "Treatment Start"
+      default: ""
       description:
           R: >
-            Name for the second milestone event.
+            Name for the second milestone event. Leave blank to use the variable's name.
 
     - name: milestone2Date
       title: "Milestone 2 date"
@@ -221,10 +251,10 @@ options:
     - name: milestone3Name
       title: "Milestone 3 name"
       type: String
-      default: "Response Assessment"
+      default: ""
       description:
           R: >
-            Name for the third milestone event.
+            Name for the third milestone event. Leave blank to use the variable's name.
 
     - name: milestone3Date
       title: "Milestone 3 date"
@@ -239,10 +269,10 @@ options:
     - name: milestone4Name
       title: "Milestone 4 name"
       type: String
-      default: "Progression"
+      default: ""
       description:
           R: >
-            Name for the fourth milestone event.
+            Name for the fourth milestone event. Leave blank to use the variable's name.
 
     - name: milestone4Date
       title: "Milestone 4 date"
@@ -257,10 +287,10 @@ options:
     - name: milestone5Name
       title: "Milestone 5 name"
       type: String
-      default: "Death/Last Follow-up"
+      default: ""
       description:
           R: >
-            Name for the fifth milestone event.
+            Name for the fifth milestone event. Leave blank to use the variable's name.
 
     - name: milestone5Date
       title: "Milestone 5 date"

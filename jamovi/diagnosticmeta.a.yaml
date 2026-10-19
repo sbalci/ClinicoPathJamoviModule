@@ -174,11 +174,11 @@ options:
           - name: 'zero_cells'
             title: +0.5 to the zero cells only
           - name: 'reciprocal_n'
-            title: +1/N to all cells (n = study size)
+            title: +1/N to all cells (N = study size)
       default: none
       description:
           R: |
-            Method for handling zero cells in 2x2 tables. 'none' (recommended) applies no correction to the data itself; the bivariate model still adds 0.5 to studies with a zero cell at fitting time (mada's 'single' correction), while the univariate heterogeneity and meta-regression models exclude those studies instead, so they rest on fewer studies. Both are disclosed in the output. Under 'none' the publication-bias path behaves differently from the rest: because a zero cell survives to that point, Deeks' test and the funnel plot add 0.5 to EVERY study, not only the affected ones (correcting only the affected studies would build a size-related trend into the test's own outcome variable), and no asymmetry verdict is reported at all when more than a quarter of the studies have a zero cell. The other three settings leave no zero cell, so neither of those steps applies and a verdict is always given. 'constant' adds 0.5 to all four cells of affected studies before any analysis. 'zero_cells' adds 0.5 only to the zero cells themselves. 'reciprocal_n' adds 1/N to all cells of affected studies, where N is the study's total sample size. (The former option keys 'treatment_arm' and 'empirical' were renamed: they did not implement the procedures those names denote in Sweeting et al. 2004.)
+            Method for handling zero cells in 2x2 tables, applied to the pooled models (bivariate, proportional-hazards SROC, heterogeneity and meta-regression) and to the forest and SROC plots. 'none' (recommended) applies no correction to the data itself; every model adds 0.5 to all four cells of studies with a zero cell at fitting time (mada's 'single' correction), so every model uses every study. 'constant' adds 0.5 to all four cells of affected studies before the pooled models are fitted; 'none' and 'constant' therefore fit the same models and give the same pooled results (only the study points of the forest and SROC plots differ), so 'zero_cells' is the alternative to compare when checking how sensitive a result is to the correction. 'zero_cells' adds 0.5 only to the zero cells themselves. 'reciprocal_n' adds 1/N to all cells of affected studies, where N is the study's total sample size; a cell of 1/N gives that study a logit variance of about N, so the zero-cell studies (the 100 percent sensitivity or specificity studies) get almost no weight and the pooled accuracy is biased downward. In simulations of high-accuracy tests its 95 percent confidence interval for pooled sensitivity covered the true value in only 31-55 percent of meta-analyses, against 58-69 percent under the default; it is not a published correction, so prefer the default. Deeks' test and the funnel plot always use the raw counts, whatever this setting: when any study has a zero cell they add 0.5 to EVERY study (correcting only the affected studies would build a size-related trend into the test's own outcome variable), and no asymmetry verdict is reported when more than a quarter of the studies have a zero cell. (The former option keys 'treatment_arm' and 'empirical' were renamed: they did not implement the procedures those names denote in Sweeting et al. 2004.)
 
     - name: forest_plot
       title: Forest plot
@@ -236,7 +236,7 @@ options:
           - name: 'standard'
             title: Standard colors
           - name: 'colorblind_safe'
-            title: Color-Blind safe
+            title: Color-blind safe
           - name: 'high_contrast'
             title: High contrast
           - name: 'viridis'

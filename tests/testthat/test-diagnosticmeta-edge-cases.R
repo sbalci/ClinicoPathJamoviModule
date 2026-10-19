@@ -29,7 +29,7 @@ test_that("missing counts are excluded and disclosed, not thrown", {
   # exclusion disclosures render in the dedicated notices channel
   txt <- gsub("<[^>]+>", " ", res$notices$content)
   expect_match(txt, "Studies excluded")
-  expect_match(txt, "missing counts")
+  expect_match(txt, "Missing counts")   # whole-sentence reasons since the 2026-10-19 audit
 })
 
 test_that("diagnosticmeta handles very small sample sizes", {
@@ -89,7 +89,7 @@ test_that("negative counts are excluded and disclosed, not thrown", {
   expect_s3_class(res, "diagnosticmetaResults")
   # exclusion disclosures render in the dedicated notices channel
   txt <- gsub("<[^>]+>", " ", res$notices$content)
-  expect_match(txt, "negative counts")
+  expect_match(txt, "Negative counts")   # whole-sentence reasons since the 2026-10-19 audit
 })
 
 test_that("diagnosticmeta handles non-integer counts", {
@@ -269,7 +269,7 @@ test_that("an all-zero study is excluded and disclosed, not thrown", {
   expect_s3_class(res, "diagnosticmetaResults")
   # exclusion disclosures render in the dedicated notices channel
   txt <- gsub("<[^>]+>", " ", res$notices$content)
-  expect_match(txt, "no diseased or no non-diseased")
+  expect_match(txt, "No diseased or no non-diseased participants: ", fixed = TRUE)
 })
 
 test_that("diagnosticmeta handles inconsistent 2x2 table structure", {

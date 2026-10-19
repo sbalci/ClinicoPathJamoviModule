@@ -15,6 +15,16 @@ verdict_of <- function(res) {
 }
 ihc <- function(d, ...) ClinicoPath::ihcheterogeneity(showInterpretation = TRUE, data = d, ...)
 note_text <- function(tbl) paste(vapply(tbl$notes, function(n) n$note, ""), collapse = " | ")
+# CI of the percentage difference since 2026-10-19 (Fieller): the set of ratios R
+# whose paired t-test of d - R z is not rejected, found by root finding - not the
+# module's closed-form quadratic. z is the reference, or the mean of a pair.
+ratio_ci <- function(d, z, level) {
+    n <- length(d); q <- qt((1 + level) / 2, n - 1)
+    t_of <- function(R) { w <- d - R * z; mean(w) / (sd(w) / sqrt(n)) }
+    R0 <- mean(d) / mean(z)
+    c(uniroot(function(R) t_of(R) - q, c(R0 - 1, R0), tol = 1e-12)$root,
+      uniroot(function(R) t_of(R) + q, c(R0, R0 + 1), tol = 1e-12)$root) * 100
+}
 
 # 30 cases: region b1 over-reads the reference by ~11 %, region b2 under-reads by
 # ~11 %. The mean of the two regions matches the reference.
@@ -97,7 +107,7 @@ test_that("the Methods paragraph describes a reference comparison only when ther
     # since the second review the regions are compared with one another (paired
     # t-tests between regions); nothing may claim a reference that does not exist
     expect_false(grepl("from the reference measurement", txt(inter$report_sentences$content), fixed = TRUE))
-    expect_match(txt(inter$report_sentences$content), "each region against the other region(s)", fixed = TRUE)
+    expect_match(txt(inter$report_sentences$content), "Systematic differences between the two regions were assessed", fixed = TRUE)
     ref <- ihc(d, wholesection = "whole", biopsy1 = "b1", biopsy2 = "b2", showReportSentences = TRUE)
     expect_match(txt(ref$report_sentences$content), "paired t-test", fixed = TRUE)
 })
@@ -498,7 +508,7 @@ test_that("a difference that is not significant but not ruled out blocks the pla
     expect_gt(reach, 5)                            # ... and not ruled out within 5%
     res <- ihc(d, wholesection = "whole", biopsy1 = "b1")
     expect_equal(verdict_of(res), "AGREEMENT THRESHOLDS MET, NOT CONFIRMED")
-    ci90 <- (mean(d$b1 - w) + c(-1, 1) * qt(0.95, 5) * sd(d$b1 - w) / sqrt(6)) / mean(w) * 100
+    ci90 <- ratio_ci(d$b1 - w, w, 0.90)
     expect_match(txt(res$interpretation$content), sprintf("(90%% CI %.1f%% to %.1f%%)", ci90[1], ci90[2]), fixed = TRUE)
     # with agreement actually shown (every CI inside 5%) the plain label is used
     ok <- ihc(clean(40), wholesection = "whole", biopsy1 = "b1", biopsy2 = "b2")
@@ -655,13 +665,18 @@ test_that("tied per-case CVs do not abort the compartment tests (R32)", {
                  "identical", fixed = TRUE)
 })
 
-test_that("ICC CIs are reported when the residual mean square is zero (R35)", {
+test_that("no ICC CI is reported when the residual mean square is zero (R35, reversed by R30 2026-10-19)", {
+    # The 1-to-1 limits it used to show described the absence of residual
+    # variation in this sample, not the sampling uncertainty of the ICC.
     ref <- c(5, 12, 18, 25, 31, 40, 47, 55, 62, 70)
     d <- data.frame(ref = ref, b1 = ref + 3)
-    df <- ihc(d, wholesection = "ref", biopsy1 = "b1")$reproducibilitytable$asDF
+    res <- ihc(d, wholesection = "ref", biopsy1 = "b1")
+    df <- res$reproducibilitytable$asDF
     ps <- psych::ICC(as.matrix(d), lmer = FALSE)$results
     a <- df[grepl("absolute agreement", df$metric), ]
-    expect_equal(c(a$value, a$ci_lower, a$ci_upper), c(ps$ICC[2], ps$`lower bound`[2], ps$`upper bound`[2]), tolerance = 1e-6)
+    expect_equal(a$value, ps$ICC[2], tolerance = 1e-6)
+    expect_true(is.na(a$ci_lower) && is.na(a$ci_upper))
+    expect_match(note_text(res$reproducibilitytable), "the ICC confidence intervals cannot be estimated", fixed = TRUE)
     # r = 1 up to rounding: no zero-width correlation CI (R38)
     r1 <- df[df$metric == "Mean Regional-Reference Correlation", ]
     expect_true(is.na(r1$ci_lower) && is.na(r1$ci_upper))
@@ -829,16 +844,18 @@ margin_data <- function() {
 test_that("Clinical Impact states the zone at the user's margin with the 90% CI the rule reads (FC2, RC1)", {
     d <- margin_data(); n <- nrow(d)
     diffs <- list(d$b1 - d$whole, d$b2 - d$whole, (d$b1 + d$b2) / 2 - d$whole)
-    rel_ci <- function(x, level) (mean(x) + c(-1, 1) * qt(1 - (1 - level) / 2, n - 1) * sd(x) / sqrt(n)) / mean(d$whole) * 100
     for (mg in c(2, 5, 10)) {
         imp <- ihc(d, wholesection = "whole", biopsy1 = "b1", biopsy2 = "b2", bias_margin = mg)$samplingbiastable$asDF$clinical_impact
         for (i in 1:3) {
-            ci90 <- rel_ci(diffs[[i]], 0.90)
-            ci_adj <- rel_ci(diffs[[i]], 1 - 0.10 / 3)       # Bonferroni over 3 rows
-            zone <- if (min(ci_adj) > mg || max(ci_adj) < -mg) "shown to exceed" else
-                    if (all(abs(ci90) <= mg)) "ruled out" else "inconclusive"
+            ci90 <- ratio_ci(diffs[[i]], d$whole, 0.90)
+            ci_adj <- ratio_ci(diffs[[i]], d$whole, 1 - 0.10 / 3)       # Bonferroni over 3 rows
+            material <- min(ci_adj) > mg || max(ci_adj) < -mg
+            zone <- if (material) "shown to exceed" else if (all(abs(ci90) <= mg)) "ruled out" else "inconclusive"
             expect_match(imp[i], zone, fixed = TRUE)
-            expect_match(imp[i], sprintf("90%% CI %.1f%% to %.1f%%", ci90[1], ci90[2]), fixed = TRUE)
+            # a material row shows the interval the decision used (2026-10-19)
+            shown <- if (material) sprintf("96.7%% CI %.1f%% to %.1f%%", ci_adj[1], ci_adj[2])
+                     else sprintf("90%% CI %.1f%% to %.1f%%", ci90[1], ci90[2])
+            expect_match(imp[i], shown, fixed = TRUE)
             expect_match(imp[i], sprintf("the %s%% margin", mg), fixed = TRUE)
         }
     }
@@ -860,7 +877,8 @@ test_that("the inter-regional design names its comparator, never a reference (FC
                            paste(txt(res$interpretation$content), txt(res$report_sentences$content)), fixed = TRUE))
         expect_equal(res$samplingbiastable$getColumn("mean_diff")$title, "Mean Difference (Region - Comparator)")
     }
-    expect_match(txt(three$interpretation$content), "can differ from the mean of the other regions by about this much", fixed = TRUE)
+    # pairs since 2026-10-19: the widest pair names both regions
+    expect_match(txt(three$interpretation$content), "in an individual case this region can differ from region '", fixed = TRUE)
     expect_match(txt(two$report_sentences$content), "can differ from region 'c1' by about this much", fixed = TRUE)
     # the value is the mean over pairs of regions (independent)
     rho <- mean(combn(3, 2, function(p) cor(d[[p[1]]], d[[p[2]]], method = "spearman")))

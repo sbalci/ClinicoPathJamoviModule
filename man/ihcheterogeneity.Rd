@@ -80,8 +80,9 @@ computationally identical - the bias table is always computed when a
 reference is supplied.)}
 
 \item{sampling_strategy}{How the regions were chosen. Recorded for
-reporting only: it changes no computation, and systematic or stratified
-sampling adds a note on how to read the estimates.}
+reporting only: it changes no computation. Random, systematic or stratified
+sampling adds a notice on how to read the estimates; 'Not specified' adds
+nothing.}
 
 \item{cv_threshold}{Largest acceptable within-case coefficient of variation
 (the root mean square of the per-case CVs), in percent. The CV is graded
@@ -96,14 +97,16 @@ reference, the mean correlation between regions is graded. Choose it before
 looking at the results.}
 
 \item{bias_margin}{Largest systematic difference, as a percentage of the
-comparison mean (the reference, or the other regions), that is still
-clinically acceptable. A difference is ruled out when its 90 percent CI
-lies inside the margin (two one-sided tests), and shown to be material when
-a Bonferroni-adjusted CI lies entirely beyond it; otherwise it is
-inconclusive. A difference shown to change with the level (proportional
-bias) is also judged at the 5th and 95th percentiles of the level, and is
-ruled out only when both ends lie inside the margin. Choose it before
-looking at the results.}
+comparison mean (the reference, or without one the mean of the two regions
+of each pair), that is still clinically acceptable. A difference is ruled
+out when its 90 percent CI (a Fieller interval for the ratio) lies inside
+the margin (two one-sided tests), and shown to be material when a
+Bonferroni-adjusted CI lies entirely beyond it; otherwise it is
+inconclusive. Without a reference every pair of regions is compared, and
+the regions agree only when every pair is ruled out. A difference shown to
+change with the level (proportional bias) is also judged at the 5th and
+95th percentiles of the level, and is ruled out only when both ends lie
+inside the margin. Choose it before looking at the results.}
 
 \item{show_variability_plots}{Show the regional-measurement, per-case CV
 and spatial plots. They are always shown under the Variance and
@@ -125,9 +128,12 @@ shown under the Comprehensive focus.}
 
 \item{generate_recommendations}{Recommendations on regions per case,
 calibration of systematic differences and quality control, derived from the
-results of this analysis.}
+results of this analysis. They are shown inside the clinical
+interpretation, so they need showInterpretation = TRUE.}
 
-\item{showInterpretation}{.}
+\item{showInterpretation}{Display the clinical interpretation report: study
+design, key findings and the overall verdict (and the recommendations, when
+generate_recommendations is TRUE).}
 
 \item{showSummary}{Display natural-language summary of heterogeneity
 analysis results}

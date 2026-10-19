@@ -11,21 +11,22 @@ swimmerplotOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
             endTime = NULL,
             responseVar = NULL,
             censorVar = NULL,
+            censorCoding = "auto",
             groupVar = NULL,
             timeType = "raw",
             dateFormat = "ymd",
             timeUnit = "months",
             timeDisplay = "relative",
             maxMilestones = 5,
-            milestone1Name = "Surgery",
+            milestone1Name = "",
             milestone1Date = NULL,
-            milestone2Name = "Treatment Start",
+            milestone2Name = "",
             milestone2Date = NULL,
-            milestone3Name = "Response Assessment",
+            milestone3Name = "",
             milestone3Date = NULL,
-            milestone4Name = "Progression",
+            milestone4Name = "",
             milestone4Date = NULL,
-            milestone5Name = "Death/Last Follow-up",
+            milestone5Name = "",
             milestone5Date = NULL,
             showEventMarkers = FALSE,
             eventVar = NULL,
@@ -102,6 +103,18 @@ swimmerplotOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                     "numeric"),
                 required=FALSE,
                 default=NULL)
+            private$..censorCoding <- jmvcore::OptionList$new(
+                "censorCoding",
+                censorCoding,
+                options=list(
+                    "auto",
+                    "yes_event",
+                    "yes_censored",
+                    "one_event_01",
+                    "one_censored",
+                    "two_event",
+                    "one_event"),
+                default="auto")
             private$..groupVar <- jmvcore::OptionVariable$new(
                 "groupVar",
                 groupVar,
@@ -157,7 +170,7 @@ swimmerplotOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
             private$..milestone1Name <- jmvcore::OptionString$new(
                 "milestone1Name",
                 milestone1Name,
-                default="Surgery")
+                default="")
             private$..milestone1Date <- jmvcore::OptionVariable$new(
                 "milestone1Date",
                 milestone1Date,
@@ -170,7 +183,7 @@ swimmerplotOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
             private$..milestone2Name <- jmvcore::OptionString$new(
                 "milestone2Name",
                 milestone2Name,
-                default="Treatment Start")
+                default="")
             private$..milestone2Date <- jmvcore::OptionVariable$new(
                 "milestone2Date",
                 milestone2Date,
@@ -183,7 +196,7 @@ swimmerplotOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
             private$..milestone3Name <- jmvcore::OptionString$new(
                 "milestone3Name",
                 milestone3Name,
-                default="Response Assessment")
+                default="")
             private$..milestone3Date <- jmvcore::OptionVariable$new(
                 "milestone3Date",
                 milestone3Date,
@@ -196,7 +209,7 @@ swimmerplotOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
             private$..milestone4Name <- jmvcore::OptionString$new(
                 "milestone4Name",
                 milestone4Name,
-                default="Progression")
+                default="")
             private$..milestone4Date <- jmvcore::OptionVariable$new(
                 "milestone4Date",
                 milestone4Date,
@@ -209,7 +222,7 @@ swimmerplotOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
             private$..milestone5Name <- jmvcore::OptionString$new(
                 "milestone5Name",
                 milestone5Name,
-                default="Death/Last Follow-up")
+                default="")
             private$..milestone5Date <- jmvcore::OptionVariable$new(
                 "milestone5Date",
                 milestone5Date,
@@ -347,6 +360,7 @@ swimmerplotOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
             self$.addOption(private$..endTime)
             self$.addOption(private$..responseVar)
             self$.addOption(private$..censorVar)
+            self$.addOption(private$..censorCoding)
             self$.addOption(private$..groupVar)
             self$.addOption(private$..timeType)
             self$.addOption(private$..dateFormat)
@@ -391,6 +405,7 @@ swimmerplotOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
         endTime = function() private$..endTime$value,
         responseVar = function() private$..responseVar$value,
         censorVar = function() private$..censorVar$value,
+        censorCoding = function() private$..censorCoding$value,
         groupVar = function() private$..groupVar$value,
         timeType = function() private$..timeType$value,
         dateFormat = function() private$..dateFormat$value,
@@ -434,6 +449,7 @@ swimmerplotOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
         ..endTime = NA,
         ..responseVar = NA,
         ..censorVar = NA,
+        ..censorCoding = NA,
         ..groupVar = NA,
         ..timeType = NA,
         ..dateFormat = NA,
@@ -518,6 +534,7 @@ swimmerplotResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                     "endTime",
                     "responseVar",
                     "censorVar",
+                    "censorCoding",
                     "timeUnit",
                     "groupVar",
                     "eventVar",
@@ -547,6 +564,7 @@ swimmerplotResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                     "endTime",
                     "responseVar",
                     "censorVar",
+                    "censorCoding",
                     "timeType",
                     "dateFormat",
                     "timeUnit",
@@ -596,6 +614,7 @@ swimmerplotResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                     "endTime",
                     "responseVar",
                     "censorVar",
+                    "censorCoding",
                     "timeType",
                     "dateFormat",
                     "timeUnit",
@@ -617,6 +636,7 @@ swimmerplotResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                     "timeDisplay",
                     "showInterpretation",
                     "censorVar",
+                    "censorCoding",
                     "personTimeAnalysis",
                     "responseAnalysis")))
             self$add(jmvcore::Table$new(
@@ -655,7 +675,8 @@ swimmerplotResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                     "dateFormat",
                     "timeDisplay",
                     "timeUnit",
-                    "personTimeAnalysis")))
+                    "personTimeAnalysis",
+                    "responseAnalysis")))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="milestoneTable",
@@ -769,7 +790,9 @@ swimmerplotResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                     "timeType",
                     "timeUnit",
                     "timeDisplay",
-                    "dateFormat")))
+                    "dateFormat",
+                    "sortOrder",
+                    "sortVariable")))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="summaryData",
@@ -843,6 +866,7 @@ swimmerplotResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                     "endTime",
                     "responseVar",
                     "censorVar",
+                    "censorCoding",
                     "timeType",
                     "dateFormat",
                     "timeDisplay",
@@ -880,6 +904,7 @@ swimmerplotResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                     "startTime",
                     "endTime",
                     "timeType",
+                    "dateFormat",
                     "responseVar",
                     "groupVar",
                     "responseAnalysis")))
@@ -907,6 +932,7 @@ swimmerplotResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                     "dateFormat",
                     "timeDisplay",
                     "censorVar",
+                    "censorCoding",
                     "responseAnalysis",
                     "timeUnit",
                     "showCopyReady")))
@@ -954,10 +980,20 @@ swimmerplotBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   PD) to color lanes.
 #' @param censorVar Optional variable giving each patient's status. A censored
 #'   / still-at-risk value draws a status arrow at the end of that patient's
-#'   lane and is also what the reverse Kaplan-Meier median follow-up uses. Use
-#'   0/FALSE/"censored"/"alive" for ongoing patients (shows arrow), or
-#'   1/TRUE/"event"/"dead" for completed follow-up (no arrow). Without a
-#'   censoring variable no arrows are drawn and an information notice says so.
+#'   lane and is also what the reverse Kaplan-Meier median follow-up uses.
+#'   Numeric 0/1 is read as 0 = censored (arrow), 1 = event (follow-up
+#'   completed), and the words "censored"/"alive"/"ongoing" and
+#'   "event"/"dead"/"died"/"death" are read as named. Any other coding, such as
+#'   Yes/No, TRUE/FALSE or 1/2, is not guessed: choose it in censorCoding.
+#'   Without a censoring variable no arrows are drawn and an information notice
+#'   says so.
+#' @param censorCoding How the censoring variable is read. Automatic reads
+#'   numeric 0/1 as 0 = censored, 1 = event (choose "0/1: 1 = censored" for a
+#'   column such as Censored = 1), and the words censored/alive/ongoing and
+#'   event/dead/died/death as named. Yes/No, TRUE/FALSE, 1/2 and a column with a
+#'   single value (all 0 or all 1) are never guessed: choose the coding that
+#'   matches the data. While a column cannot be read, no status arrows are drawn
+#'   and median follow-up is the plain median of observed durations.
 #' @param groupVar Optional grouping variable for comparing response rates
 #'   between patient groups (e.g., treatment arms, disease subtypes). When
 #'   specified, Fisher's exact tests compare ORR and DCR between groups. Lane
@@ -965,21 +1001,27 @@ swimmerplotBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param timeType Select whether time values are raw numbers or dates/times.
 #' @param dateFormat Select the date/time format in your data (only used when
 #'   Time Input Type is Date/Time).
-#' @param timeUnit Time unit to use for display and calculations.
+#' @param timeUnit With Raw Values input, the unit your start and end times
+#'   are already recorded in; the values are not rescaled. With Date/Time input,
+#'   the unit durations are calculated in.
 #' @param timeDisplay Choose whether to align all start times to 0 or use
 #'   absolute start times.
 #' @param maxMilestones Maximum number of milestone events to support
 #'   (milestone slots 1-5 are defined).
 #' @param milestone1Name Name for the first milestone event (e.g., Surgery,
-#'   Treatment Start).
+#'   Treatment Start). Leave blank to use the variable's name.
 #' @param milestone1Date Date/time variable when milestone 1 occurred.
-#' @param milestone2Name Name for the second milestone event.
+#' @param milestone2Name Name for the second milestone event. Leave blank to
+#'   use the variable's name.
 #' @param milestone2Date Date/time variable when milestone 2 occurred.
-#' @param milestone3Name Name for the third milestone event.
+#' @param milestone3Name Name for the third milestone event. Leave blank to
+#'   use the variable's name.
 #' @param milestone3Date Date/time variable when milestone 3 occurred.
-#' @param milestone4Name Name for the fourth milestone event.
+#' @param milestone4Name Name for the fourth milestone event. Leave blank to
+#'   use the variable's name.
 #' @param milestone4Date Date/time variable when milestone 4 occurred.
-#' @param milestone5Name Name for the fifth milestone event.
+#' @param milestone5Name Name for the fifth milestone event. Leave blank to
+#'   use the variable's name.
 #' @param milestone5Date Date/time variable when milestone 5 occurred.
 #' @param showEventMarkers Whether to display event markers along patient
 #'   timelines.
@@ -1070,21 +1112,22 @@ swimmerplot <- function(
     endTime,
     responseVar = NULL,
     censorVar = NULL,
+    censorCoding = "auto",
     groupVar = NULL,
     timeType = "raw",
     dateFormat = "ymd",
     timeUnit = "months",
     timeDisplay = "relative",
     maxMilestones = 5,
-    milestone1Name = "Surgery",
+    milestone1Name = "",
     milestone1Date = NULL,
-    milestone2Name = "Treatment Start",
+    milestone2Name = "",
     milestone2Date = NULL,
-    milestone3Name = "Response Assessment",
+    milestone3Name = "",
     milestone3Date = NULL,
-    milestone4Name = "Progression",
+    milestone4Name = "",
     milestone4Date = NULL,
-    milestone5Name = "Death/Last Follow-up",
+    milestone5Name = "",
     milestone5Date = NULL,
     showEventMarkers = FALSE,
     eventVar = NULL,
@@ -1152,6 +1195,7 @@ swimmerplot <- function(
         endTime = endTime,
         responseVar = responseVar,
         censorVar = censorVar,
+        censorCoding = censorCoding,
         groupVar = groupVar,
         timeType = timeType,
         dateFormat = dateFormat,

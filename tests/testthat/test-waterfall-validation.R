@@ -135,8 +135,8 @@ test_that("VAL-waterfall: Reference parity on bundled datasets (Claims C01-C07, 
   st_r <- res_r$summaryTable$asDF
   st_r_keys <- gsub('^"|"$', '', rownames(st_r))
   expect_equal(st_r[st_r_keys == "recist_CR", "n"], 1L)
-  expect_equal(st_r[st_r_keys == "recist_PR", "n"], 11L)
-  expect_equal(st_r[st_r_keys == "recist_SD", "n"], 3L)
+  expect_equal(st_r[st_r_keys == "recist_PR", "n"], 10L)
+  expect_equal(st_r[st_r_keys == "recist_SD", "n"], 4L)
   expect_equal(st_r[st_r_keys == "recist_PD", "n"], 0L)
   expect_equal(as.numeric(res_r$personTimeTable$asDF[5, "person_time"]), 90)
 })

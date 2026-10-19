@@ -186,8 +186,9 @@ options:
       default: unknown
       description:
           R: >
-            How the regions were chosen. Recorded for reporting only: it changes no computation,
-            and systematic or stratified sampling adds a note on how to read the estimates.
+            How the regions were chosen. Recorded for reporting only: it changes no computation.
+            Random, systematic or stratified sampling adds a notice on how to read the estimates;
+            'Not specified' adds nothing.
 
     - name: cv_threshold
       title: CV threshold for acceptable variability
@@ -225,10 +226,12 @@ options:
       description:
           R: >
             Largest systematic difference, as a percentage of the comparison mean (the reference,
-            or the other regions), that is still clinically acceptable. A difference is ruled out
-            when its 90 percent CI lies inside the margin (two one-sided tests), and shown to be
-            material when a Bonferroni-adjusted CI lies entirely beyond it; otherwise it is
-            inconclusive. A difference shown to change with the level (proportional bias) is
+            or without one the mean of the two regions of each pair), that is still clinically
+            acceptable. A difference is ruled out when its 90 percent CI (a Fieller interval for the
+            ratio) lies inside the margin (two one-sided tests), and shown to be material when a
+            Bonferroni-adjusted CI lies entirely beyond it; otherwise it is inconclusive. Without a
+            reference every pair of regions is compared, and the regions agree only when every pair
+            is ruled out. A difference shown to change with the level (proportional bias) is
             also judged at the 5th and 95th percentiles of the level, and is ruled out only when
             both ends lie inside the margin. Choose it before looking at the results.
 
@@ -272,12 +275,17 @@ options:
       description:
           R: >
             Recommendations on regions per case, calibration of systematic differences and
-            quality control, derived from the results of this analysis.
+            quality control, derived from the results of this analysis. They are shown inside the
+            clinical interpretation, so they need showInterpretation = TRUE.
 
     - name: showInterpretation
       title: Clinical interpretation
       type: Bool
       default: false
+      description:
+          R: >
+            Display the clinical interpretation report: study design, key findings and the
+            overall verdict (and the recommendations, when generate_recommendations is TRUE).
 
     - name: showSummary
       title: Plain-language summary

@@ -9,13 +9,18 @@ critical_studies <- function() data.frame(study = paste0("S", 1:12),
     fp = 10:21, tn = 100 - (10:21), cov = factor(rep(c("A", "B", "C"), each = 4)))
 
 test_that("diagnostic notes describe the retained reference of each fitted margin", {
+    # Level A is four TP = 0 studies. The sensitivity margin used to drop them
+    # and fall back to reference 'B'; it now keeps them with +0.5 in all four
+    # cells, as the bivariate model does, so both margins use reference 'A'.
     d <- critical_studies(); d$tp[1:4] <- 0; d$fn[1:4] <- 100
     r <- suppressWarnings(critical_dm(d))
     n <- critical_notes(r$metaregression)
-    expect_match(n, "Sensitivity:.*reference level 'B'")
-    expect_match(n, "Specificity:.*reference level 'A'")
+    expect_match(n, "Sensitivity: each coefficient contrasts that level of cov against the reference level 'A'", fixed = TRUE)
+    expect_match(n, "Specificity: each coefficient contrasts that level of cov against the reference level 'A'", fixed = TRUE)
+    expect_match(n, "4 study/studies with a zero cell were kept", fixed = TRUE)
     t <- r$metaregression$asDF
-    expect_equal(t$estimate[t$measure == "Sensitivity" & t$parameter == "cov C"], log(4))
+    expect_equal(t$estimate[t$measure == "Sensitivity" & t$parameter == "cov C"],
+                 log(4) - log(0.5 / 100.5), tolerance = 1e-10)
     d <- d[12:1, ]; r2 <- suppressWarnings(critical_dm(d))
     expect_equal(r2$metaregression$asDF, r$metaregression$asDF)
 })
@@ -46,11 +51,16 @@ test_that("ordered and custom contrasts retain their model and report actual cod
 test_that("swimmer rejects conflicting patient groups regardless of order and size", {
     for (count in c(8L, 600L)) {
         d <- data.frame(id = rep(seq_len(count), each = 2), start = rep(c(0, 2), count),
-                        end = rep(c(1, 3), count), group = rep(c("A", "B"), count))
+                        end = rep(c(1, 3), count), group = rep(c("A", "B"), count),
+                        resp = rep(c("PR", "PD"), count))
         for (idx in list(seq_len(nrow(d)), rev(seq_len(nrow(d))))) {
             expect_error(swimmerplot(d[idx, ], patientID = "id", startTime = "start",
-                                    endTime = "end", groupVar = "group"),
+                                    endTime = "end", groupVar = "group", responseVar = "resp"),
                          "conflicting non-missing group values")
+            # The group feeds only the response comparison; without one it is
+            # ignored, not a reason to fail (2026-10-19, R61).
+            expect_no_error(swimmerplot(d[idx, ], patientID = "id", startTime = "start",
+                                        endTime = "end", groupVar = "group"))
         }
     }
     d <- data.frame(id = rep(1:8, each = 2), start = rep(c(0, 2), 8),

@@ -72,12 +72,12 @@ test_that("missing required variables yield instructions, not a thrown error", {
   r1 <- waterfall(data = waterfall_test, responseVar = "best_response")
   expect_equal(r1$summaryTable$rowCount, 4)
   expect_true(all(is.na(r1$summaryTable$asDF$n)))
-  expect_match(wf_text(r1, "todo"), "Treatment Response Analysis")
+  expect_match(wf_text(r1, "todo"), "Treatment Response: Patient-Level Burden")
 
   r2 <- waterfall(data = waterfall_test, patientID = "patientID")
   expect_equal(r2$summaryTable$rowCount, 4)
   expect_true(all(is.na(r2$summaryTable$asDF$n)))
-  expect_match(wf_text(r2, "todo"), "Treatment Response Analysis")
+  expect_match(wf_text(r2, "todo"), "Treatment Response: Patient-Level Burden")
 })
 
 test_that("waterfall validates data presence", {
@@ -96,7 +96,7 @@ test_that("waterfall validates data presence", {
                             responseVar = "best_response")
   expect_equal(empty_result$summaryTable$rowCount, 4)
   expect_true(all(is.na(empty_result$summaryTable$asDF$n)))
-  expect_match(wf_text(empty_result, "todo"), "Treatment Response Analysis")
+  expect_match(wf_text(empty_result, "todo"), "Treatment Response: Patient-Level Burden")
 })
 
 test_that("waterfall validates variable names exist in data", {

@@ -1,10 +1,239 @@
 # ClinicoPath News
 
+## Unreleased — OncoPath: pre-release critical review fixes (2026-10-19)
+
+Results change by design:
+
+- **Treatment Response:** a patient with no measured value but a supplied CR/PR/SD/PD category is
+  evaluable; with one row per patient such patients were dropped, giving DCR 100% (4/4) where the
+  answer is 66.7% (4/6). A supplied "NE" makes the patient not evaluable. Raw sizes entered as
+  percentage changes stop the run instead of showing ORR 0% beside a warning. When patients are
+  excluded, a Disease Control Rate over all patients is added.
+- **IHC Heterogeneity:** proportional bias against a reference is flagged only when the slope of the
+  difference is significant in the same direction on the reference, the region and their mean
+  (Krouwer 2008); unbiased regions were flagged in 32-72% of simulated studies, now 0-2%. A
+  correlation below the threshold as a point estimate blocks "thresholds met". Ordinal scores
+  (5 or fewer whole-number values, HER2 0-3+) are not graded by CV. Near-zero cases that inflate
+  the CV are reported, and a compartment CV difference is read beside the means test.
+- **Swimmer Plot:** new censoring codings "0/1: 1 = event" and "0/1: 1 = censored"; a 0/1 column
+  named like "Censored" raises a warning, and a single-valued column waits for a coding. Sort by
+  response uses best response; reference lines on an absolute axis with a non-zero start sit on the
+  lanes; duplicated episodes no longer trigger the long-follow-up warning; a non-estimable reverse
+  Kaplan-Meier median is not called follow-up in the copy-ready text.
+- **Diagnostic Test Meta-Analysis:** small cells, zero-FP/FN dominance and the "+1/N" correction are
+  disclosed (coverage of the CI, the exact bound from the raw counts, the likelihood ratio left
+  ungraded). Estimators unchanged. Values above 99% are explained per 1,000.
+
+## Unreleased — OncoPath: module-audit fixes for all four analyses
+
+- **IHC Heterogeneity:** proportional bias against a reference is no longer judged on the reference
+  alone, where error in the reference made an unbiased region read "changes with the level", more
+  often the larger the study (all 20 of 20 simulated studies at n = 1500). The slope is shown on the
+  mean of the two measurements. *Superseded the same day:* the mean alone still flagged a precise
+  core against a noisy reference, so the release review below requires agreement on all three
+  regressors.
+- **Swimmer Plot:** the automatic censoring reading no longer guesses at "Completed", "Progressed",
+  "Active" or "Continuing". These words describe treatment or disease, not follow-up status, so the
+  analysis now asks for the column to be recoded. A response variable with no values says why ORR and
+  DCR are blank, and an unreadable event time is reported as unreadable.
+- **Treatment Response:** with no evaluable patient the analysis stops with the reason, instead of
+  showing an error over empty tables. Negative measurements are a warning, because the run continues
+  without them.
+- **Diagnostic Test Meta-Analysis:** study names and levels such as "Smith [2020]" or "<Negative>"
+  no longer cut short a table note or blank a cell. The summary panel is translated.
+- Smaller fixes across the four analyses: wording that matches the computation, whole-sentence
+  translations, layout, and cleaner saved plot state.
+
+## Unreleased — OncoPath: Treatment Response (Patient-Level Burden) release-profile fixes
+
+Results change by design in three places:
+
+- **A scan with a measurement but no time is no longer dropped in silence.** It still cannot be
+  placed in time, so it takes no part in best response, progression or duration of response. A
+  warning now counts these scans and names the patients. Before, a -60% scan with a blank time left
+  the patient SD and lowered the ORR with nothing said. A patient whose only follow-ups lack a time
+  is told so, rather than told the measurements are missing. A missing time no longer hides a
+  missing raw baseline.
+- **Rows at the same visit give the same answer in any row order.** Two values at one time point
+  are read largest first, so they can never count as progression over each other. Before, sorting
+  the spreadsheet could move a patient from SD to PR and change the ORR.
+- **The RECIST 5 mm rule can be applied to raw measurements.** The new option **Unit of raw
+  measurements** (mm or cm) makes progression also require an absolute increase of at least 5 mm
+  over the nadir, as RECIST v1.1 does. Without it, a small tumour that grows from 10 to 13 mm counts
+  as progression. The default, "Not stated", keeps the earlier results, and the notices now say
+  that without the rule progression is called more often than RECIST would, not less.
+
+Other fixes:
+
+- The always-on notice, the copy-ready Methods and the glossary state the rule actually applied.
+  With a time variable, best response stops at the first progression. They say whether the 5 mm
+  rule ran and how many categories came from the category-override variable. When every category
+  was supplied, the Main Results no longer call the ORR unconfirmed.
+- The notices panel sits at the top of the results, and its messages are ordered by severity.
+- The Annotation tracks box now accepts variables in jamovi.
+- Not-evaluable patients no longer leave empty bars in the waterfall plot; a caption counts them.
+  The spider plot labels each point by its own change, not "Responder", and has no median line,
+  which joined single patients' values when visit days differed.
+- A capped value below -100% is called a complete response only when it is the best response.
+- A wide confidence interval is warned about for DCR as well as ORR, whether or not the optional
+  CI table is shown. Option titles say what they control, and "Time unit" is no longer tied to the
+  spider plot.
+- Group colours stay the colour scheme you chose, and a group has the same colour in both plots.
+- A group variable missing for every patient, and an odds ratio that cannot be estimated, are
+  explained instead of shown as empty tables or "Inf".
+- Each extreme value and each narrative panel is reported once. The results title matches the
+  analysis name. A rejected run in guided mode shows "STOPPED", not "Ready to run".
+- The analysis is routed to `OncoPathT` for validation; production promotion is separate.
+
+## Unreleased — OncoPath: Swimmer Plot release-profile fixes
+
+Results change by design in four places:
+
+- **Response rates need every response value to be a RECIST category.** A coding such as
+  Response / Stable / Progression used to pass because some values were recognised, and every
+  "Response" patient was then counted as a non-responder. The page showed ORR 0.0% with an exact
+  CI, beside "Response Rate 41.7%", and the copy-ready text repeated the 0.0%. Now any value that
+  is not CR, PR, SD, PD or NE withholds ORR and DCR, and a notice names it. This also applies when
+  the value is on a row that a better response outranks. "Complete remission" and "Partial
+  remission" are read as CR and PR.
+- **Yes/No, TRUE/FALSE and 1/2 censoring columns are read only the way you say.** They used to be
+  read with a fixed direction (Yes = event, 1/2 = survival's convention) that was never shown. So a
+  "Censored: Yes/No" or "Ongoing: Yes/No" column put the status arrows on the patients who had
+  stopped, and it halved the reverse Kaplan-Meier follow-up. The new **Censoring coding** option,
+  under the variables, sets the direction. Until it is chosen, no arrows are drawn and median
+  follow-up is the plain observed median, labelled so. Numeric 0/1 (1 = event) and the words
+  alive/censored/dead/event are still read automatically, and every reading is stated in a notice.
+  A coding no option can read, such as 0/1/2 or Alive/Dead/Lost, asks to be recoded. The arrows and
+  the follow-up now use one reading of the whole column; before, they could read the same 1
+  differently.
+- **Best response over several rows is stated as unconfirmed.** When a patient has more than one
+  response row, the category behind ORR, DCR and the response rows is the best response recorded up
+  to the first PD. It has no confirmation of CR or PR and no minimum duration for SD. A warning, a
+  table note and the copy-ready text now say so instead of implying a RECIST 1.1 best overall
+  response. Rows that share a start time are ordered by end time, with PD first on an exact tie, so
+  the result no longer depends on row order.
+- **The observed-median fallback covers every patient.** With some censoring values missing and
+  the reverse Kaplan-Meier not estimable, the fallback used only the patients with a status, so two
+  different "observed" medians appeared on one page.
+
+Other fixes:
+
+- Unreadable milestone values (a wrong Date Format, an impossible date, "ND") are counted and
+  named per milestone; they used to vanish without a word. A milestone in a later episode is no
+  longer reported as outside the patient's timeline.
+- Milestone names default to the variable's own name. The pre-filled "Surgery", "Treatment Start",
+  ... labelled whatever column was dropped into each slot.
+- A sparse event column no longer reports rows without events as hidden markers.
+- A blank group or milestone cell is a missing value: it no longer forms an unnamed group or hides
+  a value recorded on a later episode.
+- Compact dates (20230115) are read under Date/Time and refused as raw numbers, where they produced
+  thousands of "months" of follow-up.
+- Episode-varying group values stop the analysis only when the group comparison runs. An empty
+  grouping or censoring variable is explained.
+- Follow-up over 10 years, or of zero length, is a warning, not an information note.
+- "Time unit for display" is now "Time unit": with raw values it states the unit your data are in.
+- The export panel describes the tables shown (first 500 patients) and is cleared on each run.
+- The About and glossary panels state the missing-data and best-response rules actually applied.
+- Syntax mode quotes milestone names and the censoring coding.
+- The analysis is routed to `OncoPathT` for validation; production promotion is separate.
+
+## Unreleased — OncoPath: IHC Heterogeneity release-profile fixes
+
+Results change by design in four places:
+
+- **Without a reference, every pair of regions is compared.** Each region used to be compared with
+  the mean of the others, which spread one region's offset onto the rest. With A and B agreeing and
+  C offset, all three were called materially offset, and the advice was to calibrate A and B. The
+  same rows could also all pass while two regions differed by more than the margin, and the verdict
+  then claimed every region agreed. Now each pair is judged on its own: the regions agree only when
+  every pair is ruled out, and a single region is named only when it differs from all the others.
+  Each difference is a percentage of the mean of its two regions, so swapping two regions mirrors
+  the result. Before, the order could flip the verdict.
+- **Percentage CIs allow for the uncertainty in the comparison mean** (a Fieller interval). The
+  old interval treated that mean as known, and at a 20% margin it ruled out about twice the nominal
+  5%. Material rows show the adjusted interval the decision used.
+- **Identical differences in every case are never ruled out.** Binned scores that agreed exactly
+  used to get a zero-width CI, an ICC CI of 1 to 1 and "agreement thresholds met". Now the CIs are
+  blank and the row stays inconclusive. Such a row is called material only when a sign test at the
+  adjusted level supports it.
+- **The compartment CV tests use cases with every measurement.** A CV from fewer values is smaller,
+  so lost cores made a compartment look less heterogeneous (39-61% false positives). The tests now
+  hold the nominal 5%.
+
+Other fixes:
+
+- An always-visible note states the scope: this dataset only, not an external validation, not
+  agreement at classification cut-offs, one patient per row. Notices no longer point to a hidden
+  Clinical Assessment.
+- The variance table grades shares of the total variance, no longer "sampling variability", which
+  used to contradict the CV grade.
+- With one comparison, the Methods text no longer describes a mean of all regions or a Bonferroni
+  adjustment.
+- The pooled-value outlier warning, which flagged ER-negative cases as data errors, is removed.
+- The ICCs state the complete cases they rest on, with a small-sample warning for that number.
+- A rejected rerun no longer leaves the previous verdict on screen.
+- Skipped correlations are named, and an unmet requirement is described by its actual reason.
+- The sampling strategy is shown as a notice. Recommendations requested without the interpretation
+  panel say where to find them.
+- Labels from the data render in table cells, and syntax mode parses column names with spaces.
+- The analysis is routed to `OncoPathT` for validation; production promotion is separate.
+
+## Unreleased — OncoPath: Diagnostic Test Meta-Analysis release-profile fixes
+
+Results change by design in three places:
+
+- **Deeks' funnel-plot test always uses the raw counts.** Under a user Zero-Cell Correction it used
+  to receive the corrected counts, find no zero cell and always give a verdict. On simulated
+  meta-analyses with no publication bias, where more than a quarter of the studies had a zero cell,
+  it reported asymmetry in 55-73% of them. The statistic is now the same under all four settings,
+  and no verdict is given when more than a quarter of the studies have a zero cell. The funnel plot
+  follows the test.
+- **Heterogeneity and meta-regression keep the zero-cell studies under the default setting.** They
+  now add 0.5 to all four cells of those studies, as the bivariate and proportional-hazards models
+  always did. Before, they dropped them, and those are exactly the 100% sensitivity or specificity
+  studies, so Q, tau-squared, I-squared and covariate effects rested on fewer and less accurate
+  studies. These two tables change whenever a study has a zero cell.
+- **A model that does not converge reports no numbers.** The bivariate model is refitted with up to
+  5000 iterations. If it still does not converge, it shows a strong warning and no pooled estimates,
+  where before the unfinished fit was shown as final. The proportional-hazards SROC model no longer
+  shows theta, tau-squared or the AUC from an unconverged fit, and gives no AUC verdict from one.
+
+Other fixes:
+
+- Repeated study identifiers raise a strong warning: such rows usually share participants (several
+  readers, cut-offs or algorithms on one cohort), and pooling them as separate studies counts those
+  participants twice. Missing identifiers are counted once. The data checklist and About panel state
+  the one-table-per-independent-study requirement.
+- The participant total in the bivariate table counts people, not the pseudo-counts a zero-cell
+  correction adds.
+- A meta-regression whose studies fit the covariate exactly (for example, one 2x2 table entered once
+  per level) no longer shows standard errors of 0, z = Inf and p = 0. Those cells are blank, and a
+  note explains why.
+- Without a bivariate model, whether switched off, failed or unconverged, the SROC plot draws the
+  studies with a caption giving the reason. Before, it showed a clipped one-line message asking to
+  enable an option that was often already on.
+- The copy-ready summary carries the likelihood-ratio intervals and says when an interval spans
+  more than one evidence category. The static bands no longer make fitness-for-use claims, and the
+  SROC explanation no longer suggests the curve identifies a cut-off.
+- Proportional-hazards SROC notices recommend the bivariate model only when it gave a usable
+  pooled pair. When Deeks' test withholds its verdict, it now gives the measured reason (up to 42%
+  false asymmetry at 80% zero-cell studies) and calls the cut-off what it is, a precaution.
+- The other corrections:
+  - one "Studies excluded" notice with the final count;
+  - the set-level meta-regression power warning is removed (each margin keeps its own note);
+  - the I-squared note names the between-study correlation;
+  - the few-studies warning describes the fixed-effect model correctly;
+  - the prediction-interval and prediction-region comparison is computed at the chosen level;
+  - an empty dataset with a partial selection no longer promises a result;
+  - option titles "Color-blind safe" and "+1/N to all cells (N = study size)".
+- The analysis is routed to `OncoPathT` for validation; production promotion is separate.
+
 ## Unreleased — OncoPath: unavailable values are empty cells, and zero-row data says why
 
 - **No more "NaN" in Waterfall, Swimmer Plot and Diagnostic Test Meta-Analysis tables.** A number
-  that cannot be computed is now an empty cell; the reason stays where it was (a table note, the
-  detail column or a notice). Estimates shown before are unchanged. The cases found:
+  that cannot be computed now shows jamovi's missing-value mark (".") instead of "NaN"; the reason
+  stays where it was (a table note, the detail column or a notice). Estimates shown before are
+  unchanged. The cases found:
   - Waterfall: the Response Duration table when the Kaplan-Meier median duration of response is not
     reached (the bundled longitudinal example), when no patient responds, or when there is no Time
     Variable; the percentage of the "Unknown / not evaluable" row.

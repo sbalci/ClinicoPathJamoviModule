@@ -385,7 +385,7 @@ test_that("copy-ready manuscript text never fabricates ORR for non-RECIST codes"
     # Every patient responded; nothing maps to CR/PR/SD/PD. The metrics table
     # refuses to claim 0% - the manuscript text must refuse too.
     bad <- txt(mk(rep("Responder", 6)))
-    expect_match(bad, "not RECIST-coded")
+    expect_match(bad, "Not every response value was a RECIST category")
     expect_false(grepl("objective response rate \\(ORR\\) of 0\\.0%", bad))
 })
 
@@ -393,9 +393,9 @@ test_that("the follow-up row names the estimator actually used", {
     base <- data.frame(id = paste0("P", 1:8), st = rep(0, 8),
                        en = c(4, 6, 8, 10, 12, 18, 24, 30), stringsAsFactors = FALSE)
 
-    row_for <- function(cens) {
+    row_for <- function(cens, ...) {
         df <- base; args <- list(data = df, patientID = "id", startTime = "st",
-             endTime = "en", timeType = "raw", timeDisplay = "absolute")
+             endTime = "en", timeType = "raw", timeDisplay = "absolute", ...)
         if (!is.null(cens)) { df$cs <- cens; args$data <- df; args$censorVar <- "cs" }
         m <- do.call(ClinicoPath::swimmerplot, args)$advancedMetrics$asDF
         m[grepl("Median Follow-up", m$metric_name), c("metric_name", "metric_value")]
@@ -410,15 +410,19 @@ test_that("the follow-up row names the estimator actually used", {
     expect_match(r01$metric_name[1], "reverse Kaplan-Meier")
     expect_equal(r01$metric_value[1], km)
 
-    # Yes/No is a legitimate coding and must reach the same estimate
-    ryn <- row_for(c("No", "No", "No", "Yes", "Yes", "Yes", "No", "No"))
+    # Yes/No is a legitimate coding and reaches the same estimate once the
+    # user says which way round it is (2026-10-19, R45); unchosen, it is not
+    # guessed and the row says so.
+    yn <- c("No", "No", "No", "Yes", "Yes", "Yes", "No", "No")
+    ryn <- row_for(yn, censorCoding = "yes_event")
     expect_match(ryn$metric_name[1], "reverse Kaplan-Meier")
     expect_equal(ryn$metric_value[1], km)
+    expect_match(row_for(yn)$metric_name[1], "censoring coding not chosen")
 
     # no censoring, and unclassifiable censoring, must NOT claim reverse-KM
     expect_match(row_for(NULL)$metric_name[1], "no censoring information")
     expect_match(row_for(c("A","B","A","B","A","B","A","B"))$metric_name[1],
-                 "censoring not recognised")
+                 "censoring variable not readable")
 })
 
 test_that("person-time table groups by the normalised response label", {
@@ -635,7 +639,7 @@ test_that("multi-episode patients keep later-episode milestones and events", {
 test_that("ORR/DCR use the RECIST-evaluable denominator with matching CIs and disclosure", {
     d <- data.frame(id = sprintf("P%02d", 1:10), s = 0, e = 1:10,
                     resp = factor(c("CR", "PR", "SD", "PD", "CR", "PR", "SD", "PD",
-                                    "NE", "weird")))
+                                    "NE", NA)))
     r <- ClinicoPath::swimmerplot(data = d, patientID = "id", startTime = "s",
                                   endTime = "e", responseVar = "resp",
                                   showCopyReady = TRUE)
@@ -646,8 +650,10 @@ test_that("ORR/DCR use the RECIST-evaluable denominator with matching CIs and di
     # the basis for a reported rate: "Trial conclusions should be based on the
     # response rate for all eligible (or all treated) patients and should not be
     # based on a selected 'evaluable' subset." NE is one of the five assigned
-    # outcomes, not an exclusion, so the NE patient and the unrecognised-label
-    # patient stay in the denominator as non-responders: 4/10, not 4/8.
+    # outcomes, not an exclusion, so the NE patient and the patient with no
+    # recorded response stay in the denominator as non-responders: 4/10, not
+    # 4/8. (An unrecognised label used to be the tenth patient; since
+    # 2026-10-19, R46, it withholds the rates - see the release-profile tests.)
     ci <- stats::binom.test(4, 10)$conf.int * 100
     expect_equal(orr$metric_value, 40)
     expect_equal(orr$confidence_interval, sprintf("%.1f - %.1f", ci[1], ci[2]))

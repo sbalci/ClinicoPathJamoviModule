@@ -234,7 +234,7 @@ test_that("unrecognised response-category overrides are rejected, not fatal", {
   # every row made the column all-NA and aborted the run with
   # "missing value where TRUE/FALSE needed".
   d <- data.frame(id = paste0("P", 1:6), pct = c(-50, -40, -35, -5, 10, 40),
-                  cat = rep("NE", 6))
+                  cat = rep("x", 6))   # "NE" is now read as Unknown (release review WF-2)
   p <- wf_private(d, patientID = "id", responseVar = "pct",
                   inputType = "percentage", responseCategoryVar = "cat")
   w <- data.frame(id = d$id, response = d$pct)
@@ -407,17 +407,15 @@ test_that("the waterfall still renders when no annotation track is requested", {
 rr_txt <- function(res, item = "notices")
   gsub("<[^>]+>", " ", paste(res[[item]]$content, collapse = ""))
 
-test_that("a cohort with zero evaluable patients completes and explains itself", {
-  # Every patient baseline-only: all responses demoted to Unknown, ORR = NA.
-  # This used to crash .run() with "missing value where TRUE/FALSE needed"
-  # BEFORE notices rendered, so the explanation was lost with the run.
+test_that("a cohort with zero evaluable patients stops and explains itself", {
+  # Every patient baseline-only. This used to crash .run() with "missing value where
+  # TRUE/FALSE needed"; then it completed under an ERROR banner; since 2026-10-19 it is
+  # a fatal stop whose message is the explanation.
   b_only <- data.frame(pid = sprintf("B%02d", 1:12), time = 0, resp = 0)
-  res <- ClinicoPath::waterfall(data = b_only, patientID = "pid",
-                                responseVar = "resp", timeVar = "time",
-                                inputType = "percentage")
-  expect_match(rr_txt(res), "NOT RESPONSE-EVALUABLE")
-  # NA-safe wording, not "NA%"
-  expect_false(grepl("NA%", rr_txt(res, "clinicalSummary"), fixed = TRUE))
+  expect_error(ClinicoPath::waterfall(data = b_only, patientID = "pid",
+                                      responseVar = "resp", timeVar = "time",
+                                      inputType = "percentage"),
+               "None of the 12 patients supplied could be evaluated for response", fixed = TRUE)
 })
 
 test_that("fatal processing errors reject with an informative message", {

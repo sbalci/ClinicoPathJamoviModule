@@ -3372,14 +3372,152 @@ Acceptance: no visible numeric cell holds a double NA/NaN in the sweep scenarios
 show a notice and stay idle (the policy `test-waterfall-basic.R` encodes); unconfigured state unchanged; no new
 msgid without a Turkish msgstr; all existing suites of the three analyses green.
 
-- [x] Reproduce: baseline NaN-cell sweep, 27 cells in 9 of 19 scenarios (`quality-reports/fix-oncopath-cells-2026-10-18/`)
-- [ ] Route the three analyses to `menuGroup: OncoPathT`; timestamped backups
-- [ ] `.tableValues()` boundary helper (the ihcheterogeneity 1.1.0 idiom) in all three classes; every table write goes through it
-- [ ] Zero rows: WARNING notice after the variable check (diagnosticmeta, waterfall); delete waterfall's unreachable branch
-- [ ] Regression tests, red against the old code first
-- [ ] Verify: parse + AST diff, `prepare()`, QA install (sweep 0, sibling suite, probes), umbrella suites of the three analyses, release gate, smoke
-- [ ] Verify in the jamovi GUI with a separately named QA module
-- [ ] NEWS + CHANGELOG; hand-off: move menuGroups back, regenerate OncoPath, mirror the tests
+- [x] Reproduce: baseline NaN-cell sweep, 27 cells in 8 of 19 scenarios (`quality-reports/fix-oncopath-cells-2026-10-18/`)
+- [x] Route the three analyses to `menuGroup: OncoPathT`; timestamped backups (moved back to `OncoPath` in `9b6b72a4d`)
+- [x] `.tableValues()` boundary helper (the ihcheterogeneity 1.1.0 idiom) in all three classes; every table write goes through it
+- [x] Zero rows: WARNING notice after the variable check (diagnosticmeta, waterfall); delete waterfall's unreachable branch
+- [x] Regression tests, red against the old code first (`test-oncopath-missing-cells.R`: 37 failures on the old code, 67/67 now)
+- [x] Verify: parse + AST diff, `prepare()`, QA install (sweep 0, sibling suite, probes), umbrella suites of the three analyses, release gate, smoke
+- [ ] Verify in the jamovi GUI: OncoPathQA module installed, click-path in `quality-reports/fix-oncopath-cells-2026-10-18/gui-check/README.md` (manual)
+- [x] NEWS + CHANGELOG; menuGroups moved back and OncoPath regenerated (`5f19e4a`)
+- [ ] Copy `test-oncopath-missing-cells.R` into OncoPath by hand (renaming every `ClinicoPath`); `mirror_to_submodule.R` skips tests the sibling does not have
+- [ ] Update TC-04 (zero rows) in `vignettes/testing_diagnosticmeta.md` and `vignettes/testing_waterfall.md`: idle + WARNING, now covered by a test
+
+Results: commit `628e90840`. Sweep 27 → 0 NaN cells; statistics battery 64/64 with every value unchanged; 41 existing
+test files identical before and after. A NULL cell shows as "." in jamovi, not blank. Review follow-ups (partial
+selection on zero rows, notice placement, swimmerplot's zero-row message): see
+`quality-reports/ONCOPATH_RELEASE_PROFILE_2026-10-18-night.md`.
+
+## OncoPath module-audit findings — fixed (2026-10-19)
+
+Source: `../OncoPath/docs/audit/MODULE_AUDIT_REPORT_20261019-1535.md` (4 MEDIUM, 30 LOW). Record:
+`quality-reports/fix-oncopath-audit-2026-10-19/README.md`.
+
+- [x] MEDIUM: ihcheterogeneity slope on the pair mean; swimmerplot ambiguous censoring words; waterfall no-evaluable reject;
+      diagnosticmeta `.rocLabel()` at note and cell sinks
+- [x] LOW items fixed in all four analyses (see the record); markup-template split deliberately not done (house decision)
+- [x] Tests (4 new files), 62 files / 996 tests green; prepare/document; i18n (65 Turkish); sweeps 0; gate 0 blocking; updater dry run clean
+- [ ] User: `Rscript _updateModules.R OncoPath` to carry the fixes into the sibling
+- [ ] Follow-up: diagnosticmeta "Sensitivity"/"Specificity" noun splices at `small_sample_`, `degenerate_`, omnibus notes;
+      swimmerplot `.("no recorded response")` category splice and the two-meaning `"NE"` msgid
+
+## waterfall release-review defects — `/fix-function waterfall --apply` (2026-10-19)
+
+Source: the 19 distinct confirmed waterfall findings of `quality-reports/ONCOPATH_RELEASE_PROFILE_2026-10-18-night.md`
+(R80 release-blocking; R68, R69/R75, R74, R85, R86 medium; R70-R73/R79, R76/R81, R77, R82-R84, R87-R90 low), digest in
+`quality-reports/fix-waterfall-2026-10-19/findings.md`; Codex plan beside it. Acceptance: each finding's executed repro
+no longer shows the defect; no measured row is dropped without a count; row order never changes a category; every
+description of best response matches the options used; all waterfall/OncoPath suites green; every changed msgid has Turkish.
+
+- [x] Route to `menuGroup: OncoPathT`; backups `quality-reports/fix-waterfall-2026-10-19/backup-20261019-135159/`
+- [x] Rows: untimed assessments disclosed and their reason given (R80); same-visit order largest-first (R74); exact-value
+      grouping (R76); NA-safe raw baseline check
+- [x] Rules and text: opt-in `measurementUnit` with the 5 mm rule (R68); `.bestResponseRule()` in notice/glossary and an
+      options-aware Methods/Main Results (R69/R75); denominator notes (R70); capped-CR count (R77)
+- [x] Plots/UI: spider legend and labels (R71); NA bars dropped with caption (R72); spider median removed (R73); annotation
+      tracks in a VariableSupplier (R85); notices first, sorted (R86); option titles, Time unit placement (R87); palettes (R88)
+- [x] Other: group note + notice (R82); `.rejectRun()` (R83); unconditional ORR/DCR wide-CI notice (R84); one generator per
+      panel, one report per extreme value (R89); title (R90); non-estimable Fisher OR text (found by the NaN sweep)
+- [x] Tests: 10 old-behaviour assertions revised in 5 files; new `test-waterfall-release-profile-fixes.R` 20 tests, 18 red on the backup backend
+- [x] Verify: prepare/document (waterfall header + Rd only); 53 repros re-run; 19 suites 322 tests green; battery 15/15;
+      NaN sweep 0 in 9 scenarios; Turkish smoke clean; gate 0 blocking
+- [x] Adversarial review (wf_02f384d5-267, 10 agents): 14 confirmed items fixed (Unknown overrides counted as supplied,
+      SD footnote/glossary under 5 mm, captions, no-time wording, group colours, events.js recist branch, texts, test gaps)
+- [x] i18n (55 new Turkish msgstrs), NEWS, CHANGELOG, record README
+- [ ] Hand-off (user): menuGroup back to `OncoPath`; regenerate OncoPath (`--dry-run` first); check in jamovi that the
+      Annotation tracks box takes a variable (R85 is a client-side behaviour no R test can show)
+
+**Results (2026-10-19).** Record: `quality-reports/fix-waterfall-2026-10-19/README.md`. R80: untimed scans counted and named;
+R74: six row permutations of duplicated visits give one answer, matching an independent oracle; R68: with a unit stated the
+5 mm rule agrees with the oracle on 40 simulated patients (3 of 40 change); R69: Methods and notices follow the options.
+
+## swimmerplot release-review defects — `/fix-function swimmerplot --apply` (2026-10-19)
+
+Source: the 18 distinct confirmed swimmerplot findings of `quality-reports/ONCOPATH_RELEASE_PROFILE_2026-10-18-night.md`
+(R44, R45/R54/R55, R46 release-blocking; R47/R50, R48/R57, R49, R51/R60, R52, R53, R56/R63, R58, R59, R61, R62, R64, R65,
+R66, R67), digest in `quality-reports/fix-swimmerplot-2026-10-19/findings.md`. Acceptance: each finding's executed repro no
+longer shows the defect; no ORR/DCR or manuscript rate when a response label is not a RECIST category; the best-response rule
+is stated whenever it was derived from several rows; no Yes/No, TRUE/FALSE or 1/2 censoring column is read without the user
+choosing the event value; one censoring coding drives both the arrows and the follow-up; all swimmerplot/OncoPath suites
+green; every changed msgid has Turkish.
+
+- [x] Route to `menuGroup: OncoPathT`; backups `quality-reports/fix-swimmerplot-2026-10-19/backup-20261019-121927/`
+- [x] Response: withhold ORR/DCR on any non-RECIST value, row level, naming it (R46); remission synonyms; best-response rule
+      note, glossary, copy-ready (R44); tie rule by (start, end, PD first) (R47/R50); pure RECIST check in group tests (R51/R60)
+- [x] Censoring: `censorCoding` List option (a Level broke 168 wrapper calls - required argument) and one coding per run
+      for arrows and follow-up (R45/R54/R55, R48/R57); full-cohort fallback and reason text (R53); empty censoring and group explained (R59)
+- [x] Milestones/events: unreadable values counted and warned (R56/R63); window from all episodes (R52); event-marker
+      counts over labelled rows (R58); names default "" (R65)
+- [x] Other: group-conflict reject only when used (R61); plausibility WARNING (R62); export panel wording/reset (R64);
+      About text (R49); YYYYMMDD (R66); time-unit title (R67); asSource quotes String/List options
+- [x] Tests: revised old-behaviour assertions in 5 files; new `test-swimmerplot-release-profile-fixes.R` 26 tests, 25 red on the backup backend
+- [x] Verify: prepare/document (swimmerplot header + Rd only); 52 repros re-run; 16 suites 279 tests / 1213 expectations green;
+      battery 21/21; NaN sweep 0 in 11 scenarios; Turkish smoke 0 errors; gate 0 blocking; 10-agent review, 13 confirmed items fixed
+- [x] i18n (62 new Turkish msgstrs; all 518 swimmerplot msgids translated; `msgfmt -c` OK), NEWS, CHANGELOG, record README
+- [ ] Hand-off (user): menuGroup back to `OncoPath`; regenerate OncoPath (`--dry-run` first); sibling vignette
+      `swimmerplot-unified-comprehensive.Rmd:439` passes `censorVar = "EventType"` (now "not readable") - fix and mention `censorCoding`
+- [ ] Follow-up (data): `swimmerplot_immuno`, `_milestones`, `_dates`, `_grouped` code `Censored = 1` for no death/progression
+      (1 = censored; `data-raw/swimmerplot_test_data.R:147/261/385/435`) - the analysis reads 1 = event; regenerate as an event column
+- [ ] Follow-up: unreadable event times are reported as "no event time"; give events the milestone per-slot bookkeeping
+
+**Results (2026-10-19).** Record: `quality-reports/fix-swimmerplot-2026-10-19/README.md`. R46: ORR/DCR withheld and the values
+named; R45: a Yes/No column waits for its coding, and either polarity matches survfit; R44: the unconfirmed rule is stated
+wherever it was derived; R53: fallback 7 (all patients), was 5.
+
+## ihcheterogeneity release-review defects — `/fix-function ihcheterogeneity --apply` (2026-10-19)
+
+Source: the 19 distinct confirmed ihcheterogeneity findings of `quality-reports/ONCOPATH_RELEASE_PROFILE_2026-10-18-night.md`
+(R24 release-blocking; R25, R30-R32, R36 medium; R26/R40, R27/R35, R28, R29, R33, R34, R37-R39, R41-R43, C2 low), digest in
+`quality-reports/fix-ihcheterogeneity-2026-10-19/findings.md`. Acceptance: each finding's executed repro no longer shows the
+defect; one offset region names only itself (pairwise rows, no leave-one-out spill-over); swapping two regions gives the mirrored
+verdict; an all-identical difference row is never ruled out; the ratio interval keeps the TOST near nominal at a 20% margin;
+CV tests do not reject on unequal measurement counts; no visible pointer to a hidden panel; all ihcheterogeneity/OncoPath suites
+green; every changed msgid has Turkish.
+
+- [x] Route to `menuGroup: OncoPathT`; backups `quality-reports/fix-ihcheterogeneity-2026-10-19/backup-20261019-111700/`
+- [x] Bias rule: pairwise rows for the inter-regional design (R24, R31) relative to the pair mean (R34); Fieller ratio CI for
+      ruled-out and material (R33); constant rows never ruled out, no CIs, sign-test material veto, ICC CIs blank at MSE = 0 (R30)
+- [x] Texts: interval the rule used in `.biasSentence`, m-aware Methods/Methodology (R27/R35); pair-aware warning,
+      recommendations, report and summary; scope note and visible pointers (R26/R40); variance shares (R25); kw_unit (R29)
+- [x] Data: drop the pooled-IQR outlier check (R28); CV tests on cases with every measurement (R32); ICC complete-case n (R36);
+      skipped correlations named (R38); k < 2 reasons (R39); strategy note as a notice (R41)
+- [x] Plumbing: blank narratives before a reject (R37); a.yaml docs (R42); cell-safe labels (R43); asSource (C2)
+- [x] Tests: 8 old-behaviour assertions revised (leave-one-out labels/slope, t-based ratio CIs, ICC 1-to-1 limits, wording, a synthetic fixture); `test-ihcheterogeneity-release-profile-fixes.R` 21 tests / 87 expectations, 21 red on the backup backend; 22 suites 296 tests / 1221 expectations green
+- [x] Verify: prepare/document (ihcheterogeneity header and Rd docs only, routing line); 49 repros re-run (`repro-after/`); battery 20/20 (16 values identical to 1.1.0, 4 new-rule oracles); NaN/Inf/NA sweep 0 in 10 scenarios; Turkish smoke 8 scenarios 0 errors; gate 0 blocking; 10-agent review, confirmed items fixed in rounds 2-3
+- [x] i18n (70 new Turkish msgstrs; all 501 ihcheterogeneity msgids translated; `msgfmt -c` OK), NEWS, CHANGELOG
+- [ ] Hand-off (user): menuGroup back to `OncoPath`; regenerate OncoPath (`--dry-run` first); mirror `test-oncopath-library-audit.R`;
+      re-render the sibling vignette `ihcheterogeneity-comprehensive.Rmd` (its printed output at :144 shows the old
+      'High sampling variability' label; no leave-one-out wording found)
+- [ ] Follow-ups: waterfall `showClinicalSummary`/`showAboutAnalysis` R descriptions (R42 companion); `OptionString` quoting in
+      waterfall/swimmerplot/diagnosticmeta `asSource` (C2 companion; swimmerplot milestone names fail to parse)
+
+**Results (2026-10-19).** Record: `quality-reports/fix-ihcheterogeneity-2026-10-19/README.md`. R24: only the offset region is
+named; R31: a 6% pair is no longer hidden behind ±4.6% contrasts; R33: ruled out 4.4% / material 5.1% at the margin (was
+10.4% / 10.2%); R32: CV tests 5.0% / 5.0% with 60% of a compartment incomplete (was 39% / 61% with unequal counts).
+
+## diagnosticmeta release-review defects — `/fix-function diagnosticmeta --apply` (2026-10-19)
+
+Source: the 19 confirmed diagnosticmeta findings of `quality-reports/ONCOPATH_RELEASE_PROFILE_2026-10-18-night.md`
+(R01 high/blocking, R02-R03 medium, the rest low/info) plus S08 and S01; Codex plan in
+`quality-reports/fix-diagnosticmeta-2026-10-19/`. Acceptance: each finding's executed repro no longer shows the
+defect; Deeks statistic and verdict identical under all four zero-cell settings; under `none` every model uses every
+study; no visible cell shows NaN/Inf; the statistics battery unchanged except where a fix changes a result by
+design (listed); all diagnosticmeta and OncoPath suites green; every changed msgid has a Turkish msgstr.
+
+- [x] Route to `menuGroup: OncoPathT`; backups `quality-reports/fix-diagnosticmeta-2026-10-19/backup-20261019-072859/`
+- [x] Validation: one final "Studies excluded" notice (R10/R21); missing vs repeated identifiers (R18); repeated rows as non-independent, STRONG_WARNING (R03); zero rows with a partial selection (S01)
+- [x] Counts: raw counts to Deeks and the funnel (R01); single-study +0.5 for heterogeneity and meta-regression under `none` (R02); raw participant totals (R04); notices and option text (R22, a.yaml); drop the set-level power warning (R21)
+- [x] Inference: zero Knapp-Hartung factor gives NULL cells and a note (S08)
+- [x] Bivariate status: convergence check and retry (R13); cleared model and a study-point SROC fallback (R15/R20); method-aware few-studies text (R17)
+- [x] Text: PHM verdicts only from a converged fit (R16/R19); LR intervals and band qualifier (R06); descriptive bands and SROC wording (R07); R05; R11 crossover; R23 labels. No clearWith change: no hsrocresults cell or note depends on `bivariate_analysis`, and the PHM text that does is a notice, rebuilt every run
+- [x] Tests: revised 5 old-behaviour assertions (release-fixes :71 and :92, audit-fixes :400-405, critical-release :12-21, library-audit :232); new `test-diagnosticmeta-release-profile-fixes.R` (16 tests, 92 expectations): 15 red on the backup backend, R23 red on the backup a.yaml; 17 diagnosticmeta/OncoPath suites 197 tests / 876 expectations green
+- [x] Verify: parse; `prepare()` (only `diagnosticmeta.h.R` docs + the 0000.yaml routing line) and `document()` (only the Rd); all 44 diagnosticmeta repros re-run on the fix (`repro-after/`); 18 suites 215 tests / 1003 expectations green; battery 28/28 (1.1.0 values to 4e-15, two by-design rows replaced); NaN/Inf sweep 0 cells in 18 scenarios; Turkish smoke 19 scenarios, 0 sprintf failures; gate 0 blocking; adversarial review (5 lenses, 5 skeptic judges) - confirmed items fixed in round 2
+- [x] i18n: `i18nUpdate()` (stale msgids 27 -> 0), 52 new + 5 previously missing Turkish msgstrs, `msgfmt -c` OK; NEWS; CHANGELOG
+- [ ] Hand-off (user): move `menuGroup` back to `OncoPath`; `Rscript _updateModules.R --dry-run`, then regenerate OncoPath; mirror `test-oncopath-critical-release.R` and `test-oncopath-library-audit.R` (`tools/mirror_to_submodule.R`); add `test-diagnosticmeta-release-profile-fixes.R` to the sibling if wanted; update the sibling vignette `diagnosticmeta-comprehensive.Rmd` (:104 checklist -> one independent 2x2 table per study; :195 old keys `treatment_arm`/`empirical`; :234-240 Deeks example under `constant` - re-run, the statistic now uses the raw counts)
+- [ ] Out of scope, follow-up: re-save `diagnosticmeta_test_categorical.omv` with `imaging_modality` (C3, needs the GUI)
+- [ ] Follow-up: univariate REML (metafor Fisher scoring) can fail to converge on a zero-heavy margin now that zero-cell studies stay in (18 of 20 studies with FN = 0; same as `constant` before). The margin shows the metafor error note; consider one retry with `control = list(stepadj = 0.5, maxiter = 1000)`
+
+**Results (2026-10-19).** `R/diagnosticmeta.b.R`, `jamovi/diagnosticmeta.a.yaml`, regenerated `diagnosticmeta.h.R`/`.Rd`, `jamovi/i18n/*`, 5 revised + 1 new test file. Every confirmed finding's executed repro no longer shows the defect (R01: 100% 'Not interpretable' under every setting, was 55-73% false asymmetry; R02: `none` = `constant`, null false positives 23% -> 10%; R13: the natural `vc` cycle is caught and withheld). Record: `quality-reports/fix-diagnosticmeta-2026-10-19/README.md`.
 
 ## IHC Heterogeneity
 
@@ -9428,3 +9566,110 @@ Uncommitted working-tree changes left for the maintainer to commit:
       other .b.R files that parse user dates: surveysurvival (as.Date/strptime), and via lubridate/anytime/
       as.POSIXct(format=) (check 2-digit years and day-month swaps): datetimeconverter, datevalidator, groupsummary, multisurvival, singlearm, summarydata2, survival, survivalcont, swimmerplot, timeinterval.
 - [ ] decisiongraph.b.R:2578 calls calculateMarkovTransitionMatrix, defined nowhere (parked, meddecideExtraD).
+
+## OncoPath pre-release critical review — fixed (2026-10-19)
+
+Source: `../OncoPath/docs/audit/release-review-20261019/README.md` (verdict + disposition). Record:
+`quality-reports/fix-oncopath-release-2026-10-19/README.md`. Acceptance: every confirmed analysis finding
+fixed with a test that is red on the old code; the four suites green; i18n complete; gate 0 blocking.
+
+- [x] WF-1..5, SW-1..5/7/8/9, IH-1..5 (+ LOW 6-8), DM-1..6/10 fixed; regression files `test-*-release-20261019.R`
+- [x] Docs/data: README.Rmd, NEWS, dates, vignettes, stale docs/, `.rda` = `.csv`, re-save checklist
+- [x] Verify: prepare/document, 1,033 tests 0 failures, 60 Turkish msgstrs + msgfmt, sweeps 0, Turkish smoke, gate 0 blocking
+- [ ] (user) `Rscript _updateModules.R OncoPath`, delete `OncoPath/build/`, `jmvtools::install()`
+- [ ] (user) Re-save the five `.omv` per `OMV_RESAVE_CHECKLIST.md`; decide MOD-8 (swimmer status column)
+- [ ] (user) OncoPath: `git rm -r --cached docs/audit README.html`; rebuild the site
+- [ ] Later release: see "OncoPath — open items for the next release" below
+
+## OncoPath — open items for the next release (after 1.1.0)
+
+Left open by the 2026-10-19 pre-release review. Finding IDs are those in
+`../OncoPath/docs/audit/release-review-20261019/review_*.md`, where each has its evidence and a
+`repro_*.R`. Unless marked otherwise, each item is a code or documentation change in the umbrella,
+then `_updateModules.R OncoPath`. Each needs a regression test that is red first, Turkish msgstrs,
+and the gate.
+
+### Statistical (need an oracle check before changing output)
+
+- [ ] **DM-9 (diagnosticmeta): centre numeric meta-regression covariates.** The intercept row for
+      `year` reads "logit at year 0" (38.7, SE 109). Centre at the mean and say so, or drop the
+      intercept row for numeric covariates. Re-check against metafor KNHA with the centred
+      covariate.
+- [ ] **DM-7 (diagnosticmeta): PPV/NPV come from the pooled point with no uncertainty.** Add CI
+      columns propagated from the logit vcov (delta method). Or, at minimum, add a note pointing
+      to the prediction interval when heterogeneity is substantial.
+- [ ] **IH-1 refinement (ihcheterogeneity): detect a small scale bias against a noisy
+      reference.** With one reading per method, a scale bias b is identifiable only when
+      b > 1 + var(ref error) / var(truth), so b = 1.1 is missed (flag rate 0.01-0.02). The margin
+      verdict still blocks it. With 2 or more regions, a Grubbs-type error-variance estimate or an
+      instrumental-variable slope (another region as the instrument) would identify it. Simulate
+      every error regime: ref noisy, core noisy, equal (CHANGELOG 2026-10-19).
+- [ ] **IH-6 (ihcheterogeneity): the end-of-range level check holds the comparison mean fixed.**
+      The average-difference test uses Fieller. Test the ends on the ratio scale (delta method or
+      Fieller on the pair). Today the approximation is only disclosed in the method text.
+- [ ] **IH-7 (ihcheterogeneity): compartment tests are unadjusted.** An "exploratory" note is
+      shown today. Option: a Holm adjustment across the three compartment tests.
+- [ ] **IH-8 (ihcheterogeneity): the verdict ignores the limits of agreement.** The "met" text
+      now says it is average agreement only. Option: an "LoA within a clinical limit" criterion,
+      as a new option with a default that keeps today's verdicts.
+- [ ] **IH-4 follow-up:** add a note when the percentage margin is finer than the scoring
+      resolution (low Ki-67, integer percentages).
+
+### Presentation and wording
+
+- [ ] **DM-8 (diagnosticmeta): the DOR bands have no source.** The bands are "excellent > 25,
+      good 10-25 ...". Label them an illustrative convention, as the sensitivity/specificity bands
+      already are, or remove them.
+- [ ] **SW-6 (swimmerplot): event markers from rows excluded by validation are still drawn and
+      counted.** Either drop events whose source row failed validation, or say in the exclusion
+      notice that event markers are kept (`repro_SW-6.R`).
+- [ ] **MOD-14 (0000.yaml text, umbrella `jamovi/0000.yaml` and `jamovi/waterfall.a.yaml`):**
+  - The IHC description exposes `bias_margin`.
+  - The waterfall menuSubtitle has the typo "SpiderPlot".
+  - The waterfall description (`waterfall.a.yaml:26`) and the welcome text (`R/waterfall.b.R:1667`)
+    point to a lesion-level RECIST analysis "in upcoming releases". It is unshipped
+    (`waterfallrecist` is `OncoPathP`), so drop the promise.
+  - The swimmer description is promotional ("complete ggswim integration for professional ...")
+    and does not mention ORR/DCR or follow-up.
+- [ ] **MOD-18 (references):**
+  - Add `ClopperPearson1934` to `waterfall.r.yaml` refs; the entry already exists in `00refs.yaml`.
+  - Add `Fieller1954` and `Krouwer2008` to `00refs.yaml` and to `ihcheterogeneity.r.yaml` refs;
+    both are cited in the method text.
+  - Run `/reference-verifier` on the new entries.
+- [ ] **Earlier audit leftovers:**
+  - swimmerplot uses `.("no recorded response")` as a category name.
+  - diagnosticmeta splices a translated "Sensitivity"/"Specificity" into `%s` at the
+    `small_sample_`, `degenerate_` and omnibus notes; these need whole-sentence templates.
+
+### Data and packaging (OncoPath repository)
+
+- [ ] **MOD-8 (user decision): add a status column to `swimmerplot_sample`.** It would show
+      arrows, the censoring coding and the reverse-KM follow-up; also fix the three PD patients
+      whose progression comes after their first assessment. The full proposal, expected numbers
+      and the list of files are in `OMV_RESAVE_CHECKLIST.md` § 4.
+- [ ] **MOD-16: `histopathology.rda` ships to OncoPath but no OncoPath analysis uses it.**
+  - It holds a first-name column, the Turkish "DOĞRU/YANLIŞ" strings and the typo
+    "Golden Standart".
+  - Remove it from OncoPath's `data_files` in `_updateModules_config.yaml`.
+  - Dataset Rd files should state units and that the data are synthetic.
+- [ ] **MOD-13:** delete `OncoPath/inst/extdata/*.omv` (Sep 2025 copies, unreferenced) and
+      `OncoPath/build/` before each `jmvtools::install()`.
+- [ ] **MOD-11 (advisory):** `mada` is GPL-2-only beside GPL-3-only imports (`ggrepel`,
+      `mathjaxr`, `timechange`, `mixmeta`). Mention it in the submission comments, and add `mada`
+      to the `check_license` table.
+- [ ] **MOD-17:** OncoPath has no DOI of its own; the README now says so. Mint one (Zenodo) at the
+      first library release. Every analysis's software reference is still
+      `ClinicoPathJamoviModule`.
+
+### Verification not yet done
+
+- [ ] **GUI click-path:** the verdict doc's "Manual GUI click-path" was never driven, because no
+      GUI tool was available. Run it after the re-save: examples, the censoring-coding prompt,
+      Annotation tracks, Turkish, cold reopen.
+- [ ] **diagnosticmeta:** a test for the k >= 10 boundary-correlation sentence. It needs data with
+      both tau-squared above 1e-3 and the correlation at ±1.
+- [ ] **diagnosticmeta sparse tier:** confirm `>=` at exactly 25% is wanted. With it, the bundled
+      `diagnosticmeta_test` (5 of 20 studies) shows the warning; `>` would keep it quiet.
+- [ ] **Out of scope here:** the gate's sprintf advisory lists 11 Turkish translations in other
+      analyses (pairwise comparisons, Venn, landmark, ...) that fail `sprintf()` in Turkish.
+

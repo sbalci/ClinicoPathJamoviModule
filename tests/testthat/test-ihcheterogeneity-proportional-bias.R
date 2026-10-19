@@ -6,6 +6,10 @@
 # difference of ~0 and used to get "AGREEMENT THRESHOLDS MET". P2: the plain mean of
 # per-case CVs read a true 15% as 11.8% with two values per case. Every number is
 # checked against an independent computation (lm, sandwich), never the module's helpers.
+# Since 2026-10-19 the slope is taken on the mean of the two measurements in BOTH designs
+# (Bland & Altman 1995): on the reference value, the reference's own error made an
+# unbiased region "change with the level" (audit 2026-10-19). The oracles below regress
+# on that pair mean.
 
 txt <- function(html) gsub("\\s+", " ", gsub("<[^>]+>", " ", paste(html, collapse = " ")))
 verdict_of <- function(res) {
@@ -26,7 +30,7 @@ test_that("slope and p use HC3 standard errors (sandwich::vcovHC)", {
     skip_if_not_installed("sandwich")
     d <- compressed()
     b <- ihc(d, wholesection = "ref", biopsy1 = "reg")$samplingbiastable$asDF
-    fit <- lm(I(reg - ref) ~ ref, data = d)
+    fit <- lm(I(reg - ref) ~ I((reg + ref) / 2), data = d)
     se <- sqrt(diag(sandwich::vcovHC(fit, type = "HC3")))[2]
     p <- 2 * pt(-abs(coef(fit)[2] / se), df.residual(fit))
     expect_equal(b$slope[1], unname(coef(fit)[2]), tolerance = 1e-10)
@@ -42,12 +46,13 @@ test_that("a compressing single region is no longer 'met' and both ends are name
     # independent: the mean difference is inside the 5% margin, the ends are not
     dd <- d$reg - d$ref
     expect_lt(abs(mean(dd)) / mean(d$ref) * 100, 1)
-    fit <- lm(I(reg - ref) ~ ref, data = d)
-    ends <- quantile(d$ref, c(0.05, 0.95), names = FALSE)
-    fitted_ends <- predict(fit, data.frame(ref = ends))
+    pm <- (d$reg + d$ref) / 2
+    fit <- lm(dd ~ pm)
+    ends <- quantile(pm, c(0.05, 0.95), names = FALSE)
+    fitted_ends <- predict(fit, data.frame(pm = ends))
     expect_true(all(abs(fitted_ends) > 0.05 * mean(d$ref)))
-    # a single region is judged against the reference itself, whose own error can
-    # make such a slope: the level can stop "ruled out" but never make it material
+    # unequal error in the two measurements can make such a slope: the level can
+    # stop "ruled out" but never make it material
     expect_equal(verdict_of(res), "AGREEMENT THRESHOLDS MET, NOT CONFIRMED")
     imp <- res$samplingbiastable$asDF$clinical_impact[1]
     expect_match(imp, sprintf("%+.1f at %.1f", fitted_ends[1], ends[1]), fixed = TRUE)
@@ -66,9 +71,11 @@ test_that("with two regions a compressing region is not confirmed, never materia
     # from a regression-to-the-mean artefact (release review 2026-09-19)
     expect_equal(verdict_of(res), "AGREEMENT THRESHOLDS MET, NOT CONFIRMED")
     b <- res$samplingbiastable$asDF
-    # every reference row, the mean of all regions included, is regressed on the reference
-    expect_equal(b$slope[1], unname(coef(lm(I(b1 - ws) ~ ws, data = d))[2]), tolerance = 1e-10)
-    expect_equal(b$slope[3], unname(coef(lm(I((b1 + b2) / 2 - ws) ~ ws, data = d))[2]), tolerance = 1e-10)
+    # every reference row, the mean of all regions included, is regressed on the mean
+    # of the two measurements compared (was: on the reference, until 2026-10-19)
+    expect_equal(b$slope[1], unname(coef(lm(I(b1 - ws) ~ I((b1 + ws) / 2), data = d))[2]), tolerance = 1e-10)
+    expect_equal(b$slope[3], unname(coef(lm(I((b1 + b2) / 2 - ws) ~ I(((b1 + b2) / 2 + ws) / 2), data = d))[2]),
+                 tolerance = 1e-10)
     expect_match(b$clinical_impact[1], "inconclusive at the \u00b1", fixed = TRUE)
     expect_match(b$clinical_impact[2], "ruled out", fixed = TRUE)
     it <- txt(res$interpretation$content)
@@ -77,17 +84,17 @@ test_that("with two regions a compressing region is not confirmed, never materia
     expect_false(grepl("Material systematic difference", txt(res$notices$content), fixed = TRUE))
 })
 
-test_that("a slope that reference noise alone produces never makes a region material", {
-    # Regressing on the reference builds in a slope of -s^2 / var(reference): with a
-    # noisy (hotspot-like) reference an unbiased region shows it, and it may only
-    # stop 'ruled out'.
+test_that("a slope that unequal measurement error alone produces never makes a region material", {
+    # On the pair mean, unequal error variances build in a slope of
+    # (s_region^2 - s_ref^2) / (2 var(mean)): with a noisy (hotspot-like) reference
+    # an unbiased region shows it, and it may only stop 'ruled out'.
     set.seed(3); n <- 150; t <- runif(n, 10, 60)
     d <- data.frame(ws = t + rnorm(n, 0, 6), b1 = t + rnorm(n, 0, 2), b2 = t + rnorm(n, 0, 2))
     res <- ihc(d, wholesection = "ws", biopsy1 = "b1", biopsy2 = "b2")
     b <- res$samplingbiastable$asDF
     expect_length(b$slope_p, 3)
-    expect_equal(b$slope[1], unname(coef(lm(I(b1 - ws) ~ ws, data = d))[2]), tolerance = 1e-10)
-    expect_lt(b$slope[1], -0.08)                     # the artefact is there
+    expect_equal(b$slope[1], unname(coef(lm(I(b1 - ws) ~ I((b1 + ws) / 2), data = d))[2]), tolerance = 1e-10)
+    expect_lt(b$slope[1], -0.05)                     # the artefact is there
     expect_false(verdict_of(res) == "NOT ADEQUATE FOR SUBSTITUTION")
     expect_false(any(grepl("shown to exceed", b$clinical_impact, fixed = TRUE)))
 })
@@ -138,10 +145,12 @@ test_that("levels differing only in rounding residue give a blank slope, not a c
 })
 
 test_that("comparisons without a level check are named beside 'not detected' (A3-P4)", {
-    # b3 is measured only in 10 cases whose reference is 30 or 40: 2 distinct levels
+    # b3 is measured only in 10 cases whose reference is 30 or 40 and reads 1 above or
+    # below it: 4 distinct values (and pair means). Until 2026-10-19 b3 had continuous
+    # noise, which left 2 distinct REFERENCE levels but 10 distinct pair means.
     set.seed(4); w <- c(runif(50, 20, 80), rep(c(30, 40), each = 5)); n <- length(w)
     d <- data.frame(whole = w, b1 = w + rnorm(n, 0, 1), b2 = w + rnorm(n, 0, 1),
-                    b3 = c(rep(NA, 50), w[51:60] + rnorm(10, 0, 0.3)))
+                    b3 = c(rep(NA, 50), w[51:60] + rep(c(-1, 1), 5)))
     res <- ihc(d, wholesection = "whole", biopsy1 = "b1", biopsy2 = "b2", biopsy3 = "b3")
     b <- res$samplingbiastable$asDF
     expect_true(is.na(b$slope[3]))
@@ -180,7 +189,7 @@ test_that("an ordinal score gets no slope, and the blank is explained", {
     d <- data.frame(w = w, b1 = pmin(3, pmax(0, w + sample(c(-1, 0, 0, 0, 1), n, replace = TRUE))))
     b <- ihc(d, wholesection = "w", biopsy1 = "b1")$samplingbiastable
     expect_true(is.na(b$asDF$slope[1]))
-    expect_match(note_text(b), "fewer than 5 cases or 5 distinct levels", fixed = TRUE)
+    expect_match(note_text(b), "both measurements with fewer than 5 distinct values", fixed = TRUE)
 })
 
 test_that("'met' claims only what was tested", {
@@ -218,8 +227,9 @@ test_that("between regions a compressing region blocks 'ruled out' but is never 
     d <- data.frame(c1 = t + rnorm(60), c2 = t + rnorm(60), c3 = mean(t) + 0.7 * (t - mean(t)) + rnorm(60))
     res <- ihc(d, biopsy1 = "c1", biopsy2 = "c2", biopsy3 = "c3")
     b <- res$samplingbiastable$asDF
-    # level = the case mean of all regions
-    fit <- lm(I(c3 - (c1 + c2) / 2) ~ I((c1 + c2 + c3) / 3), data = d)
+    # pairs since 2026-10-19; row 3 is c3 vs c2, its level the mean of the pair
+    expect_equal(b$comparison[3], "c3 vs c2")
+    fit <- lm(I(c3 - c2) ~ I((c2 + c3) / 2), data = d)
     expect_equal(b$slope[3], unname(coef(fit)[2]), tolerance = 1e-10)
     expect_match(b$clinical_impact[3], "inconclusive at the \u00b1", fixed = TRUE)
     expect_equal(verdict_of(res), "AGREEMENT THRESHOLDS MET, NOT CONFIRMED")
@@ -246,13 +256,16 @@ test_that("a region that reads the same value in every case is never green and i
 })
 
 test_that("a single region with a plain offset against a noisy reference gets no slope advice", {
-    # the slope on the reference is the regression-to-the-mean artefact; the row is
-    # material by its average, so the advice is an offset calibration
+    # the reference is 3x noisier than the region; the row is material by its
+    # average, so the advice is an offset calibration
     set.seed(1); n <- 100; t <- runif(n, 10, 60)
     d <- data.frame(ws = t + rnorm(n, 0, 6), b1 = t + 0.10 * mean(t) + rnorm(n, 0, 2))
     res <- ihc(d, wholesection = "ws", biopsy1 = "b1", showReportSentences = TRUE, generate_recommendations = TRUE)
     expect_equal(verdict_of(res), "NOT ADEQUATE FOR SUBSTITUTION")
-    expect_lt(res$samplingbiastable$asDF$slope_p[1], 0.05)          # the artefact is shown
+    # the slope is taken on the pair mean (was: on the reference, where the noise
+    # showed a slope at p < 0.05; on the pair mean the unequal-error slope is weaker)
+    expect_equal(res$samplingbiastable$asDF$slope[1],
+                 unname(coef(lm(I(b1 - ws) ~ I((b1 + ws) / 2), data = d))[2]), tolerance = 1e-10)
     # no claim that THIS region's difference changes with the level (the general
     # advice that averaging removes neither kind of difference may stay)
     claims <- c("slope as well as an offset", "compresses the scale", "stretches the scale",

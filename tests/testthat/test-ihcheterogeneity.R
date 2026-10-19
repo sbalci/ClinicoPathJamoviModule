@@ -57,17 +57,17 @@ test_that("ihcheterogeneity handles inter-regional analysis", {
         biopsy3 = "ki67_region3"
     )
 
-    # `wholesection` is not provided: since 2026-09-18 each region is compared with
-    # the mean of the other regions (two regions reading 27% apart were otherwise
-    # reported as agreeing)
+    # `wholesection` is not provided: since 2026-10-19 every pair of regions is
+    # compared (the earlier region-vs-mean-of-the-others rows spread one region's
+    # offset onto the others)
     bias <- results$samplingbiastable$asDF
-    expect_equal(nrow(bias), 3)
-    expect_true(all(grepl("vs mean of the other regions", bias$comparison, fixed = TRUE)))
+    expect_equal(bias$comparison, c("ki67_region2 vs ki67_region1", "ki67_region3 vs ki67_region1",
+                                    "ki67_region3 vs ki67_region2"))
     reg <- sample_data[, c("ki67_region1", "ki67_region2", "ki67_region3")]
     reg <- reg[rowSums(!is.na(reg)) >= 2, ]          # usable cases: at least 2 regions
-    others <- rowMeans(reg[, 2:3], na.rm = TRUE)
-    ok <- !is.na(reg$ki67_region1) & is.finite(others)
-    expect_equal(bias$mean_diff[1], mean(reg$ki67_region1[ok] - others[ok]), tolerance = 1e-10)
+    ok <- !is.na(reg$ki67_region1) & !is.na(reg$ki67_region3)
+    expect_equal(bias$mean_diff[2], mean(reg$ki67_region3[ok] - reg$ki67_region1[ok]), tolerance = 1e-10)
+    expect_equal(bias$n[2], sum(ok))
 })
 
 

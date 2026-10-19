@@ -1,10 +1,10 @@
 ---
 name:  oddsratio
 title: Odds Ratio Table and Plot
-menuGroup: Survival
+menuGroup: SurvivalT
 menuSubgroup: General Statistics
 menuSubtitle: 'Odds Ratio for Binary Outcomes'
-version: '1.0.81'
+version: '1.1.0'
 jas: '1.2'
 
 description:

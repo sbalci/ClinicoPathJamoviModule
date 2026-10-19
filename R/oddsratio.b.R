@@ -473,6 +473,22 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
                 mydata <- jmvcore::select(self$data, selected_columns)
 
+                # An actual NA factor level is not missing to complete.cases().
+                # levels<- removes that level and restores genuine missing codes,
+                # preserving level order, ordered status and variable metadata.
+                for (nm in names(mydata)) {
+                    x <- mydata[[nm]]
+                    if (is.factor(x) && anyNA(levels(x))) {
+                        old_levels <- levels(x)
+                        values <- attr(x, "values", exact = TRUE)
+                        levels(x) <- old_levels
+                        if (!is.null(values) && length(values) == length(old_levels)) {
+                            attr(x, "values") <- values[!is.na(old_levels)]
+                        }
+                        mydata[[nm]] <- x
+                    }
+                }
+
                 # Perform input validation before processing
                 validation_results <- private$.validateInputs(
                     mydata[, model_columns, drop = FALSE],
@@ -2601,7 +2617,7 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 # makes the figure ambiguous to anything parsing it.
                 .fmt(.("Penalized AIC: {aic} (-2 x penalized log-likelihood + 2 x {nPar} parameters)."),
                                 aic = sprintf("%.1f", -2 * loglik_full + 2 * n_par), nPar = n_par),
-                .("This AIC is computed from the penalized (Firth) likelihood. Compare it only with other Firth models fitted to these same observations, not with the maximum-likelihood AIC of an unpenalized fit."),
+                .("This is a model-specific penalized-likelihood quantity that depends on predictor units and parameterisation. It is not suitable for comparing separately fitted Firth models or for comparison with maximum-likelihood AIC. For nested models, use a documented common-penalty likelihood-ratio comparison instead."),
                 .fmt(.("Penalized likelihood-ratio test vs null model: chi-square = {stat} on {df} df, {p}."),
                                 stat = round(lr_stat, 3), df = lr_df, p = private$.fmtP(lr_p))
             )
