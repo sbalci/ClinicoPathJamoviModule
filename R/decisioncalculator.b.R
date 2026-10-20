@@ -264,6 +264,20 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) {
             .run = function() {
                 .deleteTableRows(self$results$screeningWorkload)
                 private$.noticeList <- list()
+                # Restored Html can retain old content despite clearWith. Clear before
+                # validation, including the count-dependent assumptions panel.
+                narrative <- c("summary", "faganSummary", "assumptions", "about", "glossary")
+                for (name in narrative) self$results[[name]]$setContent("")
+                on.exit(for (name in narrative) {
+                    item <- self$results[[name]]
+                    item$setVisible(nzchar(item$content) && isTRUE(switch(name,
+                        summary = self$options$showSummary,
+                        faganSummary = self$options$fagan,
+                        assumptions = self$options$showAbout,
+                        about = self$options$showAbout,
+                        glossary = self$options$showGlossary)))
+                }, add = TRUE)
+                on.exit(private$.renderNotices(), add = TRUE)
 
                 # Read numbers from input ----
                 # jamovi sends a typed whole number as int32, so these usually arrive as R
@@ -307,31 +321,31 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) {
                 # Reject non-finite inputs
                 if (any(!is.finite(c(TP, FP, TN, FN)))) {
                     private$.addNotice("ERROR", .("Non-finite counts"), .("TP, FP, TN, and FN must be finite numbers. Check the input values."))
-                    return()
+                    .diagRejectInputErrors(private$.noticeList)
                 }
 
                 # Check for non-negative values
                 if (TP < 0 || FP < 0 || TN < 0 || FN < 0) {
                     private$.addNotice("ERROR", .("Negative counts detected"), .("All counts (TP, FP, TN, FN) must be non-negative. Check the input values."))
-                    return()
+                    .diagRejectInputErrors(private$.noticeList)
                 }
 
                 # Check for at least some data
                 if (TP + FP + TN + FN == 0) {
                     private$.addNotice("ERROR", .("All counts are zero"), .("Provide diagnostic-test data with at least one non-zero count."))
-                    return()
+                    .diagRejectInputErrors(private$.noticeList)
                 }
 
                 # Check for diseased subjects
                 if (TP + FN == 0) {
                     private$.addNotice("ERROR", .("No reference-positive subjects"), .("TP + FN equals zero, so sensitivity and related measures cannot be calculated."))
-                    return()
+                    .diagRejectInputErrors(private$.noticeList)
                 }
 
                 # Check for healthy subjects
                 if (TN + FP == 0) {
                     private$.addNotice("ERROR", .("No reference-negative subjects"), .("TN + FP equals zero, so specificity and related measures cannot be calculated."))
-                    return()
+                    .diagRejectInputErrors(private$.noticeList)
                 }
 
                 # Check for positive tests
@@ -432,9 +446,9 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) {
                     )
                 }
 
-                # Continuity correction for zero-cell issues: the LR and DOR point estimates and
-                # their in-house intervals (see the ci block) use the corrected counts; the
-                # proportions, and epi.tests() on the raw table3, do not.
+                # Apply correction separately: LR+ for TP/FP zeros, LR- for FN/TN zeros,
+                # DOR for any zero. Each affected ratio and its interval use all cells +0.5;
+                # proportions, and epi.tests() on the raw table3, use observed counts.
                 zero_cell <- any(c(TP, FP, TN, FN) == 0)
                 lrp_zero <- (TP == 0 || FP == 0)
                 lrn_zero <- (FN == 0 || TN == 0)
@@ -455,7 +469,7 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) {
                 FN_lrn <- if (lrn_zero) FN + 0.5 else as.numeric(FN)
 
                 if (zero_cell) {
-                    private$.addNotice("WARNING", .("Continuity correction applied"), .("A zero cell was present, so a Haldane-Anscombe 0.5 correction was added to every cell for the likelihood ratios, the diagnostic odds ratio and their confidence intervals. Sensitivity, specificity, predictive values and their intervals use the observed counts."))
+                    private$.addNotice("WARNING", .("Continuity correction applied"), .("A zero cell was present. For LR+ only when TP or FP is zero, and for LR- only when FN or TN is zero, 0.5 is added to all four cells for that ratio and its confidence interval. The diagnostic odds ratio and its interval use all four cells plus 0.5 whenever any cell is zero (Haldane-Anscombe correction). Sensitivity, specificity, predictive values and their intervals use the observed counts. The corrected diagnostic odds ratio need not equal the ratio of the displayed likelihood ratios."))
                 }
 
                 # The early returns above guarantee DiseaseP, DiseaseN > 0. The fallbacks here and

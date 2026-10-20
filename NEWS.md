@@ -1,3 +1,35 @@
+## Unreleased — meddecide 1.1.1: 2026-10-20 release-review corrections
+
+- Quote numeric citation page fields so complete jamovi responses serialize correctly.
+- Compute categorical Agreement % directly as complete-case unanimity, including valid
+  zero-agreement data that irr::agree() incorrectly reports as greater than 100%.
+- Describe the existing selective zero-cell correction for LR+, LR- and the diagnostic
+  odds ratio accurately; preserve the estimators and confidence-interval methods.
+- Retain epiR. Its transitive pander dependency offers AGPL-3 or OSL-3.0; document
+  the library-policy question without replacing the statistical dependency.
+
+- Clear the diagnostic calculator's summary, Fagan reading and count-dependent
+  assumptions before validation; invalid counts cannot retain an earlier report.
+- Fatal input validation in decision, decisioncalculator, decisioncombine and
+  enhancedROC now reaches jamovi's error handler. Unfinished selections remain pending.
+- Agreement's null-SE fallback explains uncertain coverage without claiming that
+  the interval must be too narrow at high kappa. Statistical methods are unchanged.
+- Add portable installed-package failure, recovery, diagnostic-metric and ROC-wrapper
+  regressions. Selected verified tests travel with their analysis; generated test
+  runners use testthat edition 3. Separate draft cohenskappa coverage from agreement.
+- Export valid R syntax for agreement, decision, decisioncurve and lassologistic
+  when column names or class labels contain spaces, quotes or backslashes.
+- Reject invalid limits-of-agreement coverage without silently replacing the
+  user's entry; remove the agreement UI clamping handler.
+- Extract agreement guide sentences and cells for translation while preserving
+  markup, existing translations and the original English content. Add initial
+  Turkish guide headings and document the remaining localization queue.
+- Use sentence case for individual decision-analysis controls and carry the new
+  installed-package regressions through the updater's verified-test configuration.
+- Extract agreement's setup-guide dispatcher without changing its option gates.
+- Add the missing meddecide 1.1.0 release notes. Corrections remain in the testing
+  menu pending promotion; the existing production archive has not been rebuilt.
+
 # ClinicoPath News
 
 ## Unreleased — OncoPath: pre-release critical review fixes (2026-10-19)

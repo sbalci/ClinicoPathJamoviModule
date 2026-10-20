@@ -7,11 +7,16 @@ rel11_run <- function(data, ...) suppressWarnings(do.call(enhancedROC,
                           showClinicalReport = TRUE), list(...), keep.null = TRUE)))
 
 # Builds and runs the analysis object, to read the typed notice list behind the Html panel.
-rel11_obj <- function(data, ...) {
+rel11_obj <- function(data, ..., .fatal = FALSE) {
     options <- do.call(enhancedROCOptions$new, utils::modifyList(list(showTableNotes = TRUE, showAnalysisSummary = TRUE,
         showClinicalReport = TRUE), list(...), keep.null = TRUE))
     analysis <- enhancedROCClass$new(options = options, data = data)
-    suppressWarnings(analysis$run())
+    suppressWarnings(analysis$run(noThrow = .fatal))
+    if (.fatal) {
+        expect_identical(analysis$status, "error")
+        expect_true(analysis$errored)
+        expect_false(analysis$complete)
+    }
     analysis
 }
 rel11_notices <- function(analysis) analysis$.__enclos_env__$private$.noticeList
@@ -377,7 +382,7 @@ test_that("F-29: non-numeric Custom cutoffs entries are named in a WARNING", {
 
 test_that("F-30: an all-missing outcome is refused as having no values, not 'only one value: NA'", {
     d <- data.frame(y = factor(rep(NA, 20), levels = c("Benign", "Malignant")), m = 1:20)
-    a <- rel11_obj(d, outcome = "y", positiveClass = "Malignant", predictors = "m")
+    a <- rel11_obj(d, outcome = "y", positiveClass = "Malignant", predictors = "m", .fatal = TRUE)
     e <- Filter(function(n) identical(n$type, "ERROR"), rel11_notices(a))
     expect_length(e, 1L)
     expect_match(e[[1]]$content, "Outcome variable 'y' has no non-missing values.", fixed = TRUE)

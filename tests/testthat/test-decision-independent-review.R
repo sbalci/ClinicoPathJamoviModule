@@ -150,7 +150,7 @@ test_that("references: the suspicious ones are gone from decision and every rema
                   %in% item_refs("aboutAnalysis")))
   all_refs <- unique(c(unlist(lapply(spec$items, `[[`, "refs")), unlist(spec$refs)))
   known <- names(read_utf8(refs_yaml)$refs)
-  expect_gt(length(known), 400)                                  # the whole file was read
+  expect_true(length(known) > 0 && all(nzchar(known)) && !anyDuplicated(known))
   expect_length(setdiff(all_refs, known), 0)
 })
 

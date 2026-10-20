@@ -1,10 +1,15 @@
 # /fix-function --apply pass 2026-10-11 (TODO.md, "enhancedROC - /fix-function --apply").
 # One test_that per defect, each written to FAIL on the code before its fix.
 
-fx_run <- function(data, ...) {
+fx_run <- function(data, ..., .fatal = FALSE) {
     options <- do.call(enhancedROCOptions$new, list(...))
     analysis <- enhancedROCClass$new(options = options, data = data)
-    suppressWarnings(analysis$run())
+    suppressWarnings(analysis$run(noThrow = .fatal))
+    if (.fatal) {
+        expect_identical(analysis$status, "error")
+        expect_true(analysis$errored)
+        expect_false(analysis$complete)
+    }
     analysis
 }
 fx_notices <- function(analysis, title) {
@@ -46,11 +51,11 @@ test_that("X-02: an invalid Partial AUC range warns and skips only the partial A
     expect_match(ok$results$results$methodsExplanation$content, "partial AUC", fixed = TRUE)   # the check above is not vacuous
 })
 
-test_that("X-03: a frozen-panel input problem is an ERROR notice, not an untranslated analysis error", {
+test_that("X-03: a frozen-panel input problem reaches the engine and retains a translated ERROR notice", {
     set.seed(5)
     d <- data.frame(y = factor(sample(c("case", "ctrl"), 80, TRUE)), p = runif(80))
     frozen <- function(...) fx_run(d, outcome = "y", positiveClass = "case", predictors = "p",
-                                   validationPanel = TRUE, direction = "higher", ...)
+                                   validationPanel = TRUE, direction = "higher", .fatal = TRUE, ...)
     no_negative <- expect_no_error(frozen(modelVersion = "v1"))
     n <- fx_notices(no_negative, "Frozen-Model Evaluation Not Run")
     expect_length(n, 1L)

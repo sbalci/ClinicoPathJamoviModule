@@ -150,7 +150,7 @@ test_that("clinical strategies are summarised for two-test combinations", {
 
 test_that("input validation detects mismatched positive level", {
 
-  expect_no_error(
+  expect_error(
     decisioncombine(
       data = known_data_2_tests,
       gold = "gold",
@@ -160,7 +160,7 @@ test_that("input validation detects mismatched positive level", {
       test2 = "test2",
       test2Positive = "P",
       test3Positive = "P"
-    )
+    ), "Missing Level", fixed = TRUE
   )
 })
 

@@ -24,6 +24,14 @@ run_dcomb <- function(dat, ...) {
              test3 = "t3", test3Positive = "pos"), list(...)))
 }
 
+run_dcomb_error <- function(dat, ...) {
+    do.call(diagnostic_error_results, utils::modifyList(
+        list(analysis = "decisioncombine", data = dat, gold = "gold", goldPositive = "pos",
+             test1 = "t1", test1Positive = "pos",
+             test2 = "t2", test2Positive = "pos",
+             test3 = "t3", test3Positive = "pos"), list(...)))
+}
+
 notices_of <- function(res)
     gsub("[[:space:]]+", " ", gsub("<[^>]+>", " ", paste(res$notices$content, collapse = " ")))
 
@@ -217,20 +225,20 @@ test_that("notices survive every early return in .run()", {
     # analysis stopped was collected and then thrown away: the user saw a blank analysis
     # with no message at all.
     d <- dcomb_fixture()
-    res <- run_dcomb(d, goldPositive = "NotALevel")
+    res <- run_dcomb_error(d, goldPositive = "NotALevel")
     expect_match(notices_of(res), "Missing Level")
     expect_match(notices_of(res), "NotALevel")
     expect_equal(res$combinationTable$rowCount, 0L)
 
     d2 <- dcomb_fixture(); d2$gold <- NA
-    res2 <- run_dcomb(d2)
+    res2 <- run_dcomb_error(d2)
     expect_match(notices_of(res2), "No Complete Cases")
 })
 
 
 test_that("invalid positive levels stop before individual statistics are populated", {
     d <- dcomb_fixture()
-    res <- run_dcomb(
+    res <- run_dcomb_error(
         d,
         test2Positive = "NotALevel",
         showIndividual = TRUE
@@ -250,7 +258,7 @@ test_that("fewer than four joint complete cases stop the analysis", {
         t2 = c("pos", "neg", "pos", NA, NA, NA),
         stringsAsFactors = FALSE
     )
-    res <- ClinicoPath::decisioncombine(
+    res <- diagnostic_error_results("decisioncombine",
         data = d,
         gold = "gold",
         goldPositive = "pos",
@@ -889,7 +897,7 @@ test_that("an all-negative winner is flagged as a probable inverted positive lev
 test_that("the recommendation table is hidden rather than showing a blank row", {
     # rows: 1 is a fixed schema, so the seeded all-NA row survives every early return.
     d <- dcomb_fixture()
-    bad <- do.call(ClinicoPath::decisioncombine, list(
+    bad <- do.call(diagnostic_error_results, list(analysis = "decisioncombine",
         data = d, gold = "gold", goldPositive = "pos",
         test1 = "t1", test1Positive = "pos",
         test2 = "t1", test2Positive = "pos",        # same variable twice -> validation error
@@ -938,7 +946,7 @@ test_that("the About panel survives a validation early-return", {
     skip_if_not("showAbout" %in% names(formals(ClinicoPath::decisioncombine)),
                 "jmvtools::prepare() has not compiled the showAbout option yet")
     d <- dcomb_fixture()
-    bad <- do.call(ClinicoPath::decisioncombine, list(
+    bad <- do.call(diagnostic_error_results, list(analysis = "decisioncombine",
         data = d, gold = "gold", goldPositive = "pos",
         test1 = "t1", test1Positive = "pos",
         test2 = "t1", test2Positive = "pos",        # duplicate variable -> validation error

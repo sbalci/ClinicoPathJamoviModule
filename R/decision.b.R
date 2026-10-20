@@ -21,6 +21,12 @@ decisionClass <- if (requireNamespace("jmvcore"))
         "decisionClass",
         inherit = decisionBase,
         private = list(
+            .sourcifyOption = function(option) {
+                source <- .sourcifyDiagnosticOption(option)
+                if (!is.null(source)) return(source)
+                super$.sourcifyOption(option)
+            },
+
             .n_complete_cases = NA_integer_,
             .n_level_excluded = 0L,
             # Sign of the observed Youden's index; set in .run() before any narrative is
@@ -1814,6 +1820,8 @@ decisionClass <- if (requireNamespace("jmvcore"))
 
                 # Consolidated input validation
                 if (!private$.validateCategoricalInputs()) {
+                    private$.clearDiseaseOutputs()
+                    .diagRejectInputErrors(private$.noticeList)
                     return()
                 }
 
@@ -1823,6 +1831,8 @@ decisionClass <- if (requireNamespace("jmvcore"))
 
                 # Check if data preparation failed
                 if (is.null(prepared_data)) {
+                    private$.clearDiseaseOutputs()
+                    .diagRejectInputErrors(private$.noticeList)
                     return()
                 }
 

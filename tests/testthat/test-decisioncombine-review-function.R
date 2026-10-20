@@ -114,6 +114,14 @@ dc_run <- function(d, k = 2, ...) {
         list(...)))
 }
 
+dc_error <- function(d, k = 2, ...) {
+    do.call(diagnostic_error_results, c(list(
+        analysis = "decisioncombine", data = d, gold = "gold", goldPositive = "D", test1 = "t1", test1Positive = "pos",
+        test2 = if (k >= 2) "t2" else NULL, test2Positive = if (k >= 2) "pos" else NULL,
+        test3 = if (k >= 3) "t3" else NULL, test3Positive = if (k >= 3) "pos" else NULL),
+        list(...)))
+}
+
 dc_notices <- function(res) {
     html <- gsub("<br>", " || ", res$notices$content)
     blocks <- regmatches(html, gregexpr("<div style='background-color[^>]*>.*?</div>", html,
@@ -224,7 +232,7 @@ test_that("RF-01f a moderate imbalance is a plain warning, and a partition is ex
     p <- dc_three()
     p$t2[p$t1 == "pos"] <- NA
     p$t3[p$t1 == "neg"] <- NA
-    text <- dc_notices(dc_run(p, 3))
+    text <- dc_notices(dc_error(p, 3))
     expect_true(any(grepl("No Complete Cases", text, fixed = TRUE)))
     strong <- grep(STRONG_TITLE, text, fixed = TRUE, value = TRUE)
     expect_length(strong, 1L)

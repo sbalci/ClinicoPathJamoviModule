@@ -429,6 +429,18 @@ plan_module <- function(m, routes, index, reg, ignore = character()) {
       for (t in tests[grepl(paste0("^(test|helper)-", a, "(\\.R$|[.-])"), tests)])
         add(file.path("tests", "testthat", t), file.path(U, "tests", "testthat", t), "text", a)
   }
+  # Small, self-contained regressions can ship without opting in the entire
+  # umbrella suite. Routing still owns scope: parked analyses' tests do not ship.
+  if (!isTRUE(modes$copy_test_files)) for (a in analyses) {
+    for (t in unlist(modes$verified_test_files[[a]], use.names = FALSE)) {
+      source <- file.path(U, "tests", "testthat", t)
+      if (basename(t) != t || !grepl("^test-.*[.]R$", t) || !file.exists(source)) {
+        errors <- c(errors, paste0(m$name, ": invalid verified test file: ", t))
+        next
+      }
+      add(file.path("tests", "testthat", t), source, "text", a)
+    }
+  }
   if (isTRUE(modes$copy_vignettes)) {
     vf <- cfg$vignette_folders %||% list()
     ext <- vf$extensions %||% c(".qmd", ".Rmd", ".md")

@@ -168,6 +168,6 @@ test_that("FX-08 a selection started with Test 2 says what is missing, as one st
     d <- .fx_mk(FX_D, FX_N)
     for (start in list(list(test1 = "t1", t2 = NULL), list(test1 = NULL, t2 = "t2"))) {
         nt <- .fx_notices(.fx_run(d, gold = NULL, test1 = start$test1, t2 = start$t2))
-        expect_identical(nt$severity[nt$title == "No Gold Standard"], "Error")
+        expect_identical(nt$severity[nt$title == "No Gold Standard"], "Note")
     }
 })

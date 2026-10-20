@@ -4,7 +4,7 @@ title: Advanced ROC Analysis
 menuGroup: meddecide
 menuSubgroup: ROC
 menuSubtitle: Advanced ROC analysis with statistical comparisons and effect sizes
-version: '1.1.0'
+version: '1.1.1'
 jas: '1.2'
 
 description:
@@ -49,7 +49,7 @@ options:
           R: Show optional educational interpretation and procedure details. Input and scope notices remain visible.
 
     - name: clinicalMode
-      title: Guidance Level
+      title: Guidance level
       type: List
       options:
         - name: basic
@@ -126,7 +126,7 @@ options:
             variance gives missing inference. Pairwise AUC comparisons use ordinary paired DeLong.
 
     - name: dependentVars
-      title: Test Variables
+      title: Test variables
       type: Variables
       suggested:
         - continuous
@@ -138,7 +138,7 @@ options:
             Multiple variables can be selected for comparison.
 
     - name: classVar
-      title: Class Variable (Gold Standard)
+      title: Class variable (gold standard)
       type: Variable
       suggested:
         - nominal
@@ -153,7 +153,7 @@ options:
     # allowNone: without it the jamovi client pre-selects levels[0] - usually the NEGATIVE
     # level - and the whole analysis runs reversed. The positive class is never inferred.
     - name: positiveClass
-      title: Positive Class
+      title: Positive class
       type: Level
       variable: (classVar)
       allowNone: true
@@ -167,7 +167,7 @@ options:
             their order.
 
     - name: negativeClass
-      title: Negative Class
+      title: Negative class
       type: Level
       variable: (classVar)
       allowNone: true
@@ -180,7 +180,7 @@ options:
             NULL leaves the analysis waiting for a choice. Other levels are excluded.
 
     - name: subGroup
-      title: Subgroup Variable (Optional)
+      title: Subgroup variable (optional)
       type: Variable
       default: null
       suggested:
@@ -197,7 +197,7 @@ options:
     # ==========================================
     
     - name: method
-      title: Cutpoint Method
+      title: Cutpoint method
       type: List
       options:
         - name: maximize_metric
@@ -231,7 +231,7 @@ options:
             different aspects of classifier performance.
 
     - name: metric
-      title: Optimization Metric
+      title: Optimization metric
       type: List
       options:
         - name: youden
@@ -275,7 +275,7 @@ options:
             correction), not its p-value.
 
     - name: direction
-      title: Classification Direction
+      title: Classification direction
       type: List
       options:
         - name: ">="
@@ -289,7 +289,7 @@ options:
             Use '>=' when higher test values indicate the positive class.
 
     - name: specifyCutScore
-      title: Manual Cutpoint Value
+      title: Manual cutpoint value
       type: String
       default: ""
       description:
@@ -297,7 +297,7 @@ options:
             Specific cutpoint value to use when method is set to 'Manual cutpoint'.
 
     - name: tol_metric
-      title: Metric Tolerance
+      title: Metric tolerance
       type: Number
       default: 0.000001
       min: 0.0
@@ -315,7 +315,7 @@ options:
             over-fitting one threshold.
 
     - name: break_ties
-      title: Tie Breaking Method
+      title: Tie breaking method
       type: List
       options:
         - name: mean
@@ -343,7 +343,7 @@ options:
             not just the optimal cutpoint.
 
     - name: boot_runs
-      title: Bootstrap Iterations
+      title: Bootstrap iterations
       type: Integer
       default: 0
       min: 0
@@ -354,7 +354,7 @@ options:
             Set to 0 to disable bootstrapping.
 
     - name: seed
-      title: Random Seed
+      title: Random seed
       type: Integer
       default: 123
       description:
@@ -371,7 +371,7 @@ options:
             for calculating predictive values.
 
     - name: priorPrev
-      title: Prior Prevalence Value
+      title: Prior prevalence value
       type: Number
       default: 0.5
       min: 0.000000001
@@ -382,7 +382,7 @@ options:
             Only used when 'Use Prior Prevalence' is checked.
 
     - name: costratioFP
-      title: Cost Ratio (FP:FN)
+      title: Cost ratio (FP:FN)
       type: Number
       default: 1.0
       min: 0.01
@@ -413,7 +413,7 @@ options:
             Display detailed table with performance metrics at multiple thresholds.
 
     - name: maxThresholds
-      title: Maximum Thresholds to Display
+      title: Maximum thresholds to display
       type: Integer
       default: 20
       min: 5
@@ -496,7 +496,7 @@ options:
             Display confidence bands around the ROC curve.
 
     - name: legendPosition
-      title: Legend Position
+      title: Legend position
       type: List
       options:
         - name: "none"
@@ -536,7 +536,7 @@ options:
     # ==========================================
     
     - name: showCriterionPlot
-      title: Sensitivity/Specificity vs threshold
+      title: Sensitivity/specificity vs threshold
       type: Bool
       default: false
       description:
@@ -581,7 +581,7 @@ options:
             Calculate AUC for a specific region of the ROC curve.
 
     - name: partialAUCfrom
-      title: Partial AUC From (Specificity)
+      title: Partial AUC from (specificity)
       type: Number
       default: 0.8
       min: 0.0
@@ -591,7 +591,7 @@ options:
             Lower bound of specificity range for partial AUC calculation.
 
     - name: partialAUCto
-      title: Partial AUC To (Specificity)
+      title: Partial AUC to (specificity)
       type: Number
       default: 1.0
       min: 0.0
@@ -601,7 +601,7 @@ options:
             Upper bound of specificity range for partial AUC calculation.
 
     - name: rocSmoothingMethod
-      title: ROC Smoothing Method
+      title: ROC smoothing method
       type: List
       options:
         - name: none
@@ -629,7 +629,7 @@ options:
             original sample and stratified bootstrap replicates.
 
     - name: bootstrapReps
-      title: Bootstrap Replications
+      title: Bootstrap replications
       type: Integer
       default: 2000
       min: 100
@@ -647,7 +647,7 @@ options:
             Display confidence intervals at specific quantiles of the test variable.
 
     - name: quantiles
-      title: Quantile Positions
+      title: Quantile positions
       type: String
       default: "0.1,0.25,0.5,0.75,0.9"
       description:
@@ -687,7 +687,7 @@ options:
     # A Variable, not a Level: a LevelSelector bound to the Variables option dependentVars lists
     # no levels, so the reference could never be chosen in jamovi.
     - name: refVar
-      title: Reference Test for IDI/NRI
+      title: Reference test for IDI/NRI
       type: Variable
       default: null
       suggested:
@@ -701,7 +701,7 @@ options:
             than the reference is compared against it. NULL uses the first test variable.
 
     - name: nriThresholds
-      title: NRI Risk Categories
+      title: NRI risk categories
       type: String
       default: ""
       description:
@@ -712,7 +712,7 @@ options:
             This tolerance removes numerical roundoff and is not a clinically meaningful change threshold.
 
     - name: idiNriBootRuns
-      title: IDI/NRI Bootstrap Iterations
+      title: IDI/NRI bootstrap iterations
       type: Integer
       default: 1000
       min: 100
@@ -744,7 +744,7 @@ options:
             Does not calculate power for a difference between markers.
 
     - name: powerAnalysisType
-      title: Power Analysis Type
+      title: Power analysis type
       type: List
       options:
         - name: post_hoc
@@ -771,7 +771,7 @@ options:
             of exactly 1 is degenerate and has no sample size recommendation.
 
     - name: targetPower
-      title: Target Statistical Power
+      title: Target statistical power
       type: Number
       default: 0.8
       min: 0.5
@@ -781,7 +781,7 @@ options:
             Target statistical power for sample size calculations (typically 0.8 or 0.9).
 
     - name: significanceLevel
-      title: Significance Level (Alpha)
+      title: Significance level (alpha)
       type: Number
       default: 0.05
       min: 0.001
@@ -815,7 +815,7 @@ options:
             "credible intervals" as bootstrap percentile confidence intervals.
 
     - name: priorAUC
-      title: Prior AUC Belief
+      title: Prior AUC belief
       type: Number
       default: 0.7
       min: 0.5
@@ -825,7 +825,7 @@ options:
             Prior belief about AUC value for Bayesian analysis (center of prior distribution).
 
     - name: priorPrecision
-      title: Prior Precision
+      title: Prior precision
       type: Number
       default: 10
       min: 1
@@ -848,7 +848,7 @@ options:
             decision curve analysis, and clinical impact assessment.
 
     - name: treatmentThreshold
-      title: Treatment Threshold Range
+      title: Treatment threshold range
       type: String
       default: "0.05,0.5,0.05"
       description:
@@ -857,7 +857,7 @@ options:
             Example: "0.05,0.5,0.05" creates thresholds from 5 percent to 50 percent in 5 percent steps.
 
     - name: harmBenefitRatio
-      title: Harm-to-Benefit Ratio
+      title: Harm-to-benefit ratio
       type: Number
       default: 0.25
       min: 0.01
@@ -880,7 +880,7 @@ options:
     # ==========================================
 
     - name: fixedSensSpecAnalysis
-      title: Fixed sensitivity/Specificity analysis
+      title: Fixed sensitivity/specificity analysis
       type: Bool
       default: false
       description:
@@ -889,7 +889,7 @@ options:
             display corresponding performance metrics.
 
     - name: fixedAnalysisType
-      title: Fixed Analysis Type
+      title: Fixed analysis type
       type: List
       options:
         - name: sensitivity
@@ -902,7 +902,7 @@ options:
             Choose whether to fix sensitivity or specificity value for cutoff determination.
 
     - name: fixedSensitivityValue
-      title: Target Sensitivity
+      title: Target sensitivity
       type: Number
       default: 0.90
       min: 0.01
@@ -912,7 +912,7 @@ options:
             Target sensitivity value (0-1) for determining the corresponding cutoff and specificity.
 
     - name: fixedSpecificityValue
-      title: Target Specificity
+      title: Target specificity
       type: Number
       default: 0.90
       min: 0.01
@@ -930,7 +930,7 @@ options:
             Display separate ROC curve highlighting the fixed sensitivity/specificity point.
 
     - name: fixedInterpolation
-      title: Interpolation Method
+      title: Interpolation method
       type: List
       options:
         - name: linear

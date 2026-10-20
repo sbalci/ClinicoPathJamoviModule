@@ -13,8 +13,8 @@ data(decisioncalculator_screening, package = "ClinicoPath")
 data(decisioncalculator_biomarker, package = "ClinicoPath")
 
 
-# decisioncalculator reports invalid input as a jamovi NOTICE, not an R condition (the
-# convention across meddecide). expect_error() asserted nothing here.
+# Fatal counts reject the R API and enter jamovi's error state; inspect its notice
+# with diagnostic_error_results(), which asserts that state as well.
 dcalc_notices <- function(result) {
   gsub("[[:space:]]+", " ", gsub("<[^>]+>", " ", paste(result$notices$content, collapse = " ")))
 }
@@ -136,7 +136,7 @@ test_that("decisioncalculator handles high-performance biomarker", {
 })
 
 test_that("decisioncalculator flags negative counts", {
-  expect_no_error(res <- decisioncalculator(TP = -10, TN = 80, FP = 20, FN = 10))
+  res <- diagnostic_error_results("decisioncalculator", TP = -10, TN = 80, FP = 20, FN = 10)
   expect_match(dcalc_notices(res), "Negative counts detected")
   # and does not present numbers computed from them
   expect_true(is.na(res$ratioTable$asDF$Sens[1]))

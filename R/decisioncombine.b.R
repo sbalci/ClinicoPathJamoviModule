@@ -517,9 +517,8 @@ decisioncombineClass <- if (requireNamespace("jmvcore")) {
                 # the explanation rather than an empty pane. It depends on no data.
                 private$.renderAboutPanels()
 
-                # .run() has two early returns (failed validation and failed data prep --
-                # incomplete variable selection is now one of the validation errors, see
-                # below). Rendering only at the bottom meant every
+                # Render notices on failed validation, failed preparation and pending
+                # selections too. Rendering only at the bottom meant every
                 # notice explaining WHY the analysis stopped -- "Missing Level",
                 # "No Complete Cases", every validation error -- was collected and then
                 # discarded, leaving the user with a blank analysis and no message. on.exit
@@ -542,6 +541,7 @@ decisioncombineClass <- if (requireNamespace("jmvcore")) {
                 # failed validation they described a table, and a ranking, that never existed.
                 private$.emitMissingnessNotices(isTRUE(validation_result))
                 if (!validation_result) {
+                    .diagRejectInputErrors(private$.noticeList)
                     return() # Halt execution if validation failed
                 }
 
@@ -559,6 +559,7 @@ decisioncombineClass <- if (requireNamespace("jmvcore")) {
                 # Combination rules require joint complete cases across every selected test.
                 data_prep <- private$.prepareData()
                 if (is.null(data_prep)) {
+                    .diagRejectInputErrors(private$.noticeList)
                     return()
                 }
 
@@ -654,7 +655,7 @@ decisioncombineClass <- if (requireNamespace("jmvcore")) {
 
                 if (length(self$options$gold) == 0 || self$options$gold == "") {
                     private$.addNotice(
-                        "ERROR",
+                        "INFO",
                         .("No Gold Standard"),
                         .("A gold standard variable is required. Select a reference test.")
                     )
@@ -663,7 +664,7 @@ decisioncombineClass <- if (requireNamespace("jmvcore")) {
 
                 if (length(self$options$test1) == 0 || self$options$test1 == "") {
                     private$.addNotice(
-                        "ERROR",
+                        "INFO",
                         .("No Test 1"),
                         .("Test 1 is required. Select at least one test variable.")
                     )
@@ -1564,7 +1565,7 @@ decisioncombineClass <- if (requireNamespace("jmvcore")) {
                 # corrected number, so the per-branch rule stays visible.
                 self$results$combinationTable$setNote(
                     "haldane",
-                    jmvcore::.("LR+, LR- and the diagnostic odds ratio are computed with 0.5 added to all four cells when a cell is zero, so they stay finite (for the odds ratio this is the Haldane-Anscombe correction; the likelihood ratios use the same adjustment). No correction is made on a row with no test-positive patients: its LR+ and odds ratio are blank and its LR- is exactly 1, and the mirror case blanks LR- and the odds ratio and shows LR+ as exactly 1. In a sample with one reference outcome all three are blank.")
+                    jmvcore::.("For LR+ only when TP or FP is zero, and for LR- only when FN or TN is zero, 0.5 is added to all four cells for that ratio and its confidence interval. The diagnostic odds ratio and its interval use all four cells plus 0.5 whenever any cell is zero (Haldane-Anscombe correction). The corrected diagnostic odds ratio need not equal the ratio of the displayed likelihood ratios. No correction is made on a row with no test-positive patients: its LR+ and odds ratio are blank and its LR- is exactly 1, and the mirror case blanks LR- and the odds ratio and shows LR+ as exactly 1. In a sample with one reference outcome all three are blank.")
                 )
                 # Name the interval method; the ranking's own, different bound for J is
                 # explained in a note on the ranking table, beside the sentence that quotes it.
@@ -1692,7 +1693,7 @@ decisioncombineClass <- if (requireNamespace("jmvcore")) {
                     "INFO",
                     .("Continuity Correction"),
                     .fmt(
-                        .("A continuity correction of 0.5, added to all four cells, was applied to {n} row(s) with at least one zero cell ({patterns}). For the diagnostic odds ratio this is the Haldane-Anscombe correction; the likelihood ratios use the same adjustment. It affects LR+, LR-, the diagnostic odds ratio and their confidence intervals only; sensitivity, specificity, PPV and NPV on the same rows use the observed counts."),
+                        .("A zero cell required a continuity correction in {n} row(s) ({patterns}). For LR+ only when TP or FP is zero, and for LR- only when FN or TN is zero, 0.5 is added to all four cells for that ratio and its confidence interval. The diagnostic odds ratio and its interval use all four cells plus 0.5 whenever any cell is zero (Haldane-Anscombe correction). The corrected diagnostic odds ratio need not equal the ratio of the displayed likelihood ratios. Sensitivity, specificity, PPV and NPV use observed counts."),
                         n = length(patterns),
                         patterns = paste(patterns, collapse = ", ")
                     )

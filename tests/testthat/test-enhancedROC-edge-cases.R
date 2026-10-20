@@ -59,7 +59,7 @@ test_that("enhancedROC handles all positive outcomes", {
   test_data_all_pos$disease_status <- factor(rep("Disease", nrow(enhancedroc_biomarker)))
 
   result <- suppressWarnings(
-    enhancedROC(
+    diagnostic_error_results("enhancedROC",
       data = test_data_all_pos,
       outcome = "disease_status",
       positiveClass = "Disease",
@@ -74,7 +74,7 @@ test_that("enhancedROC handles all negative outcomes", {
   test_data_all_neg$disease_status <- factor(rep("Healthy", nrow(enhancedroc_biomarker)))
 
   result <- suppressWarnings(
-    enhancedROC(
+    diagnostic_error_results("enhancedROC",
       data = test_data_all_neg,
       outcome = "disease_status",
       positiveClass = "Disease",
@@ -102,8 +102,8 @@ test_that("enhancedROC handles constant predictor", {
 test_that("enhancedROC handles very small sample size", {
   small_data <- enhancedroc_biomarker[1:15, ]
 
-  # Should warn about small sample
-  result <- enhancedROC(
+  # The minimum of 20 complete observations is a fatal input policy.
+  result <- diagnostic_error_results("enhancedROC",
     data = small_data,
     outcome = "disease_status",
     positiveClass = "Disease",
@@ -118,7 +118,7 @@ test_that("enhancedROC handles single observation per class", {
   minimal_data <- enhancedroc_biomarker[c(1, 100), ]
 
   result <- suppressWarnings(
-    enhancedROC(
+    diagnostic_error_results("enhancedROC",
       data = minimal_data,
       outcome = "disease_status",
       positiveClass = "Disease",
@@ -284,17 +284,10 @@ test_that("enhancedROC handles extreme specificity threshold", {
   expect_s3_class(result, "enhancedROCResults")
 })
 
-test_that("enhancedROC handles wrong positive class specification", {
-  # Specify non-existent level
-  result <- suppressWarnings(
-    enhancedROC(
-      data = enhancedroc_biomarker,
-      outcome = "disease_status",
-      positiveClass = "InvalidLevel",
-      predictors = "biomarker1"
-    )
-  )
-  expect_s3_class(result, "enhancedROCResults")
+test_that("enhancedROC rejects wrong positive class specification", {
+  expect_error(enhancedROC(data = enhancedroc_biomarker, outcome = "disease_status",
+    positiveClass = "InvalidLevel", predictors = "biomarker1"),
+    "Invalid Positive Class Selection", fixed = TRUE)
 })
 
 test_that("enhancedROC handles duplicate observations", {

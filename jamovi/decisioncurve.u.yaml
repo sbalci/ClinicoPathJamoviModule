@@ -9,7 +9,7 @@ children:
     stretchFactor: 1
     children:
       - type: TargetLayoutBox
-        label: Outcome Variable
+        label: Outcome variable
         children:
           - type: VariablesListBox
             name: outcome
@@ -38,20 +38,20 @@ children:
         margin: large
         children:
           - type: Label
-            label: Threshold Range
+            label: Threshold range
             children:
               - type: ComboBox
                 name: thresholdRange
-                label: Threshold Range
+                label: Threshold range
               - type: TextBox
                 name: thresholdMin
                 format: number
-                label: Minimum Threshold
+                label: Minimum threshold
                 enable: (thresholdRange:custom)
               - type: TextBox
                 name: thresholdMax
                 format: number
-                label: Maximum Threshold
+                label: Maximum threshold
                 enable: (thresholdRange:custom)
               - type: TextBox
                 name: thresholdStep
@@ -73,7 +73,7 @@ children:
         stretchFactor: 1
         children:
           - type: TargetLayoutBox
-            label: Clinical Decision Rule (binary)
+            label: Clinical decision rule (binary)
             children:
               - type: VariablesListBox
                 name: decisionRuleVar

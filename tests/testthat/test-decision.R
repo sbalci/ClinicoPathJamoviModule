@@ -132,9 +132,9 @@ test_that("decision function works with alternative datasets", {
     result <- decision(
       data = breast_cancer_data,
       gold = "cancer_status",
-      goldPositive = "1",
+      goldPositive = "Cancer",
       newtest = "mammography",
-      testPositive = "1",
+      testPositive = "BIRADS 3-5",
       goldNegative = NULL,
       testNegative = NULL
     )
@@ -147,9 +147,9 @@ test_that("decision function works with alternative datasets", {
     result <- decision(
       data = covid_screening_data,
       gold = "covid_status",
-      goldPositive = "1",
+      goldPositive = "Positive",
       newtest = "rapid_antigen",
-      testPositive = "1",
+      testPositive = "Positive",
       goldNegative = NULL,
       testNegative = NULL
     )
@@ -372,7 +372,7 @@ test_that("decision handles absence of gold standard negatives", {
     assay = factor(c("pos", "pos", "pos", "pos", "neg"), levels = c("pos", "neg"))
   )
 
-  result <- decision(
+  result <- diagnostic_error_results("decision",
     data = diagnostic_data,
     gold = "gold",
     goldPositive = "pos",

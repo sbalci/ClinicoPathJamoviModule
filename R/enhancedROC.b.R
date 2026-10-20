@@ -482,7 +482,7 @@ enhancedROCClass <- R6::R6Class(
             # Check if we have required data
             if (is.null(private$.outcome) || is.null(private$.predictors) || length(private$.predictors) == 0) {
                 private$.addNotice(
-                    type = "ERROR",
+                    type = "INFO",
                     title = .("Missing Variables"),
                     content = .("Please select an outcome variable and at least one predictor variable for ROC analysis. \u2022 Outcome variable: required (binary/factor). \u2022 Predictor variables: at least one numeric variable required for ROC curve calculation.")
                 )
@@ -493,13 +493,14 @@ enhancedROCClass <- R6::R6Class(
                 .deleteTableRows(self$results$results$get(name))
             }
             if (isTRUE(self$options$validationPanel)) {
-                # The helper refuses bad input with stop(); shown as a translated ERROR notice like
-                # every other refusal, instead of jamovi's error state in English. The helper calls
-                # no jmvcore::reject() or .checkpoint(), so catching every error here hides neither.
+                # Translate the helper's input error, then reject outside the catch so
+                # jamovi records a failed analysis and retains the explanatory notice.
+                # The helper calls no jmvcore::reject() or .checkpoint().
                 report <- tryCatch(.enhancedROCValidation(self$data, self$options), error = function(e) e)
                 if (inherits(report, "error")) {
                     private$.addNotice(type = "ERROR", title = .("Frozen-Model Evaluation Not Run"),
                                        content = private$.frozenError(conditionMessage(report)))
+                    .diagRejectInputErrors(private$.noticeList)
                     return()
                 }
                 for (pair in list(c("validationContext", "context"), c("denominatorLedger", "ledger"),
@@ -534,6 +535,7 @@ enhancedROCClass <- R6::R6Class(
             # Prepare and validate data
             analysisData <- private$.prepareData()
             if (is.null(analysisData)) {
+                .diagRejectInputErrors(private$.noticeList)
                 return()
             }
 

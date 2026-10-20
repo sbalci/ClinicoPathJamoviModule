@@ -18,7 +18,7 @@ data(decisioncalculator_multiplecuts, package = "ClinicoPath")
 # ═══════════════════════════════════════════════════════════
 
 
-# Invalid input is reported as a jamovi NOTICE, not an R condition.
+# Fatal input rejects the R API as well as displaying a jamovi ERROR notice.
 dcalc_notices <- function(result) {
   gsub("[[:space:]]+", " ", gsub("<[^>]+>", " ", paste(result$notices$content, collapse = " ")))
 }

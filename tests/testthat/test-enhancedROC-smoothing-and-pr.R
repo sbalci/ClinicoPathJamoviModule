@@ -190,7 +190,8 @@ test_that("a fatal validation error leaves the instructions panel intact", {
     # Ten validation failures used to setContent() the shared instructions item, replacing the
     # whole welcome/glossary panel with a bare error paragraph.
     # (A bad partial-AUC range was the fatal case here; since F-51 it is a WARNING.)
-    res <- run_er(positiveClass = "Nope")
+    res <- diagnostic_error_results("enhancedROC", data = er_data(), outcome = "gold",
+        predictors = c("m1", "m2"), positiveClass = "Nope", showTableNotes = TRUE)
     expect_gt(nchar(res$results$instructions$content), 3000)
     expect_match(res$results$notices$content, "Invalid Positive Class Selection")
 })

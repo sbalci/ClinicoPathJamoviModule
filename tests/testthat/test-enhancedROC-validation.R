@@ -38,6 +38,11 @@ erv_run <- function(data, outcome, predictors, positiveClass, ...)
         utils::modifyList(list(data = data, outcome = outcome, predictors = predictors,
             positiveClass = positiveClass, showTableNotes = TRUE,
             showAnalysisSummary = TRUE, showClinicalReport = TRUE), list(...), keep.null = TRUE))))
+erv_error <- function(data, outcome, predictors, positiveClass, ...)
+    suppressWarnings(suppressMessages(do.call(diagnostic_error_results,
+        utils::modifyList(list(analysis = "enhancedROC", data = data, outcome = outcome, predictors = predictors,
+            positiveClass = positiveClass, showTableNotes = TRUE,
+            showAnalysisSummary = TRUE, showClinicalReport = TRUE), list(...), keep.null = TRUE))))
 erv_cell <- function(tab, key, col) {
     df <- tab$asDF
     rownames(df) <- gsub('^"|"$', "", rownames(df))
@@ -284,7 +289,8 @@ test_that("C88/C93 guards: fewer than 10 per class is an ERROR banner; fewer tha
     d9 <- data.frame(y = factor(c(rep("neg", 30), rep("pos", 9)), levels = c("neg", "pos")), x = c(rnorm(30), rnorm(9, 1.5)))
     expect_match(erv_notices(erv_run(d9, "y", "x", "pos")), "Low Per-Class Count", fixed = TRUE)
     d19 <- data.frame(y = factor(c(rep("neg", 10), rep("pos", 9)), levels = c("neg", "pos")), x = c(rnorm(10), rnorm(9, 1.5)))
-    r19 <- erv_run(d19, "y", "x", "pos")
+    r19 <- diagnostic_error_results("enhancedROC", data = d19,
+        outcome = "y", predictors = "x", positiveClass = "pos")
     expect_equal(nrow(r19$results$aucSummary$asDF), 0)
     expect_match(erv_notices(r19), "Data Validation Failed", fixed = TRUE)
 })
@@ -578,7 +584,7 @@ test_that("Outcome coding: a level literally named 'Other' can be the positive c
 
 test_that("Outcome coding: an explicit NA level is a '(missing)' row, not a category", {
     d <- erv_d1(); d$status <- addNA(factor(c(as.character(d$status[1:18]), NA, NA), levels = c("Benign", "Malignant")))
-    r <- erv_run(d, "status", "marker", "Malignant")
+    r <- erv_error(d, "status", "marker", "Malignant")
     oc <- r$results$outcomeCoding
     expect_equal(c(erv_cell(oc, "lvl:Benign", "n"), erv_cell(oc, "lvl:Malignant", "n"), erv_cell(oc, "missing", "n")), c(10, 8, 2))
     expect_identical(erv_cell(oc, "missing", "role"), "Excluded: missing outcome")
@@ -863,7 +869,7 @@ test_that("listwise deletion that removes a whole outcome level is named as such
     set.seed(4)
     d <- data.frame(y = factor(rep(c("Healthy", "Disease"), each = 30), levels = c("Healthy", "Disease")), m = rnorm(60), m2 = rnorm(60))
     d$m2[d$y == "Disease"] <- NA
-    r <- erv_run(d, "y", c("m", "m2"), "Disease")
+    r <- erv_error(d, "y", c("m", "m2"), "Disease")
     txt <- erv_notices(r)
     expect_match(txt, "Outcome Level Lost to Missing Predictor Values", fixed = TRUE)
     expect_match(txt, "Outcome level Disease (30 rows)", fixed = TRUE)
@@ -894,7 +900,7 @@ test_that("a numeric outcome with more than two values gets one message and no r
     set.seed(8)
     d <- data.frame(y = sample(0:2, 60, TRUE), m = rnorm(60))
     for (pc in list(NULL, "1")) {
-        r <- erv_run(d, "y", "m", pc, multiClassROC = TRUE)
+        r <- erv_error(d, "y", "m", pc, multiClassROC = TRUE)
         n <- erv_tnotes(r$results$outcomeCoding)
         expect_match(n[["unset"]], "numeric with values 0, 1, 2", fixed = TRUE)
         expect_false("positive" %in% names(n))
@@ -905,7 +911,7 @@ test_that("a numeric outcome with more than two values gets one message and no r
     # a measurement chosen as the outcome: one summary row, not one row per value
     set.seed(3)
     dc <- data.frame(y = round(runif(60, 25, 85)), m = rnorm(60))
-    oc <- erv_run(dc, "y", "m", NULL)$results$outcomeCoding
+    oc <- erv_error(dc, "y", "m", NULL)$results$outcomeCoding
     expect_equal(oc$rowCount, 1)
     expect_identical(oc$asDF$level, sprintf("%d distinct values (%s to %s)", length(unique(dc$y)), min(dc$y), max(dc$y)))
     expect_match(erv_tnotes(oc)[["unset"]], "looks like a measurement", fixed = TRUE)
@@ -1055,7 +1061,7 @@ test_that("the direction note is one whole sentence per reading, emphasised with
 })
 
 test_that("a Positive class that no row has is explained neutrally, naming the observed levels", {
-    txt <- erv_notices(erv_run(erv_cont(), "y", "m1", "Malignant"))
+    txt <- erv_notices(erv_error(erv_cont(), "y", "m1", "Malignant"))
     expect_match(txt, "Positive class is set to Malignant, but no row of y has that level (its observed levels are: neg, pos).", fixed = TRUE)
     expect_match(txt, "Choose one of the observed levels in Positive class.", fixed = TRUE)
 })
@@ -1096,7 +1102,7 @@ test_that("the missing-outcome notice counts the rows the (missing) row counts, 
     d$status[c(9, 19, 20)] <- ""
     d$m2 <- d$marker
     d$m2[19] <- NA          # row 19: blank outcome AND a missing predictor, so naOmit() drops it first
-    r <- erv_run(d, "status", c("marker", "m2"), "Malignant")
+    r <- erv_error(d, "status", c("marker", "m2"), "Malignant")
     expect_equal(erv_cell(r$results$outcomeCoding, "missing", "n"), 3)
     expect_match(erv_notices(r), "3 rows had a missing outcome", fixed = TRUE)
 })

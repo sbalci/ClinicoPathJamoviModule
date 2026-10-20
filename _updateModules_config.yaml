@@ -47,8 +47,8 @@
 # ==============================================
 
 
-new_version: "1.1.0"
-new_date: "2026-10-19"
+new_version: "1.1.1"
+new_date: "2026-10-20"
 quick: false
 TEST: true
 jjstatsplot: false
@@ -72,10 +72,17 @@ modes:
   sync_analysis_versions: false # If false (default), preserves per-analysis versions in jamovi/*.a.yaml.
                                 # If true, forces .a.yaml version fields to match the package version.
   copy_vignettes: false # Copy vignette_folders into each module's vignettes/ (and prune the rest)
-  copy_test_files: false # Distribute the umbrella's per-analysis functional tests to submodules
-                         # (name-keyed + namespace-translated). Leave FALSE until the umbrella
-                         # test suite is green -- otherwise a submodule's R CMD check goes red.
-                         # The dependency-guard test + testthat.R runner always ship.
+  # Broad per-analysis copying stays off until the entire umbrella suite is portable.
+  # The small verified tests below are selected by analysis and namespace-translated.
+  copy_test_files: false
+  verified_test_files:
+    decision: ["test-decision-release-inputs.R", "test-decision-release-metrics.R", "test-decision-audit-fixes.R", "test-decision-reference-pages.R"]
+    decisioncalculator: ["test-decisioncalculator-release-inputs.R", "test-decisioncalculator-correction-explanation.R"]
+    decisioncombine: ["test-decisioncombine-release-inputs.R", "test-decisioncombine-correction-explanation.R"]
+    enhancedROC: ["test-enhancedROC-release-inputs.R", "test-enhancedROC-release-parity.R"]
+    agreement: ["test-agreement-release-fallback.R", "test-agreement-audit-fixes.R", "test-agreement-zero-unanimity.R"]
+    decisioncurve: ["test-decisioncurve-audit-fixes.R"]
+    lassologistic: ["test-lassologistic-audit-fixes.R"]
 
 # Routing -- four categories, by menuGroup suffix:
 #   production  <Group>    e.g. Survival   -> the module whose menu_groups lists it

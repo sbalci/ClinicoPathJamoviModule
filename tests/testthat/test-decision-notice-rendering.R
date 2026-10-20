@@ -25,7 +25,7 @@ test_that("a single-level gold standard reports why the analysis stopped", {
     # trigger: the variable still has two levels, the DATA has one.
     one_level <- decision_small[decision_small$GoldStandard == "Negative", ]
 
-    res <- decision(
+    res <- diagnostic_error_results("decision",
         data = one_level,
         gold = "GoldStandard", goldPositive = "Positive", goldNegative = NULL,
         newtest = "NewTest",   testPositive = "Positive", testNegative = NULL
@@ -36,7 +36,7 @@ test_that("a single-level gold standard reports why the analysis stopped", {
 })
 
 test_that("identical positive and negative levels report an error", {
-    res <- decision(
+    res <- diagnostic_error_results("decision",
         data = decision_small,
         gold = "GoldStandard", goldPositive = "Positive", goldNegative = "Positive",
         newtest = "NewTest",   testPositive = "Positive", testNegative = NULL
@@ -47,7 +47,7 @@ test_that("identical positive and negative levels report an error", {
 })
 
 test_that("a level absent from the data reports an error naming the level", {
-    res <- decision(
+    res <- diagnostic_error_results("decision",
         data = decision_small,
         gold = "GoldStandard", goldPositive = "NOT_A_LEVEL", goldNegative = NULL,
         newtest = "NewTest",   testPositive = "Positive",    testNegative = NULL
@@ -93,7 +93,7 @@ test_that("a single-category cohort produces no R warning", {
     one_level <- decision_small[decision_small$GoldStandard == "Negative", ]
 
     expect_no_warning(
-        decision(
+        diagnostic_error_results("decision",
             data = one_level,
             gold = "GoldStandard", goldPositive = "Positive", goldNegative = NULL,
             newtest = "NewTest",   testPositive = "Positive", testNegative = NULL

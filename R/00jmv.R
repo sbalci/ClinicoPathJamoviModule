@@ -20,7 +20,7 @@
         `publisher`="BMJ", 
         `volume`=308, 
         `issue`=6943, 
-        `pages`=1552, 
+        `pages`="1552", 
         `doi`="10.1136/bmj.308.6943.1552", 
         `url`="https://doi.org/10.1136/bmj.308.6943.1552"), 
     `AltmanRoyston2006`=list(
@@ -30,7 +30,7 @@
         `title`="The cost of dichotomising continuous variables.", 
         `publisher`="BMJ", 
         `volume`=332, 
-        `pages`=1080, 
+        `pages`="1080", 
         `doi`="10.1136/bmj.332.7549.1080"), 
     `AustinLeeFine2016`=list(
         `type`="article", 
@@ -461,7 +461,7 @@
         `title`="A Pathologist-Annotated Dataset for Validating Artificial Intelligence: A Project Description and Pilot Study", 
         `publisher`="Journal of Pathology Informatics", 
         `volume`=12, 
-        `pages`=45, 
+        `pages`="45", 
         `doi`="10.4103/jpi.jpi_83_20", 
         `pmid`=34881099, 
         `url`="https://doi.org/10.4103/jpi.jpi_83_20"), 
@@ -485,7 +485,7 @@
         `publisher`="Modern Pathology", 
         `volume`=37, 
         `issue`=4, 
-        `pages`=100439, 
+        `pages`="100439", 
         `doi`="10.1016/j.modpat.2024.100439", 
         `pmid`=38286221, 
         `url`="https://doi.org/10.1016/j.modpat.2024.100439"), 
@@ -546,7 +546,7 @@
         `publisher`="New England Journal of Medicine", 
         `volume`=293, 
         `issue`=5, 
-        `pages`=257, 
+        `pages`="257", 
         `doi`="10.1056/NEJM197507312930513", 
         `url`="https://doi.org/10.1056/NEJM197507312930513"), 
     `Faul2007`=list(
@@ -589,7 +589,7 @@
         `publisher`="Cancers", 
         `volume`=14, 
         `issue`=10, 
-        `pages`=2467, 
+        `pages`="2467", 
         `doi`="10.3390/cancers14102467", 
         `pmid`=35626070, 
         `url`="https://doi.org/10.3390/cancers14102467"), 
@@ -1154,7 +1154,7 @@
         `title`="Restricted Mean Survival Time: An Alternative to the Hazard Ratio for the Design and Analysis of Randomized Trials with a Time-to-Event Outcome", 
         `publisher`="BMC Medical Research Methodology", 
         `volume`=13, 
-        `pages`=152, 
+        `pages`="152", 
         `doi`="10.1186/1471-2288-13-152", 
         `url`="https://doi.org/10.1186/1471-2288-13-152"), 
     `Rtsne`=list(
@@ -1309,7 +1309,7 @@
         `title`="Bias in random forest variable importance measures: Illustrations, sources and a solution", 
         `publisher`="BMC Bioinformatics", 
         `volume`=8, 
-        `pages`=25, 
+        `pages`="25", 
         `doi`="10.1186/1471-2105-8-25"), 
     `Swamidass2010`=list(
         `type`="article", 
@@ -1403,7 +1403,7 @@
         `publisher`="Diagnostic and Prognostic Research", 
         `volume`=7, 
         `issue`=1, 
-        `pages`=11, 
+        `pages`="11", 
         `doi`="10.1186/s41512-023-00148-y", 
         `url`="https://doi.org/10.1186/s41512-023-00148-y"), 
     `WGCNA`=list(
@@ -1489,7 +1489,7 @@
         `title`="Lymphovascular Space Invasion in Endometrial Cancer: Does it Matter Where and How Much to Sample? A Macroscopic Study of 208 Hysterectomies", 
         `publisher`="Modern Pathology", 
         `volume`=38, 
-        `pages`=100885, 
+        `pages`="100885", 
         `doi`="10.1016/j.modpat.2025.100885", 
         `url`="https://doi.org/10.1016/j.modpat.2025.100885"), 
     `base`=list(
@@ -3032,7 +3032,7 @@
         `title`="The McNemar test for binary matched-pairs data: mid-p and asymptotic are better than exact conditional", 
         `publisher`="BMC Medical Research Methodology", 
         `volume`=13, 
-        `pages`=91, 
+        `pages`="91", 
         `doi`="10.1186/1471-2288-13-91", 
         `url`="https://doi.org/10.1186/1471-2288-13-91"), 
     `newcombe1998paired`=list(
@@ -3758,7 +3758,7 @@
         `publisher`="Journal of Open Source Software", 
         `volume`=6, 
         `issue`=61, 
-        `pages`=3236, 
+        `pages`="3236", 
         `doi`="10.21105/joss.03236", 
         `url`="https://doi.org/10.21105/joss.03236"), 
     `sterlacci2020`=list(
@@ -4296,7 +4296,7 @@
         `publisher`="American Sociological Review", 
         `volume`=22, 
         `issue`=1, 
-        `pages`=17, 
+        `pages`="17", 
         `doi`="10.2307/2088760", 
         `url`="https://doi.org/10.2307/2088760"), 
     `Spearman1904`=list(
@@ -4307,7 +4307,7 @@
         `publisher`="The American Journal of Psychology", 
         `volume`=15, 
         `issue`=1, 
-        `pages`=72, 
+        `pages`="72", 
         `doi`="10.2307/1412159", 
         `url`="https://doi.org/10.2307/1412159"), 
     `Walter1998`=list(
@@ -4329,7 +4329,7 @@
         `publisher`="BMJ", 
         `volume`=309, 
         `issue`=6947, 
-        `pages`=102, 
+        `pages`="102", 
         `doi`="10.1136/bmj.309.6947.102", 
         `url`="https://doi.org/10.1136/bmj.309.6947.102"), 
     `Simel1991`=list(
@@ -4424,7 +4424,7 @@
         `publisher`="Investigative Ophthalmology & Visual Science", 
         `volume`=61, 
         `issue`=11, 
-        `pages`=29, 
+        `pages`="29", 
         `doi`="10.1167/iovs.61.11.29", 
         `url`="https://doi.org/10.1167/iovs.61.11.29"), 
     `Alberg2004`=list(

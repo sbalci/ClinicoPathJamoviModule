@@ -419,3 +419,42 @@ testthat::test_that("prune guard: only files THIS module ships count", {
                                                    prune_imports = list("vcd"))))
   testthat::expect_length(plan_env$compute_distribution_plan(reg)$errors, 0)
 })
+
+testthat::test_that("verified regressions follow routing without broad test copying", {
+  skip_if_plan_missing()
+  u <- base_umbrella(c(analysis_files("aa", "Survival"), analysis_files("bb", "SurvivalT"),
+    list("tests/testthat/test-aa-release.R" = "ClinicoPath::aa()",
+         "tests/testthat/test-bb-release.R" = "ClinicoPath::bb()")))
+  reg <- fixture_registry(u, list(
+    jsurvival = list(directory = module_dir("jsurvival"), menu_groups = "Survival"),
+    JamoviTest = list(directory = module_dir("JamoviTest"), menu_group_suffix = "T")),
+    extra = list(modes = list(copy_test_files = FALSE, verified_test_files = list(
+      aa = "test-aa-release.R", bb = "test-bb-release.R"))))
+  plan <- plan_env$compute_distribution_plan(reg)
+  testthat::expect_length(plan$errors, 0)
+  shipped <- function(m) plan$modules[[m]]$files$dest
+  testthat::expect_true("tests/testthat/test-aa-release.R" %in% shipped("jsurvival"))
+  testthat::expect_false("tests/testthat/test-bb-release.R" %in% shipped("jsurvival"))
+  testthat::expect_true("tests/testthat/test-bb-release.R" %in% shipped("JamoviTest"))
+  testthat::expect_false("tests/testthat/test-aa-release.R" %in% shipped("JamoviTest"))
+  reg$config$modes$copy_test_files <- TRUE
+  broad <- plan_env$compute_distribution_plan(reg)
+  testthat::expect_false(anyDuplicated(broad$modules$jsurvival$files$dest) > 0)
+  reg$config$modes$copy_test_files <- FALSE
+  reg$config$modes$verified_test_files$aa <- "missing.R"
+  testthat::expect_match(paste(plan_env$compute_distribution_plan(reg)$errors, collapse = " "),
+                         "invalid verified test file: missing.R", fixed = TRUE)
+})
+
+
+testthat::test_that("generated test runners default to edition 3 and preserve an explicit edition", {
+  skip_if_plan_missing()
+  d <- module_dir("example")
+  plan_env$ensure_testthat_runner(d)
+  desc_file <- file.path(d, "DESCRIPTION")
+  testthat::expect_identical(unname(read.dcf(desc_file)[1, "Config/testthat/edition"]), "3")
+  testthat::expect_true(file.exists(file.path(d, "tests", "testthat.R")))
+  desc::desc_set("Config/testthat/edition" = "2", file = desc_file)
+  plan_env$ensure_testthat_runner(d)
+  testthat::expect_identical(unname(read.dcf(desc_file)[1, "Config/testthat/edition"]), "2")
+})

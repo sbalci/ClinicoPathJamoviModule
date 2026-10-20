@@ -43,7 +43,9 @@ test_that("a margin emptied by the other variable's excluded level stops with th
     c = data.frame(g = factor(c("P", "N", "P", "N", "X", "P", "N")),
                    t = factor(c("N", "N", "N", "N", "P", "N", "N"))))
   for (nm in names(cases)) {
-    r <- fc_run(cases[[nm]], pp = TRUE)
+    r <- diagnostic_error_results("decision", data = cases[[nm]], gold = "g",
+      goldPositive = "P", goldNegative = "N", newtest = "t", testPositive = "P",
+      testNegative = "N", pp = TRUE)
     expect_match(r$notices$content, "No analysed cases at one of the positive or negative levels",
                  fixed = TRUE, info = nm)
     expect_identical(fc_severities(r$notices$content)[1], "Error", info = nm)

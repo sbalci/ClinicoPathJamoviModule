@@ -9,7 +9,7 @@ children:
     stretchFactor: 1
     children:
       - type: TargetLayoutBox
-        label: Gold Standard (Reference Test)
+        label: Gold standard (reference test)
         children:
           - type: VariablesListBox
             name: gold
@@ -20,7 +20,7 @@ children:
             label: Disease present level
 
       - type: TargetLayoutBox
-        label: Test 1 (Required)
+        label: Test 1 (required)
         children:
           - type: VariablesListBox
             name: test1
@@ -31,7 +31,7 @@ children:
             label: Positive level
 
       - type: TargetLayoutBox
-        label: Test 2 (Required for Combinations)
+        label: Test 2 (required for combinations)
         children:
           - type: VariablesListBox
             name: test2
@@ -43,7 +43,7 @@ children:
             enable: (test2)
 
       - type: TargetLayoutBox
-        label: Test 3 (Optional)
+        label: Test 3 (optional)
         children:
           - type: VariablesListBox
             name: test3

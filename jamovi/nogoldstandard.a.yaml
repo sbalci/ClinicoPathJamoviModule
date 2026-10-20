@@ -4,7 +4,7 @@ title: Analysis Without Gold Standard
 menuGroup: meddecide
 menuSubgroup: Decision
 menuSubtitle: Multiple Test Analysis Without Gold Standard
-version: '1.1.0'
+version: '1.1.1'
 jas: '1.2'
 
 description:
@@ -21,7 +21,7 @@ options:
           R: The data as a data frame.
 
     - name: clinicalPreset
-      title: Illustrative Scenario Example
+      title: Illustrative scenario example
       type: List
       options:
         - name: none
@@ -53,7 +53,7 @@ options:
     # allowNone: without it the jamovi client pre-selects levels[0] -- usually the
     # NEGATIVE level (neg/pos, Benign/Malignant, 0/1) -- and every test runs reversed.
     - name: test1Positive
-      title: Positive Level
+      title: Positive level
       type: Level
       variable: (test1)
       allowNone: true
@@ -72,7 +72,7 @@ options:
             Second diagnostic test variable.
 
     - name: test2Positive
-      title: Positive Level
+      title: Positive level
       type: Level
       variable: (test2)
       allowNone: true
@@ -91,7 +91,7 @@ options:
       default: NULL
 
     - name: test3Positive
-      title: Positive Level
+      title: Positive level
       type: Level
       variable: (test3)
       allowNone: true
@@ -111,7 +111,7 @@ options:
 
 
     - name: test4Positive
-      title: Positive Level
+      title: Positive level
       type: Level
       variable: (test4)
       allowNone: true
@@ -131,7 +131,7 @@ options:
 
 
     - name: test5Positive
-      title: Positive Level
+      title: Positive level
       type: Level
       variable: (test5)
       allowNone: true
@@ -140,7 +140,7 @@ options:
             The positive level for Test 5.
 
     - name: method
-      title: Analysis Method
+      title: Analysis method
       type: List
       options:
         - title: Latent Class Analysis
@@ -181,7 +181,7 @@ options:
             case resampling assumes independent rows.
 
     - name: nboot
-      title: Number of Bootstrap Samples
+      title: Number of bootstrap samples
       # Integer: a fractional Number reached sprintf("%d", nboot) and aborted the run.
       type: Integer
       default: 1000
@@ -192,7 +192,7 @@ options:
             Number of bootstrap samples for confidence intervals.
 
     - name: alpha
-      title: Alpha for Confidence Intervals
+      title: Alpha for confidence intervals
       type: Number
       default: 0.05
       min: 0.01
@@ -202,7 +202,7 @@ options:
             Alpha level for confidence intervals.
 
     - name: verbose
-      title: Analysis Diagnostics
+      title: Analysis diagnostics
       type: Bool
       default: false
       description:
@@ -211,7 +211,7 @@ options:
             exclusions, and bootstrap failures when bootstrap intervals are enabled.
 
     - name: seed
-      title: "Random Seed"
+      title: Random seed
       type: Integer
       default: 0
       description:
@@ -222,7 +222,7 @@ options:
             reproducible sequence; the default (0) reproduces the previous behaviour.
 
     - name: showSummary
-      title: Plain-Language Summary
+      title: Plain-language summary
       type: Bool
       default: false
       description:
@@ -231,7 +231,7 @@ options:
             quantities and their assumptions; it is not clinical guidance.
 
     - name: showMethodGuide
-      title: Method Guide
+      title: Method guide
       type: Bool
       default: false
       description:

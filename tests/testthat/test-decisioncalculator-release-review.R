@@ -342,7 +342,7 @@ test_that("invalid counts are reported through notices, not silently computed", 
         list(args = list(TP = Inf, TN = 80, FP = 20, FN = 10), notice = "Non-finite counts"),
         list(args = list(TP = 0, TN = 100, FP = 50, FN = 0),   notice = "No reference-positive subjects"),
         list(args = list(TP = 100, TN = 0, FP = 0, FN = 50),   notice = "No reference-negative subjects"))) {
-        res <- do.call(decisioncalculator, case$args)
+        res <- do.call(diagnostic_error_results, c(list(analysis = "decisioncalculator"), case$args))
         expect_match(notices_of(res), case$notice, info = case$notice)
     }
 })

@@ -19,6 +19,12 @@
 agreementClass <- if (requireNamespace("jmvcore")) {
     R6::R6Class("agreementClass",
         inherit = agreementBase, private = list(
+            .sourcifyOption = function(option) {
+                source <- .sourcifyDiagnosticOption(option)
+                if (!is.null(source)) return(source)
+                super$.sourcifyOption(option)
+            },
+
             # Maintenance note: this remains a large multi-family analysis. Split it only
             # feature-by-feature with numerical parity tests; its current kappa, ICC,
             # Krippendorff, Gwet and Bland-Altman paths have dedicated regression coverage.
@@ -669,15 +675,11 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                             <li>", .("Categories are mutually exclusive and consistent"), "</li>",
                     if (wght != "unweighted") paste0("
                             <li>", .("Ordinal scale with meaningful distances between categories"), "</li>") else "", "
-                            <li>", .("Kappa sensitive to category prevalence"), "</li>
-                        </ul>
-                    </div>
-
-                    <p style='font-size: 12px; color: inherit; margin-top: 15px;'>
-                    Reference: Landis & Koch (1977). Biometrics, 33, 159-174.</p>
-                </div>
-            </div>
-            "
+                            <li>", .("Kappa sensitive to category prevalence"), paste0(
+                    "</li>\n                        </ul>\n                    </div>\n\n                    <p style='font-size: 12px; color: inherit; margin-top: 15px;'>",
+                    paste0("\n                    ", .("Reference: Landis & Koch (1977). Biometrics, 33, 159-174.")),
+                    "</p>\n                </div>\n            </div>\n            "
+                )
                 )
 
                 return(html_output)
@@ -685,64 +687,55 @@ agreementClass <- if (requireNamespace("jmvcore")) {
             .createAboutPanel = function() {
                 # Create explanatory panel about the analysis
 
-                html_output <- paste0("
-            <div style='font-family: Arial, sans-serif; max-width: 800px; line-height: 1.4;'>
-                <div style='background-color: rgba(88, 88, 88, 0.06); border: 2px solid #333; padding: 15px; margin-bottom: 15px; color: inherit;'>
-                <h3 style='margin: 0 0 5px 0; font-size: 16px; color: inherit;'>About This Analysis</h3>
-                <p style='margin: 0; font-size: 14px; color: inherit;'>Understanding interrater reliability methods and applications</p>
-                </div>
-
-                <div style='font-size: 14px; color: inherit;'>
-                    <p style='margin: 10px 0;'><strong>What this analysis does:</strong></p>
-                    <ul style='margin: 5px 0 15px 20px;'>
-                        <li>Measures consistency between multiple raters</li>
-                        <li>Accounts for chance agreement</li>
-                        <li>Provides statistical measures with significance tests</li>
-                    </ul>
-
-                    <p style='margin: 10px 0;'><strong>When to use:</strong></p>
-                    <ul style='margin: 5px 0 15px 20px;'>
-                        <li>Quality assurance (inter-pathologist agreement)</li>
-                        <li>Method validation (rating scales, classifications)</li>
-                        <li>Training assessment (trainee vs expert concordance)</li>
-                        <li>Research (multi-rater study reliability)</li>
-                    </ul>
-
-                    <p style='margin: 10px 0;'><strong>Data requirements:</strong></p>
-                    <ul style='margin: 5px 0 15px 20px;'>
-                        <li>At least 2 rater variables (columns)</li>
-                        <li>Same cases rated by all raters</li>
-                        <li>Categorical or ordinal ratings for kappa; continuous measurements are analysed with ICC, Lin's CCC, TDI and the Bland-Altman limits instead</li>
-                        <li>Matching category levels across raters</li>
-                    </ul>
-
-                    <table style='width: 100%; border-collapse: collapse; margin: 15px 0;'>
-                    <tr>
-                        <td style='border: 1px solid #ccc; padding: 10px; vertical-align: top;'>
-                        <strong>Cohen's kappa</strong><br>
-                        <span style='font-size: 13px; color: inherit;'>For 2 raters. Supports weighted analysis for ordinal data.</span>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td style='border: 1px solid #ccc; padding: 10px; vertical-align: top;'>
-                        <strong>Fleiss' kappa</strong><br>
-                        <span style='font-size: 13px; color: inherit;'>For 3+ raters. Fixed marginal probabilities.</span>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td style='border: 1px solid #ccc; padding: 10px; vertical-align: top;'>
-                        <strong>Krippendorff's alpha</strong><br>
-                        <span style='font-size: 13px; color: inherit;'>Alternative measure. Handles missing data and various data types.</span>
-                        </td>
-                    </tr>
-                    </table>
-
-                    <div style='background-color: rgba(155, 155, 155, 0.06); border: 1px solid #ccc; padding: 10px; margin-top: 15px; color: inherit;'>
-                        <p style='margin: 0; font-size: 13px;'><strong>Tip:</strong> For ordinal data (e.g., tumor grades), use weighted kappa to account for degree of disagreement.</p>
-                    </div>
-                </div>
-            </div>
-            ")
+                html_output <- paste0(paste0(
+                    "\n            <div style='font-family: Arial, sans-serif; max-width: 800px; line-height: 1.4;'>\n                <div style='background-color: rgba(88, 88, 88, 0.06); border: 2px solid #333; padding: 15px; margin-bottom: 15px; color: inherit;'>\n                <h3 style='margin: 0 0 5px 0; font-size: 16px; color: inherit;'>",
+                    .("About This Analysis"),
+                    "</h3>\n                <p style='margin: 0; font-size: 14px; color: inherit;'>",
+                    .("Understanding interrater reliability methods and applications"),
+                    "</p>\n                </div>\n\n                <div style='font-size: 14px; color: inherit;'>\n                    <p style='margin: 10px 0;'>",
+                    jmvcore::format(.("{tag1}What this analysis does:{tag2}"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</p>\n                    <ul style='margin: 5px 0 15px 20px;'>\n                        <li>",
+                    .("Measures consistency between multiple raters"),
+                    "</li>\n                        <li>",
+                    .("Accounts for chance agreement"),
+                    "</li>\n                        <li>",
+                    .("Provides statistical measures with significance tests"),
+                    "</li>\n                    </ul>\n\n                    <p style='margin: 10px 0;'>",
+                    jmvcore::format(.("{tag1}When to use:{tag2}"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</p>\n                    <ul style='margin: 5px 0 15px 20px;'>\n                        <li>",
+                    .("Quality assurance (inter-pathologist agreement)"),
+                    "</li>\n                        <li>",
+                    .("Method validation (rating scales, classifications)"),
+                    "</li>\n                        <li>",
+                    .("Training assessment (trainee vs expert concordance)"),
+                    "</li>\n                        <li>",
+                    .("Research (multi-rater study reliability)"),
+                    "</li>\n                    </ul>\n\n                    <p style='margin: 10px 0;'>",
+                    jmvcore::format(.("{tag1}Data requirements:{tag2}"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</p>\n                    <ul style='margin: 5px 0 15px 20px;'>\n                        <li>",
+                    .("At least 2 rater variables (columns)"),
+                    "</li>\n                        <li>",
+                    .("Same cases rated by all raters"),
+                    "</li>\n                        <li>",
+                    .("Categorical or ordinal ratings for kappa; continuous measurements are analysed with ICC, Lin's CCC, TDI and the Bland-Altman limits instead"),
+                    "</li>\n                        <li>",
+                    .("Matching category levels across raters"),
+                    "</li>\n                    </ul>\n\n                    <table style='width: 100%; border-collapse: collapse; margin: 15px 0;'>\n                    <tr>\n                        <td style='border: 1px solid #ccc; padding: 10px; vertical-align: top;'>",
+                    paste0("\n                        ", jmvcore::format(.("{tag1}Cohen's kappa{tag2}"), tag1 = "<strong>", tag2 = "</strong>")),
+                    "<br>",
+                    paste0("\n                        ", jmvcore::format(.("{tag1}For 2 raters. Supports weighted analysis for ordinal data.{tag2}"), tag1 = "<span style='font-size: 13px; color: inherit;'>", tag2 = "</span>"), "\n                        "),
+                    "</td>\n                    </tr>\n                    <tr>\n                        <td style='border: 1px solid #ccc; padding: 10px; vertical-align: top;'>",
+                    paste0("\n                        ", jmvcore::format(.("{tag1}Fleiss' kappa{tag2}"), tag1 = "<strong>", tag2 = "</strong>")),
+                    "<br>",
+                    paste0("\n                        ", jmvcore::format(.("{tag1}For 3+ raters. Fixed marginal probabilities.{tag2}"), tag1 = "<span style='font-size: 13px; color: inherit;'>", tag2 = "</span>"), "\n                        "),
+                    "</td>\n                    </tr>\n                    <tr>\n                        <td style='border: 1px solid #ccc; padding: 10px; vertical-align: top;'>",
+                    paste0("\n                        ", jmvcore::format(.("{tag1}Krippendorff's alpha{tag2}"), tag1 = "<strong>", tag2 = "</strong>")),
+                    "<br>",
+                    paste0("\n                        ", jmvcore::format(.("{tag1}Alternative measure. Handles missing data and various data types.{tag2}"), tag1 = "<span style='font-size: 13px; color: inherit;'>", tag2 = "</span>"), "\n                        "),
+                    "</td>\n                    </tr>\n                    </table>\n\n                    <div style='background-color: rgba(155, 155, 155, 0.06); border: 1px solid #ccc; padding: 10px; margin-top: 15px; color: inherit;'>\n                        <p style='margin: 0; font-size: 13px;'>",
+                    jmvcore::format(.("{tag1}Tip:{tag2} For ordinal data (e.g., tumor grades), use weighted kappa to account for degree of disagreement."), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</p>\n                    </div>\n                </div>\n            </div>\n            "
+                ))
 
                 return(html_output)
             },
@@ -755,99 +748,112 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                     formula <- "Weight = 1 - |i - j| / (k - 1)"
                     formula_desc <- "where i and j are category positions, k is number of categories"
 
-                    example_table <- "
-                <table style='margin: 15px auto; border-collapse: collapse; font-size: 12px;'>
-                <tr style='background-color: rgba(33, 33, 33, 0.07); color: inherit;'>
-                    <th style='padding: 6px 12px; border: 1px solid #ddd;'>Distance</th>
-                    <th style='padding: 6px 12px; border: 1px solid #ddd;'>Example</th>
-                    <th style='padding: 6px 12px; border: 1px solid #ddd;'>Weight</th>
-                    <th style='padding: 6px 12px; border: 1px solid #ddd;'>Penalty</th>
-                </tr>
-                <tr>
-                    <td style='padding: 6px 12px; border: 1px solid #ddd;'>0 (agreement)</td>
-                    <td style='padding: 6px 12px; border: 1px solid #ddd;'>1 vs 1</td>
-                    <td style='padding: 6px 12px; border: 1px solid #ddd; text-align: center;'>1.00</td>
-                    <td style='padding: 6px 12px; border: 1px solid #ddd; text-align: center;'>None</td>
-                </tr>
-                <tr>
-                    <td style='padding: 6px 12px; border: 1px solid #ddd;'>1 category</td>
-                    <td style='padding: 6px 12px; border: 1px solid #ddd;'>1 vs 2</td>
-                    <td style='padding: 6px 12px; border: 1px solid #ddd; text-align: center;'>0.75</td>
-                    <td style='padding: 6px 12px; border: 1px solid #ddd; text-align: center;'>Small</td>
-                </tr>
-                <tr>
-                    <td style='padding: 6px 12px; border: 1px solid #ddd;'>2 categories</td>
-                    <td style='padding: 6px 12px; border: 1px solid #ddd;'>1 vs 3</td>
-                    <td style='padding: 6px 12px; border: 1px solid #ddd; text-align: center;'>0.50</td>
-                    <td style='padding: 6px 12px; border: 1px solid #ddd; text-align: center;'>Moderate</td>
-                </tr>
-                <tr>
-                    <td style='padding: 6px 12px; border: 1px solid #ddd;'>Maximum</td>
-                    <td style='padding: 6px 12px; border: 1px solid #ddd;'>1 vs 5</td>
-                    <td style='padding: 6px 12px; border: 1px solid #ddd; text-align: center;'>0.00</td>
-                    <td style='padding: 6px 12px; border: 1px solid #ddd; text-align: center;'>Full</td>
-                </tr>
-                </table>"
+                    example_table <- paste0(
+                    "\n                <table style='margin: 15px auto; border-collapse: collapse; font-size: 12px;'>\n                <tr style='background-color: rgba(33, 33, 33, 0.07); color: inherit;'>\n                    <th style='padding: 6px 12px; border: 1px solid #ddd;'>",
+                    .("Distance"),
+                    "</th>\n                    <th style='padding: 6px 12px; border: 1px solid #ddd;'>",
+                    .("Example"),
+                    "</th>\n                    <th style='padding: 6px 12px; border: 1px solid #ddd;'>",
+                    .("Weight"),
+                    "</th>\n                    <th style='padding: 6px 12px; border: 1px solid #ddd;'>",
+                    .("Penalty"),
+                    "</th>\n                </tr>\n                <tr>\n                    <td style='padding: 6px 12px; border: 1px solid #ddd;'>",
+                    .("0 (agreement)"),
+                    "</td>\n                    <td style='padding: 6px 12px; border: 1px solid #ddd;'>",
+                    .("1 vs 1"),
+                    "</td>\n                    <td style='padding: 6px 12px; border: 1px solid #ddd; text-align: center;'>1.00</td>\n                    <td style='padding: 6px 12px; border: 1px solid #ddd; text-align: center;'>",
+                    .("None"),
+                    "</td>\n                </tr>\n                <tr>\n                    <td style='padding: 6px 12px; border: 1px solid #ddd;'>",
+                    .("1 category"),
+                    "</td>\n                    <td style='padding: 6px 12px; border: 1px solid #ddd;'>",
+                    .("1 vs 2"),
+                    "</td>\n                    <td style='padding: 6px 12px; border: 1px solid #ddd; text-align: center;'>0.75</td>\n                    <td style='padding: 6px 12px; border: 1px solid #ddd; text-align: center;'>",
+                    .("Small"),
+                    "</td>\n                </tr>\n                <tr>\n                    <td style='padding: 6px 12px; border: 1px solid #ddd;'>",
+                    .("2 categories"),
+                    "</td>\n                    <td style='padding: 6px 12px; border: 1px solid #ddd;'>",
+                    .("1 vs 3"),
+                    "</td>\n                    <td style='padding: 6px 12px; border: 1px solid #ddd; text-align: center;'>0.50</td>\n                    <td style='padding: 6px 12px; border: 1px solid #ddd; text-align: center;'>",
+                    .("Moderate"),
+                    "</td>\n                </tr>\n                <tr>\n                    <td style='padding: 6px 12px; border: 1px solid #ddd;'>",
+                    .("Maximum"),
+                    "</td>\n                    <td style='padding: 6px 12px; border: 1px solid #ddd;'>",
+                    .("1 vs 5"),
+                    "</td>\n                    <td style='padding: 6px 12px; border: 1px solid #ddd; text-align: center;'>0.00</td>\n                    <td style='padding: 6px 12px; border: 1px solid #ddd; text-align: center;'>",
+                    .("Full"),
+                    "</td>\n                </tr>\n                </table>"
+                )
 
                     use_case <- "Use linear weights when each step on your ordinal scale represents equal incremental difference (e.g., Likert scales with equal intervals)."
 
-                    interpretation <- "
-                <ul style='font-size: 13px; line-height: 1.8; margin: 10px 0;'>
-                <li>Adjacent disagreements (e.g., 'Agree' vs 'Strongly Agree') receive <b>partial credit</b></li>
-                <li>Distant disagreements (e.g., 'Strongly Disagree' vs 'Strongly Agree') receive <b>no credit</b></li>
-                <li>Penalty increases <b>linearly</b> with distance</li>
-                <li>Weighted kappa will be <b>higher</b> than unweighted kappa when most disagreements are adjacent</li>
-                </ul>"
+                    interpretation <- paste0(
+                    "\n                <ul style='font-size: 13px; line-height: 1.8; margin: 10px 0;'>\n                <li>",
+                    jmvcore::format(.("Adjacent disagreements (e.g., 'Agree' vs 'Strongly Agree') receive {tag1}partial credit{tag2}"), tag1 = "<b>", tag2 = "</b>"),
+                    "</li>\n                <li>",
+                    jmvcore::format(.("Distant disagreements (e.g., 'Strongly Disagree' vs 'Strongly Agree') receive {tag1}no credit{tag2}"), tag1 = "<b>", tag2 = "</b>"),
+                    "</li>\n                <li>",
+                    jmvcore::format(.("Penalty increases {tag1}linearly{tag2} with distance"), tag1 = "<b>", tag2 = "</b>"),
+                    "</li>\n                <li>",
+                    jmvcore::format(.("Weighted kappa will be {tag1}higher{tag2} than unweighted kappa when most disagreements are adjacent"), tag1 = "<b>", tag2 = "</b>"),
+                    "</li>\n                </ul>"
+                )
                 } else if (weight_type == "squared") {
                     weight_name <- "Squared (Quadratic) Weights"
                     weight_desc <- "Disagreements are weighted by the squared distance, penalizing larger disagreements more heavily."
                     formula <- "Weight = 1 - [(i - j) / (k - 1)]\u{00B2}"
                     formula_desc <- "where i and j are category positions, k is number of categories"
 
-                    example_table <- "
-                <table style='margin: 15px auto; border-collapse: collapse; font-size: 12px;'>
-                <tr style='background-color: rgba(33, 33, 33, 0.07); color: inherit;'>
-                    <th style='padding: 6px 12px; border: 1px solid #ddd;'>Distance</th>
-                    <th style='padding: 6px 12px; border: 1px solid #ddd;'>Example</th>
-                    <th style='padding: 6px 12px; border: 1px solid #ddd;'>Weight</th>
-                    <th style='padding: 6px 12px; border: 1px solid #ddd;'>Penalty</th>
-                </tr>
-                <tr>
-                    <td style='padding: 6px 12px; border: 1px solid #ddd;'>0 (agreement)</td>
-                    <td style='padding: 6px 12px; border: 1px solid #ddd;'>1 vs 1</td>
-                    <td style='padding: 6px 12px; border: 1px solid #ddd; text-align: center;'>1.00</td>
-                    <td style='padding: 6px 12px; border: 1px solid #ddd; text-align: center;'>None</td>
-                </tr>
-                <tr>
-                    <td style='padding: 6px 12px; border: 1px solid #ddd;'>1 category</td>
-                    <td style='padding: 6px 12px; border: 1px solid #ddd;'>1 vs 2</td>
-                    <td style='padding: 6px 12px; border: 1px solid #ddd; text-align: center;'>0.94</td>
-                    <td style='padding: 6px 12px; border: 1px solid #ddd; text-align: center;'>Very small</td>
-                </tr>
-                <tr>
-                    <td style='padding: 6px 12px; border: 1px solid #ddd;'>2 categories</td>
-                    <td style='padding: 6px 12px; border: 1px solid #ddd;'>1 vs 3</td>
-                    <td style='padding: 6px 12px; border: 1px solid #ddd; text-align: center;'>0.75</td>
-                    <td style='padding: 6px 12px; border: 1px solid #ddd; text-align: center;'>Moderate</td>
-                </tr>
-                <tr>
-                    <td style='padding: 6px 12px; border: 1px solid #ddd;'>Maximum</td>
-                    <td style='padding: 6px 12px; border: 1px solid #ddd;'>1 vs 5</td>
-                    <td style='padding: 6px 12px; border: 1px solid #ddd; text-align: center;'>0.00</td>
-                    <td style='padding: 6px 12px; border: 1px solid #ddd; text-align: center;'>Full</td>
-                </tr>
-                </table>"
+                    example_table <- paste0(
+                    "\n                <table style='margin: 15px auto; border-collapse: collapse; font-size: 12px;'>\n                <tr style='background-color: rgba(33, 33, 33, 0.07); color: inherit;'>\n                    <th style='padding: 6px 12px; border: 1px solid #ddd;'>",
+                    .("Distance"),
+                    "</th>\n                    <th style='padding: 6px 12px; border: 1px solid #ddd;'>",
+                    .("Example"),
+                    "</th>\n                    <th style='padding: 6px 12px; border: 1px solid #ddd;'>",
+                    .("Weight"),
+                    "</th>\n                    <th style='padding: 6px 12px; border: 1px solid #ddd;'>",
+                    .("Penalty"),
+                    "</th>\n                </tr>\n                <tr>\n                    <td style='padding: 6px 12px; border: 1px solid #ddd;'>",
+                    .("0 (agreement)"),
+                    "</td>\n                    <td style='padding: 6px 12px; border: 1px solid #ddd;'>",
+                    .("1 vs 1"),
+                    "</td>\n                    <td style='padding: 6px 12px; border: 1px solid #ddd; text-align: center;'>1.00</td>\n                    <td style='padding: 6px 12px; border: 1px solid #ddd; text-align: center;'>",
+                    .("None"),
+                    "</td>\n                </tr>\n                <tr>\n                    <td style='padding: 6px 12px; border: 1px solid #ddd;'>",
+                    .("1 category"),
+                    "</td>\n                    <td style='padding: 6px 12px; border: 1px solid #ddd;'>",
+                    .("1 vs 2"),
+                    "</td>\n                    <td style='padding: 6px 12px; border: 1px solid #ddd; text-align: center;'>0.94</td>\n                    <td style='padding: 6px 12px; border: 1px solid #ddd; text-align: center;'>",
+                    .("Very small"),
+                    "</td>\n                </tr>\n                <tr>\n                    <td style='padding: 6px 12px; border: 1px solid #ddd;'>",
+                    .("2 categories"),
+                    "</td>\n                    <td style='padding: 6px 12px; border: 1px solid #ddd;'>",
+                    .("1 vs 3"),
+                    "</td>\n                    <td style='padding: 6px 12px; border: 1px solid #ddd; text-align: center;'>0.75</td>\n                    <td style='padding: 6px 12px; border: 1px solid #ddd; text-align: center;'>",
+                    .("Moderate"),
+                    "</td>\n                </tr>\n                <tr>\n                    <td style='padding: 6px 12px; border: 1px solid #ddd;'>",
+                    .("Maximum"),
+                    "</td>\n                    <td style='padding: 6px 12px; border: 1px solid #ddd;'>",
+                    .("1 vs 5"),
+                    "</td>\n                    <td style='padding: 6px 12px; border: 1px solid #ddd; text-align: center;'>0.00</td>\n                    <td style='padding: 6px 12px; border: 1px solid #ddd; text-align: center;'>",
+                    .("Full"),
+                    "</td>\n                </tr>\n                </table>"
+                )
 
                     use_case <- "Use squared weights when larger disagreements are disproportionately more serious than small ones (e.g., clinical severity scales, diagnostic accuracy)."
 
-                    interpretation <- "
-                <ul style='font-size: 13px; line-height: 1.8; margin: 10px 0;'>
-                <li>Adjacent disagreements receive <b>much more credit</b> than linear (0.94 vs 0.75)</li>
-                <li>Distant disagreements are <b>heavily penalized</b></li>
-                <li>Penalty increases <b>quadratically</b> with distance</li>
-                <li>Weighted kappa will be <b>substantially higher</b> than unweighted when disagreements cluster near the diagonal</li>
-                <li><b>Special property:</b> Squared weights equal the intraclass correlation coefficient under certain conditions</li>
-                </ul>"
+                    interpretation <- paste0(
+                    "\n                <ul style='font-size: 13px; line-height: 1.8; margin: 10px 0;'>\n                <li>",
+                    jmvcore::format(.("Adjacent disagreements receive {tag1}much more credit{tag2} than linear (0.94 vs 0.75)"), tag1 = "<b>", tag2 = "</b>"),
+                    "</li>\n                <li>",
+                    jmvcore::format(.("Distant disagreements are {tag1}heavily penalized{tag2}"), tag1 = "<b>", tag2 = "</b>"),
+                    "</li>\n                <li>",
+                    jmvcore::format(.("Penalty increases {tag1}quadratically{tag2} with distance"), tag1 = "<b>", tag2 = "</b>"),
+                    "</li>\n                <li>",
+                    jmvcore::format(.("Weighted kappa will be {tag1}substantially higher{tag2} than unweighted when disagreements cluster near the diagonal"), tag1 = "<b>", tag2 = "</b>"),
+                    "</li>\n                <li>",
+                    jmvcore::format(.("{tag1}Special property:{tag2} Squared weights equal the intraclass correlation coefficient under certain conditions"), tag1 = "<b>", tag2 = "</b>"),
+                    "</li>\n                </ul>"
+                )
                 }
 
                 html_output <- paste0(
@@ -855,51 +861,61 @@ agreementClass <- if (requireNamespace("jmvcore")) {
             <div style='font-family: Arial, sans-serif; max-width: 800px; line-height: 1.4;'>
                 <div style='background-color: rgba(88, 88, 88, 0.06); border: 2px solid #333; padding: 15px; margin-bottom: 15px; color: inherit;'>
                 <h3 style='margin: 0 0 5px 0; font-size: 16px; color: inherit;'>", weight_name, "</h3>
-                <p style='margin: 0; font-size: 14px; color: inherit;'>", weight_desc, "</p>
-                </div>
-
-                <div style='font-size: 14px; color: inherit;'>
-                    <div style='background-color: rgba(155, 155, 155, 0.06); border: 1px solid #ccc; padding: 12px; margin: 15px 0; color: inherit;'>
-                        <p style='margin: 0 0 8px 0; font-weight: bold;'>Formula</p>
-                        <p style='font-family: monospace; font-size: 13px; margin: 5px 0; background: rgba(155, 155, 155, 0.12); color: inherit; padding: 8px; border: 1px solid #ccc;'>",
+                <p style='margin: 0; font-size: 14px; color: inherit;'>", weight_desc, paste0(
+                    "</p>\n                </div>\n\n                <div style='font-size: 14px; color: inherit;'>\n                    <div style='background-color: rgba(155, 155, 155, 0.06); border: 1px solid #ccc; padding: 12px; margin: 15px 0; color: inherit;'>\n                        <p style='margin: 0 0 8px 0; font-weight: bold;'>",
+                    .("Formula"),
+                    "</p>\n                        <p style='font-family: monospace; font-size: 13px; margin: 5px 0; background: rgba(155, 155, 155, 0.12); color: inherit; padding: 8px; border: 1px solid #ccc;'>"
+                ),
                     formula, "</p>
-                        <p style='font-size: 13px; margin: 5px 0; color: inherit;'>", formula_desc, "</p>
-                    </div>
-
-                    <p style='margin: 15px 0; font-weight: bold;'>Example (5-point scale):</p>",
-                    example_table, "
-
-                    <div style='background-color: rgba(155, 155, 155, 0.06); border: 1px solid #ccc; padding: 12px; margin: 15px 0; color: inherit;'>
-                        <p style='margin: 0 0 8px 0; font-weight: bold;'>When to Use</p>
-                        <p style='margin: 0; font-size: 14px;'>", use_case, "</p>
-                    </div>
-
-                    <div style='background-color: rgba(155, 155, 155, 0.06); border: 1px solid #ccc; padding: 12px; margin: 15px 0; color: inherit;'>
-                        <p style='margin: 0 0 8px 0; font-weight: bold;'>Key Points</p>",
-                    interpretation, "
-                    </div>
-
-                    <div style='background-color: rgba(155, 155, 155, 0.06); border: 1px solid #ccc; padding: 12px; margin: 15px 0; color: inherit;'>
-                        <p style='margin: 0 0 8px 0; font-weight: bold;'>Important Note</p>
-                        <p style='margin: 0; font-size: 14px;'>Weighted kappa values cannot be directly compared to unweighted kappa. They measure different aspects of agreement.</p>
-                    </div>
-
-                    <div style='background-color: rgba(155, 155, 155, 0.06); border: 1px solid #ccc; padding: 12px; margin: 15px 0; color: inherit;'>
-                        <p style='margin: 0 0 8px 0; font-weight: bold;'>Interpretation Guidelines (adapted from Landis &amp; Koch, 1977)</p>
-                        <table style='width: 100%; font-size: 13px;'>
-                        <!-- Endpoints mirror the strict less-than chain in .createSummary; the old 0.21/0.41/0.61 rows disagreed with the code at every boundary, so a kappa of exactly 0.20 read Fair in the verdict and Slight here. -->
-                        <tr><td style='padding: 2px 0;'>&lt; 0.00</td><td style='padding: 2px 0;'>Poor agreement</td></tr>
-                        <tr><td style='padding: 2px 0;'>0.00 to &lt; 0.20</td><td style='padding: 2px 0;'>Slight agreement</td></tr>
-                        <tr><td style='padding: 2px 0;'>0.20 to &lt; 0.40</td><td style='padding: 2px 0;'>Fair agreement</td></tr>
-                        <tr><td style='padding: 2px 0;'>0.40 to &lt; 0.60</td><td style='padding: 2px 0;'>Moderate agreement</td></tr>
-                        <tr><td style='padding: 2px 0;'>0.60 to &lt; 0.80</td><td style='padding: 2px 0;'>Substantial agreement</td></tr>
-                        <tr><td style='padding: 2px 0;'>0.80 to 1.00</td><td style='padding: 2px 0;'>Almost perfect agreement</td></tr>
-                        </table>
-                        <p style='margin: 8px 0 0 0; font-size: 11px; color: inherit;'>Note: These cutoffs are adapted from Landis &amp; Koch (1977), who put a value exactly on a cut-point (0.20, 0.40, 0.60, 0.80) in the band below; this analysis puts it in the band above. Different coefficient families originate from distinct statistical traditions (e.g., Krippendorff 2004 for Alpha, Cicchetti 1994 / Koo &amp; Li 2016 for ICC) with different benchmark thresholds.</p>
-                    </div>
-                </div>
-            </div>
-            "
+                        <p style='font-size: 13px; margin: 5px 0; color: inherit;'>", formula_desc, paste0(
+                    "</p>\n                    </div>\n\n                    <p style='margin: 15px 0; font-weight: bold;'>",
+                    .("Example (5-point scale):"),
+                    "</p>"
+                ),
+                    example_table, paste0(
+                    "\n\n                    <div style='background-color: rgba(155, 155, 155, 0.06); border: 1px solid #ccc; padding: 12px; margin: 15px 0; color: inherit;'>\n                        <p style='margin: 0 0 8px 0; font-weight: bold;'>",
+                    .("When to Use"),
+                    "</p>\n                        <p style='margin: 0; font-size: 14px;'>"
+                ), use_case, paste0(
+                    "</p>\n                    </div>\n\n                    <div style='background-color: rgba(155, 155, 155, 0.06); border: 1px solid #ccc; padding: 12px; margin: 15px 0; color: inherit;'>\n                        <p style='margin: 0 0 8px 0; font-weight: bold;'>",
+                    .("Key Points"),
+                    "</p>"
+                ),
+                    interpretation, paste0(
+                    "\n                    </div>\n\n                    <div style='background-color: rgba(155, 155, 155, 0.06); border: 1px solid #ccc; padding: 12px; margin: 15px 0; color: inherit;'>\n                        <p style='margin: 0 0 8px 0; font-weight: bold;'>",
+                    .("Important Note"),
+                    "</p>\n                        <p style='margin: 0; font-size: 14px;'>",
+                    .("Weighted kappa values cannot be directly compared to unweighted kappa. They measure different aspects of agreement."),
+                    "</p>\n                    </div>\n\n                    <div style='background-color: rgba(155, 155, 155, 0.06); border: 1px solid #ccc; padding: 12px; margin: 15px 0; color: inherit;'>\n                        <p style='margin: 0 0 8px 0; font-weight: bold;'>",
+                    jmvcore::format(.("Interpretation Guidelines (adapted from Landis {tag1} Koch, 1977)"), tag1 = "&amp;"),
+                    "</p>\n                        <table style='width: 100%; font-size: 13px;'>\n                        <!-- Endpoints mirror the strict less-than chain in .createSummary; the old 0.21/0.41/0.61 rows disagreed with the code at every boundary, so a kappa of exactly 0.20 read Fair in the verdict and Slight here. -->\n                        <tr><td style='padding: 2px 0;'>",
+                    jmvcore::format(.("{tag1} 0.00"), tag1 = "&lt;"),
+                    "</td><td style='padding: 2px 0;'>",
+                    .("Poor agreement"),
+                    "</td></tr>\n                        <tr><td style='padding: 2px 0;'>",
+                    jmvcore::format(.("0.00 to {tag1} 0.20"), tag1 = "&lt;"),
+                    "</td><td style='padding: 2px 0;'>",
+                    .("Slight agreement"),
+                    "</td></tr>\n                        <tr><td style='padding: 2px 0;'>",
+                    jmvcore::format(.("0.20 to {tag1} 0.40"), tag1 = "&lt;"),
+                    "</td><td style='padding: 2px 0;'>",
+                    .("Fair agreement"),
+                    "</td></tr>\n                        <tr><td style='padding: 2px 0;'>",
+                    jmvcore::format(.("0.40 to {tag1} 0.60"), tag1 = "&lt;"),
+                    "</td><td style='padding: 2px 0;'>",
+                    .("Moderate agreement"),
+                    "</td></tr>\n                        <tr><td style='padding: 2px 0;'>",
+                    jmvcore::format(.("0.60 to {tag1} 0.80"), tag1 = "&lt;"),
+                    "</td><td style='padding: 2px 0;'>",
+                    .("Substantial agreement"),
+                    "</td></tr>\n                        <tr><td style='padding: 2px 0;'>",
+                    .("0.80 to 1.00"),
+                    "</td><td style='padding: 2px 0;'>",
+                    .("Almost perfect agreement"),
+                    "</td></tr>\n                        </table>\n                        <p style='margin: 8px 0 0 0; font-size: 11px; color: inherit;'>",
+                    jmvcore::format(.("Note: These cutoffs are adapted from Landis {tag1} Koch (1977), who put a value exactly on a cut-point (0.20, 0.40, 0.60, 0.80) in the band below; this analysis puts it in the band above. Different coefficient families originate from distinct statistical traditions (e.g., Krippendorff 2004 for Alpha, Cicchetti 1994 / Koo {tag2} Li 2016 for ICC) with different benchmark thresholds."), tag1 = "&amp;", tag2 = "&amp;"),
+                    "</p>\n                    </div>\n                </div>\n            </div>\n            "
+                )
                 )
 
                 return(html_output)
@@ -1123,330 +1139,278 @@ agreementClass <- if (requireNamespace("jmvcore")) {
             .populateGwetExplanation = function() {
                 # Provide educational content about Gwet's AC coefficient
                 #
-                # TODO (i18n): this guide and the other explanation panels in this file (38
-                # hard-coded HTML string literals, about 12,000 English words, measured
-                # 2026-09-27) are plain strings, not translation calls, so jamovi's extractor
-                # never sees them and they render in English in every language, while the rest
-                # of agreement is fully translated in tr.po. Fix: one translation call per
-                # sentence or table cell, markup kept outside the msgid, then
-                # jmvtools::i18nUpdate() and translate. Example: the Kendall's W guide hard-codes
-                # "Very weak agreement (essentially random)", which is translated where the
-                # results table uses it.
+                # Sentences/cells are extracted with markup passed as format values.
+                # Keep these literal translation calls inside the R6 self context.
 
-                html_content <- "
-            <div style='font-family: Arial, sans-serif; max-width: 800px; line-height: 1.6;'>
-                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>
-                    <h3 style='margin: 0 0 10px 0; color: inherit;'>What is Gwet's AC Coefficient?</h3>
-                    <p style='margin: 0; color: inherit;'>
-                        Gwet's AC coefficient was proposed for the <strong>kappa paradox</strong>, in which Cohen's/Fleiss' kappa
-                        is low despite high observed agreement because one category dominates the ratings.
-                    </p>
-                </div>
-
-                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>
-                    <h4 style='margin: 0 0 10px 0; color: inherit;'>When to Use Gwet's AC</h4>
-                    <p style='margin: 0 0 10px 0;'><strong>This method is particularly valuable when you have:</strong></p>
-                    <ul style='margin: 0; padding-left: 20px;'>
-                        <li><strong>Rare tumor subtypes</strong> - Unbalanced categories where some diagnoses are very uncommon</li>
-                        <li><strong>High agreement rates</strong> - Easy-to-diagnose cases where raters agree >90% of the time</li>
-                        <li><strong>Skewed marginal distributions</strong> - When one category dominates the data</li>
-                    </ul>
-                </div>
-
-                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>
-                    <h4 style='margin: 0 0 10px 0; color: inherit;'>AC1 vs AC2</h4>
-                    <table style='width: 100%; border-collapse: collapse;'>
-                        <tr style='background-color: rgba(88, 88, 88, 0.06); color: inherit;'>
-                            <th style='padding: 8px; text-align: left; border-bottom: 2px solid #333;'>Method</th>
-                            <th style='padding: 8px; text-align: left; border-bottom: 2px solid #333;'>Use Case</th>
-                        </tr>
-                        <tr>
-                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'><strong>AC1 (unweighted)</strong></td>
-                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>Nominal categories with no inherent order</td>
-                        </tr>
-                        <tr>
-                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'><strong>AC2 (linear weights)</strong></td>
-                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>Ordinal data where adjacent disagreements are less severe</td>
-                        </tr>
-                        <tr>
-                            <td style='padding: 8px;'><strong>AC2 (quadratic weights)</strong></td>
-                            <td style='padding: 8px;'>Ordinal data where larger disagreements should be heavily penalized</td>
-                        </tr>
-                    </table>
-                </div>
-
-                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; color: inherit;'>
-                    <h4 style='margin: 0 0 10px 0; color: inherit;'>Clinical Example</h4>
-                    <p style='margin: 0; font-style: italic;'>
-                        Two pathologists read 100 biopsies for a rare subtype; each calls it in 2 cases and they agree on 1,
-                        so they agree on 98 of 100 cases. Cohen's kappa is 0.49 and Gwet's AC1 is 0.98. AC1's chance-agreement
-                        term is less sensitive to prevalence, so it stays close to the observed agreement when one category
-                        dominates. Neither number is the true level of agreement - they correct for chance in different ways -
-                        so report the observed agreement beside whichever coefficient was prespecified.
-                    </p>
-                </div>
-
-                <div style='margin-top: 15px; padding: 10px; background-color: rgba(88, 88, 88, 0.06); border-radius: 4px; color: inherit;'>
-                    <p style='margin: 0; font-size: 12px; color: inherit;'>
-                        <strong>Reference:</strong> Gwet, K. L. (2008). Computing inter-rater reliability and its variance
-                        in the presence of high agreement. <em>British Journal of Mathematical and Statistical Psychology</em>, 61(1), 29-48.
-                    </p>
-                </div>
-            </div>
-            "
+                html_content <- paste0(
+                    "\n            <div style='font-family: Arial, sans-serif; max-width: 800px; line-height: 1.6;'>\n                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>\n                    <h3 style='margin: 0 0 10px 0; color: inherit;'>",
+                    .("What is Gwet's AC Coefficient?"),
+                    "</h3>\n                    <p style='margin: 0; color: inherit;'>",
+                    paste0("\n                        ", jmvcore::format(.("Gwet's AC coefficient was proposed for the {tag1}kappa paradox{tag2}, in which Cohen's/Fleiss' kappa\n                        is low despite high observed agreement because one category dominates the ratings."), tag1 = "<strong>", tag2 = "</strong>"), "\n                    "),
+                    "</p>\n                </div>\n\n                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>\n                    <h4 style='margin: 0 0 10px 0; color: inherit;'>",
+                    .("When to Use Gwet's AC"),
+                    "</h4>\n                    <p style='margin: 0 0 10px 0;'>",
+                    jmvcore::format(.("{tag1}This method is particularly valuable when you have:{tag2}"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</p>\n                    <ul style='margin: 0; padding-left: 20px;'>\n                        <li>",
+                    jmvcore::format(.("{tag1}Rare tumor subtypes{tag2} - Unbalanced categories where some diagnoses are very uncommon"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                        <li>",
+                    jmvcore::format(.("{tag1}High agreement rates{tag2} - Easy-to-diagnose cases where raters agree >90% of the time"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                        <li>",
+                    jmvcore::format(.("{tag1}Skewed marginal distributions{tag2} - When one category dominates the data"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                    </ul>\n                </div>\n\n                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>\n                    <h4 style='margin: 0 0 10px 0; color: inherit;'>",
+                    .("AC1 vs AC2"),
+                    "</h4>\n                    <table style='width: 100%; border-collapse: collapse;'>\n                        <tr style='background-color: rgba(88, 88, 88, 0.06); color: inherit;'>\n                            <th style='padding: 8px; text-align: left; border-bottom: 2px solid #333;'>",
+                    .("Method"),
+                    "</th>\n                            <th style='padding: 8px; text-align: left; border-bottom: 2px solid #333;'>",
+                    .("Use Case"),
+                    "</th>\n                        </tr>\n                        <tr>\n                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>",
+                    jmvcore::format(.("{tag1}AC1 (unweighted){tag2}"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</td>\n                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>",
+                    .("Nominal categories with no inherent order"),
+                    "</td>\n                        </tr>\n                        <tr>\n                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>",
+                    jmvcore::format(.("{tag1}AC2 (linear weights){tag2}"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</td>\n                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>",
+                    .("Ordinal data where adjacent disagreements are less severe"),
+                    "</td>\n                        </tr>\n                        <tr>\n                            <td style='padding: 8px;'>",
+                    jmvcore::format(.("{tag1}AC2 (quadratic weights){tag2}"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</td>\n                            <td style='padding: 8px;'>",
+                    .("Ordinal data where larger disagreements should be heavily penalized"),
+                    "</td>\n                        </tr>\n                    </table>\n                </div>\n\n                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; color: inherit;'>\n                    <h4 style='margin: 0 0 10px 0; color: inherit;'>",
+                    .("Clinical Example"),
+                    "</h4>\n                    <p style='margin: 0; font-style: italic;'>",
+                    paste0("\n                        ", .("Two pathologists read 100 biopsies for a rare subtype; each calls it in 2 cases and they agree on 1,\n                        so they agree on 98 of 100 cases. Cohen's kappa is 0.49 and Gwet's AC1 is 0.98. AC1's chance-agreement\n                        term is less sensitive to prevalence, so it stays close to the observed agreement when one category\n                        dominates. Neither number is the true level of agreement - they correct for chance in different ways -\n                        so report the observed agreement beside whichever coefficient was prespecified."), "\n                    "),
+                    "</p>\n                </div>\n\n                <div style='margin-top: 15px; padding: 10px; background-color: rgba(88, 88, 88, 0.06); border-radius: 4px; color: inherit;'>\n                    <p style='margin: 0; font-size: 12px; color: inherit;'>",
+                    paste0("\n                        ", jmvcore::format(.("{tag1}Reference:{tag2} Gwet, K. L. (2008). Computing inter-rater reliability and its variance\n                        in the presence of high agreement. {tag3}British Journal of Mathematical and Statistical Psychology{tag4}, 61(1), 29-48."), tag1 = "<strong>", tag2 = "</strong>", tag3 = "<em>", tag4 = "</em>"), "\n                    "),
+                    "</p>\n                </div>\n            </div>\n            "
+                )
 
                 self$results$gwetExplanation$setContent(html_content)
             },
             .populateClinicalUseCases = function() {
                 # Provide comprehensive clinical use cases and method selection guide
 
-                html_content <- "
-            <div style='font-family: Arial, sans-serif; max-width: 900px; line-height: 1.6;'>
-                <div style='background-color: rgba(88, 88, 88, 0.06); border: 2px solid #333; padding: 20px; margin-bottom: 20px; color: inherit;'>
-                    <h2 style='margin: 0 0 10px 0;'>Clinical Use Cases & Method Selection Guide</h2>
-                    <p style='margin: 0; opacity: 0.9;'>Choose the right agreement measure for your pathology research</p>
-                </div>
-
-                <!-- Categorical Data Methods -->
-                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 20px; margin-bottom: 20px; color: inherit;'>
-                    <h3 style='margin: 0 0 15px 0; color: inherit;'> Categorical/Ordinal Data</h3>
-
-                    <div style='background-color: rgba(155, 155, 155, 0.06); border: 1px solid #ccc; padding: 15px; margin-bottom: 15px; color: inherit;'>
-                        <h4 style='margin: 0 0 10px 0; color: inherit;'>Cohen's/Fleiss' Kappa (Standard Method)</h4>
-                        <p style='margin: 0 0 10px 0;'><strong>Use for:</strong></p>
-                        <ul style='margin: 0 0 10px 0; padding-left: 20px;'>
-                            <li><strong>Histologic type</strong> - Adenocarcinoma, squamous cell carcinoma, etc.</li>
-                            <li><strong>Margin status</strong> - Positive vs negative</li>
-                            <li><strong>Present/absent calls</strong> - Lymphovascular or perineural invasion</li>
-                        </ul>
-                        <p style='margin: 0 0 10px 0; font-size: 13px; color: inherit;'><em>Ordered scales (grade, stage, IHC 0 to 3+) can also be read with unweighted kappa, but it counts a one-step and a three-step disagreement as equally wrong; weighted kappa, below, gives partial credit for near misses.</em></p>
-                        <p style='margin: 0; font-size: 13px; color: inherit;'><em>Note: May be problematic with high agreement or rare categories</em></p>
-                    </div>
-
-                    <div style='background-color: rgba(155, 155, 155, 0.06); border: 1px solid #ccc; padding: 15px; margin-bottom: 15px; color: inherit;'>
-                        <h4 style='margin: 0 0 10px 0; color: inherit;'>Weighted Kappa (Ordinal Data)</h4>
-                        <p style='margin: 0 0 10px 0;'><strong>Use for ordered categories where partial credit matters:</strong></p>
-                        <ul style='margin: 0 0 10px 0; padding-left: 20px;'>
-                            <li><strong>Tumor grading</strong> - G1, G2, G3 classification</li>
-                            <li><strong>TNM staging</strong> - T1, T2, T3, T4 categories</li>
-                            <li><strong>Biomarker scoring</strong> - Negative (0), 1+, 2+, 3+</li>
-                            <li><strong>Dysplasia grading</strong> - None, low-grade, high-grade</li>
-                            <li><strong>Mitotic count categories</strong> - Low (1-9), intermediate (10-19), high (>=20)</li>
-                            <li><strong>Inflammation severity</strong> - Absent, mild, moderate, severe</li>
-                            <li><strong>Fibrosis stage</strong> - F0, F1, F2, F3, F4</li>
-                        </ul>
-                        <p style='margin: 0; padding: 10px; background-color: rgba(155, 155, 155, 0.06); border-left: 3px solid #333; font-size: 13px; color: inherit;'>
-                            <strong> Important:</strong> Use \"Level ordering information\" to verify proper ordering (e.g., F0 &#x2192; F1 &#x2192; F2 &#x2192; F3 &#x2192; F4)
-                        </p>
-                    </div>
-
-                    <div style='background-color: rgba(155, 155, 155, 0.06); border: 1px solid #ccc; padding: 15px; margin-bottom: 15px; color: inherit;'>
-                        <h4 style='margin: 0 0 10px 0; color: inherit;'>Gwet's AC1/AC2 (Kappa Paradox Solution)</h4>
-                        <p style='margin: 0 0 10px 0;'><strong>Choose when you have:</strong></p>
-                        <ul style='margin: 0 0 10px 0; padding-left: 20px;'>
-                            <li><strong>Rare tumor subtypes</strong> - Neuroendocrine carcinoma in colorectal specimens (2% prevalence)</li>
-                            <li><strong>High agreement rates</strong> - Benign vs malignant with 95%+ agreement</li>
-                            <li><strong>Unbalanced categories</strong> - Metastasis (5% positive) vs primary (95%)</li>
-                            <li><strong>Quality control studies</strong> - Most cases straightforward, few difficult</li>
-                        </ul>
-                        <p style='margin: 0; padding: 10px; background-color: rgba(155, 155, 155, 0.06); border-left: 3px solid #333; font-size: 13px; color: inherit;'>
-                            <strong> Tip:</strong> Decide before the analysis which coefficient you will report. Gwet's AC is less affected by skewed category prevalence than kappa, so it is the usual choice when one category dominates; kappa remains the convention for balanced categories. If the two differ substantially, report both and state which was prespecified - do not select after seeing the results.
-                        </p>
-                    </div>
-
-                    <div style='background-color: rgba(155, 155, 155, 0.06); border: 1px solid #ccc; padding: 15px; margin-bottom: 15px; color: inherit;'>
-                        <h4 style='margin: 0 0 10px 0; color: inherit;'>Krippendorff's Alpha (Missing Data/Flexible)</h4>
-                        <p style='margin: 0 0 10px 0;'><strong>Use when:</strong></p>
-                        <ul style='margin: 0; padding-left: 20px;'>
-                            <li><strong>Incomplete ratings</strong> - Not all pathologists rated all cases</li>
-                            <li><strong>Different measurement levels</strong> - Comparing nominal, ordinal, interval data</li>
-                            <li><strong>Large panels</strong> - Many raters (>5) with varying participation</li>
-                        </ul>
-                    </div>
-                </div>
-
-                <!-- Continuous Data Methods -->
-                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 20px; margin-bottom: 20px; color: inherit;'>
-                    <h3 style='margin: 0 0 15px 0; color: inherit;'> Continuous/Numeric Data</h3>
-
-                    <div style='background-color: rgba(155, 155, 155, 0.06); border: 1px solid #ccc; padding: 15px; margin-bottom: 15px; color: inherit;'>
-                        <h4 style='margin: 0 0 10px 0; color: inherit;'>ICC (Intraclass Correlation Coefficient)</h4>
-                        <p style='margin: 0 0 10px 0;'><strong>Use for:</strong></p>
-                        <ul style='margin: 0 0 10px 0; padding-left: 20px;'>
-                            <li><strong>Tumor size</strong> - Diameter measurements (mm or cm)</li>
-                            <li><strong>Biomarker quantification</strong> - Ki-67 proliferation index (%)</li>
-                            <li><strong>Cell counts</strong> - Mitotic figures per 10 HPF</li>
-                            <li><strong>Morphometric analysis</strong> - Nuclear area (&#x3BC;m&#xB2;), gland perimeter</li>
-                            <li><strong>Digital pathology</strong> - Automated vs manual measurements</li>
-                            <li><strong>Continuous scores</strong> - Visual analog scales (0-100)</li>
-                        </ul>
-                        <p style='margin: 0; padding: 10px; background-color: rgba(155, 155, 155, 0.06); border-left: 3px solid #333; font-size: 13px; color: inherit;'>
-                            <strong> Model selection:</strong> Use ICC(2,1) or ICC(3,1) for most pathology studies where all cases are rated by the same pathologists
-                        </p>
-                    </div>
-
-                    <div style='background-color: rgba(155, 155, 155, 0.06); border: 1px solid #ccc; padding: 15px; margin-bottom: 15px; color: inherit;'>
-                        <h4 style='margin: 0 0 10px 0; color: inherit;'>Bland-Altman Plot (Visual Assessment)</h4>
-                        <p style='margin: 0 0 10px 0;'><strong>Use alongside ICC to:</strong></p>
-                        <ul style='margin: 0 0 10px 0; padding-left: 20px;'>
-                            <li><strong>Detect systematic bias</strong> - Does one rater consistently measure higher/lower?</li>
-                            <li><strong>Identify outliers</strong> - Cases with unusually large disagreement</li>
-                            <li><strong>Inspect difference-mean trends</strong> - Does disagreement vary with measurement size? Treat the fitted trend as exploratory because unequal method precision can also create it</li>
-                            <li><strong>Define acceptable limits</strong> - What range of disagreement is clinically acceptable?</li>
-                        </ul>
-                        <p style='margin: 0; padding: 10px; background-color: rgba(155, 155, 155, 0.06); border-left: 3px solid #333; font-size: 13px; color: inherit;'>
-                            <strong> Best practice:</strong> Always use ICC + Bland-Altman together for continuous data
-                        </p>
-                    </div>
-                </div>
-
-                <!-- Quick Decision Guide -->
-                <div style='background-color: rgba(88, 88, 88, 0.06); border: 2px solid #333; padding: 20px; margin-bottom: 20px; color: inherit;'>
-                    <h3 style='margin: 0 0 15px 0;'> Quick Decision Guide</h3>
-                    <table style='width: 100%; background: rgba(155, 155, 155, 0.06); color: inherit; border-radius: 4px; overflow: hidden;'>
-                        <tr style='background-color: rgba(138, 155, 172, 0.06); color: inherit;'>
-                            <th style='padding: 12px; text-align: left; border-bottom: 2px solid #dee2e6;'>Your Data Type</th>
-                            <th style='padding: 12px; text-align: left; border-bottom: 2px solid #dee2e6;'>Recommended Method</th>
-                        </tr>
-                        <tr>
-                            <td style='padding: 10px; border-bottom: 1px solid #dee2e6;'>Nominal categories (no order)</td>
-                            <td style='padding: 10px; border-bottom: 1px solid #dee2e6;'><strong>Kappa</strong> or <strong>Gwet's AC1</strong></td>
-                        </tr>
-                        <tr>
-                            <td style='padding: 10px; border-bottom: 1px solid #dee2e6;'>Ordinal categories (ordered)</td>
-                            <td style='padding: 10px; border-bottom: 1px solid #dee2e6;'><strong>Weighted Kappa</strong> or <strong>Gwet's AC2</strong></td>
-                        </tr>
-                        <tr>
-                            <td style='padding: 10px; border-bottom: 1px solid #dee2e6;'>Continuous measurements</td>
-                            <td style='padding: 10px; border-bottom: 1px solid #dee2e6;'><strong>ICC + Bland-Altman</strong></td>
-                        </tr>
-                        <tr>
-                            <td style='padding: 10px; border-bottom: 1px solid #dee2e6;'>Rare categories (< 10%)</td>
-                            <td style='padding: 10px; border-bottom: 1px solid #dee2e6;'><strong>Gwet's AC</strong> (not Kappa)</td>
-                        </tr>
-                        <tr>
-                            <td style='padding: 10px;'>Missing data/incomplete ratings</td>
-                            <td style='padding: 10px;'><strong>Krippendorff's Alpha</strong></td>
-                        </tr>
-                    </table>
-                </div>
-
-                <!-- Sample Size Recommendations -->
-                <div style='margin-top: 20px; padding: 15px; background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; color: inherit;'>
-                    <h4 style='margin: 0 0 10px 0; color: inherit;'> Sample Size Recommendations</h4>
-                    <ul style='margin: 0; padding-left: 20px; font-size: 14px;'>
-                        <li><strong>Minimum:</strong> 30 cases for stable kappa/ICC estimates</li>
-                        <li><strong>Recommended:</strong> 50-100 cases for categorical data, 30-50 for continuous</li>
-                        <li><strong>Rare categories:</strong> Include >=20 positive cases if possible</li>
-                        <li><strong>Pilot studies:</strong> 20 cases minimum, but interpret cautiously</li>
-                    </ul>
-                </div>
-            </div>
-            "
+                html_content <- paste0(
+                    "\n            <div style='font-family: Arial, sans-serif; max-width: 900px; line-height: 1.6;'>\n                <div style='background-color: rgba(88, 88, 88, 0.06); border: 2px solid #333; padding: 20px; margin-bottom: 20px; color: inherit;'>\n                    <h2 style='margin: 0 0 10px 0;'>",
+                    .("Clinical Use Cases & Method Selection Guide"),
+                    "</h2>\n                    <p style='margin: 0; opacity: 0.9;'>",
+                    .("Choose the right agreement measure for your pathology research"),
+                    "</p>\n                </div>\n\n                <!-- Categorical Data Methods -->\n                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 20px; margin-bottom: 20px; color: inherit;'>\n                    <h3 style='margin: 0 0 15px 0; color: inherit;'>",
+                    paste0(" ", .("Categorical/Ordinal Data")),
+                    "</h3>\n\n                    <div style='background-color: rgba(155, 155, 155, 0.06); border: 1px solid #ccc; padding: 15px; margin-bottom: 15px; color: inherit;'>\n                        <h4 style='margin: 0 0 10px 0; color: inherit;'>",
+                    .("Cohen's/Fleiss' Kappa (Standard Method)"),
+                    "</h4>\n                        <p style='margin: 0 0 10px 0;'>",
+                    jmvcore::format(.("{tag1}Use for:{tag2}"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</p>\n                        <ul style='margin: 0 0 10px 0; padding-left: 20px;'>\n                            <li>",
+                    jmvcore::format(.("{tag1}Histologic type{tag2} - Adenocarcinoma, squamous cell carcinoma, etc."), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                            <li>",
+                    jmvcore::format(.("{tag1}Margin status{tag2} - Positive vs negative"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                            <li>",
+                    jmvcore::format(.("{tag1}Present/absent calls{tag2} - Lymphovascular or perineural invasion"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                        </ul>\n                        <p style='margin: 0 0 10px 0; font-size: 13px; color: inherit;'>",
+                    jmvcore::format(.("{tag1}Ordered scales (grade, stage, IHC 0 to 3+) can also be read with unweighted kappa, but it counts a one-step and a three-step disagreement as equally wrong; weighted kappa, below, gives partial credit for near misses.{tag2}"), tag1 = "<em>", tag2 = "</em>"),
+                    "</p>\n                        <p style='margin: 0; font-size: 13px; color: inherit;'>",
+                    jmvcore::format(.("{tag1}Note: May be problematic with high agreement or rare categories{tag2}"), tag1 = "<em>", tag2 = "</em>"),
+                    "</p>\n                    </div>\n\n                    <div style='background-color: rgba(155, 155, 155, 0.06); border: 1px solid #ccc; padding: 15px; margin-bottom: 15px; color: inherit;'>\n                        <h4 style='margin: 0 0 10px 0; color: inherit;'>",
+                    .("Weighted Kappa (Ordinal Data)"),
+                    "</h4>\n                        <p style='margin: 0 0 10px 0;'>",
+                    jmvcore::format(.("{tag1}Use for ordered categories where partial credit matters:{tag2}"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</p>\n                        <ul style='margin: 0 0 10px 0; padding-left: 20px;'>\n                            <li>",
+                    jmvcore::format(.("{tag1}Tumor grading{tag2} - G1, G2, G3 classification"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                            <li>",
+                    jmvcore::format(.("{tag1}TNM staging{tag2} - T1, T2, T3, T4 categories"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                            <li>",
+                    jmvcore::format(.("{tag1}Biomarker scoring{tag2} - Negative (0), 1+, 2+, 3+"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                            <li>",
+                    jmvcore::format(.("{tag1}Dysplasia grading{tag2} - None, low-grade, high-grade"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                            <li>",
+                    jmvcore::format(.("{tag1}Mitotic count categories{tag2} - Low (1-9), intermediate (10-19), high (>=20)"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                            <li>",
+                    jmvcore::format(.("{tag1}Inflammation severity{tag2} - Absent, mild, moderate, severe"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                            <li>",
+                    jmvcore::format(.("{tag1}Fibrosis stage{tag2} - F0, F1, F2, F3, F4"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                        </ul>\n                        <p style='margin: 0; padding: 10px; background-color: rgba(155, 155, 155, 0.06); border-left: 3px solid #333; font-size: 13px; color: inherit;'>",
+                    paste0("\n                            ", jmvcore::format(.("{tag1} Important:{tag2} Use \"Level ordering information\" to verify proper ordering (e.g., F0 {tag3} F1 {tag4} F2 {tag5} F3 {tag6} F4)"), tag1 = "<strong>", tag2 = "</strong>", tag3 = "&#x2192;", tag4 = "&#x2192;", tag5 = "&#x2192;", tag6 = "&#x2192;"), "\n                        "),
+                    "</p>\n                    </div>\n\n                    <div style='background-color: rgba(155, 155, 155, 0.06); border: 1px solid #ccc; padding: 15px; margin-bottom: 15px; color: inherit;'>\n                        <h4 style='margin: 0 0 10px 0; color: inherit;'>",
+                    .("Gwet's AC1/AC2 (Kappa Paradox Solution)"),
+                    "</h4>\n                        <p style='margin: 0 0 10px 0;'>",
+                    jmvcore::format(.("{tag1}Choose when you have:{tag2}"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</p>\n                        <ul style='margin: 0 0 10px 0; padding-left: 20px;'>\n                            <li>",
+                    jmvcore::format(.("{tag1}Rare tumor subtypes{tag2} - Neuroendocrine carcinoma in colorectal specimens (2% prevalence)"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                            <li>",
+                    jmvcore::format(.("{tag1}High agreement rates{tag2} - Benign vs malignant with 95%+ agreement"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                            <li>",
+                    jmvcore::format(.("{tag1}Unbalanced categories{tag2} - Metastasis (5% positive) vs primary (95%)"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                            <li>",
+                    jmvcore::format(.("{tag1}Quality control studies{tag2} - Most cases straightforward, few difficult"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                        </ul>\n                        <p style='margin: 0; padding: 10px; background-color: rgba(155, 155, 155, 0.06); border-left: 3px solid #333; font-size: 13px; color: inherit;'>",
+                    paste0("\n                            ", jmvcore::format(.("{tag1} Tip:{tag2} Decide before the analysis which coefficient you will report. Gwet's AC is less affected by skewed category prevalence than kappa, so it is the usual choice when one category dominates; kappa remains the convention for balanced categories. If the two differ substantially, report both and state which was prespecified - do not select after seeing the results."), tag1 = "<strong>", tag2 = "</strong>"), "\n                        "),
+                    "</p>\n                    </div>\n\n                    <div style='background-color: rgba(155, 155, 155, 0.06); border: 1px solid #ccc; padding: 15px; margin-bottom: 15px; color: inherit;'>\n                        <h4 style='margin: 0 0 10px 0; color: inherit;'>",
+                    .("Krippendorff's Alpha (Missing Data/Flexible)"),
+                    "</h4>\n                        <p style='margin: 0 0 10px 0;'>",
+                    jmvcore::format(.("{tag1}Use when:{tag2}"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</p>\n                        <ul style='margin: 0; padding-left: 20px;'>\n                            <li>",
+                    jmvcore::format(.("{tag1}Incomplete ratings{tag2} - Not all pathologists rated all cases"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                            <li>",
+                    jmvcore::format(.("{tag1}Different measurement levels{tag2} - Comparing nominal, ordinal, interval data"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                            <li>",
+                    jmvcore::format(.("{tag1}Large panels{tag2} - Many raters (>5) with varying participation"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                        </ul>\n                    </div>\n                </div>\n\n                <!-- Continuous Data Methods -->\n                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 20px; margin-bottom: 20px; color: inherit;'>\n                    <h3 style='margin: 0 0 15px 0; color: inherit;'>",
+                    paste0(" ", .("Continuous/Numeric Data")),
+                    "</h3>\n\n                    <div style='background-color: rgba(155, 155, 155, 0.06); border: 1px solid #ccc; padding: 15px; margin-bottom: 15px; color: inherit;'>\n                        <h4 style='margin: 0 0 10px 0; color: inherit;'>",
+                    .("ICC (Intraclass Correlation Coefficient)"),
+                    "</h4>\n                        <p style='margin: 0 0 10px 0;'>",
+                    jmvcore::format(.("{tag1}Use for:{tag2}"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</p>\n                        <ul style='margin: 0 0 10px 0; padding-left: 20px;'>\n                            <li>",
+                    jmvcore::format(.("{tag1}Tumor size{tag2} - Diameter measurements (mm or cm)"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                            <li>",
+                    jmvcore::format(.("{tag1}Biomarker quantification{tag2} - Ki-67 proliferation index (%)"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                            <li>",
+                    jmvcore::format(.("{tag1}Cell counts{tag2} - Mitotic figures per 10 HPF"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                            <li>",
+                    jmvcore::format(.("{tag1}Morphometric analysis{tag2} - Nuclear area ({tag3}m{tag4}), gland perimeter"), tag1 = "<strong>", tag2 = "</strong>", tag3 = "&#x3BC;", tag4 = "&#xB2;"),
+                    "</li>\n                            <li>",
+                    jmvcore::format(.("{tag1}Digital pathology{tag2} - Automated vs manual measurements"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                            <li>",
+                    jmvcore::format(.("{tag1}Continuous scores{tag2} - Visual analog scales (0-100)"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                        </ul>\n                        <p style='margin: 0; padding: 10px; background-color: rgba(155, 155, 155, 0.06); border-left: 3px solid #333; font-size: 13px; color: inherit;'>",
+                    paste0("\n                            ", jmvcore::format(.("{tag1} Model selection:{tag2} Use ICC(2,1) or ICC(3,1) for most pathology studies where all cases are rated by the same pathologists"), tag1 = "<strong>", tag2 = "</strong>"), "\n                        "),
+                    "</p>\n                    </div>\n\n                    <div style='background-color: rgba(155, 155, 155, 0.06); border: 1px solid #ccc; padding: 15px; margin-bottom: 15px; color: inherit;'>\n                        <h4 style='margin: 0 0 10px 0; color: inherit;'>",
+                    .("Bland-Altman Plot (Visual Assessment)"),
+                    "</h4>\n                        <p style='margin: 0 0 10px 0;'>",
+                    jmvcore::format(.("{tag1}Use alongside ICC to:{tag2}"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</p>\n                        <ul style='margin: 0 0 10px 0; padding-left: 20px;'>\n                            <li>",
+                    jmvcore::format(.("{tag1}Detect systematic bias{tag2} - Does one rater consistently measure higher/lower?"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                            <li>",
+                    jmvcore::format(.("{tag1}Identify outliers{tag2} - Cases with unusually large disagreement"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                            <li>",
+                    jmvcore::format(.("{tag1}Inspect difference-mean trends{tag2} - Does disagreement vary with measurement size? Treat the fitted trend as exploratory because unequal method precision can also create it"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                            <li>",
+                    jmvcore::format(.("{tag1}Define acceptable limits{tag2} - What range of disagreement is clinically acceptable?"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                        </ul>\n                        <p style='margin: 0; padding: 10px; background-color: rgba(155, 155, 155, 0.06); border-left: 3px solid #333; font-size: 13px; color: inherit;'>",
+                    paste0("\n                            ", jmvcore::format(.("{tag1} Best practice:{tag2} Always use ICC + Bland-Altman together for continuous data"), tag1 = "<strong>", tag2 = "</strong>"), "\n                        "),
+                    "</p>\n                    </div>\n                </div>\n\n                <!-- Quick Decision Guide -->\n                <div style='background-color: rgba(88, 88, 88, 0.06); border: 2px solid #333; padding: 20px; margin-bottom: 20px; color: inherit;'>\n                    <h3 style='margin: 0 0 15px 0;'>",
+                    paste0(" ", .("Quick Decision Guide")),
+                    "</h3>\n                    <table style='width: 100%; background: rgba(155, 155, 155, 0.06); color: inherit; border-radius: 4px; overflow: hidden;'>\n                        <tr style='background-color: rgba(138, 155, 172, 0.06); color: inherit;'>\n                            <th style='padding: 12px; text-align: left; border-bottom: 2px solid #dee2e6;'>",
+                    .("Your Data Type"),
+                    "</th>\n                            <th style='padding: 12px; text-align: left; border-bottom: 2px solid #dee2e6;'>",
+                    .("Recommended Method"),
+                    "</th>\n                        </tr>\n                        <tr>\n                            <td style='padding: 10px; border-bottom: 1px solid #dee2e6;'>",
+                    .("Nominal categories (no order)"),
+                    "</td>\n                            <td style='padding: 10px; border-bottom: 1px solid #dee2e6;'>",
+                    jmvcore::format(.("{tag1}Kappa{tag2} or {tag3}Gwet's AC1{tag4}"), tag1 = "<strong>", tag2 = "</strong>", tag3 = "<strong>", tag4 = "</strong>"),
+                    "</td>\n                        </tr>\n                        <tr>\n                            <td style='padding: 10px; border-bottom: 1px solid #dee2e6;'>",
+                    .("Ordinal categories (ordered)"),
+                    "</td>\n                            <td style='padding: 10px; border-bottom: 1px solid #dee2e6;'>",
+                    jmvcore::format(.("{tag1}Weighted Kappa{tag2} or {tag3}Gwet's AC2{tag4}"), tag1 = "<strong>", tag2 = "</strong>", tag3 = "<strong>", tag4 = "</strong>"),
+                    "</td>\n                        </tr>\n                        <tr>\n                            <td style='padding: 10px; border-bottom: 1px solid #dee2e6;'>",
+                    .("Continuous measurements"),
+                    "</td>\n                            <td style='padding: 10px; border-bottom: 1px solid #dee2e6;'>",
+                    jmvcore::format(.("{tag1}ICC + Bland-Altman{tag2}"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</td>\n                        </tr>\n                        <tr>\n                            <td style='padding: 10px; border-bottom: 1px solid #dee2e6;'>",
+                    .("Rare categories (< 10%)"),
+                    "</td>\n                            <td style='padding: 10px; border-bottom: 1px solid #dee2e6;'>",
+                    jmvcore::format(.("{tag1}Gwet's AC{tag2} (not Kappa)"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</td>\n                        </tr>\n                        <tr>\n                            <td style='padding: 10px;'>",
+                    .("Missing data/incomplete ratings"),
+                    "</td>\n                            <td style='padding: 10px;'>",
+                    jmvcore::format(.("{tag1}Krippendorff's Alpha{tag2}"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</td>\n                        </tr>\n                    </table>\n                </div>\n\n                <!-- Sample Size Recommendations -->\n                <div style='margin-top: 20px; padding: 15px; background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; color: inherit;'>\n                    <h4 style='margin: 0 0 10px 0; color: inherit;'>",
+                    paste0(" ", .("Sample Size Recommendations")),
+                    "</h4>\n                    <ul style='margin: 0; padding-left: 20px; font-size: 14px;'>\n                        <li>",
+                    jmvcore::format(.("{tag1}Minimum:{tag2} 30 cases for stable kappa/ICC estimates"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                        <li>",
+                    jmvcore::format(.("{tag1}Recommended:{tag2} 50-100 cases for categorical data, 30-50 for continuous"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                        <li>",
+                    jmvcore::format(.("{tag1}Rare categories:{tag2} Include >=20 positive cases if possible"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                        <li>",
+                    jmvcore::format(.("{tag1}Pilot studies:{tag2} 20 cases minimum, but interpret cautiously"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                    </ul>\n                </div>\n            </div>\n            "
+                )
 
                 self$results$clinicalUseCases$setContent(html_content)
             },
             .populateLightKappaExplanation = function() {
                 # Provide educational content about Light's Kappa
 
-                html_content <- "
-            <div style='font-family: Arial, sans-serif; max-width: 800px; line-height: 1.6;'>
-                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>
-                    <h3 style='margin: 0 0 10px 0; color: inherit;'>What is Light's Kappa?</h3>
-                    <p style='margin: 0; color: inherit;'>
-                        Light's kappa is an alternative agreement measure for <strong>3 or more raters</strong>.
-                        It calculates the <strong>average of all pairwise kappas</strong> between raters.
-                    </p>
-                </div>
-
-                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>
-                    <h4 style='margin: 0 0 10px 0; color: inherit;'>When to Use Light's Kappa</h4>
-                    <p style='margin: 0 0 10px 0;'><strong>Choose Light's kappa instead of Fleiss' kappa when:</strong></p>
-                    <ul style='margin: 0; padding-left: 20px;'>
-                        <li><strong>Raters have different marginal distributions</strong> - Some pathologists may be more conservative/liberal than others</li>
-                        <li><strong>Unequal rater characteristics</strong> - Mix of senior and junior pathologists</li>
-                        <li><strong>Assumptions questionable</strong> - When Fleiss' kappa assumptions don't hold</li>
-                        <li><strong>Pairwise comparisons matter</strong> - Want to understand individual rater-to-rater agreement</li>
-                    </ul>
-                </div>
-
-                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>
-                    <h4 style='margin: 0 0 10px 0; color: inherit;'>Light's Kappa vs Fleiss' Kappa</h4>
-                    <table style='width: 100%; border-collapse: collapse;'>
-                        <tr style='background-color: rgba(88, 88, 88, 0.06); color: inherit;'>
-                            <th style='padding: 8px; text-align: left; border-bottom: 2px solid #333;'>Feature</th>
-                            <th style='padding: 8px; text-align: left; border-bottom: 2px solid #333;'>Light's Kappa</th>
-                            <th style='padding: 8px; text-align: left; border-bottom: 2px solid #333;'>Fleiss' Kappa</th>
-                        </tr>
-                        <tr>
-                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'><strong>Method</strong></td>
-                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>Average of pairwise kappas</td>
-                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>Overall agreement across all raters</td>
-                        </tr>
-                        <tr>
-                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'><strong>Assumptions</strong></td>
-                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>Fewer, more flexible</td>
-                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>Assumes similar marginal distributions</td>
-                        </tr>
-                        <tr>
-                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'><strong>Use when</strong></td>
-                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>Raters differ systematically</td>
-                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>Raters have similar marginal distributions</td>
-                        </tr>
-                        <tr>
-                            <td style='padding: 8px;'><strong>Typical value</strong></td>
-                            <td style='padding: 8px;'>Often slightly lower</td>
-                            <td style='padding: 8px;'>Often slightly higher</td>
-                        </tr>
-                    </table>
-                </div>
-
-                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>
-                    <h4 style='margin: 0 0 10px 0; color: inherit;'>Clinical Example</h4>
-                    <p style='margin: 0; font-style: italic;'>
-                        In a study with 3 pathologists grading dysplasia (none, low-grade, high-grade):
-                        Pathologist A is conservative (more often grades as \"none\"), Pathologist B is moderate,
-                        and Pathologist C is more aggressive (more often grades as \"high-grade\").
-                        Light's kappa would be more appropriate than Fleiss' kappa because the raters have
-                        systematically different rating patterns.
-                    </p>
-                </div>
-
-                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; color: inherit;'>
-                    <h4 style='margin: 0 0 10px 0; color: inherit;'>Interpretation</h4>
-                    <p style='margin: 0 0 5px 0;'>Use the same interpretation guidelines as Cohen's kappa:</p>
-                    <table style='width: 100%; border-collapse: collapse; font-size: 14px;'>
-                        <tr>
-                            <td style='padding: 5px; font-weight: bold; border-bottom: 1px solid #ddd;'>< 0.20</td>
-                            <td style='padding: 5px; border-bottom: 1px solid #ddd;'>Slight agreement</td>
-                        </tr>
-                        <tr>
-                            <td style='padding: 5px; font-weight: bold; border-bottom: 1px solid #ddd;'>0.20 to &lt; 0.40</td>
-                            <td style='padding: 5px; border-bottom: 1px solid #ddd;'>Fair agreement</td>
-                        </tr>
-                        <tr>
-                            <td style='padding: 5px; font-weight: bold; border-bottom: 1px solid #ddd;'>0.40 to &lt; 0.60</td>
-                            <td style='padding: 5px; border-bottom: 1px solid #ddd;'>Moderate agreement</td>
-                        </tr>
-                        <tr>
-                            <td style='padding: 5px; font-weight: bold; border-bottom: 1px solid #ddd;'>0.60 to &lt; 0.80</td>
-                            <td style='padding: 5px; border-bottom: 1px solid #ddd;'>Substantial agreement</td>
-                        </tr>
-                        <tr>
-                            <td style='padding: 5px; font-weight: bold;'>0.80 to 1.00</td>
-                            <td style='padding: 5px;'>Almost perfect agreement</td>
-                        </tr>
-                    </table>
-                </div>
-
-                <div style='margin-top: 15px; padding: 10px; background-color: rgba(88, 88, 88, 0.06); border-radius: 4px; color: inherit;'>
-                    <p style='margin: 0; font-size: 12px; color: inherit;'>
-                        <strong>Reference:</strong> Light, R. J. (1971). Measures of response agreement for qualitative data: Some generalizations and alternatives.
-                        <em>Psychological Bulletin</em>, 76(5), 365-377.
-                    </p>
-                </div>
-            </div>
-            "
+                html_content <- paste0(
+                    "\n            <div style='font-family: Arial, sans-serif; max-width: 800px; line-height: 1.6;'>\n                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>\n                    <h3 style='margin: 0 0 10px 0; color: inherit;'>",
+                    .("What is Light's Kappa?"),
+                    "</h3>\n                    <p style='margin: 0; color: inherit;'>",
+                    paste0("\n                        ", jmvcore::format(.("Light's kappa is an alternative agreement measure for {tag1}3 or more raters{tag2}.\n                        It calculates the {tag3}average of all pairwise kappas{tag4} between raters."), tag1 = "<strong>", tag2 = "</strong>", tag3 = "<strong>", tag4 = "</strong>"), "\n                    "),
+                    "</p>\n                </div>\n\n                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>\n                    <h4 style='margin: 0 0 10px 0; color: inherit;'>",
+                    .("When to Use Light's Kappa"),
+                    "</h4>\n                    <p style='margin: 0 0 10px 0;'>",
+                    jmvcore::format(.("{tag1}Choose Light's kappa instead of Fleiss' kappa when:{tag2}"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</p>\n                    <ul style='margin: 0; padding-left: 20px;'>\n                        <li>",
+                    jmvcore::format(.("{tag1}Raters have different marginal distributions{tag2} - Some pathologists may be more conservative/liberal than others"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                        <li>",
+                    jmvcore::format(.("{tag1}Unequal rater characteristics{tag2} - Mix of senior and junior pathologists"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                        <li>",
+                    jmvcore::format(.("{tag1}Assumptions questionable{tag2} - When Fleiss' kappa assumptions don't hold"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                        <li>",
+                    jmvcore::format(.("{tag1}Pairwise comparisons matter{tag2} - Want to understand individual rater-to-rater agreement"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                    </ul>\n                </div>\n\n                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>\n                    <h4 style='margin: 0 0 10px 0; color: inherit;'>",
+                    .("Light's Kappa vs Fleiss' Kappa"),
+                    "</h4>\n                    <table style='width: 100%; border-collapse: collapse;'>\n                        <tr style='background-color: rgba(88, 88, 88, 0.06); color: inherit;'>\n                            <th style='padding: 8px; text-align: left; border-bottom: 2px solid #333;'>",
+                    .("Feature"),
+                    "</th>\n                            <th style='padding: 8px; text-align: left; border-bottom: 2px solid #333;'>",
+                    .("Light's Kappa"),
+                    "</th>\n                            <th style='padding: 8px; text-align: left; border-bottom: 2px solid #333;'>",
+                    .("Fleiss' Kappa"),
+                    "</th>\n                        </tr>\n                        <tr>\n                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>",
+                    jmvcore::format(.("{tag1}Method{tag2}"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</td>\n                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>",
+                    .("Average of pairwise kappas"),
+                    "</td>\n                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>",
+                    .("Overall agreement across all raters"),
+                    "</td>\n                        </tr>\n                        <tr>\n                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>",
+                    jmvcore::format(.("{tag1}Assumptions{tag2}"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</td>\n                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>",
+                    .("Fewer, more flexible"),
+                    "</td>\n                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>",
+                    .("Assumes similar marginal distributions"),
+                    "</td>\n                        </tr>\n                        <tr>\n                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>",
+                    jmvcore::format(.("{tag1}Use when{tag2}"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</td>\n                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>",
+                    .("Raters differ systematically"),
+                    "</td>\n                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>",
+                    .("Raters have similar marginal distributions"),
+                    "</td>\n                        </tr>\n                        <tr>\n                            <td style='padding: 8px;'>",
+                    jmvcore::format(.("{tag1}Typical value{tag2}"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</td>\n                            <td style='padding: 8px;'>",
+                    .("Often slightly lower"),
+                    "</td>\n                            <td style='padding: 8px;'>",
+                    .("Often slightly higher"),
+                    "</td>\n                        </tr>\n                    </table>\n                </div>\n\n                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>\n                    <h4 style='margin: 0 0 10px 0; color: inherit;'>",
+                    .("Clinical Example"),
+                    "</h4>\n                    <p style='margin: 0; font-style: italic;'>",
+                    paste0("\n                        ", .("In a study with 3 pathologists grading dysplasia (none, low-grade, high-grade):\n                        Pathologist A is conservative (more often grades as \"none\"), Pathologist B is moderate,\n                        and Pathologist C is more aggressive (more often grades as \"high-grade\").\n                        Light's kappa would be more appropriate than Fleiss' kappa because the raters have\n                        systematically different rating patterns."), "\n                    "),
+                    "</p>\n                </div>\n\n                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; color: inherit;'>\n                    <h4 style='margin: 0 0 10px 0; color: inherit;'>",
+                    .("Interpretation"),
+                    "</h4>\n                    <p style='margin: 0 0 5px 0;'>",
+                    .("Use the same interpretation guidelines as Cohen's kappa:"),
+                    "</p>\n                    <table style='width: 100%; border-collapse: collapse; font-size: 14px;'>\n                        <tr>\n                            <td style='padding: 5px; font-weight: bold; border-bottom: 1px solid #ddd;'>< 0.20</td>\n                            <td style='padding: 5px; border-bottom: 1px solid #ddd;'>",
+                    .("Slight agreement"),
+                    "</td>\n                        </tr>\n                        <tr>\n                            <td style='padding: 5px; font-weight: bold; border-bottom: 1px solid #ddd;'>",
+                    jmvcore::format(.("0.20 to {tag1} 0.40"), tag1 = "&lt;"),
+                    "</td>\n                            <td style='padding: 5px; border-bottom: 1px solid #ddd;'>",
+                    .("Fair agreement"),
+                    "</td>\n                        </tr>\n                        <tr>\n                            <td style='padding: 5px; font-weight: bold; border-bottom: 1px solid #ddd;'>",
+                    jmvcore::format(.("0.40 to {tag1} 0.60"), tag1 = "&lt;"),
+                    "</td>\n                            <td style='padding: 5px; border-bottom: 1px solid #ddd;'>",
+                    .("Moderate agreement"),
+                    "</td>\n                        </tr>\n                        <tr>\n                            <td style='padding: 5px; font-weight: bold; border-bottom: 1px solid #ddd;'>",
+                    jmvcore::format(.("0.60 to {tag1} 0.80"), tag1 = "&lt;"),
+                    "</td>\n                            <td style='padding: 5px; border-bottom: 1px solid #ddd;'>",
+                    .("Substantial agreement"),
+                    "</td>\n                        </tr>\n                        <tr>\n                            <td style='padding: 5px; font-weight: bold;'>",
+                    .("0.80 to 1.00"),
+                    "</td>\n                            <td style='padding: 5px;'>",
+                    .("Almost perfect agreement"),
+                    "</td>\n                        </tr>\n                    </table>\n                </div>\n\n                <div style='margin-top: 15px; padding: 10px; background-color: rgba(88, 88, 88, 0.06); border-radius: 4px; color: inherit;'>\n                    <p style='margin: 0; font-size: 12px; color: inherit;'>",
+                    paste0("\n                        ", jmvcore::format(.("{tag1}Reference:{tag2} Light, R. J. (1971). Measures of response agreement for qualitative data: Some generalizations and alternatives.\n                        {tag3}Psychological Bulletin{tag4}, 76(5), 365-377."), tag1 = "<strong>", tag2 = "</strong>", tag3 = "<em>", tag4 = "</em>"), "\n                    "),
+                    "</p>\n                </div>\n            </div>\n            "
+                )
 
                 self$results$lightKappaExplanation$setContent(html_content)
             },
@@ -1558,170 +1522,173 @@ agreementClass <- if (requireNamespace("jmvcore")) {
             .populateFinnExplanation = function() {
                 # Provide educational content about Finn Coefficient
 
-                html_content <- "
-            <div style='font-family: Arial, sans-serif; max-width: 800px; line-height: 1.6;'>
-                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>
-                    <h3 style='margin: 0 0 10px 0; color: inherit;'>What is the Finn Coefficient?</h3>
-                    <p style='margin: 0; color: inherit;'>
-                        The Finn coefficient is a <strong>variance-based agreement measure</strong> for categorical data.
-                        Unlike kappa-based measures that focus on exact agreement, Finn's approach uses analysis of variance
-                        to quantify interrater reliability. It is <strong>especially useful when variance between raters
-                        is low</strong> (i.e., when agreement is already high).
-                    </p>
-                </div>
-
-                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>
-                    <h4 style='margin: 0 0 10px 0; color: inherit;'>When to Use Finn Coefficient</h4>
-                    <p style='margin: 0 0 10px 0;'><strong>Particularly useful for:</strong></p>
-                    <ul style='margin: 0; padding-left: 20px;'>
-                        <li><strong>High agreement scenarios</strong> - When raters already agree well, kappa may be paradoxically low</li>
-                        <li><strong>Ordered categorical data</strong> - Tumor grades (G1/G2/G3), severity scales, ordinal ratings</li>
-                        <li><strong>Alternative to kappa</strong> - When kappa assumptions are violated or kappa values are unstable</li>
-                        <li><strong>Low variance situations</strong> - When between-rater variance is minimal</li>
-                        <li><strong>Educational/research settings</strong> - Comparing trained raters with similar rating patterns</li>
-                    </ul>
-                </div>
-
-                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>
-                    <h4 style='margin: 0 0 10px 0; color: inherit;'>Finn Coefficient vs Kappa</h4>
-                    <table style='width: 100%; border-collapse: collapse;'>
-                        <tr style='background-color: rgba(88, 88, 88, 0.06); color: inherit;'>
-                            <th style='padding: 8px; text-align: left; border-bottom: 2px solid #333;'>Feature</th>
-                            <th style='padding: 8px; text-align: left; border-bottom: 2px solid #333;'>Finn Coefficient</th>
-                            <th style='padding: 8px; text-align: left; border-bottom: 2px solid #333;'>Cohen's/Fleiss' Kappa</th>
-                        </tr>
-                        <tr>
-                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'><strong>Approach</strong></td>
-                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>Variance-based (ANOVA)</td>
-                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>Chance-corrected agreement</td>
-                        </tr>
-                        <tr>
-                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'><strong>Best when</strong></td>
-                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>Low between-rater variance</td>
-                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>Moderate agreement levels</td>
-                        </tr>
-                        <tr>
-                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'><strong>Paradox issue</strong></td>
-                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>Less susceptible</td>
-                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>Can be paradoxically low</td>
-                        </tr>
-                        <tr>
-                            <td style='padding: 8px;'><strong>Models</strong></td>
-                            <td style='padding: 8px;'>One-way or two-way random effects</td>
-                            <td style='padding: 8px;'>Depends on kappa variant</td>
-                        </tr>
-                    </table>
-                </div>
-
-                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>
-                    <h4 style='margin: 0 0 10px 0; color: inherit;'>Clinical Pathology Use Cases</h4>
-
-                    <p style='margin: 0 0 10px 0; font-weight: bold;'>1. Dysplasia Grading in Barrett's Esophagus (High Agreement Scenario):</p>
-                    <ul style='margin: 0 0 15px 0; padding-left: 20px; line-height: 1.6;'>
-                        <li><strong>Scenario:</strong> Four specialized GI pathologists grade dysplasia (none, low-grade, high-grade)</li>
-                        <li><strong>Challenge:</strong> Pathologists agree >90% of the time - skewed distribution</li>
-                        <li><strong>Kappa problem:</strong> Cohen's kappa paradoxically low despite excellent clinical agreement</li>
-                        <li><strong>Why Finn:</strong> Variance-based approach provides stable reliability estimate in high-agreement scenarios</li>
-                        <li><strong>What Finn's coefficient reports:</strong> the share of the score variance that is not rater disagreement, on a case set where nearly every biopsy is graded &quot;none&quot;. That describes how these four readers behaved on these cases; it is not evidence that their grades are correct, since four readers can agree on the same wrong grade</li>
-                    </ul>
-
-                    <p style='margin: 0 0 10px 0; font-weight: bold;'>2. Tumor Grade Harmonization (Post-Training Assessment):</p>
-                    <ul style='margin: 0 0 15px 0; padding-left: 20px; line-height: 1.6;'>
-                        <li><strong>Scenario:</strong> Six pathologists grade neuroendocrine tumors (G1/G2/G3) after standardization workshop</li>
-                        <li><strong>Context:</strong> Training aimed to reduce inter-observer variation</li>
-                        <li><strong>Expected outcome:</strong> High agreement with low between-rater variance</li>
-                        <li><strong>Why Finn:</strong> ANOVA-based approach better captures improved consistency than kappa</li>
-                        <li><strong>Application:</strong> Demonstrates effectiveness of training intervention</li>
-                    </ul>
-
-                    <p style='margin: 0 0 10px 0; font-weight: bold;'>3. Inflammatory Activity Scoring (IBD Biopsies):</p>
-                    <ul style='margin: 0 0 15px 0; padding-left: 20px; line-height: 1.6;'>
-                        <li><strong>Scenario:</strong> Three GI pathologists score inflammatory activity (quiescent, mild, moderate, severe)</li>
-                        <li><strong>Data characteristics:</strong> Most cases are quiescent or mild (skewed distribution)</li>
-                        <li><strong>Kappa limitation:</strong> Prevalence effect causes kappa to underestimate actual agreement</li>
-                        <li><strong>Why Finn:</strong> Less susceptible to prevalence-related paradoxes</li>
-                        <li><strong>Clinical Use:</strong> Reliable scoring for clinical trials and treatment response monitoring</li>
-                    </ul>
-
-                    <p style='margin: 0 0 10px 0; font-weight: bold;'>4. Mitotic Figure Detection Training (AI vs. Pathologists):</p>
-                    <ul style='margin: 0 0 15px 0; padding-left: 20px; line-height: 1.6;'>
-                        <li><strong>Scenario:</strong> Comparing AI algorithm with expert pathologists on mitotic count categories (low/intermediate/high)</li>
-                        <li><strong>Context:</strong> AI trained on expert consensus, expecting high agreement</li>
-                        <li><strong>Challenge:</strong> Most tumors are low mitotic rate (skewed toward one category)</li>
-                        <li><strong>Why Finn:</strong> Provides meaningful agreement metric even with category imbalance</li>
-                        <li><strong>Validation goal:</strong> Demonstrate AI reliability for breast cancer grading automation</li>
-                    </ul>
-
-                    <p style='margin: 0 0 10px 0; font-weight: bold;'>5. Fibrosis Staging (Liver Biopsies - Metavir Score):</p>
-                    <ul style='margin: 0; padding-left: 20px; line-height: 1.6;'>
-                        <li><strong>Scenario:</strong> Five hepatopathologists stage fibrosis (F0-F4) in chronic hepatitis C</li>
-                        <li><strong>Rating pattern:</strong> Most cases F0-F2 (early stages) with excellent inter-rater consistency</li>
-                        <li><strong>Statistical issue:</strong> Low variance between raters makes kappa unstable</li>
-                        <li><strong>Why Finn:</strong> Variance-based model designed for low between-rater variance situations</li>
-                        <li><strong>Clinical importance:</strong> Reliable staging determines antiviral treatment eligibility</li>
-                    </ul>
-                </div>
-
-                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>
-                    <h4 style='margin: 0 0 10px 0; color: inherit;'>Model Types</h4>
-                    <p style='margin: 0 0 10px 0;'><strong>One-way model (subjects random):</strong></p>
-                    <ul style='margin: 0 0 10px 0; padding-left: 20px;'>
-                        <li>Each subject may be rated by different raters</li>
-                        <li>Raters are considered fixed effects</li>
-                        <li>Use when rater assignment is not random</li>
-                    </ul>
-                    <p style='margin: 0 0 10px 0;'><strong>Two-way model (subjects and raters random):</strong></p>
-                    <ul style='margin: 0; padding-left: 20px;'>
-                        <li>Subjects and raters both randomly sampled from populations</li>
-                        <li>All subjects rated by all raters</li>
-                        <li>Generalizes to broader population of raters</li>
-                    </ul>
-                </div>
-
-                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; color: inherit;'>
-                    <h4 style='margin: 0 0 10px 0; color: inherit;'>Interpretation</h4>
-                    <p style='margin: 0 0 5px 0;'>The Finn coefficient is at most 1, and it can be negative: it is 1 minus the within-case variance divided by the variance of a uniform random rating on the s-point scale, so a value below 0 means the raters disagree more than raters picking categories at random would.</p>
-                    <table style='width: 100%; border-collapse: collapse; font-size: 14px;'>
-                        <tr>
-                            <td style='padding: 5px; font-weight: bold; border-bottom: 1px solid #ddd;'>&lt; 0</td>
-                            <td style='padding: 5px; border-bottom: 1px solid #ddd;'>Worse than random rating</td>
-                        </tr>
-                        <tr>
-                            <td style='padding: 5px; font-weight: bold; border-bottom: 1px solid #ddd;'>0 to &lt; 0.40</td>
-                            <td style='padding: 5px; border-bottom: 1px solid #ddd;'>Poor agreement</td>
-                        </tr>
-                        <tr>
-                            <td style='padding: 5px; font-weight: bold; border-bottom: 1px solid #ddd;'>0.40 to &lt; 0.60</td>
-                            <td style='padding: 5px; border-bottom: 1px solid #ddd;'>Fair agreement</td>
-                        </tr>
-                        <tr>
-                            <td style='padding: 5px; font-weight: bold; border-bottom: 1px solid #ddd;'>0.60 to &lt; 0.75</td>
-                            <td style='padding: 5px; border-bottom: 1px solid #ddd;'>Good agreement</td>
-                        </tr>
-                        <tr>
-                            <td style='padding: 5px; font-weight: bold; border-bottom: 1px solid #ddd;'>0.75 to &lt; 0.90</td>
-                            <td style='padding: 5px; border-bottom: 1px solid #ddd;'>Excellent agreement</td>
-                        </tr>
-                        <tr>
-                            <td style='padding: 5px; font-weight: bold;'>0.90 to 1.00</td>
-                            <td style='padding: 5px;'>Outstanding agreement</td>
-                        </tr>
-                    </table>
-                    <p style='margin: 10px 0 0 0; font-size: 13px;'>Finn (1970) proposed no interpretive bands for this coefficient himself. The 0.40, 0.60 and 0.75 cut-points follow the Cicchetti (1994) reliability convention, which was written for the ICC and for kappa rather than for Finn's coefficient; the split at 0.90 into Excellent and Outstanding is this module's own. They are not the Landis &amp; Koch (1977) kappa bands or the Koo &amp; Li (2016) ICC bands used elsewhere in this analysis, so the same number is described differently there.</p>
-                    <p style='margin: 10px 0 0 0; font-size: 13px;'>
-                        <strong>Statistical test:</strong> F-test evaluates if agreement is significantly better than chance.
-                        Significant p-value (< 0.05) indicates reliable agreement beyond random variation.
-                    </p>
-                </div>
-
-                <div style='margin-top: 15px; padding: 10px; background-color: rgba(88, 88, 88, 0.06); border-radius: 4px; color: inherit;'>
-                    <p style='margin: 0; font-size: 12px; color: inherit;'>
-                        <strong>Reference:</strong> Finn, R. H. (1970). A note on estimating the reliability of categorical data.
-                        <em>Educational and Psychological Measurement</em>, 30, 71-76.
-                    </p>
-                </div>
-            </div>
-            "
+                html_content <- paste0(
+                    "\n            <div style='font-family: Arial, sans-serif; max-width: 800px; line-height: 1.6;'>\n                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>\n                    <h3 style='margin: 0 0 10px 0; color: inherit;'>",
+                    .("What is the Finn Coefficient?"),
+                    "</h3>\n                    <p style='margin: 0; color: inherit;'>",
+                    paste0("\n                        ", jmvcore::format(.("The Finn coefficient is a {tag1}variance-based agreement measure{tag2} for categorical data.\n                        Unlike kappa-based measures that focus on exact agreement, Finn's approach uses analysis of variance\n                        to quantify interrater reliability. It is {tag3}especially useful when variance between raters\n                        is low{tag4} (i.e., when agreement is already high)."), tag1 = "<strong>", tag2 = "</strong>", tag3 = "<strong>", tag4 = "</strong>"), "\n                    "),
+                    "</p>\n                </div>\n\n                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>\n                    <h4 style='margin: 0 0 10px 0; color: inherit;'>",
+                    .("When to Use Finn Coefficient"),
+                    "</h4>\n                    <p style='margin: 0 0 10px 0;'>",
+                    jmvcore::format(.("{tag1}Particularly useful for:{tag2}"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</p>\n                    <ul style='margin: 0; padding-left: 20px;'>\n                        <li>",
+                    jmvcore::format(.("{tag1}High agreement scenarios{tag2} - When raters already agree well, kappa may be paradoxically low"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                        <li>",
+                    jmvcore::format(.("{tag1}Ordered categorical data{tag2} - Tumor grades (G1/G2/G3), severity scales, ordinal ratings"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                        <li>",
+                    jmvcore::format(.("{tag1}Alternative to kappa{tag2} - When kappa assumptions are violated or kappa values are unstable"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                        <li>",
+                    jmvcore::format(.("{tag1}Low variance situations{tag2} - When between-rater variance is minimal"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                        <li>",
+                    jmvcore::format(.("{tag1}Educational/research settings{tag2} - Comparing trained raters with similar rating patterns"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                    </ul>\n                </div>\n\n                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>\n                    <h4 style='margin: 0 0 10px 0; color: inherit;'>",
+                    .("Finn Coefficient vs Kappa"),
+                    "</h4>\n                    <table style='width: 100%; border-collapse: collapse;'>\n                        <tr style='background-color: rgba(88, 88, 88, 0.06); color: inherit;'>\n                            <th style='padding: 8px; text-align: left; border-bottom: 2px solid #333;'>",
+                    .("Feature"),
+                    "</th>\n                            <th style='padding: 8px; text-align: left; border-bottom: 2px solid #333;'>",
+                    .("Finn Coefficient"),
+                    "</th>\n                            <th style='padding: 8px; text-align: left; border-bottom: 2px solid #333;'>",
+                    .("Cohen's/Fleiss' Kappa"),
+                    "</th>\n                        </tr>\n                        <tr>\n                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>",
+                    jmvcore::format(.("{tag1}Approach{tag2}"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</td>\n                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>",
+                    .("Variance-based (ANOVA)"),
+                    "</td>\n                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>",
+                    .("Chance-corrected agreement"),
+                    "</td>\n                        </tr>\n                        <tr>\n                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>",
+                    jmvcore::format(.("{tag1}Best when{tag2}"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</td>\n                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>",
+                    .("Low between-rater variance"),
+                    "</td>\n                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>",
+                    .("Moderate agreement levels"),
+                    "</td>\n                        </tr>\n                        <tr>\n                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>",
+                    jmvcore::format(.("{tag1}Paradox issue{tag2}"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</td>\n                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>",
+                    .("Less susceptible"),
+                    "</td>\n                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>",
+                    .("Can be paradoxically low"),
+                    "</td>\n                        </tr>\n                        <tr>\n                            <td style='padding: 8px;'>",
+                    jmvcore::format(.("{tag1}Models{tag2}"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</td>\n                            <td style='padding: 8px;'>",
+                    .("One-way or two-way random effects"),
+                    "</td>\n                            <td style='padding: 8px;'>",
+                    .("Depends on kappa variant"),
+                    "</td>\n                        </tr>\n                    </table>\n                </div>\n\n                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>\n                    <h4 style='margin: 0 0 10px 0; color: inherit;'>",
+                    .("Clinical Pathology Use Cases"),
+                    "</h4>\n\n                    <p style='margin: 0 0 10px 0; font-weight: bold;'>",
+                    .("1. Dysplasia Grading in Barrett's Esophagus (High Agreement Scenario):"),
+                    "</p>\n                    <ul style='margin: 0 0 15px 0; padding-left: 20px; line-height: 1.6;'>\n                        <li>",
+                    jmvcore::format(.("{tag1}Scenario:{tag2} Four specialized GI pathologists grade dysplasia (none, low-grade, high-grade)"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                        <li>",
+                    jmvcore::format(.("{tag1}Challenge:{tag2} Pathologists agree >90% of the time - skewed distribution"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                        <li>",
+                    jmvcore::format(.("{tag1}Kappa problem:{tag2} Cohen's kappa paradoxically low despite excellent clinical agreement"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                        <li>",
+                    jmvcore::format(.("{tag1}Why Finn:{tag2} Variance-based approach provides stable reliability estimate in high-agreement scenarios"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                        <li>",
+                    jmvcore::format(.("{tag1}What Finn's coefficient reports:{tag2} the share of the score variance that is not rater disagreement, on a case set where nearly every biopsy is graded {tag3}none{tag4}. That describes how these four readers behaved on these cases; it is not evidence that their grades are correct, since four readers can agree on the same wrong grade"), tag1 = "<strong>", tag2 = "</strong>", tag3 = "&quot;", tag4 = "&quot;"),
+                    "</li>\n                    </ul>\n\n                    <p style='margin: 0 0 10px 0; font-weight: bold;'>",
+                    .("2. Tumor Grade Harmonization (Post-Training Assessment):"),
+                    "</p>\n                    <ul style='margin: 0 0 15px 0; padding-left: 20px; line-height: 1.6;'>\n                        <li>",
+                    jmvcore::format(.("{tag1}Scenario:{tag2} Six pathologists grade neuroendocrine tumors (G1/G2/G3) after standardization workshop"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                        <li>",
+                    jmvcore::format(.("{tag1}Context:{tag2} Training aimed to reduce inter-observer variation"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                        <li>",
+                    jmvcore::format(.("{tag1}Expected outcome:{tag2} High agreement with low between-rater variance"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                        <li>",
+                    jmvcore::format(.("{tag1}Why Finn:{tag2} ANOVA-based approach better captures improved consistency than kappa"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                        <li>",
+                    jmvcore::format(.("{tag1}Application:{tag2} Demonstrates effectiveness of training intervention"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                    </ul>\n\n                    <p style='margin: 0 0 10px 0; font-weight: bold;'>",
+                    .("3. Inflammatory Activity Scoring (IBD Biopsies):"),
+                    "</p>\n                    <ul style='margin: 0 0 15px 0; padding-left: 20px; line-height: 1.6;'>\n                        <li>",
+                    jmvcore::format(.("{tag1}Scenario:{tag2} Three GI pathologists score inflammatory activity (quiescent, mild, moderate, severe)"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                        <li>",
+                    jmvcore::format(.("{tag1}Data characteristics:{tag2} Most cases are quiescent or mild (skewed distribution)"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                        <li>",
+                    jmvcore::format(.("{tag1}Kappa limitation:{tag2} Prevalence effect causes kappa to underestimate actual agreement"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                        <li>",
+                    jmvcore::format(.("{tag1}Why Finn:{tag2} Less susceptible to prevalence-related paradoxes"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                        <li>",
+                    jmvcore::format(.("{tag1}Clinical Use:{tag2} Reliable scoring for clinical trials and treatment response monitoring"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                    </ul>\n\n                    <p style='margin: 0 0 10px 0; font-weight: bold;'>",
+                    .("4. Mitotic Figure Detection Training (AI vs. Pathologists):"),
+                    "</p>\n                    <ul style='margin: 0 0 15px 0; padding-left: 20px; line-height: 1.6;'>\n                        <li>",
+                    jmvcore::format(.("{tag1}Scenario:{tag2} Comparing AI algorithm with expert pathologists on mitotic count categories (low/intermediate/high)"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                        <li>",
+                    jmvcore::format(.("{tag1}Context:{tag2} AI trained on expert consensus, expecting high agreement"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                        <li>",
+                    jmvcore::format(.("{tag1}Challenge:{tag2} Most tumors are low mitotic rate (skewed toward one category)"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                        <li>",
+                    jmvcore::format(.("{tag1}Why Finn:{tag2} Provides meaningful agreement metric even with category imbalance"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                        <li>",
+                    jmvcore::format(.("{tag1}Validation goal:{tag2} Demonstrate AI reliability for breast cancer grading automation"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                    </ul>\n\n                    <p style='margin: 0 0 10px 0; font-weight: bold;'>",
+                    .("5. Fibrosis Staging (Liver Biopsies - Metavir Score):"),
+                    "</p>\n                    <ul style='margin: 0; padding-left: 20px; line-height: 1.6;'>\n                        <li>",
+                    jmvcore::format(.("{tag1}Scenario:{tag2} Five hepatopathologists stage fibrosis (F0-F4) in chronic hepatitis C"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                        <li>",
+                    jmvcore::format(.("{tag1}Rating pattern:{tag2} Most cases F0-F2 (early stages) with excellent inter-rater consistency"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                        <li>",
+                    jmvcore::format(.("{tag1}Statistical issue:{tag2} Low variance between raters makes kappa unstable"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                        <li>",
+                    jmvcore::format(.("{tag1}Why Finn:{tag2} Variance-based model designed for low between-rater variance situations"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                        <li>",
+                    jmvcore::format(.("{tag1}Clinical importance:{tag2} Reliable staging determines antiviral treatment eligibility"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                    </ul>\n                </div>\n\n                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>\n                    <h4 style='margin: 0 0 10px 0; color: inherit;'>",
+                    .("Model Types"),
+                    "</h4>\n                    <p style='margin: 0 0 10px 0;'>",
+                    jmvcore::format(.("{tag1}One-way model (subjects random):{tag2}"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</p>\n                    <ul style='margin: 0 0 10px 0; padding-left: 20px;'>\n                        <li>",
+                    .("Each subject may be rated by different raters"),
+                    "</li>\n                        <li>",
+                    .("Raters are considered fixed effects"),
+                    "</li>\n                        <li>",
+                    .("Use when rater assignment is not random"),
+                    "</li>\n                    </ul>\n                    <p style='margin: 0 0 10px 0;'>",
+                    jmvcore::format(.("{tag1}Two-way model (subjects and raters random):{tag2}"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</p>\n                    <ul style='margin: 0; padding-left: 20px;'>\n                        <li>",
+                    .("Subjects and raters both randomly sampled from populations"),
+                    "</li>\n                        <li>",
+                    .("All subjects rated by all raters"),
+                    "</li>\n                        <li>",
+                    .("Generalizes to broader population of raters"),
+                    "</li>\n                    </ul>\n                </div>\n\n                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; color: inherit;'>\n                    <h4 style='margin: 0 0 10px 0; color: inherit;'>",
+                    .("Interpretation"),
+                    "</h4>\n                    <p style='margin: 0 0 5px 0;'>",
+                    .("The Finn coefficient is at most 1, and it can be negative: it is 1 minus the within-case variance divided by the variance of a uniform random rating on the s-point scale, so a value below 0 means the raters disagree more than raters picking categories at random would."),
+                    "</p>\n                    <table style='width: 100%; border-collapse: collapse; font-size: 14px;'>\n                        <tr>\n                            <td style='padding: 5px; font-weight: bold; border-bottom: 1px solid #ddd;'>",
+                    jmvcore::format(.("{tag1} 0"), tag1 = "&lt;"),
+                    "</td>\n                            <td style='padding: 5px; border-bottom: 1px solid #ddd;'>",
+                    .("Worse than random rating"),
+                    "</td>\n                        </tr>\n                        <tr>\n                            <td style='padding: 5px; font-weight: bold; border-bottom: 1px solid #ddd;'>",
+                    jmvcore::format(.("0 to {tag1} 0.40"), tag1 = "&lt;"),
+                    "</td>\n                            <td style='padding: 5px; border-bottom: 1px solid #ddd;'>",
+                    .("Poor agreement"),
+                    "</td>\n                        </tr>\n                        <tr>\n                            <td style='padding: 5px; font-weight: bold; border-bottom: 1px solid #ddd;'>",
+                    jmvcore::format(.("0.40 to {tag1} 0.60"), tag1 = "&lt;"),
+                    "</td>\n                            <td style='padding: 5px; border-bottom: 1px solid #ddd;'>",
+                    .("Fair agreement"),
+                    "</td>\n                        </tr>\n                        <tr>\n                            <td style='padding: 5px; font-weight: bold; border-bottom: 1px solid #ddd;'>",
+                    jmvcore::format(.("0.60 to {tag1} 0.75"), tag1 = "&lt;"),
+                    "</td>\n                            <td style='padding: 5px; border-bottom: 1px solid #ddd;'>",
+                    .("Good agreement"),
+                    "</td>\n                        </tr>\n                        <tr>\n                            <td style='padding: 5px; font-weight: bold; border-bottom: 1px solid #ddd;'>",
+                    jmvcore::format(.("0.75 to {tag1} 0.90"), tag1 = "&lt;"),
+                    "</td>\n                            <td style='padding: 5px; border-bottom: 1px solid #ddd;'>",
+                    .("Excellent agreement"),
+                    "</td>\n                        </tr>\n                        <tr>\n                            <td style='padding: 5px; font-weight: bold;'>",
+                    .("0.90 to 1.00"),
+                    "</td>\n                            <td style='padding: 5px;'>",
+                    .("Outstanding agreement"),
+                    "</td>\n                        </tr>\n                    </table>\n                    <p style='margin: 10px 0 0 0; font-size: 13px;'>",
+                    jmvcore::format(.("Finn (1970) proposed no interpretive bands for this coefficient himself. The 0.40, 0.60 and 0.75 cut-points follow the Cicchetti (1994) reliability convention, which was written for the ICC and for kappa rather than for Finn's coefficient; the split at 0.90 into Excellent and Outstanding is this module's own. They are not the Landis {tag1} Koch (1977) kappa bands or the Koo {tag2} Li (2016) ICC bands used elsewhere in this analysis, so the same number is described differently there."), tag1 = "&amp;", tag2 = "&amp;"),
+                    "</p>\n                    <p style='margin: 10px 0 0 0; font-size: 13px;'>",
+                    paste0("\n                        ", jmvcore::format(.("{tag1}Statistical test:{tag2} F-test evaluates if agreement is significantly better than chance.\n                        Significant p-value (< 0.05) indicates reliable agreement beyond random variation."), tag1 = "<strong>", tag2 = "</strong>"), "\n                    "),
+                    "</p>\n                </div>\n\n                <div style='margin-top: 15px; padding: 10px; background-color: rgba(88, 88, 88, 0.06); border-radius: 4px; color: inherit;'>\n                    <p style='margin: 0; font-size: 12px; color: inherit;'>",
+                    paste0("\n                        ", jmvcore::format(.("{tag1}Reference:{tag2} Finn, R. H. (1970). A note on estimating the reliability of categorical data.\n                        {tag3}Educational and Psychological Measurement{tag4}, 30, 71-76."), tag1 = "<strong>", tag2 = "</strong>", tag3 = "<em>", tag4 = "</em>"), "\n                    "),
+                    "</p>\n                </div>\n            </div>\n            "
+                )
 
                 self$results$finnExplanation$setContent(html_content)
             },
@@ -1942,148 +1909,137 @@ agreementClass <- if (requireNamespace("jmvcore")) {
             .populateKendallWExplanation = function() {
                 # Provide educational content about Kendall's W
 
-                html_content <- "
-            <div style='font-family: Arial, sans-serif; max-width: 800px; line-height: 1.6;'>
-                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>
-                    <h3 style='margin: 0 0 10px 0; color: inherit;'>What is Kendall's W?</h3>
-                    <p style='margin: 0; color: inherit;'>
-                        Kendall's coefficient of concordance (W) measures the <strong>agreement among multiple raters</strong>
-                        when ranking or rating ordinal data. W reaches <strong>1 at perfect agreement</strong>, but raters
-                        who agree no better than chance score about <strong>1/m</strong> (m raters), not 0. The labels are
-                        therefore read from the average Spearman correlation between raters, which is 0 at chance
-                        (it equals (mW - 1)/(m - 1) when there are no tied grades).
-                    </p>
-                </div>
-
-                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>
-                    <h4 style='margin: 0 0 10px 0; color: inherit;'>When to Use Kendall's W</h4>
-                    <p style='margin: 0 0 10px 0;'><strong>Particularly useful for:</strong></p>
-                    <ul style='margin: 0; padding-left: 20px;'>
-                        <li><strong>Rankings</strong> - When raters rank cases from best to worst (e.g., ranking diagnostic difficulty)</li>
-                        <li><strong>Ordinal scales</strong> - Tumor grade (G1/G2/G3), severity scores, stage classifications</li>
-                        <li><strong>Agreement on order</strong> - When you care whether raters rank cases in similar order</li>
-                        <li><strong>Multiple raters (>=3)</strong> - Works best with 3 or more independent raters</li>
-                    </ul>
-                </div>
-
-                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>
-                    <h4 style='margin: 0 0 10px 0; color: inherit;'>Interpreting Kendall's W</h4>
-                    <table style='width: 100%; border-collapse: collapse;'>
-                        <tr>
-                            <td style='padding: 5px; font-weight: bold; border-bottom: 1px solid #ddd;'>r = 0.00 to &lt; 0.20</td>
-                            <td style='padding: 5px; border-bottom: 1px solid #ddd;'>Very weak agreement (essentially random)</td>
-                        </tr>
-                        <tr>
-                            <td style='padding: 5px; font-weight: bold; border-bottom: 1px solid #ddd;'>r = 0.20 to &lt; 0.40</td>
-                            <td style='padding: 5px; border-bottom: 1px solid #ddd;'>Weak agreement</td>
-                        </tr>
-                        <tr>
-                            <td style='padding: 5px; font-weight: bold; border-bottom: 1px solid #ddd;'>r = 0.40 to &lt; 0.60</td>
-                            <td style='padding: 5px; border-bottom: 1px solid #ddd;'>Moderate agreement</td>
-                        </tr>
-                        <tr>
-                            <td style='padding: 5px; font-weight: bold; border-bottom: 1px solid #ddd;'>r = 0.60 to &lt; 0.80</td>
-                            <td style='padding: 5px; border-bottom: 1px solid #ddd;'>Strong agreement</td>
-                        </tr>
-                        <tr>
-                            <td style='padding: 5px; font-weight: bold;'>r = 0.80 to 1.00</td>
-                            <td style='padding: 5px;'>Very strong agreement (nearly unanimous)</td>
-                        </tr>
-                    </table>
-                </div>
-
-                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>
-                    <h4 style='margin: 0 0 10px 0; color: inherit;'>Kendall's W vs Other Methods</h4>
-                    <table style='width: 100%; border-collapse: collapse; font-size: 13px;'>
-                        <tr style='background-color: rgba(88, 88, 88, 0.06); color: inherit;'>
-                            <th style='padding: 8px; text-align: left; border-bottom: 2px solid #333;'>Method</th>
-                            <th style='padding: 8px; text-align: left; border-bottom: 2px solid #333;'>Best For</th>
-                        </tr>
-                        <tr>
-                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'><strong>Kendall's W</strong></td>
-                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>Ranking agreement, ordinal scales, consensus on ordering</td>
-                        </tr>
-                        <tr>
-                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'><strong>Weighted Kappa</strong></td>
-                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>Exact category matching with partial credit for near-misses</td>
-                        </tr>
-                        <tr>
-                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'><strong>ICC</strong></td>
-                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>Continuous measurements (tumor size, biomarker levels)</td>
-                        </tr>
-                        <tr>
-                            <td style='padding: 8px;'><strong>Fleiss'/Light's Kappa</strong></td>
-                            <td style='padding: 8px;'>Categorical agreement (nominal or ordinal categories)</td>
-                        </tr>
-                    </table>
-                </div>
-
-                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>
-                    <h4 style='margin: 0 0 10px 0; color: inherit;'>Clinical Pathology Use Cases</h4>
-
-                    <p style='margin: 0 0 10px 0; font-weight: bold;'>1. Diagnostic Difficulty Ranking (Educational Assessment):</p>
-                    <ul style='margin: 0 0 15px 0; padding-left: 20px; line-height: 1.6;'>
-                        <li><strong>Scenario:</strong> Four pathologists rank 20 melanoma cases by diagnostic difficulty (1 = easiest, 20 = most difficult)</li>
-                        <li><strong>Purpose:</strong> Identify cases suitable for training vs. requiring expert consultation</li>
-                        <li><strong>W = 0.75:</strong> Strong agreement - pathologists generally concur on which cases are easy vs. challenging</li>
-                        <li><strong>Application:</strong> High-concordance difficult cases become core training material; low-concordance cases may need expert consensus review</li>
-                        <li><strong>What W shows:</strong> The four pathologists put the cases in a similar order of difficulty. W measures concordance among rankings and nothing else - no learning outcome enters it - so it does not establish that this ordering picks out teachable cases or that a curriculum built on it works.</li>
-                    </ul>
-
-                    <p style='margin: 0 0 10px 0; font-weight: bold;'>2. Tumor Grade Severity Ordering (Prognostic Validation):</p>
-                    <ul style='margin: 0 0 15px 0; padding-left: 20px; line-height: 1.6;'>
-                        <li><strong>Scenario:</strong> Five oncologic pathologists rank 30 sarcoma cases by perceived aggressiveness (1 = least aggressive, 30 = most aggressive)</li>
-                        <li><strong>Context:</strong> Validating whether pathologists intuitively rank cases consistent with formal grading systems (FNCLCC)</li>
-                        <li><strong>Ordinal data:</strong> Mitotic count, differentiation score, necrosis percentage inform rankings</li>
-                        <li><strong>W = 0.82:</strong> Strong agreement (r = 0.78 with five raters) - pathologists rank aggressiveness similarly</li>
-                        <li><strong>What W shows:</strong> The pathologists rank aggressiveness consistently with one another. It does not show that their ranking matches the FNCLCC grade or predicts outcome - no outcome data enter the statistic, and consistent raters can be consistently wrong.</li>
-                    </ul>
-
-                    <p style='margin: 0 0 10px 0; font-weight: bold;'>3. Specimen Adequacy Ranking (Quality Control):</p>
-                    <ul style='margin: 0 0 15px 0; padding-left: 20px; line-height: 1.6;'>
-                        <li><strong>Scenario:</strong> Three cytopathologists rank 25 thyroid FNA specimens from most to least adequate for diagnosis</li>
-                        <li><strong>Criteria:</strong> Cellularity, preservation quality, colloid amount, macrophage presence</li>
-                        <li><strong>W = 0.68:</strong> Moderate agreement on adequacy rankings (r = 0.52 with three raters)</li>
-                        <li><strong>Application:</strong> Top-ranked specimens used as reference standards for cytotechnologist training</li>
-                        <li><strong>QC improvement:</strong> Bottom-ranked cases analyzed for pre-analytical factors (aspiration technique, fixation timing)</li>
-                    </ul>
-
-                    <p style='margin: 0 0 10px 0; font-weight: bold;'>4. Inflammation Severity Ordering (Disease Activity Assessment):</p>
-                    <ul style='margin: 0 0 15px 0; padding-left: 20px; line-height: 1.6;'>
-                        <li><strong>Scenario:</strong> Four GI pathologists rank 40 ulcerative colitis biopsies by inflammation severity</li>
-                        <li><strong>Ordinal features:</strong> Crypt distortion, neutrophil infiltration, erosions, crypt abscesses</li>
-                        <li><strong>Gold standard:</strong> Compare rankings to validated Nancy Histological Index scores</li>
-                        <li><strong>W = 0.71:</strong> Strong concordance indicates pathologists assess severity consistently</li>
-                        <li><strong>What W shows:</strong> The four pathologists order the biopsies by inflammation severity consistently with one another. Concordance among raters says nothing about whether their ranking matches the Nancy Histological Index or predicts response to therapy - no outcome data enter the statistic.</li>
-                    </ul>
-
-                    <p style='margin: 0 0 10px 0; font-weight: bold;'>5. Treatment Response Priority Ranking (Clinical Trial Design):</p>
-                    <ul style='margin: 0; padding-left: 20px; line-height: 1.6;'>
-                        <li><strong>Scenario:</strong> Six pathologists rank 35 RECIST-assessed lung cancer cases by degree of treatment response (complete response to progressive disease)</li>
-                        <li><strong>Assessment:</strong> Pre- and post-treatment tumor burden, necrosis, fibrosis, residual viable tumor</li>
-                        <li><strong>Purpose:</strong> Determine if pathologic assessment aligns with radiologic RECIST criteria</li>
-                        <li><strong>W = 0.79:</strong> Strong agreement on response ranking</li>
-                        <li><strong>What W shows:</strong> The six pathologists rank degree of response consistently with one another; discordant cases are worth reviewing. Reproducibility among raters is a prerequisite for, but not evidence of, validity as a trial endpoint or predictive biomarker - that requires outcome data, which do not enter W</li>
-                    </ul>
-                </div>
-
-                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; color: inherit;'>
-                    <h4 style='margin: 0 0 10px 0; color: inherit;'>Statistical Significance</h4>
-                    <p style='margin: 0; font-size: 13px;'>
-                        The chi-square test evaluates whether the observed agreement (W) is statistically different from
-                        random chance. A significant p-value (< 0.05) indicates that raters agree more than expected by chance.
-                        However, even statistically significant agreement may not be clinically meaningful if W is low.
-                    </p>
-                </div>
-
-                <div style='margin-top: 15px; padding: 10px; background-color: rgba(88, 88, 88, 0.06); border-radius: 4px; color: inherit;'>
-                    <p style='margin: 0; font-size: 12px; color: inherit;'>
-                        <strong>Reference:</strong> Kendall, M. G., & Babington Smith, B. (1939). The problem of m rankings.
-                        <em>The Annals of Mathematical Statistics</em>, 10(3), 275-287.
-                    </p>
-                </div>
-            </div>
-            "
+                html_content <- paste0(
+                    "\n            <div style='font-family: Arial, sans-serif; max-width: 800px; line-height: 1.6;'>\n                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>\n                    <h3 style='margin: 0 0 10px 0; color: inherit;'>",
+                    .("What is Kendall's W?"),
+                    "</h3>\n                    <p style='margin: 0; color: inherit;'>",
+                    paste0("\n                        ", jmvcore::format(.("Kendall's coefficient of concordance (W) measures the {tag1}agreement among multiple raters{tag2}\n                        when ranking or rating ordinal data. W reaches {tag3}1 at perfect agreement{tag4}, but raters\n                        who agree no better than chance score about {tag5}1/m{tag6} (m raters), not 0. The labels are\n                        therefore read from the average Spearman correlation between raters, which is 0 at chance\n                        (it equals (mW - 1)/(m - 1) when there are no tied grades)."), tag1 = "<strong>", tag2 = "</strong>", tag3 = "<strong>", tag4 = "</strong>", tag5 = "<strong>", tag6 = "</strong>"), "\n                    "),
+                    "</p>\n                </div>\n\n                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>\n                    <h4 style='margin: 0 0 10px 0; color: inherit;'>",
+                    .("When to Use Kendall's W"),
+                    "</h4>\n                    <p style='margin: 0 0 10px 0;'>",
+                    jmvcore::format(.("{tag1}Particularly useful for:{tag2}"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</p>\n                    <ul style='margin: 0; padding-left: 20px;'>\n                        <li>",
+                    jmvcore::format(.("{tag1}Rankings{tag2} - When raters rank cases from best to worst (e.g., ranking diagnostic difficulty)"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                        <li>",
+                    jmvcore::format(.("{tag1}Ordinal scales{tag2} - Tumor grade (G1/G2/G3), severity scores, stage classifications"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                        <li>",
+                    jmvcore::format(.("{tag1}Agreement on order{tag2} - When you care whether raters rank cases in similar order"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                        <li>",
+                    jmvcore::format(.("{tag1}Multiple raters (>=3){tag2} - Works best with 3 or more independent raters"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                    </ul>\n                </div>\n\n                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>\n                    <h4 style='margin: 0 0 10px 0; color: inherit;'>",
+                    .("Interpreting Kendall's W"),
+                    "</h4>\n                    <table style='width: 100%; border-collapse: collapse;'>\n                        <tr>\n                            <td style='padding: 5px; font-weight: bold; border-bottom: 1px solid #ddd;'>",
+                    jmvcore::format(.("r = 0.00 to {tag1} 0.20"), tag1 = "&lt;"),
+                    "</td>\n                            <td style='padding: 5px; border-bottom: 1px solid #ddd;'>",
+                    .("Very weak agreement (essentially random)"),
+                    "</td>\n                        </tr>\n                        <tr>\n                            <td style='padding: 5px; font-weight: bold; border-bottom: 1px solid #ddd;'>",
+                    jmvcore::format(.("r = 0.20 to {tag1} 0.40"), tag1 = "&lt;"),
+                    "</td>\n                            <td style='padding: 5px; border-bottom: 1px solid #ddd;'>",
+                    .("Weak agreement"),
+                    "</td>\n                        </tr>\n                        <tr>\n                            <td style='padding: 5px; font-weight: bold; border-bottom: 1px solid #ddd;'>",
+                    jmvcore::format(.("r = 0.40 to {tag1} 0.60"), tag1 = "&lt;"),
+                    "</td>\n                            <td style='padding: 5px; border-bottom: 1px solid #ddd;'>",
+                    .("Moderate agreement"),
+                    "</td>\n                        </tr>\n                        <tr>\n                            <td style='padding: 5px; font-weight: bold; border-bottom: 1px solid #ddd;'>",
+                    jmvcore::format(.("r = 0.60 to {tag1} 0.80"), tag1 = "&lt;"),
+                    "</td>\n                            <td style='padding: 5px; border-bottom: 1px solid #ddd;'>",
+                    .("Strong agreement"),
+                    "</td>\n                        </tr>\n                        <tr>\n                            <td style='padding: 5px; font-weight: bold;'>",
+                    .("r = 0.80 to 1.00"),
+                    "</td>\n                            <td style='padding: 5px;'>",
+                    .("Very strong agreement (nearly unanimous)"),
+                    "</td>\n                        </tr>\n                    </table>\n                </div>\n\n                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>\n                    <h4 style='margin: 0 0 10px 0; color: inherit;'>",
+                    .("Kendall's W vs Other Methods"),
+                    "</h4>\n                    <table style='width: 100%; border-collapse: collapse; font-size: 13px;'>\n                        <tr style='background-color: rgba(88, 88, 88, 0.06); color: inherit;'>\n                            <th style='padding: 8px; text-align: left; border-bottom: 2px solid #333;'>",
+                    .("Method"),
+                    "</th>\n                            <th style='padding: 8px; text-align: left; border-bottom: 2px solid #333;'>",
+                    .("Best For"),
+                    "</th>\n                        </tr>\n                        <tr>\n                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>",
+                    jmvcore::format(.("{tag1}Kendall's W{tag2}"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</td>\n                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>",
+                    .("Ranking agreement, ordinal scales, consensus on ordering"),
+                    "</td>\n                        </tr>\n                        <tr>\n                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>",
+                    jmvcore::format(.("{tag1}Weighted Kappa{tag2}"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</td>\n                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>",
+                    .("Exact category matching with partial credit for near-misses"),
+                    "</td>\n                        </tr>\n                        <tr>\n                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>",
+                    jmvcore::format(.("{tag1}ICC{tag2}"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</td>\n                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>",
+                    .("Continuous measurements (tumor size, biomarker levels)"),
+                    "</td>\n                        </tr>\n                        <tr>\n                            <td style='padding: 8px;'>",
+                    jmvcore::format(.("{tag1}Fleiss'/Light's Kappa{tag2}"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</td>\n                            <td style='padding: 8px;'>",
+                    .("Categorical agreement (nominal or ordinal categories)"),
+                    "</td>\n                        </tr>\n                    </table>\n                </div>\n\n                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>\n                    <h4 style='margin: 0 0 10px 0; color: inherit;'>",
+                    .("Clinical Pathology Use Cases"),
+                    "</h4>\n\n                    <p style='margin: 0 0 10px 0; font-weight: bold;'>",
+                    .("1. Diagnostic Difficulty Ranking (Educational Assessment):"),
+                    "</p>\n                    <ul style='margin: 0 0 15px 0; padding-left: 20px; line-height: 1.6;'>\n                        <li>",
+                    jmvcore::format(.("{tag1}Scenario:{tag2} Four pathologists rank 20 melanoma cases by diagnostic difficulty (1 = easiest, 20 = most difficult)"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                        <li>",
+                    jmvcore::format(.("{tag1}Purpose:{tag2} Identify cases suitable for training vs. requiring expert consultation"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                        <li>",
+                    jmvcore::format(.("{tag1}W = 0.75:{tag2} Strong agreement - pathologists generally concur on which cases are easy vs. challenging"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                        <li>",
+                    jmvcore::format(.("{tag1}Application:{tag2} High-concordance difficult cases become core training material; low-concordance cases may need expert consensus review"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                        <li>",
+                    jmvcore::format(.("{tag1}What W shows:{tag2} The four pathologists put the cases in a similar order of difficulty. W measures concordance among rankings and nothing else - no learning outcome enters it - so it does not establish that this ordering picks out teachable cases or that a curriculum built on it works."), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                    </ul>\n\n                    <p style='margin: 0 0 10px 0; font-weight: bold;'>",
+                    .("2. Tumor Grade Severity Ordering (Prognostic Validation):"),
+                    "</p>\n                    <ul style='margin: 0 0 15px 0; padding-left: 20px; line-height: 1.6;'>\n                        <li>",
+                    jmvcore::format(.("{tag1}Scenario:{tag2} Five oncologic pathologists rank 30 sarcoma cases by perceived aggressiveness (1 = least aggressive, 30 = most aggressive)"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                        <li>",
+                    jmvcore::format(.("{tag1}Context:{tag2} Validating whether pathologists intuitively rank cases consistent with formal grading systems (FNCLCC)"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                        <li>",
+                    jmvcore::format(.("{tag1}Ordinal data:{tag2} Mitotic count, differentiation score, necrosis percentage inform rankings"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                        <li>",
+                    jmvcore::format(.("{tag1}W = 0.82:{tag2} Strong agreement (r = 0.78 with five raters) - pathologists rank aggressiveness similarly"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                        <li>",
+                    jmvcore::format(.("{tag1}What W shows:{tag2} The pathologists rank aggressiveness consistently with one another. It does not show that their ranking matches the FNCLCC grade or predicts outcome - no outcome data enter the statistic, and consistent raters can be consistently wrong."), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                    </ul>\n\n                    <p style='margin: 0 0 10px 0; font-weight: bold;'>",
+                    .("3. Specimen Adequacy Ranking (Quality Control):"),
+                    "</p>\n                    <ul style='margin: 0 0 15px 0; padding-left: 20px; line-height: 1.6;'>\n                        <li>",
+                    jmvcore::format(.("{tag1}Scenario:{tag2} Three cytopathologists rank 25 thyroid FNA specimens from most to least adequate for diagnosis"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                        <li>",
+                    jmvcore::format(.("{tag1}Criteria:{tag2} Cellularity, preservation quality, colloid amount, macrophage presence"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                        <li>",
+                    jmvcore::format(.("{tag1}W = 0.68:{tag2} Moderate agreement on adequacy rankings (r = 0.52 with three raters)"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                        <li>",
+                    jmvcore::format(.("{tag1}Application:{tag2} Top-ranked specimens used as reference standards for cytotechnologist training"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                        <li>",
+                    jmvcore::format(.("{tag1}QC improvement:{tag2} Bottom-ranked cases analyzed for pre-analytical factors (aspiration technique, fixation timing)"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                    </ul>\n\n                    <p style='margin: 0 0 10px 0; font-weight: bold;'>",
+                    .("4. Inflammation Severity Ordering (Disease Activity Assessment):"),
+                    "</p>\n                    <ul style='margin: 0 0 15px 0; padding-left: 20px; line-height: 1.6;'>\n                        <li>",
+                    jmvcore::format(.("{tag1}Scenario:{tag2} Four GI pathologists rank 40 ulcerative colitis biopsies by inflammation severity"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                        <li>",
+                    jmvcore::format(.("{tag1}Ordinal features:{tag2} Crypt distortion, neutrophil infiltration, erosions, crypt abscesses"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                        <li>",
+                    jmvcore::format(.("{tag1}Gold standard:{tag2} Compare rankings to validated Nancy Histological Index scores"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                        <li>",
+                    jmvcore::format(.("{tag1}W = 0.71:{tag2} Strong concordance indicates pathologists assess severity consistently"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                        <li>",
+                    jmvcore::format(.("{tag1}What W shows:{tag2} The four pathologists order the biopsies by inflammation severity consistently with one another. Concordance among raters says nothing about whether their ranking matches the Nancy Histological Index or predicts response to therapy - no outcome data enter the statistic."), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                    </ul>\n\n                    <p style='margin: 0 0 10px 0; font-weight: bold;'>",
+                    .("5. Treatment Response Priority Ranking (Clinical Trial Design):"),
+                    "</p>\n                    <ul style='margin: 0; padding-left: 20px; line-height: 1.6;'>\n                        <li>",
+                    jmvcore::format(.("{tag1}Scenario:{tag2} Six pathologists rank 35 RECIST-assessed lung cancer cases by degree of treatment response (complete response to progressive disease)"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                        <li>",
+                    jmvcore::format(.("{tag1}Assessment:{tag2} Pre- and post-treatment tumor burden, necrosis, fibrosis, residual viable tumor"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                        <li>",
+                    jmvcore::format(.("{tag1}Purpose:{tag2} Determine if pathologic assessment aligns with radiologic RECIST criteria"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                        <li>",
+                    jmvcore::format(.("{tag1}W = 0.79:{tag2} Strong agreement on response ranking"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                        <li>",
+                    jmvcore::format(.("{tag1}What W shows:{tag2} The six pathologists rank degree of response consistently with one another; discordant cases are worth reviewing. Reproducibility among raters is a prerequisite for, but not evidence of, validity as a trial endpoint or predictive biomarker - that requires outcome data, which do not enter W"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                    </ul>\n                </div>\n\n                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; color: inherit;'>\n                    <h4 style='margin: 0 0 10px 0; color: inherit;'>",
+                    .("Statistical Significance"),
+                    "</h4>\n                    <p style='margin: 0; font-size: 13px;'>",
+                    paste0("\n                        ", .("The chi-square test evaluates whether the observed agreement (W) is statistically different from\n                        random chance. A significant p-value (< 0.05) indicates that raters agree more than expected by chance.\n                        However, even statistically significant agreement may not be clinically meaningful if W is low."), "\n                    "),
+                    "</p>\n                </div>\n\n                <div style='margin-top: 15px; padding: 10px; background-color: rgba(88, 88, 88, 0.06); border-radius: 4px; color: inherit;'>\n                    <p style='margin: 0; font-size: 12px; color: inherit;'>",
+                    paste0("\n                        ", jmvcore::format(.("{tag1}Reference:{tag2} Kendall, M. G., & Babington Smith, B. (1939). The problem of m rankings.\n                        {tag3}The Annals of Mathematical Statistics{tag4}, 10(3), 275-287."), tag1 = "<strong>", tag2 = "</strong>", tag3 = "<em>", tag4 = "</em>"), "\n                    "),
+                    "</p>\n                </div>\n            </div>\n            "
+                )
 
                 self$results$kendallWExplanation$setContent(html_content)
             },
@@ -2251,65 +2207,59 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                 )
             },
             .populateRobinsonAExplanation = function() {
-                html_content <- "
-            <div style='font-family: Arial, sans-serif; max-width: 800px; line-height: 1.6;'>
-                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>
-                    <h3 style='margin: 0 0 10px 0; color: inherit;'>What is Robinson's A?</h3>
-                    <p style='margin: 0; color: inherit;'>
-                        Robinson's A (1957) is an <strong>agreement coefficient for ordinal or numeric ratings</strong>.
-                        It is the share of the total spread in the ratings that is <em>not</em> disagreement between raters on the same case:
-                        <strong>A = 1 &#x2212; (within-case variance) / (total variance)</strong>.
-                        A = 1 when every rater gives every case the same value; A = 0 when raters differ on a case as much as
-                        cases differ from one another. Ordered categories enter as their level codes (G1 = 1, G2 = 2, ...).
-                    </p>
-                    <p style='margin: 10px 0 0 0; color: inherit;'>
-                        Unlike a rank correlation, A is a measure of <strong>agreement, not association</strong>: two raters who differ by one
-                        grade on every case have a perfect correlation but a reduced A. It is defined for any number of raters.
-                    </p>
-                </div>
-
-                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>
-                    <h4 style='margin: 0 0 10px 0; color: inherit;'>When to use Robinson's A</h4>
-                    <ul style='margin: 0; padding-left: 20px;'>
-                        <li><strong>Ordinal scales with roughly equal steps</strong> - tumour grade, fibrosis stage, activity scores</li>
-                        <li><strong>Alongside weighted kappa</strong> - A does not depend on a chance-correction model, so it is a useful companion when kappa is depressed by an uneven category distribution</li>
-                        <li><strong>Three or more raters</strong> - one coefficient for the whole panel rather than an average of pairs</li>
-                        <li><strong>Not for nominal categories</strong> - the level codes must carry order and approximately equal spacing</li>
-                    </ul>
-                </div>
-
-                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>
-                    <h4 style='margin: 0 0 10px 0; color: inherit;'>Robinson's A and related measures</h4>
-                    <table style='width: 100%; border-collapse: collapse;'>
-                        <tr style='background-color: rgba(88, 88, 88, 0.06); color: inherit;'>
-                            <th style='padding: 8px; text-align: left; border-bottom: 2px solid #333;'>Measure</th>
-                            <th style='padding: 8px; text-align: left; border-bottom: 2px solid #333;'>What it captures</th>
-                        </tr>
-                        <tr><td style='padding: 8px; border-bottom: 1px solid #ddd;'><strong>Robinson's A</strong></td><td style='padding: 8px; border-bottom: 1px solid #ddd;'>Agreement on the actual values; related to the one-way ICC (A = (1 + ICC)/2 for two raters in the large-sample case)</td></tr>
-                        <tr><td style='padding: 8px; border-bottom: 1px solid #ddd;'><strong>Weighted kappa</strong></td><td style='padding: 8px; border-bottom: 1px solid #ddd;'>Chance-corrected agreement with partial credit for near misses; sensitive to the marginal distributions</td></tr>
-                        <tr><td style='padding: 8px; border-bottom: 1px solid #ddd;'><strong>Kendall's tau-b / Spearman</strong></td><td style='padding: 8px; border-bottom: 1px solid #ddd;'>Association of the orderings, not agreement on the values</td></tr>
-                        <tr><td style='padding: 8px;'><strong>Kendall's W</strong></td><td style='padding: 8px;'>Concordance of rankings across 3+ raters</td></tr>
-                    </table>
-                </div>
-
-                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>
-                    <h4 style='margin: 0 0 10px 0; color: inherit;'>Reading the table</h4>
-                    <ul style='margin: 0; padding-left: 20px;'>
-                        <li><strong>A</strong> with a percentile bootstrap interval over cases (the number of resamples and the seed are the analysis-wide bootstrap settings; there is no closed-form standard error)</li>
-                        <li><strong>Label bands</strong> used by this analysis: raters who agree no better than chance score A of about 1/m (0.5 for two raters), not 0, so the label is read from the chance-corrected value (mA - 1)/(m - 1), which is 0 at chance - below 0.50 poor, 0.50 to 0.75 moderate, 0.75 to 0.90 good, 0.90 and above excellent. These mirror the usual ICC bands and are conventions, not a standard</li>
-                        <li><strong>Worked example:</strong> two pathologists grade 80 carcinomas G1 to G3 and disagree by one grade on 12 cases. A is typically around 0.85 to 0.90: high, because most of the spread is between cases, not between raters. If one pathologist graded every case one step higher, agreement on the values would be poor (A drops sharply) although Spearman's correlation would still be 1</li>
-                        <li><strong>Scope:</strong> A compares raters with each other, not with a reference standard, so it says nothing about which rater is right</li>
-                    </ul>
-                </div>
-
-                <div style='margin-top: 15px; padding: 10px; background-color: rgba(88, 88, 88, 0.06); border-radius: 4px; color: inherit;'>
-                    <p style='margin: 0; font-size: 12px; color: inherit;'>
-                        <strong>Reference:</strong> Robinson, W. S. (1957). The statistical measurement of agreement.
-                        <em>American Sociological Review</em>, 22(1), 17-25.
-                    </p>
-                </div>
-            </div>
-            "
+                html_content <- paste0(
+                    "\n            <div style='font-family: Arial, sans-serif; max-width: 800px; line-height: 1.6;'>\n                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>\n                    <h3 style='margin: 0 0 10px 0; color: inherit;'>",
+                    .("What is Robinson's A?"),
+                    "</h3>\n                    <p style='margin: 0; color: inherit;'>",
+                    paste0("\n                        ", jmvcore::format(.("Robinson's A (1957) is an {tag1}agreement coefficient for ordinal or numeric ratings{tag2}.\n                        It is the share of the total spread in the ratings that is {tag3}not{tag4} disagreement between raters on the same case:\n                        {tag5}A = 1 {tag6} (within-case variance) / (total variance){tag7}.\n                        A = 1 when every rater gives every case the same value; A = 0 when raters differ on a case as much as\n                        cases differ from one another. Ordered categories enter as their level codes (G1 = 1, G2 = 2, ...)."), tag1 = "<strong>", tag2 = "</strong>", tag3 = "<em>", tag4 = "</em>", tag5 = "<strong>", tag6 = "&#x2212;", tag7 = "</strong>"), "\n                    "),
+                    "</p>\n                    <p style='margin: 10px 0 0 0; color: inherit;'>",
+                    paste0("\n                        ", jmvcore::format(.("Unlike a rank correlation, A is a measure of {tag1}agreement, not association{tag2}: two raters who differ by one\n                        grade on every case have a perfect correlation but a reduced A. It is defined for any number of raters."), tag1 = "<strong>", tag2 = "</strong>"), "\n                    "),
+                    "</p>\n                </div>\n\n                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>\n                    <h4 style='margin: 0 0 10px 0; color: inherit;'>",
+                    .("When to use Robinson's A"),
+                    "</h4>\n                    <ul style='margin: 0; padding-left: 20px;'>\n                        <li>",
+                    jmvcore::format(.("{tag1}Ordinal scales with roughly equal steps{tag2} - tumour grade, fibrosis stage, activity scores"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                        <li>",
+                    jmvcore::format(.("{tag1}Alongside weighted kappa{tag2} - A does not depend on a chance-correction model, so it is a useful companion when kappa is depressed by an uneven category distribution"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                        <li>",
+                    jmvcore::format(.("{tag1}Three or more raters{tag2} - one coefficient for the whole panel rather than an average of pairs"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                        <li>",
+                    jmvcore::format(.("{tag1}Not for nominal categories{tag2} - the level codes must carry order and approximately equal spacing"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                    </ul>\n                </div>\n\n                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>\n                    <h4 style='margin: 0 0 10px 0; color: inherit;'>",
+                    .("Robinson's A and related measures"),
+                    "</h4>\n                    <table style='width: 100%; border-collapse: collapse;'>\n                        <tr style='background-color: rgba(88, 88, 88, 0.06); color: inherit;'>\n                            <th style='padding: 8px; text-align: left; border-bottom: 2px solid #333;'>",
+                    .("Measure"),
+                    "</th>\n                            <th style='padding: 8px; text-align: left; border-bottom: 2px solid #333;'>",
+                    .("What it captures"),
+                    "</th>\n                        </tr>\n                        <tr><td style='padding: 8px; border-bottom: 1px solid #ddd;'>",
+                    jmvcore::format(.("{tag1}Robinson's A{tag2}"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</td><td style='padding: 8px; border-bottom: 1px solid #ddd;'>",
+                    .("Agreement on the actual values; related to the one-way ICC (A = (1 + ICC)/2 for two raters in the large-sample case)"),
+                    "</td></tr>\n                        <tr><td style='padding: 8px; border-bottom: 1px solid #ddd;'>",
+                    jmvcore::format(.("{tag1}Weighted kappa{tag2}"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</td><td style='padding: 8px; border-bottom: 1px solid #ddd;'>",
+                    .("Chance-corrected agreement with partial credit for near misses; sensitive to the marginal distributions"),
+                    "</td></tr>\n                        <tr><td style='padding: 8px; border-bottom: 1px solid #ddd;'>",
+                    jmvcore::format(.("{tag1}Kendall's tau-b / Spearman{tag2}"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</td><td style='padding: 8px; border-bottom: 1px solid #ddd;'>",
+                    .("Association of the orderings, not agreement on the values"),
+                    "</td></tr>\n                        <tr><td style='padding: 8px;'>",
+                    jmvcore::format(.("{tag1}Kendall's W{tag2}"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</td><td style='padding: 8px;'>",
+                    .("Concordance of rankings across 3+ raters"),
+                    "</td></tr>\n                    </table>\n                </div>\n\n                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>\n                    <h4 style='margin: 0 0 10px 0; color: inherit;'>",
+                    .("Reading the table"),
+                    "</h4>\n                    <ul style='margin: 0; padding-left: 20px;'>\n                        <li>",
+                    jmvcore::format(.("{tag1}A{tag2} with a percentile bootstrap interval over cases (the number of resamples and the seed are the analysis-wide bootstrap settings; there is no closed-form standard error)"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                        <li>",
+                    jmvcore::format(.("{tag1}Label bands{tag2} used by this analysis: raters who agree no better than chance score A of about 1/m (0.5 for two raters), not 0, so the label is read from the chance-corrected value (mA - 1)/(m - 1), which is 0 at chance - below 0.50 poor, 0.50 to 0.75 moderate, 0.75 to 0.90 good, 0.90 and above excellent. These mirror the usual ICC bands and are conventions, not a standard"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                        <li>",
+                    jmvcore::format(.("{tag1}Worked example:{tag2} two pathologists grade 80 carcinomas G1 to G3 and disagree by one grade on 12 cases. A is typically around 0.85 to 0.90: high, because most of the spread is between cases, not between raters. If one pathologist graded every case one step higher, agreement on the values would be poor (A drops sharply) although Spearman's correlation would still be 1"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                        <li>",
+                    jmvcore::format(.("{tag1}Scope:{tag2} A compares raters with each other, not with a reference standard, so it says nothing about which rater is right"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                    </ul>\n                </div>\n\n                <div style='margin-top: 15px; padding: 10px; background-color: rgba(88, 88, 88, 0.06); border-radius: 4px; color: inherit;'>\n                    <p style='margin: 0; font-size: 12px; color: inherit;'>",
+                    paste0("\n                        ", jmvcore::format(.("{tag1}Reference:{tag2} Robinson, W. S. (1957). The statistical measurement of agreement.\n                        {tag3}American Sociological Review{tag4}, 22(1), 17-25."), tag1 = "<strong>", tag2 = "</strong>", tag3 = "<em>", tag4 = "</em>"), "\n                    "),
+                    "</p>\n                </div>\n            </div>\n            "
+                )
 
                 self$results$robinsonAExplanation$setContent(html_content)
             },
@@ -2476,173 +2426,171 @@ agreementClass <- if (requireNamespace("jmvcore")) {
             .populateMeanSpearmanExplanation = function() {
                 # Provide educational content about Mean Spearman Rho
 
-                html_content <- "
-            <div style='font-family: Arial, sans-serif; max-width: 800px; line-height: 1.6;'>
-                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>
-                    <h3 style='margin: 0 0 10px 0; color: inherit;'>What is Mean Spearman Rho?</h3>
-                    <p style='margin: 0; color: inherit;'>
-                        Mean Spearman Rho (&#x3C1;) is the <strong>average rank correlation coefficient</strong> across all
-                        pairs of raters. Spearman's rho measures the <strong>monotonic association</strong> between two
-                        ordinal variables. It ranges from <strong>-1 (perfect negative correlation)</strong> through
-                        <strong>0 (no correlation)</strong> to <strong>+1 (perfect positive correlation)</strong>.
-                        For interrater agreement, high positive values indicate raters rank cases similarly.
-                    </p>
-                </div>
-
-                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>
-                    <h4 style='margin: 0 0 10px 0; color: inherit;'>When to Use Mean Spearman Rho</h4>
-                    <p style='margin: 0 0 10px 0;'><strong>Particularly useful for:</strong></p>
-                    <ul style='margin: 0; padding-left: 20px;'>
-                        <li><strong>Ordinal data</strong> - Tumor grades, severity scores, disease stages with rank order</li>
-                        <li><strong>Ranked data</strong> - When raters rank cases from best to worst, or by priority</li>
-                        <li><strong>Monotonic relationships</strong> - Tests if higher ratings by one rater correspond to higher ratings by another</li>
-                        <li><strong>Robust to outliers</strong> - Uses ranks instead of raw values, less affected by extreme scores</li>
-                        <li><strong>Non-normal distributions</strong> - Does not assume linear relationship or normal distribution</li>
-                        <li><strong>Correlation focus</strong> - Emphasizes rank-order association rather than exact agreement</li>
-                    </ul>
-                </div>
-
-                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>
-                    <h4 style='margin: 0 0 10px 0; color: inherit;'>Spearman Rho vs Other Ordinal Measures</h4>
-                    <table style='width: 100%; border-collapse: collapse;'>
-                        <tr style='background-color: rgba(88, 88, 88, 0.06); color: inherit;'>
-                            <th style='padding: 8px; text-align: left; border-bottom: 2px solid #333;'>Measure</th>
-                            <th style='padding: 8px; text-align: left; border-bottom: 2px solid #333;'>What It Measures</th>
-                            <th style='padding: 8px; text-align: left; border-bottom: 2px solid #333;'>Best Use</th>
-                        </tr>
-                        <tr>
-                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'><strong>Spearman Rho</strong></td>
-                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>Monotonic rank correlation</td>
-                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>Ordinal data, robust to outliers</td>
-                        </tr>
-                        <tr>
-                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'><strong>Kendall's tau</strong></td>
-                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>Concordant pairs (similar to Spearman)</td>
-                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>Small samples, ties in data</td>
-                        </tr>
-                        <tr>
-                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'><strong>Robinson's A</strong></td>
-                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>Ordinal agreement (concordance)</td>
-                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>Agreement focus, skewed distributions</td>
-                        </tr>
-                        <tr>
-                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'><strong>Weighted Kappa</strong></td>
-                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>Chance-corrected ordinal agreement</td>
-                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>Exact + partial credit matching</td>
-                        </tr>
-                        <tr>
-                            <td style='padding: 8px;'><strong>Kendall's W</strong></td>
-                            <td style='padding: 8px;'>Overall concordance (3+ raters)</td>
-                            <td style='padding: 8px;'>Multiple raters, ranking agreement</td>
-                        </tr>
-                    </table>
-                    <p style='margin: 10px 0 0 0; font-size: 13px;'>
-                        <strong>Key difference:</strong> Spearman rho measures <em>correlation</em> (association) while
-                        weighted kappa and Robinson's A measure <em>agreement</em> (concordance). High correlation indicates
-                        raters rank similarly but may use different scales.
-                    </p>
-                </div>
-
-                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>
-                    <h4 style='margin: 0 0 10px 0; color: inherit;'>Clinical Pathology Use Cases</h4>
-
-                    <p style='margin: 0 0 10px 0; font-weight: bold;'>1. Tumor Grade Severity Correlation (Multi-Rater Consistency):</p>
-                    <ul style='margin: 0 0 15px 0; padding-left: 20px; line-height: 1.6;'>
-                        <li><strong>Scenario:</strong> Four pathologists grade 50 neuroendocrine tumors (G1, G2, G3) based on Ki-67 and mitotic count</li>
-                        <li><strong>Purpose:</strong> Assess if pathologists rank tumors by aggressiveness consistently</li>
-                        <li><strong>Mean &#x3C1; = 0.85:</strong> Strong rank correlation - pathologists agree on relative tumor aggressiveness</li>
-                        <li><strong>What it shows:</strong> The four pathologists order tumors by aggressiveness consistently with one another. This is reproducibility, not prognostic validity - no outcome data enter the statistic</li>
-                        <li><strong>Advantage:</strong> Less sensitive to exact grade disagreement (G1 vs. G2) than kappa; focuses on ordinal progression</li>
-                    </ul>
-
-                    <p style='margin: 0 0 10px 0; font-weight: bold;'>2. Inflammation Severity Ranking (Cross-Specialty Agreement):</p>
-                    <ul style='margin: 0 0 15px 0; padding-left: 20px; line-height: 1.6;'>
-                        <li><strong>Scenario:</strong> GI pathologist and general pathologist rank 60 IBD biopsies by inflammatory activity (quiescent, mild, moderate, severe)</li>
-                        <li><strong>Challenge:</strong> Specialists may use different thresholds but recognize same severity progression</li>
-                        <li><strong>Mean &#x3C1; = 0.78:</strong> Good rank correlation despite potential systematic differences in grading</li>
-                        <li><strong>Interpretation:</strong> Both pathologists recognize severity trajectory; category-specific calibration may still be needed</li>
-                        <li><strong>Scope:</strong> The two pathologists order cases similarly, but a single rank correlation against one comparator does not settle a competency question - that needs a prespecified threshold, a representative case mix, and review of the discordant cases</li>
-                    </ul>
-
-                    <p style='margin: 0 0 10px 0; font-weight: bold;'>3. Fibrosis Progression Assessment (Longitudinal Consistency):</p>
-                    <ul style='margin: 0 0 15px 0; padding-left: 20px; line-height: 1.6;'>
-                        <li><strong>Scenario:</strong> Three hepatopathologists rank 40 liver biopsies by fibrosis severity (Ishak 0-6 or Metavir F0-F4)</li>
-                        <li><strong>Ordinal nature:</strong> Fibrosis stages represent clear progression from none to cirrhosis</li>
-                        <li><strong>Mean &#x3C1; = 0.89:</strong> Excellent rank correlation on disease progression</li>
-                        <li><strong>What the coefficient shows:</strong> The three pathologists order cases by fibrosis severity similarly. Rank correlation says nothing about whether the assigned stages are correct, so it does not on its own support any staging-driven decision</li>
-                        <li><strong>Robust to staging system:</strong> Correlation reflects biological progression regardless of exact staging scheme</li>
-                    </ul>
-
-                    <p style='margin: 0 0 10px 0; font-weight: bold;'>4. Diagnostic Difficulty Ranking (Educational Calibration):</p>
-                    <ul style='margin: 0 0 15px 0; padding-left: 20px; line-height: 1.6;'>
-                        <li><strong>Scenario:</strong> Five dermatopathologists rank 30 melanocytic lesions by diagnostic difficulty (1 = easiest, 30 = most difficult)</li>
-                        <li><strong>Educational goal:</strong> Identify cases with consensus difficulty for training curriculum</li>
-                        <li><strong>Mean &#x3C1; = 0.72:</strong> Good correlation on difficulty progression</li>
-                        <li><strong>Case selection:</strong> High-correlation difficult cases become core teaching material</li>
-                        <li><strong>Low-correlation cases:</strong> Reveal pathologist-specific knowledge gaps requiring targeted education</li>
-                    </ul>
-
-                    <p style='margin: 0 0 10px 0; font-weight: bold;'>5. AI Algorithm Validation (Prognostic Ordering):</p>
-                    <ul style='margin: 0; padding-left: 20px; line-height: 1.6;'>
-                        <li><strong>Scenario:</strong> Compare AI algorithm vs. three expert pathologists on Gleason grading (6-10) for 100 prostate cores</li>
-                        <li><strong>Validation focus:</strong> AI should rank cases by prognostic severity similar to experts</li>
-                        <li><strong>Mean &#x3C1; = 0.81:</strong> Strong rank correlation between AI and expert consensus</li>
-                        <li><strong>What it shows:</strong> The algorithm orders cases similarly to the expert consensus grade; no outcome data enter the statistic, so it says nothing about prognostic performance</li>
-                        <li><strong>Advantage:</strong> Robust measure unaffected by systematic grade shifts (AI consistently one grade higher/lower)</li>
-                        <li><strong>Scope:</strong> Rank correlation with experts describes ordering only; it does not address absolute grade accuracy, calibration, or outcome prediction, so it does not on its own answer whether the algorithm is fit for any particular use</li>
-                    </ul>
-                </div>
-
-                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>
-                    <h4 style='margin: 0 0 10px 0; color: inherit;'>Interpretation Guidelines</h4>
-                    <table style='width: 100%; border-collapse: collapse; font-size: 14px;'>
-                        <tr>
-                            <td style='padding: 5px; font-weight: bold; border-bottom: 1px solid #ddd;'>&#x3C1; &lt; 0.30</td>
-                            <td style='padding: 5px; border-bottom: 1px solid #ddd;'>Negligible correlation</td>
-                        </tr>
-                        <tr>
-                            <td style='padding: 5px; font-weight: bold; border-bottom: 1px solid #ddd;'>0.30 <= &#x3C1; &lt; 0.50</td>
-                            <td style='padding: 5px; border-bottom: 1px solid #ddd;'>Low correlation</td>
-                        </tr>
-                        <tr>
-                            <td style='padding: 5px; font-weight: bold; border-bottom: 1px solid #ddd;'>0.50 <= &#x3C1; &lt; 0.70</td>
-                            <td style='padding: 5px; border-bottom: 1px solid #ddd;'>Moderate correlation</td>
-                        </tr>
-                        <tr>
-                            <td style='padding: 5px; font-weight: bold; border-bottom: 1px solid #ddd;'>0.70 <= &#x3C1; &lt; 0.90</td>
-                            <td style='padding: 5px; border-bottom: 1px solid #ddd;'>High correlation</td>
-                        </tr>
-                        <tr>
-                            <td style='padding: 5px; font-weight: bold;'>&#x3C1; >= 0.90</td>
-                            <td style='padding: 5px;'>Very high correlation (nearly identical rankings)</td>
-                        </tr>
-                    </table>
-                    <p style='margin: 10px 0 0 0; font-size: 13px;'>
-                        <strong>Note:</strong> For interrater agreement, Mean &#x3C1; represents the average correlation
-                        across all rater pairs. Min/Max values show range of pairwise correlations, indicating
-                        heterogeneity among rater pairs.
-                    </p>
-                </div>
-
-                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; color: inherit;'>
-                    <h4 style='margin: 0 0 10px 0; color: inherit;'>Key Advantages</h4>
-                    <ul style='margin: 0; padding-left: 20px; font-size: 13px;'>
-                        <li><strong>Nonparametric:</strong> No assumptions about distribution or linearity</li>
-                        <li><strong>Robust to outliers:</strong> Uses ranks, not raw values</li>
-                        <li><strong>Monotonic focus:</strong> Detects any consistent increasing/decreasing trend</li>
-                        <li><strong>Scale-independent:</strong> Works when raters use different thresholds but agree on ordering</li>
-                        <li><strong>Interpretable:</strong> Familiar correlation coefficient interpretation</li>
-                    </ul>
-                </div>
-
-                <div style='margin-top: 15px; padding: 10px; background-color: rgba(88, 88, 88, 0.06); border-radius: 4px; color: inherit;'>
-                    <p style='margin: 0; font-size: 12px; color: inherit;'>
-                        <strong>Reference:</strong> Spearman, C. (1904). The proof and measurement of association between two things.
-                        <em>American Journal of Psychology</em>, 15(1), 72-101.
-                    </p>
-                </div>
-            </div>
-            "
+                html_content <- paste0(
+                    "\n            <div style='font-family: Arial, sans-serif; max-width: 800px; line-height: 1.6;'>\n                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>\n                    <h3 style='margin: 0 0 10px 0; color: inherit;'>",
+                    .("What is Mean Spearman Rho?"),
+                    "</h3>\n                    <p style='margin: 0; color: inherit;'>",
+                    paste0("\n                        ", jmvcore::format(.("Mean Spearman Rho ({tag1}) is the {tag2}average rank correlation coefficient{tag3} across all\n                        pairs of raters. Spearman's rho measures the {tag4}monotonic association{tag5} between two\n                        ordinal variables. It ranges from {tag6}-1 (perfect negative correlation){tag7} through\n                        {tag8}0 (no correlation){tag9} to {tag10}+1 (perfect positive correlation){tag11}.\n                        For interrater agreement, high positive values indicate raters rank cases similarly."), tag1 = "&#x3C1;", tag2 = "<strong>", tag3 = "</strong>", tag4 = "<strong>", tag5 = "</strong>", tag6 = "<strong>", tag7 = "</strong>", tag8 = "<strong>", tag9 = "</strong>", tag10 = "<strong>", tag11 = "</strong>"), "\n                    "),
+                    "</p>\n                </div>\n\n                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>\n                    <h4 style='margin: 0 0 10px 0; color: inherit;'>",
+                    .("When to Use Mean Spearman Rho"),
+                    "</h4>\n                    <p style='margin: 0 0 10px 0;'>",
+                    jmvcore::format(.("{tag1}Particularly useful for:{tag2}"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</p>\n                    <ul style='margin: 0; padding-left: 20px;'>\n                        <li>",
+                    jmvcore::format(.("{tag1}Ordinal data{tag2} - Tumor grades, severity scores, disease stages with rank order"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                        <li>",
+                    jmvcore::format(.("{tag1}Ranked data{tag2} - When raters rank cases from best to worst, or by priority"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                        <li>",
+                    jmvcore::format(.("{tag1}Monotonic relationships{tag2} - Tests if higher ratings by one rater correspond to higher ratings by another"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                        <li>",
+                    jmvcore::format(.("{tag1}Robust to outliers{tag2} - Uses ranks instead of raw values, less affected by extreme scores"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                        <li>",
+                    jmvcore::format(.("{tag1}Non-normal distributions{tag2} - Does not assume linear relationship or normal distribution"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                        <li>",
+                    jmvcore::format(.("{tag1}Correlation focus{tag2} - Emphasizes rank-order association rather than exact agreement"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                    </ul>\n                </div>\n\n                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>\n                    <h4 style='margin: 0 0 10px 0; color: inherit;'>",
+                    .("Spearman Rho vs Other Ordinal Measures"),
+                    "</h4>\n                    <table style='width: 100%; border-collapse: collapse;'>\n                        <tr style='background-color: rgba(88, 88, 88, 0.06); color: inherit;'>\n                            <th style='padding: 8px; text-align: left; border-bottom: 2px solid #333;'>",
+                    .("Measure"),
+                    "</th>\n                            <th style='padding: 8px; text-align: left; border-bottom: 2px solid #333;'>",
+                    .("What It Measures"),
+                    "</th>\n                            <th style='padding: 8px; text-align: left; border-bottom: 2px solid #333;'>",
+                    .("Best Use"),
+                    "</th>\n                        </tr>\n                        <tr>\n                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>",
+                    jmvcore::format(.("{tag1}Spearman Rho{tag2}"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</td>\n                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>",
+                    .("Monotonic rank correlation"),
+                    "</td>\n                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>",
+                    .("Ordinal data, robust to outliers"),
+                    "</td>\n                        </tr>\n                        <tr>\n                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>",
+                    jmvcore::format(.("{tag1}Kendall's tau{tag2}"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</td>\n                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>",
+                    .("Concordant pairs (similar to Spearman)"),
+                    "</td>\n                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>",
+                    .("Small samples, ties in data"),
+                    "</td>\n                        </tr>\n                        <tr>\n                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>",
+                    jmvcore::format(.("{tag1}Robinson's A{tag2}"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</td>\n                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>",
+                    .("Ordinal agreement (concordance)"),
+                    "</td>\n                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>",
+                    .("Agreement focus, skewed distributions"),
+                    "</td>\n                        </tr>\n                        <tr>\n                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>",
+                    jmvcore::format(.("{tag1}Weighted Kappa{tag2}"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</td>\n                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>",
+                    .("Chance-corrected ordinal agreement"),
+                    "</td>\n                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>",
+                    .("Exact + partial credit matching"),
+                    "</td>\n                        </tr>\n                        <tr>\n                            <td style='padding: 8px;'>",
+                    jmvcore::format(.("{tag1}Kendall's W{tag2}"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</td>\n                            <td style='padding: 8px;'>",
+                    .("Overall concordance (3+ raters)"),
+                    "</td>\n                            <td style='padding: 8px;'>",
+                    .("Multiple raters, ranking agreement"),
+                    "</td>\n                        </tr>\n                    </table>\n                    <p style='margin: 10px 0 0 0; font-size: 13px;'>",
+                    paste0("\n                        ", jmvcore::format(.("{tag1}Key difference:{tag2} Spearman rho measures {tag3}correlation{tag4} (association) while\n                        weighted kappa and Robinson's A measure {tag5}agreement{tag6} (concordance). High correlation indicates\n                        raters rank similarly but may use different scales."), tag1 = "<strong>", tag2 = "</strong>", tag3 = "<em>", tag4 = "</em>", tag5 = "<em>", tag6 = "</em>"), "\n                    "),
+                    "</p>\n                </div>\n\n                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>\n                    <h4 style='margin: 0 0 10px 0; color: inherit;'>",
+                    .("Clinical Pathology Use Cases"),
+                    "</h4>\n\n                    <p style='margin: 0 0 10px 0; font-weight: bold;'>",
+                    .("1. Tumor Grade Severity Correlation (Multi-Rater Consistency):"),
+                    "</p>\n                    <ul style='margin: 0 0 15px 0; padding-left: 20px; line-height: 1.6;'>\n                        <li>",
+                    jmvcore::format(.("{tag1}Scenario:{tag2} Four pathologists grade 50 neuroendocrine tumors (G1, G2, G3) based on Ki-67 and mitotic count"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                        <li>",
+                    jmvcore::format(.("{tag1}Purpose:{tag2} Assess if pathologists rank tumors by aggressiveness consistently"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                        <li>",
+                    jmvcore::format(.("{tag1}Mean {tag2} = 0.85:{tag3} Strong rank correlation - pathologists agree on relative tumor aggressiveness"), tag1 = "<strong>", tag2 = "&#x3C1;", tag3 = "</strong>"),
+                    "</li>\n                        <li>",
+                    jmvcore::format(.("{tag1}What it shows:{tag2} The four pathologists order tumors by aggressiveness consistently with one another. This is reproducibility, not prognostic validity - no outcome data enter the statistic"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                        <li>",
+                    jmvcore::format(.("{tag1}Advantage:{tag2} Less sensitive to exact grade disagreement (G1 vs. G2) than kappa; focuses on ordinal progression"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                    </ul>\n\n                    <p style='margin: 0 0 10px 0; font-weight: bold;'>",
+                    .("2. Inflammation Severity Ranking (Cross-Specialty Agreement):"),
+                    "</p>\n                    <ul style='margin: 0 0 15px 0; padding-left: 20px; line-height: 1.6;'>\n                        <li>",
+                    jmvcore::format(.("{tag1}Scenario:{tag2} GI pathologist and general pathologist rank 60 IBD biopsies by inflammatory activity (quiescent, mild, moderate, severe)"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                        <li>",
+                    jmvcore::format(.("{tag1}Challenge:{tag2} Specialists may use different thresholds but recognize same severity progression"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                        <li>",
+                    jmvcore::format(.("{tag1}Mean {tag2} = 0.78:{tag3} Good rank correlation despite potential systematic differences in grading"), tag1 = "<strong>", tag2 = "&#x3C1;", tag3 = "</strong>"),
+                    "</li>\n                        <li>",
+                    jmvcore::format(.("{tag1}Interpretation:{tag2} Both pathologists recognize severity trajectory; category-specific calibration may still be needed"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                        <li>",
+                    jmvcore::format(.("{tag1}Scope:{tag2} The two pathologists order cases similarly, but a single rank correlation against one comparator does not settle a competency question - that needs a prespecified threshold, a representative case mix, and review of the discordant cases"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                    </ul>\n\n                    <p style='margin: 0 0 10px 0; font-weight: bold;'>",
+                    .("3. Fibrosis Progression Assessment (Longitudinal Consistency):"),
+                    "</p>\n                    <ul style='margin: 0 0 15px 0; padding-left: 20px; line-height: 1.6;'>\n                        <li>",
+                    jmvcore::format(.("{tag1}Scenario:{tag2} Three hepatopathologists rank 40 liver biopsies by fibrosis severity (Ishak 0-6 or Metavir F0-F4)"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                        <li>",
+                    jmvcore::format(.("{tag1}Ordinal nature:{tag2} Fibrosis stages represent clear progression from none to cirrhosis"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                        <li>",
+                    jmvcore::format(.("{tag1}Mean {tag2} = 0.89:{tag3} Excellent rank correlation on disease progression"), tag1 = "<strong>", tag2 = "&#x3C1;", tag3 = "</strong>"),
+                    "</li>\n                        <li>",
+                    jmvcore::format(.("{tag1}What the coefficient shows:{tag2} The three pathologists order cases by fibrosis severity similarly. Rank correlation says nothing about whether the assigned stages are correct, so it does not on its own support any staging-driven decision"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                        <li>",
+                    jmvcore::format(.("{tag1}Robust to staging system:{tag2} Correlation reflects biological progression regardless of exact staging scheme"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                    </ul>\n\n                    <p style='margin: 0 0 10px 0; font-weight: bold;'>",
+                    .("4. Diagnostic Difficulty Ranking (Educational Calibration):"),
+                    "</p>\n                    <ul style='margin: 0 0 15px 0; padding-left: 20px; line-height: 1.6;'>\n                        <li>",
+                    jmvcore::format(.("{tag1}Scenario:{tag2} Five dermatopathologists rank 30 melanocytic lesions by diagnostic difficulty (1 = easiest, 30 = most difficult)"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                        <li>",
+                    jmvcore::format(.("{tag1}Educational goal:{tag2} Identify cases with consensus difficulty for training curriculum"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                        <li>",
+                    jmvcore::format(.("{tag1}Mean {tag2} = 0.72:{tag3} Good correlation on difficulty progression"), tag1 = "<strong>", tag2 = "&#x3C1;", tag3 = "</strong>"),
+                    "</li>\n                        <li>",
+                    jmvcore::format(.("{tag1}Case selection:{tag2} High-correlation difficult cases become core teaching material"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                        <li>",
+                    jmvcore::format(.("{tag1}Low-correlation cases:{tag2} Reveal pathologist-specific knowledge gaps requiring targeted education"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                    </ul>\n\n                    <p style='margin: 0 0 10px 0; font-weight: bold;'>",
+                    .("5. AI Algorithm Validation (Prognostic Ordering):"),
+                    "</p>\n                    <ul style='margin: 0; padding-left: 20px; line-height: 1.6;'>\n                        <li>",
+                    jmvcore::format(.("{tag1}Scenario:{tag2} Compare AI algorithm vs. three expert pathologists on Gleason grading (6-10) for 100 prostate cores"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                        <li>",
+                    jmvcore::format(.("{tag1}Validation focus:{tag2} AI should rank cases by prognostic severity similar to experts"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                        <li>",
+                    jmvcore::format(.("{tag1}Mean {tag2} = 0.81:{tag3} Strong rank correlation between AI and expert consensus"), tag1 = "<strong>", tag2 = "&#x3C1;", tag3 = "</strong>"),
+                    "</li>\n                        <li>",
+                    jmvcore::format(.("{tag1}What it shows:{tag2} The algorithm orders cases similarly to the expert consensus grade; no outcome data enter the statistic, so it says nothing about prognostic performance"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                        <li>",
+                    jmvcore::format(.("{tag1}Advantage:{tag2} Robust measure unaffected by systematic grade shifts (AI consistently one grade higher/lower)"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                        <li>",
+                    jmvcore::format(.("{tag1}Scope:{tag2} Rank correlation with experts describes ordering only; it does not address absolute grade accuracy, calibration, or outcome prediction, so it does not on its own answer whether the algorithm is fit for any particular use"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                    </ul>\n                </div>\n\n                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>\n                    <h4 style='margin: 0 0 10px 0; color: inherit;'>",
+                    .("Interpretation Guidelines"),
+                    "</h4>\n                    <table style='width: 100%; border-collapse: collapse; font-size: 14px;'>\n                        <tr>\n                            <td style='padding: 5px; font-weight: bold; border-bottom: 1px solid #ddd;'>",
+                    jmvcore::format(.("{tag1} {tag2} 0.30"), tag1 = "&#x3C1;", tag2 = "&lt;"),
+                    "</td>\n                            <td style='padding: 5px; border-bottom: 1px solid #ddd;'>",
+                    .("Negligible correlation"),
+                    "</td>\n                        </tr>\n                        <tr>\n                            <td style='padding: 5px; font-weight: bold; border-bottom: 1px solid #ddd;'>",
+                    jmvcore::format(.("0.30 <= {tag1} {tag2} 0.50"), tag1 = "&#x3C1;", tag2 = "&lt;"),
+                    "</td>\n                            <td style='padding: 5px; border-bottom: 1px solid #ddd;'>",
+                    .("Low correlation"),
+                    "</td>\n                        </tr>\n                        <tr>\n                            <td style='padding: 5px; font-weight: bold; border-bottom: 1px solid #ddd;'>",
+                    jmvcore::format(.("0.50 <= {tag1} {tag2} 0.70"), tag1 = "&#x3C1;", tag2 = "&lt;"),
+                    "</td>\n                            <td style='padding: 5px; border-bottom: 1px solid #ddd;'>",
+                    .("Moderate correlation"),
+                    "</td>\n                        </tr>\n                        <tr>\n                            <td style='padding: 5px; font-weight: bold; border-bottom: 1px solid #ddd;'>",
+                    jmvcore::format(.("0.70 <= {tag1} {tag2} 0.90"), tag1 = "&#x3C1;", tag2 = "&lt;"),
+                    "</td>\n                            <td style='padding: 5px; border-bottom: 1px solid #ddd;'>",
+                    .("High correlation"),
+                    "</td>\n                        </tr>\n                        <tr>\n                            <td style='padding: 5px; font-weight: bold;'>",
+                    jmvcore::format(.("{tag1} >= 0.90"), tag1 = "&#x3C1;"),
+                    "</td>\n                            <td style='padding: 5px;'>",
+                    .("Very high correlation (nearly identical rankings)"),
+                    "</td>\n                        </tr>\n                    </table>\n                    <p style='margin: 10px 0 0 0; font-size: 13px;'>",
+                    paste0("\n                        ", jmvcore::format(.("{tag1}Note:{tag2} For interrater agreement, Mean {tag3} represents the average correlation\n                        across all rater pairs. Min/Max values show range of pairwise correlations, indicating\n                        heterogeneity among rater pairs."), tag1 = "<strong>", tag2 = "</strong>", tag3 = "&#x3C1;"), "\n                    "),
+                    "</p>\n                </div>\n\n                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; color: inherit;'>\n                    <h4 style='margin: 0 0 10px 0; color: inherit;'>",
+                    .("Key Advantages"),
+                    "</h4>\n                    <ul style='margin: 0; padding-left: 20px; font-size: 13px;'>\n                        <li>",
+                    jmvcore::format(.("{tag1}Nonparametric:{tag2} No assumptions about distribution or linearity"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                        <li>",
+                    jmvcore::format(.("{tag1}Robust to outliers:{tag2} Uses ranks, not raw values"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                        <li>",
+                    jmvcore::format(.("{tag1}Monotonic focus:{tag2} Detects any consistent increasing/decreasing trend"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                        <li>",
+                    jmvcore::format(.("{tag1}Scale-independent:{tag2} Works when raters use different thresholds but agree on ordering"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                        <li>",
+                    jmvcore::format(.("{tag1}Interpretable:{tag2} Familiar correlation coefficient interpretation"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                    </ul>\n                </div>\n\n                <div style='margin-top: 15px; padding: 10px; background-color: rgba(88, 88, 88, 0.06); border-radius: 4px; color: inherit;'>\n                    <p style='margin: 0; font-size: 12px; color: inherit;'>",
+                    paste0("\n                        ", jmvcore::format(.("{tag1}Reference:{tag2} Spearman, C. (1904). The proof and measurement of association between two things.\n                        {tag3}American Journal of Psychology{tag4}, 15(1), 72-101."), tag1 = "<strong>", tag2 = "</strong>", tag3 = "<em>", tag4 = "</em>"), "\n                    "),
+                    "</p>\n                </div>\n            </div>\n            "
+                )
 
                 self$results$meanSpearmanExplanation$setContent(html_content)
             },
@@ -2841,186 +2789,175 @@ agreementClass <- if (requireNamespace("jmvcore")) {
             .populateMeanPearsonExplanation = function() {
                 # Provide educational content about Mean Pearson Correlation
 
-                html_content <- "
-            <div style='font-family: Arial, sans-serif; max-width: 800px; line-height: 1.6;'>
-                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>
-                    <h3 style='margin: 0 0 10px 0; color: inherit;'>What is Mean Pearson Correlation?</h3>
-                    <p style='margin: 0; color: inherit;'>
-                        Mean Pearson Correlation (r) is the <strong>average linear correlation coefficient</strong> across all
-                        pairs of raters for continuous measurements. Pearson's r measures the <strong>strength and direction
-                        of linear association</strong> between two variables. It ranges from <strong>-1 (perfect negative)</strong>
-                        through <strong>0 (no linear relationship)</strong> to <strong>+1 (perfect positive correlation)</strong>.
-                        For interrater agreement, high positive values indicate raters' measurements vary together linearly.
-                    </p>
-                </div>
-
-                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>
-                    <h4 style='margin: 0 0 10px 0; color: inherit;'>When to Use Mean Pearson Correlation</h4>
-                    <p style='margin: 0 0 10px 0;'><strong>Particularly useful for:</strong></p>
-                    <ul style='margin: 0; padding-left: 20px;'>
-                        <li><strong>Continuous measurements</strong> - Tumor size (mm), biomarker concentrations (ng/mL), quantitative scores</li>
-                        <li><strong>Linear relationships</strong> - When measurements should vary proportionally between raters</li>
-                        <li><strong>Normally distributed data</strong> - Optimal when data approximates normal distribution</li>
-                        <li><strong>Correlation focus</strong> - Assesses if raters' measurements covary, not absolute agreement</li>
-                        <li><strong>Simple interpretation</strong> - Familiar correlation coefficient widely understood in research</li>
-                        <li><strong>Complements ICC</strong> - ICC measures absolute agreement, Pearson measures relative association</li>
-                    </ul>
-                </div>
-
-                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>
-                    <h4 style='margin: 0 0 10px 0; color: inherit;'>Pearson r vs Other Continuous Measures</h4>
-                    <table style='width: 100%; border-collapse: collapse;'>
-                        <tr style='background-color: rgba(88, 88, 88, 0.06); color: inherit;'>
-                            <th style='padding: 8px; text-align: left; border-bottom: 2px solid #333;'>Measure</th>
-                            <th style='padding: 8px; text-align: left; border-bottom: 2px solid #333;'>What It Measures</th>
-                            <th style='padding: 8px; text-align: left; border-bottom: 2px solid #333;'>Best Use</th>
-                        </tr>
-                        <tr>
-                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'><strong>Pearson r</strong></td>
-                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>Linear correlation (association)</td>
-                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>Continuous data, linear relationships</td>
-                        </tr>
-                        <tr>
-                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'><strong>ICC</strong></td>
-                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>Absolute agreement (concordance)</td>
-                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>When raters should give identical values</td>
-                        </tr>
-                        <tr>
-                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'><strong>Spearman Rho</strong></td>
-                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>Monotonic rank correlation</td>
-                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>Ordinal data, non-linear relationships, outliers</td>
-                        </tr>
-                        <tr>
-                            <td style='padding: 8px;'><strong>Bland-Altman</strong></td>
-                            <td style='padding: 8px;'>Limits of agreement (bias and precision)</td>
-                            <td style='padding: 8px;'>Method comparison, detecting systematic bias</td>
-                        </tr>
-                    </table>
-                    <p style='margin: 10px 0 0 0; font-size: 13px;'>
-                        <strong>Key difference:</strong> Pearson r measures <em>correlation</em> (how measurements covary) while
-                        ICC measures <em>agreement</em> (how close measurements are). Two raters can have perfect correlation (r = 1.0)
-                        but poor agreement if one systematically measures higher/lower than the other.
-                    </p>
-                </div>
-
-                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>
-                    <h4 style='margin: 0 0 10px 0; color: inherit;'>Clinical Pathology Use Cases</h4>
-
-                    <p style='margin: 0 0 10px 0; font-weight: bold;'>1. Tumor Measurement Agreement (Longest Diameter):</p>
-                    <ul style='margin: 0 0 15px 0; padding-left: 20px; line-height: 1.6;'>
-                        <li><strong>Scenario:</strong> Three pathologists measure tumor size (mm) on 60 H&E slides using calibrated microscopes</li>
-                        <li><strong>Continuous scale:</strong> Tumor diameter ranges from 5-85 mm with normal distribution</li>
-                        <li><strong>Mean r = 0.94:</strong> Very high linear correlation - measurements vary together proportionally</li>
-                        <li><strong>Clinical interpretation:</strong> Pathologists agree on relative tumor sizes despite potential measurement variations</li>
-                        <li><strong>Advantage:</strong> Simple correlation reveals if raters rank tumors similarly by size</li>
-                    </ul>
-
-                    <p style='margin: 0 0 10px 0; font-weight: bold;'>2. Biomarker Quantification (Ki-67 Percentage):</p>
-                    <ul style='margin: 0 0 15px 0; padding-left: 20px; line-height: 1.6;'>
-                        <li><strong>Scenario:</strong> Four pathologists estimate Ki-67 proliferation index (0-100%) on 50 breast cancers</li>
-                        <li><strong>Challenge:</strong> Visual estimation varies between observers but should correlate</li>
-                        <li><strong>Mean r = 0.88:</strong> High correlation indicates pathologists identify high vs. low proliferation consistently</li>
-                        <li><strong>ICC comparison:</strong> ICC may be lower due to systematic differences in thresholds, but correlation remains high</li>
-                        <li><strong>What it shows:</strong> The pathologists order cases by proliferation similarly. Correlation is unchanged by systematic scaling differences, so it does not show that the reported percentages agree, and no outcome data enter it</li>
-                    </ul>
-
-                    <p style='margin: 0 0 10px 0; font-weight: bold;'>3. Digital Image Analysis (Nuclear Area Measurement):</p>
-                    <ul style='margin: 0 0 15px 0; padding-left: 20px; line-height: 1.6;'>
-                        <li><strong>Scenario:</strong> Compare three image analysis algorithms measuring nuclear area (&#x3BC;m&#xB2;) on 100 lymphoma cells</li>
-                        <li><strong>Continuous output:</strong> Algorithms provide precise continuous measurements</li>
-                        <li><strong>Mean r = 0.96:</strong> Excellent correlation - algorithms rank nuclear sizes identically</li>
-                        <li><strong>Systematic bias:</strong> One algorithm may consistently measure 5% larger, but correlation remains perfect</li>
-                        <li><strong>Application:</strong> Algorithms capture same biological variation despite calibration differences</li>
-                    </ul>
-
-                    <p style='margin: 0 0 10px 0; font-weight: bold;'>4. Mitotic Count Concordance (Per 10 HPF):</p>
-                    <ul style='margin: 0 0 15px 0; padding-left: 20px; line-height: 1.6;'>
-                        <li><strong>Scenario:</strong> Five pathologists count mitotic figures per 10 HPF in 40 sarcoma cases (range: 0-35)</li>
-                        <li><strong>Count data:</strong> Discrete counts treated as continuous for correlation</li>
-                        <li><strong>Mean r = 0.82:</strong> High correlation - pathologists identify mitotically active vs. inactive tumors</li>
-                        <li><strong>What it shows:</strong> The pathologists order cases by mitotic activity similarly. Counts that differ by a constant factor still correlate perfectly, so this is not agreement on the count that drives the grade, and no outcome data enter it</li>
-                        <li><strong>Training assessment:</strong> Lower correlations identify pathologists needing mitosis recognition training</li>
-                    </ul>
-
-                    <p style='margin: 0 0 10px 0; font-weight: bold;'>5. Automated Quantification Validation (Collagen Area Fraction):</p>
-                    <ul style='margin: 0; padding-left: 20px; line-height: 1.6;'>
-                        <li><strong>Scenario:</strong> Validate AI algorithm vs. manual quantification of fibrosis (collagen %) on 70 liver biopsies</li>
-                        <li><strong>Measurement:</strong> Continuous percentage (0-100%) from Sirius Red staining</li>
-                        <li><strong>Comparison:</strong> AI algorithm vs. three expert hepatopathologists</li>
-                        <li><strong>Mean r = 0.91:</strong> Excellent correlation between AI and human quantification</li>
-                        <li><strong>Scope:</strong> Correlation describes shared ordering only; a proportional or constant offset leaves it high, so it does not address absolute agreement or calibration and does not on its own answer whether the algorithm is fit for any particular use</li>
-                        <li><strong>Efficiency gain:</strong> AI provides objective, reproducible measurements with human-level correlation</li>
-                    </ul>
-                </div>
-
-                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>
-                    <h4 style='margin: 0 0 10px 0; color: inherit;'>Interpretation Guidelines</h4>
-                    <table style='width: 100%; border-collapse: collapse; font-size: 14px;'>
-                        <tr>
-                            <td style='padding: 5px; font-weight: bold; border-bottom: 1px solid #ddd;'>r &lt; 0.30</td>
-                            <td style='padding: 5px; border-bottom: 1px solid #ddd;'>Negligible correlation</td>
-                        </tr>
-                        <tr>
-                            <td style='padding: 5px; font-weight: bold; border-bottom: 1px solid #ddd;'>0.30 <= r &lt; 0.50</td>
-                            <td style='padding: 5px; border-bottom: 1px solid #ddd;'>Low correlation</td>
-                        </tr>
-                        <tr>
-                            <td style='padding: 5px; font-weight: bold; border-bottom: 1px solid #ddd;'>0.50 <= r &lt; 0.70</td>
-                            <td style='padding: 5px; border-bottom: 1px solid #ddd;'>Moderate correlation</td>
-                        </tr>
-                        <tr>
-                            <td style='padding: 5px; font-weight: bold; border-bottom: 1px solid #ddd;'>0.70 <= r &lt; 0.90</td>
-                            <td style='padding: 5px; border-bottom: 1px solid #ddd;'>High correlation</td>
-                        </tr>
-                        <tr>
-                            <td style='padding: 5px; font-weight: bold;'>r >= 0.90</td>
-                            <td style='padding: 5px;'>Very high correlation (nearly perfect linear relationship)</td>
-                        </tr>
-                    </table>
-                    <p style='margin: 10px 0 0 0; font-size: 13px;'>
-                        <strong>Note:</strong> For interrater agreement, Mean r represents the average correlation
-                        across all rater pairs. Min/Max values reveal heterogeneity among pairs. High correlation
-                        indicates measurements covary linearly but does NOT guarantee absolute agreement.
-                    </p>
-                </div>
-
-                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>
-                    <h4 style='margin: 0 0 10px 0; color: inherit;'>Correlation vs. Agreement</h4>
-                    <p style='margin: 0 0 10px 0; font-size: 13px;'>
-                        <strong>Important distinction:</strong> Pearson correlation measures how measurements <em>vary together</em>,
-                        not how <em>close</em> they are. Example:
-                    </p>
-                    <ul style='margin: 0; padding-left: 20px; font-size: 13px; line-height: 1.6;'>
-                        <li><strong>Perfect correlation (r = 1.0):</strong> Rater A measures 10, 20, 30 mm; Rater B measures 20, 40, 60 mm
-                            (doubled values - perfect linear relationship but poor agreement)</li>
-                        <li><strong>Good agreement (ICC = 0.95):</strong> Rater A: 10, 20, 30 mm; Rater B: 11, 19, 31 mm
-                            (nearly identical values - may have slightly lower correlation if measurement error is random)</li>
-                    </ul>
-                    <p style='margin: 10px 0 0 0; font-size: 13px;'>
-                        <strong>Recommendation:</strong> Use Pearson r when assessing if raters <em>rank</em> measurements similarly.
-                        Use ICC when raters should produce <em>identical</em> measurements. Often report both for comprehensive assessment.
-                    </p>
-                </div>
-
-                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; color: inherit;'>
-                    <h4 style='margin: 0 0 10px 0; color: inherit;'>Key Advantages</h4>
-                    <ul style='margin: 0; padding-left: 20px; font-size: 13px;'>
-                        <li><strong>Simple and familiar:</strong> Widely understood correlation coefficient</li>
-                        <li><strong>Sensitive to linear trends:</strong> Detects proportional relationships between raters</li>
-                        <li><strong>Complements ICC:</strong> Provides different perspective (correlation vs. agreement)</li>
-                        <li><strong>Scale-independent:</strong> Unaffected by systematic shifts (all measurements +10 mm)</li>
-                        <li><strong>Hypothesis testing:</strong> Built-in significance test for correlation &#x2260; 0</li>
-                    </ul>
-                </div>
-
-                <div style='margin-top: 15px; padding: 10px; background-color: rgba(88, 88, 88, 0.06); border-radius: 4px; color: inherit;'>
-                    <p style='margin: 0; font-size: 12px; color: inherit;'>
-                        <strong>Reference:</strong> Pearson, K. (1895). Note on regression and inheritance in the case of two parents.
-                        <em>Proceedings of the Royal Society of London</em>, 58, 240-242.
-                    </p>
-                </div>
-            </div>
-            "
+                html_content <- paste0(
+                    "\n            <div style='font-family: Arial, sans-serif; max-width: 800px; line-height: 1.6;'>\n                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>\n                    <h3 style='margin: 0 0 10px 0; color: inherit;'>",
+                    .("What is Mean Pearson Correlation?"),
+                    "</h3>\n                    <p style='margin: 0; color: inherit;'>",
+                    paste0("\n                        ", jmvcore::format(.("Mean Pearson Correlation (r) is the {tag1}average linear correlation coefficient{tag2} across all\n                        pairs of raters for continuous measurements. Pearson's r measures the {tag3}strength and direction\n                        of linear association{tag4} between two variables. It ranges from {tag5}-1 (perfect negative){tag6}\n                        through {tag7}0 (no linear relationship){tag8} to {tag9}+1 (perfect positive correlation){tag10}.\n                        For interrater agreement, high positive values indicate raters' measurements vary together linearly."), tag1 = "<strong>", tag2 = "</strong>", tag3 = "<strong>", tag4 = "</strong>", tag5 = "<strong>", tag6 = "</strong>", tag7 = "<strong>", tag8 = "</strong>", tag9 = "<strong>", tag10 = "</strong>"), "\n                    "),
+                    "</p>\n                </div>\n\n                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>\n                    <h4 style='margin: 0 0 10px 0; color: inherit;'>",
+                    .("When to Use Mean Pearson Correlation"),
+                    "</h4>\n                    <p style='margin: 0 0 10px 0;'>",
+                    jmvcore::format(.("{tag1}Particularly useful for:{tag2}"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</p>\n                    <ul style='margin: 0; padding-left: 20px;'>\n                        <li>",
+                    jmvcore::format(.("{tag1}Continuous measurements{tag2} - Tumor size (mm), biomarker concentrations (ng/mL), quantitative scores"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                        <li>",
+                    jmvcore::format(.("{tag1}Linear relationships{tag2} - When measurements should vary proportionally between raters"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                        <li>",
+                    jmvcore::format(.("{tag1}Normally distributed data{tag2} - Optimal when data approximates normal distribution"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                        <li>",
+                    jmvcore::format(.("{tag1}Correlation focus{tag2} - Assesses if raters' measurements covary, not absolute agreement"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                        <li>",
+                    jmvcore::format(.("{tag1}Simple interpretation{tag2} - Familiar correlation coefficient widely understood in research"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                        <li>",
+                    jmvcore::format(.("{tag1}Complements ICC{tag2} - ICC measures absolute agreement, Pearson measures relative association"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                    </ul>\n                </div>\n\n                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>\n                    <h4 style='margin: 0 0 10px 0; color: inherit;'>",
+                    .("Pearson r vs Other Continuous Measures"),
+                    "</h4>\n                    <table style='width: 100%; border-collapse: collapse;'>\n                        <tr style='background-color: rgba(88, 88, 88, 0.06); color: inherit;'>\n                            <th style='padding: 8px; text-align: left; border-bottom: 2px solid #333;'>",
+                    .("Measure"),
+                    "</th>\n                            <th style='padding: 8px; text-align: left; border-bottom: 2px solid #333;'>",
+                    .("What It Measures"),
+                    "</th>\n                            <th style='padding: 8px; text-align: left; border-bottom: 2px solid #333;'>",
+                    .("Best Use"),
+                    "</th>\n                        </tr>\n                        <tr>\n                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>",
+                    jmvcore::format(.("{tag1}Pearson r{tag2}"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</td>\n                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>",
+                    .("Linear correlation (association)"),
+                    "</td>\n                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>",
+                    .("Continuous data, linear relationships"),
+                    "</td>\n                        </tr>\n                        <tr>\n                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>",
+                    jmvcore::format(.("{tag1}ICC{tag2}"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</td>\n                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>",
+                    .("Absolute agreement (concordance)"),
+                    "</td>\n                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>",
+                    .("When raters should give identical values"),
+                    "</td>\n                        </tr>\n                        <tr>\n                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>",
+                    jmvcore::format(.("{tag1}Spearman Rho{tag2}"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</td>\n                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>",
+                    .("Monotonic rank correlation"),
+                    "</td>\n                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>",
+                    .("Ordinal data, non-linear relationships, outliers"),
+                    "</td>\n                        </tr>\n                        <tr>\n                            <td style='padding: 8px;'>",
+                    jmvcore::format(.("{tag1}Bland-Altman{tag2}"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</td>\n                            <td style='padding: 8px;'>",
+                    .("Limits of agreement (bias and precision)"),
+                    "</td>\n                            <td style='padding: 8px;'>",
+                    .("Method comparison, detecting systematic bias"),
+                    "</td>\n                        </tr>\n                    </table>\n                    <p style='margin: 10px 0 0 0; font-size: 13px;'>",
+                    paste0("\n                        ", jmvcore::format(.("{tag1}Key difference:{tag2} Pearson r measures {tag3}correlation{tag4} (how measurements covary) while\n                        ICC measures {tag5}agreement{tag6} (how close measurements are). Two raters can have perfect correlation (r = 1.0)\n                        but poor agreement if one systematically measures higher/lower than the other."), tag1 = "<strong>", tag2 = "</strong>", tag3 = "<em>", tag4 = "</em>", tag5 = "<em>", tag6 = "</em>"), "\n                    "),
+                    "</p>\n                </div>\n\n                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>\n                    <h4 style='margin: 0 0 10px 0; color: inherit;'>",
+                    .("Clinical Pathology Use Cases"),
+                    "</h4>\n\n                    <p style='margin: 0 0 10px 0; font-weight: bold;'>",
+                    .("1. Tumor Measurement Agreement (Longest Diameter):"),
+                    "</p>\n                    <ul style='margin: 0 0 15px 0; padding-left: 20px; line-height: 1.6;'>\n                        <li>",
+                    jmvcore::format(.("{tag1}Scenario:{tag2} Three pathologists measure tumor size (mm) on 60 H&E slides using calibrated microscopes"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                        <li>",
+                    jmvcore::format(.("{tag1}Continuous scale:{tag2} Tumor diameter ranges from 5-85 mm with normal distribution"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                        <li>",
+                    jmvcore::format(.("{tag1}Mean r = 0.94:{tag2} Very high linear correlation - measurements vary together proportionally"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                        <li>",
+                    jmvcore::format(.("{tag1}Clinical interpretation:{tag2} Pathologists agree on relative tumor sizes despite potential measurement variations"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                        <li>",
+                    jmvcore::format(.("{tag1}Advantage:{tag2} Simple correlation reveals if raters rank tumors similarly by size"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                    </ul>\n\n                    <p style='margin: 0 0 10px 0; font-weight: bold;'>",
+                    .("2. Biomarker Quantification (Ki-67 Percentage):"),
+                    "</p>\n                    <ul style='margin: 0 0 15px 0; padding-left: 20px; line-height: 1.6;'>\n                        <li>",
+                    jmvcore::format(.("{tag1}Scenario:{tag2} Four pathologists estimate Ki-67 proliferation index (0-100%) on 50 breast cancers"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                        <li>",
+                    jmvcore::format(.("{tag1}Challenge:{tag2} Visual estimation varies between observers but should correlate"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                        <li>",
+                    jmvcore::format(.("{tag1}Mean r = 0.88:{tag2} High correlation indicates pathologists identify high vs. low proliferation consistently"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                        <li>",
+                    jmvcore::format(.("{tag1}ICC comparison:{tag2} ICC may be lower due to systematic differences in thresholds, but correlation remains high"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                        <li>",
+                    jmvcore::format(.("{tag1}What it shows:{tag2} The pathologists order cases by proliferation similarly. Correlation is unchanged by systematic scaling differences, so it does not show that the reported percentages agree, and no outcome data enter it"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                    </ul>\n\n                    <p style='margin: 0 0 10px 0; font-weight: bold;'>",
+                    .("3. Digital Image Analysis (Nuclear Area Measurement):"),
+                    "</p>\n                    <ul style='margin: 0 0 15px 0; padding-left: 20px; line-height: 1.6;'>\n                        <li>",
+                    jmvcore::format(.("{tag1}Scenario:{tag2} Compare three image analysis algorithms measuring nuclear area ({tag3}m{tag4}) on 100 lymphoma cells"), tag1 = "<strong>", tag2 = "</strong>", tag3 = "&#x3BC;", tag4 = "&#xB2;"),
+                    "</li>\n                        <li>",
+                    jmvcore::format(.("{tag1}Continuous output:{tag2} Algorithms provide precise continuous measurements"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                        <li>",
+                    jmvcore::format(.("{tag1}Mean r = 0.96:{tag2} Excellent correlation - algorithms rank nuclear sizes identically"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                        <li>",
+                    jmvcore::format(.("{tag1}Systematic bias:{tag2} One algorithm may consistently measure 5% larger, but correlation remains perfect"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                        <li>",
+                    jmvcore::format(.("{tag1}Application:{tag2} Algorithms capture same biological variation despite calibration differences"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                    </ul>\n\n                    <p style='margin: 0 0 10px 0; font-weight: bold;'>",
+                    .("4. Mitotic Count Concordance (Per 10 HPF):"),
+                    "</p>\n                    <ul style='margin: 0 0 15px 0; padding-left: 20px; line-height: 1.6;'>\n                        <li>",
+                    jmvcore::format(.("{tag1}Scenario:{tag2} Five pathologists count mitotic figures per 10 HPF in 40 sarcoma cases (range: 0-35)"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                        <li>",
+                    jmvcore::format(.("{tag1}Count data:{tag2} Discrete counts treated as continuous for correlation"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                        <li>",
+                    jmvcore::format(.("{tag1}Mean r = 0.82:{tag2} High correlation - pathologists identify mitotically active vs. inactive tumors"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                        <li>",
+                    jmvcore::format(.("{tag1}What it shows:{tag2} The pathologists order cases by mitotic activity similarly. Counts that differ by a constant factor still correlate perfectly, so this is not agreement on the count that drives the grade, and no outcome data enter it"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                        <li>",
+                    jmvcore::format(.("{tag1}Training assessment:{tag2} Lower correlations identify pathologists needing mitosis recognition training"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                    </ul>\n\n                    <p style='margin: 0 0 10px 0; font-weight: bold;'>",
+                    .("5. Automated Quantification Validation (Collagen Area Fraction):"),
+                    "</p>\n                    <ul style='margin: 0; padding-left: 20px; line-height: 1.6;'>\n                        <li>",
+                    jmvcore::format(.("{tag1}Scenario:{tag2} Validate AI algorithm vs. manual quantification of fibrosis (collagen %) on 70 liver biopsies"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                        <li>",
+                    jmvcore::format(.("{tag1}Measurement:{tag2} Continuous percentage (0-100%) from Sirius Red staining"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                        <li>",
+                    jmvcore::format(.("{tag1}Comparison:{tag2} AI algorithm vs. three expert hepatopathologists"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                        <li>",
+                    jmvcore::format(.("{tag1}Mean r = 0.91:{tag2} Excellent correlation between AI and human quantification"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                        <li>",
+                    jmvcore::format(.("{tag1}Scope:{tag2} Correlation describes shared ordering only; a proportional or constant offset leaves it high, so it does not address absolute agreement or calibration and does not on its own answer whether the algorithm is fit for any particular use"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                        <li>",
+                    jmvcore::format(.("{tag1}Efficiency gain:{tag2} AI provides objective, reproducible measurements with human-level correlation"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                    </ul>\n                </div>\n\n                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>\n                    <h4 style='margin: 0 0 10px 0; color: inherit;'>",
+                    .("Interpretation Guidelines"),
+                    "</h4>\n                    <table style='width: 100%; border-collapse: collapse; font-size: 14px;'>\n                        <tr>\n                            <td style='padding: 5px; font-weight: bold; border-bottom: 1px solid #ddd;'>",
+                    jmvcore::format(.("r {tag1} 0.30"), tag1 = "&lt;"),
+                    "</td>\n                            <td style='padding: 5px; border-bottom: 1px solid #ddd;'>",
+                    .("Negligible correlation"),
+                    "</td>\n                        </tr>\n                        <tr>\n                            <td style='padding: 5px; font-weight: bold; border-bottom: 1px solid #ddd;'>",
+                    jmvcore::format(.("0.30 <= r {tag1} 0.50"), tag1 = "&lt;"),
+                    "</td>\n                            <td style='padding: 5px; border-bottom: 1px solid #ddd;'>",
+                    .("Low correlation"),
+                    "</td>\n                        </tr>\n                        <tr>\n                            <td style='padding: 5px; font-weight: bold; border-bottom: 1px solid #ddd;'>",
+                    jmvcore::format(.("0.50 <= r {tag1} 0.70"), tag1 = "&lt;"),
+                    "</td>\n                            <td style='padding: 5px; border-bottom: 1px solid #ddd;'>",
+                    .("Moderate correlation"),
+                    "</td>\n                        </tr>\n                        <tr>\n                            <td style='padding: 5px; font-weight: bold; border-bottom: 1px solid #ddd;'>",
+                    jmvcore::format(.("0.70 <= r {tag1} 0.90"), tag1 = "&lt;"),
+                    "</td>\n                            <td style='padding: 5px; border-bottom: 1px solid #ddd;'>",
+                    .("High correlation"),
+                    "</td>\n                        </tr>\n                        <tr>\n                            <td style='padding: 5px; font-weight: bold;'>",
+                    .("r >= 0.90"),
+                    "</td>\n                            <td style='padding: 5px;'>",
+                    .("Very high correlation (nearly perfect linear relationship)"),
+                    "</td>\n                        </tr>\n                    </table>\n                    <p style='margin: 10px 0 0 0; font-size: 13px;'>",
+                    paste0("\n                        ", jmvcore::format(.("{tag1}Note:{tag2} For interrater agreement, Mean r represents the average correlation\n                        across all rater pairs. Min/Max values reveal heterogeneity among pairs. High correlation\n                        indicates measurements covary linearly but does NOT guarantee absolute agreement."), tag1 = "<strong>", tag2 = "</strong>"), "\n                    "),
+                    "</p>\n                </div>\n\n                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>\n                    <h4 style='margin: 0 0 10px 0; color: inherit;'>",
+                    .("Correlation vs. Agreement"),
+                    "</h4>\n                    <p style='margin: 0 0 10px 0; font-size: 13px;'>",
+                    paste0("\n                        ", jmvcore::format(.("{tag1}Important distinction:{tag2} Pearson correlation measures how measurements {tag3}vary together{tag4},\n                        not how {tag5}close{tag6} they are. Example:"), tag1 = "<strong>", tag2 = "</strong>", tag3 = "<em>", tag4 = "</em>", tag5 = "<em>", tag6 = "</em>"), "\n                    "),
+                    "</p>\n                    <ul style='margin: 0; padding-left: 20px; font-size: 13px; line-height: 1.6;'>\n                        <li>",
+                    jmvcore::format(.("{tag1}Perfect correlation (r = 1.0):{tag2} Rater A measures 10, 20, 30 mm; Rater B measures 20, 40, 60 mm\n                            (doubled values - perfect linear relationship but poor agreement)"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                        <li>",
+                    jmvcore::format(.("{tag1}Good agreement (ICC = 0.95):{tag2} Rater A: 10, 20, 30 mm; Rater B: 11, 19, 31 mm\n                            (nearly identical values - may have slightly lower correlation if measurement error is random)"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                    </ul>\n                    <p style='margin: 10px 0 0 0; font-size: 13px;'>",
+                    paste0("\n                        ", jmvcore::format(.("{tag1}Recommendation:{tag2} Use Pearson r when assessing if raters {tag3}rank{tag4} measurements similarly.\n                        Use ICC when raters should produce {tag5}identical{tag6} measurements. Often report both for comprehensive assessment."), tag1 = "<strong>", tag2 = "</strong>", tag3 = "<em>", tag4 = "</em>", tag5 = "<em>", tag6 = "</em>"), "\n                    "),
+                    "</p>\n                </div>\n\n                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; color: inherit;'>\n                    <h4 style='margin: 0 0 10px 0; color: inherit;'>",
+                    .("Key Advantages"),
+                    "</h4>\n                    <ul style='margin: 0; padding-left: 20px; font-size: 13px;'>\n                        <li>",
+                    jmvcore::format(.("{tag1}Simple and familiar:{tag2} Widely understood correlation coefficient"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                        <li>",
+                    jmvcore::format(.("{tag1}Sensitive to linear trends:{tag2} Detects proportional relationships between raters"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                        <li>",
+                    jmvcore::format(.("{tag1}Complements ICC:{tag2} Provides different perspective (correlation vs. agreement)"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                        <li>",
+                    jmvcore::format(.("{tag1}Scale-independent:{tag2} Unaffected by systematic shifts (all measurements +10 mm)"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                        <li>",
+                    jmvcore::format(.("{tag1}Hypothesis testing:{tag2} Built-in significance test for correlation {tag3} 0"), tag1 = "<strong>", tag2 = "</strong>", tag3 = "&#x2260;"),
+                    "</li>\n                    </ul>\n                </div>\n\n                <div style='margin-top: 15px; padding: 10px; background-color: rgba(88, 88, 88, 0.06); border-radius: 4px; color: inherit;'>\n                    <p style='margin: 0; font-size: 12px; color: inherit;'>",
+                    paste0("\n                        ", jmvcore::format(.("{tag1}Reference:{tag2} Pearson, K. (1895). Note on regression and inheritance in the case of two parents.\n                        {tag3}Proceedings of the Royal Society of London{tag4}, 58, 240-242."), tag1 = "<strong>", tag2 = "</strong>", tag3 = "<em>", tag4 = "</em>"), "\n                    "),
+                    "</p>\n                </div>\n            </div>\n            "
+                )
 
                 self$results$meanPearsonExplanation$setContent(html_content)
             },
@@ -3173,292 +3110,237 @@ agreementClass <- if (requireNamespace("jmvcore")) {
             .populateLinCCCExplanation = function() {
                 # Provide educational content about Lin's Concordance Correlation Coefficient
 
-                html_content <- "
-            <div style='font-family: Arial, sans-serif; max-width: 800px; line-height: 1.6;'>
-                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>
-                    <h3 style='margin: 0 0 10px 0; color: inherit;'>What is Lin's Concordance Correlation Coefficient (CCC)?</h3>
-                    <p style='margin: 0; color: inherit;'>
-                        Lin's CCC evaluates <strong>agreement</strong> (not just association) by measuring both:
-                    </p>
-                    <ul style='margin: 10px 0 0 0; padding-left: 20px;'>
-                        <li><strong>Precision</strong> - How closely measurements correlate (Pearson's r)</li>
-                        <li><strong>Accuracy</strong> - How close measurements are to perfect agreement (bias correction factor C<sub>b</sub>)</li>
-                    </ul>
-                    <p style='margin: 10px 0 0 0; color: inherit;'>
-                        <strong>Formula:</strong> CCC = r &#xD7; C<sub>b</sub>, where C<sub>b</sub> = 2 / (v + 1/v + u&#xB2;)
-                    </p>
-                    <p style='margin: 5px 0 0 0; color: inherit; font-size: 0.9em;'>
-                        v = &#x3C3;<sub>x</sub> / &#x3C3;<sub>y</sub> (scale shift), u = (&#x3BC;<sub>x</sub> - &#x3BC;<sub>y</sub>) / &#x221A;(&#x3C3;<sub>x</sub>&#x3C3;<sub>y</sub>) (location shift)
-                    </p>
-                </div>
-
-                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>
-                    <h4 style='margin: 0 0 10px 0; color: inherit;'>When to Use Lin's CCC</h4>
-                    <p style='margin: 0 0 10px 0;'><strong>Essential for method comparison and validation:</strong></p>
-                    <ul style='margin: 0; padding-left: 20px;'>
-                        <li><strong>Method comparison</strong> - Comparing manual vs. automated measurements</li>
-                        <li><strong>Instrument validation</strong> - Assessing new equipment against gold standard</li>
-                        <li><strong>Observer agreement</strong> - Evaluating measurement consistency between raters</li>
-                        <li><strong>Quality control</strong> - Monitoring measurement system performance over time</li>
-                        <li><strong>Biomarker validation</strong> - Comparing different assay platforms</li>
-                    </ul>
-                </div>
-
-                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>
-                    <h4 style='margin: 0 0 10px 0; color: inherit;'>Interpreting CCC Values</h4>
-                    <table style='width: 100%; border-collapse: collapse;'>
-                        <tr style='background-color: rgba(88, 88, 88, 0.06); color: inherit;'>
-                            <th style='padding: 8px; text-align: left; border-bottom: 2px solid #333;'>CCC Value</th>
-                            <th style='padding: 8px; text-align: left; border-bottom: 2px solid #333;'>Agreement Strength</th>
-                            <th style='padding: 8px; text-align: left; border-bottom: 2px solid #333;'>Interpretation</th>
-                        </tr>
-                        <tr>
-                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'><strong>&lt; 0.40</strong></td>
-                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>Poor</td>
-                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>Large deviation from the line of identity</td>
-                        </tr>
-                        <tr>
-                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'><strong>0.40 to &lt; 0.70</strong></td>
-                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>Fair</td>
-                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>Appreciable deviation from the line of identity</td>
-                        </tr>
-                        <tr>
-                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'><strong>0.70 to &lt; 0.90</strong></td>
-                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>Moderate</td>
-                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>Moderate deviation from the line of identity</td>
-                        </tr>
-                        <tr>
-                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'><strong>0.90 to &lt; 0.95</strong></td>
-                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>Good</td>
-                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>Small deviation from the line of identity</td>
-                        </tr>
-                        <tr>
-                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'><strong>0.95 to &lt; 0.99</strong></td>
-                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>Substantial</td>
-                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>Very small deviation from the line of identity</td>
-                        </tr>
-                        <tr>
-                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'><strong>0.99 to 1.00</strong></td>
-                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>Almost perfect</td>
-                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>Negligible deviation from the line of identity</td>
-                        </tr>
-                    </table>
-                    <p style='margin: 15px 0 0 0; font-style: italic; color: inherit;'>
-                        Note: these band boundaries are more lenient than McBride's (2005) published CCC scale, and they are
-                        context-dependent. A CCC does not establish that two methods can be used in place of one another - that
-                        requires a prespecified acceptable difference, assessed with the Total Deviation Index or Bland-Altman limits.
-                    </p>
-                </div>
-
-                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>
-                    <h4 style='margin: 0 0 10px 0; color: inherit;'>CCC vs. Pearson's r: Key Differences</h4>
-                    <table style='width: 100%; border-collapse: collapse;'>
-                        <tr style='background-color: rgba(88, 88, 88, 0.06); color: inherit;'>
-                            <th style='padding: 8px; text-align: left; border-bottom: 2px solid #333;'>Characteristic</th>
-                            <th style='padding: 8px; text-align: left; border-bottom: 2px solid #333;'>Pearson's r</th>
-                            <th style='padding: 8px; text-align: left; border-bottom: 2px solid #333;'>Lin's CCC</th>
-                        </tr>
-                        <tr>
-                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'><strong>Measures</strong></td>
-                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>Linear association only</td>
-                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>Agreement (precision + accuracy)</td>
-                        </tr>
-                        <tr>
-                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'><strong>Systematic bias</strong></td>
-                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>Ignored (r=1 even with bias)</td>
-                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>Penalized (CCC < 1 with bias)</td>
-                        </tr>
-                        <tr>
-                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'><strong>Scale differences</strong></td>
-                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>Ignored</td>
-                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>Penalized</td>
-                        </tr>
-                        <tr>
-                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'><strong>Best use</strong></td>
-                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>Association studies</td>
-                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>Method comparison, agreement</td>
-                        </tr>
-                    </table>
-                    <p style='margin: 15px 0 0 0;'>
-                        <strong>Example:</strong> Two methods with r = 1.0 but Method B = 2 &#xD7; Method A have perfect correlation
-                        but poor agreement. CCC would be substantially < 1.0, correctly identifying the systematic difference.
-                    </p>
-                </div>
-
-                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>
-                    <h4 style='margin: 0 0 10px 0; color: inherit;'>Clinical Use Cases in Pathology</h4>
-
-                    <div style='margin-bottom: 20px;'>
-                        <h5 style='color: inherit; margin: 10px 0 5px 0;'>
-                            <span style='background: #C2185B; color: white; padding: 2px 8px; border-radius: 3px; margin-right: 8px;'>1</span>
-                            Manual vs. Digital Ki-67 Quantification
-                        </h5>
-                        <p style='margin: 5px 0; padding-left: 30px;'>
-                            <strong>Scenario:</strong> Validate digital image analysis software against manual Ki-67 counting
-                            by expert pathologists on 100 breast cancer cases (0-100% proliferation index).
-                        </p>
-                        <p style='margin: 5px 0; padding-left: 30px;'>
-                            <strong>Results:</strong><br>
-                            &#x2022; Pearson's r = 0.96 (excellent correlation)<br>
-                            &#x2022; CCC = 0.88 (poor on McBride's scale, which needs 0.90)<br>
-                            &#x2022; Bias correction factor C<sub>b</sub> = 0.92 (8% accuracy loss)<br>
-                            &#x2022; Digital consistently 3-5% lower than manual
-                        </p>
-                        <p style='margin: 5px 0; padding-left: 30px;'>
-                            <strong>Clinical Interpretation:</strong> High correlation (r=0.96) masks systematic underestimation
-                            by digital method. CCC (0.88) correctly identifies poor agreement requiring calibration before
-                            clinical use.
-                        </p>
-                        <p style='margin: 5px 0; padding-left: 30px;'>
-                            <strong>Application:</strong> Apply +4% calibration correction to digital scores to achieve
-                            CCC > 0.95 for clinical implementation.
-                        </p>
-                    </div>
-
-                    <div style='margin-bottom: 20px;'>
-                        <h5 style='color: inherit; margin: 10px 0 5px 0;'>
-                            <span style='background: #C2185B; color: white; padding: 2px 8px; border-radius: 3px; margin-right: 8px;'>2</span>
-                            Whole Slide Imaging vs. Glass Slide Mitotic Count
-                        </h5>
-                        <p style='margin: 5px 0; padding-left: 30px;'>
-                            <strong>Scenario:</strong> Four pathologists count mitoses per 10 HPF on 80 breast cancer cases
-                            using both glass slides and whole slide images (WSI).
-                        </p>
-                        <p style='margin: 5px 0; padding-left: 30px;'>
-                            <strong>Results (averaged across pathologists):</strong><br>
-                            &#x2022; Pearson's r = 0.94<br>
-                            &#x2022; CCC = 0.93<br>
-                            &#x2022; Bias correction factor C<sub>b</sub> = 0.99 (minimal bias)<br>
-                            &#x2022; Mean difference: WSI 0.3 mitoses/10HPF higher (not significant)
-                        </p>
-                        <p style='margin: 5px 0; padding-left: 30px;'>
-                            <strong>Clinical Interpretation:</strong> CCC=0.93 sits in the band this analysis prints as good
-                            concordance (0.90-0.95). CCC multiplies precision (r=0.94, how tightly the paired counts follow a
-                            straight line) by accuracy (C<sub>b</sub>=0.99, how close that line lies to the 45-degree line of
-                            identity); both are high here, which is why CCC comes out close to r.
-                        </p>
-                        <p style='margin: 5px 0; padding-left: 30px;'>
-                            <strong>Application:</strong> This level of concordance in one cohort supports proceeding to a
-                            formal validation study. A single-cohort CCC does not itself validate substituting WSI for glass
-                            slides: it does not address readers outside the study, case-mix effects, or behaviour at the
-                            mitotic-count thresholds that change grade.
-                        </p>
-                    </div>
-
-                    <div style='margin-bottom: 20px;'>
-                        <h5 style='color: inherit; margin: 10px 0 5px 0;'>
-                            <span style='background: #C2185B; color: white; padding: 2px 8px; border-radius: 3px; margin-right: 8px;'>3</span>
-                            PD-L1 TPS: Two IHC Antibody Clones Comparison
-                        </h5>
-                        <p style='margin: 5px 0; padding-left: 30px;'>
-                            <strong>Scenario:</strong> Compare PD-L1 tumor proportion scores (0-100%) between 22C3 and SP263
-                            antibody clones on 150 NSCLC cases.
-                        </p>
-                        <p style='margin: 5px 0; padding-left: 30px;'>
-                            <strong>Results:</strong><br>
-                            &#x2022; Pearson's r = 0.89<br>
-                            &#x2022; CCC = 0.75<br>
-                            &#x2022; Bias correction factor C<sub>b</sub> = 0.84 (16% accuracy loss)<br>
-                            &#x2022; SP263 scores average 8% higher than 22C3
-                        </p>
-                        <p style='margin: 5px 0; padding-left: 30px;'>
-                            <strong>Clinical Interpretation:</strong> CCC=0.75 sits in the band this analysis prints as
-                            moderate concordance (0.70-0.90), despite a high correlation (r=0.89). Correlation only asks
-                            whether the two clones rank cases in the same order; CCC also penalises distance from the line of
-                            identity, and C<sub>b</sub>=0.84 locates the loss there - a systematic offset, not scatter.
-                        </p>
-                        <p style='margin: 5px 0; padding-left: 30px;'>
-                            <strong>Application:</strong> The systematic offset falls in the range that spans the 1% and 50%
-                            TPS cutoffs, so scores from the two clones are not directly comparable at those cutoffs without
-                            further study of clone-specific behaviour.
-                        </p>
-                    </div>
-
-                    <div style='margin-bottom: 20px;'>
-                        <h5 style='color: inherit; margin: 10px 0 5px 0;'>
-                            <span style='background: #C2185B; color: white; padding: 2px 8px; border-radius: 3px; margin-right: 8px;'>4</span>
-                            Tumor Size: Radiology vs. Pathology Measurement
-                        </h5>
-                        <p style='margin: 5px 0; padding-left: 30px;'>
-                            <strong>Scenario:</strong> Compare preoperative imaging (CT/MRI) vs. pathology gross measurement
-                            for tumor size (mm) in 200 breast cancer cases.
-                        </p>
-                        <p style='margin: 5px 0; padding-left: 30px;'>
-                            <strong>Results:</strong><br>
-                            &#x2022; Pearson's r = 0.82<br>
-                            &#x2022; CCC = 0.67<br>
-                            &#x2022; Bias correction factor C<sub>b</sub> = 0.82<br>
-                            &#x2022; Imaging overestimates by 3.2 mm on average (includes surrounding edema)
-                        </p>
-                        <p style='margin: 5px 0; padding-left: 30px;'>
-                            <strong>Clinical Interpretation:</strong> CCC=0.67 sits in the band this analysis prints as fair
-                            concordance (0.40-0.70). Both components are down here: r=0.82 is scatter around the line, and
-                            C<sub>b</sub>=0.82 says the line itself sits off identity. Unlike the previous example, the
-                            disagreement is therefore not a pure offset.
-                        </p>
-                        <p style='margin: 5px 0; padding-left: 30px;'>
-                            <strong>What the numbers do and do not report:</strong> the 3.2 mm is an average difference over
-                            200 cases and says nothing about how far a single case can be off - the Bland-Altman limits of
-                            agreement in this analysis carry that spread. Because C<sub>b</sub> is not the only shortfall,
-                            subtracting the average offset would leave the two measurements still disagreeing.
-                        </p>
-                    </div>
-
-                    <div style='margin-bottom: 20px;'>
-                        <h5 style='color: inherit; margin: 10px 0 5px 0;'>
-                            <span style='background: #C2185B; color: white; padding: 2px 8px; border-radius: 3px; margin-right: 8px;'>5</span>
-                            HER2/neu Copy Number: FISH vs. Chromogenic ISH
-                        </h5>
-                        <p style='margin: 5px 0; padding-left: 30px;'>
-                            <strong>Scenario:</strong> Compare HER2 gene copy number (continuous ratio HER2/CEP17) between
-                            FISH and chromogenic ISH (CISH) on 120 breast cancer cases.
-                        </p>
-                        <p style='margin: 5px 0; padding-left: 30px;'>
-                            <strong>Results:</strong><br>
-                            &#x2022; Pearson's r = 0.97<br>
-                            &#x2022; CCC = 0.96<br>
-                            &#x2022; Bias correction factor C<sub>b</sub> = 0.99 (minimal bias)<br>
-                            &#x2022; Mean difference: CISH 0.05 ratio units lower (not clinically significant)
-                        </p>
-                        <p style='margin: 5px 0; padding-left: 30px;'>
-                            <strong>Clinical Interpretation:</strong> CCC=0.96 sits in the band this analysis prints as
-                            substantial concordance (0.95-0.99), with both high precision (r=0.97) and high accuracy
-                            (C<sub>b</sub>=0.99).
-                        </p>
-                        <p style='margin: 5px 0; padding-left: 30px;'>
-                            <strong>Application:</strong> A CCC of this size is consistent with close agreement, but it is not an
-                            equivalence test. Whether the two assays may be used in place of one another at the ratio >=2.0
-                            cutoff requires a prespecified acceptable difference and concordance assessed at that cutoff.
-                        </p>
-                    </div>
-                </div>
-
-                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>
-                    <h4 style='margin: 0 0 10px 0; color: inherit;'> Important Considerations</h4>
-                    <ul style='margin: 0; padding-left: 20px;'>
-                        <li><strong>Sample size:</strong> Minimum 30 paired observations; 100+ preferred for stable estimates</li>
-                        <li><strong>Outliers:</strong> CCC is sensitive to outliers; investigate extreme values before analysis</li>
-                        <li><strong>Range restriction:</strong> Limited measurement range can artificially inflate CCC</li>
-                        <li><strong>Missing data:</strong> Only complete pairs are analyzed; ensure balanced missingness</li>
-                        <li><strong>Clinical context:</strong> CCC thresholds vary by application; safety-critical uses require higher values</li>
-                        <li><strong>Complementary analysis:</strong> Use with Bland-Altman plots to visualize bias patterns</li>
-                        <li><strong>Multiple comparisons:</strong> For 3+ raters, all pairwise CCCs calculated; consider adjustment</li>
-                    </ul>
-                </div>
-
-                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; color: inherit;'>
-                    <h4 style='margin: 0 0 10px 0; color: inherit;'>Statistical Notes</h4>
-                    <ul style='margin: 0; padding-left: 20px;'>
-                        <li><strong>CCC formula:</strong> &#x3C1;<sub>c</sub> = 2&#x3C1;&#x3C3;<sub>x</sub>&#x3C3;<sub>y</sub> / (&#x3C3;<sub>x</sub>&#xB2; + &#x3C3;<sub>y</sub>&#xB2; + (&#x3BC;<sub>x</sub> - &#x3BC;<sub>y</sub>)&#xB2;)</li>
-                        <li><strong>Components:</strong> CCC = r &#xD7; C<sub>b</sub>, where C<sub>b</sub> is bias correction factor</li>
-                        <li><strong>Confidence intervals:</strong> Calculated using Fisher's Z-transformation</li>
-                        <li><strong>Null hypothesis:</strong> CCC = 0 (no concordance); test using asymptotic variance</li>
-                        <li><strong>Assumptions:</strong> Bivariate normal distribution preferred but not strictly required</li>
-                        <li><strong>Relationship to ICC:</strong> CCC for 2 raters &#x2248; ICC(2,1) under certain conditions</li>
-                    </ul>
-                </div>
-            </div>
-            "
+                html_content <- paste0(
+                    "\n            <div style='font-family: Arial, sans-serif; max-width: 800px; line-height: 1.6;'>\n                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>\n                    <h3 style='margin: 0 0 10px 0; color: inherit;'>",
+                    .("What is Lin's Concordance Correlation Coefficient (CCC)?"),
+                    "</h3>\n                    <p style='margin: 0; color: inherit;'>",
+                    paste0("\n                        ", jmvcore::format(.("Lin's CCC evaluates {tag1}agreement{tag2} (not just association) by measuring both:"), tag1 = "<strong>", tag2 = "</strong>"), "\n                    "),
+                    "</p>\n                    <ul style='margin: 10px 0 0 0; padding-left: 20px;'>\n                        <li>",
+                    jmvcore::format(.("{tag1}Precision{tag2} - How closely measurements correlate (Pearson's r)"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                        <li>",
+                    jmvcore::format(.("{tag1}Accuracy{tag2} - How close measurements are to perfect agreement (bias correction factor C{tag3}b{tag4})"), tag1 = "<strong>", tag2 = "</strong>", tag3 = "<sub>", tag4 = "</sub>"),
+                    "</li>\n                    </ul>\n                    <p style='margin: 10px 0 0 0; color: inherit;'>",
+                    paste0("\n                        ", jmvcore::format(.("{tag1}Formula:{tag2} CCC = r {tag3} C{tag4}b{tag5}, where C{tag6}b{tag7} = 2 / (v + 1/v + u{tag8})"), tag1 = "<strong>", tag2 = "</strong>", tag3 = "&#xD7;", tag4 = "<sub>", tag5 = "</sub>", tag6 = "<sub>", tag7 = "</sub>", tag8 = "&#xB2;"), "\n                    "),
+                    "</p>\n                    <p style='margin: 5px 0 0 0; color: inherit; font-size: 0.9em;'>",
+                    paste0("\n                        ", jmvcore::format(.("v = {tag1}{tag2}x{tag3} / {tag4}{tag5}y{tag6} (scale shift), u = ({tag7}{tag8}x{tag9} - {tag10}{tag11}y{tag12}) / {tag13}({tag14}{tag15}x{tag16}{tag17}{tag18}y{tag19}) (location shift)"), tag1 = "&#x3C3;", tag2 = "<sub>", tag3 = "</sub>", tag4 = "&#x3C3;", tag5 = "<sub>", tag6 = "</sub>", tag7 = "&#x3BC;", tag8 = "<sub>", tag9 = "</sub>", tag10 = "&#x3BC;", tag11 = "<sub>", tag12 = "</sub>", tag13 = "&#x221A;", tag14 = "&#x3C3;", tag15 = "<sub>", tag16 = "</sub>", tag17 = "&#x3C3;", tag18 = "<sub>", tag19 = "</sub>"), "\n                    "),
+                    "</p>\n                </div>\n\n                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>\n                    <h4 style='margin: 0 0 10px 0; color: inherit;'>",
+                    .("When to Use Lin's CCC"),
+                    "</h4>\n                    <p style='margin: 0 0 10px 0;'>",
+                    jmvcore::format(.("{tag1}Essential for method comparison and validation:{tag2}"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</p>\n                    <ul style='margin: 0; padding-left: 20px;'>\n                        <li>",
+                    jmvcore::format(.("{tag1}Method comparison{tag2} - Comparing manual vs. automated measurements"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                        <li>",
+                    jmvcore::format(.("{tag1}Instrument validation{tag2} - Assessing new equipment against gold standard"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                        <li>",
+                    jmvcore::format(.("{tag1}Observer agreement{tag2} - Evaluating measurement consistency between raters"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                        <li>",
+                    jmvcore::format(.("{tag1}Quality control{tag2} - Monitoring measurement system performance over time"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                        <li>",
+                    jmvcore::format(.("{tag1}Biomarker validation{tag2} - Comparing different assay platforms"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                    </ul>\n                </div>\n\n                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>\n                    <h4 style='margin: 0 0 10px 0; color: inherit;'>",
+                    .("Interpreting CCC Values"),
+                    "</h4>\n                    <table style='width: 100%; border-collapse: collapse;'>\n                        <tr style='background-color: rgba(88, 88, 88, 0.06); color: inherit;'>\n                            <th style='padding: 8px; text-align: left; border-bottom: 2px solid #333;'>",
+                    .("CCC Value"),
+                    "</th>\n                            <th style='padding: 8px; text-align: left; border-bottom: 2px solid #333;'>",
+                    .("Agreement Strength"),
+                    "</th>\n                            <th style='padding: 8px; text-align: left; border-bottom: 2px solid #333;'>",
+                    .("Interpretation"),
+                    "</th>\n                        </tr>\n                        <tr>\n                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>",
+                    jmvcore::format(.("{tag1}{tag2} 0.40{tag3}"), tag1 = "<strong>", tag2 = "&lt;", tag3 = "</strong>"),
+                    "</td>\n                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>",
+                    .("Poor"),
+                    "</td>\n                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>",
+                    .("Large deviation from the line of identity"),
+                    "</td>\n                        </tr>\n                        <tr>\n                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>",
+                    jmvcore::format(.("{tag1}0.40 to {tag2} 0.70{tag3}"), tag1 = "<strong>", tag2 = "&lt;", tag3 = "</strong>"),
+                    "</td>\n                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>",
+                    .("Fair"),
+                    "</td>\n                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>",
+                    .("Appreciable deviation from the line of identity"),
+                    "</td>\n                        </tr>\n                        <tr>\n                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>",
+                    jmvcore::format(.("{tag1}0.70 to {tag2} 0.90{tag3}"), tag1 = "<strong>", tag2 = "&lt;", tag3 = "</strong>"),
+                    "</td>\n                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>",
+                    .("Moderate"),
+                    "</td>\n                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>",
+                    .("Moderate deviation from the line of identity"),
+                    "</td>\n                        </tr>\n                        <tr>\n                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>",
+                    jmvcore::format(.("{tag1}0.90 to {tag2} 0.95{tag3}"), tag1 = "<strong>", tag2 = "&lt;", tag3 = "</strong>"),
+                    "</td>\n                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>",
+                    .("Good"),
+                    "</td>\n                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>",
+                    .("Small deviation from the line of identity"),
+                    "</td>\n                        </tr>\n                        <tr>\n                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>",
+                    jmvcore::format(.("{tag1}0.95 to {tag2} 0.99{tag3}"), tag1 = "<strong>", tag2 = "&lt;", tag3 = "</strong>"),
+                    "</td>\n                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>",
+                    .("Substantial"),
+                    "</td>\n                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>",
+                    .("Very small deviation from the line of identity"),
+                    "</td>\n                        </tr>\n                        <tr>\n                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>",
+                    jmvcore::format(.("{tag1}0.99 to 1.00{tag2}"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</td>\n                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>",
+                    .("Almost perfect"),
+                    "</td>\n                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>",
+                    .("Negligible deviation from the line of identity"),
+                    "</td>\n                        </tr>\n                    </table>\n                    <p style='margin: 15px 0 0 0; font-style: italic; color: inherit;'>",
+                    paste0("\n                        ", .("Note: these band boundaries are more lenient than McBride's (2005) published CCC scale, and they are\n                        context-dependent. A CCC does not establish that two methods can be used in place of one another - that\n                        requires a prespecified acceptable difference, assessed with the Total Deviation Index or Bland-Altman limits."), "\n                    "),
+                    "</p>\n                </div>\n\n                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>\n                    <h4 style='margin: 0 0 10px 0; color: inherit;'>",
+                    .("CCC vs. Pearson's r: Key Differences"),
+                    "</h4>\n                    <table style='width: 100%; border-collapse: collapse;'>\n                        <tr style='background-color: rgba(88, 88, 88, 0.06); color: inherit;'>\n                            <th style='padding: 8px; text-align: left; border-bottom: 2px solid #333;'>",
+                    .("Characteristic"),
+                    "</th>\n                            <th style='padding: 8px; text-align: left; border-bottom: 2px solid #333;'>",
+                    .("Pearson's r"),
+                    "</th>\n                            <th style='padding: 8px; text-align: left; border-bottom: 2px solid #333;'>",
+                    .("Lin's CCC"),
+                    "</th>\n                        </tr>\n                        <tr>\n                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>",
+                    jmvcore::format(.("{tag1}Measures{tag2}"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</td>\n                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>",
+                    .("Linear association only"),
+                    "</td>\n                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>",
+                    .("Agreement (precision + accuracy)"),
+                    "</td>\n                        </tr>\n                        <tr>\n                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>",
+                    jmvcore::format(.("{tag1}Systematic bias{tag2}"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</td>\n                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>",
+                    .("Ignored (r=1 even with bias)"),
+                    "</td>\n                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>",
+                    .("Penalized (CCC < 1 with bias)"),
+                    "</td>\n                        </tr>\n                        <tr>\n                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>",
+                    jmvcore::format(.("{tag1}Scale differences{tag2}"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</td>\n                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>",
+                    .("Ignored"),
+                    "</td>\n                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>",
+                    .("Penalized"),
+                    "</td>\n                        </tr>\n                        <tr>\n                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>",
+                    jmvcore::format(.("{tag1}Best use{tag2}"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</td>\n                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>",
+                    .("Association studies"),
+                    "</td>\n                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>",
+                    .("Method comparison, agreement"),
+                    "</td>\n                        </tr>\n                    </table>\n                    <p style='margin: 15px 0 0 0;'>",
+                    paste0("\n                        ", jmvcore::format(.("{tag1}Example:{tag2} Two methods with r = 1.0 but Method B = 2 {tag3} Method A have perfect correlation\n                        but poor agreement. CCC would be substantially < 1.0, correctly identifying the systematic difference."), tag1 = "<strong>", tag2 = "</strong>", tag3 = "&#xD7;"), "\n                    "),
+                    "</p>\n                </div>\n\n                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>\n                    <h4 style='margin: 0 0 10px 0; color: inherit;'>",
+                    .("Clinical Use Cases in Pathology"),
+                    "</h4>\n\n                    <div style='margin-bottom: 20px;'>\n                        <h5 style='color: inherit; margin: 10px 0 5px 0;'>",
+                    paste0("\n                            ", jmvcore::format(.("{tag1}1{tag2}\n                            Manual vs. Digital Ki-67 Quantification"), tag1 = "<span style='background: #C2185B; color: white; padding: 2px 8px; border-radius: 3px; margin-right: 8px;'>", tag2 = "</span>"), "\n                        "),
+                    "</h5>\n                        <p style='margin: 5px 0; padding-left: 30px;'>",
+                    paste0("\n                            ", jmvcore::format(.("{tag1}Scenario:{tag2} Validate digital image analysis software against manual Ki-67 counting\n                            by expert pathologists on 100 breast cancer cases (0-100% proliferation index)."), tag1 = "<strong>", tag2 = "</strong>"), "\n                        "),
+                    "</p>\n                        <p style='margin: 5px 0; padding-left: 30px;'>",
+                    paste0("\n                            ", jmvcore::format(.("{tag1}Results:{tag2}"), tag1 = "<strong>", tag2 = "</strong>")),
+                    "<br>",
+                    paste0("\n                            ", jmvcore::format(.("{tag1} Pearson's r = 0.96 (excellent correlation)"), tag1 = "&#x2022;")),
+                    "<br>",
+                    paste0("\n                            ", jmvcore::format(.("{tag1} CCC = 0.88 (poor on McBride's scale, which needs 0.90)"), tag1 = "&#x2022;")),
+                    "<br>",
+                    paste0("\n                            ", jmvcore::format(.("{tag1} Bias correction factor C{tag2}b{tag3} = 0.92 (8% accuracy loss)"), tag1 = "&#x2022;", tag2 = "<sub>", tag3 = "</sub>")),
+                    "<br>",
+                    paste0("\n                            ", jmvcore::format(.("{tag1} Digital consistently 3-5% lower than manual"), tag1 = "&#x2022;"), "\n                        "),
+                    "</p>\n                        <p style='margin: 5px 0; padding-left: 30px;'>",
+                    paste0("\n                            ", jmvcore::format(.("{tag1}Clinical Interpretation:{tag2} High correlation (r=0.96) masks systematic underestimation\n                            by digital method. CCC (0.88) correctly identifies poor agreement requiring calibration before\n                            clinical use."), tag1 = "<strong>", tag2 = "</strong>"), "\n                        "),
+                    "</p>\n                        <p style='margin: 5px 0; padding-left: 30px;'>",
+                    paste0("\n                            ", jmvcore::format(.("{tag1}Application:{tag2} Apply +4% calibration correction to digital scores to achieve\n                            CCC > 0.95 for clinical implementation."), tag1 = "<strong>", tag2 = "</strong>"), "\n                        "),
+                    "</p>\n                    </div>\n\n                    <div style='margin-bottom: 20px;'>\n                        <h5 style='color: inherit; margin: 10px 0 5px 0;'>",
+                    paste0("\n                            ", jmvcore::format(.("{tag1}2{tag2}\n                            Whole Slide Imaging vs. Glass Slide Mitotic Count"), tag1 = "<span style='background: #C2185B; color: white; padding: 2px 8px; border-radius: 3px; margin-right: 8px;'>", tag2 = "</span>"), "\n                        "),
+                    "</h5>\n                        <p style='margin: 5px 0; padding-left: 30px;'>",
+                    paste0("\n                            ", jmvcore::format(.("{tag1}Scenario:{tag2} Four pathologists count mitoses per 10 HPF on 80 breast cancer cases\n                            using both glass slides and whole slide images (WSI)."), tag1 = "<strong>", tag2 = "</strong>"), "\n                        "),
+                    "</p>\n                        <p style='margin: 5px 0; padding-left: 30px;'>",
+                    paste0("\n                            ", jmvcore::format(.("{tag1}Results (averaged across pathologists):{tag2}"), tag1 = "<strong>", tag2 = "</strong>")),
+                    "<br>",
+                    paste0("\n                            ", jmvcore::format(.("{tag1} Pearson's r = 0.94"), tag1 = "&#x2022;")),
+                    "<br>",
+                    paste0("\n                            ", jmvcore::format(.("{tag1} CCC = 0.93"), tag1 = "&#x2022;")),
+                    "<br>",
+                    paste0("\n                            ", jmvcore::format(.("{tag1} Bias correction factor C{tag2}b{tag3} = 0.99 (minimal bias)"), tag1 = "&#x2022;", tag2 = "<sub>", tag3 = "</sub>")),
+                    "<br>",
+                    paste0("\n                            ", jmvcore::format(.("{tag1} Mean difference: WSI 0.3 mitoses/10HPF higher (not significant)"), tag1 = "&#x2022;"), "\n                        "),
+                    "</p>\n                        <p style='margin: 5px 0; padding-left: 30px;'>",
+                    paste0("\n                            ", jmvcore::format(.("{tag1}Clinical Interpretation:{tag2} CCC=0.93 sits in the band this analysis prints as good\n                            concordance (0.90-0.95). CCC multiplies precision (r=0.94, how tightly the paired counts follow a\n                            straight line) by accuracy (C{tag3}b{tag4}=0.99, how close that line lies to the 45-degree line of\n                            identity); both are high here, which is why CCC comes out close to r."), tag1 = "<strong>", tag2 = "</strong>", tag3 = "<sub>", tag4 = "</sub>"), "\n                        "),
+                    "</p>\n                        <p style='margin: 5px 0; padding-left: 30px;'>",
+                    paste0("\n                            ", jmvcore::format(.("{tag1}Application:{tag2} This level of concordance in one cohort supports proceeding to a\n                            formal validation study. A single-cohort CCC does not itself validate substituting WSI for glass\n                            slides: it does not address readers outside the study, case-mix effects, or behaviour at the\n                            mitotic-count thresholds that change grade."), tag1 = "<strong>", tag2 = "</strong>"), "\n                        "),
+                    "</p>\n                    </div>\n\n                    <div style='margin-bottom: 20px;'>\n                        <h5 style='color: inherit; margin: 10px 0 5px 0;'>",
+                    paste0("\n                            ", jmvcore::format(.("{tag1}3{tag2}\n                            PD-L1 TPS: Two IHC Antibody Clones Comparison"), tag1 = "<span style='background: #C2185B; color: white; padding: 2px 8px; border-radius: 3px; margin-right: 8px;'>", tag2 = "</span>"), "\n                        "),
+                    "</h5>\n                        <p style='margin: 5px 0; padding-left: 30px;'>",
+                    paste0("\n                            ", jmvcore::format(.("{tag1}Scenario:{tag2} Compare PD-L1 tumor proportion scores (0-100%) between 22C3 and SP263\n                            antibody clones on 150 NSCLC cases."), tag1 = "<strong>", tag2 = "</strong>"), "\n                        "),
+                    "</p>\n                        <p style='margin: 5px 0; padding-left: 30px;'>",
+                    paste0("\n                            ", jmvcore::format(.("{tag1}Results:{tag2}"), tag1 = "<strong>", tag2 = "</strong>")),
+                    "<br>",
+                    paste0("\n                            ", jmvcore::format(.("{tag1} Pearson's r = 0.89"), tag1 = "&#x2022;")),
+                    "<br>",
+                    paste0("\n                            ", jmvcore::format(.("{tag1} CCC = 0.75"), tag1 = "&#x2022;")),
+                    "<br>",
+                    paste0("\n                            ", jmvcore::format(.("{tag1} Bias correction factor C{tag2}b{tag3} = 0.84 (16% accuracy loss)"), tag1 = "&#x2022;", tag2 = "<sub>", tag3 = "</sub>")),
+                    "<br>",
+                    paste0("\n                            ", jmvcore::format(.("{tag1} SP263 scores average 8% higher than 22C3"), tag1 = "&#x2022;"), "\n                        "),
+                    "</p>\n                        <p style='margin: 5px 0; padding-left: 30px;'>",
+                    paste0("\n                            ", jmvcore::format(.("{tag1}Clinical Interpretation:{tag2} CCC=0.75 sits in the band this analysis prints as\n                            moderate concordance (0.70-0.90), despite a high correlation (r=0.89). Correlation only asks\n                            whether the two clones rank cases in the same order; CCC also penalises distance from the line of\n                            identity, and C{tag3}b{tag4}=0.84 locates the loss there - a systematic offset, not scatter."), tag1 = "<strong>", tag2 = "</strong>", tag3 = "<sub>", tag4 = "</sub>"), "\n                        "),
+                    "</p>\n                        <p style='margin: 5px 0; padding-left: 30px;'>",
+                    paste0("\n                            ", jmvcore::format(.("{tag1}Application:{tag2} The systematic offset falls in the range that spans the 1% and 50%\n                            TPS cutoffs, so scores from the two clones are not directly comparable at those cutoffs without\n                            further study of clone-specific behaviour."), tag1 = "<strong>", tag2 = "</strong>"), "\n                        "),
+                    "</p>\n                    </div>\n\n                    <div style='margin-bottom: 20px;'>\n                        <h5 style='color: inherit; margin: 10px 0 5px 0;'>",
+                    paste0("\n                            ", jmvcore::format(.("{tag1}4{tag2}\n                            Tumor Size: Radiology vs. Pathology Measurement"), tag1 = "<span style='background: #C2185B; color: white; padding: 2px 8px; border-radius: 3px; margin-right: 8px;'>", tag2 = "</span>"), "\n                        "),
+                    "</h5>\n                        <p style='margin: 5px 0; padding-left: 30px;'>",
+                    paste0("\n                            ", jmvcore::format(.("{tag1}Scenario:{tag2} Compare preoperative imaging (CT/MRI) vs. pathology gross measurement\n                            for tumor size (mm) in 200 breast cancer cases."), tag1 = "<strong>", tag2 = "</strong>"), "\n                        "),
+                    "</p>\n                        <p style='margin: 5px 0; padding-left: 30px;'>",
+                    paste0("\n                            ", jmvcore::format(.("{tag1}Results:{tag2}"), tag1 = "<strong>", tag2 = "</strong>")),
+                    "<br>",
+                    paste0("\n                            ", jmvcore::format(.("{tag1} Pearson's r = 0.82"), tag1 = "&#x2022;")),
+                    "<br>",
+                    paste0("\n                            ", jmvcore::format(.("{tag1} CCC = 0.67"), tag1 = "&#x2022;")),
+                    "<br>",
+                    paste0("\n                            ", jmvcore::format(.("{tag1} Bias correction factor C{tag2}b{tag3} = 0.82"), tag1 = "&#x2022;", tag2 = "<sub>", tag3 = "</sub>")),
+                    "<br>",
+                    paste0("\n                            ", jmvcore::format(.("{tag1} Imaging overestimates by 3.2 mm on average (includes surrounding edema)"), tag1 = "&#x2022;"), "\n                        "),
+                    "</p>\n                        <p style='margin: 5px 0; padding-left: 30px;'>",
+                    paste0("\n                            ", jmvcore::format(.("{tag1}Clinical Interpretation:{tag2} CCC=0.67 sits in the band this analysis prints as fair\n                            concordance (0.40-0.70). Both components are down here: r=0.82 is scatter around the line, and\n                            C{tag3}b{tag4}=0.82 says the line itself sits off identity. Unlike the previous example, the\n                            disagreement is therefore not a pure offset."), tag1 = "<strong>", tag2 = "</strong>", tag3 = "<sub>", tag4 = "</sub>"), "\n                        "),
+                    "</p>\n                        <p style='margin: 5px 0; padding-left: 30px;'>",
+                    paste0("\n                            ", jmvcore::format(.("{tag1}What the numbers do and do not report:{tag2} the 3.2 mm is an average difference over\n                            200 cases and says nothing about how far a single case can be off - the Bland-Altman limits of\n                            agreement in this analysis carry that spread. Because C{tag3}b{tag4} is not the only shortfall,\n                            subtracting the average offset would leave the two measurements still disagreeing."), tag1 = "<strong>", tag2 = "</strong>", tag3 = "<sub>", tag4 = "</sub>"), "\n                        "),
+                    "</p>\n                    </div>\n\n                    <div style='margin-bottom: 20px;'>\n                        <h5 style='color: inherit; margin: 10px 0 5px 0;'>",
+                    paste0("\n                            ", jmvcore::format(.("{tag1}5{tag2}\n                            HER2/neu Copy Number: FISH vs. Chromogenic ISH"), tag1 = "<span style='background: #C2185B; color: white; padding: 2px 8px; border-radius: 3px; margin-right: 8px;'>", tag2 = "</span>"), "\n                        "),
+                    "</h5>\n                        <p style='margin: 5px 0; padding-left: 30px;'>",
+                    paste0("\n                            ", jmvcore::format(.("{tag1}Scenario:{tag2} Compare HER2 gene copy number (continuous ratio HER2/CEP17) between\n                            FISH and chromogenic ISH (CISH) on 120 breast cancer cases."), tag1 = "<strong>", tag2 = "</strong>"), "\n                        "),
+                    "</p>\n                        <p style='margin: 5px 0; padding-left: 30px;'>",
+                    paste0("\n                            ", jmvcore::format(.("{tag1}Results:{tag2}"), tag1 = "<strong>", tag2 = "</strong>")),
+                    "<br>",
+                    paste0("\n                            ", jmvcore::format(.("{tag1} Pearson's r = 0.97"), tag1 = "&#x2022;")),
+                    "<br>",
+                    paste0("\n                            ", jmvcore::format(.("{tag1} CCC = 0.96"), tag1 = "&#x2022;")),
+                    "<br>",
+                    paste0("\n                            ", jmvcore::format(.("{tag1} Bias correction factor C{tag2}b{tag3} = 0.99 (minimal bias)"), tag1 = "&#x2022;", tag2 = "<sub>", tag3 = "</sub>")),
+                    "<br>",
+                    paste0("\n                            ", jmvcore::format(.("{tag1} Mean difference: CISH 0.05 ratio units lower (not clinically significant)"), tag1 = "&#x2022;"), "\n                        "),
+                    "</p>\n                        <p style='margin: 5px 0; padding-left: 30px;'>",
+                    paste0("\n                            ", jmvcore::format(.("{tag1}Clinical Interpretation:{tag2} CCC=0.96 sits in the band this analysis prints as\n                            substantial concordance (0.95-0.99), with both high precision (r=0.97) and high accuracy\n                            (C{tag3}b{tag4}=0.99)."), tag1 = "<strong>", tag2 = "</strong>", tag3 = "<sub>", tag4 = "</sub>"), "\n                        "),
+                    "</p>\n                        <p style='margin: 5px 0; padding-left: 30px;'>",
+                    paste0("\n                            ", jmvcore::format(.("{tag1}Application:{tag2} A CCC of this size is consistent with close agreement, but it is not an\n                            equivalence test. Whether the two assays may be used in place of one another at the ratio >=2.0\n                            cutoff requires a prespecified acceptable difference and concordance assessed at that cutoff."), tag1 = "<strong>", tag2 = "</strong>"), "\n                        "),
+                    "</p>\n                    </div>\n                </div>\n\n                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>\n                    <h4 style='margin: 0 0 10px 0; color: inherit;'>",
+                    paste0(" ", .("Important Considerations")),
+                    "</h4>\n                    <ul style='margin: 0; padding-left: 20px;'>\n                        <li>",
+                    jmvcore::format(.("{tag1}Sample size:{tag2} Minimum 30 paired observations; 100+ preferred for stable estimates"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                        <li>",
+                    jmvcore::format(.("{tag1}Outliers:{tag2} CCC is sensitive to outliers; investigate extreme values before analysis"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                        <li>",
+                    jmvcore::format(.("{tag1}Range restriction:{tag2} Limited measurement range can artificially inflate CCC"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                        <li>",
+                    jmvcore::format(.("{tag1}Missing data:{tag2} Only complete pairs are analyzed; ensure balanced missingness"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                        <li>",
+                    jmvcore::format(.("{tag1}Clinical context:{tag2} CCC thresholds vary by application; safety-critical uses require higher values"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                        <li>",
+                    jmvcore::format(.("{tag1}Complementary analysis:{tag2} Use with Bland-Altman plots to visualize bias patterns"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                        <li>",
+                    jmvcore::format(.("{tag1}Multiple comparisons:{tag2} For 3+ raters, all pairwise CCCs calculated; consider adjustment"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                    </ul>\n                </div>\n\n                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; color: inherit;'>\n                    <h4 style='margin: 0 0 10px 0; color: inherit;'>",
+                    .("Statistical Notes"),
+                    "</h4>\n                    <ul style='margin: 0; padding-left: 20px;'>\n                        <li>",
+                    jmvcore::format(.("{tag1}CCC formula:{tag2} {tag3}{tag4}c{tag5} = 2{tag6}{tag7}{tag8}x{tag9}{tag10}{tag11}y{tag12} / ({tag13}{tag14}x{tag15}{tag16} + {tag17}{tag18}y{tag19}{tag20} + ({tag21}{tag22}x{tag23} - {tag24}{tag25}y{tag26}){tag27})"), tag1 = "<strong>", tag2 = "</strong>", tag3 = "&#x3C1;", tag4 = "<sub>", tag5 = "</sub>", tag6 = "&#x3C1;", tag7 = "&#x3C3;", tag8 = "<sub>", tag9 = "</sub>", tag10 = "&#x3C3;", tag11 = "<sub>", tag12 = "</sub>", tag13 = "&#x3C3;", tag14 = "<sub>", tag15 = "</sub>", tag16 = "&#xB2;", tag17 = "&#x3C3;", tag18 = "<sub>", tag19 = "</sub>", tag20 = "&#xB2;", tag21 = "&#x3BC;", tag22 = "<sub>", tag23 = "</sub>", tag24 = "&#x3BC;", tag25 = "<sub>", tag26 = "</sub>", tag27 = "&#xB2;"),
+                    "</li>\n                        <li>",
+                    jmvcore::format(.("{tag1}Components:{tag2} CCC = r {tag3} C{tag4}b{tag5}, where C{tag6}b{tag7} is bias correction factor"), tag1 = "<strong>", tag2 = "</strong>", tag3 = "&#xD7;", tag4 = "<sub>", tag5 = "</sub>", tag6 = "<sub>", tag7 = "</sub>"),
+                    "</li>\n                        <li>",
+                    jmvcore::format(.("{tag1}Confidence intervals:{tag2} Calculated using Fisher's Z-transformation"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                        <li>",
+                    jmvcore::format(.("{tag1}Null hypothesis:{tag2} CCC = 0 (no concordance); test using asymptotic variance"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                        <li>",
+                    jmvcore::format(.("{tag1}Assumptions:{tag2} Bivariate normal distribution preferred but not strictly required"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                        <li>",
+                    jmvcore::format(.("{tag1}Relationship to ICC:{tag2} CCC for 2 raters {tag3} ICC(2,1) under certain conditions"), tag1 = "<strong>", tag2 = "</strong>", tag3 = "&#x2248;"),
+                    "</li>\n                    </ul>\n                </div>\n            </div>\n            "
+                )
 
                 self$results$linCCCExplanation$setContent(html_content)
             },
@@ -3713,129 +3595,354 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                 html <- '<div class="agreement-explanation">'
 
                 # What is TDI?
-                html <- paste0(html, "<h3>What is Total Deviation Index (TDI)?</h3>")
+                html <- paste0(html, paste0(
+                    "<h3>",
+                    .("What is Total Deviation Index (TDI)?"),
+                    "</h3>"
+                ))
                 html <- paste0(
-                    html, "<p>This analysis reports an <strong>empirical Total Deviation Index (TDI)</strong>: the selected ",
+                    html, paste0(
+                    "<p>",
+                    paste0(jmvcore::format(.("This analysis reports an {tag1}empirical Total Deviation Index (TDI){tag2}: the selected"), tag1 = "<strong>", tag2 = "</strong>"), " ")
+                ),
                     "quantile (for example, the 90th percentile) of the observed absolute differences between two methods. ",
                     "It is an unconditional summary of the sampled case mix in the original measurement units. It does not ",
                     "model how variability changes with magnitude and is not, by itself, an equivalence or regulatory test.</p>"
                 )
 
                 # Key Features
-                html <- paste0(html, "<h3>Key Features</h3>")
+                html <- paste0(html, paste0(
+                    "<h3>",
+                    .("Key Features"),
+                    "</h3>"
+                ))
                 html <- paste0(html, "<ul>")
                 html <- paste0(
-                    html, "<li><strong>Empirical coverage target:</strong> Selects which quantile of the observed absolute ",
+                    html, paste0(
+                    "<li>",
+                    paste0(jmvcore::format(.("{tag1}Empirical coverage target:{tag2} Selects which quantile of the observed absolute"), tag1 = "<strong>", tag2 = "</strong>"), " ")
+                ),
                     "differences is reported (typically 90% or 95%)</li>"
                 )
                 html <- paste0(
-                    html, "<li><strong>Acceptable Limit:</strong> User-defined threshold for maximum allowable difference ",
+                    html, paste0(
+                    "<li>",
+                    paste0(jmvcore::format(.("{tag1}Acceptable Limit:{tag2} User-defined threshold for maximum allowable difference"), tag1 = "<strong>", tag2 = "</strong>"), " ")
+                ),
                     "in original measurement units</li>"
                 )
                 html <- paste0(
-                    html, "<li><strong>Scope:</strong> A descriptive comparison with a prespecified limit; formal validation ",
+                    html, paste0(
+                    "<li>",
+                    paste0(jmvcore::format(.("{tag1}Scope:{tag2} A descriptive comparison with a prespecified limit; formal validation"), tag1 = "<strong>", tag2 = "</strong>"), " ")
+                ),
                     "requires a study design, estimand and decision rule appropriate to the intended use</li>"
                 )
-                html <- paste0(html, "<li><strong>Interpretability:</strong> Direct comparison to clinical acceptability criteria</li>")
+                html <- paste0(html, paste0(
+                    "<li>",
+                    jmvcore::format(.("{tag1}Interpretability:{tag2} Direct comparison to clinical acceptability criteria"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>"
+                ))
                 html <- paste0(html, "</ul>")
 
                 # Interpretation
-                html <- paste0(html, "<h3>Interpretation</h3>")
-                html <- paste0(html, "<p><strong>Decision Rule:</strong></p>")
+                html <- paste0(html, paste0(
+                    "<h3>",
+                    .("Interpretation"),
+                    "</h3>"
+                ))
+                html <- paste0(html, paste0(
+                    "<p>",
+                    jmvcore::format(.("{tag1}Decision Rule:{tag2}"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</p>"
+                ))
                 html <- paste0(html, "<ul>")
                 html <- paste0(
-                    html, '<li>If the <strong>upper confidence bound of the empirical TDI <= Acceptable Limit</strong>: ',
+                    html, paste0(
+                    "<li>",
+                    paste0(jmvcore::format(.("If the {tag1}upper confidence bound of the empirical TDI <= Acceptable Limit{tag2}:"), tag1 = "<strong>", tag2 = "</strong>"), " ")
+                ),
                     "the observed criterion is met for this sample and case mix. This is descriptive evidence, not proof ",
                     "that the methods are interchangeable</li>"
                 )
                 html <- paste0(
-                    html, '<li>If <strong>TDI > Acceptable Limit</strong>: the <span style="color: red;">',
+                    html, paste0(
+                    "<li>",
+                    jmvcore::format(.("If {tag1}TDI > Acceptable Limit{tag2}: the {tag3}"), tag1 = "<strong>", tag2 = "</strong>", tag3 = "<span style=\"color: red;\">")
+                ),
                     "<strong>observed criterion is not met</strong></span> at the selected empirical coverage target</li>"
                 )
                 html <- paste0(html, "</ul>")
 
                 # When to Use
-                html <- paste0(html, "<h3>When to Use TDI</h3>")
-                html <- paste0(html, "<p><strong>Useful as a descriptive companion for:</strong></p>")
+                html <- paste0(html, paste0(
+                    "<h3>",
+                    .("When to Use TDI"),
+                    "</h3>"
+                ))
+                html <- paste0(html, paste0(
+                    "<p>",
+                    jmvcore::format(.("{tag1}Useful as a descriptive companion for:{tag2}"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</p>"
+                ))
                 html <- paste0(html, "<ul>")
-                html <- paste0(html, "<li>Medical device validation (manual vs. automated instruments)</li>")
-                html <- paste0(html, "<li>Laboratory method comparison (old vs. new assay platforms)</li>")
-                html <- paste0(html, "<li>Biomarker assay method-comparison studies</li>")
-                html <- paste0(html, "<li>Imaging modality comparison (different scanners, readers, software)</li>")
-                html <- paste0(html, "<li>Quality control when acceptable limits are predefined</li>")
+                html <- paste0(html, paste0(
+                    "<li>",
+                    .("Medical device validation (manual vs. automated instruments)"),
+                    "</li>"
+                ))
+                html <- paste0(html, paste0(
+                    "<li>",
+                    .("Laboratory method comparison (old vs. new assay platforms)"),
+                    "</li>"
+                ))
+                html <- paste0(html, paste0(
+                    "<li>",
+                    .("Biomarker assay method-comparison studies"),
+                    "</li>"
+                ))
+                html <- paste0(html, paste0(
+                    "<li>",
+                    .("Imaging modality comparison (different scanners, readers, software)"),
+                    "</li>"
+                ))
+                html <- paste0(html, paste0(
+                    "<li>",
+                    .("Quality control when acceptable limits are predefined"),
+                    "</li>"
+                ))
                 html <- paste0(html, "</ul>")
 
                 # Clinical Examples
-                html <- paste0(html, "<h3>Pathology Examples</h3>")
+                html <- paste0(html, paste0(
+                    "<h3>",
+                    .("Pathology Examples"),
+                    "</h3>"
+                ))
                 html <- paste0(html, '<div class="clinical-examples">')
 
-                html <- paste0(html, "<p><strong>Example 1: Tumor Size Measurement</strong></p>")
-                html <- paste0(html, "<p><em>Context:</em> Comparing caliper-measured tumor size vs. digital pathology measurements.</p>")
+                html <- paste0(html, paste0(
+                    "<p>",
+                    jmvcore::format(.("{tag1}Example 1: Tumor Size Measurement{tag2}"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</p>"
+                ))
+                html <- paste0(html, paste0(
+                    "<p>",
+                    jmvcore::format(.("{tag1}Context:{tag2} Comparing caliper-measured tumor size vs. digital pathology measurements."), tag1 = "<em>", tag2 = "</em>"),
+                    "</p>"
+                ))
                 html <- paste0(html, "<ul>")
-                html <- paste0(html, "<li><strong>Acceptable Limit:</strong> 5 mm (clinical decision threshold)</li>")
-                html <- paste0(html, "<li><strong>Coverage:</strong> 90% of differences should be <=5 mm</li>")
-                html <- paste0(html, '<li><strong>Result:</strong> If TDI = 3.8 mm and its upper bound is also below 5 mm \u{2192} <span style="color: green;">observed criterion met</span></li>')
-                html <- paste0(html, '<li><strong>Result:</strong> If TDI = 6.2 mm \u{2192} <span style="color: red;">observed criterion not met</span></li>')
-                html <- paste0(html, "<li><strong>What it reports:</strong> the criterion is met or not met at the stated limit and coverage; it does not by itself settle whether one measurement method may take the place of the other in practice</li>")
+                html <- paste0(html, paste0(
+                    "<li>",
+                    jmvcore::format(.("{tag1}Acceptable Limit:{tag2} 5 mm (clinical decision threshold)"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>"
+                ))
+                html <- paste0(html, paste0(
+                    "<li>",
+                    jmvcore::format(.("{tag1}Coverage:{tag2} 90% of differences should be <=5 mm"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>"
+                ))
+                html <- paste0(html, paste0(
+                    "<li>",
+                    jmvcore::format(.("{tag1}Result:{tag2} If TDI = 3.8 mm and its upper bound is also below 5 mm \u2192 {tag3}observed criterion met{tag4}"), tag1 = "<strong>", tag2 = "</strong>", tag3 = "<span style=\"color: green;\">", tag4 = "</span>"),
+                    "</li>"
+                ))
+                html <- paste0(html, paste0(
+                    "<li>",
+                    jmvcore::format(.("{tag1}Result:{tag2} If TDI = 6.2 mm \u2192 {tag3}observed criterion not met{tag4}"), tag1 = "<strong>", tag2 = "</strong>", tag3 = "<span style=\"color: red;\">", tag4 = "</span>"),
+                    "</li>"
+                ))
+                html <- paste0(html, paste0(
+                    "<li>",
+                    jmvcore::format(.("{tag1}What it reports:{tag2} the criterion is met or not met at the stated limit and coverage; it does not by itself settle whether one measurement method may take the place of the other in practice"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>"
+                ))
                 html <- paste0(html, "</ul>")
 
-                html <- paste0(html, "<p><strong>Example 2: Ki-67 Proliferation Index</strong></p>")
-                html <- paste0(html, "<p><em>Context:</em> Manual counting vs. automated image analysis for Ki-67% in breast cancer.</p>")
+                html <- paste0(html, paste0(
+                    "<p>",
+                    jmvcore::format(.("{tag1}Example 2: Ki-67 Proliferation Index{tag2}"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</p>"
+                ))
+                html <- paste0(html, paste0(
+                    "<p>",
+                    jmvcore::format(.("{tag1}Context:{tag2} Manual counting vs. automated image analysis for Ki-67% in breast cancer."), tag1 = "<em>", tag2 = "</em>"),
+                    "</p>"
+                ))
                 html <- paste0(html, "<ul>")
-                html <- paste0(html, "<li><strong>Acceptable Limit:</strong> 10% absolute difference (clinical cutoff significance)</li>")
-                html <- paste0(html, "<li><strong>Coverage:</strong> 95% of differences should be <=10%</li>")
-                html <- paste0(html, "<li><strong>Result:</strong> If TDI = 7.5% \u{2192} 95% of differences fall within the 10% limit</li>")
-                html <- paste0(html, "<li><strong>Reporting:</strong> A TDI stated against a prespecified limit and coverage is one of the metrics method-comparison submissions expect; on its own it does not establish fitness for any particular use</li>")
+                html <- paste0(html, paste0(
+                    "<li>",
+                    jmvcore::format(.("{tag1}Acceptable Limit:{tag2} 10% absolute difference (clinical cutoff significance)"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>"
+                ))
+                html <- paste0(html, paste0(
+                    "<li>",
+                    jmvcore::format(.("{tag1}Coverage:{tag2} 95% of differences should be <=10%"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>"
+                ))
+                html <- paste0(html, paste0(
+                    "<li>",
+                    jmvcore::format(.("{tag1}Result:{tag2} If TDI = 7.5% \u2192 95% of differences fall within the 10% limit"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>"
+                ))
+                html <- paste0(html, paste0(
+                    "<li>",
+                    jmvcore::format(.("{tag1}Reporting:{tag2} A TDI stated against a prespecified limit and coverage is one of the metrics method-comparison submissions expect; on its own it does not establish fitness for any particular use"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>"
+                ))
                 html <- paste0(html, "</ul>")
 
-                html <- paste0(html, "<p><strong>Example 3: Mitotic Count Comparison</strong></p>")
-                html <- paste0(html, "<p><em>Context:</em> Two pathologists counting mitotic figures in 10 HPF.</p>")
+                html <- paste0(html, paste0(
+                    "<p>",
+                    jmvcore::format(.("{tag1}Example 3: Mitotic Count Comparison{tag2}"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</p>"
+                ))
+                html <- paste0(html, paste0(
+                    "<p>",
+                    jmvcore::format(.("{tag1}Context:{tag2} Two pathologists counting mitotic figures in 10 HPF."), tag1 = "<em>", tag2 = "</em>"),
+                    "</p>"
+                ))
                 html <- paste0(html, "<ul>")
-                html <- paste0(html, "<li><strong>Acceptable Limit:</strong> 5 mitoses (affects tumor grade)</li>")
-                html <- paste0(html, "<li><strong>Coverage:</strong> 90% of differences should be <=5</li>")
-                html <- paste0(html, "<li><strong>Result:</strong> If TDI = 4.2 \u{2192} 90% of count differences fall within the 5-mitosis limit</li>")
-                html <- paste0(html, "<li><strong>Quality Control:</strong> Gives a difference measured in the same units as the grading threshold, so it can be compared against a prespecified quality-control limit</li>")
+                html <- paste0(html, paste0(
+                    "<li>",
+                    jmvcore::format(.("{tag1}Acceptable Limit:{tag2} 5 mitoses (affects tumor grade)"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>"
+                ))
+                html <- paste0(html, paste0(
+                    "<li>",
+                    jmvcore::format(.("{tag1}Coverage:{tag2} 90% of differences should be <=5"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>"
+                ))
+                html <- paste0(html, paste0(
+                    "<li>",
+                    jmvcore::format(.("{tag1}Result:{tag2} If TDI = 4.2 \u2192 90% of count differences fall within the 5-mitosis limit"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>"
+                ))
+                html <- paste0(html, paste0(
+                    "<li>",
+                    jmvcore::format(.("{tag1}Quality Control:{tag2} Gives a difference measured in the same units as the grading threshold, so it can be compared against a prespecified quality-control limit"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>"
+                ))
                 html <- paste0(html, "</ul>")
 
                 html <- paste0(html, "</div>")
 
                 # Advantages Over Alternatives
-                html <- paste0(html, "<h3>Advantages Over Alternative Methods</h3>")
+                html <- paste0(html, paste0(
+                    "<h3>",
+                    .("Advantages Over Alternative Methods"),
+                    "</h3>"
+                ))
                 html <- paste0(html, '<table style="width: 100%; border-collapse: collapse;">')
                 html <- paste0(html, '<tr style="background-color: rgba(33, 33, 33, 0.07); color: inherit;">')
-                html <- paste0(html, '<th style="border: 1px solid #ddd; padding: 8px;">Method</th>')
-                html <- paste0(html, '<th style="border: 1px solid #ddd; padding: 8px;">Limitation</th>')
-                html <- paste0(html, '<th style="border: 1px solid #ddd; padding: 8px;">TDI Advantage</th>')
+                html <- paste0(html, paste0(
+                    "<th style=\"border: 1px solid #ddd; padding: 8px;\">",
+                    .("Method"),
+                    "</th>"
+                ))
+                html <- paste0(html, paste0(
+                    "<th style=\"border: 1px solid #ddd; padding: 8px;\">",
+                    .("Limitation"),
+                    "</th>"
+                ))
+                html <- paste0(html, paste0(
+                    "<th style=\"border: 1px solid #ddd; padding: 8px;\">",
+                    .("TDI Advantage"),
+                    "</th>"
+                ))
                 html <- paste0(html, "</tr>")
-                html <- paste0(html, '<tr><td style="border: 1px solid #ddd; padding: 8px;">Bland-Altman</td>')
-                html <- paste0(html, '<td style="border: 1px solid #ddd; padding: 8px;">No direct comparison to acceptable limits</td>')
-                html <- paste0(html, '<td style="border: 1px solid #ddd; padding: 8px;">Single index vs. predefined criterion</td></tr>')
-                html <- paste0(html, '<tr><td style="border: 1px solid #ddd; padding: 8px;">ICC/CCC</td>')
-                html <- paste0(html, '<td style="border: 1px solid #ddd; padding: 8px;">Unitless, not linked to clinical thresholds</td>')
-                html <- paste0(html, '<td style="border: 1px solid #ddd; padding: 8px;">In original units, clinically interpretable</td></tr>')
-                html <- paste0(html, '<tr><td style="border: 1px solid #ddd; padding: 8px;">Correlation (r)</td>')
-                html <- paste0(html, '<td style="border: 1px solid #ddd; padding: 8px;">Measures association, not agreement</td>')
-                html <- paste0(html, '<td style="border: 1px solid #ddd; padding: 8px;">Quantifies actual differences</td></tr>')
+                html <- paste0(html, paste0(
+                    "<tr><td style=\"border: 1px solid #ddd; padding: 8px;\">",
+                    .("Bland-Altman"),
+                    "</td>"
+                ))
+                html <- paste0(html, paste0(
+                    "<td style=\"border: 1px solid #ddd; padding: 8px;\">",
+                    .("No direct comparison to acceptable limits"),
+                    "</td>"
+                ))
+                html <- paste0(html, paste0(
+                    "<td style=\"border: 1px solid #ddd; padding: 8px;\">",
+                    .("Single index vs. predefined criterion"),
+                    "</td></tr>"
+                ))
+                html <- paste0(html, paste0(
+                    "<tr><td style=\"border: 1px solid #ddd; padding: 8px;\">",
+                    .("ICC/CCC"),
+                    "</td>"
+                ))
+                html <- paste0(html, paste0(
+                    "<td style=\"border: 1px solid #ddd; padding: 8px;\">",
+                    .("Unitless, not linked to clinical thresholds"),
+                    "</td>"
+                ))
+                html <- paste0(html, paste0(
+                    "<td style=\"border: 1px solid #ddd; padding: 8px;\">",
+                    .("In original units, clinically interpretable"),
+                    "</td></tr>"
+                ))
+                html <- paste0(html, paste0(
+                    "<tr><td style=\"border: 1px solid #ddd; padding: 8px;\">",
+                    .("Correlation (r)"),
+                    "</td>"
+                ))
+                html <- paste0(html, paste0(
+                    "<td style=\"border: 1px solid #ddd; padding: 8px;\">",
+                    .("Measures association, not agreement"),
+                    "</td>"
+                ))
+                html <- paste0(html, paste0(
+                    "<td style=\"border: 1px solid #ddd; padding: 8px;\">",
+                    .("Quantifies actual differences"),
+                    "</td></tr>"
+                ))
                 html <- paste0(html, "</table>")
 
                 # Statistical Details
-                html <- paste0(html, "<h3>Statistical Details</h3>")
+                html <- paste0(html, paste0(
+                    "<h3>",
+                    .("Statistical Details"),
+                    "</h3>"
+                ))
                 html <- paste0(
-                    html, "<p><strong>Calculation:</strong> The estimate is the requested empirical quantile of the absolute ",
+                    html, paste0(
+                    "<p>",
+                    paste0(jmvcore::format(.("{tag1}Calculation:{tag2} The estimate is the requested empirical quantile of the absolute"), tag1 = "<strong>", tag2 = "</strong>"), " ")
+                ),
                     "paired differences. Its interval is distribution-free: its limits are order statistics of the absolute ",
                     "differences, chosen from the binomial distribution so the interval covers the true quantile with at least ",
                     "the requested confidence, without assuming any distribution or resampling. Neither calculation ",
                     "adjusts for case mix or models heteroscedasticity.</p>"
                 )
-                html <- paste0(html, "<p><strong>Requirements:</strong></p>")
+                html <- paste0(html, paste0(
+                    "<p>",
+                    jmvcore::format(.("{tag1}Requirements:{tag2}"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</p>"
+                ))
                 html <- paste0(html, "<ul>")
-                html <- paste0(html, "<li>Continuous numeric measurements from 2 raters/methods</li>")
-                html <- paste0(html, "<li>Enough pairs for the upper confidence bound to exist: an order-statistic bound on the p-th quantile needs p<sup>n</sup> &lt;= (1 - confidence) / 2, i.e. at least 36 pairs for the 90th percentile at 95% confidence and 72 for the 95th. With fewer, the bound is blank and the verdict reads Inconclusive</li>")
-                html <- paste0(html, "<li>Predefined acceptable limit based on clinical significance</li>")
+                html <- paste0(html, paste0(
+                    "<li>",
+                    .("Continuous numeric measurements from 2 raters/methods"),
+                    "</li>"
+                ))
+                html <- paste0(html, paste0(
+                    "<li>",
+                    jmvcore::format(.("Enough pairs for the upper confidence bound to exist: an order-statistic bound on the p-th quantile needs p{tag1}n{tag2} {tag3}= (1 - confidence) / 2, i.e. at least 36 pairs for the 90th percentile at 95% confidence and 72 for the 95th. With fewer, the bound is blank and the verdict reads Inconclusive"), tag1 = "<sup>", tag2 = "</sup>", tag3 = "&lt;"),
+                    "</li>"
+                ))
+                html <- paste0(html, paste0(
+                    "<li>",
+                    .("Predefined acceptable limit based on clinical significance"),
+                    "</li>"
+                ))
                 html <- paste0(html, "</ul>")
 
                 # References
-                html <- paste0(html, "<h3>References</h3>")
+                html <- paste0(html, paste0(
+                    "<h3>",
+                    .("References"),
+                    "</h3>"
+                ))
                 html <- paste0(html, '<p style="font-size: 0.9em;">')
                 html <- paste0(
                     html, "Lin L, Hedayat AS, Sinha B, Yang M. Statistical methods in assessing agreement: ",
@@ -4081,59 +4188,140 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                 html <- '<div class="agreement-explanation">'
 
                 # What are Specific Agreement Indices?
-                html <- paste0(html, "<h3>What are Specific Agreement Indices?</h3>")
+                html <- paste0(html, paste0(
+                    "<h3>",
+                    .("What are Specific Agreement Indices?"),
+                    "</h3>"
+                ))
                 html <- paste0(
-                    html, "<p><strong>Specific Agreement Indices</strong> measure agreement for individual categories ",
+                    html, paste0(
+                    "<p>",
+                    paste0(jmvcore::format(.("{tag1}Specific Agreement Indices{tag2} measure agreement for individual categories"), tag1 = "<strong>", tag2 = "</strong>"), " ")
+                ),
                     "rather than overall agreement across all categories. For binary data, this includes:</p>"
                 )
                 html <- paste0(html, "<ul>")
                 html <- paste0(
-                    html, "<li><strong>Positive Specific Agreement (PSA):</strong> Agreement on positive cases - ",
+                    html, paste0(
+                    "<li>",
+                    paste0(jmvcore::format(.("{tag1}Positive Specific Agreement (PSA):{tag2} Agreement on positive cases -"), tag1 = "<strong>", tag2 = "</strong>"), " ")
+                ),
                     "proportion of cases rated positive by one rater that are also rated positive by another</li>"
                 )
                 html <- paste0(
-                    html, "<li><strong>Negative Specific Agreement (NSA):</strong> Agreement on negative cases - ",
+                    html, paste0(
+                    "<li>",
+                    paste0(jmvcore::format(.("{tag1}Negative Specific Agreement (NSA):{tag2} Agreement on negative cases -"), tag1 = "<strong>", tag2 = "</strong>"), " ")
+                ),
                     "proportion of cases rated negative by one rater that are also rated negative by another</li>"
                 )
                 html <- paste0(html, "</ul>")
-                html <- paste0(html, "<p>For multi-category data, calculates agreement index for each category separately.</p>")
+                html <- paste0(html, paste0(
+                    "<p>",
+                    .("For multi-category data, calculates agreement index for each category separately."),
+                    "</p>"
+                ))
 
                 # Why Use Specific Agreement?
-                html <- paste0(html, "<h3>Why Use Specific Agreement?</h3>")
-                html <- paste0(html, "<p><strong>Limitations of Overall Kappa:</strong></p>")
+                html <- paste0(html, paste0(
+                    "<h3>",
+                    .("Why Use Specific Agreement?"),
+                    "</h3>"
+                ))
+                html <- paste0(html, paste0(
+                    "<p>",
+                    jmvcore::format(.("{tag1}Limitations of Overall Kappa:{tag2}"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</p>"
+                ))
                 html <- paste0(html, "<ul>")
-                html <- paste0(html, "<li>Treats all disagreements equally (benign\u{2192}malignant = malignant\u{2192}benign)</li>")
-                html <- paste0(html, "<li>Cannot identify which specific categories have poor agreement</li>")
-                html <- paste0(html, "<li>May mask problems with critical categories (e.g., cancer diagnosis)</li>")
-                html <- paste0(html, "<li>Affected by category prevalence (low prevalence categories contribute less)</li>")
+                html <- paste0(html, paste0(
+                    "<li>",
+                    .("Treats all disagreements equally (benign\u2192malignant = malignant\u2192benign)"),
+                    "</li>"
+                ))
+                html <- paste0(html, paste0(
+                    "<li>",
+                    .("Cannot identify which specific categories have poor agreement"),
+                    "</li>"
+                ))
+                html <- paste0(html, paste0(
+                    "<li>",
+                    .("May mask problems with critical categories (e.g., cancer diagnosis)"),
+                    "</li>"
+                ))
+                html <- paste0(html, paste0(
+                    "<li>",
+                    .("Affected by category prevalence (low prevalence categories contribute less)"),
+                    "</li>"
+                ))
                 html <- paste0(html, "</ul>")
 
-                html <- paste0(html, "<p><strong>Advantages of Specific Agreement:</strong></p>")
+                html <- paste0(html, paste0(
+                    "<p>",
+                    jmvcore::format(.("{tag1}Advantages of Specific Agreement:{tag2}"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</p>"
+                ))
                 html <- paste0(html, "<ul>")
-                html <- paste0(html, "<li>Focus on clinically critical categories (cancer, adverse events)</li>")
-                html <- paste0(html, "<li>Show separately how well the raters agree on the positive and on the negative calls</li>")
-                html <- paste0(html, "<li>Guide targeted training for problematic categories</li>")
-                html <- paste0(html, "<li>Essential for diagnostic test validation</li>")
+                html <- paste0(html, paste0(
+                    "<li>",
+                    .("Focus on clinically critical categories (cancer, adverse events)"),
+                    "</li>"
+                ))
+                html <- paste0(html, paste0(
+                    "<li>",
+                    .("Show separately how well the raters agree on the positive and on the negative calls"),
+                    "</li>"
+                ))
+                html <- paste0(html, paste0(
+                    "<li>",
+                    .("Guide targeted training for problematic categories"),
+                    "</li>"
+                ))
+                html <- paste0(html, paste0(
+                    "<li>",
+                    .("Essential for diagnostic test validation"),
+                    "</li>"
+                ))
                 html <- paste0(html, "</ul>")
 
                 # Interpretation
-                html <- paste0(html, "<h3>Interpretation</h3>")
-                html <- paste0(html, "<p><strong>Specific Agreement Values:</strong></p>")
+                html <- paste0(html, paste0(
+                    "<h3>",
+                    .("Interpretation"),
+                    "</h3>"
+                ))
+                html <- paste0(html, paste0(
+                    "<p>",
+                    jmvcore::format(.("{tag1}Specific Agreement Values:{tag2}"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</p>"
+                ))
                 html <- paste0(html, "<ul>")
                 html <- paste0(
-                    html, '<li><strong>0.90 to 1.00:</strong> <span style="color: green;">Excellent</span> - ',
+                    html, paste0(
+                    "<li>",
+                    paste0(jmvcore::format(.("{tag1}0.90 to 1.00:{tag2} {tag3}Excellent{tag4} -"), tag1 = "<strong>", tag2 = "</strong>", tag3 = "<span style=\"color: green;\">", tag4 = "</span>"), " ")
+                ),
                     "category has strong agreement between raters</li>"
                 )
                 html <- paste0(
-                    html, '<li><strong>0.75 to &lt;0.90:</strong> <span style="color: orange;">Good</span> - ',
+                    html, paste0(
+                    "<li>",
+                    paste0(jmvcore::format(.("{tag1}0.75 to {tag2}0.90:{tag3} {tag4}Good{tag5} -"), tag1 = "<strong>", tag2 = "&lt;", tag3 = "</strong>", tag4 = "<span style=\"color: orange;\">", tag5 = "</span>"), " ")
+                ),
                     "acceptable agreement, monitor for improvement</li>"
                 )
                 html <- paste0(
-                    html, '<li><strong>0.60 to &lt;0.75:</strong> <span style="color: orange;">Fair</span> - ',
+                    html, paste0(
+                    "<li>",
+                    paste0(jmvcore::format(.("{tag1}0.60 to {tag2}0.75:{tag3} {tag4}Fair{tag5} -"), tag1 = "<strong>", tag2 = "&lt;", tag3 = "</strong>", tag4 = "<span style=\"color: orange;\">", tag5 = "</span>"), " ")
+                ),
                     "category needs attention, consider additional training</li>"
                 )
                 html <- paste0(
-                    html, '<li><strong>&lt;0.60:</strong> <span style="color: red;">Poor</span> - ',
+                    html, paste0(
+                    "<li>",
+                    paste0(jmvcore::format(.("{tag1}{tag2}0.60:{tag3} {tag4}Poor{tag5} -"), tag1 = "<strong>", tag2 = "&lt;", tag3 = "</strong>", tag4 = "<span style=\"color: red;\">", tag5 = "</span>"), " ")
+                ),
                     "unreliable for this category, requires intervention</li>"
                 )
                 html <- paste0(html, "</ul>")
@@ -4142,99 +4330,311 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                 # the discordant cells b and c (PSA = 2a/(2a+b+c), NSA = 2d/(2d+b+c)),
                 # so the gap is driven mainly by prevalence - the table note already
                 # says so - and rater bias is b versus c, not PSA versus NSA.
-                html <- paste0(html, "<p><strong>When PSA \u2260 NSA:</strong> the gap mainly reflects prevalence, not rater bias. ",
+                html <- paste0(html, paste0(
+                    "<p>",
+                    paste0(jmvcore::format(.("{tag1}When PSA \u2260 NSA:{tag2} the gap mainly reflects prevalence, not rater bias."), tag1 = "<strong>", tag2 = "</strong>"), " ")
+                ),
                     "PSA = 2a/(2a+b+c) and NSA = 2d/(2d+b+c) share the same disagreements (b and c), ",
                     "so when positives are rare NSA is high and PSA low even if neither rater favours either call.</p>")
-                html <- paste0(html, "<p>To test whether one rater calls positive more often than the other, compare b with c: ",
+                html <- paste0(html, paste0(
+                    "<p>",
+                    paste0(.("To test whether one rater calls positive more often than the other, compare b with c:"), " ")
+                ),
                     "use the bias index of PABAK or McNemar's test (Bhapkar's test for more than two categories).</p>")
 
                 # Clinical Examples
-                html <- paste0(html, "<h3>Pathology Examples</h3>")
+                html <- paste0(html, paste0(
+                    "<h3>",
+                    .("Pathology Examples"),
+                    "</h3>"
+                ))
                 html <- paste0(html, '<div class="clinical-examples">')
 
-                html <- paste0(html, "<p><strong>Example 1: Cancer Diagnosis</strong></p>")
-                html <- paste0(html, "<p><em>Context:</em> Two pathologists diagnosing breast biopsies (Benign vs. Malignant).</p>")
+                html <- paste0(html, paste0(
+                    "<p>",
+                    jmvcore::format(.("{tag1}Example 1: Cancer Diagnosis{tag2}"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</p>"
+                ))
+                html <- paste0(html, paste0(
+                    "<p>",
+                    jmvcore::format(.("{tag1}Context:{tag2} Two pathologists diagnosing breast biopsies (Benign vs. Malignant)."), tag1 = "<em>", tag2 = "</em>"),
+                    "</p>"
+                ))
                 html <- paste0(html, "<ul>")
-                html <- paste0(html, "<li><strong>Overall Kappa:</strong> 0.82 (substantial agreement)</li>")
-                html <- paste0(html, "<li><strong>PSA (Malignant):</strong> 0.95 (excellent agreement on cancer cases)</li>")
-                html <- paste0(html, "<li><strong>NSA (Benign):</strong> 0.78 (good but lower agreement on benign cases)</li>")
+                html <- paste0(html, paste0(
+                    "<li>",
+                    jmvcore::format(.("{tag1}Overall Kappa:{tag2} 0.82 (substantial agreement)"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>"
+                ))
+                html <- paste0(html, paste0(
+                    "<li>",
+                    jmvcore::format(.("{tag1}PSA (Malignant):{tag2} 0.95 (excellent agreement on cancer cases)"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>"
+                ))
+                html <- paste0(html, paste0(
+                    "<li>",
+                    jmvcore::format(.("{tag1}NSA (Benign):{tag2} 0.78 (good but lower agreement on benign cases)"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>"
+                ))
                 html <- paste0(
-                    html, "<li><strong>Interpretation:</strong> Pathologists are very reliable at identifying cancer but ",
+                    html, paste0(
+                    "<li>",
+                    paste0(jmvcore::format(.("{tag1}Interpretation:{tag2} Pathologists are very reliable at identifying cancer but"), tag1 = "<strong>", tag2 = "</strong>"), " ")
+                ),
                     "have some inconsistency in benign diagnoses. May benefit from training on benign mimics.</li>"
                 )
-                html <- paste0(html, "<li><strong>Clinical Impact:</strong> Low PSA would be concerning (missed cancers), but here PSA is excellent.</li>")
+                html <- paste0(html, paste0(
+                    "<li>",
+                    jmvcore::format(.("{tag1}Clinical Impact:{tag2} Low PSA would be concerning (missed cancers), but here PSA is excellent."), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>"
+                ))
                 html <- paste0(html, "</ul>")
 
-                html <- paste0(html, "<p><strong>Example 2: Tumor Grade Classification</strong></p>")
-                html <- paste0(html, "<p><em>Context:</em> Inter-rater reliability for tumor grade (G1, G2, G3).</p>")
+                html <- paste0(html, paste0(
+                    "<p>",
+                    jmvcore::format(.("{tag1}Example 2: Tumor Grade Classification{tag2}"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</p>"
+                ))
+                html <- paste0(html, paste0(
+                    "<p>",
+                    jmvcore::format(.("{tag1}Context:{tag2} Inter-rater reliability for tumor grade (G1, G2, G3)."), tag1 = "<em>", tag2 = "</em>"),
+                    "</p>"
+                ))
                 html <- paste0(html, "<ul>")
-                html <- paste0(html, "<li><strong>Overall Weighted Kappa:</strong> 0.68 (moderate)</li>")
-                html <- paste0(html, "<li><strong>G1 Specific Agreement:</strong> 0.92 (excellent)</li>")
-                html <- paste0(html, "<li><strong>G2 Specific Agreement:</strong> 0.52 (poor)</li>")
-                html <- paste0(html, "<li><strong>G3 Specific Agreement:</strong> 0.88 (good)</li>")
+                html <- paste0(html, paste0(
+                    "<li>",
+                    jmvcore::format(.("{tag1}Overall Weighted Kappa:{tag2} 0.68 (moderate)"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>"
+                ))
+                html <- paste0(html, paste0(
+                    "<li>",
+                    jmvcore::format(.("{tag1}G1 Specific Agreement:{tag2} 0.92 (excellent)"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>"
+                ))
+                html <- paste0(html, paste0(
+                    "<li>",
+                    jmvcore::format(.("{tag1}G2 Specific Agreement:{tag2} 0.52 (poor)"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>"
+                ))
+                html <- paste0(html, paste0(
+                    "<li>",
+                    jmvcore::format(.("{tag1}G3 Specific Agreement:{tag2} 0.88 (good)"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>"
+                ))
                 html <- paste0(
-                    html, "<li><strong>Action:</strong> The low G2 agreement indicates intermediate grade is ambiguous. ",
+                    html, paste0(
+                    "<li>",
+                    paste0(jmvcore::format(.("{tag1}Action:{tag2} The low G2 agreement indicates intermediate grade is ambiguous."), tag1 = "<strong>", tag2 = "</strong>"), " ")
+                ),
                     "Consider collapsing into G1+G2 vs. G3, or developing clearer G2 criteria.</li>"
                 )
                 html <- paste0(html, "</ul>")
 
-                html <- paste0(html, "<p><strong>Example 3: Immunostaining Interpretation</strong></p>")
-                html <- paste0(html, "<p><em>Context:</em> Ki-67 scoring (Negative, Low, High).</p>")
+                html <- paste0(html, paste0(
+                    "<p>",
+                    jmvcore::format(.("{tag1}Example 3: Immunostaining Interpretation{tag2}"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</p>"
+                ))
+                html <- paste0(html, paste0(
+                    "<p>",
+                    jmvcore::format(.("{tag1}Context:{tag2} Ki-67 scoring (Negative, Low, High)."), tag1 = "<em>", tag2 = "</em>"),
+                    "</p>"
+                ))
                 html <- paste0(html, "<ul>")
-                html <- paste0(html, "<li><strong>Negative Specific Agreement:</strong> 0.95 (excellent)</li>")
-                html <- paste0(html, "<li><strong>Low Specific Agreement:</strong> 0.58 (poor)</li>")
-                html <- paste0(html, "<li><strong>High Specific Agreement:</strong> 0.89 (good)</li>")
-                html <- paste0(html, '<li><strong>Problem:</strong> "Low" category has poor agreement, often confused with Negative or High</li>')
-                html <- paste0(html, "<li><strong>Solution:</strong> Consider binary classification (Low/Negative vs. High) or use quantitative cutoffs</li>")
+                html <- paste0(html, paste0(
+                    "<li>",
+                    jmvcore::format(.("{tag1}Negative Specific Agreement:{tag2} 0.95 (excellent)"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>"
+                ))
+                html <- paste0(html, paste0(
+                    "<li>",
+                    jmvcore::format(.("{tag1}Low Specific Agreement:{tag2} 0.58 (poor)"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>"
+                ))
+                html <- paste0(html, paste0(
+                    "<li>",
+                    jmvcore::format(.("{tag1}High Specific Agreement:{tag2} 0.89 (good)"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>"
+                ))
+                html <- paste0(html, paste0(
+                    "<li>",
+                    jmvcore::format(.("{tag1}Problem:{tag2} \"Low\" category has poor agreement, often confused with Negative or High"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>"
+                ))
+                html <- paste0(html, paste0(
+                    "<li>",
+                    jmvcore::format(.("{tag1}Solution:{tag2} Consider binary classification (Low/Negative vs. High) or use quantitative cutoffs"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>"
+                ))
                 html <- paste0(html, "</ul>")
 
                 html <- paste0(html, "</div>")
 
                 # When to Use
-                html <- paste0(html, "<h3>When to Use Specific Agreement Indices</h3>")
-                html <- paste0(html, "<p><strong>Essential for:</strong></p>")
+                html <- paste0(html, paste0(
+                    "<h3>",
+                    .("When to Use Specific Agreement Indices"),
+                    "</h3>"
+                ))
+                html <- paste0(html, paste0(
+                    "<p>",
+                    jmvcore::format(.("{tag1}Essential for:{tag2}"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</p>"
+                ))
                 html <- paste0(html, "<ul>")
-                html <- paste0(html, "<li>Diagnostic test validation where false positives and false negatives have different implications</li>")
-                html <- paste0(html, "<li>Cancer diagnosis studies (critical to have high PSA)</li>")
-                html <- paste0(html, "<li>Quality control focusing on specific problematic categories</li>")
-                html <- paste0(html, "<li>Identifying need for category clarification or combination</li>")
-                html <- paste0(html, "<li>Training assessment showing which categories need improvement</li>")
-                html <- paste0(html, "<li>Regulatory submissions requiring category-specific reliability</li>")
+                html <- paste0(html, paste0(
+                    "<li>",
+                    .("Diagnostic test validation where false positives and false negatives have different implications"),
+                    "</li>"
+                ))
+                html <- paste0(html, paste0(
+                    "<li>",
+                    .("Cancer diagnosis studies (critical to have high PSA)"),
+                    "</li>"
+                ))
+                html <- paste0(html, paste0(
+                    "<li>",
+                    .("Quality control focusing on specific problematic categories"),
+                    "</li>"
+                ))
+                html <- paste0(html, paste0(
+                    "<li>",
+                    .("Identifying need for category clarification or combination"),
+                    "</li>"
+                ))
+                html <- paste0(html, paste0(
+                    "<li>",
+                    .("Training assessment showing which categories need improvement"),
+                    "</li>"
+                ))
+                html <- paste0(html, paste0(
+                    "<li>",
+                    .("Regulatory submissions requiring category-specific reliability"),
+                    "</li>"
+                ))
                 html <- paste0(html, "</ul>")
 
                 # Calculation Method
-                html <- paste0(html, "<h3>Calculation Method</h3>")
-                html <- paste0(html, '<p><strong>For Binary Data (Category = "Positive"):</strong></p>')
-                html <- paste0(html, "<p>PSA = 2 \u{00D7} (Both Positive) / (Rater1 Positive + Rater2 Positive)</p>")
-                html <- paste0(html, "<p>This represents: Of all cases either rater called positive, what proportion did both raters agree were positive?</p>")
+                html <- paste0(html, paste0(
+                    "<h3>",
+                    .("Calculation Method"),
+                    "</h3>"
+                ))
+                html <- paste0(html, paste0(
+                    "<p>",
+                    jmvcore::format(.("{tag1}For Binary Data (Category = \"Positive\"):{tag2}"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</p>"
+                ))
+                html <- paste0(html, paste0(
+                    "<p>",
+                    .("PSA = 2 \u00d7 (Both Positive) / (Rater1 Positive + Rater2 Positive)"),
+                    "</p>"
+                ))
+                html <- paste0(html, paste0(
+                    "<p>",
+                    .("This represents: Of all cases either rater called positive, what proportion did both raters agree were positive?"),
+                    "</p>"
+                ))
 
-                html <- paste0(html, "<p><strong>For Multi-Category Data:</strong></p>")
-                html <- paste0(html, "<p>For each category C:</p>")
-                html <- paste0(html, "<p>Specific Agreement(C) = 2 \u{00D7} (Both rated C) / (Rater1 rated C + Rater2 rated C)</p>")
+                html <- paste0(html, paste0(
+                    "<p>",
+                    jmvcore::format(.("{tag1}For Multi-Category Data:{tag2}"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</p>"
+                ))
+                html <- paste0(html, paste0(
+                    "<p>",
+                    .("For each category C:"),
+                    "</p>"
+                ))
+                html <- paste0(html, paste0(
+                    "<p>",
+                    .("Specific Agreement(C) = 2 \u00d7 (Both rated C) / (Rater1 rated C + Rater2 rated C)"),
+                    "</p>"
+                ))
 
-                html <- paste0(html, "<p><strong>Confidence Intervals:</strong> Wilson score method (recommended for proportions)</p>")
+                html <- paste0(html, paste0(
+                    "<p>",
+                    jmvcore::format(.("{tag1}Confidence Intervals:{tag2} Wilson score method (recommended for proportions)"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</p>"
+                ))
 
                 # Comparison Table
-                html <- paste0(html, "<h3>Comparison with Overall Metrics</h3>")
+                html <- paste0(html, paste0(
+                    "<h3>",
+                    .("Comparison with Overall Metrics"),
+                    "</h3>"
+                ))
                 html <- paste0(html, '<table style="width: 100%; border-collapse: collapse;">')
                 html <- paste0(html, '<tr style="background-color: rgba(33, 33, 33, 0.07); color: inherit;">')
-                html <- paste0(html, '<th style="border: 1px solid #ddd; padding: 8px;">Metric</th>')
-                html <- paste0(html, '<th style="border: 1px solid #ddd; padding: 8px;">What It Measures</th>')
-                html <- paste0(html, '<th style="border: 1px solid #ddd; padding: 8px;">Best Use</th>')
+                html <- paste0(html, paste0(
+                    "<th style=\"border: 1px solid #ddd; padding: 8px;\">",
+                    .("Metric"),
+                    "</th>"
+                ))
+                html <- paste0(html, paste0(
+                    "<th style=\"border: 1px solid #ddd; padding: 8px;\">",
+                    .("What It Measures"),
+                    "</th>"
+                ))
+                html <- paste0(html, paste0(
+                    "<th style=\"border: 1px solid #ddd; padding: 8px;\">",
+                    .("Best Use"),
+                    "</th>"
+                ))
                 html <- paste0(html, "</tr>")
-                html <- paste0(html, '<tr><td style="border: 1px solid #ddd; padding: 8px;">Overall Kappa</td>')
-                html <- paste0(html, '<td style="border: 1px solid #ddd; padding: 8px;">Agreement across all categories</td>')
-                html <- paste0(html, '<td style="border: 1px solid #ddd; padding: 8px;">General reliability assessment</td></tr>')
-                html <- paste0(html, '<tr><td style="border: 1px solid #ddd; padding: 8px;">Specific Agreement</td>')
-                html <- paste0(html, '<td style="border: 1px solid #ddd; padding: 8px;">Agreement within each category</td>')
-                html <- paste0(html, '<td style="border: 1px solid #ddd; padding: 8px;">Identify problematic categories</td></tr>')
-                html <- paste0(html, '<tr><td style="border: 1px solid #ddd; padding: 8px;">PSA/NSA</td>')
-                html <- paste0(html, '<td style="border: 1px solid #ddd; padding: 8px;">Separate positive/negative agreement</td>')
-                html <- paste0(html, '<td style="border: 1px solid #ddd; padding: 8px;">Agreement on positive vs. negative calls (a gap reflects prevalence; test rater bias with McNemar or the PABAK bias index)</td></tr>')
+                html <- paste0(html, paste0(
+                    "<tr><td style=\"border: 1px solid #ddd; padding: 8px;\">",
+                    .("Overall Kappa"),
+                    "</td>"
+                ))
+                html <- paste0(html, paste0(
+                    "<td style=\"border: 1px solid #ddd; padding: 8px;\">",
+                    .("Agreement across all categories"),
+                    "</td>"
+                ))
+                html <- paste0(html, paste0(
+                    "<td style=\"border: 1px solid #ddd; padding: 8px;\">",
+                    .("General reliability assessment"),
+                    "</td></tr>"
+                ))
+                html <- paste0(html, paste0(
+                    "<tr><td style=\"border: 1px solid #ddd; padding: 8px;\">",
+                    .("Specific Agreement"),
+                    "</td>"
+                ))
+                html <- paste0(html, paste0(
+                    "<td style=\"border: 1px solid #ddd; padding: 8px;\">",
+                    .("Agreement within each category"),
+                    "</td>"
+                ))
+                html <- paste0(html, paste0(
+                    "<td style=\"border: 1px solid #ddd; padding: 8px;\">",
+                    .("Identify problematic categories"),
+                    "</td></tr>"
+                ))
+                html <- paste0(html, paste0(
+                    "<tr><td style=\"border: 1px solid #ddd; padding: 8px;\">",
+                    .("PSA/NSA"),
+                    "</td>"
+                ))
+                html <- paste0(html, paste0(
+                    "<td style=\"border: 1px solid #ddd; padding: 8px;\">",
+                    .("Separate positive/negative agreement"),
+                    "</td>"
+                ))
+                html <- paste0(html, paste0(
+                    "<td style=\"border: 1px solid #ddd; padding: 8px;\">",
+                    .("Agreement on positive vs. negative calls (a gap reflects prevalence; test rater bias with McNemar or the PABAK bias index)"),
+                    "</td></tr>"
+                ))
                 html <- paste0(html, "</table>")
 
                 # References
-                html <- paste0(html, "<h3>References</h3>")
+                html <- paste0(html, paste0(
+                    "<h3>",
+                    .("References"),
+                    "</h3>"
+                ))
                 html <- paste0(html, '<p style="font-size: 0.9em;">')
                 html <- paste0(
                     html, "Cicchetti DV, Feinstein AR. High agreement but low kappa: II. Resolving the paradoxes. ",
@@ -4549,166 +4949,503 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                 html <- '<div class="agreement-explanation">'
 
                 # What is Agreement Heatmap?
-                html <- paste0(html, "<h3>What is an Agreement Heatmap?</h3>")
+                html <- paste0(html, paste0(
+                    "<h3>",
+                    .("What is an Agreement Heatmap?"),
+                    "</h3>"
+                ))
                 html <- paste0(
-                    html, "<p>An <strong>Agreement Heatmap</strong> is a visual confusion matrix that displays how two raters' ",
+                    html, paste0(
+                    "<p>",
+                    paste0(jmvcore::format(.("An {tag1}Agreement Heatmap{tag2} is a visual confusion matrix that displays how two raters'"), tag1 = "<strong>", tag2 = "</strong>"), " ")
+                ),
                     "classifications correspond using color-coded cells. The diagonal cells show perfect agreement ",
                     "(both raters assigned the same category), while off-diagonal cells reveal disagreements and show ",
                     "which specific category confusions occur most frequently.</p>"
                 )
 
                 # Key Features
-                html <- paste0(html, "<h3>Key Features</h3>")
+                html <- paste0(html, paste0(
+                    "<h3>",
+                    .("Key Features"),
+                    "</h3>"
+                ))
                 html <- paste0(html, "<ul>")
-                html <- paste0(html, "<li><strong>Diagonal Cells:</strong> Perfect agreement - both raters chose the same category</li>")
-                html <- paste0(html, "<li><strong>Off-Diagonal Cells:</strong> Disagreements - shows which categories are confused</li>")
+                html <- paste0(html, paste0(
+                    "<li>",
+                    jmvcore::format(.("{tag1}Diagonal Cells:{tag2} Perfect agreement - both raters chose the same category"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>"
+                ))
+                html <- paste0(html, paste0(
+                    "<li>",
+                    jmvcore::format(.("{tag1}Off-Diagonal Cells:{tag2} Disagreements - shows which categories are confused"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>"
+                ))
                 # "Darker = more frequent" was false for two of the four schemes
                 # (viridis runs dark to light as a cell fills; blue-red painted empty
                 # cells saturated blue). The scale is now a fixed 0-100 percent of all
                 # cases, so the colour can be stated per scheme and means the same
                 # thing in every panel. "Dark"/"light" in the examples below became
                 # "many"/"few cases" for the same reason.
-                html <- paste0(html, "<li><strong>Cell Colour:</strong> The share of all cases that fall in the cell, on a fixed 0-100% scale shared by every panel. ",
+                html <- paste0(html, paste0(
+                    "<li>",
+                    paste0(jmvcore::format(.("{tag1}Cell Colour:{tag2} The share of all cases that fall in the cell, on a fixed 0-100% scale shared by every panel."), tag1 = "<strong>", tag2 = "</strong>"), " ")
+                ),
                     "Colour encodes frequency, on or off the diagonal, not agreement; what few and many cases look like depends on the scheme (see Choosing Color Schemes below)</li>")
-                html <- paste0(html, "<li><strong>Cell Annotations:</strong> Shows counts and/or percentages for each cell</li>")
-                html <- paste0(html, "<li><strong>Row/Column Labels:</strong> Rater 1 (rows) vs. Rater 2 (columns) categories, laid out as in a contingency table: the first category is at the top left and the diagonal runs to the bottom right</li>")
+                html <- paste0(html, paste0(
+                    "<li>",
+                    jmvcore::format(.("{tag1}Cell Annotations:{tag2} Shows counts and/or percentages for each cell"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>"
+                ))
+                html <- paste0(html, paste0(
+                    "<li>",
+                    jmvcore::format(.("{tag1}Row/Column Labels:{tag2} Rater 1 (rows) vs. Rater 2 (columns) categories, laid out as in a contingency table: the first category is at the top left and the diagonal runs to the bottom right"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>"
+                ))
                 html <- paste0(html, "</ul>")
 
                 # How to Read the Heatmap
-                html <- paste0(html, "<h3>How to Read the Heatmap</h3>")
-                html <- paste0(html, "<p><strong>Perfect Agreement Scenario:</strong></p>")
+                html <- paste0(html, paste0(
+                    "<h3>",
+                    .("How to Read the Heatmap"),
+                    "</h3>"
+                ))
+                html <- paste0(html, paste0(
+                    "<p>",
+                    jmvcore::format(.("{tag1}Perfect Agreement Scenario:{tag2}"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</p>"
+                ))
                 html <- paste0(html, "<ul>")
-                html <- paste0(html, "<li>All/most cases on the diagonal (same category by both raters)</li>")
-                html <- paste0(html, "<li>Off-diagonal cells empty or nearly empty</li>")
-                html <- paste0(html, "<li>Interpretation: Strong agreement, reliable classification</li>")
+                html <- paste0(html, paste0(
+                    "<li>",
+                    .("All/most cases on the diagonal (same category by both raters)"),
+                    "</li>"
+                ))
+                html <- paste0(html, paste0(
+                    "<li>",
+                    .("Off-diagonal cells empty or nearly empty"),
+                    "</li>"
+                ))
+                html <- paste0(html, paste0(
+                    "<li>",
+                    .("Interpretation: Strong agreement, reliable classification"),
+                    "</li>"
+                ))
                 html <- paste0(html, "</ul>")
 
-                html <- paste0(html, "<p><strong>Systematic Bias Patterns:</strong></p>")
+                html <- paste0(html, paste0(
+                    "<p>",
+                    jmvcore::format(.("{tag1}Systematic Bias Patterns:{tag2}"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</p>"
+                ))
                 html <- paste0(html, "<ul>")
-                html <- paste0(html, "<li><strong>Many cases above the diagonal (upper triangle):</strong> Rater 2 (columns) consistently chooses a later category than Rater 1 (rows)</li>")
-                html <- paste0(html, "<li><strong>Many cases below the diagonal (lower triangle):</strong> Rater 1 (rows) consistently chooses a later category than Rater 2 (columns)</li>")
-                html <- paste0(html, "<li><strong>One off-diagonal cell with many cases:</strong> Common confusion between two specific categories</li>")
-                html <- paste0(html, "<li><strong>Scattered Pattern:</strong> Random/inconsistent disagreement, needs training</li>")
+                html <- paste0(html, paste0(
+                    "<li>",
+                    jmvcore::format(.("{tag1}Many cases above the diagonal (upper triangle):{tag2} Rater 2 (columns) consistently chooses a later category than Rater 1 (rows)"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>"
+                ))
+                html <- paste0(html, paste0(
+                    "<li>",
+                    jmvcore::format(.("{tag1}Many cases below the diagonal (lower triangle):{tag2} Rater 1 (rows) consistently chooses a later category than Rater 2 (columns)"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>"
+                ))
+                html <- paste0(html, paste0(
+                    "<li>",
+                    jmvcore::format(.("{tag1}One off-diagonal cell with many cases:{tag2} Common confusion between two specific categories"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>"
+                ))
+                html <- paste0(html, paste0(
+                    "<li>",
+                    jmvcore::format(.("{tag1}Scattered Pattern:{tag2} Random/inconsistent disagreement, needs training"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>"
+                ))
                 html <- paste0(html, "</ul>")
 
                 # Clinical Examples
-                html <- paste0(html, "<h3>Pathology Examples</h3>")
+                html <- paste0(html, paste0(
+                    "<h3>",
+                    .("Pathology Examples"),
+                    "</h3>"
+                ))
                 html <- paste0(html, '<div class="clinical-examples">')
 
-                html <- paste0(html, "<p><strong>Example 1: Tumor Grade (G1/G2/G3)</strong></p>")
-                html <- paste0(html, "<p><em>Scenario:</em> Two pathologists grading invasive breast carcinoma.</p>")
-                html <- paste0(html, "<p><strong>Heatmap Pattern Observed:</strong></p>")
+                html <- paste0(html, paste0(
+                    "<p>",
+                    jmvcore::format(.("{tag1}Example 1: Tumor Grade (G1/G2/G3){tag2}"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</p>"
+                ))
+                html <- paste0(html, paste0(
+                    "<p>",
+                    jmvcore::format(.("{tag1}Scenario:{tag2} Two pathologists grading invasive breast carcinoma."), tag1 = "<em>", tag2 = "</em>"),
+                    "</p>"
+                ))
+                html <- paste0(html, paste0(
+                    "<p>",
+                    jmvcore::format(.("{tag1}Heatmap Pattern Observed:{tag2}"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</p>"
+                ))
                 html <- paste0(html, "<ul>")
-                html <- paste0(html, "<li>G1 diagonal: many cases (strong agreement on well-differentiated)</li>")
-                html <- paste0(html, "<li>G3 diagonal: many cases (strong agreement on poorly-differentiated)</li>")
-                html <- paste0(html, "<li>G2 diagonal: few cases (poor agreement on moderately-differentiated)</li>")
-                html <- paste0(html, "<li>G2/G1 and G2/G3 cells: a moderate share (G2 confused with both)</li>")
+                html <- paste0(html, paste0(
+                    "<li>",
+                    .("G1 diagonal: many cases (strong agreement on well-differentiated)"),
+                    "</li>"
+                ))
+                html <- paste0(html, paste0(
+                    "<li>",
+                    .("G3 diagonal: many cases (strong agreement on poorly-differentiated)"),
+                    "</li>"
+                ))
+                html <- paste0(html, paste0(
+                    "<li>",
+                    .("G2 diagonal: few cases (poor agreement on moderately-differentiated)"),
+                    "</li>"
+                ))
+                html <- paste0(html, paste0(
+                    "<li>",
+                    .("G2/G1 and G2/G3 cells: a moderate share (G2 confused with both)"),
+                    "</li>"
+                ))
                 html <- paste0(html, "</ul>")
                 html <- paste0(
-                    html, "<p><strong>Interpretation:</strong> Raters agree on extreme grades but have difficulty ",
+                    html, paste0(
+                    "<p>",
+                    paste0(jmvcore::format(.("{tag1}Interpretation:{tag2} Raters agree on extreme grades but have difficulty"), tag1 = "<strong>", tag2 = "</strong>"), " ")
+                ),
                     "with intermediate grade 2. The G2 category is ambiguous and problematic.</p>"
                 )
-                html <- paste0(html, "<p><strong>Action:</strong> Consider collapsing G1+G2 vs. G3, or develop clearer G2 criteria.</p>")
+                html <- paste0(html, paste0(
+                    "<p>",
+                    jmvcore::format(.("{tag1}Action:{tag2} Consider collapsing G1+G2 vs. G3, or develop clearer G2 criteria."), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</p>"
+                ))
 
-                html <- paste0(html, "<p><strong>Example 2: Dysplasia Grading (Negative/Low/High)</strong></p>")
-                html <- paste0(html, "<p><em>Scenario:</em> Assessing agreement on Barrett's esophagus dysplasia.</p>")
-                html <- paste0(html, "<p><strong>Heatmap Pattern Observed:</strong></p>")
+                html <- paste0(html, paste0(
+                    "<p>",
+                    jmvcore::format(.("{tag1}Example 2: Dysplasia Grading (Negative/Low/High){tag2}"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</p>"
+                ))
+                html <- paste0(html, paste0(
+                    "<p>",
+                    jmvcore::format(.("{tag1}Scenario:{tag2} Assessing agreement on Barrett's esophagus dysplasia."), tag1 = "<em>", tag2 = "</em>"),
+                    "</p>"
+                ))
+                html <- paste0(html, paste0(
+                    "<p>",
+                    jmvcore::format(.("{tag1}Heatmap Pattern Observed:{tag2}"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</p>"
+                ))
                 html <- paste0(html, "<ul>")
-                html <- paste0(html, "<li>More cases above the diagonal than below it</li>")
-                html <- paste0(html, "<li>Specifically: the Negative (row) / Low (column) cell holds many cases (Rater 2 upgrades them)</li>")
-                html <- paste0(html, "<li>Low\u{2192}High cell: Minimal</li>")
+                html <- paste0(html, paste0(
+                    "<li>",
+                    .("More cases above the diagonal than below it"),
+                    "</li>"
+                ))
+                html <- paste0(html, paste0(
+                    "<li>",
+                    .("Specifically: the Negative (row) / Low (column) cell holds many cases (Rater 2 upgrades them)"),
+                    "</li>"
+                ))
+                html <- paste0(html, paste0(
+                    "<li>",
+                    .("Low\u2192High cell: Minimal"),
+                    "</li>"
+                ))
                 html <- paste0(html, "</ul>")
                 html <- paste0(
-                    html, "<p><strong>Interpretation:</strong> Rater 2 is systematically more aggressive, ",
+                    html, paste0(
+                    "<p>",
+                    paste0(jmvcore::format(.("{tag1}Interpretation:{tag2} Rater 2 is systematically more aggressive,"), tag1 = "<strong>", tag2 = "</strong>"), " ")
+                ),
                     "calling low-grade dysplasia when Rater 1 calls negative. Classic over-diagnosis pattern.</p>"
                 )
                 html <- paste0(
-                    html, "<p><strong>Action:</strong> Review criteria for negative vs. low-grade with Rater 2, ",
+                    html, paste0(
+                    "<p>",
+                    paste0(jmvcore::format(.("{tag1}Action:{tag2} Review criteria for negative vs. low-grade with Rater 2,"), tag1 = "<strong>", tag2 = "</strong>"), " ")
+                ),
                     "focus training on borderline cases.</p>"
                 )
 
-                html <- paste0(html, "<p><strong>Example 3: Immunostaining (Negative/1+/2+/3+)</strong></p>")
-                html <- paste0(html, "<p><em>Scenario:</em> HER2 scoring in breast cancer (4-tier system).</p>")
-                html <- paste0(html, "<p><strong>Heatmap Pattern Observed:</strong></p>")
+                html <- paste0(html, paste0(
+                    "<p>",
+                    jmvcore::format(.("{tag1}Example 3: Immunostaining (Negative/1+/2+/3+){tag2}"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</p>"
+                ))
+                html <- paste0(html, paste0(
+                    "<p>",
+                    jmvcore::format(.("{tag1}Scenario:{tag2} HER2 scoring in breast cancer (4-tier system)."), tag1 = "<em>", tag2 = "</em>"),
+                    "</p>"
+                ))
+                html <- paste0(html, paste0(
+                    "<p>",
+                    jmvcore::format(.("{tag1}Heatmap Pattern Observed:{tag2}"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</p>"
+                ))
                 html <- paste0(html, "<ul>")
-                html <- paste0(html, "<li>0 diagonal: most cases (excellent agreement on negative cases)</li>")
-                html <- paste0(html, "<li>3+ diagonal: most cases (excellent agreement on strong positive)</li>")
-                html <- paste0(html, "<li>1+ and 2+ diagonal: few cases (poor agreement on intermediate categories)</li>")
-                html <- paste0(html, "<li>2+/1+ and 2+/3+ cells: both hold many cases (2+ confused with neighbors)</li>")
+                html <- paste0(html, paste0(
+                    "<li>",
+                    .("0 diagonal: most cases (excellent agreement on negative cases)"),
+                    "</li>"
+                ))
+                html <- paste0(html, paste0(
+                    "<li>",
+                    .("3+ diagonal: most cases (excellent agreement on strong positive)"),
+                    "</li>"
+                ))
+                html <- paste0(html, paste0(
+                    "<li>",
+                    .("1+ and 2+ diagonal: few cases (poor agreement on intermediate categories)"),
+                    "</li>"
+                ))
+                html <- paste0(html, paste0(
+                    "<li>",
+                    .("2+/1+ and 2+/3+ cells: both hold many cases (2+ confused with neighbors)"),
+                    "</li>"
+                ))
                 html <- paste0(html, "</ul>")
                 html <- paste0(
-                    html, "<p><strong>Interpretation:</strong> Excellent agreement on clinically critical categories ",
+                    html, paste0(
+                    "<p>",
+                    paste0(jmvcore::format(.("{tag1}Interpretation:{tag2} Excellent agreement on clinically critical categories"), tag1 = "<strong>", tag2 = "</strong>"), " ")
+                ),
                     "(0 = no treatment, 3+ = treatment), but poor agreement on equivocal 2+ which requires FISH testing.</p>"
                 )
                 html <- paste0(
-                    html, "<p><strong>Clinical Impact:</strong> This is acceptable since 2+ cases undergo reflex FISH anyway. ",
+                    html, paste0(
+                    "<p>",
+                    paste0(jmvcore::format(.("{tag1}Clinical Impact:{tag2} This is acceptable since 2+ cases undergo reflex FISH anyway."), tag1 = "<strong>", tag2 = "</strong>"), " ")
+                ),
                     "The important reliability is distinguishing clear negative (0) from clear positive (3+).</p>"
                 )
 
                 html <- paste0(html, "</div>")
 
                 # When to Use
-                html <- paste0(html, "<h3>When to Use Agreement Heatmap</h3>")
-                html <- paste0(html, "<p><strong>Essential for:</strong></p>")
+                html <- paste0(html, paste0(
+                    "<h3>",
+                    .("When to Use Agreement Heatmap"),
+                    "</h3>"
+                ))
+                html <- paste0(html, paste0(
+                    "<p>",
+                    jmvcore::format(.("{tag1}Essential for:{tag2}"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</p>"
+                ))
                 html <- paste0(html, "<ul>")
-                html <- paste0(html, "<li>Identifying which specific categories have poor agreement</li>")
-                html <- paste0(html, "<li>Detecting systematic bias (one rater consistently over/under-grades)</li>")
-                html <- paste0(html, "<li>Discovering common category confusions for targeted training</li>")
-                html <- paste0(html, "<li>Multi-category classifications (3+ categories) where patterns matter</li>")
-                html <- paste0(html, "<li>Quality control reports showing visual evidence of agreement issues</li>")
-                html <- paste0(html, "<li>Presentations and publications requiring intuitive visualization</li>")
+                html <- paste0(html, paste0(
+                    "<li>",
+                    .("Identifying which specific categories have poor agreement"),
+                    "</li>"
+                ))
+                html <- paste0(html, paste0(
+                    "<li>",
+                    .("Detecting systematic bias (one rater consistently over/under-grades)"),
+                    "</li>"
+                ))
+                html <- paste0(html, paste0(
+                    "<li>",
+                    .("Discovering common category confusions for targeted training"),
+                    "</li>"
+                ))
+                html <- paste0(html, paste0(
+                    "<li>",
+                    .("Multi-category classifications (3+ categories) where patterns matter"),
+                    "</li>"
+                ))
+                html <- paste0(html, paste0(
+                    "<li>",
+                    .("Quality control reports showing visual evidence of agreement issues"),
+                    "</li>"
+                ))
+                html <- paste0(html, paste0(
+                    "<li>",
+                    .("Presentations and publications requiring intuitive visualization"),
+                    "</li>"
+                ))
                 html <- paste0(html, "</ul>")
 
-                html <- paste0(html, "<p><strong>Advantages over numeric metrics:</strong></p>")
+                html <- paste0(html, paste0(
+                    "<p>",
+                    jmvcore::format(.("{tag1}Advantages over numeric metrics:{tag2}"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</p>"
+                ))
                 html <- paste0(html, "<ul>")
-                html <- paste0(html, "<li>Immediately shows which specific disagreements are most common</li>")
-                html <- paste0(html, "<li>Reveals patterns that overall kappa values hide</li>")
-                html <- paste0(html, "<li>Intuitive for non-statisticians to understand</li>")
-                html <- paste0(html, "<li>Guides targeted interventions for problematic categories</li>")
+                html <- paste0(html, paste0(
+                    "<li>",
+                    .("Immediately shows which specific disagreements are most common"),
+                    "</li>"
+                ))
+                html <- paste0(html, paste0(
+                    "<li>",
+                    .("Reveals patterns that overall kappa values hide"),
+                    "</li>"
+                ))
+                html <- paste0(html, paste0(
+                    "<li>",
+                    .("Intuitive for non-statisticians to understand"),
+                    "</li>"
+                ))
+                html <- paste0(html, paste0(
+                    "<li>",
+                    .("Guides targeted interventions for problematic categories"),
+                    "</li>"
+                ))
                 html <- paste0(html, "</ul>")
 
                 # Color Scheme Guide
-                html <- paste0(html, "<h3>Choosing Color Schemes</h3>")
+                html <- paste0(html, paste0(
+                    "<h3>",
+                    .("Choosing Color Schemes"),
+                    "</h3>"
+                ))
                 html <- paste0(html, '<table style="width: 100%; border-collapse: collapse;">')
                 html <- paste0(html, '<tr style="background-color: rgba(33, 33, 33, 0.07); color: inherit;">')
-                html <- paste0(html, '<th style="border: 1px solid #ddd; padding: 8px;">Color Scheme</th>')
-                html <- paste0(html, '<th style="border: 1px solid #ddd; padding: 8px;">Best Use</th>')
-                html <- paste0(html, '<th style="border: 1px solid #ddd; padding: 8px;">Considerations</th>')
+                html <- paste0(html, paste0(
+                    "<th style=\"border: 1px solid #ddd; padding: 8px;\">",
+                    .("Color Scheme"),
+                    "</th>"
+                ))
+                html <- paste0(html, paste0(
+                    "<th style=\"border: 1px solid #ddd; padding: 8px;\">",
+                    .("Best Use"),
+                    "</th>"
+                ))
+                html <- paste0(html, paste0(
+                    "<th style=\"border: 1px solid #ddd; padding: 8px;\">",
+                    .("Considerations"),
+                    "</th>"
+                ))
                 html <- paste0(html, "</tr>")
-                html <- paste0(html, '<tr><td style="border: 1px solid #ddd; padding: 8px;">Blue-Red Diverging</td>')
-                html <- paste0(html, '<td style="border: 1px solid #ddd; padding: 8px;">Default</td>')
-                html <- paste0(html, '<td style="border: 1px solid #ddd; padding: 8px;">Blue = empty or rare cells, white = half of all cases, red = more than half; most cells hold under half the cases, so most are shades of blue</td></tr>')
-                html <- paste0(html, '<tr><td style="border: 1px solid #ddd; padding: 8px;">Traffic Light</td>')
-                html <- paste0(html, '<td style="border: 1px solid #ddd; padding: 8px;">Presentations, intuitive interpretation</td>')
-                html <- paste0(html, '<td style="border: 1px solid #ddd; padding: 8px;">Red = few cases, through orange and light green, to green = many cases. It shows frequency, not agreement: a crowded off-diagonal cell is green too</td></tr>')
-                html <- paste0(html, '<tr><td style="border: 1px solid #ddd; padding: 8px;">Viridis</td>')
-                html <- paste0(html, '<td style="border: 1px solid #ddd; padding: 8px;">Colorblind-safe, publications</td>')
-                html <- paste0(html, '<td style="border: 1px solid #ddd; padding: 8px;">Dark purple = few cases, yellow = many; perceptually uniform, accessible</td></tr>')
-                html <- paste0(html, '<tr><td style="border: 1px solid #ddd; padding: 8px;">Grayscale</td>')
-                html <- paste0(html, '<td style="border: 1px solid #ddd; padding: 8px;">Black-and-white printing</td>')
-                html <- paste0(html, '<td style="border: 1px solid #ddd; padding: 8px;">Light = few cases, dark = many; no color required</td></tr>')
+                html <- paste0(html, paste0(
+                    "<tr><td style=\"border: 1px solid #ddd; padding: 8px;\">",
+                    .("Blue-Red Diverging"),
+                    "</td>"
+                ))
+                html <- paste0(html, paste0(
+                    "<td style=\"border: 1px solid #ddd; padding: 8px;\">",
+                    .("Default"),
+                    "</td>"
+                ))
+                html <- paste0(html, paste0(
+                    "<td style=\"border: 1px solid #ddd; padding: 8px;\">",
+                    .("Blue = empty or rare cells, white = half of all cases, red = more than half; most cells hold under half the cases, so most are shades of blue"),
+                    "</td></tr>"
+                ))
+                html <- paste0(html, paste0(
+                    "<tr><td style=\"border: 1px solid #ddd; padding: 8px;\">",
+                    .("Traffic Light"),
+                    "</td>"
+                ))
+                html <- paste0(html, paste0(
+                    "<td style=\"border: 1px solid #ddd; padding: 8px;\">",
+                    .("Presentations, intuitive interpretation"),
+                    "</td>"
+                ))
+                html <- paste0(html, paste0(
+                    "<td style=\"border: 1px solid #ddd; padding: 8px;\">",
+                    .("Red = few cases, through orange and light green, to green = many cases. It shows frequency, not agreement: a crowded off-diagonal cell is green too"),
+                    "</td></tr>"
+                ))
+                html <- paste0(html, paste0(
+                    "<tr><td style=\"border: 1px solid #ddd; padding: 8px;\">",
+                    .("Viridis"),
+                    "</td>"
+                ))
+                html <- paste0(html, paste0(
+                    "<td style=\"border: 1px solid #ddd; padding: 8px;\">",
+                    .("Colorblind-safe, publications"),
+                    "</td>"
+                ))
+                html <- paste0(html, paste0(
+                    "<td style=\"border: 1px solid #ddd; padding: 8px;\">",
+                    .("Dark purple = few cases, yellow = many; perceptually uniform, accessible"),
+                    "</td></tr>"
+                ))
+                html <- paste0(html, paste0(
+                    "<tr><td style=\"border: 1px solid #ddd; padding: 8px;\">",
+                    .("Grayscale"),
+                    "</td>"
+                ))
+                html <- paste0(html, paste0(
+                    "<td style=\"border: 1px solid #ddd; padding: 8px;\">",
+                    .("Black-and-white printing"),
+                    "</td>"
+                ))
+                html <- paste0(html, paste0(
+                    "<td style=\"border: 1px solid #ddd; padding: 8px;\">",
+                    .("Light = few cases, dark = many; no color required"),
+                    "</td></tr>"
+                ))
                 html <- paste0(html, "</table>")
 
                 # Technical Details
-                html <- paste0(html, "<h3>Technical Details</h3>")
-                html <- paste0(html, "<p><strong>Matrix Construction:</strong></p>")
+                html <- paste0(html, paste0(
+                    "<h3>",
+                    .("Technical Details"),
+                    "</h3>"
+                ))
+                html <- paste0(html, paste0(
+                    "<p>",
+                    jmvcore::format(.("{tag1}Matrix Construction:{tag2}"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</p>"
+                ))
                 html <- paste0(html, "<ul>")
-                html <- paste0(html, "<li>Rows represent Rater 1's classifications</li>")
-                html <- paste0(html, "<li>Columns represent Rater 2's classifications</li>")
-                html <- paste0(html, "<li>Cell (i,j) = count/percentage of cases where Rater 1 chose category i AND Rater 2 chose category j</li>")
-                html <- paste0(html, "<li>Multiple rater pairs create multiple heatmaps for comparison</li>")
+                html <- paste0(html, paste0(
+                    "<li>",
+                    .("Rows represent Rater 1's classifications"),
+                    "</li>"
+                ))
+                html <- paste0(html, paste0(
+                    "<li>",
+                    .("Columns represent Rater 2's classifications"),
+                    "</li>"
+                ))
+                html <- paste0(html, paste0(
+                    "<li>",
+                    .("Cell (i,j) = count/percentage of cases where Rater 1 chose category i AND Rater 2 chose category j"),
+                    "</li>"
+                ))
+                html <- paste0(html, paste0(
+                    "<li>",
+                    .("Multiple rater pairs create multiple heatmaps for comparison"),
+                    "</li>"
+                ))
                 html <- paste0(html, "</ul>")
 
-                html <- paste0(html, "<p><strong>Interpretation Tips:</strong></p>")
+                html <- paste0(html, paste0(
+                    "<p>",
+                    jmvcore::format(.("{tag1}Interpretation Tips:{tag2}"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</p>"
+                ))
                 html <- paste0(html, "<ul>")
-                html <- paste0(html, "<li>Focus on diagonal vs. off-diagonal intensity ratio</li>")
-                html <- paste0(html, "<li>Look for asymmetry between upper and lower triangles</li>")
-                html <- paste0(html, '<li>Identify specific "hot spots" of frequent disagreement</li>')
-                html <- paste0(html, "<li>Compare patterns across multiple rater pairs if available</li>")
+                html <- paste0(html, paste0(
+                    "<li>",
+                    .("Focus on diagonal vs. off-diagonal intensity ratio"),
+                    "</li>"
+                ))
+                html <- paste0(html, paste0(
+                    "<li>",
+                    .("Look for asymmetry between upper and lower triangles"),
+                    "</li>"
+                ))
+                html <- paste0(html, paste0(
+                    "<li>",
+                    .("Identify specific \"hot spots\" of frequent disagreement"),
+                    "</li>"
+                ))
+                html <- paste0(html, paste0(
+                    "<li>",
+                    .("Compare patterns across multiple rater pairs if available"),
+                    "</li>"
+                ))
                 html <- paste0(html, "</ul>")
 
                 # References
-                html <- paste0(html, "<h3>References</h3>")
+                html <- paste0(html, paste0(
+                    "<h3>",
+                    .("References"),
+                    "</h3>"
+                ))
                 html <- paste0(html, '<p style="font-size: 0.9em;">')
                 html <- paste0(html, "Friendly M. Visualizing Categorical Data. <em>SAS Institute.</em> 2000.<br>")
                 html <- paste0(
@@ -4807,178 +5544,163 @@ agreementClass <- if (requireNamespace("jmvcore")) {
             .populateRaterProfileExplanation = function() {
                 # Provide educational content about Rater Profile Plots
 
-                html_content <- "
-            <div style='font-family: Arial, sans-serif; max-width: 800px; line-height: 1.6;'>
-                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>
-                    <h3 style='margin: 0 0 10px 0; color: inherit;'>What are Rater Profile Plots?</h3>
-                    <p style='margin: 0; color: inherit;'>
-                        Rater Profile Plots visualize the <strong>distribution of ratings</strong> for each individual rater.
-                        Unlike agreement statistics that focus on concordance between raters, profile plots reveal
-                        <strong>rating patterns and systematic differences</strong> in how raters use the rating scale.
-                    </p>
-                </div>
-
-                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>
-                    <h4 style='margin: 0 0 10px 0; color: inherit;'>When to Use Rater Profile Plots</h4>
-                    <p style='margin: 0 0 10px 0;'><strong>Essential when:</strong></p>
-                    <ul style='margin: 0; padding-left: 20px;'>
-                        <li><strong>Agreement is low</strong> - Determine if disagreement stems from systematic rating differences vs. random variation</li>
-                        <li><strong>Training evaluation</strong> - Identify raters with restricted range use or systematic over/under-grading</li>
-                        <li><strong>Quality control</strong> - Detect raters who need recalibration or additional training</li>
-                        <li><strong>Method validation</strong> - Ensure all raters are using the full scale appropriately</li>
-                        <li><strong>Identifying outlier raters</strong> - Find raters whose distributions differ markedly from the group</li>
-                    </ul>
-                </div>
-
-                <h4 style='color: inherit;'>Plot Types and When to Use Them</h4>
-                <table style='width: 100%; border-collapse: collapse; margin-bottom: 20px; border: 1px solid #ccc;'>
-                    <tr style='background-color: rgba(88, 88, 88, 0.06); color: inherit;'>
-                        <th style='padding: 8px; border: 1px solid #ccc; text-align: left;'>Plot Type</th>
-                        <th style='padding: 8px; border: 1px solid #ccc; text-align: left;'>Best For</th>
-                        <th style='padding: 8px; border: 1px solid #ccc; text-align: left;'>Shows</th>
-                    </tr>
-                    <tr>
-                        <td style='padding: 8px; border: 1px solid #ccc;'><strong>Box Plot</strong></td>
-                        <td style='padding: 8px; border: 1px solid #ccc;'>Continuous data, comparing medians</td>
-                        <td style='padding: 8px; border: 1px solid #ccc;'>Median, IQR, outliers, range</td>
-                    </tr>
-                    <tr>
-                        <td style='padding: 8px; border: 1px solid #ccc;'><strong>Violin Plot</strong></td>
-                        <td style='padding: 8px; border: 1px solid #ccc;'>Continuous data, full distribution shape</td>
-                        <td style='padding: 8px; border: 1px solid #ccc;'>Distribution density, bimodality, skewness</td>
-                    </tr>
-                    <tr>
-                        <td style='padding: 8px; border: 1px solid #ccc;'><strong>Bar Plot</strong></td>
-                        <td style='padding: 8px; border: 1px solid #ccc;'>Categorical/ordinal data</td>
-                        <td style='padding: 8px; border: 1px solid #ccc;'>Category frequencies, scale use patterns</td>
-                    </tr>
-                </table>
-
-                <h4 style='color: inherit;'>Clinical Use Cases in Pathology</h4>
-
-                <div style='background-color: rgba(155, 155, 155, 0.06); padding: 15px; margin-bottom: 15px; border-left: 3px solid #333; color: inherit;'>
-                    <h5 style='margin: 0 0 10px 0; color: inherit;'>1. Tumor Grade Assessment (Ordinal Data)</h5>
-                    <p style='margin: 0 0 10px 0; color: inherit;'>
-                        <strong>Scenario:</strong> Five pathologists grade 100 breast tumors as G1/G2/G3.
-                    </p>
-                    <p style='margin: 0 0 10px 0; color: inherit;'>
-                        <strong>Bar Plot Reveals:</strong>
-                    </p>
-                    <ul style='margin: 0; padding-left: 20px; color: inherit;'>
-                        <li>Path A: 40% G1, 50% G2, 10% G3 (under-grades G3)</li>
-                        <li>Path B: 15% G1, 40% G2, 45% G3 (over-grades G3)</li>
-                        <li>Path C: 25% G1, 50% G2, 25% G3 (balanced distribution)</li>
-                        <li>Path D: 10% G1, 80% G2, 10% G3 (restricted range - G2 overused)</li>
-                        <li>Path E: 30% G1, 40% G2, 30% G3 (balanced)</li>
-                    </ul>
-                    <p style='margin: 10px 0 0 0; color: inherit;'>
-                        <strong>Interpretation:</strong> Path A and B show opposite systematic biases.
-                        Path D shows central tendency bias (avoiding extreme grades). Targeted training
-                        can address these specific patterns.
-                    </p>
-                </div>
-
-                <div style='background-color: rgba(155, 155, 155, 0.06); padding: 15px; margin-bottom: 15px; border-left: 3px solid #333; color: inherit;'>
-                    <h5 style='margin: 0 0 10px 0; color: inherit;'>2. Ki-67 Proliferation Index (Continuous Data)</h5>
-                    <p style='margin: 0 0 10px 0; color: inherit;'>
-                        <strong>Scenario:</strong> Four pathologists score Ki-67 (0-100%) on 80 breast cancers.
-                    </p>
-                    <p style='margin: 0 0 10px 0; color: inherit;'>
-                        <strong>Box Plot Reveals:</strong>
-                    </p>
-                    <ul style='margin: 0; padding-left: 20px; color: inherit;'>
-                        <li>Scorer 1: Median 25%, IQR 15-40%, range 5-75%</li>
-                        <li>Scorer 2: Median 35%, IQR 25-50%, range 10-85% (systematically higher by ~10%)</li>
-                        <li>Scorer 3: Median 30%, IQR 20-45%, range 15-60% (restricted range, no extremes)</li>
-                        <li>Scorer 4: Median 28%, IQR 18-42%, range 2-95% (full range use)</li>
-                    </ul>
-                    <p style='margin: 10px 0 0 0; color: inherit;'>
-                        <strong>Interpretation:</strong> Scorer 2 systematically over-estimates by ~10% (needs recalibration).
-                        Scorer 3 avoids extreme values (central tendency bias). Violin plots would additionally show
-                        if distributions are unimodal or have multiple peaks.
-                    </p>
-                </div>
-
-                <div style='background-color: rgba(155, 155, 155, 0.06); padding: 15px; margin-bottom: 15px; border-left: 3px solid #333; color: inherit;'>
-                    <h5 style='margin: 0 0 10px 0; color: inherit;'>3. Mitotic Count (Continuous with Outliers)</h5>
-                    <p style='margin: 0 0 10px 0; color: inherit;'>
-                        <strong>Scenario:</strong> Six pathologists count mitoses per 10 HPF in 60 sarcomas.
-                    </p>
-                    <p style='margin: 0 0 10px 0; color: inherit;'>
-                        <strong>Violin Plot Reveals:</strong>
-                    </p>
-                    <ul style='margin: 0; padding-left: 20px; color: inherit;'>
-                        <li>Path A-E: Unimodal distributions, median ~8 mitoses, similar spread</li>
-                        <li>Path F: <strong>Bimodal distribution</strong> with peaks at 5 and 15 mitoses</li>
-                    </ul>
-                    <p style='margin: 10px 0 0 0; color: inherit;'>
-                        <strong>Interpretation:</strong> Path F's bimodal distribution suggests inconsistent counting
-                        methodology (perhaps using different field sizes or magnifications for different cases).
-                        Requires investigation and retraining.
-                    </p>
-                </div>
-
-                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>
-                    <h4 style='margin: 0 0 10px 0; color: inherit;'> Important Interpretation Notes</h4>
-                    <ul style='margin: 0; padding-left: 20px;'>
-                        <li><strong>Distribution differences &#x2260; poor agreement:</strong> Raters can have different distributions
-                            but still agree well on relative rankings</li>
-                        <li><strong>Context matters:</strong> Some distribution differences may reflect genuine expertise
-                            (expert vs. trainee) rather than error</li>
-                        <li><strong>Sample size:</strong> Need >=30 cases per rater for reliable distribution estimates</li>
-                        <li><strong>Outliers:</strong> Investigate outliers individually - may represent genuine biological extremes
-                            or measurement errors</li>
-                        <li><strong>Central tendency bias:</strong> Restricted range (avoiding extremes) is common in trainees
-                            and reduces diagnostic discrimination</li>
-                    </ul>
-                </div>
-
-                <h4 style='color: inherit;'>What to Do Based on Profile Patterns</h4>
-                <table style='width: 100%; border-collapse: collapse; margin-bottom: 20px; border: 1px solid #ccc;'>
-                    <tr style='background-color: rgba(88, 88, 88, 0.06); color: inherit;'>
-                        <th style='padding: 8px; border: 1px solid #ccc; text-align: left;'>Pattern</th>
-                        <th style='padding: 8px; border: 1px solid #ccc; text-align: left;'>Interpretation</th>
-                        <th style='padding: 8px; border: 1px solid #ccc; text-align: left;'>Action</th>
-                    </tr>
-                    <tr>
-                        <td style='padding: 8px; border: 1px solid #ccc;'>Systematic shift (higher/lower median)</td>
-                        <td style='padding: 8px; border: 1px solid #ccc;'>Over/under-grading bias</td>
-                        <td style='padding: 8px; border: 1px solid #ccc;'>Recalibration with reference standards</td>
-                    </tr>
-                    <tr>
-                        <td style='padding: 8px; border: 1px solid #ccc;'>Restricted range (narrow IQR)</td>
-                        <td style='padding: 8px; border: 1px solid #ccc;'>Central tendency bias, avoiding extremes</td>
-                        <td style='padding: 8px; border: 1px solid #ccc;'>Training on diagnostic thresholds</td>
-                    </tr>
-                    <tr>
-                        <td style='padding: 8px; border: 1px solid #ccc;'>Bimodal distribution</td>
-                        <td style='padding: 8px; border: 1px solid #ccc;'>Inconsistent methodology</td>
-                        <td style='padding: 8px; border: 1px solid #ccc;'>Standardize measurement protocol</td>
-                    </tr>
-                    <tr>
-                        <td style='padding: 8px; border: 1px solid #ccc;'>Excessive outliers</td>
-                        <td style='padding: 8px; border: 1px solid #ccc;'>Measurement errors or misclassifications</td>
-                        <td style='padding: 8px; border: 1px solid #ccc;'>Review outlier cases individually</td>
-                    </tr>
-                    <tr>
-                        <td style='padding: 8px; border: 1px solid #ccc;'>Similar distributions across all raters</td>
-                        <td style='padding: 8px; border: 1px solid #ccc;'>Good scale use calibration</td>
-                        <td style='padding: 8px; border: 1px solid #ccc;'>No action needed (assess agreement separately)</td>
-                    </tr>
-                </table>
-
-                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; color: inherit;'>
-                    <h4 style='margin: 0 0 10px 0; color: inherit;'> Best Practices</h4>
-                    <ul style='margin: 0; padding-left: 20px;'>
-                        <li>Use alongside agreement statistics (kappa/ICC) - not a replacement</li>
-                        <li>Violin plots better than box plots for detecting bimodality and distribution shape</li>
-                        <li>Show individual points for small datasets (N < 50 per rater)</li>
-                        <li>Compare profile plots before and after training to assess improvement</li>
-                        <li>For categorical data, look for overuse of middle categories (central tendency)</li>
-                    </ul>
-                </div>
-            </div>
-            "
+                html_content <- paste0(
+                    "\n            <div style='font-family: Arial, sans-serif; max-width: 800px; line-height: 1.6;'>\n                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>\n                    <h3 style='margin: 0 0 10px 0; color: inherit;'>",
+                    .("What are Rater Profile Plots?"),
+                    "</h3>\n                    <p style='margin: 0; color: inherit;'>",
+                    paste0("\n                        ", jmvcore::format(.("Rater Profile Plots visualize the {tag1}distribution of ratings{tag2} for each individual rater.\n                        Unlike agreement statistics that focus on concordance between raters, profile plots reveal\n                        {tag3}rating patterns and systematic differences{tag4} in how raters use the rating scale."), tag1 = "<strong>", tag2 = "</strong>", tag3 = "<strong>", tag4 = "</strong>"), "\n                    "),
+                    "</p>\n                </div>\n\n                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>\n                    <h4 style='margin: 0 0 10px 0; color: inherit;'>",
+                    .("When to Use Rater Profile Plots"),
+                    "</h4>\n                    <p style='margin: 0 0 10px 0;'>",
+                    jmvcore::format(.("{tag1}Essential when:{tag2}"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</p>\n                    <ul style='margin: 0; padding-left: 20px;'>\n                        <li>",
+                    jmvcore::format(.("{tag1}Agreement is low{tag2} - Determine if disagreement stems from systematic rating differences vs. random variation"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                        <li>",
+                    jmvcore::format(.("{tag1}Training evaluation{tag2} - Identify raters with restricted range use or systematic over/under-grading"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                        <li>",
+                    jmvcore::format(.("{tag1}Quality control{tag2} - Detect raters who need recalibration or additional training"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                        <li>",
+                    jmvcore::format(.("{tag1}Method validation{tag2} - Ensure all raters are using the full scale appropriately"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                        <li>",
+                    jmvcore::format(.("{tag1}Identifying outlier raters{tag2} - Find raters whose distributions differ markedly from the group"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                    </ul>\n                </div>\n\n                <h4 style='color: inherit;'>",
+                    .("Plot Types and When to Use Them"),
+                    "</h4>\n                <table style='width: 100%; border-collapse: collapse; margin-bottom: 20px; border: 1px solid #ccc;'>\n                    <tr style='background-color: rgba(88, 88, 88, 0.06); color: inherit;'>\n                        <th style='padding: 8px; border: 1px solid #ccc; text-align: left;'>",
+                    .("Plot Type"),
+                    "</th>\n                        <th style='padding: 8px; border: 1px solid #ccc; text-align: left;'>",
+                    .("Best For"),
+                    "</th>\n                        <th style='padding: 8px; border: 1px solid #ccc; text-align: left;'>",
+                    .("Shows"),
+                    "</th>\n                    </tr>\n                    <tr>\n                        <td style='padding: 8px; border: 1px solid #ccc;'>",
+                    jmvcore::format(.("{tag1}Box Plot{tag2}"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</td>\n                        <td style='padding: 8px; border: 1px solid #ccc;'>",
+                    .("Continuous data, comparing medians"),
+                    "</td>\n                        <td style='padding: 8px; border: 1px solid #ccc;'>",
+                    .("Median, IQR, outliers, range"),
+                    "</td>\n                    </tr>\n                    <tr>\n                        <td style='padding: 8px; border: 1px solid #ccc;'>",
+                    jmvcore::format(.("{tag1}Violin Plot{tag2}"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</td>\n                        <td style='padding: 8px; border: 1px solid #ccc;'>",
+                    .("Continuous data, full distribution shape"),
+                    "</td>\n                        <td style='padding: 8px; border: 1px solid #ccc;'>",
+                    .("Distribution density, bimodality, skewness"),
+                    "</td>\n                    </tr>\n                    <tr>\n                        <td style='padding: 8px; border: 1px solid #ccc;'>",
+                    jmvcore::format(.("{tag1}Bar Plot{tag2}"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</td>\n                        <td style='padding: 8px; border: 1px solid #ccc;'>",
+                    .("Categorical/ordinal data"),
+                    "</td>\n                        <td style='padding: 8px; border: 1px solid #ccc;'>",
+                    .("Category frequencies, scale use patterns"),
+                    "</td>\n                    </tr>\n                </table>\n\n                <h4 style='color: inherit;'>",
+                    .("Clinical Use Cases in Pathology"),
+                    "</h4>\n\n                <div style='background-color: rgba(155, 155, 155, 0.06); padding: 15px; margin-bottom: 15px; border-left: 3px solid #333; color: inherit;'>\n                    <h5 style='margin: 0 0 10px 0; color: inherit;'>",
+                    .("1. Tumor Grade Assessment (Ordinal Data)"),
+                    "</h5>\n                    <p style='margin: 0 0 10px 0; color: inherit;'>",
+                    paste0("\n                        ", jmvcore::format(.("{tag1}Scenario:{tag2} Five pathologists grade 100 breast tumors as G1/G2/G3."), tag1 = "<strong>", tag2 = "</strong>"), "\n                    "),
+                    "</p>\n                    <p style='margin: 0 0 10px 0; color: inherit;'>",
+                    paste0("\n                        ", jmvcore::format(.("{tag1}Bar Plot Reveals:{tag2}"), tag1 = "<strong>", tag2 = "</strong>"), "\n                    "),
+                    "</p>\n                    <ul style='margin: 0; padding-left: 20px; color: inherit;'>\n                        <li>",
+                    .("Path A: 40% G1, 50% G2, 10% G3 (under-grades G3)"),
+                    "</li>\n                        <li>",
+                    .("Path B: 15% G1, 40% G2, 45% G3 (over-grades G3)"),
+                    "</li>\n                        <li>",
+                    .("Path C: 25% G1, 50% G2, 25% G3 (balanced distribution)"),
+                    "</li>\n                        <li>",
+                    .("Path D: 10% G1, 80% G2, 10% G3 (restricted range - G2 overused)"),
+                    "</li>\n                        <li>",
+                    .("Path E: 30% G1, 40% G2, 30% G3 (balanced)"),
+                    "</li>\n                    </ul>\n                    <p style='margin: 10px 0 0 0; color: inherit;'>",
+                    paste0("\n                        ", jmvcore::format(.("{tag1}Interpretation:{tag2} Path A and B show opposite systematic biases.\n                        Path D shows central tendency bias (avoiding extreme grades). Targeted training\n                        can address these specific patterns."), tag1 = "<strong>", tag2 = "</strong>"), "\n                    "),
+                    "</p>\n                </div>\n\n                <div style='background-color: rgba(155, 155, 155, 0.06); padding: 15px; margin-bottom: 15px; border-left: 3px solid #333; color: inherit;'>\n                    <h5 style='margin: 0 0 10px 0; color: inherit;'>",
+                    .("2. Ki-67 Proliferation Index (Continuous Data)"),
+                    "</h5>\n                    <p style='margin: 0 0 10px 0; color: inherit;'>",
+                    paste0("\n                        ", jmvcore::format(.("{tag1}Scenario:{tag2} Four pathologists score Ki-67 (0-100%) on 80 breast cancers."), tag1 = "<strong>", tag2 = "</strong>"), "\n                    "),
+                    "</p>\n                    <p style='margin: 0 0 10px 0; color: inherit;'>",
+                    paste0("\n                        ", jmvcore::format(.("{tag1}Box Plot Reveals:{tag2}"), tag1 = "<strong>", tag2 = "</strong>"), "\n                    "),
+                    "</p>\n                    <ul style='margin: 0; padding-left: 20px; color: inherit;'>\n                        <li>",
+                    .("Scorer 1: Median 25%, IQR 15-40%, range 5-75%"),
+                    "</li>\n                        <li>",
+                    .("Scorer 2: Median 35%, IQR 25-50%, range 10-85% (systematically higher by ~10%)"),
+                    "</li>\n                        <li>",
+                    .("Scorer 3: Median 30%, IQR 20-45%, range 15-60% (restricted range, no extremes)"),
+                    "</li>\n                        <li>",
+                    .("Scorer 4: Median 28%, IQR 18-42%, range 2-95% (full range use)"),
+                    "</li>\n                    </ul>\n                    <p style='margin: 10px 0 0 0; color: inherit;'>",
+                    paste0("\n                        ", jmvcore::format(.("{tag1}Interpretation:{tag2} Scorer 2 systematically over-estimates by ~10% (needs recalibration).\n                        Scorer 3 avoids extreme values (central tendency bias). Violin plots would additionally show\n                        if distributions are unimodal or have multiple peaks."), tag1 = "<strong>", tag2 = "</strong>"), "\n                    "),
+                    "</p>\n                </div>\n\n                <div style='background-color: rgba(155, 155, 155, 0.06); padding: 15px; margin-bottom: 15px; border-left: 3px solid #333; color: inherit;'>\n                    <h5 style='margin: 0 0 10px 0; color: inherit;'>",
+                    .("3. Mitotic Count (Continuous with Outliers)"),
+                    "</h5>\n                    <p style='margin: 0 0 10px 0; color: inherit;'>",
+                    paste0("\n                        ", jmvcore::format(.("{tag1}Scenario:{tag2} Six pathologists count mitoses per 10 HPF in 60 sarcomas."), tag1 = "<strong>", tag2 = "</strong>"), "\n                    "),
+                    "</p>\n                    <p style='margin: 0 0 10px 0; color: inherit;'>",
+                    paste0("\n                        ", jmvcore::format(.("{tag1}Violin Plot Reveals:{tag2}"), tag1 = "<strong>", tag2 = "</strong>"), "\n                    "),
+                    "</p>\n                    <ul style='margin: 0; padding-left: 20px; color: inherit;'>\n                        <li>",
+                    .("Path A-E: Unimodal distributions, median ~8 mitoses, similar spread"),
+                    "</li>\n                        <li>",
+                    jmvcore::format(.("Path F: {tag1}Bimodal distribution{tag2} with peaks at 5 and 15 mitoses"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                    </ul>\n                    <p style='margin: 10px 0 0 0; color: inherit;'>",
+                    paste0("\n                        ", jmvcore::format(.("{tag1}Interpretation:{tag2} Path F's bimodal distribution suggests inconsistent counting\n                        methodology (perhaps using different field sizes or magnifications for different cases).\n                        Requires investigation and retraining."), tag1 = "<strong>", tag2 = "</strong>"), "\n                    "),
+                    "</p>\n                </div>\n\n                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>\n                    <h4 style='margin: 0 0 10px 0; color: inherit;'>",
+                    paste0(" ", .("Important Interpretation Notes")),
+                    "</h4>\n                    <ul style='margin: 0; padding-left: 20px;'>\n                        <li>",
+                    jmvcore::format(.("{tag1}Distribution differences {tag2} poor agreement:{tag3} Raters can have different distributions\n                            but still agree well on relative rankings"), tag1 = "<strong>", tag2 = "&#x2260;", tag3 = "</strong>"),
+                    "</li>\n                        <li>",
+                    jmvcore::format(.("{tag1}Context matters:{tag2} Some distribution differences may reflect genuine expertise\n                            (expert vs. trainee) rather than error"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                        <li>",
+                    jmvcore::format(.("{tag1}Sample size:{tag2} Need >=30 cases per rater for reliable distribution estimates"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                        <li>",
+                    jmvcore::format(.("{tag1}Outliers:{tag2} Investigate outliers individually - may represent genuine biological extremes\n                            or measurement errors"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                        <li>",
+                    jmvcore::format(.("{tag1}Central tendency bias:{tag2} Restricted range (avoiding extremes) is common in trainees\n                            and reduces diagnostic discrimination"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                    </ul>\n                </div>\n\n                <h4 style='color: inherit;'>",
+                    .("What to Do Based on Profile Patterns"),
+                    "</h4>\n                <table style='width: 100%; border-collapse: collapse; margin-bottom: 20px; border: 1px solid #ccc;'>\n                    <tr style='background-color: rgba(88, 88, 88, 0.06); color: inherit;'>\n                        <th style='padding: 8px; border: 1px solid #ccc; text-align: left;'>",
+                    .("Pattern"),
+                    "</th>\n                        <th style='padding: 8px; border: 1px solid #ccc; text-align: left;'>",
+                    .("Interpretation"),
+                    "</th>\n                        <th style='padding: 8px; border: 1px solid #ccc; text-align: left;'>",
+                    .("Action"),
+                    "</th>\n                    </tr>\n                    <tr>\n                        <td style='padding: 8px; border: 1px solid #ccc;'>",
+                    .("Systematic shift (higher/lower median)"),
+                    "</td>\n                        <td style='padding: 8px; border: 1px solid #ccc;'>",
+                    .("Over/under-grading bias"),
+                    "</td>\n                        <td style='padding: 8px; border: 1px solid #ccc;'>",
+                    .("Recalibration with reference standards"),
+                    "</td>\n                    </tr>\n                    <tr>\n                        <td style='padding: 8px; border: 1px solid #ccc;'>",
+                    .("Restricted range (narrow IQR)"),
+                    "</td>\n                        <td style='padding: 8px; border: 1px solid #ccc;'>",
+                    .("Central tendency bias, avoiding extremes"),
+                    "</td>\n                        <td style='padding: 8px; border: 1px solid #ccc;'>",
+                    .("Training on diagnostic thresholds"),
+                    "</td>\n                    </tr>\n                    <tr>\n                        <td style='padding: 8px; border: 1px solid #ccc;'>",
+                    .("Bimodal distribution"),
+                    "</td>\n                        <td style='padding: 8px; border: 1px solid #ccc;'>",
+                    .("Inconsistent methodology"),
+                    "</td>\n                        <td style='padding: 8px; border: 1px solid #ccc;'>",
+                    .("Standardize measurement protocol"),
+                    "</td>\n                    </tr>\n                    <tr>\n                        <td style='padding: 8px; border: 1px solid #ccc;'>",
+                    .("Excessive outliers"),
+                    "</td>\n                        <td style='padding: 8px; border: 1px solid #ccc;'>",
+                    .("Measurement errors or misclassifications"),
+                    "</td>\n                        <td style='padding: 8px; border: 1px solid #ccc;'>",
+                    .("Review outlier cases individually"),
+                    "</td>\n                    </tr>\n                    <tr>\n                        <td style='padding: 8px; border: 1px solid #ccc;'>",
+                    .("Similar distributions across all raters"),
+                    "</td>\n                        <td style='padding: 8px; border: 1px solid #ccc;'>",
+                    .("Good scale use calibration"),
+                    "</td>\n                        <td style='padding: 8px; border: 1px solid #ccc;'>",
+                    .("No action needed (assess agreement separately)"),
+                    "</td>\n                    </tr>\n                </table>\n\n                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; color: inherit;'>\n                    <h4 style='margin: 0 0 10px 0; color: inherit;'>",
+                    paste0(" ", .("Best Practices")),
+                    "</h4>\n                    <ul style='margin: 0; padding-left: 20px;'>\n                        <li>",
+                    .("Use alongside agreement statistics (kappa/ICC) - not a replacement"),
+                    "</li>\n                        <li>",
+                    .("Violin plots better than box plots for detecting bimodality and distribution shape"),
+                    "</li>\n                        <li>",
+                    .("Show individual points for small datasets (N < 50 per rater)"),
+                    "</li>\n                        <li>",
+                    .("Compare profile plots before and after training to assess improvement"),
+                    "</li>\n                        <li>",
+                    .("For categorical data, look for overuse of middle categories (central tendency)"),
+                    "</li>\n                    </ul>\n                </div>\n            </div>\n            "
+                )
 
                 html <- .fmt(html_content)
                 self$results$raterProfileExplanation$setContent(html)
@@ -5142,20 +5864,23 @@ agreementClass <- if (requireNamespace("jmvcore")) {
             # ============================================================
 
             .populateSubgroupExplanation = function() {
-                html <- "<div style='font-family: Arial, sans-serif; max-width: 800px; line-height: 1.6;'>
-                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>
-                    <h3 style='margin: 0 0 10px 0; color: inherit;'>Agreement by Subgroup (Stratified Analysis)</h3>
-                    <p style='margin: 0; color: inherit;'>Calculate agreement separately for each subgroup to identify which case types show reliable agreement.</p>
-                </div>
-                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; color: inherit;'>
-                    <h4 style='margin: 0 0 10px 0; color: inherit;'>Use Cases</h4>
-                    <ul style='margin: 0; padding-left: 20px;'>
-                        <li>Compare agreement across tumor types (benign vs. malignant)</li>
-                        <li>Assess agreement by disease stage or grade</li>
-                        <li>Identify case difficulty (easy vs. hard cases)</li>
-                        <li>Evaluate agreement across anatomical sites</li>
-                    </ul>
-                </div></div>"
+                html <- paste0(
+                    "<div style='font-family: Arial, sans-serif; max-width: 800px; line-height: 1.6;'>\n                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>\n                    <h3 style='margin: 0 0 10px 0; color: inherit;'>",
+                    .("Agreement by Subgroup (Stratified Analysis)"),
+                    "</h3>\n                    <p style='margin: 0; color: inherit;'>",
+                    .("Calculate agreement separately for each subgroup to identify which case types show reliable agreement."),
+                    "</p>\n                </div>\n                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; color: inherit;'>\n                    <h4 style='margin: 0 0 10px 0; color: inherit;'>",
+                    .("Use Cases"),
+                    "</h4>\n                    <ul style='margin: 0; padding-left: 20px;'>\n                        <li>",
+                    .("Compare agreement across tumor types (benign vs. malignant)"),
+                    "</li>\n                        <li>",
+                    .("Assess agreement by disease stage or grade"),
+                    "</li>\n                        <li>",
+                    .("Identify case difficulty (easy vs. hard cases)"),
+                    "</li>\n                        <li>",
+                    .("Evaluate agreement across anatomical sites"),
+                    "</li>\n                    </ul>\n                </div></div>"
+                )
                 self$results$subgroupExplanation$setContent(.fmt(html))
             },
             .subgroupForestPlot = function(image, ggtheme, theme, ...) {
@@ -5517,7 +6242,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                         if (used_null_se) {
                             table$setNote(
                                 "ci_null_se",
-                                .("At least one interval in this table was built from the null-hypothesis standard error (kappa divided by its H0 test statistic) because the non-null asymptotic standard error from vcd::Kappa was unavailable for that subgroup. Null-SE intervals are too narrow when kappa is high, so treat them as optimistic; three or more raters always use this fallback.")
+                                .("At least one interval in this table was built from the null-hypothesis standard error (kappa divided by its H0 test statistic) because the non-null asymptotic standard error from vcd::Kappa was unavailable for that subgroup. Null-SE intervals use a variance under zero agreement; their coverage at nonzero kappa is uncertain; three or more raters always use this fallback.")
                             )
                         }
                         if (!is.null(icc_guard_msg)) {
@@ -5569,24 +6294,31 @@ agreementClass <- if (requireNamespace("jmvcore")) {
             # ============================================================
 
             .populateRaterClusterExplanation = function() {
-                html <- "<div style='font-family: Arial, sans-serif; max-width: 800px; line-height: 1.6;'>
-                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>
-                    <h3 style='margin: 0 0 10px 0; color: inherit;'>Rater Clustering</h3>
-                    <p style='margin: 0; color: inherit;'>Identifies groups of raters with similar rating patterns using hierarchical or k-means clustering.</p>
-                </div>
-                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; color: inherit;'>
-                    <h4 style='margin: 0 0 10px 0; color: inherit;'>Use Cases</h4>
-                    <ul style='margin: 0; padding-left: 20px;'>
-                        <li>Identify subgroups of similarly-trained raters</li>
-                        <li>Detect outlier raters with unique rating patterns</li>
-                        <li>Understand sources of disagreement (within vs. between groups)</li>
-                        <li>Optimize panel composition for maximum diversity or homogeneity</li>
-                        <li>Target training to specific rater clusters</li>
-                    </ul>
-                    <h4 style='margin: 10px 0 10px 0; color: inherit;'>Interpretation</h4>
-                    <p style='margin: 0;'><strong>Dendrogram height:</strong> Lower = more similar. High first split = distinct rater groups.</p>
-                    <p style='margin: 5px 0 0 0;'><strong>Cluster heatmap:</strong> Each cell is the similarity of two raters on a fixed scale from blue (-1) through white (0) to red (1 = identical); negative values occur only with the correlation and concordance metrics. Red blocks on the diagonal = tight clusters; paler cells between blocks = raters in different clusters.</p>
-                </div></div>"
+                html <- paste0(
+                    "<div style='font-family: Arial, sans-serif; max-width: 800px; line-height: 1.6;'>\n                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>\n                    <h3 style='margin: 0 0 10px 0; color: inherit;'>",
+                    .("Rater Clustering"),
+                    "</h3>\n                    <p style='margin: 0; color: inherit;'>",
+                    .("Identifies groups of raters with similar rating patterns using hierarchical or k-means clustering."),
+                    "</p>\n                </div>\n                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; color: inherit;'>\n                    <h4 style='margin: 0 0 10px 0; color: inherit;'>",
+                    .("Use Cases"),
+                    "</h4>\n                    <ul style='margin: 0; padding-left: 20px;'>\n                        <li>",
+                    .("Identify subgroups of similarly-trained raters"),
+                    "</li>\n                        <li>",
+                    .("Detect outlier raters with unique rating patterns"),
+                    "</li>\n                        <li>",
+                    .("Understand sources of disagreement (within vs. between groups)"),
+                    "</li>\n                        <li>",
+                    .("Optimize panel composition for maximum diversity or homogeneity"),
+                    "</li>\n                        <li>",
+                    .("Target training to specific rater clusters"),
+                    "</li>\n                    </ul>\n                    <h4 style='margin: 10px 0 10px 0; color: inherit;'>",
+                    .("Interpretation"),
+                    "</h4>\n                    <p style='margin: 0;'>",
+                    jmvcore::format(.("{tag1}Dendrogram height:{tag2} Lower = more similar. High first split = distinct rater groups."), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</p>\n                    <p style='margin: 5px 0 0 0;'>",
+                    jmvcore::format(.("{tag1}Cluster heatmap:{tag2} Each cell is the similarity of two raters on a fixed scale from blue (-1) through white (0) to red (1 = identical); negative values occur only with the correlation and concordance metrics. Red blocks on the diagonal = tight clusters; paler cells between blocks = raters in different clusters."), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</p>\n                </div></div>"
+                )
                 self$results$raterClusterExplanation$setContent(.fmt(html))
             },
             .raterDendrogram = function(image, ggtheme, theme, ...) {
@@ -6023,28 +6755,39 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                 )
             },
             .populateCaseClusterExplanation = function() {
-                html <- "<div style='font-family: Arial, sans-serif; max-width: 800px; line-height: 1.6;'>
-                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>
-                    <h3 style='margin: 0 0 10px 0; color: inherit;'>Case Clustering</h3>
-                    <p style='margin: 0; color: inherit;'>Identifies groups of cases with similar rating patterns across raters using hierarchical or k-means clustering.</p>
-                </div>
-                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; color: inherit;'>
-                    <h4 style='margin: 0 0 10px 0; color: inherit;'>Use Cases</h4>
-                    <ul style='margin: 0; padding-left: 20px;'>
-                        <li>Identify subgroups of cases with consistent rating patterns</li>
-                        <li>Detect controversial or difficult-to-classify cases</li>
-                        <li>Understand sources of disagreement (easy vs. hard cases)</li>
-                        <li>Stratify analysis by case difficulty</li>
-                        <li>Identify cases requiring expert review or consensus discussion</li>
-                    </ul>
-                    <h4 style='margin: 10px 0 10px 0; color: inherit;'>Clinical Examples</h4>
-                    <p style='margin: 0;'><strong>Tumor grading:</strong> Cluster cases by grade agreement. Low-agreement clusters may contain borderline cases needing expert review.</p>
-                    <p style='margin: 5px 0 0 0;'><strong>Diagnostic categorization:</strong> Identify groups of cases with consistent vs. variable diagnoses across pathologists.</p>
-                    <h4 style='margin: 10px 0 10px 0; color: inherit;'>Interpretation</h4>
-                    <p style='margin: 0;'><strong>Dendrogram height:</strong> Lower = more similar rating patterns. High first split = distinct case groups.</p>
-                    <p style='margin: 5px 0 0 0;'><strong>Cluster heatmap:</strong> Each cell is the similarity of two cases on a fixed scale from blue (-1) through white (0) to red (1 = identical); negative values occur only with the correlation metric. Red blocks on the diagonal = tight clusters (similar cases); paler cells between blocks = cases in different clusters.</p>
-                    <p style='margin: 5px 0 0 0;'><strong>Low within-cluster similarity:</strong> The cases grouped together were rated in different patterns, so the cluster is loose. It compares cases with each other and does not say whether the raters agreed on any one case; the Case Agreement table (Level of Agreement) shows that.</p>
-                </div></div>"
+                html <- paste0(
+                    "<div style='font-family: Arial, sans-serif; max-width: 800px; line-height: 1.6;'>\n                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>\n                    <h3 style='margin: 0 0 10px 0; color: inherit;'>",
+                    .("Case Clustering"),
+                    "</h3>\n                    <p style='margin: 0; color: inherit;'>",
+                    .("Identifies groups of cases with similar rating patterns across raters using hierarchical or k-means clustering."),
+                    "</p>\n                </div>\n                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; color: inherit;'>\n                    <h4 style='margin: 0 0 10px 0; color: inherit;'>",
+                    .("Use Cases"),
+                    "</h4>\n                    <ul style='margin: 0; padding-left: 20px;'>\n                        <li>",
+                    .("Identify subgroups of cases with consistent rating patterns"),
+                    "</li>\n                        <li>",
+                    .("Detect controversial or difficult-to-classify cases"),
+                    "</li>\n                        <li>",
+                    .("Understand sources of disagreement (easy vs. hard cases)"),
+                    "</li>\n                        <li>",
+                    .("Stratify analysis by case difficulty"),
+                    "</li>\n                        <li>",
+                    .("Identify cases requiring expert review or consensus discussion"),
+                    "</li>\n                    </ul>\n                    <h4 style='margin: 10px 0 10px 0; color: inherit;'>",
+                    .("Clinical Examples"),
+                    "</h4>\n                    <p style='margin: 0;'>",
+                    jmvcore::format(.("{tag1}Tumor grading:{tag2} Cluster cases by grade agreement. Low-agreement clusters may contain borderline cases needing expert review."), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</p>\n                    <p style='margin: 5px 0 0 0;'>",
+                    jmvcore::format(.("{tag1}Diagnostic categorization:{tag2} Identify groups of cases with consistent vs. variable diagnoses across pathologists."), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</p>\n                    <h4 style='margin: 10px 0 10px 0; color: inherit;'>",
+                    .("Interpretation"),
+                    "</h4>\n                    <p style='margin: 0;'>",
+                    jmvcore::format(.("{tag1}Dendrogram height:{tag2} Lower = more similar rating patterns. High first split = distinct case groups."), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</p>\n                    <p style='margin: 5px 0 0 0;'>",
+                    jmvcore::format(.("{tag1}Cluster heatmap:{tag2} Each cell is the similarity of two cases on a fixed scale from blue (-1) through white (0) to red (1 = identical); negative values occur only with the correlation metric. Red blocks on the diagonal = tight clusters (similar cases); paler cells between blocks = cases in different clusters."), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</p>\n                    <p style='margin: 5px 0 0 0;'>",
+                    jmvcore::format(.("{tag1}Low within-cluster similarity:{tag2} The cases grouped together were rated in different patterns, so the cluster is loose. It compares cases with each other and does not say whether the raters agreed on any one case; the Case Agreement table (Level of Agreement) shows that."), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</p>\n                </div></div>"
+                )
                 self$results$caseClusterExplanation$setContent(.fmt(html))
             },
             .caseDendrogram = function(image, ggtheme, theme, ...) {
@@ -6513,66 +7256,73 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                 )
             },
             .populateMaxwellREExplanation = function() {
-                html_content <- "
-            <div style='font-family: Arial, sans-serif; max-width: 800px; line-height: 1.6;'>
-                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>
-                    <h3 style='margin: 0 0 10px 0; color: inherit;'>What does the rater variance decomposition show?</h3>
-                    <p style='margin: 0; color: inherit;'>
-                        A two-way analysis of variance (cases + raters) splits the spread of continuous or ordinal-numeric ratings into three parts:
-                    </p>
-                    <ul style='margin: 10px 0 0 0; padding-left: 20px;'>
-                        <li><strong>Between-case variance</strong> - how much the cases really differ. This is signal, not disagreement, and is reported in the note under the table but excluded from the shares.</li>
-                        <li><strong>Systematic disagreement</strong> (rater component) - consistent offsets between raters or methods, for example one reader scoring every case a few points higher.</li>
-                        <li><strong>Random disagreement</strong> (residual) - inconsistent, case-by-case variation that no offset explains.</li>
-                    </ul>
-                    <p style='margin: 10px 0 0 0; color: inherit;'>
-                        <strong>Random share = random disagreement / (systematic + random disagreement)</strong>, from 0 (all disagreement is systematic) to 1 (all of it is random).
-                        This table used to be labelled \"Maxwell's RE\"; Maxwell's (1977) random-error coefficient is a different statistic for dichotomous ratings and is not what is computed here.
-                    </p>
-                </div>
-
-                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>
-                    <h4 style='margin: 0 0 10px 0; color: inherit;'>Why it matters</h4>
-                    <ul style='margin: 0; padding-left: 20px;'>
-                        <li><strong>Systematic disagreement can be calibrated away</strong> - a constant offset between a digital and a manual Ki-67 score is fixed with a correction factor or a shared reference set.</li>
-                        <li><strong>Random disagreement needs a different remedy</strong> - protocol standardisation, training, or averaging replicate reads.</li>
-                        <li><strong>Read it with the ICC</strong> - the ICC tells you how reliable the ratings are; this decomposition tells you what kind of disagreement is limiting them.</li>
-                    </ul>
-                </div>
-
-                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>
-                    <h4 style='margin: 0 0 10px 0; color: inherit;'>Reading the random share</h4>
-                    <table style='width: 100%; border-collapse: collapse;'>
-                        <tr style='background-color: rgba(88, 88, 88, 0.06); color: inherit;'>
-                            <th style='padding: 8px; text-align: left; border-bottom: 2px solid #333;'>Random share</th>
-                            <th style='padding: 8px; text-align: left; border-bottom: 2px solid #333;'>Pattern</th>
-                            <th style='padding: 8px; text-align: left; border-bottom: 2px solid #333;'>What it points to</th>
-                        </tr>
-                        <tr><td style='padding: 8px; border-bottom: 1px solid #ddd;'>below 0.30</td><td style='padding: 8px; border-bottom: 1px solid #ddd;'>Most of the disagreement is a systematic offset</td><td style='padding: 8px; border-bottom: 1px solid #ddd;'>Calibration, standardisation, bias correction</td></tr>
-                        <tr><td style='padding: 8px; border-bottom: 1px solid #ddd;'>0.30 to below 0.50</td><td style='padding: 8px; border-bottom: 1px solid #ddd;'>Offsets account for more than random noise</td><td style='padding: 8px; border-bottom: 1px solid #ddd;'>Calibration first, then training</td></tr>
-                        <tr><td style='padding: 8px; border-bottom: 1px solid #ddd;'>0.50 to below 0.70</td><td style='padding: 8px; border-bottom: 1px solid #ddd;'>Random noise accounts for more than offsets</td><td style='padding: 8px; border-bottom: 1px solid #ddd;'>Training first, then calibration</td></tr>
-                        <tr><td style='padding: 8px;'>0.70 and above</td><td style='padding: 8px;'>Most of the disagreement is random noise</td><td style='padding: 8px;'>Training, protocols, replicate reads</td></tr>
-                    </table>
-                    <p style='margin: 10px 0 0 0; font-size: 13px;'>
-                        These cut-points are this module's display convention for describing the share in words - they have no published source and no diagnostic status, so read the share and the two variance components rather than the row you land in.
-                    </p>
-                    <p style='margin: 10px 0 0 0; font-size: 13px;'>
-                        <strong>Worked example:</strong> four pathologists score Ki-67 (0 to 100%) on 60 cases manually and with software that reads about 6 points lower.
-                        Rater component 9.1, residual 3.2, between-case variance 140: random share 0.26, so most of the disagreement is the offset and a calibration factor is the first fix.
-                        The same data with no offset but noisy reads would show a rater component near 0 and a random share near 1.
-                    </p>
-                </div>
-
-                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; color: inherit;'>
-                    <h4 style='margin: 0 0 10px 0; color: inherit;'>Assumptions and limits</h4>
-                    <ul style='margin: 0; padding-left: 20px;'>
-                        <li>Additive two-way model without a case-by-rater interaction term (each case rated once per rater); complete cases only</li>
-                        <li>Numeric or ordered ratings with approximately equal steps; not for nominal categories</li>
-                        <li>Components are method-of-moments estimates truncated at zero; with few raters the systematic component is imprecise</li>
-                    </ul>
-                </div>
-            </div>
-            "
+                html_content <- paste0(
+                    "\n            <div style='font-family: Arial, sans-serif; max-width: 800px; line-height: 1.6;'>\n                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>\n                    <h3 style='margin: 0 0 10px 0; color: inherit;'>",
+                    .("What does the rater variance decomposition show?"),
+                    "</h3>\n                    <p style='margin: 0; color: inherit;'>",
+                    paste0("\n                        ", .("A two-way analysis of variance (cases + raters) splits the spread of continuous or ordinal-numeric ratings into three parts:"), "\n                    "),
+                    "</p>\n                    <ul style='margin: 10px 0 0 0; padding-left: 20px;'>\n                        <li>",
+                    jmvcore::format(.("{tag1}Between-case variance{tag2} - how much the cases really differ. This is signal, not disagreement, and is reported in the note under the table but excluded from the shares."), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                        <li>",
+                    jmvcore::format(.("{tag1}Systematic disagreement{tag2} (rater component) - consistent offsets between raters or methods, for example one reader scoring every case a few points higher."), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                        <li>",
+                    jmvcore::format(.("{tag1}Random disagreement{tag2} (residual) - inconsistent, case-by-case variation that no offset explains."), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                    </ul>\n                    <p style='margin: 10px 0 0 0; color: inherit;'>",
+                    paste0("\n                        ", jmvcore::format(.("{tag1}Random share = random disagreement / (systematic + random disagreement){tag2}, from 0 (all disagreement is systematic) to 1 (all of it is random).\n                        This table used to be labelled \"Maxwell's RE\"; Maxwell's (1977) random-error coefficient is a different statistic for dichotomous ratings and is not what is computed here."), tag1 = "<strong>", tag2 = "</strong>"), "\n                    "),
+                    "</p>\n                </div>\n\n                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>\n                    <h4 style='margin: 0 0 10px 0; color: inherit;'>",
+                    .("Why it matters"),
+                    "</h4>\n                    <ul style='margin: 0; padding-left: 20px;'>\n                        <li>",
+                    jmvcore::format(.("{tag1}Systematic disagreement can be calibrated away{tag2} - a constant offset between a digital and a manual Ki-67 score is fixed with a correction factor or a shared reference set."), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                        <li>",
+                    jmvcore::format(.("{tag1}Random disagreement needs a different remedy{tag2} - protocol standardisation, training, or averaging replicate reads."), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                        <li>",
+                    jmvcore::format(.("{tag1}Read it with the ICC{tag2} - the ICC tells you how reliable the ratings are; this decomposition tells you what kind of disagreement is limiting them."), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                    </ul>\n                </div>\n\n                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>\n                    <h4 style='margin: 0 0 10px 0; color: inherit;'>",
+                    .("Reading the random share"),
+                    "</h4>\n                    <table style='width: 100%; border-collapse: collapse;'>\n                        <tr style='background-color: rgba(88, 88, 88, 0.06); color: inherit;'>\n                            <th style='padding: 8px; text-align: left; border-bottom: 2px solid #333;'>",
+                    .("Random share"),
+                    "</th>\n                            <th style='padding: 8px; text-align: left; border-bottom: 2px solid #333;'>",
+                    .("Pattern"),
+                    "</th>\n                            <th style='padding: 8px; text-align: left; border-bottom: 2px solid #333;'>",
+                    .("What it points to"),
+                    "</th>\n                        </tr>\n                        <tr><td style='padding: 8px; border-bottom: 1px solid #ddd;'>",
+                    .("below 0.30"),
+                    "</td><td style='padding: 8px; border-bottom: 1px solid #ddd;'>",
+                    .("Most of the disagreement is a systematic offset"),
+                    "</td><td style='padding: 8px; border-bottom: 1px solid #ddd;'>",
+                    .("Calibration, standardisation, bias correction"),
+                    "</td></tr>\n                        <tr><td style='padding: 8px; border-bottom: 1px solid #ddd;'>",
+                    .("0.30 to below 0.50"),
+                    "</td><td style='padding: 8px; border-bottom: 1px solid #ddd;'>",
+                    .("Offsets account for more than random noise"),
+                    "</td><td style='padding: 8px; border-bottom: 1px solid #ddd;'>",
+                    .("Calibration first, then training"),
+                    "</td></tr>\n                        <tr><td style='padding: 8px; border-bottom: 1px solid #ddd;'>",
+                    .("0.50 to below 0.70"),
+                    "</td><td style='padding: 8px; border-bottom: 1px solid #ddd;'>",
+                    .("Random noise accounts for more than offsets"),
+                    "</td><td style='padding: 8px; border-bottom: 1px solid #ddd;'>",
+                    .("Training first, then calibration"),
+                    "</td></tr>\n                        <tr><td style='padding: 8px;'>",
+                    .("0.70 and above"),
+                    "</td><td style='padding: 8px;'>",
+                    .("Most of the disagreement is random noise"),
+                    "</td><td style='padding: 8px;'>",
+                    .("Training, protocols, replicate reads"),
+                    "</td></tr>\n                    </table>\n                    <p style='margin: 10px 0 0 0; font-size: 13px;'>",
+                    paste0("\n                        ", .("These cut-points are this module's display convention for describing the share in words - they have no published source and no diagnostic status, so read the share and the two variance components rather than the row you land in."), "\n                    "),
+                    "</p>\n                    <p style='margin: 10px 0 0 0; font-size: 13px;'>",
+                    paste0("\n                        ", jmvcore::format(.("{tag1}Worked example:{tag2} four pathologists score Ki-67 (0 to 100%) on 60 cases manually and with software that reads about 6 points lower.\n                        Rater component 9.1, residual 3.2, between-case variance 140: random share 0.26, so most of the disagreement is the offset and a calibration factor is the first fix.\n                        The same data with no offset but noisy reads would show a rater component near 0 and a random share near 1."), tag1 = "<strong>", tag2 = "</strong>"), "\n                    "),
+                    "</p>\n                </div>\n\n                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; color: inherit;'>\n                    <h4 style='margin: 0 0 10px 0; color: inherit;'>",
+                    .("Assumptions and limits"),
+                    "</h4>\n                    <ul style='margin: 0; padding-left: 20px;'>\n                        <li>",
+                    .("Additive two-way model without a case-by-rater interaction term (each case rated once per rater); complete cases only"),
+                    "</li>\n                        <li>",
+                    .("Numeric or ordered ratings with approximately equal steps; not for nominal categories"),
+                    "</li>\n                        <li>",
+                    .("Components are method-of-moments estimates truncated at zero; with few raters the systematic component is imprecise"),
+                    "</li>\n                    </ul>\n                </div>\n            </div>\n            "
+                )
 
                 self$results$maxwellREExplanation$setContent(html_content)
             },
@@ -6849,268 +7599,217 @@ agreementClass <- if (requireNamespace("jmvcore")) {
             .populateInterIntraRaterExplanation = function() {
                 # Provide educational content about Inter/Intra-Rater Reliability
 
-                html_content <- "
-            <div style='font-family: Arial, sans-serif; max-width: 800px; line-height: 1.6;'>
-                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>
-                    <h3 style='margin: 0 0 10px 0; color: inherit;'>What is Inter/Intra-Rater Reliability?</h3>
-                    <p style='margin: 0; color: inherit;'>
-                        This analysis simultaneously assesses two critical aspects of measurement reliability:
-                    </p>
-                    <ul style='margin: 10px 0 0 0; padding-left: 20px;'>
-                        <li><strong>Intra-Rater Reliability (Test-Retest)</strong> - Consistency of each individual rater's
-                            assessments across different time points (within-rater consistency)</li>
-                        <li><strong>Inter-Rater Reliability</strong> - Agreement between different raters' assessments
-                            (between-rater agreement)</li>
-                    </ul>
-                </div>
-
-                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>
-                    <h4 style='margin: 0 0 10px 0; color: inherit;'>When to Use This Analysis</h4>
-                    <p style='margin: 0 0 10px 0;'><strong>Essential for test-retest reliability studies where:</strong></p>
-                    <ul style='margin: 0; padding-left: 20px;'>
-                        <li><strong>Training evaluation</strong> - Assess whether trainees maintain consistent ratings over time</li>
-                        <li><strong>Fatigue studies</strong> - Detect changes in rating consistency during long reading sessions</li>
-                        <li><strong>Quality control</strong> - Monitor both individual consistency and team agreement</li>
-                        <li><strong>Method validation</strong> - Establish both reproducibility (intra-rater) and comparability (inter-rater)</li>
-                        <li><strong>Digital pathology validation</strong> - Compare glass slide vs. digital slide ratings by same pathologists</li>
-                    </ul>
-                </div>
-
-                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>
-                    <h4 style='margin: 0 0 10px 0; color: inherit;'>Data Structure Requirements</h4>
-                    <p style='margin: 0 0 10px 0;'>
-                        Column names must follow a pattern to identify rater-timepoint pairs:
-                    </p>
-                    <div style='background-color: rgba(255, 255, 255, 0.06); padding: 10px; border-radius: 5px; font-family: monospace; color: inherit;'>
-                        <strong>Pattern:</strong> RaterID<span style='color: inherit;'>[separator]</span>TimePoint<br>
-                        <strong>Example with underscore (_):</strong><br>
-                        &#x2022; Rater1_Time1, Rater1_Time2, Rater1_Time3<br>
-                        &#x2022; Rater2_Time1, Rater2_Time2, Rater2_Time3<br>
-                        &#x2022; PathA_T1, PathA_T2 (works with any separator)<br>
-                        <strong>Example with dot (.):</strong><br>
-                        &#x2022; Observer1.Pre, Observer1.Post<br>
-                        &#x2022; Observer2.Pre, Observer2.Post
-                    </div>
-                    <p style='margin: 10px 0 0 0;'><em>The separator character (default: underscore) is specified in the analysis options.</em></p>
-                </div>
-
-                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>
-                    <h4 style='margin: 0 0 10px 0; color: inherit;'>Statistical Methods Used</h4>
-                    <p style='margin: 0 0 10px 0;'>The analysis automatically selects appropriate statistics based on data type:</p>
-                    <ul style='margin: 0 0 10px 0; padding-left: 20px;'>
-                        <li><strong>Categorical/Ordinal Data:</strong> Cohen's Kappa or Weighted Kappa for each rater's test-retest pairs</li>
-                        <li><strong>Continuous Data:</strong> ICC(2,1) - two-way random effects, absolute agreement, single rating - for each rater</li>
-                        <li><strong>Inter-Rater:</strong> ONE pooled row across every rater &#xD7; time-point column (Fleiss' kappa for three or more columns, Cohen's kappa for two, ICC(2,1) for measurements). It is not split by time point: to compare inter-rater agreement at each time point, run the analysis once on each time point's columns</li>
-                        <li><strong>Which statistic:</strong> numeric columns holding only whole numbers no greater than 10 are read as category codes and get kappa; a value with decimals or above 10 makes the columns measurements and gets the ICC</li>
-                    </ul>
-                    <p style='margin: 15px 0 5px 0;'><strong>Kappa</strong> (Landis &amp; Koch, 1977)</p>
-<table style='width: 100%; border-collapse: collapse;'>
-<tr><td style='padding: 5px; font-weight: bold; border-bottom: 1px solid #ddd;'>&lt; 0.00</td><td style='padding: 5px; border-bottom: 1px solid #ddd;'>Worse than chance</td></tr>
-<tr><td style='padding: 5px; font-weight: bold; border-bottom: 1px solid #ddd;'>0.00 to &lt; 0.20</td><td style='padding: 5px; border-bottom: 1px solid #ddd;'>Slight</td></tr>
-<tr><td style='padding: 5px; font-weight: bold; border-bottom: 1px solid #ddd;'>0.20 to &lt; 0.40</td><td style='padding: 5px; border-bottom: 1px solid #ddd;'>Fair</td></tr>
-<tr><td style='padding: 5px; font-weight: bold; border-bottom: 1px solid #ddd;'>0.40 to &lt; 0.60</td><td style='padding: 5px; border-bottom: 1px solid #ddd;'>Moderate</td></tr>
-<tr><td style='padding: 5px; font-weight: bold; border-bottom: 1px solid #ddd;'>0.60 to &lt; 0.80</td><td style='padding: 5px; border-bottom: 1px solid #ddd;'>Substantial</td></tr>
-<tr><td style='padding: 5px; font-weight: bold;'>0.80 to 1.00</td><td style='padding: 5px;'>Almost perfect</td></tr>
-</table>
-<p style='margin: 15px 0 5px 0;'><strong>ICC(2,1)</strong> (Koo &amp; Li, 2016)</p>
-<table style='width: 100%; border-collapse: collapse;'>
-<tr><td style='padding: 5px; font-weight: bold; border-bottom: 1px solid #ddd;'>&lt; 0.50</td><td style='padding: 5px; border-bottom: 1px solid #ddd;'>Poor</td></tr>
-<tr><td style='padding: 5px; font-weight: bold; border-bottom: 1px solid #ddd;'>0.50 to &lt; 0.75</td><td style='padding: 5px; border-bottom: 1px solid #ddd;'>Moderate</td></tr>
-<tr><td style='padding: 5px; font-weight: bold; border-bottom: 1px solid #ddd;'>0.75 to &lt; 0.90</td><td style='padding: 5px; border-bottom: 1px solid #ddd;'>Good</td></tr>
-<tr><td style='padding: 5px; font-weight: bold;'>0.90 to 1.00</td><td style='padding: 5px;'>Excellent</td></tr>
-</table>
-<p style='margin: 10px 0 0 0; font-size: 13px;'>
-    The Intra-Rater and Inter-Rater tables use whichever of these two scales matches the statistic named in their Statistic column, and the Analysis Summary, the ICC table and the subgroup table use the same two. The scales are not interchangeable: a kappa of 0.45 is Moderate, an ICC of 0.45 is Poor. State which coefficient you are reporting.
-</p>
-                </div>
-
-                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>
-                    <h4 style='margin: 0 0 10px 0; color: inherit;'>Clinical Use Cases in Pathology</h4>
-
-                    <div style='margin-bottom: 20px;'>
-                        <h5 style='color: inherit; margin: 10px 0 5px 0;'>
-                            <span style='background: #C2185B; color: white; padding: 2px 8px; border-radius: 3px; margin-right: 8px;'>1</span>
-                            Pathology Trainee Evaluation
-                        </h5>
-                        <p style='margin: 5px 0; padding-left: 30px;'>
-                            <strong>Scenario:</strong> Three pathology residents grade 50 breast biopsies for atypia (Absent/Mild/Moderate/Severe)
-                            at the beginning of rotation (Week 1) and end of rotation (Week 12).
-                        </p>
-                        <p style='margin: 5px 0; padding-left: 30px;'>
-                            <strong>Data Structure:</strong> Resident1_Week1, Resident1_Week12, Resident2_Week1, Resident2_Week12, etc.
-                        </p>
-                        <p style='margin: 5px 0; padding-left: 30px;'>
-                            <strong>Results:</strong><br>
-                            &#x2022; Intra-rater: Resident1 &#x3BA;=0.72, Resident2 &#x3BA;=0.58, Resident3 &#x3BA;=0.81<br>
-                            &#x2022; Inter-rater: Overall &#x3BA;=0.64
-                        </p>
-                        <p style='margin: 5px 0; padding-left: 30px;'>
-                            <strong>Clinical Interpretation:</strong> On the Landis &amp; Koch bands the table uses, Resident3's
-                            individual consistency is almost perfect (&#x3BA;=0.81) and Resident2's is moderate (&#x3BA;=0.58);
-                            Resident2 may need additional training. The pooled inter-rater agreement is substantial (&#x3BA;=0.64).
-                        </p>
-                        <p style='margin: 5px 0; padding-left: 30px;'>
-                            <strong>Application:</strong> Identifies which residents need additional mentoring and whether
-                            training is producing consistent grading standards across the cohort.
-                        </p>
-                    </div>
-
-                    <div style='margin-bottom: 20px;'>
-                        <h5 style='color: inherit; margin: 10px 0 5px 0;'>
-                            <span style='background: #C2185B; color: white; padding: 2px 8px; border-radius: 3px; margin-right: 8px;'>2</span>
-                            Digital Pathology Validation Study
-                        </h5>
-                        <p style='margin: 5px 0; padding-left: 30px;'>
-                            <strong>Scenario:</strong> Four pathologists score 100 melanocytic lesions for mitotic count (continuous)
-                            on both glass slides and whole slide images (WSI) separated by 2 weeks.
-                        </p>
-                        <p style='margin: 5px 0; padding-left: 30px;'>
-                            <strong>Data Structure:</strong> PathA_Glass, PathA_WSI, PathB_Glass, PathB_WSI, etc.
-                        </p>
-                        <p style='margin: 5px 0; padding-left: 30px;'>
-                            <strong>Results:</strong><br>
-                            &#x2022; Intra-rater: PathA ICC=0.89, PathB ICC=0.85, PathC ICC=0.78, PathD ICC=0.91<br>
-                            &#x2022; Inter-rater: Overall ICC=0.82
-                        </p>
-                        <p style='margin: 5px 0; padding-left: 30px;'>
-                            <strong>Clinical Interpretation:</strong> Individual consistency between glass and digital
-                            platforms is good to excellent by the Koo &amp; Li (2016) bands (ICC 0.78-0.91), and inter-rater
-                            reliability is good (ICC=0.82). An ICC is the share of the total variance that sits between
-                            cases, so a high value does not exclude a systematic offset between platforms: adding a constant
-                            to every WSI count leaves the between-case variance untouched and the ICC barely moves. The
-                            Bland-Altman Statistics table in this analysis is where such an offset shows up, as the Mean
-                            Difference, with the Lower and Upper limits of agreement giving the spread of individual
-                            case differences around it.
-                        </p>
-                        <p style='margin: 5px 0; padding-left: 30px;'>
-                            <strong>What these ICCs cover:</strong> how consistently each pathologist reproduced their own
-                            mitotic count across the two platforms, and how consistently the four ranked the same cases, in
-                            this one cohort. They carry no information about the size of any glass-to-WSI offset, nor about
-                            behaviour at the mitotic-count thresholds that change grade - the Bland-Altman output and
-                            agreement measured at those thresholds are the parts of this analysis that address those.
-                        </p>
-                    </div>
-
-                    <div style='margin-bottom: 20px;'>
-                        <h5 style='color: inherit; margin: 10px 0 5px 0;'>
-                            <span style='background: #C2185B; color: white; padding: 2px 8px; border-radius: 3px; margin-right: 8px;'>3</span>
-                            Fatigue Study in Frozen Section Diagnosis
-                        </h5>
-                        <p style='margin: 5px 0; padding-left: 30px;'>
-                            <strong>Scenario:</strong> Five pathologists review 40 frozen section cases for adequacy (Adequate/Inadequate)
-                            at start of shift (Hour 0) and end of 8-hour shift (Hour 8).
-                        </p>
-                        <p style='margin: 5px 0; padding-left: 30px;'>
-                            <strong>Data Structure:</strong> Path1_H0, Path1_H8, Path2_H0, Path2_H8, etc.
-                        </p>
-                        <p style='margin: 5px 0; padding-left: 30px;'>
-                            <strong>Results:</strong><br>
-                            &#x2022; Intra-rater: Path1 &#x3BA;=0.91, Path2 &#x3BA;=0.88, Path3 &#x3BA;=0.76, Path4 &#x3BA;=0.85, Path5 &#x3BA;=0.82<br>
-                            &#x2022; Inter-rater (one pooled row over all ten columns): Fleiss' &#x3BA;=0.81
-                        </p>
-                        <p style='margin: 5px 0; padding-left: 30px;'>
-                            <strong>Clinical Interpretation:</strong> Individual consistency across the shift is substantial to
-                            almost perfect (&#x3BA; 0.76-0.91). The pooled inter-rater row mixes Hour 0 and Hour 8 reads, so it
-                            cannot show whether group agreement fell over the shift; for that, run the analysis once on the five
-                            Hour 0 columns and once on the five Hour 8 columns and compare the two kappas with their intervals.
-                        </p>
-                        <p style='margin: 5px 0; padding-left: 30px;'>
-                            <strong>Application:</strong> These point estimates are consistent with stable adequacy assessment
-                            across the shift, but kappas from a single study carry wide confidence intervals, and a small
-                            difference between the two hours would be within sampling noise. The comparison does not by itself
-                            settle any question about scheduling.
-                        </p>
-                    </div>
-
-                    <div style='margin-bottom: 20px;'>
-                        <h5 style='color: inherit; margin: 10px 0 5px 0;'>
-                            <span style='background: #C2185B; color: white; padding: 2px 8px; border-radius: 3px; margin-right: 8px;'>4</span>
-                            Multi-Center Clinical Trial Quality Control
-                        </h5>
-                        <p style='margin: 5px 0; padding-left: 30px;'>
-                            <strong>Scenario:</strong> Central pathology review for Phase III trial. Six expert GI pathologists
-                            score 80 colonic biopsies for dysplasia grade (None/Low/High) at baseline and 6-month recalibration.
-                        </p>
-                        <p style='margin: 5px 0; padding-left: 30px;'>
-                            <strong>Data Structure:</strong> Expert1_Base, Expert1_M6, Expert2_Base, Expert2_M6, etc.
-                        </p>
-                        <p style='margin: 5px 0; padding-left: 30px;'>
-                            <strong>Results:</strong><br>
-                            &#x2022; Intra-rater: Range &#x3BA;=0.68-0.84 (substantial to almost perfect)<br>
-                            &#x2022; Inter-rater (one pooled row over all twelve columns): Fleiss' &#x3BA;=0.74
-                        </p>
-                        <p style='margin: 5px 0; padding-left: 30px;'>
-                            <strong>Clinical Interpretation:</strong> Each expert repeated their own dysplasia grades
-                            consistently (intra-rater &#x3BA; 0.68-0.84). The pooled inter-rater row does not separate baseline
-                            from month 6; running the analysis on the six baseline columns and then on the six month-6 columns
-                            gives one kappa per time point. Two such kappas from the same 80 cases that differ by a few
-                            hundredths are well inside the sampling variation a kappa on 80 cases carries.
-                        </p>
-                        <p style='margin: 5px 0; padding-left: 30px;'>
-                            <strong>What this comparison can and cannot say:</strong> it reports how consistently the central
-                            reviewers graded at two time points. It is an uncontrolled before-and-after look with no group
-                            that skipped recalibration, so even a real difference could not be attributed to the
-                            recalibration session rather than to case mix, drift or practice.
-                        </p>
-                    </div>
-
-                    <div style='margin-bottom: 20px;'>
-                        <h5 style='color: inherit; margin: 10px 0 5px 0;'>
-                            <span style='background: #C2185B; color: white; padding: 2px 8px; border-radius: 3px; margin-right: 8px;'>5</span>
-                            Immunohistochemistry Scoring Reproducibility
-                        </h5>
-                        <p style='margin: 5px 0; padding-left: 30px;'>
-                            <strong>Scenario:</strong> Four pathologists score PD-L1 tumor proportion score (TPS, 0-100%, continuous)
-                            on 60 lung cancer cases twice, separated by 4 weeks (blind to previous scores).
-                        </p>
-                        <p style='margin: 5px 0; padding-left: 30px;'>
-                            <strong>Data Structure:</strong> Scorer1_Read1, Scorer1_Read2, Scorer2_Read1, Scorer2_Read2, etc.
-                        </p>
-                        <p style='margin: 5px 0; padding-left: 30px;'>
-                            <strong>Results:</strong><br>
-                            &#x2022; Intra-rater: Scorer1 ICC=0.88, Scorer2 ICC=0.92, Scorer3 ICC=0.79, Scorer4 ICC=0.86<br>
-                            &#x2022; Inter-rater: Overall ICC=0.81
-                        </p>
-                        <p style='margin: 5px 0; padding-left: 30px;'>
-                            <strong>Clinical Interpretation:</strong> Individual reproducibility is good to excellent
-                            (ICC 0.79-0.92) and inter-rater reliability is good (ICC=0.81). Each intra-rater ICC rests on 60
-                            cases read twice, and its precision is set by that case count, not by how many scorers took part;
-                            all four are point estimates carrying sampling error, so the ordering among scorers is not
-                            established by the point estimates alone.
-                        </p>
-                        <p style='margin: 5px 0; padding-left: 30px;'>
-                            <strong>Application:</strong> Consistent with adequate reproducibility within and across the scoring
-                            team, subject to those confidence intervals. What counts as sufficient depends on a prespecified
-                            acceptance threshold and on agreement measured at the clinical cutoffs (TPS 1% and 50%), where
-                            discordance actually changes categories - an overall ICC does not report that.
-                        </p>
-                    </div>
-                </div>
-
-                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>
-                    <h4 style='margin: 0 0 10px 0; color: inherit;'> Important Considerations</h4>
-                    <ul style='margin: 0; padding-left: 20px;'>
-                        <li><strong>Blinding:</strong> Raters should be blinded to their previous assessments to measure true reproducibility</li>
-                        <li><strong>Time interval:</strong> Balance between too short (memory effects) and too long (true biological changes)</li>
-                        <li><strong>Practice effects:</strong> Learning between sessions can inflate intra-rater reliability</li>
-                        <li><strong>Sample size:</strong> Minimum 30 cases recommended; 50+ preferred for stable estimates</li>
-                        <li><strong>Missing data:</strong> each rater's row uses the cases with both of that rater's first two reads; the pooled inter-rater row uses only the cases with every column present</li>
-                        <li><strong>Interpretation:</strong> Low intra-rater reliability suggests measurement unreliability; low inter-rater
-                            reliability suggests raters disagree on criteria</li>
-                    </ul>
-                </div>
-
-                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; color: inherit;'>
-                    <h4 style='margin: 0 0 10px 0; color: inherit;'>Statistical Notes</h4>
-                    <ul style='margin: 0; padding-left: 20px;'>
-                        <li>ICC intervals and p-values come from irr::icc: the F-distribution interval of McGraw &amp; Wong (1996) for ICC(2,1), and an F test of ICC = 0</li>
-                        <li>Cohen's kappa intervals use the non-null asymptotic standard error from vcd::Kappa, on the scale set by the kappa CI method option; where that standard error is unavailable the null-hypothesis standard error is used and a note says so. The pooled Fleiss' kappa row carries no interval</li>
-                        <li>Weighted kappa is used only when the Weighted kappa option is set AND both of a rater's time points are ordered (an ordinal factor or numeric codes) with three or more categories; otherwise the row reports unweighted kappa and a note names the raters affected</li>
-                        <li>Only each rater's first two time points enter that rater's coefficient</li>
-                    </ul>
-                </div>
-            </div>
-            "
+                html_content <- paste0(
+                    "\n            <div style='font-family: Arial, sans-serif; max-width: 800px; line-height: 1.6;'>\n                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>\n                    <h3 style='margin: 0 0 10px 0; color: inherit;'>",
+                    .("What is Inter/Intra-Rater Reliability?"),
+                    "</h3>\n                    <p style='margin: 0; color: inherit;'>",
+                    paste0("\n                        ", .("This analysis simultaneously assesses two critical aspects of measurement reliability:"), "\n                    "),
+                    "</p>\n                    <ul style='margin: 10px 0 0 0; padding-left: 20px;'>\n                        <li>",
+                    jmvcore::format(.("{tag1}Intra-Rater Reliability (Test-Retest){tag2} - Consistency of each individual rater's\n                            assessments across different time points (within-rater consistency)"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                        <li>",
+                    jmvcore::format(.("{tag1}Inter-Rater Reliability{tag2} - Agreement between different raters' assessments\n                            (between-rater agreement)"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                    </ul>\n                </div>\n\n                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>\n                    <h4 style='margin: 0 0 10px 0; color: inherit;'>",
+                    .("When to Use This Analysis"),
+                    "</h4>\n                    <p style='margin: 0 0 10px 0;'>",
+                    jmvcore::format(.("{tag1}Essential for test-retest reliability studies where:{tag2}"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</p>\n                    <ul style='margin: 0; padding-left: 20px;'>\n                        <li>",
+                    jmvcore::format(.("{tag1}Training evaluation{tag2} - Assess whether trainees maintain consistent ratings over time"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                        <li>",
+                    jmvcore::format(.("{tag1}Fatigue studies{tag2} - Detect changes in rating consistency during long reading sessions"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                        <li>",
+                    jmvcore::format(.("{tag1}Quality control{tag2} - Monitor both individual consistency and team agreement"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                        <li>",
+                    jmvcore::format(.("{tag1}Method validation{tag2} - Establish both reproducibility (intra-rater) and comparability (inter-rater)"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                        <li>",
+                    jmvcore::format(.("{tag1}Digital pathology validation{tag2} - Compare glass slide vs. digital slide ratings by same pathologists"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                    </ul>\n                </div>\n\n                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>\n                    <h4 style='margin: 0 0 10px 0; color: inherit;'>",
+                    .("Data Structure Requirements"),
+                    "</h4>\n                    <p style='margin: 0 0 10px 0;'>",
+                    paste0("\n                        ", .("Column names must follow a pattern to identify rater-timepoint pairs:"), "\n                    "),
+                    "</p>\n                    <div style='background-color: rgba(255, 255, 255, 0.06); padding: 10px; border-radius: 5px; font-family: monospace; color: inherit;'>",
+                    paste0("\n                        ", jmvcore::format(.("{tag1}Pattern:{tag2} RaterID{tag3}{tag4}separator{tag5}{tag6}TimePoint"), tag1 = "<strong>", tag2 = "</strong>", tag3 = "<span style='color: inherit;'>", tag4 = "[", tag5 = "]", tag6 = "</span>")),
+                    "<br>",
+                    paste0("\n                        ", jmvcore::format(.("{tag1}Example with underscore (_):{tag2}"), tag1 = "<strong>", tag2 = "</strong>")),
+                    "<br>",
+                    paste0("\n                        ", jmvcore::format(.("{tag1} Rater1_Time1, Rater1_Time2, Rater1_Time3"), tag1 = "&#x2022;")),
+                    "<br>",
+                    paste0("\n                        ", jmvcore::format(.("{tag1} Rater2_Time1, Rater2_Time2, Rater2_Time3"), tag1 = "&#x2022;")),
+                    "<br>",
+                    paste0("\n                        ", jmvcore::format(.("{tag1} PathA_T1, PathA_T2 (works with any separator)"), tag1 = "&#x2022;")),
+                    "<br>",
+                    paste0("\n                        ", jmvcore::format(.("{tag1}Example with dot (.):{tag2}"), tag1 = "<strong>", tag2 = "</strong>")),
+                    "<br>",
+                    paste0("\n                        ", jmvcore::format(.("{tag1} Observer1.Pre, Observer1.Post"), tag1 = "&#x2022;")),
+                    "<br>",
+                    paste0("\n                        ", jmvcore::format(.("{tag1} Observer2.Pre, Observer2.Post"), tag1 = "&#x2022;"), "\n                    "),
+                    "</div>\n                    <p style='margin: 10px 0 0 0;'>",
+                    jmvcore::format(.("{tag1}The separator character (default: underscore) is specified in the analysis options.{tag2}"), tag1 = "<em>", tag2 = "</em>"),
+                    "</p>\n                </div>\n\n                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>\n                    <h4 style='margin: 0 0 10px 0; color: inherit;'>",
+                    .("Statistical Methods Used"),
+                    "</h4>\n                    <p style='margin: 0 0 10px 0;'>",
+                    .("The analysis automatically selects appropriate statistics based on data type:"),
+                    "</p>\n                    <ul style='margin: 0 0 10px 0; padding-left: 20px;'>\n                        <li>",
+                    jmvcore::format(.("{tag1}Categorical/Ordinal Data:{tag2} Cohen's Kappa or Weighted Kappa for each rater's test-retest pairs"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                        <li>",
+                    jmvcore::format(.("{tag1}Continuous Data:{tag2} ICC(2,1) - two-way random effects, absolute agreement, single rating - for each rater"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                        <li>",
+                    jmvcore::format(.("{tag1}Inter-Rater:{tag2} ONE pooled row across every rater {tag3} time-point column (Fleiss' kappa for three or more columns, Cohen's kappa for two, ICC(2,1) for measurements). It is not split by time point: to compare inter-rater agreement at each time point, run the analysis once on each time point's columns"), tag1 = "<strong>", tag2 = "</strong>", tag3 = "&#xD7;"),
+                    "</li>\n                        <li>",
+                    jmvcore::format(.("{tag1}Which statistic:{tag2} numeric columns holding only whole numbers no greater than 10 are read as category codes and get kappa; a value with decimals or above 10 makes the columns measurements and gets the ICC"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                    </ul>\n                    <p style='margin: 15px 0 5px 0;'>",
+                    jmvcore::format(.("{tag1}Kappa{tag2} (Landis {tag3} Koch, 1977)"), tag1 = "<strong>", tag2 = "</strong>", tag3 = "&amp;"),
+                    "</p>\n<table style='width: 100%; border-collapse: collapse;'>\n<tr><td style='padding: 5px; font-weight: bold; border-bottom: 1px solid #ddd;'>",
+                    jmvcore::format(.("{tag1} 0.00"), tag1 = "&lt;"),
+                    "</td><td style='padding: 5px; border-bottom: 1px solid #ddd;'>",
+                    .("Worse than chance"),
+                    "</td></tr>\n<tr><td style='padding: 5px; font-weight: bold; border-bottom: 1px solid #ddd;'>",
+                    jmvcore::format(.("0.00 to {tag1} 0.20"), tag1 = "&lt;"),
+                    "</td><td style='padding: 5px; border-bottom: 1px solid #ddd;'>",
+                    .("Slight"),
+                    "</td></tr>\n<tr><td style='padding: 5px; font-weight: bold; border-bottom: 1px solid #ddd;'>",
+                    jmvcore::format(.("0.20 to {tag1} 0.40"), tag1 = "&lt;"),
+                    "</td><td style='padding: 5px; border-bottom: 1px solid #ddd;'>",
+                    .("Fair"),
+                    "</td></tr>\n<tr><td style='padding: 5px; font-weight: bold; border-bottom: 1px solid #ddd;'>",
+                    jmvcore::format(.("0.40 to {tag1} 0.60"), tag1 = "&lt;"),
+                    "</td><td style='padding: 5px; border-bottom: 1px solid #ddd;'>",
+                    .("Moderate"),
+                    "</td></tr>\n<tr><td style='padding: 5px; font-weight: bold; border-bottom: 1px solid #ddd;'>",
+                    jmvcore::format(.("0.60 to {tag1} 0.80"), tag1 = "&lt;"),
+                    "</td><td style='padding: 5px; border-bottom: 1px solid #ddd;'>",
+                    .("Substantial"),
+                    "</td></tr>\n<tr><td style='padding: 5px; font-weight: bold;'>",
+                    .("0.80 to 1.00"),
+                    "</td><td style='padding: 5px;'>",
+                    .("Almost perfect"),
+                    "</td></tr>\n</table>\n<p style='margin: 15px 0 5px 0;'>",
+                    jmvcore::format(.("{tag1}ICC(2,1){tag2} (Koo {tag3} Li, 2016)"), tag1 = "<strong>", tag2 = "</strong>", tag3 = "&amp;"),
+                    "</p>\n<table style='width: 100%; border-collapse: collapse;'>\n<tr><td style='padding: 5px; font-weight: bold; border-bottom: 1px solid #ddd;'>",
+                    jmvcore::format(.("{tag1} 0.50"), tag1 = "&lt;"),
+                    "</td><td style='padding: 5px; border-bottom: 1px solid #ddd;'>",
+                    .("Poor"),
+                    "</td></tr>\n<tr><td style='padding: 5px; font-weight: bold; border-bottom: 1px solid #ddd;'>",
+                    jmvcore::format(.("0.50 to {tag1} 0.75"), tag1 = "&lt;"),
+                    "</td><td style='padding: 5px; border-bottom: 1px solid #ddd;'>",
+                    .("Moderate"),
+                    "</td></tr>\n<tr><td style='padding: 5px; font-weight: bold; border-bottom: 1px solid #ddd;'>",
+                    jmvcore::format(.("0.75 to {tag1} 0.90"), tag1 = "&lt;"),
+                    "</td><td style='padding: 5px; border-bottom: 1px solid #ddd;'>",
+                    .("Good"),
+                    "</td></tr>\n<tr><td style='padding: 5px; font-weight: bold;'>",
+                    .("0.90 to 1.00"),
+                    "</td><td style='padding: 5px;'>",
+                    .("Excellent"),
+                    "</td></tr>\n</table>\n<p style='margin: 10px 0 0 0; font-size: 13px;'>",
+                    paste0("\n    ", .("The Intra-Rater and Inter-Rater tables use whichever of these two scales matches the statistic named in their Statistic column, and the Analysis Summary, the ICC table and the subgroup table use the same two. The scales are not interchangeable: a kappa of 0.45 is Moderate, an ICC of 0.45 is Poor. State which coefficient you are reporting."), "\n"),
+                    "</p>\n                </div>\n\n                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>\n                    <h4 style='margin: 0 0 10px 0; color: inherit;'>",
+                    .("Clinical Use Cases in Pathology"),
+                    "</h4>\n\n                    <div style='margin-bottom: 20px;'>\n                        <h5 style='color: inherit; margin: 10px 0 5px 0;'>",
+                    paste0("\n                            ", jmvcore::format(.("{tag1}1{tag2}\n                            Pathology Trainee Evaluation"), tag1 = "<span style='background: #C2185B; color: white; padding: 2px 8px; border-radius: 3px; margin-right: 8px;'>", tag2 = "</span>"), "\n                        "),
+                    "</h5>\n                        <p style='margin: 5px 0; padding-left: 30px;'>",
+                    paste0("\n                            ", jmvcore::format(.("{tag1}Scenario:{tag2} Three pathology residents grade 50 breast biopsies for atypia (Absent/Mild/Moderate/Severe)\n                            at the beginning of rotation (Week 1) and end of rotation (Week 12)."), tag1 = "<strong>", tag2 = "</strong>"), "\n                        "),
+                    "</p>\n                        <p style='margin: 5px 0; padding-left: 30px;'>",
+                    paste0("\n                            ", jmvcore::format(.("{tag1}Data Structure:{tag2} Resident1_Week1, Resident1_Week12, Resident2_Week1, Resident2_Week12, etc."), tag1 = "<strong>", tag2 = "</strong>"), "\n                        "),
+                    "</p>\n                        <p style='margin: 5px 0; padding-left: 30px;'>",
+                    paste0("\n                            ", jmvcore::format(.("{tag1}Results:{tag2}"), tag1 = "<strong>", tag2 = "</strong>")),
+                    "<br>",
+                    paste0("\n                            ", jmvcore::format(.("{tag1} Intra-rater: Resident1 {tag2}=0.72, Resident2 {tag3}=0.58, Resident3 {tag4}=0.81"), tag1 = "&#x2022;", tag2 = "&#x3BA;", tag3 = "&#x3BA;", tag4 = "&#x3BA;")),
+                    "<br>",
+                    paste0("\n                            ", jmvcore::format(.("{tag1} Inter-rater: Overall {tag2}=0.64"), tag1 = "&#x2022;", tag2 = "&#x3BA;"), "\n                        "),
+                    "</p>\n                        <p style='margin: 5px 0; padding-left: 30px;'>",
+                    paste0("\n                            ", jmvcore::format(.("{tag1}Clinical Interpretation:{tag2} On the Landis {tag3} Koch bands the table uses, Resident3's\n                            individual consistency is almost perfect ({tag4}=0.81) and Resident2's is moderate ({tag5}=0.58);\n                            Resident2 may need additional training. The pooled inter-rater agreement is substantial ({tag6}=0.64)."), tag1 = "<strong>", tag2 = "</strong>", tag3 = "&amp;", tag4 = "&#x3BA;", tag5 = "&#x3BA;", tag6 = "&#x3BA;"), "\n                        "),
+                    "</p>\n                        <p style='margin: 5px 0; padding-left: 30px;'>",
+                    paste0("\n                            ", jmvcore::format(.("{tag1}Application:{tag2} Identifies which residents need additional mentoring and whether\n                            training is producing consistent grading standards across the cohort."), tag1 = "<strong>", tag2 = "</strong>"), "\n                        "),
+                    "</p>\n                    </div>\n\n                    <div style='margin-bottom: 20px;'>\n                        <h5 style='color: inherit; margin: 10px 0 5px 0;'>",
+                    paste0("\n                            ", jmvcore::format(.("{tag1}2{tag2}\n                            Digital Pathology Validation Study"), tag1 = "<span style='background: #C2185B; color: white; padding: 2px 8px; border-radius: 3px; margin-right: 8px;'>", tag2 = "</span>"), "\n                        "),
+                    "</h5>\n                        <p style='margin: 5px 0; padding-left: 30px;'>",
+                    paste0("\n                            ", jmvcore::format(.("{tag1}Scenario:{tag2} Four pathologists score 100 melanocytic lesions for mitotic count (continuous)\n                            on both glass slides and whole slide images (WSI) separated by 2 weeks."), tag1 = "<strong>", tag2 = "</strong>"), "\n                        "),
+                    "</p>\n                        <p style='margin: 5px 0; padding-left: 30px;'>",
+                    paste0("\n                            ", jmvcore::format(.("{tag1}Data Structure:{tag2} PathA_Glass, PathA_WSI, PathB_Glass, PathB_WSI, etc."), tag1 = "<strong>", tag2 = "</strong>"), "\n                        "),
+                    "</p>\n                        <p style='margin: 5px 0; padding-left: 30px;'>",
+                    paste0("\n                            ", jmvcore::format(.("{tag1}Results:{tag2}"), tag1 = "<strong>", tag2 = "</strong>")),
+                    "<br>",
+                    paste0("\n                            ", jmvcore::format(.("{tag1} Intra-rater: PathA ICC=0.89, PathB ICC=0.85, PathC ICC=0.78, PathD ICC=0.91"), tag1 = "&#x2022;")),
+                    "<br>",
+                    paste0("\n                            ", jmvcore::format(.("{tag1} Inter-rater: Overall ICC=0.82"), tag1 = "&#x2022;"), "\n                        "),
+                    "</p>\n                        <p style='margin: 5px 0; padding-left: 30px;'>",
+                    paste0("\n                            ", jmvcore::format(.("{tag1}Clinical Interpretation:{tag2} Individual consistency between glass and digital\n                            platforms is good to excellent by the Koo {tag3} Li (2016) bands (ICC 0.78-0.91), and inter-rater\n                            reliability is good (ICC=0.82). An ICC is the share of the total variance that sits between\n                            cases, so a high value does not exclude a systematic offset between platforms: adding a constant\n                            to every WSI count leaves the between-case variance untouched and the ICC barely moves. The\n                            Bland-Altman Statistics table in this analysis is where such an offset shows up, as the Mean\n                            Difference, with the Lower and Upper limits of agreement giving the spread of individual\n                            case differences around it."), tag1 = "<strong>", tag2 = "</strong>", tag3 = "&amp;"), "\n                        "),
+                    "</p>\n                        <p style='margin: 5px 0; padding-left: 30px;'>",
+                    paste0("\n                            ", jmvcore::format(.("{tag1}What these ICCs cover:{tag2} how consistently each pathologist reproduced their own\n                            mitotic count across the two platforms, and how consistently the four ranked the same cases, in\n                            this one cohort. They carry no information about the size of any glass-to-WSI offset, nor about\n                            behaviour at the mitotic-count thresholds that change grade - the Bland-Altman output and\n                            agreement measured at those thresholds are the parts of this analysis that address those."), tag1 = "<strong>", tag2 = "</strong>"), "\n                        "),
+                    "</p>\n                    </div>\n\n                    <div style='margin-bottom: 20px;'>\n                        <h5 style='color: inherit; margin: 10px 0 5px 0;'>",
+                    paste0("\n                            ", jmvcore::format(.("{tag1}3{tag2}\n                            Fatigue Study in Frozen Section Diagnosis"), tag1 = "<span style='background: #C2185B; color: white; padding: 2px 8px; border-radius: 3px; margin-right: 8px;'>", tag2 = "</span>"), "\n                        "),
+                    "</h5>\n                        <p style='margin: 5px 0; padding-left: 30px;'>",
+                    paste0("\n                            ", jmvcore::format(.("{tag1}Scenario:{tag2} Five pathologists review 40 frozen section cases for adequacy (Adequate/Inadequate)\n                            at start of shift (Hour 0) and end of 8-hour shift (Hour 8)."), tag1 = "<strong>", tag2 = "</strong>"), "\n                        "),
+                    "</p>\n                        <p style='margin: 5px 0; padding-left: 30px;'>",
+                    paste0("\n                            ", jmvcore::format(.("{tag1}Data Structure:{tag2} Path1_H0, Path1_H8, Path2_H0, Path2_H8, etc."), tag1 = "<strong>", tag2 = "</strong>"), "\n                        "),
+                    "</p>\n                        <p style='margin: 5px 0; padding-left: 30px;'>",
+                    paste0("\n                            ", jmvcore::format(.("{tag1}Results:{tag2}"), tag1 = "<strong>", tag2 = "</strong>")),
+                    "<br>",
+                    paste0("\n                            ", jmvcore::format(.("{tag1} Intra-rater: Path1 {tag2}=0.91, Path2 {tag3}=0.88, Path3 {tag4}=0.76, Path4 {tag5}=0.85, Path5 {tag6}=0.82"), tag1 = "&#x2022;", tag2 = "&#x3BA;", tag3 = "&#x3BA;", tag4 = "&#x3BA;", tag5 = "&#x3BA;", tag6 = "&#x3BA;")),
+                    "<br>",
+                    paste0("\n                            ", jmvcore::format(.("{tag1} Inter-rater (one pooled row over all ten columns): Fleiss' {tag2}=0.81"), tag1 = "&#x2022;", tag2 = "&#x3BA;"), "\n                        "),
+                    "</p>\n                        <p style='margin: 5px 0; padding-left: 30px;'>",
+                    paste0("\n                            ", jmvcore::format(.("{tag1}Clinical Interpretation:{tag2} Individual consistency across the shift is substantial to\n                            almost perfect ({tag3} 0.76-0.91). The pooled inter-rater row mixes Hour 0 and Hour 8 reads, so it\n                            cannot show whether group agreement fell over the shift; for that, run the analysis once on the five\n                            Hour 0 columns and once on the five Hour 8 columns and compare the two kappas with their intervals."), tag1 = "<strong>", tag2 = "</strong>", tag3 = "&#x3BA;"), "\n                        "),
+                    "</p>\n                        <p style='margin: 5px 0; padding-left: 30px;'>",
+                    paste0("\n                            ", jmvcore::format(.("{tag1}Application:{tag2} These point estimates are consistent with stable adequacy assessment\n                            across the shift, but kappas from a single study carry wide confidence intervals, and a small\n                            difference between the two hours would be within sampling noise. The comparison does not by itself\n                            settle any question about scheduling."), tag1 = "<strong>", tag2 = "</strong>"), "\n                        "),
+                    "</p>\n                    </div>\n\n                    <div style='margin-bottom: 20px;'>\n                        <h5 style='color: inherit; margin: 10px 0 5px 0;'>",
+                    paste0("\n                            ", jmvcore::format(.("{tag1}4{tag2}\n                            Multi-Center Clinical Trial Quality Control"), tag1 = "<span style='background: #C2185B; color: white; padding: 2px 8px; border-radius: 3px; margin-right: 8px;'>", tag2 = "</span>"), "\n                        "),
+                    "</h5>\n                        <p style='margin: 5px 0; padding-left: 30px;'>",
+                    paste0("\n                            ", jmvcore::format(.("{tag1}Scenario:{tag2} Central pathology review for Phase III trial. Six expert GI pathologists\n                            score 80 colonic biopsies for dysplasia grade (None/Low/High) at baseline and 6-month recalibration."), tag1 = "<strong>", tag2 = "</strong>"), "\n                        "),
+                    "</p>\n                        <p style='margin: 5px 0; padding-left: 30px;'>",
+                    paste0("\n                            ", jmvcore::format(.("{tag1}Data Structure:{tag2} Expert1_Base, Expert1_M6, Expert2_Base, Expert2_M6, etc."), tag1 = "<strong>", tag2 = "</strong>"), "\n                        "),
+                    "</p>\n                        <p style='margin: 5px 0; padding-left: 30px;'>",
+                    paste0("\n                            ", jmvcore::format(.("{tag1}Results:{tag2}"), tag1 = "<strong>", tag2 = "</strong>")),
+                    "<br>",
+                    paste0("\n                            ", jmvcore::format(.("{tag1} Intra-rater: Range {tag2}=0.68-0.84 (substantial to almost perfect)"), tag1 = "&#x2022;", tag2 = "&#x3BA;")),
+                    "<br>",
+                    paste0("\n                            ", jmvcore::format(.("{tag1} Inter-rater (one pooled row over all twelve columns): Fleiss' {tag2}=0.74"), tag1 = "&#x2022;", tag2 = "&#x3BA;"), "\n                        "),
+                    "</p>\n                        <p style='margin: 5px 0; padding-left: 30px;'>",
+                    paste0("\n                            ", jmvcore::format(.("{tag1}Clinical Interpretation:{tag2} Each expert repeated their own dysplasia grades\n                            consistently (intra-rater {tag3} 0.68-0.84). The pooled inter-rater row does not separate baseline\n                            from month 6; running the analysis on the six baseline columns and then on the six month-6 columns\n                            gives one kappa per time point. Two such kappas from the same 80 cases that differ by a few\n                            hundredths are well inside the sampling variation a kappa on 80 cases carries."), tag1 = "<strong>", tag2 = "</strong>", tag3 = "&#x3BA;"), "\n                        "),
+                    "</p>\n                        <p style='margin: 5px 0; padding-left: 30px;'>",
+                    paste0("\n                            ", jmvcore::format(.("{tag1}What this comparison can and cannot say:{tag2} it reports how consistently the central\n                            reviewers graded at two time points. It is an uncontrolled before-and-after look with no group\n                            that skipped recalibration, so even a real difference could not be attributed to the\n                            recalibration session rather than to case mix, drift or practice."), tag1 = "<strong>", tag2 = "</strong>"), "\n                        "),
+                    "</p>\n                    </div>\n\n                    <div style='margin-bottom: 20px;'>\n                        <h5 style='color: inherit; margin: 10px 0 5px 0;'>",
+                    paste0("\n                            ", jmvcore::format(.("{tag1}5{tag2}\n                            Immunohistochemistry Scoring Reproducibility"), tag1 = "<span style='background: #C2185B; color: white; padding: 2px 8px; border-radius: 3px; margin-right: 8px;'>", tag2 = "</span>"), "\n                        "),
+                    "</h5>\n                        <p style='margin: 5px 0; padding-left: 30px;'>",
+                    paste0("\n                            ", jmvcore::format(.("{tag1}Scenario:{tag2} Four pathologists score PD-L1 tumor proportion score (TPS, 0-100%, continuous)\n                            on 60 lung cancer cases twice, separated by 4 weeks (blind to previous scores)."), tag1 = "<strong>", tag2 = "</strong>"), "\n                        "),
+                    "</p>\n                        <p style='margin: 5px 0; padding-left: 30px;'>",
+                    paste0("\n                            ", jmvcore::format(.("{tag1}Data Structure:{tag2} Scorer1_Read1, Scorer1_Read2, Scorer2_Read1, Scorer2_Read2, etc."), tag1 = "<strong>", tag2 = "</strong>"), "\n                        "),
+                    "</p>\n                        <p style='margin: 5px 0; padding-left: 30px;'>",
+                    paste0("\n                            ", jmvcore::format(.("{tag1}Results:{tag2}"), tag1 = "<strong>", tag2 = "</strong>")),
+                    "<br>",
+                    paste0("\n                            ", jmvcore::format(.("{tag1} Intra-rater: Scorer1 ICC=0.88, Scorer2 ICC=0.92, Scorer3 ICC=0.79, Scorer4 ICC=0.86"), tag1 = "&#x2022;")),
+                    "<br>",
+                    paste0("\n                            ", jmvcore::format(.("{tag1} Inter-rater: Overall ICC=0.81"), tag1 = "&#x2022;"), "\n                        "),
+                    "</p>\n                        <p style='margin: 5px 0; padding-left: 30px;'>",
+                    paste0("\n                            ", jmvcore::format(.("{tag1}Clinical Interpretation:{tag2} Individual reproducibility is good to excellent\n                            (ICC 0.79-0.92) and inter-rater reliability is good (ICC=0.81). Each intra-rater ICC rests on 60\n                            cases read twice, and its precision is set by that case count, not by how many scorers took part;\n                            all four are point estimates carrying sampling error, so the ordering among scorers is not\n                            established by the point estimates alone."), tag1 = "<strong>", tag2 = "</strong>"), "\n                        "),
+                    "</p>\n                        <p style='margin: 5px 0; padding-left: 30px;'>",
+                    paste0("\n                            ", jmvcore::format(.("{tag1}Application:{tag2} Consistent with adequate reproducibility within and across the scoring\n                            team, subject to those confidence intervals. What counts as sufficient depends on a prespecified\n                            acceptance threshold and on agreement measured at the clinical cutoffs (TPS 1% and 50%), where\n                            discordance actually changes categories - an overall ICC does not report that."), tag1 = "<strong>", tag2 = "</strong>"), "\n                        "),
+                    "</p>\n                    </div>\n                </div>\n\n                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>\n                    <h4 style='margin: 0 0 10px 0; color: inherit;'>",
+                    paste0(" ", .("Important Considerations")),
+                    "</h4>\n                    <ul style='margin: 0; padding-left: 20px;'>\n                        <li>",
+                    jmvcore::format(.("{tag1}Blinding:{tag2} Raters should be blinded to their previous assessments to measure true reproducibility"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                        <li>",
+                    jmvcore::format(.("{tag1}Time interval:{tag2} Balance between too short (memory effects) and too long (true biological changes)"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                        <li>",
+                    jmvcore::format(.("{tag1}Practice effects:{tag2} Learning between sessions can inflate intra-rater reliability"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                        <li>",
+                    jmvcore::format(.("{tag1}Sample size:{tag2} Minimum 30 cases recommended; 50+ preferred for stable estimates"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                        <li>",
+                    jmvcore::format(.("{tag1}Missing data:{tag2} each rater's row uses the cases with both of that rater's first two reads; the pooled inter-rater row uses only the cases with every column present"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                        <li>",
+                    jmvcore::format(.("{tag1}Interpretation:{tag2} Low intra-rater reliability suggests measurement unreliability; low inter-rater\n                            reliability suggests raters disagree on criteria"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                    </ul>\n                </div>\n\n                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; color: inherit;'>\n                    <h4 style='margin: 0 0 10px 0; color: inherit;'>",
+                    .("Statistical Notes"),
+                    "</h4>\n                    <ul style='margin: 0; padding-left: 20px;'>\n                        <li>",
+                    jmvcore::format(.("ICC intervals and p-values come from irr::icc: the F-distribution interval of McGraw {tag1} Wong (1996) for ICC(2,1), and an F test of ICC = 0"), tag1 = "&amp;"),
+                    "</li>\n                        <li>",
+                    .("Cohen's kappa intervals use the non-null asymptotic standard error from vcd::Kappa, on the scale set by the kappa CI method option; where that standard error is unavailable the null-hypothesis standard error is used and a note says so. The pooled Fleiss' kappa row carries no interval"),
+                    "</li>\n                        <li>",
+                    .("Weighted kappa is used only when the Weighted kappa option is set AND both of a rater's time points are ordered (an ordinal factor or numeric codes) with three or more categories; otherwise the row reports unweighted kappa and a note names the raters affected"),
+                    "</li>\n                        <li>",
+                    .("Only each rater's first two time points enter that rater's coefficient"),
+                    "</li>\n                    </ul>\n                </div>\n            </div>\n            "
+                )
 
                 self$results$interIntraRaterExplanation$setContent(html_content)
             },
@@ -7425,7 +8124,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                                     # and on the scale kappaCIMethod selects.
                                     # That is normally vcd::Kappa's non-null ASE, but it
                                     # is irr::kappa2's NULL SE (kappa / z) whenever vcd
-                                    # returned no finite ASE - too narrow at high kappa.
+                                    # returned no finite ASE - coverage at nonzero kappa is uncertain.
                                     # This comment used to say "from the ASE" flatly and
                                     # the table said nothing at all, so a test-retest
                                     # kappa of 1.00 could carry a fallback interval that
@@ -7506,7 +8205,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                         if (intra_used_null_se) {
                             intraTable$setNote(
                                 "ci_null_se",
-                                .("At least one interval in this table was built from the null-hypothesis standard error (kappa divided by its H0 test statistic) because the non-null asymptotic standard error from vcd::Kappa was unavailable for that rater, most often because a rating category is unused at one time point and the agreement table is near-degenerate. Null-SE intervals are too narrow when kappa is high, so treat them as optimistic.")
+                                .("At least one interval in this table was built from the null-hypothesis standard error (kappa divided by its H0 test statistic) because the non-null asymptotic standard error from vcd::Kappa was unavailable for that rater, most often because a rating category is unused at one time point and the agreement table is near-degenerate. Null-SE intervals use a variance under zero agreement; their coverage at nonzero kappa is uncertain.")
                             )
                         }
 
@@ -7669,9 +8368,9 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                                 #
                                 # This used to be built from irr's NULL SE (kappa/z).
                                 # That z tests H0: kappa = 0, so kappa/z is the standard
-                                # error UNDER THE NULL - systematically too small at high
-                                # kappa, giving an interval that is too narrow exactly
-                                # where a reliability study wants to be believed. It was
+                                # error UNDER THE NULL, rather than at the observed kappa.
+                                # Its size relative to the non-null ASE depends on the table;
+                                # it can be larger or smaller. It was
                                 # printed in the same columns as the sibling table's
                                 # non-null ASE interval with nothing to distinguish them.
                                 #
@@ -7696,10 +8395,10 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                                             "ci_method",
                                             if (identical(kc_inter$method, "irr-fallback")) {
                                                 if (!requireNamespace("vcd", quietly = TRUE)) {
-                                                    sprintf(.("%.0f%% confidence interval via the irr::kappa2 fallback (approximate, built from the null-hypothesis standard error). Install the 'vcd' package to enable the more accurate ASE-based interval. A null-SE interval is too narrow when kappa is high, so treat it as optimistic."),
+                                                    sprintf(.("%.0f%% confidence interval via the irr::kappa2 fallback (approximate, built from the null-hypothesis standard error). Install the 'vcd' package to enable the more accurate ASE-based interval. This variance is estimated under zero agreement; interval coverage at nonzero kappa is uncertain."),
                                                         100 * self$options$confLevel)
                                                 } else {
-                                                    sprintf(.("%.0f%% confidence interval via the irr::kappa2 fallback (approximate, built from the null-hypothesis standard error): vcd::Kappa could not return a finite SE for this (near-degenerate) table. A null-SE interval is too narrow when kappa is high, so treat it as optimistic."),
+                                                    sprintf(.("%.0f%% confidence interval via the irr::kappa2 fallback (approximate, built from the null-hypothesis standard error): vcd::Kappa could not return a finite SE for this (near-degenerate) table. This variance is estimated under zero agreement; interval coverage at nonzero kappa is uncertain."),
                                                         100 * self$options$confLevel)
                                                 }
                                             } else if (identical(self$options$kappaCIMethod, "fisherz")) {
@@ -7718,7 +8417,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                                 } else {
                                     self$results$interIntraRaterInterTable$setNote(
                                         "ci_multi",
-                                        .("No confidence interval is shown: across three or more rater \u00D7 time-point columns this row reports Fleiss' kappa, for which only the null-hypothesis test statistic is available here. An interval built from that null standard error would be too narrow at high kappa. The per-rater rows above carry non-null intervals.")
+                                        .("No confidence interval is shown: across three or more rater \u00D7 time-point columns this row reports Fleiss' kappa, for which only the null-hypothesis test statistic is available here. That null standard error does not estimate uncertainty at the observed nonzero kappa. The per-rater rows above carry non-null intervals.")
                                     )
                                 }
 
@@ -7752,137 +8451,99 @@ agreementClass <- if (requireNamespace("jmvcore")) {
             .populateRaterBiasExplanation = function() {
                 # Provide educational content about directional discordance.
 
-                html_content <- "
-            <div style='font-family: Arial, sans-serif; max-width: 800px; line-height: 1.6;'>
-                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>
-                    <h3 style='margin: 0 0 10px 0; color: inherit;'>What is the Directional Discordance Test?</h3>
-                    <p style='margin: 0; color: inherit;'>
-                        The directional discordance test asks whether, on the cases where two raters disagree, the
-                        disagreements run <strong>one way more often than the other</strong> - whether one
-                        rater is consistently the higher scorer. It compares the total number of
-                        &quot;rater 1 higher&quot; cases with the total number of &quot;rater 2 higher&quot;
-                        cases in a single chi-square on 1 degree of freedom. It needs exactly two raters and
-                        both variables must be declared Ordinal with the same clinical scale order.<br><br>
-                        <strong>It is not a test of marginal homogeneity.</strong> It does not test whether
-                        the two raters used each category at the same overall rate: opposing shifts in
-                        different categories cancel out and the test returns p = 1. Use the
-                        <strong>Bhapkar</strong> or <strong>Stuart-Maxwell</strong> test in this section for
-                        that hypothesis.
-                    </p>
-                </div>
-
-                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>
-                    <h4 style='margin: 0 0 10px 0; color: inherit;'>When to Use This Test</h4>
-                    <p style='margin: 0 0 10px 0;'><strong>Potentially useful as a pairwise screen on an ordinal scale when:</strong></p>
-                    <ul style='margin: 0; padding-left: 20px;'>
-                        <li><strong>Rater training</strong> - Identifying trainees who are systematically too lenient or strict</li>
-                        <li><strong>Performance monitoring</strong> - Detecting drift in rater behavior over time</li>
-                        <li><strong>Multi-center studies</strong> - Ensuring consistent grading across sites</li>
-                        <li><strong>Certification</strong> - Verifying raters use categories appropriately before certification</li>
-                        <li><strong>Detecting systematic errors</strong> - Finding raters who consistently over-diagnose or under-diagnose</li>
-                    </ul>
-                </div>
-
-                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>
-                    <h4 style='margin: 0 0 10px 0; color: inherit;'>Interpreting Results</h4>
-                    <table style='width: 100%; border-collapse: collapse;'>
-                        <tr style='background-color: rgba(88, 88, 88, 0.06); color: inherit;'>
-                            <th style='padding: 8px; text-align: left; border-bottom: 2px solid #333;'>Result</th>
-                            <th style='padding: 8px; text-align: left; border-bottom: 2px solid #333;'>Interpretation</th>
-                        </tr>
-                        <tr>
-                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'><strong>p >= 0.05</strong></td>
-                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>No net direction in the disagreements. This does <em>not</em> establish that the raters use the categories at the same rates - check Bhapkar for that</td>
-                        </tr>
-                        <tr>
-                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'><strong>p < 0.05</strong></td>
-                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>One rater is the higher scorer significantly more often than the other when they disagree</td>
-                        </tr>
-                        <tr>
-                            <td style='padding: 8px;'><strong>p < 0.001</strong></td>
-                            <td style='padding: 8px;'>A strong one-directional pattern - investigate the individual rater frequencies to see which categories drive it</td>
-                        </tr>
-                    </table>
-                </div>
-
-                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>
-                    <h4 style='margin: 0 0 10px 0; color: inherit;'>Patterns Requiring Follow-up</h4>
-                    <p style='margin: 0 0 10px 0;'>The one-df test only detects the net direction of discordances. It does not distinguish the mechanisms below; use the contingency table and marginal-homogeneity tests to identify them.</p>
-                    <table style='width: 100%; border-collapse: collapse; font-size: 13px;'>
-                        <tr style='background-color: rgba(88, 88, 88, 0.06); color: inherit;'>
-                            <th style='padding: 8px; text-align: left; border-bottom: 2px solid #333;'>Pattern</th>
-                            <th style='padding: 8px; text-align: left; border-bottom: 2px solid #333;'>Clinical Impact</th>
-                        </tr>
-                        <tr>
-                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'><strong>Lenient rater</strong></td>
-                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>Systematically assigns lower grades (potential under-diagnosis)</td>
-                        </tr>
-                        <tr>
-                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'><strong>Strict rater</strong></td>
-                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>Systematically assigns higher grades (potential over-diagnosis)</td>
-                        </tr>
-                        <tr>
-                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'><strong>Central tendency bias</strong></td>
-                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>Avoids extreme categories, clusters ratings in middle</td>
-                        </tr>
-                        <tr>
-                            <td style='padding: 8px;'><strong>Extreme response bias</strong></td>
-                            <td style='padding: 8px;'>Overuses extreme categories, avoids middle grades</td>
-                        </tr>
-                    </table>
-                </div>
-
-                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>
-                    <h4 style='margin: 0 0 10px 0; color: inherit;'>Clinical Example</h4>
-                    <p style='margin: 0; padding: 10px; background: rgba(155, 155, 155, 0.12); color: inherit; border-radius: 4px; font-size: 13px;'>
-                        <strong>Scenario:</strong> Two pathologists grade 50 tumor samples as G1/G2/G3.
-                        They disagree on 18 cases. On 15 of them Pathologist B gave the higher grade; on 3
-                        of them Pathologist A did.<br><br>
-                        <strong>Result: p &lt; 0.001</strong> - when these two disagree, B is almost always the
-                        higher scorer. That is a directional difference worth a calibration session.<br><br>
-                        <strong>What it does not tell you:</strong> if instead B over-called G2 at A's expense
-                        and A over-called G3 at B's expense, the two directions would cancel and this test
-                        would return p = 1 even though the two pathologists use the grades quite differently.
-                        Enable the <strong>Bhapkar</strong> test for that question. This test needs exactly
-                        two raters; with three or more, compare them pairwise or use the rater profile plots.
-                    </p>
-                </div>
-
-                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>
-                    <h4 style='margin: 0 0 10px 0; color: inherit;'>Important Considerations</h4>
-                    <ul style='margin: 0; padding-left: 20px; font-size: 13px;'>
-                        <li><strong>Sample size matters:</strong> Test has limited power with small samples (< 30 cases)</li>
-                        <li><strong>Bias is not the same as poor agreement:</strong> Raters can be biased but still agree (all systematically lenient)</li>
-                        <li><strong>Clinical context:</strong> Some bias may be acceptable (e.g., erring on side of caution)</li>
-                        <li><strong>Training intervention:</strong> Significant bias often correctable with feedback and training</li>
-                        <li><strong>Follow-up:</strong> After detecting bias, examine individual rater frequency distributions</li>
-                    </ul>
-                </div>
-
-                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; color: inherit;'>
-                    <h4 style='margin: 0 0 10px 0; color: inherit;'>Relationship to Agreement Measures</h4>
-                    <p style='margin: 0; font-size: 13px;'>
-                        Net direction and agreement answer different questions. A non-significant result only says
-                        that upper- and lower-direction discordances balance in aggregate; it does not establish
-                        absence of bias or equal category use. A significant result says one rater is more often
-                        higher when the pair disagrees, but the contingency table is still needed to identify the
-                        categories involved and judge clinical importance.
-                    </p>
-                </div>
-
-                <div style='margin-top: 15px; padding: 10px; background-color: rgba(88, 88, 88, 0.06); border-radius: 4px; color: inherit;'>
-                    <p style='margin: 0; font-size: 12px; color: inherit;'>
-                        <strong>What is computed:</strong> (U - L)<sup>2</sup> / (U + L) on 1 df, where U and L
-                        are the total counts above and below the diagonal of the two-rater table
-                        (<code>irr::rater.bias</code>). This is a McNemar-style test of net direction.<br>
-                        <strong>For marginal homogeneity</strong> - the hypothesis that both raters used every
-                        category at the same rate - use the Bhapkar or Stuart-Maxwell test in this same section:
-                        Stuart, A. (1955). A test for homogeneity of the marginal distributions in a two-way
-                        classification. <em>Biometrika</em>, 42(3/4), 412-416.
-                    </p>
-                </div>
-            </div>
-            "
+                html_content <- paste0(
+                    "\n            <div style='font-family: Arial, sans-serif; max-width: 800px; line-height: 1.6;'>\n                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>\n                    <h3 style='margin: 0 0 10px 0; color: inherit;'>",
+                    .("What is the Directional Discordance Test?"),
+                    "</h3>\n                    <p style='margin: 0; color: inherit;'>",
+                    paste0("\n                        ", jmvcore::format(.("The directional discordance test asks whether, on the cases where two raters disagree, the\n                        disagreements run {tag1}one way more often than the other{tag2} - whether one\n                        rater is consistently the higher scorer. It compares the total number of\n                        {tag3}rater 1 higher{tag4} cases with the total number of {tag5}rater 2 higher{tag6}\n                        cases in a single chi-square on 1 degree of freedom. It needs exactly two raters and\n                        both variables must be declared Ordinal with the same clinical scale order."), tag1 = "<strong>", tag2 = "</strong>", tag3 = "&quot;", tag4 = "&quot;", tag5 = "&quot;", tag6 = "&quot;")),
+                    "<br><br>",
+                    paste0("\n                        ", jmvcore::format(.("{tag1}It is not a test of marginal homogeneity.{tag2} It does not test whether\n                        the two raters used each category at the same overall rate: opposing shifts in\n                        different categories cancel out and the test returns p = 1. Use the\n                        {tag3}Bhapkar{tag4} or {tag5}Stuart-Maxwell{tag6} test in this section for\n                        that hypothesis."), tag1 = "<strong>", tag2 = "</strong>", tag3 = "<strong>", tag4 = "</strong>", tag5 = "<strong>", tag6 = "</strong>"), "\n                    "),
+                    "</p>\n                </div>\n\n                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>\n                    <h4 style='margin: 0 0 10px 0; color: inherit;'>",
+                    .("When to Use This Test"),
+                    "</h4>\n                    <p style='margin: 0 0 10px 0;'>",
+                    jmvcore::format(.("{tag1}Potentially useful as a pairwise screen on an ordinal scale when:{tag2}"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</p>\n                    <ul style='margin: 0; padding-left: 20px;'>\n                        <li>",
+                    jmvcore::format(.("{tag1}Rater training{tag2} - Identifying trainees who are systematically too lenient or strict"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                        <li>",
+                    jmvcore::format(.("{tag1}Performance monitoring{tag2} - Detecting drift in rater behavior over time"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                        <li>",
+                    jmvcore::format(.("{tag1}Multi-center studies{tag2} - Ensuring consistent grading across sites"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                        <li>",
+                    jmvcore::format(.("{tag1}Certification{tag2} - Verifying raters use categories appropriately before certification"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                        <li>",
+                    jmvcore::format(.("{tag1}Detecting systematic errors{tag2} - Finding raters who consistently over-diagnose or under-diagnose"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                    </ul>\n                </div>\n\n                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>\n                    <h4 style='margin: 0 0 10px 0; color: inherit;'>",
+                    .("Interpreting Results"),
+                    "</h4>\n                    <table style='width: 100%; border-collapse: collapse;'>\n                        <tr style='background-color: rgba(88, 88, 88, 0.06); color: inherit;'>\n                            <th style='padding: 8px; text-align: left; border-bottom: 2px solid #333;'>",
+                    .("Result"),
+                    "</th>\n                            <th style='padding: 8px; text-align: left; border-bottom: 2px solid #333;'>",
+                    .("Interpretation"),
+                    "</th>\n                        </tr>\n                        <tr>\n                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>",
+                    jmvcore::format(.("{tag1}p >= 0.05{tag2}"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</td>\n                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>",
+                    jmvcore::format(.("No net direction in the disagreements. This does {tag1}not{tag2} establish that the raters use the categories at the same rates - check Bhapkar for that"), tag1 = "<em>", tag2 = "</em>"),
+                    "</td>\n                        </tr>\n                        <tr>\n                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>",
+                    jmvcore::format(.("{tag1}p < 0.05{tag2}"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</td>\n                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>",
+                    .("One rater is the higher scorer significantly more often than the other when they disagree"),
+                    "</td>\n                        </tr>\n                        <tr>\n                            <td style='padding: 8px;'>",
+                    jmvcore::format(.("{tag1}p < 0.001{tag2}"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</td>\n                            <td style='padding: 8px;'>",
+                    .("A strong one-directional pattern - investigate the individual rater frequencies to see which categories drive it"),
+                    "</td>\n                        </tr>\n                    </table>\n                </div>\n\n                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>\n                    <h4 style='margin: 0 0 10px 0; color: inherit;'>",
+                    .("Patterns Requiring Follow-up"),
+                    "</h4>\n                    <p style='margin: 0 0 10px 0;'>",
+                    .("The one-df test only detects the net direction of discordances. It does not distinguish the mechanisms below; use the contingency table and marginal-homogeneity tests to identify them."),
+                    "</p>\n                    <table style='width: 100%; border-collapse: collapse; font-size: 13px;'>\n                        <tr style='background-color: rgba(88, 88, 88, 0.06); color: inherit;'>\n                            <th style='padding: 8px; text-align: left; border-bottom: 2px solid #333;'>",
+                    .("Pattern"),
+                    "</th>\n                            <th style='padding: 8px; text-align: left; border-bottom: 2px solid #333;'>",
+                    .("Clinical Impact"),
+                    "</th>\n                        </tr>\n                        <tr>\n                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>",
+                    jmvcore::format(.("{tag1}Lenient rater{tag2}"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</td>\n                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>",
+                    .("Systematically assigns lower grades (potential under-diagnosis)"),
+                    "</td>\n                        </tr>\n                        <tr>\n                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>",
+                    jmvcore::format(.("{tag1}Strict rater{tag2}"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</td>\n                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>",
+                    .("Systematically assigns higher grades (potential over-diagnosis)"),
+                    "</td>\n                        </tr>\n                        <tr>\n                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>",
+                    jmvcore::format(.("{tag1}Central tendency bias{tag2}"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</td>\n                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>",
+                    .("Avoids extreme categories, clusters ratings in middle"),
+                    "</td>\n                        </tr>\n                        <tr>\n                            <td style='padding: 8px;'>",
+                    jmvcore::format(.("{tag1}Extreme response bias{tag2}"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</td>\n                            <td style='padding: 8px;'>",
+                    .("Overuses extreme categories, avoids middle grades"),
+                    "</td>\n                        </tr>\n                    </table>\n                </div>\n\n                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>\n                    <h4 style='margin: 0 0 10px 0; color: inherit;'>",
+                    .("Clinical Example"),
+                    "</h4>\n                    <p style='margin: 0; padding: 10px; background: rgba(155, 155, 155, 0.12); color: inherit; border-radius: 4px; font-size: 13px;'>",
+                    paste0("\n                        ", jmvcore::format(.("{tag1}Scenario:{tag2} Two pathologists grade 50 tumor samples as G1/G2/G3.\n                        They disagree on 18 cases. On 15 of them Pathologist B gave the higher grade; on 3\n                        of them Pathologist A did."), tag1 = "<strong>", tag2 = "</strong>")),
+                    "<br><br>",
+                    paste0("\n                        ", jmvcore::format(.("{tag1}Result: p {tag2} 0.001{tag3} - when these two disagree, B is almost always the\n                        higher scorer. That is a directional difference worth a calibration session."), tag1 = "<strong>", tag2 = "&lt;", tag3 = "</strong>")),
+                    "<br><br>",
+                    paste0("\n                        ", jmvcore::format(.("{tag1}What it does not tell you:{tag2} if instead B over-called G2 at A's expense\n                        and A over-called G3 at B's expense, the two directions would cancel and this test\n                        would return p = 1 even though the two pathologists use the grades quite differently.\n                        Enable the {tag3}Bhapkar{tag4} test for that question. This test needs exactly\n                        two raters; with three or more, compare them pairwise or use the rater profile plots."), tag1 = "<strong>", tag2 = "</strong>", tag3 = "<strong>", tag4 = "</strong>"), "\n                    "),
+                    "</p>\n                </div>\n\n                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>\n                    <h4 style='margin: 0 0 10px 0; color: inherit;'>",
+                    .("Important Considerations"),
+                    "</h4>\n                    <ul style='margin: 0; padding-left: 20px; font-size: 13px;'>\n                        <li>",
+                    jmvcore::format(.("{tag1}Sample size matters:{tag2} Test has limited power with small samples (< 30 cases)"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                        <li>",
+                    jmvcore::format(.("{tag1}Bias is not the same as poor agreement:{tag2} Raters can be biased but still agree (all systematically lenient)"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                        <li>",
+                    jmvcore::format(.("{tag1}Clinical context:{tag2} Some bias may be acceptable (e.g., erring on side of caution)"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                        <li>",
+                    jmvcore::format(.("{tag1}Training intervention:{tag2} Significant bias often correctable with feedback and training"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                        <li>",
+                    jmvcore::format(.("{tag1}Follow-up:{tag2} After detecting bias, examine individual rater frequency distributions"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                    </ul>\n                </div>\n\n                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; color: inherit;'>\n                    <h4 style='margin: 0 0 10px 0; color: inherit;'>",
+                    .("Relationship to Agreement Measures"),
+                    "</h4>\n                    <p style='margin: 0; font-size: 13px;'>",
+                    paste0("\n                        ", .("Net direction and agreement answer different questions. A non-significant result only says\n                        that upper- and lower-direction discordances balance in aggregate; it does not establish\n                        absence of bias or equal category use. A significant result says one rater is more often\n                        higher when the pair disagrees, but the contingency table is still needed to identify the\n                        categories involved and judge clinical importance."), "\n                    "),
+                    "</p>\n                </div>\n\n                <div style='margin-top: 15px; padding: 10px; background-color: rgba(88, 88, 88, 0.06); border-radius: 4px; color: inherit;'>\n                    <p style='margin: 0; font-size: 12px; color: inherit;'>",
+                    paste0("\n                        ", jmvcore::format(.("{tag1}What is computed:{tag2} (U - L){tag3}2{tag4} / (U + L) on 1 df, where U and L\n                        are the total counts above and below the diagonal of the two-rater table\n                        ({tag5}irr::rater.bias{tag6}). This is a McNemar-style test of net direction."), tag1 = "<strong>", tag2 = "</strong>", tag3 = "<sup>", tag4 = "</sup>", tag5 = "<code>", tag6 = "</code>")),
+                    "<br>",
+                    paste0("\n                        ", jmvcore::format(.("{tag1}For marginal homogeneity{tag2} - the hypothesis that both raters used every\n                        category at the same rate - use the Bhapkar or Stuart-Maxwell test in this same section:\n                        Stuart, A. (1955). A test for homogeneity of the marginal distributions in a two-way\n                        classification. {tag3}Biometrika{tag4}, 42(3/4), 412-416."), tag1 = "<strong>", tag2 = "</strong>", tag3 = "<em>", tag4 = "</em>"), "\n                    "),
+                    "</p>\n                </div>\n            </div>\n            "
+                )
 
                 self$results$raterBiasExplanation$setContent(html_content)
             },
@@ -8045,181 +8706,185 @@ agreementClass <- if (requireNamespace("jmvcore")) {
             .populateBhapkarExplanation = function() {
                 # Provide educational content about Bhapkar Test
 
-                html_content <- "
-            <div style='font-family: Arial, sans-serif; max-width: 800px; line-height: 1.6;'>
-                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>
-                    <h3 style='margin: 0 0 10px 0; color: inherit;'>What is the Bhapkar Test?</h3>
-                    <p style='margin: 0; color: inherit;'>
-                        The Bhapkar test is a <strong>chi-square test for marginal homogeneity</strong> between
-                        <strong>two raters</strong> with <strong>multiple categories</strong>. It tests whether two
-                        raters use rating categories with equal frequency. This is the extension of <strong>McNemar's test</strong>
-                        (which is limited to 2&#xD7;2 tables) to larger contingency tables.
-                    </p>
-                </div>
-
-                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>
-                    <h4 style='margin: 0 0 10px 0; color: inherit;'>When to Use Bhapkar Test</h4>
-                    <p style='margin: 0 0 10px 0;'><strong>Ideal for paired comparisons with &gt;2 categories:</strong></p>
-                    <ul style='margin: 0; padding-left: 20px;'>
-                        <li><strong>Pre-post training</strong> - Compare pathologist before and after training on same cases</li>
-                        <li><strong>Novice vs. Expert</strong> - Compare trainee ratings with senior pathologist</li>
-                        <li><strong>AI vs. Human</strong> - Compare algorithm predictions with pathologist diagnoses</li>
-                        <li><strong>Method comparison</strong> - Compare two grading systems on same specimens</li>
-                        <li><strong>Rater drift detection</strong> - Compare same rater at two time points</li>
-                        <li><strong>Quality control</strong> - Test if systematic bias exists between paired raters</li>
-                    </ul>
-                </div>
-
-                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>
-                    <h4 style='margin: 0 0 10px 0; color: inherit;'>Bhapkar vs. Related Tests</h4>
-                    <table style='width: 100%; border-collapse: collapse;'>
-                        <tr style='background-color: rgba(88, 88, 88, 0.06); color: inherit;'>
-                            <th style='padding: 8px; text-align: left; border-bottom: 2px solid #333;'>Test</th>
-                            <th style='padding: 8px; text-align: left; border-bottom: 2px solid #333;'>Raters</th>
-                            <th style='padding: 8px; text-align: left; border-bottom: 2px solid #333;'>Categories</th>
-                            <th style='padding: 8px; text-align: left; border-bottom: 2px solid #333;'>Purpose</th>
-                        </tr>
-                        <tr>
-                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'><strong>McNemar</strong></td>
-                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>2 (paired)</td>
-                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>2</td>
-                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>Binary marginal homogeneity</td>
-                        </tr>
-                        <tr>
-                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'><strong>Bhapkar</strong></td>
-                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>2 (paired)</td>
-                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>&gt;2</td>
-                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>Multi-category marginal homogeneity</td>
-                        </tr>
-                        <tr>
-                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'><strong>Stuart-Maxwell</strong></td>
-                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>2 (paired)</td>
-                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>&gt;2</td>
-                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>Same hypothesis; statistic never larger than Bhapkar's</td>
-                        </tr>
-                        <tr>
-                            <td style='padding: 8px;'><strong>Directional discordance</strong></td>
-                            <td style='padding: 8px;'>2 (paired)</td>
-                            <td style='padding: 8px;'>2+ ordered</td>
-                            <td style='padding: 8px;'>Net higher/lower direction; not marginal homogeneity</td>
-                        </tr>
-                    </table>
-                    <p style='margin: 10px 0 0 0; font-size: 13px;'>
-                        <strong>Key difference:</strong> Bhapkar's statistic is Stuart-Maxwell's divided by (1 - SM/n), so it is
-                        never smaller and its p-value never larger: Bhapkar is the more liberal of the two, not the more accurate.
-                        The two are asymptotically equivalent and converge as n grows.
-                    </p>
-                </div>
-
-                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>
-                    <h4 style='margin: 0 0 10px 0; color: inherit;'>Clinical Pathology Use Cases</h4>
-
-                    <p style='margin: 0 0 10px 0; font-weight: bold;'>1. AI Algorithm Validation (Dysplasia Detection):</p>
-                    <ul style='margin: 0 0 15px 0; padding-left: 20px; line-height: 1.6;'>
-                        <li><strong>Scenario:</strong> Compare AI algorithm vs. expert pathologist on 100 cervical dysplasia cases</li>
-                        <li><strong>Categories:</strong> Negative, LSIL, HSIL, carcinoma</li>
-                        <li><strong>Agreement:</strong> 60% perfect agreement on diagonal</li>
-                        <li><strong>Marginal frequencies:</strong> AI: 20% negative, 35% LSIL, 30% HSIL, 15% CA; Pathologist: 25%, 30%, 30%, 15%</li>
-                        <li><strong>Bhapkar p = 0.03:</strong> AI systematically assigns fewer &quot;negative&quot; and more &quot;LSIL&quot; diagnoses</li>
-                        <li><strong>What p = 0.03 says:</strong> the algorithm's and the pathologist's category totals differ by more than chance would explain. The test compares totals only, so it does not say which of the two is closer to the truth on any case - the pathologist's grades are the comparator here, not a verified reference standard</li>
-                    </ul>
-
-                    <p style='margin: 0 0 10px 0; font-weight: bold;'>2. Pre-Post Training Evaluation (Inflammatory Bowel Disease):</p>
-                    <ul style='margin: 0 0 15px 0; padding-left: 20px; line-height: 1.6;'>
-                        <li><strong>Scenario:</strong> GI pathologist re-evaluates 80 IBD biopsies after attending Robarts Histopathology Index workshop</li>
-                        <li><strong>Categories:</strong> Quiescent, mild, moderate, severe activity</li>
-                        <li><strong>Hypothesis:</strong> Training should standardize scoring, reducing tendency to overgrade mild cases</li>
-                        <li><strong>Bhapkar test:</strong> Tests if marginal distributions changed after training</li>
-                        <li><strong>p &lt; 0.05:</strong> Significant shift - pathologist now uses &quot;quiescent&quot; more and &quot;mild&quot; less frequently</li>
-                        <li><strong>What this shows:</strong> the pathologist's category totals shifted between the two readings by more than chance. With one reader, no comparison group and no repeat reading without the workshop, the test cannot attribute the shift to the workshop, and it does not say whether the new distribution is the more accurate one</li>
-                    </ul>
-
-                    <p style='margin: 0 0 10px 0; font-weight: bold;'>3. Trainee vs. Expert Comparison (Glomerulonephritis):</p>
-                    <ul style='margin: 0 0 15px 0; padding-left: 20px; line-height: 1.6;'>
-                        <li><strong>Scenario:</strong> Resident and attending nephrologist both score 60 kidney biopsies</li>
-                        <li><strong>Categories:</strong> Normal, minimal change, focal segmental, diffuse proliferative, advanced sclerosis</li>
-                        <li><strong>Concern:</strong> Trainee may systematically underdiagnose severe disease</li>
-                        <li><strong>Bhapkar test:</strong> Detects if resident's marginal distribution differs from expert</li>
-                        <li><strong>p = 0.002:</strong> Resident assigns significantly more &quot;minimal change&quot; and fewer &quot;advanced sclerosis&quot; diagnoses</li>
-                        <li><strong>Educational intervention:</strong> Focused training on chronic injury recognition</li>
-                    </ul>
-
-                    <p style='margin: 0 0 10px 0; font-weight: bold;'>4. Immunostain Method Comparison (PD-L1 Scoring):</p>
-                    <ul style='margin: 0 0 15px 0; padding-left: 20px; line-height: 1.6;'>
-                        <li><strong>Scenario:</strong> Compare two PD-L1 antibody clones (22C3 vs. SP263) on same lung cancer cases</li>
-                        <li><strong>Categories:</strong> TPS <1%, 1-49%, 50-74%, >=75%</li>
-                        <li><strong>Same pathologist:</strong> Evaluates paired sections stained with different antibodies</li>
-                        <li><strong>Bhapkar test:</strong> Tests if antibodies yield different category distributions</li>
-                        <li><strong>p = 0.12:</strong> No marginal shift in category usage was detected between the two clones</li>
-                        <li><strong>Conclusion:</strong> A non-significant test is not an equivalence test, so this does not establish that the clones may be used in place of one another. That would need an equivalence design with a prespecified margin - concordance at the TPS cutpoints that change category - and adequate power</li>
-                    </ul>
-
-                    <p style='margin: 0 0 10px 0; font-weight: bold;'>5. Rater Drift Detection (Longitudinal Quality Control):</p>
-                    <ul style='margin: 0; padding-left: 20px; line-height: 1.6;'>
-                        <li><strong>Scenario:</strong> Senior dermatopathologist re-scores 50 melanoma cases after 2-year interval</li>
-                        <li><strong>Categories:</strong> Clark level I, II, III, IV, V</li>
-                        <li><strong>Quality assurance:</strong> Detect if scoring patterns have drifted over time</li>
-                        <li><strong>Bhapkar test:</strong> Compares marginal distributions at Time 1 vs. Time 2</li>
-                        <li><strong>p = 0.04:</strong> Pathologist now assigns more Level III and fewer Level II diagnoses</li>
-                        <li><strong>Action:</strong> Review diagnostic criteria, consider reference set recalibration</li>
-                    </ul>
-                </div>
-
-                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>
-                    <h4 style='margin: 0 0 10px 0; color: inherit;'>Interpretation</h4>
-                    <table style='width: 100%; border-collapse: collapse; font-size: 14px;'>
-                        <tr>
-                            <td style='padding: 5px; font-weight: bold; border-bottom: 1px solid #ddd;'>p >= 0.05</td>
-                            <td style='padding: 5px; border-bottom: 1px solid #ddd;'>No significant difference in marginal distributions</td>
-                        </tr>
-                        <tr>
-                            <td style='padding: 5px; font-weight: bold; border-bottom: 1px solid #ddd;'>p &lt; 0.05</td>
-                            <td style='padding: 5px; border-bottom: 1px solid #ddd;'>Significant marginal heterogeneity detected</td>
-                        </tr>
-                        <tr>
-                            <td style='padding: 5px; font-weight: bold;'>p &lt; 0.01</td>
-                            <td style='padding: 5px;'>Strong evidence - raters use categories differently</td>
-                        </tr>
-                    </table>
-                    <p style='margin: 10px 0 0 0; font-size: 13px;'>
-                        <strong>Important:</strong> Significant Bhapkar test indicates <em>systematic bias</em> in category
-                        usage but does not mean <em>poor agreement</em>. Use in conjunction with Cohen's kappa to assess
-                        both agreement and bias.
-                    </p>
-                </div>
-
-                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>
-                    <h4 style='margin: 0 0 10px 0; color: inherit;'>Requirements and Assumptions</h4>
-                    <ul style='margin: 0; padding-left: 20px; font-size: 13px;'>
-                        <li><strong>Exactly 2 raters:</strong> Test designed for paired comparisons only</li>
-                        <li><strong>Same subjects rated twice:</strong> Data must be paired (same cases)</li>
-                        <li><strong>Multiple categories (&gt;2):</strong> For 2&#xD7;2 tables, use McNemar's test instead</li>
-                        <li><strong>Large sample:</strong> More reliable with n &gt; 30 cases</li>
-                        <li><strong>Categorical data:</strong> Ordered or unordered categories</li>
-                    </ul>
-                </div>
-
-                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; color: inherit;'>
-                    <h4 style='margin: 0 0 10px 0; color: inherit;'>Complementary Analyses</h4>
-                    <p style='margin: 0; font-size: 13px;'>
-                        Use Bhapkar test <strong>together with</strong>:<br><br>
-
-                         <strong>Cohen's Kappa:</strong> Measures agreement (Bhapkar tests marginal homogeneity)<br>
-                         <strong>Confusion matrix:</strong> Shows specific disagreement patterns<br>
-                         <strong>Marginal frequency tables:</strong> Identify which categories differ most<br><br>
-
-                        <strong>Best case among the combinations:</strong> High kappa (good agreement) + non-significant Bhapkar (no marginal bias detected; a null result is not proof that none is present)
-                    </p>
-                </div>
-
-                <div style='margin-top: 15px; padding: 10px; background-color: rgba(88, 88, 88, 0.06); border-radius: 4px; color: inherit;'>
-                    <p style='margin: 0; font-size: 12px; color: inherit;'>
-                        <strong>Reference:</strong> Bhapkar, V. P. (1966). A note on the equivalence of two test criteria
-                        for hypotheses in categorical data. <em>Journal of the American Statistical Association</em>, 61, 228-235.
-                    </p>
-                </div>
-            </div>
-            "
+                html_content <- paste0(
+                    "\n            <div style='font-family: Arial, sans-serif; max-width: 800px; line-height: 1.6;'>\n                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>\n                    <h3 style='margin: 0 0 10px 0; color: inherit;'>",
+                    .("What is the Bhapkar Test?"),
+                    "</h3>\n                    <p style='margin: 0; color: inherit;'>",
+                    paste0("\n                        ", jmvcore::format(.("The Bhapkar test is a {tag1}chi-square test for marginal homogeneity{tag2} between\n                        {tag3}two raters{tag4} with {tag5}multiple categories{tag6}. It tests whether two\n                        raters use rating categories with equal frequency. This is the extension of {tag7}McNemar's test{tag8}\n                        (which is limited to 2{tag9}2 tables) to larger contingency tables."), tag1 = "<strong>", tag2 = "</strong>", tag3 = "<strong>", tag4 = "</strong>", tag5 = "<strong>", tag6 = "</strong>", tag7 = "<strong>", tag8 = "</strong>", tag9 = "&#xD7;"), "\n                    "),
+                    "</p>\n                </div>\n\n                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>\n                    <h4 style='margin: 0 0 10px 0; color: inherit;'>",
+                    .("When to Use Bhapkar Test"),
+                    "</h4>\n                    <p style='margin: 0 0 10px 0;'>",
+                    jmvcore::format(.("{tag1}Ideal for paired comparisons with {tag2}2 categories:{tag3}"), tag1 = "<strong>", tag2 = "&gt;", tag3 = "</strong>"),
+                    "</p>\n                    <ul style='margin: 0; padding-left: 20px;'>\n                        <li>",
+                    jmvcore::format(.("{tag1}Pre-post training{tag2} - Compare pathologist before and after training on same cases"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                        <li>",
+                    jmvcore::format(.("{tag1}Novice vs. Expert{tag2} - Compare trainee ratings with senior pathologist"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                        <li>",
+                    jmvcore::format(.("{tag1}AI vs. Human{tag2} - Compare algorithm predictions with pathologist diagnoses"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                        <li>",
+                    jmvcore::format(.("{tag1}Method comparison{tag2} - Compare two grading systems on same specimens"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                        <li>",
+                    jmvcore::format(.("{tag1}Rater drift detection{tag2} - Compare same rater at two time points"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                        <li>",
+                    jmvcore::format(.("{tag1}Quality control{tag2} - Test if systematic bias exists between paired raters"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                    </ul>\n                </div>\n\n                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>\n                    <h4 style='margin: 0 0 10px 0; color: inherit;'>",
+                    .("Bhapkar vs. Related Tests"),
+                    "</h4>\n                    <table style='width: 100%; border-collapse: collapse;'>\n                        <tr style='background-color: rgba(88, 88, 88, 0.06); color: inherit;'>\n                            <th style='padding: 8px; text-align: left; border-bottom: 2px solid #333;'>",
+                    .("Test"),
+                    "</th>\n                            <th style='padding: 8px; text-align: left; border-bottom: 2px solid #333;'>",
+                    .("Raters"),
+                    "</th>\n                            <th style='padding: 8px; text-align: left; border-bottom: 2px solid #333;'>",
+                    .("Categories"),
+                    "</th>\n                            <th style='padding: 8px; text-align: left; border-bottom: 2px solid #333;'>",
+                    .("Purpose"),
+                    "</th>\n                        </tr>\n                        <tr>\n                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>",
+                    jmvcore::format(.("{tag1}McNemar{tag2}"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</td>\n                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>",
+                    .("2 (paired)"),
+                    "</td>\n                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>2</td>\n                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>",
+                    .("Binary marginal homogeneity"),
+                    "</td>\n                        </tr>\n                        <tr>\n                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>",
+                    jmvcore::format(.("{tag1}Bhapkar{tag2}"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</td>\n                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>",
+                    .("2 (paired)"),
+                    "</td>\n                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>",
+                    jmvcore::format(.("{tag1}2"), tag1 = "&gt;"),
+                    "</td>\n                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>",
+                    .("Multi-category marginal homogeneity"),
+                    "</td>\n                        </tr>\n                        <tr>\n                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>",
+                    jmvcore::format(.("{tag1}Stuart-Maxwell{tag2}"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</td>\n                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>",
+                    .("2 (paired)"),
+                    "</td>\n                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>",
+                    jmvcore::format(.("{tag1}2"), tag1 = "&gt;"),
+                    "</td>\n                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>",
+                    .("Same hypothesis; statistic never larger than Bhapkar's"),
+                    "</td>\n                        </tr>\n                        <tr>\n                            <td style='padding: 8px;'>",
+                    jmvcore::format(.("{tag1}Directional discordance{tag2}"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</td>\n                            <td style='padding: 8px;'>",
+                    .("2 (paired)"),
+                    "</td>\n                            <td style='padding: 8px;'>",
+                    .("2+ ordered"),
+                    "</td>\n                            <td style='padding: 8px;'>",
+                    .("Net higher/lower direction; not marginal homogeneity"),
+                    "</td>\n                        </tr>\n                    </table>\n                    <p style='margin: 10px 0 0 0; font-size: 13px;'>",
+                    paste0("\n                        ", jmvcore::format(.("{tag1}Key difference:{tag2} Bhapkar's statistic is Stuart-Maxwell's divided by (1 - SM/n), so it is\n                        never smaller and its p-value never larger: Bhapkar is the more liberal of the two, not the more accurate.\n                        The two are asymptotically equivalent and converge as n grows."), tag1 = "<strong>", tag2 = "</strong>"), "\n                    "),
+                    "</p>\n                </div>\n\n                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>\n                    <h4 style='margin: 0 0 10px 0; color: inherit;'>",
+                    .("Clinical Pathology Use Cases"),
+                    "</h4>\n\n                    <p style='margin: 0 0 10px 0; font-weight: bold;'>",
+                    .("1. AI Algorithm Validation (Dysplasia Detection):"),
+                    "</p>\n                    <ul style='margin: 0 0 15px 0; padding-left: 20px; line-height: 1.6;'>\n                        <li>",
+                    jmvcore::format(.("{tag1}Scenario:{tag2} Compare AI algorithm vs. expert pathologist on 100 cervical dysplasia cases"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                        <li>",
+                    jmvcore::format(.("{tag1}Categories:{tag2} Negative, LSIL, HSIL, carcinoma"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                        <li>",
+                    jmvcore::format(.("{tag1}Agreement:{tag2} 60% perfect agreement on diagonal"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                        <li>",
+                    jmvcore::format(.("{tag1}Marginal frequencies:{tag2} AI: 20% negative, 35% LSIL, 30% HSIL, 15% CA; Pathologist: 25%, 30%, 30%, 15%"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                        <li>",
+                    jmvcore::format(.("{tag1}Bhapkar p = 0.03:{tag2} AI systematically assigns fewer {tag3}negative{tag4} and more {tag5}LSIL{tag6} diagnoses"), tag1 = "<strong>", tag2 = "</strong>", tag3 = "&quot;", tag4 = "&quot;", tag5 = "&quot;", tag6 = "&quot;"),
+                    "</li>\n                        <li>",
+                    jmvcore::format(.("{tag1}What p = 0.03 says:{tag2} the algorithm's and the pathologist's category totals differ by more than chance would explain. The test compares totals only, so it does not say which of the two is closer to the truth on any case - the pathologist's grades are the comparator here, not a verified reference standard"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                    </ul>\n\n                    <p style='margin: 0 0 10px 0; font-weight: bold;'>",
+                    .("2. Pre-Post Training Evaluation (Inflammatory Bowel Disease):"),
+                    "</p>\n                    <ul style='margin: 0 0 15px 0; padding-left: 20px; line-height: 1.6;'>\n                        <li>",
+                    jmvcore::format(.("{tag1}Scenario:{tag2} GI pathologist re-evaluates 80 IBD biopsies after attending Robarts Histopathology Index workshop"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                        <li>",
+                    jmvcore::format(.("{tag1}Categories:{tag2} Quiescent, mild, moderate, severe activity"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                        <li>",
+                    jmvcore::format(.("{tag1}Hypothesis:{tag2} Training should standardize scoring, reducing tendency to overgrade mild cases"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                        <li>",
+                    jmvcore::format(.("{tag1}Bhapkar test:{tag2} Tests if marginal distributions changed after training"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                        <li>",
+                    jmvcore::format(.("{tag1}p {tag2} 0.05:{tag3} Significant shift - pathologist now uses {tag4}quiescent{tag5} more and {tag6}mild{tag7} less frequently"), tag1 = "<strong>", tag2 = "&lt;", tag3 = "</strong>", tag4 = "&quot;", tag5 = "&quot;", tag6 = "&quot;", tag7 = "&quot;"),
+                    "</li>\n                        <li>",
+                    jmvcore::format(.("{tag1}What this shows:{tag2} the pathologist's category totals shifted between the two readings by more than chance. With one reader, no comparison group and no repeat reading without the workshop, the test cannot attribute the shift to the workshop, and it does not say whether the new distribution is the more accurate one"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                    </ul>\n\n                    <p style='margin: 0 0 10px 0; font-weight: bold;'>",
+                    .("3. Trainee vs. Expert Comparison (Glomerulonephritis):"),
+                    "</p>\n                    <ul style='margin: 0 0 15px 0; padding-left: 20px; line-height: 1.6;'>\n                        <li>",
+                    jmvcore::format(.("{tag1}Scenario:{tag2} Resident and attending nephrologist both score 60 kidney biopsies"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                        <li>",
+                    jmvcore::format(.("{tag1}Categories:{tag2} Normal, minimal change, focal segmental, diffuse proliferative, advanced sclerosis"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                        <li>",
+                    jmvcore::format(.("{tag1}Concern:{tag2} Trainee may systematically underdiagnose severe disease"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                        <li>",
+                    jmvcore::format(.("{tag1}Bhapkar test:{tag2} Detects if resident's marginal distribution differs from expert"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                        <li>",
+                    jmvcore::format(.("{tag1}p = 0.002:{tag2} Resident assigns significantly more {tag3}minimal change{tag4} and fewer {tag5}advanced sclerosis{tag6} diagnoses"), tag1 = "<strong>", tag2 = "</strong>", tag3 = "&quot;", tag4 = "&quot;", tag5 = "&quot;", tag6 = "&quot;"),
+                    "</li>\n                        <li>",
+                    jmvcore::format(.("{tag1}Educational intervention:{tag2} Focused training on chronic injury recognition"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                    </ul>\n\n                    <p style='margin: 0 0 10px 0; font-weight: bold;'>",
+                    .("4. Immunostain Method Comparison (PD-L1 Scoring):"),
+                    "</p>\n                    <ul style='margin: 0 0 15px 0; padding-left: 20px; line-height: 1.6;'>\n                        <li>",
+                    jmvcore::format(.("{tag1}Scenario:{tag2} Compare two PD-L1 antibody clones (22C3 vs. SP263) on same lung cancer cases"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                        <li>",
+                    jmvcore::format(.("{tag1}Categories:{tag2} TPS <1%, 1-49%, 50-74%, >=75%"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                        <li>",
+                    jmvcore::format(.("{tag1}Same pathologist:{tag2} Evaluates paired sections stained with different antibodies"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                        <li>",
+                    jmvcore::format(.("{tag1}Bhapkar test:{tag2} Tests if antibodies yield different category distributions"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                        <li>",
+                    jmvcore::format(.("{tag1}p = 0.12:{tag2} No marginal shift in category usage was detected between the two clones"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                        <li>",
+                    jmvcore::format(.("{tag1}Conclusion:{tag2} A non-significant test is not an equivalence test, so this does not establish that the clones may be used in place of one another. That would need an equivalence design with a prespecified margin - concordance at the TPS cutpoints that change category - and adequate power"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                    </ul>\n\n                    <p style='margin: 0 0 10px 0; font-weight: bold;'>",
+                    .("5. Rater Drift Detection (Longitudinal Quality Control):"),
+                    "</p>\n                    <ul style='margin: 0; padding-left: 20px; line-height: 1.6;'>\n                        <li>",
+                    jmvcore::format(.("{tag1}Scenario:{tag2} Senior dermatopathologist re-scores 50 melanoma cases after 2-year interval"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                        <li>",
+                    jmvcore::format(.("{tag1}Categories:{tag2} Clark level I, II, III, IV, V"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                        <li>",
+                    jmvcore::format(.("{tag1}Quality assurance:{tag2} Detect if scoring patterns have drifted over time"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                        <li>",
+                    jmvcore::format(.("{tag1}Bhapkar test:{tag2} Compares marginal distributions at Time 1 vs. Time 2"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                        <li>",
+                    jmvcore::format(.("{tag1}p = 0.04:{tag2} Pathologist now assigns more Level III and fewer Level II diagnoses"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                        <li>",
+                    jmvcore::format(.("{tag1}Action:{tag2} Review diagnostic criteria, consider reference set recalibration"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                    </ul>\n                </div>\n\n                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>\n                    <h4 style='margin: 0 0 10px 0; color: inherit;'>",
+                    .("Interpretation"),
+                    "</h4>\n                    <table style='width: 100%; border-collapse: collapse; font-size: 14px;'>\n                        <tr>\n                            <td style='padding: 5px; font-weight: bold; border-bottom: 1px solid #ddd;'>",
+                    .("p >= 0.05"),
+                    "</td>\n                            <td style='padding: 5px; border-bottom: 1px solid #ddd;'>",
+                    .("No significant difference in marginal distributions"),
+                    "</td>\n                        </tr>\n                        <tr>\n                            <td style='padding: 5px; font-weight: bold; border-bottom: 1px solid #ddd;'>",
+                    jmvcore::format(.("p {tag1} 0.05"), tag1 = "&lt;"),
+                    "</td>\n                            <td style='padding: 5px; border-bottom: 1px solid #ddd;'>",
+                    .("Significant marginal heterogeneity detected"),
+                    "</td>\n                        </tr>\n                        <tr>\n                            <td style='padding: 5px; font-weight: bold;'>",
+                    jmvcore::format(.("p {tag1} 0.01"), tag1 = "&lt;"),
+                    "</td>\n                            <td style='padding: 5px;'>",
+                    .("Strong evidence - raters use categories differently"),
+                    "</td>\n                        </tr>\n                    </table>\n                    <p style='margin: 10px 0 0 0; font-size: 13px;'>",
+                    paste0("\n                        ", jmvcore::format(.("{tag1}Important:{tag2} Significant Bhapkar test indicates {tag3}systematic bias{tag4} in category\n                        usage but does not mean {tag5}poor agreement{tag6}. Use in conjunction with Cohen's kappa to assess\n                        both agreement and bias."), tag1 = "<strong>", tag2 = "</strong>", tag3 = "<em>", tag4 = "</em>", tag5 = "<em>", tag6 = "</em>"), "\n                    "),
+                    "</p>\n                </div>\n\n                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>\n                    <h4 style='margin: 0 0 10px 0; color: inherit;'>",
+                    .("Requirements and Assumptions"),
+                    "</h4>\n                    <ul style='margin: 0; padding-left: 20px; font-size: 13px;'>\n                        <li>",
+                    jmvcore::format(.("{tag1}Exactly 2 raters:{tag2} Test designed for paired comparisons only"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                        <li>",
+                    jmvcore::format(.("{tag1}Same subjects rated twice:{tag2} Data must be paired (same cases)"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                        <li>",
+                    jmvcore::format(.("{tag1}Multiple categories ({tag2}2):{tag3} For 2{tag4}2 tables, use McNemar's test instead"), tag1 = "<strong>", tag2 = "&gt;", tag3 = "</strong>", tag4 = "&#xD7;"),
+                    "</li>\n                        <li>",
+                    jmvcore::format(.("{tag1}Large sample:{tag2} More reliable with n {tag3} 30 cases"), tag1 = "<strong>", tag2 = "</strong>", tag3 = "&gt;"),
+                    "</li>\n                        <li>",
+                    jmvcore::format(.("{tag1}Categorical data:{tag2} Ordered or unordered categories"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                    </ul>\n                </div>\n\n                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; color: inherit;'>\n                    <h4 style='margin: 0 0 10px 0; color: inherit;'>",
+                    .("Complementary Analyses"),
+                    "</h4>\n                    <p style='margin: 0; font-size: 13px;'>",
+                    paste0("\n                        ", jmvcore::format(.("Use Bhapkar test {tag1}together with{tag2}:"), tag1 = "<strong>", tag2 = "</strong>")),
+                    "<br><br>",
+                    paste0("\n\n                         ", jmvcore::format(.("{tag1}Cohen's Kappa:{tag2} Measures agreement (Bhapkar tests marginal homogeneity)"), tag1 = "<strong>", tag2 = "</strong>")),
+                    "<br>",
+                    paste0("\n                         ", jmvcore::format(.("{tag1}Confusion matrix:{tag2} Shows specific disagreement patterns"), tag1 = "<strong>", tag2 = "</strong>")),
+                    "<br>",
+                    paste0("\n                         ", jmvcore::format(.("{tag1}Marginal frequency tables:{tag2} Identify which categories differ most"), tag1 = "<strong>", tag2 = "</strong>")),
+                    "<br><br>",
+                    paste0("\n\n                        ", jmvcore::format(.("{tag1}Best case among the combinations:{tag2} High kappa (good agreement) + non-significant Bhapkar (no marginal bias detected; a null result is not proof that none is present)"), tag1 = "<strong>", tag2 = "</strong>"), "\n                    "),
+                    "</p>\n                </div>\n\n                <div style='margin-top: 15px; padding: 10px; background-color: rgba(88, 88, 88, 0.06); border-radius: 4px; color: inherit;'>\n                    <p style='margin: 0; font-size: 12px; color: inherit;'>",
+                    paste0("\n                        ", jmvcore::format(.("{tag1}Reference:{tag2} Bhapkar, V. P. (1966). A note on the equivalence of two test criteria\n                        for hypotheses in categorical data. {tag3}Journal of the American Statistical Association{tag4}, 61, 228-235."), tag1 = "<strong>", tag2 = "</strong>", tag3 = "<em>", tag4 = "</em>"), "\n                    "),
+                    "</p>\n                </div>\n            </div>\n            "
+                )
 
                 self$results$bhapkarExplanation$setContent(html_content)
             },
@@ -8352,179 +9017,177 @@ agreementClass <- if (requireNamespace("jmvcore")) {
             .populateStuartMaxwellExplanation = function() {
                 # Provide educational content about Stuart-Maxwell Test
 
-                html_content <- "
-            <div style='font-family: Arial, sans-serif; max-width: 800px; line-height: 1.6;'>
-                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>
-                    <h3 style='margin: 0 0 10px 0; color: inherit;'>What is the Stuart-Maxwell Test?</h3>
-                    <p style='margin: 0; color: inherit;'>
-                        The Stuart-Maxwell test is a <strong>classic chi-square test for marginal homogeneity</strong>
-                        between <strong>two raters</strong> with <strong>multiple categories</strong>. It tests whether
-                        two raters use rating categories with equal frequency in <strong>matched/paired data</strong>.
-                        This is the traditional extension of <strong>McNemar's test</strong> (which is for 2&#xD7;2 tables) to
-                        larger contingency tables.
-                    </p>
-                </div>
-
-                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>
-                    <h4 style='margin: 0 0 10px 0; color: inherit;'>When to Use Stuart-Maxwell Test</h4>
-                    <p style='margin: 0 0 10px 0;'><strong>Ideal for matched/paired comparisons:</strong></p>
-                    <ul style='margin: 0; padding-left: 20px;'>
-                        <li><strong>Matched data analysis</strong> - Same subjects rated twice under different conditions</li>
-                        <li><strong>Pre-post comparisons</strong> - Before and after intervention on same cases</li>
-                        <li><strong>Repeated measurements</strong> - Same rater assessing cases at two time points</li>
-                        <li><strong>Method comparison</strong> - Two different diagnostic methods on same specimens</li>
-                        <li><strong>Observer agreement</strong> - Two observers rating same cases independently</li>
-                        <li><strong>Traditional choice</strong> - Historical standard for marginal homogeneity testing</li>
-                    </ul>
-                </div>
-
-                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>
-                    <h4 style='margin: 0 0 10px 0; color: inherit;'>Stuart-Maxwell vs. Related Tests</h4>
-                    <table style='width: 100%; border-collapse: collapse;'>
-                        <tr style='background-color: rgba(88, 88, 88, 0.06); color: inherit;'>
-                            <th style='padding: 8px; text-align: left; border-bottom: 2px solid #333;'>Test</th>
-                            <th style='padding: 8px; text-align: left; border-bottom: 2px solid #333;'>Categories</th>
-                            <th style='padding: 8px; text-align: left; border-bottom: 2px solid #333;'>Characteristics</th>
-                        </tr>
-                        <tr>
-                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'><strong>McNemar</strong></td>
-                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>2</td>
-                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>Classic test for binary paired data</td>
-                        </tr>
-                        <tr>
-                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'><strong>Stuart-Maxwell</strong></td>
-                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>&gt;2</td>
-                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>Traditional choice, well-established</td>
-                        </tr>
-                        <tr>
-                            <td style='padding: 8px;'><strong>Bhapkar</strong></td>
-                            <td style='padding: 8px;'>&gt;2</td>
-                            <td style='padding: 8px;'>SM / (1 - SM/n): never smaller than Stuart-Maxwell, so more liberal</td>
-                        </tr>
-                    </table>
-                    <p style='margin: 10px 0 0 0; font-size: 13px;'>
-                        <strong>Note:</strong> Stuart-Maxwell and Bhapkar are asymptotically equivalent and give similar
-                        results with large samples. Bhapkar's statistic is SM / (1 - SM/n), so it is never smaller and its p-value
-                        never larger: it is the more liberal test, not the more accurate one. Choose one before
-                        seeing the data.
-                    </p>
-                </div>
-
-                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>
-                    <h4 style='margin: 0 0 10px 0; color: inherit;'>Clinical Pathology Use Cases</h4>
-
-                    <p style='margin: 0 0 10px 0; font-weight: bold;'>1. Post-Training Diagnostic Recalibration (Breast Pathology):</p>
-                    <ul style='margin: 0 0 15px 0; padding-left: 20px; line-height: 1.6;'>
-                        <li><strong>Scenario:</strong> Pathologist re-evaluates 80 breast cases after HER2 scoring workshop</li>
-                        <li><strong>Categories:</strong> Benign, atypical, DCIS, invasive carcinoma</li>
-                        <li><strong>Original grading:</strong> 35% benign, 25% atypical, 20% DCIS, 20% invasive</li>
-                        <li><strong>Post-training:</strong> 30% benign, 20% atypical, 25% DCIS, 25% invasive</li>
-                        <li><strong>Stuart-Maxwell p = 0.04:</strong> Significant shift toward more aggressive diagnoses</li>
-                        <li><strong>What p = 0.04 shows:</strong> the reader's category totals moved between the two readings by more than chance. A shift in totals is not by itself a shift toward the correct diagnosis, and with a single uncontrolled before-and-after reading the test cannot separate the workshop from practice or recall of the cases</li>
-                    </ul>
-
-                    <p style='margin: 0 0 10px 0; font-weight: bold;'>2. Digital vs. Glass Slide Diagnosis (Method Comparison):</p>
-                    <ul style='margin: 0 0 15px 0; padding-left: 20px; line-height: 1.6;'>
-                        <li><strong>Scenario:</strong> Same pathologist diagnoses 100 skin biopsies using whole slide imaging vs. traditional microscopy</li>
-                        <li><strong>Categories:</strong> Normal, dysplastic nevus, melanoma in-situ, invasive melanoma</li>
-                        <li><strong>Concern:</strong> Digital platform may alter diagnostic behavior</li>
-                        <li><strong>Stuart-Maxwell test:</strong> Detects if marginal distributions differ between modalities</li>
-                        <li><strong>p = 0.68:</strong> No shift in category usage was detected between digital and glass</li>
-                        <li><strong>What that does and does not show:</strong> Marginal homogeneity is the null hypothesis, so failing to reject it does not demonstrate equivalence. The test also compares category totals only and is blind to case-level disagreement, so pair it with a case-level agreement statistic and a prespecified concordance margin before drawing any validation conclusion</li>
-                    </ul>
-
-                    <p style='margin: 0 0 10px 0; font-weight: bold;'>3. Temporal Stability Assessment (Intra-Rater Reliability):</p>
-                    <ul style='margin: 0 0 15px 0; padding-left: 20px; line-height: 1.6;'>
-                        <li><strong>Scenario:</strong> Gynecologic pathologist re-scores 60 endometrial biopsies 6 months later (blinded)</li>
-                        <li><strong>Categories:</strong> Proliferative, hyperplasia without atypia, atypical hyperplasia, carcinoma</li>
-                        <li><strong>Quality control:</strong> Assess consistency of diagnostic criteria over time</li>
-                        <li><strong>Stuart-Maxwell test:</strong> Tests if marginal distributions are stable</li>
-                        <li><strong>p = 0.89:</strong> No drift in category usage was detected between the two readings</li>
-                        <li><strong>QA implication:</strong> A null result is not evidence that thresholds are stable - with 60 cases only a large shift would have been detected, and the test compares category totals rather than case-level consistency</li>
-                    </ul>
-
-                    <p style='margin: 0 0 10px 0; font-weight: bold;'>4. Stain Protocol Optimization (Immunohistochemistry):</p>
-                    <ul style='margin: 0 0 15px 0; padding-left: 20px; line-height: 1.6;'>
-                        <li><strong>Scenario:</strong> Compare standard vs. optimized Ki-67 staining protocol on same cases</li>
-                        <li><strong>Categories:</strong> Low (<10%), intermediate (10-30%), high (30-50%), very high (>50%)</li>
-                        <li><strong>Same observer:</strong> Scores 70 breast cancer cases with both protocols</li>
-                        <li><strong>Stuart-Maxwell test:</strong> Detects if new protocol shifts scoring distribution</li>
-                        <li><strong>p = 0.02:</strong> Optimized protocol yields more &quot;high&quot; and &quot;very high&quot; scores</li>
-                        <li><strong>Technical decision:</strong> Enhanced sensitivity requires recalibration of clinical cutoffs</li>
-                    </ul>
-
-                    <p style='margin: 0 0 10px 0; font-weight: bold;'>5. Diagnostic Criteria Update Impact (Prostate Pathology):</p>
-                    <ul style='margin: 0; padding-left: 20px; line-height: 1.6;'>
-                        <li><strong>Scenario:</strong> GU pathologist applies 2014 vs. 2019 WHO criteria to 90 prostate biopsies</li>
-                        <li><strong>Categories:</strong> Benign, HGPIN, Gleason 6, Gleason 7, Gleason 8-10</li>
-                        <li><strong>Context:</strong> 2019 criteria refined cribriform pattern and intraductal carcinoma definitions</li>
-                        <li><strong>Stuart-Maxwell test:</strong> Quantifies impact of criteria change on diagnostic distribution</li>
-                        <li><strong>p = 0.001:</strong> 2019 criteria yield significantly more Gleason 7 and fewer Gleason 6 diagnoses</li>
-                        <li><strong>What p = 0.001 shows:</strong> the two criteria sets produce different category totals on the same 90 biopsies by more than chance. The test compares totals, not individual cases, so it does not report how many biopsies changed category or in which direction any single one moved - the contingency table in this analysis shows that</li>
-                    </ul>
-                </div>
-
-                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>
-                    <h4 style='margin: 0 0 10px 0; color: inherit;'>Interpretation</h4>
-                    <table style='width: 100%; border-collapse: collapse; font-size: 14px;'>
-                        <tr>
-                            <td style='padding: 5px; font-weight: bold; border-bottom: 1px solid #ddd;'>p >= 0.05</td>
-                            <td style='padding: 5px; border-bottom: 1px solid #ddd;'>No significant departure from marginal homogeneity detected (this does not establish that the marginals are equal)</td>
-                        </tr>
-                        <tr>
-                            <td style='padding: 5px; font-weight: bold; border-bottom: 1px solid #ddd;'>p &lt; 0.05</td>
-                            <td style='padding: 5px; border-bottom: 1px solid #ddd;'>Significant marginal heterogeneity detected</td>
-                        </tr>
-                        <tr>
-                            <td style='padding: 5px; font-weight: bold;'>p &lt; 0.01</td>
-                            <td style='padding: 5px;'>Strong evidence - systematic shift in category usage</td>
-                        </tr>
-                    </table>
-                    <p style='margin: 10px 0 0 0; font-size: 13px;'>
-                        <strong>Important:</strong> Significant test indicates <em>systematic change</em> in category usage
-                        but does not necessarily mean <em>poor agreement</em>. Use alongside Cohen's kappa or correlation
-                        to assess overall consistency.
-                    </p>
-                </div>
-
-                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>
-                    <h4 style='margin: 0 0 10px 0; color: inherit;'>Assumptions and Requirements</h4>
-                    <ul style='margin: 0; padding-left: 20px; font-size: 13px;'>
-                        <li><strong>Paired/matched data:</strong> Same subjects rated twice or same cases by two raters</li>
-                        <li><strong>Two raters only:</strong> Designed for comparing exactly 2 sets of ratings</li>
-                        <li><strong>Multiple categories (&gt;2):</strong> Use McNemar for 2&#xD7;2 tables</li>
-                        <li><strong>Categorical data:</strong> Works with nominal or ordinal categories</li>
-                        <li><strong>Sample size:</strong> More reliable with n &gt; 30</li>
-                        <li><strong>Complete pairs:</strong> Cases with missing data are excluded</li>
-                    </ul>
-                </div>
-
-                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; color: inherit;'>
-                    <h4 style='margin: 0 0 10px 0; color: inherit;'>Use Together With</h4>
-                    <p style='margin: 0; font-size: 13px;'>
-                        <strong>Complementary analyses:</strong><br><br>
-
-                         <strong>Cohen's Kappa:</strong> Measures agreement (Stuart-Maxwell tests marginal distributions)<br>
-                         <strong>Contingency table:</strong> Shows exact disagreement patterns cell-by-cell<br>
-                         <strong>McNemar-Bowker:</strong> Provides cell-by-cell symmetry test<br>
-                         <strong>Marginal frequency comparison:</strong> Identifies which categories differ most<br><br>
-
-                        <strong>Ideal outcome:</strong> High kappa (good agreement) + Non-significant Stuart-Maxwell
-                        (no systematic bias in category usage)
-                    </p>
-                </div>
-
-                <div style='margin-top: 15px; padding: 10px; background-color: rgba(88, 88, 88, 0.06); border-radius: 4px; color: inherit;'>
-                    <p style='margin: 0; font-size: 12px; color: inherit;'>
-                        <strong>References:</strong><br>
-                        Stuart, A. A. (1955). A test for homogeneity of the marginal distributions in a two-way
-                        classification. <em>Biometrika</em>, 42, 412-416.<br>
-                        Maxwell, A. E. (1970). Comparing the classification of subjects by two independent judges.
-                        <em>British Journal of Psychiatry</em>, 116, 651-655.
-                    </p>
-                </div>
-            </div>
-            "
+                html_content <- paste0(
+                    "\n            <div style='font-family: Arial, sans-serif; max-width: 800px; line-height: 1.6;'>\n                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>\n                    <h3 style='margin: 0 0 10px 0; color: inherit;'>",
+                    .("What is the Stuart-Maxwell Test?"),
+                    "</h3>\n                    <p style='margin: 0; color: inherit;'>",
+                    paste0("\n                        ", jmvcore::format(.("The Stuart-Maxwell test is a {tag1}classic chi-square test for marginal homogeneity{tag2}\n                        between {tag3}two raters{tag4} with {tag5}multiple categories{tag6}. It tests whether\n                        two raters use rating categories with equal frequency in {tag7}matched/paired data{tag8}.\n                        This is the traditional extension of {tag9}McNemar's test{tag10} (which is for 2{tag11}2 tables) to\n                        larger contingency tables."), tag1 = "<strong>", tag2 = "</strong>", tag3 = "<strong>", tag4 = "</strong>", tag5 = "<strong>", tag6 = "</strong>", tag7 = "<strong>", tag8 = "</strong>", tag9 = "<strong>", tag10 = "</strong>", tag11 = "&#xD7;"), "\n                    "),
+                    "</p>\n                </div>\n\n                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>\n                    <h4 style='margin: 0 0 10px 0; color: inherit;'>",
+                    .("When to Use Stuart-Maxwell Test"),
+                    "</h4>\n                    <p style='margin: 0 0 10px 0;'>",
+                    jmvcore::format(.("{tag1}Ideal for matched/paired comparisons:{tag2}"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</p>\n                    <ul style='margin: 0; padding-left: 20px;'>\n                        <li>",
+                    jmvcore::format(.("{tag1}Matched data analysis{tag2} - Same subjects rated twice under different conditions"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                        <li>",
+                    jmvcore::format(.("{tag1}Pre-post comparisons{tag2} - Before and after intervention on same cases"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                        <li>",
+                    jmvcore::format(.("{tag1}Repeated measurements{tag2} - Same rater assessing cases at two time points"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                        <li>",
+                    jmvcore::format(.("{tag1}Method comparison{tag2} - Two different diagnostic methods on same specimens"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                        <li>",
+                    jmvcore::format(.("{tag1}Observer agreement{tag2} - Two observers rating same cases independently"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                        <li>",
+                    jmvcore::format(.("{tag1}Traditional choice{tag2} - Historical standard for marginal homogeneity testing"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                    </ul>\n                </div>\n\n                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>\n                    <h4 style='margin: 0 0 10px 0; color: inherit;'>",
+                    .("Stuart-Maxwell vs. Related Tests"),
+                    "</h4>\n                    <table style='width: 100%; border-collapse: collapse;'>\n                        <tr style='background-color: rgba(88, 88, 88, 0.06); color: inherit;'>\n                            <th style='padding: 8px; text-align: left; border-bottom: 2px solid #333;'>",
+                    .("Test"),
+                    "</th>\n                            <th style='padding: 8px; text-align: left; border-bottom: 2px solid #333;'>",
+                    .("Categories"),
+                    "</th>\n                            <th style='padding: 8px; text-align: left; border-bottom: 2px solid #333;'>",
+                    .("Characteristics"),
+                    "</th>\n                        </tr>\n                        <tr>\n                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>",
+                    jmvcore::format(.("{tag1}McNemar{tag2}"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</td>\n                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>2</td>\n                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>",
+                    .("Classic test for binary paired data"),
+                    "</td>\n                        </tr>\n                        <tr>\n                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>",
+                    jmvcore::format(.("{tag1}Stuart-Maxwell{tag2}"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</td>\n                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>",
+                    jmvcore::format(.("{tag1}2"), tag1 = "&gt;"),
+                    "</td>\n                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>",
+                    .("Traditional choice, well-established"),
+                    "</td>\n                        </tr>\n                        <tr>\n                            <td style='padding: 8px;'>",
+                    jmvcore::format(.("{tag1}Bhapkar{tag2}"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</td>\n                            <td style='padding: 8px;'>",
+                    jmvcore::format(.("{tag1}2"), tag1 = "&gt;"),
+                    "</td>\n                            <td style='padding: 8px;'>",
+                    .("SM / (1 - SM/n): never smaller than Stuart-Maxwell, so more liberal"),
+                    "</td>\n                        </tr>\n                    </table>\n                    <p style='margin: 10px 0 0 0; font-size: 13px;'>",
+                    paste0("\n                        ", jmvcore::format(.("{tag1}Note:{tag2} Stuart-Maxwell and Bhapkar are asymptotically equivalent and give similar\n                        results with large samples. Bhapkar's statistic is SM / (1 - SM/n), so it is never smaller and its p-value\n                        never larger: it is the more liberal test, not the more accurate one. Choose one before\n                        seeing the data."), tag1 = "<strong>", tag2 = "</strong>"), "\n                    "),
+                    "</p>\n                </div>\n\n                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>\n                    <h4 style='margin: 0 0 10px 0; color: inherit;'>",
+                    .("Clinical Pathology Use Cases"),
+                    "</h4>\n\n                    <p style='margin: 0 0 10px 0; font-weight: bold;'>",
+                    .("1. Post-Training Diagnostic Recalibration (Breast Pathology):"),
+                    "</p>\n                    <ul style='margin: 0 0 15px 0; padding-left: 20px; line-height: 1.6;'>\n                        <li>",
+                    jmvcore::format(.("{tag1}Scenario:{tag2} Pathologist re-evaluates 80 breast cases after HER2 scoring workshop"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                        <li>",
+                    jmvcore::format(.("{tag1}Categories:{tag2} Benign, atypical, DCIS, invasive carcinoma"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                        <li>",
+                    jmvcore::format(.("{tag1}Original grading:{tag2} 35% benign, 25% atypical, 20% DCIS, 20% invasive"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                        <li>",
+                    jmvcore::format(.("{tag1}Post-training:{tag2} 30% benign, 20% atypical, 25% DCIS, 25% invasive"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                        <li>",
+                    jmvcore::format(.("{tag1}Stuart-Maxwell p = 0.04:{tag2} Significant shift toward more aggressive diagnoses"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                        <li>",
+                    jmvcore::format(.("{tag1}What p = 0.04 shows:{tag2} the reader's category totals moved between the two readings by more than chance. A shift in totals is not by itself a shift toward the correct diagnosis, and with a single uncontrolled before-and-after reading the test cannot separate the workshop from practice or recall of the cases"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                    </ul>\n\n                    <p style='margin: 0 0 10px 0; font-weight: bold;'>",
+                    .("2. Digital vs. Glass Slide Diagnosis (Method Comparison):"),
+                    "</p>\n                    <ul style='margin: 0 0 15px 0; padding-left: 20px; line-height: 1.6;'>\n                        <li>",
+                    jmvcore::format(.("{tag1}Scenario:{tag2} Same pathologist diagnoses 100 skin biopsies using whole slide imaging vs. traditional microscopy"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                        <li>",
+                    jmvcore::format(.("{tag1}Categories:{tag2} Normal, dysplastic nevus, melanoma in-situ, invasive melanoma"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                        <li>",
+                    jmvcore::format(.("{tag1}Concern:{tag2} Digital platform may alter diagnostic behavior"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                        <li>",
+                    jmvcore::format(.("{tag1}Stuart-Maxwell test:{tag2} Detects if marginal distributions differ between modalities"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                        <li>",
+                    jmvcore::format(.("{tag1}p = 0.68:{tag2} No shift in category usage was detected between digital and glass"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                        <li>",
+                    jmvcore::format(.("{tag1}What that does and does not show:{tag2} Marginal homogeneity is the null hypothesis, so failing to reject it does not demonstrate equivalence. The test also compares category totals only and is blind to case-level disagreement, so pair it with a case-level agreement statistic and a prespecified concordance margin before drawing any validation conclusion"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                    </ul>\n\n                    <p style='margin: 0 0 10px 0; font-weight: bold;'>",
+                    .("3. Temporal Stability Assessment (Intra-Rater Reliability):"),
+                    "</p>\n                    <ul style='margin: 0 0 15px 0; padding-left: 20px; line-height: 1.6;'>\n                        <li>",
+                    jmvcore::format(.("{tag1}Scenario:{tag2} Gynecologic pathologist re-scores 60 endometrial biopsies 6 months later (blinded)"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                        <li>",
+                    jmvcore::format(.("{tag1}Categories:{tag2} Proliferative, hyperplasia without atypia, atypical hyperplasia, carcinoma"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                        <li>",
+                    jmvcore::format(.("{tag1}Quality control:{tag2} Assess consistency of diagnostic criteria over time"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                        <li>",
+                    jmvcore::format(.("{tag1}Stuart-Maxwell test:{tag2} Tests if marginal distributions are stable"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                        <li>",
+                    jmvcore::format(.("{tag1}p = 0.89:{tag2} No drift in category usage was detected between the two readings"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                        <li>",
+                    jmvcore::format(.("{tag1}QA implication:{tag2} A null result is not evidence that thresholds are stable - with 60 cases only a large shift would have been detected, and the test compares category totals rather than case-level consistency"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                    </ul>\n\n                    <p style='margin: 0 0 10px 0; font-weight: bold;'>",
+                    .("4. Stain Protocol Optimization (Immunohistochemistry):"),
+                    "</p>\n                    <ul style='margin: 0 0 15px 0; padding-left: 20px; line-height: 1.6;'>\n                        <li>",
+                    jmvcore::format(.("{tag1}Scenario:{tag2} Compare standard vs. optimized Ki-67 staining protocol on same cases"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                        <li>",
+                    jmvcore::format(.("{tag1}Categories:{tag2} Low (<10%), intermediate (10-30%), high (30-50%), very high (>50%)"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                        <li>",
+                    jmvcore::format(.("{tag1}Same observer:{tag2} Scores 70 breast cancer cases with both protocols"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                        <li>",
+                    jmvcore::format(.("{tag1}Stuart-Maxwell test:{tag2} Detects if new protocol shifts scoring distribution"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                        <li>",
+                    jmvcore::format(.("{tag1}p = 0.02:{tag2} Optimized protocol yields more {tag3}high{tag4} and {tag5}very high{tag6} scores"), tag1 = "<strong>", tag2 = "</strong>", tag3 = "&quot;", tag4 = "&quot;", tag5 = "&quot;", tag6 = "&quot;"),
+                    "</li>\n                        <li>",
+                    jmvcore::format(.("{tag1}Technical decision:{tag2} Enhanced sensitivity requires recalibration of clinical cutoffs"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                    </ul>\n\n                    <p style='margin: 0 0 10px 0; font-weight: bold;'>",
+                    .("5. Diagnostic Criteria Update Impact (Prostate Pathology):"),
+                    "</p>\n                    <ul style='margin: 0; padding-left: 20px; line-height: 1.6;'>\n                        <li>",
+                    jmvcore::format(.("{tag1}Scenario:{tag2} GU pathologist applies 2014 vs. 2019 WHO criteria to 90 prostate biopsies"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                        <li>",
+                    jmvcore::format(.("{tag1}Categories:{tag2} Benign, HGPIN, Gleason 6, Gleason 7, Gleason 8-10"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                        <li>",
+                    jmvcore::format(.("{tag1}Context:{tag2} 2019 criteria refined cribriform pattern and intraductal carcinoma definitions"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                        <li>",
+                    jmvcore::format(.("{tag1}Stuart-Maxwell test:{tag2} Quantifies impact of criteria change on diagnostic distribution"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                        <li>",
+                    jmvcore::format(.("{tag1}p = 0.001:{tag2} 2019 criteria yield significantly more Gleason 7 and fewer Gleason 6 diagnoses"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                        <li>",
+                    jmvcore::format(.("{tag1}What p = 0.001 shows:{tag2} the two criteria sets produce different category totals on the same 90 biopsies by more than chance. The test compares totals, not individual cases, so it does not report how many biopsies changed category or in which direction any single one moved - the contingency table in this analysis shows that"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                    </ul>\n                </div>\n\n                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>\n                    <h4 style='margin: 0 0 10px 0; color: inherit;'>",
+                    .("Interpretation"),
+                    "</h4>\n                    <table style='width: 100%; border-collapse: collapse; font-size: 14px;'>\n                        <tr>\n                            <td style='padding: 5px; font-weight: bold; border-bottom: 1px solid #ddd;'>",
+                    .("p >= 0.05"),
+                    "</td>\n                            <td style='padding: 5px; border-bottom: 1px solid #ddd;'>",
+                    .("No significant departure from marginal homogeneity detected (this does not establish that the marginals are equal)"),
+                    "</td>\n                        </tr>\n                        <tr>\n                            <td style='padding: 5px; font-weight: bold; border-bottom: 1px solid #ddd;'>",
+                    jmvcore::format(.("p {tag1} 0.05"), tag1 = "&lt;"),
+                    "</td>\n                            <td style='padding: 5px; border-bottom: 1px solid #ddd;'>",
+                    .("Significant marginal heterogeneity detected"),
+                    "</td>\n                        </tr>\n                        <tr>\n                            <td style='padding: 5px; font-weight: bold;'>",
+                    jmvcore::format(.("p {tag1} 0.01"), tag1 = "&lt;"),
+                    "</td>\n                            <td style='padding: 5px;'>",
+                    .("Strong evidence - systematic shift in category usage"),
+                    "</td>\n                        </tr>\n                    </table>\n                    <p style='margin: 10px 0 0 0; font-size: 13px;'>",
+                    paste0("\n                        ", jmvcore::format(.("{tag1}Important:{tag2} Significant test indicates {tag3}systematic change{tag4} in category usage\n                        but does not necessarily mean {tag5}poor agreement{tag6}. Use alongside Cohen's kappa or correlation\n                        to assess overall consistency."), tag1 = "<strong>", tag2 = "</strong>", tag3 = "<em>", tag4 = "</em>", tag5 = "<em>", tag6 = "</em>"), "\n                    "),
+                    "</p>\n                </div>\n\n                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>\n                    <h4 style='margin: 0 0 10px 0; color: inherit;'>",
+                    .("Assumptions and Requirements"),
+                    "</h4>\n                    <ul style='margin: 0; padding-left: 20px; font-size: 13px;'>\n                        <li>",
+                    jmvcore::format(.("{tag1}Paired/matched data:{tag2} Same subjects rated twice or same cases by two raters"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                        <li>",
+                    jmvcore::format(.("{tag1}Two raters only:{tag2} Designed for comparing exactly 2 sets of ratings"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                        <li>",
+                    jmvcore::format(.("{tag1}Multiple categories ({tag2}2):{tag3} Use McNemar for 2{tag4}2 tables"), tag1 = "<strong>", tag2 = "&gt;", tag3 = "</strong>", tag4 = "&#xD7;"),
+                    "</li>\n                        <li>",
+                    jmvcore::format(.("{tag1}Categorical data:{tag2} Works with nominal or ordinal categories"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                        <li>",
+                    jmvcore::format(.("{tag1}Sample size:{tag2} More reliable with n {tag3} 30"), tag1 = "<strong>", tag2 = "</strong>", tag3 = "&gt;"),
+                    "</li>\n                        <li>",
+                    jmvcore::format(.("{tag1}Complete pairs:{tag2} Cases with missing data are excluded"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                    </ul>\n                </div>\n\n                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; color: inherit;'>\n                    <h4 style='margin: 0 0 10px 0; color: inherit;'>",
+                    .("Use Together With"),
+                    "</h4>\n                    <p style='margin: 0; font-size: 13px;'>",
+                    paste0("\n                        ", jmvcore::format(.("{tag1}Complementary analyses:{tag2}"), tag1 = "<strong>", tag2 = "</strong>")),
+                    "<br><br>",
+                    paste0("\n\n                         ", jmvcore::format(.("{tag1}Cohen's Kappa:{tag2} Measures agreement (Stuart-Maxwell tests marginal distributions)"), tag1 = "<strong>", tag2 = "</strong>")),
+                    "<br>",
+                    paste0("\n                         ", jmvcore::format(.("{tag1}Contingency table:{tag2} Shows exact disagreement patterns cell-by-cell"), tag1 = "<strong>", tag2 = "</strong>")),
+                    "<br>",
+                    paste0("\n                         ", jmvcore::format(.("{tag1}McNemar-Bowker:{tag2} Provides cell-by-cell symmetry test"), tag1 = "<strong>", tag2 = "</strong>")),
+                    "<br>",
+                    paste0("\n                         ", jmvcore::format(.("{tag1}Marginal frequency comparison:{tag2} Identifies which categories differ most"), tag1 = "<strong>", tag2 = "</strong>")),
+                    "<br><br>",
+                    paste0("\n\n                        ", jmvcore::format(.("{tag1}Ideal outcome:{tag2} High kappa (good agreement) + Non-significant Stuart-Maxwell\n                        (no systematic bias in category usage)"), tag1 = "<strong>", tag2 = "</strong>"), "\n                    "),
+                    "</p>\n                </div>\n\n                <div style='margin-top: 15px; padding: 10px; background-color: rgba(88, 88, 88, 0.06); border-radius: 4px; color: inherit;'>\n                    <p style='margin: 0; font-size: 12px; color: inherit;'>",
+                    paste0("\n                        ", jmvcore::format(.("{tag1}References:{tag2}"), tag1 = "<strong>", tag2 = "</strong>")),
+                    "<br>",
+                    paste0("\n                        ", jmvcore::format(.("Stuart, A. A. (1955). A test for homogeneity of the marginal distributions in a two-way\n                        classification. {tag1}Biometrika{tag2}, 42, 412-416."), tag1 = "<em>", tag2 = "</em>")),
+                    "<br>",
+                    paste0("\n                        ", jmvcore::format(.("Maxwell, A. E. (1970). Comparing the classification of subjects by two independent judges.\n                        {tag1}British Journal of Psychiatry{tag2}, 116, 651-655."), tag1 = "<em>", tag2 = "</em>"), "\n                    "),
+                    "</p>\n                </div>\n            </div>\n            "
+                )
 
                 self$results$stuartMaxwellExplanation$setContent(html_content)
             },
@@ -8663,127 +9326,137 @@ agreementClass <- if (requireNamespace("jmvcore")) {
             .populatePairwiseKappaExplanation = function() {
                 # Provide educational content about Pairwise Kappa Analysis
 
-                html_content <- "
-            <div style='font-family: Arial, sans-serif; max-width: 800px; line-height: 1.6;'>
-                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>
-                    <h3 style='margin: 0 0 10px 0; color: inherit;'>What is Pairwise Kappa Analysis?</h3>
-                    <p style='margin: 0; color: inherit;'>
-                        Pairwise Kappa Analysis compares <strong>each rater individually</strong> against a
-                        <strong>reference rater</strong> (gold standard, consensus, or senior expert).
-                        Each comparison produces a separate Cohen's kappa measuring agreement between that
-                        rater and the reference.
-                    </p>
-                </div>
-
-                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>
-                    <h4 style='margin: 0 0 10px 0; color: inherit;'>When to Use Pairwise Analysis</h4>
-                    <p style='margin: 0 0 10px 0;'><strong>Essential for:</strong></p>
-                    <ul style='margin: 0; padding-left: 20px;'>
-                        <li><strong>Training assessment</strong> - Compare trainees vs expert to measure learning progress</li>
-                        <li><strong>Rater certification</strong> - Verify raters meet minimum kappa threshold vs gold standard</li>
-                        <li><strong>Performance monitoring</strong> - Track individual rater agreement with reference over time</li>
-                        <li><strong>Quality control</strong> - Identify specific raters who need retraining</li>
-                        <li><strong>Competency evaluation</strong> - Rank raters by performance for advancement decisions</li>
-                    </ul>
-                </div>
-
-                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>
-                    <h4 style='margin: 0 0 10px 0; color: inherit;'>Interpreting Kappa Values</h4>
-                    <table style='width: 100%; border-collapse: collapse;'>
-                        <tr style='background-color: rgba(88, 88, 88, 0.06); color: inherit;'>
-                            <th style='padding: 8px; text-align: left; border-bottom: 2px solid #333;'>Kappa</th>
-                            <th style='padding: 8px; text-align: left; border-bottom: 2px solid #333;'>Agreement Level</th>
-                            <th style='padding: 8px; text-align: left; border-bottom: 2px solid #333;'>What the value says about this rater</th>
-                        </tr>
-<tr><td style='padding: 8px; border-bottom: 1px solid #ddd;'><strong>&#x3BA; &lt; 0.00</strong></td><td style='padding: 8px; border-bottom: 1px solid #ddd;'>Worse than chance</td><td style='padding: 8px; border-bottom: 1px solid #ddd;'>Grades land on the reference category LESS often than chance alone would produce; check for a reversed or mismapped category</td></tr>
-<tr><td style='padding: 8px; border-bottom: 1px solid #ddd;'><strong>0.00 to &lt; 0.20</strong></td><td style='padding: 8px; border-bottom: 1px solid #ddd;'>Slight</td><td style='padding: 8px; border-bottom: 1px solid #ddd;'>Barely better than chance; this rater and the reference are not measuring the same thing</td></tr>
-<tr><td style='padding: 8px; border-bottom: 1px solid #ddd;'><strong>0.20 to &lt; 0.40</strong></td><td style='padding: 8px; border-bottom: 1px solid #ddd;'>Fair</td><td style='padding: 8px; border-bottom: 1px solid #ddd;'>Better than chance, but disagreement with the reference is the common case</td></tr>
-<tr><td style='padding: 8px; border-bottom: 1px solid #ddd;'><strong>0.40 to &lt; 0.60</strong></td><td style='padding: 8px; border-bottom: 1px solid #ddd;'>Moderate</td><td style='padding: 8px; border-bottom: 1px solid #ddd;'>Clearly better than chance, but disagreement with the reference is still frequent</td></tr>
-<tr><td style='padding: 8px; border-bottom: 1px solid #ddd;'><strong>0.60 to &lt; 0.80</strong></td><td style='padding: 8px; border-bottom: 1px solid #ddd;'>Substantial</td><td style='padding: 8px; border-bottom: 1px solid #ddd;'>Grades track the reference well beyond chance; disagreements concentrate on a minority of cases</td></tr>
-<tr><td style='padding: 8px;'><strong>&#x3BA; 0.80 to 1.00</strong></td><td style='padding: 8px;'>Almost perfect</td><td style='padding: 8px;'>Close alignment with the reference rater on this case set; no training gap is indicated by this comparison</td></tr>
-                    </table>
-                </div>
-
-                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>
-                    <h4 style='margin: 0 0 10px 0; color: inherit;'>Choosing the Reference Rater</h4>
-                    <table style='width: 100%; border-collapse: collapse; font-size: 13px;'>
-                        <tr style='background-color: rgba(88, 88, 88, 0.06); color: inherit;'>
-                            <th style='padding: 8px; text-align: left; border-bottom: 2px solid #333;'>Reference Type</th>
-                            <th style='padding: 8px; text-align: left; border-bottom: 2px solid #333;'>Use Case</th>
-                        </tr>
-                        <tr>
-                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'><strong>Gold Standard</strong></td>
-                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>Verified diagnosis (biopsy, surgery, outcome data)</td>
-                        </tr>
-                        <tr>
-                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'><strong>Consensus Score</strong></td>
-                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>Modal rating from expert panel (create using Consensus Variable)</td>
-                        </tr>
-                        <tr>
-                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'><strong>Senior Expert</strong></td>
-                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>Most experienced pathologist/clinician</td>
-                        </tr>
-                        <tr>
-                            <td style='padding: 8px;'><strong>External Reviewer</strong></td>
-                            <td style='padding: 8px;'>Independent expert from another institution</td>
-                        </tr>
-                    </table>
-                </div>
-
-                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>
-                    <h4 style='margin: 0 0 10px 0; color: inherit;'>Clinical Example: Trainee Certification</h4>
-                    <p style='margin: 0; padding: 10px; background-color: rgba(155, 155, 155, 0.06); color: inherit; border-radius: 4px; font-size: 13px;'>
-                        <strong>Scenario:</strong> Five pathology residents (Raters 1-5) grade 100 tumor samples.
-                        A senior pathologist provides reference diagnoses.<br><br>
-                        <strong>Results:</strong><br>
-                        &#x2022; Resident 1: &#x3BA; = 0.82 - almost perfect agreement with the reference grades<br>
-                        &#x2022; Resident 2: &#x3BA; = 0.68 - substantial agreement<br>
-                        &#x2022; Resident 3: &#x3BA; = 0.52 - moderate agreement<br>
-                        &#x2022; Resident 4: &#x3BA; = 0.45 - moderate agreement<br>
-                        &#x2022; Resident 5: &#x3BA; = 0.28 - fair agreement, only a little above what chance alone
-                        would produce<br><br>
-                        <strong>What each number is:</strong> how far that resident's grades exceed chance agreement with
-                        one senior pathologist's grades on the same 100 cases. It is agreement with a particular reader, not
-                        a measure of diagnostic ability, and it absorbs any error in the reference grades themselves - a
-                        resident who is right where the senior reader is wrong scores lower, not higher.<br><br>
-                        <strong>Caveat:</strong> these are point estimates from 100 cases against a single reference rater
-                        whose own reliability is unknown. This analysis computes no confidence intervals for the Pairwise
-                        Kappa table, so how much of the gap between adjacent residents is sampling variation cannot be read
-                        off these numbers, and the ordering is not a precise ranking.
-                    </p>
-                </div>
-
-                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>
-                    <h4 style='margin: 0 0 10px 0; color: inherit;'>Ranking Raters</h4>
-                    <p style='margin: 0; font-size: 13px;'>
-                        When <strong>Rank Raters by Performance</strong> is enabled, raters are sorted from highest
-                        to lowest kappa. This identifies:<br><br>
-                         <strong>Top performers:</strong> Candidates for senior roles, teaching positions, or gold standard rating<br>
-                         <strong>Middle performers:</strong> Acceptable but could benefit from continued training<br>
-                         <strong>Low performers:</strong> Require immediate intervention or exclusion from study
-                    </p>
-                </div>
-
-                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; color: inherit;'>
-                    <h4 style='margin: 0 0 10px 0; color: inherit;'>Pairwise vs Overall Agreement</h4>
-                    <p style='margin: 0; font-size: 13px;'>
-                        <strong>Pairwise Kappa (vs Reference):</strong> Measures each rater's agreement with gold standard<br>
-                        &#x2192; <em>Focus: Individual performance assessment</em><br><br>
-                        <strong>Fleiss'/Light's Kappa:</strong> Measures overall agreement among all raters<br>
-                        &#x2192; <em>Focus: General reliability of rating system</em><br><br>
-                        <strong>Recommendation:</strong> Use both! Overall kappa shows if your rating system is reliable.
-                        Pairwise kappa identifies which specific raters need training.
-                    </p>
-                </div>
-
-                <div style='margin-top: 15px; padding: 10px; background-color: rgba(88, 88, 88, 0.06); border-radius: 4px; color: inherit;'>
-                    <p style='margin: 0; font-size: 12px; color: inherit;'>
-                        <strong>Reference:</strong> Cohen, J. (1960). A coefficient of agreement for nominal scales.
-                        <em>Educational and Psychological Measurement</em>, 20(1), 37-46.
-                    </p>
-                </div>
-            </div>
-            "
+                html_content <- paste0(
+                    "\n            <div style='font-family: Arial, sans-serif; max-width: 800px; line-height: 1.6;'>\n                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>\n                    <h3 style='margin: 0 0 10px 0; color: inherit;'>",
+                    .("What is Pairwise Kappa Analysis?"),
+                    "</h3>\n                    <p style='margin: 0; color: inherit;'>",
+                    paste0("\n                        ", jmvcore::format(.("Pairwise Kappa Analysis compares {tag1}each rater individually{tag2} against a\n                        {tag3}reference rater{tag4} (gold standard, consensus, or senior expert).\n                        Each comparison produces a separate Cohen's kappa measuring agreement between that\n                        rater and the reference."), tag1 = "<strong>", tag2 = "</strong>", tag3 = "<strong>", tag4 = "</strong>"), "\n                    "),
+                    "</p>\n                </div>\n\n                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>\n                    <h4 style='margin: 0 0 10px 0; color: inherit;'>",
+                    .("When to Use Pairwise Analysis"),
+                    "</h4>\n                    <p style='margin: 0 0 10px 0;'>",
+                    jmvcore::format(.("{tag1}Essential for:{tag2}"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</p>\n                    <ul style='margin: 0; padding-left: 20px;'>\n                        <li>",
+                    jmvcore::format(.("{tag1}Training assessment{tag2} - Compare trainees vs expert to measure learning progress"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                        <li>",
+                    jmvcore::format(.("{tag1}Rater certification{tag2} - Verify raters meet minimum kappa threshold vs gold standard"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                        <li>",
+                    jmvcore::format(.("{tag1}Performance monitoring{tag2} - Track individual rater agreement with reference over time"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                        <li>",
+                    jmvcore::format(.("{tag1}Quality control{tag2} - Identify specific raters who need retraining"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                        <li>",
+                    jmvcore::format(.("{tag1}Competency evaluation{tag2} - Rank raters by performance for advancement decisions"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                    </ul>\n                </div>\n\n                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>\n                    <h4 style='margin: 0 0 10px 0; color: inherit;'>",
+                    .("Interpreting Kappa Values"),
+                    "</h4>\n                    <table style='width: 100%; border-collapse: collapse;'>\n                        <tr style='background-color: rgba(88, 88, 88, 0.06); color: inherit;'>\n                            <th style='padding: 8px; text-align: left; border-bottom: 2px solid #333;'>",
+                    .("Kappa"),
+                    "</th>\n                            <th style='padding: 8px; text-align: left; border-bottom: 2px solid #333;'>",
+                    .("Agreement Level"),
+                    "</th>\n                            <th style='padding: 8px; text-align: left; border-bottom: 2px solid #333;'>",
+                    .("What the value says about this rater"),
+                    "</th>\n                        </tr>\n<tr><td style='padding: 8px; border-bottom: 1px solid #ddd;'>",
+                    jmvcore::format(.("{tag1}{tag2} {tag3} 0.00{tag4}"), tag1 = "<strong>", tag2 = "&#x3BA;", tag3 = "&lt;", tag4 = "</strong>"),
+                    "</td><td style='padding: 8px; border-bottom: 1px solid #ddd;'>",
+                    .("Worse than chance"),
+                    "</td><td style='padding: 8px; border-bottom: 1px solid #ddd;'>",
+                    .("Grades land on the reference category LESS often than chance alone would produce; check for a reversed or mismapped category"),
+                    "</td></tr>\n<tr><td style='padding: 8px; border-bottom: 1px solid #ddd;'>",
+                    jmvcore::format(.("{tag1}0.00 to {tag2} 0.20{tag3}"), tag1 = "<strong>", tag2 = "&lt;", tag3 = "</strong>"),
+                    "</td><td style='padding: 8px; border-bottom: 1px solid #ddd;'>",
+                    .("Slight"),
+                    "</td><td style='padding: 8px; border-bottom: 1px solid #ddd;'>",
+                    .("Barely better than chance; this rater and the reference are not measuring the same thing"),
+                    "</td></tr>\n<tr><td style='padding: 8px; border-bottom: 1px solid #ddd;'>",
+                    jmvcore::format(.("{tag1}0.20 to {tag2} 0.40{tag3}"), tag1 = "<strong>", tag2 = "&lt;", tag3 = "</strong>"),
+                    "</td><td style='padding: 8px; border-bottom: 1px solid #ddd;'>",
+                    .("Fair"),
+                    "</td><td style='padding: 8px; border-bottom: 1px solid #ddd;'>",
+                    .("Better than chance, but disagreement with the reference is the common case"),
+                    "</td></tr>\n<tr><td style='padding: 8px; border-bottom: 1px solid #ddd;'>",
+                    jmvcore::format(.("{tag1}0.40 to {tag2} 0.60{tag3}"), tag1 = "<strong>", tag2 = "&lt;", tag3 = "</strong>"),
+                    "</td><td style='padding: 8px; border-bottom: 1px solid #ddd;'>",
+                    .("Moderate"),
+                    "</td><td style='padding: 8px; border-bottom: 1px solid #ddd;'>",
+                    .("Clearly better than chance, but disagreement with the reference is still frequent"),
+                    "</td></tr>\n<tr><td style='padding: 8px; border-bottom: 1px solid #ddd;'>",
+                    jmvcore::format(.("{tag1}0.60 to {tag2} 0.80{tag3}"), tag1 = "<strong>", tag2 = "&lt;", tag3 = "</strong>"),
+                    "</td><td style='padding: 8px; border-bottom: 1px solid #ddd;'>",
+                    .("Substantial"),
+                    "</td><td style='padding: 8px; border-bottom: 1px solid #ddd;'>",
+                    .("Grades track the reference well beyond chance; disagreements concentrate on a minority of cases"),
+                    "</td></tr>\n<tr><td style='padding: 8px;'>",
+                    jmvcore::format(.("{tag1}{tag2} 0.80 to 1.00{tag3}"), tag1 = "<strong>", tag2 = "&#x3BA;", tag3 = "</strong>"),
+                    "</td><td style='padding: 8px;'>",
+                    .("Almost perfect"),
+                    "</td><td style='padding: 8px;'>",
+                    .("Close alignment with the reference rater on this case set; no training gap is indicated by this comparison"),
+                    "</td></tr>\n                    </table>\n                </div>\n\n                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>\n                    <h4 style='margin: 0 0 10px 0; color: inherit;'>",
+                    .("Choosing the Reference Rater"),
+                    "</h4>\n                    <table style='width: 100%; border-collapse: collapse; font-size: 13px;'>\n                        <tr style='background-color: rgba(88, 88, 88, 0.06); color: inherit;'>\n                            <th style='padding: 8px; text-align: left; border-bottom: 2px solid #333;'>",
+                    .("Reference Type"),
+                    "</th>\n                            <th style='padding: 8px; text-align: left; border-bottom: 2px solid #333;'>",
+                    .("Use Case"),
+                    "</th>\n                        </tr>\n                        <tr>\n                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>",
+                    jmvcore::format(.("{tag1}Gold Standard{tag2}"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</td>\n                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>",
+                    .("Verified diagnosis (biopsy, surgery, outcome data)"),
+                    "</td>\n                        </tr>\n                        <tr>\n                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>",
+                    jmvcore::format(.("{tag1}Consensus Score{tag2}"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</td>\n                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>",
+                    .("Modal rating from expert panel (create using Consensus Variable)"),
+                    "</td>\n                        </tr>\n                        <tr>\n                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>",
+                    jmvcore::format(.("{tag1}Senior Expert{tag2}"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</td>\n                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>",
+                    .("Most experienced pathologist/clinician"),
+                    "</td>\n                        </tr>\n                        <tr>\n                            <td style='padding: 8px;'>",
+                    jmvcore::format(.("{tag1}External Reviewer{tag2}"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</td>\n                            <td style='padding: 8px;'>",
+                    .("Independent expert from another institution"),
+                    "</td>\n                        </tr>\n                    </table>\n                </div>\n\n                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>\n                    <h4 style='margin: 0 0 10px 0; color: inherit;'>",
+                    .("Clinical Example: Trainee Certification"),
+                    "</h4>\n                    <p style='margin: 0; padding: 10px; background-color: rgba(155, 155, 155, 0.06); color: inherit; border-radius: 4px; font-size: 13px;'>",
+                    paste0("\n                        ", jmvcore::format(.("{tag1}Scenario:{tag2} Five pathology residents (Raters 1-5) grade 100 tumor samples.\n                        A senior pathologist provides reference diagnoses."), tag1 = "<strong>", tag2 = "</strong>")),
+                    "<br><br>",
+                    paste0("\n                        ", jmvcore::format(.("{tag1}Results:{tag2}"), tag1 = "<strong>", tag2 = "</strong>")),
+                    "<br>",
+                    paste0("\n                        ", jmvcore::format(.("{tag1} Resident 1: {tag2} = 0.82 - almost perfect agreement with the reference grades"), tag1 = "&#x2022;", tag2 = "&#x3BA;")),
+                    "<br>",
+                    paste0("\n                        ", jmvcore::format(.("{tag1} Resident 2: {tag2} = 0.68 - substantial agreement"), tag1 = "&#x2022;", tag2 = "&#x3BA;")),
+                    "<br>",
+                    paste0("\n                        ", jmvcore::format(.("{tag1} Resident 3: {tag2} = 0.52 - moderate agreement"), tag1 = "&#x2022;", tag2 = "&#x3BA;")),
+                    "<br>",
+                    paste0("\n                        ", jmvcore::format(.("{tag1} Resident 4: {tag2} = 0.45 - moderate agreement"), tag1 = "&#x2022;", tag2 = "&#x3BA;")),
+                    "<br>",
+                    paste0("\n                        ", jmvcore::format(.("{tag1} Resident 5: {tag2} = 0.28 - fair agreement, only a little above what chance alone\n                        would produce"), tag1 = "&#x2022;", tag2 = "&#x3BA;")),
+                    "<br><br>",
+                    paste0("\n                        ", jmvcore::format(.("{tag1}What each number is:{tag2} how far that resident's grades exceed chance agreement with\n                        one senior pathologist's grades on the same 100 cases. It is agreement with a particular reader, not\n                        a measure of diagnostic ability, and it absorbs any error in the reference grades themselves - a\n                        resident who is right where the senior reader is wrong scores lower, not higher."), tag1 = "<strong>", tag2 = "</strong>")),
+                    "<br><br>",
+                    paste0("\n                        ", jmvcore::format(.("{tag1}Caveat:{tag2} these are point estimates from 100 cases against a single reference rater\n                        whose own reliability is unknown. This analysis computes no confidence intervals for the Pairwise\n                        Kappa table, so how much of the gap between adjacent residents is sampling variation cannot be read\n                        off these numbers, and the ordering is not a precise ranking."), tag1 = "<strong>", tag2 = "</strong>"), "\n                    "),
+                    "</p>\n                </div>\n\n                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>\n                    <h4 style='margin: 0 0 10px 0; color: inherit;'>",
+                    .("Ranking Raters"),
+                    "</h4>\n                    <p style='margin: 0; font-size: 13px;'>",
+                    paste0("\n                        ", jmvcore::format(.("When {tag1}Rank Raters by Performance{tag2} is enabled, raters are sorted from highest\n                        to lowest kappa. This identifies:"), tag1 = "<strong>", tag2 = "</strong>")),
+                    "<br><br>",
+                    paste0("\n                         ", jmvcore::format(.("{tag1}Top performers:{tag2} Candidates for senior roles, teaching positions, or gold standard rating"), tag1 = "<strong>", tag2 = "</strong>")),
+                    "<br>",
+                    paste0("\n                         ", jmvcore::format(.("{tag1}Middle performers:{tag2} Acceptable but could benefit from continued training"), tag1 = "<strong>", tag2 = "</strong>")),
+                    "<br>",
+                    paste0("\n                         ", jmvcore::format(.("{tag1}Low performers:{tag2} Require immediate intervention or exclusion from study"), tag1 = "<strong>", tag2 = "</strong>"), "\n                    "),
+                    "</p>\n                </div>\n\n                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; color: inherit;'>\n                    <h4 style='margin: 0 0 10px 0; color: inherit;'>",
+                    .("Pairwise vs Overall Agreement"),
+                    "</h4>\n                    <p style='margin: 0; font-size: 13px;'>",
+                    paste0("\n                        ", jmvcore::format(.("{tag1}Pairwise Kappa (vs Reference):{tag2} Measures each rater's agreement with gold standard"), tag1 = "<strong>", tag2 = "</strong>")),
+                    "<br>",
+                    paste0("\n                        ", jmvcore::format(.("{tag1} {tag2}Focus: Individual performance assessment{tag3}"), tag1 = "&#x2192;", tag2 = "<em>", tag3 = "</em>")),
+                    "<br><br>",
+                    paste0("\n                        ", jmvcore::format(.("{tag1}Fleiss'/Light's Kappa:{tag2} Measures overall agreement among all raters"), tag1 = "<strong>", tag2 = "</strong>")),
+                    "<br>",
+                    paste0("\n                        ", jmvcore::format(.("{tag1} {tag2}Focus: General reliability of rating system{tag3}"), tag1 = "&#x2192;", tag2 = "<em>", tag3 = "</em>")),
+                    "<br><br>",
+                    paste0("\n                        ", jmvcore::format(.("{tag1}Recommendation:{tag2} Use both! Overall kappa shows if your rating system is reliable.\n                        Pairwise kappa identifies which specific raters need training."), tag1 = "<strong>", tag2 = "</strong>"), "\n                    "),
+                    "</p>\n                </div>\n\n                <div style='margin-top: 15px; padding: 10px; background-color: rgba(88, 88, 88, 0.06); border-radius: 4px; color: inherit;'>\n                    <p style='margin: 0; font-size: 12px; color: inherit;'>",
+                    paste0("\n                        ", jmvcore::format(.("{tag1}Reference:{tag2} Cohen, J. (1960). A coefficient of agreement for nominal scales.\n                        {tag3}Educational and Psychological Measurement{tag4}, 20(1), 37-46."), tag1 = "<strong>", tag2 = "</strong>", tag3 = "<em>", tag4 = "</em>"), "\n                    "),
+                    "</p>\n                </div>\n            </div>\n            "
+                )
 
                 self$results$pairwiseKappaExplanation$setContent(html_content)
             },
@@ -9031,47 +9704,27 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                 }
             },
             .populateAllPairsKappaExplanation = function() {
-                html_content <- "
-            <div style='font-family: Arial, sans-serif; max-width: 800px; line-height: 1.6;'>
-                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>
-                    <h3 style='margin: 0 0 10px 0; color: inherit;'>What is the All-Pairs Kappa table?</h3>
-                    <p style='margin: 0; color: inherit;'>
-                        For studies with three or more raters, the All-Pairs table reports
-                        Cohen's kappa, observed agreement, standard error, a confidence
-                        interval at the confidence level set in the options, z, and p-value for <strong>every pair</strong> of raters
-                        (C(k,2) rows). This is the conventional supplementary table in
-                        interobserver reliability studies, complementing the single overall
-                        Fleiss kappa.
-                    </p>
-                </div>
-                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>
-                    <h4 style='margin: 0 0 10px 0; color: inherit;'>When to use it</h4>
-                    <ul style='margin: 0; padding-left: 20px;'>
-                        <li>Identifying which rater pairs disagree most (training needs)</li>
-                        <li>Reporting in agreement studies that follow Layfield et al. 2020 or Boler et al. 2022 conventions</li>
-                        <li>Detecting outlier raters whose pairwise kappas are systematically lower</li>
-                    </ul>
-                </div>
-                <div style='background-color: rgba(255, 202, 33, 0.23); border-left: 4px solid #856404; padding: 15px; margin-bottom: 20px; color: inherit;'>
-                    <h4 style='margin: 0 0 10px 0; color: inherit;'>Multiplicity caveat</h4>
-                    <p style='margin: 0; color: inherit;'>
-                        With k raters you compute C(k,2) p-values. For k=4 that is 6 tests; for
-                        k=6 it is 15. Enable a multiple-testing correction (Bonferroni, BH, or
-                        Holm) under <em>Mixed-Effects Comparison \u{2192} Multiple Testing
-                        Correction</em> to control familywise error or FDR.
-                    </p>
-                </div>
-                <p style='font-size: 0.9em; color: inherit;'>
-                    Weights for ordinal categories follow the <em>Weighted Kappa</em> option
-                    (unweighted / linear / squared). Confidence intervals use the non-null
-                    asymptotic standard error from <code>vcd::Kappa</code>, on the scale set by the
-                    kappa CI method option: symmetric Wald limits clamped to -1 and 1, or Fisher z
-                    limits transformed back. Where vcd cannot return a finite standard error the
-                    row falls back to the null-hypothesis standard error of <code>irr::kappa2</code>
-                    and a footnote says so. <em>z</em> and <em>p</em> are kappa / SE against the
-                    no-agreement null.
-                </p>
-            </div>"
+                html_content <- paste0(
+                    "\n            <div style='font-family: Arial, sans-serif; max-width: 800px; line-height: 1.6;'>\n                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>\n                    <h3 style='margin: 0 0 10px 0; color: inherit;'>",
+                    .("What is the All-Pairs Kappa table?"),
+                    "</h3>\n                    <p style='margin: 0; color: inherit;'>",
+                    paste0("\n                        ", jmvcore::format(.("For studies with three or more raters, the All-Pairs table reports\n                        Cohen's kappa, observed agreement, standard error, a confidence\n                        interval at the confidence level set in the options, z, and p-value for {tag1}every pair{tag2} of raters\n                        (C(k,2) rows). This is the conventional supplementary table in\n                        interobserver reliability studies, complementing the single overall\n                        Fleiss kappa."), tag1 = "<strong>", tag2 = "</strong>"), "\n                    "),
+                    "</p>\n                </div>\n                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>\n                    <h4 style='margin: 0 0 10px 0; color: inherit;'>",
+                    .("When to use it"),
+                    "</h4>\n                    <ul style='margin: 0; padding-left: 20px;'>\n                        <li>",
+                    .("Identifying which rater pairs disagree most (training needs)"),
+                    "</li>\n                        <li>",
+                    .("Reporting in agreement studies that follow Layfield et al. 2020 or Boler et al. 2022 conventions"),
+                    "</li>\n                        <li>",
+                    .("Detecting outlier raters whose pairwise kappas are systematically lower"),
+                    "</li>\n                    </ul>\n                </div>\n                <div style='background-color: rgba(255, 202, 33, 0.23); border-left: 4px solid #856404; padding: 15px; margin-bottom: 20px; color: inherit;'>\n                    <h4 style='margin: 0 0 10px 0; color: inherit;'>",
+                    .("Multiplicity caveat"),
+                    "</h4>\n                    <p style='margin: 0; color: inherit;'>",
+                    paste0("\n                        ", jmvcore::format(.("With k raters you compute C(k,2) p-values. For k=4 that is 6 tests; for\n                        k=6 it is 15. Enable a multiple-testing correction (Bonferroni, BH, or\n                        Holm) under {tag1}Mixed-Effects Comparison \u2192 Multiple Testing\n                        Correction{tag2} to control familywise error or FDR."), tag1 = "<em>", tag2 = "</em>"), "\n                    "),
+                    "</p>\n                </div>\n                <p style='font-size: 0.9em; color: inherit;'>",
+                    paste0("\n                    ", jmvcore::format(.("Weights for ordinal categories follow the {tag1}Weighted Kappa{tag2} option\n                    (unweighted / linear / squared). Confidence intervals use the non-null\n                    asymptotic standard error from {tag3}vcd::Kappa{tag4}, on the scale set by the\n                    kappa CI method option: symmetric Wald limits clamped to -1 and 1, or Fisher z\n                    limits transformed back. Where vcd cannot return a finite standard error the\n                    row falls back to the null-hypothesis standard error of {tag5}irr::kappa2{tag6}\n                    and a footnote says so. {tag7}z{tag8} and {tag9}p{tag10} are kappa / SE against the\n                    no-agreement null."), tag1 = "<em>", tag2 = "</em>", tag3 = "<code>", tag4 = "</code>", tag5 = "<code>", tag6 = "</code>", tag7 = "<em>", tag8 = "</em>", tag9 = "<em>", tag10 = "</em>"), "\n                "),
+                    "</p>\n            </div>"
+                )
                 self$results$allPairsKappaExplanation$setContent(html_content)
             },
 
@@ -9647,36 +10300,23 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                 }
             },
             .populateItemModalAgreementExplanation = function() {
-                html_content <- "
-            <div style='font-family: Arial, sans-serif; max-width: 800px; line-height: 1.6;'>
-                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>
-                    <h3 style='margin: 0 0 10px 0; color: inherit;'>What is item-modal-category agreement?</h3>
-                    <p style='margin: 0; color: inherit;'>
-                        For each rating category <em>c</em>, this metric reports the mean
-                        within-case agreement rate <em>across raters</em> on the cases whose
-                        modal rating is <em>c</em>. In a 4-rater study, a case all 4 raters
-                        score the same gets agreement 1.00; a 3-1 split gets 0.75; a 2-2 split
-                        has no unique mode and is excluded.
-                    </p>
-                </div>
-                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>
-                    <h4 style='margin: 0 0 10px 0; color: inherit;'>When to use it</h4>
-                    <ul style='margin: 0; padding-left: 20px;'>
-                        <li>Identifying which categories are the agreement bottleneck (e.g., YSRB Category IV 'suspicious' in breast cytology)</li>
-                        <li>Reporting per-category agreement alongside an overall Fleiss kappa</li>
-                        <li>Quality assurance: where should category-specific training focus?</li>
-                    </ul>
-                </div>
-                <p style='font-size: 0.9em; color: inherit;'>
-                    Cases with no unique mode (ties) are excluded and reported in a footnote.
-                    Confidence intervals are normal-approximation Wald intervals on the
-                    case-level mean agreement, bounded to the range 0 to 1, at the confidence level
-                    set in the options. No interval is shown for a category whose cases
-                    carry no spread in their within-case agreement rate (one case, or
-                    several cases that all agree to the same degree): the standard error
-                    would be zero and the interval would claim perfect precision.
-                </p>
-            </div>"
+                html_content <- paste0(
+                    "\n            <div style='font-family: Arial, sans-serif; max-width: 800px; line-height: 1.6;'>\n                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>\n                    <h3 style='margin: 0 0 10px 0; color: inherit;'>",
+                    .("What is item-modal-category agreement?"),
+                    "</h3>\n                    <p style='margin: 0; color: inherit;'>",
+                    paste0("\n                        ", jmvcore::format(.("For each rating category {tag1}c{tag2}, this metric reports the mean\n                        within-case agreement rate {tag3}across raters{tag4} on the cases whose\n                        modal rating is {tag5}c{tag6}. In a 4-rater study, a case all 4 raters\n                        score the same gets agreement 1.00; a 3-1 split gets 0.75; a 2-2 split\n                        has no unique mode and is excluded."), tag1 = "<em>", tag2 = "</em>", tag3 = "<em>", tag4 = "</em>", tag5 = "<em>", tag6 = "</em>"), "\n                    "),
+                    "</p>\n                </div>\n                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>\n                    <h4 style='margin: 0 0 10px 0; color: inherit;'>",
+                    .("When to use it"),
+                    "</h4>\n                    <ul style='margin: 0; padding-left: 20px;'>\n                        <li>",
+                    .("Identifying which categories are the agreement bottleneck (e.g., YSRB Category IV 'suspicious' in breast cytology)"),
+                    "</li>\n                        <li>",
+                    .("Reporting per-category agreement alongside an overall Fleiss kappa"),
+                    "</li>\n                        <li>",
+                    .("Quality assurance: where should category-specific training focus?"),
+                    "</li>\n                    </ul>\n                </div>\n                <p style='font-size: 0.9em; color: inherit;'>",
+                    paste0("\n                    ", .("Cases with no unique mode (ties) are excluded and reported in a footnote.\n                    Confidence intervals are normal-approximation Wald intervals on the\n                    case-level mean agreement, bounded to the range 0 to 1, at the confidence level\n                    set in the options. No interval is shown for a category whose cases\n                    carry no spread in their within-case agreement rate (one case, or\n                    several cases that all agree to the same degree): the standard error\n                    would be zero and the interval would claim perfect precision."), "\n                "),
+                    "</p>\n            </div>"
+                )
                 self$results$itemModalAgreementExplanation$setContent(html_content)
             },
             .calculateItemModalAgreement = function(ratings) {
@@ -9784,160 +10424,147 @@ agreementClass <- if (requireNamespace("jmvcore")) {
             .populateICCExplanation = function() {
                 # Provide educational content about ICC
 
-                html_content <- "
-            <div style='font-family: Arial, sans-serif; max-width: 800px; line-height: 1.6;'>
-                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>
-                    <h3 style='margin: 0 0 10px 0; color: inherit;'>What is ICC (Intraclass Correlation Coefficient)?</h3>
-                    <p style='margin: 0; color: inherit;'>
-                        ICC measures the reliability and agreement of <strong>continuous measurements</strong>
-                        between raters. It's the gold standard for assessing inter-rater reliability with numeric data.
-                    </p>
-                </div>
-
-                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>
-                    <h4 style='margin: 0 0 10px 0; color: inherit;'>When to Use ICC</h4>
-                    <p style='margin: 0 0 10px 0;'><strong>Use ICC for continuous measurements:</strong></p>
-                    <ul style='margin: 0; padding-left: 20px;'>
-                        <li><strong>Tumor size</strong> - Diameter measurements in mm or cm</li>
-                        <li><strong>Biomarker quantification</strong> - Protein expression levels, cell counts</li>
-                        <li><strong>Morphometric analysis</strong> - Nuclear size, gland area measurements</li>
-                        <li><strong>Scoring systems</strong> - Continuous scores (e.g., 0-100 scale)</li>
-                    </ul>
-                </div>
-
-                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>
-                    <h4 style='margin: 0 0 10px 0; color: inherit;'>ICC Model Selection Guide</h4>
-                    <table style='width: 100%; border-collapse: collapse; font-size: 13px;'>
-                        <tr style='background-color: rgba(88, 88, 88, 0.06); color: inherit;'>
-                            <th style='padding: 8px; text-align: left; border-bottom: 2px solid #333;'>Model</th>
-                            <th style='padding: 8px; text-align: left; border-bottom: 2px solid #333;'>Design</th>
-                            <th style='padding: 8px; text-align: left; border-bottom: 2px solid #333;'>Use Case</th>
-                        </tr>
-                        <tr>
-                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'><strong>ICC(1,1)</strong></td>
-                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>One-way random</td>
-                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>Each case rated by different raters</td>
-                        </tr>
-                        <tr>
-                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'><strong>ICC(2,1)</strong></td>
-                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>Two-way random</td>
-                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>All cases rated by same raters (random sample)</td>
-                        </tr>
-                        <tr>
-                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'><strong>ICC(3,1)</strong></td>
-                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>Two-way mixed</td>
-                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>All cases rated by same raters (fixed panel)</td>
-                        </tr>
-                        <tr>
-                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'><strong>ICC(1,k)</strong></td>
-                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>One-way, average</td>
-                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>Reliability of mean of k different raters</td>
-                        </tr>
-                        <tr>
-                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'><strong>ICC(2,k)</strong></td>
-                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>Two-way random, average</td>
-                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>Reliability of mean rating (random raters)</td>
-                        </tr>
-                        <tr>
-                            <td style='padding: 8px;'><strong>ICC(3,k)</strong></td>
-                            <td style='padding: 8px;'>Two-way mixed, average</td>
-                            <td style='padding: 8px;'>Reliability of mean rating (fixed panel)</td>
-                        </tr>
-                    </table>
-                    <p style='margin: 10px 0 0 0; font-size: 12px; color: inherit;'>
-                        <strong>Tip:</strong> Use ICC(2,1) or ICC(3,1) for most pathology studies where all cases are rated by the same pathologists.
-                    </p>
-                </div>
-
-                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>
-                    <h4 style='margin: 0 0 10px 0; color: inherit;'>Technical Reference: irr::icc() Parameters</h4>
-                    <p style='margin: 0 0 10px 0; font-size: 13px; color: inherit;'>
-                        This table shows the exact parameters passed to the <code>irr::icc()</code> function for each model.
-                        Useful for understanding implementation details and replicating results in R.
-                    </p>
-                    <table style='width: 100%; border-collapse: collapse; font-size: 12px; font-family: monospace;'>
-                        <tr style='background-color: rgba(88, 88, 88, 0.06); color: inherit;'>
-                            <th style='padding: 8px; text-align: left; border-bottom: 2px solid #333;'>Model</th>
-                            <th style='padding: 8px; text-align: left; border-bottom: 2px solid #333;'>irr::icc Parameters</th>
-                            <th style='padding: 8px; text-align: left; border-bottom: 2px solid #333;'>Use Case</th>
-                        </tr>
-                        <tr>
-                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'><strong>ICC(1,1)</strong></td>
-                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>model=&quot;oneway&quot;, type=&quot;consistency&quot;, unit=&quot;single&quot;</td>
-                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>Each case rated by different raters</td>
-                        </tr>
-                        <tr>
-                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'><strong>ICC(2,1)</strong></td>
-                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>model=&quot;twoway&quot;, type=&quot;agreement&quot;, unit=&quot;single&quot;</td>
-                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>All cases by same raters (random sample)</td>
-                        </tr>
-                        <tr>
-                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'><strong>ICC(3,1)</strong></td>
-                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>model=&quot;twoway&quot;, type=&quot;consistency&quot;, unit=&quot;single&quot;</td>
-                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>All cases by same raters (fixed panel)</td>
-                        </tr>
-                        <tr>
-                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'><strong>ICC(1,k)</strong></td>
-                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>model=&quot;oneway&quot;, type=&quot;consistency&quot;, unit=&quot;average&quot;</td>
-                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>Average of k different raters</td>
-                        </tr>
-                        <tr>
-                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'><strong>ICC(2,k)</strong></td>
-                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>model=&quot;twoway&quot;, type=&quot;agreement&quot;, unit=&quot;average&quot;</td>
-                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>Average rating (random raters)</td>
-                        </tr>
-                        <tr>
-                            <td style='padding: 8px;'><strong>ICC(3,k)</strong></td>
-                            <td style='padding: 8px;'>model=&quot;twoway&quot;, type=&quot;consistency&quot;, unit=&quot;average&quot;</td>
-                            <td style='padding: 8px;'>Average rating (fixed panel)</td>
-                        </tr>
-                    </table>
-                    <p style='margin: 10px 0 0 0; font-size: 11px; color: inherit;'>
-                        <strong>Note:</strong> <em>model</em> = &quot;oneway&quot; or &quot;twoway&quot; |
-                        <em>type</em> = &quot;consistency&quot; or &quot;agreement&quot; |
-                        <em>unit</em> = &quot;single&quot; or &quot;average&quot;
-                    </p>
-                </div>
-
-                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>
-                    <h4 style='margin: 0 0 10px 0; color: inherit;'>Interpreting ICC Values</h4>
-                    <table style='width: 100%; border-collapse: collapse;'>
-                        <tr>
-                            <td style='padding: 5px; font-weight: bold; border-bottom: 1px solid #ddd;'>ICC < 0.50</td>
-                            <td style='padding: 5px; border-bottom: 1px solid #ddd;'>Poor reliability</td>
-                        </tr>
-                        <tr>
-                            <td style='padding: 5px; font-weight: bold; border-bottom: 1px solid #ddd;'>0.50 to &lt; 0.75</td>
-                            <td style='padding: 5px; border-bottom: 1px solid #ddd;'>Moderate reliability</td>
-                        </tr>
-                        <tr>
-                            <td style='padding: 5px; font-weight: bold; border-bottom: 1px solid #ddd;'>0.75 to &lt; 0.90</td>
-                            <td style='padding: 5px; border-bottom: 1px solid #ddd;'>Good reliability</td>
-                        </tr>
-                        <tr>
-                            <td style='padding: 5px; font-weight: bold;'>0.90 to 1.00</td>
-                            <td style='padding: 5px;'>Excellent reliability</td>
-                        </tr>
-                    </table>
-                </div>
-
-                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; color: inherit;'>
-                    <h4 style='margin: 0 0 10px 0; color: inherit;'>ICC vs Bland-Altman</h4>
-                    <p style='margin: 0;'>
-                        <strong>ICC</strong> quantifies reliability with a single coefficient (0-1).<br>
-                        <strong>Bland-Altman</strong> visualizes agreement and detects systematic bias.<br>
-                        <em>Best practice: Use both methods together for comprehensive assessment.</em>
-                    </p>
-                </div>
-
-                <div style='margin-top: 15px; padding: 10px; background-color: rgba(88, 88, 88, 0.06); border-radius: 4px; color: inherit;'>
-                    <p style='margin: 0; font-size: 12px; color: inherit;'>
-                        <strong>Reference:</strong> Shrout, P. E., & Fleiss, J. L. (1979). Intraclass correlations: Uses in assessing rater reliability.
-                        <em>Psychological Bulletin</em>, 86(2), 420-428.
-                    </p>
-                </div>
-            </div>
-            "
+                html_content <- paste0(
+                    "\n            <div style='font-family: Arial, sans-serif; max-width: 800px; line-height: 1.6;'>\n                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>\n                    <h3 style='margin: 0 0 10px 0; color: inherit;'>",
+                    .("What is ICC (Intraclass Correlation Coefficient)?"),
+                    "</h3>\n                    <p style='margin: 0; color: inherit;'>",
+                    paste0("\n                        ", jmvcore::format(.("ICC measures the reliability and agreement of {tag1}continuous measurements{tag2}\n                        between raters. It's the gold standard for assessing inter-rater reliability with numeric data."), tag1 = "<strong>", tag2 = "</strong>"), "\n                    "),
+                    "</p>\n                </div>\n\n                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>\n                    <h4 style='margin: 0 0 10px 0; color: inherit;'>",
+                    .("When to Use ICC"),
+                    "</h4>\n                    <p style='margin: 0 0 10px 0;'>",
+                    jmvcore::format(.("{tag1}Use ICC for continuous measurements:{tag2}"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</p>\n                    <ul style='margin: 0; padding-left: 20px;'>\n                        <li>",
+                    jmvcore::format(.("{tag1}Tumor size{tag2} - Diameter measurements in mm or cm"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                        <li>",
+                    jmvcore::format(.("{tag1}Biomarker quantification{tag2} - Protein expression levels, cell counts"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                        <li>",
+                    jmvcore::format(.("{tag1}Morphometric analysis{tag2} - Nuclear size, gland area measurements"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                        <li>",
+                    jmvcore::format(.("{tag1}Scoring systems{tag2} - Continuous scores (e.g., 0-100 scale)"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                    </ul>\n                </div>\n\n                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>\n                    <h4 style='margin: 0 0 10px 0; color: inherit;'>",
+                    .("ICC Model Selection Guide"),
+                    "</h4>\n                    <table style='width: 100%; border-collapse: collapse; font-size: 13px;'>\n                        <tr style='background-color: rgba(88, 88, 88, 0.06); color: inherit;'>\n                            <th style='padding: 8px; text-align: left; border-bottom: 2px solid #333;'>",
+                    .("Model"),
+                    "</th>\n                            <th style='padding: 8px; text-align: left; border-bottom: 2px solid #333;'>",
+                    .("Design"),
+                    "</th>\n                            <th style='padding: 8px; text-align: left; border-bottom: 2px solid #333;'>",
+                    .("Use Case"),
+                    "</th>\n                        </tr>\n                        <tr>\n                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>",
+                    jmvcore::format(.("{tag1}ICC(1,1){tag2}"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</td>\n                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>",
+                    .("One-way random"),
+                    "</td>\n                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>",
+                    .("Each case rated by different raters"),
+                    "</td>\n                        </tr>\n                        <tr>\n                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>",
+                    jmvcore::format(.("{tag1}ICC(2,1){tag2}"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</td>\n                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>",
+                    .("Two-way random"),
+                    "</td>\n                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>",
+                    .("All cases rated by same raters (random sample)"),
+                    "</td>\n                        </tr>\n                        <tr>\n                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>",
+                    jmvcore::format(.("{tag1}ICC(3,1){tag2}"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</td>\n                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>",
+                    .("Two-way mixed"),
+                    "</td>\n                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>",
+                    .("All cases rated by same raters (fixed panel)"),
+                    "</td>\n                        </tr>\n                        <tr>\n                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>",
+                    jmvcore::format(.("{tag1}ICC(1,k){tag2}"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</td>\n                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>",
+                    .("One-way, average"),
+                    "</td>\n                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>",
+                    .("Reliability of mean of k different raters"),
+                    "</td>\n                        </tr>\n                        <tr>\n                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>",
+                    jmvcore::format(.("{tag1}ICC(2,k){tag2}"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</td>\n                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>",
+                    .("Two-way random, average"),
+                    "</td>\n                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>",
+                    .("Reliability of mean rating (random raters)"),
+                    "</td>\n                        </tr>\n                        <tr>\n                            <td style='padding: 8px;'>",
+                    jmvcore::format(.("{tag1}ICC(3,k){tag2}"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</td>\n                            <td style='padding: 8px;'>",
+                    .("Two-way mixed, average"),
+                    "</td>\n                            <td style='padding: 8px;'>",
+                    .("Reliability of mean rating (fixed panel)"),
+                    "</td>\n                        </tr>\n                    </table>\n                    <p style='margin: 10px 0 0 0; font-size: 12px; color: inherit;'>",
+                    paste0("\n                        ", jmvcore::format(.("{tag1}Tip:{tag2} Use ICC(2,1) or ICC(3,1) for most pathology studies where all cases are rated by the same pathologists."), tag1 = "<strong>", tag2 = "</strong>"), "\n                    "),
+                    "</p>\n                </div>\n\n                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>\n                    <h4 style='margin: 0 0 10px 0; color: inherit;'>",
+                    .("Technical Reference: irr::icc() Parameters"),
+                    "</h4>\n                    <p style='margin: 0 0 10px 0; font-size: 13px; color: inherit;'>",
+                    paste0("\n                        ", jmvcore::format(.("This table shows the exact parameters passed to the {tag1}irr::icc(){tag2} function for each model.\n                        Useful for understanding implementation details and replicating results in R."), tag1 = "<code>", tag2 = "</code>"), "\n                    "),
+                    "</p>\n                    <table style='width: 100%; border-collapse: collapse; font-size: 12px; font-family: monospace;'>\n                        <tr style='background-color: rgba(88, 88, 88, 0.06); color: inherit;'>\n                            <th style='padding: 8px; text-align: left; border-bottom: 2px solid #333;'>",
+                    .("Model"),
+                    "</th>\n                            <th style='padding: 8px; text-align: left; border-bottom: 2px solid #333;'>",
+                    .("irr::icc Parameters"),
+                    "</th>\n                            <th style='padding: 8px; text-align: left; border-bottom: 2px solid #333;'>",
+                    .("Use Case"),
+                    "</th>\n                        </tr>\n                        <tr>\n                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>",
+                    jmvcore::format(.("{tag1}ICC(1,1){tag2}"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</td>\n                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>",
+                    jmvcore::format(.("model={tag1}oneway{tag2}, type={tag3}consistency{tag4}, unit={tag5}single{tag6}"), tag1 = "&quot;", tag2 = "&quot;", tag3 = "&quot;", tag4 = "&quot;", tag5 = "&quot;", tag6 = "&quot;"),
+                    "</td>\n                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>",
+                    .("Each case rated by different raters"),
+                    "</td>\n                        </tr>\n                        <tr>\n                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>",
+                    jmvcore::format(.("{tag1}ICC(2,1){tag2}"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</td>\n                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>",
+                    jmvcore::format(.("model={tag1}twoway{tag2}, type={tag3}agreement{tag4}, unit={tag5}single{tag6}"), tag1 = "&quot;", tag2 = "&quot;", tag3 = "&quot;", tag4 = "&quot;", tag5 = "&quot;", tag6 = "&quot;"),
+                    "</td>\n                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>",
+                    .("All cases by same raters (random sample)"),
+                    "</td>\n                        </tr>\n                        <tr>\n                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>",
+                    jmvcore::format(.("{tag1}ICC(3,1){tag2}"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</td>\n                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>",
+                    jmvcore::format(.("model={tag1}twoway{tag2}, type={tag3}consistency{tag4}, unit={tag5}single{tag6}"), tag1 = "&quot;", tag2 = "&quot;", tag3 = "&quot;", tag4 = "&quot;", tag5 = "&quot;", tag6 = "&quot;"),
+                    "</td>\n                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>",
+                    .("All cases by same raters (fixed panel)"),
+                    "</td>\n                        </tr>\n                        <tr>\n                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>",
+                    jmvcore::format(.("{tag1}ICC(1,k){tag2}"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</td>\n                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>",
+                    jmvcore::format(.("model={tag1}oneway{tag2}, type={tag3}consistency{tag4}, unit={tag5}average{tag6}"), tag1 = "&quot;", tag2 = "&quot;", tag3 = "&quot;", tag4 = "&quot;", tag5 = "&quot;", tag6 = "&quot;"),
+                    "</td>\n                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>",
+                    .("Average of k different raters"),
+                    "</td>\n                        </tr>\n                        <tr>\n                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>",
+                    jmvcore::format(.("{tag1}ICC(2,k){tag2}"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</td>\n                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>",
+                    jmvcore::format(.("model={tag1}twoway{tag2}, type={tag3}agreement{tag4}, unit={tag5}average{tag6}"), tag1 = "&quot;", tag2 = "&quot;", tag3 = "&quot;", tag4 = "&quot;", tag5 = "&quot;", tag6 = "&quot;"),
+                    "</td>\n                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>",
+                    .("Average rating (random raters)"),
+                    "</td>\n                        </tr>\n                        <tr>\n                            <td style='padding: 8px;'>",
+                    jmvcore::format(.("{tag1}ICC(3,k){tag2}"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</td>\n                            <td style='padding: 8px;'>",
+                    jmvcore::format(.("model={tag1}twoway{tag2}, type={tag3}consistency{tag4}, unit={tag5}average{tag6}"), tag1 = "&quot;", tag2 = "&quot;", tag3 = "&quot;", tag4 = "&quot;", tag5 = "&quot;", tag6 = "&quot;"),
+                    "</td>\n                            <td style='padding: 8px;'>",
+                    .("Average rating (fixed panel)"),
+                    "</td>\n                        </tr>\n                    </table>\n                    <p style='margin: 10px 0 0 0; font-size: 11px; color: inherit;'>",
+                    paste0("\n                        ", jmvcore::format(.("{tag1}Note:{tag2} {tag3}model{tag4} = {tag5}oneway{tag6} or {tag7}twoway{tag8} |\n                        {tag9}type{tag10} = {tag11}consistency{tag12} or {tag13}agreement{tag14} |\n                        {tag15}unit{tag16} = {tag17}single{tag18} or {tag19}average{tag20}"), tag1 = "<strong>", tag2 = "</strong>", tag3 = "<em>", tag4 = "</em>", tag5 = "&quot;", tag6 = "&quot;", tag7 = "&quot;", tag8 = "&quot;", tag9 = "<em>", tag10 = "</em>", tag11 = "&quot;", tag12 = "&quot;", tag13 = "&quot;", tag14 = "&quot;", tag15 = "<em>", tag16 = "</em>", tag17 = "&quot;", tag18 = "&quot;", tag19 = "&quot;", tag20 = "&quot;"), "\n                    "),
+                    "</p>\n                </div>\n\n                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>\n                    <h4 style='margin: 0 0 10px 0; color: inherit;'>",
+                    .("Interpreting ICC Values"),
+                    "</h4>\n                    <table style='width: 100%; border-collapse: collapse;'>\n                        <tr>\n                            <td style='padding: 5px; font-weight: bold; border-bottom: 1px solid #ddd;'>",
+                    .("ICC < 0.50"),
+                    "</td>\n                            <td style='padding: 5px; border-bottom: 1px solid #ddd;'>",
+                    .("Poor reliability"),
+                    "</td>\n                        </tr>\n                        <tr>\n                            <td style='padding: 5px; font-weight: bold; border-bottom: 1px solid #ddd;'>",
+                    jmvcore::format(.("0.50 to {tag1} 0.75"), tag1 = "&lt;"),
+                    "</td>\n                            <td style='padding: 5px; border-bottom: 1px solid #ddd;'>",
+                    .("Moderate reliability"),
+                    "</td>\n                        </tr>\n                        <tr>\n                            <td style='padding: 5px; font-weight: bold; border-bottom: 1px solid #ddd;'>",
+                    jmvcore::format(.("0.75 to {tag1} 0.90"), tag1 = "&lt;"),
+                    "</td>\n                            <td style='padding: 5px; border-bottom: 1px solid #ddd;'>",
+                    .("Good reliability"),
+                    "</td>\n                        </tr>\n                        <tr>\n                            <td style='padding: 5px; font-weight: bold;'>",
+                    .("0.90 to 1.00"),
+                    "</td>\n                            <td style='padding: 5px;'>",
+                    .("Excellent reliability"),
+                    "</td>\n                        </tr>\n                    </table>\n                </div>\n\n                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; color: inherit;'>\n                    <h4 style='margin: 0 0 10px 0; color: inherit;'>",
+                    .("ICC vs Bland-Altman"),
+                    "</h4>\n                    <p style='margin: 0;'>",
+                    paste0("\n                        ", jmvcore::format(.("{tag1}ICC{tag2} quantifies reliability with a single coefficient (0-1)."), tag1 = "<strong>", tag2 = "</strong>")),
+                    "<br>",
+                    paste0("\n                        ", jmvcore::format(.("{tag1}Bland-Altman{tag2} visualizes agreement and detects systematic bias."), tag1 = "<strong>", tag2 = "</strong>")),
+                    "<br>",
+                    paste0("\n                        ", jmvcore::format(.("{tag1}Best practice: Use both methods together for comprehensive assessment.{tag2}"), tag1 = "<em>", tag2 = "</em>"), "\n                    "),
+                    "</p>\n                </div>\n\n                <div style='margin-top: 15px; padding: 10px; background-color: rgba(88, 88, 88, 0.06); border-radius: 4px; color: inherit;'>\n                    <p style='margin: 0; font-size: 12px; color: inherit;'>",
+                    paste0("\n                        ", jmvcore::format(.("{tag1}Reference:{tag2} Shrout, P. E., & Fleiss, J. L. (1979). Intraclass correlations: Uses in assessing rater reliability.\n                        {tag3}Psychological Bulletin{tag4}, 86(2), 420-428."), tag1 = "<strong>", tag2 = "</strong>", tag3 = "<em>", tag4 = "</em>"), "\n                    "),
+                    "</p>\n                </div>\n            </div>\n            "
+                )
 
                 self$results$iccExplanation$setContent(html_content)
             },
@@ -10477,122 +11104,79 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                 # variable and no option here can supply a second variable, so no claim
                 # about several variables may appear in this panel.
 
-                html_content <- "
-                <div style='font-family: Arial, sans-serif; max-width: 900px; line-height: 1.6; padding: 20px;'>
-                    <h3 style='color: inherit; border-bottom: 2px solid #333; padding-bottom: 10px;'>
-                        Iota Coefficient (Single Variable)
-                    </h3>
-
-                    <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin: 20px 0; color: inherit;'>
-                        <h4 style='margin: 0 0 10px 0; color: inherit;'>What is the Iota Coefficient?</h4>
-                        <p style='margin: 0; color: inherit;'>
-                            Iota (Janson &amp; Olsson, 2001) is a <strong>chance-corrected agreement index</strong>.
-                            It weighs the disagreement actually observed between raters against the disagreement
-                            expected if they had rated independently: 0 is chance-level agreement, 1 is perfect
-                            agreement. What sets it apart from kappa is that it is defined for
-                            <strong>categorical</strong> and for <strong>continuous</strong> ratings with the same formula.
-                        </p>
-                    </div>
-
-                    <div style='background-color: rgba(255, 169, 33, 0.14); border-left: 4px solid #FF9800; padding: 15px; margin: 20px 0; color: inherit;'>
-                        <h4 style='margin: 0 0 10px 0; color: inherit;'>What this analysis computes - and what it does not</h4>
-                        <p style='margin: 0 0 10px 0;'>
-                            Every column you select is read as <strong>another rater of one variable</strong>.
-                            The number reported is therefore the <strong>single-variable</strong> iota over your
-                            rater columns, and the Cases and Raters columns describe that layout.
-                        </p>
-                        <p style='margin: 0;'>
-                            The <strong>multivariate</strong> form of iota - several variables, say tumor size,
-                            grade and mitotic count, scored by the same raters and summarised in one coefficient -
-                            is <strong>not computed by this analysis</strong>. Nothing in this dialog can say which
-                            columns belong to which variable. Entering the columns of several variables side by
-                            side does <strong>not</strong> produce the multivariate coefficient: it produces the
-                            single-variable iota of a table whose &quot;raters&quot; are really different
-                            measurements, and that number does not describe your study. For the multivariate
-                            form, call <code>irr::iota()</code> in R with one matrix per variable.
-                        </p>
-                    </div>
-
-                    <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin: 20px 0; color: inherit;'>
-                        <h4 style='margin: 0 0 10px 0; color: inherit;'>Which coefficient should you use?</h4>
-                        <table style='width: 100%; border-collapse: collapse; font-size: 13px;'>
-                            <tr style='background-color: rgba(88, 88, 88, 0.06); color: inherit;'>
-                                <th style='padding: 8px; text-align: left; border-bottom: 2px solid #333;'>Your ratings</th>
-                                <th style='padding: 8px; text-align: left; border-bottom: 2px solid #333;'>Preferred index</th>
-                                <th style='padding: 8px; text-align: left; border-bottom: 2px solid #333;'>Why</th>
-                            </tr>
-                            <tr>
-                                <td style='padding: 8px; border-bottom: 1px solid #ddd;'>Unordered categories, 3 or more raters</td>
-                                <td style='padding: 8px; border-bottom: 1px solid #ddd;'><strong>Exact kappa</strong> (Conger)</td>
-                                <td style='padding: 8px; border-bottom: 1px solid #ddd;'>Iota for one nominal variable <em>is</em> Conger's exact kappa - the same number under another name, and that option also gives you the rest of the kappa output</td>
-                            </tr>
-                            <tr>
-                                <td style='padding: 8px; border-bottom: 1px solid #ddd;'>Ordered categories (G1, G2, G3)</td>
-                                <td style='padding: 8px; border-bottom: 1px solid #ddd;'><strong>Weighted kappa</strong></td>
-                                <td style='padding: 8px; border-bottom: 1px solid #ddd;'>iota treats G1 vs G3 as no worse than G1 vs G2; weighted kappa gives partial credit for adjacent grades</td>
-                            </tr>
-                            <tr>
-                                <td style='padding: 8px; border-bottom: 1px solid #ddd;'>Continuous measurements</td>
-                                <td style='padding: 8px; border-bottom: 1px solid #ddd;'><strong>ICC(2,1) or ICC(3,1)</strong></td>
-                                <td style='padding: 8px; border-bottom: 1px solid #ddd;'>the standard for continuous agreement, with an explicit model for rater effects and a confidence interval; the iota table has neither</td>
-                            </tr>
-                            <tr>
-                                <td style='padding: 8px;'>Missing ratings, or raters who did not all see every case</td>
-                                <td style='padding: 8px;'><strong>Krippendorff's alpha</strong></td>
-                                <td style='padding: 8px;'>alpha is defined for incomplete designs; iota is not</td>
-                            </tr>
-                        </table>
-                        <p style='margin: 10px 0 0 0; font-size: 12px; color: inherit;'>
-                            <strong>So when is iota the right choice here?</strong> When your ratings are continuous
-                            and you want a chance-corrected index that does not assume the variance components of
-                            an ICC model. For categorical ratings, prefer the kappa family: you get the same
-                            number plus its standard error, test and interpretation.
-                        </p>
-                    </div>
-
-                    <div style='background-color: rgba(211, 47, 47, 0.10); border-left: 4px solid #D32F2F; padding: 15px; margin: 20px 0; color: inherit;'>
-                        <h4 style='margin: 0 0 10px 0; color: inherit;'>Limits you should know before quoting the number</h4>
-                        <ul style='margin: 0; padding-left: 20px;'>
-                            <li><strong>No confidence interval, no p-value.</strong> <code>irr::iota()</code> returns a point estimate only, so this table shows one number with no measure of its precision. A point estimate from 20 cases and one from 500 look identical here.</li>
-                            <li><strong>For categorical ratings it duplicates an existing result.</strong> It equals Conger's exact kappa, the <em>Exact kappa (3+ raters)</em> option. Switching both on prints one number twice under two names.</li>
-                            <li><strong>Standardizing does nothing in this scope.</strong> Standardization exists to equalise the contribution of several variables. With one variable it is an affine rescaling, which leaves the coefficient unchanged.</li>
-                            <li><strong>One measurement type only.</strong> All selected columns must be numeric, or all must be categorical; a mixed selection is rejected.</li>
-                            <li><strong>A label is not a verdict.</strong> The word beside the number names the size of the number on a published scale. Whether that is good enough depends on the decision the rating drives, not on the scale.</li>
-                        </ul>
-                    </div>
-
-                    <div style='background-color: rgba(155, 155, 155, 0.06); border: 1px solid #ccc; padding: 15px; color: inherit;'>
-                        <h4 style='margin: 0 0 10px 0; color: inherit;'>Interpretation labels - which scale applies</h4>
-                        <p style='margin: 0 0 5px 0;'>
-                            <strong>Nominal ratings</strong> (iota is Conger's exact kappa) - Landis &amp; Koch (1977):
-                        </p>
-                        <p style='margin: 0;'>
-                            <strong>&lt; 0.00:</strong> Worse than chance |
-                            <strong>0.00 to &lt; 0.20:</strong> Slight |
-                            <strong>0.20 to &lt; 0.40:</strong> Fair |
-                            <strong>0.40 to &lt; 0.60:</strong> Moderate |
-                            <strong>0.60 to &lt; 0.80:</strong> Substantial |
-                            <strong>0.80 to 1.00:</strong> Almost perfect
-                        </p>
-                        <p style='margin: 10px 0 5px 0;'>
-                            <strong>Continuous ratings</strong> (iota is a variance-ratio coefficient close to ICC(2,1)) - Koo &amp; Li (2016):
-                        </p>
-                        <p style='margin: 0;'>
-                            <strong>&lt; 0.50:</strong> Poor |
-                            <strong>0.50 to &lt; 0.75:</strong> Moderate |
-                            <strong>0.75 to &lt; 0.90:</strong> Good |
-                            <strong>0.90 to 1.00:</strong> Excellent
-                        </p>
-                        <p style='margin: 10px 0 0 0; font-size: 11px; color: inherit;'>
-                            Iota publishes no bands of its own, so each branch borrows the scale of the statistic it
-                            coincides with: for one nominal variable iota IS a kappa, and for continuous ratings it
-                            stays close to ICC(2,1). Grading the continuous case on the kappa scale is what used to put
-                            &quot;Almost perfect&quot; beside the ICC table's &quot;Good&quot; for the same reliability in one output. The
-                            bands are half-open, so a value landing exactly on a cut-point takes the higher band.
-                        </p>
-                    </div>
-                </div>
-            "
+                html_content <- paste0(
+                    "\n                <div style='font-family: Arial, sans-serif; max-width: 900px; line-height: 1.6; padding: 20px;'>\n                    <h3 style='color: inherit; border-bottom: 2px solid #333; padding-bottom: 10px;'>",
+                    paste0("\n                        ", .("Iota Coefficient (Single Variable)"), "\n                    "),
+                    "</h3>\n\n                    <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin: 20px 0; color: inherit;'>\n                        <h4 style='margin: 0 0 10px 0; color: inherit;'>",
+                    .("What is the Iota Coefficient?"),
+                    "</h4>\n                        <p style='margin: 0; color: inherit;'>",
+                    paste0("\n                            ", jmvcore::format(.("Iota (Janson {tag1} Olsson, 2001) is a {tag2}chance-corrected agreement index{tag3}.\n                            It weighs the disagreement actually observed between raters against the disagreement\n                            expected if they had rated independently: 0 is chance-level agreement, 1 is perfect\n                            agreement. What sets it apart from kappa is that it is defined for\n                            {tag4}categorical{tag5} and for {tag6}continuous{tag7} ratings with the same formula."), tag1 = "&amp;", tag2 = "<strong>", tag3 = "</strong>", tag4 = "<strong>", tag5 = "</strong>", tag6 = "<strong>", tag7 = "</strong>"), "\n                        "),
+                    "</p>\n                    </div>\n\n                    <div style='background-color: rgba(255, 169, 33, 0.14); border-left: 4px solid #FF9800; padding: 15px; margin: 20px 0; color: inherit;'>\n                        <h4 style='margin: 0 0 10px 0; color: inherit;'>",
+                    .("What this analysis computes - and what it does not"),
+                    "</h4>\n                        <p style='margin: 0 0 10px 0;'>",
+                    paste0("\n                            ", jmvcore::format(.("Every column you select is read as {tag1}another rater of one variable{tag2}.\n                            The number reported is therefore the {tag3}single-variable{tag4} iota over your\n                            rater columns, and the Cases and Raters columns describe that layout."), tag1 = "<strong>", tag2 = "</strong>", tag3 = "<strong>", tag4 = "</strong>"), "\n                        "),
+                    "</p>\n                        <p style='margin: 0;'>",
+                    paste0("\n                            ", jmvcore::format(.("The {tag1}multivariate{tag2} form of iota - several variables, say tumor size,\n                            grade and mitotic count, scored by the same raters and summarised in one coefficient -\n                            is {tag3}not computed by this analysis{tag4}. Nothing in this dialog can say which\n                            columns belong to which variable. Entering the columns of several variables side by\n                            side does {tag5}not{tag6} produce the multivariate coefficient: it produces the\n                            single-variable iota of a table whose {tag7}raters{tag8} are really different\n                            measurements, and that number does not describe your study. For the multivariate\n                            form, call {tag9}irr::iota(){tag10} in R with one matrix per variable."), tag1 = "<strong>", tag2 = "</strong>", tag3 = "<strong>", tag4 = "</strong>", tag5 = "<strong>", tag6 = "</strong>", tag7 = "&quot;", tag8 = "&quot;", tag9 = "<code>", tag10 = "</code>"), "\n                        "),
+                    "</p>\n                    </div>\n\n                    <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin: 20px 0; color: inherit;'>\n                        <h4 style='margin: 0 0 10px 0; color: inherit;'>",
+                    .("Which coefficient should you use?"),
+                    "</h4>\n                        <table style='width: 100%; border-collapse: collapse; font-size: 13px;'>\n                            <tr style='background-color: rgba(88, 88, 88, 0.06); color: inherit;'>\n                                <th style='padding: 8px; text-align: left; border-bottom: 2px solid #333;'>",
+                    .("Your ratings"),
+                    "</th>\n                                <th style='padding: 8px; text-align: left; border-bottom: 2px solid #333;'>",
+                    .("Preferred index"),
+                    "</th>\n                                <th style='padding: 8px; text-align: left; border-bottom: 2px solid #333;'>",
+                    .("Why"),
+                    "</th>\n                            </tr>\n                            <tr>\n                                <td style='padding: 8px; border-bottom: 1px solid #ddd;'>",
+                    .("Unordered categories, 3 or more raters"),
+                    "</td>\n                                <td style='padding: 8px; border-bottom: 1px solid #ddd;'>",
+                    jmvcore::format(.("{tag1}Exact kappa{tag2} (Conger)"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</td>\n                                <td style='padding: 8px; border-bottom: 1px solid #ddd;'>",
+                    jmvcore::format(.("Iota for one nominal variable {tag1}is{tag2} Conger's exact kappa - the same number under another name, and that option also gives you the rest of the kappa output"), tag1 = "<em>", tag2 = "</em>"),
+                    "</td>\n                            </tr>\n                            <tr>\n                                <td style='padding: 8px; border-bottom: 1px solid #ddd;'>",
+                    .("Ordered categories (G1, G2, G3)"),
+                    "</td>\n                                <td style='padding: 8px; border-bottom: 1px solid #ddd;'>",
+                    jmvcore::format(.("{tag1}Weighted kappa{tag2}"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</td>\n                                <td style='padding: 8px; border-bottom: 1px solid #ddd;'>",
+                    .("iota treats G1 vs G3 as no worse than G1 vs G2; weighted kappa gives partial credit for adjacent grades"),
+                    "</td>\n                            </tr>\n                            <tr>\n                                <td style='padding: 8px; border-bottom: 1px solid #ddd;'>",
+                    .("Continuous measurements"),
+                    "</td>\n                                <td style='padding: 8px; border-bottom: 1px solid #ddd;'>",
+                    jmvcore::format(.("{tag1}ICC(2,1) or ICC(3,1){tag2}"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</td>\n                                <td style='padding: 8px; border-bottom: 1px solid #ddd;'>",
+                    .("the standard for continuous agreement, with an explicit model for rater effects and a confidence interval; the iota table has neither"),
+                    "</td>\n                            </tr>\n                            <tr>\n                                <td style='padding: 8px;'>",
+                    .("Missing ratings, or raters who did not all see every case"),
+                    "</td>\n                                <td style='padding: 8px;'>",
+                    jmvcore::format(.("{tag1}Krippendorff's alpha{tag2}"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</td>\n                                <td style='padding: 8px;'>",
+                    .("alpha is defined for incomplete designs; iota is not"),
+                    "</td>\n                            </tr>\n                        </table>\n                        <p style='margin: 10px 0 0 0; font-size: 12px; color: inherit;'>",
+                    paste0("\n                            ", jmvcore::format(.("{tag1}So when is iota the right choice here?{tag2} When your ratings are continuous\n                            and you want a chance-corrected index that does not assume the variance components of\n                            an ICC model. For categorical ratings, prefer the kappa family: you get the same\n                            number plus its standard error, test and interpretation."), tag1 = "<strong>", tag2 = "</strong>"), "\n                        "),
+                    "</p>\n                    </div>\n\n                    <div style='background-color: rgba(211, 47, 47, 0.10); border-left: 4px solid #D32F2F; padding: 15px; margin: 20px 0; color: inherit;'>\n                        <h4 style='margin: 0 0 10px 0; color: inherit;'>",
+                    .("Limits you should know before quoting the number"),
+                    "</h4>\n                        <ul style='margin: 0; padding-left: 20px;'>\n                            <li>",
+                    jmvcore::format(.("{tag1}No confidence interval, no p-value.{tag2} {tag3}irr::iota(){tag4} returns a point estimate only, so this table shows one number with no measure of its precision. A point estimate from 20 cases and one from 500 look identical here."), tag1 = "<strong>", tag2 = "</strong>", tag3 = "<code>", tag4 = "</code>"),
+                    "</li>\n                            <li>",
+                    jmvcore::format(.("{tag1}For categorical ratings it duplicates an existing result.{tag2} It equals Conger's exact kappa, the {tag3}Exact kappa (3+ raters){tag4} option. Switching both on prints one number twice under two names."), tag1 = "<strong>", tag2 = "</strong>", tag3 = "<em>", tag4 = "</em>"),
+                    "</li>\n                            <li>",
+                    jmvcore::format(.("{tag1}Standardizing does nothing in this scope.{tag2} Standardization exists to equalise the contribution of several variables. With one variable it is an affine rescaling, which leaves the coefficient unchanged."), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                            <li>",
+                    jmvcore::format(.("{tag1}One measurement type only.{tag2} All selected columns must be numeric, or all must be categorical; a mixed selection is rejected."), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                            <li>",
+                    jmvcore::format(.("{tag1}A label is not a verdict.{tag2} The word beside the number names the size of the number on a published scale. Whether that is good enough depends on the decision the rating drives, not on the scale."), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                        </ul>\n                    </div>\n\n                    <div style='background-color: rgba(155, 155, 155, 0.06); border: 1px solid #ccc; padding: 15px; color: inherit;'>\n                        <h4 style='margin: 0 0 10px 0; color: inherit;'>",
+                    .("Interpretation labels - which scale applies"),
+                    "</h4>\n                        <p style='margin: 0 0 5px 0;'>",
+                    paste0("\n                            ", jmvcore::format(.("{tag1}Nominal ratings{tag2} (iota is Conger's exact kappa) - Landis {tag3} Koch (1977):"), tag1 = "<strong>", tag2 = "</strong>", tag3 = "&amp;"), "\n                        "),
+                    "</p>\n                        <p style='margin: 0;'>",
+                    paste0("\n                            ", jmvcore::format(.("{tag1}{tag2} 0.00:{tag3} Worse than chance |\n                            {tag4}0.00 to {tag5} 0.20:{tag6} Slight |\n                            {tag7}0.20 to {tag8} 0.40:{tag9} Fair |\n                            {tag10}0.40 to {tag11} 0.60:{tag12} Moderate |\n                            {tag13}0.60 to {tag14} 0.80:{tag15} Substantial |\n                            {tag16}0.80 to 1.00:{tag17} Almost perfect"), tag1 = "<strong>", tag2 = "&lt;", tag3 = "</strong>", tag4 = "<strong>", tag5 = "&lt;", tag6 = "</strong>", tag7 = "<strong>", tag8 = "&lt;", tag9 = "</strong>", tag10 = "<strong>", tag11 = "&lt;", tag12 = "</strong>", tag13 = "<strong>", tag14 = "&lt;", tag15 = "</strong>", tag16 = "<strong>", tag17 = "</strong>"), "\n                        "),
+                    "</p>\n                        <p style='margin: 10px 0 5px 0;'>",
+                    paste0("\n                            ", jmvcore::format(.("{tag1}Continuous ratings{tag2} (iota is a variance-ratio coefficient close to ICC(2,1)) - Koo {tag3} Li (2016):"), tag1 = "<strong>", tag2 = "</strong>", tag3 = "&amp;"), "\n                        "),
+                    "</p>\n                        <p style='margin: 0;'>",
+                    paste0("\n                            ", jmvcore::format(.("{tag1}{tag2} 0.50:{tag3} Poor |\n                            {tag4}0.50 to {tag5} 0.75:{tag6} Moderate |\n                            {tag7}0.75 to {tag8} 0.90:{tag9} Good |\n                            {tag10}0.90 to 1.00:{tag11} Excellent"), tag1 = "<strong>", tag2 = "&lt;", tag3 = "</strong>", tag4 = "<strong>", tag5 = "&lt;", tag6 = "</strong>", tag7 = "<strong>", tag8 = "&lt;", tag9 = "</strong>", tag10 = "<strong>", tag11 = "</strong>"), "\n                        "),
+                    "</p>\n                        <p style='margin: 10px 0 0 0; font-size: 11px; color: inherit;'>",
+                    paste0("\n                            ", jmvcore::format(.("Iota publishes no bands of its own, so each branch borrows the scale of the statistic it\n                            coincides with: for one nominal variable iota IS a kappa, and for continuous ratings it\n                            stays close to ICC(2,1). Grading the continuous case on the kappa scale is what used to put\n                            {tag1}Almost perfect{tag2} beside the ICC table's {tag3}Good{tag4} for the same reliability in one output. The\n                            bands are half-open, so a value landing exactly on a cut-point takes the higher band."), tag1 = "&quot;", tag2 = "&quot;", tag3 = "&quot;", tag4 = "&quot;"), "\n                        "),
+                    "</p>\n                    </div>\n                </div>\n            "
+                )
 
                 self$results$iotaExplanation$setContent(html_content)
             },
@@ -11480,7 +12064,11 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                 # Generate HTML info about computed variables added to dataset
 
                 info_html <- "<div style='font-family: Arial, sans-serif; padding: 10px;'>"
-                info_html <- paste0(info_html, "<h4 style='margin-top: 0;'>Computed Variables Added:</h4><ul>")
+                info_html <- paste0(info_html, paste0(
+                    "<h4 style='margin-top: 0;'>",
+                    .("Computed Variables Added:"),
+                    "</h4><ul>"
+                ))
 
                 if (self$options$consensusVar) {
                     var_name <- self$options$consensusName
@@ -12091,7 +12679,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                         if (n_raters >= 3 && !weights_blocked)
                             .("For three or more raters each institution's kappa uses every observed rating, as in the headline table, with the same standard error and t interval (Gwet 2014).")
                         else if (any(methods == "irr-fallback"))
-                            .("At least one interval was built from the null-hypothesis standard error, because vcd::Kappa returned no finite asymptotic standard error for that institution (most often a category unused there). Such intervals are too narrow when kappa is high, so treat them as optimistic.")
+                            .("At least one interval was built from the null-hypothesis standard error, because vcd::Kappa returned no finite asymptotic standard error for that institution (most often a category unused there). These intervals use a variance under zero agreement; their coverage at nonzero kappa is uncertain.")
                         else NULL)
                     n_undef <- sum(methods == "undefined")
                     cl_tbl$setNote("undefined",
@@ -12610,49 +13198,47 @@ agreementClass <- if (requireNamespace("jmvcore")) {
 
                 html <- "<div style='font-family: Arial, sans-serif; padding: 15px; line-height: 1.6;'>"
 
-                html <- paste0(html, "
-                <h3 style='color: inherit; margin-top: 0;'>Hierarchical/Multilevel Agreement</h3>
-
-                <div style='background-color: rgba(155, 155, 155, 0.06); padding: 12px; border-left: 4px solid #333; margin-bottom: 15px; color: inherit;'>
-                    <strong>What is it?</strong><br/>
-                    Agreement for a design in which every case belongs to one cluster (institution, centre,
-                    scanner) and the same raters score the cases. It reports agreement WITHIN cluster, so that
-                    clusters which differ in case mix do not masquerade as better or worse agreement, and it shows
-                    each cluster separately so you can see whether agreement is similar across them.
-                </div>
-
-                <h4 style='color: inherit; margin-top: 20px;'>When to Use</h4>
-                <ul>
-                    <li><strong>Multi-centre reader studies</strong>: cases from several hospitals scored by the same pathologists</li>
-                    <li><strong>Multi-scanner studies</strong>: images from several imaging centres</li>
-                    <li><strong>Quality control</strong>: identifying institutions where agreement is lower</li>
-                </ul>
-
-                <h4 style='color: inherit; margin-top: 20px;'>Categorical ratings (grades, subtypes, positive/negative)</h4>
-                <ul>
-                    <li><strong>Cluster-specific kappa</strong>: Cohen's kappa (2 raters, with a confidence interval) or Fleiss' kappa (3 or more raters) within each cluster</li>
-                    <li><strong>Stratified kappa</strong>: the cluster kappas averaged with weights equal to each cluster's number of cases (Barlow, Lai and Azen, 1991) - agreement within cluster, shown beside the pooled kappa that ignores clusters</li>
-                    <li><strong>Variance components</strong>: the variance decomposition, hierarchical ICC and cluster test tables stay empty for categorical ratings. Tick <em>Model-based agreement</em> in the Pathologist Grading Analysis section instead: an ordinal mixed model that estimates the case, pathologist and institution variances, the latent ICC and a model-based kappa</li>
-                </ul>
-
-                <h4 style='color: inherit; margin-top: 20px;'>Continuous ratings (measurements, scores)</h4>
-                <ul>
-                    <li><strong>Overall ICC(2,1) and ICC(2,k)</strong>: within-cluster absolute-agreement reliability of one rater and of the mean of the raters, from a linear mixed model; intraclass correlations, not kappas</li>
-                    <li><strong>Cluster-specific ICC</strong>: the same ICC within each cluster</li>
-                    <li><strong>Variance decomposition</strong>: the share of score variance due to cases, raters, clusters and residual error</li>
-                </ul>
-
-                <h4 style='color: inherit; margin-top: 20px;'>Reading the Cluster Test</h4>
-                <ul>
-                    <li>The homogeneity test (continuous ratings) asks whether the cases' <em>mean scores</em> differ between clusters. Each case belongs to one cluster, so a difference can come from case mix or from site-level scoring, and this design cannot tell them apart. It does not test whether <em>agreement</em> differs; compare the cluster-specific values and their intervals for that</li>
-                    <li>With only a few clusters, any between-cluster variance and any test of it rest on very little information</li>
-                </ul>
-
-                <div style='background-color: rgba(155, 155, 155, 0.06); padding: 12px; border-left: 4px solid #333; margin-top: 15px; color: inherit;'>
-                    <strong>Note:</strong> Each cluster needs enough cases for its own estimate - a kappa from fewer than
-                    10 cases can move by a tenth or more with a single case.
-                </div>
-            </div>")
+                html <- paste0(html, paste0(
+                    "\n                <h3 style='color: inherit; margin-top: 0;'>",
+                    .("Hierarchical/Multilevel Agreement"),
+                    "</h3>\n\n                <div style='background-color: rgba(155, 155, 155, 0.06); padding: 12px; border-left: 4px solid #333; margin-bottom: 15px; color: inherit;'>",
+                    paste0("\n                    ", jmvcore::format(.("{tag1}What is it?{tag2}"), tag1 = "<strong>", tag2 = "</strong>")),
+                    "<br/>",
+                    paste0("\n                    ", .("Agreement for a design in which every case belongs to one cluster (institution, centre,\n                    scanner) and the same raters score the cases. It reports agreement WITHIN cluster, so that\n                    clusters which differ in case mix do not masquerade as better or worse agreement, and it shows\n                    each cluster separately so you can see whether agreement is similar across them."), "\n                "),
+                    "</div>\n\n                <h4 style='color: inherit; margin-top: 20px;'>",
+                    .("When to Use"),
+                    "</h4>\n                <ul>\n                    <li>",
+                    jmvcore::format(.("{tag1}Multi-centre reader studies{tag2}: cases from several hospitals scored by the same pathologists"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                    <li>",
+                    jmvcore::format(.("{tag1}Multi-scanner studies{tag2}: images from several imaging centres"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                    <li>",
+                    jmvcore::format(.("{tag1}Quality control{tag2}: identifying institutions where agreement is lower"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                </ul>\n\n                <h4 style='color: inherit; margin-top: 20px;'>",
+                    .("Categorical ratings (grades, subtypes, positive/negative)"),
+                    "</h4>\n                <ul>\n                    <li>",
+                    jmvcore::format(.("{tag1}Cluster-specific kappa{tag2}: Cohen's kappa (2 raters, with a confidence interval) or Fleiss' kappa (3 or more raters) within each cluster"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                    <li>",
+                    jmvcore::format(.("{tag1}Stratified kappa{tag2}: the cluster kappas averaged with weights equal to each cluster's number of cases (Barlow, Lai and Azen, 1991) - agreement within cluster, shown beside the pooled kappa that ignores clusters"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                    <li>",
+                    jmvcore::format(.("{tag1}Variance components{tag2}: the variance decomposition, hierarchical ICC and cluster test tables stay empty for categorical ratings. Tick {tag3}Model-based agreement{tag4} in the Pathologist Grading Analysis section instead: an ordinal mixed model that estimates the case, pathologist and institution variances, the latent ICC and a model-based kappa"), tag1 = "<strong>", tag2 = "</strong>", tag3 = "<em>", tag4 = "</em>"),
+                    "</li>\n                </ul>\n\n                <h4 style='color: inherit; margin-top: 20px;'>",
+                    .("Continuous ratings (measurements, scores)"),
+                    "</h4>\n                <ul>\n                    <li>",
+                    jmvcore::format(.("{tag1}Overall ICC(2,1) and ICC(2,k){tag2}: within-cluster absolute-agreement reliability of one rater and of the mean of the raters, from a linear mixed model; intraclass correlations, not kappas"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                    <li>",
+                    jmvcore::format(.("{tag1}Cluster-specific ICC{tag2}: the same ICC within each cluster"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                    <li>",
+                    jmvcore::format(.("{tag1}Variance decomposition{tag2}: the share of score variance due to cases, raters, clusters and residual error"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                </ul>\n\n                <h4 style='color: inherit; margin-top: 20px;'>",
+                    .("Reading the Cluster Test"),
+                    "</h4>\n                <ul>\n                    <li>",
+                    jmvcore::format(.("The homogeneity test (continuous ratings) asks whether the cases' {tag1}mean scores{tag2} differ between clusters. Each case belongs to one cluster, so a difference can come from case mix or from site-level scoring, and this design cannot tell them apart. It does not test whether {tag3}agreement{tag4} differs; compare the cluster-specific values and their intervals for that"), tag1 = "<em>", tag2 = "</em>", tag3 = "<em>", tag4 = "</em>"),
+                    "</li>\n                    <li>",
+                    .("With only a few clusters, any between-cluster variance and any test of it rest on very little information"),
+                    "</li>\n                </ul>\n\n                <div style='background-color: rgba(155, 155, 155, 0.06); padding: 12px; border-left: 4px solid #333; margin-top: 15px; color: inherit;'>",
+                    paste0("\n                    ", jmvcore::format(.("{tag1}Note:{tag2} Each cluster needs enough cases for its own estimate - a kappa from fewer than\n                    10 cases can move by a tenth or more with a single case."), tag1 = "<strong>", tag2 = "</strong>"), "\n                "),
+                    "</div>\n            </div>"
+                ))
 
                 self$results$hierarchicalExplanation$setContent(html)
             },
@@ -13002,27 +13588,33 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                 )
             },
             .populateMixedEffectsExplanation = function() {
-                html <- "<div style='font-family: Arial, sans-serif; padding: 15px; line-height: 1.6;'>
-                <h3 style='color: inherit; margin-top: 0;'>Mixed-Effects Condition Comparison</h3>
-                <div style='background-color: rgba(155, 155, 155, 0.06); padding: 12px; border-left: 4px solid #333; margin-bottom: 15px; color: inherit;'>
-                    <strong>What is it?</strong><br/>
-                    A linear mixed-effects model that compares measurement conditions (e.g., AI-assisted vs.
-                    conventional scoring) while properly accounting for the crossed structure of rater x case data.
-                </div>
-                <h4 style='color: inherit;'>Model</h4>
-                <p><code>score ~ condition + (1|rater) + (1|case)</code></p>
-                <ul>
-                    <li><strong>Fixed effect (condition)</strong>: Systematic difference between conditions</li>
-                    <li><strong>Random effect (rater)</strong>: Accounts for systematic rater differences</li>
-                    <li><strong>Random effect (case)</strong>: Accounts for case difficulty</li>
-                </ul>
-                <h4 style='color: inherit;'>When to Use</h4>
-                <ul>
-                    <li>Comparing AI-assisted vs. conventional scoring</li>
-                    <li>Pre-training vs. post-training assessment</li>
-                    <li>Any crossed rater x case x condition design</li>
-                </ul>
-            </div>"
+                html <- paste0(
+                    "<div style='font-family: Arial, sans-serif; padding: 15px; line-height: 1.6;'>\n                <h3 style='color: inherit; margin-top: 0;'>",
+                    .("Mixed-Effects Condition Comparison"),
+                    "</h3>\n                <div style='background-color: rgba(155, 155, 155, 0.06); padding: 12px; border-left: 4px solid #333; margin-bottom: 15px; color: inherit;'>",
+                    paste0("\n                    ", jmvcore::format(.("{tag1}What is it?{tag2}"), tag1 = "<strong>", tag2 = "</strong>")),
+                    "<br/>",
+                    paste0("\n                    ", .("A linear mixed-effects model that compares measurement conditions (e.g., AI-assisted vs.\n                    conventional scoring) while properly accounting for the crossed structure of rater x case data."), "\n                "),
+                    "</div>\n                <h4 style='color: inherit;'>",
+                    .("Model"),
+                    "</h4>\n                <p>",
+                    jmvcore::format(.("{tag1}score ~ condition + (1|rater) + (1|case){tag2}"), tag1 = "<code>", tag2 = "</code>"),
+                    "</p>\n                <ul>\n                    <li>",
+                    jmvcore::format(.("{tag1}Fixed effect (condition){tag2}: Systematic difference between conditions"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                    <li>",
+                    jmvcore::format(.("{tag1}Random effect (rater){tag2}: Accounts for systematic rater differences"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                    <li>",
+                    jmvcore::format(.("{tag1}Random effect (case){tag2}: Accounts for case difficulty"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                </ul>\n                <h4 style='color: inherit;'>",
+                    .("When to Use"),
+                    "</h4>\n                <ul>\n                    <li>",
+                    .("Comparing AI-assisted vs. conventional scoring"),
+                    "</li>\n                    <li>",
+                    .("Pre-training vs. post-training assessment"),
+                    "</li>\n                    <li>",
+                    .("Any crossed rater x case x condition design"),
+                    "</li>\n                </ul>\n            </div>"
+                )
                 self$results$mixedEffectsExplanation$setContent(html)
             },
             # F1 = 2TP / (2TP + FP + FN): 0 when the class was never matched, NA only
@@ -13168,20 +13760,23 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                 )
             },
             .populateConfusionMatrixExplanation = function() {
-                html <- "<div style='font-family: Arial, sans-serif; max-width: 700px; line-height: 1.5;'>
-                <h3>Multi-Class Confusion Matrix</h3>
-                <p>Cross-tabulation of ratings from two raters (Reference vs. Predicted).</p>
-                <h4>Per-Class Metrics</h4>
-                <ul>
-                    <li><strong>Precision (PPV)</strong>: TP / (TP + FP)</li>
-                    <li><strong>Recall (Sensitivity)</strong>: TP / (TP + FN)</li>
-                    <li><strong>F1 Score</strong>: Harmonic mean of precision and recall</li>
-                </ul>
-                <div style='background-color: rgba(155, 155, 155, 0.06); padding: 12px; border-left: 4px solid #333; margin-top: 15px; color: inherit;'>
-                    <strong>Clinical Use:</strong> In ordinal scoring (e.g., HER2 0/1+/2+/3+), the confusion
-                    matrix reveals systematic misclassification patterns.
-                </div>
-            </div>"
+                html <- paste0(
+                    "<div style='font-family: Arial, sans-serif; max-width: 700px; line-height: 1.5;'>\n                <h3>",
+                    .("Multi-Class Confusion Matrix"),
+                    "</h3>\n                <p>",
+                    .("Cross-tabulation of ratings from two raters (Reference vs. Predicted)."),
+                    "</p>\n                <h4>",
+                    .("Per-Class Metrics"),
+                    "</h4>\n                <ul>\n                    <li>",
+                    jmvcore::format(.("{tag1}Precision (PPV){tag2}: TP / (TP + FP)"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                    <li>",
+                    jmvcore::format(.("{tag1}Recall (Sensitivity){tag2}: TP / (TP + FN)"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                    <li>",
+                    jmvcore::format(.("{tag1}F1 Score{tag2}: Harmonic mean of precision and recall"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                </ul>\n                <div style='background-color: rgba(155, 155, 155, 0.06); padding: 12px; border-left: 4px solid #333; margin-top: 15px; color: inherit;'>",
+                    paste0("\n                    ", jmvcore::format(.("{tag1}Clinical Use:{tag2} In ordinal scoring (e.g., HER2 0/1+/2+/3+), the confusion\n                    matrix reveals systematic misclassification patterns."), tag1 = "<strong>", tag2 = "</strong>"), "\n                "),
+                    "</div>\n            </div>"
+                )
                 self$results$confusionMatrixExplanation$setContent(html)
             },
             # ICC model/type/unit for the user's iccType selection.
@@ -13629,25 +14224,24 @@ agreementClass <- if (requireNamespace("jmvcore")) {
             },
             .populateBootstrapCIExplanation = function() {
                 conf_pct <- round(100 * self$options$confLevel)
-                html <- paste0("<div style='font-family: Arial, sans-serif; max-width: 700px; line-height: 1.5;'>
-                <h3>Bootstrap Confidence Intervals</h3>
-                <p>Bootstrap CIs are computed by resampling cases with replacement and recomputing
-                each agreement metric. The BCa (Bias-Corrected and Accelerated) method adjusts for
-                both bias and skewness in the bootstrap distribution.</p>
-                <h4>Interpreting Results</h4>
-                <ul>
-                    <li><strong>Boot SE</strong>: Standard deviation of bootstrap distribution</li>
-                    <li><strong>", conf_pct, "% CI</strong>: an interval from a procedure that captures the true value in about ", conf_pct, "% of repeated studies. It does not mean the true value lies in this particular interval with ", conf_pct, "% probability</li>
-                    <li><strong>Bias</strong>: Mean bootstrap estimate minus observed; large bias suggests instability</li>
-                </ul>
-                <div style='background-color: rgba(155, 155, 155, 0.06); padding: 12px; border-left: 4px solid #333; margin-top: 15px; color: inherit;'>
-                    <strong>When to prefer them:</strong> bootstrap intervals make no normal-approximation
-                    assumption, which helps for bounded, skewed statistics such as a kappa near 1. They are not
-                    automatically better than the analytical intervals: with few cases or a rare category a resample
-                    can miss a category, and the interval can be too narrow. Read any dropped-resample note under the
-                    table, and report which interval method you used (the CI Method column says).
-                </div>
-            </div>")
+                html <- paste0(paste0(
+                    "<div style='font-family: Arial, sans-serif; max-width: 700px; line-height: 1.5;'>\n                <h3>",
+                    .("Bootstrap Confidence Intervals"),
+                    "</h3>\n                <p>",
+                    .("Bootstrap CIs are computed by resampling cases with replacement and recomputing\n                each agreement metric. The BCa (Bias-Corrected and Accelerated) method adjusts for\n                both bias and skewness in the bootstrap distribution."),
+                    "</p>\n                <h4>",
+                    .("Interpreting Results"),
+                    "</h4>\n                <ul>\n                    <li>",
+                    jmvcore::format(.("{tag1}Boot SE{tag2}: Standard deviation of bootstrap distribution"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                    <li><strong>"
+                ), conf_pct, "% CI</strong>: an interval from a procedure that captures the true value in about ", conf_pct, "% of repeated studies. It does not mean the true value lies in this particular interval with ", conf_pct, paste0(
+                    .("% probability"),
+                    "</li>\n                    <li>",
+                    jmvcore::format(.("{tag1}Bias{tag2}: Mean bootstrap estimate minus observed; large bias suggests instability"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                </ul>\n                <div style='background-color: rgba(155, 155, 155, 0.06); padding: 12px; border-left: 4px solid #333; margin-top: 15px; color: inherit;'>",
+                    paste0("\n                    ", jmvcore::format(.("{tag1}When to prefer them:{tag2} bootstrap intervals make no normal-approximation\n                    assumption, which helps for bounded, skewed statistics such as a kappa near 1. They are not\n                    automatically better than the analytical intervals: with few cases or a rare category a resample\n                    can miss a category, and the interval can be too narrow. Read any dropped-resample note under the\n                    table, and report which interval method you used (the CI Method column says)."), tag1 = "<strong>", tag2 = "</strong>"), "\n                "),
+                    "</div>\n            </div>"
+                ))
                 self$results$bootstrapCIExplanation$setContent(html)
             },
             .calculateConcordanceF1 = function(ratings) {
@@ -13889,16 +14483,15 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                 )
             },
             .populateConcordanceF1Explanation = function() {
-                html <- "<div style='font-family: Arial, sans-serif; max-width: 700px; line-height: 1.5;'>
-                <h3>Multi-Annotator Concordance</h3>
-                <p>Evaluates predictions against all annotators simultaneously. A prediction is correct
-                if it matches ANY reference annotator's label (concordance) or only the majority
-                consensus (strict).</p>
-                <div style='background-color: rgba(155, 155, 155, 0.06); padding: 12px; border-left: 4px solid #333; margin-top: 15px; color: inherit;'>
-                    <strong>Reference:</strong> Ottl et al. (2025) used concordance F1 for HER2 scoring
-                    evaluation with multiple annotators.
-                </div>
-            </div>"
+                html <- paste0(
+                    "<div style='font-family: Arial, sans-serif; max-width: 700px; line-height: 1.5;'>\n                <h3>",
+                    .("Multi-Annotator Concordance"),
+                    "</h3>\n                <p>",
+                    .("Evaluates predictions against all annotators simultaneously. A prediction is correct\n                if it matches ANY reference annotator's label (concordance) or only the majority\n                consensus (strict)."),
+                    "</p>\n                <div style='background-color: rgba(155, 155, 155, 0.06); padding: 12px; border-left: 4px solid #333; margin-top: 15px; color: inherit;'>",
+                    paste0("\n                    ", jmvcore::format(.("{tag1}Reference:{tag2} Ottl et al. (2025) used concordance F1 for HER2 scoring\n                    evaluation with multiple annotators."), tag1 = "<strong>", tag2 = "</strong>"), "\n                "),
+                    "</div>\n            </div>"
+                )
                 self$results$concordanceF1Explanation$setContent(html)
             },
             .calculatePairedAgreementComparison = function(ratings_A) {
@@ -14205,15 +14798,15 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                 )
             },
             .populatePairedAgreementExplanation = function() {
-                html <- "<div style='font-family: Arial, sans-serif; max-width: 700px; line-height: 1.5;'>
-                <h3>Paired Agreement Comparison</h3>
-                <p>Compares interobserver agreement between two conditions applied to the same cases
-                (e.g., manual vs AI-assisted scoring). Uses case-bootstrap test.</p>
-                <div style='background-color: rgba(155, 155, 155, 0.06); padding: 12px; border-left: 4px solid #333; margin-top: 15px; color: inherit;'>
-                    <strong>Study design note:</strong> Assumes a paired (crossover) design where the same
-                    cases are scored under both conditions.
-                </div>
-            </div>"
+                html <- paste0(
+                    "<div style='font-family: Arial, sans-serif; max-width: 700px; line-height: 1.5;'>\n                <h3>",
+                    .("Paired Agreement Comparison"),
+                    "</h3>\n                <p>",
+                    .("Compares interobserver agreement between two conditions applied to the same cases\n                (e.g., manual vs AI-assisted scoring). Uses case-bootstrap test."),
+                    "</p>\n                <div style='background-color: rgba(155, 155, 155, 0.06); padding: 12px; border-left: 4px solid #333; margin-top: 15px; color: inherit;'>",
+                    paste0("\n                    ", jmvcore::format(.("{tag1}Study design note:{tag2} Assumes a paired (crossover) design where the same\n                    cases are scored under both conditions."), tag1 = "<strong>", tag2 = "</strong>"), "\n                "),
+                    "</div>\n            </div>"
+                )
                 self$results$pairedAgreementExplanation$setContent(html)
             },
             .calculateAgreementSampleSize = function() {
@@ -14458,308 +15051,231 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                 )
             },
             .populateAgreementSampleSizeExplanation = function() {
-                html <- "<div style='font-family: Arial, sans-serif; max-width: 700px; line-height: 1.5;'>
-                <h3>Sample Size for Agreement Studies</h3>
-                <p>Calculates required number of subjects for a prospective interrater agreement study.</p>
-                <h4>Formulas</h4>
-                <ul>
-                    <li><strong>Kappa (2-5 categories)</strong>: kappaSize power calculation for the common-marginal (intraclass) kappa (Donner & Eliasziw 1987; Rotondi & Donner 2012)</li>
-                    <li><strong>ICC</strong>: Based on Walter, Eliasziw & Donner (1998)</li>
-                </ul>
-                <div style='background-color: rgba(155, 155, 155, 0.06); padding: 12px; border-left: 4px solid #333; margin-top: 15px; color: inherit;'>
-                    <strong>Note:</strong> Kappa sample sizes assume equal marginal proportions across categories.
-                    Highly imbalanced categories generally require larger sample sizes.
-                </div>
-            </div>"
+                html <- paste0(
+                    "<div style='font-family: Arial, sans-serif; max-width: 700px; line-height: 1.5;'>\n                <h3>",
+                    .("Sample Size for Agreement Studies"),
+                    "</h3>\n                <p>",
+                    .("Calculates required number of subjects for a prospective interrater agreement study."),
+                    "</p>\n                <h4>",
+                    .("Formulas"),
+                    "</h4>\n                <ul>\n                    <li>",
+                    jmvcore::format(.("{tag1}Kappa (2-5 categories){tag2}: kappaSize power calculation for the common-marginal (intraclass) kappa (Donner & Eliasziw 1987; Rotondi & Donner 2012)"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                    <li>",
+                    jmvcore::format(.("{tag1}ICC{tag2}: Based on Walter, Eliasziw & Donner (1998)"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                </ul>\n                <div style='background-color: rgba(155, 155, 155, 0.06); padding: 12px; border-left: 4px solid #333; margin-top: 15px; color: inherit;'>",
+                    paste0("\n                    ", jmvcore::format(.("{tag1}Note:{tag2} Kappa sample sizes assume equal marginal proportions across categories.\n                    Highly imbalanced categories generally require larger sample sizes."), tag1 = "<strong>", tag2 = "</strong>"), "\n                "),
+                    "</div>\n            </div>"
+                )
                 self$results$agreementSampleSizeExplanation$setContent(html)
             },
             .populateContingencyTableExplanation = function() {
-                html_content <- "
-            <div style='font-family: Arial, sans-serif; max-width: 800px; line-height: 1.6;'>
-                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>
-                    <h3 style='margin: 0 0 10px 0; color: inherit;'>What are Contingency Tables &amp; Rating Combinations?</h3>
-                    <p style='margin: 0; color: inherit;'>
-                        These tables show the <strong>raw frequency distribution</strong> of ratings across raters.
-                        For 2 raters, a cross-tabulation (contingency table) is displayed. For 3+ raters,
-                        all unique rating combinations and their frequencies are shown.
-                    </p>
-                </div>
-
-                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>
-                    <h4 style='margin: 0 0 10px 0; color: inherit;'>How to Read the Table</h4>
-                    <ul style='margin: 0; padding-left: 20px;'>
-                        <li><strong>Diagonal cells</strong> (where Row = Column) represent <strong>agreement</strong> - both raters assigned the same category</li>
-                        <li><strong>Off-diagonal cells</strong> represent <strong>disagreement</strong> - raters assigned different categories</li>
-                        <li>A well-agreeing pair of raters will have most counts concentrated on the diagonal</li>
-                        <li>Systematic patterns in off-diagonal cells may indicate <strong>rater bias</strong> (e.g., one rater consistently upgrading)</li>
-                    </ul>
-                </div>
-
-                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>
-                    <h4 style='margin: 0 0 10px 0; color: inherit;'>When to Use</h4>
-                    <ul style='margin: 0; padding-left: 20px;'>
-                        <li><strong>Before computing agreement statistics</strong> - inspect the raw data to identify unexpected patterns</li>
-                        <li><strong>When kappa is low</strong> - the contingency table reveals <em>where</em> disagreements occur</li>
-                        <li><strong>To detect specific confusion pairs</strong> - which categories are most often confused?</li>
-                        <li><strong>To check data completeness</strong> - are all expected categories represented?</li>
-                    </ul>
-                </div>
-
-                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; color: inherit;'>
-                    <h4 style='margin: 0 0 10px 0; color: inherit;'>Clinical Example</h4>
-                    <p style='margin: 0; font-style: italic;'>
-                        In a breast cancer grading study, the contingency table might reveal that Grade 1 vs Grade 2
-                        is the most common disagreement (off-diagonal counts concentrated there), while Grade 1 vs Grade 3
-                        disagreements are rare. This directs targeted training efforts.
-                    </p>
-                </div>
-            </div>
-            "
+                html_content <- paste0(
+                    "\n            <div style='font-family: Arial, sans-serif; max-width: 800px; line-height: 1.6;'>\n                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>\n                    <h3 style='margin: 0 0 10px 0; color: inherit;'>",
+                    jmvcore::format(.("What are Contingency Tables {tag1} Rating Combinations?"), tag1 = "&amp;"),
+                    "</h3>\n                    <p style='margin: 0; color: inherit;'>",
+                    paste0("\n                        ", jmvcore::format(.("These tables show the {tag1}raw frequency distribution{tag2} of ratings across raters.\n                        For 2 raters, a cross-tabulation (contingency table) is displayed. For 3+ raters,\n                        all unique rating combinations and their frequencies are shown."), tag1 = "<strong>", tag2 = "</strong>"), "\n                    "),
+                    "</p>\n                </div>\n\n                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>\n                    <h4 style='margin: 0 0 10px 0; color: inherit;'>",
+                    .("How to Read the Table"),
+                    "</h4>\n                    <ul style='margin: 0; padding-left: 20px;'>\n                        <li>",
+                    jmvcore::format(.("{tag1}Diagonal cells{tag2} (where Row = Column) represent {tag3}agreement{tag4} - both raters assigned the same category"), tag1 = "<strong>", tag2 = "</strong>", tag3 = "<strong>", tag4 = "</strong>"),
+                    "</li>\n                        <li>",
+                    jmvcore::format(.("{tag1}Off-diagonal cells{tag2} represent {tag3}disagreement{tag4} - raters assigned different categories"), tag1 = "<strong>", tag2 = "</strong>", tag3 = "<strong>", tag4 = "</strong>"),
+                    "</li>\n                        <li>",
+                    .("A well-agreeing pair of raters will have most counts concentrated on the diagonal"),
+                    "</li>\n                        <li>",
+                    jmvcore::format(.("Systematic patterns in off-diagonal cells may indicate {tag1}rater bias{tag2} (e.g., one rater consistently upgrading)"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                    </ul>\n                </div>\n\n                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>\n                    <h4 style='margin: 0 0 10px 0; color: inherit;'>",
+                    .("When to Use"),
+                    "</h4>\n                    <ul style='margin: 0; padding-left: 20px;'>\n                        <li>",
+                    jmvcore::format(.("{tag1}Before computing agreement statistics{tag2} - inspect the raw data to identify unexpected patterns"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                        <li>",
+                    jmvcore::format(.("{tag1}When kappa is low{tag2} - the contingency table reveals {tag3}where{tag4} disagreements occur"), tag1 = "<strong>", tag2 = "</strong>", tag3 = "<em>", tag4 = "</em>"),
+                    "</li>\n                        <li>",
+                    jmvcore::format(.("{tag1}To detect specific confusion pairs{tag2} - which categories are most often confused?"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                        <li>",
+                    jmvcore::format(.("{tag1}To check data completeness{tag2} - are all expected categories represented?"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                    </ul>\n                </div>\n\n                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; color: inherit;'>\n                    <h4 style='margin: 0 0 10px 0; color: inherit;'>",
+                    .("Clinical Example"),
+                    "</h4>\n                    <p style='margin: 0; font-style: italic;'>",
+                    paste0("\n                        ", .("In a breast cancer grading study, the contingency table might reveal that Grade 1 vs Grade 2\n                        is the most common disagreement (off-diagonal counts concentrated there), while Grade 1 vs Grade 3\n                        disagreements are rare. This directs targeted training efforts."), "\n                    "),
+                    "</p>\n                </div>\n            </div>\n            "
+                )
                 self$results$contingencyTableExplanation$setContent(html_content)
             },
             .populateBlandAltmanExplanation = function() {
-                html_content <- "
-            <div style='font-family: Arial, sans-serif; max-width: 800px; line-height: 1.6;'>
-                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>
-                    <h3 style='margin: 0 0 10px 0; color: inherit;'>What is Bland-Altman Analysis?</h3>
-                    <p style='margin: 0; color: inherit;'>
-                        The Bland-Altman method assesses <strong>agreement between two continuous measurements</strong>
-                        by plotting the difference between methods against their mean. It is the gold standard for
-                        method comparison studies in clinical research.
-                    </p>
-                </div>
-
-                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>
-                    <h4 style='margin: 0 0 10px 0; color: inherit;'>When to Use Bland-Altman</h4>
-                    <ul style='margin: 0; padding-left: 20px;'>
-                        <li><strong>Comparing two measurement methods</strong> - e.g., automated vs manual Ki-67 scoring</li>
-                        <li><strong>Validating a new instrument</strong> against an established reference method</li>
-                        <li><strong>Continuous data only</strong> - for categorical data, use kappa-based methods instead</li>
-                        <li><strong>Paired measurements</strong> - both methods must measure the same cases</li>
-                    </ul>
-                </div>
-
-                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>
-                    <h4 style='margin: 0 0 10px 0; color: inherit;'>Interpreting the Results</h4>
-                    <table style='width: 100%; border-collapse: collapse;'>
-                        <tr style='background-color: rgba(88, 88, 88, 0.06); color: inherit;'>
-                            <th style='padding: 8px; text-align: left; border-bottom: 2px solid #333;'>Metric</th>
-                            <th style='padding: 8px; text-align: left; border-bottom: 2px solid #333;'>Interpretation</th>
-                        </tr>
-                        <tr>
-                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'><strong>Mean Difference (Bias)</strong></td>
-                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>Systematic difference between methods; close to 0 = no systematic bias</td>
-                        </tr>
-                        <tr>
-                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'><strong>Limits of Agreement (LoA)</strong></td>
-                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>Mean \u00B1 z \u00D7 SD, where z comes from the coverage you choose (1.96 at the default 95%); that share of differences is expected to fall within these limits if the differences are normally distributed</td>
-                        </tr>
-                        <tr>
-                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'><strong>Difference-Mean Slope (p)</strong></td>
-                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>Exploratory OLS test of a zero slope. A significant result can reflect a magnitude-related difference or unequal method precision; it is not, alone, proof of proportional bias</td>
-                        </tr>
-                        <tr>
-                            <td style='padding: 8px;'><strong>Normality test</strong></td>
-                            <td style='padding: 8px;'>Differences should be approximately normally distributed for valid LoA</td>
-                        </tr>
-                    </table>
-                </div>
-
-                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>
-                    <h4 style='margin: 0 0 10px 0; color: inherit;'>Clinical Decision Rule</h4>
-                    <p style='margin: 0; font-style: italic;'>
-                        The key question is: \u{201C}Are the limits of agreement clinically acceptable?\u{201D} For example,
-                        if two Ki-67 scoring methods have LoA of \u00B15%, and the clinical threshold is 20%,
-                        a \u00B15% discrepancy could change treatment decisions for patients near the cutoff.
-                        Clinical context - not statistical significance - determines acceptability.
-                    </p>
-                </div>
-
-                <div style='margin-top: 15px; padding: 10px; background-color: rgba(88, 88, 88, 0.06); border-radius: 4px; color: inherit;'>
-                    <p style='margin: 0; font-size: 12px; color: inherit;'>
-                        <strong>Reference:</strong> Bland, J. M., &amp; Altman, D. G. (1986). Statistical methods for assessing
-                        agreement between two methods of clinical measurement. <em>The Lancet</em>, 327(8476), 307-310.
-                    </p>
-                </div>
-            </div>
-            "
+                html_content <- paste0(
+                    "\n            <div style='font-family: Arial, sans-serif; max-width: 800px; line-height: 1.6;'>\n                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>\n                    <h3 style='margin: 0 0 10px 0; color: inherit;'>",
+                    .("What is Bland-Altman Analysis?"),
+                    "</h3>\n                    <p style='margin: 0; color: inherit;'>",
+                    paste0("\n                        ", jmvcore::format(.("The Bland-Altman method assesses {tag1}agreement between two continuous measurements{tag2}\n                        by plotting the difference between methods against their mean. It is the gold standard for\n                        method comparison studies in clinical research."), tag1 = "<strong>", tag2 = "</strong>"), "\n                    "),
+                    "</p>\n                </div>\n\n                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>\n                    <h4 style='margin: 0 0 10px 0; color: inherit;'>",
+                    .("When to Use Bland-Altman"),
+                    "</h4>\n                    <ul style='margin: 0; padding-left: 20px;'>\n                        <li>",
+                    jmvcore::format(.("{tag1}Comparing two measurement methods{tag2} - e.g., automated vs manual Ki-67 scoring"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                        <li>",
+                    jmvcore::format(.("{tag1}Validating a new instrument{tag2} against an established reference method"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                        <li>",
+                    jmvcore::format(.("{tag1}Continuous data only{tag2} - for categorical data, use kappa-based methods instead"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                        <li>",
+                    jmvcore::format(.("{tag1}Paired measurements{tag2} - both methods must measure the same cases"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                    </ul>\n                </div>\n\n                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>\n                    <h4 style='margin: 0 0 10px 0; color: inherit;'>",
+                    .("Interpreting the Results"),
+                    "</h4>\n                    <table style='width: 100%; border-collapse: collapse;'>\n                        <tr style='background-color: rgba(88, 88, 88, 0.06); color: inherit;'>\n                            <th style='padding: 8px; text-align: left; border-bottom: 2px solid #333;'>",
+                    .("Metric"),
+                    "</th>\n                            <th style='padding: 8px; text-align: left; border-bottom: 2px solid #333;'>",
+                    .("Interpretation"),
+                    "</th>\n                        </tr>\n                        <tr>\n                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>",
+                    jmvcore::format(.("{tag1}Mean Difference (Bias){tag2}"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</td>\n                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>",
+                    .("Systematic difference between methods; close to 0 = no systematic bias"),
+                    "</td>\n                        </tr>\n                        <tr>\n                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>",
+                    jmvcore::format(.("{tag1}Limits of Agreement (LoA){tag2}"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</td>\n                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>",
+                    .("Mean \u00b1 z \u00d7 SD, where z comes from the coverage you choose (1.96 at the default 95%); that share of differences is expected to fall within these limits if the differences are normally distributed"),
+                    "</td>\n                        </tr>\n                        <tr>\n                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>",
+                    jmvcore::format(.("{tag1}Difference-Mean Slope (p){tag2}"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</td>\n                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>",
+                    .("Exploratory OLS test of a zero slope. A significant result can reflect a magnitude-related difference or unequal method precision; it is not, alone, proof of proportional bias"),
+                    "</td>\n                        </tr>\n                        <tr>\n                            <td style='padding: 8px;'>",
+                    jmvcore::format(.("{tag1}Normality test{tag2}"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</td>\n                            <td style='padding: 8px;'>",
+                    .("Differences should be approximately normally distributed for valid LoA"),
+                    "</td>\n                        </tr>\n                    </table>\n                </div>\n\n                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>\n                    <h4 style='margin: 0 0 10px 0; color: inherit;'>",
+                    .("Clinical Decision Rule"),
+                    "</h4>\n                    <p style='margin: 0; font-style: italic;'>",
+                    paste0("\n                        ", .("The key question is: \u201cAre the limits of agreement clinically acceptable?\u201d For example,\n                        if two Ki-67 scoring methods have LoA of \u00b15%, and the clinical threshold is 20%,\n                        a \u00b15% discrepancy could change treatment decisions for patients near the cutoff.\n                        Clinical context - not statistical significance - determines acceptability."), "\n                    "),
+                    "</p>\n                </div>\n\n                <div style='margin-top: 15px; padding: 10px; background-color: rgba(88, 88, 88, 0.06); border-radius: 4px; color: inherit;'>\n                    <p style='margin: 0; font-size: 12px; color: inherit;'>",
+                    paste0("\n                        ", jmvcore::format(.("{tag1}Reference:{tag2} Bland, J. M., {tag3} Altman, D. G. (1986). Statistical methods for assessing\n                        agreement between two methods of clinical measurement. {tag4}The Lancet{tag5}, 327(8476), 307-310."), tag1 = "<strong>", tag2 = "</strong>", tag3 = "&amp;", tag4 = "<em>", tag5 = "</em>"), "\n                    "),
+                    "</p>\n                </div>\n            </div>\n            "
+                )
                 self$results$blandAltmanExplanation$setContent(html_content)
             },
             .populateKrippExplanation = function() {
-                html_content <- "
-            <div style='font-family: Arial, sans-serif; max-width: 800px; line-height: 1.6;'>
-                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>
-                    <h3 style='margin: 0 0 10px 0; color: inherit;'>What is Krippendorff's Alpha?</h3>
-                    <p style='margin: 0; color: inherit;'>
-                        Krippendorff's alpha (\u{03B1}) is a versatile reliability coefficient that works with
-                        <strong>any number of raters</strong>, <strong>any measurement scale</strong>
-                        (nominal, ordinal, interval, ratio), and <strong>handles missing data</strong> gracefully.
-                        It is one of the most widely used agreement measures in content analysis and clinical research.
-                    </p>
-                </div>
-
-                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>
-                    <h4 style='margin: 0 0 10px 0; color: inherit;'>When to Use Krippendorff's Alpha</h4>
-                    <ul style='margin: 0; padding-left: 20px;'>
-                        <li><strong>Missing data</strong> - Unlike kappa, it naturally handles incomplete designs where not all raters rate all cases</li>
-                        <li><strong>Multiple raters (3+)</strong> - Generalizes seamlessly beyond 2 raters without modification</li>
-                        <li><strong>Mixed scale types</strong> - Choose nominal, ordinal, interval, or ratio depending on your data</li>
-                        <li><strong>Content analysis studies</strong> - Standard in communication and social science research</li>
-                    </ul>
-                </div>
-
-                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>
-                    <h4 style='margin: 0 0 10px 0; color: inherit;'>Interpretation Thresholds (Krippendorff 2004)</h4>
-                    <table style='width: 100%; border-collapse: collapse;'>
-                        <tr style='background-color: rgba(88, 88, 88, 0.06); color: inherit;'>
-                            <th style='padding: 8px; text-align: left; border-bottom: 2px solid #333;'>Alpha Range</th>
-                            <th style='padding: 8px; text-align: left; border-bottom: 2px solid #333;'>Interpretation</th>
-                            <th style='padding: 8px; text-align: left; border-bottom: 2px solid #333;'>Action</th>
-                        </tr>
-                        <tr>
-                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'><strong>\u{03B1} \u{2265} 0.80</strong></td>
-                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>Reliable agreement</td>
-                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>Data can be used with confidence</td>
-                        </tr>
-                        <tr>
-                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'><strong>0.667 \u{2264} \u{03B1} &lt; 0.80</strong></td>
-                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>Tentative conclusions</td>
-                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>Use cautiously; consider additional rater training</td>
-                        </tr>
-                        <tr>
-                            <td style='padding: 8px;'><strong>\u{03B1} &lt; 0.667</strong></td>
-                            <td style='padding: 8px;'>Insufficient agreement</td>
-                            <td style='padding: 8px;'>Variable should be discarded or criteria revised</td>
-                        </tr>
-                    </table>
-                </div>
-
-                <div style='background-color: rgba(33, 152, 239, 0.13); border-left: 4px solid #1565C0; padding: 15px; margin-bottom: 20px; color: inherit;'>
-                    <h4 style='margin: 0 0 10px 0; color: inherit;'>Krippendorff's Alpha vs Other Measures</h4>
-                    <table style='width: 100%; border-collapse: collapse;'>
-                        <tr style='background-color: rgba(88, 88, 88, 0.06); color: inherit;'>
-                            <th style='padding: 8px; text-align: left; border-bottom: 2px solid #333;'>Feature</th>
-                            <th style='padding: 8px; text-align: center; border-bottom: 2px solid #333;'>Krippendorff</th>
-                            <th style='padding: 8px; text-align: center; border-bottom: 2px solid #333;'>Fleiss' Kappa</th>
-                            <th style='padding: 8px; text-align: center; border-bottom: 2px solid #333;'>ICC</th>
-                        </tr>
-                        <tr>
-                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>Handles missing data</td>
-                            <td style='padding: 8px; text-align: center; border-bottom: 1px solid #ddd;'>\u{2713}</td>
-                            <td style='padding: 8px; text-align: center; border-bottom: 1px solid #ddd;'>\u{2717}</td>
-                            <td style='padding: 8px; text-align: center; border-bottom: 1px solid #ddd;'>\u{2717}</td>
-                        </tr>
-                        <tr>
-                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>Any number of raters</td>
-                            <td style='padding: 8px; text-align: center; border-bottom: 1px solid #ddd;'>\u{2713}</td>
-                            <td style='padding: 8px; text-align: center; border-bottom: 1px solid #ddd;'>\u{2713}</td>
-                            <td style='padding: 8px; text-align: center; border-bottom: 1px solid #ddd;'>\u{2713}</td>
-                        </tr>
-                        <tr>
-                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>Nominal/ordinal/interval</td>
-                            <td style='padding: 8px; text-align: center; border-bottom: 1px solid #ddd;'>\u{2713}</td>
-                            <td style='padding: 8px; text-align: center; border-bottom: 1px solid #ddd;'>Nominal only</td>
-                            <td style='padding: 8px; text-align: center; border-bottom: 1px solid #ddd;'>Continuous only</td>
-                        </tr>
-                        <tr>
-                            <td style='padding: 8px;'>Kappa paradox resistant</td>
-                            <td style='padding: 8px; text-align: center;'>Partially</td>
-                            <td style='padding: 8px; text-align: center;'>\u{2717}</td>
-                            <td style='padding: 8px; text-align: center;'>N/A</td>
-                        </tr>
-                    </table>
-                </div>
-
-                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; color: inherit;'>
-                    <h4 style='margin: 0 0 10px 0; color: inherit;'>Clinical Example</h4>
-                    <p style='margin: 0; font-style: italic;'>
-                        In a multi-site tumor grading study where 5 pathologists each reviewed a subset of cases
-                        (not all pathologists reviewed every slide), Krippendorff's alpha is the ideal choice because
-                        it handles the incomplete design naturally. An \u{03B1} of 0.72 for histologic grade sits between
-                        the two benchmarks listed above - above Krippendorff's 0.667 floor and below his 0.800 level.
-                        Those cutoffs are a convention carried over from content analysis, so the number tells you where
-                        this study falls against a published convention, not what the grades mean for any case.
-                    </p>
-                </div>
-
-                <div style='margin-top: 15px; padding: 10px; background-color: rgba(88, 88, 88, 0.06); border-radius: 4px; color: inherit;'>
-                    <p style='margin: 0; font-size: 12px; color: inherit;'>
-                        <strong>Reference:</strong> Krippendorff, K. (2004). <em>Content Analysis: An Introduction to Its Methodology</em>
-                        (2nd ed.). Sage Publications. Chapter 11.
-                    </p>
-                </div>
-            </div>
-            "
+                html_content <- paste0(
+                    "\n            <div style='font-family: Arial, sans-serif; max-width: 800px; line-height: 1.6;'>\n                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>\n                    <h3 style='margin: 0 0 10px 0; color: inherit;'>",
+                    .("What is Krippendorff's Alpha?"),
+                    "</h3>\n                    <p style='margin: 0; color: inherit;'>",
+                    paste0("\n                        ", jmvcore::format(.("Krippendorff's alpha (\u03b1) is a versatile reliability coefficient that works with\n                        {tag1}any number of raters{tag2}, {tag3}any measurement scale{tag4}\n                        (nominal, ordinal, interval, ratio), and {tag5}handles missing data{tag6} gracefully.\n                        It is one of the most widely used agreement measures in content analysis and clinical research."), tag1 = "<strong>", tag2 = "</strong>", tag3 = "<strong>", tag4 = "</strong>", tag5 = "<strong>", tag6 = "</strong>"), "\n                    "),
+                    "</p>\n                </div>\n\n                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>\n                    <h4 style='margin: 0 0 10px 0; color: inherit;'>",
+                    .("When to Use Krippendorff's Alpha"),
+                    "</h4>\n                    <ul style='margin: 0; padding-left: 20px;'>\n                        <li>",
+                    jmvcore::format(.("{tag1}Missing data{tag2} - Unlike kappa, it naturally handles incomplete designs where not all raters rate all cases"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                        <li>",
+                    jmvcore::format(.("{tag1}Multiple raters (3+){tag2} - Generalizes seamlessly beyond 2 raters without modification"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                        <li>",
+                    jmvcore::format(.("{tag1}Mixed scale types{tag2} - Choose nominal, ordinal, interval, or ratio depending on your data"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                        <li>",
+                    jmvcore::format(.("{tag1}Content analysis studies{tag2} - Standard in communication and social science research"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                    </ul>\n                </div>\n\n                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>\n                    <h4 style='margin: 0 0 10px 0; color: inherit;'>",
+                    .("Interpretation Thresholds (Krippendorff 2004)"),
+                    "</h4>\n                    <table style='width: 100%; border-collapse: collapse;'>\n                        <tr style='background-color: rgba(88, 88, 88, 0.06); color: inherit;'>\n                            <th style='padding: 8px; text-align: left; border-bottom: 2px solid #333;'>",
+                    .("Alpha Range"),
+                    "</th>\n                            <th style='padding: 8px; text-align: left; border-bottom: 2px solid #333;'>",
+                    .("Interpretation"),
+                    "</th>\n                            <th style='padding: 8px; text-align: left; border-bottom: 2px solid #333;'>",
+                    .("Action"),
+                    "</th>\n                        </tr>\n                        <tr>\n                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'><strong>\u03b1 \u2265 0.80</strong></td>\n                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>",
+                    .("Reliable agreement"),
+                    "</td>\n                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>",
+                    .("Data can be used with confidence"),
+                    "</td>\n                        </tr>\n                        <tr>\n                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>",
+                    jmvcore::format(.("{tag1}0.667 \u2264 \u03b1 {tag2} 0.80{tag3}"), tag1 = "<strong>", tag2 = "&lt;", tag3 = "</strong>"),
+                    "</td>\n                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>",
+                    .("Tentative conclusions"),
+                    "</td>\n                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>",
+                    .("Use cautiously; consider additional rater training"),
+                    "</td>\n                        </tr>\n                        <tr>\n                            <td style='padding: 8px;'>",
+                    jmvcore::format(.("{tag1}\u03b1 {tag2} 0.667{tag3}"), tag1 = "<strong>", tag2 = "&lt;", tag3 = "</strong>"),
+                    "</td>\n                            <td style='padding: 8px;'>",
+                    .("Insufficient agreement"),
+                    "</td>\n                            <td style='padding: 8px;'>",
+                    .("Variable should be discarded or criteria revised"),
+                    "</td>\n                        </tr>\n                    </table>\n                </div>\n\n                <div style='background-color: rgba(33, 152, 239, 0.13); border-left: 4px solid #1565C0; padding: 15px; margin-bottom: 20px; color: inherit;'>\n                    <h4 style='margin: 0 0 10px 0; color: inherit;'>",
+                    .("Krippendorff's Alpha vs Other Measures"),
+                    "</h4>\n                    <table style='width: 100%; border-collapse: collapse;'>\n                        <tr style='background-color: rgba(88, 88, 88, 0.06); color: inherit;'>\n                            <th style='padding: 8px; text-align: left; border-bottom: 2px solid #333;'>",
+                    .("Feature"),
+                    "</th>\n                            <th style='padding: 8px; text-align: center; border-bottom: 2px solid #333;'>",
+                    .("Krippendorff"),
+                    "</th>\n                            <th style='padding: 8px; text-align: center; border-bottom: 2px solid #333;'>",
+                    .("Fleiss' Kappa"),
+                    "</th>\n                            <th style='padding: 8px; text-align: center; border-bottom: 2px solid #333;'>",
+                    .("ICC"),
+                    "</th>\n                        </tr>\n                        <tr>\n                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>",
+                    .("Handles missing data"),
+                    "</td>\n                            <td style='padding: 8px; text-align: center; border-bottom: 1px solid #ddd;'>\u2713</td>\n                            <td style='padding: 8px; text-align: center; border-bottom: 1px solid #ddd;'>\u2717</td>\n                            <td style='padding: 8px; text-align: center; border-bottom: 1px solid #ddd;'>\u2717</td>\n                        </tr>\n                        <tr>\n                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>",
+                    .("Any number of raters"),
+                    "</td>\n                            <td style='padding: 8px; text-align: center; border-bottom: 1px solid #ddd;'>\u2713</td>\n                            <td style='padding: 8px; text-align: center; border-bottom: 1px solid #ddd;'>\u2713</td>\n                            <td style='padding: 8px; text-align: center; border-bottom: 1px solid #ddd;'>\u2713</td>\n                        </tr>\n                        <tr>\n                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>",
+                    .("Nominal/ordinal/interval"),
+                    "</td>\n                            <td style='padding: 8px; text-align: center; border-bottom: 1px solid #ddd;'>\u2713</td>\n                            <td style='padding: 8px; text-align: center; border-bottom: 1px solid #ddd;'>",
+                    .("Nominal only"),
+                    "</td>\n                            <td style='padding: 8px; text-align: center; border-bottom: 1px solid #ddd;'>",
+                    .("Continuous only"),
+                    "</td>\n                        </tr>\n                        <tr>\n                            <td style='padding: 8px;'>",
+                    .("Kappa paradox resistant"),
+                    "</td>\n                            <td style='padding: 8px; text-align: center;'>",
+                    .("Partially"),
+                    "</td>\n                            <td style='padding: 8px; text-align: center;'>\u2717</td>\n                            <td style='padding: 8px; text-align: center;'>",
+                    .("N/A"),
+                    "</td>\n                        </tr>\n                    </table>\n                </div>\n\n                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; color: inherit;'>\n                    <h4 style='margin: 0 0 10px 0; color: inherit;'>",
+                    .("Clinical Example"),
+                    "</h4>\n                    <p style='margin: 0; font-style: italic;'>",
+                    paste0("\n                        ", .("In a multi-site tumor grading study where 5 pathologists each reviewed a subset of cases\n                        (not all pathologists reviewed every slide), Krippendorff's alpha is the ideal choice because\n                        it handles the incomplete design naturally. An \u03b1 of 0.72 for histologic grade sits between\n                        the two benchmarks listed above - above Krippendorff's 0.667 floor and below his 0.800 level.\n                        Those cutoffs are a convention carried over from content analysis, so the number tells you where\n                        this study falls against a published convention, not what the grades mean for any case."), "\n                    "),
+                    "</p>\n                </div>\n\n                <div style='margin-top: 15px; padding: 10px; background-color: rgba(88, 88, 88, 0.06); border-radius: 4px; color: inherit;'>\n                    <p style='margin: 0; font-size: 12px; color: inherit;'>",
+                    paste0("\n                        ", jmvcore::format(.("{tag1}Reference:{tag2} Krippendorff, K. (2004). {tag3}Content Analysis: An Introduction to Its Methodology{tag4}\n                        (2nd ed.). Sage Publications. Chapter 11."), tag1 = "<strong>", tag2 = "</strong>", tag3 = "<em>", tag4 = "</em>"), "\n                    "),
+                    "</p>\n                </div>\n            </div>\n            "
+                )
                 self$results$krippExplanation$setContent(html_content)
             },
             .populatePABAKExplanation = function() {
-                html_content <- "
-            <div style='font-family: Arial, sans-serif; max-width: 800px; line-height: 1.6;'>
-                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>
-                    <h3 style='margin: 0 0 10px 0; color: inherit;'>What is PABAK?</h3>
-                    <p style='margin: 0; color: inherit;'>
-                        PABAK (Prevalence-Adjusted Bias-Adjusted Kappa) corrects Cohen's kappa for the effects of
-                        <strong>unequal category prevalence</strong> and <strong>systematic rater bias</strong>.
-                        It directly addresses the <strong>kappa paradox</strong>, where kappa can be misleadingly low
-                        despite high observed agreement.
-                    </p>
-                </div>
-
-                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>
-                    <h4 style='margin: 0 0 10px 0; color: inherit;'>When to Use PABAK</h4>
-                    <ul style='margin: 0; padding-left: 20px;'>
-                        <li><strong>Rare diagnoses</strong> - When one category is much more common than others (e.g., benign vs malignant in screening)</li>
-                        <li><strong>Low kappa despite high agreement</strong> - The classic kappa paradox situation</li>
-                        <li><strong>Two raters only</strong> - PABAK is defined for 2\u{00D7}2 and multi-category tables with exactly 2 raters</li>
-                        <li><strong>Alongside kappa</strong> - Report both to show whether prevalence/bias effects are distorting kappa</li>
-                    </ul>
-                </div>
-
-                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>
-                    <h4 style='margin: 0 0 10px 0; color: inherit;'>Key Indices Explained</h4>
-                    <table style='width: 100%; border-collapse: collapse;'>
-                        <tr style='background-color: rgba(88, 88, 88, 0.06); color: inherit;'>
-                            <th style='padding: 8px; text-align: left; border-bottom: 2px solid #333;'>Index</th>
-                            <th style='padding: 8px; text-align: left; border-bottom: 2px solid #333;'>Formula</th>
-                            <th style='padding: 8px; text-align: left; border-bottom: 2px solid #333;'>Interpretation</th>
-                        </tr>
-                        <tr>
-                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'><strong>PABAK</strong></td>
-                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>(qP<sub>o</sub> \u2212 1) / (q \u2212 1) for q categories; 2P<sub>o</sub> \u2212 1 with two categories</td>
-                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>Agreement adjusted for both prevalence and bias; ranges from \u{2212}1 to 1</td>
-                        </tr>
-                        <tr>
-                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'><strong>Prevalence Index</strong></td>
-                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>|a \u{2212} d| / n (2\u{00D7}2 tables only: a and d are the two agreement cells; not reported for more categories)</td>
-                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>High values (&gt;0.5) indicate unbalanced categories; kappa is deflated</td>
-                        </tr>
-                        <tr>
-                            <td style='padding: 8px;'><strong>Bias Index</strong></td>
-                            <td style='padding: 8px;'>|b \u{2212} c| / n (2\u{00D7}2 tables only: b and c are the two disagreement cells; not reported for more categories)</td>
-                            <td style='padding: 8px;'>High values (&gt;0.3) indicate systematic difference between raters</td>
-                        </tr>
-                    </table>
-                </div>
-
-                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>
-                    <h4 style='margin: 0 0 10px 0; color: inherit;'>Clinical Example: The Kappa Paradox</h4>
-                    <p style='margin: 0; font-style: italic;'>
-                        Two pathologists classify 100 biopsies as benign/malignant. Results: 90 both say benign,
-                        5 both say malignant, 3 and 2 disagree. Observed agreement = 95%, but kappa = 0.64
-                        (\u{201C}substantial\u{201D}), well below what 95% agreement suggests. The Prevalence Index = 0.85 (highly
-                        imbalanced categories) is deflating kappa. PABAK = 0.90 (\u{201C}almost perfect\u{201D})
-                        better reflects the true agreement level.
-                    </p>
-                </div>
-
-                <div style='margin-top: 15px; padding: 10px; background-color: rgba(88, 88, 88, 0.06); border-radius: 4px; color: inherit;'>
-                    <p style='margin: 0; font-size: 12px; color: inherit;'>
-                        <strong>Reference:</strong> Byrt, T., Bishop, J., &amp; Carlin, J. B. (1993). Bias, prevalence and kappa.
-                        <em>Journal of Clinical Epidemiology</em>, 46(5), 423-429.
-                    </p>
-                </div>
-            </div>
-            "
+                html_content <- paste0(
+                    "\n            <div style='font-family: Arial, sans-serif; max-width: 800px; line-height: 1.6;'>\n                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>\n                    <h3 style='margin: 0 0 10px 0; color: inherit;'>",
+                    .("What is PABAK?"),
+                    "</h3>\n                    <p style='margin: 0; color: inherit;'>",
+                    paste0("\n                        ", jmvcore::format(.("PABAK (Prevalence-Adjusted Bias-Adjusted Kappa) corrects Cohen's kappa for the effects of\n                        {tag1}unequal category prevalence{tag2} and {tag3}systematic rater bias{tag4}.\n                        It directly addresses the {tag5}kappa paradox{tag6}, where kappa can be misleadingly low\n                        despite high observed agreement."), tag1 = "<strong>", tag2 = "</strong>", tag3 = "<strong>", tag4 = "</strong>", tag5 = "<strong>", tag6 = "</strong>"), "\n                    "),
+                    "</p>\n                </div>\n\n                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>\n                    <h4 style='margin: 0 0 10px 0; color: inherit;'>",
+                    .("When to Use PABAK"),
+                    "</h4>\n                    <ul style='margin: 0; padding-left: 20px;'>\n                        <li>",
+                    jmvcore::format(.("{tag1}Rare diagnoses{tag2} - When one category is much more common than others (e.g., benign vs malignant in screening)"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                        <li>",
+                    jmvcore::format(.("{tag1}Low kappa despite high agreement{tag2} - The classic kappa paradox situation"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                        <li>",
+                    jmvcore::format(.("{tag1}Two raters only{tag2} - PABAK is defined for 2\u00d72 and multi-category tables with exactly 2 raters"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                        <li>",
+                    jmvcore::format(.("{tag1}Alongside kappa{tag2} - Report both to show whether prevalence/bias effects are distorting kappa"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                    </ul>\n                </div>\n\n                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>\n                    <h4 style='margin: 0 0 10px 0; color: inherit;'>",
+                    .("Key Indices Explained"),
+                    "</h4>\n                    <table style='width: 100%; border-collapse: collapse;'>\n                        <tr style='background-color: rgba(88, 88, 88, 0.06); color: inherit;'>\n                            <th style='padding: 8px; text-align: left; border-bottom: 2px solid #333;'>",
+                    .("Index"),
+                    "</th>\n                            <th style='padding: 8px; text-align: left; border-bottom: 2px solid #333;'>",
+                    .("Formula"),
+                    "</th>\n                            <th style='padding: 8px; text-align: left; border-bottom: 2px solid #333;'>",
+                    .("Interpretation"),
+                    "</th>\n                        </tr>\n                        <tr>\n                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>",
+                    jmvcore::format(.("{tag1}PABAK{tag2}"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</td>\n                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>",
+                    jmvcore::format(.("(qP{tag1}o{tag2} \u2212 1) / (q \u2212 1) for q categories; 2P{tag3}o{tag4} \u2212 1 with two categories"), tag1 = "<sub>", tag2 = "</sub>", tag3 = "<sub>", tag4 = "</sub>"),
+                    "</td>\n                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>",
+                    .("Agreement adjusted for both prevalence and bias; ranges from \u22121 to 1"),
+                    "</td>\n                        </tr>\n                        <tr>\n                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>",
+                    jmvcore::format(.("{tag1}Prevalence Index{tag2}"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</td>\n                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>",
+                    .("|a \u2212 d| / n (2\u00d72 tables only: a and d are the two agreement cells; not reported for more categories)"),
+                    "</td>\n                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>",
+                    jmvcore::format(.("High values ({tag1}0.5) indicate unbalanced categories; kappa is deflated"), tag1 = "&gt;"),
+                    "</td>\n                        </tr>\n                        <tr>\n                            <td style='padding: 8px;'>",
+                    jmvcore::format(.("{tag1}Bias Index{tag2}"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</td>\n                            <td style='padding: 8px;'>",
+                    .("|b \u2212 c| / n (2\u00d72 tables only: b and c are the two disagreement cells; not reported for more categories)"),
+                    "</td>\n                            <td style='padding: 8px;'>",
+                    jmvcore::format(.("High values ({tag1}0.3) indicate systematic difference between raters"), tag1 = "&gt;"),
+                    "</td>\n                        </tr>\n                    </table>\n                </div>\n\n                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>\n                    <h4 style='margin: 0 0 10px 0; color: inherit;'>",
+                    .("Clinical Example: The Kappa Paradox"),
+                    "</h4>\n                    <p style='margin: 0; font-style: italic;'>",
+                    paste0("\n                        ", .("Two pathologists classify 100 biopsies as benign/malignant. Results: 90 both say benign,\n                        5 both say malignant, 3 and 2 disagree. Observed agreement = 95%, but kappa = 0.64\n                        (\u201csubstantial\u201d), well below what 95% agreement suggests. The Prevalence Index = 0.85 (highly\n                        imbalanced categories) is deflating kappa. PABAK = 0.90 (\u201calmost perfect\u201d)\n                        better reflects the true agreement level."), "\n                    "),
+                    "</p>\n                </div>\n\n                <div style='margin-top: 15px; padding: 10px; background-color: rgba(88, 88, 88, 0.06); border-radius: 4px; color: inherit;'>\n                    <p style='margin: 0; font-size: 12px; color: inherit;'>",
+                    paste0("\n                        ", jmvcore::format(.("{tag1}Reference:{tag2} Byrt, T., Bishop, J., {tag3} Carlin, J. B. (1993). Bias, prevalence and kappa.\n                        {tag4}Journal of Clinical Epidemiology{tag5}, 46(5), 423-429."), tag1 = "<strong>", tag2 = "</strong>", tag3 = "&amp;", tag4 = "<em>", tag5 = "</em>"), "\n                    "),
+                    "</p>\n                </div>\n            </div>\n            "
+                )
                 self$results$pabakExplanation$setContent(html_content)
             },
             # ---- Pathologist grading analysis (model-based ordinal agreement) ----
@@ -15329,6 +15845,45 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                 info
             },
 
+            .populateSetupGuides = function() {
+                if (self$options$showKrippGuide) private$.populateKrippExplanation()
+                if (self$options$showLightKappaGuide) private$.populateLightKappaExplanation()
+                if (self$options$showFinnGuide) private$.populateFinnExplanation()
+                if (self$options$showKendallWGuide) private$.populateKendallWExplanation()
+                if (self$options$showRobinsonAGuide) private$.populateRobinsonAExplanation()
+                if (self$options$showMeanSpearmanGuide) private$.populateMeanSpearmanExplanation()
+                if (self$options$showICCGuide) private$.populateICCExplanation()
+                if (self$options$showMeanPearsonGuide) private$.populateMeanPearsonExplanation()
+                if (self$options$showLinCCCGuide) private$.populateLinCCCExplanation()
+                if (self$options$showTDIGuide) private$.populateTDIExplanation()
+                if (self$options$showSpecificAgreementGuide) private$.populateSpecificAgreementExplanation()
+                if (self$options$showAgreementHeatmapGuide) private$.populateAgreementHeatmapExplanation()
+                if (self$options$showRaterProfileGuide) private$.populateRaterProfileExplanation()
+                if (self$options$showSubgroupGuide) private$.populateSubgroupExplanation()
+                if (self$options$showRaterClusterGuide) private$.populateRaterClusterExplanation()
+                if (self$options$showCaseClusterGuide) private$.populateCaseClusterExplanation()
+                if (self$options$showMaxwellREGuide) private$.populateMaxwellREExplanation()
+                if (self$options$showInterIntraRaterGuide) private$.populateInterIntraRaterExplanation()
+                if (self$options$showIotaGuide) private$.populateIotaExplanation()
+                if (self$options$showHierarchicalGuide) private$.populateHierarchicalExplanation()
+                if (self$options$showBlandAltmanGuide) private$.populateBlandAltmanExplanation()
+                if (self$options$showMixedEffectsGuide) private$.populateMixedEffectsExplanation()
+                if (self$options$showConfusionMatrixGuide) private$.populateConfusionMatrixExplanation()
+                if (self$options$showBootstrapCIGuide) private$.populateBootstrapCIExplanation()
+                if (self$options$showConcordanceF1Guide) private$.populateConcordanceF1Explanation()
+                if (self$options$showPairedAgreementGuide) private$.populatePairedAgreementExplanation()
+                if (self$options$showSampleSizeGuide) private$.populateAgreementSampleSizeExplanation()
+                if (self$options$showRaterBiasGuide) private$.populateRaterBiasExplanation()
+                if (self$options$showBhapkarGuide) private$.populateBhapkarExplanation()
+                if (self$options$showStuartMaxwellGuide) private$.populateStuartMaxwellExplanation()
+                if (self$options$showPairwiseKappaGuide) private$.populatePairwiseKappaExplanation()
+                if (self$options$showAllPairsKappaGuide) private$.populateAllPairsKappaExplanation()
+                if (self$options$showItemModalGuide) private$.populateItemModalAgreementExplanation()
+                if (self$options$showGwetGuide) private$.populateGwetExplanation()
+                if (self$options$showPABAKGuide) private$.populatePABAKExplanation()
+                if (self$options$showGradingGuide) private$.populateGradingGuide()
+            },
+
             .run = function() {
                 # TODO (UX, file-wide): error reporting throughout this file uses
                 # `self$results$<table>$setNote("error", .("..."))` + `return()` rather
@@ -15423,6 +15978,14 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                     for (k in names(tbl$notes)) tbl$setNote(k, NULL)
                 }
 
+                # Coverage controls the limits themselves; reject rather than clamp.
+                coverage <- self$options$baConfidenceLevel
+                if (isTRUE(self$options$blandAltmanPlot) &&
+                    (length(coverage) != 1L || !is.finite(coverage) ||
+                     coverage < 0.50 || coverage > 0.99)) {
+                    jmvcore::reject(.("Coverage for limits of agreement must be a finite proportion from 0.50 to 0.99 (enter 0.95 for 95%)."))
+                }
+
                 # The categorical hierarchical route hides three linear-model tables
                 # (.calculateHierarchicalCategorical). setVisible() replaces the .r.yaml
                 # `visible:` expression on this object, and resetVisible() would make
@@ -15440,81 +16003,39 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                 if (is.null(self$options$vars) || length(self$options$vars) < 2) {
                     self$results$welcome$setVisible(TRUE)
                     self$results$welcome$setContent(
-                        "<div style='font-family: Arial, sans-serif; max-width: 800px; line-height: 1.4;'>
-                <div style='background-color: rgba(88, 88, 88, 0.06); border: 2px solid #333; padding: 20px; margin-bottom: 20px; color: inherit;'>
-                <h2 style='margin: 0 0 10px 0; font-size: 18px; color: inherit;'>Interrater Reliability Analysis</h2>
-                <p style='margin: 0; font-size: 14px; color: inherit;'>Measure agreement between multiple raters scoring the same cases</p>
-                </div>
-
-                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>
-                <h3 style='margin: 0 0 10px 0; color: inherit; font-size: 16px;'>Setup Progress</h3>
-                <div style='margin-bottom: 10px; font-size: 14px;'>
-                [ ] Raters: 0/2 minimum - Select at least 2 rater variables to begin
-                </div>
-                </div>
-
-                <table style='width: 100%; border-collapse: collapse; margin-bottom: 20px;'>
-                <tr>
-                <td style='width: 50%; border: 1px solid #ccc; padding: 15px; vertical-align: top;'>
-                <h4 style='margin: 0 0 10px 0; font-size: 15px;'>Quick Start</h4>
-                <ol style='margin: 0; padding-left: 20px; font-size: 14px;'>
-                <li>Select 2+ rater variables</li>
-                <li>For ordinal data, choose weighted kappa</li>
-                <li>Enable optional outputs as needed</li>
-                </ol>
-                </td>
-                <td style='width: 50%; border: 1px solid #ccc; padding: 15px; vertical-align: top;'>
-                <h4 style='margin: 0 0 10px 0; font-size: 15px;'>Available Methods</h4>
-                <ul style='margin: 0; padding-left: 20px; font-size: 14px;'>
-                <li><strong>Cohen's kappa:</strong> 2 raters</li>
-                <li><strong>Fleiss' kappa:</strong> 3+ raters</li>
-                <li><strong>Krippendorff's alpha:</strong> Alternative measure</li>
-                </ul>
-                </td>
-                </tr>
-                </table>
-                </div>"
+                        paste0(
+                    "<div style='font-family: Arial, sans-serif; max-width: 800px; line-height: 1.4;'>\n                <div style='background-color: rgba(88, 88, 88, 0.06); border: 2px solid #333; padding: 20px; margin-bottom: 20px; color: inherit;'>\n                <h2 style='margin: 0 0 10px 0; font-size: 18px; color: inherit;'>",
+                    .("Interrater Reliability Analysis"),
+                    "</h2>\n                <p style='margin: 0; font-size: 14px; color: inherit;'>",
+                    .("Measure agreement between multiple raters scoring the same cases"),
+                    "</p>\n                </div>\n\n                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>\n                <h3 style='margin: 0 0 10px 0; color: inherit; font-size: 16px;'>",
+                    .("Setup Progress"),
+                    "</h3>\n                <div style='margin-bottom: 10px; font-size: 14px;'>",
+                    paste0("\n                ", jmvcore::format(.("{tag1} {tag2} Raters: 0/2 minimum - Select at least 2 rater variables to begin"), tag1 = "[", tag2 = "]"), "\n                "),
+                    "</div>\n                </div>\n\n                <table style='width: 100%; border-collapse: collapse; margin-bottom: 20px;'>\n                <tr>\n                <td style='width: 50%; border: 1px solid #ccc; padding: 15px; vertical-align: top;'>\n                <h4 style='margin: 0 0 10px 0; font-size: 15px;'>",
+                    .("Quick Start"),
+                    "</h4>\n                <ol style='margin: 0; padding-left: 20px; font-size: 14px;'>\n                <li>",
+                    .("Select 2+ rater variables"),
+                    "</li>\n                <li>",
+                    .("For ordinal data, choose weighted kappa"),
+                    "</li>\n                <li>",
+                    .("Enable optional outputs as needed"),
+                    "</li>\n                </ol>\n                </td>\n                <td style='width: 50%; border: 1px solid #ccc; padding: 15px; vertical-align: top;'>\n                <h4 style='margin: 0 0 10px 0; font-size: 15px;'>",
+                    .("Available Methods"),
+                    "</h4>\n                <ul style='margin: 0; padding-left: 20px; font-size: 14px;'>\n                <li>",
+                    jmvcore::format(.("{tag1}Cohen's kappa:{tag2} 2 raters"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                <li>",
+                    jmvcore::format(.("{tag1}Fleiss' kappa:{tag2} 3+ raters"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                <li>",
+                    jmvcore::format(.("{tag1}Krippendorff's alpha:{tag2} Alternative measure"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</li>\n                </ul>\n                </td>\n                </tr>\n                </table>\n                </div>"
+                )
                     )
                     self$results$irrtableHeading$setVisible(FALSE)
 
                     # Populate guide explanations even before data is selected
                     # so users can read about methods while setting up analysis
-                    if (self$options$showKrippGuide) private$.populateKrippExplanation()
-                    if (self$options$showLightKappaGuide) private$.populateLightKappaExplanation()
-                    if (self$options$showFinnGuide) private$.populateFinnExplanation()
-                    if (self$options$showKendallWGuide) private$.populateKendallWExplanation()
-                    if (self$options$showRobinsonAGuide) private$.populateRobinsonAExplanation()
-                    if (self$options$showMeanSpearmanGuide) private$.populateMeanSpearmanExplanation()
-                    if (self$options$showICCGuide) private$.populateICCExplanation()
-                    if (self$options$showMeanPearsonGuide) private$.populateMeanPearsonExplanation()
-                    if (self$options$showLinCCCGuide) private$.populateLinCCCExplanation()
-                    if (self$options$showTDIGuide) private$.populateTDIExplanation()
-                    if (self$options$showSpecificAgreementGuide) private$.populateSpecificAgreementExplanation()
-                    if (self$options$showAgreementHeatmapGuide) private$.populateAgreementHeatmapExplanation()
-                    if (self$options$showRaterProfileGuide) private$.populateRaterProfileExplanation()
-                    if (self$options$showSubgroupGuide) private$.populateSubgroupExplanation()
-                    if (self$options$showRaterClusterGuide) private$.populateRaterClusterExplanation()
-                    if (self$options$showCaseClusterGuide) private$.populateCaseClusterExplanation()
-                    if (self$options$showMaxwellREGuide) private$.populateMaxwellREExplanation()
-                    if (self$options$showInterIntraRaterGuide) private$.populateInterIntraRaterExplanation()
-                    if (self$options$showIotaGuide) private$.populateIotaExplanation()
-                    if (self$options$showHierarchicalGuide) private$.populateHierarchicalExplanation()
-                    if (self$options$showBlandAltmanGuide) private$.populateBlandAltmanExplanation()
-                    if (self$options$showMixedEffectsGuide) private$.populateMixedEffectsExplanation()
-                    if (self$options$showConfusionMatrixGuide) private$.populateConfusionMatrixExplanation()
-                    if (self$options$showBootstrapCIGuide) private$.populateBootstrapCIExplanation()
-                    if (self$options$showConcordanceF1Guide) private$.populateConcordanceF1Explanation()
-                    if (self$options$showPairedAgreementGuide) private$.populatePairedAgreementExplanation()
-                    if (self$options$showSampleSizeGuide) private$.populateAgreementSampleSizeExplanation()
-                    if (self$options$showRaterBiasGuide) private$.populateRaterBiasExplanation()
-                    if (self$options$showBhapkarGuide) private$.populateBhapkarExplanation()
-                    if (self$options$showStuartMaxwellGuide) private$.populateStuartMaxwellExplanation()
-                    if (self$options$showPairwiseKappaGuide) private$.populatePairwiseKappaExplanation()
-                    if (self$options$showAllPairsKappaGuide) private$.populateAllPairsKappaExplanation()
-                    if (self$options$showItemModalGuide) private$.populateItemModalAgreementExplanation()
-                    if (self$options$showGwetGuide) private$.populateGwetExplanation()
-                    if (self$options$showPABAKGuide) private$.populatePABAKExplanation()
-                    if (self$options$showGradingGuide) private$.populateGradingGuide()
+                    private$.populateSetupGuides()
 
                     # The agreement sample size calculator is a pure DESIGN calculation:
                     # it reads the ssXxx options only and never touches self$data or the
@@ -15648,30 +16169,57 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                             # Show guidance when no appropriate analysis is enabled
                             self$results$welcome$setVisible(TRUE)
                             self$results$welcome$setContent(
-                                "<div style='font-family: Arial, sans-serif; max-width: 800px; line-height: 1.4;'>
-                        <div style='background-color: rgba(255, 202, 33, 0.23); border: 2px solid #856404; padding: 20px; margin-bottom: 20px; color: inherit;'>
-                        <h2 style='margin: 0 0 10px 0; font-size: 18px; color: inherit;'>Continuous Data Detected</h2>
-                        <p style='margin: 0; font-size: 14px; color: inherit;'>At least one variable you selected is a continuous measurement. Cohen's/Fleiss' Kappa requires categorical data, so it has been skipped. If these numbers are category codes, set the variables to Nominal or Ordinal, or wrap them in factor() when calling from R.</p>
-                        </div>
-
-                        <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #0d6efd; padding: 15px; margin-bottom: 20px; color: inherit;'>
-                        <h3 style='margin: 0 0 10px 0; color: inherit; font-size: 16px;'>Recommended Analyses for Continuous Data</h3>
-                        <table style='width: 100%; border-collapse: collapse;'>
-                        <tr><td style='padding: 8px; border-bottom: 1px solid #ddd;'><strong>ICC</strong></td><td style='padding: 8px; border-bottom: 1px solid #ddd;'>Intraclass Correlation Coefficient - standard measure for continuous rater agreement</td></tr>
-                        <tr><td style='padding: 8px; border-bottom: 1px solid #ddd;'><strong>Lin's CCC</strong></td><td style='padding: 8px; border-bottom: 1px solid #ddd;'>Concordance Correlation Coefficient - assesses both precision and accuracy (2 raters)</td></tr>
-                        <tr><td style='padding: 8px; border-bottom: 1px solid #ddd;'><strong>Bland-Altman</strong></td><td style='padding: 8px; border-bottom: 1px solid #ddd;'>Limits of Agreement plot - visualizes systematic bias and agreement range (2 raters)</td></tr>
-                        <tr><td style='padding: 8px; border-bottom: 1px solid #ddd;'><strong>TDI</strong></td><td style='padding: 8px; border-bottom: 1px solid #ddd;'>Total Deviation Index - boundary within which a proportion of differences fall</td></tr>
-                        <tr><td style='padding: 8px; border-bottom: 1px solid #ddd;'><strong>Krippendorff's Alpha</strong></td><td style='padding: 8px; border-bottom: 1px solid #ddd;'>Works with any data type including continuous (interval/ratio level)</td></tr>
-                        <tr><td style='padding: 8px; border-bottom: 1px solid #ddd;'><strong>Mean Pearson / Mean Spearman</strong></td><td style='padding: 8px; border-bottom: 1px solid #ddd;'>Average pairwise linear or rank correlation - association between raters, not absolute agreement</td></tr>
-                        <tr><td style='padding: 8px; border-bottom: 1px solid #ddd;'><strong>Kendall's W</strong></td><td style='padding: 8px; border-bottom: 1px solid #ddd;'>Concordance of the raters' rankings of the cases (3+ raters)</td></tr>
-                        <tr><td style='padding: 8px; border-bottom: 1px solid #ddd;'><strong>Robinson's A</strong></td><td style='padding: 8px; border-bottom: 1px solid #ddd;'>Agreement index for measurements, related to the ICC</td></tr>
-                        <tr><td style='padding: 8px; border-bottom: 1px solid #ddd;'><strong>Hierarchical/multilevel kappa</strong></td><td style='padding: 8px; border-bottom: 1px solid #ddd;'>For continuous scores, ICC(2,1) and ICC(2,k) from a mixed model with raters nested in institutions (needs a cluster variable)</td></tr>
-                        <tr><td style='padding: 8px;'><strong>Mixed-effects condition comparison</strong></td><td style='padding: 8px;'>Tests whether measurements differ between conditions (e.g., two platforms), with case and rater as random effects</td></tr>
-                        </table>
-                        </div>
-
-                        <p style='font-size: 13px; color: inherit;'>Enable these options from the panels on the left to analyze your continuous measurements.</p>
-                        </div>"
+                                paste0(
+                    "<div style='font-family: Arial, sans-serif; max-width: 800px; line-height: 1.4;'>\n                        <div style='background-color: rgba(255, 202, 33, 0.23); border: 2px solid #856404; padding: 20px; margin-bottom: 20px; color: inherit;'>\n                        <h2 style='margin: 0 0 10px 0; font-size: 18px; color: inherit;'>",
+                    .("Continuous Data Detected"),
+                    "</h2>\n                        <p style='margin: 0; font-size: 14px; color: inherit;'>",
+                    .("At least one variable you selected is a continuous measurement. Cohen's/Fleiss' Kappa requires categorical data, so it has been skipped. If these numbers are category codes, set the variables to Nominal or Ordinal, or wrap them in factor() when calling from R."),
+                    "</p>\n                        </div>\n\n                        <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #0d6efd; padding: 15px; margin-bottom: 20px; color: inherit;'>\n                        <h3 style='margin: 0 0 10px 0; color: inherit; font-size: 16px;'>",
+                    .("Recommended Analyses for Continuous Data"),
+                    "</h3>\n                        <table style='width: 100%; border-collapse: collapse;'>\n                        <tr><td style='padding: 8px; border-bottom: 1px solid #ddd;'>",
+                    jmvcore::format(.("{tag1}ICC{tag2}"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</td><td style='padding: 8px; border-bottom: 1px solid #ddd;'>",
+                    .("Intraclass Correlation Coefficient - standard measure for continuous rater agreement"),
+                    "</td></tr>\n                        <tr><td style='padding: 8px; border-bottom: 1px solid #ddd;'>",
+                    jmvcore::format(.("{tag1}Lin's CCC{tag2}"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</td><td style='padding: 8px; border-bottom: 1px solid #ddd;'>",
+                    .("Concordance Correlation Coefficient - assesses both precision and accuracy (2 raters)"),
+                    "</td></tr>\n                        <tr><td style='padding: 8px; border-bottom: 1px solid #ddd;'>",
+                    jmvcore::format(.("{tag1}Bland-Altman{tag2}"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</td><td style='padding: 8px; border-bottom: 1px solid #ddd;'>",
+                    .("Limits of Agreement plot - visualizes systematic bias and agreement range (2 raters)"),
+                    "</td></tr>\n                        <tr><td style='padding: 8px; border-bottom: 1px solid #ddd;'>",
+                    jmvcore::format(.("{tag1}TDI{tag2}"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</td><td style='padding: 8px; border-bottom: 1px solid #ddd;'>",
+                    .("Total Deviation Index - boundary within which a proportion of differences fall"),
+                    "</td></tr>\n                        <tr><td style='padding: 8px; border-bottom: 1px solid #ddd;'>",
+                    jmvcore::format(.("{tag1}Krippendorff's Alpha{tag2}"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</td><td style='padding: 8px; border-bottom: 1px solid #ddd;'>",
+                    .("Works with any data type including continuous (interval/ratio level)"),
+                    "</td></tr>\n                        <tr><td style='padding: 8px; border-bottom: 1px solid #ddd;'>",
+                    jmvcore::format(.("{tag1}Mean Pearson / Mean Spearman{tag2}"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</td><td style='padding: 8px; border-bottom: 1px solid #ddd;'>",
+                    .("Average pairwise linear or rank correlation - association between raters, not absolute agreement"),
+                    "</td></tr>\n                        <tr><td style='padding: 8px; border-bottom: 1px solid #ddd;'>",
+                    jmvcore::format(.("{tag1}Kendall's W{tag2}"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</td><td style='padding: 8px; border-bottom: 1px solid #ddd;'>",
+                    .("Concordance of the raters' rankings of the cases (3+ raters)"),
+                    "</td></tr>\n                        <tr><td style='padding: 8px; border-bottom: 1px solid #ddd;'>",
+                    jmvcore::format(.("{tag1}Robinson's A{tag2}"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</td><td style='padding: 8px; border-bottom: 1px solid #ddd;'>",
+                    .("Agreement index for measurements, related to the ICC"),
+                    "</td></tr>\n                        <tr><td style='padding: 8px; border-bottom: 1px solid #ddd;'>",
+                    jmvcore::format(.("{tag1}Hierarchical/multilevel kappa{tag2}"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</td><td style='padding: 8px; border-bottom: 1px solid #ddd;'>",
+                    .("For continuous scores, ICC(2,1) and ICC(2,k) from a mixed model with raters nested in institutions (needs a cluster variable)"),
+                    "</td></tr>\n                        <tr><td style='padding: 8px;'>",
+                    jmvcore::format(.("{tag1}Mixed-effects condition comparison{tag2}"), tag1 = "<strong>", tag2 = "</strong>"),
+                    "</td><td style='padding: 8px;'>",
+                    .("Tests whether measurements differ between conditions (e.g., two platforms), with case and rater as random effects"),
+                    "</td></tr>\n                        </table>\n                        </div>\n\n                        <p style='font-size: 13px; color: inherit;'>",
+                    .("Enable these options from the panels on the left to analyze your continuous measurements."),
+                    "</p>\n                        </div>"
+                )
                             )
                         }
                     } else {
@@ -15758,21 +16306,17 @@ agreementClass <- if (requireNamespace("jmvcore")) {
 
 
                         # Percentage agreement ----
-                        result1 <- irr::agree(ratings)
-                        # irr::agree() uses complete cases only; with none (an empty rater
-                        # column, or a design where nobody reads every case) it returns NaN,
-                        # now beside a valid all-ratings kappa. Blank it and say why.
+                        # Count unanimous complete CASES directly. irr::agree() can simplify
+                        # row-wise character tables into a matrix and return 200% for valid
+                        # zero-agreement data. Equality retains tolerance = 0 semantics.
+                        complete_ratings <- as.matrix(ratings[stats::complete.cases(ratings), , drop = FALSE])
+                        result1 <- list(subjects = nrow(complete_ratings), raters = ncol(ratings),
+                            value = if (nrow(complete_ratings) > 0)
+                                100 * mean(rowSums(complete_ratings == complete_ratings[, 1]) ==
+                                           ncol(complete_ratings)) else NA_real_)
                         if (!is.finite(result1[["value"]])) {
-                            result1[["value"]] <- NA
                             self$results$irrtable$setNote("peragree_empty",
                                 .("Agreement % is empty: it counts only cases rated by every rater, and no case was."))
-                        }
-                        if (!is.na(result1[["value"]]) && result1[["value"]] > 100) {
-                            result1[["value"]] <- NA
-                            self$results$irrtable$setNote(
-                                "data_error",
-                                .("Unexpected agreement value > 100%. Please check the data.")
-                            )
                         }
 
                         # Populate main results table ----
@@ -15893,10 +16437,10 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                                 # has always disclosed this; say the same thing here.
                                 table2$setNote("ci_method", if (identical(kc$method, "irr-fallback")) {
                                     if (!requireNamespace("vcd", quietly = TRUE)) {
-                                        sprintf(.("%.0f%% confidence interval via the irr::kappa2 fallback (approximate, built from the null-hypothesis standard error). Install the 'vcd' package to enable the more accurate ASE-based interval. A null-SE interval is too narrow when kappa is high, so treat it as optimistic."),
+                                        sprintf(.("%.0f%% confidence interval via the irr::kappa2 fallback (approximate, built from the null-hypothesis standard error). Install the 'vcd' package to enable the more accurate ASE-based interval. This variance is estimated under zero agreement; interval coverage at nonzero kappa is uncertain."),
                                             100 * self$options$confLevel)
                                     } else {
-                                        sprintf(.("%.0f%% confidence interval via the irr::kappa2 fallback (approximate, built from the null-hypothesis standard error): vcd::Kappa could not return a finite SE for this (near-degenerate) table. A null-SE interval is too narrow when kappa is high, so treat it as optimistic."),
+                                        sprintf(.("%.0f%% confidence interval via the irr::kappa2 fallback (approximate, built from the null-hypothesis standard error): vcd::Kappa could not return a finite SE for this (near-degenerate) table. This variance is estimated under zero agreement; interval coverage at nonzero kappa is uncertain."),
                                             100 * self$options$confLevel)
                                     }
                                 } else if (identical(self$options$kappaCIMethod, "fisherz")) {
@@ -16010,7 +16554,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                             p = p_val
                         ))
 
-                        # Agreement % is irr::agree(), whose default tolerance = 0
+                        # Agreement % uses exact equality (tolerance = 0), which
                         # counts a case as agreement only when EVERY rater gave the
                         # same category. With two raters that is the ordinary match
                         # rate; from three raters up it is the unanimity rate, which

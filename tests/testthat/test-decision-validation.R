@@ -15,6 +15,10 @@ val_mk <- function(TP, FP, FN, TN) data.frame(
 val_run <- function(d, gp = "Present", tp = "Pos", gn = NULL, tn = NULL, ...)
   suppressWarnings(ClinicoPath::decision(data = d, gold = "gold", goldPositive = gp, goldNegative = gn,
                                          newtest = "test", testPositive = tp, testNegative = tn, ...))
+val_error <- function(d, gp = "Present", tp = "Pos", gn = NULL, tn = NULL, ...)
+  diagnostic_error_results("decision", data = d, gold = "gold", goldPositive = gp,
+    goldNegative = gn, newtest = "test", testPositive = tp, testNegative = tn, ...)
+
 val_ratio <- function(r) r$ratioTable$asDF[1, ]
 val_key <- function(df, key) df[gsub('^"|"$', "", rownames(df)) == key, , drop = FALSE]
 val_strip <- function(x) trimws(gsub("[[:space:]]+", " ", gsub("<[^>]*>", " ", paste(x, collapse = " "))))
@@ -120,7 +124,7 @@ test_that("C11/C72 an unselected gold level is excluded, not pooled into disease
   r <- val_run(d, gn = "Absent")
   expect_equal(c(val_ratio(r)$Sens, val_ratio(r)$Spec), c(30 / 35, 40 / 46), tolerance = 1e-10)
   expect_equal(r$nTable$asDF$TotalPop, 81)
-  expect_match(val_notices(val_run(d)), "Choose which gold-standard level means disease absent", fixed = TRUE)
+  expect_match(val_notices(val_error(d)), "Choose which gold-standard level means disease absent", fixed = TRUE)
 })
 
 test_that("C73 an explicit-NA level is excluded and disclosed, never counted as negative", {
@@ -321,7 +325,7 @@ test_that("C91 VAL-decision-09: the DOR footnote gives the odds-ratio definition
 test_that("C71 VAL-decision-10: a one-level gold standard is refused with its own message", {
   d <- rbind(val_mk(88, 0, 12, 0), data.frame(gold = c("Present", "Absent"), test = c(NA, NA)))
   d$gold <- factor(d$gold, levels = c("Absent", "Present")); d$test <- addNA(factor(d$test, levels = c("Neg", "Pos")))
-  n <- val_notices(val_run(d))
+  n <- val_notices(val_error(d))
   expect_match(n, "The gold standard has only one level among the analysed cases", fixed = TRUE)
   expect_no_match(n, "has more than one level besides", fixed = TRUE)
 })
@@ -329,7 +333,7 @@ test_that("C71 VAL-decision-10: a one-level gold standard is refused with its ow
 test_that("C71 VAL-decision-10: a one-level test is not described as having 'more than one level'", {
   d <- rbind(val_mk(88, 12, 0, 0), data.frame(gold = c(NA, NA), test = c("Pos", "Neg")))
   d$gold <- addNA(factor(d$gold, levels = c("Absent", "Present"))); d$test <- factor(d$test, levels = c("Neg", "Pos"))
-  n <- val_notices(val_run(d))
+  n <- val_notices(val_error(d))
   expect_no_match(n, "has more than one level besides", fixed = TRUE)
   expect_match(n, "The test has only one level among the analysed cases", fixed = TRUE)
 })
@@ -339,7 +343,7 @@ test_that("C69 fewer than 4 cases left after exclusions is refused, not tabulate
   d <- data.frame(gold = factor(c("Present", "Absent", "Absent", "Equivocal", "Equivocal", "Equivocal"),
                                 levels = c("Absent", "Equivocal", "Present")),
                   test = factor(c("Pos", "Neg", "Pos", "Pos", "Neg", "Pos"), levels = c("Neg", "Pos")))
-  r <- val_run(d, gn = "Absent")
+  r <- val_error(d, gn = "Absent")
   expect_match(val_notices(r), "Insufficient data after exclusions: 3 cases analysed", fixed = TRUE)
   expect_true(is.na(val_ratio(r)$Sens))
 })
@@ -348,7 +352,7 @@ test_that("C71 a level emptied by missing-value removal is dropped, not inferred
   # Review finding RT-04: every test-negative row has a missing gold standard. The emptied "Neg"
   # level used to stay in levels(), get inferred, and the run was refused as "not dichotomous".
   d <- val_mk(20, 5, 4, 15); d$gold[d$test == "Neg"] <- NA
-  n <- val_notices(val_run(d))
+  n <- val_notices(val_error(d))
   expect_match(n, "The test has only one level among the analysed cases", fixed = TRUE)
   expect_no_match(n, "must have exactly 2 levels each", fixed = TRUE)
   # a declared but never-used third level no longer blocks inference of the negative level

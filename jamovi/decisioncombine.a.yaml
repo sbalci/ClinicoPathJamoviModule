@@ -4,7 +4,7 @@ title: Combine Medical Decision Tests
 menuGroup: meddecide
 menuSubgroup: Decision
 menuSubtitle: Combine and evaluate test patterns
-version: '1.1.0'
+version: '1.1.1'
 jas: '1.2'
 
 description:
@@ -43,7 +43,7 @@ options:
           R: The data as a data frame.
 
     - name: gold
-      title: Gold Standard (Reference Test)
+      title: Gold standard (reference test)
       type: Variable
       default: NULL
       suggested: [ nominal ]
@@ -75,7 +75,7 @@ options:
             listing the levels found. The argument has no default; pass the level.
 
     - name: test1
-      title: Test 1 (Required)
+      title: Test 1 (required)
       type: Variable
       default: NULL
       suggested: [ nominal ]
@@ -88,7 +88,7 @@ options:
 
     # allowNone: as goldPositive. levels[0] is usually the negative result.
     - name: test1Positive
-      title: Test 1 Positive Level
+      title: Test 1 positive level
       type: Level
       variable: (test1)
       allowNone: true
@@ -103,7 +103,7 @@ options:
             listing the levels found. The argument has no default; pass the level.
 
     - name: test2
-      title: Test 2 (Required for Combinations)
+      title: Test 2 (required for combinations)
       type: Variable
       default: NULL
       suggested: [ nominal ]
@@ -115,7 +115,7 @@ options:
             The second diagnostic test variable for combination analysis.
 
     - name: test2Positive
-      title: Test 2 Positive Level
+      title: Test 2 positive level
       type: Level
       variable: (test2)
       allowNone: true
@@ -125,7 +125,7 @@ options:
             not selected; with Test 2 selected, NULL leaves the analysis pending.
 
     - name: test3
-      title: Test 3 (Optional)
+      title: Test 3 (optional)
       type: Variable
       default: NULL
       suggested: [ nominal ]
@@ -137,7 +137,7 @@ options:
             The third diagnostic test variable for 3-way combination analysis.
 
     - name: test3Positive
-      title: Test 3 Positive Level
+      title: Test 3 positive level
       type: Level
       variable: (test3)
       allowNone: true

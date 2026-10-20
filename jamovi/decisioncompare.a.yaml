@@ -4,7 +4,7 @@ title: Compare Medical Decision Tests
 menuGroup: meddecide
 menuSubgroup: Decision
 menuSubtitle: Compare sensitivity, specificity, PPV, NPV, ...
-version: '1.1.0'
+version: '1.1.1'
 jas: '1.2'
 
 description:
@@ -121,7 +121,7 @@ options:
     # For the first test
 
     - name: test1
-      title: Test 1 (Required)
+      title: Test 1 (required)
       type: Variable
       default: NULL
       suggested: [ nominal ]
@@ -134,7 +134,7 @@ options:
             The first diagnostic test variable being evaluated for performance.
 
     - name: test1Positive
-      title: Test 1 Positive Level
+      title: Test 1 positive level
       type: Level
       variable: (test1)
       allowNone: true
@@ -146,7 +146,7 @@ options:
             The level representing a positive result for Test 1.
 
     - name: test1Negative
-      title: Test 1 Negative Level
+      title: Test 1 negative level
       type: Level
       variable: (test1)
       allowNone: true
@@ -162,7 +162,7 @@ options:
     # For the second test
 
     - name: test2
-      title: Test 2 (Required for Comparison)
+      title: Test 2 (required for comparison)
       type: Variable
       default: NULL
       suggested: [ nominal ]
@@ -175,7 +175,7 @@ options:
             The second diagnostic test variable for comparison analysis.
 
     - name: test2Positive
-      title: Test 2 Positive Level
+      title: Test 2 positive level
       type: Level
       variable: (test2)
       allowNone: true
@@ -186,7 +186,7 @@ options:
             The level representing a positive result for Test 2.
 
     - name: test2Negative
-      title: Test 2 Negative Level
+      title: Test 2 negative level
       type: Level
       variable: (test2)
       allowNone: true
@@ -202,7 +202,7 @@ options:
     # For the third test
 
     - name: test3
-      title: Test 3 (Optional)
+      title: Test 3 (optional)
       type: Variable
       default: NULL
       suggested: [ nominal ]
@@ -215,7 +215,7 @@ options:
             Optional third diagnostic test variable for extended comparison analysis.
 
     - name: test3Positive
-      title: Test 3 Positive Level
+      title: Test 3 positive level
       type: Level
       variable: (test3)
       allowNone: true
@@ -228,7 +228,7 @@ options:
     # Options
 
     - name: test3Negative
-      title: Test 3 Negative Level
+      title: Test 3 negative level
       type: Level
       variable: (test3)
       allowNone: true
@@ -303,7 +303,7 @@ options:
             Generate comparison plot showing test performance metrics.
 
     - name: excludeIndeterminate
-      title: Exclude other observed levels
+      title: Selected positive and negative levels only
       type: Bool
       default: false
       description:
@@ -382,7 +382,7 @@ options:
             Whether to apply the descriptive minimum OPA criterion.
 
     - name: ciMethod
-      title: CI Method for Agreement
+      title: CI method for agreement
       type: List
       options:
         - title: Wilson Score
@@ -405,7 +405,7 @@ options:
             (Clopper-Pearson). Logit falls back to Clopper-Pearson at 0 or 100 percent agreement.
 
     - name: stratify
-      title: Stratification Variable
+      title: Stratification variable
       type: Variable
       default: NULL
       suggested: [ nominal ]
@@ -432,7 +432,7 @@ options:
             Perform statistical comparison between tests (McNemar's test and confidence intervals for differences).
 
     - name: mcnemarMethod
-      title: McNemar Test
+      title: McNemar test
       type: List
       options:
         - title: Mid-p

@@ -149,11 +149,13 @@ test_that("decision: ready -> pending -> ready on one object leaves no stale num
 })
 
 test_that("decision: a non-empty level that is not in the data is still an error", {
-    expect_no_error(res <- pl_decision(goldPositive = "Malignant"))
+    res <- do.call(diagnostic_error_results,
+        c(list(analysis = "decision"), pl_decision_args(goldPositive = "Malignant")))
     expect_match(res$notices$content, "not found in gold standard variable", fixed = TRUE)
     expect_match(res$notices$content, pl_error_style, fixed = TRUE)
     expect_no_match(res$notices$content, "Choose the Reference Positive Level", fixed = TRUE)
-    res <- pl_decision(testPositive = "Positiv")
+    res <- do.call(diagnostic_error_results,
+        c(list(analysis = "decision"), pl_decision_args(testPositive = "Positiv")))
     expect_match(res$notices$content, "not found in test variable", fixed = TRUE)
     expect_true(is.na(res$ratioTable$asDF$Sens))
 })
@@ -245,7 +247,8 @@ test_that("decisioncombine: ready -> pending -> ready on one object leaves no st
 })
 
 test_that("decisioncombine: a non-empty level that is not in the data is still an error", {
-    expect_no_error(res <- pl_combine(test1Positive = "Positive"))
+    res <- do.call(diagnostic_error_results,
+        c(list(analysis = "decisioncombine"), pl_combine_args(test1Positive = "Positive")))
     expect_match(res$notices$content, "Missing Level", fixed = TRUE)
     expect_match(res$notices$content, pl_error_style, fixed = TRUE)
     expect_no_match(res$notices$content, "Choose the Positive Level for Test 1", fixed = TRUE)

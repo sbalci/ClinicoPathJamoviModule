@@ -14,6 +14,12 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
     "decisioncurveClass",
     inherit = decisioncurveBase,
     private = list(
+            .sourcifyOption = function(option) {
+                source <- .sourcifyDiagnosticOption(option)
+                if (!is.null(source)) return(source)
+                super$.sourcifyOption(option)
+            },
+
 
         # Store analysis results
         .dcaResults = NULL,

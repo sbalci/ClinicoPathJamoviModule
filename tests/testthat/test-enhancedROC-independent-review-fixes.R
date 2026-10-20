@@ -171,7 +171,8 @@ test_that("the 20-complete-observation policy cannot be bypassed by missing rows
     for (n in c(9L, 10L, 19L, 20L)) for (pad in c(0L, 24L)) {
         input <- rbind(d[seq_len(n), ], d[rep(NA_integer_, pad), ])
         h <- ir_roc_object(input)
-        h$p$.run()
+        if (n < 20) expect_error(h$p$.run(), "at least 20", fixed = TRUE)
+        else expect_no_error(h$p$.run())
         expect_equal(nrow(h$a$results$results$aucSummary$asDF), as.integer(n >= 20),
                      info = paste(n, "complete;", pad, "missing"))
         if (n < 20) {
@@ -183,7 +184,7 @@ test_that("the 20-complete-observation policy cannot be bypassed by missing rows
     d$second <- d$score
     d$second[1:5] <- NA_real_
     h <- ir_roc_object(d, predictors = c("score", "second"))
-    h$p$.run()
+    expect_error(h$p$.run(), "Only 19 complete", fixed = TRUE)
     expect_equal(nrow(h$a$results$results$aucSummary$asDF), 0L)
     expect_match(h$a$results$results$notices$content, "Only 19 complete", fixed = TRUE)
 })

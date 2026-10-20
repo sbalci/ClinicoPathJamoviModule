@@ -10,10 +10,8 @@ library(testthat)
 # Load test data
 data(decisioncombine_pathology, package = "ClinicoPath")
 
-# decisioncombine reports problems as jamovi notices rendered into an Html output, not
-# as R conditions -- the convention across the whole meddecide family. Several tests below
-# were written against expect_warning()/expect_error(), which no analysis in this module
-# ever satisfies, so they asserted nothing. They now check the notice a user actually sees.
+# Refused inputs must reach the jamovi error handler and retain explanatory
+# notices. Warnings can accompany a completed analysis.
 dc_notices <- function(result) {
   gsub("[[:space:]]+", " ", gsub("<[^>]+>", " ", paste(result$notices$content, collapse = " ")))
 }
@@ -124,7 +122,7 @@ test_that("a positive level absent from test2 halts with an explanatory notice",
   test_data_const <- decisioncombine_pathology
   test_data_const$rater2 <- factor(rep("Negative", nrow(decisioncombine_pathology)))
 
-  res <- decisioncombine(
+  res <- diagnostic_error_results("decisioncombine",
     data = test_data_const, gold = "gold_standard", goldPositive = "Malignant",
     test1 = "rater1", test1Positive = "Positive",
     test2 = "rater2", test2Positive = "Positive", test3Positive = NULL)
@@ -215,7 +213,7 @@ test_that("decisioncombine handles completely random test (AUC=0.5)", {
 })
 
 test_that("decisioncombine explains a positive level that is not in the data", {
-  res <- decisioncombine(
+  res <- diagnostic_error_results("decisioncombine",
     data = decisioncombine_pathology,
     gold = "gold_standard", goldPositive = "InvalidLevel",
     test1 = "rater1", test1Positive = "Positive",

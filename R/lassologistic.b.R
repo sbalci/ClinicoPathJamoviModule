@@ -14,6 +14,12 @@ lassologisticClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
         "lassologisticClass",
         inherit = lassologisticBase,
         private = list(
+            .sourcifyOption = function(option) {
+                source <- .sourcifyDiagnosticOption(option)
+                if (!is.null(source)) return(source)
+                super$.sourcifyOption(option)
+            },
+
             # ══════════════════════════════════════════════════════════════════
             # Notice collection (HTML-based)
             # Notices are collected here and rendered into one Html item because

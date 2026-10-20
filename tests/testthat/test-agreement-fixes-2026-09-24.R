@@ -386,8 +386,10 @@ test_that("FIX-18 clearWith, enable and refs carry the dependencies the backend 
                   clusterSpecificTable = c("wght", "exct", "kappaCIMethod"))
     for (nm in names(needs))
         expect_true(all(needs[[nm]] %in% unlist(item(nm)$clearWith)), info = nm)
-    # An Image with an incomplete clearWith keeps a stale PNG for good; this one has none.
-    expect_null(item("subgroupForestPlotImage")$clearWith)
+    # Every forest-plot dependency must invalidate a previously rendered image.
+    expect_setequal(unlist(item("subgroupForestPlotImage")$clearWith),
+                    c("vars", "subgroupVariable", "confLevel", "kappaCIMethod",
+                      "subgroupMinCases", "wght"))
     expect_identical(item("irrtable")$columns[[which(vapply(item("irrtable")$columns, `[[`, "", "name") == "peragree")]]$type, "number")
 
     uy <- readLines(rp("jamovi", "agreement.u.yaml"))

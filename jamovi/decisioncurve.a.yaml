@@ -4,7 +4,7 @@ title: Decision Curve Analysis
 menuGroup: meddecide
 menuSubgroup: Decision Curve Analysis
 menuSubtitle: Clinical Utility, Net Benefit, Threshold Analysis
-version: '1.1.0'
+version: '1.1.1'
 jas: '1.2'
 
 description:
@@ -35,7 +35,7 @@ options:
           R: The data as a data frame.
 
     - name: outcome
-      title: Outcome Variable
+      title: Outcome variable
       type: Variable
       suggested: [ nominal ]
       permitted: [ factor ]
@@ -48,7 +48,7 @@ options:
     # allowNone: without it the jamovi client pre-selects levels[0] - usually the NON-event
     # ("No", "0", "Absent") - and every curve answers the wrong question. Never inferred.
     - name: outcomePositive
-      title: Positive Outcome Level
+      title: Positive outcome level
       type: Level
       variable: (outcome)
       allowNone: true
@@ -60,7 +60,7 @@ options:
             nothing. From R the argument has no default; pass the level.
 
     - name: models
-      title: Prediction Variables/Models
+      title: Prediction variables/models
       type: Variables
       default: NULL
       suggested: [ continuous ]
@@ -77,7 +77,7 @@ options:
             ascertainment because censoring is not handled by this function.
 
     - name: modelNames
-      title: Model Names
+      title: Model names
       type: String
       default: ""
       description:
@@ -86,7 +86,7 @@ options:
             variable names will be used.
 
     - name: thresholdRange
-      title: Threshold Range
+      title: Threshold range
       type: List
       options:
         - name: auto
@@ -103,7 +103,7 @@ options:
             interventions; the presets are computational conveniences, not recommendations.
 
     - name: thresholdMin
-      title: Minimum Threshold
+      title: Minimum threshold
       type: Number
       default: 0.05
       min: 0.001
@@ -113,7 +113,7 @@ options:
             Minimum threshold probability when using custom range.
 
     - name: thresholdMax
-      title: Maximum Threshold
+      title: Maximum threshold
       type: Number
       default: 0.50
       min: 0.001
@@ -123,7 +123,7 @@ options:
             Maximum threshold probability when using custom range.
 
     - name: thresholdStep
-      title: Threshold Step Size
+      title: Threshold step size
       type: Number
       default: 0.01
       min: 0.001
@@ -133,7 +133,7 @@ options:
             Step size between threshold probabilities.
 
     - name: showTable
-      title: Results Table
+      title: Results table
       type: Bool
       default: true
       description:
@@ -141,7 +141,7 @@ options:
             Display table with net benefit values at selected thresholds.
 
     - name: selectedThresholds
-      title: Selected Thresholds for Table
+      title: Selected thresholds for table
       type: String
       default: "0.05, 0.10, 0.15, 0.20, 0.25, 0.30"
       description:
@@ -149,7 +149,7 @@ options:
             Comma-separated list of threshold probabilities to display in table.
 
     - name: showPlot
-      title: Decision Curve Plot
+      title: Decision curve plot
       type: Bool
       default: true
       description:
@@ -157,7 +157,7 @@ options:
             Display the decision curve plot.
 
     - name: plotStyle
-      title: Plot Style
+      title: Plot style
       type: List
       options:
         - name: standard
@@ -172,7 +172,7 @@ options:
             Style of the decision curve plot.
 
     - name: showReferenceLinesLabels
-      title: Reference Line Labels
+      title: Reference line labels
       type: Bool
       default: false
       description:
@@ -180,7 +180,7 @@ options:
             Show labels for "Treat All" and "Treat None" reference lines.
 
     - name: highlightRange
-      title: Clinical Range Highlight
+      title: Clinical range highlight
       type: Bool
       default: false
       description:
@@ -188,7 +188,7 @@ options:
             Highlight a clinically relevant threshold range on the plot.
 
     - name: highlightMin
-      title: Highlight Range Minimum
+      title: Highlight range minimum
       type: Number
       default: 0.10
       min: 0.001
@@ -198,7 +198,7 @@ options:
             Minimum threshold for highlighted range.
 
     - name: highlightMax
-      title: Highlight Range Maximum
+      title: Highlight range maximum
       type: Number
       default: 0.30
       min: 0.001
@@ -208,7 +208,7 @@ options:
             Maximum threshold for highlighted range.
 
     - name: calculateClinicalImpact
-      title: Clinical Impact
+      title: Clinical impact
       type: Bool
       default: false
       description:
@@ -216,7 +216,7 @@ options:
             Calculate clinical impact metrics (number needed to screen, etc.).
 
     - name: populationSize
-      title: Population Size for Projections
+      title: Population size for projections
       type: Number
       default: 1000
       min: 100
@@ -227,7 +227,7 @@ options:
             monetary payoff from the complete-case cohort proportions.
 
     - name: showInterventionAvoided
-      title: Net Interventions Avoided
+      title: Net interventions avoided
       type: Bool
       default: false
       description:
@@ -236,7 +236,7 @@ options:
             the net-benefit difference after accounting for the threshold odds.
 
     - name: confidenceIntervals
-      title: Bootstrap Confidence Intervals
+      title: Bootstrap confidence intervals
       type: Bool
       default: false
       description:
@@ -247,7 +247,7 @@ options:
             selects which the plot draws.
 
     - name: bootReps
-      title: Bootstrap Replications
+      title: Bootstrap replications
       type: Integer
       default: 1000
       min: 100
@@ -257,7 +257,7 @@ options:
             Number of bootstrap replications for confidence intervals.
 
     - name: seed
-      title: "Random Seed"
+      title: Random seed
       type: Integer
       default: 42
       min: 1
@@ -269,7 +269,7 @@ options:
             options produce a different interval and a different p-value on every run.
 
     - name: ciLevel
-      title: Confidence Level
+      title: Confidence level
       type: Number
       default: 0.95
       min: 0.80
@@ -279,7 +279,7 @@ options:
             Confidence level for bootstrap confidence intervals.
 
     - name: ciBand
-      title: Interval Type
+      title: Interval type
       type: List
       options:
         - name: pointwise
@@ -298,7 +298,7 @@ options:
             selects which is drawn.
 
     - name: showBenefitRange
-      title: Range of Benefit
+      title: Range of benefit
       type: Bool
       default: false
       description:
@@ -309,7 +309,7 @@ options:
             clinical trade-off, not optimized on the same data.
 
     - name: compareModels
-      title: Model Comparison Statistics
+      title: Model comparison statistics
       type: Bool
       default: false
       description:
@@ -320,7 +320,7 @@ options:
             at prespecified clinically relevant thresholds or independent validation.
 
     - name: weightedAUC
-      title: Average Net Benefit Over the Threshold Range
+      title: Average net benefit over the threshold range
       type: Bool
       default: false
       description:
@@ -334,7 +334,7 @@ options:
             universally best model.
 
     - name: clinicalDecisionRule
-      title: Clinical Decision Rule Integration
+      title: Clinical decision rule integration
       type: Bool
       default: false
       description:
@@ -342,7 +342,7 @@ options:
             Add clinical decision rule analysis and comparison with models.
 
     - name: decisionRuleVar
-      title: Clinical Decision Rule (binary)
+      title: Clinical decision rule (binary)
       type: Variable
       suggested: [ nominal ]
       permitted: [ factor ]
@@ -353,7 +353,7 @@ options:
 
     # allowNone: as outcomePositive. levels[0] is usually "No", which would reverse the rule.
     - name: decisionRulePositive
-      title: Decision Rule Positive Level
+      title: Decision rule positive level
       type: Level
       variable: (decisionRuleVar)
       allowNone: true
@@ -367,7 +367,7 @@ options:
             pass decisionRulePositive = NULL explicitly.
 
     - name: decisionRuleLabel
-      title: Decision Rule Label
+      title: Decision rule label
       type: String
       default: "Clinical Rule"
       description:
@@ -376,7 +376,7 @@ options:
 
     # Enhanced Decision Curve Analysis Options
     - name: showClinicalImpactPlot
-      title: Clinical Impact Plot
+      title: Clinical impact plot
       type: Bool
       default: false
       description:
@@ -389,7 +389,7 @@ options:
     # still loads, but its ribbons now need "Bootstrap confidence intervals" ticked.
 
     - name: costBenefitAnalysis
-      title: Exploratory Monetary Payoff
+      title: Exploratory monetary payoff
       type: Bool
       default: false
       description:
@@ -399,7 +399,7 @@ options:
             net-monetary-benefit analysis.
 
     - name: testCost
-      title: Monetary Cost per Test/Screening
+      title: Monetary cost per test/screening
       type: Number
       default: 100
       min: 0
@@ -410,7 +410,7 @@ options:
             other payoff inputs.
 
     - name: treatmentCost
-      title: Monetary Cost per Treatment
+      title: Monetary cost per treatment
       type: Number
       default: 1000
       min: 0
@@ -421,7 +421,7 @@ options:
             payoff inputs.
 
     - name: benefitCorrectTreatment
-      title: Monetary Value Assigned to a True Positive
+      title: Monetary value assigned to a true positive
       type: Number
       default: 10000
       min: 0
@@ -432,7 +432,7 @@ options:
             currency and time frame as every other payoff input. Do not enter QALYs.
 
     - name: harmFalseTreatment
-      title: Monetary Harm Assigned to a False Positive
+      title: Monetary harm assigned to a false positive
       type: Number
       default: 500
       min: 0
@@ -443,7 +443,7 @@ options:
             currency and time frame as every other payoff input.
 
     - name: showStandardizedNetBenefit
-      title: Standardized Net Benefit
+      title: Standardized net benefit
       type: Bool
       default: false
       description:
@@ -453,7 +453,7 @@ options:
             achievable value; it is not net benefit per 100 patients.
 
     - name: multiModelComparison
-      title: Enhanced Multi-Model Comparison
+      title: Enhanced multi-model comparison
       type: Bool
       default: false
       description:
@@ -471,7 +471,7 @@ options:
     # failing on it.
 
     - name: showDecisionConsequences
-      title: Decision Consequences Table
+      title: Decision consequences table
       type: Bool
       default: false
       description:
@@ -479,7 +479,7 @@ options:
             Show detailed table of decision consequences (TP, FP, TN, FN) at selected thresholds.
 
     - name: showInterpretation
-      title: Clinical Interpretation
+      title: Clinical interpretation
       type: Bool
       default: false
       description:
@@ -490,7 +490,7 @@ options:
             is always shown.
 
     - name: resourceUtilization
-      title: Resource Utilization Analysis
+      title: Resource utilization analysis
       type: Bool
       default: false
       description:
@@ -499,7 +499,7 @@ options:
             population size.
 
     - name: showRelativeUtility
-      title: Relative Utility Curve
+      title: Relative utility curve
       type: Bool
       default: false
       description:

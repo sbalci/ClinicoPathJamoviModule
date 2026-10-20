@@ -120,7 +120,7 @@ test_that("an ambiguous third level is refused, not silently pooled into negativ
   # negative arm used to be the default, and it inflates the specificity
   # denominator with cases the test was never right about. The level must now be
   # named; an indeterminate result is not a negative result.
-  result <- decision(
+  result <- diagnostic_error_results("decision",
     data = decision_multilevel,
     gold = "GoldStandard", goldPositive = "Positive", goldNegative = NULL,
     newtest = "NewTest",   testPositive = "Positive", testNegative = NULL
@@ -305,7 +305,9 @@ test_that("decision: names with spaces, punctuation and Unicode; an empty datase
   expect_equal(nrow(as.data.frame(r$falsePositiveTable)), 10)
   expect_equal(nrow(as.data.frame(r$falseNegativeTable)), 6)
 
-  r0 <- run(d[0, ])
+  r0 <- diagnostic_error_results("decision", data = d[0, ], gold = names(d)[1],
+    goldPositive = pos, goldNegative = neg, newtest = names(d)[2],
+    testPositive = tpos, testNegative = tneg, od = TRUE, showMisclassified = TRUE)
   expect_match(r0$notices$content, "No data available for analysis", fixed = TRUE)
 })
 

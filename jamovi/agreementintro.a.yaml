@@ -5,7 +5,7 @@ menuGroup: meddecideT
 menuSubgroup: Agreement
 menuTitle: Method Guide
 menuSubtitle: Choose an agreement analysis for your study design
-version: '1.1.0'
+version: '1.1.1'
 jas: '1.2'
 description:
   main: An educational decision guide across the agreement analysis family. Uses user-confirmed study

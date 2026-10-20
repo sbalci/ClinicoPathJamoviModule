@@ -319,7 +319,8 @@ test_that("B6 TDI upper bound is the order-statistic bound, and too few pairs gi
 })
 
 test_that("D1 the confidence level no longer rewrites the Bland-Altman coverage", {
-    js <- readLines(file.path(testthat::test_path(), "..", "..", "jamovi", "js", "agreement.events.js"))
+    path <- file.path(testthat::test_path(), "..", "..", "jamovi", "js", "agreement.events.js")
+    js <- if (file.exists(path)) readLines(path) else character()
     expect_false(any(grepl("onChange_confLevel", js, fixed = TRUE)))
     ui <- readLines(file.path(testthat::test_path(), "..", "..", "jamovi", "agreement.u.yaml"))
     expect_false(any(grepl("onChange_confLevel", ui, fixed = TRUE)))

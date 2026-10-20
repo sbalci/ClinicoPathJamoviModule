@@ -585,23 +585,26 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                 # so `all_labels == <original>` always matches exactly one column.
                 mydata <- self$data
 
-                mydata$row_names <- rownames(mydata)
-
                 original_names <- names(mydata)
-
-                labels <- setNames(original_names, original_names)
-
-                mydata <- mydata %>% janitor::clean_names()
-
-                corrected_labels <-
-                    setNames(original_names, names(mydata))
+                # Reserve the join key before cleaning user names. A source column
+                # named row_names (or Row Names) must retain its values and mapping.
+                internal_names <- c(
+                    "row_names", "start", "end", "interval", "mytime", "myoutcome",
+                    "myfactor", "rmst_groups", "risk_groups", "test_groups"
+                )
+                names(mydata) <- janitor::make_clean_names(
+                    c(internal_names, original_names)
+                )[-seq_along(internal_names)]
+                corrected_labels <- setNames(original_names, names(mydata))
+                mydata$row_names <- rownames(mydata)
 
                 mydata <- labelled::set_variable_labels(
                     .data = mydata,
-                    .labels = corrected_labels
+                    .labels = c(corrected_labels, row_names = "row_names")
                 )
 
-                all_labels <- labelled::var_label(mydata)
+                # Only source variables belong in the selection/display mapping.
+                all_labels <- labelled::var_label(mydata)[names(corrected_labels)]
 
 
                 mytime <-
@@ -1164,7 +1167,10 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                         !!name3contexpl := myfactor
                     )
 
-                analysis_outcome <- paste0(name2outcome, "_event")
+                # The generated indicator must not replace a selected time/marker.
+                analysis_outcome <- tail(make.unique(c(
+                    names(cleanData), paste0(name2outcome, "_event")
+                ), sep = "_"), 1L)
                 cleanData[[analysis_outcome]] <- private$.eventOfInterestIndicator(cleanData[[name2outcome]])
 
                 # naOmit ----
@@ -3022,6 +3028,11 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                         "minpval" = private$.minPvalueCutoffs(mydata, mytime, myoutcome, mycontexpl, num_cuts)
                     )
 
+                    # Preserve the actual method when a tree used its existing
+                    # quantile fallback or needed quantile supplementation.
+                    actual_method <- attr(cutoff_values, "method", exact = TRUE)
+                    if (is.null(actual_method)) actual_method <- self$options$cutoff_method
+
                     # Check if cutoffs were successfully calculated
                     if (is.null(cutoff_values) || length(cutoff_values) == 0) {
                         return(fail(sprintf(
@@ -3104,7 +3115,7 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                         cutoff_values = cutoff_values,
                         risk_groups = risk_groups,
                         group_stats = group_stats,
-                        method = self$options$cutoff_method,
+                        method = actual_method,
                         num_cuts = length(cutoff_values),
                         original_data = mydata,
                         mytime = mytime,
@@ -3189,8 +3200,17 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
             # Tree-based partitioning ----
             ,
             .treeCutoffs = function(mydata, mytime, myoutcome, mycontexpl, num_cuts) {
+                quantile_fallback <- function(reason) {
+                    private$.addHtmlMessage(
+                        "warning",
+                        .("Tree-based cut-points unavailable"),
+                        .fmt(.("The survival tree could not provide cut-points ({reason}). Quantile cut-points are shown instead."), reason = reason))
+                    points <- private$.quantileCutoffs(mydata[[mycontexpl]], num_cuts)
+                    attr(points, "method") <- "quantile (tree fallback)"
+                    points
+                }
                 if (!requireNamespace("rpart", quietly = TRUE)) {
-                    return(private$.quantileCutoffs(mydata[[mycontexpl]], num_cuts))
+                    return(quantile_fallback(.("the rpart package is unavailable")))
                 }
 
                 tryCatch({
@@ -3217,7 +3237,7 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                     # Extract split points
                     splits <- tree_fit$splits
                     if (is.null(splits) || nrow(splits) == 0) {
-                        return(private$.quantileCutoffs(mydata[[mycontexpl]], num_cuts))
+                        return(quantile_fallback(.("no split met the tree criteria")))
                     }
 
                     # rpart stores the splitting variable in rownames(splits),
@@ -3246,12 +3266,7 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                         sort(unique(as.numeric(splits[is_var, "index"]))) else numeric(0)
 
                     if (length(cutoffs) == 0) {
-                        # Say so rather than silently returning quantiles under a
-                        # "tree" label.
-                        private$.addHtmlMessage(
-                            "warning",
-                            .("Tree-based cut-points unavailable"),
-                            .fmt(.("The survival tree produced no usable split for '{var}'. Quantile cut-points are shown instead. This usually means the tree found no split meeting the complexity and minimum group-size criteria."), var = mycontexpl))
+                        return(quantile_fallback(.("no usable continuous split was found")))
                     }
 
                     if (length(cutoffs) > num_cuts) {
@@ -3277,11 +3292,16 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                         additional_cuts <- private$.quantileCutoffs(mydata[[mycontexpl]], num_cuts - length(cutoffs))
                         cutoffs <- sort(c(cutoffs, additional_cuts))
                         cutoffs <- unique(cutoffs)[1:num_cuts]
+                        attr(cutoffs, "method") <- "tree + quantile"
+                        private$.addHtmlMessage(
+                            "warning",
+                            .("Tree cut-points supplemented"),
+                            .("The survival tree provided fewer cut-points than requested. Quantile cut-points supplement the tree splits; the displayed method is tree + quantile."))
                     }
 
                     return(cutoffs)
                 }, error = function(e) {
-                    return(private$.quantileCutoffs(mydata[[mycontexpl]], num_cuts))
+                    return(quantile_fallback(conditionMessage(e)))
                 })
             }
 
@@ -3585,7 +3605,7 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                                              " (df = ", length(logrank_test$n) - 1, "), p = ",
                                              ifelse(overall_pval < 0.001, "< 0.001", round(overall_pval, 3)))
 
-                        interpretation <- .("The log-rank p above is EXPLORATORY: the cut-points were selected from these same data, so it is the largest of many statistics reported as a single test and is optimistic. No selection-adjusted p-value is reported: a single-split maximally selected-rank test does not adjust a multiple-cutoff procedure. Validate every cut-point in independent data before clinical use.")
+                        interpretation <- .("The log-rank p above is unadjusted. When survival outcomes guided the cut-point search, this comparison is optimistic and exploratory. No selection-adjusted p-value is reported; a single-split maximally selected-rank adjustment does not cover a multiple-cutoff procedure. Validate data-derived cut-points independently before clinical use.")
 
                         full_text <- paste(logrank_text, interpretation, sep = "\n\n")
 
@@ -4193,6 +4213,17 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                 mydata[[".strata"]] <- src[[sv[1]]][
                     match(as.character(mydata$row_names), as.character(src$row_names))
                 ]
+                # An explicit NA factor level is not missing to is.na(). Restore
+                # genuine missing codes before excluding unclassified strata.
+                stratum <- mydata[[".strata"]]
+                if (is.factor(stratum) && anyNA(levels(stratum))) {
+                    old_levels <- levels(stratum)
+                    values <- attr(stratum, "values", exact = TRUE)
+                    levels(stratum) <- old_levels
+                    if (!is.null(values) && length(values) == length(old_levels))
+                        attr(stratum, "values") <- values[!is.na(old_levels)]
+                    mydata[[".strata"]] <- stratum
+                }
                 mydata <- mydata[!is.na(mydata[[".strata"]]), , drop = FALSE]
                 mydata[[".strata"]] <- droplevels(as.factor(mydata[[".strata"]]))
 

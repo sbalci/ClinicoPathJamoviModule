@@ -251,8 +251,6 @@ children:
             name: baConfidenceLevel
             format: number
             enable: (blandAltmanPlot)
-            events:
-              change: ./agreement.events::onChange_baConfidenceLevel
           - type: CheckBox
             name: proportionalBias
             enable: (blandAltmanPlot)

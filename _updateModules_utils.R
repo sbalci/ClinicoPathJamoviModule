@@ -553,6 +553,11 @@ ensure_testthat_runner <- function(module_dir) {
   pkg_name <- tryCatch(read.dcf(desc_file)[1, "Package"], error = function(e) NA_character_)
   if (is.na(pkg_name)) return(invisible(FALSE))
 
+  # The verified umbrella regressions use edition 3 expectations and mocks.
+  if (!requireNamespace("desc", quietly = TRUE)) stop("The 'desc' package is required")
+  if (!desc::desc_has_fields("Config/testthat/edition", file = desc_file))
+    desc::desc_set("Config/testthat/edition" = "3", file = desc_file)
+
   tests_dir <- file.path(module_dir, "tests")
   if (!dir.exists(tests_dir)) dir.create(tests_dir, recursive = TRUE)
   runner <- file.path(tests_dir, "testthat.R")
@@ -613,7 +618,7 @@ prune_conflicts <- function(prune, files) {
   prune <- unlist(prune, use.names = FALSE)
   if (length(prune) == 0L || length(files) == 0L) return(character(0))
   usage <- scan_r_package_usage(files = files)
-  tagged <- unlist(lapply(files, function(f) {
+  tagged <- unlist(lapply(files[grepl("\\.[Rr]$", files)], function(f) {
     tags <- grep("^\\s*#'\\s*@import(From)?\\s", readLines(f, warn = FALSE), value = TRUE)
     sub("^\\s*#'\\s*@import(From)?\\s+([A-Za-z0-9._]+).*$", "\\2", tags)
   }), use.names = FALSE)
