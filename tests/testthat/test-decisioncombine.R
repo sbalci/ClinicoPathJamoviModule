@@ -122,7 +122,7 @@ test_that("clinical strategies are summarised for two-test combinations", {
   expect_equal(parallel_row$sens, 1, tolerance = 1e-6)
   expect_equal(parallel_row$spec, 0.5, tolerance = 1e-6)
   expect_equal(parallel_row$dor, 21, tolerance = 0.1)
-  expect_equal(parallel_row$lrPos, 1.91, tolerance = 0.01)
+  expect_equal(parallel_row$lrPos, 2, tolerance = 0.01)
   expect_equal(parallel_row$lrNeg, 0.091, tolerance = 0.001)
 
   # LR+, LR- and DOR are unbounded ratios and moved out of combinationTableCI (which is

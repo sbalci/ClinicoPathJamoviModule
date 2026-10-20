@@ -27,7 +27,7 @@
 
 test_that("IR01 affine marker units cannot create NRI", {
   d <- .irROC_data()
-  for (scale in c(100, 1e-6, -100)) {
+  for (scale in c(100, 1e-6)) {
     d$shift <- scale * d$x + 50
     for (thresholds in c("", "0.25,0.5,0.75")) {
       r <- .irROC_run(d, c("x", "shift"), calculateNRI = TRUE, calculateIDI = TRUE,
@@ -40,6 +40,21 @@ test_that("IR01 affine marker units cannot create NRI", {
       expect_match(.irROC_note(r$nriTable, "numerical_ties"), "1.5e-8", fixed = TRUE)
     }
   }
+  d$neg_x <- -d$x
+  d$neg_shift <- -100 * d$x + 50
+  r_le <- .irROC_run(d, c("neg_x", "neg_shift"), direction = "<=",
+    calculateNRI = TRUE, calculateIDI = TRUE, refVar = "neg_x", idiNriBootRuns = 100)
+  expect_equal(r_le$idiTable$asDF$idi, 0, tolerance = 1e-9)
+  expect_equal(r_le$nriTable$asDF$nri, 0)
+
+  # Anti-directed marker (-x vs x under direction ">=") is clamped to base rate rather than auto-flipped
+  r_inv_ge <- .irROC_run(d, c("x", "neg_x"), direction = ">=",
+    calculateNRI = TRUE, calculateIDI = TRUE, refVar = "x", idiNriBootRuns = 100)
+  expect_lt(r_inv_ge$idiTable$asDF$idi, 0)
+  r_inv_le <- .irROC_run(d, c("x", "neg_x"), direction = "<=",
+    calculateNRI = TRUE, calculateIDI = TRUE, refVar = "x", idiNriBootRuns = 100)
+  expect_gt(r_inv_le$idiTable$asDF$idi, 0)
+
   d$shift <- 100 * d$x + 50
   r <- .irROC_run(d[12:1, ], c("x", "shift"), calculateNRI = TRUE,
     refVar = "x", idiNriBootRuns = 100, seed = 923)

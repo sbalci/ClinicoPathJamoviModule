@@ -337,6 +337,14 @@ kappaSizeCIClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 e <- kappaSizeGofCells(params$outcome, R, p, rho)
                 if (params$outcome == 2 && R >= 3) c(e[1], sum(e[2:R]), e[R + 1]) else e
             }
+            in_model <- function(p, rho) {
+                cells <- kappaSizeGofCells(params$outcome, R, p, rho)
+                if (!all(is.finite(cells)) || any(cells < 0)) return(FALSE)
+                if (params$outcome == 2) return(TRUE)
+                i <- seq_len(R) - 1
+                all((1 - rho) + i * rho > 0) &&
+                    all(outer(p, i, function(pj, k) pj * (1 - rho) + k * rho) >= 0)
+            }
             q <- pooled(params$props, params$kappa0)
             if (!all(is.finite(q)) || any(q <= 0)) return(NULL)
 
@@ -344,21 +352,40 @@ kappaSizeCIClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             rhos <- rhos[is.finite(rhos)]
             if (length(rhos) == 0) return(NULL)
 
-            # K - 1 logits against the last category; the shift by max() keeps exp() finite.
-            to_props <- function(th) { e <- exp(c(th, 0) - max(c(th, 0))); e / sum(e) }
-            start <- log(params$props[-K] / params$props[K])
             out <- vapply(rhos, function(rho) {
+                t <- if (rho >= 0) 0
+                     else if (params$outcome == 2) (-rho / (1 - rho))^(1 / (R - 1))
+                     else -(R - 1) * rho / (1 - rho)
+                if (K * t >= 1 || 1 + (R - 2) * rho <= 0) return(NA_real_)
+                to_props <- function(th) { e <- exp(c(th, 0) - max(c(th, 0))); t + (1 - K * t) * e / sum(e) }
                 nll <- function(th) {
                     b <- pooled(to_props(th), rho)
                     if (!all(is.finite(b)) || any(b <= 0)) return(1e10)
                     -sum(q * log(b))
                 }
-                fit <- tryCatch(
-                    stats::optim(start, nll, method = "BFGS",
-                                 control = list(reltol = 1e-14, maxit = 1000)),
-                    error = function(e) NULL)
-                if (is.null(fit) || fit$convergence != 0) return(NA_real_)
-                b <- pooled(to_props(fit$par), rho)
+                fit_from <- function(st) {
+                    fit <- NULL
+                    for (k in 1:20) {
+                        f <- tryCatch(
+                            stats::nlminb(if (is.null(fit)) st else fit$par, nll,
+                                          control = list(rel.tol = 1e-15, x.tol = 1e-12, eval.max = 2000, iter.max = 1000)),
+                            error = function(e) NULL)
+                        if (is.null(f) || !(f$objective < (if (is.null(fit)) 1e10 else fit$objective - 1e-15))) break
+                        fit <- f
+                    }
+                    fit
+                }
+                w <- (params$props - t) / (1 - K * t)
+                starts <- c(if (all(w > 0)) list(log(w[-K] / w[K])), list(rep(0, K - 1)))
+                fit <- NULL
+                for (st in starts) {
+                    f <- fit_from(st)
+                    if (!is.null(f) && (is.null(fit) || f$objective < fit$objective)) fit <- f
+                }
+                if (is.null(fit)) return(NA_real_)
+                p <- to_props(fit$par)
+                if (!in_model(p, rho)) return(NA_real_)
+                b <- pooled(p, rho)
                 if (!all(is.finite(b)) || any(b <= 0)) return(NA_real_)
                 sum((q - b)^2 / b)
             }, numeric(1))
@@ -1059,6 +1086,7 @@ kappaSizeCIClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
         # Syntax pane: props escaped (see kappaSizeSourcifyOption in R/utils-kappasize.R).
         .sourcifyOption = function(option) {
+            if (!option$name %in% names(formals(kappaSizeCI))) return("")
             src <- kappaSizeSourcifyOption(option)
             if (is.null(src)) super$.sourcifyOption(option) else src
         },

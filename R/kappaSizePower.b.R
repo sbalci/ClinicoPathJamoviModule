@@ -89,7 +89,10 @@ kappaSizePowerClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
         # 2026-10-15, KSP-IR-01). A binary outcome is simulated instead (.simPowerBinary).
         .estimatedPropsRatio = function(raters, props, kappa0, kappa1) {
             P0 <- kappaSizeGofCells(length(props), raters, props, kappa0)
-            d  <- kappaSizeGofCells(length(props), raters, props, kappa1) - P0
+            P1 <- kappaSizeGofCells(length(props), raters, props, kappa1)
+            if (any(!is.finite(P0)) || any(!is.finite(P1)) || any(P0 <= 0) || any(P1 <= 0))
+                return(NA_real_)
+            d  <- P1 - P0
             # cells are (disagree, agree_1..agree_K); free proportions pi_1..pi_(K-1).
             # d agree_j / d pi_j by the product rule, with no division by pi_j (no overflow as pi_j -> 0).
             i  <- seq_len(raters) - 1
@@ -462,16 +465,17 @@ kappaSizePowerClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
 
         # Syntax pane: props escaped (see kappaSizeSourcifyOption in R/utils-kappasize.R).
         .sourcifyOption = function(option) {
+            if (!option$name %in% names(formals(kappaSizePower))) return("")
             src <- kappaSizeSourcifyOption(option)
             if (is.null(src)) super$.sourcifyOption(option) else src
         },
 
         .run = function() {
 
-            outcome <- as.integer(self$options$outcome)
+            outcome <- suppressWarnings(as.numeric(self$options$outcome))
             kappa0  <- self$options$kappa0
             kappa1  <- self$options$kappa1
-            raters  <- as.integer(self$options$raters)
+            raters  <- suppressWarnings(as.numeric(self$options$raters))
             alpha   <- self$options$alpha
             power   <- self$options$power
 
@@ -480,6 +484,26 @@ kappaSizePowerClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
             self$results$text1$setContent("")
             self$results$text_summary$setContent("")
             self$results$text2$setContent("")
+
+            if (!isTRUE(outcome %in% c(2, 3, 4, 5)))
+                jmvcore::reject(.("Number of outcome levels must be 2, 3, 4, or 5."), code = "invalid_outcome")
+            outcome <- as.integer(outcome)
+
+            if (!isTRUE(raters %in% 2:6))
+                jmvcore::reject(.("Number of raters must be 2, 3, 4, 5, or 6."), code = "invalid_raters")
+            raters <- as.integer(raters)
+
+            if (!is.finite(kappa0) || kappa0 <= 0 || kappa0 >= 1)
+                jmvcore::reject(.("kappa0 must be strictly between 0 and 1."), code = "invalid_kappa0")
+
+            if (!is.finite(kappa1) || kappa1 <= 0 || kappa1 >= 1)
+                jmvcore::reject(.("kappa1 must be strictly between 0 and 1."), code = "invalid_kappa1")
+
+            if (!is.finite(alpha) || alpha < 0.001 || alpha > 0.20)
+                jmvcore::reject(.("Significance level (alpha) must be between 0.001 and 0.20."), code = "invalid_alpha")
+
+            if (!is.finite(power) || power < 0.01 || power > 0.99)
+                jmvcore::reject(.("Power must be between 0.01 and 0.99."), code = "invalid_power")
 
             # --- Parse and validate the proportions ---------------------------
             parsed <- private$.parseProps(self$options$props)
@@ -603,6 +627,10 @@ kappaSizePowerClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
             # designs: development-ideas/kappaSizePower-validation-2026-10-09.md (VAL-01, VAL-03).
             P0 <- kappaSizeGofCells(outcome, raters, props, kappa0)
             P1 <- kappaSizeGofCells(outcome, raters, props, kappa1)
+            if (any(!is.finite(P0)) || any(!is.finite(P1)) || any(P0 <= 0) || any(P1 <= 0))
+                jmvcore::reject(
+                    .("The sample size could not be computed: a proportion is too close to 0 for the agreement-pattern probabilities to be evaluated. Check the proportions."),
+                    code = "n_not_computable")
             crit <- stats::qchisq(1 - alpha, 1)
             lambda <- stats::uniroot(
                 function(l) stats::pchisq(crit, 1, ncp = l) - (1 - power),

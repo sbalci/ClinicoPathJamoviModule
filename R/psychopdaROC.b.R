@@ -3568,6 +3568,7 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
 
         # Calculate partial AUC if requested
         if (self$options$partialAUC) {
+          if (!is.null(self$options$seed)) withr::local_seed(self$options$seed)
           # Checkpoint before expensive partial AUC calculations
           private$.checkpoint()
           self$results$partialAUCTable$setNote("seed", if (self$options$bootstrapCI) .fmt(.("Random seed: {seed}"), seed = self$options$seed), init = FALSE)
@@ -3645,6 +3646,7 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
 
         # Calculate bootstrap confidence intervals if requested
         if (self$options$bootstrapCI) {
+          if (!is.null(self$options$seed)) withr::local_seed(self$options$seed)
           # Checkpoint before expensive bootstrap calculations
           private$.checkpoint()
           self$results$bootstrapCITable$setNote("seed", .fmt(.("Random seed: {seed}"), seed = self$options$seed), init = FALSE)
@@ -3856,6 +3858,7 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
 
           # Calculate IDI if requested
           if (self$options$calculateIDI) {
+            if (!is.null(self$options$seed)) withr::local_seed(self$options$seed)
             # Get reference variable values with escaped name
             refVarEscaped <- private$.escapeVar(refVar)
             ref_values <- jmvcore::toNumeric(data[[refVarEscaped]])
@@ -3927,6 +3930,7 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
 
           # Calculate NRI if requested
           if (self$options$calculateNRI) {
+            if (!is.null(self$options$seed)) withr::local_seed(self$options$seed)
             # Get reference variable values with escaped name
             refVarEscaped <- private$.escapeVar(refVar)
             ref_values <- jmvcore::toNumeric(data[[refVarEscaped]])
@@ -4083,6 +4087,7 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
 
         # Bayesian ROC analysis
         if (self$options$bayesianAnalysis) {
+          if (!is.null(self$options$seed)) withr::local_seed(self$options$seed)
           # Checkpoint before expensive Bayesian analysis computation
           private$.checkpoint()
           private$.calculateBayesianROC(data, classVar, positiveClass)
@@ -4236,7 +4241,8 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
         }
 
         # Add common elements
-        plot <- plot + ggplot2::scale_fill_manual(values = marker_colours) +
+        has_fill <- FALSE
+        plot <- plot +
           ggplot2::xlab(.("1 - Specificity (False Positive Rate)")) +
           ggplot2::ylab(.("Sensitivity (True Positive Rate)")) +
           ggplot2::xlim(0, 1) +
@@ -4369,6 +4375,7 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
             plot <- plot + ggplot2::geom_ribbon(data = loess_data,
               ggplot2::aes(x = x, ymin = ymin, ymax = ymax, fill = var, group = var),
               inherit.aes = FALSE, alpha = 0.4, show.legend = combined)
+            has_fill <- TRUE
           }
           plot <- plot + ggplot2::geom_line(data = loess_data,
             ggplot2::aes(x = x, y = y, colour = var, group = var),
@@ -4528,6 +4535,7 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
                 ggplot2::aes(x = x, ymin = ymin, ymax = ymax, fill = var),
                 alpha = 0.15, inherit.aes = FALSE, show.legend = FALSE
               )
+            has_fill <- TRUE
             # Match the curve palette so a band is unambiguously "its" marker's.
             plot <- plot + ggplot2::labs(
               # The method named here must be the method computed above. This said
@@ -4660,6 +4668,10 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
               }
             }
           }
+        }
+
+        if (has_fill) {
+          plot <- plot + ggplot2::scale_fill_manual(values = marker_colours)
         }
 
         print(plot)
@@ -5479,6 +5491,8 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
           note = .("Cohen's d is the standardized difference in a marker's mean between the positive and negative classes (pooled SD), given for each marker of the pair. The three difference columns are second marker minus first marker; Glass' delta uses the negative-class SD and Hedges' g applies the small-sample correction J to each d before differencing. No interval or test accompanies these point estimates. The 0.2/0.5/0.8 size bands are descriptive conventions only; they have not been validated as clinical thresholds for a difference between two marker effects."),
           init = FALSE
         )
+        private$.noteDirection(self$results$effectSizeTable)
+        dir_sign <- if (identical(self$options$direction, "<=")) -1 else 1
         plot_rows <- list()
 
         for (i in 1:(length(vars) - 1)) {
@@ -5508,7 +5522,7 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
                 n_pos <- length(pos1)
                 n_neg <- length(neg1)
 
-                # Cohen's d for each variable: (mean_pos - mean_neg) / pooled_sd
+                # Cohen's d for each variable: dir_sign * (mean_pos - mean_neg) / pooled_sd
                 pooled_sd1 <- sqrt(((n_pos - 1) * var(pos1) +
                   (n_neg - 1) * var(neg1)) /
                   (n_pos + n_neg - 2))
@@ -5516,8 +5530,8 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
                   (n_neg - 1) * var(neg2)) /
                   (n_pos + n_neg - 2))
 
-                d1 <- if (pooled_sd1 > 0) (mean(pos1) - mean(neg1)) / pooled_sd1 else NA
-                d2 <- if (pooled_sd2 > 0) (mean(pos2) - mean(neg2)) / pooled_sd2 else NA
+                d1 <- if (pooled_sd1 > 0) dir_sign * (mean(pos1) - mean(neg1)) / pooled_sd1 else NA
+                d2 <- if (pooled_sd2 > 0) dir_sign * (mean(pos2) - mean(neg2)) / pooled_sd2 else NA
 
                 # Difference in discriminative ability between the two tests
                 cohens_d <- if (!is.na(d1) && !is.na(d2)) d2 - d1 else NA
@@ -5525,8 +5539,8 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
                 # Glass's delta: difference using negative-class (control) SD
                 sd_neg1 <- sd(neg1)
                 sd_neg2 <- sd(neg2)
-                glass_delta1 <- if (sd_neg1 > 0) (mean(pos1) - mean(neg1)) / sd_neg1 else NA
-                glass_delta2 <- if (sd_neg2 > 0) (mean(pos2) - mean(neg2)) / sd_neg2 else NA
+                glass_delta1 <- if (sd_neg1 > 0) dir_sign * (mean(pos1) - mean(neg1)) / sd_neg1 else NA
+                glass_delta2 <- if (sd_neg2 > 0) dir_sign * (mean(pos2) - mean(neg2)) / sd_neg2 else NA
                 glass_delta <- glass_delta2 - glass_delta1
 
                 # Hedges' g: bias-corrected Cohen's d, J = 1 - 3/(4*df - 1). Both markers share
@@ -5810,7 +5824,7 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
         # Renamed from mcmc_samples: no MCMC runs anywhere in this method, these are
         # ordinary bootstrap resamples and the old name advertised an algorithm that is
         # not here.
-        n_boot <- 2000 # Fixed number of bootstrap resamples
+        n_boot <- max(500L, as.integer(self$options$bootstrapReps))
 
         for (var in vars) {
           x <- jmvcore::toNumeric(data[[var]])
@@ -5826,15 +5840,24 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
                 roc_obj <- pROC::roc(y_complete, x_complete, levels = c(0, 1), direction = ifelse(self$options$direction == ">=", "<", ">"), quiet = TRUE)
                 observed_auc <- as.numeric(pROC::auc(roc_obj))
 
-                # Simulate posterior distribution using bootstrap
+                # Simulate posterior distribution using stratified bootstrap
                 bootstrap_aucs <- numeric(n_boot)
                 n <- length(y_complete)
+                idx_pos <- which(y_complete == 1)
+                idx_neg <- which(y_complete == 0)
+                n_pos <- length(idx_pos)
+                n_neg <- length(idx_neg)
 
                 # Bootstrap simulation with prior weighting
                 # (prior_auc and prior_precision are used in the weighted average below)
                 for (i in 1:n_boot) {
-                  # Bootstrap sample
-                  sample_idx <- sample(n, n, replace = TRUE)
+                  # Stratified bootstrap sample (preserves case/control counts)
+                  sample_idx <- if (n_pos > 0L && n_neg > 0L) {
+                    c(idx_pos[sample.int(n_pos, n_pos, replace = TRUE)],
+                      idx_neg[sample.int(n_neg, n_neg, replace = TRUE)])
+                  } else {
+                    sample(n, n, replace = TRUE)
+                  }
                   boot_x <- x_complete[sample_idx]
                   boot_y <- y_complete[sample_idx]
 
@@ -5872,12 +5895,12 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
                 # Weight data vs prior based on sample size relative to prior precision
                 data_weight <- n / (n + prior_precision)
                 prior_weight <- prior_precision / (n + prior_precision)
-                posterior_mean <- data_weight * mean(bootstrap_aucs) + prior_weight * prior_auc
+                posterior_samples <- pmin(1, pmax(0, data_weight * bootstrap_aucs + prior_weight * prior_auc))
+                posterior_mean <- mean(posterior_samples)
 
                 # Posterior credible interval via weighted bootstrap samples
-                posterior_samples <- data_weight * bootstrap_aucs + prior_weight * prior_auc
-                credible_lower <- quantile(posterior_samples, 0.025)
-                credible_upper <- quantile(posterior_samples, 0.975)
+                credible_lower <- as.numeric(quantile(posterior_samples, 0.025))
+                credible_upper <- as.numeric(quantile(posterior_samples, 0.975))
 
                 # Tail count over the retained resamples, NOT a Bayes factor: nothing here
                 # integrates a likelihood over a prior. Renamed from bayes_factor to stop the
@@ -5923,7 +5946,10 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
                   if (!is.null(image)) {
                     image$setState(list(
                       ready = TRUE,
-                      bootstrap_aucs = bootstrap_aucs,
+                      bootstrap_aucs = posterior_samples,
+                      posterior_mean = posterior_mean,
+                      credible_lower = credible_lower,
+                      credible_upper = credible_upper,
                       prior_auc = prior_auc,
                       prior_precision = prior_precision,
                       n_boot = n_kept
@@ -6427,6 +6453,22 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
           return(FALSE)
         }
 
+        mean_val <- if (!is.null(state$posterior_mean) && is.finite(state$posterior_mean)) {
+          state$posterior_mean
+        } else {
+          mean(bootstrap_aucs)
+        }
+        ci_lo <- if (!is.null(state$credible_lower) && is.finite(state$credible_lower)) {
+          state$credible_lower
+        } else {
+          as.numeric(quantile(bootstrap_aucs, 0.025))
+        }
+        ci_hi <- if (!is.null(state$credible_upper) && is.finite(state$credible_upper)) {
+          state$credible_upper
+        } else {
+          as.numeric(quantile(bootstrap_aucs, 0.975))
+        }
+
         n_samples <- length(bootstrap_aucs)
         trace_df <- data.frame(
           iteration = seq_len(n_samples),
@@ -6436,11 +6478,11 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
         p <- ggplot2::ggplot(trace_df, ggplot2::aes(x = iteration, y = auc)) +
           ggplot2::geom_line(alpha = 0.5, color = "steelblue") +
           ggplot2::geom_hline(
-            yintercept = mean(bootstrap_aucs),
+            yintercept = mean_val,
             linetype = "dashed", color = "darkred", linewidth = 0.8
           ) +
           ggplot2::geom_hline(
-            yintercept = quantile(bootstrap_aucs, c(0.025, 0.975)),
+            yintercept = c(ci_lo, ci_hi),
             linetype = "dotted", color = "grey40"
           ) +
           ggplot2::labs(
@@ -6451,9 +6493,9 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
               # "Mean = %1$.3f, 95%% CI" and the interval bounds vanished from the
               # subtitle. Parentheses carry no such meaning.
               .("Mean = %1$.3f, 95%% CI (%2$.3f to %3$.3f)"),
-              mean(bootstrap_aucs),
-              quantile(bootstrap_aucs, 0.025),
-              quantile(bootstrap_aucs, 0.975)
+              mean_val,
+              ci_lo,
+              ci_hi
             ),
             x = .("Bootstrap Iteration"),
             y = .("AUC")

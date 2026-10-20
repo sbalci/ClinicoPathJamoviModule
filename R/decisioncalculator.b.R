@@ -436,18 +436,25 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) {
                 # their in-house intervals (see the ci block) use the corrected counts; the
                 # proportions, and epi.tests() on the raw table3, do not.
                 zero_cell <- any(c(TP, FP, TN, FN) == 0)
+                lrp_zero <- (TP == 0 || FP == 0)
+                lrn_zero <- (FN == 0 || TN == 0)
                 # Doubles: the DOR and the nomogram's cross products multiply these.
-                TP_cc <- as.numeric(TP)
-                FP_cc <- as.numeric(FP)
-                TN_cc <- as.numeric(TN)
-                FN_cc <- as.numeric(FN)
+                TP_cc <- if (zero_cell) TP + 0.5 else as.numeric(TP)
+                FP_cc <- if (zero_cell) FP + 0.5 else as.numeric(FP)
+                TN_cc <- if (zero_cell) TN + 0.5 else as.numeric(TN)
+                FN_cc <- if (zero_cell) FN + 0.5 else as.numeric(FN)
+
+                TP_lrp <- if (lrp_zero) TP + 0.5 else as.numeric(TP)
+                FP_lrp <- if (lrp_zero) FP + 0.5 else as.numeric(FP)
+                TN_lrp <- if (lrp_zero) TN + 0.5 else as.numeric(TN)
+                FN_lrp <- if (lrp_zero) FN + 0.5 else as.numeric(FN)
+
+                TP_lrn <- if (lrn_zero) TP + 0.5 else as.numeric(TP)
+                FP_lrn <- if (lrn_zero) FP + 0.5 else as.numeric(FP)
+                TN_lrn <- if (lrn_zero) TN + 0.5 else as.numeric(TN)
+                FN_lrn <- if (lrn_zero) FN + 0.5 else as.numeric(FN)
 
                 if (zero_cell) {
-                    TP_cc <- TP + 0.5
-                    FP_cc <- FP + 0.5
-                    TN_cc <- TN + 0.5
-                    FN_cc <- FN + 0.5
-
                     private$.addNotice("WARNING", .("Continuity correction applied"), .("A zero cell was present, so a Haldane-Anscombe 0.5 correction was added to every cell for the likelihood ratios, the diagnostic odds ratio and their confidence intervals. Sensitivity, specificity, predictive values and their intervals use the observed counts."))
                 }
 
@@ -585,14 +592,14 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) {
 
 
                 # Calculate likelihood ratios with safe division (corrected if needed)
-                LRP <- if ((1 - (TN_cc / (TN_cc + FP_cc))) > 0) {
-                    (TP_cc / (TP_cc + FN_cc)) / (1 - (TN_cc / (TN_cc + FP_cc)))
+                LRP <- if ((1 - (TN_lrp / (TN_lrp + FP_lrp))) > 0) {
+                    (TP_lrp / (TP_lrp + FN_lrp)) / (1 - (TN_lrp / (TN_lrp + FP_lrp)))
                 } else {
                     Inf
                 }
 
-                LRN <- if ((TN_cc / (TN_cc + FP_cc)) > 0) {
-                    (1 - (TP_cc / (TP_cc + FN_cc))) / (TN_cc / (TN_cc + FP_cc))
+                LRN <- if ((TN_lrn / (TN_lrn + FP_lrn)) > 0) {
+                    (1 - (TP_lrn / (TP_lrn + FN_lrn))) / (TN_lrn / (TN_lrn + FP_lrn))
                 } else {
                     0
                 }
@@ -793,8 +800,8 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) {
                     if (zero_cell) {
                         # LRN and the DOR are corrected too; the note used to sit on LRP only.
                         zc_note <- .("A zero cell was present, so 0.5 was added to every cell for the likelihood ratios and the diagnostic odds ratio. Their confidence intervals use the same corrected counts.")
-                        if (is.finite(LRP)) ratioTable$addFootnote(rowNo = 1, col = "LRP", zc_note)
-                        if (is.finite(LRN)) ratioTable$addFootnote(rowNo = 1, col = "LRN", zc_note)
+                        if (lrp_zero && is.finite(LRP)) ratioTable$addFootnote(rowNo = 1, col = "LRP", zc_note)
+                        if (lrn_zero && is.finite(LRN)) ratioTable$addFootnote(rowNo = 1, col = "LRN", zc_note)
                     }
                 }
 
@@ -959,7 +966,7 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) {
                         z <- stats::qnorm(0.975)
                         log_ci <- function(est, v, num0, den0) {
                             if (!is.finite(est)) return(c(NA_real_, NA_real_))   # not estimable
-                            ci <- if (est > 0 && is.finite(v)) exp(log(est) + c(-1, 1) * z * sqrt(v))
+                            ci <- if (est > 0 && is.finite(v) && v > 0) exp(log(est) + c(-1, 1) * z * sqrt(v))
                                   else c(NA_real_, NA_real_)
                             if (num0) ci[1] <- 0
                             if (den0) ci[2] <- NA_real_                  # unbounded: footnoted in fill()
@@ -1342,6 +1349,14 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) {
                 # arbitrary epsilon. The tables keep the uncorrected values.
                 sens_plot <- TP_cc / (TP_cc + FN_cc)
                 spec_plot <- TN_cc / (TN_cc + FP_cc)
+                if (zero_cell && is.finite(LRP) && is.finite(LRN) && LRP != LRN) {
+                    sp_b <- (LRP - 1) / (LRP - LRN)
+                    se_b <- LRP * (1 - sp_b)
+                    if (all(is.finite(c(se_b, sp_b))) && se_b > 0 && se_b < 1 && sp_b > 0 && sp_b < 1) {
+                        sens_plot <- se_b
+                        spec_plot <- sp_b
+                    }
+                }
 
                 # nomogrammer also refuses LR+ < 1 ("should be >= 1 for an informative
                 # test"), which is a fair objection -- a positive result that argues AGAINST
@@ -1355,10 +1370,10 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) {
                 # Half-integer cross products are exact in floating point; the relative
                 # tolerance only guards fractional or very large counts. Each ratio gets its
                 # own test: LR+ within rounding of 1 does not make LR- 1.
-                lr_pos_cross <- TP_cc * (TN_cc + FP_cc) - FP_cc * (TP_cc + FN_cc)   # sign of LR+ - 1
-                lr_neg_cross <- FN_cc * (TN_cc + FP_cc) - TN_cc * (TP_cc + FN_cc)   # sign of LR- - 1
-                lr_pos_one <- abs(lr_pos_cross) <= 1e-12 * TP_cc * (TN_cc + FP_cc)
-                lr_neg_one <- abs(lr_neg_cross) <= 1e-12 * TN_cc * (TP_cc + FN_cc)
+                lr_pos_cross <- TP_lrp * (TN_lrp + FP_lrp) - FP_lrp * (TP_lrp + FN_lrp)   # sign of LR+ - 1
+                lr_neg_cross <- FN_lrn * (TN_lrn + FP_lrn) - TN_lrn * (TP_lrn + FN_lrn)   # sign of LR- - 1
+                lr_pos_one <- abs(lr_pos_cross) <= 1e-12 * TP_lrp * (TN_lrp + FP_lrp)
+                lr_neg_one <- abs(lr_neg_cross) <= 1e-12 * TN_lrn * (TP_lrn + FN_lrn)
                 fagan_ok <- is.finite(LRP) && is.finite(LRN) && (lr_pos_cross > 0 || lr_pos_one)
                 # Only explains the missing plot. fagan_ok is decided on the corrected counts, and the
                 # inversion notice above is graded on the raw ones, so either can appear without the

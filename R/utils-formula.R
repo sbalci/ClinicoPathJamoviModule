@@ -73,7 +73,8 @@
 #' @keywords internal
 .stripBackticks <- function(x) {
     clean <- function(nm) {
-        nm <- gsub("`", "", nm, fixed = TRUE)
+        nm <- gsub("(?<!\\\\)`", "", nm, perl = TRUE)
+        nm <- gsub("\\`", "`", nm, fixed = TRUE)
         if (anyDuplicated(nm)) nm <- make.unique(nm, sep = "_")
         nm
     }

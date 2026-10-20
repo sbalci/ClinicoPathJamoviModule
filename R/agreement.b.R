@@ -4271,11 +4271,16 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                         all_categories <- self$options$specificAllCategories
                         include_ci <- self$options$specificConfidenceIntervals
 
-                        # Remove rows with missing values
-                        complete_rows <- complete.cases(ratings)
-                        ratings_complete <- ratings[complete_rows, , drop = FALSE]
+                        n_raters <- ncol(ratings)
+                        if (n_raters < 2) {
+                            self$results$specificAgreementTable$setNote(
+                                "error",
+                                .("Specific agreement requires at least 2 raters for comparison.")
+                            )
+                            return()
+                        }
 
-                        cluster_values <- NULL
+                        all_clusters <- NULL
                         cluster_var <- self$options$specificCluster
                         if (!is.null(cluster_var)) {
                             if (nrow(ratings) != nrow(self$data) || !cluster_var %in% names(self$data))
@@ -4285,23 +4290,20 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                                 stop("Every row must have a patient/cluster ID.")
                             if (include_ci && self$options$specificCIMethod != "bootstrap")
                                 stop("Select bootstrap intervals when a patient/cluster ID is supplied.")
-                            cluster_values <- all_clusters[complete_rows]
-                        }
-                        n_cases <- nrow(ratings_complete)
-                        n_raters <- ncol(ratings_complete)
-
-                        if (n_cases < 10) {
-                            self$results$specificAgreementTable$setNote(
-                                "error",
-                                sprintf(.("Specific agreement requires at least 10 complete observations. Found %d."), n_cases)
-                            )
-                            return()
                         }
 
-                        if (n_raters < 2) {
+                        pair_counts <- integer(0)
+                        for (i in 1:(n_raters - 1)) {
+                            for (j in (i + 1):n_raters) {
+                                pair_counts <- c(pair_counts, sum(!is.na(ratings[[i]]) & !is.na(ratings[[j]])))
+                            }
+                        }
+                        max_pair_n <- if (length(pair_counts) > 0) max(pair_counts) else 0L
+
+                        if (max_pair_n < 10) {
                             self$results$specificAgreementTable$setNote(
                                 "error",
-                                .("Specific agreement requires at least 2 raters for comparison.")
+                                sprintf(.("Specific agreement requires at least 10 complete observations. Found %d."), max_pair_n)
                             )
                             return()
                         }
@@ -4310,7 +4312,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                         # kappa (private$.continuousRatingNames). The class-only test that used to
                         # stand here read histopathology's numeric 0/1 raters as continuous and
                         # refused this output in the same run that printed Cohen's kappa 0.8206.
-                        is_categorical <- !private$.ratingsAreContinuous(ratings_complete)
+                        is_categorical <- !private$.ratingsAreContinuous(ratings)
 
                         if (!is_categorical) {
                             self$results$specificAgreementTable$setNote(
@@ -4321,8 +4323,8 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                         }
 
                         # Get all unique categories across all raters
-                        all_levels <- unique(unlist(lapply(ratings_complete, function(x) {
-                            if (is.factor(x)) levels(x) else unique(as.character(x))
+                        all_levels <- unique(unlist(lapply(ratings, function(x) {
+                            if (is.factor(x)) levels(x) else unique(as.character(x[!is.na(x)]))
                         })))
 
                         # Determine which categories to analyze
@@ -4372,12 +4374,18 @@ agreementClass <- if (requireNamespace("jmvcore")) {
 
                         # Calculate for all pairwise combinations
                         saTable <- self$results$specificAgreementTable
-                        rater_names <- colnames(ratings_complete)
+                        rater_names <- colnames(ratings)
 
                         for (i in 1:(n_raters - 1)) {
                             for (j in (i + 1):n_raters) {
-                                rater1 <- as.character(ratings_complete[[i]])
-                                rater2 <- as.character(ratings_complete[[j]])
+                                pair_ok <- !is.na(ratings[[i]]) & !is.na(ratings[[j]])
+                                n_cases <- sum(pair_ok)
+                                if (n_cases < 10) {
+                                    next
+                                }
+                                rater1 <- as.character(ratings[[i]][pair_ok])
+                                rater2 <- as.character(ratings[[j]][pair_ok])
+                                cluster_values <- if (!is.null(all_clusters)) all_clusters[pair_ok] else NULL
 
                                 # Binary split for the named-positive-category mode, so
                                 # that NSA is computable from the same 2x2 as PSA.
@@ -4407,7 +4415,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                                     specific_agreement <- (2 * both_positive) / total_positive
 
                                     # Approximate CI with Wilson interval on specific agreement scale
-                                    # Use number of subjects with at least one positive rating as N
+                                    # Use Dice denominator 2*a + b + c (total_positive) to match numerator 2*a
                                     attempted <- valid <- undefined <- 0L
                                     ci_method <- "Not requested"
                                     units <- if (is.null(cluster_values)) n_cases else length(unique(cluster_values))
@@ -4429,16 +4437,16 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                                         ci_method <- boot_ci$status
                                     } else if (include_ci) {
                                         ci_method <- "Approximate Wilson (legacy)"
-                                        n_eff <- sum(rater1 == category | rater2 == category)
-                                        if (n_eff < 1) {
+                                        n_total <- 2 * both_positive + (rater1_positive - both_positive) + (rater2_positive - both_positive)
+                                        if (n_total < 1) {
                                             ci_lower <- NA
                                             ci_upper <- NA
                                         } else {
                                             p_hat <- specific_agreement
                                             z <- qnorm(1 - (1 - self$options$confLevel) / 2)
-                                            denom <- 1 + z^2 / n_eff
-                                            center <- (p_hat + z^2 / (2 * n_eff)) / denom
-                                            margin <- z * sqrt(p_hat * (1 - p_hat) / n_eff + z^2 / (4 * n_eff^2)) / denom
+                                            denom <- 1 + z^2 / n_total
+                                            center <- (p_hat + z^2 / (2 * n_total)) / denom
+                                            margin <- z * sqrt(p_hat * (1 - p_hat) / n_total + z^2 / (4 * n_total^2)) / denom
                                             ci_lower <- max(0, center - margin)
                                             ci_upper <- min(1, center + margin)
                                         }
@@ -7586,11 +7594,16 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                         } else {
                             # Use Fleiss' Kappa or Light's Kappa for categorical data
                             # Convert all to factors with same levels
-                            all_data <- unlist(inter_ratings)
-                            all_levels <- sort(unique(all_data[!is.na(all_data)]))
+                            ordered_inter <- all(vapply(inter_ratings, private$.hasOrder, logical(1)))
+                            merged_inter_lv <- private$.orderedLevelsInfo(inter_ratings)
+                            all_levels <- merged_inter_lv$levels
 
                             for (i in seq_len(ncol(inter_ratings))) {
-                                inter_ratings[[i]] <- factor(inter_ratings[[i]], levels = all_levels)
+                                inter_ratings[[i]] <- factor(
+                                    inter_ratings[[i]],
+                                    levels = all_levels,
+                                    ordered = is.ordered(inter_ratings[[i]]) || ordered_inter
+                                )
                             }
 
                             if (requireNamespace("irr", quietly = TRUE)) {
@@ -7612,16 +7625,21 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                                 # statistics in one row. Take the value, the interval, the
                                 # p-value and the label from the SAME computation.
                                 if (n_raters == 2) {
+                                    w_mode <- if (ordered_inter && !isTRUE(merged_inter_lv$ambiguous)) {
+                                        private$.wghtEffective(all_levels)
+                                    } else {
+                                        "unweighted"
+                                    }
                                     kc_inter <- tryCatch(
-                                        private$.pairKappaWithCI(inter_ratings, "unweighted"),
+                                        private$.pairKappaWithCI(inter_ratings, w_mode),
                                         error = function(e) NULL
                                     )
-                                    if (!is.null(kc_inter) && !is.na(kc_inter$ci_lower)) {
+                                    if (!is.null(kc_inter) && !is.na(kc_inter$kappa)) {
                                         kappa_value <- kc_inter$kappa
                                         p_value <- kc_inter$p
                                         ci_lower <- kc_inter$ci_lower
                                         ci_upper <- kc_inter$ci_upper
-                                        stat_label <- private$.kappaLabel(2L)
+                                        stat_label <- private$.kappaLabel(2L, w_mode)
                                     }
                                 }
 
@@ -9207,9 +9225,10 @@ agreementClass <- if (requireNamespace("jmvcore")) {
             # option, unless a rater variable is nominal. The headline used to reject()
             # that case, which also kept these paths from ever seeing it; now it reports
             # unweighted kappa with a note, so they must not lay weights over it either.
-            .wghtEffective = function() {
+            .wghtEffective = function(all_levels = NULL) {
                 w <- self$options$wght
                 if (identical(w, "unweighted") || is.null(self$data)) return(w)
+                if (!is.null(all_levels) && length(all_levels) < 3) return("unweighted")
                 cols <- self$data[, intersect(self$options$vars, names(self$data)), drop = FALSE]
                 if (private$.weightsOnNominal(cols)) "unweighted" else w
             },
@@ -14205,7 +14224,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                         # next run of the same analysis object. Clear every key this
                         # function can write, then let each branch write only its own -
                         # otherwise a guard's "error" sits beside a later, valid result.
-                        for (nk in c("error", "info", "props", "unweighted", "sparse"))
+                        for (nk in c("error", "invalid", "info", "props", "unweighted", "sparse"))
                             self$results$agreementSampleSizeTable$setNote(nk, NULL)
 
                         metric <- self$options$ssMetric
@@ -14336,9 +14355,23 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                             # (rho0 = .70, rho1 = .90, k = 2 gave n = 9 where Walter gives n = 23).
                             # The note below cites Walter, so the arithmetic has to be Walter's.
                             c_of <- function(rho) 1 + k * rho / (1 - rho)
+                            min_icc <- -1 / (k - 1)
+                            c0 <- c_of(rho0)
+                            c1 <- c_of(rho1)
+                            if (rho0 <= min_icc || rho1 <= min_icc || c0 <= 0 || c1 <= 0) {
+                                self$results$agreementSampleSizeTable$setNote(
+                                    "invalid",
+                                    .fmt(
+                                        .("For {raters} raters, the theoretical lower bound for ICC is -1 / (k - 1) = {minIcc}. Both H0 and H1 ICC values must be strictly greater than {minIcc}."),
+                                        raters = k,
+                                        minIcc = round(min_icc, 3)
+                                    )
+                                )
+                                return()
+                            }
                             n_required <- ceiling(
                                 1 + 2 * k * (z_alpha + z_beta)^2 /
-                                    ((k - 1) * (base::log(c_of(rho1) / c_of(rho0)))^2)
+                                    ((k - 1) * (base::log(c1 / c0))^2)
                             )
                             n_required <- max(n_required, k + 1)
                             metric_label <- private$.ssMetricLabel()

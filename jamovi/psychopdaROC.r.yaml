@@ -644,6 +644,7 @@ items:
         - refVar
         - idiNriBootRuns
         - direction
+        - seed
       columns:
         - name: variable
           title: Variable
@@ -687,6 +688,7 @@ items:
         - nriThresholds
         - idiNriBootRuns
         - direction
+        - seed
       columns:
         - name: variable
           title: Variable
@@ -828,6 +830,7 @@ items:
         - priorAUC
         - priorPrecision
         - direction
+        - seed
       columns:
         - name: variable
           title: Variable
@@ -1167,6 +1170,7 @@ items:
           - classVar
           - positiveClass
           - negativeClass
+          - direction
 
     - name: powerCurvePlot
       title: Power Analysis Curves
@@ -1236,6 +1240,7 @@ items:
           - treatmentThreshold
           - harmBenefitRatio
           - interventionCost
+          - direction
 
     - name: metaAnalysisForestPlot
       title: Meta-Analysis Forest Plot

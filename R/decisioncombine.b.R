@@ -1821,7 +1821,17 @@ decisioncombineClass <- if (requireNamespace("jmvcore")) {
                 # not a structural one.
                 empty_margin <- (tp + fp) == 0 || (fn + tn) == 0 ||
                     (tp + fn) == 0 || (fp + tn) == 0
+                lrp_zero <- !empty_margin && (tp == 0 || fp == 0)
+                lrn_zero <- !empty_margin && (fn == 0 || tn == 0)
                 use_continuity <- !empty_margin && any(c(tp, fp, fn, tn) == 0)
+                tp_lrp <- if (lrp_zero) tp + 0.5 else as.numeric(tp)
+                fp_lrp <- if (lrp_zero) fp + 0.5 else as.numeric(fp)
+                fn_lrp <- if (lrp_zero) fn + 0.5 else as.numeric(fn)
+                tn_lrp <- if (lrp_zero) tn + 0.5 else as.numeric(tn)
+                tp_lrn <- if (lrn_zero) tp + 0.5 else as.numeric(tp)
+                fp_lrn <- if (lrn_zero) fp + 0.5 else as.numeric(fp)
+                fn_lrn <- if (lrn_zero) fn + 0.5 else as.numeric(fn)
+                tn_lrn <- if (lrn_zero) tn + 0.5 else as.numeric(tn)
                 if (use_continuity) {
                     tp_adj <- tp + 0.5
                     fp_adj <- fp + 0.5
@@ -1895,13 +1905,10 @@ decisioncombineClass <- if (requireNamespace("jmvcore")) {
                 youden_j <- sens + spec - 1
                 youden_ci <- private$.youdenCI(tp, fn, fp, tn)
 
-                # Calculate sensitivity and specificity from adjusted counts for LR/DOR
-                sens_adj <- tp_adj / (tp_adj + fn_adj)
-                spec_adj <- tn_adj / (fp_adj + tn_adj)
-
-                # Likelihood ratios using adjusted counts (prevents Inf/NaN)
-                lr_pos <- sens_adj / (1 - spec_adj)
-                lr_neg <- (1 - sens_adj) / spec_adj
+                # Likelihood ratios using per-ratio adjusted counts (LR+ corrected iff TP=0|FP=0,
+                # LR- corrected iff FN=0|TN=0)
+                lr_pos <- (tp_lrp / (tp_lrp + fn_lrp)) / (fp_lrp / (fp_lrp + tn_lrp))
+                lr_neg <- (fn_lrn / (tp_lrn + fn_lrn)) / (tn_lrn / (fp_lrn + tn_lrn))
 
                 # Diagnostic odds ratio using adjusted counts
                 dor <- (tp_adj * tn_adj) / (fp_adj * fn_adj)
@@ -2018,7 +2025,7 @@ decisioncombineClass <- if (requireNamespace("jmvcore")) {
                     upper = acc_ci[2]
                 ))
 
-                # LR+ with CI (log-scale transformation for CI, using adjusted counts)
+                # LR+ with CI (log-scale transformation for CI, using per-ratio adjusted counts)
                 # .estimableSe(): the estimate being legitimate says nothing about the
                 # interval. On a structurally empty margin no correction is applied and the
                 # delta-method SE collapses to EXACTLY 0 -- tp=30, fp=20, fn=0, tn=0 gave
@@ -2027,9 +2034,9 @@ decisioncombineClass <- if (requireNamespace("jmvcore")) {
                 # zero or non-finite SE means the interval is not estimable; blank it.
                 if (!is.na(lr_pos) && lr_pos > 0) {
                     log_lr_pos <- log(lr_pos)
-                    # Standard SE for log(LR+) using adjusted counts
-                    se_log_lr_pos <- sqrt((1 / tp_adj) - (1 / (tp_adj + fn_adj)) +
-                        (1 / fp_adj) - (1 / (fp_adj + tn_adj)))
+                    # Standard SE for log(LR+) using per-ratio adjusted counts
+                    se_log_lr_pos <- sqrt((1 / tp_lrp) - (1 / (tp_lrp + fn_lrp)) +
+                        (1 / fp_lrp) - (1 / (fp_lrp + tn_lrp)))
                     if (private$.estimableSe(se_log_lr_pos)) {
                         lr_pos_lower <- exp(log_lr_pos - z_crit * se_log_lr_pos)
                         lr_pos_upper <- exp(log_lr_pos + z_crit * se_log_lr_pos)
@@ -2051,12 +2058,12 @@ decisioncombineClass <- if (requireNamespace("jmvcore")) {
                     upper = lr_pos_upper
                 ))
 
-                # LR- with CI (log-scale transformation for CI, using adjusted counts)
+                # LR- with CI (log-scale transformation for CI, using per-ratio adjusted counts)
                 if (!is.na(lr_neg) && lr_neg > 0) {
                     log_lr_neg <- log(lr_neg)
-                    # Standard SE for log(LR-) using adjusted counts
-                    se_log_lr_neg <- sqrt((1 / fn_adj) - (1 / (tp_adj + fn_adj)) +
-                        (1 / tn_adj) - (1 / (fp_adj + tn_adj)))
+                    # Standard SE for log(LR-) using per-ratio adjusted counts
+                    se_log_lr_neg <- sqrt((1 / fn_lrn) - (1 / (tp_lrn + fn_lrn)) +
+                        (1 / tn_lrn) - (1 / (fp_lrn + tn_lrn)))
                     if (private$.estimableSe(se_log_lr_neg)) {
                         lr_neg_lower <- exp(log_lr_neg - z_crit * se_log_lr_neg)
                         lr_neg_upper <- exp(log_lr_neg + z_crit * se_log_lr_neg)

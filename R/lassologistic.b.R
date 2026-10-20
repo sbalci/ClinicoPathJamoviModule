@@ -194,6 +194,7 @@ lassologisticClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 # survival.b.R.
                 private$.noticeList <- list()
                 private$.cutFellback <- character(0)
+                private$.cutAdjusted <- character(0)
                 # A saved result can be restored before an incomplete selection is run.
                 # Clear dependent content before every early-return path.
                 for (nm in c("notices", "suitabilityReport", "summaryText", "lassoExplanation",
@@ -1289,7 +1290,8 @@ lassologisticClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 # DeLong's variance is then exactly 0: the interval printed as "0.500
                 # (0.500-0.500)", a zero-width interval around a model that does not
                 # discriminate, while the AUC = 1 end already said "CI not estimable".
-                constant_score <- length(unique(round(fit$probabilities, 12))) < 2
+                constant_score <- length(fit$selected) == 0 ||
+                    length(unique(round(fit$probabilities, 12))) < 2
                 if (constant_score) degenerate <- TRUE
 
                 # The other degenerate end. An apparent AUC of 1.000 means the
@@ -1716,6 +1718,7 @@ lassologisticClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
             # Reset per run alongside .noticeList; .populateScoringSystem fills it,
             # and it runs BEFORE the methodology notes, so those see the truth too.
             .cutFellback = character(0),
+            .cutAdjusted = character(0),
 
             # ── Human name of the resolved cut rule ─────────────────────────
             #
@@ -1733,8 +1736,15 @@ lassologisticClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                     # supplied" was a flat contradiction of the manual_fallback
                     # note sitting on the very same table - and the fix that
                     # centralised this label broadcast it to three panels.
+                    if (!isTRUE(self$options$scoringSystem) &&
+                        length(private$.parseCutPoints(private$.opt("scoreCutPoints", ""))) == 0)
+                        return(.("the cut points you supply (or the sample median when none is supplied)"))
+                    if (length(private$.cutFellback) > 0 && length(private$.cutAdjusted) > 0)
+                        return(.("the cut points you supplied, and the sample median where none was supplied or a supplied cut left all cases on one side"))
                     if (length(private$.cutFellback) > 0)
                         return(.("the cut points you supplied, and the sample median for the predictors you did not give one for"))
+                    if (length(private$.cutAdjusted) > 0)
+                        return(.("the cut points you supplied, and the sample median where a supplied cut left all cases on one side"))
                     return(.("the cut points you supplied"))
                 }
                 switch(method,
@@ -2047,6 +2057,15 @@ lassologisticClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 max_points <- self$options$scoringMaxPoints
 
                 vars <- fit$selected
+                ord <- if (!is.null(data)) data$ordinal_vars else character(0)
+                table$setNote("ordinal_note", if (length(ord) > 0) sprintf(
+                    .("Ordinal predictor(s) %s are coded with one indicator per level, each compared with that predictor's lowest level; they are not modelled as a linear trend."),
+                    .rocLabel(paste(ord, collapse = ", "))) else NULL)
+                ref_src <- if (!is.null(data$factor_ref) && length(vars) > 0)
+                    unique(data$column_source[vars][data$column_factor[vars]]) else character(0)
+                table$setNote("reference_note", if (length(ref_src) > 0) sprintf(
+                    .("Each factor term is compared with its predictor's reference (first) level: %s. Points for a factor level apply relative to that reference level (0 points)."),
+                    .rocLabel(paste(sprintf("%s = %s", ref_src, data$factor_ref[ref_src]), collapse = "; "))) else NULL)
                 # Resolve the cut points ONCE and pass them to every consumer, so the
                 # rule printed in the criterion column, the contrast the points are
                 # derived from, and the cut actually applied when scoring cannot
@@ -2056,6 +2075,8 @@ lassologisticClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 # this point (here, and in the methodology notes) can say so.
                 fb <- attr(cuts, "fellback")
                 private$.cutFellback <- if (is.null(fb)) character(0) else as.character(fb)
+                adj_attr <- attr(cuts, "adjusted")
+                private$.cutAdjusted <- if (is.null(adj_attr)) character(0) else as.character(adj_attr)
 
                 # Points are derived from the log-odds contribution of MEETING each
                 # criterion, so they are on the same contrast the score applies and

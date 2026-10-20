@@ -2606,6 +2606,7 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                     model_results$net_benefits,
                     model_results$thresholds
                 )
+                wauc <- if (is.finite(wauc)) wauc else NA_real_
 
                 # Gain over treating everyone, as a DIFFERENCE in weighted net benefit.
                 # This used to be reported as the ratio (wauc - treat_all) / |treat_all|.
@@ -2613,19 +2614,25 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                 # prevalence, so whenever the threshold range brackets the prevalence the
                 # denominator is near zero and the ratio explodes - percentages in the
                 # hundreds were being displayed for ordinary differences.
-                if (!is.na(wauc) && !is.na(reference_wauc)) {
+                if (is.finite(wauc) && is.finite(reference_wauc)) {
                     benefit_gain <- wauc - reference_wauc
                 } else {
-                    benefit_gain <- NA
+                    benefit_gain <- NA_real_
                 }
 
-                weighted_auc_table$setRow(rowKey = row_keys[i], values = list(
+                row_vals <- list(
                     model = model_name,
                     weighted_auc = wauc,
                     auc_range = paste0(round(min(thresholds) * 100, 1), "% - ",
                                        round(max(thresholds) * 100, 1), "%"),
                     benefit_gain = benefit_gain
-                ))
+                )
+                weighted_auc_table$setRow(rowKey = row_keys[i], values = row_vals)
+                private$.footnoteNA(
+                    weighted_auc_table, row_keys[i],
+                    row_vals[c("weighted_auc", "benefit_gain")],
+                    .("Weighted AUC requires at least two threshold points with positive range width.")
+                )
             }
 
             weighted_auc_table$setNote(
@@ -2679,7 +2686,7 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                         private$.dcaResults[[model2_name]]$net_benefits,
                         thresholds
                     )
-                    wauc_diff <- wauc1 - wauc2
+                    wauc_diff <- if (is.finite(wauc1) && is.finite(wauc2)) wauc1 - wauc2 else NA_real_
 
                     private$.checkpoint()
 
@@ -2711,6 +2718,11 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                 r <- rows[[k]]
                 r$p_value_adj <- adj_p[k]
                 comparison_table$setRow(rowKey = row_keys[k], values = r)
+                private$.footnoteNA(
+                    comparison_table, row_keys[k],
+                    r[c("weighted_auc_diff", "ci_lower", "ci_upper", "p_value", "p_value_adj")],
+                    .("Fewer than 50 bootstrap resamples gave a usable difference, so no interval or p-value is reported.")
+                )
             }
 
             comparison_table$setNote(

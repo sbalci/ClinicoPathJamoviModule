@@ -145,6 +145,9 @@ nogoldstandard_em_start <- function(tab, par, checkpoint = function() {}) {
 }
 
 nogoldstandard_identification <- function(tab, par) {
+  if (is.null(tab$k) || tab$k < 2L) {
+    return(list(identified = FALSE, weak = TRUE, ratio = NA_real_, exact_factorization = FALSE))
+  }
   z <- nogoldstandard_probabilities(par, tab$patterns)
   singular_values <- svd(z$jacobian, nu = 0, nv = 0)$d
   ratio <- min(singular_values) / max(singular_values)
@@ -165,7 +168,7 @@ nogoldstandard_identification <- function(tab, par) {
     }
     if (max(abs(implied - empirical)) < 1e-12) factorized <- TRUE
   }
-  list(identified = !factorized && is.finite(ratio) && ratio > 1e-8,
+  list(identified = tab$k >= 3L && !factorized && is.finite(ratio) && ratio > 1e-8,
        weak = is.finite(ratio) && ratio < 1e-4,
        ratio = ratio, exact_factorization = factorized)
 }

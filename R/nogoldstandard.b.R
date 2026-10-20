@@ -712,7 +712,7 @@ nogoldstandardClass <- if (requireNamespace("jmvcore")) {
                     if (isTRUE(private$.degenerateCI))
                         private$.addNotice("WARNING", .("Some bootstrap intervals left blank"),
                             .("For at least one estimate every bootstrap resample gave the same value, so its percentile interval has zero width. A zero-width interval does not describe the uncertainty and is left blank. This usually happens at 0% or 100%."))
-                    if (self$options$method == "latent_class") {
+                    if (self$options$method == "latent_class" && !isFALSE(results$converged)) {
                         private$.populateModelFit(results$model)
                         private$.populateConditionalDependence(results$model, tests)
                     }
@@ -995,6 +995,8 @@ nogoldstandardClass <- if (requireNamespace("jmvcore")) {
 
                     # Calculate PPV and NPV
                     prevalence <- results$prevalence
+                    has_pos <- is.null(results$data) || any(results$data[[i]] == 1, na.rm = TRUE)
+                    has_neg <- is.null(results$data) || any(results$data[[i]] == 0, na.rm = TRUE)
                     if (self$options$method %in% c("composite", "all_positive", "any_positive")) {
                         ref <- switch(self$options$method,
                             composite = rowMeans(results$data) > 0.5,
@@ -1007,6 +1009,8 @@ nogoldstandardClass <- if (requireNamespace("jmvcore")) {
                         )
                     } else {
                         ppv_npv <- private$.calculatePPVNPV(sensitivity, specificity, prevalence)
+                        if (!has_pos) ppv_npv$ppv <- NA_real_
+                        if (!has_neg) ppv_npv$npv <- NA_real_
                     }
 
                     # Predictive-value intervals use the same source as the other intervals.
@@ -1016,9 +1020,9 @@ nogoldstandardClass <- if (requireNamespace("jmvcore")) {
                         boot <- private$.boot_cache
                         boot_pv <- private$.calculatePPVNPV(boot$sensitivities[, i],
                             boot$specificities[, i], boot$prevalence)
-                        ppv_ci <- if (degenerate_spec) no_ci else
+                        ppv_ci <- if (degenerate_spec || !has_pos) no_ci else
                             private$.bootCI(boot_pv$ppv, self$options$alpha)
-                        npv_ci <- if (degenerate_sens) no_ci else
+                        npv_ci <- if (degenerate_sens || !has_neg) no_ci else
                             private$.bootCI(boot_pv$npv, self$options$alpha)
                     } else if (self$options$method %in% c("composite", "all_positive", "any_positive")) {
                         ppv_ci <- private$.wilsonCI(sum(ref & positive), sum(positive), self$options$alpha)
@@ -1743,21 +1747,25 @@ nogoldstandardClass <- if (requireNamespace("jmvcore")) {
                             # boundary. Its MLE is that value in both classes and leaves the other
                             # tests' likelihood unchanged: fit the rest, place it at the boundary.
                             keep <- vapply(boot_data, function(x) length(unique(x)) > 1, logical(1))
-                            fit <- private$.runLCA(boot_data[keep], names(data)[keep],
-                                                   n_starts = 3L,
-                                                   probs_start = warm_start[keep])
-                            if (!all(keep) && isTRUE(fit$estimable)) {
-                                # (tryCatch evaluates here: never reuse the names sens/spec)
-                                value <- vapply(boot_data[!keep], `[`, numeric(1), 1L)
-                                full_sens <- full_spec <- numeric(n_tests)
-                                full_sens[keep] <- fit$sensitivities
-                                full_spec[keep] <- fit$specificities
-                                full_sens[!keep] <- value
-                                full_spec[!keep] <- 1 - value
-                                fit$sensitivities <- full_sens
-                                fit$specificities <- full_spec
+                            if (sum(keep) < 3L) {
+                                NULL
+                            } else {
+                                fit <- private$.runLCA(boot_data[keep], names(data)[keep],
+                                                       n_starts = 3L,
+                                                       probs_start = warm_start[keep])
+                                if (!all(keep) && isTRUE(fit$estimable)) {
+                                    # (tryCatch evaluates here: never reuse the names sens/spec)
+                                    value <- vapply(boot_data[!keep], `[`, numeric(1), 1L)
+                                    full_sens <- full_spec <- numeric(n_tests)
+                                    full_sens[keep] <- fit$sensitivities
+                                    full_spec[keep] <- fit$specificities
+                                    full_sens[!keep] <- value
+                                    full_spec[!keep] <- 1 - value
+                                    fit$sensitivities <- full_sens
+                                    fit$specificities <- full_spec
+                                }
+                                fit
                             }
-                            fit
                         } else if (method == "composite") {
                             private$.runComposite(boot_data)
                         } else if (method == "all_positive") {
@@ -1806,8 +1814,14 @@ nogoldstandardClass <- if (requireNamespace("jmvcore")) {
                     )
                 }
 
-                finite_counts <- c(sum(is.finite(prevalence)),
-                    colSums(is.finite(sens)), colSums(is.finite(spec)))
+                deg_sens <- identical(method, "all_positive") ||
+                    (identical(method, "composite") && n_tests == 2L)
+                deg_spec <- identical(method, "any_positive")
+                finite_counts <- c(
+                    sum(is.finite(prevalence)),
+                    if (!deg_sens) colSums(is.finite(sens)) else integer(0),
+                    if (!deg_spec) colSums(is.finite(spec)) else integer(0)
+                )
                 if (any(finite_counts < 20L)) {
                     private$.addNotice("STRONG_WARNING", .("Insufficient bootstrap estimates"),
                         .fmt(.("Each interval requires at least 20 finite parameter estimates. Across the class or rule proportion and test response probabilities, successful counts range from {minimum} to {maximum} of {requested}. Intervals with fewer than 20 are left blank; increase the sample information or resolve fitting failures before reporting uncertainty."),
@@ -1836,7 +1850,7 @@ nogoldstandardClass <- if (requireNamespace("jmvcore")) {
                 q <- stats::quantile(values, c(alpha / 2, 1 - alpha / 2), names = FALSE, na.rm = TRUE)
                 # Every resample gave the same value (in practice 0 or 1): a zero-width
                 # percentile interval reads as certainty, so blank it and say why once.
-                if (q[2] - q[1] < 1e-12) {
+                if (q[2] - q[1] < 1e-9) {
                     private$.degenerateCI <- TRUE
                     return(list(lower = NA_real_, upper = NA_real_))
                 }
@@ -1856,12 +1870,15 @@ nogoldstandardClass <- if (requireNamespace("jmvcore")) {
                 # so it also gives a rule method's empirical PPV/NPV -- provided an empty group
                 # contributes 0: with prevalence 0 sensitivity is NA (no positive group) but
                 # PPV is 0 and NPV 1, and NA * 0 would otherwise drop that resample.
-                tp <- ifelse(prevalence == 0, 0, sensitivity * prevalence)
-                fn <- ifelse(prevalence == 0, 0, (1 - sensitivity) * prevalence)
-                fp <- ifelse(prevalence == 1, 0, (1 - specificity) * (1 - prevalence))
-                tn <- ifelse(prevalence == 1, 0, specificity * (1 - prevalence))
-                ppv <- ifelse(tp + fp > 0, tp / (tp + fp), NA_real_)
-                npv <- ifelse(tn + fn > 0, tn / (tn + fn), NA_real_)
+                s <- ifelse(sensitivity <= 1e-9, 0, ifelse(sensitivity >= 1 - 1e-9, 1, sensitivity))
+                sp <- ifelse(specificity <= 1e-9, 0, ifelse(specificity >= 1 - 1e-9, 1, specificity))
+                pr <- ifelse(prevalence <= 1e-9, 0, ifelse(prevalence >= 1 - 1e-9, 1, prevalence))
+                tp <- ifelse(pr == 0, 0, s * pr)
+                fn <- ifelse(pr == 0, 0, (1 - s) * pr)
+                fp <- ifelse(pr == 1, 0, (1 - sp) * (1 - pr))
+                tn <- ifelse(pr == 1, 0, sp * (1 - pr))
+                ppv <- ifelse(tp + fp > 1e-9, tp / (tp + fp), NA_real_)
+                npv <- ifelse(tn + fn > 1e-9, tn / (tn + fn), NA_real_)
 
                 return(list(ppv = ppv, npv = npv))
             },

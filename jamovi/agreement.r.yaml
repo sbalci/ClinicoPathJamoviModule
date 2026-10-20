@@ -241,6 +241,8 @@ items:
       clearWith:
           - vars
           - confLevel
+          - perPathologist
+          - severityModel
       refs:
           - Nelson2015
           - ordinal
@@ -283,6 +285,10 @@ items:
       renderFun: .severityPlot
       requiresData: false
       visible: (severityModel)
+      clearWith:
+          - vars
+          - confLevel
+          - severityModel
       refs:
           - Nelson2015
           - ordinal
@@ -858,6 +864,8 @@ items:
           - referenceRater
           - rankRaters
           - wght
+          - confLevel
+          - kappaCIMethod
       refs:
           - Cohen1960
           - LandisKoch1977
@@ -1833,6 +1841,7 @@ items:
           - interIntraSeparator
           - confLevel
           - kappaCIMethod
+          - wght
       refs:
           - Shrout1979
           - Koo2016
@@ -2168,6 +2177,7 @@ items:
           - vars
           - raterProfileType
           - raterProfileShowPoints
+          - heatmapColorScheme
 
     - name: raterProfileExplanation
       title: "About Rater Profile Plots"
@@ -2226,6 +2236,13 @@ items:
       height: 450
       renderFun: .subgroupForestPlot
       visible: (agreementBySubgroup && subgroupForestPlot)
+      clearWith:
+          - vars
+          - subgroupVariable
+          - confLevel
+          - kappaCIMethod
+          - subgroupMinCases
+          - wght
       refs:
           - LandisKoch1977
           - Koo2016
@@ -2393,6 +2410,8 @@ items:
           - confLevel
           - seed
           - wght
+          - exct
+          - iccType
       columns:
         - name: metric
           title: "Metric"

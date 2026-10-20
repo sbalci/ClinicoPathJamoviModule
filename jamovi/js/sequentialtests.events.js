@@ -16,7 +16,16 @@ const setControlValue = (control, value) => {
 };
 
 const SEQUENTIAL_PRESET_CONFIGS = {
-    custom: {},
+    custom: {
+        test1_name: 'Screening Test',
+        test1_sens: 0.95,
+        test1_spec: 0.70,
+        test2_name: 'Confirmatory Test',
+        test2_sens: 0.80,
+        test2_spec: 0.98,
+        prevalence: 0.10,
+        strategy: 'serial_positive'
+    },
     covid_screening_confirmation: {
         test1_name: 'Rapid Antigen Test',
         test1_sens: 0.75,
@@ -115,9 +124,6 @@ const events = {
             return;
 
         const preset = presetControl.value();
-
-        if (preset === 'custom')
-            return;
 
         applySequentialPresetConfig(ui, preset);
     }

@@ -81,24 +81,99 @@ decisionClass <- if (requireNamespace("jmvcore"))
                 paste(shown, collapse = ", ")
             },
 
+            .diagText = function() {
+                utils::modifyList(.diagText, list(
+                    ref_interpretation = .("Reference interpretation"),
+                    ref_description = .("Comparator description"),
+                    ref_target = .("Target definition"),
+                    ref_rules = .("Positive and negative rules"),
+                    ref_population = .("Analysis population"),
+                    ref_unit = .("Sampling unit"),
+                    ref_unit_value = .("Independent cases; repeated reads require a reader/cluster analysis"),
+                    not_specified = .("Not specified"),
+                    mode_legacy = .("Not specified"),
+                    mode_disease = .("Disease reference"),
+                    mode_consensus = .("Expert consensus"),
+                    mode_method = .("Comparative method"),
+                    note_legacy = .("Reference interpretation is not specified. Existing diagnostic wording is retained for compatibility; it requires a suitable disease reference. Choose consensus or comparative method when measuring agreement."),
+                    note_comparator = .("Agreement with this comparator does not establish disease status. PPA/NPA condition on the comparator; symmetric positive/negative specific agreement uses different denominators. Population-prevalence adjustment and disease-risk outputs are not used."),
+                    note_disease = .("Diagnostic interpretation assumes the selected reference establishes the target disease status."),
+                    metric_ppa = .("Positive percent agreement (PPA)"),
+                    metric_npa = .("Negative percent agreement (NPA)"),
+                    metric_opa = .("Overall percent agreement (OPA)"),
+                    metric_rpos = .("Reference positive given positive call"),
+                    metric_rneg = .("Reference negative given negative call"),
+                    metric_psa = .("Positive specific agreement (symmetric)"),
+                    metric_nsa = .("Negative specific agreement (symmetric)"),
+                    method_not_requested = .("Not requested"),
+                    method_no_denominator = .("No eligible denominator"),
+                    method_exact = .("Exact binomial (independent cases)"),
+                    method_symmetric = .("Symmetric ratio; binomial CI not applicable"),
+                    call_positive = .("Positive"),
+                    call_negative = .("Negative"),
+                    note_denominators = .("PPA/NPA condition on reference-positive/reference-negative cases. Reverse conditional agreement is not a patient's probability of disease. Symmetric specific agreement is not PPA/NPA. All binary estimates use determinate reference/test pairs under the displayed recoding rule."),
+                    bin_missing_positive = .("Select an explicit positive level. Both positive and negative levels are required; no level is inferred."),
+                    bin_missing_negative = .("Select an explicit negative level. Both positive and negative levels are required; no level is inferred."),
+                    bin_unavailable_positive = .("The positive level \"%1$s\" is not available. Available levels: %2$s."),
+                    bin_unavailable_negative = .("The negative level \"%1$s\" is not available. Available levels: %2$s."),
+                    bin_identical = .("Choose different positive and negative levels."),
+                    bin_other = .("Observed levels outside the selected positive/negative pair: %s. Select 'Exclude other observed levels' to omit these results, or explicitly recode the variable before analysis. Other levels are never treated as negative."),
+                    report_rate = .("%1$.1f%% (%2$d/%3$d)"),
+                    report_unavailable = .("unavailable (denominator 0)"),
+                    report_test = .("%1$s: PPA %2$s, NPA %3$s; %4$d analyzed cases, %5$d excluded."),
+                    report_close = .("These quantities describe agreement with the selected comparator. The tables state the denominators and interval methods. Differences between tests require paired comparisons on common cases."),
+                    plot_test = .("Test"),
+                    plot_row = .("Selected row"),
+                    plot_call = .("Call / reference"),
+                    plot_agreement = .("Agreement"),
+                    plot_gaps = .("Not estimable (denominator 0), not drawn: %s"),
+                    class_pos_match = .("Positive match"),
+                    class_pos_call = .("Positive call / negative reference"),
+                    class_neg_call = .("Negative call / positive reference"),
+                    class_neg_match = .("Negative match"),
+                    class_excluded = .("Excluded")
+                ))
+            },
+
+            .dvText = function() {
+                list(
+                    cohortRole = .("Cohort role"),
+                    samplingDesign = .("Sampling design"),
+                    thresholdSource = .("Threshold source"),
+                    modelVersion = .("Model version"),
+                    analysisUnit = .("Unit of observation"),
+                    referenceType = .("Reference interpretation"),
+                    referenceDescription = .("Comparator description"),
+                    not_specified = .("Not specified"),
+                    legacy = .("Not specified"),
+                    disease = .("Disease reference"),
+                    consensus = .("Expert consensus"),
+                    method = .("Comparative method"),
+                    note = .("User-declared context does not verify independence or external validation. Mapping and exclusion ledgers define the analyzed pairs; unknown levels must not silently become negative.")
+                )
+            },
+
             .runComparator = function(mydata, testVariable, goldVariable) {
                 negative <- function(variable, recoded) paste(unique(as.character(
                     mydata[[variable]][mydata[[recoded]] == "Negative"])), collapse = ", ")
+                text <- private$.diagText()
                 .diagReferenceDefinition(self$results, self$options,
-                    paste0(goldVariable, ": positive = ", self$options$goldPositive,
-                        "; negative = ", negative(goldVariable, "goldVariable2"), " | ",
-                        testVariable, ": positive = ", self$options$testPositive,
-                        "; negative = ", negative(testVariable, "testVariable2")),
-                    "Selected binary pairs only; missing and unselected levels excluded")
+                    .fmt(.("{gold}: positive = {gpos}; negative = {gneg} | {test}: positive = {tpos}; negative = {tneg}"),
+                        gold = goldVariable, gpos = self$options$goldPositive,
+                        gneg = negative(goldVariable, "goldVariable2"),
+                        test = testVariable, tpos = self$options$testPositive,
+                        tneg = negative(testVariable, "testVariable2")),
+                    .("Selected binary pairs only; missing and unselected levels excluded"),
+                    text = text)
                 call <- rep(NA, nrow(self$data))
                 reference <- call
                 idx <- mydata$original_row_position
                 call[idx] <- mydata$testVariable2 == "Positive"
                 reference[idx] <- mydata$goldVariable2 == "Positive"
                 comparisons <- stats::setNames(list(list(call = call, reference = reference)), testVariable)
-                summaries <- .diagFillComparator(self$results, comparisons, self$options$ci)
-                self$results$comparatorReport$setContent(.diagComparatorReport(summaries))
-                classifications <- .diagComparatorClassifications(call, reference)
+                summaries <- .diagFillComparator(self$results, comparisons, self$options$ci, text = text)
+                self$results$comparatorReport$setContent(.diagComparatorReport(summaries, text = text))
+                classifications <- .diagComparatorClassifications(call, reference, text = text)
                 if (isTRUE(self$options$saveClassifications)) {
                     self$results$saveClassifications$setRowNums(rownames(self$data))
                     self$results$saveClassifications$setValues(classifications)
@@ -108,8 +183,8 @@ decisionClass <- if (requireNamespace("jmvcore"))
                     for (i in utils::head(discordant, self$options$maxCasesShow)) {
                         self$results$comparatorCases$addRow(rowKey = i, values = list(
                             row = mydata$original_row_index[match(i, idx)],
-                            reference = as.character(self$data[[goldVariable]][i]),
-                            test = as.character(self$data[[testVariable]][i]),
+                            reference = private$.richText(self$data[[goldVariable]][i]),
+                            test = private$.richText(self$data[[testVariable]][i]),
                             classification = classifications[i]))
                     }
                 }
@@ -690,7 +765,7 @@ decisionClass <- if (requireNamespace("jmvcore"))
                         type = "WARNING",
                         title = .fmt(.("Removed {n} case(s) with an explicit missing level"), n = sprintf("%d", sum(explicit_na))),
                         content = if (.diagReferenceMode(self$options$referenceType)$comparator)
-                            "These cases carry a missingness code. They are excluded from agreement denominators rather than counted as negative."
+                            .("These cases carry a missingness code. They are excluded from agreement denominators rather than counted as negative.")
                         else .("These cases carry a level that codes missingness rather than a result. They are excluded rather than counted as negative, which would have biased sensitivity and specificity.")
                     )
                     mydata <- mydata[!explicit_na, , drop = FALSE]
@@ -743,10 +818,10 @@ decisionClass <- if (requireNamespace("jmvcore"))
                         private$.addNotice(
                             type = "ERROR",
                             title = if (.diagReferenceMode(self$options$referenceType)$comparator)
-                                "The reference has only one level among the analysed cases"
+                                .("The reference has only one level among the analysed cases")
                             else .("The gold standard has only one level among the analysed cases"),
                             content = .fmt(if (.diagReferenceMode(self$options$referenceType)$comparator)
-                                'Every analysed case has reference level "{pos}". No reference-negative denominator is available; check exclusions and level selection.'
+                                .('Every analysed case has reference level "{pos}". No reference-negative denominator is available; check exclusions and level selection.')
                             else .('Every analysed case has the gold-standard level "{pos}", so there are no disease-absent cases to estimate specificity from. Check the data, any exclusions reported in the warnings, and the level selection.'),
                                            pos = self$options$goldPositive)
                         )
@@ -754,10 +829,10 @@ decisionClass <- if (requireNamespace("jmvcore"))
                         private$.addNotice(
                             type = "ERROR",
                             title = if (.diagReferenceMode(self$options$referenceType)$comparator)
-                                "Choose the reference-negative level"
+                                .("Choose the reference-negative level")
                             else .("Choose which gold-standard level means disease absent"),
                             content = .fmt(if (.diagReferenceMode(self$options$referenceType)$comparator)
-                                'The reference has multiple levels besides "{pos}" ({lvls}). Select one Reference negative level. Unselected levels are excluded from the binary comparison.'
+                                .('The reference has multiple levels besides "{pos}" ({lvls}). Select one Reference negative level. Unselected levels are excluded from the binary comparison.')
                             else .('The gold standard has more than one level besides "{pos}" ({lvls}), so the disease-absent level cannot be inferred. Select it under Disease absent level. Levels you do not name are excluded from the analysis rather than counted as disease-absent.'),
                                            pos = self$options$goldPositive,
                                            lvls = paste(gold_candidates, collapse = ", "))
@@ -894,7 +969,7 @@ decisionClass <- if (requireNamespace("jmvcore"))
                         type = "STRONG_WARNING",
                         title = .("Zero counts detected in contingency table"),
                         content = if (.diagReferenceMode(self$options$referenceType)$comparator)
-                            "A zero count makes an agreement proportion 0% or 100%. Inspect the exact 95% confidence intervals; no continuity correction is applied to agreement proportions."
+                            .("A zero count makes an agreement proportion 0% or 100%. Inspect the exact 95% confidence intervals; no continuity correction is applied to agreement proportions.")
                         else .("A zero count makes a proportion exactly 0% or 100%. Read the 95% confidence intervals (95% confidence intervals option), not the point estimate. For the likelihood ratios, see Continuity correction applied.")
                     )
                 }
@@ -1677,7 +1752,7 @@ decisionClass <- if (requireNamespace("jmvcore"))
 
             ,
             .run = function() {
-                .dvProvenance(self$results$validationContext, self$options)
+                .dvProvenance(self$results$validationContext, self$options, private$.dvText())
                 # Reset accumulated notices at the start of every run cycle.
                 # The R6 instance is reused across runs, so the `.noticeList = list()`
                 # field default (evaluated once at instantiation) is not enough: without
@@ -1689,10 +1764,15 @@ decisionClass <- if (requireNamespace("jmvcore"))
                     private$.clearDiseaseOutputs()
 
                 .diagReferenceDefinition(self$results, self$options,
-                    paste("Reference:", self$options$gold, "positive", self$options$goldPositive,
-                          "negative", self$options$goldNegative, "; test:", self$options$newtest,
-                          "positive", self$options$testPositive, "negative", self$options$testNegative),
-                    "Only selected positive/negative reference and test levels; missing and other levels excluded")
+                    .fmt(.("Reference: {gold} positive {gpos} negative {gneg} ; test: {test} positive {tpos} negative {tneg}"),
+                        gold = paste(self$options$gold, collapse = ""),
+                        gpos = paste(self$options$goldPositive, collapse = ""),
+                        gneg = paste(self$options$goldNegative, collapse = ""),
+                        test = paste(self$options$newtest, collapse = ""),
+                        tpos = paste(self$options$testPositive, collapse = ""),
+                        tneg = paste(self$options$testNegative, collapse = "")),
+                    .("Only selected positive/negative reference and test levels; missing and other levels excluded"),
+                    text = private$.diagText())
                 for (nm in c("comparatorCounts", "comparatorMetrics", "comparatorPopulation", "comparatorCases"))
                     .deleteTableRows(self$results[[nm]])
                 self$results$comparatorReport$setContent("")
@@ -2693,6 +2773,8 @@ decisionClass <- if (requireNamespace("jmvcore"))
                     # rather than clamping to an arbitrary epsilon.
                     sens_plot <- Sens
                     spec_plot <- Spec
+                    ok_b <- is.finite(sens_plot) && is.finite(spec_plot) &&
+                        sens_plot > 0 && sens_plot < 1 && spec_plot > 0 && spec_plot < 1
                     if (isTRUE(continuity_used)) {
                         # nomogrammer re-derives both ratios from Sens/Spec and rejects 0 and
                         # 1. Back-solve the proportions whose ratios ARE the table's LR+ and
@@ -2706,12 +2788,27 @@ decisionClass <- if (requireNamespace("jmvcore"))
                         spec_plot <- if (ok_b) sp_b else TNc / (TNc + FPc)
                     }
 
+                    drawable <- is.finite(LRP) && is.finite(LRN) &&
+                        (LRP > 1) && (LRN < 1) && (LRP > LRN) && ok_b
+                    if (!drawable) {
+                        private$.addNotice(
+                            type = "WARNING",
+                            title = .("Fagan nomogram not drawn"),
+                            content = .fmt(
+                                .("The positive likelihood ratio is {lrp} and the negative likelihood ratio is {lrn}. A Fagan nomogram requires an informative test with LR+ > 1 and LR- < 1 (sensitivity + specificity > 1); here the plot is omitted."),
+                                lrp = if (is.na(LRP)) .("undefined") else private$.fmtLR(LRP),
+                                lrn = if (is.na(LRN)) .("undefined") else private$.fmtLR(LRN)
+                            )
+                        )
+                    }
+
                     plotData1 <- list(
                         "Prevalence" = PriorProb,
                         "Sens" = sens_plot,
                         "Spec" = spec_plot,
                         "Plr" = LRP,
-                        "Nlr" = LRN
+                        "Nlr" = LRN,
+                        "drawable" = drawable
                     )
 
                     image1 <- self$results$plot1
@@ -2755,7 +2852,7 @@ decisionClass <- if (requireNamespace("jmvcore"))
                 # Validate plot state data structure
                 plotData1 <- private$.validatePlotState(image1$state)
 
-                if (is.null(plotData1)) {
+                if (is.null(plotData1) || isFALSE(plotData1$drawable)) {
                     # Return FALSE to prevent plot rendering
                     return(FALSE)
                 }

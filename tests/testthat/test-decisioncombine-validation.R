@@ -134,10 +134,10 @@ test_that("C18-C20 LR+, LR- and DOR with log-scale CIs equal epiR::epi.tests on 
 
 test_that("C15 Haldane-Anscombe 0.5 correction on zero-cell rows, proportions kept observed", {
     tb <- .val_run(.val_mk(.F2$cD, .F2$cN), t3 = "t3", t3p = "pos")$combinationTable$asDF
-    # "+/-/+": tp 4 fp 0 fn 26 tn 50 -> 4.5 0.5 26.5 50.5
+    # "+/-/+": tp 4 fp 0 fn 26 tn 50 -> LR+ & DOR use 4.5 0.5 26.5 50.5; LR- has no zero in FN/TN so uses raw 26/30
     r <- .val_row(tb, "+/-/+")
     expect_equal(c(r$lrPos, r$lrNeg, r$dor),
-                 c(229.5 / 15.5, (26.5 / 31) / (50.5 / 51), 4.5 * 50.5 / (0.5 * 26.5)), tolerance = 1e-12)
+                 c(229.5 / 15.5, 26 / 30, 4.5 * 50.5 / (0.5 * 26.5)), tolerance = 1e-12)
     expect_equal(c(r$sens, r$spec), c(4/30, 1), tolerance = 1e-12)
 })
 

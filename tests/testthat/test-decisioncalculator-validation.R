@@ -69,10 +69,10 @@ test_that("C15-C17 a population prevalence moves PPV/NPV by Bayes and leaves Sen
 })
 
 test_that("C19-C25 a zero cell applies Haldane-Anscombe to LR and DOR points only", {
-  # Oracle: the notice's own rule, +0.5 to all four cells; Sens/Spec stay raw
+  # Oracle: per-ratio +0.5 when a ratio's own numerator/denominator cell is zero; Sens/Spec and unaffected LR stay raw
   r <- val_dc(TP = 10, FP = 0, FN = 10, TN = 10, ci = TRUE)
   rt <- val_key(r$ratioTable$asDF, "1")
-  expect_equal(c(rt$Sens, rt$Spec, rt$LRP, rt$LRN), c(0.5, 1, (10.5/21) / (0.5/11), (10.5/21) / (10.5/11)), tolerance = 1e-12)
+  expect_equal(c(rt$Sens, rt$Spec, rt$LRP, rt$LRN), c(0.5, 1, (10.5/21) / (0.5/11), 0.5), tolerance = 1e-12)
   expect_equal(val_key(r$advancedMetricsTable$asDF, "1")$dor, 10.5 * 10.5 / (0.5 * 10.5), tolerance = 1e-12)
   # the interval table shows the same corrected LR+; FP = 0 leaves its upper limit unbounded (blank)
   lp <- val_ci(r, "lr.pos")
@@ -219,7 +219,7 @@ test_that("C98 VAL-decisioncalculator-10: the interval table cites the DOR, Youd
 })
 
 test_that("C41-C43 VAL-decisioncalculator-11: on a zero cell the LR and DOR intervals use the corrected counts", {
-  # Oracle: log method on TP 10.5, FP 0.5, FN 10.5, TN 10.5 (the counts the point estimates use)
+  # Oracle: log method on TP 10.5, FP 0.5, FN 10.5, TN 10.5 for LR+ and DOR; raw counts for LR-
   # FP = 0: LR+ and the DOR have no finite upper limit (blank); the lower limit is the log method
   r <- val_dc(TP = 10, FP = 0, FN = 10, TN = 10, ci = TRUE)
   a <- 10.5; b <- 0.5; c <- 10.5; d <- 10.5
@@ -230,8 +230,8 @@ test_that("C41-C43 VAL-decisioncalculator-11: on a zero cell the LR and DOR inte
   dor <- a * d / (b * c)
   expect_equal(val_ci(r, "diag.or"), c(dor, exp(log(dor) - val_z * sqrt(1/a + 1/b + 1/c + 1/d)), NA),
                tolerance = 1e-10, ignore_attr = TRUE)
-  # LR- has no zero in its own counts' role (FN = 10, TN = 10): both limits on the corrected counts
-  lrn <- (c / (a + c)) / (d / (b + d))
+  # LR- has no zero in its own counts' role (FN = 10, TN = 10): point estimate uses raw counts, Simel SE uses corrected counts
+  lrn <- 0.5
   expect_equal(val_ci(r, "lr.neg"), c(lrn, exp(log(lrn) + c(-1, 1) * val_z * sqrt(1/c - 1/(a + c) + 1/d - 1/(b + d)))),
                tolerance = 1e-10, ignore_attr = TRUE)
   expect_match(r$epirTable_number$notes$rawcounts$note, "0.5 added to every cell", fixed = TRUE)

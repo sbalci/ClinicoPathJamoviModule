@@ -2237,9 +2237,6 @@ enhancedROCClass <- R6::R6Class(
                     predictor_var <- data[[predictor]]
 
                     for (cutoff in custom_cuts) {
-                        # Calculate sensitivity and specificity at this cutoff
-                        coords <- pROC::coords(roc_obj, cutoff, ret = c("sensitivity", "specificity", "ppv", "npv"))
-
                         # CRITICAL FIX: Create predictions respecting ROC direction
                         predictions <- ifelse(
                             private$.applyDirectionCutoff(predictor_var, cutoff, roc_obj$direction),
@@ -2252,15 +2249,26 @@ enhancedROCClass <- R6::R6Class(
                             positive = levels(outcome_var)[2]
                         ))
 
+                        pos_lvl <- levels(outcome_var)[2]
+                        neg_lvl <- levels(outcome_var)[1]
+                        tp <- as.numeric(cm$table[pos_lvl, pos_lvl])
+                        tn <- as.numeric(cm$table[neg_lvl, neg_lvl])
+                        fp <- as.numeric(cm$table[pos_lvl, neg_lvl])
+                        fn <- as.numeric(cm$table[neg_lvl, pos_lvl])
+                        sens <- if ((tp + fn) > 0) tp / (tp + fn) else NA_real_
+                        spec <- if ((tn + fp) > 0) tn / (tn + fp) else NA_real_
+                        ppv_val <- if ((tp + fp) > 0) tp / (tp + fp) else NA_real_
+                        npv_val <- if ((tn + fn) > 0) tn / (tn + fn) else NA_real_
+
                         # Store results
                         custom_results <- rbind(custom_results, data.frame(
                             cutoff = cutoff,
-                            sensitivity = coords$sensitivity,
-                            specificity = coords$specificity,
-                            youden_index = coords$sensitivity + coords$specificity - 1,
+                            sensitivity = sens,
+                            specificity = spec,
+                            youden_index = sens + spec - 1,
                             accuracy = as.numeric(cm$overall["Accuracy"]),
-                            ppv = coords$ppv,
-                            npv = coords$npv
+                            ppv = ppv_val,
+                            npv = npv_val
                         ))
                     }
 
@@ -2604,6 +2612,20 @@ enhancedROCClass <- R6::R6Class(
                 return(list(probs = if (ok) pred_vals, assumed_probability = TRUE))
             }
             model <- stats::glm(y_binary ~ pred_vals, family = stats::binomial())
+            slope <- unname(stats::coef(model)[2])
+            dir_opt <- tryCatch(self$options$direction, error = function(e) "auto")
+            if (!is.finite(slope) ||
+                (identical(dir_opt, "higher") && slope < 0) ||
+                (identical(dir_opt, "lower") && slope > 0)) {
+                p_bar <- mean(y_binary, na.rm = TRUE)
+                lp_bar <- stats::qlogis(pmin(pmax(p_bar, 1e-6), 1 - 1e-6))
+                n_obs <- length(stats::fitted(model))
+                return(list(
+                    probs = rep(p_bar, n_obs),
+                    lp = rep(lp_bar, n_obs),
+                    assumed_probability = FALSE
+                ))
+            }
             list(probs = stats::fitted(model), lp = stats::predict(model, type = "link"),
                  assumed_probability = FALSE)
         },

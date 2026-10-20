@@ -1818,7 +1818,9 @@ agreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                         `visible`="(severityModel)")),
                 clearWith=list(
                     "vars",
-                    "confLevel"),
+                    "confLevel",
+                    "perPathologist",
+                    "severityModel"),
                 refs=list(
                     "Nelson2015",
                     "ordinal",
@@ -1867,6 +1869,10 @@ agreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 renderFun=".severityPlot",
                 requiresData=FALSE,
                 visible="(severityModel)",
+                clearWith=list(
+                    "vars",
+                    "confLevel",
+                    "severityModel"),
                 refs=list(
                     "Nelson2015",
                     "ordinal")))
@@ -2498,7 +2504,9 @@ agreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "vars",
                     "referenceRater",
                     "rankRaters",
-                    "wght"),
+                    "wght",
+                    "confLevel",
+                    "kappaCIMethod"),
                 refs=list(
                     "Cohen1960",
                     "LandisKoch1977")))
@@ -3626,7 +3634,8 @@ agreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "vars",
                     "interIntraSeparator",
                     "confLevel",
-                    "kappaCIMethod"),
+                    "kappaCIMethod",
+                    "wght"),
                 refs=list(
                     "Shrout1979",
                     "Koo2016",
@@ -3987,7 +3996,8 @@ agreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 clearWith=list(
                     "vars",
                     "raterProfileType",
-                    "raterProfileShowPoints")))
+                    "raterProfileShowPoints",
+                    "heatmapColorScheme")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="raterProfileExplanation",
@@ -4052,6 +4062,13 @@ agreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 height=450,
                 renderFun=".subgroupForestPlot",
                 visible="(agreementBySubgroup && subgroupForestPlot)",
+                clearWith=list(
+                    "vars",
+                    "subgroupVariable",
+                    "confLevel",
+                    "kappaCIMethod",
+                    "subgroupMinCases",
+                    "wght"),
                 refs=list(
                     "LandisKoch1977",
                     "Koo2016")))
@@ -4219,7 +4236,9 @@ agreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "pairedBootN",
                     "confLevel",
                     "seed",
-                    "wght"),
+                    "wght",
+                    "exct",
+                    "iccType"),
                 columns=list(
                     list(
                         `name`="metric", 

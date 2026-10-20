@@ -365,9 +365,15 @@ raw_to_prob <- function(values, actual, direction = ">=", warn = TRUE) {
             if (spread == 0) spread <- 1
             predictor <- (predictor - center) / spread
             model <- stats::glm(actual_clean ~ predictor, family = binomial(link = "logit"))
-            new_predictor <- if (direction == "<=") -values else values
-            new_predictor <- (new_predictor - center) / spread
-            stats::predict(model, newdata = data.frame(predictor = new_predictor), type = "response")
+            slope <- unname(stats::coef(model)[2])
+            if (!is.finite(slope) || slope <= 0) {
+                base_rate <- mean(actual_clean)
+                ifelse(is.na(values), NA_real_, base_rate)
+            } else {
+                new_predictor <- if (direction == "<=") -values else values
+                new_predictor <- (new_predictor - center) / spread
+                stats::predict(model, newdata = data.frame(predictor = new_predictor), type = "response")
+            }
         }, warning = function(w) {
             fit_warnings <<- c(fit_warnings, conditionMessage(w))
             invokeRestart("muffleWarning")

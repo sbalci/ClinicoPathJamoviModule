@@ -555,7 +555,9 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
                 }
                 text <- private$.diagText()
                 summaries <- .diagFillComparator(self$results, comparisons, self$options$ci, text)
-                gold_missing <- is.na(as.character(self$data[[self$options$gold]]))
+                gold_raw <- as.character(self$data[[self$options$gold]])
+                gold_missing <- is.na(gold_raw)
+                gold_other <- !gold_missing & is.na(reference)
                 for (i in seq_along(tests)) {
                     nm <- tests[i]
                     k <- summaries[[nm]]$counts
@@ -570,10 +572,16 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
                             else
                                 .fmt(jmvcore::.("{test}: PPA rests on {positives} comparator-positive cases and NPA on {negatives} comparator-negative cases. A percentage computed on a denominator this small is far less precise than the overall analyzed N suggests. Enable the 95% CI option and read the interval before quoting either figure."),
                                     test = nm, positives = positives_n, negatives = negatives_n))
-                    # Split the excluded pairs: a missing result versus an excluded other level.
-                    missing_n <- sum(gold_missing | is.na(as.character(self$data[[nm]])))
+                    # Split the excluded pairs: a row with an unselected non-NA level in either
+                    # the comparator or the test is counted under other; missing counts rows
+                    # with no unselected level and at least one NA.
+                    test_raw <- as.character(self$data[[nm]])
+                    test_missing <- is.na(test_raw)
+                    test_other <- !test_missing & is.na(comparisons[[nm]]$call)
+                    other_n <- sum(gold_other | test_other)
+                    missing_n <- sum(!gold_other & !test_other & (gold_missing | test_missing))
                     self$results$comparatorPopulation$setRow(rowKey = i, values = list(
-                        missing = missing_n, other = summaries[[nm]]$excluded - missing_n))
+                        missing = missing_n, other = other_n))
                 }
                 self$results$comparatorReport$setContent(.diagComparatorReport(summaries, text))
                 if (self$options$statComp) {
@@ -1388,13 +1396,16 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
                     test_values, testPLevel, testNLevel, testVariable))
                 gold_binary <- as_binary_factor(private$.mapBinary(
                     gold_values, goldPLevel, goldNLevel, goldVariable))
-                missing_row <- is.na(as.character(test_values)) | is.na(as.character(gold_values))
+                test_raw_na <- is.na(as.character(test_values))
+                gold_raw_na <- is.na(as.character(gold_values))
+                other_row <- (!test_raw_na & is.na(test_binary)) | (!gold_raw_na & is.na(gold_binary))
+                missing_row <- !other_row & (test_raw_na | gold_raw_na)
                 determinate <- !is.na(test_binary) & !is.na(gold_binary)
                 n_total <- length(determinate)
                 n_analyzed <- sum(determinate)
                 n_excluded <- n_total - n_analyzed
                 n_missing <- sum(missing_row)
-                n_indeterminate <- sum(!missing_row & !determinate)
+                n_indeterminate <- sum(other_row)
 
                 if (exclude && n_analyzed == 0) {
                     private$.addNotice(
@@ -1521,17 +1532,9 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
                 }
 
                 # Likelihood ratios.
-                # The 0.5 continuity correction belongs ONLY to the ratio whose
-                # denominator is empty: LR+ = Sens/(1-Spec) is undefined only when
-                # FP == 0, LR- = (1-Sens)/Spec only when TN == 0. The previous code
-                # corrected BOTH ratios whenever ANY of the four cells was zero, so a
-                # zero FN (a stain that caught every tumour) or a zero TP shifted a
-                # perfectly well defined LR toward the null: TP=50, FP=5, FN=0, TN=45
-                # printed LR+ = 9.18 for an exact LR+ of 10.00, which also downgraded
-                # the interpretation row from "Strong" to "Moderate positive evidence",
-                # and TP=0, FP=3, FN=10, TN=80 printed LR+ = 1.09 for an exact 0.00.
-                # It also made the printed LR+ irreproducible from the Sens and Spec
-                # printed beside it, which come from the raw counts.
+                # Per-ratio 0.5 continuity correction: LR+ uses +0.5 on all four cells iff
+                # TP == 0 || FP == 0 (and TP + FP > 0), and LR- uses +0.5 on all four cells
+                # iff FN == 0 || TN == 0 (and FN + TN > 0).
                 zero_cells <- any(c(TP, FP, FN, TN) == 0)
                 cc <- private$ZERO_CELL_CONTINUITY
                 both_classes <- !is.na(Sens) && !is.na(Spec)
@@ -1542,8 +1545,8 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
                 # (VAL-decisioncompare-02). Both are reported as not estimable.
                 lrp_undefined <- both_classes && (TP + FP) == 0
                 lrn_undefined <- both_classes && (FN + TN) == 0
-                lrp_corrected <- both_classes && FP == 0 && TP > 0
-                lrn_corrected <- both_classes && TN == 0 && FN > 0
+                lrp_corrected <- both_classes && !lrp_undefined && (TP == 0 || FP == 0)
+                lrn_corrected <- both_classes && !lrn_undefined && (FN == 0 || TN == 0)
 
                 # Each ratio is formed from its two class rates, each from its own counts:
                 # FP/(FP+TN), not 1 - Spec, whose cancellation turned an exact LR+ of 10 into

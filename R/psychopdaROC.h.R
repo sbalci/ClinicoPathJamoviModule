@@ -1506,7 +1506,8 @@ psychopdaROCResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                     "negativeClass",
                     "refVar",
                     "idiNriBootRuns",
-                    "direction"),
+                    "direction",
+                    "seed"),
                 columns=list(
                     list(
                         `name`="variable", 
@@ -1555,7 +1556,8 @@ psychopdaROCResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                     "refVar",
                     "nriThresholds",
                     "idiNriBootRuns",
-                    "direction"),
+                    "direction",
+                    "seed"),
                 columns=list(
                     list(
                         `name`="variable", 
@@ -1710,7 +1712,8 @@ psychopdaROCResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                     "negativeClass",
                     "priorAUC",
                     "priorPrecision",
-                    "direction"),
+                    "direction",
+                    "seed"),
                 columns=list(
                     list(
                         `name`="variable", 
@@ -2080,7 +2083,8 @@ psychopdaROCResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                         "analysisUnit",
                         "classVar",
                         "positiveClass",
-                        "negativeClass"))))
+                        "negativeClass",
+                        "direction"))))
             self$add(jmvcore::Array$new(
                 options=options,
                 name="powerCurvePlot",
@@ -2149,7 +2153,8 @@ psychopdaROCResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                         "negativeClass",
                         "treatmentThreshold",
                         "harmBenefitRatio",
-                        "interventionCost"))))
+                        "interventionCost",
+                        "direction"))))
             self$add(jmvcore::Array$new(
                 options=options,
                 name="metaAnalysisForestPlot",
