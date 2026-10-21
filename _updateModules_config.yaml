@@ -80,7 +80,7 @@ modes:
     decisioncalculator: ["test-decisioncalculator-release-inputs.R", "test-decisioncalculator-correction-explanation.R", "test-decisioncalculator-release-fixes.R"]
     decisioncombine: ["test-decisioncombine-release-inputs.R", "test-decisioncombine-correction-explanation.R", "test-decisioncombine-release-fixes.R"]
     enhancedROC: ["test-enhancedROC-release-inputs.R", "test-enhancedROC-release-parity.R", "test-enhancedROC-release-fixes.R", "test-enhancedROC-release-fixes-2026-10-21.R"]
-    agreement: ["test-agreement-release-fallback.R", "test-agreement-audit-fixes.R", "test-agreement-zero-unanimity.R", "test-agreement-release-fixes.R"]
+    agreement: ["helper-agreement.R", "test-agreement-release-fallback.R", "test-agreement-audit-fixes.R", "test-agreement-zero-unanimity.R", "test-agreement-release-fixes.R"]
     decisioncurve: ["test-decisioncurve-audit-fixes.R", "test-decisioncurve-release-fixes.R"]
     lassologistic: ["test-lassologistic-audit-fixes.R", "test-lassologistic-release-fixes.R"]
     cotest: ["test-cotest-release-fixes.R"]

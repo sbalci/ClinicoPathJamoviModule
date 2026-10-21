@@ -236,6 +236,7 @@ resolve_helpers <- function(index, seeds,
 rename_namespace <- function(lines, pkg) {
   lines <- gsub("library(ClinicoPath)", paste0("library(", pkg, ")"), lines, fixed = TRUE)
   lines <- gsub("ClinicoPath::", paste0(pkg, "::"), lines, fixed = TRUE)
+  lines <- gsub("asNamespace(\"ClinicoPath\")", paste0("asNamespace(\"", pkg, "\")"), lines, fixed = TRUE)
   gsub("package\\s*=\\s*(['\"])ClinicoPath\\1", paste0("package = \\1", pkg, "\\1"), lines)
 }
 
@@ -434,7 +435,7 @@ plan_module <- function(m, routes, index, reg, ignore = character()) {
   if (!isTRUE(modes$copy_test_files)) for (a in analyses) {
     for (t in unlist(modes$verified_test_files[[a]], use.names = FALSE)) {
       source <- file.path(U, "tests", "testthat", t)
-      if (basename(t) != t || !grepl("^test-.*[.]R$", t) || !file.exists(source)) {
+      if (basename(t) != t || !grepl("^(test|helper)-.*[.]R$", t) || !file.exists(source)) {
         errors <- c(errors, paste0(m$name, ": invalid verified test file: ", t))
         next
       }

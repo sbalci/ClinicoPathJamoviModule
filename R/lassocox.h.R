@@ -721,7 +721,7 @@ lassocoxBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             super$initialize(
                 package = "ClinicoPath",
                 name = "lassocox",
-                version = c(1,0,82),
+                version = c(1,1,1),
                 options = options,
                 results = lassocoxResults$new(options=options),
                 data = data,

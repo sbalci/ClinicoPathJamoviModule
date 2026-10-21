@@ -4,6 +4,12 @@ library(testthat)
 
 rl_run <- function(...) suppressWarnings(do.call(ClinicoPath::enhancedROC, list(...)))
 rl_strip <- function(x) trimws(gsub("[[:space:]]+", " ", gsub("<[^>]+>", " ", if (is.null(x)) "" else x)))
+# Source-text checks need the package tree; the installed (R CMD check) copy has no R/.
+rl_src <- function() {
+    path <- test_path("..", "..", "R", "enhancedROC.b.R")
+    skip_if_not(file.exists(path), "package source tree not available")
+    readLines(path, warn = FALSE)
+}
 
 rl_data <- function(seed = 21, n = 240) {
     set.seed(seed)
@@ -19,7 +25,7 @@ test_that("the analysis frame is not stored in jmvcore's private .data slot", {
     # Analysis$run() clears it when the caller did not supply the frame - the GUI path. A
     # subclass field of the same name therefore vanishes between .run() and the renderers,
     # which read it after run() has returned.
-    src <- readLines(test_path("..", "..", "R", "enhancedROC.b.R"), warn = FALSE)
+    src <- rl_src()
     expect_false(any(grepl("^\\s*\\.data\\s*=\\s*NULL", src)))
     expect_true(any(grepl("^\\s*\\.analysisData\\s*=\\s*NULL", src)))
     expect_false(any(grepl("private\\$\\.data([^A-Za-z0-9_.]|$)", src)))
@@ -63,7 +69,7 @@ test_that("all eleven renderers still draw", {
 test_that("the multi-class outcome is cleared at the top of every run", {
     # Assigned only on the >2-level branch of .prepareData() and never cleared, so switching to
     # a two-level outcome left the multi-class tables computing on the previous variable.
-    src <- paste(readLines(test_path("..", "..", "R", "enhancedROC.b.R"), warn = FALSE), collapse = "\n")
+    src <- paste(rl_src(), collapse = "\n")
     expect_match(src, "private\\$\\.multiClassOutcome <- NULL")
 })
 
@@ -94,7 +100,7 @@ test_that("infinite LR+/LR-/DOR are blank, not the literal 9999", {
                                clinicalMetrics = TRUE)$results$clinicalApplicationMetrics)
     num <- suppressWarnings(as.numeric(unlist(cm[, intersect(c("lr_positive", "lr_negative", "dor"), names(cm))])))
     expect_false(any(num == 9999, na.rm = TRUE))
-    src <- paste(readLines(test_path("..", "..", "R", "enhancedROC.b.R"), warn = FALSE), collapse = "\n")
+    src <- paste(rl_src(), collapse = "\n")
     expect_false(grepl("<- 9999", src, fixed = TRUE))
 })
 
@@ -119,6 +125,6 @@ test_that("the custom preset raises no override notice", {
 
 test_that("no opaque white panel survives in the clinical report", {
     # White-on-white in jamovi's dark theme.
-    src <- paste(readLines(test_path("..", "..", "R", "enhancedROC.b.R"), warn = FALSE), collapse = "\n")
+    src <- paste(rl_src(), collapse = "\n")
     expect_false(grepl("background-color: white", src, fixed = TRUE))
 })

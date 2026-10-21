@@ -423,13 +423,14 @@ testthat::test_that("prune guard: only files THIS module ships count", {
 testthat::test_that("verified regressions follow routing without broad test copying", {
   skip_if_plan_missing()
   u <- base_umbrella(c(analysis_files("aa", "Survival"), analysis_files("bb", "SurvivalT"),
-    list("tests/testthat/test-aa-release.R" = "ClinicoPath::aa()",
+    list("tests/testthat/helper-aa.R" = "ns <- asNamespace(\"ClinicoPath\")",
+         "tests/testthat/test-aa-release.R" = "ClinicoPath::aa()",
          "tests/testthat/test-bb-release.R" = "ClinicoPath::bb()")))
   reg <- fixture_registry(u, list(
     jsurvival = list(directory = module_dir("jsurvival"), menu_groups = "Survival"),
     JamoviTest = list(directory = module_dir("JamoviTest"), menu_group_suffix = "T")),
     extra = list(modes = list(copy_test_files = FALSE, verified_test_files = list(
-      aa = "test-aa-release.R", bb = "test-bb-release.R"))))
+      aa = c("helper-aa.R", "test-aa-release.R"), bb = "test-bb-release.R"))))
   plan <- plan_env$compute_distribution_plan(reg)
   testthat::expect_length(plan$errors, 0)
   shipped <- function(m) plan$modules[[m]]$files$dest
@@ -437,6 +438,10 @@ testthat::test_that("verified regressions follow routing without broad test copy
   testthat::expect_false("tests/testthat/test-bb-release.R" %in% shipped("jsurvival"))
   testthat::expect_true("tests/testthat/test-bb-release.R" %in% shipped("JamoviTest"))
   testthat::expect_false("tests/testthat/test-aa-release.R" %in% shipped("JamoviTest"))
+  # a verified test may bring its helper; asNamespace() is renamed like pkg:: (meddecide agreement, 2026-10-21)
+  testthat::expect_true("tests/testthat/helper-aa.R" %in% shipped("jsurvival"))
+  testthat::expect_identical(plan_env$rename_namespace('ns <- asNamespace("ClinicoPath")', "jsurvival"),
+                             'ns <- asNamespace("jsurvival")')
   reg$config$modes$copy_test_files <- TRUE
   broad <- plan_env$compute_distribution_plan(reg)
   testthat::expect_false(anyDuplicated(broad$modules$jsurvival$files$dest) > 0)
