@@ -633,17 +633,16 @@ test_that("IR-07 the 0.5 correction is added to all four cells; Haldane-Anscombe
     a <- .ir_object(.ir_mk(cD, cN), showForest = TRUE)
     res <- a$results
 
+    # Wording updated for the 2026-10-21 zero-cell rule (XA-01): only an empty DENOMINATOR is
+    # corrected, so the note and notice now state per-ratio conditions.
     note <- res$combinationTable$notes$haldane$note
     expect_match(note, paste0(
-        "LR+, LR- and the diagnostic odds ratio are computed with 0.5 added to all four cells ",
-        "when a cell is zero, so they stay finite (for the odds ratio this is the ",
-        "Haldane-Anscombe correction; the likelihood ratios use the same adjustment)"), fixed = TRUE)
+        "0.5 is then added to all four cells for that ratio and its confidence interval ",
+        "(Haldane-Anscombe for the odds ratio)"), fixed = TRUE)
     continuity <- .ir_notice(res, "Continuity Correction")
     expect_length(continuity, 1L)
     expect_true(startsWith(continuity, paste0(
-        "A continuity correction of 0.5, added to all four cells, was applied to 2 row(s) with at ",
-        "least one zero cell (+/+, Serial (all pos)). For the diagnostic odds ratio this is the ",
-        "Haldane-Anscombe correction; the likelihood ratios use the same adjustment.")))
+        "A zero cell required a continuity correction in 2 row(s) (+/+, Serial (all pos)). ")))
 
     # Corrected cells 20.5, 0.5, 20.5, 60.5: LR+ = (20.5/41) / (0.5/61) = 61, DOR = 121.
     row <- .ir_row(res$combinationTable$asDF, "+/+")
@@ -654,8 +653,8 @@ test_that("IR-07 the 0.5 correction is added to all four cells; Haldane-Anscombe
     built <- a$.__enclos_env__$private$.buildForestPanels(res$forestPlot$state)
     caption <- gsub("\\s+", " ", built$panels[[length(built$panels)]]$labels$caption)
     expect_match(caption, paste0(
-        "Open points: rows with a zero cell, whose LR+, LR- and DOR use a 0.5 continuity ",
-        "correction; without it at least one of the three would be 0 or infinite."), fixed = TRUE)
+        "Open points: rows where at least one of LR+, LR- and DOR uses a 0.5 continuity ",
+        "correction, because a cell in its denominator is zero"), fixed = TRUE)
 })
 
 # ---- IR-R2: second review round -----------------------------------------------------------

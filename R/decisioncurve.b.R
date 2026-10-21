@@ -301,6 +301,15 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
         # unticking "Decision curve plot" did nothing while the intervals were ticked. A disabled
         # jamovi control keeps its value, so the .u.yaml enable alone would still have run
         # bootReps resamples per strategy, and described them in the footnotes, for no plot.
+        # Where the Range of Benefit's uncertainty can be read (DC-21-01). The range itself is a
+        # point-estimate statement; the bootstrap bands are drawn only on the decision curve plot.
+        .rangeUncertaintyPointer = function() {
+            if (private$.ciDrawn())
+                .("Check whether the model's bootstrap interval on the decision curve plot stays above both reference lines over this range.")
+            else
+                .("Turn on Bootstrap confidence intervals (with the Decision curve plot) to see the uncertainty of the net benefit over this range.")
+        },
+
         .ciDrawn = function() {
             isTRUE(self$options$confidenceIntervals) && isTRUE(self$options$showPlot)
         },
@@ -1303,9 +1312,9 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
             # full clinical interpretation on screen next to the new error. On a data-only
             # change (an edit or a filter) they were not even greyed. Same fix as
             # R/survival.b.R:280-286.
-            self$results$procedureNotes$setContent("")
-            self$results$summaryText$setContent("")
-            self$results$notices$setContent("")
+            self$results$procedureNotes$setContent("<div></div>")
+            self$results$summaryText$setContent("<div></div>")
+            self$results$notices$setContent("<div></div>")  # Html: the client skips ""
 
             # Clear the previous run's analysis state. The five .plot* renderers read these
             # private fields directly, so without this an early return - a bad variable, a
@@ -1474,7 +1483,7 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                     title = .("Clinical Decision Rule Not Included Yet"),
                     content = paste(
                         if (is.null(self$options$decisionRuleVar))
-                            .('"Clinical decision rule" is enabled but no rule variable has been selected: drop a binary variable into "Clinical Decision Rule (binary)".')
+                            .('"Clinical decision rule" is enabled but no rule variable has been selected: drop a binary variable into "Clinical decision rule (binary)".')
                         else
                             .('"Clinical decision rule" is enabled but its positive level has not been chosen: select the level that means the rule recommends intervention.'),
                         .('Nothing about the clinical rule is shown until then.')
@@ -1596,22 +1605,29 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                 )
             }
 
-            # An exact 1:1 split is what a 1:1 case-control design produces, and its 50% prevalence
-            # passes the extreme-prevalence check above. On a case-control sample net benefit and
+            # An exact 1:k split (k = 1..4) is what a case-control design with k controls per case
+            # produces, and its 50%-20% prevalence passes the extreme-prevalence check above (the
+            # 2026-10-21 review's 1:3 sample read NB 0.101 at 20% against a cohort 0.037 with no
+            # notice, DC-21-02). On a case-control sample net benefit and
             # treat-all are not the source population's: in the independent review a calibrated
             # score read NB 0.260 at 20% against a cohort value of 0.037, and treat-all at 30% read
             # +0.286 against -0.224 (IR-decisioncurve-01). Worded conditionally: a cohort can
             # also split evenly by chance - in 25% of 10-patient cohorts at a true 50% prevalence
             # (Codex review) - so it waits for 20 per class, below which the small-sample and
             # few-events notices already speak.
-            if (n_diseased == n_total - n_diseased && n_diseased >= 20) {
+            n_smaller <- min(n_diseased, n_total - n_diseased)
+            design_ratio <- (n_total - n_smaller) / n_smaller
+            if (n_smaller >= 20 && design_ratio %in% 1:4) {
                 private$.addNotice(
                     type = "WARNING",
-                    title = .("Equal Numbers of Events and Non-Events"),
+                    title = .("Outcome Split Matches a Case-Control Ratio"),
                     content = paste(
-                        .fmt(.('The analysed cases contain exactly as many patients with the outcome as without it ({n} each), as a 1:1 case-control design would.'),
-                             n = n_diseased),
-                        .('If cases and controls were sampled separately, the 50% prevalence is a design choice rather than the outcome rate of the target population, and the net benefit, the treat-all line and every projection here do not apply to that population.'),
+                        # with:without order, so 60 events and 20 non-events read 3:1, not 1:3
+                        .fmt(.('The analysed cases contain {events} patients with the outcome and {nonevents} without it, an exact {ratio} ratio of patients with the outcome to patients without it, as a case-control design that samples a fixed number of controls per case (or of cases per control) would produce.'),
+                             events = n_diseased, nonevents = n_total - n_diseased,
+                             ratio = if (n_diseased <= n_total - n_diseased) paste0("1:", design_ratio) else paste0(design_ratio, ":1")),
+                        .fmt(.('If cases and controls were sampled separately, the {pct}% prevalence is a design choice rather than the outcome rate of the target population, and the net benefit, the treat-all line and every projection here do not apply to that population.'),
+                             pct = sprintf("%.1f", prevalence * 100)),
                         .('Decision curves need a cohort or consecutive series from the target population.')
                     )
                 )
@@ -1634,7 +1650,7 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                             .('The clinical decision rule variable must be binary (exactly 2 levels).'),
                             .fmt(.('The current rule variable "{var}" has {n} levels: {levels}.'),
                                  var = rule_var, n = length(rule_levels), levels = paste(rule_levels, collapse = ", ")),
-                            .('Select a binary rule variable or disable "Clinical Decision Rule Integration".')
+                            .('Select a binary rule variable or disable "Clinical decision rule".')
                         )
                     )
                 }
@@ -1894,7 +1910,7 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                     content = paste(
                         first,
                         .('Decision curve analysis needs the predicted probability of the selected positive level; if these values describe the other level, the curves answer a different question.'),
-                        .('Check that "Positive Outcome Level" is the level the model predicts and that the column is not one minus the risk.')
+                        .('Check that "Positive Outcome" is the level the model predicts and that the column is not one minus the risk.')
                     )
                 )
             }
@@ -2489,7 +2505,8 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
             range_table$setNote(
                 "definition",
                 paste(
-                    .("Range of threshold probabilities over which the model's net benefit exceeds both treat-all and treat-none; a model is only worth using within this range."),
+                    .("Observed range of threshold probabilities over which the model's apparent (in-sample) net benefit exceeds both treat-all and treat-none. It carries no allowance for sampling variation: near the outcome prevalence even a predictor unrelated to the outcome often shows a short range by chance, so a narrow range or a small margin is not evidence of benefit."),
+                    private$.rangeUncertaintyPointer(),
                     .("Threshold probability is set by clinical judgement about the relative cost of a missed case versus an unnecessary treatment; it is not estimated from the data, so there is no optimal value to report.")
                 )
             )
@@ -2813,8 +2830,9 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                     interpretation <- paste0(
                         interpretation,
                         "<p><strong>", range_label, "</strong> ",
-                        .fmt(.('{lo}% to {hi}% threshold probability - the range over which this model beats both treating everyone and treating no one.'),
+                        .fmt(.('{lo}% to {hi}% threshold probability - the observed range over which this model\'s apparent (in-sample) net benefit exceeds both treating everyone and treating no one. It carries no allowance for sampling variation, and a narrow range can arise by chance.'),
                              lo = round(range_info$range_start * 100, 1), hi = round(range_info$range_end * 100, 1)),
+                        " ", private$.rangeUncertaintyPointer(),
                         if (isFALSE(range_info$contiguous))
                             paste0(" ", .("This range contains a gap where the model is not superior; read the curve."))
                         else "",
@@ -3341,7 +3359,10 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                      x = .("Threshold Probability"),
                      y = .("Relative Utility (vs best default strategy)"),
                      color = .("Model"),
-                     caption = plot_caption) +
+                     # Wrapped: as long single lines the caption overflowed and was clipped at the left
+                     # edge at the default plot size (2026-10-21).
+                     caption = paste(strwrap(unlist(strsplit(plot_caption, "\n", fixed = TRUE)), width = 90),
+                                     collapse = "\n")) +
                 # theme_minimal() removed: it sat before `+ ggtheme`, which replaces every
                 # earlier theme, so it was dead code that only hid the global theme.
                 ggtheme +
@@ -3373,7 +3394,8 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                      x = .("Threshold Probability"),
                      y = .("Standardized Net Benefit (NB / Prevalence)"),
                      color = .("Model"),
-                     caption = .("A value of 1 corresponds to the maximum net benefit of perfect classification; values are not counts per 100 patients.")) +
+                     caption = paste(strwrap(.("A value of 1 corresponds to the maximum net benefit of perfect classification; values are not counts per 100 patients."),
+                                             width = 90), collapse = "\n")) +
                 # theme_minimal() removed: dead code before `+ ggtheme` (see above).
                 ggtheme
 

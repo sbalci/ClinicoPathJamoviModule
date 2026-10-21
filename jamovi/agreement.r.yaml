@@ -2225,6 +2225,7 @@ items:
           - kappaCIMethod
           - subgroupMinCases
           - wght
+          - exct
       refs:
           - LandisKoch1977
           - Koo2016
@@ -2243,6 +2244,7 @@ items:
           - kappaCIMethod
           - subgroupMinCases
           - wght
+          - exct
       refs:
           - LandisKoch1977
           - Koo2016

@@ -5,6 +5,34 @@ prevents them. Newest first. Release notes for users live in `NEWS.md`.
 
 ---
 
+## 2026-10-21 — meddecide release review: a regression filed as a fix, and audits that judged by text
+
+- **Failure mode 1 (zero cells, 4 analyses).** The same LR/DOR zero-cell rule lived in four
+  backends. A 2026-10-20 commit aligned decisioncompare with the other three on "correct when any
+  cell is zero", so all four printed LR+ 3.06 for a test with no true positive (exact 0): the +0.5
+  weighs more in the smaller reference group and reversed the direction of the evidence.
+  decisioncompare's own comment, deleted by that commit, had explained exactly this.
+- **Failure mode 2 (constant substitution).** psychopdaROC NRI/IDI and enhancedROC replaced a marker
+  whose fitted slope opposed the declared direction with a constant base rate, silently. NRI showed
+  +0.61 where the correct value was -0.56. The module's own clinical-utility code already did it right
+  (fit freely, disclose), so one idiom had three treatments.
+- **Failure mode 3 (my static audit).** I flagged "phantom datasets" (they were objects inside
+  multi-object .rda files) and a stale-notices MEDIUM for decisioncalculator and sequentialtests
+  (Preformatted items clear on ""; only Html skips it). Both were judgements from source text.
+- **Detection.** Independent reviews with executed oracles (hand Pencina NRI, closed-form LRs), a
+  cross-analysis reviewer feeding one 2x2 to every analysis, and an engine harness running the
+  installed module in jamovi's own R (`development-scripts/audit_meddecide_engine_2026-10-21/`).
+- **Rules:**
+  - A statistic computed in several analyses gets one shared helper (`R/utils-diagnostic-ratios.R`);
+    a "consistency" change that edits copies is a red flag.
+  - A correction may only stand in for an undefined or infinite value, and must point the same way
+    the raw value does.
+  - Never replace a fitted model with a null one without saying so in the output.
+  - Check the result item type before calling a `setContent("")` stale-panel bug: Html skips "",
+    Preformatted does not. Check `data(package = )` objects, not file names, for dataset docs.
+
+---
+
 ## 2026-10-19 — OncoPath release review: a morning fix that only moved the artefact, and a state with no exit
 
 - **Failure mode 1 (ihcheterogeneity, IH-1).** The module-audit fix moved the proportional-bias

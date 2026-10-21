@@ -787,8 +787,21 @@ kappaSizeCIClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 raters = params$raters
             )
 
-            return(paste0(.fmt(.("Required sample size: {n}"), n = private$.fmtN(required_n)),
-                          "\n", sentence))
+            # F-02 (independent review 2026-10-21): a two-sided n is set by ONE limit, so "within [0.4, 0.8]"
+            # alone reads as if both were planned for. Name it. The other limit has the larger slope, so at
+            # this n its expected chi-square clears the critical value too: it comes in at or inside its request.
+            binding <- if (!isTRUE(params$citype == "one_sided") && isTRUE(is.finite(params$kappaU)))
+                private$.bindingLimit(params)
+            governs <- if (is.null(binding)) NULL
+                else if (abs(binding$rho - params$kappaL) < abs(binding$rho - params$kappaU))
+                    .fmt(.("The lower limit ({lower}) drives the sample size; the expected upper limit then falls at or inside {upper}."),
+                         lower = params$kappaL, upper = params$kappaU)
+                else
+                    .fmt(.("The upper limit ({upper}) drives the sample size; the expected lower limit then falls at or inside {lower}."),
+                         lower = params$kappaL, upper = params$kappaU)
+
+            return(paste(c(.fmt(.("Required sample size: {n}"), n = private$.fmtN(required_n)),
+                           sentence, governs), collapse = "\n"))
         },
 
         .extractRequiredN = function(result) {
@@ -1092,6 +1105,15 @@ kappaSizeCIClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         },
 
         .run = function() {
+            # Blank the panels first, as kappaSizeFixedN/kappaSizePower do: every refusal below
+            # rejects before anything is written, and jamovi keeps an errored analysis's old
+            # items on screen (greyed), so the PREVIOUS run's n stayed visible under the error.
+            # Preformatted "" clears in the client; an Html "" is skipped, hence "<div></div>".
+            self$results$text1$setContent("")
+            self$results$text_summary$setContent("")
+            self$results$text2$setContent("")
+            self$results$notices$setContent("<div></div>")
+
             # Input validation
             validation_errors <- private$.validateInputs()
             if (!is.null(validation_errors)) {
@@ -1218,7 +1240,7 @@ kappaSizeCIClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 self$results$text1$setContent("")
                 self$results$text_summary$setContent("")
                 self$results$text2$setContent("")
-                self$results$notices$setContent("")
+                self$results$notices$setContent("<div></div>")  # Html: the client skips ""
                 jmvcore::reject(
                     .fmt(.("The sample size was computed but could not be formatted for display: {error}"),
                          error = conditionMessage(e)),

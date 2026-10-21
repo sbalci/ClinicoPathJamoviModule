@@ -1000,8 +1000,7 @@ enhancedROCResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                                 list(
                                     `name`="prevalence", 
                                     `title`="Prevalence", 
-                                    `type`="number", 
-                                    `format`="zto"),
+                                    `type`="number"),
                                 list(
                                     `name`="prc_baseline", 
                                     `title`="PRC Baseline", 
@@ -1505,8 +1504,7 @@ enhancedROCResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                                 list(
                                     `name`="prevalence", 
                                     `title`="Prevalence", 
-                                    `type`="number", 
-                                    `format`="zto"),
+                                    `type`="number"),
                                 list(
                                     `name`="ppv", 
                                     `title`="PPV", 

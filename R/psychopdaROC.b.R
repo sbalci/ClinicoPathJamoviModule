@@ -589,6 +589,8 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
 
         interpretation <- sprintf(.("The test '%1$s' has an AUC of %2$.3f"), var, auc)
 
+        # Same six bands as .interpretAUC (the Performance cell of this row), so the cell and the
+        # sentence never name different bands (AUC 0.178 read "Below chance" beside "poor").
         a <- round(auc, 3)   # the displayed value, as in .interpretAUC (same table row)
         band <- if (a >= 0.9) {
           .("excellent")
@@ -596,8 +598,12 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
           .("good")
         } else if (a >= 0.7) {
           .("fair")
-        } else {
+        } else if (a >= 0.6) {
           .("poor")
+        } else if (a >= 0.5) {
+          .("minimal")
+        } else {
+          .("below chance")
         }
 
         # With method = "oc_manual" the cut score comes from the user and nothing is searched,
@@ -783,6 +789,28 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
       # ============================================================================
       # FIXED SENSITIVITY/SPECIFICITY ANALYSIS METHODS
       # ============================================================================
+
+      # IDI/NRI compare fitted logistic risks, which do not depend on the declared direction.
+      # When a marker's fitted slope runs against Classification Direction, say so beside the
+      # table: the comparison uses the risk model the data support (raw_to_prob()).
+      .noteDirectionReversal = function(table, marker, values, actual, positive) {
+        ok <- is.finite(values) & !is.na(actual)
+        if (sum(ok) < 3 || length(unique(values[ok])) < 2) return(invisible(FALSE))
+        slope <- tryCatch(suppressWarnings(stats::coef(stats::glm(actual[ok] ~ values[ok],
+          family = stats::binomial()))[[2]]), error = function(e) NA_real_)
+        declared_up <- identical(self$options$direction, ">=")
+        if (!is.finite(slope) || slope == 0 || (slope > 0) == declared_up) return(invisible(FALSE))
+        template <- if (declared_up) {
+          .("{marker}: in these data the proportion of {positive} cases rises as the values fall, the opposite direction to the Classification Direction you selected. IDI and NRI compare fitted logistic risks, which do not depend on the selected direction, so this marker enters with the risk model the data support.")
+        } else {
+          .("{marker}: in these data the proportion of {positive} cases rises as the values rise, the opposite direction to the Classification Direction you selected. IDI and NRI compare fitted logistic risks, which do not depend on the selected direction, so this marker enters with the risk model the data support.")
+        }
+        table$setNote(
+          key = paste0("dir_", marker),  # raw name: make.names() maps "A B" and "A-B" to one key
+          note = .fmt(template, marker = .rocLabel(marker), positive = .rocLabel(positive)),
+          init = FALSE)
+        invisible(TRUE)
+      },
 
       # Map a numeric cutoff to the empirical decision rule, including infinite endpoints.
       .thresholdIndex = function(thresholds, cut, direction = self$options$direction) {
@@ -1001,6 +1029,17 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
         }
         table$setNote("achieved_rule",
           .("Achieved rates and accuracy classify the observed complete cases at the displayed cutoff. An interpolated cutoff can miss the target; Stepwise meets or exceeds it. Empty predicted groups have undefined predictive values, shown as blank cells."), init = FALSE)
+        # Linear interpolation (the default) can land on the lower step of the empirical curve
+        # (asked 0.90, achieved 0.88). Name the shortfall beside the row, not only in the help.
+        achieved_target <- if (analysis_type == "sensitivity") achieved_sens else achieved_spec
+        missed <- if (isTRUE(achieved_target < target_value - 1e-10)) .fmt(
+          if (analysis_type == "sensitivity")
+            .("{variable}: the achieved sensitivity, {achieved}, is below the target of {target}. Choose Stepwise to get the cutoff that meets or exceeds the target.")
+          else
+            .("{variable}: the achieved specificity, {achieved}, is below the target of {target}. Choose Stepwise to get the cutoff that meets or exceeds the target."),
+          variable = .rocLabel(var), achieved = as.character(signif(achieved_target, 4)),
+          target = as.character(signif(target_value, 4)))
+        table$setNote(paste0("missed_target_", make.names(var)), missed, init = FALSE)
 
         # Add row to table
         table$addRow(rowKey = var, values = list(
@@ -1583,6 +1622,13 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
         }
         resultsTable$setNote("tied_optima", tieNote, init = FALSE)
 
+        # cutpointr's misclassification_cost and total_utility run with their default unit costs
+        # and utilities, so both pick the accuracy cut-point; Cost ratio (FP:FN) is not passed.
+        unitCostNote <- if (grepl("^(maximize|minimize)_", self$options$method) &&
+            self$options$metric %in% c("misclassification_cost", "total_utility"))
+          .("This metric counts every false positive and every false negative at an equal unit cost (and every correct classification at an equal unit utility), so it selects the same cut-point as accuracy. Cost ratio (FP:FN) is not used here; to weigh the two errors unequally, choose the Cost-benefit optimized cutpoint method.")
+        resultsTable$setNote("unit_costs", unitCostNote, init = FALSE)
+
         # Add rows for each threshold to display
         for (row_index in seq_along(resultsToDisplay)) {
           threshold <- resultsToDisplay[row_index]
@@ -2136,15 +2182,20 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
       .notePredictiveValues = function(table, prevalence) {
         if (is.null(prevalence) || !is.finite(prevalence)) return(invisible(NULL))
         extreme <- prevalence < 0.10 || prevalence > 0.90
+        # Enough decimals that neither the prevalence nor its complement rounds away: a screening
+        # prior of 0.0004 printed "0.0%" with "%.1f".
+        pct <- prevalence * 100
+        gap <- min(pct, 100 - pct)
+        pct <- formatC(pct, format = "f", digits = if (gap > 0) min(10, max(1, ceiling(-log10(gap)) + 1)) else 1)
         msg <- if (isTRUE(self$options$usePriorPrev)) sprintf(
-          .("PPV and NPV below are adjusted to the user-specified target prevalence (%.1f%%), not the prevalence observed in this sample. Transport to that population assumes comparable case mix and conditional score distributions."),
-          prevalence * 100) else sprintf(
-          .("PPV and NPV below are computed at the prevalence of this sample (%.1f%%) and do not carry over to a population where the condition is more or less common - sensitivity and specificity also require comparable case mix and conditional score distributions. Recompute them for your own setting's prevalence before quoting them."),
-          prevalence * 100)
+          .("PPV and NPV below are adjusted to the user-specified target prevalence (%s%%), not the prevalence observed in this sample. Transport to that population assumes comparable case mix and conditional score distributions."),
+          pct) else sprintf(
+          .("PPV and NPV below are computed at the prevalence of this sample (%s%%) and do not carry over to a population where the condition is more or less common - sensitivity and specificity also require comparable case mix and conditional score distributions. Recompute them for your own setting's prevalence before quoting them."),
+          pct)
         if (extreme) {
           msg <- paste(msg, sprintf(
-            .("At a prevalence of %1$.1f%%, the %2$s is especially sensitive to changes in prevalence."),
-            prevalence * 100,
+            .("At a prevalence of %1$s%%, the %2$s is especially sensitive to changes in prevalence."),
+            pct,
             if (prevalence < 0.10) .("PPV") else .("NPV")))
         }
         tryCatch(table$setNote("predictive_values_prevalence", msg), error = function(e) NULL)
@@ -2656,7 +2707,7 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
           methodName <- private$.effectiveMethod()
           if (!identical(methodName, self$options$method)) {
             private$.warnUser(sprintf(
-              .("The '%s' metric is best at its %s, so the cut-point was found by %s it; the Cutpoint method setting asked for the opposite direction."),
+              .("The '%1$s' metric is best at its %2$s, so the cut-point was found by %3$s it; the Cutpoint method setting asked for the opposite direction."),
               self$options$metric,
               if (startsWith(methodName, "minimize")) .("minimum") else .("maximum"),
               if (startsWith(methodName, "minimize")) .("minimising") else .("maximising")),
@@ -3936,6 +3987,8 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
                     init = FALSE
                   )
                 }
+                for (m in c(var, refVar)) private$.noteDirectionReversal(self$results$idiTable,
+                  m, if (identical(m, var)) var_values[cc] else ref_values[cc], actual_binary[cc], positiveClass)
 
                 # Add to IDI table
                 self$results$idiTable$addRow(rowKey = var, values = list(
@@ -4044,6 +4097,8 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
                     init = FALSE
                   )
                 }
+                for (m in c(var, refVar)) private$.noteDirectionReversal(self$results$nriTable,
+                  m, if (identical(m, var)) var_values[cc] else ref_values[cc], actual_binary[cc], positiveClass)
 
                 # Add to NRI table
                 self$results$nriTable$addRow(rowKey = var, values = list(

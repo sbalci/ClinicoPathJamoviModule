@@ -62,25 +62,31 @@ test_that("F2 a zero cell with ONE corrected likelihood ratio says DOR need not 
   expect_match(dor_foot, "need not satisfy that identity", fixed = TRUE)
 })
 
-test_that("F2 the mirror case, only LR- corrected, says the same", {
-  # TP 20, FP 5, FN 0, TN 15: LR+ observed (20/20)/(5/20) = 4.00; LR- corrected
-  # (0.5/21)/(15.5/21) = 0.0323; DOR corrected 20.5*15.5/(5.5*0.5) = 115.5, not 4.00/0.0323 = 124.
+test_that("F2 the mirror case, FN = 0, says the same", {
+  # TP 20, FP 5, FN 0, TN 15: LR+ observed (20/20)/(5/20) = 4.00; LR- observed = 0 exactly
+  # (zero numerator, not corrected since XA-01, 2026-10-21; it was 0.0323 from the corrected
+  # table); DOR corrected (zero denominator) 20.5*15.5/(5.5*0.5) = 115.5, not 4.00/0 = Inf.
   r <- ir_run(ir_mk(20, 5, 0, 15), ci = TRUE, fnote = TRUE)
   rt <- r$ratioTable$asDF
-  expect_equal(c(rt$LRP, rt$LRN), c(4, 0.5 / 15.5), tolerance = 1e-12)
+  expect_equal(c(rt$LRP, rt$LRN), c(4, 0), tolerance = 1e-12)
   expect_equal(r$epirTable_number$asDF$est[3], 20.5 * 15.5 / (5.5 * 0.5), tolerance = 1e-9)
   expect_match(r$epirTable_number$notes$continuity$note, "need not equal LR+ / LR- as displayed", fixed = TRUE)
   dor_foot <- paste(unlist(r$epirTable_number$getCell(rowNo = 3, col = "statsnames")$footnotes), collapse = " ")
   expect_match(dor_foot, "need not satisfy that identity", fixed = TRUE)
 })
 
-test_that("F2 when both likelihood ratios are corrected the identity holds and is stated plainly", {
-  # FP = FN = 0: every ratio comes from the corrected table, so DOR = LR+/LR- exactly.
+test_that("F2 the identity is stated plainly only when no ratio is corrected", {
+  # FP = FN = 0 (TP 10, TN 10): LR+ corrected (zero denominator), LR- exactly 0 (zero
+  # numerator), DOR corrected. Before XA-01 (2026-10-21) LR- was corrected too and the identity
+  # held; it no longer can, and the notes say so.
   r <- ir_run(ir_mk(10, 0, 0, 10), ci = TRUE, fnote = TRUE)
-  rt <- r$ratioTable$asDF
-  expect_equal(r$epirTable_number$asDF$est[3], rt$LRP / rt$LRN, tolerance = 1e-9)
-  expect_no_match(r$epirTable_number$notes$continuity$note, "need not", fixed = TRUE)
-  dor_foot <- paste(unlist(r$epirTable_number$getCell(rowNo = 3, col = "statsnames")$footnotes), collapse = " ")
+  expect_identical(r$ratioTable$asDF$LRN, 0)
+  expect_match(r$epirTable_number$notes$continuity$note, "need not", fixed = TRUE)
+  # TP 0, FP 2, FN 10, TN 18: nothing corrected; LR+ = 0 and DOR = 0 = LR+ / LR-.
+  r0 <- ir_run(ir_mk(0, 2, 10, 18), ci = TRUE, fnote = TRUE)
+  expect_identical(r0$epirTable_number$asDF$est[3], 0)
+  expect_null(r0$epirTable_number$notes$continuity)
+  dor_foot <- paste(unlist(r0$epirTable_number$getCell(rowNo = 3, col = "statsnames")$footnotes), collapse = " ")
   expect_match(dor_foot, "equal to LR+ / LR- (Glas et al. 2003)", fixed = TRUE)
   # No zero cell: no continuity note at all.
   expect_null(ir_run(ir_mk(231, 32, 27, 54), ci = TRUE)$epirTable_number$notes$continuity)

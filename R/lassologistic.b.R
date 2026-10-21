@@ -125,7 +125,9 @@ lassologisticClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                             beta10 = "Beta10",
                             smallest = .("Smallest-unit"),
                             maxscaled = .("Max-scaled"),
-                            full = .("Full LASSO model (continuous)")),
+                            # Named for the penalty actually fitted: ridge and elastic net were
+                            # labelled LASSO here (LR-04, 2026-10-21).
+                            full = sprintf(.("Full %s model (continuous)"), private$.penaltyLabel())),
                         static = list(reference = c(
                             beta10 = "Mehta et al. 2016",
                             smallest = .("Sullivan-type (Sullivan et al. 2004), B = smallest contribution"),
@@ -328,6 +330,10 @@ lassologisticClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                         .("Try the Minimum CV Error lambda instead of the 1SE rule, or add more informative predictors.")
                     else
                         .("You are already using the least conservative lambda (Minimum CV Error), so the penalty is not the limiting factor: none of these predictors carries enough signal at this sample size. Add more informative predictors or collect more cases.")
+                    # The Coefficient Plot stays on screen with nothing to draw; say why it
+                    # is empty rather than leave a blank panel (LR-02, 2026-10-21).
+                    if (isTRUE(self$options$coef_plot))
+                        remedy <- paste(remedy, .("The Coefficient Plot is empty because no term was retained."))
                     private$.addNotice(
                         "STRONG_WARNING", .("No Variables Selected"),
                         sprintf(.("The penalized model retained no informative terms at the chosen lambda. %s"), remedy)
@@ -1361,7 +1367,10 @@ lassologisticClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                     ),
                     # .fmtNum, not sprintf: precision and f1 are NA_real_ when the
                     # model predicts no positives, and sprintf would print "NA".
-                    threshold = list(private$.fmtNum(optimal_threshold), .("Youden index")),
+                    # Not "Youden index" when the score is constant: the 0.500 is then the
+                    # default the degenerate_note describes, not a maximised Youden J (LR-03).
+                    threshold = list(private$.fmtNum(optimal_threshold),
+                                     if (degenerate && optimal_threshold == 0.5) .("Default (no discrimination)") else .("Youden index")),
                     accuracy = list(private$.fmtNum(accuracy), ""),
                     sensitivity = list(private$.fmtNum(sensitivity), ""),
                     specificity = list(private$.fmtNum(specificity), ""),
@@ -2496,11 +2505,19 @@ lassologisticClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                     table$setNote(
                         "optimism_warning",
                         sprintf(
-                            .("Optimism = %1$.3f indicates overfitting. The corrected AUC (%2$.3f) is a more realistic estimate of future performance."),
+                            .("Optimism = %1$.3f indicates overfitting. The corrected AUC (%2$.3f) removes the estimated optimism."),
                             mean_optimism_auc, corrected_auc
                         )
                     )
                 }
+
+                # Always, not only below AUC 0.7: in the 2026-10-21 simulation (n = 150, 8
+                # candidates, lambda.min) the corrected AUC still exceeded the external AUC by
+                # 0.0215 (MCSE 0.0068), so "corrected" must not read as "realistic" (LR-01).
+                table$setNote(
+                    "corrected_meaning",
+                    .("Corrected values are an optimism-corrected internal validation (Harrell's bootstrap) on the same patients, not an external validation. With variable and lambda selection in a modest sample the correction removes only part of the optimism, so the corrected AUC can still be too high; confirm performance on independent data.")
+                )
 
                 # A corrected AUC below 0.5 is a legitimate outcome, not a glitch:
                 # even when the final model selects nothing, bootstrap resamples

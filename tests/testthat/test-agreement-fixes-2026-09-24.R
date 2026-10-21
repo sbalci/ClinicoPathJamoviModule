@@ -387,9 +387,10 @@ test_that("FIX-18 clearWith, enable and refs carry the dependencies the backend 
     for (nm in names(needs))
         expect_true(all(needs[[nm]] %in% unlist(item(nm)$clearWith)), info = nm)
     # Every forest-plot dependency must invalidate a previously rendered image.
+    # exct added 2026-10-21 (AR-05): it now selects Fleiss vs Conger for 3+-rater subgroup rows.
     expect_setequal(unlist(item("subgroupForestPlotImage")$clearWith),
                     c("vars", "subgroupVariable", "confLevel", "kappaCIMethod",
-                      "subgroupMinCases", "wght"))
+                      "subgroupMinCases", "wght", "exct"))
     expect_identical(item("irrtable")$columns[[which(vapply(item("irrtable")$columns, `[[`, "", "name") == "peragree")]]$type, "number")
 
     uy <- readLines(rp("jamovi", "agreement.u.yaml"))

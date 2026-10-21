@@ -107,6 +107,33 @@ sequentialtestsClass <- if (requireNamespace('jmvcore'))
                                 list(preset = preset_values$title)
                             )
                         )
+
+                        # In the GUI these controls are disabled while an example is selected and
+                        # the JavaScript writes the example's values into them, so they agree. An R
+                        # call can pass its own values next to a preset; name the ones replaced.
+                        # Names are display labels (translated here, English in the JS): not compared.
+                        override_labels <- c(
+                            test1_sens = .("Test 1 sensitivity"), test1_spec = .("Test 1 specificity"),
+                            test2_sens = .("Test 2 sensitivity"), test2_spec = .("Test 2 specificity"),
+                            prevalence = .("Prevalence"), strategy = .("Testing strategy"))
+                        overridden <- character(0)
+                        for (key in names(override_labels)) {
+                            entered <- self$options$get(key)
+                            used <- preset_values[[key]]
+                            if (!isTRUE(all.equal(entered, used)))
+                                overridden <- c(overridden, sprintf("%s: %s -> %s",
+                                    override_labels[[key]], format(entered), format(used)))
+                        }
+                        if (length(overridden) > 0) {
+                            private$.addNotice(
+                                'WARNING',
+                                .('Teaching Example Replaced Entered Values'),
+                                private$.formatTranslated(
+                                    .('The teaching example replaced these entered values (entered -> used): {values}. Set the teaching example to "Custom Values" to analyse your own values.'),
+                                    list(values = paste(overridden, collapse = "; "))
+                                )
+                            )
+                        }
                     }
                 }
 
@@ -761,7 +788,10 @@ sequentialtestsClass <- if (requireNamespace('jmvcore'))
                     formulas <- paste0(formulas, .("<li><strong>Convert post-test odds back to probability</strong>: Post-test P = Odds/(1+Odds)</li>"))
                     formulas <- paste0(formulas, "</ol>")
 
-                    # Strategy-specific formulas
+                    # Strategy-specific formulas. Every product below is a probability within one
+                    # disease-status group and holds only under conditional independence; say so
+                    # once here, and again on each line that conditions on the other test.
+                    formulas <- paste0(formulas, .("<p><strong>Assumption:</strong> combined sensitivity is computed among people with the disease and combined specificity among people without it. All products below assume the two tests are conditionally independent given disease status. If the tests are correlated within a disease-status group (for example, the same specimen or related biology), the true combined values differ.</p>"))
                     if (strategy == "serial_positive") {
                         formulas <- paste0(formulas, .("<h4>Serial Testing Strategy (Testing Positives)</h4>"))
 
@@ -778,7 +808,7 @@ sequentialtestsClass <- if (requireNamespace('jmvcore'))
                             .("<li>Probability of testing positive on Test 1: {value}</li>"),
                             list(value = private$.formatProb(test1_sens))))
                         formulas <- paste0(formulas, private$.formatTranslated(
-                            .("<li>Given a positive Test 1, probability of testing positive on Test 2: {value}</li>"),
+                            .("<li>Among people with the disease, given a positive Test 1, the probability that Test 2 is positive is assumed equal to Se<sub>2</sub> (conditional independence): {value}</li>"),
                             list(value = private$.formatProb(test2_sens))))
                         formulas <- paste0(formulas, private$.formatTranslated(
                             .("<li>Combined probability = {sens1} \u00D7 {sens2} = {combined}</li>"),
@@ -858,7 +888,7 @@ sequentialtestsClass <- if (requireNamespace('jmvcore'))
                             .("<li>Probability of testing negative on Test 1: {value}</li>"),
                             list(value = private$.formatProb(test1_spec))))
                         formulas <- paste0(formulas, private$.formatTranslated(
-                            .("<li>Given a negative Test 1, probability of testing negative on Test 2: {value}</li>"),
+                            .("<li>Among people without the disease, given a negative Test 1, the probability that Test 2 is negative is assumed equal to Sp<sub>2</sub> (conditional independence): {value}</li>"),
                             list(value = private$.formatProb(test2_spec))))
                         formulas <- paste0(formulas, private$.formatTranslated(
                             .("<li>Combined probability = {spec1} \u00D7 {spec2} = {combined}</li>"),
@@ -889,7 +919,7 @@ sequentialtestsClass <- if (requireNamespace('jmvcore'))
                             .("<li>Probability of testing positive on Test 2: {value}</li>"),
                             list(value = private$.formatProb(test2_sens))))
                         formulas <- paste0(formulas, private$.formatTranslated(
-                            .("<li>Probability of testing positive on both: {sens1} \u00D7 {sens2} = {both}</li>"),
+                            .("<li>Among people with the disease, probability of testing positive on both, assuming conditional independence: {sens1} \u00D7 {sens2} = {both}</li>"),
                             list(
                                 sens1 = private$.formatProb(test1_sens),
                                 sens2 = private$.formatProb(test2_sens),

@@ -35,7 +35,7 @@
   bin_unavailable_positive = "The positive level \"%1$s\" is not available. Available levels: %2$s.",
   bin_unavailable_negative = "The negative level \"%1$s\" is not available. Available levels: %2$s.",
   bin_identical = "Choose different positive and negative levels.",
-  bin_other = "Observed levels outside the selected positive/negative pair: %s. Select 'Exclude other observed levels' to omit these results, or explicitly recode the variable before analysis. Other levels are never treated as negative.",
+  bin_other = "Observed levels outside the selected positive/negative pair: %s. Restrict the analysis to the selected positive and negative levels, where the analysis offers that option, or explicitly recode the variable before analysis. Other levels are never treated as negative.",
   report_rate = "%1$.1f%% (%2$d/%3$d)", report_unavailable = "unavailable (denominator 0)",
   report_test = "%1$s: PPA %2$s, NPA %3$s; %4$d analyzed cases, %5$d excluded.",
   report_close = "These quantities describe agreement with the selected comparator. The tables state the denominators and interval methods. Differences between tests require paired comparisons on common cases.",

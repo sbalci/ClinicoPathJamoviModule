@@ -86,11 +86,13 @@ decisionOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             private$..goldNegative <- jmvcore::OptionLevel$new(
                 "goldNegative",
                 goldNegative,
-                variable="(gold)")
+                variable="(gold)",
+                allowNone=TRUE)
             private$..testNegative <- jmvcore::OptionLevel$new(
                 "testNegative",
                 testNegative,
-                variable="(newtest)")
+                variable="(newtest)",
+                allowNone=TRUE)
             private$..pp <- jmvcore::OptionBool$new(
                 "pp",
                 pp,

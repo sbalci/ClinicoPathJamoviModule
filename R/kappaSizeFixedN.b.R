@@ -504,13 +504,15 @@ kappaSizeFixedNClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
                 # up to +0.103 (p .05, 6 raters, n 30), median +0.015.
                 if (isTRUE(outcome == 2 && raters >= 3))
                     .("With three or more raters, the lower bound for a binary finding also depends on how agreement among more than two raters is modelled. This analysis uses the model of Altaye, Donner and Klar; the Dirichlet-multinomial model used for three to five categories, which for two categories is the beta-binomial, describes the same kappa, and with the proportions held at their anticipated values it never gave a lower bound than the one shown in the designs checked and usually gave a higher one (by up to about 0.10 when the finding is rare and the study small), so the figure shown is the more cautious of the two."),
-                # IR-01: the under-coverage is a rare-category effect, not a "three or more raters" one.
-                # This analysis's simulations (one-sided 95%, R = 2000): plug-in 0.901-0.9375 with a
-                # category near 0.1 (4 and 6 raters p .1; 3 categories .11/.70/.19), but 0.949 at 3 raters
-                # p .3 and 0.942 with 3 balanced categories; ADK 2001 p.587 "provided pi >= 0.2". The
-                # sibling kappaSizeCI still carries the older, unqualified msgid (TODO IR-01).
+                # FN-02 (independent review 2026-10-21): NOT a rare-category effect only, as the IR-01 wording
+                # said. One-sided 95% plug-in coverage: 0.901-0.9375 with a category near 0.1 (R = 2000), 0.861-0.914
+                # in the review's rare designs, and 0.878 with four BALANCED categories and four raters (n 80,
+                # R = 1000); 0.939-0.942 with three balanced categories and three raters. At the true kappa the
+                # plug-in statistic's mean is 1.37 (K3 R3), 1.50 (K4 R2), 1.88-1.94 (K4 R4) and 2.77 (K5 R6) with
+                # every category balanced, against 1.0-1.1 re-estimated: the margins estimate the proportions,
+                # so the excess grows with raters and categories and does not shrink with n.
                 if (reest)
-                    .("When the study is analysed, estimate the category prevalences by maximum likelihood at each candidate value of kappa. With three or more raters or categories, plugging in the overall proportions of ratings instead can give an interval that covers kappa less often than stated when a category makes up less than about a fifth of the ratings (about 0.90 to 0.94 instead of 0.95 in the designs of that kind simulated for this analysis); without such a category it stayed close to 0.95."))
+                    .("When the study is analysed, estimate the category prevalences by maximum likelihood at each candidate value of kappa. With three or more raters or categories, plugging in the overall proportions of ratings instead can give an interval that covers kappa less often than stated (about 0.86 to 0.94 instead of 0.95 in the designs simulated for this analysis), generally more so with more raters or categories. Balanced categories do not prevent it: with four equally common categories and four raters the plug-in interval covered kappa about 0.88 of the time."))
 
             paste0(caveats, details)
         },
@@ -628,8 +630,8 @@ kappaSizeFixedNClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
             self$results$text1$setContent("")
             self$results$text_summary$setContent("")
             self$results$text2$setContent("")
-            self$results$notices$setContent("")
-            self$results$methodology$setContent("")
+            self$results$notices$setContent("<div></div>")  # Html: the client skips ""
+            self$results$methodology$setContent("<div></div>")
 
             outcome <- as.numeric(self$options$outcome)
             kappa0  <- self$options$kappa0
@@ -675,10 +677,18 @@ kappaSizeFixedNClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
 
             # --- Populate outputs ---------------------------------------------
             n_txt <- private$.fmtN(n)
-            self$results$text1$setContent(.fmt(
+            # FN-01 (independent review 2026-10-21): when re-estimation lowers the bound, the default view must
+            # say so - the cited method and kappaSize give the fixed figure (up to 0.029 higher), and on rare
+            # designs that figure clears 0.40 while the headline, and so the amber verdict, does not.
+            self$results$text1$setContent(paste0(.fmt(
                 .("A total of {n} subjects can produce an expected one-sided {conf} lower limit for kappa of {bound}."),
                 n = n_txt, conf = paste0(base::format(100 * (1 - alpha), scientific = FALSE, trim = TRUE), "%"),
-                bound = private$.fmtBound(bound)))
+                bound = private$.fmtBound(bound)),
+                if (show_rml)
+                    paste0("\n", private$.wrap(.fmt(
+                        .("Holding the category proportions at their anticipated values, as the published calculation and kappaSize do, gives {fixed}; the figure shown re-estimates them at each value of kappa, as the analysis of the study should, and is the lower of the two."),
+                        fixed = private$.fmtBound(fixed))))
+                else ""))
 
             engine_sparse <- FALSE
             engine_ok <- FALSE

@@ -119,13 +119,16 @@ test_that("an ambiguous third level is refused, not silently pooled into negativ
   # NewTest is Negative/Positive/Indeterminate. Pooling Indeterminate into the
   # negative arm used to be the default, and it inflates the specificity
   # denominator with cases the test was never right about. The level must now be
-  # named; an indeterminate result is not a negative result.
-  result <- diagnostic_error_results("decision",
+  # named; an indeterminate result is not a negative result. Since the negative-level boxes allow
+  # None (2026-10-21), an empty box is a selection in progress: an INFO and nothing computed, not
+  # an error state - the protection is that no estimate is produced until the level is chosen.
+  result <- suppressWarnings(ClinicoPath::decision(
     data = decision_multilevel,
     gold = "GoldStandard", goldPositive = "Positive", goldNegative = NULL,
     newtest = "NewTest",   testPositive = "Positive", testNegative = NULL
-  )
+  ))
   expect_s3_class(result, "decisionResults")
+  expect_true(all(is.na(result$ratioTable$asDF[, c("Sens", "Spec", "LRP", "LRN")])))
   expect_match(notices_text(result), "cannot be inferred")
   expect_match(notices_text(result), "Indeterminate")
 })

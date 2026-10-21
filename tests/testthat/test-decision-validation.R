@@ -103,19 +103,23 @@ test_that("C11 metamorphic: swapping both positive levels swaps sens/spec and PP
   expect_equal(c(r1$Sens, r1$Spec, r1$PPV, r1$NPV), c(r0$Spec, r0$Sens, r0$NPV, r0$PPV), tolerance = 1e-10)
 })
 
-test_that("C17/C22 a zero cell: only the ratio whose formula has the zero is corrected, and both tables say so", {
-  # FN = 0 enters LR- and the DOR, not LR+ = (20/20)/(5/30) = 6 (observed, defined).
+test_that("C17/C22 a zero cell: only a ratio with a zero DENOMINATOR is corrected, and the tables say so", {
+  # FN = 0 is the NUMERATOR of LR-, so LR- = 0 exactly (XA-01, 2026-10-21; it used to be
+  # corrected to (0.5/21)/(25.5/31)). LR+ = (20/20)/(5/30) = 6 (observed). The DOR has FN in
+  # its denominator, so it alone is corrected: 20.5*25.5/(5.5*0.5).
   r <- val_run(val_mk(20, 5, 0, 25), ci = TRUE, fagan = TRUE)
   expect_equal(val_ratio(r)$Sens, 1)
   expect_equal(val_ratio(r)$LRP, 6, tolerance = 1e-10)
-  expect_equal(val_ratio(r)$LRN, (0.5 / 21) / (25.5 / 31), tolerance = 1e-10)
+  expect_identical(val_ratio(r)$LRN, 0)
   expect_equal(val_key(r$epirTable_number$asDF, "lr.pos")$est, val_ratio(r)$LRP, tolerance = 1e-10)
-  expect_equal(val_key(r$epirTable_number$asDF, "lr.neg")$est, val_ratio(r)$LRN, tolerance = 1e-10)
-  expect_false(is.null(r$ratioTable$notes[["continuity"]]))
+  expect_identical(val_key(r$epirTable_number$asDF, "lr.neg")$est, 0)
+  expect_equal(val_key(r$epirTable_number$asDF, "diag.or")$est, 20.5 * 25.5 / (5.5 * 0.5), tolerance = 1e-10)
+  expect_null(r$ratioTable$notes[["continuity"]])
+  expect_false(is.null(r$ratioTable$notes[["zero_ratio"]]))
   expect_false(is.null(r$epirTable_number$notes[["continuity"]]))
-  # the nomogram's proportions reproduce the table's ratios exactly
-  st <- r$plot1$state
-  expect_equal(c(st$Sens / (1 - st$Spec), (1 - st$Sens) / st$Spec), c(val_ratio(r)$LRP, val_ratio(r)$LRN), tolerance = 1e-10)
+  # LR- = 0 has no place on the log scale: the nomogram is not drawn, and the notice says why.
+  expect_false(isTRUE(r$plot1$state$drawable))
+  expect_match(val_notices(r), "cannot be placed on the nomogram", fixed = TRUE)
 })
 
 test_that("C11/C72 an unselected gold level is excluded, not pooled into disease-absent", {
@@ -124,7 +128,10 @@ test_that("C11/C72 an unselected gold level is excluded, not pooled into disease
   r <- val_run(d, gn = "Absent")
   expect_equal(c(val_ratio(r)$Sens, val_ratio(r)$Spec), c(30 / 35, 40 / 46), tolerance = 1e-10)
   expect_equal(r$nTable$asDF$TotalPop, 81)
-  expect_match(val_notices(val_error(d)), "Choose which gold-standard level means disease absent", fixed = TRUE)
+  # Negative box left empty with two candidate levels: pending INFO, nothing computed (allowNone, 2026-10-21).
+  pending <- val_run(d)
+  expect_match(val_notices(pending), "Choose which gold-standard level means disease absent", fixed = TRUE)
+  expect_true(all(is.na(pending$ratioTable$asDF[, c("Sens", "Spec", "LRP", "LRN")])))
 })
 
 test_that("C73 an explicit-NA level is excluded and disclosed, never counted as negative", {
@@ -243,13 +250,19 @@ test_that("C55 LR bands are decided at the printed three significant figures, in
   expect_match(val_strip(r9$clinicalInterpretation$content), "Negative LR (0.100): Moderate decrease", fixed = TRUE)
 })
 
-test_that("C55 a corrected LR on the wrong side of 1 from the observed data has no stated direction", {
-  # TP 0, FP 1, FN 5, TN 19: sensitivity 0, Youden < 0; the zero-cell corrected LR+ is 1.17 > 1.
-  r <- val_run(val_mk(0, 1, 5, 19), showNaturalLanguage = TRUE, showReportTemplate = TRUE)
+test_that("C55 a zero-denominator LR whose correction would fall below 1 is not estimable, with no stated direction", {
+  # TP 1, FP 0, FN 20, TN 2: no disease-free case tested positive (Youden > 0), but the
+  # corrected LR+ (1.5/22)/(0.5/3) = 0.41 < 1 would reverse the evidence. Since XA-01
+  # (2026-10-21) such a ratio is "undefined" and left blank; it used to be printed and banded
+  # "no reliable evidence either way". (The older fixture TP 0, FP 1, FN 5, TN 19 now gives the
+  # exact LR+ 0: a zero numerator is not corrected.)
+  r <- val_run(val_mk(1, 0, 20, 2), showNaturalLanguage = TRUE, showReportTemplate = TRUE)
+  expect_true(is.na(val_ratio(r)$LRP) || identical(as.character(val_ratio(r)$LRP), ""))
   rp <- val_strip(r$reportTemplate$content)
-  expect_match(rp, "no reliable evidence either way", fixed = TRUE)
-  expect_no_match(rp, "minimal evidence for disease", fixed = TRUE)
-  expect_match(val_strip(r$naturalLanguageSummary$content), "Unreliable: rests on a zero count", fixed = TRUE)
+  expect_match(rp, "positive likelihood ratio of not estimable from these counts", fixed = TRUE)
+  expect_no_match(rp, "evidence for disease when positive", fixed = TRUE)
+  expect_no_match(rp, "evidence against disease when positive", fixed = TRUE)
+  expect_match(val_strip(r$naturalLanguageSummary$content), "Positive LR: not estimable from these counts", fixed = TRUE)
 })
 
 test_that("C55 VAL-decision-03: a likelihood ratio of exactly 1 in rationals reads as uninformative", {

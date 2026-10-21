@@ -189,6 +189,8 @@ nogoldstandard_update_lca <- function(model, tab, fit) {
   model$aic <- -2 * model$llik + 2 * (2 * k + 1)
   model$bic <- -2 * model$llik + log(tab$n) * (2 * k + 1)
   model$Gsq <- 2 * sum(observed[used] * log(observed[used] / expected[used]))
+  # An exact (three-test) fit leaves rounding noise of either sign (-8.9e-14, +1.0e-13).
+  if (abs(model$Gsq) < 1e-8) model$Gsq <- 0
   model$Chisq <- sum((observed - expected)^2 / pmax(expected, .Machine$double.xmin))
   model$probs.se <- model$P.se <- NULL
   model$posterior <- model$predclass <- NULL
@@ -197,4 +199,18 @@ nogoldstandard_update_lca <- function(model, tab, fit) {
   model$predcell$observed <- observed[used]
   model$predcell$expected <- expected[used]
   model
+}
+
+# poLCA-shaped stand-in (y, probs, P, resid.df) for a fit that did not come from poLCA, so the
+# bivariate-residual check can run on penalized EM's unpenalized companion fit.
+nogoldstandard_bvr_model <- function(data, par) {
+  k <- ncol(data)
+  probs <- lapply(seq_len(k), function(j) {
+    q <- c(par[1 + j], par[1 + k + j])
+    matrix(c(1 - q, q), 2, dimnames = list(NULL, c("no", "yes")))
+  })
+  names(probs) <- names(data)
+  y <- lapply(data, function(x) factor(x, levels = c(0, 1), labels = c("no", "yes")))
+  list(y = as.data.frame(y), probs = probs, P = c(par[1], 1 - par[1]),
+       resid.df = 2^k - 1 - (2 * k + 1))
 }

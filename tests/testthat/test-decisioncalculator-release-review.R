@@ -141,7 +141,11 @@ test_that("the Fagan nomogram renders on a zero cell", {
 
     expect_true(isTRUE(render_with()))               # normal
     expect_true(isTRUE(render_with(FP = 0)))         # specificity == 1
-    expect_true(isTRUE(render_with(FN = 0)))         # sensitivity == 1
+    # FN = 0 makes LR- exactly 0 since 2026-10-21 (XA-01), which a log-odds nomogram cannot
+    # place: it now declines with a reason instead of drawing a corrected LR-.
+    expect_false(isTRUE(render_with(FN = 0)))
+    expect_match(notices_of(decisioncalculator(TP = TP0, TN = TN0, FP = FP0, FN = 0, fagan = TRUE)),
+                 "negative likelihood ratio is exactly 0")
     expect_true(isTRUE(render_with(pp = TRUE, pprob = 0.05)))
 
     # a test whose positive result argues AGAINST disease cannot be drawn on a nomogram;
@@ -426,7 +430,8 @@ test_that("a zero cell continuity-corrects the ratios and says so", {
     # validate-function 2026-10-06 VAL-02/VAL-11: the LR/DOR intervals now use the same
     # corrected counts as the point estimates (raw counts gave Inf/NaN and [1, 1]); the
     # notice says so, and that the proportions stay on the observed counts.
-    expect_match(notices_of(r), "the diagnostic odds ratio and their confidence intervals")
+    # Wording changed 2026-10-21 (XA-01): the notice now states the denominator-only rule.
+    expect_match(notices_of(r), "0.5 is then added to all four cells for that ratio and its confidence interval")
     expect_match(notices_of(r), "use the observed counts")
 })
 

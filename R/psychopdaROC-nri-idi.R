@@ -366,7 +366,13 @@ raw_to_prob <- function(values, actual, direction = ">=", warn = TRUE) {
             predictor <- (predictor - center) / spread
             model <- stats::glm(actual_clean ~ predictor, family = binomial(link = "logit"))
             slope <- unname(stats::coef(model)[2])
-            if (!is.finite(slope) || slope <= 0) {
+            # A one-predictor logistic fit is invariant to the declared direction (glm(y ~ x)
+            # and glm(y ~ -x) give identical fitted risks), so a slope that contradicts the
+            # direction is still the risk model the data support. Replacing it with a constant
+            # base rate (as before 2026-10-21) turned a strong "lower = disease" reference into
+            # a null model and flipped the sign of NRI/IDI. The caller discloses the reversal.
+            # Only a non-estimable slope (a constant marker) falls back to the base rate.
+            if (!is.finite(slope)) {
                 base_rate <- mean(actual_clean)
                 ifelse(is.na(values), NA_real_, base_rate)
             } else {

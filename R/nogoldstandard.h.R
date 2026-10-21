@@ -519,7 +519,7 @@ nogoldstandardResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 name="conditional_dependence",
                 title="Conditional Independence Check (Bivariate Residuals)",
                 rows=0,
-                visible="(method==\"latent_class\")",
+                visible="(method==\"latent_class\" || method==\"bayesian\")",
                 clearWith=list(
                     "test1",
                     "test1Positive",

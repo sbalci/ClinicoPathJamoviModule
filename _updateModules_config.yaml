@@ -48,7 +48,7 @@
 
 
 new_version: "1.1.1"
-new_date: "2026-10-20"
+new_date: "2026-10-21"
 quick: false
 TEST: true
 jjstatsplot: false
@@ -76,13 +76,21 @@ modes:
   # The small verified tests below are selected by analysis and namespace-translated.
   copy_test_files: false
   verified_test_files:
-    decision: ["test-decision-release-inputs.R", "test-decision-release-metrics.R", "test-decision-audit-fixes.R", "test-decision-reference-pages.R"]
-    decisioncalculator: ["test-decisioncalculator-release-inputs.R", "test-decisioncalculator-correction-explanation.R"]
-    decisioncombine: ["test-decisioncombine-release-inputs.R", "test-decisioncombine-correction-explanation.R"]
-    enhancedROC: ["test-enhancedROC-release-inputs.R", "test-enhancedROC-release-parity.R"]
-    agreement: ["test-agreement-release-fallback.R", "test-agreement-audit-fixes.R", "test-agreement-zero-unanimity.R"]
-    decisioncurve: ["test-decisioncurve-audit-fixes.R"]
-    lassologistic: ["test-lassologistic-audit-fixes.R"]
+    decision: ["test-decision-release-inputs.R", "test-decision-release-metrics.R", "test-decision-audit-fixes.R", "test-decision-reference-pages.R", "test-decision-release-fixes.R"]
+    decisioncalculator: ["test-decisioncalculator-release-inputs.R", "test-decisioncalculator-correction-explanation.R", "test-decisioncalculator-release-fixes.R"]
+    decisioncombine: ["test-decisioncombine-release-inputs.R", "test-decisioncombine-correction-explanation.R", "test-decisioncombine-release-fixes.R"]
+    enhancedROC: ["test-enhancedROC-release-inputs.R", "test-enhancedROC-release-parity.R", "test-enhancedROC-release-fixes.R", "test-enhancedROC-release-fixes-2026-10-21.R"]
+    agreement: ["test-agreement-release-fallback.R", "test-agreement-audit-fixes.R", "test-agreement-zero-unanimity.R", "test-agreement-release-fixes.R"]
+    decisioncurve: ["test-decisioncurve-audit-fixes.R", "test-decisioncurve-release-fixes.R"]
+    lassologistic: ["test-lassologistic-audit-fixes.R", "test-lassologistic-release-fixes.R"]
+    cotest: ["test-cotest-release-fixes.R"]
+    decisioncompare: ["test-decisioncompare-release-fixes.R"]
+    kappaSizeCI: ["test-kappaSizeCI-release-fixes.R"]
+    kappaSizeFixedN: ["test-kappaSizeFixedN-release-fixes.R"]
+    kappaSizePower: ["test-kappaSizePower-release-fixes.R"]
+    nogoldstandard: ["test-nogoldstandard-release-fixes.R"]
+    psychopdaROC: ["test-psychopdaROC-release-fixes.R"]
+    sequentialtests: ["test-sequentialtests-release-fixes.R"]
 
 # Routing -- four categories, by menuGroup suffix:
 #   production  <Group>    e.g. Survival   -> the module whose menu_groups lists it

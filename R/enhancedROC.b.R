@@ -574,12 +574,18 @@ enhancedROCClass <- R6::R6Class(
             # every binary table, plot and summary needs a positive class (E1b).
             if (private$.binaryEnabled) {
                 # Run ROC analysis for each predictor
+                n_notices <- length(private$.noticeList)
                 private$.runROCAnalysis(analysisData)
                 # Each failure is a WARNING naming its predictor; when none is left nothing below
-                # has a result, which is an error, not a caution.
+                # has a result, so the analysis is rejected (outside the per-predictor tryCatch,
+                # which would swallow reject()) with those reasons in its message.
                 if (length(private$.rocResults) == 0) {
+                    reasons <- vapply(private$.noticeList[seq_along(private$.noticeList) > n_notices],
+                                      function(n) paste(n$title, n$content, sep = ": "), character(1))
                     private$.addNotice(type = "ERROR", title = .("No Predictor Could Be Analysed"),
-                        content = .("ROC analysis failed for every selected predictor, so the tables and plots below have no results. The warnings name the reason for each predictor."))
+                        content = paste(c(.("ROC analysis failed for every selected predictor, so there are no results."), reasons), collapse = " "))
+                    .diagRejectInputErrors(private$.noticeList)
+                    return()
                 }
                 # The Outcome coding table also says which way each marker was read.
                 private$.noteDirection(self$results$results$outcomeCoding, private$.rocObjects, "reading")
@@ -1327,7 +1333,8 @@ enhancedROCClass <- R6::R6Class(
                 } else if (identical(attr(ci, "method"), "bootstrap")) {
                     private$.bootstrapCiText(ci)
                 } else {
-                    sprintf(.("%s%% confidence intervals for the AUC use DeLong's method (DeLong et al., 1988)."), self$options$confidenceLevel)
+                    paste(sprintf(.("%s%% confidence intervals for the AUC use DeLong's method (DeLong et al., 1988)."), self$options$confidenceLevel),
+                          .("They are Wald intervals on the AUC scale: the AUC plus or minus z times DeLong's standard error, truncated to 0-1."))
                 }
                 if (isTRUE(attr(ci, "bootstrap.failed"))) {
                     text <- paste(text, .("The requested bootstrap interval could not be computed; DeLong's method was used as the fallback."))
@@ -1376,8 +1383,10 @@ enhancedROCClass <- R6::R6Class(
         # The multi-class orientation notes stay too: without them a perfect marker read against
         # the declared Direction shows one-vs-one AUC 0.000 "Below chance", and the one-vs-rest
         # averages 0.5 by construction, with nothing on screen saying why.
+        # "ci_method" too (cross-analysis review XA-05, 2026-10-21): an interval is not read
+        # correctly without its method, and the default page never named DeLong.
         .keptTableNotes = c("seed", "rule", "cutpoint_optimism", "venkatraman", "multiplicity",
-                            "ovr_average", "ovr_direction", "ovo_direction", "pair_order"),
+                            "ovr_average", "ovr_direction", "ovo_direction", "pair_order", "ci_method"),
         .applyTableNotesOption = function() {
             if (isTRUE(self$options$showTableNotes)) return(invisible(NULL))
             strip <- function(item) {
@@ -2611,7 +2620,14 @@ enhancedROCClass <- R6::R6Class(
         # supplied, never reversed; `probs` is NULL when one lies outside 0-1, so that predictor
         # gets none of those outputs. Score: glm(y ~ x) fitted to these data (in-sample), `lp` its
         # linear predictor. Raises no notice: .riskNotices() speaks once per run.
-        # Returns $probs, $lp and $assumed_probability (TRUE: the values are used as supplied).
+        # A one-predictor logistic fit is invariant to Direction (glm(y ~ x) and glm(y ~ -x) give
+        # the same risks), so a slope against Direction is still the risk model the data support.
+        # Until 2026-10-21 such a slope was replaced by the sample prevalence for everyone: an
+        # AUC-0.918 marker with one outlying control drew its decision curve on treat-all and a
+        # scaled Brier of 0, under its own name. .riskNotices() now discloses the reversal
+        # (.riskReversed()); only a non-estimable slope (a constant marker) gets the prevalence.
+        # Returns $probs, $lp, $assumed_probability (TRUE: the values are used as supplied) and
+        # $constant (TRUE: the slope was not estimable).
         .riskProbabilities = function(pred_vals, y_binary) {
             if (identical(self$options$predictionScale, "probability")) {
                 ok <- all(pred_vals >= 0 & pred_vals <= 1, na.rm = TRUE)
@@ -2619,32 +2635,74 @@ enhancedROCClass <- R6::R6Class(
             }
             model <- stats::glm(y_binary ~ pred_vals, family = stats::binomial())
             slope <- unname(stats::coef(model)[2])
-            dir_opt <- tryCatch(self$options$direction, error = function(e) "auto")
-            if (!is.finite(slope) ||
-                (identical(dir_opt, "higher") && slope < 0) ||
-                (identical(dir_opt, "lower") && slope > 0)) {
+            if (!is.finite(slope)) {
                 p_bar <- mean(y_binary, na.rm = TRUE)
                 lp_bar <- stats::qlogis(pmin(pmax(p_bar, 1e-6), 1 - 1e-6))
                 n_obs <- length(stats::fitted(model))
                 return(list(
                     probs = rep(p_bar, n_obs),
                     lp = rep(lp_bar, n_obs),
-                    assumed_probability = FALSE
+                    assumed_probability = FALSE,
+                    constant = TRUE
                 ))
             }
             list(probs = stats::fitted(model), lp = stats::predict(model, type = "link"),
-                 assumed_probability = FALSE)
+                 assumed_probability = FALSE, constant = FALSE)
+        },
+
+        # Sign of the fitted slope of glm(y ~ x), exactly: the profile log-likelihood is concave,
+        # so it is the sign of the score at zero, n0 * sum(x of cases) - n1 * sum(x of controls)
+        # (F-25). glm() returned -3.7e-17 for an exactly zero slope; a zero slope is 0 here.
+        # ponytail: the 1e-12 relative tolerance absorbs summation rounding for non-integer data.
+        .slopeSign = function(y, x) {
+            n1 <- sum(y == 1)
+            n0 <- sum(y == 0)
+            s <- n0 * sum(x[y == 1]) - n1 * sum(x[y == 0])
+            if (abs(s) <= 1e-12 * n0 * n1 * max(abs(x))) 0 else sign(s)
+        },
+
+        # Score scale: the predictors whose fitted logistic risk runs against the direction the
+        # ROC tables read them in (Direction, or the direction auto chose). Named AUC vector.
+        .riskReversed = function() {
+            if (identical(self$options$predictionScale, "probability")) return(numeric())
+            data <- private$.analysisData
+            y <- as.integer(data[[private$.outcome]] == levels(data[[private$.outcome]])[2])
+            out <- numeric()
+            for (p in names(private$.rocResults)) {
+                if (isTRUE(private$.rocResults[[p]]$constant)) next
+                s <- private$.slopeSign(y, data[[p]])
+                higher <- !identical(private$.rocObjects[[p]]$direction, ">")
+                if (s != 0 && (s > 0) != higher) out[p] <- as.numeric(private$.rocResults[[p]]$roc$auc)
+            }
+            out
         },
 
         # The notices for .riskProbabilities(), once per run and only when an output reads a risk.
         .riskNotices = function() {
             o <- self$options
             if (!(isTRUE(o$calibrationAnalysis) || isTRUE(o$decisionImpactCurves) ||
-                  (isTRUE(o$clinicalImpact) && isTRUE(o$clinicalUtilityCurve)))) return()
+                  (isTRUE(o$clinicalImpact) && isTRUE(o$clinicalUtilityCurve)) ||
+                  isTRUE(o$internalValidation))) return()
             preds <- names(private$.rocResults)
             if (!length(preds)) return()
             in_unit <- vapply(preds, function(p) all(private$.analysisData[[p]] >= 0 & private$.analysisData[[p]] <= 1, na.rm = TRUE), logical(1))
             pos <- private$.positiveClass
+            # The fitted risk runs against the direction of the ROC tables (.riskProbabilities()
+            # keeps it). Below 0.5 the ranks agree with the fit: the data run opposite to the
+            # direction read, and the risk outputs flatter it. At or above 0.5 the ranks (AUC) and
+            # the means (slope) disagree - a skewed marker or an outlier - and the risk outputs
+            # describe the reversed rule, not the marker as the ROC tables read it.
+            reversed <- private$.riskReversed()
+            for (p in names(reversed)) {
+                private$.addNotice(
+                    type = "WARNING",
+                    title = sprintf(.("Risk Model Runs Against the ROC Direction: %s"), p),
+                    content = if (reversed[[p]] < 0.5) {
+                        sprintf(.("In these data the fitted logistic risk of %2$s runs opposite to the direction in which the ROC tables read %1$s (AUC %3$.3f in that direction). A one-marker logistic model does not depend on Direction, so calibration, the Brier score, the Hosmer-Lemeshow test, the decision and clinical impact curves and internal validation use the risk model the data support. Under the direction selected, %1$s performs worse than those outputs show. Check Direction and Positive class."), p, pos, reversed[[p]])
+                    } else {
+                        sprintf(.("The ROC tables read %1$s in the direction in which it ranks patients well (AUC %3$.3f), but its group means point the other way, so the slope of the fitted logistic risk of %2$s runs opposite to that direction. This happens with a skewed marker or an outlying value. Calibration, the Brier score, the Hosmer-Lemeshow test, the decision and clinical impact curves and internal validation use that fitted model, the risk model the data support, which ranks patients the opposite way to the ROC, cut-point and fixed-cutoff tables; they do not describe %1$s as those tables read it, and can disagree with them. A log or rank transformation of the marker usually removes the conflict."), p, pos, reversed[[p]])
+                    })
+            }
             if (!identical(o$predictionScale, "probability")) {
                 if (any(in_unit)) {
                     private$.addNotice(
@@ -2703,7 +2761,7 @@ enhancedROCClass <- R6::R6Class(
             if (!is.na(prevalence) && abs(prevalence - observed_prevalence) > 0.05 && !isTRUE(self$options$useObservedPrevalence)) {
                 private$.addNotice(type = "INFO", title = .("User-Specified Prevalence"),
                     content = sprintf(.("PPV, NPV and the other prevalence-dependent metrics use the prevalence you entered (%1$s), not the %2$s observed in the analysed rows."),
-                        sprintf("%.3f", prevalence), sprintf("%.3f", observed_prevalence)))
+                        sprintf("%.3g", prevalence), sprintf("%.3g", observed_prevalence)))
             }
 
             for (predictor in names(private$.rocResults)) {
@@ -3881,7 +3939,8 @@ enhancedROCClass <- R6::R6Class(
                 prev_txt <- if (isTRUE(self$options$useObservedPrevalence)) {
                     .("the prevalence observed in these data")
                 } else {
-                    sprintf(.("the prevalence you entered (%.3f)"), self$options$prevalence)
+                    # 3 significant digits: "%.3f" showed a screening prevalence of 0.0004 as 0.000
+                    sprintf(.("the prevalence you entered (%s)"), sprintf("%.3g", self$options$prevalence))
                 }
                 ppv_hint <- if (isTRUE(self$options$clinicalMetrics)) {
                     sprintf(.("The Clinical Application Metrics table reports the PPV at %s."), prev_txt)
@@ -5246,8 +5305,9 @@ enhancedROCClass <- R6::R6Class(
                             y = .("True Positive Rate (Sensitivity)"),
                             title = .("CROC (Concentrated ROC) Curve Analysis"),
                             subtitle = .("Exponential magnifier emphasizes early retrieval performance"),
-                            caption = .fmt(.("Random ranking: dashed diagonal for the ROC curve, dotted curve for the CROC curve (CROC area {r})."),
-                                           r = sprintf("%.3f", 1 / alpha - 1 / (exp(alpha) - 1))),
+                            # wrapped: on the fixed-aspect plot the one-line caption was clipped (2026-10-21)
+                            caption = paste(strwrap(.fmt(.("Random ranking: dashed diagonal for the ROC curve, dotted curve for the CROC curve (CROC area {r})."),
+                                           r = sprintf("%.3f", 1 / alpha - 1 / (exp(alpha) - 1))), width = 80), collapse = "\n"),
                             color = .("Predictor"),
                             linetype = .("Curve Type")
                         ) +
@@ -5639,11 +5699,15 @@ enhancedROCClass <- R6::R6Class(
                         # Hosmer-Lemeshow Test
                         if (self$options$hosmerLemeshow) {
                             if (length(breaks) < 3) {
-                                # Too few unique predicted probability values for meaningful grouping
+                                # Too few distinct predicted risks to group; say which cause applies.
                                 private$.addNotice(
                                     type = "WARNING",
                                     title = sprintf(.("HL Test Skipped: %s"), predictor),
-                                    content = .("Insufficient unique predicted probability values for Hosmer-Lemeshow grouping (need at least 3 distinct break points). This typically occurs when the predictor has very few unique values.")
+                                    content = if (isTRUE(risk$constant)) {
+                                        sprintf(.("The logistic slope of %s is not estimable because the marker is constant in the analysed rows, so every patient receives the same predicted risk (the sample prevalence) and there are no risk groups to compare."), predictor)
+                                    } else {
+                                        sprintf(.("The predicted risks of %1$s take only %2$s distinct values, too few for Hosmer-Lemeshow grouping, which needs at least 3 distinct quantile break points. This happens when the marker has very few distinct values or is heavily tied."), predictor, length(unique(probs)))
+                                    }
                                 )
                             } else {
                                 actual_groups <- length(unique(groups))
@@ -5765,7 +5829,7 @@ enhancedROCClass <- R6::R6Class(
                             if (length(cal$excluded) && setequal(cal$excluded, cal$predictors)) {
                                 .("Prediction scale is Probability, but no predictor has all its values between 0 and 1, so there are no risks to plot.")
                             } else {
-                                .("Every predictor produced a single distinct predicted probability, so there is nothing to group into calibration bins. This usually means the predictor is constant within the analysed rows.")
+                                .("Every predictor produced a single distinct predicted probability, so there is nothing to group into calibration bins. That happens only when a predictor is constant within the analysed rows: with Prediction scale Score its logistic slope is then not estimable, and every patient receives the sample prevalence as risk.")
                             }
                         ))
                     }
@@ -6584,7 +6648,10 @@ enhancedROCClass <- R6::R6Class(
                         ggplot2::theme(
                             plot.title = ggplot2::element_text(hjust = 0.5, size = 14, face = "bold"),
                             plot.subtitle = ggplot2::element_text(hjust = 0.5, size = 9),
-                            legend.position = "bottom"
+                            legend.position = "bottom",
+                            # stacked: side by side, the Strategy and Type legends ran past the right
+                            # edge at the default size and clipped "Reference" (2026-10-21)
+                            legend.box = "vertical"
                         )
 
                     print(p)
@@ -6635,18 +6702,10 @@ enhancedROCClass <- R6::R6Class(
             outcome <- data[[private$.outcome]]
             y_binary <- as.numeric(outcome == levels(outcome)[2])
             n <- length(y_binary)
-            # F-25: a one-marker logistic model ranks patients by sign(slope) * x, and its slope has
-            # the sign of the score at zero, n0 * sum(x of cases) - n1 * sum(x of controls), because
-            # the profile log-likelihood is concave. glm() returned -3.7e-17 for an exactly zero
-            # slope, and that noise read a constant model (AUC 0.5) as a marker pointing one way.
-            # The sign is taken from the sums; a zero slope ranks every patient equal.
-            # ponytail: the 1e-12 relative tolerance absorbs summation rounding for non-integer data.
-            slope_sign <- function(y, x) {
-                n1 <- sum(y == 1)
-                n0 <- sum(y == 0)
-                s <- n0 * sum(x[y == 1]) - n1 * sum(x[y == 0])
-                if (abs(s) <= 1e-12 * n0 * n1 * max(abs(x))) 0 else sign(s)
-            }
+            # F-25: a one-marker logistic model ranks patients by sign(slope) * x (.slopeSign());
+            # a zero slope ranks every patient equal. The same fitted model as calibration and the
+            # decision curves (.riskProbabilities()), and .riskNotices() discloses a reversal.
+            slope_sign <- private$.slopeSign
             # A model points one way by construction, so every AUC reads it with direction "<";
             # "auto" let a small resample flip it and inflate the validated AUC.
             lp_auc <- function(y, score) as.numeric(pROC::roc(y, score, direction = "<", quiet = TRUE)$auc)

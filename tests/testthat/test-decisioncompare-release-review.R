@@ -242,12 +242,15 @@ equivocal_fixture <- function() {
 }
 
 test_that("excludeIndeterminate stops when no negative level is named", {
-    expect_error(call_decisioncompare(
+    # IR2-decisioncompare-04: the stop is now a quiet INFO naming the empty box (was an error).
+    res <- expect_no_error(call_decisioncompare(
         data = equivocal_fixture(), gold = "gold", goldPositive = "Pos", goldNegative = NULL,
         test1 = "t1", test1Positive = "Pos", test1Negative = "Neg",
         test2 = "t2", test2Positive = "Pos", test2Negative = "Neg",
         test3 = NULL, test3Positive = NULL, test3Negative = NULL,
-        excludeIndeterminate = TRUE), "gold: Select an explicit negative level")
+        excludeIndeterminate = TRUE))
+    expect_match(res$notices$content, "Reference negative level", fixed = TRUE)
+    expect_equal(res$comparisonTable$rowCount, 0)
 })
 
 
@@ -506,8 +509,9 @@ test_that("missing co-tests and stratifiers do not change standalone metrics", {
 test_that("narrative panels and OPA criterion are opt in", {
     d <- make_fixture(n = 100)
     base <- run_dc(d, opa = TRUE)
-    expect_identical(base$clinicalReport$content, "")
-    expect_identical(base$aboutAnalysis$content, "")
+    # Html panels are blanked with "<div></div>" since 2026-10-21: the jamovi client skips an Html update of "".
+    expect_identical(base$clinicalReport$content, "<div></div>")
+    expect_identical(base$aboutAnalysis$content, "<div></div>")
     expect_true(all(is.na(base$opaTable$asDF$niMargin)))
     expect_true(all(base$opaTable$asDF$niResult == "Not requested"))
 

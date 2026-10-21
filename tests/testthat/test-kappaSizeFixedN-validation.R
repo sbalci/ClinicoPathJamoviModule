@@ -420,10 +420,13 @@ test_that("IR-kappaSizeFixedN-02 a positive bound below 0.001 is rounded down, n
     expect_true(vfn_shown_ok(vfn_bound(res), g))
 })
 
-test_that("IR-kappaSizeFixedN-01 the plug-in coverage warning is qualified to a rare category", {
+test_that("IR-kappaSizeFixedN-01 / FN-02 the plug-in coverage warning covers balanced categories too", {
+    # FN-02 (independent review 2026-10-21) reverses IR-01's rare-category qualifier: balanced K4 R4 n 80
+    # gave plug-in coverage 0.878, so "without such a category it stayed close to 0.95" was false.
     notes <- vfn_run(outcome = "3", props = "0.3, 0.3, 0.4", raters = "3")$methodology$content
-    expect_match(notes, "less than about a fifth of the ratings", fixed = TRUE)
-    expect_match(notes, "without such a category it stayed close to 0.95", fixed = TRUE)
+    expect_false(grepl("less than about a fifth of the ratings", notes, fixed = TRUE))
+    expect_false(grepl("stayed close to 0.95", notes, fixed = TRUE))
+    expect_match(notes, "Balanced categories do not prevent it", fixed = TRUE)
     expect_false(grepl("with three or more raters, or three or more categories, plugging in",
                        notes, fixed = TRUE))
     # two raters, binary: no re-estimation, so no advice at all

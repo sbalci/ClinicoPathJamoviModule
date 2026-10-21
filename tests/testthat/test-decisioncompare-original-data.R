@@ -55,7 +55,8 @@ test_that("original table limit allows 10000 cells and omits larger cross-tabs",
   omitted <- dc_original_analysis(data)
   hidden <- dc_original_analysis(data, od = FALSE)
   expect_identical(omitted$results$text1$content, "")
-  expect_identical(omitted$results$text2$content, "")
+  # Html panels are blanked with "<div></div>" since 2026-10-21: the jamovi client skips an Html update of "".
+  expect_identical(omitted$results$text2$content, "<div></div>")
   expect_match(omitted$results$notices$content, "Original Data Display Omitted", fixed = TRUE)
   expect_match(omitted$results$notices$content, "10,000 cells", fixed = TRUE)
   expect_false(grepl("Original Data Display Omitted", hidden$results$notices$content,
@@ -81,7 +82,7 @@ test_that("preflight covers the optional third test before building any original
   data$b <- data$a
   analysis <- dc_original_analysis(data)
   expect_identical(analysis$results$text1$content, "")
-  expect_identical(analysis$results$text2$content, "")
+  expect_identical(analysis$results$text2$content, "<div></div>")
   expect_match(analysis$results$notices$content, "Original Data Display Omitted", fixed = TRUE)
   expect_equal(analysis$results$comparisonTable$getCell(rowKey = "test_3", col = "n")$value,
                2)
@@ -93,7 +94,7 @@ test_that("original display and its warning reset when data or display options c
   private <- analysis$.__enclos_env__$private
   private$.data <- dc_original_data(101)
   analysis$run()
-  expect_identical(analysis$results$text2$content, "")
+  expect_identical(analysis$results$text2$content, "<div></div>")
   expect_match(analysis$results$notices$content, "Original Data Display Omitted", fixed = TRUE)
 
   option <- analysis$options$option("od")

@@ -83,7 +83,6 @@ items:
                 - name: prevalence
                   title: 'Prevalence'
                   type: number
-                  format: zto
                 - name: prc_baseline
                   title: 'PRC Baseline'
                   type: number
@@ -560,7 +559,6 @@ items:
                 - name: prevalence
                   title: 'Prevalence'
                   type: number
-                  format: zto
                 - name: ppv
                   title: 'PPV'
                   type: number

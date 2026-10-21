@@ -350,12 +350,12 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) {
 
                 # Check for positive tests
                 if (TP + FP == 0) {
-                    private$.addNotice("WARNING", .("No positive test results"), .("TP + FP equals zero: the test was never positive. The positive predictive value, the positive likelihood ratio and the diagnostic odds ratio are not estimable, and the test cannot separate the two groups. The negative likelihood ratio differs from 1 only because of the 0.5 zero-cell correction."))
+                    private$.addNotice("WARNING", .("No positive test results"), .("TP + FP equals zero: the test was never positive. The positive predictive value, the positive likelihood ratio and the diagnostic odds ratio are not estimable, and the test cannot separate the two groups. The negative likelihood ratio is exactly 1: a negative result carries no information."))
                 }
 
                 # Check for negative tests
                 if (TN + FN == 0) {
-                    private$.addNotice("WARNING", .("No negative test results"), .("TN + FN equals zero: the test was never negative. The negative predictive value, the negative likelihood ratio and the diagnostic odds ratio are not estimable, and the test cannot separate the two groups. The positive likelihood ratio differs from 1 only because of the 0.5 zero-cell correction."))
+                    private$.addNotice("WARNING", .("No negative test results"), .("TN + FN equals zero: the test was never negative. The negative predictive value, the negative likelihood ratio and the diagnostic odds ratio are not estimable, and the test cannot separate the two groups. The positive likelihood ratio is exactly 1: a positive result carries no information."))
                 }
 
 
@@ -446,31 +446,57 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) {
                     )
                 }
 
-                # Apply correction separately: LR+ for TP/FP zeros, LR- for FN/TN zeros,
-                # DOR for any zero. Each affected ratio and its interval use all cells +0.5;
-                # proportions, and epi.tests() on the raw table3, use observed counts.
+                # Zero cells, .diagRatioRules() (shared with decision, decisioncompare, decisioncombine):
+                # a ratio is 0.5-corrected (all four cells + 0.5, Haldane-Anscombe) only when its
+                # DENOMINATOR cell is empty and its numerator is not; an empty numerator gives an exact
+                # 0 with interval [0, U] (.diagZeroRatioUpper); 0/0 is not estimable. Correcting a zero numerator too
+                # printed LR+ 3.06 and DOR 3.16 for TP=0 FN=10 FP=1 TN=99, a test that found no
+                # diseased patient (review 2026-10-21, DC2-01). Proportions, and epi.tests() on the
+                # raw table3, use observed counts.
                 zero_cell <- any(c(TP, FP, TN, FN) == 0)
-                lrp_zero <- (TP == 0 || FP == 0)
-                lrn_zero <- (FN == 0 || TN == 0)
+                rules <- .diagRatioRules(TP, FP, FN, TN)
+                # .diagRatioRules() leaves a correction that would land at or below 1 "undefined"
+                # (TP=99 FN=1 FP=10 TN=0 gave LR- 0.33 for a test with specificity 0). Say why here:
+                # an empty denominator with a non-empty numerator is that case.
+                reversed <- c(
+                    lrp = rules$lrp == "undefined" && FP == 0 && TP > 0,
+                    lrn = rules$lrn == "undefined" && TN == 0 && FN > 0,
+                    dor = rules$dor == "undefined" && (FP == 0 || FN == 0) && TP > 0 && TN > 0)
+                ratio_names <- c(lrp = .("positive likelihood ratio"), lrn = .("negative likelihood ratio"),
+                                 dor = .("diagnostic odds ratio"))
+                for (k in names(reversed)[reversed]) {
+                    private$.addNotice("WARNING", .("Zero-cell ratio not estimable"), .fmt(
+                        .("The {ratio} has an empty denominator cell, so its observed value is infinite. Adding 0.5 to every cell would put it at or below 1 and reverse its direction, because the empty cell lies in the smaller reference group, so it is left blank."),
+                        ratio = ratio_names[[k]]))
+                }
+                lrp_corr <- rules$lrp == "corrected"
+                lrn_corr <- rules$lrn == "corrected"
+                dor_corr <- rules$dor == "corrected"
                 # Doubles: the DOR and the nomogram's cross products multiply these.
-                TP_cc <- if (zero_cell) TP + 0.5 else as.numeric(TP)
-                FP_cc <- if (zero_cell) FP + 0.5 else as.numeric(FP)
-                TN_cc <- if (zero_cell) TN + 0.5 else as.numeric(TN)
-                FN_cc <- if (zero_cell) FN + 0.5 else as.numeric(FN)
+                cc <- function(x, on) if (on) x + 0.5 else as.numeric(x)
+                TP_cc <- cc(TP, dor_corr)
+                FP_cc <- cc(FP, dor_corr)
+                TN_cc <- cc(TN, dor_corr)
+                FN_cc <- cc(FN, dor_corr)
 
-                TP_lrp <- if (lrp_zero) TP + 0.5 else as.numeric(TP)
-                FP_lrp <- if (lrp_zero) FP + 0.5 else as.numeric(FP)
-                TN_lrp <- if (lrp_zero) TN + 0.5 else as.numeric(TN)
-                FN_lrp <- if (lrp_zero) FN + 0.5 else as.numeric(FN)
+                TP_lrp <- cc(TP, lrp_corr)
+                FP_lrp <- cc(FP, lrp_corr)
+                TN_lrp <- cc(TN, lrp_corr)
+                FN_lrp <- cc(FN, lrp_corr)
 
-                TP_lrn <- if (lrn_zero) TP + 0.5 else as.numeric(TP)
-                FP_lrn <- if (lrn_zero) FP + 0.5 else as.numeric(FP)
-                TN_lrn <- if (lrn_zero) TN + 0.5 else as.numeric(TN)
-                FN_lrn <- if (lrn_zero) FN + 0.5 else as.numeric(FN)
+                TP_lrn <- cc(TP, lrn_corr)
+                FP_lrn <- cc(FP, lrn_corr)
+                TN_lrn <- cc(TN, lrn_corr)
+                FN_lrn <- cc(FN, lrn_corr)
 
                 if (zero_cell) {
-                    private$.addNotice("WARNING", .("Continuity correction applied"), .("A zero cell was present. For LR+ only when TP or FP is zero, and for LR- only when FN or TN is zero, 0.5 is added to all four cells for that ratio and its confidence interval. The diagnostic odds ratio and its interval use all four cells plus 0.5 whenever any cell is zero (Haldane-Anscombe correction). Sensitivity, specificity, predictive values and their intervals use the observed counts. The corrected diagnostic odds ratio need not equal the ratio of the displayed likelihood ratios."))
+                    private$.addNotice("WARNING",
+                        if (lrp_corr || lrn_corr || dor_corr) .("Continuity correction applied") else .("Zero cell in the table"),
+                        .("A zero cell was present. A likelihood ratio or the diagnostic odds ratio is corrected only when its denominator cell is empty and its numerator is not (FP for LR+, TN for LR-, FP or FN for the diagnostic odds ratio): 0.5 is then added to all four cells for that ratio and its confidence interval (Haldane-Anscombe correction). When its numerator cell is empty (TP for LR+, FN for LR-, TP or TN for the diagnostic odds ratio) the ratio is exactly 0, and its confidence interval runs from 0 to the upper limit of the same log-scale interval computed with 0.5 added to every cell; when both are empty it is not estimable. Sensitivity, specificity, predictive values and their intervals use the observed counts. The corrected diagnostic odds ratio need not equal the ratio of the displayed likelihood ratios."))
                 }
+                # Footnotes for a corrected ratio and for a ratio that is exactly 0.
+                zc_note <- .("The denominator cell of this ratio is zero, so 0.5 was added to every cell (Haldane-Anscombe correction). Its confidence interval uses the same corrected counts.")
+                zero_note <- .("The numerator cell of this ratio is zero, so the ratio is exactly 0 and is not corrected. Its confidence interval runs from 0 to the upper limit of the same log-scale interval computed with 0.5 added to every cell (Haldane-Anscombe correction).")
 
                 # The early returns above guarantee DiseaseP, DiseaseN > 0. The fallbacks here and
                 # for AccurT/PrevalenceD are NA_real_ (a footnoted blank), never a fabricated 0%,
@@ -605,39 +631,19 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) {
                 }
 
 
-                # Calculate likelihood ratios with safe division (corrected if needed)
-                LRP <- if ((1 - (TN_lrp / (TN_lrp + FP_lrp))) > 0) {
-                    (TP_lrp / (TP_lrp + FN_lrp)) / (1 - (TN_lrp / (TN_lrp + FP_lrp)))
-                } else {
-                    Inf
-                }
-
-                LRN <- if ((TN_lrn / (TN_lrn + FP_lrn)) > 0) {
-                    (1 - (TP_lrn / (TP_lrn + FN_lrn))) / (TN_lrn / (TN_lrn + FP_lrn))
-                } else {
-                    0
-                }
-
-                # Diagnostic Odds Ratio (Haldane-Anscombe corrected counts), displayed in
-                # advancedMetricsTable. Its interval, like the LR ones, is computed in the ci block
-                # on these corrected counts; epi.tests() supplies only the proportion intervals.
-                if (FN_cc > 0 && FP_cc > 0) {
-                    DOR <- (TP_cc * TN_cc) / (FN_cc * FP_cc)
-                } else {
-                    DOR <- NA
-                }
-
-                # A test-result row of zeros (the test was never positive, or never negative) makes
-                # that likelihood ratio and the DOR 0/0. The 0.5 correction turned them into a function
-                # of the group sizes alone -- LR+ = (n0 + 1) / (n1 + 1), 9.18 at 0/0/10/100 -- under a
-                # nomogram saying a positive result raised the probability. With n1 == n0 the artifact
-                # is exactly 1, which is how it went unnoticed. The other ratio keeps its corrected
-                # value (the all-cells correction is a deferred estimator choice); the notice says so.
+                # Likelihood ratios and the DOR by their zero-cell rule (above): exactly 0 for an empty
+                # numerator, NA (blank, footnoted) when not estimable, else on the observed or the
+                # all-cells + 0.5 counts. Its interval is computed in the ci block on the same counts.
+                # A never-positive (never-negative) test makes LR+ (LR-) and the DOR 0/0: the old
+                # correction turned them into LR+ = (n0 + 1) / (n1 + 1) under a "raises" nomogram.
+                LRP <- switch(rules$lrp, undefined = NA_real_, zero = 0,
+                    (TP_lrp / (TP_lrp + FN_lrp)) / (FP_lrp / (TN_lrp + FP_lrp)))
+                LRN <- switch(rules$lrn, undefined = NA_real_, zero = 0,
+                    (FN_lrn / (TP_lrn + FN_lrn)) / (TN_lrn / (TN_lrn + FP_lrn)))
+                DOR <- switch(rules$dor, undefined = NA_real_, zero = 0,
+                    (TP_cc * TN_cc) / (FN_cc * FP_cc))
                 no_pos_tests <- TestP == 0
                 no_neg_tests <- TestN == 0
-                if (no_pos_tests) LRP <- NA_real_
-                if (no_neg_tests) LRN <- NA_real_
-                if (no_pos_tests || no_neg_tests) DOR <- NA_real_
 
                 # Youden's Index (optimal cut-off criterion)
                 YoudenIndex <- Sens + Spec - 1
@@ -811,12 +817,10 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) {
                         .("Negative likelihood ratio: the factor by which a negative result multiplies pre-test odds. Its practical importance depends on the clinical context and starting probability.")
                     )
 
-                    if (zero_cell) {
-                        # LRN and the DOR are corrected too; the note used to sit on LRP only.
-                        zc_note <- .("A zero cell was present, so 0.5 was added to every cell for the likelihood ratios and the diagnostic odds ratio. Their confidence intervals use the same corrected counts.")
-                        if (lrp_zero && is.finite(LRP)) ratioTable$addFootnote(rowNo = 1, col = "LRP", zc_note)
-                        if (lrn_zero && is.finite(LRN)) ratioTable$addFootnote(rowNo = 1, col = "LRN", zc_note)
-                    }
+                    if (lrp_corr) ratioTable$addFootnote(rowNo = 1, col = "LRP", zc_note)
+                    if (lrn_corr) ratioTable$addFootnote(rowNo = 1, col = "LRN", zc_note)
+                    if (rules$lrp == "zero") ratioTable$addFootnote(rowNo = 1, col = "LRP", zero_note)
+                    if (rules$lrn == "zero") ratioTable$addFootnote(rowNo = 1, col = "LRN", zero_note)
                 }
 
 
@@ -859,8 +863,8 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) {
                         rowNo = 1, col = "dor",
                         .("Diagnostic odds ratio compares the odds of a positive result between reference-positive and reference-negative groups. Its magnitude is descriptive and has no universal clinical cut-off.")
                     )
-                    if (zero_cell && is.finite(DOR))   # zc_note: set in the ratioTable footnote block above
-                        advancedMetricsTable$addFootnote(rowNo = 1, col = "dor", zc_note)
+                    if (dor_corr) advancedMetricsTable$addFootnote(rowNo = 1, col = "dor", zc_note)
+                    if (rules$dor == "zero") advancedMetricsTable$addFootnote(rowNo = 1, col = "dor", zero_note)
                 }
 
 
@@ -962,8 +966,9 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) {
                     # epirTable_number is not epiR's: every row is computed here, so it does not
                     # wait on epiR (an epiR error or a renamed statistic used to blank it).
                     # LR+, LR- and the DOR are the values the
-                    # tables above show (all cells + 0.5 when one of the ratio's own cells is
-                    # zero) with log-scale intervals on those same counts (Simel 1991; Woolf for
+                    # tables above show (all cells + 0.5 only when the ratio's denominator cell is
+                    # empty, .diagRatioRules; none for an exact 0, whose interval is [0, U] with U from the
+                    # +0.5 table, .diagZeroRatioUpper) with log-scale intervals on those same counts (Simel 1991; Woolf for
                     # the DOR), finite on both sides; without a zero cell this is exactly
                     # epi.tests(), and with one it is what decision and decisioncombine print.
                     # Known ceiling, accepted 2026-10-21 for agreement between the three
@@ -990,7 +995,7 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) {
                         # Simel variance of log(LR) = log(x / (x + y)) - log(u / (u + w)).
                         lr_v <- function(x, y, u, w) 1 / x - 1 / (x + y) + 1 / u - 1 / (u + w)
                         # Each LR's variance on the counts its point estimate uses (_lrp/_lrn),
-                        # not the any-zero _cc set: TP=25 FN=5 FP=0 TN=30 put LR- 0.1667 on raw
+                        # not another ratio's set: TP=25 FN=5 FP=0 TN=30 put LR- 0.1667 on raw
                         # counts inside an interval built from corrected ones. Only where those
                         # counts give variance 0 - the other ratio of a never-positive or
                         # never-negative test, e.g. LR- with TP = FP = 0 - would that be the
@@ -999,21 +1004,27 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) {
                         v_or_cc <- function(v, v_cc) if (is.finite(v) && v > 0) v else v_cc
                         own <- rbind(
                             lr.pos = c(LRP, log_ci(LRP, v_or_cc(lr_v(TP_lrp, FN_lrp, FP_lrp, TN_lrp),
-                                                                lr_v(TP_cc, FN_cc, FP_cc, TN_cc)))),
+                                                                lr_v(TP + 0.5, FN + 0.5, FP + 0.5, TN + 0.5)))),
                             lr.neg = c(LRN, log_ci(LRN, v_or_cc(lr_v(FN_lrn, TP_lrn, TN_lrn, FP_lrn),
-                                                                lr_v(FN_cc, TP_cc, TN_cc, FP_cc)))),
+                                                                lr_v(FN + 0.5, TP + 0.5, TN + 0.5, FP + 0.5)))),
                             diag.or = c(DOR, log_ci(DOR, 1 / TP_cc + 1 / FP_cc + 1 / FN_cc + 1 / TN_cc)),
                             youden = unname(youden_ci),
                             nndx = unname(private$.nndxFromYouden(youden_ci)))
+                        # An exact 0: [0, U], U from the +0.5 table (same helper as decision, decisioncombine).
+                        zero_keys <- c(lr.pos = "lrp", lr.neg = "lrn", diag.or = "dor")
+                        zero_rows <- names(zero_keys)[unlist(rules[zero_keys]) == "zero"]
+                        for (k in zero_rows)
+                            own[k, ] <- c(0, 0, .diagZeroRatioUpper(zero_keys[[k]], TP, FP, FN, TN))
                         fill(epirTable_number,
                              data.frame(statistic = rownames(own), est = own[, 1], lower = own[, 2], upper = own[, 3]),
                              private$.epirNumberStats())
+                        for (k in zero_rows) epirTable_number$addFootnote(rowKey = k, col = "upper", zero_note)
 
                         # Always on: a reader cannot reproduce an interval without its method.
                         epirTable_number$setNote("method", .("Likelihood ratios: approximate log-scale 95% interval (Simel, Samsa and Matchar 1991), which can fall short of 95% when sensitivity or specificity is near 100% in a small study. Diagnostic odds ratio: log-scale (Woolf) interval. Youden's index: Agresti-Caffo interval for the difference between the true-positive and false-positive rates. Number needed to diagnose = 1 / Youden's index; its interval is the inverse of the positive part of the Youden interval."))
                         epirTable_number$setNote("independence", independence_note)
                         epirTable_number$setNote("rawcounts", if (zero_cell)
-                            .("A zero cell was present. As in the tables above, a likelihood ratio with a zero among its own cells (TP or FP for LR+, FN or TN for LR-) and the diagnostic odds ratio use the table with 0.5 added to every cell (Haldane-Anscombe), and so do their intervals; the other likelihood ratio uses the observed counts. These corrected limits are approximate. Youden's index and the number needed to diagnose use the observed counts.")
+                            .("A zero cell was present. As in the tables above, a ratio whose denominator cell is empty (FP for LR+, TN for LR-, FP or FN for the diagnostic odds ratio) while its numerator cell is not uses the table with 0.5 added to every cell (Haldane-Anscombe), and so does its interval; these corrected limits are approximate. If that correction would put the ratio at or below 1 it is left blank, because it would reverse the direction of an infinite observed value. A ratio whose numerator cell is empty and denominator cell is not is exactly 0, and its interval runs from 0 to the upper limit of the same log-scale interval computed with 0.5 added to every cell; one with both cells empty (0/0) is not estimable. Every other ratio, Youden's index and the number needed to diagnose use the observed counts.")
                             else NULL)
                         # An empty NNDx cell needs its reason on screen (decision.b.R wording).
                         nn <- own["nndx", ]
@@ -1339,7 +1350,7 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) {
                 if (self$options$showSummary) {
                     summary_html <- private$.createSummary(
                         Sens, Spec, PPV, NPV, LRP, LRN,
-                        YoudenIndex, AccurT, PriorProb, zero_cell
+                        YoudenIndex, AccurT, PriorProb, lrp_corr || lrn_corr
                     )
                     self$results$summary$setContent(summary_html)
                 }
@@ -1362,34 +1373,14 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) {
                 # Send Data to Plot ----
 
 
-                # A zero cell puts sensitivity or specificity at exactly 0 or 1, and
-                # nomogrammer rejects the closed bounds outright ("must be between 0 and 1
-                # (exclusive)"), so the whole nomogram silently failed to draw for precisely
-                # the sparse tables that most need one. Confirmed for FP=0, FN=0 and TP=0.
-                # The likelihood ratios handed to it are already Haldane-Anscombe corrected
-                # (TP_cc..FN_cc above), so pass the proportions from that same corrected
-                # table -- the plot is then self-consistent rather than clamped to an
-                # arbitrary epsilon. The tables keep the uncorrected values.
-                sens_plot <- TP_cc / (TP_cc + FN_cc)
-                spec_plot <- TN_cc / (TN_cc + FP_cc)
-                if (zero_cell && is.finite(LRP) && is.finite(LRN) && LRP != LRN) {
-                    sp_b <- (LRP - 1) / (LRP - LRN)
-                    se_b <- LRP * (1 - sp_b)
-                    if (all(is.finite(c(se_b, sp_b))) && se_b > 0 && se_b < 1 && sp_b > 0 && sp_b < 1) {
-                        sens_plot <- se_b
-                        spec_plot <- sp_b
-                    }
-                }
-
-                # nomogrammer also refuses LR+ < 1 ("should be >= 1 for an informative
-                # test"), which is a fair objection -- a positive result that argues AGAINST
-                # disease inverts the nomogram's meaning -- but it arrived as an unexplained
-                # crash. Detect it here, where a notice can still be rendered, and tell the
-                # plot to decline instead.
+                # nomogrammer refuses LR+ < 1 ("should be >= 1 for an informative test"), which is a
+                # fair objection -- a positive result that argues AGAINST disease inverts the
+                # nomogram's meaning -- but it arrived as an unexplained crash. Detect it here, where
+                # a notice can still be rendered, and tell the plot to decline instead.
                 # Decided on the counts, not on the derived double: sens 1/3, spec 2/3 is an
                 # LR+ of exactly 1 but is stored as 0.9999999999999999, and `LRP >= 1` then
                 # declined the plot and told the user the test coding was inverted.
-                # LR+ >= 1  <=>  TP (TN + FP) >= FP (TP + FN), on the corrected counts.
+                # LR+ >= 1  <=>  TP (TN + FP) >= FP (TP + FN), on the counts LR+ uses.
                 # Half-integer cross products are exact in floating point; the relative
                 # tolerance only guards fractional or very large counts. Each ratio gets its
                 # own test: LR+ within rounding of 1 does not make LR- 1.
@@ -1397,23 +1388,42 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) {
                 lr_neg_cross <- FN_lrn * (TN_lrn + FP_lrn) - TN_lrn * (TP_lrn + FN_lrn)   # sign of LR- - 1
                 lr_pos_one <- abs(lr_pos_cross) <= 1e-12 * TP_lrp * (TN_lrp + FP_lrp)
                 lr_neg_one <- abs(lr_neg_cross) <= 1e-12 * TN_lrn * (TP_lrn + FN_lrn)
-                fagan_ok <- is.finite(LRP) && is.finite(LRN) && (lr_pos_cross > 0 || lr_pos_one)
-                # Only explains the missing plot. fagan_ok is decided on the corrected counts, and the
-                # inversion notice above is graded on the raw ones, so either can appear without the
-                # other. A never-positive or never-negative test has no ratio to draw at all.
+                # The nomogram is a log-odds scale: a likelihood ratio of exactly 0 (an empty
+                # numerator cell) or one that is not estimable cannot be placed on it. NULL = drawable.
+                fagan_reason <- if (no_pos_tests)
+                    .("The test was never positive in this table, so the positive likelihood ratio is not estimable.")
+                else if (no_neg_tests)
+                    .("The test was never negative in this table, so the negative likelihood ratio is not estimable.")
+                else if (rules$lrp == "zero")
+                    .("No reference-positive subject tested positive (TP = 0), so the positive likelihood ratio is exactly 0. A ratio of 0 cannot be placed on the nomogram's logarithmic scale.")
+                else if (rules$lrn == "zero")
+                    .("No reference-positive subject tested negative (FN = 0), so the negative likelihood ratio is exactly 0. A ratio of 0 cannot be placed on the nomogram's logarithmic scale.")
+                else if (!is.finite(LRP) || !is.finite(LRN))
+                    .("A likelihood ratio is not estimable for this table (see the notices above), so it cannot be placed on the nomogram.")
+                else if (!(lr_pos_cross > 0 || lr_pos_one)) .fmt(
+                    .("The positive likelihood ratio is {lr}, so a positive result lowers the probability of a reference-positive outcome rather than raising it. A nomogram assumes that a positive result raises it. Check the test coding."),
+                    lr = sprintf("%.3f", LRP))
+                # nomogrammer rejects sensitivity or specificity of exactly 0 or 1, and recomputes the
+                # ratios from them. Without a zero cell the observed pair is strictly inside (0, 1).
+                # With one, at least one LR is corrected: draw the pair whose ratios are exactly the
+                # table's LRP and LRN, so plot, panel and tables quote one number (the all-cells
+                # corrected pair drew LR- 0.969 beside a table LR- of 1.010, DC2-02).
+                sens_plot <- Sens
+                spec_plot <- Spec
+                if (is.null(fagan_reason) && zero_cell) {
+                    sp_b <- (LRP - 1) / (LRP - LRN)
+                    se_b <- LRP * (1 - sp_b)
+                    if (all(is.finite(c(se_b, sp_b))) && se_b > 0 && se_b < 1 && sp_b > 0 && sp_b < 1) {
+                        sens_plot <- se_b
+                        spec_plot <- sp_b
+                    } else {
+                        fagan_reason <- .("The two likelihood ratios in the table cannot be drawn together on one nomogram.")
+                    }
+                }
+                fagan_ok <- is.null(fagan_reason)
                 if (isTRUE(self$options$fagan) && !fagan_ok) {
-                    private$.addNotice(
-                        "WARNING",
-                        .("Fagan nomogram not drawn"),
-                        if (no_pos_tests)
-                            .("The test was never positive in this table, so the positive likelihood ratio is not estimable and the nomogram is omitted.")
-                        else if (no_neg_tests)
-                            .("The test was never negative in this table, so the negative likelihood ratio is not estimable and the nomogram is omitted.")
-                        else .fmt(
-                            .("The positive likelihood ratio is {lr}. A nomogram assumes that a positive result raises the probability of the outcome; here it lowers that probability, so the plot is omitted. Check the test coding."),
-                            lr = sprintf("%.3f", LRP)
-                        )
-                    )
+                    private$.addNotice("WARNING", .("Fagan nomogram not drawn"),
+                        paste(fagan_reason, .("The nomogram is omitted.")))
                 }
 
                 plotData1 <- list(
@@ -1437,14 +1447,7 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) {
                 fagan_item <- self$results$faganSummary
                 if (isTRUE(self$options$fagan)) {
                     if (!fagan_ok) {
-                        not_drawn_reason <- if (no_pos_tests)
-                            .("The test was never positive in this table, so the positive likelihood ratio is not estimable.")
-                        else if (no_neg_tests)
-                            .("The test was never negative in this table, so the negative likelihood ratio is not estimable.")
-                        else .fmt(
-                            .("The positive likelihood ratio is {lr}, so a positive result lowers the probability of a reference-positive outcome rather than raising it."),
-                            lr = sprintf("%.3f", LRP)
-                        )
+                        not_drawn_reason <- fagan_reason
                         fagan_item$setContent(paste0(
                             "<div style='padding:12px;border-left:4px solid #c00;background-color: rgba(255, 88, 88, 0.06); color: inherit;'>",
                             "<p>", .("No nomogram is drawn for this table."), " ",
@@ -1452,9 +1455,9 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) {
                             "</p></div>"))
                     } else {
                         pre <- PriorProb
-                        # These sentences quote LRP/LRN, which are Haldane-Anscombe
-                        # corrected, and sit directly under a nomogram drawn from the same
-                        # corrected proportions. PostTestProbDisease is Bayes on the
+                        # These sentences quote LRP/LRN (Haldane-Anscombe corrected when a
+                        # denominator cell is empty) and sit directly under a nomogram drawn from
+                        # proportions with exactly those ratios. PostTestProbDisease is Bayes on the
                         # UNcorrected Sens/Spec, so with a zero cell the panel printed a
                         # post-test probability the quoted likelihood ratio cannot produce
                         # (100.0% beside LR+ = 145.16, against the plot's 99.5%). Take the
@@ -1483,9 +1486,13 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) {
                             else .fmt(
                                 .("A positive result has a likelihood ratio of {lr} and raises the probability from {prevalence} to {posttest}."),
                                 lr = sprintf("%.2f", LRP), prevalence = private$.pct(pre), posttest = private$.pct(post_pos))
+                        # The verb follows the sign of LR- - 1 (DC2-02 said "lowers" beside LR- 1.010).
                         negative_sentence <- if (lr_neg_one) .fmt(
                                 .("A negative result has a likelihood ratio of {lr} and leaves the probability at {prevalence}."),
                                 lr = sprintf("%.3f", LRN), prevalence = private$.pct(pre))
+                            else if (lr_neg_cross > 0) .fmt(
+                                .("A negative result has a likelihood ratio of {lr} and raises the probability from {prevalence} to {posttest}."),
+                                lr = sprintf("%.3f", LRN), prevalence = private$.pct(pre), posttest = private$.pct(post_neg))
                             else .fmt(
                                 .("A negative result has a likelihood ratio of {lr} and lowers the probability from {prevalence} to {posttest}."),
                                 lr = sprintf("%.3f", LRN), prevalence = private$.pct(pre), posttest = private$.pct(post_neg))
@@ -1493,9 +1500,9 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) {
                         # They now follow the corrected likelihood ratios (and the plot);
                         # the Measures table's PPV/NPV are raw-count Bayes, so with a zero
                         # cell the two panels legitimately differ by a fraction of a point.
-                        correction_paragraph <- if (zero_cell) {
+                        correction_paragraph <- if (lrp_corr || lrn_corr) {
                             paste0("<p style='font-size:90%;color:inherit;'>",
-                                .("A zero cell was present, so the likelihood ratios and the probabilities read from the nomogram use the Haldane-Anscombe 0.5 correction. The predictive values and post-test probabilities in the Measures table are computed from the raw counts and can differ, by a wide margin in a small table."),
+                                .("A likelihood ratio whose denominator cell is empty uses the Haldane-Anscombe 0.5 correction, and so do the probabilities read from the nomogram. The predictive values and post-test probabilities in the Measures table are computed from the raw counts and can differ, by a wide margin in a small table."),
                                 "</p>")
                         } else {
                             ""
@@ -1531,8 +1538,8 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) {
                 # validator, which aborts with a raw R error when LR+ == LR- ("uninformative
                 # test"). That fires for any Youden's J == 0 table, e.g. 50/50/50/50, which
                 # fagan_ok lets through because LR+ == 1 satisfies LR+ >= 1. Sens/Spec here
-                # are the Haldane-Anscombe corrected proportions, so the ratios nomogrammer
-                # recomputes are exactly the LRP/LRN shown in the tables.
+                # are the pair whose ratios are the table's LRP/LRN (observed, or back-solved
+                # from a corrected LR in .run()), so nomogrammer recomputes exactly those.
                 plot1 <- nomogrammer(
                     Prevalence = plotData1$Prevalence,
                     Sens = plotData1$Sens,
@@ -1574,7 +1581,7 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) {
 
             # Private helper methods for summaries ----
 
-            .createSummary = function(Sens, Spec, PPV, NPV, LRP, LRN, Youden, Accuracy, Prevalence, zero_cell = FALSE) {
+            .createSummary = function(Sens, Spec, PPV, NPV, LRP, LRN, Youden, Accuracy, Prevalence, lr_corrected = FALSE) {
                 # PPV is NA when TP + FP == 0 and NPV when TN + FN == 0. Both are only
                 # WARNINGs, not early returns, so this panel is still built and
                 # sprintf("%.1f%%", NA) printed the literal "NA%" in 18px type while the
@@ -1593,11 +1600,11 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) {
                 positive_update <- if (is.finite(LRP)) .fmt(
                     .("A positive result multiplies pre-test odds by {lr}."),
                     lr = sprintf("%.2f", LRP)
-                ) else .("The positive likelihood ratio is not estimable: the test was never positive in this table.")
+                ) else .("The positive likelihood ratio is not estimable for this table; the notices above say why.")
                 negative_update <- if (is.finite(LRN)) .fmt(
                     .("A negative result multiplies pre-test odds by {lr}."),
                     lr = sprintf("%.3f", LRN)
-                ) else .("The negative likelihood ratio is not estimable: the test was never negative in this table.")
+                ) else .("The negative likelihood ratio is not estimable for this table; the notices above say why.")
 
                 paste0(
                     "<div style='font-family: Arial, sans-serif; max-width: 800px; line-height: 1.4;'>",
@@ -1630,8 +1637,8 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) {
                     # The LRs above are Haldane-Anscombe corrected on a zero cell and the PPV /
                     # NPV are not, so "PPV 100.0%" sat beside "multiplies pre-test odds by
                     # 11.00" with nothing to reconcile them.
-                    if (isTRUE(zero_cell)) paste0("<p style='margin: 10px 0; font-size: 13px;'>",
-                        .("A zero cell was present, so the likelihood ratios use the Haldane-Anscombe 0.5 correction, while the predictive values above use the observed counts. Multiplying the pre-test odds by these likelihood ratios therefore need not reproduce the predictive values exactly."),
+                    if (isTRUE(lr_corrected)) paste0("<p style='margin: 10px 0; font-size: 13px;'>",
+                        .("A likelihood ratio whose denominator cell is empty uses the Haldane-Anscombe 0.5 correction, while the predictive values above use the observed counts. Multiplying the pre-test odds by these likelihood ratios therefore need not reproduce the predictive values exactly."),
                         "</p>") else "",
                     "<div style='background-color: rgba(155, 155, 155, 0.06); border: 1px solid #ccc; padding: 12px; margin: 15px 0; color: inherit;'>",
                     "<p style='margin: 0; font-weight: bold;'>", .("Interpretation caveat"),

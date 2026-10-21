@@ -24,8 +24,9 @@ ertn_tables <- function(analysis) {
 # 2026-10-11): the notes without which a number is misread. Excluded here; the seed is below.
 # The multi-class orientation notes joined them 2026-10-21: without them a perfect marker read
 # against the declared Direction showed one-vs-one AUC 0.000 "Below chance" with no reason.
+# "ci_method" joined 2026-10-21 (XA-05): the default page never named the AUC interval's method.
 ertn_kept <- c("rule", "cutpoint_optimism", "venkatraman", "multiplicity",
-               "ovr_average", "ovr_direction", "ovo_direction", "pair_order")
+               "ovr_average", "ovr_direction", "ovo_direction", "pair_order", "ci_method")
 # A blanked cell keeps the footnote saying why it is blank (review 2026-10-11): an empty
 # statistic with no reason anywhere reads as a missing result. Excluded here like the kept notes.
 ertn_notes <- function(table) {
@@ -83,7 +84,8 @@ test_that("enhancedROC keeps the cut-off rule note when table notes are off", {
 test_that("enhancedROC keeps the random seed note when table notes are off", {
     off <- ertn_object(useBootstrap = TRUE, bootstrapSamples = 100)
     expect_identical(off$results$results$aucSummary$notes$seed$note, paste0("Random seed: ", off$options$seed))
-    expect_identical(names(off$results$results$aucSummary$notes), "seed")
+    # the AUC interval method stays too since 2026-10-21 (XA-05): it was the only interval label
+    expect_setequal(names(off$results$results$aucSummary$notes), c("seed", "ci_method"))
 })
 
 test_that("enhancedROC removes and restores notes when the checkbox changes", {

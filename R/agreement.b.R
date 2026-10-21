@@ -5971,6 +5971,14 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                         # format identically but are not the same method, so the
                         # table has to say which one ran.
                         used_null_se <- FALSE
+                        # 3+-rater kappa rows take Gwet's SE and a t interval, whatever
+                        # kappaCIMethod says; set when any such row has one, and named below.
+                        used_gwet_ci <- FALSE
+                        # 3+ categorical raters run .fleissAllRatings(), which uses every
+                        # observed rating; the minimum-case gate must count the cases it
+                        # uses, not complete cases (a site rated by 2 of 3 readers was
+                        # dropped although its kappa was estimable).
+                        fleiss_path <- is_categorical && ncol(ratings) >= 3
                         # Weighted kappa needs ONE category order, and these columns
                         # may not declare one (see .mergeDeclaredLevels). Decided once
                         # on the full rater columns: nestedness is hereditary, so if
@@ -5987,7 +5995,12 @@ agreementClass <- if (requireNamespace("jmvcore")) {
 
                         for (level in subgroup_levels) {
                             # Subset data for this subgroup
-                            idx <- which(subgroup == level & complete.cases(ratings))
+                            # Fleiss/Conger: cases rated by at least two raters (the
+                            # cases that enter observed agreement); otherwise complete cases.
+                            idx <- if (fleiss_path)
+                                which(subgroup == level & rowSums(!is.na(ratings)) >= 2)
+                            else
+                                which(subgroup == level & complete.cases(ratings))
 
                             if (length(idx) < min_cases) {
                                 skipped_levels <- c(skipped_levels, as.character(level))
@@ -6104,6 +6117,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                                             ci_lower <- max(-1, kappa_result$ci_lower)
                                             ci_upper <- kappa_result$ci_upper
                                             got_ci <- TRUE
+                                            used_gwet_ci <- TRUE
                                         }
                                         if (!got_ci && n_raters == 2) {
                                             z_stat <- kappa_result$statistic
@@ -6241,7 +6255,10 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                             table$setNote(
                                 "skipped",
                                 sprintf(
-                                    .("%1$d of %2$d subgroups are not shown because they have fewer than %3$d complete cases: %4$s. This table is therefore not a complete breakdown of the data."),
+                                    if (fleiss_path)
+                                        .("%1$d of %2$d subgroups are not shown because they have fewer than %3$d cases rated by at least two raters: %4$s. This table is therefore not a complete breakdown of the data.")
+                                    else
+                                        .("%1$d of %2$d subgroups are not shown because they have fewer than %3$d complete cases: %4$s. This table is therefore not a complete breakdown of the data."),
                                     length(skipped_levels), length(subgroup_levels),
                                     as.integer(min_cases),
                                     paste(private$.noteSafe(skipped_levels), collapse = ", ")
@@ -6258,9 +6275,13 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                         if (used_null_se) {
                             table$setNote(
                                 "ci_null_se",
-                                .("At least one interval in this table was built from the null-hypothesis standard error (kappa divided by its H0 test statistic) because the non-null asymptotic standard error from vcd::Kappa was unavailable for that subgroup. Null-SE intervals use a variance under zero agreement; their coverage at nonzero kappa is uncertain; three or more raters always use this fallback.")
+                                .("At least one interval in this table was built from the null-hypothesis standard error (kappa divided by its H0 test statistic) because the non-null asymptotic standard error from vcd::Kappa was unavailable for that subgroup. Null-SE intervals use a variance under zero agreement; their coverage at nonzero kappa is uncertain.")
                             )
                         }
+                        table$setNote("ci_method_fleiss",
+                            if (used_gwet_ci)
+                                .("With three or more raters each interval is kappa plus or minus the t quantile on n - 1 degrees of freedom times Gwet's subject-sampling standard error (irrCAC), where n is the number of cases with at least one rating (the N Cases column). The raters are treated as fixed, so the interval reflects the sampling of cases, not of raters. The kappa interval method option (Wald or Fisher z) applies to Cohen's kappa for two raters only and does not change these intervals.")
+                            else NULL)
                         if (!is.null(icc_guard_msg)) {
                             table$setNote("numeric", icc_guard_msg)
                         }

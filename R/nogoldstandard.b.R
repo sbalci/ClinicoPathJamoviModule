@@ -192,12 +192,14 @@ nogoldstandardClass <- if (requireNamespace("jmvcore")) {
                     self$results$test_metrics$addRow(rowKey = t, values = list(test = .diagCellText(t)))
 
                 latent <- identical(self$options$method, "latent_class")
+                # Penalized EM gets the dependence check too (from its unpenalized fit).
+                dependence <- self$options$method %in% c("latent_class", "bayesian")
                 # Same "pair_i_j" keys and order as the i < j loops in .run().
                 for (p in utils::combn(length(tests), 2, simplify = FALSE)) {
                     key <- paste0("pair_", p[1], "_", p[2])
                     label <- .diagCellText(.fmt(.("{a} vs {b}"), a = tests[p[1]], b = tests[p[2]]))
                     self$results$agreement_stats$addRow(rowKey = key, values = list(test_pair = label))
-                    if (latent)
+                    if (dependence)
                         self$results$conditional_dependence$addRow(rowKey = key, values = list(pair = label))
                 }
 
@@ -319,7 +321,7 @@ nogoldstandardClass <- if (requireNamespace("jmvcore")) {
                         "<li><strong>", .("All/Any Tests Positive:"), "</strong> ", .("Conservative/liberal reference standards"), "</li>",
                         "</ul>",
                         "</li>",
-                        "<li><strong>", .("Optional: Bootstrap CI:"), "</strong> ", .("Enable bootstrap confidence intervals for robust estimates"), "</li>",
+                        "<li><strong>", .("Optional: Bootstrap CI:"), "</strong> ", .("Enable bootstrap for approximate confidence intervals (estimates do not change)"), "</li>",
                         "</ol>",
                         method_info$background,
                         method_info$references,
@@ -636,6 +638,17 @@ nogoldstandardClass <- if (requireNamespace("jmvcore")) {
                         .("The model cannot determine which class is disease. Results are oriented so that the class with the higher average selected-positive probability is the high-positive class. Calling that class diseased, and the response probabilities sensitivity and specificity, requires the substantive assumption that selected-positive results are more common in diseased people for most tests. If tests perform below chance or positive levels are reversed, the clinical interpretation is inverted.")
                     )
 
+                    # 2^3 - 1 = 7 cell frequencies, 2 * 3 + 1 = 7 parameters: the fit is
+                    # saturated, so a dependent pair (sim: Se .8 read as .95) leaves no trace in
+                    # G-squared or the residuals. The table footnotes alone were too easy to miss.
+                    if (length(tests) == 3) {
+                        private$.addNotice(
+                            "STRONG_WARNING",
+                            .("Conditional independence cannot be checked with three tests"),
+                            .("With three tests the two-class model has as many parameters as the data have free cell frequencies, so it usually reproduces the observed table exactly and conditional independence cannot be checked from these data. If two of the tests share a mechanism (same target, same reader or same specimen), the estimates can be strongly biased in either direction with no sign of it in the fit statistics or the bivariate residuals. Detecting such dependence needs at least four tests.")
+                        )
+                    }
+
                     # Orientation is set by the tests on average, so one test whose positive
                     # level was picked the wrong way round comes out as sensitivity + specificity
                     # < 1 (sim .7/.75 reversed: .356/.266) and reads as a poor test. Name it.
@@ -729,6 +742,19 @@ nogoldstandardClass <- if (requireNamespace("jmvcore")) {
                     if (self$options$method == "latent_class" && !isFALSE(results$converged)) {
                         private$.populateModelFit(results$model)
                         private$.populateConditionalDependence(results$model, tests)
+                    }
+                    # WRONG BEFORE: penalized EM never checked dependence, so a pair that
+                    # latent_class flags (BVR 94.6) reported Se .95 for a .80 test silently.
+                    if (self$options$method == "bayesian" && !isFALSE(results$converged)) {
+                        if (is.null(results$model)) {
+                            private$.addNotice("STRONG_WARNING", .("Conditional independence not checked"),
+                                .("The unpenalized companion fit did not converge, so the bivariate residuals could not be computed. Penalized EM assumes the tests err independently within each class; run the latent class analysis and check its residuals before interpreting these estimates."))
+                        } else {
+                            private$.populateConditionalDependence(results$model, tests)
+                            dep_table <- private$.resultsItem("conditional_dependence")
+                            if (!is.null(dep_table)) dep_table$setNote("source",
+                                .("Penalized EM: residuals come from the unpenalized (maximum-likelihood) fit of the same conditional-independence model, so the fixed priors do not enter them. They check the model assumption, not the prior-adjusted estimates."))
+                        }
                     }
                     # Add cross-tabulation if requested
                     private$.populateCrossTab(test_data, tests, test_levels)
@@ -1122,7 +1148,7 @@ nogoldstandardClass <- if (requireNamespace("jmvcore")) {
                                 jmvcore::.("Not assessable: the model reproduces this pair exactly")
                             else if (bvr > THRESHOLD)
                                 jmvcore::.("Evidence against conditional independence")
-                            else jmvcore::.("Consistent with independence")
+                            else jmvcore::.("No evidence against conditional independence (descriptive)")
                         ))
                     }
                 }
@@ -1634,7 +1660,11 @@ nogoldstandardClass <- if (requireNamespace("jmvcore")) {
                      converged = fit$converged, iterations = fit$iterations,
                      identification = identification, orientation = orientation,
                      orientation_tied = class_orientation$tied,
-                     objective = fit$objective))
+                     objective = fit$objective,
+                     # Dependence is a property of the model, not the prior: check it on
+                     # the unpenalized fit, as identification above does.
+                     model = if (isTRUE(unpenalized$converged))
+                         nogoldstandard_bvr_model(binary_data, unpenalized$par)))
             },
 
             # Analysis using "All Tests Positive" as reference

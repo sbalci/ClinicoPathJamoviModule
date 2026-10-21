@@ -85,7 +85,8 @@ test_that("invalid reruns clear old values while preserving fixed table rows", {
     for (name in c("plot1", "plotRadar", "plotHeatmap"))
         expect_null(analysis$results[[name]]$state)
     expect_identical(analysis$results$text1$content, "")
-    expect_identical(analysis$results$text2$content, "")
+    # Html panels are blanked with "<div></div>" since 2026-10-21: the jamovi client skips an Html update of "".
+    expect_identical(analysis$results$text2$content, "<div></div>")
     expect_equal(analysis$results$comparisonTable$rowCount, 0)
 
     dc_fix_option(analysis, "test1Positive", "P")

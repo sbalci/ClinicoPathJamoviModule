@@ -280,13 +280,14 @@ test_that("the second-test notice names no slot and fires for any single test sl
 })
 
 test_that("every mapping problem is reported in one notice, reference included", {
-  a <- rc_run(test1Negative = "P", test2Negative = NULL)
+  # Two real mapping errors (an empty box is no longer one: IR2-decisioncompare-04).
+  a <- rc_run(test1Negative = "P", test2Negative = "absent")
   notices <- a$results$notices$content
   expect_match(notices, "a: Choose different", fixed = TRUE)
-  expect_match(notices, "b: Select an explicit negative level", fixed = TRUE)
-  a <- rc_run(goldPositive = NULL)
-  expect_match(a$results$notices$content, "Missing Positive Levels", fixed = TRUE)
-  expect_match(a$results$notices$content, "Reference", fixed = TRUE)
+  expect_match(notices, "b: The negative level", fixed = TRUE)
+  a <- rc_run(goldPositive = NULL, test2Negative = NULL)
+  expect_match(a$results$notices$content, "Levels Not Yet Selected", fixed = TRUE)
+  expect_match(a$results$notices$content, "Reference positive level, Test 2 negative level", fixed = TRUE)
 })
 
 test_that("the recorded rule keeps level labels with braces exactly", {

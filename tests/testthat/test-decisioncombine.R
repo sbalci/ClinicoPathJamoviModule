@@ -123,7 +123,9 @@ test_that("clinical strategies are summarised for two-test combinations", {
   expect_equal(parallel_row$spec, 0.5, tolerance = 1e-6)
   expect_equal(parallel_row$dor, 21, tolerance = 0.1)
   expect_equal(parallel_row$lrPos, 2, tolerance = 0.01)
-  expect_equal(parallel_row$lrNeg, 0.091, tolerance = 0.001)
+  # Parallel has FN = 0: LR- is exactly 0 since the 2026-10-21 zero-cell rule (XA-01); it was
+  # the Haldane-corrected 0.091, but only an empty DENOMINATOR (TN) is corrected now.
+  expect_equal(parallel_row$lrNeg, 0)
 
   # LR+, LR- and DOR are unbounded ratios and moved out of combinationTableCI (which is
   # now proportions only, formatted as percentages) into combinationTableCIRatios, so one

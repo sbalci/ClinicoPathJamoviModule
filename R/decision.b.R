@@ -77,6 +77,37 @@ decisionClass <- if (requireNamespace("jmvcore"))
                 is.null(x) || length(x) != 1 || is.na(x) || !nzchar(as.character(x))
             },
 
+            # Reference definition table. Called before the data are read (an unset negative
+            # level is blank) and again with the levels .prepareAnalysisData() resolved, so an
+            # inferred negative is named and marked as inferred (review 2026-10-21, D7).
+            .fillReferenceDefinition = function(gold_negative = NULL, test_negative = NULL) {
+                negative_text <- function(chosen, resolved) {
+                    if (!private$.levelUnset(chosen)) return(paste(chosen, collapse = ""))
+                    if (private$.levelUnset(resolved)) return("")
+                    .fmt(.("{level} (inferred: the only other level)"), level = resolved)
+                }
+                .diagReferenceDefinition(self$results, self$options,
+                    .fmt(.("Reference: {gold} positive {gpos} negative {gneg} ; test: {test} positive {tpos} negative {tneg}"),
+                        gold = paste(self$options$gold, collapse = ""),
+                        gpos = paste(self$options$goldPositive, collapse = ""),
+                        gneg = negative_text(self$options$goldNegative, gold_negative),
+                        test = paste(self$options$newtest, collapse = ""),
+                        tpos = paste(self$options$testPositive, collapse = ""),
+                        tneg = negative_text(self$options$testNegative, test_negative)),
+                    .("Only selected positive/negative reference and test levels; missing and other levels excluded"),
+                    text = private$.diagText())
+            },
+
+            # A percentage as printed in sentences and notes. Below 1% one decimal place loses
+            # the value: a prior of 0.0004 printed "0.0%" beside the PPV it produced, and 0.0014
+            # printed "0.1%" (review 2026-10-21, D2 / XA-03). Two significant figures there.
+            .fmtPct = function(p) {
+                x <- 100 * p
+                if (length(x) == 1 && is.finite(x) && x != 0 && abs(x) < 1)
+                    paste0(trimws(formatC(x, digits = 2, format = "fg", decimal.mark = ".")), "%")
+                else sprintf("%.1f%%", x)
+            },
+
             # "level (n = k)" for each non-missing level present in a column, in level order.
             # Unused factor levels, an explicit NA level and "" are left out.
             .observedLevels = function(var) {
@@ -123,7 +154,7 @@ decisionClass <- if (requireNamespace("jmvcore"))
                     bin_unavailable_positive = .("The positive level \"%1$s\" is not available. Available levels: %2$s."),
                     bin_unavailable_negative = .("The negative level \"%1$s\" is not available. Available levels: %2$s."),
                     bin_identical = .("Choose different positive and negative levels."),
-                    bin_other = .("Observed levels outside the selected positive/negative pair: %s. Select 'Exclude other observed levels' to omit these results, or explicitly recode the variable before analysis. Other levels are never treated as negative."),
+                    bin_other = .("Observed levels outside the selected positive/negative pair: %s. Choose the positive and negative levels to compare under the level selectors, or recode the variable before analysis. Cases at other levels are excluded, never treated as negative."),
                     report_rate = .("%1$.1f%% (%2$d/%3$d)"),
                     report_unavailable = .("unavailable (denominator 0)"),
                     report_test = .("%1$s: PPA %2$s, NPA %3$s; %4$d analyzed cases, %5$d excluded."),
@@ -233,8 +264,8 @@ decisionClass <- if (requireNamespace("jmvcore"))
             # narrative panel), so "2.00" can never sit beside the band below 2.
             # `direction` is the sign of the observed Youden's index (TP*TN - FP*FN): a
             # ratio computed from the zero-cell corrected table can land on the other side
-            # of 1 from the observed data (TP 0, FP 1, FN 5, TN 19 gives LR+ 1.17 while
-            # sensitivity is 0), and that is reported as "unstable", not as a direction.
+            # of 1 from the observed data (TP 1, FP 0, FN 20, TN 2 gives LR+ 0.41 while
+            # no disease-free case tested positive), and that is reported as "unstable", not as a direction.
             .lrBand = function(lr, side = c("pos", "neg"), direction = NULL) {
                 side <- match.arg(side)
                 if (length(lr) != 1 || !is.finite(lr)) return("na")
@@ -504,8 +535,9 @@ decisionClass <- if (requireNamespace("jmvcore"))
                 if (length(private$.noticeList) == 0) {
                     # Clear, do not just return: jamovi keeps the previous content, so a
                     # warning from an earlier run would sit beside numbers that no longer
-                    # support it. Matches decisioncalculator.b.R:32.
-                    self$results$notices$setContent("")
+                    # support it. Matches decisioncalculator.b.R:32. "<div></div>", not "":
+                    # the client skips an empty Html update, so "" left the old panel up.
+                    self$results$notices$setContent("<div></div>")
                     return()
                 }
 
@@ -587,8 +619,10 @@ decisionClass <- if (requireNamespace("jmvcore"))
                 # No pprob range check: min 0.001 / max 0.999 in decision.a.yaml are enforced by
                 # the option check before .run(), in jamovi and through the R wrapper alike.
 
-                # Warn about CI interpretation when using population prevalence
-                if (self$options$pp && self$options$ci) {
+                # Warn about CI interpretation when using population prevalence. Not in
+                # comparator mode: it shows no predictive values, prior-adjusted or not.
+                if (self$options$pp && self$options$ci &&
+                    !.diagReferenceMode(self$options$referenceType)$comparator) {
                     private$.addNotice(
                         type = "WARNING",
                         refs = c("AltmanBland1994b"),
@@ -749,7 +783,9 @@ decisionClass <- if (requireNamespace("jmvcore"))
                     private$.addNotice(
                         type = "WARNING",
                         title = .fmt(.("Removed {n} row(s) with missing diagnostic data"), n = removed),
-                        content = .fmt(.("{used} of {total} cases have both a test and a gold-standard value; any further exclusions are listed below. Consider investigating patterns of missingness."),
+                        content = .fmt(if (.diagReferenceMode(self$options$referenceType)$comparator)
+                                           .("{used} of {total} cases have both a test and a reference value; any further exclusions are listed below. Consider investigating patterns of missingness.")
+                                       else .("{used} of {total} cases have both a test and a gold-standard value; any further exclusions are listed below. Consider investigating patterns of missingness."),
                                                   used = nrow(mydata), total = nrow(self$data))
                     )
                 }
@@ -832,14 +868,16 @@ decisionClass <- if (requireNamespace("jmvcore"))
                                            pos = self$options$goldPositive)
                         )
                     else
+                        # An empty negative-level box (allowNone) with several candidate levels is a
+                        # selection still in progress, like an unset positive level: INFO, not an error.
                         private$.addNotice(
-                            type = "ERROR",
+                            type = "INFO",
                             title = if (.diagReferenceMode(self$options$referenceType)$comparator)
                                 .("Choose the reference-negative level")
                             else .("Choose which gold-standard level means disease absent"),
                             content = .fmt(if (.diagReferenceMode(self$options$referenceType)$comparator)
                                 .('The reference has multiple levels besides "{pos}" ({lvls}). Select one Reference negative level. Unselected levels are excluded from the binary comparison.')
-                            else .('The gold standard has more than one level besides "{pos}" ({lvls}), so the disease-absent level cannot be inferred. Select it under Disease absent level. Levels you do not name are excluded from the analysis rather than counted as disease-absent.'),
+                            else .('The gold standard has more than one level besides "{pos}" ({lvls}), so the disease-absent level cannot be inferred. Select it under Reference negative level. Levels you do not name are excluded from the analysis rather than counted as disease-absent.'),
                                            pos = self$options$goldPositive,
                                            lvls = paste(gold_candidates, collapse = ", "))
                         )
@@ -855,7 +893,7 @@ decisionClass <- if (requireNamespace("jmvcore"))
                         )
                     else
                         private$.addNotice(
-                            type = "ERROR",
+                            type = "INFO",
                             title = .("Choose which test level means a negative result"),
                             content = .fmt(.('The test has more than one level besides "{pos}" ({lvls}), so the test-negative level cannot be inferred. Select it under Test negative level. Levels you do not name are excluded from the analysis rather than counted as negative.'),
                                            pos = self$options$testPositive,
@@ -880,8 +918,12 @@ decisionClass <- if (requireNamespace("jmvcore"))
                     private$.addNotice(
                         type = "WARNING",
                         refs = c("STARD2015"),
-                        title = .fmt(.('Gold standard levels excluded from analysis: {lvls}'), lvls = excluded_str),
-                        content = .fmt(.('Only "{pos}" (disease-present) and "{neg}" (disease-absent) take part. Cases at any other level are removed, not counted as disease-absent. Removing them can bias the estimates. Report how many were removed (STARD 2015).'), pos = self$options$goldPositive, neg = gold_negative_level)
+                        title = if (.diagReferenceMode(self$options$referenceType)$comparator)
+                                    .fmt(.('Reference levels excluded from analysis: {lvls}'), lvls = excluded_str)
+                                else .fmt(.('Gold standard levels excluded from analysis: {lvls}'), lvls = excluded_str),
+                        content = if (.diagReferenceMode(self$options$referenceType)$comparator)
+                                      .fmt(.('Only "{pos}" (reference-positive) and "{neg}" (reference-negative) take part. Cases at any other level are removed, not counted as reference-negative. Removing them can bias the estimates. Report how many were removed (STARD 2015).'), pos = self$options$goldPositive, neg = gold_negative_level)
+                                  else .fmt(.('Only "{pos}" (disease-present) and "{neg}" (disease-absent) take part. Cases at any other level are removed, not counted as disease-absent. Removing them can bias the estimates. Report how many were removed (STARD 2015).'), pos = self$options$goldPositive, neg = gold_negative_level)
                     )
                 }
 
@@ -976,11 +1018,14 @@ decisionClass <- if (requireNamespace("jmvcore"))
                         title = .("Zero counts detected in contingency table"),
                         content = if (.diagReferenceMode(self$options$referenceType)$comparator)
                             .("A zero count makes an agreement proportion 0% or 100%. Inspect the exact 95% confidence intervals; no continuity correction is applied to agreement proportions.")
-                        else .("A zero count makes a proportion exactly 0% or 100%. Read the 95% confidence intervals (95% confidence intervals option), not the point estimate. For the likelihood ratios, see Continuity correction applied.")
+                        else .("A zero count makes a proportion exactly 0% or 100%. Read the 95% confidence intervals (95% confidence intervals option), not the point estimate. For the likelihood ratios and the diagnostic odds ratio, see the notes under the tables.")
                     )
                 }
-                
-                return(list(data = mydata, testVar = testVar, goldVar = goldVar))
+
+                # The resolved negative levels travel with the data: an inferred one is
+                # known only here, and the Reference definition table has to name it.
+                return(list(data = mydata, testVar = testVar, goldVar = goldVar,
+                            goldNegative = gold_negative_level, testNegative = test_negative_level))
             },
 
             # Enhanced diagnostic accuracy interpretation helper
@@ -1066,7 +1111,7 @@ decisionClass <- if (requireNamespace("jmvcore"))
                                                       prevalence, total_pop, test_name, gold_name) {
                 format_percent <- function(value, fallback_label) {
                     if (is.na(value)) return(fallback_label)
-                    sprintf("%.1f%%", value * 100)
+                    private$.fmtPct(value)
                 }
 
                 # Get clinical benchmarks for enhanced interpretation
@@ -1112,12 +1157,11 @@ decisionClass <- if (requireNamespace("jmvcore"))
 
                 summary_template <- .("<div style='margin: 15px; padding: 15px; border-left: 5px solid #4CAF50; background-color: rgba(114, 184, 33, 0.1); color: inherit;'><h3 style='color: inherit; margin-top: 0;'>Clinical Summary</h3><p style='font-size: 16px;'><strong>Analysis:</strong> Diagnostic test performance evaluation comparing {testname} against the reference standard {goldname}.</p><p><strong>Sample:</strong> {sample}. Predictive values below are computed at a disease prevalence of {prev}.</p><p><strong>Test Performance:</strong> By the conventional rule of thumb for the area under the ROC curve (Hosmer, Lemeshow and Sturdivant 2013), the test shows <strong>{quality}</strong> discrimination (equivalent AUC {auc}), with sensitivity of <strong>{sens}</strong> (<em>{sensnote}</em>) and specificity of <strong>{spec}</strong> (<em>{specnote}</em>).</p><p><strong>Discrimination Profile:</strong> {profile}.</p><p><strong>Likelihood Ratios:</strong> Positive LR: {lrpos} (<em>{lrposnote}</em>), Negative LR: {lrneg} (<em>{lrnegnote}</em>). Likelihood-ratio bands are a rule of thumb (Jaeschke, Guyatt and Sackett 1994).</p><p><strong>Key Findings:</strong> Predictive values are post-test probabilities. After a positive result the probability of disease is the positive predictive value (PPV {ppv}). After a negative result the probability of disease is <strong>{postneg}</strong>, and the probability of being disease-free is the negative predictive value (NPV {npv}).</p></div>")
 
-                # Only the NA arm can fire: a zero cell triggers the Haldane-Anscombe 0.5
-                # correction before the LRs are formed, so neither LR is ever Inf here,
-                # and both are NA exactly when sensitivity or specificity is NA.
-                lr_pos_safe <- if (is.na(lr_pos)) .("not calculated (needs both sensitivity and specificity)")
+                # Only the NA arm can fire: neither LR is ever Inf here. NA is a ratio that is
+                # not estimable from the counts (.diagRatioRules "undefined").
+                lr_pos_safe <- if (is.na(lr_pos)) .("not estimable from these counts")
                     else private$.fmtLR(lr_pos)
-                lr_neg_safe <- if (is.na(lr_neg)) .("not calculated (needs both sensitivity and specificity)")
+                lr_neg_safe <- if (is.na(lr_neg)) .("not estimable from these counts")
                     else private$.fmtLR(lr_neg)
 
                 # Escape user-derived variable names before HTML interpolation
@@ -1198,14 +1242,14 @@ decisionClass <- if (requireNamespace("jmvcore"))
                     ci = ci_text,
                     # Predictive values are meaningless without the prevalence they
                     # were computed at; the sentence quoted them bare.
-                    prev = sprintf("%.1f%%", if (is.finite(prevalence)) prevalence * 100 else NA_real_),
-                    ppv = sprintf("%.1f%%", ppv * 100),
+                    prev = private$.fmtPct(if (is.finite(prevalence)) prevalence else NA_real_),
+                    ppv = private$.fmtPct(ppv),
                     ppvci = pct_ci(ppv_ci),
                     npv = sprintf("%.1f%%", npv * 100),
                     npvci = pct_ci(npv_ci),
                     # .fmtLR, as in the Clinical Summary: at one decimal LR+ 1.96
                     # printed "2.0" beside the band for LR+ below 2.
-                    lr = private$.fmtLR(lr_pos),
+                    lr = if (is.na(lr_pos)) .("not estimable from these counts") else private$.fmtLR(lr_pos),
                     lrci = lr_ci_text,
                     interp = interpretation
                 )
@@ -1231,7 +1275,7 @@ decisionClass <- if (requireNamespace("jmvcore"))
                         type = "STRONG_WARNING",
                         refs = c("AltmanBland1994b", "UsherSmith2016"),
                         title = .fmt(.("Very low disease prevalence observed in this sample ({pct})"),
-                                                pct = sprintf("%.1f%%", 100 * prevalence)),
+                                                pct = private$.fmtPct(prevalence)),
                         # No "consider supplying a prior" when one is already supplied, and the
                         # prevalence-independence of Se/Sp stated as the assumption it is
                         # (it holds arithmetically; case mix can still change them).
@@ -1247,7 +1291,7 @@ decisionClass <- if (requireNamespace("jmvcore"))
                         type = "STRONG_WARNING",
                         refs = c("AltmanBland1994b"),
                         title = .fmt(.("Very high disease prevalence observed in this sample ({pct})"),
-                                                pct = sprintf("%.1f%%", 100 * prevalence)),
+                                                pct = private$.fmtPct(prevalence)),
                         content = .("Negative predictive value is unstable at this prevalence. Verify that the level selected as disease-present is the one you meant.")
                     )
                 }
@@ -1596,7 +1640,7 @@ decisionClass <- if (requireNamespace("jmvcore"))
 
                 format_percent <- function(value, default = .("not available")) {
                     if (is.na(value)) return(default)
-                    sprintf("%.1f%%", value * 100)
+                    private$.fmtPct(value)
                 }
 
                 # Generate clinical interpretation
@@ -1737,7 +1781,7 @@ decisionClass <- if (requireNamespace("jmvcore"))
                         paste0("<p>", private$.safeHtmlOutput(excl_text), "</p>"))
 
                 if (isTRUE(continuity_used)) {
-                    cc_sentence <- para(.("A cell of the 2x2 table was zero. A likelihood ratio that would be zero or infinite on the observed counts is computed from the Haldane-Anscombe corrected table (0.5 added to every cell); sensitivity, specificity and the predictive values above are not corrected."))
+                    cc_sentence <- para(.("A cell of the 2x2 table was zero. A likelihood ratio whose denominator count is zero would be infinite, so it is computed from the Haldane-Anscombe corrected table (0.5 added to every cell); a likelihood ratio with a zero numerator count is exactly 0 and is not corrected. Sensitivity, specificity and the predictive values above are not corrected."))
                     results$report_template <- in_report_box(results$report_template, cc_sentence)
                     results$natural_summary <- paste0(results$natural_summary, cc_sentence)
                     results$clinical_summary <- paste0(results$clinical_summary, cc_sentence)
@@ -1769,16 +1813,7 @@ decisionClass <- if (requireNamespace("jmvcore"))
                 if (.diagReferenceMode(self$options$referenceType)$comparator)
                     private$.clearDiseaseOutputs()
 
-                .diagReferenceDefinition(self$results, self$options,
-                    .fmt(.("Reference: {gold} positive {gpos} negative {gneg} ; test: {test} positive {tpos} negative {tneg}"),
-                        gold = paste(self$options$gold, collapse = ""),
-                        gpos = paste(self$options$goldPositive, collapse = ""),
-                        gneg = paste(self$options$goldNegative, collapse = ""),
-                        test = paste(self$options$newtest, collapse = ""),
-                        tpos = paste(self$options$testPositive, collapse = ""),
-                        tneg = paste(self$options$testNegative, collapse = "")),
-                    .("Only selected positive/negative reference and test levels; missing and other levels excluded"),
-                    text = private$.diagText())
+                private$.fillReferenceDefinition()
                 for (nm in c("comparatorCounts", "comparatorMetrics", "comparatorPopulation", "comparatorCases"))
                     .deleteTableRows(self$results[[nm]])
                 self$results$comparatorReport$setContent("")
@@ -1839,6 +1874,8 @@ decisionClass <- if (requireNamespace("jmvcore"))
                 mydata <- prepared_data$data
                 testVariable <- prepared_data$testVar
                 goldVariable <- prepared_data$goldVar
+                # Again, now that an inferred negative level is known (it was blank above).
+                private$.fillReferenceDefinition(prepared_data$goldNegative, prepared_data$testNegative)
 
                 if (.diagReferenceMode(self$options$referenceType)$comparator) {
                     private$.runComparator(mydata, testVariable, goldVariable)
@@ -2076,12 +2113,16 @@ decisionClass <- if (requireNamespace("jmvcore"))
                 # Haldane (1956) and Anscombe (1956) add 1/2 unconditionally to logits;
                 # applying it to likelihood ratios and the DOR on a zero cell is the
                 # convention Glas et al. (2003, p. 1131) describe, not Haldane's own result.
-                conf_table_cc <- conf_table
-                continuity_used <- FALSE
-                if (any(conf_table == 0)) {
-                    conf_table_cc <- conf_table + 0.5
-                    continuity_used <- TRUE
-                }
+                # Only a ratio whose DENOMINATOR is empty is corrected (.diagRatioRules); an
+                # empty numerator gives an exact 0. Correcting that too reversed the evidence:
+                # TP 0, FN 10, FP 1, TN 99 printed LR+ 3.06 and DOR 3.16 for a test that found
+                # no diseased patient (exact 0 and 0; review 2026-10-21, XA-01).
+                # "undefined": 0/0, or a correction that would land at or below 1 (it replaces an
+                # infinite ratio); left blank as not estimable.
+                ratio_rules <- .diagRatioRules(conf_table[1, 1], conf_table[1, 2],
+                                               conf_table[2, 1], conf_table[2, 2])
+                continuity_used <- any(unlist(ratio_rules) == "corrected")
+                conf_table_cc <- if (continuity_used) conf_table + 0.5 else conf_table
                 # Haldane (1956) and Anscombe (1956) are cited only for this correction.
                 if (!continuity_used)
                     for (item in c("ratioTable", "epirTable_number", "naturalLanguageSummary", "reportTemplate",
@@ -2223,22 +2264,32 @@ decisionClass <- if (requireNamespace("jmvcore"))
 
 
 
-                # Likelihood ratios. On a zero cell only a ratio whose OWN formula contains
-                # the zero count is taken from the Haldane-Anscombe corrected table: LR+ uses
-                # TP and FP, LR- uses FN and TN. Correcting a ratio that is well defined on
-                # the observed counts moved it for nothing - TP 20, FP 2, FN 0, TN 19 has an
-                # observed LR+ of 10.5 ("large") that the blanket correction turned into 8.59
-                # ("moderate"), under a note saying it would otherwise be undefined.
-                lrp_cc_used <- isTRUE(continuity_used) && (TP == 0 || FP == 0)
-                lrn_cc_used <- isTRUE(continuity_used) && (FN == 0 || TN == 0)
-                # The DOR is always taken from the corrected table on a zero cell, so when only
-                # ONE likelihood ratio is corrected the displayed DOR and LR+/LR- come from two
-                # different tables and need not satisfy DOR = LR+/LR- (TP 20, FP 0, FN 5, TN 15:
-                # DOR 115.5 against 25.2/0.20 = 126.2). Both notes that state the identity say so.
-                mixed_lr_correction <- xor(lrp_cc_used, lrn_cc_used)
-                # A ratio that is not corrected has no zero in its own formula, so it is finite.
-                LRP <- if (lrp_cc_used) (TPc / (TPc + FNc)) / (FPc / (FPc + TNc)) else Sens / (1 - Spec)
-                LRN <- if (lrn_cc_used) (FNc / (TPc + FNc)) / (TNc / (FPc + TNc)) else (1 - Sens) / Spec
+                # Likelihood ratios. Only a ratio whose own DENOMINATOR count is zero (LR+: FP,
+                # LR-: TN) is taken from the Haldane-Anscombe corrected table; a zero numerator
+                # (LR+: TP, LR-: FN) gives an exact 0 on the observed counts. Correcting a ratio
+                # that is well defined on the observed counts moved it for nothing - TP 20, FP 2,
+                # FN 0, TN 19 has an observed LR+ of 10.5 ("large") that the blanket correction
+                # turned into 8.59 ("moderate").
+                lrp_cc_used <- ratio_rules$lrp == "corrected"
+                lrn_cc_used <- ratio_rules$lrn == "corrected"
+                dor_cc_used <- ratio_rules$dor == "corrected"
+                # Ratios at exactly 0: no log-scale interval exists for them.
+                zero_ratios <- c(lr.pos = ratio_rules$lrp, lr.neg = ratio_rules$lrn,
+                                 diag.or = ratio_rules$dor) == "zero"
+                # When the three ratios do not all come from one table the displayed DOR need
+                # not equal LR+/LR- (TP 20, FP 0, FN 5, TN 15: DOR 115.5 against 25.2/0.20 =
+                # 126.2). Every correction leaves at least one ratio on the observed counts, so
+                # this is simply "some ratio corrected". Both notes that state the identity say so.
+                mixed_lr_correction <- continuity_used &&
+                    !(lrp_cc_used && lrn_cc_used && dor_cc_used)
+                # Uncorrected: the denominator is not zero, so the ratio is finite (0 when its
+                # numerator is). "undefined" is NA: every panel prints it as not estimable.
+                LRP <- if (ratio_rules$lrp == "undefined") NA_real_
+                       else if (lrp_cc_used) (TPc / (TPc + FNc)) / (FPc / (FPc + TNc)) else Sens / (1 - Spec)
+                LRN <- if (ratio_rules$lrn == "undefined") NA_real_
+                       else if (lrn_cc_used) (FNc / (TPc + FNc)) / (TNc / (FPc + TNc)) else (1 - Sens) / Spec
+                undefined_ratios <- c(lr.pos = ratio_rules$lrp, lr.neg = ratio_rules$lrn,
+                                      diag.or = ratio_rules$dor) == "undefined"
                 # Sign of the observed Youden's index, from the counts (exact integers): the
                 # direction every likelihood-ratio sentence must agree with (.lrBand).
                 youden_direction <- sign(TP * TN - FP * FN)
@@ -2259,7 +2310,7 @@ decisionClass <- if (requireNamespace("jmvcore"))
                         type = "INFO",
                         refs = c("haldane1956", "anscombe1956"),
                         title = .("Continuity correction applied"),
-                        content = .("A cell of the 2x2 table is zero. Each likelihood ratio that would be zero, infinite or undefined on the observed counts, and the diagnostic odds ratio, are computed from the Haldane-Anscombe corrected table (0.5 added to every cell). Sensitivity, specificity, accuracy, the predictive values and any other likelihood ratio are not corrected. The Fagan nomogram shows the table's likelihood ratios when one is above 1 and the other below 1; otherwise it takes both from the corrected table. The two sets therefore do not reconcile exactly: a non-zero, finite likelihood ratio can sit beside a sensitivity or specificity of 0% or 100%.")
+                        content = .("A cell of the 2x2 table is zero. A ratio whose denominator count is zero would be infinite (LR+: no false positives; LR-: no true negatives; diagnostic odds ratio: no false positives or no false negatives), so it is computed from the Haldane-Anscombe corrected table (0.5 added to every cell). A ratio whose numerator count is zero is exactly 0 and is not corrected. Sensitivity, specificity, accuracy, the predictive values and every other ratio use the observed counts, so a corrected, finite likelihood ratio can sit beside a sensitivity or specificity of 0% or 100%.")
                     )
                 }
 
@@ -2314,20 +2365,28 @@ decisionClass <- if (requireNamespace("jmvcore"))
                     NPV_report <- PostTestProbHealthy
                     ratioTable$setNote("prior_ppv", .fmt(
                         .("Predictive values are computed by Bayes' theorem at the population prior of {prior} that you supplied, NOT at this sample's observed prevalence of {observed}. Sensitivity and specificity are carried over unchanged, which assumes the target population has the same case mix (spectrum) as this sample; PPV and NPV are recomputed."),
-                        prior = sprintf("%.1f%%", 100 * PriorProb),
-                        observed = sprintf("%.1f%%", 100 * PrevalenceD)))
+                        prior = private$.fmtPct(PriorProb),
+                        observed = private$.fmtPct(PrevalenceD)))
                 } else {
                     ratioTable$setNote("study_ppv", .fmt(
                         .("Predictive values are computed at this sample's observed prevalence of {prevalence}. If the sample was enriched or case-control, that prevalence is not the clinical one and these predictive values do not transfer - tick Known population prevalence under Population Prevalence Settings to obtain values for your setting."),
-                        prevalence = sprintf("%.1f%%", 100 * PrevalenceD)))
+                        prevalence = private$.fmtPct(PrevalenceD)))
                 }
 
                 # The likelihood ratios on this row come from a different table than the
                 # proportions beside them whenever a cell is zero. That has to be said on
                 # the table, not only in the notices pane: a reader who sees Spec 100.0%
                 # next to a finite LR+ will otherwise assume one of them is a typo.
-                if (isTRUE(continuity_used))
-                    ratioTable$setNote("continuity", .("A cell of the 2x2 table is zero. A likelihood ratio that would be zero, infinite or undefined on the observed counts is computed from the Haldane-Anscombe corrected table (0.5 added to every cell) and reflects that correction, not the observed data: the positive likelihood ratio when sensitivity is 0% or specificity is 100%, the negative likelihood ratio when sensitivity is 100% or specificity is 0%. Sensitivity, specificity, accuracy, the predictive values and any other likelihood ratio are not corrected."))
+                # Only when a likelihood ratio on THIS table is corrected (a corrected DOR alone
+                # lives in the CI table, which carries its own note).
+                if (lrp_cc_used || lrn_cc_used)
+                    ratioTable$setNote("continuity", .("A cell of the 2x2 table is zero. A likelihood ratio whose denominator count is zero would be infinite, so it is computed from the Haldane-Anscombe corrected table (0.5 added to every cell) and reflects that correction, not the observed data: the positive likelihood ratio when specificity is 100%, the negative likelihood ratio when specificity is 0%. Sensitivity, specificity, accuracy, the predictive values and any other likelihood ratio use the observed counts."))
+                ratioTable$setNote("undefined_ratio", if (any(undefined_ratios[c("lr.pos", "lr.neg")]))
+                    .("A blank likelihood ratio is not estimable from these counts: its denominator count is zero, so it would be infinite, and the continuity correction (0.5 added to every cell) would not keep it above 1. Read the sensitivity and specificity with their confidence intervals instead.")
+                    else NULL)
+                ratioTable$setNote("zero_ratio", if (any(zero_ratios[c("lr.pos", "lr.neg")]))
+                    .("A likelihood ratio of exactly 0 is the observed value: its numerator count is zero (no true positives for LR+, no false negatives for LR-), so no correction is applied.")
+                    else NULL)
 
                 # Sample accuracy stays on the observed 2x2 even when a population
                 # prior is supplied -- it is a property of THIS sample's case mix, not a
@@ -2344,7 +2403,7 @@ decisionClass <- if (requireNamespace("jmvcore"))
                         .("Sample Accuracy is the proportion of concordant results at the prevalence observed in this sample ({prevalence}), NOT at the population prior you supplied. Unlike the predictive values it is not standardised to that prior, and it changes with case mix.")
                     else
                         .("Sample Accuracy is the proportion of concordant results at the prevalence observed in this sample ({prevalence}), and it changes with case mix."),
-                    prevalence = sprintf("%.1f%%", PrevalenceD * 100)))
+                    prevalence = private$.fmtPct(PrevalenceD)))
 
                 ratioTable$setRow(
                     rowNo = 1,
@@ -2356,8 +2415,9 @@ decisionClass <- if (requireNamespace("jmvcore"))
                         PrevalenceD = PriorProb,
                         PPV = PPV_report,
                         NPV = NPV_report,
-                        LRP = LRP,
-                        LRN = LRN
+                        # "" not NA: an NA cell renders "NaN".
+                        LRP = if (is.na(LRP)) "" else LRP,
+                        LRN = if (is.na(LRN)) "" else LRN
                     )
                 )
 
@@ -2415,13 +2475,14 @@ decisionClass <- if (requireNamespace("jmvcore"))
                         ppv_ci = if (isTRUE(pp)) NULL else exact_ci(TP, TP + FP),
                         npv_ci = if (isTRUE(pp)) NULL else exact_ci(TN, TN + FN),
                         lr_pos_ci = if (lrp_cc_used) private$.lrPosCI(TPc, FPc, FNc, TNc)
+                                    else if (ratio_rules$lrp == "zero") c(0, .diagZeroRatioUpper("lrp", TP, FP, FN, TN))
                                     else private$.lrPosCI(TP, FP, FN, TN))
 
                     content_results <- private$.generateAllContent(Sens, Spec, PPV_report, NPV_report, LRP, LRN,
                                                                   PriorProb, TotalPop, test_label, gold_label,
                                                                   report_extras = report_extras,
                                                                   sens_ci = sens_ci, spec_ci = spec_ci,
-                                                                  continuity_used = continuity_used)
+                                                                  continuity_used = lrp_cc_used || lrn_cc_used)
                 }
 
                 # Populate content outputs based on user selections
@@ -2518,7 +2579,7 @@ decisionClass <- if (requireNamespace("jmvcore"))
                                           est = NA_real_, lower = NA_real_, upper = NA_real_))
                     # Conditional notes are re-derived below on every run; a note from a
                     # previous run must not outlive the numbers it explained.
-                    for (key in c("nndx_undefined", "nndx_unbounded"))
+                    for (key in c("nndx_undefined", "nndx_unbounded", "zero_ratio", "undefined_ratio"))
                         self$results$epirTable_number$setNote(key, NULL)
 
                     # With a population prior supplied, the main table's PPV/NPV are Bayes
@@ -2531,8 +2592,8 @@ decisionClass <- if (requireNamespace("jmvcore"))
                     if (isTRUE(self$options$pp))
                         self$results$epirTable_ratio$setNote("pv_prevalence", .fmt(
                             .("The predictive values in this table are computed at the prevalence observed in this sample ({observed}), not at the population prior of {prior} used for the predictive values in the main table above. The intervals here belong to these estimates, not to those. Sensitivity and specificity are the same in both tables."),
-                            observed = sprintf("%.1f%%", 100 * PrevalenceD),
-                            prior = sprintf("%.1f%%", 100 * PriorProb)))
+                            observed = private$.fmtPct(PrevalenceD),
+                            prior = private$.fmtPct(PriorProb)))
 
                     # epiR confidence intervals with error handling
                     epir_success <- FALSE
@@ -2545,7 +2606,7 @@ decisionClass <- if (requireNamespace("jmvcore"))
                     tryCatch({
                         epirresult <- epiR::epi.tests(dat = conf_table)
                         # LR+/LR-/DOR in the main tables are computed from Haldane-Anscombe
-                        # corrected counts when a cell is zero. epi.tests on the raw table
+                        # corrected counts when their denominator cell is zero. epi.tests on the raw table
                         # returns Inf with a NaN lower bound, so the CI pane disagreed with
                         # the estimate it sat next to. Sens/spec/PPV/NPV stay on raw counts.
                         epir_detail_cc <- if (continuity_used) {
@@ -2583,10 +2644,21 @@ decisionClass <- if (requireNamespace("jmvcore"))
                                     # into them made this pane contradict both the Se/Sp in
                                     # the table above it and the Youden in the Clinical
                                     # Interpretation panel (Se+Sp-1).
-                                    # Only the rows whose own formula contains the zero count
-                                    # (the same rule as the main table: LR+ on TP/FP, LR- on
-                                    # FN/TN; the DOR uses every cell).
-                                    cc_stats <- c(if (lrp_cc_used) "lr.pos", if (lrn_cc_used) "lr.neg", "diag.or")
+                                    # Only the rows whose own DENOMINATOR is zero (the same
+                                    # rule as the main table, .diagRatioRules).
+                                    cc_stats <- c(if (lrp_cc_used) "lr.pos", if (lrn_cc_used) "lr.neg",
+                                                  if (dor_cc_used) "diag.or")
+                                    # A ratio at exactly 0 has no log-scale interval (log 0);
+                                    # epiR returns NaN/0/Inf bounds there. Point estimate 0,
+                                    # interval [0, U] with U from the 0.5-corrected table
+                                    # (.diagZeroRatioUpper), explained in a note below.
+                                    zero_keys <- c(lr.pos = "lrp", lr.neg = "lrn", diag.or = "dor")
+                                    for (zs in names(zero_ratios)[zero_ratios]) {
+                                        iz <- which(epir_number$statistic == zs)
+                                        if (length(iz) == 1)
+                                            epir_number[iz, c("est", "lower", "upper")] <- list(0, 0,
+                                                .diagZeroRatioUpper(zero_keys[[zs]], TP, FP, FN, TN))
+                                    }
                                     if (!is.null(epir_detail_cc) && nrow(epir_number) > 0) {
                                         m <- match(epir_number$statistic, epir_detail_cc$statistic)
                                         keep <- !is.na(m) & epir_number$statistic %in% cc_stats
@@ -2707,11 +2779,20 @@ decisionClass <- if (requireNamespace("jmvcore"))
                             for (i in seq_len(nrow(data_frame))) {
                                 key <- epirresult_number_stats[i]
                                 if (key %in% private$.epirNumberStats())
+                                    # A ratio at exactly 0 keeps its [0, U] interval from
+                                    # above, explained by the zero_ratio note; an undefined
+                                    # one is blank ("" - NA renders "NaN").
                                     epirTable_number$setRow(rowKey = key,
-                                        values = list(est = data_frame$est[i],
-                                                      lower = data_frame$lower[i],
-                                                      upper = data_frame$upper[i]))
+                                        values = if (isTRUE(undefined_ratios[key]))
+                                                     list(est = "", lower = "", upper = "")
+                                                 else list(est = data_frame$est[i],
+                                                           lower = data_frame$lower[i],
+                                                           upper = data_frame$upper[i]))
                             }
+                            if (any(undefined_ratios))
+                                epirTable_number$setNote("undefined_ratio", .("A blank ratio is not estimable from these counts: its denominator count is zero, so it would be infinite, and the continuity correction (0.5 added to every cell) would not keep it above 1."))
+                            if (any(zero_ratios))
+                                epirTable_number$setNote("zero_ratio", .("A ratio shown as exactly 0 has a zero numerator count (LR+: no true positives; LR-: no false negatives; diagnostic odds ratio: no true positives or no true negatives). It is the observed value and is not corrected. Its confidence interval runs from 0 to the upper limit of the same log-scale interval computed with 0.5 added to every cell (Haldane-Anscombe correction)."))
 
                             # Always-on (setNote, not the off-by-default footnotes): the
                             # Youden and NNDx intervals are not epiR's, and a blank NNDx
@@ -2733,9 +2814,9 @@ decisionClass <- if (requireNamespace("jmvcore"))
                             # zero cell too; the note used to live only on the main ratio table.
                             epirTable_number$setNote("continuity",
                                 if (isTRUE(mixed_lr_correction))
-                                    .("A cell of the 2x2 table is zero. A likelihood ratio that would be zero, infinite or undefined on the observed counts, and the diagnostic odds ratio, are computed from the Haldane-Anscombe corrected table (0.5 added to every cell). The other rows use the observed counts. Because only one likelihood ratio is corrected, the diagnostic odds ratio shown need not equal LR+ / LR- as displayed.")
+                                    .("A cell of the 2x2 table is zero. A ratio whose denominator count is zero would be infinite, so it is computed from the Haldane-Anscombe corrected table (0.5 added to every cell). The other rows use the observed counts. Because the ratios do not all come from the same table, the diagnostic odds ratio shown need not equal LR+ / LR- as displayed.")
                                 else if (isTRUE(continuity_used))
-                                    .("A cell of the 2x2 table is zero. A likelihood ratio whose formula contains the zero count, and the diagnostic odds ratio, are computed from the Haldane-Anscombe corrected table (0.5 added to every cell), because on the observed counts they would be zero or infinite. The other rows use the observed counts.")
+                                    .("A cell of the 2x2 table is zero. A ratio whose denominator count is zero would be infinite, so it is computed from the Haldane-Anscombe corrected table (0.5 added to every cell). The other rows use the observed counts.")
                                 else NULL)
 
                             if (self$options$fnote) {
@@ -2747,7 +2828,7 @@ decisionClass <- if (requireNamespace("jmvcore"))
                                     # The old text (epiR's help wording) described TP/FN - the odds
                                     # of a correct result in the diseased only - not the DOR.
                                     `diag.or` = if (isTRUE(mixed_lr_correction))
-                                        .("Diagnostic odds ratio: the odds of a positive test in patients with the disease divided by the odds of a positive test in patients without it. On one 2x2 table it equals LR+ / LR- (Glas et al. 2003); here it and only one of the likelihood ratios come from the zero-cell corrected table, so the displayed values need not satisfy that identity.")
+                                        .("Diagnostic odds ratio: the odds of a positive test in patients with the disease divided by the odds of a positive test in patients without it. On one 2x2 table it equals LR+ / LR- (Glas et al. 2003); here the displayed ratios do not all come from the same table (a ratio with a zero denominator count is computed from the zero-cell corrected table), so they need not satisfy that identity.")
                                     else
                                         .("Diagnostic odds ratio: the odds of a positive test in patients with the disease divided by the odds of a positive test in patients without it, equal to LR+ / LR- (Glas et al. 2003)."),
                                     # epiR's wording ("to give one correct positive test") is not
@@ -2800,7 +2881,19 @@ decisionClass <- if (requireNamespace("jmvcore"))
 
                     drawable <- is.finite(LRP) && is.finite(LRN) &&
                         (LRP > 1) && (LRN < 1) && (LRP > LRN) && ok_b
-                    if (!drawable) {
+                    # A likelihood ratio of exactly 0 (zero numerator count, not corrected) has no
+                    # place on the nomogram's log scale; drawing it from the corrected table
+                    # instead would plot a ratio the tables do not show.
+                    if (any(zero_ratios[c("lr.pos", "lr.neg")] | undefined_ratios[c("lr.pos", "lr.neg")])) {
+                        drawable <- FALSE
+                        private$.addNotice(
+                            type = "WARNING",
+                            title = .("Fagan nomogram not drawn"),
+                            content = .fmt(
+                                .("The positive likelihood ratio is {lrp} and the negative likelihood ratio is {lrn}. A likelihood ratio that is exactly 0 or not estimable cannot be placed on the nomogram's logarithmic scale, so the plot is omitted. Both come from a zero count in the 2x2 table; see the confidence intervals of sensitivity and specificity."),
+                                lrp = if (is.na(LRP)) .("not estimable") else private$.fmtLR(LRP),
+                                lrn = if (is.na(LRN)) .("not estimable") else private$.fmtLR(LRN)))
+                    } else if (!drawable) {
                         private$.addNotice(
                             type = "WARNING",
                             title = .("Fagan nomogram not drawn"),

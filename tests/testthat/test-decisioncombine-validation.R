@@ -382,13 +382,15 @@ test_that("VAL-decisioncombine-05 (C35) a single inverted test is flagged even w
 }
 .F3 <- list(cD = c("+/+" = 15, "+/-" = 0, "-/+" = 0, "-/-" = 5),
             cN = c("+/+" = 3, "+/-" = 0, "-/+" = 0, "-/-" = 27))
-.PERFECT <- list(cD = c("+/+" = 20, "+/-" = 0, "-/+" = 0, "-/-" = 0),
-                 cN = c("+/+" = 0, "+/-" = 0, "-/+" = 0, "-/-" = 30))
+.NEARPERFECT <- list(cD = c("+/+" = 199, "+/-" = 0, "-/+" = 0, "-/-" = 1),
+                     cN = c("+/+" = 1, "+/-" = 0, "-/+" = 0, "-/-" = 199))
 
 test_that("VAL-04 (C56) log-axis ticks print their true value: no '0', no thousands space, decimal symbol honoured", {
     grDevices::pdf(NULL); on.exit(grDevices::dev.off(), add = TRUE)
     # scales::label_number() rounded 0.001 to "0" (beside a DOR of 0.0004) and printed "1 000"
-    b <- .val_forest(.val_obj(.val_mk(.PERFECT$cD, .PERFECT$cN)))
+    # Near-perfect, not perfect: since the 2026-10-21 zero-cell rule (XA-01) a perfect test's
+    # LR- is exactly 0 and is not drawn, so the small ticks need a raw LR- (1/200 here).
+    b <- .val_forest(.val_obj(.val_mk(.NEARPERFECT$cD, .NEARPERFECT$cN)))
     labs <- unlist(lapply(seq_len(nlevels(b$panels$ratios$data$statistic)),
                           function(k) .val_ticks(b$panels$ratios, k)))
     expect_false(any(labs == "0"))
@@ -527,11 +529,13 @@ test_that("VAL-04 (C56) the exported figure separates pattern rows from single t
     # a pattern filter leaves only pattern rows (no single test, no strategy): no line, no pattern caption
     bm <- .val_forest(.val_obj(.val_mk(.F4$cD, .F4$cN), filterPattern = "mixed"))
     expect_false("GeomHline" %in% geoms(bm$panels$proportions))
-    # F2 "+/-/+" (fp = 0) carries the 0.5 correction: an open point in the ratio panel
+    # F2 "+/-/+" (fp = 0) carries the 0.5 correction: an open point in the ratio panel.
+    # "-/+/-" (tp = 0) used to be corrected too; since the 2026-10-21 zero-cell rule (XA-01) its
+    # LR+ and DOR are exactly 0 (not drawn) and its LR- is raw, so it is a filled point.
     b2 <- .val_forest(.val_obj(.val_mk(.F2$cD, .F2$cN)))
     pts <- ggplot2::layer_data(b2$panels$ratios, which(geoms(b2$panels$ratios) == "GeomPoint"))
     ylab <- rev(levels(b2$panels$ratios$data$pattern))
-    corrected_rows <- b2$panels$ratios$data$pattern %in% c("+/-/+", "-/+/-")
+    corrected_rows <- b2$panels$ratios$data$pattern %in% c("+/-/+")
     expect_true(all(pts$shape[corrected_rows] == 21))
     expect_true(all(pts$shape[!corrected_rows] == 16))
     expect_match(b2$panels$ratios$labels$caption, "continuity correction", fixed = TRUE)

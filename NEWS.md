@@ -1,3 +1,43 @@
+## Unreleased — meddecide 1.1.1: 2026-10-21 independent-review corrections
+
+- psychopdaROC: IDI and NRI no longer replace a marker whose risk runs against the
+  Classification Direction with a constant base rate, which could flip their sign (a
+  stronger "lower = disease" reference read as the weaker marker). Both risk models are
+  fitted freely, and a table note names any marker whose association runs against the
+  selected direction.
+- Zero cells (decision, decisioncalculator, decisioncompare, decisioncombine): one shared
+  rule. LR+, LR- and the diagnostic odds ratio are 0.5-corrected only when their denominator
+  cell is empty; an empty numerator gives an exact 0 with no log-scale interval; a ratio
+  whose correction would not stay above 1, or 0/0, is left blank. Previously TP = 0 could
+  print LR+ 3.06. A ratio of exactly 0 shows the interval [0, U], U from the 0.5-corrected
+  log-scale interval, so a perfect small study does not read as certain. Fagan nomograms are
+  not drawn for a zero or blank likelihood ratio.
+- enhancedROC: calibration, Brier, Hosmer-Lemeshow, decision and clinical impact curves
+  use the fitted risk model when its slope runs against Direction, with a warning, instead
+  of a silent constant-prevalence model. The analysis is rejected when no predictor can be
+  analysed, and the AUC interval method is always named.
+- decision: the negative-level boxes start at None, so jamovi no longer pre-selects the
+  first level (with three levels it could take "Equivocal" as negative). A variable with
+  several candidate negatives waits for the choice; an inferred negative is shown.
+- decisioncompare: when tests were done on different cases, the best-test sentence ranks
+  them on the cases common to all; the prevalence sentence names its denominator; an empty
+  level box is an information notice, not an error.
+- nogoldstandard: the penalized EM method now shows bivariate residuals and the dependence
+  warning; three-test models carry a warning that dependence cannot be checked.
+  The vignette runs and describes complete-case handling and the fixed priors.
+- Stale results: notices are cleared when a re-run has nothing to report (cotest, decision,
+  decisioncombine), and kappaSizeCI no longer leaves the previous sample size under an
+  error. Undefined cells in decisioncombine are blank instead of "NaN".
+- Plot text no longer runs off the edge at the default size: the cotest Fagan caption (which
+  hid its "not for clinical use" disclaimer), two decisioncurve captions, and the enhancedROC
+  clinical-utility legend and CROC caption.
+- Wording made accurate: agreement 3+ rater subgroup intervals (Gwet SE, t) and minimum-case
+  rule; kappaSize methodology and governing-limit statements; decisioncurve "range of
+  benefit" (observed, in-sample) and case-control notice; lassologistic optimism-corrected
+  AUC; sequentialtests conditional-independence formulas; rare priors print with enough
+  digits; psychopdaROC tie, fixed-sensitivity and unit-cost notes.
+- Turkish translations added for the new and reworded messages.
+
 ## Unreleased — meddecide 1.1.1: 2026-10-20 release-review corrections
 
 - Quote numeric citation page fields so complete jamovi responses serialize correctly.

@@ -27,7 +27,8 @@
 
 test_that("IR01 affine marker units cannot create NRI", {
   d <- .irROC_data()
-  for (scale in c(100, 1e-6)) {
+  # -100 restored 2026-10-21: an anti-directed affine copy is the same logistic risk model (PR-01).
+  for (scale in c(100, 1e-6, -100)) {
     d$shift <- scale * d$x + 50
     for (thresholds in c("", "0.25,0.5,0.75")) {
       r <- .irROC_run(d, c("x", "shift"), calculateNRI = TRUE, calculateIDI = TRUE,
@@ -47,13 +48,17 @@ test_that("IR01 affine marker units cannot create NRI", {
   expect_equal(r_le$idiTable$asDF$idi, 0, tolerance = 1e-9)
   expect_equal(r_le$nriTable$asDF$nri, 0)
 
-  # Anti-directed marker (-x vs x under direction ">=") is clamped to base rate rather than auto-flipped
-  r_inv_ge <- .irROC_run(d, c("x", "neg_x"), direction = ">=",
-    calculateNRI = TRUE, calculateIDI = TRUE, refVar = "x", idiNriBootRuns = 100)
-  expect_lt(r_inv_ge$idiTable$asDF$idi, 0)
-  r_inv_le <- .irROC_run(d, c("x", "neg_x"), direction = "<=",
-    calculateNRI = TRUE, calculateIDI = TRUE, refVar = "x", idiNriBootRuns = 100)
-  expect_gt(r_inv_le$idiTable$asDF$idi, 0)
+  # Anti-directed marker (-x vs x): changed 2026-10-21 (PR-01) from "clamped to the base rate"
+  # (IDI < 0 / > 0) to the free logistic fit, which gives -x the same risks as x, plus a note.
+  for (dir in c(">=", "<=")) {
+    r_inv <- .irROC_run(d, c("x", "neg_x"), direction = dir,
+      calculateNRI = TRUE, calculateIDI = TRUE, refVar = "x", idiNriBootRuns = 100)
+    expect_equal(r_inv$idiTable$asDF$idi, 0, tolerance = 1e-9)
+    expect_equal(r_inv$nriTable$asDF$nri, 0)
+    reversed <- if (dir == ">=") "dir_neg_x" else "dir_x"
+    expect_match(.irROC_note(r_inv$idiTable, reversed), "opposite direction", fixed = TRUE)
+    expect_match(.irROC_note(r_inv$nriTable, reversed), "opposite direction", fixed = TRUE)
+  }
 
   d$shift <- 100 * d$x + 50
   r <- .irROC_run(d[12:1, ], c("x", "shift"), calculateNRI = TRUE,

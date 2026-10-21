@@ -438,8 +438,11 @@ cotestClass <- if (requireNamespace("jmvcore"))
                 # After the theme, so it is not replaced by it. The colour is left to the theme:
                 # a pinned "grey30" was the lowest-contrast element on the figure at export
                 # resolution and unreadable on a dark background.
+                # Wrapped: as one line the caption ran off the right edge at the default size and
+                # cut the "illustrative values, not for clinical use" disclaimer (2026-10-21).
                 if (!is.null(plotData$Caption) && nzchar(plotData$Caption))
-                    p <- p + ggplot2::labs(caption = plotData$Caption) +
+                    p <- p + ggplot2::labs(caption = paste(strwrap(strsplit(plotData$Caption, "  |  ", fixed = TRUE)[[1]],
+                                                                   width = 90), collapse = "\n")) +
                              ggplot2::theme(plot.caption = ggplot2::element_text(
                                  hjust = 0, size = 8))
                 print(p)
@@ -1320,8 +1323,10 @@ cotestClass <- if (requireNamespace("jmvcore"))
                 if (length(private$.notices) == 0) {
                     # Empty content rather than setVisible(FALSE): jamovi greys a programmatically
                     # hidden pane, and a hide/restore pair drifts out of step with the declarative
-                    # `visible:` in the .r.yaml. Nothing to say renders as nothing.
-                    self$results$notices$setContent("")
+                    # `visible:` in the .r.yaml. Nothing to say renders as nothing: "<div></div>",
+                    # not "" - the jamovi client skips an empty Html update, which left the
+                    # previous run's notices (e.g. the worked-example disclosure) on screen.
+                    self$results$notices$setContent("<div></div>")
                     return()
                 }
 

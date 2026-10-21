@@ -113,10 +113,13 @@ options:
             It is never taken from the order of the levels: NULL leaves the analysis pending,
             listing the levels found. The argument has no default; pass the level.
 
+    # allowNone: without it the client pre-selects levels[0], so a three-level variable got its
+    # FIRST level as the negative and the refusal below never fired (review 2026-10-21, D1).
     - name: goldNegative
       title: Reference negative level
       type: Level
       variable: (gold)
+      allowNone: true
       description:
           ui: >
             Select the level that indicates disease is absent in your gold standard variable.
@@ -133,6 +136,7 @@ options:
       title: Test negative level
       type: Level
       variable: (newtest)
+      allowNone: true
       description:
           ui: >
             Select the level that represents a negative test result.

@@ -260,7 +260,7 @@ items:
       title: 'Conditional Independence Check (Bivariate Residuals)'
       type: Table
       rows: 0
-      visible: (method=="latent_class")
+      visible: (method=="latent_class" || method=="bayesian")
       clearWith:
         - test1
         - test1Positive

@@ -4050,7 +4050,8 @@ agreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "confLevel",
                     "kappaCIMethod",
                     "subgroupMinCases",
-                    "wght"),
+                    "wght",
+                    "exct"),
                 refs=list(
                     "LandisKoch1977",
                     "Koo2016")))
@@ -4068,7 +4069,8 @@ agreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "confLevel",
                     "kappaCIMethod",
                     "subgroupMinCases",
-                    "wght"),
+                    "wght",
+                    "exct"),
                 refs=list(
                     "LandisKoch1977",
                     "Koo2016")))

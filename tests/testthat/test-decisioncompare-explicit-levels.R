@@ -15,6 +15,9 @@ dc_explicit_analysis <- function(data = dc_explicit_data(), ...) {
 }
 
 test_that("all reference modes require both levels even on binary data", {
+  # IR2-decisioncompare-04: an empty level box is the unconfigured state, so the run now stops
+  # quietly with an INFO naming the box instead of a "Validation failed" error; no result is
+  # filled and no level is inferred, which is what this test protects.
   data <- dc_explicit_data()[1:251, ]
   for (mode in c("legacy", "disease", "consensus", "method")) {
     for (exclude in c(FALSE, TRUE)) {
@@ -23,7 +26,9 @@ test_that("all reference modes require both levels even on binary data", {
         args <- c(list(data = data, referenceType = mode, excludeIndeterminate = exclude),
           stats::setNames(list(NULL), option))
         a <- do.call(dc_explicit_analysis, args)
-        expect_error(a$run(), "Validation failed", info = paste(mode, exclude, option))
+        expect_no_error(a$run())
+        expect_match(a$results$notices$content, "Levels Not Yet Selected", fixed = TRUE,
+          info = paste(mode, exclude, option))
         expect_equal(a$results$comparisonTable$rowCount, 0)
         expect_equal(a$results$comparatorMetrics$rowCount, 0)
         expect_equal(a$results$levelMapping$rowCount, 0)
@@ -63,9 +68,12 @@ test_that("extra observed levels stop every mode until exclusion is explicitly s
 
 test_that("missing or stale negative selections cannot produce asymmetric policies", {
   for (mode in c("legacy", "disease", "consensus", "method")) {
+    # IR2-decisioncompare-04: an empty negative box is an INFO and a quiet stop, not an error.
     a <- dc_explicit_analysis(referenceType = mode, excludeIndeterminate = TRUE,
       test2Negative = NULL)
-    expect_error(a$run(), "b: Select an explicit negative level")
+    expect_no_error(a$run())
+    expect_match(a$results$notices$content, "Test 2 negative level", fixed = TRUE)
+    expect_equal(a$results$levelMapping$rowCount, 0)
     for (bad in c("P", "absent")) {
       a <- dc_explicit_analysis(referenceType = mode, test2Negative = bad,
         excludeIndeterminate = TRUE)
@@ -76,7 +84,9 @@ test_that("missing or stale negative selections cannot produce asymmetric polici
   data$c <- data$b
   a <- dc_explicit_analysis(data, test1 = NULL, test1Positive = NULL, test1Negative = NULL,
     test3 = "c", test3Positive = "P", test3Negative = NULL)
-  expect_error(a$run(), "c: Select an explicit negative level")
+  expect_no_error(a$run())   # IR2-decisioncompare-04: unconfigured, not an error
+  expect_match(a$results$notices$content, "Test 3 negative level", fixed = TRUE)
+  expect_equal(a$results$comparisonTable$rowCount, 0)
   a <- dc_explicit_analysis(data, test1 = NULL, test1Positive = NULL, test1Negative = NULL,
     test3 = "c", test3Positive = "P", test3Negative = "N")
   expect_no_error(a$run())
@@ -144,11 +154,13 @@ test_that("invalid mapping reruns clear previous tables, plots and reports in ev
     a$run()
     expect_equal(a$results$levelMapping$rowCount, 3)
     options <- a$options
+    # An identical negative level, not an empty box: an empty box is now a quiet INFO
+    # (IR2-decisioncompare-04), and this test needs a rerun that fails validation.
     option <- options$option("test2Negative")
-    option$value <- NULL
-    options$.__enclos_env__$private$.env$test2Negative <- NULL
+    option$value <- "P"
+    options$.__enclos_env__$private$.env$test2Negative <- "P"
     a$optionsChangedHandler("test2Negative")
-    expect_error(a$run(), "b: Select an explicit negative")
+    expect_error(a$run(), "b: Choose different")
     for (name in c("levelMapping", "comparisonTable", "comparatorMetrics",
                    "mcnemarTable", "diffTable", "comparatorDifferences"))
       expect_equal(a$results[[name]]$rowCount, 0)
@@ -156,15 +168,17 @@ test_that("invalid mapping reruns clear previous tables, plots and reports in ev
                    "comparatorRadar", "comparatorHeatmap"))
       expect_null(a$results[[name]]$state)
     expect_identical(a$results$comparatorReport$content, "")
-    expect_match(a$results$notices$content, "b: Select an explicit negative")
+    expect_match(a$results$notices$content, "b: Choose different")
   }
 })
 
-test_that("an NA positive selection produces an actionable validation error", {
+test_that("an NA positive selection names the empty level box without an error state", {
+  # IR2-decisioncompare-04: was an ERROR "Missing Positive Levels" + "Validation failed".
   for (mode in c("legacy", "disease", "consensus", "method")) {
     a <- dc_explicit_analysis(referenceType = mode, test1Positive = NA_character_)
-    expect_error(a$run(), "Validation failed")
-    expect_match(a$results$notices$content, "Missing Positive Levels")
+    expect_no_error(a$run())
+    expect_match(a$results$notices$content, "Levels Not Yet Selected", fixed = TRUE)
+    expect_match(a$results$notices$content, "Test 1 positive level", fixed = TRUE)
     expect_equal(a$results$levelMapping$rowCount, 0)
   }
 })

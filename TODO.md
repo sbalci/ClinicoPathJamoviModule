@@ -1,8 +1,42 @@
-# NEWS update and the issues it surfaced (2026-10-18; done, uncommitted)
+# meddecide 1.1.1 independent review — fixes applied, follow-ups (2026-10-21; uncommitted)
 
-Acceptance: every NEWS.md current (umbrella + five siblings; meddecide/OncoPath 1.0.9 headings pass the gate);
-each surfaced defect fixed with a red-first regression test; prepare() clean; touched suites green.
+Done: S1 psychopdaROC NRI/IDI; S2 zero-cell rule (shared `R/utils-diagnostic-ratios.R`, 4 analyses),
+enhancedROC constant model, decision negative-level auto-fill, decisioncompare best test, nogoldstandard
+penalized-EM dependence check; stale Html notices; kappaSizeCI stale n; S3 wording fixes; Turkish for 124 new
+msgids. Verified: full suite vs HEAD baseline (0 new failures, 5 fixed), release gate 0 blocking, installed
+smoke PASS, engine harness on the installed build (NRI -0.561 = oracle; LR+ 0; 100/100 lifecycle; 46/46 redraw).
+Reports: `development-ideas/*-independent-review-2026-10-21.md`, `independent-review-2026-10-21-summary.md`.
 
+Follow-ups (not fixed in this release):
+- [x] Audit scripts updated to today's deliberate fixes (rows marked `# updated 2026-10-21`) and all 16 re-run against
+      the fixed sibling: 13 FAIL rows remain, all known unfixed findings or disclosed limitations; none a regression.
+- [x] Zero-ratio interval decided and implemented: an exact-0 LR/DOR shows [0, U], U = upper limit of the same
+      log-scale interval on the 0.5-corrected table (`.diagZeroRatioUpper()`, R/utils-diagnostic-ratios.R), identical in
+      decision, decisioncalculator and decisioncombine (hand oracle |diff| = 0). Audit F02C 0.882 -> 0.925 (PASS).
+      Revert by restoring the blank: the helper is the only source of U.
+- [x] decisioncurve audit N11 now checks that every null-predictor "range of benefit" carries the in-sample qualifier
+      (the fix discloses rather than suppresses); the share shown (0.577) is still recorded.
+- [ ] decision S4 not assigned: comparator small-sample guard (D5), discordant table truncation (D6),
+      half-even vs half-up rounding (D8), TP*TN integer overflow at n = 1e5 (D9).
+- [ ] agreement AR-04: `exct` option description (audit row E03).
+- [ ] psychopdaROC defaults (break_ties = mean, linear fixed-sensitivity) stay; now disclosed. Decide.
+- [ ] sequentialtests: conditional-dependence input (epiR is already imported); decisioncurve: external
+      prevalence input for case-control samples. Both are disclosed limitations, not bugs.
+- [x] enhancedROC prevalence columns: the client formats `zto` with toFixed(3), so 0.0004 showed "0.000" (read from
+      quill-*.js). `format: zto` removed from imbalanceMetrics/clinicalApplicationMetrics prevalence: default
+      significant figures show 0.000400.
+- [ ] jsurvival `R/survival.b.R:280-286` blanks Html panels with "" before reject (same pattern as
+      decisioncurve, fixed here): the client skips "", so old results stay greyed under the error.
+- [x] GUI-substitute checks: no new Html or note markup outside jamovi's allowed subset (30 added notes are plain text);
+      theme_safe_html.py 0 hits; all plots export to PDF and SVG from a reopened state without errors or glyph
+      warnings; Turkish rendering and reopening of pre-fix states verified in the engine. Dark theme checked
+      visually: 11 live Html panels from the installed build (incl. today's new notices) screenshotted in headless
+      Chrome on a dark pane (light inherited text, as jamovi's dark theme does) - all legible, translucent tints.
+- [ ] epiR -> pander (AGPL-3 or OSL-3.0): library-policy question for the jamovi team (gate advisory).
+- [x] Plot text checked by exporting every plot to PDF at default and 3x width (words missing at default = clipped):
+      5 plots clipped text (cotest Fagan caption hid "not for clinical use"; decisioncurve relative-utility and
+      standardized-NB captions; enhancedROC clinical-utility legend and CROC caption) - all wrapped/stacked. The cotest
+      em dash renders correctly in PNG/PDF (the mbcsToSbcs warning is harmless).
 - [x] NEWS.md: meddecide 1.0.9 + 1.0.81 backfill; OncoPath 1.0.9; ClinicoPathDescriptives, jjstatsplot,
       jsurvival 1.0.82.03 + 1.0.81; umbrella gap sections; `**Bold.**Text` rendering fixed in all six files.
 - [x] `chisqposttest`: "Always Fisher's exact" drives every gate and sentence (`chiSqTest$omnibus_p`); new

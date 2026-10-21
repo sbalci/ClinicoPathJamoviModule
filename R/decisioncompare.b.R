@@ -252,6 +252,20 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
                       collapse = " ")
             },
 
+            # IR2-decisioncompare-02. "" when every test was evaluated on the same cases; otherwise
+            # the case set the ranking used (or why no ranking was possible), because the per-test
+            # figures printed beside the ranking use each test's own available cases.
+            .rankingBasisSentence = function() {
+                n <- private$.ranking_common_n
+                if (is.null(n)) return("")
+                if (isTRUE(private$.best_test_ranked))
+                    .fmt(jmvcore::.("The tests were evaluated on different sets of cases, so this ranking compares them on the {n} cases with a determinate result for every test; the per-test figures use each test's own available cases."),
+                        n = n)
+                else
+                    .fmt(jmvcore::.("The tests were evaluated on different sets of cases, and the {n} cases with a determinate result for every test do not include both reference-standard classes, so the tests cannot be ranked on common cases."),
+                        n = n)
+            },
+
             # IR-decisioncompare-01. The ranking uses balanced accuracy, which weights sensitivity and
             # specificity equally; McNemar's test compares overall accuracy, which weights them by the
             # prevalence in the sample, so the two can point in opposite directions. When a significant
@@ -376,7 +390,7 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
                     bin_unavailable_positive = jmvcore::.("The positive level \"%1$s\" is not available. Available levels: %2$s."),
                     bin_unavailable_negative = jmvcore::.("The negative level \"%1$s\" is not available. Available levels: %2$s."),
                     bin_identical = jmvcore::.("Choose different positive and negative levels."),
-                    bin_other = jmvcore::.("Observed levels outside the selected positive/negative pair: %s. Select 'Exclude other observed levels' to omit these results, or explicitly recode the variable before analysis. Other levels are never treated as negative."),
+                    bin_other = jmvcore::.("Observed levels outside the selected positive/negative pair: %s. Select 'Selected positive and negative levels only' to omit these results, or explicitly recode the variable before analysis. Other levels are never treated as negative."),
                     report_rate = jmvcore::.("%1$.1f%% (%2$d/%3$d)"),
                     report_unavailable = jmvcore::.("unavailable (denominator 0)"),
                     report_test = jmvcore::.("%1$s: PPA %2$s, NPA %3$s; %4$d analyzed cases, %5$d excluded."),
@@ -444,6 +458,9 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
 
             # Names of tests tied for best, if any (set by .findBestTest)
             .best_test_tied = NULL,
+            # Number of cases the ranking used when the tests were evaluated on different
+            # case sets (set by .findBestTest); NULL when every test had the same cases.
+            .ranking_common_n = NULL,
 
             # Add a notice to the collection.
             # .findBestTest() is reached independently from three display toggles
@@ -701,6 +718,7 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
                 private$.holm_applied <- NULL
                 private$.best_test_tied <- NULL
                 private$.best_test_ranked <- NULL
+                private$.ranking_common_n <- NULL
                 private$.cached_test_results <- NULL
                 private$.cached_processed_data <- NULL
                 private$.pair_results <- NULL
@@ -723,20 +741,22 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
                     ctable <- self$results[[paste0("cTable", i)]]
                     for (key in c("Test Positive", "Test Negative", "Total"))
                         ctable$setRow(rowKey = key,
-                            values = list(GP = NA_real_, GN = NA_real_, Total = NA_real_))
+                            values = list(GP = "", GN = "", Total = ""))  # "" is blank; NA_real_ shows NaN
                     epitable <- self$results[[paste0("epirTable", i)]]
                     for (key in private$.epirRatioStats())
                         epitable$setRow(rowKey = key,
-                            values = list(est = NA_real_, lower = NA_real_, upper = NA_real_))
+                            values = list(est = "", lower = "", upper = ""))
                 }
                 self$results$text1$setContent("")
-                self$results$text2$setContent("")
+                self$results$text2$setContent("<div></div>")  # Html: the client skips ""
                 for (plot_name in c("plot1", "plotRadar", "plotHeatmap"))
                     self$results[[plot_name]]$setState(NULL)
                 for (html_name in c("summaryReport", "reportSentence", "explanationsContent",
                                     "clinicalReport", "aboutAnalysis", "notices")) {
                     html <- tryCatch(self$results[[html_name]], error = function(e) NULL)
-                    if (!is.null(html)) html$setContent("")
+                    # "<div></div>", not "": the client skips an empty Html update, so a run
+                    # that stops early (pending level box) would leave the old reports on screen.
+                    if (!is.null(html)) html$setContent("<div></div>")
                 }
 
                 # Step 1: Check if minimum required variables are selected
@@ -755,8 +775,12 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
 
                 tryCatch(
                     {
-                        # Step 2: Comprehensive input validation
-                        private$.validateInputs()
+                        # Step 2: Comprehensive input validation. TRUE = a level box is
+                        # still empty: an INFO names it and the run stops without an error.
+                        if (isTRUE(private$.validateInputs())) {
+                            private$.renderNotices()
+                            return(invisible(NULL))
+                        }
 
                         if (.diagReferenceMode(self$options$referenceType)$comparator) {
                             private$.runComparator()
@@ -1016,32 +1040,34 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
                     stop(jmvcore::.("Validation failed"), call. = FALSE)
                 }
 
-                # Validate that positive levels are specified for selected tests
-                test_positive_pairs <- list(
-                    list(test = self$options$gold, positive = self$options$goldPositive, name = jmvcore::.("Reference")),
-                    list(test = self$options$test1, positive = self$options$test1Positive, name = jmvcore::.("Test 1")),
-                    list(test = self$options$test2, positive = self$options$test2Positive, name = jmvcore::.("Test 2")),
-                    list(test = self$options$test3, positive = self$options$test3Positive, name = jmvcore::.("Test 3"))
+                # Level options have no default (allowNone), so a variable whose positive or
+                # negative level box is still empty is the normal unconfigured state, not an
+                # error: name the empty boxes and stop quietly (IR2-decisioncompare-04). The
+                # caller returns before any result is filled, so no level is ever inferred.
+                level_boxes <- list(
+                    list(var = self$options$gold, level = self$options$goldPositive, box = jmvcore::.("Reference positive level")),
+                    list(var = self$options$gold, level = private$.opt("goldNegative"), box = jmvcore::.("Reference negative level")),
+                    list(var = self$options$test1, level = self$options$test1Positive, box = jmvcore::.("Test 1 positive level")),
+                    list(var = self$options$test1, level = private$.opt("test1Negative"), box = jmvcore::.("Test 1 negative level")),
+                    list(var = self$options$test2, level = self$options$test2Positive, box = jmvcore::.("Test 2 positive level")),
+                    list(var = self$options$test2, level = private$.opt("test2Negative"), box = jmvcore::.("Test 2 negative level")),
+                    list(var = self$options$test3, level = self$options$test3Positive, box = jmvcore::.("Test 3 positive level")),
+                    list(var = self$options$test3, level = private$.opt("test3Negative"), box = jmvcore::.("Test 3 negative level"))
                 )
-
-                missing_positives <- character(0)
-                for (pair in test_positive_pairs) {
-                    if (!is.null(pair$test) && pair$test != "") {
-                        if (length(pair$positive) != 1L || is.na(pair$positive) ||
-                            !nzchar(pair$positive)) {
-                            missing_positives <- c(missing_positives, pair$name)
-                        }
-                    }
+                empty_boxes <- character(0)
+                for (b in level_boxes) {
+                    if (!is.null(b$var) && b$var != "" &&
+                        (length(b$level) != 1L || is.na(b$level) || !nzchar(b$level)))
+                        empty_boxes <- c(empty_boxes, b$box)
                 }
-
-                if (length(missing_positives) > 0) {
+                if (length(empty_boxes) > 0) {
                     private$.addNotice(
-                        type = "ERROR",
-                        title = jmvcore::.("Missing Positive Levels"),
-                        content = .fmt(jmvcore::.("Please specify positive levels for: {slots}. Use the level selector in the variable panel to choose which level represents a positive test result."),
-                            slots = paste(missing_positives, collapse = ", "))
+                        type = "INFO",
+                        title = jmvcore::.("Levels Not Yet Selected"),
+                        content = .fmt(jmvcore::.("To finish setting up the analysis, choose: {boxes}. The reference and every test need both a positive and a negative level; no level is inferred."),
+                            boxes = paste(empty_boxes, collapse = ", "))
                     )
-                    stop(jmvcore::.("Validation failed"), call. = FALSE)
+                    return(TRUE)
                 }
 
                 private$.validateMappings()
@@ -1080,6 +1106,7 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
                         content = jmvcore::.("PPV/NPV will be calculated using the supplied population prevalence (pp=TRUE). Confidence intervals are unavailable in this mode.")
                     )
                 }
+                invisible(FALSE)
             },
 
             # Data preparation and cleaning
@@ -1532,27 +1559,35 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
                 }
 
                 # Likelihood ratios.
-                # Per-ratio 0.5 continuity correction: LR+ uses +0.5 on all four cells iff
-                # TP == 0 || FP == 0 (and TP + FP > 0), and LR- uses +0.5 on all four cells
-                # iff FN == 0 || TN == 0 (and FN + TN > 0).
+                # The 0.5 continuity correction belongs ONLY to the ratio whose denominator
+                # is empty while its numerator is not (.diagRatioRules): LR+ when FP == 0 and
+                # TP > 0, LR- when TN == 0 and FN > 0. An empty numerator gives an exact 0.
+                # Correcting on any zero cell (commit 9f0e394ca, IR2-decisioncompare-01)
+                # printed LR+ = 1.09 for TP=0, FP=3, FN=10, TN=80, whose exact LR+ is 0: the
+                # +0.5 weighs more in the smaller diseased group and moved a test that never
+                # found a diseased case to the rule-in side of 1, irreproducible from the raw
+                # Sens and Spec printed beside it.
                 zero_cells <- any(c(TP, FP, FN, TN) == 0)
                 cc <- private$ZERO_CELL_CONTINUITY
                 both_classes <- !is.na(Sens) && !is.na(Spec)
                 # A test that never called positive (TP + FP == 0) has LR+ = 0/0, and one that
                 # never called negative (FN + TN == 0) has LR- = 0/0. Neither ratio is infinite,
-                # so the correction above does not apply: on 0/0 it returned (TN+1)/(FN+1) and
+                # so the correction does not apply: on 0/0 it returned (TN+1)/(FN+1) and
                 # banded a test with no positive call as "Moderate positive evidence"
                 # (VAL-decisioncompare-02). Both are reported as not estimable.
-                lrp_undefined <- both_classes && (TP + FP) == 0
-                lrn_undefined <- both_classes && (FN + TN) == 0
-                lrp_corrected <- both_classes && !lrp_undefined && (TP == 0 || FP == 0)
-                lrn_corrected <- both_classes && !lrn_undefined && (FN == 0 || TN == 0)
+                ratio_rules <- if (both_classes) .diagRatioRules(TP, FP, FN, TN)
+                    else list(lrp = "undefined", lrn = "undefined")
+                lrp_undefined <- both_classes && ratio_rules$lrp == "undefined"
+                lrn_undefined <- both_classes && ratio_rules$lrn == "undefined"
+                lrp_corrected <- ratio_rules$lrp == "corrected"
+                lrn_corrected <- ratio_rules$lrn == "corrected"
 
                 # Each ratio is formed from its two class rates, each from its own counts:
                 # FP/(FP+TN), not 1 - Spec, whose cancellation turned an exact LR+ of 10 into
                 # 9.999999999999991 and moved it out of the ">= 10" band
                 # (VAL-decisioncompare-09). Algebraically identical to Sens/(1 - Spec) and
                 # (1 - Sens)/Spec, and to the corrected forms with 0.5 added to every cell.
+                # A "zero" ratio (empty numerator) takes the raw form, which is exactly 0.
                 LRP <- if (!both_classes || lrp_undefined) {
                     NA_real_
                 } else if (lrp_corrected) {
@@ -1568,16 +1603,28 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
                     (FN / (TP + FN)) / (TN / (TN + FP))
                 }
 
+                # "undefined" also covers an infinite ratio whose 0.5-corrected value would fall
+                # to or below 1 (.diagRatioRules): the correction would reverse its direction.
+                lrp_infinite <- lrp_undefined && (TP + FP) > 0
+                lrn_infinite <- lrn_undefined && (FN + TN) > 0
                 if (isTRUE(add_notices) && (lrp_undefined || lrn_undefined)) {
+                    undefined_text <- c(
+                        if (lrp_undefined && !lrp_infinite)
+                            .fmt(jmvcore::.("{test}: the test was never positive in these cases, so LR+ is 0/0 and is left blank (its sensitivity is 0 and its specificity 1 here). A continuity correction cannot create rule-in evidence for a test that made no positive call."),
+                                test = test_label),
+                        if (lrp_infinite)
+                            .fmt(jmvcore::.("{test}: no false positive was observed, so LR+ is infinite, and adding 0.5 to every cell would give a value of 1 or less, reversing its direction; LR+ is left blank."),
+                                test = test_label),
+                        if (lrn_undefined && !lrn_infinite)
+                            .fmt(jmvcore::.("{test}: the test was never negative in these cases, so LR- is 0/0 and is left blank (its sensitivity is 1 and its specificity 0 here). A continuity correction cannot create rule-out evidence for a test that made no negative call."),
+                                test = test_label),
+                        if (lrn_infinite)
+                            .fmt(jmvcore::.("{test}: no true negative was observed, so LR- is infinite, and adding 0.5 to every cell would give a value of 1 or less, reversing its direction; LR- is left blank."),
+                                test = test_label))
                     private$.addNotice(
                         type = "WARNING",
                         title = jmvcore::.("Likelihood Ratio Not Estimable"),
-                        content = if (lrp_undefined)
-                            .fmt(jmvcore::.("{test}: the test was never positive in these cases, so LR+ is 0/0 and is left blank (its sensitivity is 0 and its specificity 1 here). A continuity correction cannot create rule-in evidence for a test that made no positive call."),
-                                test = test_label)
-                        else
-                            .fmt(jmvcore::.("{test}: the test was never negative in these cases, so LR- is 0/0 and is left blank (its sensitivity is 1 and its specificity 0 here). A continuity correction cannot create rule-out evidence for a test that made no negative call."),
-                                test = test_label)
+                        content = paste(undefined_text, collapse = " ")
                     )
                 }
 
@@ -1616,7 +1663,9 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
                     lrp_corrected = isTRUE(lrp_corrected),
                     lrn_corrected = isTRUE(lrn_corrected),
                     lrp_undefined = isTRUE(lrp_undefined),
-                    lrn_undefined = isTRUE(lrn_undefined)
+                    lrn_undefined = isTRUE(lrn_undefined),
+                    lrp_infinite = isTRUE(lrp_infinite),
+                    lrn_infinite = isTRUE(lrn_infinite)
                 ))
             },
 
@@ -1656,7 +1705,7 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
                         if (any(c(TP, FP, FN, TN) == 0)) {
                             # The correction is no longer applied to both ratios on any
                             # zero cell, so this footnote must no longer claim it was.
-                            cTable$addFootnote(rowKey = "Total", col = "Total", jmvcore::.("Zero cell detected. A 0.5 continuity correction is applied only to a likelihood ratio whose own denominator cell is empty while its numerator is not (FP = 0 with TP > 0 for LR+, TN = 0 with FN > 0 for LR-); a ratio that is 0/0 is left blank, and every other statistic uses these raw counts. Interpret cautiously."))
+                            cTable$addFootnote(rowKey = "Total", col = "Total", jmvcore::.("Zero cell detected. A 0.5 continuity correction is applied only to a likelihood ratio whose own denominator cell is empty while its numerator is not (FP = 0 with TP > 0 for LR+, TN = 0 with FN > 0 for LR-), and only when the corrected value stays above 1; an empty numerator gives an exact 0, a ratio that is 0/0 or whose correction would fall to 1 or below is left blank, and every other statistic uses these raw counts. Interpret cautiously."))
                         }
                     }
                 }
@@ -1702,8 +1751,10 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
                             AccurT = metrics$AccurT,
                             PPV = metrics$PPV,
                             NPV = metrics$NPV,
-                            LRP = metrics$LRP,
-                            LRN = metrics$LRN
+                            # A not-estimable ratio is "" (blank, footnoted below): NA renders
+                            # as "NaN" in jamovi.
+                            LRP = if (is.na(metrics$LRP)) "" else metrics$LRP,
+                            LRN = if (is.na(metrics$LRN)) "" else metrics$LRN
                         )
                     )
 
@@ -1722,10 +1773,16 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
 
                     if (isTRUE(metrics$lrp_undefined))
                         comparisonTable$addFootnote(rowKey = row_key, col = "LRP",
-                            jmvcore::.("Not estimable: the test was never positive, so LR+ is 0/0."))
+                            if (isTRUE(metrics$lrp_infinite))
+                                jmvcore::.("Not estimable: FP = 0 makes LR+ infinite, and the 0.5 correction would reverse its direction.")
+                            else
+                                jmvcore::.("Not estimable: the test was never positive, so LR+ is 0/0."))
                     if (isTRUE(metrics$lrn_undefined))
                         comparisonTable$addFootnote(rowKey = row_key, col = "LRN",
-                            jmvcore::.("Not estimable: the test was never negative, so LR- is 0/0."))
+                            if (isTRUE(metrics$lrn_infinite))
+                                jmvcore::.("Not estimable: TN = 0 makes LR- infinite, and the 0.5 correction would reverse its direction.")
+                            else
+                                jmvcore::.("Not estimable: the test was never negative, so LR- is 0/0."))
 
                     # Add clinical interpretation
                     clinical_interpretation <- private$.generateClinicalInterpretation(metrics)
@@ -3072,11 +3129,28 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
                 self$results$clinicalReport$setContent(report_html)
             },
 
-            # Find the highest observed balanced accuracy for descriptive reporting
+            # Find the highest observed balanced accuracy for descriptive reporting.
+            # IR2-decisioncompare-02: the ranking compares the tests on the SAME cases. With
+            # partial testing (an assay not done on the hardest cases) each test's own rows
+            # differ, and ranking those standalone figures named as best a test that was
+            # significantly less sensitive on the common cases. When the case sets differ the
+            # ranking uses the cases determinate for every test; the standalone figures in
+            # the tables and report are unchanged, and .rankingBasisSentence() says so.
             .findBestTest = function(test_results) {
+                common <- Reduce(`&`, lapply(test_results, function(x) x$determinate))
+                same_cases <- all(vapply(test_results,
+                    function(x) identical(x$determinate, common), logical(1)))
+                private$.ranking_common_n <- if (same_cases) NULL else sum(common)
+                gold_common <- test_results[[1]]$gold_reference[common]
                 scores <- vapply(names(test_results), function(test_name) {
-                    m <- test_results[[test_name]]$metrics
-                    score <- (m$Sens + m$Spec) / 2
+                    if (same_cases) {
+                        m <- test_results[[test_name]]$metrics
+                        score <- (m$Sens + m$Spec) / 2
+                    } else {
+                        call <- test_results[[test_name]]$test_results[common]
+                        score <- (mean(call[gold_common == "Positive"] == "Positive") +
+                                  mean(call[gold_common == "Negative"] == "Negative")) / 2
+                    }
                     if (length(score) != 1 || !is.finite(score)) NA_real_ else score
                 }, numeric(1))
 
@@ -3245,6 +3319,12 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
                     sprintf(
                         jmvcore::.("Among the tests evaluated, %s had the highest observed balanced accuracy; this is a descriptive ranking only and not evidence of superiority or a clinical recommendation."),
                         private$.safeHtmlOutput(best_test))
+                else if (!is.null(private$.ranking_common_n))
+                    # Different case sets: each test's own figures exist; only the common
+                    # cases lack a reference class (the basis sentence says so).
+                    sprintf(
+                        jmvcore::.("No test could be ranked on the cases common to all tests; the figures below describe %s, the first test selected."),
+                        private$.safeHtmlOutput(best_test))
                 else
                     sprintf(
                         jmvcore::.("No test could be ranked by balanced accuracy because one reference-standard class has no cases; the figures below describe %s, the first test selected."),
@@ -3273,10 +3353,18 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
                     sprintf(
                         jmvcore::.("At the disease prevalence observed in this sample, %1$s positive predictive value, %2$s negative predictive value, and %3$s overall accuracy were observed; predictive values and accuracy change with prevalence and would need to be recomputed for a population with a different disease rate."),
                         ppv_pct, npv_pct, acc_pct)
-                } else {
+                } else if (isTRUE(best$n_analyzed == best$n_total)) {
                     sprintf(
                         jmvcore::.("At the %1$s%% disease prevalence observed in this sample, %2$s positive predictive value, %3$s negative predictive value, and %4$s overall accuracy were observed; predictive values and accuracy change with prevalence and would need to be recomputed for a population with a different disease rate."),
                         private$.pctAdaptive(sample_prev_pct / 100), ppv_pct, npv_pct, acc_pct)
+                } else {
+                    # IR2-decisioncompare-03: these figures come from the test's own analysed
+                    # cases, which are not the sample when some of its results are missing or
+                    # excluded; name that denominator rather than "this sample".
+                    sprintf(
+                        jmvcore::.("At the %1$s%% disease prevalence among the %2$d cases analysed for %3$s, %4$s positive predictive value, %5$s negative predictive value, and %6$s overall accuracy were observed; predictive values and accuracy change with prevalence and would need to be recomputed for a population with a different disease rate."),
+                        private$.pctAdaptive(sample_prev_pct / 100), as.integer(n_total_best),
+                        private$.safeHtmlOutput(best_test), ppv_pct, npv_pct, acc_pct)
                 }
 
                 # IR-decisioncompare-01: a "significant difference" sentence must say which way it
@@ -3310,6 +3398,7 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
                 # reorder. nzchar() drops the optional pieces without leaving double spaces.
                 pieces <- c(
                     lead,
+                    private$.rankingBasisSentence(),
                     sprintf(jmvcore::.("Sensitivity was %1$s%2$s and specificity was %3$s%4$s."),
                         sens_pct, sens_ci, spec_pct, spec_ci),
                     predictive_sentence,
@@ -3834,7 +3923,11 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
                             ) else if (isTRUE(private$.best_test_ranked)) sprintf(
                                 jmvcore::.("<p><b>Descriptive interpretation:</b> <span style='color:inherit;'><b>%1$s</b></span> had the highest observed balanced accuracy in this sample (overall accuracy %2$.1f%%). This descriptive ranking is not a superiority test or clinical recommendation. Review the pairwise comparisons above for inferential results.</p>"),
                                 private$.safeHtmlOutput(best_test), private$.halfUp1(best_acc * 100)
-                            ) else jmvcore::.("<p><b>Descriptive interpretation:</b> balanced accuracy could not be estimated for any test because one reference-standard class has no cases, so no test is ranked. Review the pairwise comparisons above for inferential results.</p>"))
+                            ) else if (!is.null(private$.ranking_common_n)) jmvcore::.("<p><b>Descriptive interpretation:</b> no test is ranked on the cases common to all tests. Review the pairwise comparisons above for inferential results.</p>")
+                            else jmvcore::.("<p><b>Descriptive interpretation:</b> balanced accuracy could not be estimated for any test because one reference-standard class has no cases, so no test is ranked. Review the pairwise comparisons above for inferential results.</p>"))
+                            basis <- private$.rankingBasisSentence()
+                            if (nzchar(basis))
+                                html <- paste0(html, "<p>", basis, "</p>")
 
                             conflict <- private$.rankingConflictSentence(best_test)
                             if (nzchar(conflict))
@@ -4026,7 +4119,11 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
                             ) else if (isTRUE(private$.best_test_ranked)) sprintf(
                                 jmvcore::.("%s had the highest observed balanced accuracy; this descriptive ranking was not tested as a superiority claim and is not a clinical recommendation."),
                                 private$.safeHtmlOutput(best_test)
-                            ) else jmvcore::.("Balanced accuracy could not be estimated for any test because one reference-standard class has no cases, so no test is ranked."))
+                            ) else if (!is.null(private$.ranking_common_n)) jmvcore::.("No test is ranked on the cases common to all tests.")
+                            else jmvcore::.("Balanced accuracy could not be estimated for any test because one reference-standard class has no cases, so no test is ranked."))
+                            basis <- private$.rankingBasisSentence()
+                            if (nzchar(basis))
+                                report <- paste(report, basis)
 
                             conflict <- private$.rankingConflictSentence(best_test)
                             if (nzchar(conflict))

@@ -14,7 +14,8 @@ decisioncombineClass <- if (requireNamespace("jmvcore")) {
         inherit = decisioncombineBase,
         private = list(
             .noticeList = list(),
-            # Rows that needed the 0.5 continuity correction, accumulated across
+            # Rows where a ratio needed the 0.5 continuity correction (an empty denominator
+            # cell; .diagRatioRules()), accumulated across
             # .analyzeSinglePattern() calls and reported as ONE notice. Emitting per
             # pattern produced up to eleven near-identical banners in a 3-test analysis.
             .continuityPatterns = character(),
@@ -23,6 +24,10 @@ decisioncombineClass <- if (requireNamespace("jmvcore")) {
             # interval would be the point estimate repeated. Collected here and disclosed
             # as ONE table note, for the same reason .continuityPatterns is.
             .zeroSeIntervalPatterns = character(),
+            # Rows where LR+, LR- or the diagnostic odds ratio is exactly 0 (an empty
+            # numerator cell, no correction): their interval is [0, U] (.diagZeroRatioUpper).
+            # Disclosed as ONE table note, like the two above.
+            .zeroRatioPatterns = character(),
             # Every row of the combination table as a rule, keyed by its label:
             # list(flag = patient-level positive call, type = row type, components = the
             # tests it uses). Filled by .analyzeSinglePattern(); read by the paired
@@ -96,11 +101,11 @@ decisioncombineClass <- if (requireNamespace("jmvcore")) {
                     li(esc(.("Prevalence is identical in every row: it is the disease rate in the whole sample, not the rate within that pattern. Every row is scored on the same complete cases; the individual-test tables use each test's own pairwise-complete cases, so with missing data they can differ from the \"alone\" rows."))),
                     li(esc(.("PPV and NPV depend on prevalence, so they transfer to another population only if its disease rate is similar. Sensitivity, specificity and the likelihood ratios are less prevalence-dependent, though not independent of it. LR+ and LR- are the more useful numbers to carry elsewhere not because they are more stable -- being functions of sensitivity and specificity, they inherit exactly the same dependence -- but because they convert a pre-test probability into a post-test probability at whatever prevalence the new setting has."))),
                     li(esc(.("Balanced Accuracy and Youden's J are the same statistic on two scales: Balanced Accuracy = (J + 1) / 2, so ranking by one is identical to ranking by the other."))),
-                    li(esc(.("LR+, LR- and the diagnostic odds ratio add 0.5 to all four cells when a cell is zero, so they stay finite (for the odds ratio this is the Haldane-Anscombe correction; the likelihood ratios use the same adjustment); the proportions on the same row use the observed counts, so the two need not agree exactly at a zero cell. The correction repairs a sampling zero, not a structural one. On a row with no test-positive patients (a pattern nobody shows, or a rule that is never positive), LR+ and the odds ratio are 0/0 and are left BLANK rather than corrected, while LR- is exactly 1: any other result leaves the odds unchanged. On a row with no test-negative patients, LR- and the odds ratio are blank and LR+ is exactly 1. In a sample with only one reference outcome all three are blank in every row, as are PPV and NPV, which the sampling alone fixes, and Accuracy, which then only repeats the sensitivity or specificity."))),
+                    li(esc(.("LR+, LR- and the diagnostic odds ratio add 0.5 to all four cells only when a cell in the ratio's denominator is zero and its numerator is not (FP for LR+, TN for LR-, FP or FN for the odds ratio), so the ratio stays finite (for the odds ratio this is the Haldane-Anscombe correction; the likelihood ratios use the same adjustment). When the numerator cell is zero instead (TP for LR+, FN for LR-, TP or TN for the odds ratio), the ratio is exactly 0 and is not corrected: adding 0.5 there would turn a test that never detected disease into one that seems to point towards it. Its confidence interval runs from 0 to the upper limit of the same log-scale interval computed with 0.5 added to every cell. A corrected ratio stands in for an infinite one, so when the correction would bring it to 1 or below (an empty cell in a much smaller reference group) it is left blank as not estimable. The proportions on the same row use the observed counts, so the two need not agree exactly at a zero cell. The correction repairs a sampling zero, not a structural one. On a row with no test-positive patients (a pattern nobody shows, or a rule that is never positive), LR+ and the odds ratio are 0/0 and are left BLANK rather than corrected, while LR- is exactly 1: any other result leaves the odds unchanged. On a row with no test-negative patients, LR- and the odds ratio are blank and LR+ is exactly 1. In a sample with only one reference outcome all three are blank in every row, as are PPV and NPV, which the sampling alone fixes, and Accuracy, which then only repeats the sensitivity or specificity."))),
                     "</ul><h4>", esc(.("What this analysis does NOT assume")), "</h4><p>",
                     esc(.("Every row is estimated directly from the observed joint results, not derived from the individual tests' sensitivity and specificity. These figures therefore do NOT require the tests to be conditionally independent given disease status, and they stay valid when the tests share biology, specimen or technology. That is the main difference from a sequential-testing calculator, which must assume independence and warns about it.")),
                     "</p><p>",
-                    esc(.("Two things that assumption-free estimation does not buy. Precision: the sample is split across four or eight pattern cells instead of being pooled into two marginal proportions, so the intervals are wider -- that width is what the assumption was paying for. Transport: these numbers carry to another population only if the whole joint distribution of results given disease status carries over, which is a stronger requirement than each test's sensitivity and specificity carrying over. Parallel and Serial figures here will also generally NOT match the textbook independence formulas computed by hand from the individual tests, and will usually be worse when the tests are correlated.")),
+                    esc(.("Two things that assumption-free estimation does not buy. Precision: the sample is split across four or eight pattern cells instead of being pooled into two marginal proportions, so the intervals are wider -- that width is what the assumption was paying for. Transport: these numbers carry to another population only if the whole joint distribution of results given disease status carries over, which is a stronger requirement than each test's sensitivity and specificity carrying over. Parallel and Serial figures here will also generally NOT match the textbook independence formulas computed by hand from the individual tests. With positively correlated tests each strategy gains less than those formulas predict on the measure it is chosen for -- Parallel raises sensitivity less, Serial raises specificity less -- while the other measure loses less than predicted, so Youden's J can be the same as the formulas give.")),
                     "</p><h4>", esc(.("The ranking")), "</h4><p>",
                     esc(.("The candidate-rule ranking is a descriptive argmax over observed Youden's J, taken over every row of the table -- result patterns, single tests and strategies -- with no significance test and no multiplicity correction. On a tie the rule using fewer tests is shown first. On data with no real signal it will still name a winner. It is a hypothesis to confirm in new data, not a validated recommendation. Tick \"Youden's J corrected for rule selection\" for a bootstrap estimate of how much of the highest J is the luck of being picked from many rules.")),
                     "</p><p>", esc(.("The pattern-type and statistic filters affect the plots only. The performance tables always show every row.")), "</p>"
@@ -137,7 +142,9 @@ decisioncombineClass <- if (requireNamespace("jmvcore")) {
                 self$results$notices$setRefs(
                     unique(unlist(lapply(private$.noticeList, `[[`, "refs"))))
                 if (length(private$.noticeList) == 0) {
-                    self$results$notices$setContent("")
+                    # Not "": the jamovi client skips an empty Html update, so the previous
+                    # run's warnings would stay on screen.
+                    self$results$notices$setContent("<div></div>")
                     return()
                 }
 
@@ -215,6 +222,16 @@ decisioncombineClass <- if (requireNamespace("jmvcore")) {
                 html <- paste0(html, "</div>")
 
                 self$results$notices$setContent(html)
+            },
+            # A cell that is undefined by design (0/0 ratio, PPV in a one-class sample, the p
+            # of a nested paired rule, a pending row) must be BLANK, as the notes promise.
+            # jmvcore sends a numeric NA as a double, which jamovi prints as "NaN", and a
+            # logical NA as missing; "" is the only empty cell, and $asDF reads it back as NA,
+            # so the ranking and plot states still see NA. Values that exist keep their type.
+            .blankNA = function(values) {
+                lapply(values, function(v) {
+                    if (length(v) == 1L && !is.character(v) && is.na(v)) "" else v
+                })
             },
             .safeProp = function(num, den) {
                 # Zero-safe proportion: the definitional form of sensitivity,
@@ -353,7 +370,7 @@ decisioncombineClass <- if (requireNamespace("jmvcore")) {
                     cont$setRow(rowKey = "Total", values = list(
                         goldPos = NA_integer_, goldNeg = NA_integer_, total = NA_integer_))
                     for (key in c("sens", "spec", "ppv", "npv")) {
-                        stats$setRow(rowKey = key, values = list(estimate = NA_real_))
+                        stats$setRow(rowKey = key, values = list(estimate = ""))
                     }
                 }
 
@@ -378,6 +395,7 @@ decisioncombineClass <- if (requireNamespace("jmvcore")) {
                 # whose intervals are all estimable would still show the previous run's
                 # "interval left blank" footnote.
                 self$results$combinationTableCIRatios$setNote("nonestimable_ci", NULL)
+                self$results$combinationTableCIRatios$setNote("zero_ratio_ci", NULL)
 
                 self$results$recommendationTable$setVisible(FALSE)
                 # Set only beside the "advantage is not established" sentence it explains.
@@ -411,7 +429,7 @@ decisioncombineClass <- if (requireNamespace("jmvcore")) {
                               specChange = NA_real_, specLower = NA_real_,
                               specUpper = NA_real_, specP = NA_real_)
                 for (key in paired$rowKeys) {
-                    paired$setRow(rowKey = key, values = blank)
+                    paired$setRow(rowKey = key, values = private$.blankNA(blank))
                 }
 
                 for (name in c("barPlot", "heatmapPlot", "forestPlot",
@@ -424,6 +442,7 @@ decisioncombineClass <- if (requireNamespace("jmvcore")) {
                 private$.noticeList <- list()
                 private$.continuityPatterns <- character()
                 private$.zeroSeIntervalPatterns <- character()
+                private$.zeroRatioPatterns <- character()
                 private$.rules <- list()
                 private$.missingness <- NULL
                 private$.constantTests <- integer()
@@ -506,6 +525,7 @@ decisioncombineClass <- if (requireNamespace("jmvcore")) {
                 private$.noticeList <- list()
                 private$.continuityPatterns <- character()
                 private$.zeroSeIntervalPatterns <- character()
+                private$.zeroRatioPatterns <- character()
                 private$.rules <- list()
                 private$.missingness <- NULL
                 private$.constantTests <- integer()
@@ -1529,18 +1549,18 @@ decisioncombineClass <- if (requireNamespace("jmvcore")) {
                 }
 
                 # Populate statistics table
-                statsTable$setRow(rowKey = "sens", values = list(
+                statsTable$setRow(rowKey = "sens", values = private$.blankNA(list(
                     estimate = sens
-                ))
-                statsTable$setRow(rowKey = "spec", values = list(
+                )))
+                statsTable$setRow(rowKey = "spec", values = private$.blankNA(list(
                     estimate = spec
-                ))
-                statsTable$setRow(rowKey = "ppv", values = list(
+                )))
+                statsTable$setRow(rowKey = "ppv", values = private$.blankNA(list(
                     estimate = ppv
-                ))
-                statsTable$setRow(rowKey = "npv", values = list(
+                )))
+                statsTable$setRow(rowKey = "npv", values = private$.blankNA(list(
                     estimate = npv
-                ))
+                )))
             },
             .analyzeCombinations = function(data_prep) {
                 # Generate and analyze all test combinations
@@ -1565,10 +1585,16 @@ decisioncombineClass <- if (requireNamespace("jmvcore")) {
                 # corrected number, so the per-branch rule stays visible.
                 self$results$combinationTable$setNote(
                     "haldane",
-                    jmvcore::.("For LR+ only when TP or FP is zero, and for LR- only when FN or TN is zero, 0.5 is added to all four cells for that ratio and its confidence interval. The diagnostic odds ratio and its interval use all four cells plus 0.5 whenever any cell is zero (Haldane-Anscombe correction). The corrected diagnostic odds ratio need not equal the ratio of the displayed likelihood ratios. No correction is made on a row with no test-positive patients: its LR+ and odds ratio are blank and its LR- is exactly 1, and the mirror case blanks LR- and the odds ratio and shows LR+ as exactly 1. In a sample with one reference outcome all three are blank.")
+                    jmvcore::.("A ratio is corrected only when the cell in its denominator is zero and its numerator is not (FP for LR+, TN for LR-, FP or FN for the odds ratio): 0.5 is then added to all four cells for that ratio and its confidence interval (Haldane-Anscombe for the odds ratio). A zero numerator gives exactly 0, uncorrected; a corrected value of 1 or below is left blank as not estimable. On a row with no test-positive patients LR+ and the odds ratio are blank and its LR- is exactly 1; the mirror case blanks LR- and shows LR+ as exactly 1.")
                 )
                 # Name the interval method; the ranking's own, different bound for J is
                 # explained in a note on the ranking table, beside the sentence that quotes it.
+                # Named because the other diagnostic analyses of this module report exact
+                # (Clopper-Pearson) intervals for the same proportions (review XA-04).
+                self$results$combinationTableCI$setNote(
+                    "method",
+                    jmvcore::.("These are Wilson score 95% confidence intervals. The decision and decisioncompare analyses report exact (Clopper-Pearson) intervals for the same proportions, which are usually a little wider, so the two sets of limits differ.")
+                )
                 self$results$combinationTable$setNote(
                     "youden_ci",
                     jmvcore::.("The 95% confidence interval beside Youden's J is the Agresti-Caffo interval for a difference of two independent proportions, sensitivity minus the false-positive rate. No row is adjusted for multiple comparisons or for choosing among rules: treat the best-looking row as a hypothesis to confirm in new patients.")
@@ -1670,6 +1696,14 @@ decisioncombineClass <- if (requireNamespace("jmvcore")) {
                 # would otherwise survive into a run where the condition no longer holds.
                 # setNote(key, NULL) removes it.
                 ratioTable <- self$results$combinationTableCIRatios
+                zero_rows <- unique(private$.zeroRatioPatterns)
+                ratioTable$setNote("zero_ratio_ci", if (length(zero_rows) > 0) {
+                    .fmt(
+                        jmvcore::.("In {n} row(s) ({patterns}) LR+, LR- or the diagnostic odds ratio is exactly 0 because the cell in its numerator is zero; no continuity correction is applied to that estimate. Its confidence interval runs from 0 to the upper limit of the same log-scale interval computed with 0.5 added to every cell (Haldane-Anscombe correction)."),
+                        n = length(zero_rows),
+                        patterns = paste(zero_rows, collapse = ", ")
+                    )
+                })
                 patterns <- unique(private$.zeroSeIntervalPatterns)
                 if (length(patterns) == 0) {
                     ratioTable$setNote("nonestimable_ci", NULL)
@@ -1693,7 +1727,7 @@ decisioncombineClass <- if (requireNamespace("jmvcore")) {
                     "INFO",
                     .("Continuity Correction"),
                     .fmt(
-                        .("A zero cell required a continuity correction in {n} row(s) ({patterns}). For LR+ only when TP or FP is zero, and for LR- only when FN or TN is zero, 0.5 is added to all four cells for that ratio and its confidence interval. The diagnostic odds ratio and its interval use all four cells plus 0.5 whenever any cell is zero (Haldane-Anscombe correction). The corrected diagnostic odds ratio need not equal the ratio of the displayed likelihood ratios. Sensitivity, specificity, PPV and NPV use observed counts."),
+                        .("A zero cell required a continuity correction in {n} row(s) ({patterns}). LR+ is corrected only when FP is zero and TP is not, LR- only when TN is zero and FN is not, and the diagnostic odds ratio only when FP or FN is zero and neither TP nor TN is: 0.5 is then added to all four cells for that ratio and its confidence interval (for the odds ratio, the Haldane-Anscombe correction). A ratio whose numerator cell is zero is reported as exactly 0 instead. A corrected ratio stands in for an infinite one, so when the correction would bring it to 1 or below it is left blank as not estimable. The corrected diagnostic odds ratio need not equal the ratio of the displayed likelihood ratios. Sensitivity, specificity, PPV and NPV use observed counts."),
                         n = length(patterns),
                         patterns = paste(patterns, collapse = ", ")
                     )
@@ -1805,8 +1839,8 @@ decisioncombineClass <- if (requireNamespace("jmvcore")) {
                     return()
                 }
 
-                # Apply continuity correction if any cell is zero (except when all are zero)
-                # This prevents Inf/NaN in likelihood ratios and allows valid CIs
+                # Continuity correction, per ratio, only where a zero cell would make it infinite
+                # (rules below). This keeps those ratios and their log-scale CIs finite.
                 # A pattern that NO patient exhibits (tp = 0 and fp = 0) is routine whenever
                 # two tests agree closely. The all-zero guard above cannot catch it, because
                 # fn + tn is then the whole sample. Adding 0.5 to every cell would manufacture
@@ -1820,28 +1854,46 @@ decisioncombineClass <- if (requireNamespace("jmvcore")) {
                 # just 2 x sens_adj and tp_adj/fn_adj and reflect no non-diseased patient,
                 # because there are none. A continuity correction repairs a SAMPLING zero,
                 # not a structural one.
-                empty_margin <- (tp + fp) == 0 || (fn + tn) == 0 ||
-                    (tp + fn) == 0 || (fp + tn) == 0
-                lrp_zero <- !empty_margin && (tp == 0 || fp == 0)
-                lrn_zero <- !empty_margin && (fn == 0 || tn == 0)
-                use_continuity <- !empty_margin && any(c(tp, fp, fn, tn) == 0)
-                tp_lrp <- if (lrp_zero) tp + 0.5 else as.numeric(tp)
-                fp_lrp <- if (lrp_zero) fp + 0.5 else as.numeric(fp)
-                fn_lrp <- if (lrp_zero) fn + 0.5 else as.numeric(fn)
-                tn_lrp <- if (lrp_zero) tn + 0.5 else as.numeric(tn)
-                tp_lrn <- if (lrn_zero) tp + 0.5 else as.numeric(tp)
-                fp_lrn <- if (lrn_zero) fp + 0.5 else as.numeric(fp)
-                fn_lrn <- if (lrn_zero) fn + 0.5 else as.numeric(fn)
-                tn_lrn <- if (lrn_zero) tn + 0.5 else as.numeric(tn)
+                #
+                # The 0.5 also used to fire when only a NUMERATOR cell was zero. With TP 0,
+                # FP 1, FN 10, TN 99 that printed LR+ 3.06 and DOR 3.16 for a test that found
+                # no diseased patient (exact LR+ 0, DOR 0): the correction reversed the
+                # direction of the evidence (review 2026-10-21, XA-01). .diagRatioRules():
+                # correct a ratio only when its denominator is empty; an empty numerator is
+                # an exact 0 and an empty numerator AND denominator (an empty test margin)
+                # is 0/0, left blank below. A correction that would land at or below 1 (it
+                # replaces an infinite ratio) is "undefined" too, and blank.
+                empty_class <- (tp + fn) == 0 || (fp + tn) == 0
+                ratio_rules <- if (empty_class) {
+                    list(lrp = "undefined", lrn = "undefined", dor = "undefined")
+                } else {
+                    .diagRatioRules(tp, fp, fn, tn)
+                }
+                lrp_corrected <- ratio_rules$lrp == "corrected"
+                lrn_corrected <- ratio_rules$lrn == "corrected"
+                use_continuity <- ratio_rules$dor == "corrected"
+                if (any(unlist(ratio_rules) == "zero")) {
+                    private$.zeroRatioPatterns <- c(private$.zeroRatioPatterns, pattern_name)
+                }
+                tp_lrp <- if (lrp_corrected) tp + 0.5 else as.numeric(tp)
+                fp_lrp <- if (lrp_corrected) fp + 0.5 else as.numeric(fp)
+                fn_lrp <- if (lrp_corrected) fn + 0.5 else as.numeric(fn)
+                tn_lrp <- if (lrp_corrected) tn + 0.5 else as.numeric(tn)
+                tp_lrn <- if (lrn_corrected) tp + 0.5 else as.numeric(tp)
+                fp_lrn <- if (lrn_corrected) fp + 0.5 else as.numeric(fp)
+                fn_lrn <- if (lrn_corrected) fn + 0.5 else as.numeric(fn)
+                tn_lrn <- if (lrn_corrected) tn + 0.5 else as.numeric(tn)
+                if (lrp_corrected || lrn_corrected || use_continuity) {
+                    # Collected, not announced here: .emitContinuityNotice() reports every
+                    # corrected pattern in a single banner once the sweep is finished.
+                    private$.continuityPatterns <- c(
+                        private$.continuityPatterns, pattern_name)
+                }
                 if (use_continuity) {
                     tp_adj <- tp + 0.5
                     fp_adj <- fp + 0.5
                     fn_adj <- fn + 0.5
                     tn_adj <- tn + 0.5
-                    # Collected, not announced here: .emitContinuityNotice() reports every
-                    # corrected pattern in a single banner once the sweep is finished.
-                    private$.continuityPatterns <- c(
-                        private$.continuityPatterns, pattern_name)
                 } else {
                     # Doubles, as in the corrected branch: table() counts are integers, and the
                     # odds ratio's products overflowed to NA once two cells passed ~46,000, so
@@ -1906,8 +1958,8 @@ decisioncombineClass <- if (requireNamespace("jmvcore")) {
                 youden_j <- sens + spec - 1
                 youden_ci <- private$.youdenCI(tp, fn, fp, tn)
 
-                # Likelihood ratios using per-ratio adjusted counts (LR+ corrected iff TP=0|FP=0,
-                # LR- corrected iff FN=0|TN=0)
+                # Likelihood ratios using per-ratio adjusted counts (LR+ corrected iff FP = 0 < TP,
+                # LR- corrected iff TN = 0 < FN; an empty numerator gives an exact 0)
                 lr_pos <- (tp_lrp / (tp_lrp + fn_lrp)) / (fp_lrp / (fp_lrp + tn_lrp))
                 lr_neg <- (fn_lrn / (tp_lrn + fn_lrn)) / (tn_lrn / (fp_lrn + tn_lrn))
 
@@ -1919,26 +1971,18 @@ decisioncombineClass <- if (requireNamespace("jmvcore")) {
                 # with no predicted negatives sens = 1 and spec = 0, so LR- is 0/0 while
                 # LR+ is exactly 1. Either way the diagnostic odds ratio is undefined. An
                 # LR of 1 is worth showing -- it says the result does not move the odds.
-                if ((tp + fp) == 0) {
-                    lr_pos <- NA_real_
-                    dor <- NA_real_
-                }
-                if ((fn + tn) == 0) {
-                    lr_neg <- NA_real_
-                    dor <- NA_real_
-                }
                 # An empty DISEASE margin leaves sensitivity (or specificity) undefined, so
                 # all three ratios are undefined -- they cannot be read off a sample that
-                # contains only diseased or only non-diseased patients.
-                if ((tp + fn) == 0 || (fp + tn) == 0) {
-                    lr_pos <- NA_real_
-                    lr_neg <- NA_real_
-                    dor <- NA_real_
-                }
+                # contains only diseased or only non-diseased patients. ratio_rules above
+                # encodes both cases as "undefined".
+                if (ratio_rules$lrp == "undefined") lr_pos <- NA_real_
+                if (ratio_rules$lrn == "undefined") lr_neg <- NA_real_
+                if (ratio_rules$dor == "undefined") dor <- NA_real_
                 # Anything still non-finite is an undefined quantity, not a number: with
                 # tp = fp = fn = 0 and tn > 0, sens_adj was 0/0 and lr_neg reached addRow()
-                # as a literal "NaN" next to a correctly blank Sensitivity. jamovi renders
-                # NA as an empty cell but prints NaN and Inf verbatim.
+                # as a literal "NaN" next to a correctly blank Sensitivity. Undefined cells
+                # are NA here and become "" when written (.blankNA): jamovi prints a
+                # numeric NA, NaN and Inf verbatim, and only "" is an empty cell.
                 if (!is.finite(lr_pos)) lr_pos <- NA_real_
                 if (!is.finite(lr_neg)) lr_neg <- NA_real_
                 if (!is.finite(dor)) dor <- NA_real_
@@ -1949,7 +1993,7 @@ decisioncombineClass <- if (requireNamespace("jmvcore")) {
 
                 # Add to main table
                 combTable <- self$results$combinationTable
-                combTable$addRow(rowKey = pattern_name, values = list(
+                combTable$addRow(rowKey = pattern_name, values = private$.blankNA(list(
                     pattern = pattern_name,
                     # A "+/-" row is a mutually exclusive group of patients, not a rule you
                     # can apply: its "Sensitivity" is P(this exact pattern | diseased). The
@@ -1973,7 +2017,7 @@ decisioncombineClass <- if (requireNamespace("jmvcore")) {
                     lrPos = lr_pos,
                     lrNeg = lr_neg,
                     dor = dor
-                ))
+                )))
 
                 # Populate CI table with Wilson score intervals
                 ciTable <- self$results$combinationTableCI
@@ -1982,49 +2026,49 @@ decisioncombineClass <- if (requireNamespace("jmvcore")) {
                 ratioTable <- self$results$combinationTableCIRatios
 
                 # Sensitivity with CI
-                ciTable$addRow(rowKey = paste0(pattern_name, "_sens"), values = list(
+                ciTable$addRow(rowKey = paste0(pattern_name, "_sens"), values = private$.blankNA(list(
                     pattern = pattern_name,
                     statistic = .("Sensitivity"),
                     estimate = sens,
                     lower = sens_ci[1],
                     upper = sens_ci[2]
-                ))
+                )))
 
                 # Specificity with CI
-                ciTable$addRow(rowKey = paste0(pattern_name, "_spec"), values = list(
+                ciTable$addRow(rowKey = paste0(pattern_name, "_spec"), values = private$.blankNA(list(
                     pattern = pattern_name,
                     statistic = .("Specificity"),
                     estimate = spec,
                     lower = spec_ci[1],
                     upper = spec_ci[2]
-                ))
+                )))
 
                 # PPV with CI
-                ciTable$addRow(rowKey = paste0(pattern_name, "_ppv"), values = list(
+                ciTable$addRow(rowKey = paste0(pattern_name, "_ppv"), values = private$.blankNA(list(
                     pattern = pattern_name,
                     statistic = .("PPV"),
                     estimate = ppv,
                     lower = ppv_ci[1],
                     upper = ppv_ci[2]
-                ))
+                )))
 
                 # NPV with CI
-                ciTable$addRow(rowKey = paste0(pattern_name, "_npv"), values = list(
+                ciTable$addRow(rowKey = paste0(pattern_name, "_npv"), values = private$.blankNA(list(
                     pattern = pattern_name,
                     statistic = .("NPV"),
                     estimate = npv,
                     lower = npv_ci[1],
                     upper = npv_ci[2]
-                ))
+                )))
 
                 # Accuracy with CI
-                ciTable$addRow(rowKey = paste0(pattern_name, "_acc"), values = list(
+                ciTable$addRow(rowKey = paste0(pattern_name, "_acc"), values = private$.blankNA(list(
                     pattern = pattern_name,
                     statistic = .("Accuracy"),
                     estimate = acc,
                     lower = acc_ci[1],
                     upper = acc_ci[2]
-                ))
+                )))
 
                 # LR+ with CI (log-scale transformation for CI, using per-ratio adjusted counts)
                 # .estimableSe(): the estimate being legitimate says nothing about the
@@ -2047,17 +2091,21 @@ decisioncombineClass <- if (requireNamespace("jmvcore")) {
                         private$.zeroSeIntervalPatterns <- c(
                             private$.zeroSeIntervalPatterns, pattern_name)
                     }
+                } else if (ratio_rules$lrp == "zero") {
+                    # Exactly 0 (empty numerator): [0, U], U from the +0.5 table.
+                    lr_pos_lower <- 0
+                    lr_pos_upper <- .diagZeroRatioUpper("lrp", tp, fp, fn, tn)
                 } else {
                     lr_pos_lower <- NA
                     lr_pos_upper <- NA
                 }
-                ratioTable$addRow(rowKey = paste0(pattern_name, "_lrPos"), values = list(
+                ratioTable$addRow(rowKey = paste0(pattern_name, "_lrPos"), values = private$.blankNA(list(
                     pattern = pattern_name,
                     statistic = .("LR+"),
                     estimate = lr_pos,
                     lower = lr_pos_lower,
                     upper = lr_pos_upper
-                ))
+                )))
 
                 # LR- with CI (log-scale transformation for CI, using per-ratio adjusted counts)
                 if (!is.na(lr_neg) && lr_neg > 0) {
@@ -2074,17 +2122,20 @@ decisioncombineClass <- if (requireNamespace("jmvcore")) {
                         private$.zeroSeIntervalPatterns <- c(
                             private$.zeroSeIntervalPatterns, pattern_name)
                     }
+                } else if (ratio_rules$lrn == "zero") {
+                    lr_neg_lower <- 0
+                    lr_neg_upper <- .diagZeroRatioUpper("lrn", tp, fp, fn, tn)
                 } else {
                     lr_neg_lower <- NA
                     lr_neg_upper <- NA
                 }
-                ratioTable$addRow(rowKey = paste0(pattern_name, "_lrNeg"), values = list(
+                ratioTable$addRow(rowKey = paste0(pattern_name, "_lrNeg"), values = private$.blankNA(list(
                     pattern = pattern_name,
                     statistic = .("LR-"),
                     estimate = lr_neg,
                     lower = lr_neg_lower,
                     upper = lr_neg_upper
-                ))
+                )))
 
                 # DOR with CI (log-scale transformation for CI, using adjusted counts)
                 if (!is.na(dor) && dor > 0) {
@@ -2100,17 +2151,20 @@ decisioncombineClass <- if (requireNamespace("jmvcore")) {
                         private$.zeroSeIntervalPatterns <- c(
                             private$.zeroSeIntervalPatterns, pattern_name)
                     }
+                } else if (ratio_rules$dor == "zero") {
+                    dor_lower <- 0
+                    dor_upper <- .diagZeroRatioUpper("dor", tp, fp, fn, tn)
                 } else {
                     dor_lower <- NA
                     dor_upper <- NA
                 }
-                ratioTable$addRow(rowKey = paste0(pattern_name, "_dor"), values = list(
+                ratioTable$addRow(rowKey = paste0(pattern_name, "_dor"), values = private$.blankNA(list(
                     pattern = pattern_name,
                     statistic = .("DOR"),
                     estimate = dor,
                     lower = dor_lower,
                     upper = dor_upper
-                ))
+                )))
             },
             .patternConditions = function(data_prep) {
                 # The 4- and 8-pattern condition lists were once written out verbatim in the
@@ -2280,13 +2334,13 @@ decisioncombineClass <- if (requireNamespace("jmvcore")) {
                         sens <- private$.pairedChange(flag[diseased], positive[diseased, i], way)
                         spec <- private$.pairedChange(!flag[!diseased], !positive[!diseased, i],
                                                       -way)
-                        paired$setRow(rowKey = paste0(def$key, "_", i), values = list(
+                        paired$setRow(rowKey = paste0(def$key, "_", i), values = private$.blankNA(list(
                             sensGained = sens$gained, sensLost = sens$lost,
                             sensChange = sens$change, sensLower = sens$lower,
                             sensUpper = sens$upper, sensP = sens$p,
                             specGained = spec$gained, specLost = spec$lost,
                             specChange = spec$change, specLower = spec$lower,
-                            specUpper = spec$upper, specP = spec$p))
+                            specUpper = spec$upper, specP = spec$p)))
                     }
                 }
                 paired$setNote("method", .fmt(
@@ -2982,7 +3036,7 @@ decisioncombineClass <- if (requireNamespace("jmvcore")) {
                                                   seed = as.integer(self$options$seed)))
                     recTable$setRefs("harrell2015")
                 }
-                recTable$setRow(rowNo = 1, values = list(
+                recTable$setRow(rowNo = 1, values = private$.blankNA(list(
                     pattern = best_pattern$pattern,
                     method = .("Descriptive Youden ranking"),
                     youden = best_pattern$youden,
@@ -2992,7 +3046,7 @@ decisioncombineClass <- if (requireNamespace("jmvcore")) {
                     spec = best_pattern$spec,
                     acc = best_pattern$acc,
                     rationale = rationale
-                ))
+                )))
             },
             .addPatternColumn = function() {
                 # A pattern depends on the tests alone, so it is written for every case with
@@ -3615,7 +3669,7 @@ decisioncombineClass <- if (requireNamespace("jmvcore")) {
                             ggplot2::aes(xmin = .data$lower, xmax = .data$upper),
                             orientation = "y", width = 0.25
                         ) +
-                        # Open points: a continuity-corrected ratio (a zero cell), so an
+                        # Open points: a continuity-corrected row (an empty denominator cell), so an
                         # infinite observed LR+ no longer looks like an ordinary 14.8.
                         # .data$ names the COLUMN: a bare `corrected` also matched the
                         # character vector of corrected rule labels in the enclosing frame.
@@ -3686,7 +3740,7 @@ decisioncombineClass <- if (requireNamespace("jmvcore")) {
                     caption <- c(caption, .("Rows such as +/- are exact result patterns, each scored as 'this exact pattern' against all other results; the rows below the line are single tests and testing strategies. Read Youden's J in the table for pattern rows."))
                 }
                 if (!is.null(ratios) && any(ratios$pattern %in% corrected)) {
-                    caption <- c(caption, .("Open points: rows with a zero cell, whose LR+, LR- and DOR use a 0.5 continuity correction; without it at least one of the three would be 0 or infinite."))
+                    caption <- c(caption, .("Open points: rows where at least one of LR+, LR- and DOR uses a 0.5 continuity correction, because a cell in its denominator is zero; without it that ratio would be infinite."))
                 }
                 if (length(caption) > 0) {
                     last <- length(panels)

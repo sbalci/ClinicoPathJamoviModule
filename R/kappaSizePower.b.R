@@ -31,6 +31,8 @@ kappaSizePowerClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
         #   projection's figures, which missed held-out simulation by up to 0.14 either way; 3-5 categories: a
         #   qualitative note (KSP-IR-01). The Methodology states the approximation in both directions; two raters
         #   get the ML-prevalence sentence (KSP-IR-02).
+        # Resolved 2026-10-21 (independent review KSP-21-01): the 3-5 category note fires for every 3+ rater design,
+        #   not on the projection, which missed shortfalls of 0.06-0.13; the Methodology says so.
         # Resolved 2026-10-15 (review-function): the bold sample size names the simulated N beside the published one;
         #   every simulated figure comes from the one seed shown; a shortfall whose simulated N exceeds 1e9 is still reported.
 
@@ -76,40 +78,6 @@ kappaSizePowerClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                 if (s >= 5) s <- floor(x * 100) / 100    # 4.9996 -> "4.99"
             }
             base::format(s, scientific = FALSE, trim = TRUE)
-        },
-
-        # Noncentrality left once the expected proportions are ESTIMATED, as a fraction of the one
-        # N is computed from (VAL-09), for 3-5 categories. The published formula evaluates the cells at
-        # the typed proportions, as if they were known; the papers' test estimates them, which removes
-        # the part of d = P(kappa1) - P(kappa0) that a shift in the proportions could also explain
-        # (Mitra 1958): ratio = (d'Wd - d'WG (G'WG)^-1 G'Wd) / d'Wd, W = 1/P0, G = dP0 / d(free props).
-        # It is a LOCAL approximation and is used only to decide whether to warn: at the kappa gaps users
-        # type, the power it implied missed simulation by -0.14 to +0.13 in both directions, and N / ratio
-        # was worse than the published N in 6 of 16 held-out binary designs (independent review
-        # 2026-10-15, KSP-IR-01). A binary outcome is simulated instead (.simPowerBinary).
-        .estimatedPropsRatio = function(raters, props, kappa0, kappa1) {
-            P0 <- kappaSizeGofCells(length(props), raters, props, kappa0)
-            P1 <- kappaSizeGofCells(length(props), raters, props, kappa1)
-            if (any(!is.finite(P0)) || any(!is.finite(P1)) || any(P0 <= 0) || any(P1 <= 0))
-                return(NA_real_)
-            d  <- P1 - P0
-            # cells are (disagree, agree_1..agree_K); free proportions pi_1..pi_(K-1).
-            # d agree_j / d pi_j by the product rule, with no division by pi_j (no overflow as pi_j -> 0).
-            i  <- seq_len(raters) - 1
-            K  <- length(props)
-            fp <- vapply(props, function(pj) {
-                a <- (pj * (1 - kappa0) + i * kappa0) / ((1 - kappa0) + i * kappa0)
-                sum(vapply(seq_along(i), function(m)
-                    (1 - kappa0) / ((1 - kappa0) + i[m] * kappa0) * prod(a[-m]), numeric(1)))
-            }, numeric(1))
-            G <- rbind(-(fp[-K] - fp[K]), diag(fp[-K], nrow = K - 1), rep(-fp[K], K - 1))
-            # Weighted projection by QR rather than normal equations: (G'WG) is near-singular for a
-            # proportion of 1e-20 while the projection itself is well defined.
-            w    <- sqrt(1 / P0)
-            full <- sum((w * d)^2)
-            q    <- qr(w * G)
-            proj <- sum(qr.qty(q, w * d)[seq_len(q$rank)]^2)
-            (full - proj) / full
         },
 
         # KSP-IR-01: power of the test the Notes recommend for a binary outcome - the goodness-of-fit
@@ -303,7 +271,7 @@ kappaSizePowerClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
             }
 
             # VAL-09 / KSP-IR-01: .run() fills est only from 10 subjects up. Binary: the simulated power fell
-            # more than 0.03 short; 3-5 categories: the projection flags a large loss it cannot size reliably.
+            # more than 0.03 short; 3-5 categories: three or more raters (KSP-21-01), a loss it cannot size reliably.
             # est$n is NULL when the N that reaches the target is above 1e9 (rmultinom's integer size): the shortfall
             # was still measured, so it is still reported, without a simulated N.
             if (isTRUE(est$type == "sim")) {
@@ -326,7 +294,7 @@ kappaSizePowerClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                 warn <- paste0(warn, block(warn_div,
                     .("Expected proportions treated as known."),
                     .fmt(
-                        .("The published formula behind this sample size treats the expected proportions as known. The goodness-of-fit test has to estimate them from the ratings, and in this design that can leave it well short of the stated power of {power} at {n} subjects. How far short cannot be computed reliably here, so confirm the sample size by simulating the intended analysis."),
+                        .("The published formula behind this sample size treats the expected proportions as known and rests on a large-sample approximation. With three or more raters and three to five categories, simulations of the recommended goodness-of-fit test at the published sample size gave a power of about 0.64 to 0.81 for a stated 0.80, below 0.75 in 8 of 12 designs, balanced proportions included, so this design can fall well short of the stated power of {power} at {n} subjects. How far short cannot be computed reliably here, so confirm the sample size by simulating the intended analysis."),
                         n = private$.fmtN(n_required), power = base::format(power, nsmall = 2))))
             }
 
@@ -412,8 +380,9 @@ kappaSizePowerClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                 .("Kappa here is the unweighted intraclass kappa for nominal categories (Scott's pi for two raters, Fleiss' kappa for more), which assumes that all raters share the same category prevalences; when raters differ systematically (rater bias), other methods are more appropriate."),
                 .("The sample size is for the papers' goodness-of-fit chi-square test on one degree of freedom, computed over the cells in which all raters agree on a category plus one pooled cell for any disagreement; a likelihood-ratio test of kappa is an approximate alternative."),
                 # KSP-IR-01: simulated power at the published N was 0.74-0.83 with two raters and as low as 0.28
-                # with several raters and a rare finding, for a stated 0.80 (independent review 2026-10-15).
-                .("Like the published formulas, it treats the expected proportions as known and rests on a large-sample approximation, so the power actually achieved can differ from the stated power in either direction: by several percentage points in many designs, and by much more with several raters and a rare finding, where estimating the proportions costs power. For a binary outcome the analysis therefore simulates the recommended test at the sample size shown and, when the simulated power falls more than 0.03 short, gives a simulated sample size; with three to five categories a note flags designs where the loss is likely to be large (both from 10 subjects upwards)."),
+                # with several raters and a rare finding, for a stated 0.80 (independent review 2026-10-15); with
+                # 3-5 categories and 3+ raters 0.64-0.74 in 8 of 12 designs, balanced ones too (KSP-21-01).
+                .("Like the published formulas, it treats the expected proportions as known and rests on a large-sample approximation, so the power actually achieved can differ from the stated power in either direction: by several percentage points in many designs, and by much more with several raters or a rare finding. For a binary outcome the analysis therefore simulates the recommended test at the sample size shown and, when the simulated power falls more than 0.03 short, gives a simulated sample size; with three to five categories and three or more raters, where the simulated power at the published sample size was below 0.75 for a stated 0.80 in 8 of 12 designs checked, a note asks for the sample size to be confirmed by simulation (both from 10 subjects upwards)."),
                 if (isTRUE(outcome == 2L && raters >= 3))
                     .("With three or more raters, do not compute the chi-square over every count of raters calling the finding present (none, one, ..., all): that statistic has more than one degree of freedom and, read on one, rejects a true kappa0 much more often than the stated significance level."),
                 # VAL-10: DE 1992 p.1513 and ADK 2001 p.585 plug in the overall proportion of positive
@@ -480,7 +449,7 @@ kappaSizePowerClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
             power   <- self$options$power
 
             # Clear any prior content so stale results never survive a rejected run.
-            self$results$notices$setContent("")
+            self$results$notices$setContent("<div></div>")  # Html: the client skips ""
             self$results$text1$setContent("")
             self$results$text_summary$setContent("")
             self$results$text2$setContent("")
@@ -674,8 +643,12 @@ kappaSizePowerClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
             # VAL-09 / KSP-IR-01: the published N is a large-sample approximation that treats the proportions as
             # known. Binary outcome: simulate the recommended test at the shown N and, when it falls more than 0.03
             # short (about 4.7 Monte Carlo SE at R = 4000), find the N that reaches the target by simulation.
-            # 3-5 categories (the note then always comes with the Sparse notice): a qualitative warning when the
-            # local projection removes more than 15% of the noncentrality. Two-rater ratios never go below 0.889.
+            # 3-5 categories: a qualitative warning for every design with three or more raters (KSP-21-01, independent
+            # review 2026-10-21). Simulated power of the ML-at-kappa0 test at the published N, stated 0.80, R = 2000:
+            # 0.636-0.807 over 12 such designs, below 0.75 in 8, balanced .3/.3/.4 with 6 raters at 0.68; two raters
+            # 0.785 and 0.805. The trigger it replaces, a local projection of the noncentrality lost to estimating
+            # the proportions (Mitra 1958; ratio < 0.85), fired in 1 of those 8: it read 0.995 for .3/.3/.4, so the
+            # shortfall is not that projection's and no ratio threshold separated short from adequate designs.
             # Not computed below 10 subjects (the "Very small sample size" note already says approximate) or above
             # 1e9 (rmultinom's integer size; the "Very large sample size" note covers those).
             est <- NULL
@@ -691,10 +664,8 @@ kappaSizePowerClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                         est <- list(type = "sim", power = sim_p, n = found$n, power_n = found$power,
                                     R = sim_R, seed = sim_seed)
                     }
-                } else {
-                    ratio <- private$.estimatedPropsRatio(raters, props, kappa0, kappa1)
-                    if (isTRUE(is.finite(ratio) && ratio > 0 && ratio < 0.85))
-                        est <- list(type = "cat")
+                } else if (raters >= 3) {
+                    est <- list(type = "cat")
                 }
             }
 
@@ -719,7 +690,7 @@ kappaSizePowerClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                                 seed = est$seed),
                         if (isTRUE(est$type == "cat"))
                             .fmt(
-                                .("Because the goodness-of-fit test has to estimate the expected proportions from the ratings, this sample size can fall well short of power {power}; confirm it by simulating the intended analysis."),
+                                .("With three or more raters and three to five categories, this sample size can fall well short of power {power}; confirm it by simulating the intended analysis."),
                                 power = base::format(power, nsmall = 2))),
                         collapse = " ")))
                 else ""))

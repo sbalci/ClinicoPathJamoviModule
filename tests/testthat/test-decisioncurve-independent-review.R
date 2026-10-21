@@ -65,12 +65,13 @@ test_that("IR-decisioncurve-01 the analysis summary states the sample-prevalence
 })
 
 test_that("IR-decisioncurve-01 an exact 1:1 event/non-event split warns about case-control sampling", {
+  # Title renamed 2026-10-21 (DC-21-02): the notice now covers exact 1:1 to 1:4 splits, not 1:1 only.
   set.seed(3)
   bal <- data.frame(y = factor(rep(c("event", "none"), each = 150), levels = c("none", "event")),
                     good = c(runif(150, 0.2, 0.9), runif(150, 0.05, 0.6)))
-  expect_true(ir_has_notice(run_ir(bal), "Equal Numbers of Events and Non-Events", "WARNING"))
+  expect_true(ir_has_notice(run_ir(bal), "Outcome Split Matches a Case-Control Ratio", "WARNING"))
   unbal <- bal[-1, ]                                     # 149 events, 150 non-events
-  expect_false(ir_has_notice(run_ir(unbal), "Equal Numbers of Events and Non-Events", "WARNING"))
+  expect_false(ir_has_notice(run_ir(unbal), "Outcome Split Matches a Case-Control Ratio", "WARNING"))
 })
 
 # ---------------------------------------------------------------------------------------------
@@ -177,10 +178,10 @@ test_that("IR-decisioncurve-01 the 1:1 warning waits for 20 per class", {
   set.seed(4)
   small <- data.frame(y = factor(rep(c("event", "none"), each = 19), levels = c("none", "event")),
                       good = c(runif(19, 0.2, 0.9), runif(19, 0.05, 0.6)))
-  expect_false(ir_has_notice(run_ir(small), "Equal Numbers of Events and Non-Events", "WARNING"))
+  expect_false(ir_has_notice(run_ir(small), "Outcome Split Matches a Case-Control Ratio", "WARNING"))
   big <- data.frame(y = factor(rep(c("event", "none"), each = 20), levels = c("none", "event")),
                     good = c(runif(20, 0.2, 0.9), runif(20, 0.05, 0.6)))
-  expect_true(ir_has_notice(run_ir(big), "Equal Numbers of Events and Non-Events", "WARNING"))
+  expect_true(ir_has_notice(run_ir(big), "Outcome Split Matches a Case-Control Ratio", "WARNING"))
 })
 
 # ---------------------------------------------------------------------------------------------
@@ -604,7 +605,8 @@ test_that("RF-decisioncurve-06/07 whole-sentence i18n units; payoff labels say m
 test_that("RF-decisioncurve-08a the clinical interpretation is opt-in; the caveats are not", {
   res <- run_ir(ir_fixture(n = 300))
   expect_false(isTRUE(res$summaryText$visible))
-  expect_false(isTRUE(nzchar(res$summaryText$content)))
+  # "<div></div>" is the blank (an Html "" is skipped by the client), so test for visible text.
+  expect_false(isTRUE(nzchar(gsub("<[^>]+>", "", res$summaryText$content))))
   expect_match(res$procedureNotes$content, "one row per patient", fixed = TRUE)
   on <- run_ir(ir_fixture(n = 300), showInterpretation = TRUE)
   expect_true(isTRUE(on$summaryText$visible))
