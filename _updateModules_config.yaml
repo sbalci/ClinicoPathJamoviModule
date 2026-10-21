@@ -52,7 +52,7 @@ new_date: "2026-10-21"
 quick: false
 TEST: true
 jjstatsplot: false
-jsurvival: false
+jsurvival: true
 ClinicoPathDescriptives: false
 OncoPath: true
 meddecide: true
