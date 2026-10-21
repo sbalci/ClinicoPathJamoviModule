@@ -27,7 +27,9 @@ BACKWARD_LINES = 12
 
 def guard_forward(var, window):
     v = re.escape(var)
-    return re.search(r'is\.null\(\s*%s\b|length\(\s*%s\s*\)\s*(==|<)\s*(0|1)' % (v, v), window)
+    # !is.data.frame(x) / !is.list(x) reject NULL as well as a stale state of the wrong shape.
+    return re.search(r'is\.null\(\s*%s\b|length\(\s*%s\s*\)\s*(==|<)\s*(0|1)|!\s*is\.(data\.frame|list)\(\s*%s\b'
+                     % (v, v, v), window)
 
 
 def guard_backward(img, window):

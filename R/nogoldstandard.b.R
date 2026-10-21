@@ -636,6 +636,20 @@ nogoldstandardClass <- if (requireNamespace("jmvcore")) {
                         .("The model cannot determine which class is disease. Results are oriented so that the class with the higher average selected-positive probability is the high-positive class. Calling that class diseased, and the response probabilities sensitivity and specificity, requires the substantive assumption that selected-positive results are more common in diseased people for most tests. If tests perform below chance or positive levels are reversed, the clinical interpretation is inverted.")
                     )
 
+                    # Orientation is set by the tests on average, so one test whose positive
+                    # level was picked the wrong way round comes out as sensitivity + specificity
+                    # < 1 (sim .7/.75 reversed: .356/.266) and reads as a poor test. Name it.
+                    below <- names(binary_data)[is.finite(results$sensitivities) &
+                        is.finite(results$specificities) &
+                        results$sensitivities + results$specificities < 1]
+                    if (length(below)) {
+                        private$.addNotice(
+                            "STRONG_WARNING",
+                            .("Test below chance"),
+                            .fmt(.("Sensitivity plus specificity is below 1 for: {tests}. Such a test agrees with the fitted disease class less often than chance. Check that its positive level is not reversed before interpreting it as a poor test."),
+                                 tests = paste(below, collapse = ", ")))
+                    }
+
                     if (is.finite(results$prevalence) &&
                         (results$prevalence < 0.05 || results$prevalence > 0.95)) {
                         private$.addNotice(

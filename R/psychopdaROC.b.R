@@ -372,6 +372,20 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
         as.integer(hi)
       },
 
+      # The metric decides the direction, the Cutpoint method only the family (plain, LOESS,
+      # bootstrapped). These four are distances or costs, best at their MINIMUM; every other
+      # metric is best at its maximum. The method's maximize/minimize prefix used to be obeyed
+      # against the metric, so "Misclassification cost" under the default "Maximize metric"
+      # returned the WORST cut-point (sensitivity 1, specificity 0) with no warning.
+      .effectiveMethod = function() {
+        m <- self$options$method
+        if (!grepl("^(maximize|minimize)_", m)) return(m)
+        want <- if (self$options$metric %in% c("abs_d_sens_spec", "abs_d_ppv_npv",
+                                               "misclassification_cost", "roc01"))
+          "minimize" else "maximize"
+        sub("^(maximize|minimize)", want, m)
+      },
+
       .warnUser = function(msg, type = jmvcore::NoticeType$WARNING) {
         if (length(msg) && nzchar(msg)) {
           private$.userWarnings <- unique(c(private$.userWarnings, msg))
@@ -1553,11 +1567,11 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
         cut1 <- unlist(results$optimal_cutpoint)[1]
         tol <- self$options$tol_metric
         tieNote <- NULL
-        if (self$options$method %in% c("maximize_metric", "minimize_metric") &&
+        if (private$.effectiveMethod() %in% c("maximize_metric", "minimize_metric") &&
             self$options$break_ties %in% c("mean", "median") && isTRUE(is.finite(cut1)) &&
             isTRUE(tol <= 1e-05) && any(is.finite(metricList))) {
           fin <- metricList[is.finite(metricList)]
-          best <- if (self$options$method == "maximize_metric") max(fin) else min(fin)
+          best <- if (private$.effectiveMethod() == "maximize_metric") max(fin) else min(fin)
           tied <- xs[which(abs(metricList - best) <= tol)]
           shown <- if (self$options$break_ties == "mean") mean(tied) else stats::median(tied)
           at <- ruleIdx(cut1)
@@ -2639,7 +2653,15 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
           }
         } else {
           # Map method name to actual function
-          methodName <- self$options$method
+          methodName <- private$.effectiveMethod()
+          if (!identical(methodName, self$options$method)) {
+            private$.warnUser(sprintf(
+              .("The '%s' metric is best at its %s, so the cut-point was found by %s it; the Cutpoint method setting asked for the opposite direction."),
+              self$options$metric,
+              if (startsWith(methodName, "minimize")) .("minimum") else .("maximum"),
+              if (startsWith(methodName, "minimize")) .("minimising") else .("maximising")),
+              type = jmvcore::NoticeType$INFO)
+          }
           if (methodName == "maximize_metric") {
             method <- cutpointr::maximize_metric
           } else if (methodName == "minimize_metric") {

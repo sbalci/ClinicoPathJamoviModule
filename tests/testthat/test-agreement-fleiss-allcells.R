@@ -131,3 +131,26 @@ test_that("an empty rater column: Conger's kappa is computed without it, Agreeme
         expect_false("undefined_kappa" %in% names(agreement_notes(with_empty)))
     }
 })
+
+test_that("subgroup table for 3+ raters uses every rating and honours exct (2026-10-21)", {
+    skip_if_not_installed("irrCAC")
+    # It called irr::kappam.fleiss on complete cases: Fleiss always, null-SE interval, and
+    # every case with a missing rating dropped (0.465, n 29 against the headline's 0.530, n 37).
+    withr::local_seed(11); n <- 80
+    truth <- sample(1:4, n, TRUE)
+    mk <- function() factor(pmin(4, pmax(1, truth + sample(-1:1, n, TRUE, prob = c(.2, .6, .2)))),
+                            levels = 1:4, ordered = TRUE)
+    d <- data.frame(R1 = mk(), R2 = mk(), R3 = mk(), sex = factor(sample(c("F", "M"), n, TRUE)))
+    d$R3[sample(n, 15)] <- NA
+    st <- agreement_run(d, vars = c("R1", "R2", "R3"), exct = TRUE, agreementBySubgroup = TRUE,
+                        subgroupVariable = "sex")$results$subgroupAgreementTable$asDF
+    for (sx in c("F", "M")) {
+        codes <- as.data.frame(lapply(d[d$sex == sx, c("R1", "R2", "R3")], as.integer))
+        codes <- codes[rowSums(!is.na(codes)) > 0, ]
+        est <- irrCAC::conger.kappa.raw(codes, categ.labels = 1:4)$est
+        row <- st[st$subgroup == sx, ]
+        expect_equal(row$agreement_stat, est$coeff.val, tolerance = 1e-4, info = sx)
+        expect_equal(row$n_cases, nrow(codes), info = sx)
+        expect_lt(row$ci_lower, row$agreement_stat)
+    }
+})

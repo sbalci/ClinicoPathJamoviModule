@@ -580,3 +580,22 @@ test_that("asSource() escapes the free-text options so the syntax parses back to
     b$run()
     expect_false(grepl("cutoff1", b$asSource(), fixed = TRUE))
 })
+
+test_that("each LR interval uses the counts of its own point estimate (2026-10-21)", {
+    # FP = 0 corrects LR+ only. LR- stays on raw counts, and so must its interval: it was
+    # built from the all-cells +0.5 table (0.078-0.356 around a raw-count 0.1667).
+    res <- ClinicoPath::decisioncalculator(TP = 25, FN = 5, FP = 0, TN = 30, ci = TRUE)
+    df <- res$epirTable_number$asDF
+    keys <- gsub("^\"|\"$", "", rownames(df))
+    lrn <- df[keys == "lr.neg", ]
+    hand <- exp(log((5 / 30) / (30 / 30)) + c(-1, 1) * qnorm(0.975) * sqrt(1 / 5 - 1 / 30 + 1 / 30 - 1 / 30))
+    expect_equal(lrn$est, 5 / 30, tolerance = 1e-8)
+    expect_equal(c(lrn$lower, lrn$upper), hand, tolerance = 1e-6)
+    # LR+ (FP = 0) on all cells + 0.5, finite on both sides: the limits decision prints for this
+    # table (upper 801.15), where this table used to leave the upper limit blank.
+    lrp <- df[keys == "lr.pos", ]
+    est <- (25.5 / 31) / (0.5 / 31)
+    hand_p <- exp(log(est) + c(-1, 1) * qnorm(0.975) * sqrt(1 / 25.5 - 1 / 31 + 1 / 0.5 - 1 / 31))
+    expect_equal(c(lrp$est, lrp$lower, lrp$upper), c(est, hand_p), tolerance = 1e-6)
+    expect_equal(lrp$upper, 801.15, tolerance = 1e-4)
+})

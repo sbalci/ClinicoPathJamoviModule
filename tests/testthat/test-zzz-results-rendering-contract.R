@@ -63,7 +63,9 @@ test_that("no render function reads image$state without a NULL guard", {
       forward <- paste(lines[min(length(lines), i + 1L):min(length(lines), i + 7L)],
                        collapse = "\n")
       guarded <- grepl(paste0("is\\.null\\(\\s*", variable, "\\b"), forward) ||
-        grepl(paste0("length\\(\\s*", variable, "\\s*\\)\\s*(==|<)\\s*[01]"), forward)
+        grepl(paste0("length\\(\\s*", variable, "\\s*\\)\\s*(==|<)\\s*[01]"), forward) ||
+        # !is.data.frame(x) / !is.list(x) reject NULL as well as a stale state of the wrong shape
+        grepl(paste0("!\\s*is\\.(data\\.frame|list)\\(\\s*", variable, "\\b"), forward)
       if (guarded) next
 
       # an unguarded sub-field read needs the PARENT guarded before the read

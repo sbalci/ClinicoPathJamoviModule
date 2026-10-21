@@ -744,3 +744,18 @@ test_that("SEC-3: the Methods quote the partial AUC range only when it parses", 
     expect_match(me(), "from 0.8 to 1.0", fixed = TRUE)
     expect_false(grepl("NA to NA", me(partialRange = ""), fixed = TRUE))
 })
+
+test_that("multi-class orientation notes survive with table notes off (2026-10-21)", {
+    # A perfect A > B > C marker read against the default Direction shows one-vs-one AUC 0.000
+    # "Below chance"; the notes saying why were stripped because showTableNotes defaults FALSE.
+    set.seed(4); g <- sample(c("A", "B", "C"), 150, TRUE)
+    d <- data.frame(st3 = factor(g), x = rnorm(150, (g == "A") * 6 + (g == "B") * 3, 0.5))
+    ovr <- rel11_run(d, outcome = "st3", positiveClass = "A", predictors = "x", multiClassROC = TRUE,
+                     showTableNotes = FALSE)
+    expect_match(rel11_note(ovr$results$multiClassAverage, "ovr_average"), "not a summary of discrimination", fixed = TRUE)
+    expect_true(nzchar(rel11_note(ovr$results$multiClassAUC, "ovr_direction")))
+    ovo <- rel11_run(d, outcome = "st3", positiveClass = "A", predictors = "x", multiClassROC = TRUE,
+                     multiClassStrategy = "ovo", showTableNotes = FALSE)
+    expect_true(nzchar(rel11_note(ovo$results$multiClassAUC, "ovo_direction")))
+    expect_true(nzchar(rel11_note(ovo$results$multiClassAUC, "pair_order")))
+})

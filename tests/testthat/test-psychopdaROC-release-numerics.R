@@ -110,3 +110,29 @@ test_that("multiple DeLong comparisons retain raw inference and add Holm adjustm
   expect_match(note, "Holm-adjusted pairwise p-values", fixed = TRUE)
   expect_match(result$delongTest$content, "Holm-adjusted pairwise p-values", fixed = TRUE)
 })
+
+test_that("a minimise-type metric is minimised whatever the method's direction (2026-10-21)", {
+  skip_if_not_installed("cutpointr")
+  # "Misclassification cost" under the default "Maximize metric" returned the WORST cut-point
+  # (sensitivity 1, specificity 0); abs_d_sens_spec and roc01 returned an empty table.
+  set.seed(7); n <- 160
+  y <- rbinom(n, 1, 0.35)
+  m1 <- round(rnorm(n, 10 + 1.2 * y, 2), 0)
+  m <- round(rnorm(n, 5 + 0.6 * y, 1.5) + 0.3 * m1, 1)
+  d <- data.frame(status = factor(ifelse(y == 1, "Disease", "Healthy"), levels = c("Disease", "Healthy")), m = m)
+  run <- function(...) suppressWarnings(suppressMessages(ClinicoPath::psychopdaROC(run = TRUE, data = d,
+    dependentVars = "m", classVar = "status", positiveClass = "Disease", negativeClass = "Healthy",
+    refVar = NULL, ...)))$resultsTable$items[[1]]$asDF
+  oracle <- cutpointr::cutpointr(x = m, class = y, method = cutpointr::minimize_metric,
+    metric = cutpointr::misclassification_cost, cost_fp = 3, cost_fn = 1, direction = ">=",
+    pos_class = 1, break_ties = mean, silent = TRUE)
+  cost <- run(metric = "misclassification_cost", costratioFP = 3)
+  expect_equal(cost$cutpoint[1], unlist(oracle$optimal_cutpoint), tolerance = 1e-8)
+  for (metric in c("abs_d_sens_spec", "roc01", "abs_d_ppv_npv")) {
+    expect_identical(run(metric = metric)$cutpoint, run(metric = metric, method = "minimize_metric")$cutpoint,
+                     info = metric)
+    expect_gt(nrow(run(metric = metric)), 0)
+  }
+  # and a maximise-type metric is maximised under a minimize method
+  expect_identical(run(method = "minimize_metric")$cutpoint, run()$cutpoint)
+})

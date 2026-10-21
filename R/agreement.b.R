@@ -6038,15 +6038,26 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                                             if (n_raters == 2) {
                                                 private$.kappa2Ordered(sub_ratings, irr_w_sub, subgroup_lv)
                                             } else {
-                                                irr::kappam.fleiss(sub_ratings)
+                                                # The headline's estimator, as the hierarchical
+                                                # cluster table uses: every observed rating of the
+                                                # subgroup, Fleiss or Conger per exct, Gwet SE and
+                                                # t interval. irr::kappam.fleiss here dropped every
+                                                # case with a missing rating, ignored exct and gave
+                                                # a null-SE interval (subgroup kappa 0.465, n 29,
+                                                # against 0.530, n 37, for the same subgroup).
+                                                private$.fleissAllRatings(
+                                                    ratings[which(subgroup == level), , drop = FALSE],
+                                                    isTRUE(self$options$exct), self$options$confLevel)
                                             }
                                         },
                                         error = function(e) NULL
                                     )
                                     if (!is.null(kappa_result)) {
                                         agreement_stat <- kappa_result$value
-                                        stat_type <- private$.kappaLabel(n_raters, irr_w_sub)
+                                        stat_type <- private$.kappaLabel(n_raters, irr_w_sub,
+                                                                         exact = isTRUE(self$options$exct))
                                         stat_family <- "kappa"
+                                        if (n_raters > 2) n_cases <- kappa_result$subjects
 
                                         # Confidence interval.
                                         #
@@ -6089,7 +6100,12 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                                                 }
                                             }
                                         }
-                                        if (!got_ci) {
+                                        if (n_raters > 2 && is.finite(kappa_result$ci_lower)) {
+                                            ci_lower <- max(-1, kappa_result$ci_lower)
+                                            ci_upper <- kappa_result$ci_upper
+                                            got_ci <- TRUE
+                                        }
+                                        if (!got_ci && n_raters == 2) {
                                             z_stat <- kappa_result$statistic
                                             if (!is.null(z_stat) && is.finite(z_stat) &&
                                                 abs(z_stat) > 1e-6 && is.finite(agreement_stat)) {

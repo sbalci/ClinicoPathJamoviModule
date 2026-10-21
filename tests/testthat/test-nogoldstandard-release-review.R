@@ -888,3 +888,15 @@ test_that("predictive-value intervals: blank by construction, by method, and pre
     expect_true(all(lb$ppv_ci_lower <= lb$ppv & lb$ppv <= lb$ppv_ci_upper))
     expect_true(all(lb$npv_ci_lower <= lb$npv & lb$npv <= lb$npv_ci_upper))
 })
+
+test_that("a test with sensitivity + specificity < 1 is named (2026-10-21)", {
+    skip_if_not_installed("poLCA")
+    # Orientation follows the tests on average, so one test whose positive level was chosen
+    # the wrong way round reads as a poor test; only a generic warning used to appear.
+    d <- sim_tests(0.30, c(.90, .80, .70), c(.95, .85, .75), n = 500, seed = 5)
+    rev <- run_ngs(d, method = "latent_class", test3Positive = "neg")
+    tm <- rev$test_metrics$asDF
+    expect_lt(tm$sensitivity[3] + tm$specificity[3], 1)
+    expect_match(notices_of(rev), "below 1 for: t3", fixed = TRUE)
+    expect_false(grepl("below 1 for", notices_of(run_ngs(d, method = "latent_class")), fixed = TRUE))
+})

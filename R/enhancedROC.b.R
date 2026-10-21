@@ -1373,7 +1373,11 @@ enhancedROCClass <- R6::R6Class(
         # that produced it) and the notes without which a number is misread - the cut-off rule
         # (>= or <=, midpoints), that the cut-point was searched for on these data, what
         # Venkatraman's test tests, and that p-values are unadjusted.
-        .keptTableNotes = c("seed", "rule", "cutpoint_optimism", "venkatraman", "multiplicity"),
+        # The multi-class orientation notes stay too: without them a perfect marker read against
+        # the declared Direction shows one-vs-one AUC 0.000 "Below chance", and the one-vs-rest
+        # averages 0.5 by construction, with nothing on screen saying why.
+        .keptTableNotes = c("seed", "rule", "cutpoint_optimism", "venkatraman", "multiplicity",
+                            "ovr_average", "ovr_direction", "ovo_direction", "pair_order"),
         .applyTableNotesOption = function() {
             if (isTRUE(self$options$showTableNotes)) return(invisible(NULL))
             strip <- function(item) {

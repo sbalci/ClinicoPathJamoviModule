@@ -22,7 +22,10 @@ ertn_tables <- function(analysis) {
 
 # Kept with table notes off besides the seed (enhancedROC .keptTableNotes, production pass
 # 2026-10-11): the notes without which a number is misread. Excluded here; the seed is below.
-ertn_kept <- c("rule", "cutpoint_optimism", "venkatraman", "multiplicity")
+# The multi-class orientation notes joined them 2026-10-21: without them a perfect marker read
+# against the declared Direction showed one-vs-one AUC 0.000 "Below chance" with no reason.
+ertn_kept <- c("rule", "cutpoint_optimism", "venkatraman", "multiplicity",
+               "ovr_average", "ovr_direction", "ovo_direction", "pair_order")
 # A blanked cell keeps the footnote saying why it is blank (review 2026-10-11): an empty
 # statistic with no reason anywhere reads as a missing result. Excluded here like the kept notes.
 ertn_notes <- function(table) {

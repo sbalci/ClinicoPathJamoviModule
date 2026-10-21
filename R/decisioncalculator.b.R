@@ -962,38 +962,47 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) {
                     # epirTable_number is not epiR's: every row is computed here, so it does not
                     # wait on epiR (an epiR error or a renamed statistic used to blank it).
                     # LR+, LR- and the DOR are the values the
-                    # tables above show (all cells + 0.5 when one is zero) with log-scale
-                    # intervals on those same counts (Simel 1991; Woolf for the DOR); without
-                    # a zero cell this is exactly epi.tests(). A ratio whose RAW denominator
-                    # count is 0 has no finite upper limit, and one whose raw numerator count
-                    # is 0 has lower limit 0: the corrected counts would otherwise invent a
-                    # finite bound (true LR+ 900 at specificity 0.999 lay above every possible
-                    # upper limit at 10 + 10). On the raw counts epiR gave Inf/NaN, a
-                    # zero-width [1, 1] interval for a test that is never positive, and at
-                    # 10 + 10, specificity 0.95, an LR+ interval for only 40% of tables
-                    # (coverage 0.785 among them). Exact enumeration of this rule over six
-                    # designs (10 + 10 to 100 + 100, sens/spec 0.5-0.999): mean coverage
-                    # 0.94-0.96 for the LRs, 0.96-0.98 for the DOR; the log method still dips
-                    # to 0.84-0.91 at extreme accuracy, so the note calls them approximate.
+                    # tables above show (all cells + 0.5 when one of the ratio's own cells is
+                    # zero) with log-scale intervals on those same counts (Simel 1991; Woolf for
+                    # the DOR), finite on both sides; without a zero cell this is exactly
+                    # epi.tests(), and with one it is what decision and decisioncombine print.
+                    # Known ceiling, accepted 2026-10-21 for agreement between the three
+                    # analyses: a +0.5 bound can lie below the true ratio at extreme accuracy
+                    # (true LR+ 900 at specificity 0.999 lay above every possible upper limit at
+                    # 10 + 10). Until then this table left the upper limit blank when the RAW
+                    # denominator count was 0 and set the lower to 0 when the raw numerator was
+                    # 0; exact enumeration of that rule over six designs (10 + 10 to 100 + 100,
+                    # sens/spec 0.5-0.999) gave mean coverage 0.94-0.96 for the LRs and
+                    # 0.96-0.98 for the DOR. Restore it here AND in decision/decisioncombine if
+                    # coverage at extreme accuracy matters more than the shared definition.
                     # Youden: Agresti-Caffo on the observed counts.
                     if (!fractional_counts) {
                         z <- stats::qnorm(0.975)
-                        log_ci <- function(est, v, num0, den0) {
+                        # Finite Haldane-Anscombe limits on the corrected counts, as decision and
+                        # decisioncombine print for the same table (maintainer decision 2026-10-21;
+                        # the raw-count blank/0 limits used to differ between the three analyses).
+                        log_ci <- function(est, v) {
                             if (!is.finite(est)) return(c(NA_real_, NA_real_))   # not estimable
-                            ci <- if (est > 0 && is.finite(v) && v > 0) exp(log(est) + c(-1, 1) * z * sqrt(v))
-                                  else c(NA_real_, NA_real_)
-                            if (num0) ci[1] <- 0
-                            if (den0) ci[2] <- NA_real_                  # unbounded: footnoted in fill()
-                            ci
+                            if (est > 0 && is.finite(v) && v > 0) exp(log(est) + c(-1, 1) * z * sqrt(v))
+                            else c(NA_real_, NA_real_)
                         }
                         youden_ci <- private$.youdenCI(TP, TP + FN, FP, FP + TN, z)
+                        # Simel variance of log(LR) = log(x / (x + y)) - log(u / (u + w)).
+                        lr_v <- function(x, y, u, w) 1 / x - 1 / (x + y) + 1 / u - 1 / (u + w)
+                        # Each LR's variance on the counts its point estimate uses (_lrp/_lrn),
+                        # not the any-zero _cc set: TP=25 FN=5 FP=0 TN=30 put LR- 0.1667 on raw
+                        # counts inside an interval built from corrected ones. Only where those
+                        # counts give variance 0 - the other ratio of a never-positive or
+                        # never-negative test, e.g. LR- with TP = FP = 0 - would that be the
+                        # zero-width [LR, LR] epiR prints, so that one interval comes from the
+                        # all-cells +0.5 table.
+                        v_or_cc <- function(v, v_cc) if (is.finite(v) && v > 0) v else v_cc
                         own <- rbind(
-                            lr.pos = c(LRP, log_ci(LRP, 1 / TP_cc - 1 / (TP_cc + FN_cc) + 1 / FP_cc - 1 / (FP_cc + TN_cc),
-                                                   TP == 0, FP == 0)),
-                            lr.neg = c(LRN, log_ci(LRN, 1 / FN_cc - 1 / (TP_cc + FN_cc) + 1 / TN_cc - 1 / (FP_cc + TN_cc),
-                                                   FN == 0, TN == 0)),
-                            diag.or = c(DOR, log_ci(DOR, 1 / TP_cc + 1 / FP_cc + 1 / FN_cc + 1 / TN_cc,
-                                                    TP == 0 || TN == 0, FP == 0 || FN == 0)),
+                            lr.pos = c(LRP, log_ci(LRP, v_or_cc(lr_v(TP_lrp, FN_lrp, FP_lrp, TN_lrp),
+                                                                lr_v(TP_cc, FN_cc, FP_cc, TN_cc)))),
+                            lr.neg = c(LRN, log_ci(LRN, v_or_cc(lr_v(FN_lrn, TP_lrn, TN_lrn, FP_lrn),
+                                                                lr_v(FN_cc, TP_cc, TN_cc, FP_cc)))),
+                            diag.or = c(DOR, log_ci(DOR, 1 / TP_cc + 1 / FP_cc + 1 / FN_cc + 1 / TN_cc)),
                             youden = unname(youden_ci),
                             nndx = unname(private$.nndxFromYouden(youden_ci)))
                         fill(epirTable_number,
@@ -1004,7 +1013,7 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) {
                         epirTable_number$setNote("method", .("Likelihood ratios: approximate log-scale 95% interval (Simel, Samsa and Matchar 1991), which can fall short of 95% when sensitivity or specificity is near 100% in a small study. Diagnostic odds ratio: log-scale (Woolf) interval. Youden's index: Agresti-Caffo interval for the difference between the true-positive and false-positive rates. Number needed to diagnose = 1 / Youden's index; its interval is the inverse of the positive part of the Youden interval."))
                         epirTable_number$setNote("independence", independence_note)
                         epirTable_number$setNote("rawcounts", if (zero_cell)
-                            .("A zero cell was present, so the likelihood ratios and the diagnostic odds ratio here, as in the tables above, use the table with 0.5 added to every cell, and so do their intervals. A ratio whose denominator count is zero has no finite upper limit, which is left blank and footnoted; one whose numerator count is zero has a lower limit of 0. Youden's index and the number needed to diagnose use the observed counts.")
+                            .("A zero cell was present. As in the tables above, a likelihood ratio with a zero among its own cells (TP or FP for LR+, FN or TN for LR-) and the diagnostic odds ratio use the table with 0.5 added to every cell (Haldane-Anscombe), and so do their intervals; the other likelihood ratio uses the observed counts. These corrected limits are approximate. Youden's index and the number needed to diagnose use the observed counts.")
                             else NULL)
                         # An empty NNDx cell needs its reason on screen (decision.b.R wording).
                         nn <- own["nndx", ]

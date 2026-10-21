@@ -76,6 +76,20 @@ timeintervalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
     "timeintervalClass",
     inherit = timeintervalBase,
     private = list(
+        # Saved options can contain unexpected names/types before validation. Keep
+        # regenerated syntax literal; never turn their text into R expressions.
+        .sourcifyOption = function(option) {
+            if (!option$name %in% names(formals(timeinterval))) return("")
+            if (identical(option$name, "data")) return(super$.sourcifyOption(option))
+            value <- option$value
+            if (is.list(value)) return("")
+            if (is.character(value) && (length(value) != 1L || anyNA(value))) return("")
+            if (is.character(value) && !identical(value, option$default)) {
+                return(paste0(option$name, " = ", encodeString(value, quote = '"')))
+            }
+            super$.sourcifyOption(option)
+        },
+
         # ===================================================================
         # COMPREHENSIVE TIME INTERVAL CALCULATION FUNCTIONS
         # ===================================================================
@@ -1625,7 +1639,7 @@ timeintervalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     "<span style='font-size: 0.9em;'>Day/month ambiguity: ", axp0$n, " of ",
                     axp0$total, " rows could have been typed in either order and cannot be verified here",
                     if (is.finite(axp0$pt_share)) paste0(" (", round(axp0$pt_share),
-                                                         "% of the person-time above)") else "",
+                                                         "% of the raw person-time in days, before filters or landmark)") else "",
                     ".</span><br>")
 
                 # Surface the date format actually used (auto-detected or manual)
@@ -1992,7 +2006,8 @@ timeintervalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     axp$n, " of ", axp$total, " rows read as a valid date under both '",
                     axp$fmt, "' and '", axp$swap, "'",
                     if (is.finite(axp$pt_share))
-                        paste0(", carrying ", round(axp$pt_share), "% of the total person-time")
+                        paste0(", carrying ", round(axp$pt_share),
+                               "% of the raw person-time in days, before filters or landmark")
                     else "",
                     ". The '", axp$fmt, "' reading was used because ", axp$proven_by,
                     " other rows can only be read that way. If any of the ambiguous rows were ",
@@ -2100,7 +2115,7 @@ timeintervalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                             <li><strong>End dates should occur on or after start dates</strong> - Negative intervals usually indicate data entry errors</li>
                             <li><strong>Date formats must be consistent</strong> - All dates in a column should use the same format</li>
                             <li><strong>Landmark analysis excludes participants</strong> - Only those with follow-up \u2265 landmark time are included; participants with missing follow-up are also excluded, because their eligibility cannot be determined</li>
-                            <li><strong>Landmark analysis re-zeroes the clock</strong> - When a landmark is active, the landmark is subtracted from every interval, so every duration reported here (mean, median, SD, range, total person-time) is time measured <em>from the landmark</em>, not from the start date. A participant with 12 months of follow-up and a 6-month landmark contributes 6 months, and the person-time shown is post-landmark person-time. Add the landmark to each value to recover time from the start date</li>
+                            <li><strong>Landmark analysis re-zeroes the clock</strong> - When a landmark is active, the landmark is subtracted from every retained interval. A participant with 12 months of follow-up and a 6-month landmark contributes 6 months, and the person-time shown is post-landmark person-time. For the retained participants, add the landmark to each individual interval, to the mean and median, and to each range limit to recover time from the start date. Add the number of retained participants times the landmark to the total person-time. The standard deviation is unchanged by subtracting a constant from those same retained intervals. This does not restore excluded participants or reconstruct summaries for the original cohort</li>
                             <li><strong>Missing dates produce missing intervals</strong> - These are excluded from summary statistics</li>
                         </ul>
 
