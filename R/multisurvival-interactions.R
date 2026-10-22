@@ -165,10 +165,11 @@
     if (is.character(modvec)) modvec <- factor(modvec) else return(NULL)
   }
   # Clean the moderator ONCE: unordered (relevel rejects ordered factors) and
-  # dropping declared-but-unobserved levels (relevel rejects a zero-count ref).
+  # dropping declared-but-unobserved levels (relevel rejects a zero-count ref),
+  # while preserving the declared factor level ordering.
   # Treatment-contrast subgroup HRs are inherently about observed discrete
   # levels, so coercing an ordered moderator to unordered is correct here.
-  modvec <- droplevels(factor(as.character(modvec)))
+  modvec <- factor(modvec, ordered = FALSE)
   data[[moderator]] <- modvec
   mod_levels <- levels(modvec)
   if (length(mod_levels) < 2) return(NULL)
@@ -179,7 +180,7 @@
   fvec <- data[[focal]]
   focal_is_cat <- is.factor(fvec) || is.character(fvec)
   if (focal_is_cat) {
-    flev <- levels(factor(fvec))
+    flev <- if (is.factor(fvec)) levels(droplevels(fvec)) else levels(factor(fvec))
     focal_coef_names <- paste0(.escapeVariableNames(focal), flev[-1])  # <var><level>
     focal_effect_lab <- flev[-1]
   } else {

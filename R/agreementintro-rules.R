@@ -22,13 +22,13 @@
     list(title = title, group = group, subgroup = subgroup, version = version, state = state)
   }
   list(
-    agreement = entry("Interrater Reliability", "meddecide", "Agreement", "1.0.9", "production"),
+    agreement = entry("Interrater Reliability", "meddecide", "Agreement", "1.1.1", "production"),
     cohenskappa = entry("Cohen's Kappa Agreement", "meddecideExtraD", "Diagnostic Statistics",
       "1.0.83", "draft"),
     icccoeff = entry("Intraclass Correlation Coefficient", "meddecideExtraD", "Agreement",
       "0.0.31", "draft"),
     pathagreement = entry("Pathology Interrater Reliability", "OncoPathT", "Agreement",
-      "1.0.9", "testing"),
+      "1.1.1", "testing"),
     pathologyagreement = entry("Pathology Agreement Analysis", "OncoPathP", "Agreement",
       "1.0.0", "pending"),
     modalitycomparison = entry("Modality Comparison Analysis", "meddecideExtraD", "Agreement",
@@ -36,16 +36,18 @@
     multifocalconcordance = entry("Multifocal / Primary-Metastasis Concordance", "OncoPathD",
       "ClinicoPath Biomarker Analysis", "0.0.1", "draft"),
     kappaSizeCI = entry("Confidence Interval Approach for the Number of Subjects Required",
-      "Power", "Power Analysis by meddecide", "1.0.9", "production"),
+      "Power", "Power Analysis by meddecide", "1.1.1", "production"),
     kappaSizePower = entry("Power Approach for the Number of Subjects Required",
-      "Power", "Power Analysis by meddecide", "1.0.9", "production"),
+      "Power", "Power Analysis by meddecide", "1.1.1", "production"),
     kappaSizeFixedN = entry("Lowest Expected Kappa for a Fixed Sample Size", "Power",
-      "Power Analysis by meddecide", "1.0.9", "production")
+      "Power Analysis by meddecide", "1.1.1", "production")
   )
 }
 
 .agreementIntroMissing <- function(x) {
-  is.na(x) | if (is.character(x) || is.factor(x)) trimws(as.character(x)) == "" else FALSE
+  # Explicit NA factor levels have nonmissing codes; inspect their labels instead.
+  if (is.factor(x)) x <- as.character(x)
+  is.na(x) | if (is.character(x)) trimws(x) == "" else FALSE
 }
 
 # Match original ID values before making a composite key. Formatting floating-point
@@ -89,7 +91,7 @@
         if (is.numeric(x)) "numeric" else "text",
       observed = sum(present), missing = sum(!present),
       categories = length(unique(x[present])),
-      declared = if (is.factor(x)) levels(x) else character(),
+      declared = if (is.factor(x)) levels(x)[!is.na(levels(x))] else character(),
       constant = length(unique(x[present])) < 2L)
   }
   out$facts$rows <- nrow(data)
@@ -107,7 +109,8 @@
   out$facts$idFormatCollision <- any(vapply(data[unique(c(o$caseID, o$readerID,
     o$patientID, o$condition))], function(x)
       length(unique(x)) != length(unique(as.character(x))), logical(1)))
-  ordered <- lapply(data[values], function(x) if (is.ordered(x)) levels(x) else NULL)
+  ordered <- lapply(data[values], function(x)
+    if (is.ordered(x)) levels(x)[!is.na(levels(x))] else NULL)
   declared <- Filter(Negate(is.null), ordered)
   out$facts$orderConflict <- length(declared) > 1L &&
     !all(vapply(declared, identical, logical(1), declared[[1]]))
@@ -126,11 +129,11 @@
       any(vapply(data[o$conditionBRatings], function(x) any(missing(x)), logical(1)))
     if (length(o$conditionBRatings) && length(o$conditionBRatings) != length(o$ratings))
       out$issues <- c(out$issues, "inspect_paired_columns")
-    if (selected(o$caseID)) {
-      if (any(missing(data[[o$caseID]]))) out$issues <- c(out$issues, "inspect_missing_id")
-      out$facts$duplicateKeys <- sum(duplicated(.agreementIntroKey(data,
-        c(o$caseID, o$condition, o$occasion))))
-    } else out$facts$duplicateKeys <- 0L
+    keys <- c(o$caseID, o$condition, o$occasion)
+    if (any(vapply(data[keys], function(x) any(missing(x)), logical(1))))
+      out$issues <- c(out$issues, "inspect_missing_id")
+    out$facts$duplicateKeys <- if (selected(o$caseID))
+      sum(duplicated(.agreementIntroKey(data, keys))) else 0L
   } else {
     keys <- c(o$caseID, o$readerID, o$condition, o$occasion)
     if (any(vapply(data[keys], function(x) any(missing(x)), logical(1))))

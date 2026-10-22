@@ -14,6 +14,12 @@ items:
       clearWith:
           - outcome
           - outcomeLevel
+          - elapsedtime
+          - explanatory
+          - contexpl
+          - fudate
+          - dxdate
+          - tint
           - multievent
           - analysistype
           - dod
@@ -80,6 +86,7 @@ items:
     #   type:  Preformatted
 
 
+    # Static section divider (rendered via .r.yaml title; no setContent needed)
     - name:  multivariableCoxHeading
       title: Multivariable Survival Model
       type:  Preformatted
@@ -111,6 +118,7 @@ items:
           - uselandmark
           - landmark
           - timetypedata
+          - showSummaries
       
 
     - name:  text2
@@ -139,6 +147,7 @@ items:
           - uselandmark
           - landmark
           - timetypedata
+          - showSummaries
 
     - name: interactionExplanation
       title: 'Interaction Terms — how to read this'
@@ -281,6 +290,7 @@ items:
           - uselandmark
           - landmark
           - timetypedata
+          - showSummaries
 
     # Statistical Glossary Panel
     - name: glossaryPanel
@@ -1004,6 +1014,9 @@ items:
           - risktable
           - censored
           - medianline
+          - endplot
+          - byplot
+          - pplot
           - elapsedtime
           - fudate
           - dxdate
@@ -1072,6 +1085,8 @@ items:
       type: Html
       visible: (use_stratify)
       clearWith:
+          - use_stratify
+          - stratvar
           - calculateRiskScore
           - outcome
           - outcomeLevel
@@ -1416,6 +1431,7 @@ items:
           - uselandmark
           - landmark
           - timetypedata
+          - showSummaries
 
 
     # - name: adjustedSummaryTable2

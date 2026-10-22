@@ -225,7 +225,7 @@ options:
 
     - name: landmark
       title: Landmark Time
-      type: Integer
+      type: Number
       default: 3
       min: 0
       description:
@@ -449,9 +449,9 @@ options:
 
     - name: endplot
       title: Plot End Time
-      type: Integer
+      type: Number
       default: 60
-      min: 1
+      min: 0
       description:
         R: >
           The maximum follow-up time (in units defined by `timetypeoutput`) to display on survival plots.
@@ -459,9 +459,9 @@ options:
 
     - name: byplot
       title: Time Interval
-      type: Integer
+      type: Number
       default: 12
-      min: 1
+      min: 0
       description:
         R: >
           The interval (in units defined by `timetypeoutput`) at which time points or labels are shown on plots.

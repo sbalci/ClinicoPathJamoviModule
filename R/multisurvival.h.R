@@ -123,7 +123,7 @@ multisurvivalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 "uselandmark",
                 uselandmark,
                 default=FALSE)
-            private$..landmark <- jmvcore::OptionInteger$new(
+            private$..landmark <- jmvcore::OptionNumber$new(
                 "landmark",
                 landmark,
                 default=3,
@@ -221,16 +221,16 @@ multisurvivalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 "km",
                 km,
                 default=FALSE)
-            private$..endplot <- jmvcore::OptionInteger$new(
+            private$..endplot <- jmvcore::OptionNumber$new(
                 "endplot",
                 endplot,
                 default=60,
-                min=1)
-            private$..byplot <- jmvcore::OptionInteger$new(
+                min=0)
+            private$..byplot <- jmvcore::OptionNumber$new(
                 "byplot",
                 byplot,
                 default=12,
-                min=1)
+                min=0)
             private$..ci95 <- jmvcore::OptionBool$new(
                 "ci95",
                 ci95,
@@ -654,6 +654,12 @@ multisurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 clearWith=list(
                     "outcome",
                     "outcomeLevel",
+                    "elapsedtime",
+                    "explanatory",
+                    "contexpl",
+                    "fudate",
+                    "dxdate",
+                    "tint",
                     "multievent",
                     "analysistype",
                     "dod",
@@ -736,7 +742,8 @@ multisurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                     "interactions",
                     "uselandmark",
                     "landmark",
-                    "timetypedata")))
+                    "timetypedata",
+                    "showSummaries")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="text2",
@@ -763,7 +770,8 @@ multisurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                     "interactions",
                     "uselandmark",
                     "landmark",
-                    "timetypedata")))
+                    "timetypedata",
+                    "showSummaries")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="interactionExplanation",
@@ -916,7 +924,8 @@ multisurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                     "interactions",
                     "uselandmark",
                     "landmark",
-                    "timetypedata")))
+                    "timetypedata",
+                    "showSummaries")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="glossaryPanel",
@@ -1552,6 +1561,9 @@ multisurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                     "risktable",
                     "censored",
                     "medianline",
+                    "endplot",
+                    "byplot",
+                    "pplot",
                     "elapsedtime",
                     "fudate",
                     "dxdate",
@@ -1620,6 +1632,8 @@ multisurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 title="Stratification Notes",
                 visible="(use_stratify)",
                 clearWith=list(
+                    "use_stratify",
+                    "stratvar",
                     "calculateRiskScore",
                     "outcome",
                     "outcomeLevel",
@@ -1921,7 +1935,8 @@ multisurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                     "interactions",
                     "uselandmark",
                     "landmark",
-                    "timetypedata")))
+                    "timetypedata",
+                    "showSummaries")))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="adjustedSurvTable",

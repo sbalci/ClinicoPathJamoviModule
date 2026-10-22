@@ -9,60 +9,48 @@ children:
     stretchFactor: 1
     children:
       - type: TargetLayoutBox
+        label: Study identifier (required)
         children:
-          - type: Label
-            label: Study identifier (required)
-            fitToGrid: true
           - type: VariablesListBox
             name: study
             maxItemCount: 1
             isTarget: true
             itemDropBehaviour: overwrite
       - type: TargetLayoutBox
+        label: True positives (disease+, test+)
         children:
-          - type: Label
-            label: True positives (disease+, test+)
-            fitToGrid: true
           - type: VariablesListBox
             name: true_positives
             maxItemCount: 1
             isTarget: true
             itemDropBehaviour: overwrite
       - type: TargetLayoutBox
+        label: False positives (disease-, test+)
         children:
-          - type: Label
-            label: False positives (disease-, test+)
-            fitToGrid: true
           - type: VariablesListBox
             name: false_positives
             maxItemCount: 1
             isTarget: true
             itemDropBehaviour: overwrite
       - type: TargetLayoutBox
+        label: False negatives (disease+, test-)
         children:
-          - type: Label
-            label: False negatives (disease+, test-)
-            fitToGrid: true
           - type: VariablesListBox
             name: false_negatives
             maxItemCount: 1
             isTarget: true
             itemDropBehaviour: overwrite
       - type: TargetLayoutBox
+        label: True negatives (disease-, test-)
         children:
-          - type: Label
-            label: True negatives (disease-, test-)
-            fitToGrid: true
           - type: VariablesListBox
             name: true_negatives
             maxItemCount: 1
             isTarget: true
             itemDropBehaviour: overwrite
       - type: TargetLayoutBox
+        label: Meta-regression covariate (optional)
         children:
-          - type: Label
-            label: Meta-regression covariate (optional)
-            fitToGrid: true
           - type: VariablesListBox
             name: covariate
             maxItemCount: 1

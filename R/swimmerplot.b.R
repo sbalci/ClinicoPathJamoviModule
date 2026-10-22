@@ -36,9 +36,7 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
             })
         },
 
-        # Notice collection helpers. A single Preformatted (plain-text) output item.
-        # library-audit 2026-09-22 OncoPath [LOW] REJECTED: Notice renders single-line plain text;
-        #   Preformatted avoids HTML and accumulates safely across run cycles (guide section 13)
+        # Escape notice text and wrap it within the available results width.
         .noticeList = list(),
         # The censoring coding decided once per run by .censorCoding().
         .censor_coding = NULL,
@@ -64,12 +62,10 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
 
         .renderNotices = function() {
             if (length(private$.noticeList) == 0) {
-                self$results$notices$setContent("")
+                self$results$notices$setContent("<div></div>")
                 return()
             }
 
-            # Plain text only - notices avoid HTML by project convention; the Preformatted
-            # output item renders this literally (no markup, no injection surface).
             # STRONG_WARNING must not print as a plain "WARNING: " too, or the level
             # has no effect: a clinician cannot tell "n = 3 patients, treat as
             # exploratory" from "a milestone date could not be parsed". The two
@@ -103,7 +99,12 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
                 paste0(prefix, notice$title, "\n", notice$content)
             }, character(1))
 
-            self$results$notices$setContent(paste(blocks, collapse = "\n\n"))
+            self$results$notices$setContent(paste0(
+                '<div style="max-width:100%;white-space:pre-wrap;',
+                'overflow-wrap:anywhere;word-break:break-word;color:inherit;">',
+                htmltools::htmlEscape(paste(blocks, collapse = "\n\n")),
+                '</div>'
+            ))
         },
 
         # Row index of each patient's EARLIEST start, one entry per row.

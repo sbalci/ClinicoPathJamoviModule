@@ -16,35 +16,19 @@ children:
             maxItemCount: 1
             isTarget: true
       - type: TargetLayoutBox
-        label: Response value (raw or percentage measurement)
+        label: Response measurement
         children:
           - type: VariablesListBox
             name: responseVar
             maxItemCount: 1
             isTarget: true
-          - type: LayoutBox
-            margin: large
-            children:
-              - type: ComboBox
-                name: inputType
-                events:
-                  change: './waterfall.events::onChange_inputType'
-              - type: ComboBox
-                name: measurementUnit
-                enable: (inputType:raw)
       - type: TargetLayoutBox
-        label: Time variable (raw input, visits, spider plot)
+        label: Time variable (if used)
         children:
           - type: VariablesListBox
             name: timeVar
             maxItemCount: 1
             isTarget: true
-          - type: LayoutBox
-            margin: large
-            children:
-              - type: ComboBox
-                name: timeUnitLabel
-                enable: (timeVar)
       - type: TargetLayoutBox
         label: Group variable
         children:
@@ -62,14 +46,14 @@ children:
             maxItemCount: 1
             isTarget: true
       - type: TargetLayoutBox
-        label: On-Treatment / ongoing (optional)
+        label: Ongoing status (optional)
         children:
           - type: VariablesListBox
             name: ongoingVar
             maxItemCount: 1
             isTarget: true
       - type: TargetLayoutBox
-        label: Response category override (optional)
+        label: Category override (optional)
         children:
           - type: VariablesListBox
             name: responseCategoryVar
@@ -78,6 +62,21 @@ children:
   - type: LayoutBox
     margin: large
     children:
+      - type: Label
+        label: Input Settings
+        children:
+          - type: ComboBox
+            name: inputType
+            label: Input type
+            events:
+              change: './waterfall.events::onChange_inputType'
+          - type: ComboBox
+            name: measurementUnit
+            label: Raw measurement unit
+            enable: (inputType:raw)
+          - type: ComboBox
+            name: timeUnitLabel
+            label: Time unit
       - type: CheckBox
         name: enableGuidedMode
       - type: CheckBox

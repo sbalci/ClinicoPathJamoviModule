@@ -6,7 +6,7 @@ jrs: '1.1'
 items:
     - name: notices
       title: Important Information
-      type: Preformatted
+      type: Html
       clearWith:
           - patientID
           - startTime

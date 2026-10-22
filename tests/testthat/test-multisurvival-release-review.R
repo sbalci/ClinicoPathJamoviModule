@@ -1,10 +1,41 @@
 .msrr_ns <- NULL
 for (.p in c("ClinicoPath", "jsurvival")) {
-  if (.p %in% loadedNamespaces() || requireNamespace(.p, quietly = TRUE)) {
+  if (.p %in% loadedNamespaces()) {
     .candidate <- asNamespace(.p)
     if (exists("multisurvival", envir = .candidate, inherits = FALSE)) {
       .msrr_ns <- .candidate
       break
+    }
+  }
+}
+if (is.null(.msrr_ns)) {
+  .r_dir <- NULL
+  for (.d in c("R", "../R", "../../R")) {
+    if (file.exists(file.path(.d, "multisurvival.b.R"))) {
+      .r_dir <- .d
+      break
+    }
+  }
+  if (!is.null(.r_dir)) {
+    .msrr_ns <- new.env(parent = globalenv())
+    .msrr_ns$. <- function(x, ...) x
+    for (.f in c("00jmv.R", "utils.R", "utils-Notices.R", "utils-formula.R",
+                 "utils-eventindicator.R", "utils-followup.R", "survival-competingrisks.R",
+                 "multisurvival-formula.R", "multisurvival-interactions.R",
+                 "multisurvival-nomogram.R", "multisurvival.h.R", "multisurvival.b.R")) {
+      .fp <- file.path(.r_dir, .f)
+      if (file.exists(.fp)) sys.source(.fp, envir = .msrr_ns)
+    }
+  }
+}
+if (is.null(.msrr_ns)) {
+  for (.p in c("ClinicoPath", "jsurvival")) {
+    if (requireNamespace(.p, quietly = TRUE)) {
+      .candidate <- asNamespace(.p)
+      if (exists("multisurvival", envir = .candidate, inherits = FALSE)) {
+        .msrr_ns <- .candidate
+        break
+      }
     }
   }
 }
@@ -271,4 +302,119 @@ test_that("a plot horizon shorter than follow-up is disclosed", {
 
   no_plot <- .msrr_run(data, explanatory = "group", km = FALSE, ac = FALSE, endplot = 60)
   expect_false(grepl("Plot horizon shorter than follow-up", as.character(no_plot$infoMessages$content), fixed = TRUE))
+})
+
+test_that("IR-01..IR-07 regressions: exclusion notes, HTML escaping, stratified summaries/scores, singular zph, person-time multi-explanatory, competing-risk riskGroupPlot options, and fractional time options", {
+  set.seed(20261022)
+  n <- 120
+  df <- data.frame(
+    time = round(stats::runif(n, 0.5, 10), 2),
+    status = stats::rbinom(n, 1, 0.5),
+    sex = factor(sample(c("Male", "Female"), n, TRUE)),
+    rx = factor(sample(c("Control", "Experimental<img src=x onerror=alert(1)>"), n, TRUE)),
+    age = round(stats::rnorm(n, 60, 10), 1)
+  )
+
+  # IR-01a & IR-07: Fractional landmark (2.5) on complete data does not claim missing time/covariate exclusions
+  res_lm <- .msrr_run(
+    df,
+    explanatory = c("sex", "rx"),
+    contexpl = "age",
+    uselandmark = TRUE,
+    landmark = 2.5,
+    endplot = 8.5,
+    byplot = 0.5
+  )
+  expect_false(grepl(
+    "excluded from the model because the follow-up time or at least one selected covariate was missing",
+    as.character(res_lm$infoMessages$content),
+    fixed = TRUE
+  ))
+
+  # IR-01c: Missing outcome rows are not misattributed to missing time/covariates
+  df_out_na <- df
+  df_out_na$status[1:5] <- NA_integer_
+  res_out_na <- .msrr_run(df_out_na, explanatory = "sex", contexpl = "age")
+  expect_false(grepl(
+    "A further 5 row(s)",
+    as.character(res_out_na$infoMessages$content),
+    fixed = TRUE
+  ))
+
+  # IR-02: HTML tags in factor levels are escaped in Clinical Summary
+  res_xss <- .msrr_run(df, explanatory = c("sex", "rx"), contexpl = "age", showSummaries = TRUE)
+  expect_false(grepl("<img src=x onerror=alert(1)>", as.character(res_xss$text$content), fixed = TRUE))
+
+  # IR-03a & IR-03b: Stratified variable is not counted as a multivariable risk factor, and risk scores use sample centering
+  res_strat <- .msrr_run(
+    df,
+    explanatory = c("sex", "rx"),
+    contexpl = "age",
+    use_stratify = TRUE,
+    stratvar = "sex",
+    calculateRiskScore = TRUE,
+    showSummaries = TRUE
+  )
+  expect_false(grepl("examined 3 potential risk factors", as.character(res_strat$multivariableCoxSummary$content), fixed = TRUE))
+  fit_strat <- survival::coxph(survival::Surv(time, status) ~ rx + age + strata(sex), data = df)
+  rk_sample <- stats::predict(fit_strat, type = "risk", reference = "sample")
+  q_strat <- stats::quantile(rk_sample, probs = c(0, 0.25, 0.5, 0.75, 1), na.rm = TRUE)
+  grp_strat <- cut(rk_sample, breaks = q_strat, labels = c("Low Risk", "Intermediate-Low Risk", "Intermediate-High Risk", "High Risk"), include.lowest = TRUE)
+  expect_equal(
+    as.data.frame(res_strat$riskScoreTable)$median_score[1],
+    round(stats::median(rk_sample[grp_strat == "Low Risk"]), 3)
+  )
+
+  # IR-04: Singular cox.zph in .adjustedCox() does not crash the analysis
+  df_tie <- df
+  df_tie$time <- ifelse(df_tie$status == 1, 5, 10)
+  res_tie <- .msrr_run(
+    df_tie,
+    explanatory = c("sex", "rx"),
+    contexpl = "age",
+    ac = TRUE,
+    adjexplanatory = "sex",
+    ac_summary = TRUE,
+    ph_cox = TRUE
+  )
+  expect_match(as.character(res_tie$adjustedCoxPH$content), "Proportional hazards test could not be computed")
+
+  # IR-05: personTimeTable stratifies all categorical explanatory variables
+  res_pt <- .msrr_run(df, explanatory = c("sex", "rx"), person_time = TRUE)
+  pt_df <- as.data.frame(res_pt$personTimeTable)
+  expect_true(any(grepl("^sex:", pt_df$interval)))
+  expect_true(any(grepl("^rx:", pt_df$interval)))
+
+  # IR-01b & IR-06: Competing risks reconciles missing covariate rows and riskGroupPlot honours endplot/ci95
+  df_cr <- df
+  df_cr$status_cr <- factor(sample(c("DOD", "DOOC", "AWOD"), n, TRUE, prob = c(0.4, 0.2, 0.4)))
+  df_cr$age[1:6] <- NA_real_
+  res_cr <- .msrr_run(
+    df_cr,
+    outcome = "status_cr",
+    multievent = TRUE,
+    analysistype = "compete",
+    dod = "DOD",
+    dooc = "DOOC",
+    awod = "AWOD",
+    explanatory = "sex",
+    contexpl = "age",
+    calculateRiskScore = TRUE,
+    plotRiskGroups = TRUE,
+    ci95 = TRUE,
+    endplot = 6.5,
+    byplot = 1.5
+  )
+  expect_match(as.character(res_cr$infoMessages$content), "A further 6 row\\(s\\)")
+  grDevices::pdf(NULL)
+  on.exit(grDevices::dev.off(), add = TRUE)
+  expect_true(.msrr_quiet(res_cr$riskGroupPlot$.render()))
+  p_cr <- ggplot2::last_plot()
+  expect_lte(max(p_cr$data$time, na.rm = TRUE), 6.5)
+  geom_classes <- vapply(p_cr$layers, function(l) class(l$geom)[1], character(1))
+  expect_true("GeomRibbon" %in% geom_classes)
+
+  # Welcome screen (no explanatory variables) keeps eventRecodeInfo empty
+  res_todo <- .msrr_run(df, explanatory = NULL, contexpl = NULL)
+  expect_equal(as.character(res_todo$eventRecodeInfo$content), "")
 })
