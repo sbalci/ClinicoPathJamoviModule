@@ -370,4 +370,8 @@ person-time by modeling the hazard function, which represents the
 instantaneous event rate per unit of person-time. When stratifying analyses
 or examining multiple predictors, the model accounts for how these factors
 influence event rates relative to the person-time at risk in each subgroup.
+Each row must represent one independent patient with one event or censoring
+time. Repeated visits, recurrent events, delayed entry, clustering and
+time-dependent covariates require a different analysis designed for those
+data.
 }

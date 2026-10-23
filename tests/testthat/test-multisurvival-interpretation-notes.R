@@ -10,7 +10,12 @@
 }
 .in_notes <- function(tbl) vapply(tbl$notes, function(n) as.character(n$note), character(1))
 .in_data <- function() {
-  data(multisurvival_test, package = "ClinicoPath", envir = environment())
+  rda <- testthat::test_path("..", "..", "data", "multisurvival_test.rda")
+  if (file.exists(rda)) {
+    load(rda, envir = environment())
+  } else {
+    data(multisurvival_test, package = "ClinicoPath", envir = environment())
+  }
   d <- multisurvival_test
   d$treatment <- factor(d$treatment)
   d$stage <- factor(d$stage)

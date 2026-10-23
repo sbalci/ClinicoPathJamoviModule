@@ -1078,7 +1078,7 @@ analyses:
   - title: Multivariable Survival Analysis
     name: multisurvival
     ns: ClinicoPath
-    menuGroup: Survival
+    menuGroup: SurvivalT
     menuSubgroup: ClinicoPath Survival
     menuTitle: Multivariable Survival Analysis
     menuSubtitle: Multivariable Cox-regression, Adjusted Survival
@@ -1091,7 +1091,10 @@ analyses:
       instantaneous event rate per unit of person-time. When stratifying
       analyses or examining multiple predictors, the model accounts for how
       these factors influence event rates relative to the person-time at risk in
-      each subgroup.
+      each subgroup. Each row must represent one independent patient with one
+      event or censoring time. Repeated visits, recurrent events, delayed entry,
+      clustering and time-dependent covariates require a different analysis
+      designed for those data.
     ribbon: analyses
     category: analyses
   - title: Survival Feature Ranking

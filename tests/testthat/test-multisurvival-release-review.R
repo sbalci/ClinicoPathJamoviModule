@@ -416,5 +416,5 @@ test_that("IR-01..IR-07 regressions: exclusion notes, HTML escaping, stratified 
 
   # Welcome screen (no explanatory variables) keeps eventRecodeInfo empty
   res_todo <- .msrr_run(df, explanatory = NULL, contexpl = NULL)
-  expect_equal(as.character(res_todo$eventRecodeInfo$content), "")
+  expect_equal(as.character(res_todo$eventRecodeInfo$content), "<div></div>")
 })

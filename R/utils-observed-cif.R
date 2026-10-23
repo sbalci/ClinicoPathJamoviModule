@@ -1,5 +1,7 @@
 # Observed-time state probabilities, with a common risk set for every cause.
-.observedCifReport <- function(time, status, cutpoints, group = NULL) {
+.observedCifReport <- function(time, status, cutpoints, group = NULL,
+                               conf.type = "log-log",
+                               extend_exhausted = FALSE) {
   if (is.null(group)) group <- rep("Overall", length(time))
   if (length(time) != length(status) || length(time) != length(group) ||
       anyNA(time) || anyNA(status) || anyNA(group) ||
@@ -12,13 +14,18 @@
   for (g in unique(as.character(group))) {
     keep <- as.character(group) == g
     d <- data.frame(time = time[keep], status = status[keep])
-    times <- cutpoints[cutpoints <= max(d$time)]
-    if (any(cutpoints > max(d$time))) omitted <- c(omitted, g)
+    max_t <- max(d$time)
+    tail_status <- d$status[d$time == max_t]
+    exhausted <- isTRUE(extend_exhausted) &&
+      length(tail_status) > 0 && all(tail_status != 0)
+    times <- if (exhausted) cutpoints else cutpoints[cutpoints <= max_t]
+    if (!exhausted && any(cutpoints > max_t)) omitted <- c(omitted, g)
     if (!length(times)) next
     d$state <- factor(d$status, levels = 0:2,
                       labels = c("censored", "target", "competing"))
     if (any(d$status != 0)) {
-      fit <- survival::survfit(survival::Surv(time, state) ~ 1, data = d)
+      fit <- survival::survfit(survival::Surv(time, state) ~ 1, data = d,
+                               conf.type = conf.type)
       s <- summary(fit, times = times, extend = TRUE)
       estimate <- s$pstate[, match(c("(s0)", "target", "competing"), s$states),
                            drop = FALSE]
@@ -51,8 +58,12 @@
        omitted = omitted)
 }
 
-.populateObservedCif <- function(table, time, status, cutpoints, group = NULL) {
-  result <- .observedCifReport(time, status, cutpoints, group)
+.populateObservedCif <- function(table, time, status, cutpoints, group = NULL,
+                                 conf.type = "log-log",
+                                 extend_exhausted = FALSE) {
+  result <- .observedCifReport(time, status, cutpoints, group,
+                               conf.type = conf.type,
+                               extend_exhausted = extend_exhausted)
   for (i in seq_len(nrow(result$table))) {
     table$addRow(rowKey = i, values = as.list(result$table[i, ]))
   }

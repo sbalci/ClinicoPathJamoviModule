@@ -1063,7 +1063,6 @@ singlearmResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 refs=list(
                     "KaplanMeier1958"),
                 visible="(sc && (!multievent || analysistype:overall || analysistype:cause || analysistype:dfs))",
-                requiresData=TRUE,
                 clearWith=list(
                     "sc",
                     "endplot",

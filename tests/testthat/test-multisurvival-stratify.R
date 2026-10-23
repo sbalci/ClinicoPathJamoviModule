@@ -7,13 +7,15 @@
 # stratified variable is absorbed into the baseline hazard and has no coefficient,
 # so both cannot be true.
 
-.ms_ns <- NULL
-for (.p in c("ClinicoPath", "jsurvival")) {
-    if (.p %in% loadedNamespaces() || requireNamespace(.p, quietly = TRUE)) {
-        .cand <- asNamespace(.p)
-        if (exists("multisurvival", envir = .cand, inherits = FALSE)) {
-            .ms_ns <- .cand
-            break
+.ms_ns <- if (exists(".multisurvival_ns", mode = "function")) .multisurvival_ns() else NULL
+if (is.null(.ms_ns)) {
+    for (.p in c("ClinicoPath", "jsurvival")) {
+        if (.p %in% loadedNamespaces() || requireNamespace(.p, quietly = TRUE)) {
+            .cand <- asNamespace(.p)
+            if (exists("multisurvival", envir = .cand, inherits = FALSE)) {
+                .ms_ns <- .cand
+                break
+            }
         }
     }
 }

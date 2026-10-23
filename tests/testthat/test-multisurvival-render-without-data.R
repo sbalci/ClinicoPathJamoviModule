@@ -12,13 +12,15 @@
 # caches. These tests recreate the redraw condition -- no dataset, empty caches --
 # and check that the renderers draw from image$state alone.
 
-.msrd_ns <- NULL
-for (.p in c("ClinicoPath", "jsurvival")) {
-    if (.p %in% loadedNamespaces() || requireNamespace(.p, quietly = TRUE)) {
-        .cand <- asNamespace(.p)
-        if (exists("multisurvival", envir = .cand, inherits = FALSE)) {
-            .msrd_ns <- .cand
-            break
+.msrd_ns <- if (exists(".multisurvival_ns", mode = "function")) .multisurvival_ns() else NULL
+if (is.null(.msrd_ns)) {
+    for (.p in c("ClinicoPath", "jsurvival")) {
+        if (.p %in% loadedNamespaces() || requireNamespace(.p, quietly = TRUE)) {
+            .cand <- asNamespace(.p)
+            if (exists("multisurvival", envir = .cand, inherits = FALSE)) {
+                .msrd_ns <- .cand
+                break
+            }
         }
     }
 }
@@ -66,7 +68,8 @@ skip_if(is.null(.msrd_ns), "multisurvival not available in this distribution")
 test_that("adjusted curves redraw from state alone, with no dataset and no cached model", {
     res <- .msrd_run(ac = TRUE, adjexplanatory = "grp", ac_method = "average")
     st <- res$plot_adj$state
-    expect_setequal(names(st), c("curves", "finegray"))   # no dataset, no coxph fit
+    expect_setequal(names(st), c("curves", "finegray", "has_competing"))
+    expect_false(st$has_competing)   # no dataset, no coxph fit
     expect_true(is.data.frame(st$curves) && nrow(st$curves) > 0)
 
     .msrd_as_redraw(res)

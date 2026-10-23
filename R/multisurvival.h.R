@@ -1690,6 +1690,7 @@ multisurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                     "dxdate",
                     "fudate",
                     "timetypedata",
+                    "timetypeoutput",
                     "uselandmark",
                     "landmark",
                     "explanatory",
@@ -1715,6 +1716,7 @@ multisurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                     "dxdate",
                     "tint",
                     "timetypedata",
+                    "timetypeoutput",
                     "adjexplanatory",
                     "multievent",
                     "analysistype",
@@ -1748,6 +1750,7 @@ multisurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                     "dxdate",
                     "tint",
                     "timetypedata",
+                    "timetypeoutput",
                     "adjexplanatory",
                     "multievent",
                     "analysistype",
@@ -2426,7 +2429,7 @@ multisurvivalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             super$initialize(
                 package = "ClinicoPath",
                 name = "multisurvival",
-                version = c(1,1,1),
+                version = c(1,1,2),
                 options = options,
                 results = multisurvivalResults$new(options=options),
                 data = data,
@@ -2448,7 +2451,11 @@ multisurvivalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' person-time by modeling the hazard function, which represents the 
 #' instantaneous event rate per unit of person-time. When stratifying analyses 
 #' or examining multiple predictors, the model accounts for how these factors 
-#' influence event rates relative to the person-time at risk in each subgroup.
+#' influence event rates relative to the person-time at risk in each subgroup. 
+#' Each row must represent one independent patient with one event or censoring 
+#' time. Repeated visits, recurrent events, delayed entry, clustering and 
+#' time-dependent covariates require a different analysis designed for those 
+#' data.
 #' @param data The dataset to be analyzed, provided as a data frame. Must
 #'   contain the variables specified in the options below.
 #' @param elapsedtime The numeric variable representing follow-up time until

@@ -621,7 +621,6 @@ items:
       # visibilities from the recode, which also catches a 0/1/2 outcome
       # arriving with multievent = FALSE (outcomeorganizer hand-off).
       visible: (sc && (!multievent || analysistype:overall || analysistype:cause || analysistype:dfs))
-      requiresData: true
       clearWith:
           - sc
           - endplot

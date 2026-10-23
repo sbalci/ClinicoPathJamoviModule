@@ -17,6 +17,7 @@ probabilities, person-time incidence rates and piecewise hazard rates.
 \section{Methods}{
 \subsection{Public methods}{
   \itemize{
+    \item \href{#method-singlearmClass-initialize}{\code{singlearmClass$new()}}
     \item \href{#method-singlearmClass-clone}{\code{singlearmClass$clone()}}
   }
 }
@@ -50,9 +51,19 @@ probabilities, person-time incidence rates and piecewise hazard rates.
   <li><span class="pkg-link" data-pkg="jmvcore" data-topic="Analysis" data-id="setError"><a href='../../jmvcore/html/Analysis.html#method-Analysis-setError'><code>jmvcore::Analysis$setError()</code></a></span></li>
   <li><span class="pkg-link" data-pkg="jmvcore" data-topic="Analysis" data-id="setStatus"><a href='../../jmvcore/html/Analysis.html#method-Analysis-setStatus'><code>jmvcore::Analysis$setStatus()</code></a></span></li>
   <li><span class="pkg-link" data-pkg="jmvcore" data-topic="Analysis" data-id="translate"><a href='../../jmvcore/html/Analysis.html#method-Analysis-translate'><code>jmvcore::Analysis$translate()</code></a></span></li>
-  <li><code>singlearmBase$initialize()</code></li>
 </ul>
 </details>}}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-singlearmClass-initialize"></a>}}
+\if{latex}{\out{\hypertarget{method-singlearmClass-initialize}{}}}
+\subsection{\code{singlearmClass$new()}}{
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{singlearmClass$new(...)}
+    \if{html}{\out{</div>}}
+  }
+}
+
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-singlearmClass-clone"></a>}}
 \if{latex}{\out{\hypertarget{method-singlearmClass-clone}{}}}

@@ -14,13 +14,15 @@
 # hazard for each unit increase in stageIV". .coefTerms() recovers variable /
 # level / reference from $assign, $contrasts and $xlevels instead.
 
-.msacc_ns <- NULL
-for (.p in c("ClinicoPath", "jsurvival")) {
-    if (.p %in% loadedNamespaces() || requireNamespace(.p, quietly = TRUE)) {
-        .cand <- asNamespace(.p)
-        if (exists("multisurvival", envir = .cand, inherits = FALSE)) {
-            .msacc_ns <- .cand
-            break
+.msacc_ns <- if (exists(".multisurvival_ns", mode = "function")) .multisurvival_ns() else NULL
+if (is.null(.msacc_ns)) {
+    for (.p in c("ClinicoPath", "jsurvival")) {
+        if (.p %in% loadedNamespaces() || requireNamespace(.p, quietly = TRUE)) {
+            .cand <- asNamespace(.p)
+            if (exists("multisurvival", envir = .cand, inherits = FALSE)) {
+                .msacc_ns <- .cand
+                break
+            }
         }
     }
 }

@@ -10,13 +10,15 @@
 # model's common risk set and were therefore the same number for every level
 # while carrying a per-level label.
 
-.msac_ns <- NULL
-for (.p in c("ClinicoPath", "jsurvival")) {
-    if (.p %in% loadedNamespaces() || requireNamespace(.p, quietly = TRUE)) {
-        .cand <- asNamespace(.p)
-        if (exists("multisurvival", envir = .cand, inherits = FALSE)) {
-            .msac_ns <- .cand
-            break
+.msac_ns <- if (exists(".multisurvival_ns", mode = "function")) .multisurvival_ns() else NULL
+if (is.null(.msac_ns)) {
+    for (.p in c("ClinicoPath", "jsurvival")) {
+        if (.p %in% loadedNamespaces() || requireNamespace(.p, quietly = TRUE)) {
+            .cand <- asNamespace(.p)
+            if (exists("multisurvival", envir = .cand, inherits = FALSE)) {
+                .msac_ns <- .cand
+                break
+            }
         }
     }
 }

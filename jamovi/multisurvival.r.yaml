@@ -1153,6 +1153,7 @@ items:
           - dxdate
           - fudate
           - timetypedata
+          - timetypeoutput
           - uselandmark
           - landmark
           - explanatory
@@ -1180,6 +1181,7 @@ items:
           - dxdate
           - tint
           - timetypedata
+          - timetypeoutput
           - adjexplanatory
           - multievent
           - analysistype
@@ -1214,6 +1216,7 @@ items:
           - dxdate
           - tint
           - timetypedata
+          - timetypeoutput
           - adjexplanatory
           - multievent
           - analysistype
