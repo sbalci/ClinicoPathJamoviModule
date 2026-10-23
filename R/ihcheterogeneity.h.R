@@ -778,7 +778,7 @@ ihcheterogeneityBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             super$initialize(
                 package = "ClinicoPath",
                 name = "ihcheterogeneity",
-                version = c(1,1,1),
+                version = c(1,1,2),
                 options = options,
                 results = ihcheterogeneityResults$new(options=options),
                 data = data,

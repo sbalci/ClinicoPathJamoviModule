@@ -103,6 +103,8 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         # exported columns mean what their names say.
         .rawTime = NULL,
         .rawOutcome = NULL,
+        .cifReachedAtTail = FALSE,
+        .cifTailPct = NA_real_,
         .errorMessages = character(0),
         .warningMessages = character(0),
         .infoMessages = character(0),
@@ -192,7 +194,9 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         # but an explicit reset is also required for programmatic reruns and
         # for early-return paths reached after an option combination becomes
         # invalid.
-        for (nm in c("medianTable", "survTable", "personTimeTable",
+        private$.cifReachedAtTail <- FALSE
+        private$.cifTailPct <- NA_real_
+        for (nm in c("cifTable", "medianTable", "survTable", "personTimeTable",
                      "baselineHazardTable")) {
           try(.deleteTableRows(self$results[[nm]]), silent = TRUE)
         }
@@ -206,6 +210,7 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         }
 
         for (spec in list(
+          c("cifTable", "estimand"), c("cifTable", "support"),
           c("medianTable", "rmst"), c("medianTable", "cr_ci"),
           c("survTable", "cif_note"), c("survTable", "boundary_ci"),
           c("personTimeTable", "ci"),
@@ -1738,8 +1743,6 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
           private$.validatePlotParameters(check_y = self$options$sc || self$options$ce)
         if (private$.isCompetingRisk() && self$options$sc) {
           unavailable <- character()
-          if (isTRUE(self$options$risktable))
-            unavailable <- c(unavailable, "the numbers-at-risk panel")
           if (isTRUE(self$options$censored))
             unavailable <- c(unavailable, "censoring marks")
           if (!identical(self$options$medianline, "none"))
@@ -1954,6 +1957,8 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
             if (is.finite(max_time) && candidate >= max_time && prev_est < 0.5) {
               reached_at_tail <- TRUE
+              private$.cifReachedAtTail <- TRUE
+              private$.cifTailPct <- 100 * cif_est[median_idx]
               private$.addWarning(.fmt(.("The cumulative incidence of the event of interest reaches 50% only at the very last observed time ({time} {unit}), stepping from {before}% to {after}% with {atrisk} subject(s) still at risk. That step is driven by the final observation rather than by the cohort, so no median is reported. Report the cumulative incidence at fixed time points instead, or extend follow-up."),
                 time   = base::format(round(candidate, 1), trim = TRUE),
                 unit   = self$options$timetypeoutput,
@@ -2408,6 +2413,7 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         if (private$.isCompetingRisk()) {
           raw_cutp <- private$.resolveCutpoints(self$options$cutp)
           if (isTRUE(self$options$cif_all_causes)) {
+            try(.deleteTableRows(self$results$cifTable), silent = TRUE)
             .populateObservedCif(self$results$cifTable, mydata[[mytime]],
                                 mydata[[myoutcome]],
                                 raw_cutp,
@@ -2415,80 +2421,94 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                                 extend_exhausted = TRUE)
           }
           # For competing risk, we calculate Cumulative Incidence
-          
-          # Build the multi-state status as a FACTOR with explicit levels.
-          #
-          # Surv(time, status, type = "mstate") with a NUMERIC status treats the
-          # LOWEST OBSERVED value as censoring -- not the value 0. In a cohort
-          # with no censored subjects the observed values are {1, 2}, so code 1
-          # (the event of interest) BECAME the censoring code, survfit returned
-          # states ("(s0)", "2"), the lookup for state "1" failed, and the table
-          # reported 0% cumulative incidence for an event that occurred in 169
-          # of 200 subjects -- with a footnote saying it never happened. R also
-          # warns that type = "mstate" is deprecated, for exactly this reason.
-          #
-          # With an explicit factor the states come back as
-          # ("(s0)", "event", "competing") whichever codes happen to be present,
-          # so the column can be selected by NAME and cannot be misread.
-          mydata[["myoutcome_mstate"]] <- factor(
-            mydata[[myoutcome]],
-            levels = c(0, 1, 2),
-            labels = c("censored", "event", "competing"))
-
-          # composeTerm backtick-escapes user column names; asFormula validates
-          # against jamovi's allow-list (Surv is allow-listed).
-          f_str <- paste0('Surv(',
-                          jmvcore::composeTerm(mytime),
-                          ', ',
-                          jmvcore::composeTerm("myoutcome_mstate"),
-                          ') ~ 1')
-          formula_mstate <- jmvcore::asFormula(f_str, additional_allowed_functions = c("Surv"))
-
-          fit_mstate <- private$.safeExecute({
-            private$.getCachedSurvfit(formula_mstate, mydata, "survtable_mstate")
-          }, context = "survival_calculation")
-
-          if (is.null(fit_mstate)) {
-            private$.addError(.('Unable to perform competing risk analysis. Verify outcome is coded as 0 (censored), 1 (event of interest), 2 (competing event) and sufficient events exist.'))
-            return()
-          }
-          
           utimes <- private$.supportedCutpoints(raw_cutp, mydata[[mytime]], mydata[[myoutcome]])
           if (length(utimes) == 0) {
             private$.addWarning(.('No requested time point falls within the observed follow-up, so the cumulative incidence table is empty. Enter cutpoints inside the follow-up range.'))
             return()
           }
 
-          s_summary <- summary(fit_mstate, times = utimes, extend = TRUE)
+          if (!any(mydata[[myoutcome]] != 0, na.rm = TRUE)) {
+            # survival:::survfitAJ errors with "subscript out of bounds" when
+            # every observation is censored (no code-1 or code-2 events),
+            # whereas .medianSurv(), .plotCIF(), and .observedCifReport() all
+            # report the valid boundary estimate CIF(t) = 0.
+            s_time <- utimes
+            n_risk_val <- vapply(utimes, function(t) sum(mydata[[mytime]] >= t, na.rm = TRUE), integer(1))
+            n_event_val <- rep(0L, length(utimes))
+            cif_est <- rep(0, length(utimes))
+            cif_se <- rep(0, length(utimes))
+            cif_lower <- rep(NA_real_, length(utimes))
+            cif_upper <- rep(NA_real_, length(utimes))
+          } else {
+            # Build the multi-state status as a FACTOR with explicit levels.
+            #
+            # Surv(time, status, type = "mstate") with a NUMERIC status treats the
+            # LOWEST OBSERVED value as censoring -- not the value 0. In a cohort
+            # with no censored subjects the observed values are {1, 2}, so code 1
+            # (the event of interest) BECAME the censoring code, survfit returned
+            # states ("(s0)", "2"), the lookup for state "1" failed, and the table
+            # reported 0% cumulative incidence for an event that occurred in 169
+            # of 200 subjects -- with a footnote saying it never happened. R also
+            # warns that type = "mstate" is deprecated, for exactly this reason.
+            #
+            # With an explicit factor the states come back as
+            # ("(s0)", "event", "competing") whichever codes happen to be present,
+            # so the column can be selected by NAME and cannot be misread.
+            mydata[["myoutcome_mstate"]] <- factor(
+              mydata[[myoutcome]],
+              levels = c(0, 1, 2),
+              labels = c("censored", "event", "competing"))
 
-          # Extract the CIF of the event of interest BY STATE NAME. The factor
-          # levels above guarantee the "event" state exists whether or not any
-          # code-1 event was observed, so this lookup is deterministic.
-          states <- s_summary$states
-          if (is.null(states)) states <- colnames(s_summary$pstate)
-          ev_col <- match("event", states)
+            # composeTerm backtick-escapes user column names; asFormula validates
+            # against jamovi's allow-list (Surv is allow-listed).
+            f_str <- paste0('Surv(',
+                            jmvcore::composeTerm(mytime),
+                            ', ',
+                            jmvcore::composeTerm("myoutcome_mstate"),
+                            ') ~ 1')
+            formula_mstate <- jmvcore::asFormula(f_str, additional_allowed_functions = c("Surv"))
 
-          if (is.na(ev_col)) {
-            # Unreachable with the factor fit above. If it ever happens the fit
-            # is not the object we built and NOTHING here is safe to report -- a
-            # failed state lookup is an ERROR condition, not a zero. The previous
-            # pass zero-filled here, which is how a real 84.5% cumulative
-            # incidence was printed as 0% under a footnote asserting the event
-            # was never observed.
-            private$.addError(.('Competing risk analysis failed: the fitted model does not contain the event-of-interest state. Verify the outcome is coded 0 (censored), 1 (event of interest), 2 (competing event).'))
-            return()
+            fit_mstate <- private$.safeExecute({
+              private$.getCachedSurvfit(formula_mstate, mydata, "survtable_mstate")
+            }, context = "survival_calculation")
+
+            if (is.null(fit_mstate)) {
+              private$.addError(.('Unable to perform competing risk analysis. Verify outcome is coded as 0 (censored), 1 (event of interest), 2 (competing event) and sufficient events exist.'))
+              return()
+            }
+
+            s_summary <- summary(fit_mstate, times = utimes, extend = TRUE)
+
+            # Extract the CIF of the event of interest BY STATE NAME. The factor
+            # levels above guarantee the "event" state exists whether or not any
+            # code-1 event was observed, so this lookup is deterministic.
+            states <- s_summary$states
+            if (is.null(states)) states <- colnames(s_summary$pstate)
+            ev_col <- match("event", states)
+
+            if (is.na(ev_col)) {
+              # Unreachable with the factor fit above. If it ever happens the fit
+              # is not the object we built and NOTHING here is safe to report -- a
+              # failed state lookup is an ERROR condition, not a zero. The previous
+              # pass zero-filled here, which is how a real 84.5% cumulative
+              # incidence was printed as 0% under a footnote asserting the event
+              # was never observed.
+              private$.addError(.('Competing risk analysis failed: the fitted model does not contain the event-of-interest state. Verify the outcome is coded 0 (censored), 1 (event of interest), 2 (competing event).'))
+              return()
+            }
+
+            # summary.survfitms returns times x states matrices, but tolerate a
+            # dropped dimension rather than silently indexing a vector by column.
+            pick <- function(x, col) if (is.null(dim(x))) x[col] else x[, col]
+
+            s_time <- s_summary$time
+            n_risk_val <- pick(s_summary$n.risk, 1)
+            cif_est <- pick(s_summary$pstate, ev_col)
+            cif_se <- pick(s_summary$std.err, ev_col)
+            cif_lower <- pick(s_summary$lower, ev_col)
+            cif_upper <- pick(s_summary$upper, ev_col)
+            n_event_val <- pick(s_summary$n.event, ev_col)
           }
-
-          # summary.survfitms returns times x states matrices, but tolerate a
-          # dropped dimension rather than silently indexing a vector by column.
-          pick <- function(x, col) if (is.null(dim(x))) x[col] else x[, col]
-
-          n_risk_val <- pick(s_summary$n.risk, 1)
-          cif_est <- pick(s_summary$pstate, ev_col)
-          cif_se <- pick(s_summary$std.err, ev_col)
-          cif_lower <- pick(s_summary$lower, ev_col)
-          cif_upper <- pick(s_summary$upper, ev_col)
-          n_event_val <- pick(s_summary$n.event, ev_col)
 
           # Standard large-sample transformations degenerate at the probability
           # boundaries: before the first target event they can print 0%-0%, and
@@ -2512,7 +2532,7 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
           }
 
           km_fit_df <- data.frame(
-            time = s_summary$time,
+            time = s_time,
             n.risk = n_risk_val,
             n.event = n_event_val,
             surv = cif_est,
@@ -2528,12 +2548,15 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             survTable$addRow(rowKey = i, values = c(km_fit_df[i, names(km_fit_df) != "std.err"]))
           }
           
+          cohort_n <- nrow(mydata)
+          km_fit_df$events_cum <- cumsum(km_fit_df$n.event)
+          km_fit_df$prev_time <- c(0, utils::head(km_fit_df$time, -1))
           km_fit_df$ci <- private$.ciText(km_fit_df$lower, km_fit_df$upper)
 
           km_fit_df %>%
             dplyr::mutate(
               description = glue::glue(
-                "At {time} {self$options$timetypeoutput}, the cumulative incidence of the event of interest is {scales::percent(surv)}{ci}."
+                "At {time} {self$options$timetypeoutput}, the cumulative incidence of the event of interest is {scales::percent(surv)}{ci}. \n At this time point {n.risk} of the {cohort_n} subjects were still at risk. \n {n.event} target event(s) occurred between {prev_time} and {time} {self$options$timetypeoutput}; {events_cum} target event(s) had been observed by {time} {self$options$timetypeoutput}."
               )
             ) %>%
             dplyr::select(description) %>%
@@ -3501,6 +3524,54 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             lab[lab == "2"] <- cr_lab
             plot_obj$data$event <- factor(
               lab, levels = unique(c(ev_lab, cr_lab, lab)))
+
+            # Replace ggcompetingrisks's unclipped linear Wald ribbon (est +/-
+            # 1.96*std, which crosses below 0 and above 1) and diagonal GeomLine
+            # with Kalbfleisch-Prentice log-log confidence bounds inside [0, 1]
+            # and a right-continuous step curve (GeomStep) matching survTable
+            # and cifTable.
+            est_v <- as.numeric(plot_obj$data$est)
+            std_v <- if ("std" %in% names(plot_obj$data)) {
+              as.numeric(plot_obj$data$std)
+            } else if ("var" %in% names(plot_obj$data)) {
+              sqrt(pmax(0, as.numeric(plot_obj$data$var)))
+            } else {
+              rep(NA_real_, length(est_v))
+            }
+            valid_ci <- is.finite(est_v) & est_v > 0 & est_v < 1 &
+                        is.finite(std_v) & std_v > 0
+            z_val <- stats::qnorm(0.975)
+            lower_v <- rep(NA_real_, length(est_v))
+            upper_v <- rep(NA_real_, length(est_v))
+            theta <- std_v[valid_ci] / (est_v[valid_ci] * abs(log(est_v[valid_ci])))
+            lower_v[valid_ci] <- pmax(0, pmin(1, est_v[valid_ci]^exp(z_val * theta)))
+            upper_v[valid_ci] <- pmax(0, pmin(1, est_v[valid_ci]^exp(-z_val * theta)))
+            plot_obj$data$lower <- lower_v
+            plot_obj$data$upper <- upper_v
+
+            plot_obj <- ggplot2::ggplot(
+              plot_obj$data,
+              ggplot2::aes(x = time, y = est, color = event, group = event)
+            )
+            if (isTRUE(self$options$ci95)) {
+              plot_obj <- plot_obj +
+                ggplot2::geom_ribbon(
+                  ggplot2::aes(ymin = lower, ymax = upper, fill = event),
+                  alpha = 0.2,
+                  color = NA,
+                  na.rm = TRUE
+                )
+            }
+            plot_obj <- plot_obj +
+              ggplot2::geom_step(direction = "hv", linewidth = 1.0, na.rm = TRUE) +
+              ggplot2::labs(
+                title = .("Cumulative Incidence Function (CIF)"),
+                x = paste0('Time (', self$options$timetypeoutput, ')')
+              ) +
+              ggplot2::coord_cartesian(
+                xlim = c(0, self$options$endplot),
+                ylim = c(self$options$ybegin_plot, self$options$yend_plot)
+              )
           }
 
           # Only name aesthetics that exist. ggplot2 prints "Ignoring unknown
@@ -4303,6 +4374,11 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
               .("The median time to the event of interest could not be estimated: no event of interest was observed (longest follow-up %.1f %s)") else
               sprintf(.("%s could not be estimated: no events were observed (longest follow-up %%.1f %%s)"), estimand_meta$median)
             median_text <- sprintf(no_median_label, max_followup, time_unit)
+          } else if (private$.isCompetingRisk() && isTRUE(private$.cifReachedAtTail)) {
+            median_text <- sprintf(
+              .("The median time to the event of interest was not reached within interior follow-up: the cumulative incidence of the event of interest reached 50%% only at the final observed follow-up time (%.1f %s, reaching %.1f%%), where the step is driven by the last observation(s); report fixed-time cumulative incidence estimates instead"),
+              max_followup, time_unit, private$.cifTailPct
+            )
           } else if (private$.isCompetingRisk()) {
             median_text <- sprintf(
               .("The median time to the event of interest was not reached: the cumulative incidence of the event of interest stayed below 50%% within the observed follow-up (longest follow-up %.1f %s). With competing risks this is expected whenever the competing event is frequent, since the cumulative incidence can plateau below 50%% however long follow-up continues; it is not a statement that outcomes were good"),

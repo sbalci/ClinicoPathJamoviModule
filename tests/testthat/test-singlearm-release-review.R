@@ -57,6 +57,47 @@ test_that("a CIF crossing 50% only at the last observed time is not a median", {
   expect_match(msg, "1 subject\\(s\\) still at risk")
   # and the narrative must not assert a median
   expect_match(strip_html(r$medianSummary$content), "not reached")
+
+  # IR-01: clinicalSummary must not claim cumulative incidence "stayed below 50%"
+  # when CIF_1 reached >= 50% at the final observation time.
+  r_sum <- sa_rr_compete(d, showSummaries = TRUE)
+  expect_false(grepl("stayed below 50%", strip_html(r_sum$clinicalSummary$content), fixed = TRUE))
+  expect_match(strip_html(r_sum$clinicalSummary$content), "reached 50% only at the final observed follow-up time")
+})
+
+test_that("competing-risks all-censored cohort populates survTable without survfitAJ crash (IR-02)", {
+  d_cens <- data.frame(
+    time_months = c(6, 12, 18, 24, 30, 36, 42, 48),
+    outcome = factor(rep(c("Alive_NED", "Alive_Disease"), 4),
+                     levels = c("Alive_NED", "Alive_Disease", "Dead_Disease", "Dead_Other"))
+  )
+  r <- sa_rr_compete(d_cens, cutp = "12, 24", showSummaries = TRUE)
+  expect_equal(r$survTable$rowCount, 2L)
+  expect_equal(r$survTable$asDF$surv, c(0, 0))
+  expect_equal(r$survTable$asDF$n.risk, c(7L, 5L))
+  expect_false(grepl("Unable to perform competing risk analysis", strip_html(r$errors$content), fixed = TRUE))
+  expect_match(strip_html(r$survTableSummary$content), "of the 8 subjects were still at risk")
+})
+
+test_that("cifTable is cleared across reruns and invalid transitions, and risktable notice is not emitted falsely (IR-04, IR-05)", {
+  d <- as.data.frame(get("singlearm_compete"))
+  opts <- ClinicoPath:::singlearmOptions$new(
+    elapsedtime = "time_months", outcome = "outcome", outcomeLevel = NULL,
+    multievent = TRUE, analysistype = "compete",
+    dod = "Dead_Disease", dooc = "Dead_Other",
+    awd = "Alive_Disease", awod = "Alive_NED",
+    cif_all_causes = TRUE, sc = TRUE, risktable = TRUE
+  )
+  an <- ClinicoPath:::singlearmClass$new(options = opts, data = d)
+  an$run()
+  n1 <- an$results$cifTable$rowCount
+  expect_gt(n1, 0L)
+  expect_false(grepl("does not display the numbers-at-risk panel", strip_html(an$results$info$content), fixed = TRUE))
+
+  # Re-run idempotency
+  an$run()
+  expect_equal(an$results$cifTable$rowCount, n1)
+  expect_s3_class(an$results$cifTable$asDF, "data.frame")
 })
 
 test_that("a CIF median attained inside follow-up is still reported", {
@@ -85,7 +126,8 @@ test_that("the Kaplan-Meier median path is untouched by the guard", {
   r <- do.call(ClinicoPath::singlearm, sa_rr_args())
   d <- as.data.frame(get("singlearm_test"))
   ref <- summary(survival::survfit(
-    survival::Surv(d$time_months, as.integer(d$outcome == "Dead")) ~ 1))$table
+    survival::Surv(d$time_months, as.integer(d$outcome == "Dead")) ~ 1,
+    conf.type = "log-log"))$table
   expect_equal(r$medianTable$asDF$median,   unname(ref[["median"]]))
   expect_equal(r$medianTable$asDF$x0_95lcl, unname(ref[["0.95LCL"]]))
 })

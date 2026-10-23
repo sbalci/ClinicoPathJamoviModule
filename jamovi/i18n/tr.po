@@ -104035,8 +104035,8 @@ msgid ""
 "%s %s; %d remain. Time is measured from the landmark, and estimates are "
 "conditional on surviving to it."
 msgstr ""
-"Yer işareti analizi, takibi %s %s veya öncesinde sona eren %d deneği "
-"çıkardı; %d denek kaldı. Zaman yer işaretinden itibaren ölçülür ve tahminler "
+"Yer işareti analizi, takibi %2$s %3$s veya öncesinde sona eren %1$d deneği "
+"çıkardı; %4$d denek kaldı. Zaman yer işaretinden itibaren ölçülür ve tahminler "
 "o zamana kadar hayatta kalmaya bağlıdır."
 
 #: condsurvival/results/landmarkAnalysisTable.title

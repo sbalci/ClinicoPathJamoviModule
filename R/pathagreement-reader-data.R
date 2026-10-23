@@ -22,6 +22,22 @@
 
 .paReaderPrepare <- function(data, options) {
   o <- utils::modifyList(.paReaderDefaults(), options)
+  # NA factor levels carry integer codes; restore missing codes before cutoff
+  # comparisons and status counts. Keep declared order and variable metadata.
+  selected <- unique(c(o$vars, o$readerScores, o$referenceStandard, o$caseID,
+                       o$readerCluster, o$readerID, o$modality, o$rating))
+  for (v in intersect(selected, names(data))) {
+    x <- data[[v]]
+    if (is.factor(x) && anyNA(levels(x))) {
+      old_levels <- levels(x)
+      values <- attr(x, "values", exact = TRUE)
+      levels(x) <- old_levels
+      if (!is.null(values) && length(values) == length(old_levels)) {
+        attr(x, "values") <- values[!is.na(old_levels)]
+      }
+      data[[v]] <- x
+    }
+  }
   if (identical(o$readerFormat, "long")) return(.paReaderPrepareLong(data, o))
   pending <- function(message) list(ready = FALSE, message = message)
   numeric_mode <- identical(o$readerWorkflow, "numeric_cutoff")
@@ -40,6 +56,11 @@
   }
   rows <- rows[!meta]
   raw <- data[rows, vars, drop = FALSE]
+  # [.factor drops custom metadata when case rows are selected.
+  for (v in vars) {
+    attr(raw[[v]], "label") <- attr(data[[v]], "label", exact = TRUE)
+    attr(raw[[v]], "values") <- attr(data[[v]], "values", exact = TRUE)
+  }
   original_raw <- raw
   if (o$readerNondiagnostic) {
     if (!nzchar(o$readerNondiagnosticLevel)) return(pending("Enter the exact nondiagnostic label."))
