@@ -84,12 +84,10 @@ items:
           title: 'Kappa'
           type: number
         - name: ci_lower
-          title: 'Lower'
-          superTitle: 'Confidence Interval'
+          title: '95% CI Lower'
           type: number
         - name: ci_upper
-          title: 'Upper'
-          superTitle: 'Confidence Interval'
+          title: '95% CI Upper'
           type: number
         - name: z
           title: 'z'

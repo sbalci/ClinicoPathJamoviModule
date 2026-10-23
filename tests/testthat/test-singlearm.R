@@ -1,4 +1,18 @@
 
+if (!exists("singlearm", mode = "function")) {
+  suppressPackageStartupMessages({
+    library(jmvcore)
+    library(R6)
+    library(dplyr)
+    library(survival)
+  })
+  for (f in list.files(testthat::test_path("..", "..", "R"), pattern = "^utils.*\\.R$", full.names = TRUE)) {
+    source(f)
+  }
+  source(testthat::test_path("..", "..", "R", "singlearm.h.R"))
+  source(testthat::test_path("..", "..", "R", "singlearm.b.R"))
+}
+
 test_that('singlearm analysis works', {
   # Synthetic data generation
   set.seed(123)

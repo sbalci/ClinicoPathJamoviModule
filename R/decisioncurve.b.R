@@ -217,28 +217,42 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
             if (is.null(self$options$outcome) ||
                 private$.levelUnset(self$options$outcomePositive)) return(invisible(NULL))
             thr <- private$.parseSelectedThresholdsQuietly()
-            pairs <- if (length(models) >= 2) utils::combn(models, 2, simplify = FALSE) else list()
-            per_strategy_threshold <- lapply(seq_len(length(models) * length(thr)), function(k) {
-                m <- (k - 1) %/% length(thr) + 1
-                list(model = models[m], threshold = thr[(k - 1) %% length(thr) + 1])
-            })
-            labels <- list(
-                resultsTable              = lapply(thr, function(t) list(threshold = t)),
-                benefitRangeTable         = lapply(models, function(m) list(model = m)),
-                weightedAUCTable          = lapply(models, function(m) list(model = m)),
-                comparisonTable           = lapply(pairs, function(p)
-                    list(comparison = .fmt(.('{a} vs {b}'), a = p[1], b = p[2]))),
-                modelComparisonEnhanced   = lapply(pairs, function(p) list(model1 = p[1], model2 = p[2])),
-                clinicalImpactTable       = per_strategy_threshold,
-                costBenefitTable          = per_strategy_threshold,
-                decisionConsequencesTable = per_strategy_threshold,
-                resourceUtilizationTable  = per_strategy_threshold
+            table_names <- c(
+                "resultsTable", "benefitRangeTable", "weightedAUCTable", "comparisonTable",
+                "modelComparisonEnhanced", "clinicalImpactTable", "costBenefitTable",
+                "decisionConsequencesTable", "resourceUtilizationTable"
             )
-            for (nm in names(labels)) {
+            # Pair generation is quadratic; neither pairs nor their translated labels are
+            # needed while both comparison tables are hidden.
+            pairs <- NULL
+            per_strategy_threshold <- NULL
+            for (nm in table_names) {
                 table <- self$results[[nm]]
                 if (!isTRUE(table$visible)) next
+                if (nm %in% c("comparisonTable", "modelComparisonEnhanced") && is.null(pairs))
+                    pairs <- if (length(models) >= 2)
+                        utils::combn(models, 2, simplify = FALSE) else list()
+                if (nm %in% c("clinicalImpactTable", "costBenefitTable",
+                              "decisionConsequencesTable", "resourceUtilizationTable") &&
+                    is.null(per_strategy_threshold)) {
+                    per_strategy_threshold <- lapply(
+                        seq_len(length(models) * length(thr)), function(k) {
+                            m <- (k - 1) %/% length(thr) + 1
+                            list(model = models[m], threshold = thr[(k - 1) %% length(thr) + 1])
+                        })
+                }
+                labels <- switch(nm,
+                    resultsTable = lapply(thr, function(t) list(threshold = t)),
+                    benefitRangeTable = lapply(models, function(m) list(model = m)),
+                    weightedAUCTable = lapply(models, function(m) list(model = m)),
+                    comparisonTable = lapply(pairs, function(p)
+                        list(comparison = .fmt(.('{a} vs {b}'), a = p[1], b = p[2]))),
+                    modelComparisonEnhanced = lapply(pairs, function(p)
+                        list(model1 = p[1], model2 = p[2])),
+                    per_strategy_threshold
+                )
                 keys <- private$.tableRowKeys(nm, length(models), length(thr))
-                for (k in seq_along(keys)) table$addRow(rowKey = keys[k], values = labels[[nm]][[k]])
+                for (k in seq_along(keys)) table$addRow(rowKey = keys[k], values = labels[[k]])
             }
             invisible(NULL)
         },
@@ -1340,38 +1354,6 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
             # failure the private-field reset above exists to prevent.
             private$.clearPlotStates()
 
-            # Fix the RNG for every bootstrap in this run. Unseeded, the same data and the
-            # same options gave a different confidence interval and a different p-value on
-            # each run: across eight identical reruns at the default 1000 replications the
-            # comparison p-value moved between 0.030 and 0.060 and the 95% CI crossed zero
-            # in two of them. A clinician who reruns an analysis must get the same numbers.
-            # withr::local_seed() restores the caller's RNG state when .run() exits, so neither an
-            # R-API user's stream nor the next analysis in the shared jamovi process is disturbed.
-            # This is the floor: each bootstrap consumer additionally re-seeds its own substream
-            # via private$.bootSeed(), so one consumer cannot shift another's draws.
-            withr::local_seed(private$.seedValue())
-
-            # Check if required packages are available
-            required_packages <- c("ggplot2", "dplyr", "tidyr")
-            missing_packages <- character(0)
-
-            for (pkg in required_packages) {
-                if (!requireNamespace(pkg, quietly = TRUE)) {
-                    missing_packages <- c(missing_packages, pkg)
-                }
-            }
-
-            if (length(missing_packages) > 0) {
-                private$.fatal(
-                    .("Missing Packages"),
-                    paste(
-                        .fmt(.('Required packages missing: {pkgs}.'), pkgs = paste(missing_packages, collapse = ", ")),
-                        .fmt(.('Install with install.packages(c({quoted})).'),
-                             quoted = paste0('"', paste(missing_packages, collapse = '", "'), '"'))
-                    )
-                )
-            }
-
             # Show instructions if needed
             if (is.null(self$options$outcome) || is.null(self$options$models) ||
                 length(self$options$models) == 0) {
@@ -1420,6 +1402,43 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                 )
                 private$.renderNotices()
                 return()
+            }
+
+            # Fix the RNG for every bootstrap in this run. Unseeded, the same data and the
+            # same options gave a different confidence interval and a different p-value on
+            # each run: across eight identical reruns at the default 1000 replications the
+            # comparison p-value moved between 0.030 and 0.060 and the 95% CI crossed zero
+            # in two of them. A clinician who reruns an analysis must get the same numbers.
+            # withr::local_seed() restores the caller's RNG state when .run() exits, so neither an
+            # R-API user's stream nor the next analysis in the shared jamovi process is disturbed.
+            # This is the floor: each bootstrap consumer additionally re-seeds its own substream
+            # via private$.bootSeed(), so one consumer cannot shift another's draws.
+            withr::local_seed(private$.seedValue())
+
+            # Check if required packages are available
+            required_packages <- "dplyr"
+            if (any(vapply(private$.plotImageNames(), function(nm)
+                isTRUE(self$results[[nm]]$visible), logical(1))))
+                required_packages <- c(required_packages, "ggplot2")
+            if (self$options$calculateClinicalImpact || self$options$showClinicalImpactPlot)
+                required_packages <- c(required_packages, "tidyr")
+            missing_packages <- character(0)
+
+            for (pkg in required_packages) {
+                if (!requireNamespace(pkg, quietly = TRUE)) {
+                    missing_packages <- c(missing_packages, pkg)
+                }
+            }
+
+            if (length(missing_packages) > 0) {
+                private$.fatal(
+                    .("Missing Packages"),
+                    paste(
+                        .fmt(.('Required packages missing: {pkgs}.'), pkgs = paste(missing_packages, collapse = ", ")),
+                        .fmt(.('Install with install.packages(c({quoted})).'),
+                             quoted = paste0('"', paste(missing_packages, collapse = '", "'), '"'))
+                    )
+                )
             }
 
             # Get data and variables

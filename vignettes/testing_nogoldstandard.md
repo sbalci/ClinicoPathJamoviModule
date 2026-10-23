@@ -25,3 +25,17 @@ testthat::test_file("tests/testthat/test-nogoldstandard.R")
 - [x] UI labels match clinical guidance standards.
 - [x] Internationalization tags and translation plans completed.
 
+
+## 4. Saved diagnostic-test example
+
+- Open `meddecide/data/nogoldstandard_validation.omv` in the desktop GUI.
+- Confirm 190 rows and the three test assignments `New_Test`, `Reference1`, `Reference2`.
+- Confirm `Positive` for each, method `latent_class`, bootstrap 1,000, alpha 0.05,
+  seed 42, diagnostics and the plain-language summary enabled.
+- Confirm the teaching annotation calls both reference tests imperfect and states
+  that this is simulated data, not clinical validation.
+- Confirm all three metric rows and their bootstrap intervals render, with the
+  class-label, conditional-independence and approximate-coverage notices retained.
+- Save, close and reopen; confirm assignments, annotation and results persist.
+- Confirm the Data Library entry points to `nogoldstandard_validation.omv` and no
+  longer references `nogoldstandard_pathology.omv`.

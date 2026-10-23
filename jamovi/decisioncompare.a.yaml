@@ -93,7 +93,7 @@ options:
             The reference variable; its interpretation is selected separately.
 
     - name: goldPositive
-      title: Reference positive level
+      title: Reference positive
       type: Level
       variable: (gold)
       allowNone: true
@@ -105,7 +105,7 @@ options:
             The positive reference level; disease interpretation requires a disease standard.
 
     - name: goldNegative
-      title: Reference negative level
+      title: Reference negative
       type: Level
       variable: (gold)
       allowNone: true

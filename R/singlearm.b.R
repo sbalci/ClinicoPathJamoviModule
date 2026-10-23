@@ -654,6 +654,40 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         return(result)
       },
 
+      .survPlotLogLog = function(.data, dependent, explanatory, ...) {
+        # Keep the finalfit::surv_plot styling contract (Lancet palette, font
+        # sizes, theme_classic, and theme_cleantable on the risk table) while
+        # fitting survival::survfit(..., conf.type = "log-log") so the plotted
+        # confidence ribbon matches .getCachedSurvfit(), medianTable, and survTable.
+        invisible(finalfit::surv_plot)
+        args <- list(...)
+        .formula <- jmvcore::asFormula(
+          paste0(dependent, " ~ ", paste(explanatory, collapse = " + ")),
+          additional_allowed_functions = c("Surv")
+        )
+        fit <- survival::survfit(.formula, data = .data, conf.type = "log-log")
+        fit$call$formula <- .formula
+        args$fit <- fit
+        args$data <- .data
+        if (is.null(args$xlab)) args$xlab <- "Time"
+        if (is.null(args$ylab)) args$ylab <- "Probability"
+        if (is.null(args$censor)) args$censor <- FALSE
+        if (is.null(args$conf.int)) args$conf.int <- FALSE
+        if (is.null(args$risk.table)) args$risk.table <- TRUE
+        if (is.null(args$linetype)) args$linetype <- "strata"
+        if (is.null(args$palette)) args$palette <- "lancet"
+        if (is.null(args$legend.title)) args$legend.title <- ""
+        if (is.null(args$font.x)) args$font.x <- 14
+        if (is.null(args$font.y)) args$font.y <- 14
+        if (is.null(args$font.tickslab)) args$font.tickslab <- 12
+        if (is.null(args$ggtheme)) args$ggtheme <- ggplot2::theme_classic()
+        ggsurv <- do.call(survminer::ggsurvplot, args)
+        if (!is.null(ggsurv$table)) {
+          ggsurv$table <- ggsurv$table + survminer::theme_cleantable()
+        }
+        ggsurv
+      },
+
       .calculateAdaptiveSpan = function(n_points) {
         # More sophisticated span calculation based on data characteristics
         if (n_points <= 10) return(0.8)
@@ -816,8 +850,6 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         ### Define subconditions ----
         subcondition1a <- !is.null(self$options$outcome)
         subcondition1b1 <- self$options$multievent
-        subcondition1b2 <- !is.null(self$options$dod)
-        subcondition1b3 <- !is.null(self$options$dooc)
         subcondition2a <- !is.null(self$options$elapsedtime)
         subcondition2b1 <- self$options$tint
         subcondition2b2 <- !is.null(self$options$dxdate)
@@ -936,7 +968,7 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         mydata <- mydata %>% janitor::clean_names()
 
         corrected_labels <-
-          setNames(original_names, names(mydata))
+          stats::setNames(original_names, names(mydata))
 
         mydata <- labelled::set_variable_labels(.data = mydata,
                                                 .labels = corrected_labels)
@@ -2141,48 +2173,49 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         .med   <- suppressWarnings(as.numeric(results1table$median))
         .lcl   <- suppressWarnings(as.numeric(results1table$x0_95lcl))
         .ucl   <- suppressWarnings(as.numeric(results1table$x0_95ucl))
-        .bound <- function(x) ifelse(is.finite(x), base::format(round(x, 1), trim = TRUE),
-                                     "not reached")
-        .ci_txt <- ifelse(is.finite(.lcl) | is.finite(.ucl),
-                          paste0(" [95% CI: ", .bound(.lcl), " - ", .bound(.ucl), "]"), "")
+        .bound <- function(x) if (is.finite(x)) base::format(round(x, 1), trim = TRUE) else "not reached"
+        .ci_txt <- if (is.finite(.lcl) || is.finite(.ucl)) {
+          paste0(" [95% CI: ", .bound(.lcl), " - ", .bound(.ucl), "]")
+        } else {
+          ""
+        }
 
         # Different narrative for competing risk vs standard survival
         if (private$.isCompetingRisk()) {
           # Competing risk: report median time to event (cumulative incidence)
-          km_fit_median_definition <- ifelse(
-            !is.finite(.med) & results1table$events == 0,
+          km_fit_median_definition <- if (!is.finite(.med) && results1table$events == 0) {
             paste0("There is no median time to the event of interest: no event of interest was ",
                    "observed, so its cumulative incidence is 0 throughout the observed follow-up. ",
-                   "Only competing events and censoring occurred."),
-            ifelse(
-              !is.finite(.med) & isTRUE(reached_at_tail),
-              paste0("Median time to event of interest not reached within interior follow-up ",
-                     "(the cumulative incidence reached 50% only at the final observed follow-up time, ",
-                     "where the step is driven by the last observation(s); report fixed-time ",
-                     "cumulative incidence instead)."),
-              ifelse(
-                !is.finite(.med),
-                paste0("Median time to event of interest not reached (the cumulative incidence of ",
-                       "the event of interest did not exceed 50% within the observed follow-up). ",
-                       "This is common in competing risk analyses where the competing event is frequent."),
-                paste0("Median time to event of interest is ", round(.med, 2), " ", time_unit,
-                       " (based on the cumulative incidence function, accounting for competing risks). ",
-                       "This is the first time the estimated cumulative incidence of the event ",
-                       "of interest reaches 50% or greater; the step curve need not equal 50% ",
-                       "exactly. No confidence interval is computed for this quantile."))))
+                   "Only competing events and censoring occurred.")
+          } else if (!is.finite(.med) && isTRUE(reached_at_tail)) {
+            paste0("Median time to event of interest not reached within interior follow-up ",
+                   "(the cumulative incidence reached 50% only at the final observed follow-up time, ",
+                   "where the step is driven by the last observation(s); report fixed-time ",
+                   "cumulative incidence instead).")
+          } else if (!is.finite(.med)) {
+            paste0("Median time to event of interest not reached (the cumulative incidence of ",
+                   "the event of interest did not exceed 50% within the observed follow-up). ",
+                   "This is common in competing risk analyses where the competing event is frequent.")
+          } else {
+            paste0("Median time to event of interest is ", round(.med, 2), " ", time_unit,
+                   " (based on the cumulative incidence function, accounting for competing risks). ",
+                   "This is the first time the estimated cumulative incidence of the event ",
+                   "of interest reaches 50% or greater; the step curve need not equal 50% ",
+                   "exactly. No confidence interval is computed for this quantile.")
+          }
 
         } else {
           # Standard survival analysis narrative
-          km_fit_median_definition <- ifelse(
-            !is.finite(.med) & results1table$events == 0,
+          km_fit_median_definition <- if (!is.finite(.med) && results1table$events == 0) {
             .fmt(.("{median} cannot be estimated: no events were observed, so the Kaplan-Meier event-free probability is 100% throughout the observed follow-up and the curve never falls to 50%."),
-                            median = estimand_meta$median),
-            ifelse(
-              !is.finite(.med),
-              .fmt(.("{median} was not reached: the Kaplan-Meier curve did not fall to 50% within the observed follow-up."),
-                              median = estimand_meta$median),
-              .fmt(.("{median} is {val} {unit}{ci}."),
-                              median = estimand_meta$median, val = round(.med, 1), unit = time_unit, ci = .ci_txt)))
+                            median = estimand_meta$median)
+          } else if (!is.finite(.med)) {
+            .fmt(.("{median} was not reached: the Kaplan-Meier curve did not fall to 50% within the observed follow-up."),
+                            median = estimand_meta$median)
+          } else {
+            .fmt(.("{median} is {val} {unit}{ci}."),
+                            median = estimand_meta$median, val = round(.med, 1), unit = time_unit, ci = .ci_txt)
+          }
         }  # End of if/else for competing risk vs standard
 
 
@@ -2957,7 +2990,7 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
           #   Only patients who survived past t_i contribute person-time to interval i+1
 
           # Loop through each time interval
-          for (i in 1:(length(breaks)-1)) {
+          for (i in seq_len(length(breaks) - 1L)) {
             start_time <- breaks[i]
             end_time <- breaks[i+1]
 
@@ -3342,7 +3375,7 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
               jmvcore::composeTerm(myoutcome), ")")
 
             plot_result <- plotData %>%
-              finalfit::surv_plot(
+              private$.survPlotLogLog(
                 .data = .,
                 dependent = myformula,
                 explanatory = myfactor,
@@ -3707,7 +3740,7 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         private$.checkpoint()
 
         plot2 <- plotData %>%
-          finalfit::surv_plot(
+          private$.survPlotLogLog(
             .data = .,
             dependent = myformula,
             explanatory = myfactor,
@@ -3792,12 +3825,12 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         private$.checkpoint()
 
         plot3 <- plotData %>%
-          finalfit::surv_plot(
+          private$.survPlotLogLog(
             .data = .,
             dependent = myformula,
             explanatory = myfactor,
             xlab = paste0('Time (', self$options$timetypeoutput, ')'),
-            ylab = "Cumulative Hazard",
+            ylab = .("Cumulative Hazard"),
             legend = 'none',
             break.time.by = self$options$byplot,
             xlim = c(0, self$options$endplot),
@@ -3820,7 +3853,8 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             paste0(myformula, " ~ ", myfactor),
             additional_allowed_functions = c("Surv"))
           median_time <- suppressWarnings(
-            as.numeric(summary(survival::survfit(median_formula, data = plotData))
+            as.numeric(summary(survival::survfit(median_formula, data = plotData,
+                                                 conf.type = "log-log"))
                        $table[["median"]]))
           if (length(median_time) > 0 && is.finite(median_time)) {
             if (self$options$medianline %in% c("h", "hv"))
@@ -3891,7 +3925,7 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         myformula <- jmvcore::asFormula(myformula, additional_allowed_functions = c("Surv"))
 
         km_fit <-
-          survival::survfit(myformula, data = plotData)
+          survival::survfit(myformula, data = plotData, conf.type = "log-log")
 
         time_scale <-
           seq(0, self$options$endplot, by = self$options$byplot)
@@ -4135,7 +4169,7 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                   span = round(adaptive_span, 2)
                 ),
                 x = paste0("Time (", self$options$timetypeoutput, ")"),
-                y = "Smoothed Hazard Rate"
+                y = .("Smoothed Hazard Rate")
               ) +
               ggplot2::theme_minimal()
             if (!missing(ggtheme) && !is.null(ggtheme))

@@ -1648,13 +1648,11 @@ agreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                         `type`="number"),
                     list(
                         `name`="ci_lower", 
-                        `title`="Lower", 
-                        `superTitle`="Confidence Interval", 
+                        `title`="95% CI Lower", 
                         `type`="number"),
                     list(
                         `name`="ci_upper", 
-                        `title`="Upper", 
-                        `superTitle`="Confidence Interval", 
+                        `title`="95% CI Upper", 
                         `type`="number"),
                     list(
                         `name`="z", 
@@ -4332,7 +4330,7 @@ agreementBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             super$initialize(
                 package = "ClinicoPath",
                 name = "agreement",
-                version = c(1,1,1),
+                version = c(1,1,2),
                 options = options,
                 results = agreementResults$new(options=options),
                 data = data,

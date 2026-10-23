@@ -36,20 +36,18 @@ nogoldstandard(
   method = "latent_class"
 )
 
-# ═══ EXAMPLE 3: Pathologist Agreement (Three Tests) ═══
-data(nogoldstandard_pathology)
+# ═══ EXAMPLE 3: Saved GUI Teaching Configuration ═══
+# Simulated diagnostic tests, not reader agreement. Neither reference test is perfect.
+# The configured .omv lives in meddecide/data/nogoldstandard_validation.omv.
+data(nogoldstandard_validation)
 nogoldstandard(
-  data = nogoldstandard_pathology,
-  test1 = "Pathologist1",
-  test1Positive = "Malignant",
-  test2 = "Pathologist2",
-  test2Positive = "Malignant",
-  test3 = "Pathologist3",
-  test3Positive = "Malignant",
-  test4Positive = NULL,
-  test5Positive = NULL,
-  method = "latent_class",
-  clinicalPreset = "pathology_agreement"
+  data = nogoldstandard_validation,
+  test1 = "New_Test", test1Positive = "Positive",
+  test2 = "Reference1", test2Positive = "Positive",
+  test3 = "Reference2", test3Positive = "Positive",
+  test4Positive = NULL, test5Positive = NULL,
+  method = "latent_class", bootstrap = TRUE, nboot = 1000, alpha = 0.05,
+  seed = 42, verbose = TRUE, showSummary = TRUE
 )
 
 # ═══ EXAMPLE 4: Tumor Marker Evaluation (Four Tests) ═══
@@ -101,18 +99,14 @@ nogoldstandard(
   method = "composite"
 )
 
-# ═══ EXAMPLE 7: Any Positive Method ═══
-data(nogoldstandard_pathology)
+# ═══ EXAMPLE 7: Any Positive Rule (Descriptive, Not Diagnostic Accuracy) ═══
+data(nogoldstandard_validation)
 nogoldstandard(
-  data = nogoldstandard_pathology,
-  test1 = "Pathologist1",
-  test1Positive = "Malignant",
-  test2 = "Pathologist2",
-  test2Positive = "Malignant",
-  test3 = "Pathologist3",
-  test3Positive = "Malignant",
-  test4Positive = NULL,
-  test5Positive = NULL,
+  data = nogoldstandard_validation,
+  test1 = "New_Test", test1Positive = "Positive",
+  test2 = "Reference1", test2Positive = "Positive",
+  test3 = "Reference2", test3Positive = "Positive",
+  test4Positive = NULL, test5Positive = NULL,
   method = "any_positive"
 )
 

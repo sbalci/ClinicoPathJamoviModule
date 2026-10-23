@@ -14,9 +14,11 @@ children:
       - type: TextBox
         name: referenceDescription
         format: string
+        width: large
       - type: TextBox
         name: targetDefinition
         format: string
+        width: large
   - type: VariableSupplier
     persistentItems: false
     stretchFactor: 1
@@ -30,9 +32,11 @@ children:
             isTarget: true
           - type: LevelSelector
             name: goldPositive
+            label: Positive level
             enable: (gold)
           - type: LevelSelector
             name: goldNegative
+            label: Negative level
             enable: (gold)
       - type: TargetLayoutBox
         label: Test Under Evaluation
@@ -43,9 +47,11 @@ children:
             isTarget: true
           - type: LevelSelector
             name: testPositive
+            label: Positive level
             enable: (newtest)
           - type: LevelSelector
             name: testNegative
+            label: Negative level
             enable: (newtest)
   - type: CollapseBox
     label: Analysis Options

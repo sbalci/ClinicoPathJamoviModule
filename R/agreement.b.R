@@ -48,7 +48,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                 }
 
                 # CI columns titled individually
-                for (nm in c("gwetTable", "allPairsKappaTable", "itemModalAgreementTable",
+                for (nm in c("irrtable", "gwetTable", "allPairsKappaTable", "itemModalAgreementTable",
                              "tdiTable", "specificAgreementTable", "subgroupAgreementTable",
                              "interIntraRaterIntraTable", "interIntraRaterInterTable",
                              "robinsonATable", "pairedAgreementTable",
@@ -569,7 +569,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                 # reader got an English panel with one Turkish phrase in it.
                 if (have_ci) {
                     ci_pointer <- sprintf(
-                        .("The Confidence Interval columns of the table above put that range at %1$.3f to %2$.3f for these data."),
+                        .("The confidence interval rows of the table above put that range at %1$.3f to %2$.3f for these data."),
                         ci_lo, ci_hi)
                 } else {
                     ci_pointer <- .("No interval could be computed for this kappa, so the table above carries the point estimate only and says nothing about how precisely this sample pins it down.")

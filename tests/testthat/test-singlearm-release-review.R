@@ -183,3 +183,53 @@ test_that(".assessDataQuality no longer advertises a warnings channel", {
   expect_false(grepl("data_quality\\$warnings", src))
   expect_false(grepl("warnings = warnings", src))
 })
+
+# --- plot CI consistency & UI ordering (2026-10-23 release review) ----------
+
+test_that("survival plots and KMunicate use conf.type = 'log-log' matching survTable", {
+  d_small <- data.frame(
+    mytime = c(2, 4, 6, 8, 10, 12),
+    myoutcome = c(1L, 0L, 1L, 0L, 1L, 0L),
+    myfactor = "1",
+    stringsAsFactors = FALSE
+  )
+  # Under survfit's default conf.type = "log", upper is clipped at 1.0 for every
+  # event time on this dataset; under conf.type = "log-log" it stays < 1.0.
+  ref_ll <- survival::survfit(
+    survival::Surv(mytime, myoutcome) ~ myfactor,
+    data = d_small,
+    conf.type = "log-log"
+  )
+  expect_true(all(ref_ll$upper < 1))
+
+  cls <- get("singlearmClass", envir = asNamespace("ClinicoPath"))
+  ggsurv <- cls$private_methods$.survPlotLogLog(
+    .data = d_small,
+    dependent = "survival::Surv(mytime, myoutcome)",
+    explanatory = "myfactor",
+    conf.int = TRUE,
+    risk.table = FALSE
+  )
+  expect_equal(
+    ggsurv$data.survplot$upper,
+    ref_ll$upper,
+    tolerance = 1e-8
+  )
+  expect_equal(
+    ggsurv$data.survplot$lower,
+    ref_ll$lower,
+    tolerance = 1e-8
+  )
+
+  src <- paste(readLines(testthat::test_path("..", "..", "R", "singlearm.b.R"),
+                         warn = FALSE), collapse = "\n")
+  expect_match(
+    src,
+    'survival::survfit\\(myformula,\\s*data\\s*=\\s*plotData,\\s*conf\\.type\\s*=\\s*"log-log"\\)'
+  )
+})
+
+test_that("VariableSupplier is the first top-level control in singlearm.u.yaml", {
+  ui <- yaml::read_yaml(testthat::test_path("..", "..", "jamovi", "singlearm.u.yaml"))
+  expect_identical(ui$children[[1]]$type, "VariableSupplier")
+})

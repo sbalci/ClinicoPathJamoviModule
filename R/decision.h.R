@@ -1185,7 +1185,7 @@ decisionBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             super$initialize(
                 package = "ClinicoPath",
                 name = "decision",
-                version = c(1,1,1),
+                version = c(1,1,2),
                 options = options,
                 results = decisionResults$new(options=options),
                 data = data,

@@ -129,3 +129,21 @@ sequenceDiagram
 - **Formula Conflicts**: Use isolated environment calls or base formula methods when interacting with `ggstatsplot` or formula parsers.
 - **Safe Deparsing**: Use `deparse(val)` in syntax generation (`asSource()`) to escape column names with spaces or special symbols.
 
+
+## 7. Bundled GUI teaching example (2026-10-23)
+
+The meddecide Data Library now uses `data/nogoldstandard_validation.omv`:
+**Three Imperfect Tests Without a Gold Standard**. The file was configured and saved
+in the jamovi GUI with 190 simulated patient records, `New_Test`, `Reference1` and
+`Reference2`, each positive at `Positive`, method `latent_class`, bootstrap enabled,
+1,000 samples, alpha 0.05, seed 42, diagnostics and the plain-language summary enabled.
+Tests 4 and 5 are unassigned. Neither imperfect reference test is treated as a gold
+standard. The original raw input remains in
+`data-raw/non-rda/nogoldstandard_validation.omv`; the configured file is owned by
+`../meddecide/data/` and must not be overwritten by the raw input.
+
+This replaces the pathologist-reading Data Library example. The patient is the
+analysis unit. Class labels require substantive interpretation, and three tests do
+not establish conditional independence. The filename is not a clinical-validation
+claim. Full provenance, settings and R reproduction are documented in
+`../meddecide/vignettes/nogoldstandard-validation-example.md`.
