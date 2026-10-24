@@ -790,10 +790,15 @@ test_that("Recommended McNemar variants (Fagerland 2013): a last pair never obse
     for (m in c("midp", "asymptotic")) {
         res <- val_dc(d, test3 = "t3", test3Positive = "+", test3Negative = "-", statComp = TRUE, mcnemarMethod = m)
         tb <- res$mcnemarTable
-        expect_identical(unlist(tb$rowKeys), c("t1 vs t2", "t1 vs t3"), info = m)
+        # library-audit 2026-10-23 meddecide [MEDIUM] DONE: every row comes from .init(); the pair that
+        #   cannot be tested and the undefined Cochran's Q keep their rows and say "Not computed".
+        expect_identical(unlist(tb$rowKeys), c("cochran_q_global", "t1 vs t2", "t1 vs t3", "t2 vs t3"), info = m)
+        df <- tb$asDF
+        expect_match(df$interpretation[c(1, 4)], "^Not computed", info = m)
+        expect_true(all(is.na(df$p[c(1, 4)])), info = m)
         raw <- if (m == "midp") c(46, 10) / 256 else c(dc_mcnemar_asymptotic(2, 6)[["p"]], dc_mcnemar_asymptotic(7, 1)[["p"]])
-        expect_equal(tb$asDF$p, stats::p.adjust(raw, "holm"), tolerance = 1e-12, info = m)
-        if (m == "midp") expect_equal(tb$asDF$p, c(46, 20) / 256, tolerance = 1e-12)
+        expect_equal(df$p[2:3], stats::p.adjust(raw, "holm"), tolerance = 1e-12, info = m)
+        if (m == "midp") expect_equal(df$p[2:3], c(46, 20) / 256, tolerance = 1e-12)
         nt <- val_text(res$notices$content)
         expect_match(nt, "Pairwise Comparison Not Computed t2 vs t3 could not be tested: no case has a determinate result for both tests and the reference standard",
                      fixed = TRUE)
@@ -1037,7 +1042,10 @@ test_that("Recommended McNemar variants (Fagerland 2013): mid-p rows leave the s
     nopair$t1[1:8] <- NA
     nopair$t2[9:16] <- NA
     none <- val_dc(nopair, statComp = TRUE)$mcnemarTable
-    expect_equal(none$rowCount, 0)
+    # library-audit 2026-10-23 meddecide [MEDIUM] DONE: the pair keeps its .init() row and says it was not computed
+    expect_identical(unlist(none$rowKeys), "t1 vs t2")
+    expect_match(none$asDF$interpretation, "^Not computed")
+    expect_true(is.na(none$asDF$p))
     expect_false("mcnemar_midp_nostat" %in% names(none$notes))
 })
 
@@ -1082,13 +1090,16 @@ test_that("Recommended McNemar variants (Fagerland 2013): a test named 'Cochrane
         expect_no_error(res <- val_dc(d, test1 = "Cochrane", test2 = "t2", test3 = "t3", test3Positive = "+", test3Negative = "-",
                                       statComp = TRUE, mcnemarMethod = m, showSummary = TRUE, showReportSentence = TRUE))
         if (is.null(res)) next   # the crash is the failure; the other variant is still checked
-        # the three pairwise rows, each on its own 20 complete cases, Holm-adjusted over 3; no Cochran row
+        # the three pairwise rows, each on its own 20 complete cases, Holm-adjusted over 3; Cochran's Q
+        # keeps its .init() row and says it was not computed (library-audit 2026-10-23 meddecide [MEDIUM])
         tb <- res$mcnemarTable
-        expect_identical(unlist(tb$rowKeys), pairs, info = m)
+        expect_identical(unlist(tb$rowKeys), c("cochran_q_global", pairs), info = m)
+        df <- tb$asDF
+        expect_match(df$interpretation[1], "^Not computed", info = m)
         raw <- vapply(bc, function(x) if (m == "midp") dc_mcnemar_midp(x[1], x[2]) else dc_mcnemar_asymptotic(x[1], x[2])[["p"]],
                       numeric(1))
-        expect_equal(tb$asDF$n, rep(20, 3))
-        expect_equal(tb$asDF$p, stats::p.adjust(raw, "holm"), tolerance = 1e-12)
+        expect_equal(df$n[2:4], rep(20, 3))
+        expect_equal(df$p[2:4], stats::p.adjust(raw, "holm"), tolerance = 1e-12)
         sm <- val_text(res$summaryReport$content)
         rp <- val_text(res$reportSentence$content)
         expect_match(sm, "The global Cochran's Q test could not be computed for these data; the reason is given in the Important Information panel. The pairwise comparisons and their confidence intervals in the tables above are unaffected.",

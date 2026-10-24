@@ -655,7 +655,13 @@ per pair (`mcnemarTable`, `diffTable`), per pattern (`combinationTable*`), per t
 `as.character(i)`). A static rule cannot tell an options-derived key from a data-derived one, so
 the property needs the runtime test — call `.init()` alone with the analysis's options, record
 the row keys, run, and assert the keys did not change. `tests/testthat/test-zzz-init-row-structure-runtime.R`
-does this for named tables; add each table you fix to it. Parse an option string such as
+does this for named tables, and the meddecide audit test ("option-fixed rows exist after .init()")
+for the eight round-8 tables; add each table you fix to one of them. The pattern that fixed them:
+compute the keys from the options in one private method, lay the rows down from `.init()` **and**
+at the start of `.run()` in place of `deleteRows()`, and fill them with `.fillRow()` (`R/utils.R`:
+`setRow()` for a scaffolded key, `addRow()` otherwise). Reuse the helpers `.run()` already uses to
+name its rows (decisioncombine builds its pattern labels from `.patternConditions()` on a
+zero-row frame), so the two paths cannot disagree. Parse an option string such as
 `prevalenceScenarios` in `.init()` too, and report a parse error from `.run()`.
 
 This is also the likelier source of the "blink" the same report attributes to missing `clearWith`

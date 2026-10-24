@@ -14,7 +14,7 @@
 #' - Multiple cut-offs analysis with 4 different methods (quantile, recursive, tree-based, minimum p-value)
 #' - Person-time analysis with interval stratification
 #' - Date-based time calculation with multiple format support
-#' - Multiple event level support (overall, cause-specific, competing risks)
+#' - Multiple event level support (overall, cause-specific, and disease-free survival)
 #' - Landmark analysis for time-dependent effects
 #'
 #' **Advanced Analytics:**
@@ -136,7 +136,7 @@
 #' time-to-event outcome. BMC Medical Research Methodology, 13(1), 152.
 #'
 #' Morris, T. P., et al. (2019). Proposals on Kaplan-Meier plots in medical research
-#' and a survey of stakeholder views: KMunicate. BMJ Open, 9(9), e030874.
+#' and a survey of stakeholder views: KMunicate. BMJ Open, 9(9), e030215.
 #'
 #' @importFrom R6 R6Class
 #' @return An \code{R6} class generator object for the \code{survivalcontClass} backend; used internally by the jamovi analysis wrapper and not called directly.
@@ -514,6 +514,7 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                         # Check if this name exists in our mapping and replace it
                         if (current_name %in% names(name_mapping)) {
                             table_data[i, 1] <- name_mapping[current_name]
+                            next
                         }
 
                         # Also handle factor level names (e.g., "variable_name=level")
@@ -521,7 +522,7 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                             original_name <- name_mapping[clean_name]
                             pattern <- paste0("^", clean_name, "([=:].*)?$")
                             if (grepl(pattern, current_name)) {
-                                table_data[i, 1] <- gsub(clean_name, original_name, current_name)
+                                table_data[i, 1] <- sub(clean_name, original_name, current_name, fixed = TRUE)
                                 break
                             }
                         }
@@ -634,6 +635,27 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                 self$results$infoMessages$setContent("")
                 self$results$infoMessages$setVisible(FALSE)
             }
+            ,
+            .clearAnalysisOutputs = function() {
+                for (tbl_name in c(
+                    "coxTable", "stratifiedCoxTable", "personTimeTable",
+                    "rmstTable", "residualsTable", "schoenfeldResidualsTable",
+                    "rescutTable", "medianTable", "survTable",
+                    "multipleCutTable", "multipleMedianTable", "multipleSurvTable"
+                )) {
+                    if (!is.null(self$results[[tbl_name]])) {
+                        .deleteTableRows(self$results[[tbl_name]])
+                    }
+                }
+                for (html_name in c(
+                    "coxSummary", "tCoxtext2", "personTimeSummary", "rmstSummary",
+                    "medianSummary", "survTableSummary", "multipleSurvTableSummary"
+                )) {
+                    if (!is.null(self$results[[html_name]])) {
+                        self$results[[html_name]]$setContent("")
+                    }
+                }
+            }
 
             ,
             .addHtmlMessage = function(type, title, message) {
@@ -705,7 +727,7 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                         <li><strong>Outcome Variable:</strong> Select the level representing death or event occurrence
                             <ul>
                                 <li>Use basic outcome level for simple analysis</li>
-                                <li>Use advanced outcome options (Dead of Disease, Dead of Other, etc.) for cause-specific or competing risk analysis</li>
+                                <li>Use advanced outcome options (Dead of Disease, Dead of Other, etc.) for overall, cause-specific, or disease-free survival analysis</li>
                             </ul>
                         </li>
                         <li><strong>Survival Time:</strong> Should be numeric and continuous
@@ -1244,6 +1266,7 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                 # Reset accumulating HTML message outputs at the start of every run
                 # so notices are not duplicated across re-run cycles.
                 private$.initializeMessageOutputs()
+                private$.clearAnalysisOutputs()
                 self$results$clinicalWarnings$setContent("")
                 self$results$clinicalWarnings$setVisible(FALSE)
                 private$.eventRecode <- NULL
@@ -1368,20 +1391,6 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                             title = .("Moderate Event Count"),
                             message = sprintf(.("%d events detected (n=%d total). Analysis is feasible but statistical power is limited. Confidence intervals may be wider than ideal. Results should be interpreted cautiously and ideally validated in larger cohorts."), n_events, n_total)
                         )
-                    }
-
-                    # EPV Check for Cox Regression (if continuous variable present)
-                    if (!is.null(results$name3contexpl) && n_events >= 10) {
-                        n_covariates <- 1  # Single continuous variable
-                        epv <- n_events / n_covariates
-
-                        if (epv < 10) {
-                            private$.addHtmlMessage(
-                                type = "strongWarning",
-                                title = .("Low Events Per Variable (EPV)"),
-                                message = sprintf(.("Events per variable (EPV) = %d/%d = %.1f. Recommended minimum is 10 EPV for reliable Cox regression. With EPV < 10, coefficient estimates may be biased, standard errors inflated, and overfitting likely. Consider: (1) collecting more events, (2) simpler models, or (3) penalized regression methods."), n_events, n_covariates, epv)
-                            )
-                        }
                     }
 
                     # Small sample size warning
@@ -1952,14 +1961,6 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                     tooltip = cox_tooltip,
                     metrics = unlist(tCox[[2]]))
 
-                if (private$.isCompetingRisk()) {
-                    tCoxtext2 <- glue::glue(.(
-                        '{previous_text}
-
-                        **Competing risk note:** Analyses use cause-specific hazards (competing events censored). For subdistribution hazards, use a Fine-Gray model.'),
-                        previous_text = tCoxtext2)
-                }
-
                 if (self$options$uselandmark) {
                     landmark <- jmvcore::toNumeric(self$options$landmark)
 
@@ -2261,6 +2262,17 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                 medianTable <- self$results$medianTable
                 .deleteTableRows(medianTable)
                 private$.landmarkNote(self$results$medianTable, results)
+                max_obs_time <- max(mydata[[mytime]], na.rm = TRUE)
+                if (is.finite(max_obs_time)) {
+                    medianTable$setNote(
+                        "rmean_horizon",
+                        .fmt(
+                            .("Restricted mean survival time (rmean) in this table is integrated up to the longest observed follow-up ({max} {unit}, survival::survfit default). For RMST at a prespecified or common group horizon (tau), see the Restricted Mean Survival Time table."),
+                            max = round(max_obs_time, 2),
+                            unit = self$options$timetypeoutput
+                        )
+                    )
+                }
                 data_frame <- results2table
                 for (i in seq_along(data_frame[, 1, drop = TRUE])) {
                     medianTable$addRow(rowKey = i, values = c(data_frame[i,]))
@@ -4016,9 +4028,14 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                     )
                 }
 
-                # Calculate RMST for each group
+                # Calculate RMST for each group in deterministic order
                 rmst_results <- list()
-                groups <- unique(data_to_use[[mygroup]])
+                groups <- if (is.factor(data_to_use[[mygroup]])) {
+                    levels(droplevels(data_to_use[[mygroup]]))
+                } else {
+                    sort(unique(as.character(data_to_use[[mygroup]])))
+                }
+                groups <- groups[!is.na(groups)]
 
                 for (group in groups) {
                     group_data <- data_to_use[data_to_use[[mygroup]] == group, ]
@@ -4195,11 +4212,12 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                     if (n_obs > n_shown)
                         residuals_table$setNote("truncated", sprintf(
                             .("Showing the first %d of %d cases."), n_shown, n_obs))
-                    residuals_table$setNote("model", sprintf(
+                    model_note <- sprintf(
                         .("Residuals are from a Cox model of survival on %s."),
                         if (!is.null(cutoffdata))
                             sprintf(.("the cut-off groups of '%s'"), self$options$contexpl)
-                        else sprintf(.("'%s' as a continuous predictor"), self$options$contexpl)))
+                        else sprintf(.("'%s' as a continuous predictor"), self$options$contexpl))
+                    residuals_table$setNote("model", model_note)
 
                     schoenfeld_values <- if (is.matrix(schoenfeld_resid)) {
                         schoenfeld_resid[, 1]
@@ -4214,6 +4232,7 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                         event_times <- rep(NA_real_, length(schoenfeld_values))
 
                     schoenfeld_table <- self$results$schoenfeldResidualsTable
+                    schoenfeld_table$setNote("model", model_note)
                     n_sch_shown <- min(100, length(schoenfeld_values))
                     if (length(schoenfeld_values) > n_sch_shown)
                         schoenfeld_table$setNote("truncated", sprintf(
@@ -4310,7 +4329,25 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                         attr(stratum, "values") <- values[!is.na(old_levels)]
                     mydata[[".strata"]] <- stratum
                 }
+                n_before_strata <- nrow(mydata)
                 mydata <- mydata[!is.na(mydata[[".strata"]]), , drop = FALSE]
+                n_strata_excluded <- n_before_strata - nrow(mydata)
+                if (n_strata_excluded > 0L) {
+                    strata_excl_msg <- sprintf(
+                        .("%d of %d analyzed record(s) had missing values in stratification variable '%s' and were excluded from the stratified Cox model (n=%d, events=%d analyzed)."),
+                        n_strata_excluded,
+                        n_before_strata,
+                        strata_var,
+                        nrow(mydata),
+                        sum(mydata[[myoutcome]] == 1, na.rm = TRUE)
+                    )
+                    tbl$setNote("strata_excluded", strata_excl_msg)
+                    private$.addHtmlMessage(
+                        "warning",
+                        .("Missing stratification values excluded"),
+                        strata_excl_msg
+                    )
+                }
                 mydata[[".strata"]] <- droplevels(as.factor(mydata[[".strata"]]))
 
                 if (nlevels(mydata[[".strata"]]) < 2) {
@@ -4514,10 +4551,11 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                         deviance = residuals_data$deviance
                     )
 
+                    has_smooth_support <- length(unique(plot_data$fitted[is.finite(plot_data$fitted)])) >= 4L
+
                     # Martingale residuals vs fitted values
                     p1 <- ggplot2::ggplot(plot_data, ggplot2::aes(x = fitted, y = martingale)) +
                         ggplot2::geom_point(alpha = 0.6) +
-                        ggplot2::geom_smooth(method = "loess", se = FALSE, color = "red") +
                         ggplot2::geom_hline(yintercept = 0, linetype = "dashed") +
                         ggplot2::labs(
                             x = "Linear Predictors",
@@ -4525,11 +4563,13 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                             title = "Martingale Residuals vs Fitted"
                         ) +
                         ggplot2::theme_minimal()
+                    if (has_smooth_support) {
+                        p1 <- p1 + ggplot2::geom_smooth(method = "loess", se = FALSE, color = "red")
+                    }
 
                     # Deviance residuals vs fitted values
                     p2 <- ggplot2::ggplot(plot_data, ggplot2::aes(x = fitted, y = deviance)) +
                         ggplot2::geom_point(alpha = 0.6) +
-                        ggplot2::geom_smooth(method = "loess", se = FALSE, color = "red") +
                         ggplot2::geom_hline(yintercept = 0, linetype = "dashed") +
                         ggplot2::labs(
                             x = "Linear Predictors",
@@ -4537,6 +4577,9 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                             title = "Deviance Residuals vs Fitted"
                         ) +
                         ggplot2::theme_minimal()
+                    if (has_smooth_support) {
+                        p2 <- p2 + ggplot2::geom_smooth(method = "loess", se = FALSE, color = "red")
+                    }
 
                     # QQ plot of deviance residuals
                     p3 <- ggplot2::ggplot(plot_data, ggplot2::aes(sample = deviance)) +
@@ -5090,10 +5133,14 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
             #' Generate R source code for survivalcont analysis
             #' @return Character string with R syntax for reproducible analysis
             asSource = function() {
-                elapsedtime <- self$options$elapsedtime
+                has_time <- if (isTRUE(self$options$tint)) {
+                    !is.null(self$options$dxdate) && !is.null(self$options$fudate)
+                } else {
+                    !is.null(self$options$elapsedtime)
+                }
                 outcome <- self$options$outcome
 
-                if (is.null(elapsedtime) || is.null(outcome))
+                if (!has_time || is.null(outcome))
                     return('')
 
                 # Build the argument list in option-declaration order.

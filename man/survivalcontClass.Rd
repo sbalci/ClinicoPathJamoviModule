@@ -21,7 +21,7 @@ explanatory variables. It includes:
 \item Multiple cut-offs analysis with 4 different methods (quantile, recursive, tree-based, minimum p-value)
 \item Person-time analysis with interval stratification
 \item Date-based time calculation with multiple format support
-\item Multiple event level support (overall, cause-specific, competing risks)
+\item Multiple event level support (overall, cause-specific, and disease-free survival)
 \item Landmark analysis for time-dependent effects
 }
 
@@ -149,7 +149,7 @@ to the hazard ratio for the design and analysis of randomized trials with a
 time-to-event outcome. BMC Medical Research Methodology, 13(1), 152.
 
 Morris, T. P., et al. (2019). Proposals on Kaplan-Meier plots in medical research
-and a survey of stakeholder views: KMunicate. BMJ Open, 9(9), e030874.
+and a survey of stakeholder views: KMunicate. BMJ Open, 9(9), e030215.
 }
 \section{Super classes}{
 \code{\link[jmvcore:Analysis]{jmvcore::Analysis}} -> \code{survivalcontBase} -> \code{survivalcontClass}

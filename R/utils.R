@@ -208,6 +208,23 @@ NULL
     invisible(table)
 }
 
+#' Fill a row that `.init()` scaffolded, or add it when this run has a row the options did not
+#' foresee.
+#'
+#' A table whose row set follows from the options is scaffolded in `.init()`, so it never shows an
+#' empty header that then restructures (library review guide section 6); `.run()` fills it here.
+#'
+#' @param table a `jmvcore::Table`.
+#' @param rowKey the row key.
+#' @param values a named list of cell values.
+#' @return `table`, invisibly.
+#' @noRd
+.fillRow <- function(table, rowKey, values) {
+    if (rowKey %in% table$rowKeys) table$setRow(rowKey = rowKey, values = values)
+    else table$addRow(rowKey = rowKey, values = values)
+    invisible(table)
+}
+
 # Which outcome level is the positive class, and why (enhancedROC, psychopdaROC). Never taken
 # from level order: only a NUMERIC 0/1 outcome defaults (1 = positive), as .defineEventIndicator()
 # does. Pure - the analyses translate `status`. A blank "" is missing, like an explicit NA level

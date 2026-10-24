@@ -555,10 +555,14 @@ survivalcontResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                     "finalfit",
                     "survival",
                     "survminer",
+                    "maxstat",
                     "dichotomizing",
                     "survivaltutorial",
                     "survivalrwnahhas",
                     "SchemperSmith1996",
+                    "RoystonParmar2013",
+                    "Garwood1936",
+                    "Dafni2011",
                     "KMunicate",
                     "lubridate",
                     "patchwork",
@@ -1397,7 +1401,8 @@ survivalcontResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                     list(
                         `name`="time", 
                         `title`="time", 
-                        `type`="integer"),
+                        `type`="number", 
+                        `format`="zto"),
                     list(
                         `name`="n.risk", 
                         `title`="Number at Risk", 
@@ -1912,7 +1917,8 @@ survivalcontResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                     list(
                         `name`="time_point", 
                         `title`="Time", 
-                        `type`="integer"),
+                        `type`="number", 
+                        `format`="zto"),
                     list(
                         `name`="n_risk", 
                         `title`="N at Risk", 

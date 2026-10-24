@@ -1163,3 +1163,57 @@ test_that("validation failures leave results in place for jamovi's error present
   }
   audit_skip_absent(absent, root)
 })
+
+# library-audit 2026-10-23 meddecide [MEDIUM] DONE: a table whose rows follow from the options has
+#   them after .init(), and .run() fills those same rows - it never appears empty and then
+#   restructures (guide section 6). Keys are compared, so a row added or dropped by .run() fails.
+test_that("option-fixed rows exist after .init() and .run() keeps the same keys", {
+  wanted <- c("decisioncompare", "decisioncombine", "decisioncalculator")
+  loaded <- audit_loaded(wanted)
+  quiet <- function(expr) suppressWarnings(suppressMessages(expr))
+  same_rows <- function(a, tables) {
+    before <- lapply(tables, function(t) unlist(a$results[[t]]$rowKeys))
+    quiet(a$run())
+    expect_identical(a$status, "complete")
+    for (i in seq_along(tables)) {
+      expect_gt(length(before[[i]]), 0, label = paste(tables[i], "rows after .init()"))
+      expect_identical(unlist(a$results[[tables[i]]]$rowKeys), before[[i]], label = tables[i])
+    }
+  }
+  set.seed(4)
+  n <- 300
+  gold <- sample(c("pos", "neg"), n, TRUE, c(0.4, 0.6))
+  mk <- function(se, sp) factor(ifelse(gold == "pos", sample(c("pos", "neg"), n, TRUE, c(se, 1 - se)),
+                                       sample(c("neg", "pos"), n, TRUE, c(sp, 1 - sp))), levels = c("neg", "pos"))
+  d <- data.frame(gold = factor(gold, levels = c("neg", "pos")), t1 = mk(.8, .85), t2 = mk(.7, .9), t3 = mk(.9, .6))
+
+  if ("decisioncompare" %in% loaded) {
+    a <- decisioncompareClass$new(options = decisioncompareOptions$new(
+      gold = "gold", goldPositive = "pos", goldNegative = "neg",
+      test1 = "t1", test1Positive = "pos", test1Negative = "neg",
+      test2 = "t2", test2Positive = "pos", test2Negative = "neg",
+      test3 = "t3", test3Positive = "pos", test3Negative = "neg",
+      opa = TRUE, statComp = TRUE), data = d)
+    quiet(a$init())
+    same_rows(a, c("comparisonTable", "opaTable", "mcnemarTable", "diffTable"))
+  }
+  if ("decisioncombine" %in% loaded) {
+    for (t3 in list(NULL, "t3")) {
+      a <- decisioncombineClass$new(options = decisioncombineOptions$new(
+        gold = "gold", goldPositive = "pos", test1 = "t1", test1Positive = "pos",
+        test2 = "t2", test2Positive = "pos", test3 = t3, test3Positive = if (!is.null(t3)) "pos"),
+        data = d)
+      quiet(a$init())
+      same_rows(a, c("combinationTable", "combinationTableCI", "combinationTableCIRatios"))
+    }
+  }
+  if ("decisioncalculator" %in% loaded) {
+    a <- decisioncalculatorClass$new(options = decisioncalculatorOptions$new(
+      TP = 90, FP = 30, FN = 20, TN = 80, showWorkload = TRUE, prevalenceScenarios = "0.01,0.05",
+      pp = TRUE, pprob = 0.2), data = data.frame())
+    quiet(a$init())
+    same_rows(a, "screeningWorkload")
+    expect_length(a$results$screeningWorkload$rowKeys, 4)   # observed + 0.2, 0.01, 0.05
+  }
+  audit_skip_unloaded(wanted)
+})

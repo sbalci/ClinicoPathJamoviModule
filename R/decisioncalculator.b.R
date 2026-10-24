@@ -260,9 +260,29 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) {
                     rowKey = 3,
                     values = list(cutoffName = .("Current (reference)"))
                 )
+
+                # library-audit 2026-10-23 meddecide [MEDIUM] DONE: the workload rows (observed + one per
+                #   target prevalence) follow from the options, so they are laid down here and .run() fills them.
+                if (isTRUE(self$options$showWorkload)) {
+                    workload <- self$results$screeningWorkload
+                    .deleteTableRows(workload)
+                    for (i in seq_len(1 + length(private$.workloadTargets()$targets)))
+                        workload$addRow(rowKey = as.character(i), values = list(
+                            source = if (i == 1) .("Observed") else .("Projected"),
+                            unit = private$.richText(self$options$analysisUnit)))
+                }
+            },
+            # Target prevalences of the workload table, from the options alone, so .init() and .run()
+            # build the same row keys. A list that does not parse gives no projected rows.
+            .workloadTargets = function() {
+                parsed <- tryCatch(
+                    list(values = .dvNumbers(self$options$prevalenceScenarios, 0, 1, fallback = NULL), error = FALSE),
+                    error = function(e) list(values = numeric(), error = TRUE))
+                targets <- parsed$values
+                if (self$options$pp) targets <- unique(c(self$options$pprob, targets))
+                list(targets = targets, error = parsed$error, empty = is.null(parsed$values))
             },
             .run = function() {
-                .deleteTableRows(self$results$screeningWorkload)
                 private$.noticeList <- list()
                 on.exit(private$.renderNotices(), add = TRUE)
 
@@ -501,27 +521,22 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) {
                 # Footnote for any table cell that has no value (see .footnoteNA)
                 na_note <- .("Not estimable for this table: a denominator is zero or the quantity is undefined.")
                 if (self$options$showWorkload) {
-                    # Wrap only the parser: its stop() used to abort .run() and discard every
-                    # table for one mistyped scenario ("1%,5%"). NULL = nothing was entered.
-                    scenario <- tryCatch(.dvNumbers(self$options$prevalenceScenarios, 0, 1, fallback = NULL),
-                        error = function(e) {
-                            private$.addNotice("ERROR", .("Invalid target prevalences"),
-                                .("Target prevalences must be at most 100 comma-separated proportions between 0 and 1, for example 0.001,0.01. The projected rows for this list are omitted; every other result is unaffected."))
-                            numeric()
-                        })
-                    if (is.null(scenario))
+                    # A parse error used to abort .run() and discard every table for one mistyped
+                    # scenario ("1%,5%"); it now gives no projected rows and this notice.
+                    targets <- private$.workloadTargets()
+                    if (targets$error)
+                        private$.addNotice("ERROR", .("Invalid target prevalences"),
+                            .("Target prevalences must be at most 100 comma-separated proportions between 0 and 1, for example 0.001,0.01. The projected rows for this list are omitted; every other result is unaffected."))
+                    if (targets$empty)
                         private$.addNotice("INFO", .("No target prevalences"),
                             .("The target-prevalence list is empty, so no projected rows are added from it. Enter comma-separated proportions, for example 0.001,0.01."))
-                    if (self$options$pp) scenario <- unique(c(self$options$pprob, scenario))
-                    prev <- c(DiseaseP / (DiseaseP + DiseaseN), scenario)
-                    # TODO (cleanup): the row set depends only on options (prevalenceScenarios,
-                    # pp, pprob), so it belongs in .init() with setRow() here (check-function
-                    # library-review checklist); kept in .run() because the parse-error notice lives here.
+                    prev <- c(DiseaseP / (DiseaseP + DiseaseN), targets$targets)
+                    # Rows laid down by .init() from the same targets; filled here.
                     for (i in seq_along(prev)) {
                         w <- .dvWorkload(Sens, Spec, prev[i],
                             if (i == 1) DiseaseP+DiseaseN else self$options$workloadPopulationSize)
                         w$net_benefit <- NULL
-                        self$results$screeningWorkload$addRow(rowKey = as.character(i), values = c(
+                        .fillRow(self$results$screeningWorkload, rowKey = as.character(i), values = c(
                             list(source = if (i == 1) .("Observed") else .("Projected"),
                                  unit = private$.richText(self$options$analysisUnit)), as.list(w)))
                         private$.footnoteNA(self$results$screeningWorkload, as.list(w), na_note,

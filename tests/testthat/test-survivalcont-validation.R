@@ -459,3 +459,80 @@ test_that("Recommendations: RMST qnorm(0.975) & [0, tau] clamping, single landma
   res_pt_small <- .sc_val_run(d_small_rate, person_time = TRUE, rate_multiplier = 1)
   expect_gt(res_pt_small$personTimeTable$asDF$rate[1], 0)
 })
+
+test_that("IR-survivalcont-01 to IR-survivalcont-07: Independent cold-audit regression guards", {
+  d <- .make_sc_cohort()
+
+  # IR-survivalcont-01: schoenfeldResidualsTable carries model disclosure note & .plot9() guards loess smoother
+  r_fc <- .sc_val_run(d, findcut = TRUE, residual_diagnostics = TRUE, return_analysis = TRUE)
+  expect_match(as.character(r_fc$results$schoenfeldResidualsTable$notes$model$note), "cut-off groups", fixed = TRUE)
+  loess_warns <- character(0)
+  tf <- tempfile(fileext = ".pdf")
+  grDevices::pdf(tf)
+  withCallingHandlers(
+    r_fc$.__enclos_env__$private$.plot9(r_fc$results$residualsPlot, ggtheme = ggplot2::theme_bw(), theme = list()),
+    warning = function(w) {
+      loess_warns <<- c(loess_warns, conditionMessage(w))
+      invokeRestart("muffleWarning")
+    }
+  )
+  grDevices::dev.off()
+  unlink(tf)
+  expect_length(loess_warns, 0L)
+
+  # IR-survivalcont-02: RMST group row ordering and difference sign are row-permutation invariant
+  set.seed(101)
+  d_perm <- d[sample(nrow(d)), ]
+  r_rmst1 <- .sc_val_run(d, findcut = TRUE, rmst_analysis = TRUE, rmst_tau = 20, showSummaries = TRUE)
+  r_rmst2 <- .sc_val_run(d_perm, findcut = TRUE, rmst_analysis = TRUE, rmst_tau = 20, showSummaries = TRUE)
+  expect_equal(r_rmst1$rmstTable$asDF$rmst, r_rmst2$rmstTable$asDF$rmst, tolerance = 1e-10)
+  expect_identical(.sc_strip_html(r_rmst1$rmstSummary$content), .sc_strip_html(r_rmst2$rmstSummary$content))
+
+  # IR-survivalcont-03: Stale table rows cleared on early failure & asSource() emits syntax when tint=TRUE
+  an_reuse <- .sc_val_run(d, findcut = TRUE, rmst_analysis = TRUE, rmst_tau = 20, return_analysis = TRUE)
+  expect_gt(nrow(an_reuse$results$coxTable$asDF), 0L)
+  opt_lm <- an_reuse$options$option("uselandmark")
+  opt_lm$value <- TRUE
+  opt_lm_val <- an_reuse$options$option("landmark")
+  opt_lm_val$value <- 99999
+  suppressWarnings(suppressMessages(an_reuse$run()))
+  expect_equal(nrow(an_reuse$results$coxTable$asDF), 0L)
+  expect_equal(nrow(an_reuse$results$rmstTable$asDF), 0L)
+
+  d_dates <- data.frame(
+    dx = as.character(as.Date("2020-01-01") + seq_len(30)),
+    fu = as.character(as.Date("2020-06-01") + seq_len(30) * 10),
+    status = d$status[1:30],
+    marker = d$marker[1:30],
+    stringsAsFactors = FALSE
+  )
+  an_tint <- .sc_val_run(d_dates, elapsedtime = NULL, tint = TRUE, dxdate = "dx", fudate = "fu",
+                         timetypedata = "ymd", timetypeoutput = "months",
+                         return_analysis = TRUE)
+  expect_true(nzchar(trimws(an_tint$asSource())))
+  expect_no_error(parse(text = an_tint$asSource()))
+
+  # IR-survivalcont-04: Stratified Cox discloses excluded missing strata rows
+  d_sna <- d
+  d_sna$site[1:15] <- NA
+  r_sna <- .sc_val_run(d_sna, stratified_cox = TRUE, strata_variable = "site")
+  expect_match(.sc_strip_html(r_sna$warnings$content), "Missing stratification values excluded", fixed = TRUE)
+  expect_true("strata_excluded" %in% names(r_sna$stratifiedCoxTable$notes))
+
+  # IR-survivalcont-05: Fractional cutp preserved in survTable$time and multipleSurvTable$time_point
+  r_frac <- .sc_val_run(d, findcut = TRUE, multiple_cutoffs = TRUE, cutp = "0.5, 1.5, 2.5")
+  expect_identical(r_frac$survTable$columns[["time"]]$type, "number")
+  expect_identical(r_frac$multipleSurvTable$columns[["time_point"]]$type, "number")
+  expect_equal(unique(r_frac$survTable$asDF$time), c(0.5, 1.5, 2.5))
+
+  # IR-survivalcont-06: medianTable carries rmean_horizon footnote disclosing max(t) integration horizon
+  expect_true("rmean_horizon" %in% names(r_fc$results$medianTable$notes))
+
+  # IR-survivalcont-07: .restoreOriginalNamesInTable preserves literal backslash + digit
+  lit_bs <- paste0("Marker ", intToUtf8(92), "1 (score)")
+  restored_df <- r_fc$.__enclos_env__$private$.restoreOriginalNamesInTable(
+    data.frame(Explanatory = "marker_1_score", stringsAsFactors = FALSE),
+    list(marker_1_score = lit_bs)
+  )
+  expect_identical(restored_df$Explanatory[1], lit_bs)
+})

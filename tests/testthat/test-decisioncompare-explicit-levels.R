@@ -29,7 +29,8 @@ test_that("all reference modes require both levels even on binary data", {
         expect_no_error(a$run())
         expect_match(a$results$notices$content, "Levels Not Yet Selected", fixed = TRUE,
           info = paste(mode, exclude, option))
-        expect_equal(a$results$comparisonTable$rowCount, 0)
+        # library-audit 2026-10-23 meddecide [MEDIUM] DONE: rows come from .init(); nothing is computed
+        expect_true(all(is.na(a$results$comparisonTable$asDF$Sens)))
         expect_equal(a$results$comparatorMetrics$rowCount, 0)
         expect_equal(a$results$levelMapping$rowCount, 0)
       }
@@ -41,7 +42,8 @@ test_that("extra observed levels stop every mode until exclusion is explicitly s
   for (mode in c("legacy", "disease", "consensus", "method")) {
     blocked <- dc_explicit_analysis(referenceType = mode)
     expect_error(blocked$run(), "ND \\(n=34\\)")
-    expect_equal(blocked$results$comparisonTable$rowCount, 0)
+    # library-audit 2026-10-23 meddecide [MEDIUM] DONE: rows come from .init(); nothing is computed
+    expect_true(all(is.na(blocked$results$comparisonTable$asDF$Sens)))
     expect_equal(blocked$results$comparatorMetrics$rowCount, 0)
     a <- dc_explicit_analysis(referenceType = mode, excludeIndeterminate = TRUE)
     expect_no_error(a$run())
@@ -86,7 +88,8 @@ test_that("missing or stale negative selections cannot produce asymmetric polici
     test3 = "c", test3Positive = "P", test3Negative = NULL)
   expect_no_error(a$run())   # IR2-decisioncompare-04: unconfigured, not an error
   expect_match(a$results$notices$content, "Test 3 negative level", fixed = TRUE)
-  expect_equal(a$results$comparisonTable$rowCount, 0)
+  # library-audit 2026-10-23 meddecide [MEDIUM] DONE: rows come from .init(); nothing is computed
+  expect_true(all(is.na(a$results$comparisonTable$asDF$Sens)))
   a <- dc_explicit_analysis(data, test1 = NULL, test1Positive = NULL, test1Negative = NULL,
     test3 = "c", test3Positive = "P", test3Negative = "N")
   expect_no_error(a$run())
@@ -161,9 +164,11 @@ test_that("invalid mapping reruns clear previous tables, plots and reports in ev
     options$.__enclos_env__$private$.env$test2Negative <- "P"
     a$optionsChangedHandler("test2Negative")
     expect_error(a$run(), "b: Choose different")
-    for (name in c("levelMapping", "comparisonTable", "comparatorMetrics",
-                   "mcnemarTable", "diffTable", "comparatorDifferences"))
+    for (name in c("levelMapping", "comparatorMetrics", "comparatorDifferences"))
       expect_equal(a$results[[name]]$rowCount, 0)
+    # library-audit 2026-10-23 meddecide [MEDIUM] DONE: the option-fixed tables keep their .init() rows, all empty
+    for (cell in list(c("comparisonTable", "Sens"), c("mcnemarTable", "p"), c("diffTable", "diff")))
+      expect_true(all(is.na(a$results[[cell[1]]]$asDF[[cell[2]]])), info = cell[1])
     for (name in c("plot1", "plotRadar", "plotHeatmap", "comparatorPlot",
                    "comparatorRadar", "comparatorHeatmap"))
       expect_null(a$results[[name]]$state)

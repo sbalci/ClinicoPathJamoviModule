@@ -543,6 +543,7 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
             .init = function() {
                 # Initialize table rows for dynamic population
                 private$.initializeTables()
+                private$.scaffoldComparisonRows()
                 # Option-only tables get their rows here so they never render as an empty
                 # header that then restructures; .run()/.validateMappings() refill the same keys.
                 .dvProvenance(self$results$validationContext, self$options, private$.dvText())
@@ -729,10 +730,10 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
                 # Dynamic results must not survive an invalid rerun. clearWith handles
                 # ordinary option changes; this explicit reset also covers validation
                 # failures and analyses whose required variables have just been removed.
-                for (table_name in c("comparisonTable", "opaTable", "stratifiedTable", "mcnemarTable", "diffTable")) {
-                    table <- tryCatch(self$results[[table_name]], error = function(e) NULL)
-                    if (!is.null(table)) .deleteTableRows(table)
-                }
+                # The option-fixed tables are rebuilt as labelled, empty rows; the stratified
+                # table's rows come from the data.
+                private$.scaffoldComparisonRows()
+                .deleteTableRows(self$results$stratifiedTable)
                 # Deleting rows does not remove table notes from a previous method or dataset.
                 for (key in c("mcnemar_multiplicity", "mcnemar_uninformative_excluded",
                               "mcnemar_midp_nostat", "cochran_q_failed", "cochran_method"))
@@ -1319,6 +1320,57 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
                 }
             },
 
+            # Pairwise comparisons of the selected tests. Row KEYS stay "A vs B" in every language
+            # and are made unique (a test named "X vs Y" beside X and Y); labels come from one
+            # translatable template. .init() builds the rows from these and .run() fills them.
+            .testPairs = function(tests) {
+                pairs <- if (length(tests) >= 2) combn(tests, 2, simplify = FALSE) else list()
+                keys <- character(length(pairs))
+                labels <- character(length(pairs))
+                for (k in seq_along(pairs)) {
+                    keys[k] <- paste(pairs[[k]][1], "vs", pairs[[k]][2])
+                    labels[k] <- .fmt(jmvcore::.("{first} vs {second}"), first = pairs[[k]][1], second = pairs[[k]][2])
+                }
+                if (anyDuplicated(keys)) keys <- make.unique(keys, sep = " #")
+                list(pairs = pairs, keys = keys, labels = labels)
+            },
+
+            # library-audit 2026-10-23 meddecide [MEDIUM] DONE: one row per selected test, per pair and
+            #   per pair x metric follows from the options, so the rows are laid down here - from .init()
+            #   and again at the start of .run() - and filled with .fillRow(); a pair that cannot be
+            #   computed keeps its labelled, empty row beside the notice that says why (guide section 6).
+            .scaffoldComparisonRows = function() {
+                tests <- private$.getTestVariables()
+                cmp <- self$results$comparisonTable
+                .deleteTableRows(cmp)
+                for (i in seq_along(tests)) {
+                    cmp$addRow(rowKey = paste0("test_", i), values = list(test = tests[i]))
+                    cmp$addRow(rowKey = paste0("test_", i, "_interp"), values = list(test = ""))
+                }
+                opa <- self$results$opaTable
+                .deleteTableRows(opa)
+                if (isTRUE(self$options$opa))
+                    for (i in seq_along(tests))
+                        opa$addRow(rowKey = paste0("test_", i), values = list(test = tests[i]))
+                mc <- self$results$mcnemarTable
+                diff <- self$results$diffTable
+                .deleteTableRows(mc)
+                .deleteTableRows(diff)
+                if (!isTRUE(self$options$statComp) || length(tests) < 2) return(invisible())
+                if (length(tests) >= 3)
+                    mc$addRow(rowKey = "cochran_q_global", values = list(
+                        comparison = sprintf(jmvcore::.("Overall (%d tests)"), length(tests))))
+                pairs <- private$.testPairs(tests)
+                metrics <- c(Sens = jmvcore::.("Sensitivity"), Spec = jmvcore::.("Specificity"),
+                             AccurT = jmvcore::.("Accuracy"))
+                for (k in seq_along(pairs$keys)) {
+                    mc$addRow(rowKey = pairs$keys[k], values = list(comparison = pairs$labels[k]))
+                    for (m in names(metrics))
+                        diff$addRow(rowKey = paste(pairs$keys[k], m, sep = "_"),
+                                    values = list(comparison = pairs$labels[k], metric = metrics[[m]]))
+                }
+            },
+
             # Get valid test variables
             .getTestVariables = function() {
                 testVariables <- c(self$options$test1, self$options$test2, self$options$test3)
@@ -1728,8 +1780,6 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
             # Populate comparison table with all test results
             .populateComparisonTable = function(test_results) {
                 comparisonTable <- self$results$comparisonTable
-
-                .deleteTableRows(comparisonTable)
                 comparisonTable$setNote(
                     "interpretation_scope",
                     jmvcore::.("Qualitative performance labels are illustrative summaries of the observed sample only. They are not clinical guides, validated decision rules, or recommendations for patient care.")
@@ -1745,7 +1795,7 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
                     row_key <- paste0("test_", test_index)
 
 
-                    comparisonTable$addRow(
+                    .fillRow(comparisonTable,
                         rowKey = row_key,
                         values = list(
                             test = test_name,
@@ -1798,7 +1848,7 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
                         jmvcore::.("(zero cell; LR may be unstable)")
                     else ""
                     comparisonTable$addFormat(rowKey = row_key, col = "test", format = jmvcore::Cell.BEGIN_GROUP)
-                    comparisonTable$addRow(
+                    .fillRow(comparisonTable,
                         rowKey = paste0(row_key, "_interp"),
                         values = list(
                             test = paste0("  \u{2192} ", clinical_interpretation,
@@ -1872,7 +1922,6 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
             # Populate OPA table with confidence intervals and noninferiority result
             .populateOPATable = function(test_results) {
                 opaTable <- self$results$opaTable
-                .deleteTableRows(opaTable)
 
                 ci_method <- self$options$ciMethod
                 use_criterion <- isTRUE(private$.opt("useOpaCriterion", FALSE))
@@ -1918,7 +1967,7 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
                         jmvcore::.("No")
                     }
 
-                    opaTable$addRow(
+                    .fillRow(opaTable,
                         rowKey = paste0("test_", test_index),
                         values = list(
                             test = test_name,
@@ -2211,9 +2260,6 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
                 mcnemarTable <- self$results$mcnemarTable
                 diffTable <- self$results$diffTable
 
-                .deleteTableRows(mcnemarTable)
-                .deleteTableRows(diffTable)
-
                 # This caveat used to live only inside the showExplanations HTML panel, so a
                 # clinician who read the table alone saw a p-value with no hint of what it
                 # does and does not test. It belongs on the table that carries the p-value.
@@ -2233,18 +2279,16 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
                     private$.performCochranQ(test_results, mcnemarTable)
                 }
 
-                # Generate all pairwise combinations
-                test_pairs <- combn(test_names, 2, simplify = FALSE)
+                # All pairwise combinations, with the row keys and labels .init() used
+                pair_info <- private$.testPairs(test_names)
+                test_pairs <- pair_info$pairs
                 n_comparisons <- length(test_pairs)
 
                 # Calculate p-value adjustment for multiple comparisons
                 # Use Holm-Bonferroni method (less conservative than Bonferroni)
                 p_values <- rep(NA_real_, n_comparisons)
-                # comparison_names are row KEYS and stay "A vs B" in every language;
-                # comparison_labels are what the tables and notices show, from one complete
-                # translatable template rather than a bare "vs" fragment.
-                comparison_names <- character(n_comparisons)
-                comparison_labels <- character(n_comparisons)
+                comparison_names <- pair_info$keys
+                comparison_labels <- pair_info$labels
 
                 # First pass: compute each McNemar test once and cache it (avoids
                 # recomputing the table/test in the display pass below).
@@ -2256,8 +2300,6 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
                     pair <- test_pairs[[i]]
                     test1 <- pair[1]
                     test2 <- pair[2]
-                    comparison_names[i] <- paste(test1, "vs", test2)
-                    comparison_labels[i] <- .fmt(jmvcore::.("{first} vs {second}"), first = test1, second = test2)
 
                     mc <- private$.computeMcNemar(test_results, test1, test2)
                     # [i] <- list(mc), not [[i]] <- mc: assigning NULL with [[ deletes the slot, so a
@@ -2266,8 +2308,8 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
                     # A pair that cannot be tested must NOT enter p.adjust(): padding it
                     # with a synthetic p = 1 raised m from 2 to 3 and over-corrected the
                     # comparisons that could be computed (a raw p = 0.02 was reported as
-                    # 0.06 and read as "no significant difference"). The pair is also
-                    # dropped from the table with no row, so disclose it here.
+                    # 0.06 and read as "no significant difference"). Its row stays labelled
+                    # and empty, so disclose it here.
                     if (is.null(mc)) {
                         private$.addNotice(
                             type = "WARNING",
@@ -2279,11 +2321,6 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
                         p_values[i] <- mc$result$p.value
                     }
                 }
-
-                # Row keys must be unique: test names such as "X vs Y" selected beside X and Y would
-                # otherwise build the same key for two different pairs.
-                if (anyDuplicated(comparison_names))
-                    comparison_names <- make.unique(comparison_names, sep = " #")
 
                 # Holm-Bonferroni over the comparisons that were actually tested: computed pairs
                 # with discordant pairs. A pair without discordant pairs keeps its conventional
@@ -2442,6 +2479,11 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
                 # Builds an n x k correctness matrix over the whole cohort before the
                 # statistic; checkpoint before that work rather than after it.
                 private$.checkpoint()
+                # The row .init() laid down says "not computed" when Q is undefined; the notice says why.
+                not_computed <- list(
+                    comparison = sprintf(jmvcore::.("Overall (%d tests)"), length(test_results)),
+                    method = jmvcore::.("Cochran's Q"),
+                    interpretation = jmvcore::.("Not computed; the notice above says why."))
 
                 tryCatch(
                     {
@@ -2469,6 +2511,7 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
                                 title = jmvcore::.("Global Test Not Computed"),
                                 content = jmvcore::.("Cochran's Q was not computed: no case has a determinate result for all three tests and the reference standard. The pairwise comparisons below each use their own complete cases.")
                             )
+                            .fillRow(mcnemarTable, rowKey = "cochran_q_global", values = not_computed)
                             return()
                         }
 
@@ -2494,6 +2537,7 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
                                 title = jmvcore::.("Global Test Not Computed"),
                                 content = jmvcore::.("Cochran's Q is undefined for these data: every case was classified identically by all three tests (all correct, or all incorrect), leaving no discordance for the statistic to use. This means the data cannot separate the tests, not that the analysis failed.")
                             )
+                            .fillRow(mcnemarTable, rowKey = "cochran_q_global", values = not_computed)
                             return()
                         }
 
@@ -2520,7 +2564,7 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
                             TRUE ~ jmvcore::.("No significant overall difference detected among tests (p>=0.05); this does not establish that the tests perform equally")
                         )
 
-                        mcnemarTable$addRow(
+                        .fillRow(mcnemarTable,
                             rowKey = "cochran_q_global",
                             values = list(
                                 comparison = sprintf(jmvcore::.("Overall (%d tests)"), n_tests),
@@ -2544,8 +2588,8 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
                     error = function(e) {
                         error_msg <- conditionMessage(e)
                         # Add visible error row to table
-                        mcnemarTable$addRow(
-                            rowKey = "cochran_q_error",
+                        .fillRow(mcnemarTable,
+                            rowKey = "cochran_q_global",
                             values = list(
                                 comparison = sprintf(jmvcore::.("Overall (%d tests) - ERROR"), n_tests),
                                 n = NA,
@@ -2684,7 +2728,13 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
                             mcnemar_result <- cached$result
                         } else {
                             cached <- private$.computeMcNemar(test_results, test1, test2)
-                            if (is.null(cached)) return()
+                            if (is.null(cached)) {
+                                # The pair keeps the row .init() laid down; the notice says why.
+                                .fillRow(mcnemarTable, rowKey = comparison_name, values = list(
+                                    comparison = comparison_label,
+                                    interpretation = jmvcore::.("Not computed; the notice above says why.")))
+                                return()
+                            }
                             mcnemar_table <- cached$table
                             mcnemar_result <- cached$result
                         }
@@ -2716,7 +2766,7 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
                             interpretation <- paste0(interpretation, " ", jmvcore::.("(Holm-Bonferroni corrected)"))
                         }
 
-                        mcnemarTable$addRow(
+                        .fillRow(mcnemarTable,
                             rowKey = comparison_name,
                             values = list(
                                 comparison = comparison_label,
@@ -2847,7 +2897,7 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
                         return()
                     }
                     row_key <- paste(comparison_name, metric_key, sep = "_")
-                    diffTable$addRow(
+                    .fillRow(diffTable,
                         rowKey = row_key,
                         values = list(
                             comparison = comparison_label,

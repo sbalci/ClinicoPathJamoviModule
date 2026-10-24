@@ -873,7 +873,8 @@ items:
           type: text
         - name: 'time'
           title: "time"
-          type: integer
+          type: number
+          format: zto
         - name: n.risk
           title: "Number at Risk"
           type: integer
@@ -1403,7 +1404,8 @@ items:
           type: text
         - name: time_point
           title: "Time"
-          type: integer
+          type: number
+          format: zto
         - name: n_risk
           title: "N at Risk"
           type: integer
@@ -1588,10 +1590,14 @@ refs:
     - finalfit
     - survival
     - survminer
+    - maxstat
     - dichotomizing
     - survivaltutorial
     - survivalrwnahhas
     - SchemperSmith1996
+    - RoystonParmar2013
+    - Garwood1936
+    - Dafni2011
     - KMunicate
     - lubridate
     - patchwork

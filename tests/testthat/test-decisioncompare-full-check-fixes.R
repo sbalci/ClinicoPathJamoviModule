@@ -87,8 +87,8 @@ test_that("invalid reruns clear old values while preserving fixed table rows", {
     # library-audit 2026-10-23 meddecide [HIGH] DONE: original data are Tables now (goldFrequency, originalCrossTab)
     expect_equal(analysis$results$goldFrequency$rowCount, 0)
     expect_equal(analysis$results$originalCrossTab$rowCount, 0)
-    expect_equal(analysis$results$comparisonTable$rowCount, 0)
-
+    # library-audit 2026-10-23 meddecide [MEDIUM] DONE: rows come from .init(); nothing is computed
+    expect_true(all(is.na(analysis$results$comparisonTable$asDF$Sens)))
     dc_fix_option(analysis, "test1Positive", "P")
     expect_no_error(analysis$run())
     expect_equal(analysis$results$cTable1$asDF$Total[3], 26)

@@ -296,6 +296,46 @@ decisioncombineClass <- if (requireNamespace("jmvcore")) {
                 !is.null(value) && length(value) == 1L && !is.na(value) && nzchar(value)
             },
 
+            # Rows of the combination tables, from the options alone: the 2^k result patterns, one
+            # row per single test and the strategy rules for k tests - or "Test 1" alone without a
+            # second test, as .analyzeCombinations() does. Built from the same helpers it uses,
+            # on a zero-row frame with the selected tests' columns.
+            .combinationRowKeys = function() {
+                selected <- c(private$.optionSelected(self$options$test1),
+                              private$.optionSelected(self$options$test2),
+                              private$.optionSelected(self$options$test3))
+                if (!selected[1]) return(character(0))
+                if (!selected[2]) return(.("Test 1"))
+                cols <- paste0("test", which(selected), "Variable2")
+                empty <- as.data.frame(stats::setNames(rep(list(character(0)), length(cols)), cols))
+                single <- character(0)
+                for (i in which(selected)) single <- c(single, private$.singleTestLabel(i))
+                strategy <- vapply(private$.strategyDefinitions(sum(selected)), `[[`, "", "label")
+                c(names(private$.patternConditions(empty)), single, strategy)
+            },
+
+            # library-audit 2026-10-23 meddecide [MEDIUM] DONE: the combination tables' rows follow from
+            #   the selected tests, so they are laid down here (from .init() and at the start of every
+            #   analysis) and .analyzeSinglePattern() fills them with .fillRow() (guide section 6).
+            .scaffoldCombinationRows = function() {
+                comb <- self$results$combinationTable
+                ci <- self$results$combinationTableCI
+                ratio <- self$results$combinationTableCIRatios
+                for (table in list(comb, ci, ratio)) .deleteTableRows(table)
+                ci_stats <- c(sens = .("Sensitivity"), spec = .("Specificity"), ppv = .("PPV"),
+                              npv = .("NPV"), acc = .("Accuracy"))
+                ratio_stats <- c(lrPos = .("LR+"), lrNeg = .("LR-"), dor = .("DOR"))
+                for (pattern in private$.combinationRowKeys()) {
+                    comb$addRow(rowKey = pattern, values = list(pattern = pattern))
+                    for (k in names(ci_stats))
+                        ci$addRow(rowKey = paste0(pattern, "_", k),
+                                  values = list(pattern = pattern, statistic = ci_stats[[k]]))
+                    for (k in names(ratio_stats))
+                        ratio$addRow(rowKey = paste0(pattern, "_", k),
+                                     values = list(pattern = pattern, statistic = ratio_stats[[k]]))
+                }
+            },
+
             # "level (n = k)" for each non-missing level present in a column, in level order.
             # Unused factor levels, an explicit NA level and "" are left out.
             .observedLevels = function(var) {
@@ -425,6 +465,7 @@ decisioncombineClass <- if (requireNamespace("jmvcore")) {
             },
 
             .init = function() {
+                private$.scaffoldCombinationRows()
                 private$.noticeList <- list()
                 private$.continuityPatterns <- character()
                 private$.zeroSeIntervalPatterns <- character()
@@ -1592,9 +1633,7 @@ decisioncombineClass <- if (requireNamespace("jmvcore")) {
                 # (5 -> 10 -> 15) until the duplicated rowKeys made $asDF fail outright
                 # with "duplicate 'row.names' are not allowed", taking the recommendation
                 # and every plot down with it.
-                .deleteTableRows(self$results$combinationTable)
-                .deleteTableRows(self$results$combinationTableCI)
-                .deleteTableRows(self$results$combinationTableCIRatios)
+                private$.scaffoldCombinationRows()
 
                 # PPV and NPV assume this sample's prevalence. That was an INFO notice on
                 # every ordinary run, where a standing caveat about two columns does not
@@ -1979,7 +2018,7 @@ decisioncombineClass <- if (requireNamespace("jmvcore")) {
 
                 # Add to main table
                 combTable <- self$results$combinationTable
-                combTable$addRow(rowKey = pattern_name, values = private$.blankNA(list(
+                .fillRow(combTable, rowKey = pattern_name, values = private$.blankNA(list(
                     pattern = pattern_name,
                     # A "+/-" row is a mutually exclusive group of patients, not a rule you
                     # can apply: its "Sensitivity" is P(this exact pattern | diseased). The
@@ -2012,7 +2051,7 @@ decisioncombineClass <- if (requireNamespace("jmvcore")) {
                 ratioTable <- self$results$combinationTableCIRatios
 
                 # Sensitivity with CI
-                ciTable$addRow(rowKey = paste0(pattern_name, "_sens"), values = private$.blankNA(list(
+                .fillRow(ciTable, rowKey = paste0(pattern_name, "_sens"), values = private$.blankNA(list(
                     pattern = pattern_name,
                     statistic = .("Sensitivity"),
                     estimate = sens,
@@ -2021,7 +2060,7 @@ decisioncombineClass <- if (requireNamespace("jmvcore")) {
                 )))
 
                 # Specificity with CI
-                ciTable$addRow(rowKey = paste0(pattern_name, "_spec"), values = private$.blankNA(list(
+                .fillRow(ciTable, rowKey = paste0(pattern_name, "_spec"), values = private$.blankNA(list(
                     pattern = pattern_name,
                     statistic = .("Specificity"),
                     estimate = spec,
@@ -2030,7 +2069,7 @@ decisioncombineClass <- if (requireNamespace("jmvcore")) {
                 )))
 
                 # PPV with CI
-                ciTable$addRow(rowKey = paste0(pattern_name, "_ppv"), values = private$.blankNA(list(
+                .fillRow(ciTable, rowKey = paste0(pattern_name, "_ppv"), values = private$.blankNA(list(
                     pattern = pattern_name,
                     statistic = .("PPV"),
                     estimate = ppv,
@@ -2039,7 +2078,7 @@ decisioncombineClass <- if (requireNamespace("jmvcore")) {
                 )))
 
                 # NPV with CI
-                ciTable$addRow(rowKey = paste0(pattern_name, "_npv"), values = private$.blankNA(list(
+                .fillRow(ciTable, rowKey = paste0(pattern_name, "_npv"), values = private$.blankNA(list(
                     pattern = pattern_name,
                     statistic = .("NPV"),
                     estimate = npv,
@@ -2048,7 +2087,7 @@ decisioncombineClass <- if (requireNamespace("jmvcore")) {
                 )))
 
                 # Accuracy with CI
-                ciTable$addRow(rowKey = paste0(pattern_name, "_acc"), values = private$.blankNA(list(
+                .fillRow(ciTable, rowKey = paste0(pattern_name, "_acc"), values = private$.blankNA(list(
                     pattern = pattern_name,
                     statistic = .("Accuracy"),
                     estimate = acc,
@@ -2085,7 +2124,7 @@ decisioncombineClass <- if (requireNamespace("jmvcore")) {
                     lr_pos_lower <- NA
                     lr_pos_upper <- NA
                 }
-                ratioTable$addRow(rowKey = paste0(pattern_name, "_lrPos"), values = private$.blankNA(list(
+                .fillRow(ratioTable, rowKey = paste0(pattern_name, "_lrPos"), values = private$.blankNA(list(
                     pattern = pattern_name,
                     statistic = .("LR+"),
                     estimate = lr_pos,
@@ -2115,7 +2154,7 @@ decisioncombineClass <- if (requireNamespace("jmvcore")) {
                     lr_neg_lower <- NA
                     lr_neg_upper <- NA
                 }
-                ratioTable$addRow(rowKey = paste0(pattern_name, "_lrNeg"), values = private$.blankNA(list(
+                .fillRow(ratioTable, rowKey = paste0(pattern_name, "_lrNeg"), values = private$.blankNA(list(
                     pattern = pattern_name,
                     statistic = .("LR-"),
                     estimate = lr_neg,
@@ -2144,7 +2183,7 @@ decisioncombineClass <- if (requireNamespace("jmvcore")) {
                     dor_lower <- NA
                     dor_upper <- NA
                 }
-                ratioTable$addRow(rowKey = paste0(pattern_name, "_dor"), values = private$.blankNA(list(
+                .fillRow(ratioTable, rowKey = paste0(pattern_name, "_dor"), values = private$.blankNA(list(
                     pattern = pattern_name,
                     statistic = .("DOR"),
                     estimate = dor,

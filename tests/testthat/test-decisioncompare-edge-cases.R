@@ -228,8 +228,8 @@ test_that("decisioncompare waits silently until required variables are selected"
       test3Negative = NULL
     )
   )
-  expect_equal(res1$comparisonTable$rowCount, 0L)
-
+  # library-audit 2026-10-23 meddecide [MEDIUM] DONE: rows come from .init(); nothing is computed
+  expect_true(all(is.na(res1$comparisonTable$asDF$Sens)))
   # No gold standard: nothing to compare against
   expect_no_error(
     res2 <- call_decisioncompare(
@@ -246,8 +246,8 @@ test_that("decisioncompare waits silently until required variables are selected"
       test3Negative = NULL
     )
   )
-  expect_equal(res2$comparisonTable$rowCount, 0L)
-
+  # library-audit 2026-10-23 meddecide [MEDIUM] DONE: rows come from .init(); nothing is computed
+  expect_true(all(is.na(res2$comparisonTable$asDF$Sens)))
   # ...but a complete selection does produce results
   res3 <- call_decisioncompare(
     data = decisioncompare_small,
