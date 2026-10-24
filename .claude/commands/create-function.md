@@ -283,6 +283,15 @@ Checklist:
 - [ ] **Tabular data belongs in a `type: Table` result in `.r.yaml`**, not hand-built HTML `<table>`
       markup. Hand-crafted HTML tables break dark themes, lose Copy/Copy LaTeX grid operations, and
       cannot be translated (§26).
+- [ ] **The panel and results use jamovi's native shapes** (2026-10-23 meddecide, §5/§12/§26) —
+      every variable role in the first `VariableSupplier` (optional ones greyed with `enable:`);
+      a factor level is `type: Level` + `LevelSelector`, a fixed set of numbers is `Number` options;
+      a preset greys or rewrites the controls it overrides; help only in the empty state
+      (`showGuidance` defaults to `false`); a section heading is a `Group` title, never an empty
+      `Preformatted`; numbers go to `number` columns, not `format()`ed text; plots draw with
+      `ggtheme`, no theme option. On failure, nothing is hidden or blanked before `reject()`, each
+      error is reported once, and an optional sub-analysis that cannot run is a WARNING notice, not
+      a `setNote("error", ...)`. `tools/release_gate.py` WARNs on each.
 - [ ] **Metadata self-consistency** — `description: main:` must be one `>` folded paragraph with no
       blank lines (`tools/release_gate.py` `check_description_newlines`); bug-report URL must match
       across `DESCRIPTION`, `jamovi/0000.yaml`, and `README.md`; example datasets must have distinct

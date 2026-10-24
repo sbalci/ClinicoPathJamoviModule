@@ -1105,15 +1105,6 @@ kappaSizeCIClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         },
 
         .run = function() {
-            # Blank the panels first, as kappaSizeFixedN/kappaSizePower do: every refusal below
-            # rejects before anything is written, and jamovi keeps an errored analysis's old
-            # items on screen (greyed), so the PREVIOUS run's n stayed visible under the error.
-            # Preformatted "" clears in the client; an Html "" is skipped, hence "<div></div>".
-            self$results$text1$setContent("")
-            self$results$text_summary$setContent("")
-            self$results$text2$setContent("")
-            self$results$notices$setContent("<div></div>")
-
             # Input validation
             validation_errors <- private$.validateInputs()
             if (!is.null(validation_errors)) {
@@ -1224,10 +1215,12 @@ kappaSizeCIClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                     show_details  = show_details,
                     show_summary  = show_summary)
 
-                # Set results
+                # library-audit 2026-10-23 meddecide [MEDIUM] DONE: panels are cleared on the success path only; under
+                #   reject() the greyed previous result is jamovi's failure presentation (guide section 5).
+                # Every panel is written, so a panel switched off cannot keep an earlier run's text.
                 self$results$text1$setContent(formatted_result)
-                if (show_summary) self$results$text_summary$setContent(summary_text)
-                if (show_details) self$results$text2$setContent(private$.generateExplanation(params))
+                self$results$text_summary$setContent(if (show_summary) summary_text else "")
+                self$results$text2$setContent(if (show_details) private$.generateExplanation(params) else "")
                 self$results$notices$setContent(notices_html)
 
             }, error = function(e) {
@@ -1237,10 +1230,6 @@ kappaSizeCIClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 # returned, so kappaSize IS installed and the parameters ARE valid - the fault is
                 # downstream formatting. Neither sibling has such a handler; reject so the failure
                 # surfaces as a real jamovi error instead of as body text.
-                self$results$text1$setContent("")
-                self$results$text_summary$setContent("")
-                self$results$text2$setContent("")
-                self$results$notices$setContent("<div></div>")  # Html: the client skips ""
                 jmvcore::reject(
                     .fmt(.("The sample size was computed but could not be formatted for display: {error}"),
                          error = conditionMessage(e)),

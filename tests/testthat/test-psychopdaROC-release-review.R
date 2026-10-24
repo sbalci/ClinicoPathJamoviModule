@@ -737,28 +737,31 @@ test_that("confusion matrices and dot plots name the actual levels", {
     d <- ps_data()
     res <- run_ps(data = d, dependentVars = "biomarker", sensSpecTable = TRUE, showDotPlot = TRUE,
                   combinePlots = FALSE)
-    html <- res$sensSpecTable$get(key = "biomarker")$content
-    expect_match(html, "Positive (Disease)", fixed = TRUE)
-    expect_match(html, "Negative (Healthy)", fixed = TRUE)
+    # library-audit 2026-10-23 meddecide [HIGH] DONE: the matrices are Tables; levels name the columns and rows
+    cm <- res$sensSpecTable$get(key = "biomarker")
+    expect_identical(cm$getColumn("pos")$title, "Positive (Disease)")
+    expect_identical(cm$getColumn("neg")$title, "Negative (Healthy)")
+    expect_identical(cm$asDF$decision[1:2], c("Positive (Disease)", "Negative (Healthy)"))
     st <- res$dotPlot$get(key = "biomarker")$state
     expect_equal(as.vector(table(st$label)[c("Negative (Healthy)", "Positive (Disease)")]),
                  as.vector(table(d$disease_status)))
 
     three <- run_ps(data = ps_data3(), dependentVars = "biomarker", classVar = "ds3",
                     positiveClass = "Severe", negativeClass = "Healthy", sensSpecTable = TRUE)
-    html3 <- three$sensSpecTable$get(key = "biomarker")$content
-    expect_match(html3, "Positive (Severe)", fixed = TRUE)
-    expect_match(html3, "Negative (Healthy)", fixed = TRUE)
+    cm3 <- three$sensSpecTable$get(key = "biomarker")
+    expect_identical(cm3$getColumn("pos")$title, "Positive (Severe)")
+    expect_identical(cm3$getColumn("neg")$title, "Negative (Healthy)")
 
     # level names are user data: escaped inside the Html
     d$lt <- factor(ifelse(d$disease_status == "Disease", "Ca <b>", "Benign & co"),
                    levels = c("Benign & co", "Ca <b>"))
     esc <- run_ps(data = d, dependentVars = "biomarker", classVar = "lt", positiveClass = "Ca <b>", negativeClass = "Benign & co",
                   sensSpecTable = TRUE)
-    html_e <- esc$sensSpecTable$get(key = "biomarker")$content
-    expect_match(html_e, "Positive (Ca &lt;b&gt;)", fixed = TRUE)
-    expect_match(html_e, "Negative (Benign &amp; co)", fixed = TRUE)
-    expect_false(grepl("Ca <b>", html_e, fixed = TRUE))
+    # Table titles and cells are HTML-parsed by the client: a "<" before a letter is broken (.rocLabel)
+    cme <- esc$sensSpecTable$get(key = "biomarker")
+    expect_identical(cme$getColumn("pos")$title, "Positive (Ca < b>)")
+    expect_identical(cme$asDF$decision[2], "Negative (Benign & co)")
+    expect_false(grepl("Ca <b>", paste(unlist(cme$asDF), collapse = " "), fixed = TRUE))
 })
 
 test_that("the interactive ROC plot draws one path per marker", {
@@ -808,17 +811,18 @@ test_that("a cut-point between observed values is read with its own rule, and ti
     sp <- mean(d$marker[!case] < cut)
     expect_equal(c(row$sensitivity, row$specificity, row$youden), c(se, sp, se + sp - 1), tolerance = 1e-12)
     expect_match(tnote(rt, "tied_optima"), "Several cut-points tie for the best youden (0.5): 8, 9, 11.", fixed = TRUE)
-    html <- res$sensSpecTable$get(key = "marker")$content    # the confusion matrix uses the same rule
-    expect_match(html, paste0(">", sum(d$marker[case] >= cut), " (TP)<"), fixed = TRUE)
-    expect_match(html, paste0(">", sum(d$marker[case] < cut), " (FN)<"), fixed = TRUE)
+    cm <- res$sensSpecTable$get(key = "marker")$asDF    # the confusion matrix uses the same rule
+    expect_equal(cm$pos[1], sum(d$marker[case] >= cut))   # TP
+    expect_equal(cm$pos[2], sum(d$marker[case] < cut))    # FN
 })
 
 test_that("'All tied cutpoints' gives one confusion matrix per tie and a dot plot, without an error", {
     res <- expect_no_error(run_ps(data = ps_d1(), dependentVars = "marker", classVar = "status", positiveClass = "Malignant", negativeClass = "Benign",
                                   break_ties = "c", sensSpecTable = TRUE, showDotPlot = TRUE, combinePlots = FALSE))
     expect_equal(sort(res$resultsTable$get(key = "marker")$asDF$cutpoint), c(8, 9, 11))
-    html <- res$sensSpecTable$get(key = "marker")$content
-    expect_equal(lengths(regmatches(html, gregexpr("Confusion Matrix for", html, fixed = TRUE))), 3)
+    cm <- res$sensSpecTable$get(key = "marker")$asDF    # two rows per tied cut-point
+    expect_equal(nrow(cm), 6)
+    expect_equal(sort(unique(cm$cutpoint)), c(8, 9, 11))
     expect_equal(nrow(res$dotPlot$get(key = "marker")$state), 20)
 })
 
@@ -855,8 +859,8 @@ test_that("Analysis Status and Procedure Notes are emptied and hidden when the s
             oChanges = "positiveClass", vChanges = character())
     unset$postInit()
     suppressMessages(unset$run())
-    expect_identical(unset$results$procedureNotes$content, "")
-    expect_false(isTRUE(unset$results$procedureNotes$visible))
+    # library-audit 2026-10-23 meddecide [MEDIUM] DONE: the old notes are cleared ("<div></div>"), not hidden
+    expect_identical(unset$results$procedureNotes$content, "<div></div>")
     expect_match(unset$results$runSummary$content, "Choose the positive and negative classes", fixed = TRUE)
 })
 

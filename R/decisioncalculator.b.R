@@ -264,19 +264,6 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) {
             .run = function() {
                 .deleteTableRows(self$results$screeningWorkload)
                 private$.noticeList <- list()
-                # Restored Html can retain old content despite clearWith. Clear before
-                # validation, including the count-dependent assumptions panel.
-                narrative <- c("summary", "faganSummary", "assumptions", "about", "glossary")
-                for (name in narrative) self$results[[name]]$setContent("")
-                on.exit(for (name in narrative) {
-                    item <- self$results[[name]]
-                    item$setVisible(nzchar(item$content) && isTRUE(switch(name,
-                        summary = self$options$showSummary,
-                        faganSummary = self$options$fagan,
-                        assumptions = self$options$showAbout,
-                        about = self$options$showAbout,
-                        glossary = self$options$showGlossary)))
-                }, add = TRUE)
                 on.exit(private$.renderNotices(), add = TRUE)
 
                 # Read numbers from input ----
@@ -358,6 +345,14 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) {
                     private$.addNotice("WARNING", .("No negative test results"), .("TN + FN equals zero: the test was never negative. The negative predictive value, the negative likelihood ratio and the diagnostic odds ratio are not estimable, and the test cannot separate the two groups. The positive likelihood ratio is exactly 1: a positive result carries no information."))
                 }
 
+
+                # Restored Html can retain old content despite clearWith, so the narrative panels
+                # are cleared once validation has passed; invalid counts reject() above, and under
+                # the error jamovi greys the previous run's panels in place.
+                # library-audit 2026-10-23 meddecide [MEDIUM] DONE: no on.exit() visibility rule and no blank
+                #   before reject(); visible: decides. "<div></div>" clears: the client skips "" (guide section 5).
+                for (name in c("summary", "faganSummary", "assumptions", "about", "glossary"))
+                    self$results[[name]]$setContent("<div></div>")
 
                 # Create confusion matrix ----
 
@@ -1593,10 +1588,6 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) {
                     youden = sprintf("%.3f", Youden),
                     accuracy = fmtPct(Accuracy)
                 )
-                prevalence_label <- .fmt(
-                    .("At {prevalence} prevalence"),
-                    prevalence = fmtPct(Prevalence)
-                )
                 positive_update <- if (is.finite(LRP)) .fmt(
                     .("A positive result multiplies pre-test odds by {lr}."),
                     lr = sprintf("%.2f", LRP)
@@ -1614,23 +1605,8 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) {
                     "</h3></div><div style='font-size: 14px;'>",
                     "<p style='margin: 10px 0;'><strong>", .("Descriptive results:"),
                     "</strong> ", descriptive_result, "</p>",
-                    "<table style='width: 100%; border-collapse: collapse; margin: 15px 0;'><tr>",
-                    "<td style='border: 1px solid #ccc; padding: 10px; background-color: rgba(155, 155, 155, 0.06); color: inherit;'><strong>",
-                    .("Sensitivity"), "</strong><br><span style='font-size: 18px;'>",
-                    fmtPct(Sens), "</span><br><span style='font-size: 12px;'>",
-                    .("True-positive rate"), "</span></td>",
-                    "<td style='border: 1px solid #ccc; padding: 10px; background-color: rgba(155, 155, 155, 0.06); color: inherit;'><strong>",
-                    .("Specificity"), "</strong><br><span style='font-size: 18px;'>",
-                    fmtPct(Spec), "</span><br><span style='font-size: 12px;'>",
-                    .("True-negative rate"), "</span></td></tr><tr>",
-                    "<td style='border: 1px solid #ccc; padding: 10px; background-color: rgba(155, 155, 155, 0.06); color: inherit;'><strong>",
-                    .("PPV"), "</strong><br><span style='font-size: 18px;'>",
-                    fmtPct(PPV), "</span><br><span style='font-size: 12px;'>",
-                    prevalence_label, "</span></td>",
-                    "<td style='border: 1px solid #ccc; padding: 10px; background-color: rgba(155, 155, 155, 0.06); color: inherit;'><strong>",
-                    .("NPV"), "</strong><br><span style='font-size: 18px;'>",
-                    fmtPct(NPV), "</span><br><span style='font-size: 12px;'>",
-                    prevalence_label, "</span></td></tr></table>",
+                    # library-audit 2026-10-23 meddecide [HIGH] DONE: no bordered grid here; sensitivity,
+                    #   specificity, PPV and NPV are in ratioTable, a native Table (guide section 26).
                     "<p style='margin: 10px 0;'><strong>", .("Likelihood-ratio update:"),
                     "</strong></p><ul style='margin: 10px 0; padding-left: 25px;'><li>",
                     positive_update, "</li><li>", negative_update, "</li></ul>",

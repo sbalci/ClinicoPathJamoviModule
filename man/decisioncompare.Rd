@@ -187,8 +187,8 @@ A results object containing:
 \tabular{llllll}{
 \code{results$notices} \tab \tab \tab \tab \tab a html \cr
 \code{results$levelMapping} \tab \tab \tab \tab \tab a table \cr
-\code{results$text1} \tab \tab \tab \tab \tab a preformatted \cr
-\code{results$text2} \tab \tab \tab \tab \tab a html \cr
+\code{results$goldFrequency} \tab \tab \tab \tab \tab a table \cr
+\code{results$originalCrossTab} \tab \tab \tab \tab \tab a table \cr
 \code{results$cTable1} \tab \tab \tab \tab \tab a table \cr
 \code{results$epirTable1} \tab \tab \tab \tab \tab a table \cr
 \code{results$cTable2} \tab \tab \tab \tab \tab a table \cr

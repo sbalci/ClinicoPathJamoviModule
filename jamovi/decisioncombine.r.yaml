@@ -269,7 +269,7 @@ items:
       title: 'Test Results Cross-Tabulation'
       type: Table
       rows: 0
-      visible: (showFrequency)
+      visible: (showFrequency && length(test2) > 0)
       clearWith: *analysisInputs
       columns:
         - name: testCombo
@@ -481,7 +481,7 @@ items:
       title: 'Descriptive Candidate-Rule Ranking'
       type: Table
       rows: 1
-      visible: (showRecommendation)
+      visible: (showRecommendation && (length(test2) > 0 || length(test3) > 0))
       # Cited only when the bootstrap ran (setRefs() in .populateRecommendation()); declared
       # here so the module updater keeps the key in the submodule's 00refs.yaml.
       refs:

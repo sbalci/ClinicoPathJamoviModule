@@ -1655,17 +1655,24 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
 
           # One matrix per reported cut-point, read with the Results rows' rule. 'All tied
           # cutpoints' makes optimal_cutpoint a list column (a Results row per tie), and the
-          # arithmetic on its [1] aborted the whole analysis.
-          html <- vapply(unlist(results$optimal_cutpoint), function(cut) {
-            i <- ruleIdx(cut)
-            if (!length(i)) return("")
-            private$.formatSensSpecTable(
-              Title = paste("Confusion Matrix for", var, "at Selected Cutpoint =", round(cut, 3)),
-              TP = as.numeric(confusionMatrix$tp[i]), FP = as.numeric(confusionMatrix$fp[i]),
-              TN = as.numeric(confusionMatrix$tn[i]), FN = as.numeric(confusionMatrix$fn[i]),
-              labels = classLabels)
-          }, character(1))
-          sensSpecTable$setContent(paste(html, collapse = "<br>"))
+          # arithmetic on its [1] aborted the whole analysis. Rows 1_pos/1_neg come from
+          # .init(); a tie adds its own pair.
+          cuts <- unlist(results$optimal_cutpoint)
+          for (k in seq_along(cuts)) {
+            i <- ruleIdx(cuts[k])
+            if (!length(i)) next
+            cells <- list(
+              pos = list(pos = as.integer(confusionMatrix$tp[i]), neg = as.integer(confusionMatrix$fp[i])),
+              neg = list(pos = as.integer(confusionMatrix$fn[i]), neg = as.integer(confusionMatrix$tn[i])))
+            for (side in c("pos", "neg")) {
+              key <- paste0(k, "_", side)
+              values <- c(list(cutpoint = cuts[k],
+                decision = .rocLabel(classLabels[[if (side == "pos") "positive" else "negative"]], note = FALSE)),
+                cells[[side]])
+              if (key %in% sensSpecTable$rowKeys) sensSpecTable$setRow(rowKey = key, values = values)
+              else sensSpecTable$addRow(rowKey = key, values = values)
+            }
+          }
         }
 
         return(list(
@@ -2068,6 +2075,8 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
         # Set up initial instructions - show by default until variables are provided
         private$.showWelcome()
 
+        private$.initSensSpecTables()
+
         # .init() re-runs on EVERY option change (jmvcore's optionsChangedHandler sets
         # status to "none" and Analysis$run() then calls init() again) on the same object,
         # against results that persist - and Table$addRow() has no duplicate check. This
@@ -2397,7 +2406,6 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
             .("Ready to run"), "</b></p><p>",
             .("Adjust your settings, then click Run selected analyses. Computationally intensive options and large datasets always wait for Run; Run all analyses manually also pauses basic analysis."),
             "</p></div>"))
-          self$results$runSummary$setVisible(TRUE)
           self$results$runSummary$setContent(paste0("<p>",
             .("Results have not been updated for the current settings. Any displayed estimates are from the previous run."),
             "</p>"))
@@ -2428,12 +2436,11 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
         # runSummary and procedureNotes have no clearWith and are not written in .init(), so
         # jamovi hands back the previous run's text: the 'Choose the positive class' panel after
         # a class was chosen, 'Positive Class: X' after it was unset. Clear both here (after the
-        # gate, so manual mode keeps its results). The client keeps what it painted when an Html
-        # turns empty, so one still empty when .run() exits is hidden too.
-        self$results$runSummary$setContent("")
-        self$results$procedureNotes$setContent("")
-        on.exit(for (el in list(self$results$runSummary, self$results$procedureNotes))
-          if (!isTRUE(nzchar(el$content))) el$setVisible(FALSE), add = TRUE)
+        # gate, so manual mode keeps its results).
+        # library-audit 2026-10-23 meddecide [MEDIUM] DONE: no on.exit() visibility rule - visible: in the
+        #   .r.yaml decides. "<div></div>" clears, because the client skips an Html update of "" (guide section 5).
+        self$results$runSummary$setContent("<div></div>")
+        self$results$procedureNotes$setContent("<div></div>")
         private$.delongUsedFallback <- FALSE
         # Per-run storage is keyed by variable name and read back by the threshold table,
         # the combined criterion plot, the prevalence plot and the forest plot renderer.
@@ -5228,86 +5235,24 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
       # ENHANCED FUNCTIONS FROM LEGACY TESTROC IMPLEMENTATION
       # ============================================================================
 
-      # Enhanced HTML table formatting for sensitivity/specificity results
-      .formatSensSpecTable = function(Title, TP, FP, TN, FN, labels) {
-        # Escape Title once at function entry - callers (e.g. L1385-1390) pass
-        # paste("Confusion Matrix for", var, ...) where `var` is a user column
-        # name from OptionVariables. Without this escape, a column literally
-        # named `<img src=x onerror=alert(1)>` would render as live HTML in the
-        # `<th>` cell at L4240 since sensSpecTable is type:Html in .r.yaml.
-        Title <- jmvcore::htmlEscape(Title)
-        # The header cells were raw English buried in the HTML literal, so a translated
-        # analysis showed translated tables next to an English confusion matrix. Broken out
-        # so each is an extractable msgid.
-        lblDecision <- .("Decision based on measure")
-        lblCriterion <- .("Criterion")
-        # "Positive (<level>)" / "Negative (<level>)": level names are user data, and this is Html.
-        lblNegative <- jmvcore::htmlEscape(labels[["negative"]])
-        lblPositive <- jmvcore::htmlEscape(labels[["positive"]])
-        res <- paste0(
-          "<style type='text/css'>
-        .tg  {border-collapse:collapse;border-spacing:0;border-width:1px;border-style:solid;border-color:black;}
-        .tg td{font-family:Arial, sans-serif;font-size:14px;padding:10px 5px;border-style:solid;border-width:0px;overflow:hidden;word-break:normal;}
-        .tg th{font-family:Arial, sans-serif;font-size:14px;font-weight:normal;padding:10px 5px;border-style:solid;border-width:0px;overflow:hidden;word-break:normal;}
-        .tg .tg-s6z2{text-align:center}
-        .tg .tg-uys7{border-color:inherit;text-align:center}
-        .tg .tg-h0x1{text-align:center}
-        </style>
-        <table class='tg'>
-          <tr>
-            <th class='tg-0lax' colspan='4'>",
-          Title,
-          "</th>
-          </tr>
-          <tr>
-            <td class='tg-s6z2'></td>
-            <td class='tg-uys7' colspan='3'>",
-          lblDecision,
-          "</td>
-          </tr>
-          <tr>
-            <td class='tg-h0x1' rowspan='3'>",
-          lblCriterion,
-          "</td>
-            <td class='tg-h0x1'></td>
-            <td class='tg-h0x1'>",
-          lblNegative,
-          "</td>
-            <td class='tg-h0x1'>",
-          lblPositive,
-          "</td>
-          </tr>
-          <tr>
-            <td class='tg-s6z2'>",
-          lblNegative,
-          "</td>
-            <td class='tg-s6z2'>",
-          TN,
-          " (TN)</td>
-            <td class='tg-s6z2'>",
-          FP,
-          " (FP)</td>
-          </tr>
-          <tr>
-            <td class='tg-h0x1'>",
-          lblPositive,
-          "</td>
-            <td class='tg-h0x1'>",
-          FN,
-          " (FN)</td>
-            <td class='tg-h0x1'>",
-          TP,
-          " (TP)</td>
-          </tr>
-          <tr>
-            <td class='tg-tf2e'></td>
-            <td class='tg-tf2e'></td>
-            <td class='tg-tf2e'></td>
-            <td class='tg-tf2e'></td>
-          </tr>
-        </table>"
-        )
-        return(res)
+      # library-audit 2026-10-23 meddecide [HIGH] DONE: confusion matrices are Tables (rows = decision,
+      #   columns = criterion levels); a <table> lost number format, Copy as a grid and Copy Latex.
+      .initSensSpecTables = function() {
+        if (!isTRUE(self$options$sensSpecTable)) return()
+        pos <- self$options$positiveClass
+        neg <- self$options$negativeClass
+        lab <- function(fmt, level, plain)
+          if (length(level) && nzchar(level)) .rocLabel(sprintf(fmt, level), note = FALSE) else plain
+        for (var in self$options$dependentVars) {
+          table <- self$results$sensSpecTable$get(key = var)
+          if (is.null(table)) next
+          .deleteTableRows(table)
+          table$getColumn("pos")$setTitle(lab(.("Positive (%s)"), pos, .("Positive")))
+          table$getColumn("neg")$setTitle(lab(.("Negative (%s)"), neg, .("Negative")))
+          table$addRow(rowKey = "1_pos", values = list(decision = lab(.("Positive (%s)"), pos, .("Positive"))))
+          table$addRow(rowKey = "1_neg", values = list(decision = lab(.("Negative (%s)"), neg, .("Negative"))))
+          table$setNote("cells", .("Rows are the decision at the cutpoint and columns the criterion: the Positive row holds true and false positives, the Negative row false and true negatives."))
+        }
       },
 
       # Enhanced DeLong test implementation with better error handling

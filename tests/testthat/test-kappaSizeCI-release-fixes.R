@@ -1,16 +1,22 @@
-# Release fixes 2026-10-21 (independent review F-01): a rejected re-run must not leave the previous
-# run's n on screen. jamovi keeps an errored analysis's items (greyed), so .run() blanks them first.
-
-test_that("a rejected re-run blanks the previous sample size and notices", {
+# library-audit 2026-10-23 meddecide [MEDIUM] DONE: a rejected re-run leaves the panels alone - jamovi
+#   greys the errored analysis with its previous results in place (guide section 5); a successful run
+#   rewrites every panel, so one switched off cannot keep an earlier run's text.
+test_that("a rejected re-run leaves the panels to jamovi's error state; a success clears them", {
     opts <- ClinicoPath:::kappaSizeCIOptions$new(props = "0.5, 0.6")
     a <- ClinicoPath:::kappaSizeCIClass$new(options = opts, data = data.frame())
     a$init()
     a$results$text1$setContent("Required sample size: 118")
-    a$results$notices$setContent("<p>old notice</p>")
     expect_error(a$run())
-    expect_identical(a$results$text1$content, "")
-    # Html "" is skipped by the jamovi client, so the blank must be non-empty markup
-    expect_identical(a$results$notices$content, "<div></div>")
+    expect_identical(a$results$text1$content, "Required sample size: 118")
+
+    ok <- ClinicoPath:::kappaSizeCIClass$new(options = ClinicoPath:::kappaSizeCIOptions$new(), data = data.frame())
+    ok$init()
+    ok$results$text_summary$setContent("old summary")
+    ok$results$text2$setContent("old explanation")
+    ok$run()
+    expect_identical(ok$results$text_summary$content, "")
+    expect_identical(ok$results$text2$content, "")
+    expect_true(nzchar(ok$results$text1$content))
 })
 
 test_that("F-02: the default view says which two-sided limit sets n", {

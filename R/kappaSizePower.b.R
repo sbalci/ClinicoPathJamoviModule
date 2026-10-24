@@ -448,11 +448,6 @@ kappaSizePowerClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
             alpha   <- self$options$alpha
             power   <- self$options$power
 
-            # Clear any prior content so stale results never survive a rejected run.
-            self$results$notices$setContent("<div></div>")  # Html: the client skips ""
-            self$results$text1$setContent("")
-            self$results$text_summary$setContent("")
-            self$results$text2$setContent("")
 
             if (!isTRUE(outcome %in% c(2, 3, 4, 5)))
                 jmvcore::reject(.("Number of outcome levels must be 2, 3, 4, or 5."), code = "invalid_outcome")
@@ -630,6 +625,12 @@ kappaSizePowerClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
             dedupe <- function(lines)
                 lines[!(duplicated(lines) & grepl("expected cell count", lines, fixed = TRUE))]
             result_text <- paste(dedupe(utils::capture.output(print(result))), collapse = "\n")
+            # library-audit 2026-10-23 meddecide [MEDIUM] DONE: panels are cleared on the success path only; under
+            #   reject() the greyed previous result is jamovi's failure presentation (guide section 5).
+            self$results$notices$setContent("<div></div>")  # Html: the client skips ""
+            self$results$text1$setContent("")
+            self$results$text_summary$setContent("")
+            self$results$text2$setContent("")
             self$results$text1$setContent(result_text)
 
             summary_text <- paste(dedupe(utils::capture.output(summary(result))),

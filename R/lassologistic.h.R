@@ -368,11 +368,25 @@ lassologisticResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                     "random_seed",
                     "suitabilityCheck",
                     "bootstrapValidation")))
-            self$add(jmvcore::Html$new(
+            self$add(jmvcore::Table$new(
                 options=options,
                 name="suitabilityReport",
                 title="Data Suitability Assessment",
                 visible="(suitabilityCheck)",
+                rows=0,
+                columns=list(
+                    list(
+                        `name`="check", 
+                        `title`="Check", 
+                        `type`="text"),
+                    list(
+                        `name`="status", 
+                        `title`="Status", 
+                        `type`="text"),
+                    list(
+                        `name`="result", 
+                        `title`="Result", 
+                        `type`="text")),
                 clearWith=list(
                     "outcome",
                     "patientID",
@@ -1012,7 +1026,7 @@ lassologisticBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' \tabular{llllll}{
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$notices} \tab \tab \tab \tab \tab a html \cr
-#'   \code{results$suitabilityReport} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$suitabilityReport} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$modelSummary} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$coefficients} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$performance} \tab \tab \tab \tab \tab a table \cr
@@ -1035,9 +1049,9 @@ lassologisticBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'
 #' Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
 #'
-#' \code{results$modelSummary$asDF}
+#' \code{results$suitabilityReport$asDF}
 #'
-#' \code{as.data.frame(results$modelSummary)}
+#' \code{as.data.frame(results$suitabilityReport)}
 #'
 #' @export
 lassologistic <- function(

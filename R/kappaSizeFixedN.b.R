@@ -625,13 +625,6 @@ kappaSizeFixedNClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
 
         .run = function() {
 
-            # Blank the panels first: .validateInputs() rejects before anything is written, so a
-            # failed re-run must not leave the PREVIOUS run's numbers on screen under the error.
-            self$results$text1$setContent("")
-            self$results$text_summary$setContent("")
-            self$results$text2$setContent("")
-            self$results$notices$setContent("<div></div>")  # Html: the client skips ""
-            self$results$methodology$setContent("<div></div>")
 
             outcome <- as.numeric(self$options$outcome)
             kappa0  <- self$options$kappa0
@@ -676,6 +669,13 @@ kappaSizeFixedNClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
             show_rml <- rml_governs && !identical(private$.fmtBound(fixed), private$.fmtBound(bound))
 
             # --- Populate outputs ---------------------------------------------
+            # library-audit 2026-10-23 meddecide [MEDIUM] DONE: panels are cleared on the success path only; under
+            #   reject() the greyed previous result is jamovi's failure presentation (guide section 5).
+            self$results$text1$setContent("")
+            self$results$text_summary$setContent("")
+            self$results$text2$setContent("")
+            self$results$notices$setContent("<div></div>")  # Html: the client skips ""
+            self$results$methodology$setContent("<div></div>")
             n_txt <- private$.fmtN(n)
             # FN-01 (independent review 2026-10-21): when re-estimation lowers the bound, the default view must
             # say so - the cited method and kappaSize give the fixed figure (up to 0.029 higher), and on rare

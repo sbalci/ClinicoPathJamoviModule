@@ -1248,7 +1248,12 @@ For complex formatting beyond standard tables, use `Html` result type:
   visible: true
 ```
 
-`Html` is the right home for gt/gtsummary/kableExtra tables. For narrative or
+`Html` is **not** the home for a table of results, however it is drawn: a
+`knitr::kable(format = "html")` cross-tab was one of the four sites in the
+2026-10-23 meddecide [HIGH] (`decisioncompare`). Results go in a `Table`; the
+package examples below are for a whole publication table a package already lays
+out (a `gtsummary` Table 1), and even then the user loses number formatting,
+Copy as a grid and Copy Latex. For narrative or
 explanatory text about a table (interpretation, methods summary), the official jamovi
 dev docs say to prefer `type: Text` over hand-rolled HTML - see
 [`Text`](jamovi_r_yaml_guide.md#text-jamovi-283) (jamovi 28.3+; module-wide
@@ -1338,8 +1343,21 @@ Do **not** generate manual HTML `<table>` elements for tabular data results. Han
 Tabular data must be declared as a `type: Table` element in `.r.yaml`, with static rows scaffolded in `.init()` and computed values populated in `.run()`. Use `setNote()` for table footnotes.
 
 Reserve `type: Html` solely for:
-1. Complex tables from dedicated R packages with their own mature HTML rendering engines (e.g., `gtsummary` or `kableExtra`), or
+1. A whole publication table that a dedicated package lays out (`gtsummary`) and that has no
+   `Table` equivalent - never a 2x2, a confusion matrix, a cross-tab or a check list, and never
+   `knitr::kable(format = "html")` or a `table()` printed into a `Preformatted`, or
 2. Non-tabular empty-state and instructional panels (quick-start guides, glossaries, format diagrams).
+
+A verdict is words (a `setNote()` or a footnote marker), never red/amber/green text: APA tables do
+not encode meaning in colour. The shapes to copy are already in meddecide: an Array of `Table` whose
+two count columns share a `superTitle` and are renamed to the criterion levels in `.init()`
+(the reviewer's `sensSpecTable` suggestion), and `decision.r.yaml`'s `rawContingency`/`rawCounts`.
+`release_gate.py` `check_html_tables` WARNs on a `<table` or an HTML `kable()` outside a help-named
+method (round 8, 2026-10-24).
+
+A number pushed through `format()`/`sprintf()` into a `text` column ignores the user's number
+format (`check_text_number_cells`). A key/value table mixing a label row with numbers needs two
+columns.
 
 See [jamovi Library Review Guide §26](jamovi_library_review_guide.md#26-rule-tabular-data-belongs-in-a-table-result).
 

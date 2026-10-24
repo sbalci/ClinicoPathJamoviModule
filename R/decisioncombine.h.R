@@ -633,7 +633,7 @@ decisioncombineResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                 name="crossTabTable",
                 title="Test Results Cross-Tabulation",
                 rows=0,
-                visible="(showFrequency)",
+                visible="(showFrequency && length(test2) > 0)",
                 clearWith=list(
                     "gold",
                     "goldPositive",
@@ -913,7 +913,7 @@ decisioncombineResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                 name="recommendationTable",
                 title="Descriptive Candidate-Rule Ranking",
                 rows=1,
-                visible="(showRecommendation)",
+                visible="(showRecommendation && (length(test2) > 0 || length(test3) > 0))",
                 refs=list(
                     "harrell2015"),
                 clearWith=list(

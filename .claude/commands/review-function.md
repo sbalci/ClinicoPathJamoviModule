@@ -183,6 +183,9 @@ grep -n "visible: *( *!" jamovi/<fn>.r.yaml   # a leading "!" is silently ALWAYS
 grep -nE '\.\(\s*"[[:space:],;:.]|\.\(\s*"[^"]*[[:space:]]"\s*[,)]' R/<fn>.b.R   # separator/padding inside .()
 grep -nE '^\s*(type: *(File|Text)|mode: *vector)\s*$' jamovi/<fn>.a.yaml jamovi/<fn>.r.yaml; grep -n '^minApp' jamovi/0000.yaml   # File/Text need module-wide minApp: 28.3.0 (Text table columns are false hits); vector = bounded-mark plots only
 python3 tools/release_gate.py          # requiresData, CollapseBox Title Case, refs, .() " [..]"/\u{}/padding, translation %-specifiers, notice title colours (FAIL = blocking)
+#   round-8 WARNs (2026-10-23 meddecide): html_tables, error_presentation, variables_first, level_as_string,
+#   number_list_strings, default_guidance, empty_preformatted, setnote_errors, uyaml_structure,
+#   plot_theme_option, label_notation, text_number_cells, notice_myths - read each for the analysis under review
 Rscript -e 'testthat::test_file("tests/testthat/test-zzz-results-rendering-contract.R")'
 ```
 

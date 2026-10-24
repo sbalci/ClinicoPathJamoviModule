@@ -977,6 +977,24 @@ children:
 
 ## 10. Best Practices and Design Principles
 
+### Native controls the library reviewer checks (2026-10-23 meddecide)
+
+- **Every variable role in the first `VariableSupplier`**, optional roles greyed with `enable:`
+  (jmv `linreg.u.yaml`); never a second supplier inside a `CollapseBox`, never a CollapseBox above
+  the variables. `release_gate.py` `check_variables_first`.
+- **A factor level is `type: Level`** rendered with a `LevelSelector` (`allowNone: true`), not a
+  `String` "typed exactly as it appears in the data". `check_level_as_string`.
+- **A fixed number of numbers is `Number` options** (`partialAUCfrom`/`partialAUCto`), not a
+  comma-separated `String`; an open-ended list may stay a `String` - mark it
+  `# number-list: open-ended` above its `- name:` in the `.a.yaml`. `check_number_list_strings`.
+- **A preset shows its values**: grey the controls it overrides (`enable: (preset:custom)`) or write
+  its values into them from `events.js` with `ui.<name>.setValue()` (`cotest.events.js`).
+- **Choices come from the `.a.yaml`**: no `options:` on a `ComboBox`; a `Label` wraps the controls it
+  heads; a dependent control sits next to the option that enables it. `check_uyaml_structure`.
+- Free text that is only printed back is jamovi's Add Note, not an option.
+
+Full rationale and the reviewer's sites: [library review guide section 12](jamovi_library_review_guide.md#12-rule-ui-label-conventions).
+
 ### User Experience Design
 
 #### 1. Progressive Disclosure

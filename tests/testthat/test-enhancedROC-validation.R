@@ -937,8 +937,8 @@ test_that("the narrative panels are emptied and hidden when a run stops before w
         list(stale = FALSE, state = raw(), html = list(content = old, scripts = character(), stylesheets = character())),
         oChanges = "positiveClass", vChanges = character())
     suppressWarnings(pr$a$run())
-    expect_identical(pr$a$results$results$clinicalReport$content, "")
-    expect_false(isTRUE(pr$a$results$results$clinicalReport$visible))
+    # library-audit 2026-10-23 meddecide [MEDIUM] DONE: the old report is cleared ("<div></div>"), not hidden
+    expect_identical(pr$a$results$results$clinicalReport$content, "<div></div>")
     expect_match(as.character(pr$a$results$results$notices$content), "Choose the positive class", fixed = TRUE)
 })
 

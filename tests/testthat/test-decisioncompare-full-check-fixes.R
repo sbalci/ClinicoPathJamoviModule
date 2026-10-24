@@ -84,9 +84,9 @@ test_that("invalid reruns clear old values while preserving fixed table rows", {
         expect_true(all(is.na(analysis$results[[name]]$asDF[, c("est", "lower", "upper")])))
     for (name in c("plot1", "plotRadar", "plotHeatmap"))
         expect_null(analysis$results[[name]]$state)
-    expect_identical(analysis$results$text1$content, "")
-    # Html panels are blanked with "<div></div>" since 2026-10-21: the jamovi client skips an Html update of "".
-    expect_identical(analysis$results$text2$content, "<div></div>")
+    # library-audit 2026-10-23 meddecide [HIGH] DONE: original data are Tables now (goldFrequency, originalCrossTab)
+    expect_equal(analysis$results$goldFrequency$rowCount, 0)
+    expect_equal(analysis$results$originalCrossTab$rowCount, 0)
     expect_equal(analysis$results$comparisonTable$rowCount, 0)
 
     dc_fix_option(analysis, "test1Positive", "P")

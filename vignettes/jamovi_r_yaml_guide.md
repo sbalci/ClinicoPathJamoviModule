@@ -173,6 +173,13 @@ Seed, event/reference level, start time, subject ID, correction method and thres
 omissions. Check nested Array templates and saved Output columns as well as tables and images.
 `visible:` and a new `setState()` payload do not prove that an old cached result was invalidated.
 
+`clearWith:` may come after a long `columns:` list. Judge whether a table has one from the parsed
+YAML (or the generated `.h.R`), not from the first lines of its block: the 2026-10-23 meddecide
+[LOW] "no clearWith on display toggles" named eight tables, and every one had a `clearWith` below
+its columns that excluded the toggles. A blink on a display toggle more often comes from rows
+built with `addRow()` in `.run()`: `Table$fromProtoBuf` restores cells only for rows that exist
+after `.init()` (library review guide section 6).
+
 The release gate checks that entries **exist**, not that the list is **complete**. Reuse an
 analysis at A, change one dependency to B, and compare with a fresh analysis at B. Retain renderer
 NULL guards; review cache-reuse guards in `.run()` separately. See
@@ -358,6 +365,11 @@ Displays plain text with preserved formatting and monospace font.
 - Console output
 - Fixed-width formatted text
 - Algorithm descriptions
+
+**Not a heading.** A `Preformatted` that is never filled, shown only for its title, is treated as
+content by Copy and Export (2026-10-23 meddecide [LOW]: 15 in `agreement`). Put the heading's
+elements in a `type: Group` with them as `items:`; the Group's title is the heading and the Group
+hides itself when all its children are hidden. `release_gate.py` `check_empty_preformatted` WARNs.
 
 #### `Table`
 The most complex and powerful result type for tabular data.

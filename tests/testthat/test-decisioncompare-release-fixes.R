@@ -149,7 +149,8 @@ test_that("IR2-04: variables chosen before their levels give a quiet INFO, not a
     # The run stops early, so the reports reset above it must REPLACE old content: an Html ""
     # is skipped by the jamovi client, and NA_real_ cells render "NaN" (Codex review).
     expect_identical(r$res$summaryReport$content, "<div></div>")
-    expect_identical(r$res$text2$content, "<div></div>")
+    # library-audit 2026-10-23 meddecide [HIGH] DONE: original data are Tables now (goldFrequency, originalCrossTab)
+    expect_equal(r$res$originalCrossTab$rowCount, 0)
     expect_identical(r$res$cTable1$getCell(rowKey = "Test Positive", "GP")$value, "")
 })
 

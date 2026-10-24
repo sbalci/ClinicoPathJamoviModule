@@ -90,8 +90,9 @@ test_that("decisioncompare works with 3 tests", {
 test_that("decisioncompare works with footnotes and original data", {
   result <- do.call(call_decisioncompare, c(list(data = diagnostic_sample, fnote = TRUE, od = TRUE), basic_args))
 
-  expect_true(!is.null(result$text1$content))
-  expect_true(!is.null(result$text2$content))
+  # library-audit 2026-10-23 meddecide [HIGH] DONE: original data are Tables now (goldFrequency, originalCrossTab)
+  expect_gt(result$goldFrequency$rowCount, 0)
+  expect_gt(result$originalCrossTab$rowCount, 0)
 })
 
 test_that("decisioncompare handles missing data gracefully", {

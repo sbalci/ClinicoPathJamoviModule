@@ -3161,3 +3161,20 @@ write once:
 self$results$notices$setContent(paste(Filter(nzchar, private$.noticeList), collapse = "\n"))
 ```
 
+### Round 8 additions (2026-10-23 meddecide [LOW])
+
+- **Report each error once.** One condition was a `<b>Error:</b>` summary line, an ERROR notice and
+  a `reject()` (`psychopdaROC`); an alert banner sat beside an ERROR notice (`lassologistic`).
+  Fatal means `reject()` and nothing else - a missing required package included.
+- **Severity is never colour alone.** `decisioncompare` set `icon = ""`, so an error and an info
+  message differed only in hue.
+- **A failed optional sub-analysis is a WARNING notice naming it**, not
+  `table$setNote("error", ...)` on an empty table - users "see results that look fine until they
+  spot the small note" (our own TODO). Keep `reject()` for analysis-wide input checks.
+  `release_gate.py` `check_setnote_errors`.
+- **The comment is our position.** A comment that still gives "Notice cannot be serialized" as the
+  reason is read as current; the reason is the plain-text, title-less content
+  (section 13 of the review guide). `check_notice_myths`.
+- Do not blank panels right before `reject()`; the greyed previous result under the error is
+  jamovi's failure presentation (review guide section 5, with what jmvcore restores between runs).
+

@@ -397,8 +397,8 @@ decisioncompareResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
     active = list(
         notices = function() private$.items[["notices"]],
         levelMapping = function() private$.items[["levelMapping"]],
-        text1 = function() private$.items[["text1"]],
-        text2 = function() private$.items[["text2"]],
+        goldFrequency = function() private$.items[["goldFrequency"]],
+        originalCrossTab = function() private$.items[["originalCrossTab"]],
         cTable1 = function() private$.items[["cTable1"]],
         epirTable1 = function() private$.items[["epirTable1"]],
         cTable2 = function() private$.items[["cTable2"]],
@@ -542,11 +542,12 @@ decisioncompareResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                         `name`="otherLevels", 
                         `title`="Other observed levels (counts)", 
                         `type`="text"))))
-            self$add(jmvcore::Preformatted$new(
+            self$add(jmvcore::Table$new(
                 options=options,
-                name="text1",
-                title="Original Data",
+                name="goldFrequency",
+                title="Original Data - Reference Standard",
                 visible="(referenceType:legacy && (od) || referenceType:disease && (od))",
+                rows=0,
                 clearWith=list(
                     "referenceType",
                     "referenceDescription",
@@ -564,12 +565,22 @@ decisioncompareResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                     "test3Positive",
                     "test3Negative",
                     "excludeIndeterminate",
-                    "od")))
-            self$add(jmvcore::Html$new(
+                    "od"),
+                columns=list(
+                    list(
+                        `name`="level", 
+                        `title`="Level", 
+                        `type`="text"),
+                    list(
+                        `name`="n", 
+                        `title`="Count", 
+                        `type`="integer"))))
+            self$add(jmvcore::Table$new(
                 options=options,
-                name="text2",
-                title="Original Data",
+                name="originalCrossTab",
+                title="Original Data - Tests by Reference Standard",
                 visible="(referenceType:legacy && (od) || referenceType:disease && (od))",
+                rows=0,
                 clearWith=list(
                     "referenceType",
                     "referenceDescription",
@@ -587,7 +598,17 @@ decisioncompareResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                     "test3Positive",
                     "test3Negative",
                     "excludeIndeterminate",
-                    "od")))
+                    "od"),
+                columns=list(
+                    list(
+                        `name`="test", 
+                        `title`="Test", 
+                        `type`="text", 
+                        `combineBelow`=TRUE),
+                    list(
+                        `name`="level", 
+                        `title`="Test level", 
+                        `type`="text"))))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="cTable1",
@@ -2001,8 +2022,8 @@ decisioncompareBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
 #' \tabular{llllll}{
 #'   \code{results$notices} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$levelMapping} \tab \tab \tab \tab \tab a table \cr
-#'   \code{results$text1} \tab \tab \tab \tab \tab a preformatted \cr
-#'   \code{results$text2} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$goldFrequency} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$originalCrossTab} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$cTable1} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$epirTable1} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$cTable2} \tab \tab \tab \tab \tab a table \cr

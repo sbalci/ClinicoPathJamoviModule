@@ -1011,6 +1011,7 @@ psychopdaROCResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                 options=options,
                 name="sensSpecTable",
                 title="Confusion Matrices",
+                items="(dependentVars)",
                 visible="(sensSpecTable)",
                 clearWith=list(
                     "dependentVars",
@@ -1024,8 +1025,30 @@ psychopdaROCResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                     "allObserved",
                     "specifyCutScore",
                     "direction"),
-                template=jmvcore::Html$new(
-                    options=options)))
+                template=jmvcore::Table$new(
+                    options=options,
+                    title="Confusion Matrix for ($key)",
+                    rows=0,
+                    columns=list(
+                        list(
+                            `name`="cutpoint", 
+                            `title`="Cutpoint", 
+                            `type`="number", 
+                            `combineBelow`=TRUE),
+                        list(
+                            `name`="decision", 
+                            `title`="Decision based on measure", 
+                            `type`="text"),
+                        list(
+                            `name`="pos", 
+                            `title`="Positive", 
+                            `superTitle`="Criterion", 
+                            `type`="integer"),
+                        list(
+                            `name`="neg", 
+                            `title`="Negative", 
+                            `superTitle`="Criterion", 
+                            `type`="integer")))))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="thresholdTable",
@@ -2449,7 +2472,7 @@ psychopdaROCBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   \code{results$outcomeCoding} \tab \tab \tab \tab \tab Class levels with their counts and the role each plays in the analysis \cr
 #'   \code{results$clinicalInterpretationTable} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$resultsTable} \tab \tab \tab \tab \tab an array of tables \cr
-#'   \code{results$sensSpecTable} \tab \tab \tab \tab \tab an array of htmls \cr
+#'   \code{results$sensSpecTable} \tab \tab \tab \tab \tab an array of tables \cr
 #'   \code{results$thresholdTable} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$fixedSensSpecTable} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$fixedSensSpecExplanation} \tab \tab \tab \tab \tab a html \cr

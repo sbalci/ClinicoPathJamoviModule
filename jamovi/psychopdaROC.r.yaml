@@ -143,9 +143,11 @@ items:
             type: number
             format: zto
 
+    # library-audit 2026-10-23 meddecide [HIGH] DONE: a Table, not <table> markup - number format, Copy, Copy Latex
     - name: sensSpecTable
       title: Confusion Matrices
       type: Array
+      items: (dependentVars)
       visible: (sensSpecTable)
       clearWith:
         - dependentVars
@@ -160,7 +162,25 @@ items:
         - specifyCutScore
         - direction
       template:
-        type: Html
+        title: Confusion Matrix for ($key)
+        type: Table
+        rows: 0
+        columns:
+          - name: cutpoint
+            title: Cutpoint
+            type: number
+            combineBelow: true
+          - name: decision
+            title: Decision based on measure
+            type: text
+          - name: pos
+            title: Positive
+            superTitle: Criterion
+            type: integer
+          - name: neg
+            title: Negative
+            superTitle: Criterion
+            type: integer
 
     # ==========================================
     # THRESHOLD ANALYSIS

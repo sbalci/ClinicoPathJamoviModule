@@ -161,6 +161,10 @@ modules:
       #   `psych` stays: its every mention in agreement.b.R is a comment or a user-facing
       #   string saying the result agrees with psych::cohen.kappa -- not one call.
       - "psych"
+      # library-audit 2026-10-23 meddecide [HIGH] DONE: knitr's only meddecide use was
+      #   kable(format = "html") in decisioncompare's original-data panel, now Tables.
+      #   Umbrella-only users (oddsratio, tableone, multisurvival, jvisr) ship elsewhere.
+      - "knitr"
     i18n_files:
       - "catalog.pot"
       - "en.po"

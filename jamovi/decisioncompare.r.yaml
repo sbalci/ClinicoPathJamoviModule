@@ -74,17 +74,36 @@ items:
           title: Other observed levels (counts)
           type: text
 
-    - name: text1
-      title: Original Data
-      type: Preformatted
+    # library-audit 2026-10-23 meddecide [HIGH] DONE: original data as Tables (one cross-tab per test,
+    #   reference levels as columns), not a printed table() and kable(format = "html")
+    - name: goldFrequency
+      title: Original Data - Reference Standard
+      type: Table
       visible: (referenceType:legacy && (od) || referenceType:disease && (od))
+      rows: 0
       clearWith: [referenceType, referenceDescription, targetDefinition, gold, goldPositive, goldNegative, test1, test1Positive, test1Negative, test2, test2Positive, test2Negative, test3, test3Positive, test3Negative, excludeIndeterminate, od]
+      columns:
+        - name: level
+          title: Level
+          type: text
+        - name: n
+          title: Count
+          type: integer
 
-    - name: text2
-      title: Original Data
-      type: Html
+    - name: originalCrossTab
+      title: Original Data - Tests by Reference Standard
+      type: Table
       visible: (referenceType:legacy && (od) || referenceType:disease && (od))
+      rows: 0
       clearWith: [referenceType, referenceDescription, targetDefinition, gold, goldPositive, goldNegative, test1, test1Positive, test1Negative, test2, test2Positive, test2Negative, test3, test3Positive, test3Negative, excludeIndeterminate, od]
+      columns:
+        - name: test
+          title: Test
+          type: text
+          combineBelow: true
+        - name: level
+          title: Test level
+          type: text
 
     # Tables for Test 1
     - name: cTable1

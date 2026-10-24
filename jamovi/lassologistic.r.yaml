@@ -30,10 +30,22 @@ items:
           - suitabilityCheck
           - bootstrapValidation
 
+    # library-audit 2026-10-23 meddecide [HIGH] DONE: a Table with the verdict in words, never colour
     - name: suitabilityReport
       title: Data Suitability Assessment
-      type: Html
+      type: Table
       visible: (suitabilityCheck)
+      rows: 0
+      columns:
+        - name: check
+          title: Check
+          type: text
+        - name: status
+          title: Status
+          type: text
+        - name: result
+          title: Result
+          type: text
       clearWith:
           - outcome
           - patientID

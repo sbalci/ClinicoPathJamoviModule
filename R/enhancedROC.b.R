@@ -111,17 +111,15 @@ enhancedROCClass <- R6::R6Class(
         .renderNotices = function() {
             # An empty list must CLEAR the panel, not leave it alone: the Html item keeps
             # whatever the PREVIOUS run wrote until something overwrites it, and jamovi's Html
-            # view skips "" (see the narrative items in .run()), so the panel is hidden. Reached
+            # view skips "", so it is cleared with "<div></div>" (no imperative hide). Reached
             # by a clean Frozen-model validation report and by a throw before the first
             # .addNotice() - where the last run's ERROR panel would otherwise stand above tables
             # computed from new options.
             notices <- self$results$results$notices
             if (length(private$.noticeList) == 0) {
-                notices$setContent("")
-                notices$setVisible(FALSE)
+                notices$setContent("<div></div>")
                 return()
             }
-            notices$setVisible(TRUE)
 
             # Severity is said in words as well as colour (a grey-scale print or a colour-blind
             # reader cannot tell the fills apart), and notices are shown most severe first: they
@@ -420,17 +418,13 @@ enhancedROCClass <- R6::R6Class(
             # Table notes are opt-in (Table notes); stripped on every exit path, like the notices.
             on.exit(private$.applyTableNotesOption(), add = TRUE)
             # jmvcore restores an Html item's previous content whatever its clearWith says
-            # (Html$fromProtoBuf only marks it stale), and jamovi's Html view neither greys a
-            # stale item nor clears one whose new content is "". So empty these narrative items
-            # now and hide whichever this run leaves empty - an early return (no positive class
-            # chosen yet, an ERROR) would otherwise show the previous outcome's report. Not in
-            # .init(): that also runs on render-only cycles (resize, .omv reopen).
-            narrative <- c("analysisSummary", "clinicalReport", "methodsExplanation", "clinicalInterpretationGuide")
-            for (nm in narrative) self$results$results$get(nm)$setContent("")
-            on.exit(for (nm in narrative) {
-                item <- self$results$results$get(nm)
-                if (!nzchar(item$content)) item$setVisible(FALSE)
-            }, add = TRUE)
+            # (Html$fromProtoBuf only marks it stale), so empty these narrative items now - an
+            # early return (no positive class chosen yet) would otherwise show the previous
+            # outcome's report. Not in .init(): that also runs on render-only cycles.
+            # library-audit 2026-10-23 meddecide [MEDIUM] DONE: no on.exit() visibility rule - visible: in the
+            #   .r.yaml decides. "<div></div>" clears, because the client skips an Html update of "" (guide section 5).
+            for (nm in c("analysisSummary", "clinicalReport", "methodsExplanation", "clinicalInterpretationGuide"))
+                self$results$results$get(nm)$setContent("<div></div>")
             private$.instructionsHtml <- private$.getInstructions()
             private$.presetConfig <- NULL
             private$.presetNoticeShown <- FALSE

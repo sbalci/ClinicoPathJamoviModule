@@ -534,8 +534,6 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                 # Extract values with safety checks
                 n_subjects <- result1[["subjects"]]
                 n_raters <- result1[["raters"]]
-                perc_agree <- round(result1[["value"]], 1)
-                agree_txt <- if (length(perc_agree) == 1L && is.finite(perc_agree)) paste0(perc_agree, "%") else .("not available")
                 # Band the RAW kappa; round only for what is printed. Rounding first
                 # moved kappa = 0.599774873366 to 0.600, which then passed the
                 # >= 0.60 test below and told the reader "substantial or higher on the
@@ -543,9 +541,6 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                 # that same sentence names. Measured on the 2x2 table
                 # matrix(c(29, 12, 20, 339), 2, byrow = TRUE).
                 kappa_raw <- result2[["value"]]
-                kappa_val <- round(kappa_raw, 3)
-                # The table blanks an undefined kappa; the panel printed -Inf, NaN or NA.
-                kappa_txt <- if (length(kappa_raw) == 1L && is.finite(kappa_raw)) kappa_val else .("not available")
                 p_val <- result2[["p.value"]]
                 method <- result2[["method"]]
 
@@ -618,7 +613,8 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                 # so they claimed weights on a run where .kappa2Ordered() had dropped them
                 # for an ambiguous category order.
 
-                # Build summary with consistent styling
+                # library-audit 2026-10-23 meddecide [HIGH] DONE (same class): no Raw agreement / Kappa card
+                #   grid here; both numbers are in irrtable, a native Table (guide section 26).
                 html_output <- paste0(
                     "
             <div style='font-family: Arial, sans-serif; max-width: 800px; line-height: 1.4;'>
@@ -628,19 +624,6 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                 </div>
 
                 <div style='font-size: 14px; color: inherit;'>
-                    <table style='width: 100%; border-collapse: collapse; margin-bottom: 15px;'>
-                    <tr>
-                        <td style='border: 1px solid #ccc; padding: 10px; background-color: rgba(155, 155, 155, 0.06); color: inherit;'>
-                        <strong>", .("Raw Agreement"), "</strong><br>
-                        <span style='font-size: 18px;'>", agree_txt, "</span>
-                        </td>
-                        <td style='border: 1px solid #ccc; padding: 10px; background-color: rgba(155, 155, 155, 0.06); color: inherit;'>
-                        <strong>", .("Kappa"), " (\u{03BA})</strong><br>
-                        <span style='font-size: 18px;'>", kappa_txt, "</span>
-                        </td>
-                    </tr>
-                    </table>
-
                     <p style='margin: 10px 0;'><strong>", .("Method:"), "</strong> ", method, "</p>
                     <p style='margin: 10px 0;'><strong>", .("Statistical test:"), "</strong> ", sig_text, " ", .("for the null hypothesis that agreement is no better than chance (kappa = 0). A small p-value only rules out zero agreement; it does not say how large the agreement is. The size of kappa answers that, and the interval around kappa says how precisely these cases pin it down."), " ", ci_pointer, "</p>
                     <p style='margin: 10px 0;'><strong>", .("Interpretation:"), "</strong> ", interp, "</p>

@@ -17,6 +17,7 @@ reviewer against this project's submodules, with external learning sources ident
 | `jamovi-library-audit/2026-09-16 <Module>.md` (×4) | OncoPath, ClinicoPathDescriptives, jjstatsplot, meddecide (round 4) | 2026-09-16 |
 | `jamovi-library-audit/2026-09-22 OncoPath.md` | OncoPath (round 5) | 2026-09-22 |
 | `jamovi-library-audit/2026-10-23 jamovi library OncoPath 1.1.2 is on its way.md` | OncoPath (round 7; the report arrives in the library's "on its way" email for a release it is already publishing) | 2026-10-23 |
+| `jamovi-library-audit/2026-10-23 jamovi library meddecide 1-1-2 is on its way.md` | meddecide (round 8; the first round to inspect the options panels and results, 20 findings on a build the gate called clean) | 2026-10-23 |
 | User-supplied `2026-10-03 jYS.md` and `MODIFICATIONS_REPORT_EN.md` | external jYS 1.1.5; audit plus remediation account, not our closure evidence | 2026-10-03 / 2026-10-10 |
 
 Every rule below is something the reviewer *actually raised*, on real files, with
@@ -187,6 +188,16 @@ Plus the cheap metadata gates the reviewer checks first:
   ([section 12](#12-rule-ui-label-conventions), [section 27](#27-rule-the-modules-own-prose-must-agree-with-itself)).
 - Every panel puts variables first and every other group in a **top-level** `CollapseBox`
   ([section 12](#12-rule-ui-label-conventions)).
+- Every variable role in that first `VariableSupplier` (greyed with `enable:`, never inside a
+  CollapseBox); a level is a `Level`, a fixed set of numbers is `Number` options, and a preset
+  shows its values in the controls it overrides ([section 12](#12-rule-ui-label-conventions)).
+- Nothing hidden or blanked on the way to `reject()`; one report per error; a failed optional
+  sub-analysis is a WARNING notice ([section 5](#5-rule-setvisiblefalse-is-not-an-error-mechanism),
+  [section 13](#13-notices-the-native-element-and-the-insert-trap)).
+- Data in a `Table`, numbers in `number` columns, headings as `Group` titles, help only in the
+  empty state, and `ggtheme` rather than a module theme option (sections 6, 11, 23, 25, 26).
+  Every one of these is a `release_gate.py` WARN since round 8 (2026-10-24): read them for the
+  shipped analyses before the version bump.
 - No `library-audit` tag in `README.md`, `DESCRIPTION` or `NEWS.md`, and no test that requires one
   ([section 14](#14-encoding-review-findings-as-tests)).
 - `description: main:` is one `>` folded paragraph with no blank line, in every `.a.yaml`
@@ -229,6 +240,11 @@ problems, not one-off bugs** — when one function does it, the whole module doe
 | 19 | Config or a test derived from which analyses a module holds today (`prune_imports`, hard-coded analysis lists) | 4 of 5 (round 6) | LOW |
 | 20 | Committed local scratch: failing-test output, personal editor config | 5 of 5 (`.claude/settings.local.json`, round 7 sweep) | LOW |
 | 21 | All-caps notice titles; British and American spelling mixed in one module | caps 3 of 5, spelling 5 of 5 (round 7 sweep) | LOW |
+| 22 | Variable boxes buried in CollapseBoxes or placed after other controls | 5 of 5 (round 8 sweep: MD 4, JS 8, OP 2, JJ 2, CPD 1 panels) | MEDIUM |
+| 23 | A level or a fixed set of numbers typed into a `String` | MD level 2, number lists 8; JS 10, JJ 1 number lists (round 8) | MEDIUM |
+| 24 | Results hidden or blanked on a failure path (`on.exit` hide, blank before `reject()`) | MD 6 (round 8; §5 class, first raised round 2; the OP and JJ hits were detector false positives, fixed) | MEDIUM |
+| 25 | Empty `Preformatted` used as a heading | MD 15, JS 40, CPD 2 (round 8; round 2 named two) | LOW |
+| 26 | A failed optional sub-analysis reported as a table footnote | MD 102, JS 22, OP 7 (round 8) | LOW |
 
 **The lesson:** when a review names one instance, grep for the class and fix all
 of it. The reviewer explicitly rewards this — "several of them by fixing the
@@ -511,6 +527,51 @@ message beside it is the fix.
 | Deliberate methodological guard (e.g. no post-hoc when omnibus n.s.) | Hide it **and** explain why — this one is fine |
 | Onboarding / welcome panel before variables are chosen | `setVisible()` is fine — this is option state |
 
+### Round 8: hiding, and blanking, on the way to `reject()` (2026-10-23 meddecide [MEDIUM])
+
+The reviewer found three shapes the earlier rounds had not named:
+
+- **Hidden until filled.** `decisioncombine` hid three tables at the top of every run and
+  turned them back on only when populated, so after any validation failure they vanished.
+- **An `on.exit()` visibility rule.** `decisioncalculator`'s `.run()` hid every narrative panel
+  still empty on exit, which is exactly the state a validation return leaves.
+  `enhancedROC` and `psychopdaROC` had the same `on.exit()`; the reviewer did not name them.
+- **Blanking before `reject()`.** The three `kappaSize` analyses wrote `""` / `"<div></div>"` to
+  their panels and then rejected.
+
+What jmvcore actually restores between runs (read from jmvcore 2.7.38, jamovi build, 2026-10-24 —
+`ResultsElement`, `Html`, `Preformatted` and `Table` `$fromProtoBuf`):
+
+| Carried from the previous run | Restored? |
+|---|---|
+| visibility set with `setVisible()` | **never** — `fromProtoBuf` does not read it |
+| `image$state` | yes, unless a `clearWith` option changed |
+| `Preformatted` content | **always**, even when a `clearWith` option changed (only marked stale) |
+| `Html` content | yes (marked stale when a `clearWith` option changed) |
+| `Table` cells | only for rows that exist after `.init()`, and only when no `clearWith` option changed |
+
+So the reviewer is right that nothing needs a `setVisible()` to *undo* a previous run, and
+**wrong** that "nothing an earlier run set with `setContent()` carries into the next one":
+`Html`/`Preformatted` content does, by design. Both conclusions still hold:
+
+- Delete the error-driven `setVisible()` and the `on.exit()` rule; let `visible:` decide.
+- Clearing a panel at the top of `.run()` is still right **when the run can end normally
+  without rewriting it** (an early return for an emptied variable box). Clearing it **right
+  before `reject()`** is not: the stale, greyed content under the error *is* jamovi's
+  presentation of a failed analysis.
+
+**Enforce it:** `release_gate.py` `check_error_presentation` (WARN) — an `on.exit()` that calls
+`setVisible` inside its own argument, and a method that blanks a panel (not an onboarding
+`todo`/`welcome`/`instructions` one) and then reaches `reject()` with no `return(` in between.
+Both scopes were narrowed after the first sweep: a 400-character window flagged
+`ihcheterogeneity`'s `on.exit(private$.renderNotices())` beside an unrelated onboarding
+`setVisible`, and `raincloud`'s clearing of its `todo` panel read as a blank. Reconciled on the
+audited meddecide build: 6 hits = the reviewer's
+`decisioncalculator` and three `kappaSize` sites plus the two `on.exit()`s they missed. It is
+**blind to hide-until-filled** (`decisioncombine`): a `setVisible(FALSE)` that a populate method
+undoes looks like an onboarding panel to any static rule, so checklist item 4 still needs a
+reader for each `setVisible(FALSE)` (21 in meddecide).
+
 ---
 
 ## 6. Rule: row structure that isn't result-dependent belongs in `.init()`
@@ -587,12 +648,33 @@ here. That is the shape the 2026-09-16 meddecide report named in `decision.b.R` 
 check is not proof**; when you touch a table built in `.run()`, ask the question in "The test"
 above yourself.
 
+**Round 8 (2026-10-23 meddecide [MEDIUM]), the fourth round running for this module:** 8 tables
+whose row set follows from the options alone — one row per selected test (`comparisonTable`),
+per pair (`mcnemarTable`, `diffTable`), per pattern (`combinationTable*`), per target prevalence
+(`screeningWorkload`). The check reported **0**: every key is computed (`rowKey = row_key`,
+`as.character(i)`). A static rule cannot tell an options-derived key from a data-derived one, so
+the property needs the runtime test — call `.init()` alone with the analysis's options, record
+the row keys, run, and assert the keys did not change. `tests/testthat/test-zzz-init-row-structure-runtime.R`
+does this for named tables; add each table you fix to it. Parse an option string such as
+`prevalenceScenarios` in `.init()` too, and report a parse error from `.run()`.
+
+This is also the likelier source of the "blink" the same report attributes to missing `clearWith`
+(*inferred* from `Table$fromProtoBuf`, not observed in the client): cells are restored only for
+rows that exist after `.init()`, so a `rows: 0` table refilled by `addRow()` in `.run()` starts
+empty on **every** re-run, display toggle or not.
+
 ### Related: don't push numbers through a text column
 
 Two summary tables declared `value` as `type: text` and pushed numbers through
 `as.character()`. That gives up jamovi's own number formatting and decimal-place
 handling, and text columns don't right-align, so a column of numbers reads
 ragged. Split numeric statistics into a `type: number` column.
+
+Round 8 (2026-10-23 meddecide [LOW]) found it again in `agreement`'s sample-size table
+(`value = base::format(k0, digits = 3)`). A key/value table mixing a text row (the metric) with
+numeric rows needs two columns or two tables; a single `number` column cannot hold the label.
+**Enforce it:** `check_text_number_cells` (WARN) — `format()`/`formatC()`/`sprintf()`/`prettyNum()`
+into a `value =` cell; the reviewer's 4 sites exactly, 0 in the other four modules.
 
 ---
 
@@ -932,6 +1014,19 @@ expression so the compiler keeps you honest.
   hunting for something that isn't there. "Stale TODOs are how a real backlog
   loses credibility."
 
+
+**Round 8 (2026-10-23 meddecide [LOW]): the same shape, fifteen times.** Round 2 named two empty
+`Preformatted` headings in `agreement`; both were fixed and the class was not. Round 8 found 15
+more (`irrtableHeading` … `pairedAgreementHeading`), each shown only for its title, so Copy and
+Export treat it as content, and each with a long `visible:` repeating its tables' visibility. Turn
+each heading and its tables into a `type: Group` with the tables as `items:` — a Group's title is
+the section heading, and it hides itself when all its children are hidden. Remove an option whose
+own label says it has no effect (`iotaStandardize`), make an index into a list a `Variable`
+(`predictionColumn`), and prefer two `Variables` boxes to a column-naming convention
+(`interIntraSeparator`). **Enforce it:** `check_empty_preformatted` (WARN; a Preformatted with no
+`setContent` directly, through `[["name"]]`, or through a helper) — MD 15, exactly the reviewer's;
+JS 40, CPD 2.
+
 ---
 
 ## 12. Rule: UI label conventions
@@ -985,6 +1080,50 @@ jsurvival 0; **FAIL** since 2026-10-24, when the sweep reached 0 shipped everywh
 the reviewer's one site, `diagnosticmeta`, which is regrouped; 0 shipped everywhere, 32 in
 parked analyses as promotion debt) and `check_collapsebox_titlecase`. List-title casing
 and "one concept, one name" have no detector: judging them needs a reader.
+
+### Round 8: labels a clinician reads (2026-10-23 meddecide [LOW])
+
+| Convention | Wrong | Right |
+|---|---|---|
+| Variable boxes and group headings Title Case; individual controls sentence case | "Patient identifier" box beside "Outcome Variable"; "Step Size" checkbox | "Patient Identifier"; "Step size" |
+| No R notation in a label | "Wald (symmetric, matches psych::cohen.kappa)", "Anticipated kappa (kappa0)" | "Wald (symmetric)", "Anticipated kappa" or "κ₀" (renames no option) |
+| Name the thing, not the toggle | "Explain the imbalance warning in full" | "Imbalance warning details" |
+| Eponyms possessive | "Fleiss kappa", "weighted Cohen kappa" | "Fleiss' kappa", "weighted Cohen's kappa" |
+| One name per statistic | "Youden's Index" / "Youden Index" / "Youden's J" / "Youden index" | one of them, everywhere |
+| One scale per neighbourhood | `confLevel` 0.95 beside `tdiCoverage` 90 | percent with `suffix: "%"`, as jmv's `ciWidth` |
+| A stated range matches the option | "(0.001-0.999)" on an option accepting 1e-9 to 0.999999999 | the option's real `min`/`max` |
+| Two options, two titles | `pp` and `pprob` both "Prior probability (prevalence)" | distinct titles |
+
+**Enforce it:** `check_label_notation` (WARN) — `pkg::fn` or a camelCase argument in brackets in
+any `.a/.u/.r.yaml` title or label, a label starting "Explain", and "Fleiss kappa"/"Cohen kappa"
+in `.()` text. On the audited build: the reviewer's sites plus the `kappaSize` siblings and three
+"(kappaSize)" results titles they did not name. Case, synonyms, units and ranges need a reader.
+
+### Native controls for the value's shape (2026-10-23 meddecide [MEDIUM]/[LOW])
+
+The panel is part of the analysis. The reviewer's stance, stated once in the report: if the native
+shape cannot express what you need, open a feature request at
+<https://github.com/jamovi/jamovi/issues> rather than building around it.
+
+| Value | Native shape | What the reviewer found |
+|---|---|---|
+| Every variable role | one top-level `VariableSupplier`; optional roles greyed with `enable:` (jmv `linreg.u.yaml`) | `agreement`: six suppliers inside collapsed boxes, each with its own variable list; `decisioncurve`: one; `decision`/`decisioncompare`: a CollapseBox above the variables |
+| A factor level | `type: Level` + `LevelSelector` (`allowNone: true`) | `enhancedROC validationNegative` typed as `String`; `agreement specificPositiveCategory` draws on several variables — a LevelSelector for a multi-variable box is a feature request, not a workaround |
+| A fixed number of numbers | one `Number` option each (`partialAUCfrom`/`partialAUCto` already did) | `partialRange "0.8,1.0"`, `treatmentThreshold "0.05,0.5,0.05"`, the `kappaSize` `props` (≤5 values: `p1..p5`, greyed by outcome count) |
+| An open-ended list | a `String` is fine — jamovi has no number-list control | `customCutoffs`, `prevalenceScenarios`, `nriThresholds` |
+| A preset that overrides controls | grey the overridden controls (`enable: (clinicalPresets:custom)`) or write the preset's values into them from `events.js` (`cotest.events.js` does) | `enhancedROC` presets changed three thresholds while the boxes kept showing the user's values; a notice explaining it afterwards does not fix the panel |
+| Free text only printed back | jamovi's Add Note | `cohortRole`, `samplingDesign`, `analysisUnit` …; keep a field that feeds a check (`modelVersion` for a frozen cohort), and give it the `enable:` its siblings have |
+| A dependent control | next to the option that enables it | `agreement nBoot` enabled from three other boxes; `psychopdaROC costratioFP` far from its method |
+| A section heading | a `Label` **wrapping** its controls; a `CollapseBox` per question | childless Title Case Labels (`psychopdaROC`); `cotest`'s "Display Options" a Label, not a CollapseBox |
+| ComboBox choices | from the `.a.yaml` only | `nogoldstandard` repeated `options:` in a different order |
+
+**Enforce it:** `check_variables_first` (exactly the reviewer's four panels; one more variable
+role, `conditionBVars`, than they listed), `check_level_as_string` (keyed on option names ending
+`Positive`/`Negative`/`Level`/`Category`/`Class`; the reviewer's two), `check_number_list_strings`
+(any `String` default of 2–6 numbers; 8 on the audited build — the reviewer's 5 plus 3 open-ended
+lists, which take a `# number-list: open-ended` comment above `- name:` once judged) and
+`check_uyaml_structure` (`options:` on a ComboBox; childless Title Case Labels). All WARN.
+Presets, free text and grouping by the user's question have no detector.
 
 ---
 
@@ -1166,6 +1305,28 @@ correct them. The channel worked; the content was wrong. Replace with:
 .addNotice = function(type, title, content) {
 ```
 
+
+
+### Round 8: the retracted reason still in the code (2026-10-23 meddecide [LOW])
+
+The reviewer quoted `nogoldstandard.b.R:16-19` — "avoids BOTH the jmvcore::Notice serialization
+error from `insert(999, Notice)`" — and set it beside `kappaSizeCI.b.R:892`, which already says
+the opposite. The umbrella's correction of 2026-09-22 rewrote the comments it knew about; a
+templated comment copied into dozens of files was not among them. The reason left in the code is
+the one the reviewer reads as our position.
+
+The same finding repeats the round-7 asks for meddecide: colour as the only severity marker
+(`decisioncompare` sets `icon = ""`), an error reported two or three ways (a `<b>Error:</b>`
+summary, an ERROR notice and `reject()` for one condition in `psychopdaROC`), a missing package
+reported as a banner followed by a normal return (`lassologistic`, glmnet — §25's fatal half),
+and untranslated lines in `agreement`'s computed-variables message. Report each error once,
+through `reject()`; a failed **optional** sub-analysis is a WARNING `jmvcore::Notice` naming it,
+not a `setNote("error", …)` on an empty table (`agreement`, about 30 sites by the reviewer's
+count; 102 by the gate, which reads calls that span lines).
+
+**Enforce it:** `check_notice_myths` (WARN) — a comment within two lines of "Notice" that
+mentions serialisation and not the correction; on 2026-10-24 meddecide 3 (the reviewer's one, and
+two they missed), CPD 29, JJ 10, JS 9, OP 2. `check_setnote_errors` (WARN) for the footnotes.
 
 ---
 
@@ -1398,6 +1559,20 @@ self$results$plot3$setState(list(
 
 Detect: `grep -nE 'setState\(.*(model|fit|clean(ed)?[Dd]ata)' R/<fn>.b.R`
 
+
+**Round 8 (2026-10-23 meddecide [LOW]): rows the plot really draws.** A dot plot of one point per
+patient and a rater profile of every rating need the raw rows, so they are drawing data — and
+`check_state_payload`, which matches names (`fit`, `model`, `cleanData` …), reported 0 for
+`dotImage$setState(rawData)` and `raterProfilePlot$setState(list(plot_data = …))`. But the state
+is copied into the `.omv` once per image: the dot plot is an Array, so once per marker. When the
+state grows with n × images, prefer `requiresData: true` and build the frame from `self$data` in
+the renderer, keeping only scalars (threshold, direction, labels) in state
+(<https://dev.jamovi.org/tutorial/tuts0301-image-state-performance>). This is the other side of the
+round-5 `waterfall` trade-off, where one value per patient was the cheaper choice. jmvcore itself
+prints `WARNING: state object … is too large` above 500 KB of **compressed** state
+(`ResultsElement$asProtoBuf`), so the runtime check is
+`length(memCompress(serialize(image$state, NULL)))` at a realistic n, not a name match.
+
 ---
 
 ## 18. Why round 3 still found things: how rules decay
@@ -1577,6 +1752,49 @@ Both round-5 MEDIUMs held; nothing was above LOW.
    asserted bookkeeping and wording, not behaviour.
 4. **Sweep the reviewer's finding across all five siblings before answering.** The reviewer saw
    one tracked `settings.local.json` and one placeholder release; there were five and three.
+
+### Round 8 (2026-10-23 meddecide, release 1.1.2)
+
+Another "on its way" email, so everything below shipped. Every item from 2026-07-13 held. The new
+fact is scope: this was the first round to read the options panels and the results as a user
+meets them, and `release_gate.py --root ../meddecide` on the audited build (073714f) said
+**0 blocking, 1 advisory** — none of the 20 findings was visible to any detector.
+
+| Finding | Rule existed? | Recurrence · why |
+|---|---|---|
+| Four tables drawn as HTML (HIGH) | §26 (round 5) | **INSTANCE, NO-CHECK.** Round 5 counted 47 meddecide blocks and specified a detector; nothing was built and only OncoPath's two sites were fixed. Now `check_html_tables`. |
+| Hidden/blanked on failure (MEDIUM) | §5 (round 2) | **RECURRED, NO-CHECK** (a grep judged by eye). Three new shapes; the reviewer's mechanism is half wrong (§5 Round 8). Now `check_error_presentation`, blind to hide-until-filled. |
+| Rows in `.run()` (MEDIUM) | §6 (round 1) | **RECURRED, fourth meddecide round.** The check is blind to computed keys and said 0 for 8 tables. Runtime test only (§6). |
+| Variable boxes buried (MEDIUM) | §12 said "variables first" | **NEW (scope).** `check_variables_first`. |
+| Level typed as text (MEDIUM) | none | **NEW.** `check_level_as_string`. |
+| Number lists as strings (MEDIUM) | none | **NEW.** `check_number_list_strings` (open-ended lists waived by comment). |
+| Presets override visible controls (MEDIUM) | none | **NEW**; our own comment described the defect and we answered it with a notice. No detector. |
+| Hand-built notices (LOW) | §13 | **NO-CHANNEL + INSTANCE.** The retracted serialisation reason survives in 53 comments across four siblings (`check_notice_myths`). Native Notice still waits on the feature request drafted in round 7. |
+| Guidance above results (LOW) | §25 | **NEW sub-shape** (help outside the empty state). `check_default_guidance`. |
+| Raw rows in image state (LOW) | §17 | **NEW sub-shape, detector blind** (name-based). Runtime size check (§17). |
+| No `clearWith` on display toggles (LOW) | R4 MD, DONE | **Reviewer error.** Every table named — `decision` `cTable`/`nTable`/`ratioTable`, `lassologistic` ×3, `agreement` `irrtable`/`krippTable` — has a `clearWith` placed after `columns:` that excludes the toggles; in the parsed YAML 0 of 53 `agreement` tables lack one, not 49 of 62. The blink, if real, comes from `.run()` rows (§6). Read the parsed tree before accepting a "missing key" finding. |
+| Failed sub-analyses as footnotes (LOW) | none (our own TODO named it) | **NEW.** `check_setnote_errors`: 102 in `agreement`, where the reviewer's line grep saw about 30 — the calls span lines. |
+| Free-text fields echoed (LOW) | none | **NEW**, plus a missing `enable:` in `decision`. No detector. |
+| Panel grouping (LOW) | §12 (round 7) | **RECURRED class, new modules.** `check_uyaml_structure` covers the mechanical part (duplicated ComboBox `options:`, childless Title Case Labels). |
+| `agreement` controls and 15 empty headings (LOW) | §11 (round 2 named two) | **INSTANCE.** `check_empty_preformatted`. |
+| `plotTheme` over `ggtheme` (LOW) | §23 | **NEW sub-shape.** `check_plot_theme_option`. |
+| Labels, casing, spelling (LOW) | §12 (round 7) | **RECURRED** for case/synonyms; the British spellings the reviewer read were swept the next day (a71b5c0). `check_label_notation` covers R notation, "Explain…", bare eponyms. |
+| Numbers as text (LOW) | §6 "Related" | **RECURRED.** `check_text_number_cells`. |
+| `style: list` (INFO) | none | Optional polish; no rule. |
+| Six TODO markers (INFO) | standing | DEFERRED except `enhancedROC.b.R:2344`: a predictor named like `<LOD` displays blank in 18 tables, because table cells are HTML-parsed (memory `reference_table_cells_titles_are_html_parsed`). That one is a bug. |
+
+**What to do differently (round 8):**
+
+1. **The gate only knows the questions we were asked.** A clean gate on a module the reviewer then
+   reads in a new way is expected, not reassuring. When a round opens a new dimension (panels,
+   results), add a detector per class the same day, reconciled with the reviewer's list.
+2. **A specified detector is not a detector.** §26 had a measured spec for six weeks and the class
+   came back as a HIGH.
+3. **The reviewer also makes reading errors.** The `clearWith` finding is wrong at every named site,
+   and the `setContent()` half of the hidden-results mechanism contradicts jmvcore's source. Check
+   the parsed YAML and the jmvcore source before accepting a mechanism — and say so in the code.
+4. **A comment is the position the reviewer reads.** Correcting `CLAUDE.md` did not correct 53
+   copies of the old reason.
 
 ---
 
@@ -1935,6 +2153,13 @@ Remember §17's companion trap: `ggtheme` **replaces** earlier `theme()` and
 `scale_*_manual()` calls, so apply your scales and then `ggtheme`, and add any
 tweaks after it.
 
+
+**Round 8 (2026-10-23 meddecide [LOW]):** a module-level theme option over `ggtheme` is the same
+defect one layer up — `enhancedROC`'s `plotTheme` (Classic / Modern / Clinical) made its plots
+disagree with the document. Draw with the `ggtheme` jamovi passes. **Enforce it:**
+`check_plot_theme_option` (WARN; a `List` option whose name contains "theme") — MD 1, OP 1,
+CPD 1, JJ 5, JS 0 on 2026-10-24.
+
 ---
 
 ## 24. Where the debt actually lives: promotion, not release
@@ -2059,6 +2284,16 @@ in the `.a.yaml`, and suppress a guard whose options a *silent* earlier return a
 and it should be built with those before it is turned on. Note the known false **negative**: an
 option unset into an `NA_character_` sentinel (`decision.b.R:477`) looks like a data check.
 
+
+**Round 8 (2026-10-23 meddecide [LOW]): help that is not in the empty state.** `cotest` has no
+empty state, and its `showGuidance` defaulted to true, so "Welcome to Co-Testing Analysis" sat
+above every result; `enhancedROC`'s instructions were never hidden at all. The reviewer named six
+analyses that do it right, and `decisioncurve.b.R:1376-1385` (hide once the outcome and
+predictors are set) as the model. In-app help is coming to jamovi, so expect to move this content.
+**Enforce it:** `check_default_guidance` (WARN) — a guidance-named `Bool` defaulting to `true`,
+and an instructions-named `Html` that is always visible and never `setVisible()`'d; exactly the
+two on the audited build.
+
 ---
 
 ## 26. Rule: tabular data belongs in a `Table` result
@@ -2111,6 +2346,28 @@ the reviewer named. Union ≈ 51 shipped at ≈94% precision, with the exemption
 *calling method name* (`.populateInstructions`, `.populateIntro`, todo-style builders), not on the
 markup. Note that the interpolation detector scores **zero** on the file the reviewer was reading —
 all three `diagnosticmeta` tables are static literals.
+
+
+### Round 8: the class reached a HIGH (2026-10-23 meddecide)
+
+The round-5 sweep counted 47 shipped `<table>` blocks in meddecide and none was converted. The
+reviewer took the four that are data, not help, as the module's one HIGH: `psychopdaROC`'s
+confusion matrices (core output, a stylesheet forcing Arial 14 px), `decisioncalculator`'s
+bordered 2×2 summary (repeating `ratioTable`), `decisioncompare`'s `kable(format = "html")`
+cross-tabs beside a `table()` printed into a Preformatted, and `lassologistic`'s suitability check
+with its verdict carried by red/amber/green text. The fixes they gave are all in the module
+already: an Array of `Table` with the criterion levels as `superTitle`d columns renamed in
+`.init()`, `decision.r.yaml`'s `rawContingency`/`rawCounts` pattern, and a `setNote()` for a
+verdict in words. APA tables do not encode a verdict in colour.
+
+**Enforce it:** `check_html_tables` (WARN) — a `<table` or `kable(format = "html")` in a method
+whose **name** is not help-like (`instruction`, `intro`, `welcome`, `guide`, `help`, `about`,
+`glossary`, `explan`, `tutorial`, `example`, `usecase`, `methodolog`). On the audited build: the
+reviewer's four, plus `agreement::.createSummary` (a computed Raw agreement / Kappa card grid, the
+same shape as `decisioncalculator`'s — reviewer missed it) and two in `agreement::.run` (a
+two-column welcome layout, exempt; the computed-variables banner, raised under notices). Across the
+siblings on 2026-10-24: MD 6, CPD 10, JJ 9, JS 12, OP 0. The interpolation/static-grid pair above
+remains the more precise spec; the name exemption is what made a WARN readable today.
 
 ---
 

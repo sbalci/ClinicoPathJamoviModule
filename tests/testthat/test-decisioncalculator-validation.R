@@ -185,7 +185,9 @@ test_that("C48 C78 C83 VAL-decisioncalculator-05: a positive probability is neve
   expect_false(grepl("from 0.0% to 0.0%", fs, fixed = TRUE))
   expect_match(fs, "Pre-test probability is 0.01%", fixed = TRUE)
   expect_match(fs, "raises the probability from 0.01% to 0.03%", fixed = TRUE)
-  expect_match(val_strip(r$summary$content), "PPV 0.03%", fixed = TRUE)
+  # library-audit 2026-10-23 meddecide [HIGH] DONE: PPV lives in ratioTable (number, format pc), not a summary grid
+  expect_equal(val_key(r$ratioTable$asDF, "1")$PPV, 0.00029994, tolerance = 1e-6)
+  expect_false(grepl("0.0%", val_strip(r$summary$content), fixed = TRUE))
   expect_match(val_notices(r), "The supplied prevalence is 0.01%", fixed = TRUE)   # INFO since 2026-10-07
 })
 

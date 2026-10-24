@@ -1193,6 +1193,18 @@ validateFactorVariable <- function(data, var_name, min_levels = 2) {
 
 ## 9. Performance Optimization
 
+### State that grows with n x images
+
+State is saved into the `.omv`. A plot that needs one mark per row (a dot plot of patients, every
+rating in long format) and stores those rows in state copies the dataset into the file once per
+image - per marker for an Array (2026-10-23 meddecide [LOW]: `psychopdaROC` `dotPlot`, `agreement`
+`raterProfilePlot`). Declare `requiresData: true`, build the frame from `self$data` in the
+renderer, and keep only scalars in state (<https://dev.jamovi.org/tutorial/tuts0301-image-state-performance>).
+jmvcore prints `WARNING: state object ... is too large` above 500 KB compressed; measure with
+`length(memCompress(serialize(image$state, NULL)))` at a realistic n. Draw with the `ggtheme`
+jamovi passes; a module-level theme option makes the plots disagree with the document
+(`check_plot_theme_option`).
+
 ### Efficient Data Processing
 
 ```R

@@ -1,4 +1,4 @@
-test_that("calculator clears restored narratives before fatal input and recovers", {
+test_that("calculator keeps panels under a fatal input, and a later run clears unused ones", {
   ns <- environment(decisioncalculator)
   make <- function(counts, panel_options = list()) {
     opts <- do.call(ns$decisioncalculatorOptions$new,
@@ -27,17 +27,15 @@ test_that("calculator clears restored narratives before fatal input and recovers
     expect_identical(bad$status, "error")
     expect_true(bad$errored)
     expect_false(bad$complete)
-    for (nm in panels) expect_identical(bad$results[[nm]]$content, "", info = nm)
-    fresh <- make(utils::modifyList(counts, invalid))
-    suppressWarnings(fresh$run(noThrow = TRUE))
-    for (nm in panels) expect_identical(bad$results[[nm]]$content,
-                                       fresh$results[[nm]]$content)
+    # library-audit 2026-10-23 meddecide [MEDIUM] DONE: a rejected run leaves the panels in place;
+    #   jamovi greys the errored analysis with its previous results (guide section 5).
+    for (i in seq_along(panels)) expect_identical(bad$results[[panels[i]]]$content, old[[i]], info = panels[i])
   }
   hidden <- make(counts, list(showSummary = FALSE, fagan = FALSE, showAbout = FALSE))
   for (i in seq_along(panels)) hidden$results[[panels[i]]]$setContent(old[[i]])
   suppressWarnings(hidden$run(noThrow = TRUE))
   expect_true(hidden$complete)
-  for (nm in panels) expect_identical(hidden$results[[nm]]$content, "")
+  for (nm in panels) expect_identical(hidden$results[[nm]]$content, "<div></div>")  # the client skips ""
   recovered <- make(counts)
   suppressWarnings(recovered$run(noThrow = TRUE))
   expect_true(recovered$complete)

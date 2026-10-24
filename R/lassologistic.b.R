@@ -113,6 +113,14 @@ lassologisticClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                             mean_pos = .("Mean score (positive class)"),
                             mean_neg = .("Mean score (reference class)"),
                             range = .("Score range"))),
+                    suitabilityReport = list(
+                        label = "check", fill = c("status", "result"),
+                        rows = c(
+                            epv = .("Events per variable"),
+                            n = .("Sample size"),
+                            balance = .("Class balance"),
+                            p = .("Predictor count"),
+                            collinearity = .("Collinearity"))),
                     validationTable = list(
                         label = "metric", fill = c("apparent", "optimism", "corrected"),
                         rows = c(
@@ -205,7 +213,7 @@ lassologisticClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 private$.cutAdjusted <- character(0)
                 # A saved result can be restored before an incomplete selection is run.
                 # Clear dependent content before every early-return path.
-                for (nm in c("notices", "suitabilityReport", "summaryText", "lassoExplanation",
+                for (nm in c("notices", "summaryText", "lassoExplanation",
                              "methodologyNotes", "clinicalGuidance"))
                     self$results[[nm]]$setContent("")
                 for (nm in c("cv_plot", "coef_plot", "roc_plot"))
@@ -824,39 +832,26 @@ lassologisticClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                     }
                 }
 
-                # Render HTML
-                icons <- c(green = "\u{2705}", yellow = "\u{26A0}\u{FE0F}", red = "\u{274C}")
-                n_green <- sum(sapply(checks, function(x) x$status == "green"))
                 n_yellow <- sum(sapply(checks, function(x) x$status == "yellow"))
                 n_red <- sum(sapply(checks, function(x) x$status == "red"))
 
-                if (n_red > 0) {
-                    overall <- paste0("<span style='color:red;font-weight:bold;'>", .("Caution: Major concerns detected"), "</span>")
-                } else if (n_yellow > 0) {
-                    overall <- paste0("<span style='color:#cc8800;font-weight:bold;'>", .("Acceptable with caveats"), "</span>")
-                } else {
-                    overall <- paste0("<span style='color:green;font-weight:bold;'>", .("No concerns flagged by these checks"), "</span>")
-                }
-
-                rows <- sapply(checks, function(x) {
-                    sprintf(
-                        "<tr><td>%s</td><td>%s</td><td>%s</td></tr>",
-                        icons[x$status], x$label, x$detail
-                    )
-                })
-
-                html <- paste0(
-                    "<h4>", .("Data Suitability Assessment"), "</h4>",
-                    "<p>", .("Overall:"), " ", overall, "</p>",
-                    "<table class='table table-condensed'><thead>",
-                    "<tr><th></th><th>", .("Check"), "</th><th>", .("Result"), "</th></tr></thead><tbody>",
-                    paste(rows, collapse = ""),
-                    "</tbody></table>",
-                    "<p>", .("The EPV threshold of 10 comes from Peduzzi et al. (1996); the other bands are conventions. Rules of thumb like these should give way to sample-size criteria for prediction models (Riley et al. 2019, 2020), and penalization does not make a small sample reliable (Riley et al. 2021)."), "</p>"
-                )
+                # library-audit 2026-10-23 meddecide [HIGH] DONE: a Table with the verdict in words
+                #   (status column + note), not an HTML table carried by red/amber/green text.
                 # Only the PANEL is optional; the notices below always fire.
-                if (isTRUE(self$options$suitabilityCheck))
-                    self$results$suitabilityReport$setContent(html)
+                if (isTRUE(self$options$suitabilityCheck)) {
+                    table <- self$results$suitabilityReport
+                    status_word <- c(green = .("No concern"), yellow = .("Marginal"), red = .("Major concern"))
+                    for (key in names(checks))
+                        table$setRow(rowKey = key, values = list(
+                            status = status_word[[checks[[key]]$status]], result = checks[[key]]$detail))
+                    if (is.null(checks$collinearity))
+                        table$setRow(rowKey = "collinearity", values = list(
+                            status = "", result = .("Not computed: the predictor correlations could not be estimated.")))
+                    table$setNote("overall", if (n_red > 0) .("Caution: Major concerns detected")
+                        else if (n_yellow > 0) .("Acceptable with caveats")
+                        else .("No concerns flagged by these checks"))
+                    table$setNote("source", .("The EPV threshold of 10 comes from Peduzzi et al. (1996); the other bands are conventions. Rules of thumb like these should give way to sample-size criteria for prediction models (Riley et al. 2019, 2020), and penalization does not make a small sample reliable (Riley et al. 2021)."))
+                }
 
                 # Surface critical suitability issues as Notices
                 if (n_red > 0) {

@@ -402,7 +402,7 @@ A results object containing:
 \code{results$outcomeCoding} \tab \tab \tab \tab \tab Class levels with their counts and the role each plays in the analysis \cr
 \code{results$clinicalInterpretationTable} \tab \tab \tab \tab \tab a table \cr
 \code{results$resultsTable} \tab \tab \tab \tab \tab an array of tables \cr
-\code{results$sensSpecTable} \tab \tab \tab \tab \tab an array of htmls \cr
+\code{results$sensSpecTable} \tab \tab \tab \tab \tab an array of tables \cr
 \code{results$thresholdTable} \tab \tab \tab \tab \tab a table \cr
 \code{results$fixedSensSpecTable} \tab \tab \tab \tab \tab a table \cr
 \code{results$fixedSensSpecExplanation} \tab \tab \tab \tab \tab a html \cr

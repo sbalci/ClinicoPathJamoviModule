@@ -29,6 +29,8 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
 
             # Cache for test results to avoid redundant calculations
             .cached_test_results = NULL,
+            # originalCrossTab columns added by the previous run (jmvcore has no removeColumn)
+            .odColumns = character(0),
             # Cache for processed data (needed by heatmap)
             .cached_processed_data = NULL,
 
@@ -747,8 +749,8 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
                         epitable$setRow(rowKey = key,
                             values = list(est = "", lower = "", upper = ""))
                 }
-                self$results$text1$setContent("")
-                self$results$text2$setContent("<div></div>")  # Html: the client skips ""
+                .deleteTableRows(self$results$goldFrequency)
+                .deleteTableRows(self$results$originalCrossTab)
                 for (plot_name in c("plot1", "plotRadar", "plotHeatmap"))
                     self$results[[plot_name]]$setState(NULL)
                 for (html_name in c("summaryReport", "reportSentence", "explanationsContent",
@@ -1290,26 +1292,30 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
                     return(invisible(NULL))
                 }
 
-                # Create frequency table for gold standard
-                freq_table <- table(mydata[[goldVariable]])
-                self$results$text1$setContent(freq_table)
+                # library-audit 2026-10-23 meddecide [HIGH] DONE: Tables, not table() in a Preformatted and
+                #   kable(format = "html"). Levels are data, so rows and the reference-level columns are
+                #   built here; a column from an earlier run's levels is hidden (no removeColumn).
+                gold_levels <- levels(as.factor(mydata[[goldVariable]]))
+                gold <- factor(mydata[[goldVariable]], levels = gold_levels)
+                freq <- table(gold)
+                for (k in seq_along(gold_levels))
+                    self$results$goldFrequency$addRow(rowKey = k, values = list(
+                        level = .rocLabel(gold_levels[k], note = FALSE), n = as.integer(freq[[k]])))
 
-                # Create cross-tabulation tables
-                if (length(test_vars) > 0) {
-                    html_tables <- ""
-                    for (test_var in test_vars) {
-                        cross_tab <- table(mydata[[test_var]], mydata[[goldVariable]])
-                        html_table <- knitr::kable(
-                            cross_tab,
-                            format = "html",
-                            caption = .fmt(jmvcore::.("Cross-tabulation of {test} and {gold}"),
-                                test = private$.safeHtmlOutput(test_var),
-                                gold = private$.safeHtmlOutput(goldVariable)
-                            )
-                        )
-                        html_tables <- paste(html_tables, html_table, "<br><br>")
-                    }
-                    self$results$text2$setContent(html_tables)
+                cross <- self$results$originalCrossTab
+                for (nm in private$.odColumns) cross$getColumn(nm)$setVisible(FALSE)
+                private$.odColumns <- paste0("gold_", seq_along(gold_levels))
+                for (k in seq_along(gold_levels))
+                    cross$addColumn(name = private$.odColumns[k],
+                        title = .rocLabel(gold_levels[k], note = FALSE),
+                        superTitle = .rocLabel(goldVariable, note = FALSE), type = "integer")
+                for (t in seq_along(test_vars)) {
+                    tab <- table(as.factor(mydata[[test_vars[t]]]), gold)
+                    for (r in seq_len(nrow(tab)))
+                        cross$addRow(rowKey = paste0(t, "_", r), values = c(
+                            list(test = .rocLabel(test_vars[t], note = FALSE),
+                                 level = .rocLabel(rownames(tab)[r], note = FALSE)),
+                            stats::setNames(as.list(as.integer(tab[r, ])), private$.odColumns)))
                 }
             },
 

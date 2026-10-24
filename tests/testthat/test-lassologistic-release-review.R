@@ -237,7 +237,8 @@ test_that("IR-07/IR-10 guidance and suitability text do not overclaim", {
   d <- ll_fixture()
   res <- ll_run(d, includeClinicalGuidance = TRUE)
   expect_false(grepl("most useful", res$clinicalGuidance$content, fixed = TRUE))
-  expect_false(grepl("adequate", res$suitabilityReport$content, fixed = TRUE))
+  # library-audit 2026-10-23 meddecide [HIGH] DONE: suitabilityReport is a Table now
+  expect_false(any(grepl("adequate", unlist(res$suitabilityReport$asDF), fixed = TRUE)))
 })
 
 test_that("Printed cut points are exact and readable: a typed 19.65 prints as 19.65", {

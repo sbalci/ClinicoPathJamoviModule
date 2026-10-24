@@ -162,7 +162,7 @@ A results object containing:
 \tabular{llllll}{
 \code{results$todo} \tab \tab \tab \tab \tab a html \cr
 \code{results$notices} \tab \tab \tab \tab \tab a html \cr
-\code{results$suitabilityReport} \tab \tab \tab \tab \tab a html \cr
+\code{results$suitabilityReport} \tab \tab \tab \tab \tab a table \cr
 \code{results$modelSummary} \tab \tab \tab \tab \tab a table \cr
 \code{results$coefficients} \tab \tab \tab \tab \tab a table \cr
 \code{results$performance} \tab \tab \tab \tab \tab a table \cr
@@ -185,9 +185,9 @@ A results object containing:
 
 Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
 
-\code{results$modelSummary$asDF}
+\code{results$suitabilityReport$asDF}
 
-\code{as.data.frame(results$modelSummary)}
+\code{as.data.frame(results$suitabilityReport)}
 }
 \description{
 Performs LASSO-penalized logistic regression for variable selection in

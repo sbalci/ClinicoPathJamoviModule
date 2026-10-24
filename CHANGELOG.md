@@ -5,6 +5,48 @@ prevents them. Newest first. Release notes for users live in `NEWS.md`.
 
 ---
 
+## 2026-10-24 — library audit round 8 (meddecide 1.1.2): a clean gate on a module the reviewer read in a new way
+
+### 20 findings on a build the gate called "0 blocking"
+
+- **Failure mode:** the round read meddecide's options panels and results as a user meets them for
+  the first time. HTML tables of results (HIGH), variable boxes inside collapsed boxes, levels and
+  fixed number sets typed as `String`, presets that leave stale values in their controls, results
+  hidden or blanked before `reject()`, empty `Preformatted` headings, failed sub-analyses as
+  footnotes, a theme option over `ggtheme`. `release_gate.py --root` on the audited build 073714f
+  printed "0 blocking, 1 advisory".
+- **Detection signal:** the library reviewer (`2026-10-23 meddecide` [HIGH]..[INFO]). No local check
+  asked these questions; the HTML-table class had a measured detector *spec* in guide §26 since
+  round 5 and no detector, and `jamovi_tables_guide.md` §7 still taught "`Html` is the right home for
+  gt/gtsummary/kableExtra tables".
+- **Prevention rule:** a detector per class the same day, reconciled with the reviewer's list on the
+  audited build: 13 new `release_gate.py` WARN checks (`check_html_tables` … `check_notice_myths`),
+  self-tested in `tools/test_release_gate.py`; teaching text corrected; guide §5, §6, §11, §12,
+  §13, §17, §23, §25, §26 and §18 Round 8.
+
+### The reviewer's mechanism, checked against jmvcore
+
+- **Failure mode (reviewer side):** "no `clearWith`" was wrong at all eight named tables — the key
+  sits after `columns:`. "Nothing an earlier run set with `setContent()` carries into the next one"
+  contradicts `Preformatted`/`Html$fromProtoBuf`, which restore content; only visibility is never
+  restored. Acting on either as written would add redundant keys, and would delete clears that stop
+  a previous run's text standing beside new numbers.
+- **Detection signal:** parsing the YAML and printing jmvcore 2.7.38's `fromProtoBuf` methods during
+  the learn pass.
+- **Prevention rule:** check a "missing key" finding against the parsed tree and a platform mechanism
+  against the jmvcore source before accepting it; answer with the measured fact in a breadcrumb
+  (library-audit Pitfall 29; landmines in `recurring-classes.md`).
+
+### A retracted reason lives on in copied comments
+
+- **Failure mode:** the 2026-09-22 correction ("`jmvcore::Notice` serializes fine") reached
+  `CLAUDE.md` and the comments it named; a templated "avoids the jmvcore::Notice serialization error"
+  comment survived in 53 shipped sites (MD 3, CPD 29, JJ 10, JS 9, OP 2), and the reviewer quoted
+  one as our position.
+- **Detection signal:** the reviewer (`nogoldstandard.b.R:16-19`).
+- **Prevention rule:** `check_notice_myths` (WARN); a correction is swept as a class, comments
+  included.
+
 ## 2026-10-24 — library audit round 7 (OncoPath 1.1.2): warnings that cannot stop a release, and a retraction nobody ran
 
 ### Three of five October releases published "Release <v>." as their notes

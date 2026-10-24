@@ -1050,3 +1050,116 @@ test_that("no meddecide msgid is a fragment, carries padding, or cannot be reord
   expect_equal(unordered, character(0))
   audit_skip_absent(absent, root)
 })
+
+# library-audit 2026-10-23 meddecide [HIGH] DONE: results that are tables are Table elements - an HTML
+#   <table> loses the number format, Copy as a grid, Copy Latex and screen readers (guide section 26).
+test_that("confusion matrices, cross-tabs and check lists are Tables, not HTML", {
+  wanted <- c("psychopdaROC", "decisioncalculator", "decisioncompare", "lassologistic", "agreement")
+  loaded <- audit_loaded(wanted)
+  quiet <- function(expr) suppressWarnings(suppressMessages(expr))
+
+  if ("psychopdaROC" %in% loaded) {
+    set.seed(11)
+    cls <- factor(rep(c("H", "D"), c(60, 40)), levels = c("H", "D"))
+    d <- data.frame(m = stats::rnorm(100, ifelse(cls == "D", 1.2, 0)), cls = cls)
+    a <- psychopdaROCClass$new(options = psychopdaROCOptions$new(
+      dependentVars = "m", classVar = "cls", positiveClass = "D", negativeClass = "H",
+      sensSpecTable = TRUE, run = TRUE), data = d)
+    quiet(a$init())
+    t <- a$results$sensSpecTable$get(key = "m")
+    expect_true(inherits(t, "Table"))
+    expect_identical(t$rowKeys, list("1_pos", "1_neg"))          # scaffolded before .run()
+    quiet(a$run())
+    cm <- t$asDF
+    expect_equal(sum(cm$pos[1:2]), 40)                            # criterion columns hold the classes
+    expect_equal(sum(cm$neg[1:2]), 60)
+    sens <- a$results$resultsTable$get(key = "m")$asDF$sensitivity[1]
+    expect_equal(cm$pos[1] / 40, sens, tolerance = 1e-8)          # TP / (TP + FN)
+    expect_identical(t$getColumn("pos")$title, "Positive (D)")
+  }
+  if ("agreement" %in% loaded) {
+    set.seed(8)
+    r1 <- factor(sample(c("a", "b"), 40, TRUE))
+    r2 <- factor(ifelse(stats::runif(40) < 0.8, as.character(r1), "a"), levels = c("a", "b"))
+    ag <- agreementClass$new(options = agreementOptions$new(vars = c("r1", "r2"), showSummary = TRUE),
+                             data = data.frame(r1, r2))
+    quiet(ag$init()); quiet(ag$run())
+    expect_true(nzchar(ag$results$summary$content))
+    expect_false(grepl("<table", ag$results$summary$content, fixed = TRUE))
+  }
+  if ("decisioncalculator" %in% loaded) {
+    dc <- decisioncalculatorClass$new(options = decisioncalculatorOptions$new(
+      TP = 90, FP = 30, FN = 20, TN = 80, showSummary = TRUE), data = data.frame())
+    quiet(dc$init()); quiet(dc$run())
+    expect_true(nzchar(dc$results$summary$content))
+    expect_false(grepl("<table", dc$results$summary$content, fixed = TRUE))
+  }
+  if ("decisioncompare" %in% loaded) {
+    v <- c("v1", "v2", "v3")
+    d <- data.frame(gold = factor(rep(v, c(5, 7, 3))), a = factor(rep(c("v1", "v2"), c(9, 6))),
+                    b = factor(rep(c("v2", "v1"), c(4, 11))))
+    cmp <- decisioncompareClass$new(options = decisioncompareOptions$new(
+      gold = "gold", goldPositive = "v1", goldNegative = "v2",
+      test1 = "a", test1Positive = "v1", test1Negative = "v2",
+      test2 = "b", test2Positive = "v1", test2Negative = "v2", excludeIndeterminate = TRUE,
+      od = TRUE), data = d)
+    quiet(cmp$init()); quiet(cmp$run())
+    gf <- cmp$results$goldFrequency$asDF
+    used <- droplevels(cmp$.__enclos_env__$private$.cached_processed_data$data)
+    expect_equal(gf$n, as.vector(table(used$gold)))
+    ct <- cmp$results$originalCrossTab$asDF
+    oracle <- table(used$a, used$gold)
+    got <- as.matrix(ct[ct$test == "a", grep("^gold_", names(ct))])
+    expect_equal(unname(got), unname(matrix(as.integer(oracle), nrow(oracle))))
+  }
+  if ("lassologistic" %in% loaded && requireNamespace("glmnet", quietly = TRUE)) {
+    set.seed(3)
+    X <- as.data.frame(matrix(stats::rnorm(120 * 5), 120, dimnames = list(NULL, paste0("x", 1:5))))
+    X$y <- factor(ifelse(X$x1 + stats::rnorm(120) > 0, "Yes", "No"))
+    lasso <- lassologisticClass$new(options = lassologisticOptions$new(
+      outcome = "y", outcomeLevel = "Yes", explanatory = paste0("x", 1:5), nfolds = 3,
+      suitabilityCheck = TRUE), data = X)
+    quiet(lasso$init()); quiet(lasso$run())
+    s <- lasso$results$suitabilityReport
+    expect_true(inherits(s, "Table"))
+    expect_identical(unlist(s$rowKeys), c("epv", "n", "balance", "p", "collinearity"))
+    expect_true(all(s$asDF$status %in% c("No concern", "Marginal", "Major concern")))
+  }
+  audit_skip_unloaded(wanted)
+})
+
+# library-audit 2026-10-23 meddecide [MEDIUM] DONE: a failure path neither hides results nor blanks them
+#   before reject(): jmvcore never restores visibility between runs, and jamovi greys an errored
+#   analysis with its results in place. Html is cleared with "<div></div>" before a normal early
+#   return (the client skips ""), never by an on.exit() hide (guide section 5).
+test_that("validation failures leave results in place for jamovi's error presentation", {
+  root <- audit_source_root()
+  files <- c("decisioncombine", "decisioncalculator", "enhancedROC", "psychopdaROC",
+             "kappaSizeCI", "kappaSizeFixedN", "kappaSizePower")
+  absent <- audit_absent(root, files)
+  for (name in setdiff(files, absent)) {
+    src <- paste(readLines(file.path(root, "R", paste0(name, ".b.R")), warn = FALSE), collapse = "\n")
+    src <- gsub("(?m)^[ \t]*#[^\n]*", "", src, perl = TRUE)
+    # the on.exit() call's own argument, balanced parentheses
+    calls <- regmatches(src, gregexpr("on\\.exit(\\((?:[^()]++|(?1))*\\))", src, perl = TRUE))[[1]]
+    expect_false(any(grepl("setVisible", calls, fixed = TRUE)), label = paste(name, "on.exit hide"))
+    run <- sub("(?s).*?\\n\\s*\\.run = function\\(\\) \\{", "", src, perl = TRUE)
+    first_reject <- regexpr("reject\\(", run)
+    first_blank <- regexpr("setContent\\(\\s*\"(<div></div>)?\"\\s*\\)", run)
+    if (name %in% c("kappaSizeCI", "kappaSizeFixedN", "kappaSizePower"))
+      expect_true(first_blank < 0 || first_blank > first_reject, label = paste(name, "blank before reject"))
+  }
+  if ("decisioncombine" %in% audit_loaded("decisioncombine")) {
+    src <- paste(readLines(file.path(root, "R", "decisioncombine.b.R"), warn = FALSE), collapse = "\n")
+    for (tbl in c("crossTabTable", "recommendationTable", "pairedComparisonTable", "paired", "recTable", "crossTable"))
+      expect_false(grepl(paste0("\\b", tbl, "\\$setVisible\\("), src), label = paste("decisioncombine", tbl))
+  }
+  if ("kappaSizeCI" %in% audit_loaded("kappaSizeCI")) {
+    a <- kappaSizeCIClass$new(options = kappaSizeCIOptions$new(props = "0.5, 0.6"), data = data.frame())
+    a$init()
+    a$results$text1$setContent("previous n")
+    expect_error(suppressWarnings(a$run()))
+    expect_identical(a$results$text1$content, "previous n")
+  }
+  audit_skip_absent(absent, root)
+})

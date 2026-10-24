@@ -894,8 +894,9 @@ test_that("an all-negative winner is flagged as a probable inverted positive lev
 })
 
 
-test_that("the recommendation table is hidden rather than showing a blank row", {
-    # rows: 1 is a fixed schema, so the seeded all-NA row survives every early return.
+test_that("the recommendation table stays in place under a validation error", {
+    # library-audit 2026-10-23 meddecide [MEDIUM] DONE: not hidden on failure; jamovi greys the
+    #   errored analysis with its results in place, so the pane does not collapse.
     d <- dcomb_fixture()
     bad <- do.call(diagnostic_error_results, list(analysis = "decisioncombine",
         data = d, gold = "gold", goldPositive = "pos",
@@ -903,7 +904,7 @@ test_that("the recommendation table is hidden rather than showing a blank row", 
         test2 = "t1", test2Positive = "pos",        # same variable twice -> validation error
         test3 = NULL, test3Positive = NULL, showRecommendation = TRUE))
     expect_match(notices_of(bad), "Variables Must Be Distinct")
-    expect_false(bad$recommendationTable$visible)
+    expect_true(bad$recommendationTable$visible)
 
     good <- run_dcomb2(d, showRecommendation = TRUE)
     expect_true(good$recommendationTable$visible)

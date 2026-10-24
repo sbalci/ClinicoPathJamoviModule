@@ -1265,6 +1265,264 @@ def check_review_breadcrumbs():
     print('  review breadcrumbs: %d user-facing files, %d test assertions' % (len(files), len(tests)))
 
 
+# ---- 2026-10-23 meddecide [HIGH..LOW] (round 8). Every class below passed every earlier check:
+# the gate read meddecide 1.1.2 as "0 blocking" while the reviewer found 20 items. WARN until the
+# shipped count is 0 in all five siblings (learn-targets.md section 4).
+
+def _report(key, label, hits, warn):
+    """hits: (shipped?, text). Prints the count, WARNs on shipped hits, books the rest as debt."""
+    ship = [x for live, x in hits if live]
+    UNSHIPPED[key] = len(hits) - len(ship)
+    if ship:
+        WARN.append('%d shipped %s: %s' % (len(ship), warn, ', '.join(cap(ship))))
+    print('  %s: %d (%d shipped)' % (label, len(hits), len(ship)))
+
+
+def _bodies(src):
+    """{method name: body} for an R6 .b.R source with comments removed."""
+    heads = list(_METHOD.finditer(src))
+    return [(h.group(1), src[h.end(): heads[i + 1].start() if i + 1 < len(heads) else len(src)],
+             src.count('\n', 0, h.end()) + 1) for i, h in enumerate(heads)]
+
+
+def _b_sources():
+    for p in sorted(glob.glob('R/*.b.R')):
+        yield p, os.path.basename(p)[:-4], re.sub(r'(?m)^[ \t]*#.*$', '', open(p, encoding='utf-8', errors='replace').read())
+
+
+def _options(name):
+    return [o for o in (_safe_yaml('jamovi/%s.a.yaml' % name) or {}).get('options') or [] if isinstance(o, dict)]
+
+
+# Methods whose HTML is help, not data - the reviewer exempts these explicitly (section 26).
+_HELP_METHOD = re.compile(r'instruction|intro|welcome|guide|help|about|glossary|explan|tutorial|example|usecase|methodolog', re.I)
+
+
+def check_html_tables():
+    """Tabular output drawn as <table> markup (or knitr::kable(format = "html")) loses the user's
+    number format, the results theme, Copy as a grid, Copy Latex and screen readers (section 26).
+    2026-10-23 meddecide [HIGH]: psychopdaROC confusion matrices, decisioncalculator summary grid,
+    decisioncompare cross-tabs, lassologistic suitability check - exactly the four non-help
+    methods this finds there. Help/explanation methods are exempt by NAME, not by markup."""
+    hits = []
+    for p, name, src in _b_sources():
+        for meth, body, line in _bodies(src):
+            k = len(re.findall(r'<table\b', body)) + len(re.findall(r'kable\([^)]*format\s*=\s*["\']html', body))
+            if k and not _HELP_METHOD.search(meth):
+                hits.append((_shipped(name), '%s::%s (%d)' % (name, meth, k)))
+    _report('html_tables', 'HTML <table> outside help methods', hits,
+            'methods draw a table as HTML instead of a Table result')
+
+
+def check_error_presentation():
+    """jamovi greys a failed analysis and shows the error over the results; that needs the results
+    to stay where they are (section 5). Two mechanical shapes from 2026-10-23 meddecide [MEDIUM]:
+    an on.exit() that hides still-empty panels (it runs on every validation return), and panels
+    blanked at the top of a method that then reject()s with no normal return in between.
+    Measured in jmvcore 2.7.38: fromProtoBuf never restores visibility, so an imperative hide is
+    not needed to undo anything; Html/Preformatted CONTENT is restored (stale), which is why
+    clearing before a NORMAL early return stays correct - only blanking before reject() is flagged."""
+    hits = []
+    for p, name, src in _b_sources():
+        for meth, body, line in _bodies(src):
+            for m in re.finditer(r'on\.exit\(', body):
+                depth, j = 1, m.end()                       # the on.exit() call's own argument only
+                while j < len(body) and depth:
+                    depth += (body[j] == '(') - (body[j] == ')')
+                    j += 1
+                if 'setVisible' in body[m.end(): j]:
+                    hits.append((_shipped(name), '%s::%s on.exit hides' % (name, meth)))
+            # clearing an onboarding panel (todo/welcome/instructions) once variables are set is not a blank
+            b = re.search(r'(?<!todo)(?<!welcome)(?<!instructions)\$setContent\(\s*["\'](?:<div>\s*</div>)?["\']\s*\)', body)
+            r = re.search(r'\breject\(', body)
+            if b and r and b.start() < r.start() and 'return(' not in body[b.start(): r.start()]:
+                hits.append((_shipped(name), '%s::%s blanks before reject()' % (name, meth)))
+    _report('error_presentation', 'results hidden/blanked on a failure path', hits,
+            'failure paths hide or blank results instead of letting reject() present the error')
+
+
+def _u_walk(node, anc=()):
+    if isinstance(node, dict):
+        yield node, anc
+        for v in node.values():
+            if isinstance(v, (list, dict)):
+                yield from _u_walk(v, anc + (node.get('type'),))
+    elif isinstance(node, list):
+        for v in node:
+            yield from _u_walk(v, anc)
+
+
+def check_variables_first():
+    """Every variable role in the top VariableSupplier, optional ones greyed with enable:, as jmv's
+    linreg does. 2026-10-23 meddecide [MEDIUM]: agreement had six suppliers inside collapsed boxes,
+    decisioncurve one; decision/decisioncompare opened with a CollapseBox above the variables."""
+    hits = []
+    for p in sorted(glob.glob('jamovi/*.u.yaml')):
+        name = os.path.basename(p)[:-7]
+        top = (_safe_yaml(p) or {}).get('children') or []
+        sup = [i for i, c in enumerate(top) if isinstance(c, dict) and c.get('type') == 'VariableSupplier']
+        buried = sum(1 for d, anc in _u_walk(top) if d.get('type') == 'VariableSupplier' and 'CollapseBox' in anc)
+        if buried:
+            hits.append((_shipped(name), '%s (%d supplier(s) in a CollapseBox)' % (name, buried)))
+        if sup and sup[0] > 0:
+            hits.append((_shipped(name), '%s (%s before the variables)' % (name, top[0].get('type'))))
+    _report('variables_first', 'variable boxes not first', hits, 'panels bury or postpone variable boxes')
+
+
+def check_level_as_string():
+    """A factor level typed as free text silently matches nothing on a typo; type: Level with a
+    LevelSelector lists the levels (2026-10-23 meddecide [MEDIUM]: enhancedROC validationNegative,
+    agreement specificPositiveCategory). Keyed on the option NAME, which is what a level is called."""
+    hits = [(_shipped(n), '%s::%s' % (n, o['name']))
+            for n in sorted(os.path.basename(p)[:-7] for p in glob.glob('jamovi/*.a.yaml'))
+            for o in _options(n)
+            if o.get('type') == 'String' and re.search(r'(Positive|Negative|Level|Category|Class)$', o['name'])]
+    _report('level_as_string', 'factor levels typed as String', hits, 'String options name a factor level')
+
+
+def check_number_list_strings():
+    """A fixed number of numbers in one String loses the TextBox's own validation and min/max
+    (2026-10-23 meddecide [MEDIUM]: enhancedROC partialRange, psychopdaROC treatmentThreshold, the
+    kappaSize props). Open-ended lists have no native control and may stay: mark one with
+    `# number-list: open-ended` on the line above its `- name:`."""
+    hits = []
+    for p in sorted(glob.glob('jamovi/*.a.yaml')):
+        name = os.path.basename(p)[:-7]
+        lines = open(p, encoding='utf-8').read().split('\n')
+        for o in _options(name):
+            d = str(o.get('default', ''))
+            if o.get('type') == 'String' and re.fullmatch(r'\s*-?\d*\.?\d+(\s*[,;]\s*-?\d*\.?\d+){1,5}\s*', d):
+                at = next((i for i, l in enumerate(lines) if re.match(r'\s*-\s*name:\s*%s\s*$' % re.escape(o['name']), l)), 0)
+                if not any('number-list:' in l for l in lines[max(0, at - 3): at]):
+                    hits.append((_shipped(name), '%s::%s' % (name, o['name'])))
+    _report('number_list_strings', 'numbers entered as one String', hits,
+            'String options hold a list of numbers (split into Number options, or mark open-ended)')
+
+
+def check_default_guidance():
+    """Help belongs to the empty state. 2026-10-23 meddecide [LOW]: cotest's showGuidance defaulted
+    to true (no empty state, so the welcome sat above every result) and enhancedROC's instructions
+    were never hidden. Flags a guidance Bool defaulting to true, and an instructions-like Html that
+    is always visible and never setVisible()'d (decisioncurve is the model)."""
+    hits = []
+    for p in sorted(glob.glob('jamovi/*.r.yaml')):
+        name = os.path.basename(p)[:-7]
+        b = 'R/%s.b.R' % name
+        src = open(b, encoding='utf-8', errors='replace').read() if os.path.exists(b) else ''
+        for o in _options(name):
+            if o.get('type') == 'Bool' and o.get('default') is True and \
+                    re.search(r'guid|instruct|welcome|intro|tutorial', o['name'], re.I):
+                hits.append((_shipped(name), '%s::%s default true' % (name, o['name'])))
+        for d in _dicts(((_safe_yaml(p) or {}).get('items')) or []):
+            n = str(d.get('name'))
+            if d.get('type') == 'Html' and re.search(r'instruct|welcome|intro', n, re.I) and \
+                    d.get('visible') in (None, True) and not re.search(r'\b%s\s*\$\s*setVisible' % re.escape(n), src):
+                hits.append((_shipped(name), '%s::%s always shown' % (name, n)))
+    _report('default_guidance', 'guidance shown on every run', hits, 'analyses show help above results by default')
+
+
+def check_empty_preformatted():
+    """A Preformatted that is never filled is a heading pretending to be content: Copy and Export
+    treat it as output. A type: Group's title is the heading, and the Group hides itself with its
+    children (2026-10-23 meddecide [LOW]: 15 agreement *Heading elements)."""
+    hits = []
+    for p in sorted(glob.glob('jamovi/*.r.yaml')):
+        name = os.path.basename(p)[:-7]
+        b = 'R/%s.b.R' % name
+        src = re.sub(r'#[^\n]*', '', open(b, encoding='utf-8', errors='replace').read()) if os.path.exists(b) else ''
+        for d in _dicts(((_safe_yaml(p) or {}).get('items')) or []):
+            n = d.get('name')
+            # filled directly, through [["name"]], or through a helper: item <- f("name"); item$setContent()
+            if d.get('type') == 'Preformatted' and n and not re.search(
+                    r'\$%s\s*\$\s*setContent|\[\[\s*["\']%s["\']\s*\]\]\s*\$\s*setContent' % (n, n), src) and \
+                    not any('setContent(' in src[m.end(): m.end() + 300] for m in re.finditer(r'["\']%s["\']\s*\)' % n, src)):
+                hits.append((_shipped(name), '%s::%s' % (name, n)))
+    _report('empty_preformatted', 'Preformatted never filled', hits, 'Preformatted items are never filled (use a Group title)')
+
+
+def check_setnote_errors():
+    """An optional sub-analysis that cannot run is a WARNING notice naming it, not a footnote on an
+    empty table (2026-10-23 meddecide [LOW]: about 30 in agreement; its own TODO said users 'see
+    results that look fine until they spot the small note')."""
+    hits = []
+    for p, name, src in _b_sources():
+        for m in re.finditer(r'setNote\(\s*["\'](?:error|err|fail\w*)["\']\s*,(?!\s*NULL\b)', src):
+            hits.append((_shipped(name), '%s:%d' % (name, src.count('\n', 0, m.start()) + 1)))
+    _report('setnote_errors', 'failures reported as table footnotes', hits, 'setNote("error") calls report a failed sub-analysis')
+
+
+def check_uyaml_structure():
+    """A ComboBox that repeats options: drifts from the .a.yaml (nogoldstandard listed them in a
+    different order); a Title Case Label with no children is a heading that wraps nothing
+    (psychopdaROC, 2026-10-23 meddecide [LOW])."""
+    hits = []
+    for p in sorted(glob.glob('jamovi/*.u.yaml')):
+        name = os.path.basename(p)[:-7]
+        for d in _dicts(_safe_yaml(p) or {}):
+            if d.get('type') == 'ComboBox' and d.get('options'):
+                hits.append((_shipped(name), '%s::%s options:' % (name, d.get('name'))))
+            lab = str(d.get('label', ''))
+            if d.get('type') == 'Label' and not d.get('children') and ' ' in lab and all(w[0].isupper() or w in _SMALL_WORDS for w in lab.split()):
+                hits.append((_shipped(name), '%s "%s"' % (name, lab)))
+    _report('uyaml_structure', 'duplicated ComboBox options / childless headings', hits, 'panel structure issues')
+
+
+def check_plot_theme_option():
+    """jamovi passes the user's chosen theme to every render function as ggtheme; a module-level
+    theme option makes these plots disagree with the rest of the document (2026-10-23 meddecide
+    [LOW]: enhancedROC plotTheme; section 23)."""
+    hits = [(_shipped(n), '%s::%s' % (n, o['name']))
+            for n in sorted(os.path.basename(p)[:-7] for p in glob.glob('jamovi/*.a.yaml'))
+            for o in _options(n) if o.get('type') == 'List' and re.search(r'theme', o['name'], re.I)]
+    _report('plot_theme_option', 'module-level plot theme options', hits, 'List options replace jamovi\'s plot theme')
+
+
+_R_NOTATION = re.compile(r'\b[a-z][\w.]*::[a-z][\w.]*|\((?:[a-z]+[A-Z0-9][A-Za-z0-9]*)\)')
+
+
+def check_label_notation():
+    """Labels are for clinicians: no R function names (`psych::cohen.kappa`), no argument names in
+    brackets (`(kappa0)`), no verb that only toggles output ("Explain ..."), and the eponyms in
+    their possessive form (2026-10-23 meddecide [LOW]; section 12)."""
+    hits = []
+    for p in sorted(glob.glob('jamovi/*.[aur].yaml')):
+        name = os.path.basename(p).split('.')[0]
+        for i, l in enumerate(open(p, encoding='utf-8'), 1):
+            m = re.match(r'\s*-?\s*(title|label|superTitle):\s*(.+)$', l)
+            if m and (_R_NOTATION.search(m.group(2)) or re.match(r'\s*["\']?Explain\b', m.group(2))):
+                hits.append((_shipped(name), '%s:%d' % (os.path.basename(p), i)))
+    for p, i, s in _dot_literals():
+        if re.search(r'\b(?:Fleiss|Cohen)\s+kappa\b', s):
+            hits.append((_file_shipped(p), '%s:%d' % (os.path.basename(p), i)))
+    _report('label_notation', 'R notation / verb labels / bare eponyms', hits, 'labels use R notation or non-possessive eponyms')
+
+
+def check_text_number_cells():
+    """A number formatted in R ignores the user's number format, so the table disagrees with every
+    other in the document (2026-10-23 meddecide [LOW]: agreement sample-size table). Pass the raw
+    number to a number/integer column."""
+    hits = []
+    for p, name, src in _b_sources():
+        for m in re.finditer(r'(?:setRow|addRow|setCell)\([^\n]*\bvalue\s*=\s*(?:base::)?(?:format|formatC|sprintf|prettyNum)\(', src):
+            hits.append((_shipped(name), '%s:%d' % (name, src.count('\n', 0, m.start()) + 1)))
+    _report('text_number_cells', 'numbers formatted into text cells', hits, 'cells receive R-formatted numbers')
+
+
+def check_notice_myths():
+    """The 2025-11 claim that jmvcore::Notice cannot be serialised was retracted 2026-09-22 (the
+    crash was Group$insert()); a comment still giving it as the reason to avoid Notice is read by
+    the reviewer as our current position (2026-10-23 meddecide [LOW]: nogoldstandard.b.R:16-19)."""
+    hits = []
+    for p in sorted(glob.glob('R/*.R')):
+        lines = open(p, encoding='utf-8', errors='replace').read().split('\n')
+        for i, l in enumerate(lines):
+            if l.lstrip().startswith('#') and re.search(r'seriali[sz]', l, re.I):
+                near = ' '.join(lines[max(0, i - 2): i + 3])
+                if re.search(r'Notice', near) and not re.search(r'retract|corrected|fine|not about|never existed|fails identically', near, re.I):
+                    hits.append((_file_shipped(p), '%s:%d' % (os.path.basename(p), i + 1)))
+    _report('notice_myths', 'comments blaming Notice serialisation', hits, 'comments repeat the retracted Notice-serialisation claim')
+
+
 if __name__ == '__main__':
     print('RELEASE GATE  %s\n' % ROOT)
     for fn in (check_versions, check_news, check_license, check_refs, check_clearwith, check_renderfun,
@@ -1275,7 +1533,11 @@ if __name__ == '__main__':
                check_column_formats, check_fabricated_stats, check_state_payload,
                check_description_newlines, check_issue_urls, check_dataset_descriptions,
                check_sentinel_insert, check_init_row_structure, check_label_case,
-               check_collapsebox_nested, check_forward_refs, check_review_breadcrumbs):
+               check_collapsebox_nested, check_forward_refs, check_review_breadcrumbs,
+               check_html_tables, check_error_presentation, check_variables_first, check_level_as_string,
+               check_number_list_strings, check_default_guidance, check_empty_preformatted,
+               check_setnote_errors, check_uyaml_structure, check_plot_theme_option,
+               check_label_notation, check_text_number_cells, check_notice_myths):
         try:
             fn()
         except Exception as e:

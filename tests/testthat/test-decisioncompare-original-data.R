@@ -22,9 +22,11 @@ dc_original_data <- function(k) {
   data.frame(gold = factor(values), a = factor(values), b = factor(c(values[1:2], rev(values[-(1:2)]))))
 }
 
+# library-audit 2026-10-23 meddecide [HIGH] DONE: original data are Tables now (goldFrequency, originalCrossTab)
+# Count cells: one per test level x observed reference level ($asDF drops hidden columns).
 dc_original_cell_count <- function(analysis) {
-  hits <- gregexpr("<td", analysis$results$text2$content, fixed = TRUE)[[1]]
-  if (identical(hits[1], -1L)) 0L else length(hits)
+  df <- analysis$results$originalCrossTab$asDF
+  nrow(df) * length(grep("^gold_", names(df)))
 }
 
 test_that("original tables discard unused levels without changing diagnostic results", {
@@ -33,10 +35,10 @@ test_that("original tables discard unused levels without changing diagnostic res
   unused <- data
   for (name in names(unused)) levels(unused[[name]]) <- paste0("v", 1:120)
   analysis <- dc_original_analysis(unused)
-  # Two 2x2 tables, each with two additional row-label cells.
-  expect_equal(dc_original_cell_count(analysis), 12L)
-  expect_identical(analysis$results$text2$content, baseline$results$text2$content)
-  expect_identical(analysis$results$text1$content, baseline$results$text1$content)
+  # Two tests x two observed levels x two observed reference levels.
+  expect_equal(dc_original_cell_count(analysis), 8L)
+  expect_equal(analysis$results$originalCrossTab$asDF, baseline$results$originalCrossTab$asDF)
+  expect_equal(analysis$results$goldFrequency$asDF, baseline$results$goldFrequency$asDF)
   expect_equal(analysis$results$comparisonTable$asDF, baseline$results$comparisonTable$asDF)
   expect_equal(analysis$results$mcnemarTable$asDF, baseline$results$mcnemarTable$asDF)
   expect_false(grepl("Original Data Display Omitted", analysis$results$notices$content,
@@ -47,16 +49,15 @@ test_that("original tables discard unused levels without changing diagnostic res
 
 test_that("original table limit allows 10000 cells and omits larger cross-tabs", {
   boundary <- dc_original_analysis(dc_original_data(100))
-  expect_equal(dc_original_cell_count(boundary), 2L * 100L * 101L)
+  expect_equal(dc_original_cell_count(boundary), 2L * 100L * 100L)
   expect_false(grepl("Original Data Display Omitted", boundary$results$notices$content,
                      fixed = TRUE))
 
   data <- dc_original_data(101)
   omitted <- dc_original_analysis(data)
   hidden <- dc_original_analysis(data, od = FALSE)
-  expect_identical(omitted$results$text1$content, "")
-  # Html panels are blanked with "<div></div>" since 2026-10-21: the jamovi client skips an Html update of "".
-  expect_identical(omitted$results$text2$content, "<div></div>")
+  expect_equal(omitted$results$goldFrequency$rowCount, 0)
+  expect_equal(omitted$results$originalCrossTab$rowCount, 0)
   expect_match(omitted$results$notices$content, "Original Data Display Omitted", fixed = TRUE)
   expect_match(omitted$results$notices$content, "10,000 cells", fixed = TRUE)
   expect_false(grepl("Original Data Display Omitted", hidden$results$notices$content,
@@ -81,8 +82,8 @@ test_that("preflight covers the optional third test before building any original
   data$a <- factor(ifelse(data$gold == "v1", "v1", "v2"))
   data$b <- data$a
   analysis <- dc_original_analysis(data)
-  expect_identical(analysis$results$text1$content, "")
-  expect_identical(analysis$results$text2$content, "<div></div>")
+  expect_equal(analysis$results$goldFrequency$rowCount, 0)
+  expect_equal(analysis$results$originalCrossTab$rowCount, 0)
   expect_match(analysis$results$notices$content, "Original Data Display Omitted", fixed = TRUE)
   expect_equal(analysis$results$comparisonTable$getCell(rowKey = "test_3", col = "n")$value,
                2)
@@ -90,11 +91,11 @@ test_that("preflight covers the optional third test before building any original
 
 test_that("original display and its warning reset when data or display options change", {
   analysis <- dc_original_analysis(dc_original_data(2))
-  expect_true(nzchar(analysis$results$text2$content))
+  expect_gt(analysis$results$originalCrossTab$rowCount, 0)
   private <- analysis$.__enclos_env__$private
   private$.data <- dc_original_data(101)
   analysis$run()
-  expect_identical(analysis$results$text2$content, "<div></div>")
+  expect_equal(analysis$results$originalCrossTab$rowCount, 0)
   expect_match(analysis$results$notices$content, "Original Data Display Omitted", fixed = TRUE)
 
   option <- analysis$options$option("od")
@@ -108,7 +109,7 @@ test_that("original display and its warning reset when data or display options c
   values$od <- TRUE
   private$.data <- dc_original_data(2)
   analysis$run()
-  expect_equal(dc_original_cell_count(analysis), 12L)
+  expect_equal(dc_original_cell_count(analysis), 8L)
   expect_false(grepl("Original Data Display Omitted", analysis$results$notices$content,
                      fixed = TRUE))
 })

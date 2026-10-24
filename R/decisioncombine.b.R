@@ -377,27 +377,15 @@ decisioncombineClass <- if (requireNamespace("jmvcore")) {
                 # recommendationTable has a fixed one-row schema. Deleting that row makes
                 # the later setRow(rowNo = 1) fail, so clear its cells while preserving the
                 # result structure established by the schema.
-                # Hidden until something is actually ranked. The schema fixes this table at
-                # rows: 1, so the seeded all-NA row survives every early return -- a user who
-                # ticks the ranking box and then hits a validation error was shown a blank row
-                # under the header "Highest-Ranked Rule". Same defect as crossTabTable; the
-                # populate method turns it back on, and both paths run on every .run().
-                # crossTabTable has exactly the same defect, and the comment above already
-                # named it: its setVisible() is reached only from .populateFrequencyTables(),
-                # which .run() calls only when showFrequency is TRUE. An imperative
-                # setVisible() permanently replaces the declarative visible: (showFrequency)
-                # binding, so the literal TRUE written on a previous run was never undone --
-                # unticking the box left an empty "Test Results Cross-Tabulation" header on
-                # screen, in the export and in the saved .omv. Reset here; the populate path
-                # turns it back on, and this method runs on every .run().
-                self$results$crossTabTable$setVisible(FALSE)
+                # library-audit 2026-10-23 meddecide [MEDIUM] DONE: crossTabTable, recommendationTable
+                #   and pairedComparisonTable are never hidden here and shown when filled; their visible:
+                #   bindings decide, and under a validation error jamovi greys them in place (guide section 5).
                 # A conditional note must not outlive the condition: without this, a run
                 # whose intervals are all estimable would still show the previous run's
                 # "interval left blank" footnote.
                 self$results$combinationTableCIRatios$setNote("nonestimable_ci", NULL)
                 self$results$combinationTableCIRatios$setNote("zero_ratio_ci", NULL)
 
-                self$results$recommendationTable$setVisible(FALSE)
                 # Set only beside the "advantage is not established" sentence it explains.
                 self$results$recommendationTable$setNote("bound", NULL)
                 # The optimism notes, seed and reference exist only when the bootstrap ran.
@@ -417,10 +405,8 @@ decisioncombineClass <- if (requireNamespace("jmvcore")) {
                 ))
 
                 # Rows from .init(), so reset rather than deleted: jamovi restores an
-                # existing row's cells from the previous run. Hidden until filled, like the
-                # ranking above: after a validation error it showed labelled rows of blanks.
+                # existing row's cells from the previous run.
                 paired <- self$results$pairedComparisonTable
-                paired$setVisible(FALSE)
                 paired$setRefs(character(0))
                 blank <- list(sensGained = NA_integer_, sensLost = NA_integer_,
                               sensChange = NA_real_, sensLower = NA_real_,
@@ -2315,7 +2301,6 @@ decisioncombineClass <- if (requireNamespace("jmvcore")) {
                     return()
                 }
                 paired <- self$results$pairedComparisonTable
-                paired$setVisible(TRUE)
                 # Newcombe and the McNemar mid-p are used only for Majority (three tests); the
                 # keys stay in the .r.yaml so the module updater ships them.
                 paired$setRefs(if (k == 3L) {
@@ -2409,13 +2394,8 @@ decisioncombineClass <- if (requireNamespace("jmvcore")) {
                 crossTable <- self$results$crossTabTable
                 has_test2 <- "test2Variable2" %in% names(data_prep)
 
-                # A cross-tabulation of test PATTERNS needs at least two tests. With only
-                # test 1 selected this returned early, leaving a fully empty "Test Results
-                # Cross-Tabulation" on screen -- headers, no rows, no explanation. Hide the
-                # structurally inapplicable table instead. This is shape-driven, not a
-                # failure signal, and it is set on BOTH branches every run so it cannot
-                # drift out of sync with the declarative visible: (showFrequency).
-                crossTable$setVisible(has_test2 && isTRUE(self$options$showFrequency))
+                # A cross-tabulation of test PATTERNS needs at least two tests; with test 1
+                # alone its visible: (showFrequency && length(test2) > 0) keeps it hidden.
                 if (!has_test2) {
                     return()
                 }
@@ -2557,8 +2537,8 @@ decisioncombineClass <- if (requireNamespace("jmvcore")) {
                 # Called on every .run(), not only when showRecommendation is ticked: the
                 # two inversion STRONG_WARNINGs below are the analysis's only detectors of a
                 # reversed positive level, and .assessTopRuleDiscrimination() the only check
-                # on how well the best rule discriminates. Only the table is gated, at the
-                # setVisible() near the end of this method.
+                # on how well the best rule discriminates. Only the table is gated, by its
+                # visible: (showRecommendation) binding.
                 combTable <- self$results$combinationTable
                 # Defensive only, and carrying no notice for that reason: .run() calls
                 # .analyzeCombinations() immediately before this, every branch of which
@@ -3010,7 +2990,6 @@ decisioncombineClass <- if (requireNamespace("jmvcore")) {
                 rationale <- paste(rationale_parts, collapse = " ")
 
                 recTable <- self$results$recommendationTable
-                recTable$setVisible(isTRUE(self$options$showRecommendation))
                 recTable$setNote(
                     "scope",
                     jmvcore::.("This is a descriptive, sample-dependent ranking of exact-pattern rules, each test alone and named testing strategies. It is not a clinical guide or validated recommendation.")

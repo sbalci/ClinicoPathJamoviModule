@@ -106,13 +106,13 @@ test_that("R-05: with table notes off, a blank cell keeps the footnote that says
     expect_length(names(a$results$results$partialAucAnalysis$notes), 0L)
 })
 
-test_that("R-06: a run that ends with no notices hides the panel instead of leaving the last run's", {
+test_that("R-06: a run that ends with no notices clears the panel instead of leaving the last run's", {
+    # library-audit 2026-10-23 meddecide [MEDIUM] DONE: cleared with "<div></div>" (the client skips ""), not hidden
     d <- rv_asah()[, c("outcome", "s100b")]
     a <- rv_obj(d, outcome = "outcome", positiveClass = "Poor", predictors = "s100b", validationPanel = TRUE,
                 validationNegative = "Good", direction = "higher", modelVersion = "v1", impactCutoffs = "0.2")
     n <- a$results$results$notices
-    expect_identical(n$content, "")
-    expect_false(n$visible)
+    expect_identical(n$content, "<div></div>")
     b <- rv_obj(d, outcome = "outcome", positiveClass = "Poor", predictors = "s100b")
     expect_true(b$results$results$notices$visible)
 })
@@ -156,8 +156,9 @@ test_that("R-10: Analysis Summary and Clinical Report are opt-in", {
     d <- rv_asah()
     base <- list(d, outcome = "outcome", positiveClass = "Poor", predictors = "s100b")
     r <- do.call(rv_obj, base)$results$results
-    expect_identical(r$analysisSummary$content, "")
-    expect_identical(r$clinicalReport$content, "")
+    # library-audit 2026-10-23 meddecide [MEDIUM] DONE: cleared with "<div></div>"; visible: decides
+    expect_identical(r$analysisSummary$content, "<div></div>")
+    expect_identical(r$clinicalReport$content, "<div></div>")
     expect_false(r$analysisSummary$visible)
     expect_false(r$clinicalReport$visible)
     on <- do.call(rv_obj, c(base, showAnalysisSummary = TRUE, showClinicalReport = TRUE))$results$results
