@@ -1048,7 +1048,7 @@ test_that("the constant-predictor notice counts variables, not matrix columns", 
   expect_false(grepl("7 variables remain", txt, fixed = TRUE))
   # and the Model Summary must now label the two quantities distinctly
   ms <- res$modelSummary$asDF
-  expect_equal(ms[[2]][ms[[1]] == "Variables analysed"], "3")
+  expect_equal(ms[[2]][ms[[1]] == "Variables analyzed"], "3")
   expect_false(any(ms[[1]] == "Candidate predictors"))
 })
 

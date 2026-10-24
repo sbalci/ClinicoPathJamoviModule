@@ -717,7 +717,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                     "</li>\n                        <li>",
                     .("Same cases rated by all raters"),
                     "</li>\n                        <li>",
-                    .("Categorical or ordinal ratings for kappa; continuous measurements are analysed with ICC, Lin's CCC, TDI and the Bland-Altman limits instead"),
+                    .("Categorical or ordinal ratings for kappa; continuous measurements are analyzed with ICC, Lin's CCC, TDI and the Bland-Altman limits instead"),
                     "</li>\n                        <li>",
                     .("Matching category levels across raters"),
                     "</li>\n                    </ul>\n\n                    <table style='width: 100%; border-collapse: collapse; margin: 15px 0;'>\n                    <tr>\n                        <td style='border: 1px solid #ccc; padding: 10px; vertical-align: top;'>",
@@ -1119,7 +1119,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                 # The fill is the cell's share of ALL cases on the fixed 0-100% scale (zlim above).
                 key_at <- c(0, 25, 50, 75, 100)
                 private$.drawHeatmapKey(colors, c(0, 100), key_at, paste0(key_at, "%"),
-                    .("Cell colour: share of all rated cases"))
+                    .("Cell color: share of all rated cases"))
 
                 # Disclose the truncation on the figure itself, so it travels with
                 # the image if it is exported into a paper.
@@ -2217,7 +2217,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                     "</p>\n                </div>\n\n                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>\n                    <h4 style='margin: 0 0 10px 0; color: inherit;'>",
                     .("When to use Robinson's A"),
                     "</h4>\n                    <ul style='margin: 0; padding-left: 20px;'>\n                        <li>",
-                    jmvcore::format(.("{tag1}Ordinal scales with roughly equal steps{tag2} - tumour grade, fibrosis stage, activity scores"), tag1 = "<strong>", tag2 = "</strong>"),
+                    jmvcore::format(.("{tag1}Ordinal scales with roughly equal steps{tag2} - tumor grade, fibrosis stage, activity scores"), tag1 = "<strong>", tag2 = "</strong>"),
                     "</li>\n                        <li>",
                     jmvcore::format(.("{tag1}Alongside weighted kappa{tag2} - A does not depend on a chance-correction model, so it is a useful companion when kappa is depressed by an uneven category distribution"), tag1 = "<strong>", tag2 = "</strong>"),
                     "</li>\n                        <li>",
@@ -3254,7 +3254,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                     "</p>\n                        <p style='margin: 5px 0; padding-left: 30px;'>",
                     paste0("\n                            ", jmvcore::format(.("{tag1}Clinical Interpretation:{tag2} CCC=0.93 sits in the band this analysis prints as good\n                            concordance (0.90-0.95). CCC multiplies precision (r=0.94, how tightly the paired counts follow a\n                            straight line) by accuracy (C{tag3}b{tag4}=0.99, how close that line lies to the 45-degree line of\n                            identity); both are high here, which is why CCC comes out close to r."), tag1 = "<strong>", tag2 = "</strong>", tag3 = "<sub>", tag4 = "</sub>"), "\n                        "),
                     "</p>\n                        <p style='margin: 5px 0; padding-left: 30px;'>",
-                    paste0("\n                            ", jmvcore::format(.("{tag1}Application:{tag2} This level of concordance in one cohort supports proceeding to a\n                            formal validation study. A single-cohort CCC does not itself validate substituting WSI for glass\n                            slides: it does not address readers outside the study, case-mix effects, or behaviour at the\n                            mitotic-count thresholds that change grade."), tag1 = "<strong>", tag2 = "</strong>"), "\n                        "),
+                    paste0("\n                            ", jmvcore::format(.("{tag1}Application:{tag2} This level of concordance in one cohort supports proceeding to a\n                            formal validation study. A single-cohort CCC does not itself validate substituting WSI for glass\n                            slides: it does not address readers outside the study, case-mix effects, or behavior at the\n                            mitotic-count thresholds that change grade."), tag1 = "<strong>", tag2 = "</strong>"), "\n                        "),
                     "</p>\n                    </div>\n\n                    <div style='margin-bottom: 20px;'>\n                        <h5 style='color: inherit; margin: 10px 0 5px 0;'>",
                     paste0("\n                            ", jmvcore::format(.("{tag1}3{tag2}\n                            PD-L1 TPS: Two IHC Antibody Clones Comparison"), tag1 = "<span style='background: #C2185B; color: white; padding: 2px 8px; border-radius: 3px; margin-right: 8px;'>", tag2 = "</span>"), "\n                        "),
                     "</h5>\n                        <p style='margin: 5px 0; padding-left: 30px;'>",
@@ -3272,7 +3272,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                     "</p>\n                        <p style='margin: 5px 0; padding-left: 30px;'>",
                     paste0("\n                            ", jmvcore::format(.("{tag1}Clinical Interpretation:{tag2} CCC=0.75 sits in the band this analysis prints as\n                            moderate concordance (0.70-0.90), despite a high correlation (r=0.89). Correlation only asks\n                            whether the two clones rank cases in the same order; CCC also penalises distance from the line of\n                            identity, and C{tag3}b{tag4}=0.84 locates the loss there - a systematic offset, not scatter."), tag1 = "<strong>", tag2 = "</strong>", tag3 = "<sub>", tag4 = "</sub>"), "\n                        "),
                     "</p>\n                        <p style='margin: 5px 0; padding-left: 30px;'>",
-                    paste0("\n                            ", jmvcore::format(.("{tag1}Application:{tag2} The systematic offset falls in the range that spans the 1% and 50%\n                            TPS cutoffs, so scores from the two clones are not directly comparable at those cutoffs without\n                            further study of clone-specific behaviour."), tag1 = "<strong>", tag2 = "</strong>"), "\n                        "),
+                    paste0("\n                            ", jmvcore::format(.("{tag1}Application:{tag2} The systematic offset falls in the range that spans the 1% and 50%\n                            TPS cutoffs, so scores from the two clones are not directly comparable at those cutoffs without\n                            further study of clone-specific behavior."), tag1 = "<strong>", tag2 = "</strong>"), "\n                        "),
                     "</p>\n                    </div>\n\n                    <div style='margin-bottom: 20px;'>\n                        <h5 style='color: inherit; margin: 10px 0 5px 0;'>",
                     paste0("\n                            ", jmvcore::format(.("{tag1}4{tag2}\n                            Tumor Size: Radiology vs. Pathology Measurement"), tag1 = "<span style='background: #C2185B; color: white; padding: 2px 8px; border-radius: 3px; margin-right: 8px;'>", tag2 = "</span>"), "\n                        "),
                     "</h5>\n                        <p style='margin: 5px 0; padding-left: 30px;'>",
@@ -4908,7 +4908,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                         # on a 3+ category scale does not keep the binary wording.
                         self$results$specificAgreementTable$setNote("info",
                             if (binary_split)
-                                sprintf(.("PSA (positive specific agreement) is for '%s' and NSA (negative specific agreement) for the other category. A gap between them mainly reflects prevalence: when positives are rare, NSA is high and PSA low even if neither rater favours either call. A systematic difference between the raters is measured by the bias index of PABAK or by McNemar's test, not by this gap."), private$.noteSafe(positive_category))
+                                sprintf(.("PSA (positive specific agreement) is for '%s' and NSA (negative specific agreement) for the other category. A gap between them mainly reflects prevalence: when positives are rare, NSA is high and PSA low even if neither rater favors either call. A systematic difference between the raters is measured by the bias index of PABAK or by McNemar's test, not by this gap."), private$.noteSafe(positive_category))
                             else NULL)
                         self$results$specificAgreementTable$setNote(
                             "scale",
@@ -4989,7 +4989,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                 # "many"/"few cases" for the same reason.
                 html <- paste0(html, paste0(
                     "<li>",
-                    paste0(jmvcore::format(.("{tag1}Cell Colour:{tag2} The share of all cases that fall in the cell, on a fixed 0-100% scale shared by every panel."), tag1 = "<strong>", tag2 = "</strong>"), " ")
+                    paste0(jmvcore::format(.("{tag1}Cell Color:{tag2} The share of all cases that fall in the cell, on a fixed 0-100% scale shared by every panel."), tag1 = "<strong>", tag2 = "</strong>"), " ")
                 ),
                     "Colour encodes frequency, on or off the diagonal, not agreement; what few and many cases look like depends on the scheme (see Choosing Color Schemes below)</li>")
                 html <- paste0(html, paste0(
@@ -6249,7 +6249,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                         table$setNote("weights_fleiss",
                             if (is_categorical && ncol(ratings) >= 3 &&
                                 !identical(private$.wghtEffective(), "unweighted"))
-                                .("Weighted kappa was requested, but with three or more raters each subgroup is summarised by Fleiss' kappa, which has no weighted form, so these values are unweighted.")
+                                .("Weighted kappa was requested, but with three or more raters each subgroup is summarized by Fleiss' kappa, which has no weighted form, so these values are unweighted.")
                             else NULL)
                         if (length(skipped_levels) > 0) {
                             table$setNote(
@@ -6464,7 +6464,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
 
                 # Similarity is 1 - distance, on the fixed -1..1 scale (zlim above).
                 private$.drawHeatmapKey(colors, c(-1, 1), c(-1, -0.5, 0, 0.5, 1),
-                    c("-1", "-0.5", "0", "0.5", "1"), .("Cell colour: similarity (1 - distance)"))
+                    c("-1", "-0.5", "0", "0.5", "1"), .("Cell color: similarity (1 - distance)"))
 
                 return(TRUE)
             },
@@ -6942,7 +6942,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
 
                 # Similarity is 1 - distance, on the fixed -1..1 scale (zlim above).
                 private$.drawHeatmapKey(colors, c(-1, 1), c(-1, -0.5, 0, 0.5, 1),
-                    c("-1", "-0.5", "0", "0.5", "1"), .("Cell colour: similarity (1 - distance)"))
+                    c("-1", "-0.5", "0", "0.5", "1"), .("Cell color: similarity (1 - distance)"))
 
                 return(TRUE)
             },
@@ -7305,13 +7305,13 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                     "</li>\n                        <li>",
                     jmvcore::format(.("{tag1}Random disagreement{tag2} (residual) - inconsistent, case-by-case variation that no offset explains."), tag1 = "<strong>", tag2 = "</strong>"),
                     "</li>\n                    </ul>\n                    <p style='margin: 10px 0 0 0; color: inherit;'>",
-                    paste0("\n                        ", jmvcore::format(.("{tag1}Random share = random disagreement / (systematic + random disagreement){tag2}, from 0 (all disagreement is systematic) to 1 (all of it is random).\n                        This table used to be labelled \"Maxwell's RE\"; Maxwell's (1977) random-error coefficient is a different statistic for dichotomous ratings and is not what is computed here."), tag1 = "<strong>", tag2 = "</strong>"), "\n                    "),
+                    paste0("\n                        ", jmvcore::format(.("{tag1}Random share = random disagreement / (systematic + random disagreement){tag2}, from 0 (all disagreement is systematic) to 1 (all of it is random).\n                        This table used to be labeled \"Maxwell's RE\"; Maxwell's (1977) random-error coefficient is a different statistic for dichotomous ratings and is not what is computed here."), tag1 = "<strong>", tag2 = "</strong>"), "\n                    "),
                     "</p>\n                </div>\n\n                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>\n                    <h4 style='margin: 0 0 10px 0; color: inherit;'>",
                     .("Why it matters"),
                     "</h4>\n                    <ul style='margin: 0; padding-left: 20px;'>\n                        <li>",
                     jmvcore::format(.("{tag1}Systematic disagreement can be calibrated away{tag2} - a constant offset between a digital and a manual Ki-67 score is fixed with a correction factor or a shared reference set."), tag1 = "<strong>", tag2 = "</strong>"),
                     "</li>\n                        <li>",
-                    jmvcore::format(.("{tag1}Random disagreement needs a different remedy{tag2} - protocol standardisation, training, or averaging replicate reads."), tag1 = "<strong>", tag2 = "</strong>"),
+                    jmvcore::format(.("{tag1}Random disagreement needs a different remedy{tag2} - protocol standardization, training, or averaging replicate reads."), tag1 = "<strong>", tag2 = "</strong>"),
                     "</li>\n                        <li>",
                     jmvcore::format(.("{tag1}Read it with the ICC{tag2} - the ICC tells you how reliable the ratings are; this decomposition tells you what kind of disagreement is limiting them."), tag1 = "<strong>", tag2 = "</strong>"),
                     "</li>\n                    </ul>\n                </div>\n\n                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>\n                    <h4 style='margin: 0 0 10px 0; color: inherit;'>",
@@ -7327,7 +7327,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                     "</td><td style='padding: 8px; border-bottom: 1px solid #ddd;'>",
                     .("Most of the disagreement is a systematic offset"),
                     "</td><td style='padding: 8px; border-bottom: 1px solid #ddd;'>",
-                    .("Calibration, standardisation, bias correction"),
+                    .("Calibration, standardization, bias correction"),
                     "</td></tr>\n                        <tr><td style='padding: 8px; border-bottom: 1px solid #ddd;'>",
                     .("0.30 to below 0.50"),
                     "</td><td style='padding: 8px; border-bottom: 1px solid #ddd;'>",
@@ -7595,7 +7595,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                             # note says so and the verdicts describe rather than prescribe.
                             self$results$maxwellRETable$setNote(
                                 "bands",
-                                .("The sentence in the Interpretation column splits the random share at 0.30, 0.50 and 0.70. These cut-points are this module's convention for putting the share into words; no published source defines them and they carry no diagnostic status. Read the share itself and the two variance components beside it, not the label. A low random share implies the disagreement is an offset that a calibration factor or a shared reference set can remove; a high one implies it is case-by-case noise, which instead points to protocol standardisation, training, or averaging replicate reads.")
+                                .("The sentence in the Interpretation column splits the random share at 0.30, 0.50 and 0.70. These cut-points are this module's convention for putting the share into words; no published source defines them and they carry no diagnostic status. Read the share itself and the two variance components beside it, not the label. A low random share implies the disagreement is an offset that a calibration factor or a shared reference set can remove; a high one implies it is case-by-case noise, which instead points to protocol standardization, training, or averaging replicate reads.")
                             )
                         }
 
@@ -7772,7 +7772,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                     "</p>\n                        <p style='margin: 5px 0; padding-left: 30px;'>",
                     paste0("\n                            ", jmvcore::format(.("{tag1}Clinical Interpretation:{tag2} Individual consistency between glass and digital\n                            platforms is good to excellent by the Koo {tag3} Li (2016) bands (ICC 0.78-0.91), and inter-rater\n                            reliability is good (ICC=0.82). An ICC is the share of the total variance that sits between\n                            cases, so a high value does not exclude a systematic offset between platforms: adding a constant\n                            to every WSI count leaves the between-case variance untouched and the ICC barely moves. The\n                            Bland-Altman Statistics table in this analysis is where such an offset shows up, as the Mean\n                            Difference, with the Lower and Upper limits of agreement giving the spread of individual\n                            case differences around it."), tag1 = "<strong>", tag2 = "</strong>", tag3 = "&amp;"), "\n                        "),
                     "</p>\n                        <p style='margin: 5px 0; padding-left: 30px;'>",
-                    paste0("\n                            ", jmvcore::format(.("{tag1}What these ICCs cover:{tag2} how consistently each pathologist reproduced their own\n                            mitotic count across the two platforms, and how consistently the four ranked the same cases, in\n                            this one cohort. They carry no information about the size of any glass-to-WSI offset, nor about\n                            behaviour at the mitotic-count thresholds that change grade - the Bland-Altman output and\n                            agreement measured at those thresholds are the parts of this analysis that address those."), tag1 = "<strong>", tag2 = "</strong>"), "\n                        "),
+                    paste0("\n                            ", jmvcore::format(.("{tag1}What these ICCs cover:{tag2} how consistently each pathologist reproduced their own\n                            mitotic count across the two platforms, and how consistently the four ranked the same cases, in\n                            this one cohort. They carry no information about the size of any glass-to-WSI offset, nor about\n                            behavior at the mitotic-count thresholds that change grade - the Bland-Altman output and\n                            agreement measured at those thresholds are the parts of this analysis that address those."), tag1 = "<strong>", tag2 = "</strong>"), "\n                        "),
                     "</p>\n                    </div>\n\n                    <div style='margin-bottom: 20px;'>\n                        <h5 style='color: inherit; margin: 10px 0 5px 0;'>",
                     paste0("\n                            ", jmvcore::format(.("{tag1}3{tag2}\n                            Fatigue Study in Frozen Section Diagnosis"), tag1 = "<span style='background: #C2185B; color: white; padding: 2px 8px; border-radius: 3px; margin-right: 8px;'>", tag2 = "</span>"), "\n                        "),
                     "</h5>\n                        <p style='margin: 5px 0; padding-left: 30px;'>",
@@ -8221,7 +8221,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                         private$.noteScaleAmbiguity(intraTable, intra_scale_ambiguous)
                         intraTable$setNote("weight_override",
                             if (length(intra_weight_dropped) > 0)
-                                .fmt(.("Weighted kappa was requested, but the reads of {raters} are not an ordered scale with three or more categories, so unweighted Cohen's kappa is reported for them. Weights assume a distance between categories, which a nominal scale (tumour type, mutation class) does not have. Set the variable's measure type to Ordinal to obtain the weighted statistic."),
+                                .fmt(.("Weighted kappa was requested, but the reads of {raters} are not an ordered scale with three or more categories, so unweighted Cohen's kappa is reported for them. Weights assume a distance between categories, which a nominal scale (tumor type, mutation class) does not have. Set the variable's measure type to Ordinal to obtain the weighted statistic."),
                                      raters = paste(private$.noteSafe(intra_weight_dropped), collapse = ", "))
                             else NULL)
 
@@ -9927,7 +9927,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
             # (.weightsOnNominal passes them). Read it before as.factor() erases it.
             .hasOrder = function(x) is.ordered(x) || (is.numeric(x) && !is.factor(x)),
             .weightOverrideNote = function() {
-                .("Weighted kappa was requested, but at least one rater variable is nominal (an unordered factor), so unweighted Cohen's kappa is reported here. Weights assume a distance between categories, which a nominal scale such as tumour type does not have. Set the variables' measure type to Ordinal to obtain the weighted statistic.")
+                .("Weighted kappa was requested, but at least one rater variable is nominal (an unordered factor), so unweighted Cohen's kappa is reported here. Weights assume a distance between categories, which a nominal scale such as tumor type does not have. Set the variables' measure type to Ordinal to obtain the weighted statistic.")
             },
             # The mirror of the headline table's numeric_as_codes note. ICC, Lin's CCC
             # and TDI are dispatched on is.numeric() alone, so a 0/1 or 1-5 column that
@@ -11153,7 +11153,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                     "</h4>\n                        <p style='margin: 0 0 10px 0;'>",
                     paste0("\n                            ", jmvcore::format(.("Every column you select is read as {tag1}another rater of one variable{tag2}.\n                            The number reported is therefore the {tag3}single-variable{tag4} iota over your\n                            rater columns, and the Cases and Raters columns describe that layout."), tag1 = "<strong>", tag2 = "</strong>", tag3 = "<strong>", tag4 = "</strong>"), "\n                        "),
                     "</p>\n                        <p style='margin: 0;'>",
-                    paste0("\n                            ", jmvcore::format(.("The {tag1}multivariate{tag2} form of iota - several variables, say tumor size,\n                            grade and mitotic count, scored by the same raters and summarised in one coefficient -\n                            is {tag3}not computed by this analysis{tag4}. Nothing in this dialog can say which\n                            columns belong to which variable. Entering the columns of several variables side by\n                            side does {tag5}not{tag6} produce the multivariate coefficient: it produces the\n                            single-variable iota of a table whose {tag7}raters{tag8} are really different\n                            measurements, and that number does not describe your study. For the multivariate\n                            form, call {tag9}irr::iota(){tag10} in R with one matrix per variable."), tag1 = "<strong>", tag2 = "</strong>", tag3 = "<strong>", tag4 = "</strong>", tag5 = "<strong>", tag6 = "</strong>", tag7 = "&quot;", tag8 = "&quot;", tag9 = "<code>", tag10 = "</code>"), "\n                        "),
+                    paste0("\n                            ", jmvcore::format(.("The {tag1}multivariate{tag2} form of iota - several variables, say tumor size,\n                            grade and mitotic count, scored by the same raters and summarized in one coefficient -\n                            is {tag3}not computed by this analysis{tag4}. Nothing in this dialog can say which\n                            columns belong to which variable. Entering the columns of several variables side by\n                            side does {tag5}not{tag6} produce the multivariate coefficient: it produces the\n                            single-variable iota of a table whose {tag7}raters{tag8} are really different\n                            measurements, and that number does not describe your study. For the multivariate\n                            form, call {tag9}irr::iota(){tag10} in R with one matrix per variable."), tag1 = "<strong>", tag2 = "</strong>", tag3 = "<strong>", tag4 = "</strong>", tag5 = "<strong>", tag6 = "</strong>", tag7 = "&quot;", tag8 = "&quot;", tag9 = "<code>", tag10 = "</code>"), "\n                        "),
                     "</p>\n                    </div>\n\n                    <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin: 20px 0; color: inherit;'>\n                        <h4 style='margin: 0 0 10px 0; color: inherit;'>",
                     .("Which coefficient should you use?"),
                     "</h4>\n                        <table style='width: 100%; border-collapse: collapse; font-size: 13px;'>\n                            <tr style='background-color: rgba(88, 88, 88, 0.06); color: inherit;'>\n                                <th style='padding: 8px; text-align: left; border-bottom: 2px solid #333;'>",
@@ -13241,13 +13241,13 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                     "</h3>\n\n                <div style='background-color: rgba(155, 155, 155, 0.06); padding: 12px; border-left: 4px solid #333; margin-bottom: 15px; color: inherit;'>",
                     paste0("\n                    ", jmvcore::format(.("{tag1}What is it?{tag2}"), tag1 = "<strong>", tag2 = "</strong>")),
                     "<br/>",
-                    paste0("\n                    ", .("Agreement for a design in which every case belongs to one cluster (institution, centre,\n                    scanner) and the same raters score the cases. It reports agreement WITHIN cluster, so that\n                    clusters which differ in case mix do not masquerade as better or worse agreement, and it shows\n                    each cluster separately so you can see whether agreement is similar across them."), "\n                "),
+                    paste0("\n                    ", .("Agreement for a design in which every case belongs to one cluster (institution, center,\n                    scanner) and the same raters score the cases. It reports agreement WITHIN cluster, so that\n                    clusters which differ in case mix do not masquerade as better or worse agreement, and it shows\n                    each cluster separately so you can see whether agreement is similar across them."), "\n                "),
                     "</div>\n\n                <h4 style='color: inherit; margin-top: 20px;'>",
                     .("When to Use"),
                     "</h4>\n                <ul>\n                    <li>",
-                    jmvcore::format(.("{tag1}Multi-centre reader studies{tag2}: cases from several hospitals scored by the same pathologists"), tag1 = "<strong>", tag2 = "</strong>"),
+                    jmvcore::format(.("{tag1}Multi-center reader studies{tag2}: cases from several hospitals scored by the same pathologists"), tag1 = "<strong>", tag2 = "</strong>"),
                     "</li>\n                    <li>",
-                    jmvcore::format(.("{tag1}Multi-scanner studies{tag2}: images from several imaging centres"), tag1 = "<strong>", tag2 = "</strong>"),
+                    jmvcore::format(.("{tag1}Multi-scanner studies{tag2}: images from several imaging centers"), tag1 = "<strong>", tag2 = "</strong>"),
                     "</li>\n                    <li>",
                     jmvcore::format(.("{tag1}Quality control{tag2}: identifying institutions where agreement is lower"), tag1 = "<strong>", tag2 = "</strong>"),
                     "</li>\n                </ul>\n\n                <h4 style='color: inherit; margin-top: 20px;'>",
@@ -14789,7 +14789,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                         if (both_cohen && !paired_scale_ambiguous &&
                             !identical(self$options$wght, "unweighted") &&
                             identical(irr_weight, "unweighted")) {
-                            table$setNote("weight_override", .("Weighted kappa was requested but the rater variables are not ordered factors with three or more categories, so unweighted Cohen's kappa is reported here. Weights assume a distance between categories, which a nominal scale (tumour type, mutation class) does not have. Set every rater variable in both conditions to Ordinal to obtain the weighted statistic."))
+                            table$setNote("weight_override", .("Weighted kappa was requested but the rater variables are not ordered factors with three or more categories, so unweighted Cohen's kappa is reported here. Weights assume a distance between categories, which a nominal scale (tumor type, mutation class) does not have. Set every rater variable in both conditions to Ordinal to obtain the weighted statistic."))
                         } else if (same_panel && !both_cohen && !identical(self$options$wght, "unweighted")) {
                             table$setNote("weight_override", .("Weighted kappa was requested, but with three or more raters per condition the coefficient is Fleiss' kappa, which has no weighted form. Weights apply only to Cohen's kappa for two raters."))
                         } else {
@@ -15053,7 +15053,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                             # squared-weighted (option `wght`); this sample size cannot.
                             table$setNote(
                                 "unweighted",
-                                .("This sample size is for <b>unweighted</b> kappa: categories are treated as nominal and every disagreement counts the same. It does not apply to weighted kappa for ordered grades, so if the Weighted kappa option is set to linear or squared weights, either analyse the study unweighted as well or size it with a dedicated weighted-kappa method.")
+                                .("This sample size is for <b>unweighted</b> kappa: categories are treated as nominal and every disagreement counts the same. It does not apply to weighted kappa for ordered grades, so if the Weighted kappa option is set to linear or squared weights, either analyze the study unweighted as well or size it with a dedicated weighted-kappa method.")
                             )
 
                             # Cochran's rule on the agreement-pattern cells the goodness-of-fit
@@ -15394,7 +15394,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                         sev_scale <- if (identical(as.integer(design$C_used), 2L)) "binary" else "ordinal"
                         need <- agreement_severity_min_raters(sev_scale, max_share)
                         if (identical(sev_scale, "binary"))
-                            sprintf(.("With two categories at least %1$d pathologists are needed for the grading tendency; this study has %2$d. With fewer, its behaviour was not checked in simulation."), need, J)
+                            sprintf(.("With two categories at least %1$d pathologists are needed for the grading tendency; this study has %2$d. With fewer, its behavior was not checked in simulation."), need, J)
                         else if (need > G$severity_min_raters)
                             sprintf(.("One category holds %1$.0f%% of all ratings. When one category holds %2$.0f%% or more, at least %3$d pathologists are needed for the grading tendency, because with fewer its intervals were too narrow in simulation; this study has %4$d."), pct, 100 * G$skew_share, need, J)
                         else
@@ -15433,9 +15433,9 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                                          else .("The latent model could not be fitted: %s."),
                                          private$.noteSafe(if (is.null(detail)) "" else detail)),
                     not_converged = if (sev)
-                        .("The grading-tendency model did not converge (the optimiser stopped away from a maximum), so no tendency is shown.")
+                        .("The grading-tendency model did not converge (the optimizer stopped away from a maximum), so no tendency is shown.")
                     else
-                        .("The latent model did not converge (the optimiser stopped away from a maximum), so no estimate is shown."),
+                        .("The latent model did not converge (the optimizer stopped away from a maximum), so no estimate is shown."),
                     boundary = .("No confidence interval is available: the case or pathologist variance was estimated at zero, the edge of its range, where the interval method does not hold."),
                     se_unavailable = .("No confidence interval is available: the standard error of the latent ICC could not be computed from this fit."),
                     too_large = sprintf(.("The grading tendency was not fitted: its model gains a parameter for every pathologist, and %1$d ratings from %2$d pathologists would take minutes to fit. The boundary table and the per-pathologist agreement answer the same question without a model."),

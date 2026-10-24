@@ -370,19 +370,19 @@ test_that("extreme prevalence and very sparse groups produce graded warnings", {
     extreme <- decisioncalculator(TP = 90, TN = 80, FP = 30, FN = 20,
                                   pp = TRUE, pprob = 0.001)
     extreme_notice <- notices_of(extreme)
-    expect_match(extreme_notice, "INFO: Extreme prevalence")
+    expect_match(extreme_notice, "Info: Extreme prevalence")
     expect_match(extreme_notice, "0.1%")
     mixed <- notices_of(decisioncalculator(TP = 1, TN = 1, FP = 1, FN = 1,
                                            pp = TRUE, pprob = 0.001))
     expect_lt(
-        regexpr("STRONG WARNING", mixed)[1],
-        regexpr("INFO:", mixed)[1],
+        regexpr("Strong warning", mixed)[1],
+        regexpr("Info:", mixed)[1],
         label = "strong warnings should be displayed before informational notices"
     )
 
     sparse <- decisioncalculator(TP = 1, TN = 1, FP = 1, FN = 1)
     sparse_notice <- notices_of(sparse)
-    expect_match(sparse_notice, "STRONG WARNING: Very sparse reference groups")
+    expect_match(sparse_notice, "Strong warning: Very sparse reference groups")
     expect_match(sparse_notice, "not a clinical adequacy threshold")
 })
 

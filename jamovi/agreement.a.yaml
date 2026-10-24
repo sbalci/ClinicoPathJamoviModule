@@ -145,7 +145,7 @@ options:
             classifications with complex disagreement patterns.
 
     - name: heatmapColorScheme
-      title: "Heatmap colour scheme"
+      title: "Heatmap color scheme"
       type: List
       options:
         - title: 'Blue-White-Red'
@@ -159,8 +159,8 @@ options:
       default: bluered
       description:
           R: >
-            Colour palette for the heatmap. Every scheme shows the share of all cases in a cell on a
-            fixed 0 to 100 percent scale, so colour means frequency, on or off the diagonal, not
+            Color palette for the heatmap. Every scheme shows the share of all cases in a cell on a
+            fixed 0 to 100 percent scale, so color means frequency, on or off the diagonal, not
             agreement. Blue-White-Red: blue for empty or rare cells, white at half of all cases, red
             above half. Traffic light: red for few cases through green for many, so a crowded
             off-diagonal cell is green too. Viridis is perceptually uniform and colorblind-safe (dark
@@ -503,7 +503,7 @@ options:
             absolute differences between two measurement methods fall. Computed here as the
             empirical quantile of the absolute differences, with a distribution-free order-statistic
             confidence interval; a finite upper limit needs at least 36 pairs at 90 percent coverage
-            and a 95 percent confidence level, and more at higher settings. It is a single number summarising how far apart the two methods get, and
+            and a 95 percent confidence level, and more at higher settings. It is a single number summarizing how far apart the two methods get, and
             it is useful alongside Bland-Altman when the differences are not normal. Note the
             scope: this estimator is unconditional, so it does NOT model variability as a
             function of magnitude and does not adjust for the case mix of the sample - a
@@ -556,7 +556,7 @@ options:
             variable rated by all of them. Supports quantitative (continuous) and nominal (categorical)
             ratings. For nominal ratings it is numerically identical to Conger's exact kappa, which the
             'Exact kappa (3+ raters)' option also reports. The multivariate form of iota - several
-            variables scored by the same raters, summarised in one coefficient - is NOT computed by this
+            variables scored by the same raters, summarized in one coefficient - is NOT computed by this
             analysis, because no option here can say which columns belong to which variable; enter the
             rater columns of one variable at a time.
 
@@ -938,8 +938,8 @@ options:
       default: false
       description:
           R: >
-            Agreement for multi-centre designs in which every case belongs to one cluster
-            (institution, centre or scanner) and the same raters score the cases. Categorical
+            Agreement for multi-center designs in which every case belongs to one cluster
+            (institution, center or scanner) and the same raters score the cases. Categorical
             ratings get cluster-specific kappa and a stratified kappa (the cluster kappas
             weighted by cluster size, Barlow, Lai and Azen 1991) shown beside the pooled kappa.
             Continuous ratings get the within-cluster ICC(2,1) and ICC(2,k) from a linear mixed
@@ -981,7 +981,7 @@ options:
           R: >
             Agreement within each cluster separately, to see whether it is similar across
             sites: Cohen's or Fleiss' kappa for categorical ratings, the ICC for continuous
-            ratings. Useful for quality control in multi-centre studies.
+            ratings. Useful for quality control in multi-center studies.
 
     - name: varianceDecomposition
       title: "Variance component decomposition"
@@ -1956,9 +1956,9 @@ options:
       description:
           R: >
             Random seed for everything random in this analysis: the bootstrap resampling, the
-            k-means starting centres of rater and case clustering, and the random subsample the
+            k-means starting centers of rater and case clustering, and the random subsample the
             case-cluster heatmap draws above 200 cases. Change this value to obtain a different
-            draw; the default (42) reproduces the previous fixed behaviour.
+            draw; the default (42) reproduces the previous fixed behavior.
 
 
 

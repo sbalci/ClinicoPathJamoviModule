@@ -217,7 +217,7 @@ test_that("Raw data validation works correctly", {
       responseVar = "Measurement",
       inputType = "raw"
     ),
-    "Time Variable"
+    "Time variable required"
   )
 })
 
@@ -298,7 +298,7 @@ test_that("Person-time analysis works correctly", {
   # Check that additional clinical metrics are calculated
   clinical_metrics <- result$clinicalMetrics$asDF
   expect_true(any(grepl("Time to First Response", clinical_metrics$metric)))
-  expect_true(any(grepl("Duration of Response", clinical_metrics$metric)))
+  expect_true(any(grepl("duration of response", clinical_metrics$metric)))
 })
 
 # =================================
@@ -485,7 +485,7 @@ test_that("responseCategoryVar override on baseline-only patient reconciles with
   )
 
   notices_html <- res$notices$content
-  expect_false(grepl("NOT RESPONSE-EVALUABLE", notices_html, fixed = TRUE))
+  expect_false(grepl("Not response-evaluable", notices_html, fixed = TRUE))
   expect_match(notices_html, "Only n=3 evaluable patients", fixed = TRUE)
 })
 

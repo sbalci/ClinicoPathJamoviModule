@@ -8,8 +8,10 @@ test_that("long swimmer notices wrap and escape user text", {
 
   notice <- analysis$results$notices
   expect_s3_class(notice, "Html")
-  expect_match(notice$content, "white-space:pre-wrap", fixed = TRUE)
-  expect_match(notice$content, "overflow-wrap:anywhere", fixed = TRUE)
+  # the shared renderer (R/utils-notices.R, library-audit 2026-10-23 OncoPath [LOW]) keeps newlines
+  # and breaks long unbroken text
+  expect_match(notice$content, "white-space: pre-line", fixed = TRUE)
+  expect_match(notice$content, "overflow-wrap: anywhere", fixed = TRUE)
   expect_false(grepl("<img", notice$content, fixed = TRUE))
   expect_match(notice$content, "&lt;img", fixed = TRUE)
   expect_match(notice$content, strrep("longname", 100), fixed = TRUE)

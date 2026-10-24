@@ -208,7 +208,7 @@ tableoneClass <- if (requireNamespace("jmvcore", quietly = TRUE)) R6::R6Class(
                     paste(vapply(all_na_vars, htmltools::htmlEscape, character(1)),
                           collapse = "; "),
                     ". ",
-                    .("Every value of this variable is missing, so it cannot be summarised and does not appear in the table below."),
+                    .("Every value of this variable is missing, so it cannot be summarized and does not appear in the table below."),
                     "</div>")
                 self$results$todo$setContent(todo_html)
             }
@@ -241,11 +241,11 @@ tableoneClass <- if (requireNamespace("jmvcore", quietly = TRUE)) R6::R6Class(
                     todo_html,
                     "<div style='background: rgba(255, 202, 33, 0.23); color: inherit;border-left:4px solid #ffc107;",
                     "padding:10px;margin:10px 0;'><b>",
-                    .("Nothing to summarise"), ":</b> ",
+                    .("Nothing to summarize"), ":</b> ",
                     .("No selected variable has recorded values in a supported storage type. Select at least one numeric, categorical, text or logical variable with recorded values."),
                     "</div>"))
                 private$.setAssumptionsSkipped(
-                    .("No data quality check was performed because no selected variable could be summarised; the Instructions panel above explains why."))
+                    .("No data quality check was performed because no selected variable could be summarized; the Instructions panel above explains why."))
                 return(invisible(NULL))
             }
 

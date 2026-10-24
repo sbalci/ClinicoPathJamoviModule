@@ -697,7 +697,7 @@ alluvialClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     "WARNING",
                     .("Styling options not applied"),
                     paste(
-                        .("Marginal plots are switched on, so the diagram and its histograms are assembled into a fixed grid that cannot take further styling. These settings were left out of this plot: colour palette, theme style, enhanced edge gradients, plot orientation, flow direction, plot subtitle and custom title."),
+                        .("Marginal plots are switched on, so the diagram and its histograms are assembled into a fixed grid that cannot take further styling. These settings were left out of this plot: color palette, theme style, enhanced edge gradients, plot orientation, flow direction, plot subtitle and custom title."),
                         .("Why this matters: changing any of them will not alter the picture on screen while marginal plots are on."),
                         .("What to do next: switch 'Marginal plots' off if you need any of those settings."),
                         sep = "\n")
@@ -900,7 +900,7 @@ alluvialClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     n_fill_groups > 10) {
                 private$.addNotice("STRONG_WARNING", .("Too Many Fill Categories"), paste(
                     .fmt(
-                        .("Fill variable '{variable}' has {n} distinct categories, so the flows are coloured in that many shades and the legend will be hard to read."),
+                        .("Fill variable '{variable}' has {n} distinct categories, so the flows are colored in that many shades and the legend will be hard to read."),
                         variable = fill_var, n = n_fill_groups),
                     .("What to do next: choose a fill variable with fewer categories, or group the less frequent categories with Data > Transform."),
                     sep = "\n"))
@@ -919,12 +919,12 @@ alluvialClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     n_fill_groups > palette_cap) {
                 private$.addNotice(
                     "WARNING",
-                    .("Colour palette stretched"),
+                    .("Color palette stretched"),
                     paste(
                         .fmt(
-                            .("The {palette} palette publishes {cap} distinguishable colours, and this diagram has at least {groups} groups to colour."),
+                            .("The {palette} palette publishes {cap} distinguishable colors, and this diagram has at least {groups} groups to color."),
                             palette = private$.paletteLabel[[colorPalette]], cap = palette_cap, groups = n_fill_groups),
-                        .("Why this matters: the extra groups are drawn in shades blended between the published colours, so neighbouring groups can look alike and are hard to tell apart in the legend."),
+                        .("Why this matters: the extra groups are drawn in shades blended between the published colors, so neighbouring groups can look alike and are hard to tell apart in the legend."),
                         .("What to do next: choose Viridis or Plasma, which stay distinguishable over many groups, or group categories with Data > Transform until the palette fits."),
                         sep = "\n")
                 )

@@ -377,7 +377,7 @@ lassologisticClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                         "WARNING",
                         .("Constant predictors removed"),
                         sprintf(
-                            .("%1$d selected variable(s) had the same value in every case and were removed before fitting: %2$s. A constant carries no information and cannot be penalised or selected. %3$d variables remain and are shown as Variables analysed."),
+                            .("%1$d selected variable(s) had the same value in every case and were removed before fitting: %2$s. A constant carries no information and cannot be penalised or selected. %3$d variables remain and are shown as Variables analyzed."),
                             data$n_dropped_constant,
                             paste(data$dropped_constant, collapse = ", "), data$n_vars)
                     )
@@ -386,9 +386,9 @@ lassologisticClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 if (length(data$dropped_single) > 0) {
                     private$.addNotice(
                         "WARNING",
-                        .("Predictors constant among the analysed cases"),
+                        .("Predictors constant among the analyzed cases"),
                         sprintf(
-                            .("Removed before fitting: %1$s. Each varies only in rows that were excluded for a missing value, so every analysed case has the same value, and a predictor that does not vary cannot be penalised or selected. %2$d variables remain and are shown as Variables analysed."),
+                            .("Removed before fitting: %1$s. Each varies only in rows that were excluded for a missing value, so every analyzed case has the same value, and a predictor that does not vary cannot be penalised or selected. %2$d variables remain and are shown as Variables analyzed."),
                             paste(data$dropped_single, collapse = ", "), data$n_vars)
                     )
                 }
@@ -1103,7 +1103,7 @@ lassologisticClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                     # it read as the full cohort while listwise deletion had silently
                     # removed rows - and .suitabilityAssessment then green-lit the
                     # reduced N. Report both.
-                    list(.("Complete cases analysed"), as.character(data$n)),
+                    list(.("Complete cases analyzed"), as.character(data$n)),
                     # Same partition as the exclusion notice.
                     list(.("Excluded from analysis"),
                          if (data$n_excluded > 0)
@@ -1121,7 +1121,7 @@ lassologisticClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                     # variables -> terms -> selected terms. "Variables selected"
                     # beside "Selected predictors" would have been two near-identical
                     # labels for two different quantities.
-                    list(.("Variables analysed"), as.character(data$n_vars)),
+                    list(.("Variables analyzed"), as.character(data$n_vars)),
                     list(.("Model terms (after dummy coding)"), as.character(data$p)),
                     list(.("Terms selected"), as.character(length(fit$selected))),
                     list(.("Penalty type"), penalty_label),
@@ -1173,7 +1173,7 @@ lassologisticClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 b0 <- fit$intercept
                 ord <- if (!is.null(data)) data$ordinal_vars else character(0)
                 table$setNote("ordinal_note", if (length(ord) > 0) sprintf(
-                    .("Ordinal predictor(s) %s are coded with one indicator per level, each compared with that predictor's lowest level; they are not modelled as a linear trend."),
+                    .("Ordinal predictor(s) %s are coded with one indicator per level, each compared with that predictor's lowest level; they are not modeled as a linear trend."),
                     .rocLabel(paste(ord, collapse = ", "))) else NULL)
                 # A dummy such as gradeG2 is an odds ratio against a level the table never named.
                 ref_src <- if (!is.null(data$factor_ref) && length(fit$selected) > 0)
@@ -1417,7 +1417,7 @@ lassologisticClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 # qualify (a constant score and AUC 1 have none; both say so in the cell).
                 table$setNote("auc_ci_note",
                     if (!is.na(auc_val) && !perfect && !constant_score && !is.na(auc_ci_lower))
-                        .("The interval beside the apparent AUC is DeLong's 95% CI computed on these fitted probabilities as if they were a fixed, pre-specified marker. It does not account for fitting the coefficients or for selecting the variables and lambda on the same patients, so it is centred on an optimistic estimate and can under-cover the model's discrimination in new patients. Enable Bootstrap Internal Validation for an optimism-corrected AUC.")
+                        .("The interval beside the apparent AUC is DeLong's 95% CI computed on these fitted probabilities as if they were a fixed, pre-specified marker. It does not account for fitting the coefficients or for selecting the variables and lambda on the same patients, so it is centered on an optimistic estimate and can under-cover the model's discrimination in new patients. Enable Bootstrap Internal Validation for an optimism-corrected AUC.")
                     else NULL)
 
                 table$setNote("auc_band_note", if (!is.na(auc_val) && !perfect)
@@ -2074,7 +2074,7 @@ lassologisticClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 vars <- fit$selected
                 ord <- if (!is.null(data)) data$ordinal_vars else character(0)
                 table$setNote("ordinal_note", if (length(ord) > 0) sprintf(
-                    .("Ordinal predictor(s) %s are coded with one indicator per level, each compared with that predictor's lowest level; they are not modelled as a linear trend."),
+                    .("Ordinal predictor(s) %s are coded with one indicator per level, each compared with that predictor's lowest level; they are not modeled as a linear trend."),
                     .rocLabel(paste(ord, collapse = ", "))) else NULL)
                 ref_src <- if (!is.null(data$factor_ref) && length(vars) > 0)
                     unique(data$column_source[vars][data$column_factor[vars]]) else character(0)
@@ -2253,7 +2253,7 @@ lassologisticClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 # these data AND the cutoff is Youden-optimised on the same data.
                 perf_table$setNote(
                     "apparent",
-                    .("These figures are APPARENT (in-sample) and optimistic twice over: the points were derived from a model fitted to this dataset, and the score cutoff was chosen to maximise the Youden index on the same rows. They are not an estimate of how the score would perform on new patients. Enable bootstrap validation for an optimism-corrected estimate of the model, and validate any score externally before clinical use.")
+                    .("These figures are APPARENT (in-sample) and optimistic twice over: the points were derived from a model fitted to this dataset, and the score cutoff was chosen to maximize the Youden index on the same rows. They are not an estimate of how the score would perform on new patients. Enable bootstrap validation for an optimism-corrected estimate of the model, and validate any score externally before clinical use.")
                 )
 
                 # ── Degenerate score guard ─────────────────────────────────

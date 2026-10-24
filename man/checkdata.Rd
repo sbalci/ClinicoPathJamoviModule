@@ -32,7 +32,7 @@ categorical summary instead.}
 \item{showOutliers}{Detect potential outliers using three methods - z-score
 (|z| > 3), the IQR fence (1.5 x IQR), and the modified Z-score (|M| > 3.5,
 MAD-based) - and report points flagged by at least two of them. Below n =
-10 single-method flags are shown and labelled informative-only.}
+10 single-method flags are shown and labeled informative-only.}
 
 \item{showDistribution}{Display descriptive statistics and distribution
 characteristics.}
@@ -82,7 +82,7 @@ A results object containing:
 \code{results$qualityText} \tab \tab \tab \tab \tab a preformatted \cr
 \code{results$missingVals} \tab \tab \tab \tab \tab a table \cr
 \code{results$noOutliers} \tab \tab \tab \tab \tab a html \cr
-\code{results$outliers} \tab \tab \tab \tab \tab Shows outliers detected by at least 2 of the methods that ran: Z-score (|z|>3), IQR (1.5x IQR rule), Modified Z-score (MAD-based |z|>3.5, unavailable when there are 3 or fewer complete values or the MAD is zero). Points flagged by only 1 method are not shown, except below n = 10 where single-method flags are shown, labelled informative-only in the table title and excluded from the quality grade. \cr
+\code{results$outliers} \tab \tab \tab \tab \tab Shows outliers detected by at least 2 of the methods that ran: Z-score (|z|>3), IQR (1.5x IQR rule), Modified Z-score (MAD-based |z|>3.5, unavailable when there are 3 or fewer complete values or the MAD is zero). Points flagged by only 1 method are not shown, except below n = 10 where single-method flags are shown, labeled informative-only in the table title and excluded from the quality grade. \cr
 \code{results$outlierMethodSummary} \tab \tab \tab \tab \tab Summary of each outlier detection method. These are heuristic approaches; consider skewness and sample size when interpreting. \cr
 \code{results$distribution} \tab \tab \tab \tab \tab a table \cr
 \code{results$duplicates} \tab \tab \tab \tab \tab a table \cr
@@ -102,7 +102,7 @@ Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.f
 Screens a single variable for data-quality problems before it is used in
 analysis: completeness and the shape of its missingness, consensus outlier
 detection (at n = 10 or more a point is flagged only when at least 2
-methods agree; below n = 10 single-method flags are shown, labelled
+methods agree; below n = 10 single-method flags are shown, labeled
 informative-only and excluded from the grade; the MAD-based method is
 unavailable when there are 3 or fewer complete values or the MAD is zero,
 leaving 2 methods), distribution summaries, duplicate or repeated values,

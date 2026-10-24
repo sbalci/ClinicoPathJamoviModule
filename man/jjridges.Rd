@@ -122,7 +122,7 @@ Hodges-Lehmann shift shows typical difference in units.}
 
 \item{seed}{Random seed for the bootstrap confidence interval of Cliff's
 delta. The statistical tests table names the seed whenever it was used. The
-default reproduces the previous fixed behaviour.}
+default reproduces the previous fixed behavior.}
 
 \item{alpha}{Transparency level for ridge fills.}
 

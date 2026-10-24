@@ -781,7 +781,7 @@ crosstableClass <- if (requireNamespace('jmvcore'))
                         "WARNING",
                         .("Variables with no values were left out"),
                         sprintf(
-                            .("These variables have no non-missing values among the rows being analysed, so nothing can be tabulated for them and they were left out of the table: %s."),
+                            .("These variables have no non-missing values among the rows being analyzed, so nothing can be tabulated for them and they were left out of the table: %s."),
                             paste(vapply(all_missing, function(v) .crosstableDisplayName(v, original_names_mapping), character(1)), collapse = ", ")
                         )
                     )
@@ -792,9 +792,9 @@ crosstableClass <- if (requireNamespace('jmvcore'))
                         "WARNING",
                         .("Single-valued variables cannot be compared"),
                         if (identical(sty, "finalfit"))
-                            sprintf(.("These variables take a single value in the rows being analysed, so no comparison between the groups is possible for them: %s. The finalfit style cannot build a table that contains them, so they were left out; choose another style to see their row."), constant_labels)
+                            sprintf(.("These variables take a single value in the rows being analyzed, so no comparison between the groups is possible for them: %s. The finalfit style cannot build a table that contains them, so they were left out; choose another style to see their row."), constant_labels)
                         else
-                            sprintf(.("These variables take a single value in the rows being analysed, so no comparison between the groups is possible for them and their p-value is blank: %s."), constant_labels)
+                            sprintf(.("These variables take a single value in the rows being analyzed, so no comparison between the groups is possible for them and their p-value is blank: %s."), constant_labels)
                     )
                 }
                 if (length(dropped_vars) > 0) {
@@ -803,7 +803,7 @@ crosstableClass <- if (requireNamespace('jmvcore'))
                         private$.addNotice(
                             "ERROR",
                             .("Nothing left to tabulate"),
-                            .("Every selected variable was left out for the reasons above, so there is no table to build. Select at least one variable that has values in the rows being analysed.")
+                            .("Every selected variable was left out for the reasons above, so there is no table to build. Select at least one variable that has values in the rows being analyzed.")
                         )
                         return()
                     }
@@ -859,7 +859,7 @@ crosstableClass <- if (requireNamespace('jmvcore'))
                         "ERROR",
                         .("Only one group - nothing to compare"),
                         sprintf(
-                            .("The grouping variable '%s' has fewer than two groups among the rows being analysed, so there is nothing to compare across and no significance test can be computed. %s Rows dropped by a row filter or by the missing-value setting are not counted here. Widen or remove the row filter, switch off missing-value exclusion, or choose a grouping variable that has at least two levels present in the data."),
+                            .("The grouping variable '%s' has fewer than two groups among the rows being analyzed, so there is nothing to compare across and no significance test can be computed. %s Rows dropped by a row filter or by the missing-value setting are not counted here. Widen or remove the row filter, switch off missing-value exclusion, or choose a grouping variable that has at least two levels present in the data."),
                             group_label, present
                         )
                     )
@@ -884,7 +884,7 @@ crosstableClass <- if (requireNamespace('jmvcore'))
                         "INFO",
                         .("Numeric variables that look like coded categories"),
                         sprintf(
-                            .("These variables are stored as numbers but take 6 or fewer distinct values, so they are most likely encoded categories such as grade 1, 2, 3 rather than measurements: %s. The table styles do not agree on how to handle them: gtsummary summarises them as counts and percentages and tests them with a chi-square or Fisher's exact test, finalfit does the same only when the column has fewer than 5 distinct values counting missing as one of them, so a four-value score with any missing data is treated as continuous there, and arsenal, NEJM, Lancet and Hmisc treat any numeric column as continuous and test the codes with ANOVA or Kruskal-Wallis. The p-value for these variables can therefore change when you switch style, with nothing else changed. To get the same handling in every style, set their measure type to Nominal or Ordinal in the data; leave them Continuous if they really are measurements."),
+                            .("These variables are stored as numbers but take 6 or fewer distinct values, so they are most likely encoded categories such as grade 1, 2, 3 rather than measurements: %s. The table styles do not agree on how to handle them: gtsummary summarizes them as counts and percentages and tests them with a chi-square or Fisher's exact test, finalfit does the same only when the column has fewer than 5 distinct values counting missing as one of them, so a four-value score with any missing data is treated as continuous there, and arsenal, NEJM, Lancet and Hmisc treat any numeric column as continuous and test the codes with ANOVA or Kruskal-Wallis. The p-value for these variables can therefore change when you switch style, with nothing else changed. To get the same handling in every style, set their measure type to Nominal or Ordinal in the data; leave them Continuous if they really are measurements."),
                             paste(numeric_as_cat_labels, collapse = ", ")
                         )
                     )
@@ -1706,7 +1706,7 @@ crosstableClass <- if (requireNamespace('jmvcore'))
                         absSMD = a, balance = bal))
                 }
                 tab$setNote("smd", sprintf(
-                    .("SMD between '%s' and '%s'. Continuous: (m1 - m2) / sqrt((s1^2 + s2^2)/2); numeric columns with 6 or fewer distinct values are labelled 'continuous (numeric codes)' and treat the codes as an interval scale. Categorical: multinomial SMD (Yang & Dalton, 2012). |SMD| < 0.1 conventionally indicates negligible imbalance."),
+                    .("SMD between '%s' and '%s'. Continuous: (m1 - m2) / sqrt((s1^2 + s2^2)/2); numeric columns with 6 or fewer distinct values are labeled 'continuous (numeric codes)' and treat the codes as an interval scale. Categorical: multinomial SMD (Yang & Dalton, 2012). |SMD| < 0.1 conventionally indicates negligible imbalance."),
                     levs[1], levs[2]))
             },
 

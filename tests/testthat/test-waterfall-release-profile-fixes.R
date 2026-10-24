@@ -24,11 +24,11 @@ r80 <- data.frame(pid = c("P1", "P1", "P1", "P2", "P2", "P3", "P3", "P4", "P4", 
 test_that("R80: a measured assessment with no time is disclosed, not dropped in silence", {
     res <- wr(r80, patientID = "pid", responseVar = "chg", timeVar = "t")
     nt <- wn(res)
-    expect_match(nt, "ASSESSMENTS WITHOUT A TIME", fixed = TRUE)
+    expect_match(nt, "Assessments without a time", fixed = TRUE)
     expect_match(nt, "3 assessment(s) for 2 patient(s) have a response value but no time", fixed = TRUE)
     # P1 is not blamed on missing measurements, and NA times are not "repeated visits"
     expect_match(nt, "some of their measured rows have no time", fixed = TRUE)
-    expect_false(grepl("REPEATED VISIT TIMES", nt, fixed = TRUE))
+    expect_false(grepl("Repeated visit times", nt, fixed = TRUE))
     expect_equal(unname(wcounts(res)[c("PR", "SD")]), c(1, 2))
 })
 
@@ -61,10 +61,10 @@ test_that("R74: rows at one visit give the same result in any row order", {
 
 test_that("R76: numeric IDs past the 15th digit are separate patients in both notices", {
     d1 <- data.frame(id = 1e15 + 0:3, chg = c(-40, -10, 25, -35))
-    expect_false(grepl("SEVERAL ROWS PER PATIENT", wn(wr(d1, patientID = "id", responseVar = "chg")), fixed = TRUE))
+    expect_false(grepl("Several rows per patient", wn(wr(d1, patientID = "id", responseVar = "chg")), fixed = TRUE))
     d2 <- data.frame(id = rep(1e15 + 0:1, each = 2), time = rep(c(0, 2), 2), chg = c(0, NA, 0, -40))
     expect_match(wn(wr(d2, patientID = "id", responseVar = "chg", timeVar = "time")),
-                 "NOT RESPONSE-EVALUABLE", fixed = TRUE)
+                 "Not response-evaluable", fixed = TRUE)
 })
 
 # raw sizes: P1 nadir 10 mm then 13 mm (+30% but +3 mm), later 0 mm; P3 20 -> 24 mm (+20%, +4 mm)
@@ -86,7 +86,7 @@ test_that("R68: with a stated unit, PD also needs the 5 mm absolute increase", {
     expect_match(wn(abs), "Progression also requires the RECIST v1.1 absolute increase of at least 5 mm", fixed = TRUE)
     expect_false(grepl("may still be under-detected", wn(rel), fixed = TRUE))
     # the rule reaches duration of response too: P1's +3 mm rise is not a DoR event
-    dor <- function(res) { m <- res$clinicalMetrics$asDF; m$value[grepl("Duration of Response", m$metric)][1] }
+    dor <- function(res) { m <- res$clinicalMetrics$asDF; m$value[grepl("duration of response", m$metric)][1] }
     expect_match(dor(rel), "1 of 2 responders progressed", fixed = TRUE)
     expect_match(dor(abs), "0 of 2 responders progressed", fixed = TRUE)
     # and the SD definition says so
@@ -148,7 +148,7 @@ test_that("R82: all-missing groups are explained on both tables and in a notice"
     res <- wr(d, patientID = "pid", responseVar = "chg", groupVar = "g")
     expect_match(wnotes(res$groupComparisonTable), "no group comparison is possible", fixed = TRUE)
     expect_match(wnotes(res$groupComparisonTest), "no group comparison is possible", fixed = TRUE)
-    expect_match(wn(res), "NO GROUP COMPARISON", fixed = TRUE)
+    expect_match(wn(res), "No group comparison", fixed = TRUE)
 })
 
 test_that("R83: a rejected run in guided mode shows STOPPED, not READY", {
@@ -270,7 +270,7 @@ test_that("review: a group with no evaluable patient keeps the colours aligned",
 test_that("review: notices are ordered most severe first, and a guided stop names its reason", {
     d <- data.frame(pid = paste0("P", 1:12), chg = c(-0.35, -0.5, 0.1, -0.2, 0.05, -0.4, 0.3, -0.6, 0.15, -0.1, 0.2, -0.45))
     nt <- wn(wr(d, patientID = "pid", responseVar = "chg"))
-    expect_lt(regexpr("PROPORTIONS", nt, fixed = TRUE), regexpr("EXPLORATORY RESPONSE CATEGORIES", nt, fixed = TRUE))
+    expect_lt(regexpr("Percent change looks like proportions", nt, fixed = TRUE), regexpr("Exploratory response categories", nt, fixed = TRUE))
     a <- ClinicoPath:::waterfallClass$new(
         options = ClinicoPath:::waterfallOptions$new(patientID = "pid", responseVar = "chg", enableGuidedMode = TRUE),
         data = data.frame(pid = paste0("P", 1:4), chg = c(-50, Inf, 5, 30)))

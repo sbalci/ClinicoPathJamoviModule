@@ -66,7 +66,7 @@ left-closed, so an age on a boundary starts the band named for it.}
 [lower, upper) bands, the WHO/UN and demographic convention: a person aged
 exactly 65 starts the 65-69 band, and equal-width bands hold equal numbers
 of single years. 'right' gives (lower, upper] bands, where age 65 closes
-the band below it; this reproduces the behaviour of releases before 1.0.52
+the band below it; this reproduces the behavior of releases before 1.0.52
 and makes the lowest band one year wider than the others, which inflates
 the youngest bar of the pyramid. Applies to the custom age grouping only:
 the named presets are defined by their sources as left-closed bands, so a
@@ -92,7 +92,7 @@ is always open-ended.}
 axis of the plots. 'within_gender' divides each band by the number of that
 gender, so the Female and Male columns each sum to 100 and the two sides
 compare the shape of the two age distributions. 'total' divides every band
-by the number of analysed observations, so both columns together sum to 100
+by the number of analyzed observations, so both columns together sum to 100
 and the sides also reflect how many of each gender there are; the Total row
 then shows each gender's share.}
 

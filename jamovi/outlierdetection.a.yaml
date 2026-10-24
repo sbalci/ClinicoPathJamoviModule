@@ -225,12 +225,12 @@ options:
       max: 1000000
       description:
           R: >
-            Row count above which a random subsample is analysed instead of the full
-            dataset. Datasets at or below this size are always analysed in full. Raise
-            it to analyse a large dataset completely at the cost of speed.
+            Row count above which a random subsample is analyzed instead of the full
+            dataset. Datasets at or below this size are always analyzed in full. Raise
+            it to analyze a large dataset completely at the cost of speed.
 
     - name: sampleSize
-      title: 'Rows to analyse when subsampling'
+      title: 'Rows to analyze when subsampling'
       type: Integer
       default: 5000
       min: 100
@@ -248,7 +248,7 @@ options:
       description:
           R: >
             Random seed for the random subsample drawn when the dataset exceeds the
-            subsampling threshold, and for the randomised detection methods (MCD draws
+            subsampling threshold, and for the randomized detection methods (MCD draws
             random subsets; ICS simulates its cutoff). The outlier table names the seed
             whenever it affected the result. Change it to draw a different sample; the
-            default of 123 reproduces the previous fixed behaviour.
+            default of 123 reproduces the previous fixed behavior.

@@ -1620,7 +1620,7 @@ singlearmBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   possible (the column carries no unit), so this option DECLARES the unit
 #'   that variable is already recorded in. Either way it determines how
 #'   cutpoints and plausibility checks are interpreted, and how axes are
-#'   labelled - so selecting the wrong unit for pre-calculated time changes the
+#'   labeled, so selecting the wrong unit for pre-calculated time changes the
 #'   reported results, not just the labels.
 #' @param uselandmark Performs a conditional landmark description: only
 #'   subjects still event-free and under observation after the landmark are

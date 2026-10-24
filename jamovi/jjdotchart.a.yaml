@@ -32,7 +32,7 @@ description:
         "Horizontal Box-Violin Comparison" instead.
 
         Best suited to many labels each contributing one meaningful summary -
-        mean turnaround time across 20 laboratories, median biomarker by centre -
+        mean turnaround time across 20 laboratories, median biomarker by center -
         which is what a Cleveland dot plot is designed for. With only two or three
         groups the test has 1-2 degrees of freedom and is of little value, even
         though the chart itself is still a fair picture of the group averages.
@@ -52,7 +52,7 @@ options:
       permitted: [ numeric ]
       description:
           R: >
-            The continuous variable to summarise. Each group is reduced to one
+            The continuous variable to summarize. Each group is reduced to one
             point on the chart - its mean, median, trimmed mean or MAP estimate,
             whichever matches the Statistical Test selected below.
 
@@ -89,7 +89,7 @@ options:
             limit of normal, a target turnaround time, a published benchmark.
 
             The default of 0 is rarely the right choice: for a measurement that
-            is not centred near zero it makes the standardised effect enormous,
+            is not centered near zero it makes the standardized effect enormous,
             and the statistics package then fails to compute a confidence
             interval for the effect size and returns NO statistics at all. The
             analysis detects this and says so rather than showing an empty
@@ -161,22 +161,22 @@ options:
             observations, the plotted summary value, and its spread. This is
             what makes the aggregation auditable: it states how many
             observations each single plotted point represents. The summary
-            column is labelled with the statistic actually used, which changes
+            column is labeled with the statistic actually used, which changes
             with the Statistical Test.
 
     - name: centralityplotting
-      title: Also mark the centre of the plotted points
+      title: Also mark the center of the plotted points
       type: Bool
       default: false
       description:
           R: >
-            Draw a SECOND vertical line at the centre of the k plotted summaries
+            Draw a SECOND vertical line at the center of the k plotted summaries
             - i.e. the average of the group averages. This is not the Reference
-            Value; the Reference Value line is always drawn and is labelled.
+            Value; the Reference Value line is always drawn and is labeled.
 
             Off by default deliberately. The statistics package draws this line
             by default and draws NO line at the reference value, so the only
-            vertical line on an unmodified figure sits at the centre of the data
+            vertical line on an unmodified figure sits at the center of the data
             while the user believes it marks the threshold they typed in
             (measured: identical line position for reference values of 0, 12 and
             999). This analysis inverts that - the reference line is always
@@ -198,8 +198,8 @@ options:
       default: parametric
       description:
           R: >
-            Which centre to use for the optional second line, when 'Also mark the
-            centre of the plotted points' is ticked. It affects that line ONLY -
+            Which center to use for the optional second line, when 'Also mark the
+            center of the plotted points' is ticked. It affects that line ONLY -
             the plotted points always follow the Statistical Test. Leave it
             matching your Statistical Test unless you have a specific reason.
 
@@ -256,7 +256,7 @@ options:
       description:
           R: >
             Height of the plot in pixels. Increase it when there are many groups,
-            since each one needs a labelled row.
+            since each one needs a labeled row.
 
     - name: seed
       title: Random seed

@@ -56,87 +56,86 @@ children:
             maxItemCount: 1
             isTarget: true
             itemDropBehaviour: overwrite
-  - type: LayoutBox
-    margin: large
-    stretchFactor: 2
+  - type: CollapseBox
+    label: Analysis Options
+    collapsed: false
     children:
-      - type: Label
-        label: Analysis Options
+      - type: LayoutBox
+        margin: large
         children:
-          - type: LayoutBox
-            margin: large
-            children:
-              - type: CheckBox
-                name: bivariate_analysis
-                label: Bivariate random-effects model
-              - type: CheckBox
-                name: hsroc_analysis
-                label: Proportional-hazards SROC analysis
-              - type: CheckBox
-                name: heterogeneity_analysis
-                label: Heterogeneity assessment (study variability)
-              - type: CheckBox
-                name: meta_regression
-                label: Meta-regression (covariate effects)
-                enable: (covariate)
-              - type: CheckBox
-                name: publication_bias
-                label: Publication bias assessment (Deeks' test)
-              - type: CheckBox
-                name: show_individual_studies
-                label: Individual study results
-      - type: CollapseBox
-        label: Advanced Options
-        collapsed: true
+          - type: CheckBox
+            name: bivariate_analysis
+            label: Bivariate random-effects model
+          - type: CheckBox
+            name: hsroc_analysis
+            label: Proportional-hazards SROC analysis
+          - type: CheckBox
+            name: heterogeneity_analysis
+            label: Heterogeneity assessment (study variability)
+          - type: CheckBox
+            name: meta_regression
+            label: Meta-regression (covariate effects)
+            enable: (covariate)
+          - type: CheckBox
+            name: publication_bias
+            label: Publication bias assessment (Deeks' test)
+          - type: CheckBox
+            name: show_individual_studies
+            label: Individual study results
+  - type: CollapseBox
+    label: Advanced Options
+    collapsed: true
+    children:
+      - type: LayoutBox
+        margin: large
         children:
-          - type: LayoutBox
-            margin: large
-            children:
-              - type: TextBox
-                name: confidence_level
-                label: Confidence level (%)
-                format: number
-                suffix: '%'
-              - type: ComboBox
-                name: method
-                label: Estimation method
-              - type: ComboBox
-                name: zero_cell_correction
-                label: Zero-cell correction
-      - type: Label
-        label: Visualization Options
+          - type: TextBox
+            name: confidence_level
+            label: Confidence level (%)
+            format: number
+            suffix: '%'
+          - type: ComboBox
+            name: method
+            label: Estimation method
+          - type: ComboBox
+            name: zero_cell_correction
+            label: Zero-cell correction
+  - type: CollapseBox
+    label: Visualization Options
+    collapsed: true
+    children:
+      - type: LayoutBox
+        margin: large
         children:
-          - type: LayoutBox
-            margin: large
-            children:
-              - type: CheckBox
-                name: forest_plot
-                label: Forest plot (sensitivity & specificity)
-              - type: CheckBox
-                name: sroc_plot
-                label: Summary ROC plot
-              - type: CheckBox
-                name: funnel_plot
-                label: Funnel plot (publication bias)
-                enable: (publication_bias)
-              - type: ComboBox
-                name: color_palette
-                label: Plot colors (accessibility)
-              - type: CheckBox
-                name: show_plot_explanations
-                label: Plot explanations & interpretation
-      - type: Label
-        label: Reporting Options
+          - type: CheckBox
+            name: forest_plot
+            label: Forest plot (sensitivity & specificity)
+          - type: CheckBox
+            name: sroc_plot
+            label: Summary ROC plot
+          - type: CheckBox
+            name: funnel_plot
+            label: Funnel plot (publication bias)
+            enable: (publication_bias)
+          - type: ComboBox
+            name: color_palette
+            label: Plot colors (accessibility)
+          - type: CheckBox
+            name: show_plot_explanations
+            label: Plot explanations & interpretation
+  - type: CollapseBox
+    label: Reporting Options
+    collapsed: true
+    children:
+      - type: LayoutBox
+        margin: large
         children:
-          - type: LayoutBox
-            margin: large
-            children:
-              - type: CheckBox
-                name: show_interpretation
-                label: Clinical interpretation
-              - type: CheckBox
-                name: show_methodology
-                label: Methodology information
-              - type: CheckBox
-                name: show_analysis_summary
-                label: Analysis summary
+          - type: CheckBox
+            name: show_interpretation
+            label: Clinical interpretation
+          - type: CheckBox
+            name: show_methodology
+            label: Methodology information
+          - type: CheckBox
+            name: show_analysis_summary
+            label: Analysis summary

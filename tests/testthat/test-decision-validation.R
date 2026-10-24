@@ -339,7 +339,7 @@ test_that("C71 VAL-decision-10: a one-level gold standard is refused with its ow
   d <- rbind(val_mk(88, 0, 12, 0), data.frame(gold = c("Present", "Absent"), test = c(NA, NA)))
   d$gold <- factor(d$gold, levels = c("Absent", "Present")); d$test <- addNA(factor(d$test, levels = c("Neg", "Pos")))
   n <- val_notices(val_error(d))
-  expect_match(n, "The gold standard has only one level among the analysed cases", fixed = TRUE)
+  expect_match(n, "The gold standard has only one level among the analyzed cases", fixed = TRUE)
   expect_no_match(n, "has more than one level besides", fixed = TRUE)
 })
 
@@ -348,7 +348,7 @@ test_that("C71 VAL-decision-10: a one-level test is not described as having 'mor
   d$gold <- addNA(factor(d$gold, levels = c("Absent", "Present"))); d$test <- factor(d$test, levels = c("Neg", "Pos"))
   n <- val_notices(val_error(d))
   expect_no_match(n, "has more than one level besides", fixed = TRUE)
-  expect_match(n, "The test has only one level among the analysed cases", fixed = TRUE)
+  expect_match(n, "The test has only one level among the analyzed cases", fixed = TRUE)
 })
 
 test_that("C69 fewer than 4 cases left after exclusions is refused, not tabulated", {
@@ -357,7 +357,7 @@ test_that("C69 fewer than 4 cases left after exclusions is refused, not tabulate
                                 levels = c("Absent", "Equivocal", "Present")),
                   test = factor(c("Pos", "Neg", "Pos", "Pos", "Neg", "Pos"), levels = c("Neg", "Pos")))
   r <- val_error(d, gn = "Absent")
-  expect_match(val_notices(r), "Insufficient data after exclusions: 3 cases analysed", fixed = TRUE)
+  expect_match(val_notices(r), "Insufficient data after exclusions: 3 cases analyzed", fixed = TRUE)
   expect_true(is.na(val_ratio(r)$Sens))
 })
 
@@ -366,7 +366,7 @@ test_that("C71 a level emptied by missing-value removal is dropped, not inferred
   # level used to stay in levels(), get inferred, and the run was refused as "not dichotomous".
   d <- val_mk(20, 5, 4, 15); d$gold[d$test == "Neg"] <- NA
   n <- val_notices(val_error(d))
-  expect_match(n, "The test has only one level among the analysed cases", fixed = TRUE)
+  expect_match(n, "The test has only one level among the analyzed cases", fixed = TRUE)
   expect_no_match(n, "must have exactly 2 levels each", fixed = TRUE)
   # a declared but never-used third level no longer blocks inference of the negative level
   d3 <- val_mk(88, 31, 22, 159); d3$gold <- factor(as.character(d3$gold), levels = c("Absent", "Present", "Unknown"))

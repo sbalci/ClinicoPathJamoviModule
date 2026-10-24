@@ -83,7 +83,7 @@ test_that("a summed measurement is never reported as an observation count", {
     # invites the reader to quote it as N.
     res <- jjsegmentedtotalbar(data = stb_cost(), x_var = "arm", fill_var = "path", y_var = "cost")
     w <- stb_warn(res)
-    expect_match(w, "Analysed 90 rows")
+    expect_match(w, "Analyzed 90 rows")
     expect_false(grepl("26678 observations", w, fixed = TRUE))
     expect_match(w, "summed quantity")
 })

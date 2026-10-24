@@ -827,7 +827,7 @@ jjridgesBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   Hodges-Lehmann shift shows typical difference in units.
 #' @param seed Random seed for the bootstrap confidence interval of Cliff's
 #'   delta. The statistical tests table names the seed whenever it was used. The
-#'   default reproduces the previous fixed behaviour.
+#'   default reproduces the previous fixed behavior.
 #' @param alpha Transparency level for ridge fills.
 #' @param color_palette Color palette for ridges. 'Clinical' is optimized for
 #'   accessibility and medical publications. Viridis family are also

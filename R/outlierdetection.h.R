@@ -417,19 +417,19 @@ outlierdetectionBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
 #'   and distribution of outlier scores.
 #' @param show_interpretation Display detailed interpretation of outlier
 #'   detection results and methodological notes.
-#' @param sampleThreshold Row count above which a random subsample is analysed
+#' @param sampleThreshold Row count above which a random subsample is analyzed
 #'   instead of the full dataset. Datasets at or below this size are always
-#'   analysed in full. Raise it to analyse a large dataset completely at the
+#'   analyzed in full. Raise it to analyze a large dataset completely at the
 #'   cost of speed.
 #' @param sampleSize Number of rows retained when subsampling. Outliers among
 #'   the rows that are not sampled cannot be detected, so the reported count is
 #'   a lower bound; larger values recover more of them at the cost of speed.
 #' @param seed Random seed for the random subsample drawn when the dataset
-#'   exceeds the subsampling threshold, and for the randomised detection methods
+#'   exceeds the subsampling threshold, and for the randomized detection methods
 #'   (MCD draws random subsets; ICS simulates its cutoff). The outlier table
 #'   names the seed whenever it affected the result. Change it to draw a
 #'   different sample; the default of 123 reproduces the previous fixed
-#'   behaviour.
+#'   behavior.
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr

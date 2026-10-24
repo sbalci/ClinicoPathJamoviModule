@@ -171,7 +171,7 @@ test_that("Codex-07 plot-only mode does not describe table rows that do not exis
   res <- run_ir(ir_fixture(n = 300), showTable = FALSE, calculateClinicalImpact = FALSE,
                 showClinicalImpactPlot = TRUE, thresholdRange = "custom", thresholdMin = 0.1,
                 thresholdMax = 0.2, selectedThresholds = "0.3")
-  expect_false(ir_has_notice(res, "Table thresholds outside the analysed range", "WARNING"))
+  expect_false(ir_has_notice(res, "Table thresholds outside the analyzed range", "WARNING"))
 })
 
 test_that("IR-decisioncurve-01 the 1:1 warning waits for 20 per class", {

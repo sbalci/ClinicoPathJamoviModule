@@ -72,9 +72,9 @@ dataqualityClass <- if (requireNamespace("jmvcore")) R6::R6Class("dataqualityCla
         # output item renders this literally (no markup, no injection surface).
         blocks <- vapply(private$.noticeList, function(notice) {
             prefix <- switch(notice$type,
-                ERROR          = paste0(.("ERROR"), ": "),
-                STRONG_WARNING = paste0(.("WARNING"), ": "),
-                WARNING        = paste0(.("WARNING"), ": "),
+                ERROR          = paste0(.("Error"), ": "),
+                STRONG_WARNING = paste0(.("Warning"), ": "),
+                WARNING        = paste0(.("Warning"), ": "),
                 "")
             paste0(prefix, notice$title, "\n", notice$content)
         }, character(1))

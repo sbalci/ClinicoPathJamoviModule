@@ -15,7 +15,7 @@ test_that("negative measurements are a strong warning: the run proceeds without 
     d <- data.frame(pid = rep(c("A", "B", "C"), each = 2), t = rep(c(0, 2), 3),
                     size = c(20, -5, 30, 15, 40, 44))
     nt <- wa_n(wa(d, patientID = "pid", responseVar = "size", timeVar = "t", inputType = "raw"))
-    expect_match(nt, "NEGATIVE TUMOUR MEASUREMENTS", fixed = TRUE)
+    expect_match(nt, "Negative tumor measurements", fixed = TRUE)
     expect_false(grepl("ERROR: NEGATIVE", nt, fixed = TRUE))
     expect_false(grepl("rgba(220, 38, 38", nt, fixed = TRUE))     # the ERROR tint
 })

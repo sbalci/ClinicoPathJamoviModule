@@ -292,7 +292,7 @@ options:
       default: 20250101
       description:
           R: >
-            Random seed for the bootstrap confidence interval of Cliff's delta. The statistical tests table names the seed whenever it was used. The default reproduces the previous fixed behaviour.
+            Random seed for the bootstrap confidence interval of Cliff's delta. The statistical tests table names the seed whenever it was used. The default reproduces the previous fixed behavior.
 
     - name: alpha
       title: Ridge Transparency

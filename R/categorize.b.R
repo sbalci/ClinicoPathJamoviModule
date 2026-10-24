@@ -878,7 +878,7 @@ categorizeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 else
                     .fmt(.("the upper boundary (mean + {k} SD)"), k = sdmult)
                 notice_html$meansdCollapse <- .noticeBox("STRONG_WARNING", .fmt(
-                    .("Mean +/- SD boundary outside the data: {band} lies beyond the observed range, so that band cannot be formed and {ncat} categories were created instead of the usual 4. This happens on skewed distributions (CRP, ferritin, tumour burden). Quantile or natural-breaks binning gives bands that always fall inside the data."),
+                    .("Mean +/- SD boundary outside the data: {band} lies beyond the observed range, so that band cannot be formed and {ncat} categories were created instead of the usual 4. This happens on skewed distributions (CRP, ferritin, tumor burden). Quantile or natural-breaks binning gives bands that always fall inside the data."),
                     band = band, ncat = n_categories))
             }
 

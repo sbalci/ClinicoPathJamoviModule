@@ -11,7 +11,8 @@ txt <- function(html) gsub("\\s+", " ", gsub("<[^>]+>", " ", paste(html, collaps
 verdict_of <- function(res) {
     t <- txt(res$interpretation$content)
     regmatches(t, regexpr(
-        "(AGREEMENT THRESHOLDS MET, NOT CONFIRMED|AGREEMENT THRESHOLDS MET|MODERATE SAMPLING|INADEQUATE SAMPLING|NOT ADEQUATE FOR SUBSTITUTION|INSUFFICIENT DATA)", t))
+        "(Agreement thresholds met, not confirmed|Agreement thresholds met|Moderate sampling|Inadequate sampling|Not adequate for substitution|Insufficient data):", t)) |>
+        sub(pattern = ":$", replacement = "")  # labels are sentence case; the colon marks the verdict
 }
 ihc <- function(d, ...) ClinicoPath::ihcheterogeneity(showInterpretation = TRUE, data = d, ...)
 note_text <- function(tbl) paste(vapply(tbl$notes, function(n) n$note, ""), collapse = " | ")
@@ -53,7 +54,7 @@ test_that("opposite regional biases cannot cancel in the verdict (I00, I01)", {
         expect_lt(tt$p.value, 1e-6)
         expect_gt(abs(unname(tt$estimate)) / mean(d$whole) * 100, 5)
     }
-    expect_equal(verdict_of(res), "NOT ADEQUATE FOR SUBSTITUTION")
+    expect_equal(verdict_of(res), "Not adequate for substitution")
     it <- txt(res$interpretation$content)
     expect_match(it, "b1", fixed = TRUE)          # offending regions are named
     expect_match(it, "b2", fixed = TRUE)
@@ -67,7 +68,7 @@ test_that("an exact constant offset vetoes the verdict and gives no -Inf effect 
     w <- c(12, 18, 25, 31, 36, 44, 50, 57, 63, 70, 22, 41)
     d <- data.frame(whole = w, b1 = w - 6, b2 = w - 6)      # 6 / mean(w) = 15 %
     res <- ihc(d, wholesection = "whole", biopsy1 = "b1", biopsy2 = "b2")
-    expect_equal(verdict_of(res), "NOT ADEQUATE FOR SUBSTITUTION")
+    expect_equal(verdict_of(res), "Not adequate for substitution")
     it <- txt(res$interpretation$content)
     expect_false(grepl("Not enough paired observations", it))
     bt <- res$samplingbiastable$asDF
@@ -89,7 +90,7 @@ test_that("Hedges' small-sample correction is applied at every n (I35)", {
 test_that("copy-ready text, summary and recommendations follow the bias veto (I02, I21)", {
     res <- ihc(underread(), wholesection = "whole", biopsy1 = "b1", biopsy2 = "b2",
                showReportSentences = TRUE, showSummary = TRUE, generate_recommendations = TRUE)
-    expect_equal(verdict_of(res), "NOT ADEQUATE FOR SUBSTITUTION")
+    expect_equal(verdict_of(res), "Not adequate for substitution")
     rs <- txt(res$report_sentences$content)
     expect_false(grepl("met the predefined quality criteria", rs, fixed = TRUE))
     expect_match(rs, "systematic difference", ignore.case = TRUE)
@@ -465,7 +466,7 @@ test_that("Turkish msgstrs that reword count sentences keep the counts on their 
     expect_match(out_decomp, "3 y\u00f6ntemle", fixed = TRUE)
     expect_match(out_decomp, "30 vaka", fixed = TRUE)
 
-    ihc_regions <- tr_of("We analysed %d cases, each measured in up to %d regions, to see how well regional measurements represent the biomarker expression of a case.")
+    ihc_regions <- tr_of("We analyzed %d cases, each measured in up to %d regions, to see how well regional measurements represent the biomarker expression of a case.")
     expect_false(is.na(ihc_regions))
     out_regions <- sprintf(ihc_regions, 50L, 4L)
     expect_match(out_regions, "4 b\u00f6lgede", fixed = TRUE)
@@ -495,7 +496,7 @@ test_that("an offset near the margin whose CI spans it is inconclusive, never gr
         expect_false(all(abs(ci90) <= 5))                    # not ruled out
     }
     res <- ihc(d, wholesection = "whole", biopsy1 = "b1", biopsy2 = "b2")
-    expect_equal(verdict_of(res), "AGREEMENT THRESHOLDS MET, NOT CONFIRMED")
+    expect_equal(verdict_of(res), "Agreement thresholds met, not confirmed")
     expect_match(txt(res$interpretation$content), "neither ruled out nor shown", fixed = TRUE)
 })
 
@@ -507,12 +508,12 @@ test_that("a difference that is not significant but not ruled out blocks the pla
     expect_gt(tt$p.value, 0.05)                    # not significant ...
     expect_gt(reach, 5)                            # ... and not ruled out within 5%
     res <- ihc(d, wholesection = "whole", biopsy1 = "b1")
-    expect_equal(verdict_of(res), "AGREEMENT THRESHOLDS MET, NOT CONFIRMED")
+    expect_equal(verdict_of(res), "Agreement thresholds met, not confirmed")
     ci90 <- ratio_ci(d$b1 - w, w, 0.90)
     expect_match(txt(res$interpretation$content), sprintf("(90%% CI %.1f%% to %.1f%%)", ci90[1], ci90[2]), fixed = TRUE)
     # with agreement actually shown (every CI inside 5%) the plain label is used
     ok <- ihc(clean(40), wholesection = "whole", biopsy1 = "b1", biopsy2 = "b2")
-    expect_equal(verdict_of(ok), "AGREEMENT THRESHOLDS MET")
+    expect_equal(verdict_of(ok), "Agreement thresholds met")
 })
 
 test_that("near-zero cases are excluded whether or not they agree exactly (R03)", {
@@ -576,7 +577,7 @@ test_that("a region fails the verdict only when SHOWN below the threshold; the w
     d <- four(30); r4 <- cor(d$whole, d$c4, method = "spearman")
     expect_lt(bw_upper(r4, 60), 0.90)
     res <- run(d)
-    expect_false(grepl("AGREEMENT THRESHOLDS MET", verdict_of(res)))
+    expect_false(grepl("Agreement thresholds met", verdict_of(res)))
     expect_match(txt(res$interpretation$content), "Shown to be below the threshold on their own", fixed = TRUE)
 })
 
@@ -585,7 +586,7 @@ test_that("the plain-language summary follows a non-green verdict (R12, R36)", {
     d <- data.frame(whole = w, c1 = w + rnorm(n, 0, 1.5), c4 = w + rnorm(n, 0, 15))
     res <- ihc(d, wholesection = "whole", biopsy1 = "c1", biopsy2 = "c4", correlation_threshold = 0.90,
                showSummary = TRUE)
-    expect_false(grepl("AGREEMENT THRESHOLDS MET", verdict_of(res)))
+    expect_false(grepl("Agreement thresholds met", verdict_of(res)))
     sm <- txt(res$summary$content)
     expect_false(grepl("agree closely|gave similar values", sm))
     expect_match(sm, "Overall:", fixed = TRUE)
@@ -685,7 +686,7 @@ test_that("no ICC CI is reported when the residual mean square is zero (R35, rev
 test_that("a constant reference gives INSUFFICIENT DATA, not a calibration verdict (R37)", {
     set.seed(5); d <- data.frame(whole = rep(40, 20), b1 = runif(20, 5, 50), b2 = runif(20, 5, 50))
     res <- ihc(d, wholesection = "whole", biopsy1 = "b1", biopsy2 = "b2")
-    expect_equal(verdict_of(res), "INSUFFICIENT DATA")
+    expect_equal(verdict_of(res), "Insufficient data")
     expect_match(txt(res$interpretation$content), "'whole' has the same value in every case", fixed = TRUE)
 })
 
@@ -741,11 +742,11 @@ test_that("a 3% offset is never 'material' and is ruled out once the 90% CI fits
         expect_lt(t.test(dd)$p.value, 1e-6)  # yet clearly non-zero: the old rule vetoed on p alone
     }
     res <- ihc(d, wholesection = "whole", biopsy1 = "b1", biopsy2 = "b2")
-    expect_equal(verdict_of(res), "AGREEMENT THRESHOLDS MET")
+    expect_equal(verdict_of(res), "Agreement thresholds met")
     # A 3% SCALING changes with the level: about 2.3 points at the top of the range
     # against a 2.5-point margin (5% of the mean). It is still never material.
     dm <- data.frame(whole = w, b1 = w * 1.03 * (1 + rnorm(n, 0, 0.04)), b2 = w * 1.03 * (1 + rnorm(n, 0, 0.04)))
-    expect_false(verdict_of(ihc(dm, wholesection = "whole", biopsy1 = "b1", biopsy2 = "b2")) == "NOT ADEQUATE FOR SUBSTITUTION")
+    expect_false(verdict_of(ihc(dm, wholesection = "whole", biopsy1 = "b1", biopsy2 = "b2")) == "Not adequate for substitution")
 })
 
 test_that("the margin is the user's choice (S03)", {
@@ -755,8 +756,8 @@ test_that("the margin is the user's choice (S03)", {
     dd <- d$b1 - w
     ci90 <- (mean(dd) + c(-1, 1) * qt(0.95, n - 1) * sd(dd) / sqrt(n)) / mean(w) * 100
     expect_true(min(ci90) > 5 && max(ci90) < 10)
-    expect_equal(verdict_of(ihc(d, wholesection = "whole", biopsy1 = "b1")), "NOT ADEQUATE FOR SUBSTITUTION")
-    expect_equal(verdict_of(ihc(d, wholesection = "whole", biopsy1 = "b1", bias_margin = 10)), "AGREEMENT THRESHOLDS MET")
+    expect_equal(verdict_of(ihc(d, wholesection = "whole", biopsy1 = "b1")), "Not adequate for substitution")
+    expect_equal(verdict_of(ihc(d, wholesection = "whole", biopsy1 = "b1", bias_margin = 10)), "Agreement thresholds met")
 })
 
 test_that("two regions reading systematically apart are not called interchangeable (S11)", {
@@ -764,7 +765,7 @@ test_that("two regions reading systematically apart are not called interchangeab
     d <- data.frame(b1 = t * 1.27 * (1 + rnorm(n, 0, 0.03)), b2 = t * (1 + rnorm(n, 0, 0.03)))
     expect_gt(mean(d$b1) / mean(d$b2), 1.2)
     res <- ihc(d, biopsy1 = "b1", biopsy2 = "b2", showReportSentences = TRUE)
-    expect_equal(verdict_of(res), "NOT ADEQUATE FOR SUBSTITUTION")
+    expect_equal(verdict_of(res), "Not adequate for substitution")
     bt <- res$samplingbiastable$asDF
     expect_equal(bt$comparison, "b2 vs b1")
     expect_equal(bt$mean_diff, mean(d$b2 - d$b1), tolerance = 1e-10)
@@ -790,7 +791,7 @@ test_that("a region that cannot be assessed blocks the green verdict and is name
     d <- data.frame(whole = w, b1 = w + rnorm(n, 0, 1), b2 = w + rnorm(n, 0, 1),
                     b3 = c(w[1:3] + rnorm(3, 0, 1), rep(NA, n - 3)))
     res <- ihc(d, wholesection = "whole", biopsy1 = "b1", biopsy2 = "b2", biopsy3 = "b3")
-    expect_equal(verdict_of(res), "AGREEMENT THRESHOLDS MET, NOT CONFIRMED")
+    expect_equal(verdict_of(res), "Agreement thresholds met, not confirmed")
     expect_match(txt(res$interpretation$content), "Not assessed (too few paired values or the same value in every case): 'b3'", fixed = TRUE)
 })
 
@@ -814,7 +815,7 @@ test_that("the reference selected again as a region is analysed once, as the ref
     d <- clean(30)
     both <- ihc(d, wholesection = "whole", biopsy1 = "whole", biopsy2 = "b1")
     only <- ihc(d, wholesection = "whole", biopsy1 = "b1")
-    expect_match(txt(both$notices$content), "analysed as the reference only", fixed = TRUE)
+    expect_match(txt(both$notices$content), "analyzed as the reference only", fixed = TRUE)
     expect_equal(both$reproducibilitytable$asDF, only$reproducibilitytable$asDF)
 })
 
@@ -1038,7 +1039,7 @@ test_that("a material difference is also a strong warning, listed before warning
     notes <- txt(ihc(d, wholesection = "whole", biopsy1 = "b1", biopsy2 = "b2")$notices$content)
     expect_match(notes, "Material systematic difference Region(s) 'b1', 'b2' are offset from the reference", fixed = TRUE)
     expect_lt(regexpr("Material systematic difference", notes, fixed = TRUE),
-              regexpr("Cases not analysed", notes, fixed = TRUE))
+              regexpr("Cases not analyzed", notes, fixed = TRUE))
 })
 
 test_that("a hidden variability plot is explained", {

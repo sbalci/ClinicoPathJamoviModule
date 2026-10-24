@@ -209,6 +209,13 @@ items:
           - timetypedata
           - timetypeoutput
           - multievent
+          - analysistype
+          - dod
+          - dooc
+          - awd
+          - awod
+          - uselandmark
+          - landmark
 
     - name:  medianTable
       # title: Median Survival Table
@@ -467,6 +474,9 @@ items:
           - uselandmark
           - landmark
           - age_stratified_cox
+          - age_group_cutpoints
+          - stratified_cox
+          - strata_variable
 
     - name: ageInteractionTable
       title: 'Age x Group Interaction Test'
@@ -519,6 +529,9 @@ items:
           - uselandmark
           - landmark
           - age_stratified_cox
+          - age_group_cutpoints
+          - stratified_cox
+          - strata_variable
 
     - name: ageAdjustedInterpretation
       title: 'Age Adjustment Interpretation'
@@ -526,9 +539,29 @@ items:
       visible: (age_adjustment)
       clearWith:
           - age_adjustment
+          - age_interaction
           - age_variable
           - explanatory
           - outcome
+          - outcomeLevel
+          - elapsedtime
+          - tint
+          - timetypedata
+          - dxdate
+          - fudate
+          - timetypeoutput
+          - multievent
+          - analysistype
+          - dod
+          - dooc
+          - awd
+          - awod
+          - uselandmark
+          - landmark
+          - age_stratified_cox
+          - age_group_cutpoints
+          - stratified_cox
+          - strata_variable
 
     - name: ageAdjustedExplanation
       title: 'Understanding Age-Adjusted Survival Analysis'
@@ -595,6 +628,22 @@ items:
           - age_time_scale
           - age_variable
           - explanatory
+          - outcome
+          - elapsedtime
+          - outcomeLevel
+          - tint
+          - timetypedata
+          - dxdate
+          - fudate
+          - timetypeoutput
+          - multievent
+          - analysistype
+          - dod
+          - dooc
+          - awd
+          - awod
+          - uselandmark
+          - landmark
 
     # Age Standardization (SMR) Results
     - name: ageStandardizationTable
@@ -658,8 +707,26 @@ items:
       visible: (age_standardization)
       clearWith:
           - age_standardization
+          - age_standardization_method
           - age_variable
+          - age_group_cutpoints
           - explanatory
+          - outcome
+          - outcomeLevel
+          - elapsedtime
+          - tint
+          - timetypedata
+          - dxdate
+          - fudate
+          - timetypeoutput
+          - multievent
+          - analysistype
+          - dod
+          - dooc
+          - awd
+          - awod
+          - uselandmark
+          - landmark
 
     # Age-Stratified KM Plot
     - name: ageStratifiedKMPlot
@@ -760,6 +827,8 @@ items:
           - awod
           - uselandmark
           - landmark
+          - stratified_cox
+          - strata_variable
 
     - name: phInterpretation
       title: 'Proportional Hazards Assessment & Recommendations'
@@ -776,6 +845,15 @@ items:
           - timetypedata
           - timetypeoutput
           - multievent
+          - analysistype
+          - dod
+          - dooc
+          - awd
+          - awod
+          - uselandmark
+          - landmark
+          - stratified_cox
+          - strata_variable
 
     - name: plot8
       title: '`Proportional Hazards Assumption - ${explanatory}`'
@@ -805,6 +883,8 @@ items:
           - awod
           - uselandmark
           - landmark
+          - stratified_cox
+          - strata_variable
 
 
     - name:  survivalTablesHeading
@@ -828,6 +908,15 @@ items:
           - tint
           - timetypedata
           - multievent
+          - cutp
+          - analysistype
+          - dod
+          - dooc
+          - awd
+          - awod
+          - uselandmark
+          - landmark
+          - timetypeoutput
 
 
 
@@ -994,6 +1083,15 @@ items:
         - tint
         - timetypedata
         - multievent
+        - explanatory
+        - analysistype
+        - dod
+        - dooc
+        - awd
+        - awod
+        - uselandmark
+        - landmark
+        - timetypeoutput
 
 
     # Person-Time Analysis Explanation
@@ -1081,6 +1179,19 @@ items:
         - outcome
         - outcomeLevel
         - elapsedtime
+        - multievent
+        - analysistype
+        - dod
+        - dooc
+        - awd
+        - awod
+        - tint
+        - timetypedata
+        - fudate
+        - dxdate
+        - uselandmark
+        - landmark
+        - timetypeoutput
 
 
 
@@ -1150,6 +1261,8 @@ items:
         - awod
         - uselandmark
         - landmark
+        - stratified_cox
+        - strata_variable
 
     - name: export_survival_data
       title: 'Export Survival Data'
@@ -1568,6 +1681,8 @@ items:
           - awod
           - uselandmark
           - landmark
+          - stratified_cox
+          - strata_variable
 
 
 
@@ -1737,6 +1852,28 @@ items:
       title: 'Calibration Assessment Interpretation'
       type: Html
       visible: (calibration_curves && showExplanations)
+      clearWith:
+        - calibration_curves
+        - calibration_timepoint
+        - calibration_ngroups
+        - explanatory
+        - outcome
+        - elapsedtime
+        - outcomeLevel
+        - tint
+        - timetypedata
+        - dxdate
+        - fudate
+        - timetypeoutput
+        - multievent
+        - analysistype
+        - dod
+        - dooc
+        - awd
+        - awod
+        - uselandmark
+        - landmark
+        - rcs_variable
 
     # RCS Non-Linearity Assessment Results
     - name: rcsTestTable
@@ -1825,6 +1962,27 @@ items:
       title: 'Non-Linearity Assessment Interpretation'
       type: Html
       visible: (rcs_analysis && showExplanations)
+      clearWith:
+        - rcs_analysis
+        - rcs_variable
+        - rcs_knots
+        - explanatory
+        - outcome
+        - elapsedtime
+        - outcomeLevel
+        - tint
+        - timetypedata
+        - dxdate
+        - fudate
+        - timetypeoutput
+        - multievent
+        - analysistype
+        - dod
+        - dooc
+        - awd
+        - awod
+        - uselandmark
+        - landmark
 
     # Bootstrap Internal Validation Results
     - name: bootstrapValidationTable
@@ -1855,6 +2013,8 @@ items:
         - bootstrapValidation
         - bootstrapValN
         - seed
+        - stratified_cox
+        - strata_variable
         - explanatory
         - outcome
         - outcomeLevel
@@ -1881,6 +2041,8 @@ items:
         - bootstrapValidation
         - bootstrapValN
         - seed
+        - stratified_cox
+        - strata_variable
         - explanatory
         - outcome
         - outcomeLevel
@@ -2066,6 +2228,23 @@ items:
       clearWith:
           - explanatory
           - outcome
+          - outcomeLevel
+          - elapsedtime
+          - tint
+          - timetypedata
+          - dxdate
+          - fudate
+          - timetypeoutput
+          - multievent
+          - analysistype
+          - dod
+          - dooc
+          - awd
+          - awod
+          - uselandmark
+          - landmark
+          - stratified_cox
+          - strata_variable
 
     # Copy-Ready Clinical Report Sentences
     - name: copyReadySentencesExplanation
@@ -2075,6 +2254,23 @@ items:
       clearWith:
           - explanatory
           - outcome
+          - outcomeLevel
+          - elapsedtime
+          - tint
+          - timetypedata
+          - dxdate
+          - fudate
+          - timetypeoutput
+          - multievent
+          - analysistype
+          - dod
+          - dooc
+          - awd
+          - awod
+          - uselandmark
+          - landmark
+          - stratified_cox
+          - strata_variable
 
 refs:
     - ClinicoPathJamoviModule

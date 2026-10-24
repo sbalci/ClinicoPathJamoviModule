@@ -79,20 +79,27 @@ NULL
 singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
     "singlearmClass",
     inherit = singlearmBase,
-    public = list(
-      initialize = function(...) {
-        super$initialize(...)
-        # .plot() renders entirely from image$state (including original_time_name),
-        # so state-only redraws do not require reloading the dataset even before
-        # singlearm.h.R is next regenerated from singlearm.r.yaml.
-        plot_item <- self$results$plot
-        if (!is.null(plot_item)) {
-          plot_item$.__enclos_env__$private$.requiresData <- FALSE
-        }
-      }
-    ),
     # Constants and cache
     private = list(
+        .sourcifyOption = function(option) {
+          if (!option$name %in% names(formals(singlearm)))
+            return("")
+          if (identical(option$name, "data"))
+            return(super$.sourcifyOption(option))
+          value <- option$value
+          if (is.null(value) || length(value) == 0)
+            return("")
+          if (is.list(value))
+            return("")
+          if (is.character(value) && (length(value) != 1L || anyNA(value)))
+            return("")
+          if (is.character(value)) {
+            if (identical(value, option$default))
+              return("")
+            return(paste0(option$name, " = ", encodeString(value, quote = '"')))
+          }
+          super$.sourcifyOption(option)
+        },
         .cache = new.env(parent = emptyenv()),
         # Result of .defineEventIndicator(), kept so .run() can render the
         # recode disclosure without redoing the work.
@@ -1540,27 +1547,31 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
           "original_time_name" = if (!self$options$tint) self$options$elapsedtime else NULL
         )
 
-        image <- self$results$plot
-        image$setState(plotData)
+        if (isTRUE(self$options$sc)) {
+          self$results$plot$setState(plotData)
+          self$results$plot_cif$setState(plotData)
+        }
 
-        imageCIF <- self$results$plot_cif
-        imageCIF$setState(plotData)
+        if (isTRUE(self$options$ce)) {
+          self$results$plot2$setState(plotData)
+        }
 
-        image2 <- self$results$plot2
-        image2$setState(plotData)
+        if (isTRUE(self$options$ch)) {
+          self$results$plot3$setState(plotData)
+        }
 
-        image3 <- self$results$plot3
-        image3$setState(plotData)
+        if (isTRUE(self$options$kmunicate)) {
+          self$results$plot6$setState(plotData)
+        }
 
-        image6 <- self$results$plot6
-        image6$setState(plotData)
+        # Set state for baseline hazard plots only when enabled
+        if (isTRUE(self$options$baseline_hazard)) {
+          self$results$baselineHazardPlot$setState(plotData)
+        }
 
-        # Set state for baseline hazard plots
-        baselineHazardImage <- self$results$baselineHazardPlot
-        baselineHazardImage$setState(plotData)
-
-        smoothedHazardImage <- self$results$smoothedHazardPlot
-        smoothedHazardImage$setState(plotData)
+        if (isTRUE(self$options$hazard_smoothing)) {
+          self$results$smoothedHazardPlot$setState(plotData)
+        }
 
         # Return Data ----
 
@@ -2892,7 +2903,7 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         }
 
         # Get time unit
-        time_unit <- self$options$timetypeoutput
+        time_unit <- htmltools::htmlEscape(self$options$timetypeoutput)
 
         person_table <- self$results$personTimeTable
         if (private$.isCompetingRisk()) {
@@ -3248,11 +3259,12 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
         n_bins <- nrow(hz)
         pooled_rate <- sum(hz$events) / sum(hz$person_time)
+        unit_esc <- htmltools::htmlEscape(self$options$timetypeoutput)
         if (n_bins >= 3L) {
           peak_text <- sprintf(
             '<b>%.4f</b> in the interval ending at %.1f %s (highest of %d equal-width intervals)',
             max(hz$rate), hz$end[which.max(hz$rate)],
-            self$options$timetypeoutput, n_bins)
+            unit_esc, n_bins)
           variation_text <- sprintf(
             '<b>%.4f to %.4f</b> across %d equal-width intervals; this descriptive range is not a test of a constant-hazard, exponential, or proportional-hazards model',
             min(hz$rate), max(hz$rate), n_bins)
@@ -3278,7 +3290,7 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             </div>
             <h4>Exploratory Piecewise Hazard-Rate Summary</h4>
             <ul>
-              <li>Pooled event rate: <b>{round(pooled_rate, 4)}</b> events per person-{self$options$timetypeoutput}</li>
+              <li>Pooled event rate: <b>{round(pooled_rate, 4)}</b> events per person-{unit_esc}</li>
               <li>Highest interval rate: {peak_text}</li>
               <li>Variation over time: {variation_text}</li>
             </ul>
@@ -3371,7 +3383,7 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             # backticks was both unnecessary and unsafe for names containing a
             # backtick; it also risked duplicate restored column names.
             myformula <- paste0(
-              "survival::Surv(", jmvcore::composeTerm(mytime), ", ",
+              "Surv(", jmvcore::composeTerm(mytime), ", ",
               jmvcore::composeTerm(myoutcome), ")")
 
             plot_result <- plotData %>%
@@ -4021,8 +4033,8 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             ggplot2::labs(
               title = .("Piecewise Hazard-Rate Estimates"),
               subtitle = .("Equal-width intervals; events divided by exact person-time"),
-              x = paste0("Time (", self$options$timetypeoutput, ")"),
-              y = paste0("Events per person-", self$options$timetypeoutput)) +
+              x = sprintf(.("Time (%s)"), self$options$timetypeoutput),
+              y = sprintf(.("Events per person-%s"), self$options$timetypeoutput)) +
             ggplot2::theme_minimal()
           if (!missing(ggtheme) && !is.null(ggtheme))
             plot <- plot + ggtheme
@@ -4119,10 +4131,7 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
           hz <- hz[is.finite(hz$rate) & hz$person_time > 0, , drop = FALSE]
           if (nrow(hz) < 3)
             return(hazard_refusal(sprintf(
-              paste0(
-                "A smoothed hazard was not estimated because automatic binning ",
-                "produced %d usable interval(s). At least three interval-rate ",
-                "estimates are needed for this exploratory smoother."),
+              .("A smoothed hazard was not estimated because automatic binning produced %d usable interval(s). At least three interval-rate estimates are needed for this exploratory smoother."),
               nrow(hz))))
 
           smooth_data <- data.frame(
@@ -4168,7 +4177,7 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                   .("Person-time weighted local-constant LOESS, span = {span}. Each point is one interval's events / person-time at risk."),
                   span = round(adaptive_span, 2)
                 ),
-                x = paste0("Time (", self$options$timetypeoutput, ")"),
+                x = sprintf(.("Time (%s)"), self$options$timetypeoutput),
                 y = .("Smoothed Hazard Rate")
               ) +
               ggplot2::theme_minimal()
@@ -4315,7 +4324,7 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             "<h4 style='color: inherit; margin-top: 0;'> Descriptive Data Diagnostics</h4>",
             "<p>This analysis includes <strong>", dq$n_total, " subjects</strong>: <strong>",
             count_text, "</strong> (", dq$event_rate, "% observed target-event proportion) over an observed-time range of ",
-            dq$min_time, " to ", dq$max_time, " ", self$options$timetypeoutput, ".</p>",
+            dq$min_time, " to ", dq$max_time, " ", htmltools::htmlEscape(self$options$timetypeoutput), ".</p>",
             warning_text,
             "<div style='background-color: rgba(33, 152, 239, 0.13); padding: 10px; border-radius: 5px; margin: 10px 0; color: inherit;'>",
             "<strong>Interpretive limitations:</strong>",
@@ -4360,7 +4369,7 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
           n_censored <- if (!is.null(results$data_quality$n_censored))
             results$data_quality$n_censored else n_total - n_events - n_competing
           
-          time_unit <- self$options$timetypeoutput
+          time_unit <- htmltools::htmlEscape(self$options$timetypeoutput)
 
           # NO PROGNOSIS VERDICT.
           #

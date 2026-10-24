@@ -328,7 +328,7 @@ jjscatterstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 "<li>", .("<strong>Correlation coefficient</strong> with p-value and confidence interval"), "</li>",
                 "<li>", .("<strong>Per-group panels</strong> when a Split By variable is set"), "</li>",
                 "<li>", .("<strong>Marginal distributions</strong> on both axes"), "</li>",
-                "<li>", .("<strong>Publication-ready output</strong> in journal colour palettes"), "</li>",
+                "<li>", .("<strong>Publication-ready output</strong> in journal color palettes"), "</li>",
                 "</ul></td></tr></table>",
 
                 "<div style='background-color: rgba(155, 155, 155, 0.06); border: 1px solid rgba(128, 128, 128, 0.4); padding: 15px; color: inherit;'>",
@@ -361,7 +361,7 @@ jjscatterstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         .warnShapeLevels = function(d) {
             n <- private$.shapeLevels(d)
             if (n <= 6) return(invisible(NULL))
-            private$.appendWarning(.fmt(.("<b>Shape mapping skipped:</b> '{var}' has {levels} levels and ggplot2 provides only 6 distinct shapes. Mapping it would have drawn no point at all for the surplus levels while the correlation still used every case. Use colour for a variable with this many levels, or group the rare categories."),
+            private$.appendWarning(.fmt(.("<b>Shape mapping skipped:</b> '{var}' has {levels} levels and ggplot2 provides only 6 distinct shapes. Mapping it would have drawn no point at all for the surplus levels while the correlation still used every case. Use color for a variable with this many levels, or group the rare categories."),
                 var = htmltools::htmlEscape(self$options$shapevar), levels = n))
         },
 
@@ -372,7 +372,7 @@ jjscatterstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             if (!isTRUE(private$.option("addGGPubrPlot"))) return(invisible(NULL))
             if (!is.null(self$options$grvar)) return(invisible(NULL))
             if (identical(private$.option("ggpubrPalette"), "jco")) return(invisible(NULL))
-            private$.appendWarning(.("<b>Colour palette not applied:</b> the publication-ready panel draws a single ungrouped set of points, so there is no grouping for a journal palette to colour. Set a 'Split By' variable to see the palette take effect."))
+            private$.appendWarning(.("<b>Color palette not applied:</b> the publication-ready panel draws a single ungrouped set of points, so there is no grouping for a journal palette to color. Set a 'Split By' variable to see the palette take effect."))
         },
 
         # Assemble the near-identical preset-notification HTML from a single

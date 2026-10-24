@@ -2154,7 +2154,7 @@ survivalcontBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   categories as events; Cause Specific treats other-cause death as censored;
 #'   Disease-Free counts disease, recurrence, and death categories as events
 #'   according to the selected mapping. Competing-risk coding is retained for
-#'   compatibility but is not analysed by this continuous cut-off function;
+#'   compatibility but is not analyzed by this continuous cut-off function;
 #'   select it to receive guidance to a competing-risk analysis.
 #' @param cutp Specify time points for survival-probability estimates. The
 #'   historical factory value "12, 36, 60" and the word "default" both select
@@ -2253,7 +2253,7 @@ survivalcontBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param strata_variable Categorical variable used for stratification in Cox
 #'   regression, allowing a different baseline hazard in each stratum. Must be a
 #'   factor with a small number of reasonably sized groups (for example treating
-#'   centre or stage). A near-continuous variable would give one stratum per
+#'   center or stage). A near-continuous variable would give one stratum per
 #'   patient and no estimable hazard ratio.
 #' @param loglog Enable log-log plot for assessing proportional hazards
 #'   assumption. Parallel lines  in the log-log plot suggest that proportional

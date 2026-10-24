@@ -910,7 +910,7 @@ cotestClass <- if (requireNamespace("jmvcore"))
                 # multiplies them to transport the result to another prevalence overstates the
                 # evidence roughly two-fold at the shipped hpv_pap example.
                 if (!isTRUE(indep)) {
-                    self$results$testParamsTable$setNote("marginal_only", .("These likelihood ratios describe each test <i>on its own</i>. Because the two tests are modelled as conditionally dependent, the combined likelihood ratio is <b>not</b> their product \u2014 use the Post-test Odds column of the Co-Testing Results table instead."))
+                    self$results$testParamsTable$setNote("marginal_only", .("These likelihood ratios describe each test <i>on its own</i>. Because the two tests are modeled as conditionally dependent, the combined likelihood ratio is <b>not</b> their product \u2014 use the Post-test Odds column of the Co-Testing Results table instead."))
                 }
 
                 # Update all rows using loop to reduce duplication
@@ -1237,7 +1237,7 @@ cotestClass <- if (requireNamespace("jmvcore"))
                         cond_dep_pos = 0.15, cond_dep_neg = 0.10,
                         test1_name = .("HPV"), test2_name = .("Pap cytology"),
                         label = .("HPV (Test 1) + Pap cytology (Test 2)"),
-                        note = .("A sensitive test paired with a specific one, both read from the same cervical sample, so they are modelled as conditionally dependent.")
+                        note = .("A sensitive test paired with a specific one, both read from the same cervical sample, so they are modeled as conditionally dependent.")
                     ),
                     psa_dre = list(
                         test1_sens = 0.80, test1_spec = 0.70,
@@ -1255,7 +1255,7 @@ cotestClass <- if (requireNamespace("jmvcore"))
                         cond_dep_pos = 0.20, cond_dep_neg = 0.05,
                         test1_name = .("Troponin"), test2_name = .("ECG"),
                         label = .("Troponin (Test 1) + ECG (Test 2)"),
-                        note = .("Both tests are driven by the extent of myocardial injury, so they are modelled as dependent among diseased subjects in particular.")
+                        note = .("Both tests are driven by the extent of myocardial injury, so they are modeled as dependent among diseased subjects in particular.")
                     ),
                     mammogram_ultrasound = list(
                         test1_sens = 0.85, test1_spec = 0.90,

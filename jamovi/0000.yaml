@@ -133,7 +133,7 @@ analyses:
       using equal-width intervals, sample quantiles, hand-entered break points,
       mean +/- SD bands, a median split, or Fisher-Jenks natural breaks. Reports
       the break points and the resulting category frequencies, draws the
-      distribution with the boundaries marked, and can add the categorised
+      distribution with the boundaries marked, and can add the categorized
       variable straight to the dataset.
     ribbon: analyses
     category: analyses
@@ -153,7 +153,7 @@ analyses:
     menuSubgroup: Patient Follow-Up Plots
     menuTitle: 'Treatment Response: Patient-Level Burden'
     description: >
-      Use this when you have one tumour burden number per patient: either a
+      Use this when you have one tumor burden number per patient: either a
       percent change from baseline you have already calculated (one row per
       patient), or a single measurement recorded at each visit (one row per
       patient per visit). It draws waterfall and spider plots, assigns each
@@ -169,8 +169,7 @@ analyses:
       it cannot apply the 4-week confirmation rule (a confirmation column only
       adds markers to the plot; to count confirmed responses, supply confirmed
       categories through the category override). If your data list each lesion
-      separately, use the lesion-level RECIST v1.1 analysis. It will be
-      available in upcoming releases.
+      separately, sum the target lesions per patient and visit first.
     menuSubtitle: 'Waterfall and SpiderPlot: One burden value per patient or visit'
     ribbon: analyses
     category: analyses
@@ -859,7 +858,7 @@ analyses:
       Screens a single variable for data-quality problems before it is used in
       analysis: completeness and the shape of its missingness, consensus outlier
       detection (at n = 10 or more a point is flagged only when at least 2
-      methods agree; below n = 10 single-method flags are shown, labelled
+      methods agree; below n = 10 single-method flags are shown, labeled
       informative-only and excluded from the grade; the MAD-based method is
       unavailable when there are 3 or fewer complete values or the MAD is zero,
       leaving 2 methods), distribution summaries, duplicate or repeated values,
@@ -1054,7 +1053,7 @@ analyses:
   - title: Survival Analysis
     name: survival
     ns: ClinicoPath
-    menuGroup: Survival
+    menuGroup: SurvivalT
     menuSubgroup: ClinicoPath Survival
     menuTitle: Survival Analysis
     menuSubtitle: Univariate Survival Analysis, Cox, Kaplan-Meier, 1,3,5-yr
@@ -1484,7 +1483,7 @@ analyses:
       kappa (kappa0); every value below it is excluded. Solved from the
       goodness-of-fit models of the kappaSize package; with three or more raters
       or categories it also allows for re-estimating the category proportions
-      when the study is analysed. Use kappaSizePower to size a study for a
+      when the study is analyzed. Use kappaSizePower to size a study for a
       hypothesis test and kappaSizeCI to size it for target confidence limits.
     ribbon: analyses
     category: analyses
@@ -1497,7 +1496,7 @@ analyses:
     menuSubtitle: Find sample size based on power
     description: >
       Sample size for an interobserver agreement study sized to reject a null
-      kappa (kappa0) in favour of an alternative kappa (kappa1) at a given
+      kappa (kappa0) in favor of an alternative kappa (kappa1) at a given
       two-sided significance level and power - the power approach of the
       kappaSize package. Use kappaSizeCI for a target confidence-interval width,
       and kappaSizeFixedN when the number of subjects is already fixed.
@@ -1513,7 +1512,7 @@ analyses:
     menuSubtitle: Advanced ROC analysis with statistical comparisons and effect sizes
     description: >
       Exploratory Receiver Operating Characteristic (ROC) curve analysis with
-      optimal cutpoint determination. Analyse independent rows or a prespecified
+      optimal cutpoint determination. Analyze independent rows or a prespecified
       mean or median per patient. Patient summaries require an ID and a
       consistent outcome within each patient; all calculations and resampling
       then use one summary per patient. Nominal coverage is not guaranteed in

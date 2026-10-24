@@ -2569,7 +2569,7 @@ multisurvivalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param adjexplanatory Categorical model variable whose levels are
 #'   contrasted in the adjusted curves. The variable must also be selected as an
 #'   explanatory or stratification variable so it is part of the fitted model.
-#' @param ac_method Estimand for the adjusted survival curves. "Standardised
+#' @param ac_method Estimand for the adjusted survival curves. "Standardized
 #'   over cohort" sets every observed patient to each level in turn and averages
 #'   the model-predicted curves (g-computation), so the curves differ only by
 #'   the adjustment variable. "At reference covariate profile" predicts a single

@@ -219,7 +219,7 @@ test_that("error paths write the notices panel as well as the red box", {
   d <- cq_data()
   one <- d; one$cols <- factor("C1")
   res <- cq(one)
-  expect_match(res$notices$content, "ERROR: The analysis cannot proceed")
+  expect_match(res$notices$content, "Error: The analysis cannot proceed")
   expect_match(res$notices$content, "at least 2 rows and 2 columns")
   expect_match(as.character(res$todo$content), "at least 2 rows and 2 columns")
   expect_match(cq(d[0, ])$notices$content, "no \\(complete\\) rows")
@@ -240,7 +240,7 @@ test_that("non-integer counts are refused, whole-number counts are not", {
 
 test_that("every run ends with a one-line analysis summary", {
   s <- cq(cq_data())$notices$content
-  expect_match(s, "NOTE: Analysis summary")
+  expect_match(s, "Note: Analysis summary")
   expect_match(s, "180 observations in a 3 x 3 table")
   expect_match(s, "6 pairwise comparisons with Bonferroni adjustment")
   expect_match(cq(cq_data(), posthoc = "none")$notices$content, "post-hoc method set to None")

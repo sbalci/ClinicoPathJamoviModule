@@ -44,6 +44,6 @@ test_that("a one-valued explanatory variable is rejected in plain language", {
   expect_error(
     .run_multisurvival(data = d, elapsedtime = "fu", outcome = "status",
                        outcomeLevel = "Dead", explanatory = "arm"),
-    "has only one value in the analysed rows"
+    "has only one value in the analyzed rows"
   )
 })

@@ -503,7 +503,7 @@ kappaSizeFixedNClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
                 # 171, equal in the 9 at p .5 with 3 raters (where the two cell sets coincide), never lower;
                 # up to +0.103 (p .05, 6 raters, n 30), median +0.015.
                 if (isTRUE(outcome == 2 && raters >= 3))
-                    .("With three or more raters, the lower bound for a binary finding also depends on how agreement among more than two raters is modelled. This analysis uses the model of Altaye, Donner and Klar; the Dirichlet-multinomial model used for three to five categories, which for two categories is the beta-binomial, describes the same kappa, and with the proportions held at their anticipated values it never gave a lower bound than the one shown in the designs checked and usually gave a higher one (by up to about 0.10 when the finding is rare and the study small), so the figure shown is the more cautious of the two."),
+                    .("With three or more raters, the lower bound for a binary finding also depends on how agreement among more than two raters is modeled. This analysis uses the model of Altaye, Donner and Klar; the Dirichlet-multinomial model used for three to five categories, which for two categories is the beta-binomial, describes the same kappa, and with the proportions held at their anticipated values it never gave a lower bound than the one shown in the designs checked and usually gave a higher one (by up to about 0.10 when the finding is rare and the study small), so the figure shown is the more cautious of the two."),
                 # FN-02 (independent review 2026-10-21): NOT a rare-category effect only, as the IR-01 wording
                 # said. One-sided 95% plug-in coverage: 0.901-0.9375 with a category near 0.1 (R = 2000), 0.861-0.914
                 # in the review's rare designs, and 0.878 with four BALANCED categories and four raters (n 80,
@@ -512,7 +512,7 @@ kappaSizeFixedNClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
                 # every category balanced, against 1.0-1.1 re-estimated: the margins estimate the proportions,
                 # so the excess grows with raters and categories and does not shrink with n.
                 if (reest)
-                    .("When the study is analysed, estimate the category prevalences by maximum likelihood at each candidate value of kappa. With three or more raters or categories, plugging in the overall proportions of ratings instead can give an interval that covers kappa less often than stated (about 0.86 to 0.94 instead of 0.95 in the designs simulated for this analysis), generally more so with more raters or categories. Balanced categories do not prevent it: with four equally common categories and four raters the plug-in interval covered kappa about 0.88 of the time."))
+                    .("When the study is analyzed, estimate the category prevalences by maximum likelihood at each candidate value of kappa. With three or more raters or categories, plugging in the overall proportions of ratings instead can give an interval that covers kappa less often than stated (about 0.86 to 0.94 instead of 0.95 in the designs simulated for this analysis), generally more so with more raters or categories. Balanced categories do not prevent it: with four equally common categories and four raters the plug-in interval covered kappa about 0.88 of the time."))
 
             paste0(caveats, details)
         },
@@ -546,7 +546,7 @@ kappaSizeFixedNClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
 
             if (length(props4) == 0 || any(is.na(props4)))
                 jmvcore::reject(
-                    .("Proportions must be numbers separated by commas, semicolons or spaces (for example '0.20, 0.80'). One or more entries could not be read as a number. Note that a decimal comma is not recognised - use a point, as in 0.20."),
+                    .("Proportions must be numbers separated by commas, semicolons or spaces (for example '0.20, 0.80'). One or more entries could not be read as a number. Note that a decimal comma is not recognized - use a point, as in 0.20."),
                     code = NULL)
 
             # "0,30 0,70" splits into 0, 30, 0, 70 and would be reported as the wrong COUNT of

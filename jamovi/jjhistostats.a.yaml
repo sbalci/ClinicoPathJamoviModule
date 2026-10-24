@@ -123,7 +123,7 @@ options:
       default: 20250101
       description:
           R: >
-            Random seed for the statistics computed by resampling or posterior sampling (robust tests, Bayesian estimates, and some nonparametric effect-size intervals). The plot caption names the seed whenever it affected the numbers shown. The default reproduces the previous fixed behaviour.
+            Random seed for the statistics computed by resampling or posterior sampling (robust tests, Bayesian estimates, and some nonparametric effect-size intervals). The plot caption names the seed whenever it affected the numbers shown. The default reproduces the previous fixed behavior.
 
     - name: centralityline
       title: Centrality line
@@ -259,7 +259,7 @@ options:
       default: two.sided
       description:
           R: >
-            Direction of the one-sample test. 'two.sided' asks whether the centre differs from
+            Direction of the one-sample test. 'two.sided' asks whether the center differs from
             the test value in either direction; 'greater' and 'less' are one-sided. Two-sided is
             the conventional default and the conservative choice - only pick a one-sided test if
             the direction was specified before seeing the data.

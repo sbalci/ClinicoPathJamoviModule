@@ -1054,7 +1054,14 @@ survivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "tint",
                     "timetypedata",
                     "timetypeoutput",
-                    "multievent")))
+                    "multievent",
+                    "analysistype",
+                    "dod",
+                    "dooc",
+                    "awd",
+                    "awod",
+                    "uselandmark",
+                    "landmark")))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="medianTable",
@@ -1296,7 +1303,10 @@ survivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "awod",
                     "uselandmark",
                     "landmark",
-                    "age_stratified_cox")))
+                    "age_stratified_cox",
+                    "age_group_cutpoints",
+                    "stratified_cox",
+                    "strata_variable")))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="ageInteractionTable",
@@ -1354,7 +1364,10 @@ survivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "awod",
                     "uselandmark",
                     "landmark",
-                    "age_stratified_cox")))
+                    "age_stratified_cox",
+                    "age_group_cutpoints",
+                    "stratified_cox",
+                    "strata_variable")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="ageAdjustedInterpretation",
@@ -1362,9 +1375,29 @@ survivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 visible="(age_adjustment)",
                 clearWith=list(
                     "age_adjustment",
+                    "age_interaction",
                     "age_variable",
                     "explanatory",
-                    "outcome")))
+                    "outcome",
+                    "outcomeLevel",
+                    "elapsedtime",
+                    "tint",
+                    "timetypedata",
+                    "dxdate",
+                    "fudate",
+                    "timetypeoutput",
+                    "multievent",
+                    "analysistype",
+                    "dod",
+                    "dooc",
+                    "awd",
+                    "awod",
+                    "uselandmark",
+                    "landmark",
+                    "age_stratified_cox",
+                    "age_group_cutpoints",
+                    "stratified_cox",
+                    "strata_variable")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="ageAdjustedExplanation",
@@ -1435,7 +1468,23 @@ survivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 clearWith=list(
                     "age_time_scale",
                     "age_variable",
-                    "explanatory")))
+                    "explanatory",
+                    "outcome",
+                    "elapsedtime",
+                    "outcomeLevel",
+                    "tint",
+                    "timetypedata",
+                    "dxdate",
+                    "fudate",
+                    "timetypeoutput",
+                    "multievent",
+                    "analysistype",
+                    "dod",
+                    "dooc",
+                    "awd",
+                    "awod",
+                    "uselandmark",
+                    "landmark")))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="ageStandardizationTable",
@@ -1505,8 +1554,26 @@ survivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 visible="(age_standardization)",
                 clearWith=list(
                     "age_standardization",
+                    "age_standardization_method",
                     "age_variable",
-                    "explanatory")))
+                    "age_group_cutpoints",
+                    "explanatory",
+                    "outcome",
+                    "outcomeLevel",
+                    "elapsedtime",
+                    "tint",
+                    "timetypedata",
+                    "dxdate",
+                    "fudate",
+                    "timetypeoutput",
+                    "multievent",
+                    "analysistype",
+                    "dod",
+                    "dooc",
+                    "awd",
+                    "awod",
+                    "uselandmark",
+                    "landmark")))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="ageStratifiedKMPlot",
@@ -1601,7 +1668,9 @@ survivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "awd",
                     "awod",
                     "uselandmark",
-                    "landmark")))
+                    "landmark",
+                    "stratified_cox",
+                    "strata_variable")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="phInterpretation",
@@ -1617,7 +1686,16 @@ survivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "tint",
                     "timetypedata",
                     "timetypeoutput",
-                    "multievent")))
+                    "multievent",
+                    "analysistype",
+                    "dod",
+                    "dooc",
+                    "awd",
+                    "awod",
+                    "uselandmark",
+                    "landmark",
+                    "stratified_cox",
+                    "strata_variable")))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="plot8",
@@ -1646,7 +1724,9 @@ survivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "awd",
                     "awod",
                     "uselandmark",
-                    "landmark")))
+                    "landmark",
+                    "stratified_cox",
+                    "strata_variable")))
             self$add(jmvcore::Preformatted$new(
                 options=options,
                 name="survivalTablesHeading",
@@ -1666,7 +1746,16 @@ survivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "dxdate",
                     "tint",
                     "timetypedata",
-                    "multievent")))
+                    "multievent",
+                    "cutp",
+                    "analysistype",
+                    "dod",
+                    "dooc",
+                    "awd",
+                    "awod",
+                    "uselandmark",
+                    "landmark",
+                    "timetypeoutput")))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="survTable",
@@ -1818,7 +1907,16 @@ survivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "dxdate",
                     "tint",
                     "timetypedata",
-                    "multievent")))
+                    "multievent",
+                    "explanatory",
+                    "analysistype",
+                    "dod",
+                    "dooc",
+                    "awd",
+                    "awod",
+                    "uselandmark",
+                    "landmark",
+                    "timetypeoutput")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="personTimeExplanation",
@@ -1902,7 +2000,20 @@ survivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "explanatory",
                     "outcome",
                     "outcomeLevel",
-                    "elapsedtime")))
+                    "elapsedtime",
+                    "multievent",
+                    "analysistype",
+                    "dod",
+                    "dooc",
+                    "awd",
+                    "awod",
+                    "tint",
+                    "timetypedata",
+                    "fudate",
+                    "dxdate",
+                    "uselandmark",
+                    "landmark",
+                    "timetypeoutput")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="rmstExplanation",
@@ -1970,7 +2081,9 @@ survivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "awd",
                     "awod",
                     "uselandmark",
-                    "landmark")))
+                    "landmark",
+                    "stratified_cox",
+                    "strata_variable")))
             self$add(jmvcore::Output$new(
                 options=options,
                 name="export_survival_data",
@@ -2372,7 +2485,9 @@ survivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "awd",
                     "awod",
                     "uselandmark",
-                    "landmark")))
+                    "landmark",
+                    "stratified_cox",
+                    "strata_variable")))
             self$add(jmvcore::Output$new(
                 options=options,
                 name="calculatedtime",
@@ -2549,7 +2664,29 @@ survivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 options=options,
                 name="calibrationInterpretation",
                 title="Calibration Assessment Interpretation",
-                visible="(calibration_curves && showExplanations)"))
+                visible="(calibration_curves && showExplanations)",
+                clearWith=list(
+                    "calibration_curves",
+                    "calibration_timepoint",
+                    "calibration_ngroups",
+                    "explanatory",
+                    "outcome",
+                    "elapsedtime",
+                    "outcomeLevel",
+                    "tint",
+                    "timetypedata",
+                    "dxdate",
+                    "fudate",
+                    "timetypeoutput",
+                    "multievent",
+                    "analysistype",
+                    "dod",
+                    "dooc",
+                    "awd",
+                    "awod",
+                    "uselandmark",
+                    "landmark",
+                    "rcs_variable")))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="rcsTestTable",
@@ -2644,7 +2781,28 @@ survivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 options=options,
                 name="rcsInterpretation",
                 title="Non-Linearity Assessment Interpretation",
-                visible="(rcs_analysis && showExplanations)"))
+                visible="(rcs_analysis && showExplanations)",
+                clearWith=list(
+                    "rcs_analysis",
+                    "rcs_variable",
+                    "rcs_knots",
+                    "explanatory",
+                    "outcome",
+                    "elapsedtime",
+                    "outcomeLevel",
+                    "tint",
+                    "timetypedata",
+                    "dxdate",
+                    "fudate",
+                    "timetypeoutput",
+                    "multievent",
+                    "analysistype",
+                    "dod",
+                    "dooc",
+                    "awd",
+                    "awod",
+                    "uselandmark",
+                    "landmark")))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="bootstrapValidationTable",
@@ -2679,6 +2837,8 @@ survivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "bootstrapValidation",
                     "bootstrapValN",
                     "seed",
+                    "stratified_cox",
+                    "strata_variable",
                     "explanatory",
                     "outcome",
                     "outcomeLevel",
@@ -2705,6 +2865,8 @@ survivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "bootstrapValidation",
                     "bootstrapValN",
                     "seed",
+                    "stratified_cox",
+                    "strata_variable",
                     "explanatory",
                     "outcome",
                     "outcomeLevel",
@@ -2889,7 +3051,24 @@ survivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 visible="(showSummaries)",
                 clearWith=list(
                     "explanatory",
-                    "outcome")))
+                    "outcome",
+                    "outcomeLevel",
+                    "elapsedtime",
+                    "tint",
+                    "timetypedata",
+                    "dxdate",
+                    "fudate",
+                    "timetypeoutput",
+                    "multievent",
+                    "analysistype",
+                    "dod",
+                    "dooc",
+                    "awd",
+                    "awod",
+                    "uselandmark",
+                    "landmark",
+                    "stratified_cox",
+                    "strata_variable")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="copyReadySentencesExplanation",
@@ -2897,7 +3076,24 @@ survivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 visible="(showSummaries)",
                 clearWith=list(
                     "explanatory",
-                    "outcome")))}))
+                    "outcome",
+                    "outcomeLevel",
+                    "elapsedtime",
+                    "tint",
+                    "timetypedata",
+                    "dxdate",
+                    "fudate",
+                    "timetypeoutput",
+                    "multievent",
+                    "analysistype",
+                    "dod",
+                    "dooc",
+                    "awd",
+                    "awod",
+                    "uselandmark",
+                    "landmark",
+                    "stratified_cox",
+                    "strata_variable")))}))
 
 survivalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "survivalBase",
@@ -2907,7 +3103,7 @@ survivalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             super$initialize(
                 package = "ClinicoPath",
                 name = "survival",
-                version = c(1,1,1),
+                version = c(1,1,2),
                 options = options,
                 results = survivalResults$new(options=options),
                 data = data,
@@ -3040,8 +3236,9 @@ survivalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   adjusting as a covariate. Allows different baseline hazards for each age
 #'   group without assuming a linear age effect.
 #' @param age_group_cutpoints Comma-separated age cutpoints for creating age
-#'   groups. For example, 50, 65, 75 creates groups less than 50, 50-64, 65-74,
-#'   75 and above.
+#'   groups. For example, 50, 65, 75 creates groups 50 or younger, over 50 to
+#'   65, over 65 to 75, and over 75. Each upper cutpoint is included in the
+#'   preceding group.
 #' @param age_time_scale Use biological age as the time axis instead of
 #'   follow-up time. The Cox model becomes Surv(age_at_entry, age_at_event,
 #'   event). Most rigorous for cancer epidemiology where age drives risk.
@@ -3086,8 +3283,8 @@ survivalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   allow more flexible hazard shapes but may lead to overfitting. Used only
 #'   for Royston-Parmar splines.
 #' @param spline_scale Scale for spline-based models. Hazard scale models log
-#'   hazard function, odds scale models log cumulative odds, normal scale models
-#'   normal scores.
+#'   cumulative hazard, odds scale models log cumulative odds, normal scale
+#'   models normal scores.
 #' @param compare_distributions Fit and compare multiple parametric
 #'   distributions using AIC/BIC criteria. Helps select the best-fitting
 #'   distribution for your data.
@@ -3118,16 +3315,17 @@ survivalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   tumor size, biomarker levels, and follow-up duration.
 #' @param rcs_knots Number of knots for restricted cubic splines. 3 knots = 2
 #'   df (simplest), 4 knots = 3 df (recommended default), 5 knots = 4 df (more
-#'   flexible). Knots are placed at Harrell-recommended percentiles. More knots
-#'   allow detection of complex non-linear patterns but may overfit with small
-#'   samples.
+#'   flexible). Uses natural splines with interior knots at equally spaced
+#'   quantiles and boundary knots at the observed minimum and maximum, as in
+#'   splines::ns(). More knots allow detection of complex non-linear patterns
+#'   but may overfit with small samples.
 #' @param bootstrapValidation Performs bootstrap internal validation of
 #'   discrimination and calibration slope.
 #' @param bootstrapValN Number of bootstrap resamples used for internal
 #'   validation.
 #' @param seed Random seed for the reproducible bootstrap internal validation.
 #'   Change this value to obtain a different bootstrap draw; the default (42)
-#'   reproduces the previous fixed behaviour.
+#'   reproduces the previous fixed behavior.
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$cifTable} \tab \tab \tab \tab \tab a table \cr

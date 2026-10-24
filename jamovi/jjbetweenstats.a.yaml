@@ -129,7 +129,7 @@ options:
       default: 20250101
       description:
           R: >
-            Random seed for the statistics computed by resampling or posterior sampling (robust tests, Bayesian estimates, and some nonparametric effect-size intervals). The plot caption names the seed whenever it affected the numbers shown. The default reproduces the previous fixed behaviour.
+            Random seed for the statistics computed by resampling or posterior sampling (robust tests, Bayesian estimates, and some nonparametric effect-size intervals). The plot caption names the seed whenever it affected the numbers shown. The default reproduces the previous fixed behavior.
 
     - name: pairwisecomparisons
       title: Pairwise comparisons
@@ -355,7 +355,7 @@ options:
           name: jama
         - title: New England Journal of Medicine (nejm)
           name: nejm
-        - title: Grey scale
+        - title: Gray scale
           name: grey
         - title: Default ggplot2
           name: default

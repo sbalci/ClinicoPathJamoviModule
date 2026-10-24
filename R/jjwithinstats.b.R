@@ -1133,7 +1133,7 @@ jjwithinstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 .("This reports a Bayes factor, quantifying the evidence for and against the null hypothesis."), "</li>",
                 "</ul>",
                 "<p><strong>", .("Missing data:"), "</strong> ",
-                .("Only subjects with a value for every selected measurement are analysed, because a paired comparison needs complete records."), "</p>",
+                .("Only subjects with a value for every selected measurement are analyzed, because a paired comparison needs complete records."), "</p>",
                 "<p><strong>", .("Note on the Wilcoxon p-value:"), "</strong> ",
                 .("The signed-rank p-value is computed from the normal approximation with a continuity correction, not from the exact permutation distribution that stats::wilcox.test uses by default, so it may differ from base R for small samples without ties."), "</p>"
             ))

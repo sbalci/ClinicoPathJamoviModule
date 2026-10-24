@@ -54,9 +54,9 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             }
 
             # Translated once, outside the closure, as the other panels do.
-            prefix_error   <- .("ERROR:")
-            prefix_warning <- .("WARNING:")
-            prefix_note    <- .("NOTE:")
+            prefix_error   <- .("Error:")
+            prefix_warning <- .("Warning:")
+            prefix_note    <- .("Note:")
             blocks <- vapply(private$.noticeList, function(notice) {
                 prefix <- switch(notice$type,
                     ERROR          = prefix_error,
@@ -1585,7 +1585,7 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     "STRONG_WARNING",
                     .("Rows with missing values were excluded"),
                     sprintf(
-                        .("%d of %d rows (%.1f%%) had a missing value on %s and were dropped before the contingency table was built, so every result below describes the remaining %d rows. Missing values are never counted as a category of their own: that would add a row or column and change the degrees of freedom of the test. If the dropped rows may differ systematically from the rest, say so when reporting the association, or analyse missingness explicitly."),
+                        .("%d of %d rows (%.1f%%) had a missing value on %s and were dropped before the contingency table was built, so every result below describes the remaining %d rows. Missing values are never counted as a category of their own: that would add a row or column and change the degrees of freedom of the test. If the dropped rows may differ systematically from the rest, say so when reporting the association, or analyze missingness explicitly."),
                         n_dropped, n_before, 100 * n_dropped / n_before,
                         paste(analysis_vars, collapse = ", "), nrow(data)))
 
@@ -1954,7 +1954,7 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     fisher_reason <- if (identical(self$options$testSelection, "fisher"))
                         .("Method notice: Fisher's exact test was selected in the options and used for every pairwise comparison; the reported p-values use that exact method.")
                     else
-                        .("Method notice: Pairwise comparisons with expected cell counts below 5 are automatically analysed with Fisher's exact test; the reported p-values use that exact method.")
+                        .("Method notice: Pairwise comparisons with expected cell counts below 5 are automatically analyzed with Fisher's exact test; the reported p-values use that exact method.")
                     fisher_notice <- htmltools::div(
                         style = "padding: 10px; background-color: rgba(33, 152, 239, 0.13); border-left: 4px solid #1976d2; margin: 8px 0; color: inherit;",
                         htmltools::strong(fisher_reason),

@@ -98,7 +98,7 @@ children:
     collapsed: true
     children:
       - type: Label
-        label: Greyed out when the analysis focus above already includes them.
+        label: Grayed out when the analysis focus above already includes them.
       - type: CheckBox
         name: show_variability_plots
         label: Variability plots

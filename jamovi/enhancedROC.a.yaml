@@ -60,13 +60,13 @@ options:
             Malignant). Required for a nominal or ordinal outcome: levels are never chosen
             from their order. A numeric outcome coded 0/1 is read as 1 = positive without a
             choice; for any other numeric coding, set the outcome's measure type to Nominal in
-            Data > Setup so its values are listed here. Every other level is analysed as
+            Data > Setup so its values are listed here. Every other level is analyzed as
             negative. The Outcome coding table shows which level was used and how.
           R: >
             Level of outcome treated as the positive class (condition present), matched
             exactly. Pass NULL to leave it unset: a numeric outcome coded 0/1 then reads 1 as
             positive, and any other outcome leaves the analysis waiting for a choice, because
-            levels are never chosen from their order. Every other level is analysed as
+            levels are never chosen from their order. Every other level is analyzed as
             negative (pooled when there are more than two). A numeric outcome must have
             exactly two values; to choose among more, make it a factor.
 
@@ -125,7 +125,7 @@ options:
       type: Bool
       default: true
       description: >
-          Find the optimal cutoff by maximising the Youden index (sensitivity + specificity - 1),
+          Find the optimal cutoff by maximizing the Youden index (sensitivity + specificity - 1),
           subject to the minimum sensitivity/specificity below. When off, the cutoff closest to
           the top-left corner of the ROC curve is reported instead. The minimum sensitivity and
           specificity are used only by the Youden search; with this off they are not applied and a
@@ -221,7 +221,7 @@ options:
       description: >
         Bootstrap confidence interval for the partial AUC, using the resample count, interval
         type (BCa/percentile/basic) and stratification set above. The interval is for the raw
-        partial AUC on the chosen focus range, not for the McClish-normalised value.
+        partial AUC on the chosen focus range, not for the McClish-normalized value.
 
     - name: stratifiedBootstrap
       title: "Stratified bootstrap"
@@ -879,7 +879,7 @@ options:
           Fixed score cutoffs on the marker's own scale, comma separated. The default 0.5 is meant
           for predicted probabilities (Prediction scale = probability); for a raw marker enter
           cutoffs inside its observed range. A warning names any cutoff that classifies every
-          analysed patient the same way.
+          analyzed patient the same way.
     - name: utilityThreshold
       title: Utility threshold (harm/benefit)
       type: Number
@@ -900,14 +900,14 @@ options:
       description: >
           Size of the population the projected workload counts are scaled to. Used for every
           projected row: the main prevalence when Observed prevalence is unticked, and every
-          additional target prevalence. Observed rows count the analysed patients instead.
+          additional target prevalence. Observed rows count the analyzed patients instead.
     - name: analysisUnit
       title: Unit of observation
       type: String
       default: slide
       description: >
           What one row is (slide, core, patient...). Printed in the frozen-model report; every
-          analysed row weighs equally in its metrics.
+          analyzed row weighs equally in its metrics.
     - name: prevalenceScenarios
       title: Additional target prevalences (proportions)
       type: String
@@ -1033,7 +1033,7 @@ options:
       - factor
       - numeric
       description: >
-          Optional site or centre of each row. The frozen-model report then adds one set of metrics
+          Optional site or center of each row. The frozen-model report then adds one set of metrics
           per site, conditional on the observed sites, and resamples within sites. Every row needs
           a site, and a patient may not appear at two sites.
     - name: partitionID

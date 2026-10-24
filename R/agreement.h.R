@@ -4413,9 +4413,9 @@ agreementBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   Shows where raters agree strongly, where they consistently disagree, and
 #'   which category confusions are most common. Particularly valuable for
 #'   multi-category classifications with complex disagreement patterns.
-#' @param heatmapColorScheme Colour palette for the heatmap. Every scheme
-#'   shows the share of all cases in a cell on a fixed 0 to 100 percent scale,
-#'   so colour means frequency, on or off the diagonal, not agreement.
+#' @param heatmapColorScheme Color palette for the heatmap. Every scheme shows
+#'   the share of all cases in a cell on a fixed 0 to 100 percent scale, so
+#'   color means frequency, on or off the diagonal, not agreement.
 #'   Blue-White-Red: blue for empty or rare cells, white at half of all cases,
 #'   red above half. Traffic light: red for few cases through green for many, so
 #'   a crowded off-diagonal cell is green too. Viridis is perceptually uniform
@@ -4535,7 +4535,7 @@ agreementBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   differences, with a distribution-free order-statistic confidence interval;
 #'   a finite upper limit needs at least 36 pairs at 90 percent coverage and a
 #'   95 percent confidence level, and more at higher settings. It is a single
-#'   number summarising how far apart the two methods get, and it is useful
+#'   number summarizing how far apart the two methods get, and it is useful
 #'   alongside Bland-Altman when the differences are not normal. Note the scope:
 #'   this estimator is unconditional, so it does NOT model variability as a
 #'   function of magnitude and does not adjust for the case mix of the sample -
@@ -4560,7 +4560,7 @@ agreementBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   quantitative (continuous) and nominal (categorical) ratings. For nominal
 #'   ratings it is numerically identical to Conger's exact kappa, which the
 #'   'Exact kappa (3+ raters)' option also reports. The multivariate form of
-#'   iota - several variables scored by the same raters, summarised in one
+#'   iota - several variables scored by the same raters, summarized in one
 #'   coefficient - is NOT computed by this analysis, because no option here can
 #'   say which columns belong to which variable; enter the rater columns of one
 #'   variable at a time.
@@ -4719,8 +4719,8 @@ agreementBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   cytology). Cases with no unique mode (ties) are excluded.
 #' @param showItemModalGuide Show educational guide for per-category
 #'   item-modal agreement.
-#' @param hierarchicalKappa Agreement for multi-centre designs in which every
-#'   case belongs to one cluster (institution, centre or scanner) and the same
+#' @param hierarchicalKappa Agreement for multi-center designs in which every
+#'   case belongs to one cluster (institution, center or scanner) and the same
 #'   raters score the cases. Categorical ratings get cluster-specific kappa and
 #'   a stratified kappa (the cluster kappas weighted by cluster size, Barlow,
 #'   Lai and Azen 1991) shown beside the pooled kappa. Continuous ratings get
@@ -4743,7 +4743,7 @@ agreementBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param clusterSpecificKappa Agreement within each cluster separately, to
 #'   see whether it is similar across sites: Cohen's or Fleiss' kappa for
 #'   categorical ratings, the ICC for continuous ratings. Useful for quality
-#'   control in multi-centre studies.
+#'   control in multi-center studies.
 #' @param varianceDecomposition Share of the rating variance due to cases,
 #'   raters, clusters and residual error, from a linear mixed model. Continuous
 #'   ratings only; for categorical ratings the variances are estimated by the
@@ -5058,10 +5058,10 @@ agreementBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param showSampleSizeGuide Show educational guide for planning agreement
 #'   study sample size.
 #' @param seed Random seed for everything random in this analysis: the
-#'   bootstrap resampling, the k-means starting centres of rater and case
+#'   bootstrap resampling, the k-means starting centers of rater and case
 #'   clustering, and the random subsample the case-cluster heatmap draws above
 #'   200 cases. Change this value to obtain a different draw; the default (42)
-#'   reproduces the previous fixed behaviour.
+#'   reproduces the previous fixed behavior.
 #' @param specificCIMethod Bootstrap preserves paired observations and
 #'   suppresses intervals with undefined or constant draws. It is exploratory;
 #'   simulations found undercoverage even with 60 clusters. Legacy Wilson uses

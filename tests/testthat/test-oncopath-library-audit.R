@@ -160,7 +160,8 @@ test_that("umbrella updater keeps the production OncoPath helper boundary minima
   expect_equal(helpers$errors, character(0))
   # swimmerplot needs only the follow-up estimator; the RECIST and IHC engines,
   # the survival formula and event-coding helpers must not leak into OncoPath.
-  allowed <- c("utils.R", "utils-followup.R", "utils-patient-ids.R", "swimmerplot-html.R")
+  # utils-notices.R: the notice renderer all four analyses share (library-audit 2026-10-23 OncoPath [LOW])
+  allowed <- c("utils.R", "utils-followup.R", "utils-patient-ids.R", "swimmerplot-html.R", "utils-notices.R")
   expect_equal(setdiff(helpers$files, allowed), character(0))
   if (length(parked) == 0) expect_setequal(helpers$files, allowed)
 
@@ -850,11 +851,11 @@ test_that("diagnosticmeta clinical interpretation tables are Table elements, not
   expect_true(!is.null(p_val) && is.finite(p_val) && p_val > 0 && p_val < 1)
 })
 
-# library-audit 2026-09-22 OncoPath [LOW] REJECTED: dynamic runtime jmvcore::Notice insertion
-#   in .run() accumulates across cycles (Group$remove() is broken in jmvcore) and Notice only
-#   supports unformatted single-line plain text. The old claims ('no native notice element' and
-#   'Notice serialization error') were incorrect generalizations of Group$insert() bounds bugs
-#   and have been retracted from code comments and breadcrumbs (guide section 13).
+# library-audit 2026-09-22 OncoPath [LOW] REJECTED: a jmvcore::Notice holds one plain-text string
+#   with no title, and these panels are a title plus a paragraph. Three earlier reasons were wrong
+#   and must not come back: 'no native notice element', 'Notice serialization error' (it was
+#   Group$insert()'s missing bounds check) and 'insert() in .run() accumulates across runs'
+#   (2026-10-23 OncoPath [LOW]; disproved by test-zzz-jmvcore-notice-run-cycle.R). Guide section 13.
 test_that("stale notice serialization and native notice claims are retracted across OncoPath", {
   skip_if_no_oncopath_source()
   absent <- audit_absent(oncopath_root, audit_analyses)
@@ -864,6 +865,8 @@ test_that("stale notice serialization and native notice claims are retracted acr
                  info = paste(f, "still claims 'no native notice element'"))
     expect_false(grepl("serialization error", src, ignore.case = TRUE),
                  info = paste(f, "still claims 'serialization error'"))
+    expect_false(grepl("accumulates across runs", src, fixed = TRUE),
+                 info = paste(f, "still claims run-time notices accumulate across runs"))
     expect_true(grepl("library-audit 2026-09-22 OncoPath \\[LOW\\] REJECTED:", src),
                 info = paste(f, "missing updated 2026-09-22 REJECTED breadcrumb"))
   }
@@ -957,10 +960,8 @@ test_that("NEWS.md has a matching heading for released version 1.0.83", {
   # 3. 1.0.82.02 must no longer be an unreleased placeholder heading in NEWS.md
   expect_false(any(grepl("^#+[[:space:]]+OncoPath 1\\.0\\.82\\.02", news)),
                info = "NEWS.md still contains unreleased 4-part dev heading 1.0.82.02")
-
-  # 4. Breadcrumb
-  expect_true(any(grepl("library-audit 2026-09-22 OncoPath \\[LOW\\] DONE: retitled 1.0.82.02", news)),
-              info = "NEWS.md missing library-audit 2026-09-22 DONE breadcrumb")
+  # A breadcrumb assertion on NEWS.md was removed: NEWS.md is the GitHub release body, and review
+  # bookkeeping does not belong there (library-audit 2026-10-23 OncoPath [LOW]; guide section 14).
 })
 
 # library-audit 2026-09-22 OncoPath [LOW] DONE: aligned RECIST claims across DESCRIPTION and README.md
@@ -985,8 +986,10 @@ test_that("module prose and clinical capability claims agree across files", {
               info = "DESCRIPTION missing qualified RECIST thresholds wording matching 0000.yaml")
   expect_false(grepl("RECIST Criteria Support.*Built-in Response Evaluation Criteria In Solid Tumors", readme_text),
                info = "README.md still promises built-in RECIST guidelines instead of adapted thresholds")
-  expect_true(grepl("Adapted RECIST (v1\\.1 )?Thresholds", readme_text),
-              info = "README.md missing qualified Adapted RECIST Thresholds section")
+  # library-audit 2026-10-23 OncoPath [LOW] DONE: assert the disclaimer, not a heading the README may
+  #   reword (the old `Adapted RECIST Thresholds` heading test failed on a more accurate rewrite)
+  expect_true(grepl("not a RECIST v1\\.1[[:space:]]+implementation", readme_text),
+              info = "README.md no longer says the analysis is not a RECIST v1.1 implementation")
 
   # 2. Issue URLs: every issue URL across DESCRIPTION, 0000.yaml, README.md, CITATION.cff must point to sbalci/OncoPath
   issue_regex <- "https?://github\\.com/([\\w.-]+/[\\w.-]+?)(?:\\.git)?/issues"
@@ -1016,10 +1019,8 @@ test_that("module prose and clinical capability claims agree across files", {
   expect_equal(length(dataset_descs), length(unique(dataset_descs)),
                info = "0000.yaml has duplicate dataset descriptions")
 
-  # 5. Breadcrumb present in DESCRIPTION or README.md
-  expect_true(grepl("library-audit 2026-09-22 OncoPath \\[LOW\\] DONE:", readme_text) ||
-              grepl("library-audit 2026-09-22 OncoPath \\[LOW\\] DONE:", desc_text),
-              info = "Missing library-audit 2026-09-22 DONE breadcrumb for prose alignment")
+  # A check that DESCRIPTION or README.md carry a review breadcrumb was removed: users read both
+  # (library-audit 2026-10-23 OncoPath [LOW]; guide section 14).
   audit_skip_absent(absent, oncopath_root)
 })
 
@@ -1027,3 +1028,131 @@ test_that("module prose and clinical capability claims agree across files", {
 
 
 
+
+# library-audit 2026-10-23 OncoPath [LOW] DONE: testthat's failure output and personal editor config
+#   stay out of the repository; a .gitignore entry alone does not untrack a file already committed
+test_that("failing-test output and personal config are ignored and not tracked", {
+  skip_if_no_oncopath_source()
+  package <- read.dcf(oncopath_file("DESCRIPTION"), fields = "Package")[[1]]
+  skip_if(package != "OncoPath", "the umbrella's own repository is checked separately")
+  git <- Sys.which("git")
+  skip_if(!nzchar(git) || !dir.exists(oncopath_file(".git")), "not a git checkout")
+  scratch <- c("tests/testthat/_problems/x-1.R", "tests/testthat/testthat-problems.rds",
+               ".claude/settings.local.json")
+  ignored <- suppressWarnings(system2(git, c("-C", shQuote(oncopath_root), "check-ignore",
+                                             "--no-index", scratch), stdout = TRUE))
+  expect_setequal(ignored, scratch)
+  tracked <- setdiff(system2(git, c("-C", shQuote(oncopath_root), "ls-files"), stdout = TRUE),
+                     system2(git, c("-C", shQuote(oncopath_root), "ls-files", "--deleted"), stdout = TRUE))
+  expect_false(any(grepl("(^|/)_problems/|testthat-problems\\.rds$", tracked)),
+               info = paste(grep("_problems|testthat-problems", tracked, value = TRUE), collapse = ", "))
+})
+
+# library-audit 2026-10-23 OncoPath [LOW] DONE: user-visible text is sentence case (notice titles and
+#   List choices), American spelling, and one name for the colour-blind-safe palette (guide section 12)
+test_that("OncoPath labels: sentence case, American spelling, one palette name", {
+  skip_if_no_oncopath_source()
+  absent <- audit_absent(oncopath_root, audit_analyses)
+  british <- paste0("\\b(tumours?|analys(ed|ing|e)|colou?rs?|coloured|colouring|labell(ed|ing)|",
+                    "modell(ed|ing)|summaris(e|es|ed|ing)|optimis(e|ed|er|ation)|behaviours?|centre|",
+                    "(milli|centi)metres?|favour)\\b")
+  british <- sub("colou?rs?", "colours?", british, fixed = TRUE)
+  dot_literals <- function(src) {
+    lines <- src[!grepl("^\\s*#", src)]
+    m <- regmatches(lines, gregexpr('(?<![\\w.])\\.\\(\\s*"((?:[^"\\\\]|\\\\.)*)"', lines, perl = TRUE))
+    sub('^\\.\\(\\s*"', "", sub('"$', "", unlist(m)))
+  }
+  yaml_text <- function(node) {
+    if (!is.list(node)) return(character(0))
+    keep <- names(node) %in% c("title", "description", "label", "menuTitle", "menuSubtitle", "ui", "R", "main")
+    c(unlist(Filter(is.character, node[keep])), unlist(lapply(node, yaml_text)))
+  }
+  for (a in setdiff(audit_analyses, absent)) {
+    r_files <- c(file.path("R", paste0(a, ".b.R")),
+                 file.path("R", list.files(oncopath_file("R"), pattern = paste0("^", a, "-.*\\.R$"))))
+    lits <- unlist(lapply(r_files, function(f) dot_literals(readLines(oncopath_file(f), warn = FALSE))))
+    words <- lapply(regmatches(lits, gregexpr("[A-Za-z]{2,}", lits)), identity)
+    shouting <- lits[vapply(words, function(w) length(w) >= 2 && any(nchar(w) >= 5) &&
+                                    all(w == toupper(w)), logical(1))]
+    expect_identical(shouting, character(0), info = paste(a, "all-caps .() strings"))
+    ytext <- unlist(lapply(c("a", "r", "u"), function(k)
+      yaml_text(yaml::read_yaml(oncopath_file("jamovi", sprintf("%s.%s.yaml", a, k))))))
+    brit <- unname(grep(british, c(lits, ytext), value = TRUE, ignore.case = TRUE, perl = TRUE))
+    expect_identical(brit, character(0), info = paste(a, "British spelling"))
+    opts <- yaml::read_yaml(oncopath_file("jamovi", paste0(a, ".a.yaml")))$options
+    choices <- unlist(lapply(Filter(function(o) identical(o$type, "List"), opts),
+                             function(o) vapply(o$options, function(x) x$title %||% "", "")))
+    title_case <- unname(choices)[vapply(regmatches(choices, gregexpr("[A-Za-z]{3,}", choices)), function(w) {
+      w <- w[w != toupper(w)]
+      length(w) >= 2 && all(grepl("^[A-Z]", w))
+    }, logical(1))]
+    expect_identical(title_case, character(0), info = paste(a, "Title Case List choices"))
+    blind <- grep("colou?r.?blind", choices, value = TRUE, ignore.case = TRUE)
+    expect_true(all(startsWith(blind, "Color-blind safe")), info = paste(a, paste(blind, collapse = "; ")))
+  }
+  audit_skip_absent(absent, oncopath_root)
+})
+
+# library-audit 2026-10-23 OncoPath [LOW] DONE: the four analyses share one notice renderer
+#   (R/utils-notices.R): one banner style, most severe first, severity named in words, never ""
+test_that("OncoPath notices share one renderer: one look, most severe first, never blank", {
+  skip_if_no_oncopath_source()
+  absent <- audit_absent(oncopath_root, audit_analyses)
+  for (a in setdiff(audit_analyses, absent)) {
+    src <- read_oncopath("R", paste0(a, ".b.R"))
+    body <- regmatches(src, regexpr("(?s)\\.renderNotices = function\\(\\) \\{.*?\\n        \\},", src, perl = TRUE))
+    expect_length(body, 1)
+    expect_match(body, "notice_panel_html(self, ", fixed = TRUE, info = a)
+    expect_false(grepl("rgba\\(|white-space|setContent\\(\"\"\\)", body), info = a)
+  }
+  if (length(audit_loaded("waterfall")) == 1) {
+    an <- waterfallClass$new(options = waterfallOptions$new(), data = data.frame())
+    expect_identical(notice_panel_html(an, list()), "<div></div>")
+    ns <- notice_append(list(), "INFO", "Later", "x")
+    ns <- notice_append(ns, "ERROR", "First <b>", "line one\nline two")
+    expect_length(notice_append(ns, "ERROR", "First <b>", "line one\nline two"), 2)
+    html <- notice_panel_html(an, ns)
+    expect_lt(regexpr("Error: First &lt;b&gt;", html, fixed = TRUE), regexpr("Note: Later", html, fixed = TRUE))
+    expect_match(html, "white-space: pre-line", fixed = TRUE)
+  }
+  audit_skip_absent(absent, oncopath_root)
+  audit_skip_unloaded("waterfall")
+})
+
+# library-audit 2026-10-23 OncoPath [LOW] DONE: variables first, then top-level CollapseBoxes; a
+#   CollapseBox nested among always-open sections pushes the panel down when opened (guide section 12)
+test_that("options panels keep every CollapseBox at the top level", {
+  skip_if_no_oncopath_source()
+  absent <- audit_absent(oncopath_root, audit_analyses, "jamovi/%s.u.yaml")
+  nested <- function(node, depth) {
+    if (!is.list(node)) return(character(0))
+    here <- if (identical(node$type, "CollapseBox") && depth > 0) node$label else character(0)
+    c(here, unlist(lapply(node$children, nested, depth = depth + 1)))
+  }
+  for (a in setdiff(audit_analyses, absent)) {
+    u <- yaml::read_yaml(oncopath_file("jamovi", paste0(a, ".u.yaml")))
+    expect_length(unlist(lapply(u$children, nested, depth = 0)), 0)
+  }
+  if (!"diagnosticmeta" %in% absent) {
+    top <- yaml::read_yaml(oncopath_file("jamovi", "diagnosticmeta.u.yaml"))$children
+    expect_identical(vapply(top, function(x) x$type, ""), c("VariableSupplier", rep("CollapseBox", 4)))
+    expect_identical(vapply(top[-1], function(x) isTRUE(x$collapsed), TRUE), c(FALSE, TRUE, TRUE, TRUE))
+  }
+  audit_skip_absent(absent, oncopath_root)
+})
+
+# library-audit 2026-10-23 OncoPath [LOW] DONE: user-visible text names only what ships; a pointer to an
+#   analysis "available in upcoming releases" sends the reader to an empty menu (guide section 27)
+test_that("OncoPath text does not point to analyses that have not shipped", {
+  skip_if_no_oncopath_source()
+  absent <- audit_absent(oncopath_root, audit_analyses)
+  promise <- "upcoming release|future release|coming soon|will be available|not yet available"
+  for (a in setdiff(audit_analyses, absent)) {
+    src <- readLines(oncopath_file("R", paste0(a, ".b.R")), warn = FALSE)
+    yml <- readLines(oncopath_file("jamovi", paste0(a, ".a.yaml")), warn = FALSE)
+    hits <- grep(promise, c(src[!grepl("^\\s*#", src)], yml[!grepl("^\\s*#", yml)]),
+                 value = TRUE, ignore.case = TRUE)
+    expect_identical(hits, character(0), info = a)
+  }
+  audit_skip_absent(absent, oncopath_root)
+})

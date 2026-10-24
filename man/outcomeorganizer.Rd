@@ -59,7 +59,7 @@ applying event hierarchies.}
 administrative censoring actually truncate follow-up and reset event
 status, and lets the event hierarchy keep the earliest priority event per
 patient instead of writing a later one back onto earlier records. Leave
-empty to keep the previous behaviour.}
+empty to keep the previous behavior.}
 
 \item{analysistype}{The type of survival analysis to prepare the outcome
 for.}

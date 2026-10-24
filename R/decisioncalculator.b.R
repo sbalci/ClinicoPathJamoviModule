@@ -67,10 +67,10 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) {
                 # output item renders this literally (no markup, no injection surface).
                 blocks <- vapply(ordered_notices, function(notice) {
                     prefix <- switch(notice$type,
-                        ERROR          = paste0(.("ERROR"), ": "),
-                        STRONG_WARNING = paste0(.("STRONG WARNING"), ": "),
-                        WARNING        = paste0(.("WARNING"), ": "),
-                        INFO           = paste0(.("INFO"), ": "),
+                        ERROR          = paste0(.("Error"), ": "),
+                        STRONG_WARNING = paste0(.("Strong warning"), ": "),
+                        WARNING        = paste0(.("Warning"), ": "),
+                        INFO           = paste0(.("Info"), ": "),
                         ""
                     )
                     paste0(prefix, notice$title, "\n", notice$content)

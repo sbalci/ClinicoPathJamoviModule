@@ -877,7 +877,7 @@ waterfallBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 
 #' Treatment Response: Patient-Level Burden
 #'
-#' Use this when you have one tumour burden number per patient: either a 
+#' Use this when you have one tumor burden number per patient: either a 
 #' percent change from baseline you have already calculated (one row per 
 #' patient), or a single measurement recorded at each visit (one row per 
 #' patient per visit). It draws waterfall and spider plots, assigns each 
@@ -892,9 +892,8 @@ waterfallBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' detect a new lesion, or judge non-target progression, and it cannot apply 
 #' the 4-week confirmation rule (a confirmation column only adds markers to 
 #' the plot; to count confirmed responses, supply confirmed categories through 
-#' the category override). If your data list each lesion separately, use the 
-#' lesion-level RECIST v1.1 analysis. It will be available in upcoming 
-#' releases.
+#' the category override). If your data list each lesion separately, sum the 
+#' target lesions per patient and visit first.
 #' 
 #' @param data The data as a data frame.
 #' @param patientID Variable containing patient identifiers (e.g., PT001,
@@ -910,18 +909,18 @@ waterfallBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   from treatment start). Required for spider plot and raw measurement
 #'   processing. Baseline should be time = 0.
 #' @param groupVar Optional grouping variable for coloring bars by patient
-#'   groups (e.g., treatment arms, disease subtypes). Bars are coloured by group
-#'   when Color by is set to Patient Groups (jamovi sets it when a group is
+#'   groups (e.g., treatment arms, disease subtypes). Bars are colored by group
+#'   when Color by is set to Patient groups (jamovi sets it when a group is
 #'   chosen; from R, set colorBy = "group").
 #' @param inputType Specify data format: 'raw' for actual tumor measurements
 #'   (requires time variable) or 'percentage' for pre-calculated percentage
 #'   changes from baseline
-#' @param measurementUnit Unit of the raw tumour measurements (raw input
-#'   only). When stated, progression also requires the RECIST v1.1 absolute
-#'   increase of at least 5 mm over the nadir, for the PD category and for
-#'   progression in time to response and duration of response. Without it a
-#'   small sum can be called progression on the 20 percent rule alone.
-#'   Percentage input carries no size, so the rule cannot apply there.
+#' @param measurementUnit Unit of the raw tumor measurements (raw input only).
+#'   When stated, progression also requires the RECIST v1.1 absolute increase of
+#'   at least 5 mm over the nadir, for the PD category and for progression in
+#'   time to response and duration of response. Without it a small sum can be
+#'   called progression on the 20 percent rule alone. Percentage input carries
+#'   no size, so the rule cannot apply there.
 #' @param sortBy Sort the waterfall plot by best response or patient ID.
 #' @param sortDirection Direction for the response sort. 'conventional' places
 #'   the highest (worst) response on the left and the lowest (best, most
@@ -952,11 +951,11 @@ waterfallBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   reported.
 #' @param showCategoryLabels Print the response category (CR, PR, SD, PD)
 #'   above each waterfall bar, so the category can be read directly instead of
-#'   being mapped back from the bar colour.
+#'   being mapped back from the bar color.
 #' @param showSpiderLabels Label the end of every spider trajectory with its
 #'   patient ID, so an outlying line can be traced to a patient without reading
 #'   a large legend.
-#' @param annotationVars Optional patient-level variables drawn as coloured
+#' @param annotationVars Optional patient-level variables drawn as colored
 #'   tracks beneath the waterfall bars, aligned to the same patient ordering.
 #'   One row of tiles per variable. Use for biomarker status, mutation, prior
 #'   therapy, treatment arm or any covariate you want read off against each
@@ -975,17 +974,17 @@ waterfallBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   (requires Group Variable).
 #' @param colorScheme Color scheme for waterfall plot. 'Colorful' provides
 #'   distinct colors for group-based coloring; 'jamovi (follow global)' takes
-#'   its colours from the palette set in jamovi's preferences, so the figure
+#'   its colors from the palette set in jamovi's preferences, so the figure
 #'   matches every other plot in the document. The former 'jamovi' choice drew
-#'   the RECIST colours and was identical to 'RECIST'; it was removed in favour
-#'   of that name.
+#'   the RECIST colors and was identical to 'RECIST'; it was removed in favor of
+#'   that name.
 #' @param barAlpha Transparency of bars in waterfall plot.
 #' @param barWidth Width of bars in waterfall plot.
 #' @param showWaterfallPlot Display the waterfall plot showing best response
 #'   for each patient.
 #' @param showSpiderPlot Display spider plot showing response trajectories
 #'   over time (requires time variable).
-#' @param spiderColorBy Colouring for the spider plot: each point by its own
+#' @param spiderColorBy Coloring for the spider plot: each point by its own
 #'   change from baseline (-30 percent or less vs above -30 percent), or each
 #'   patient by group.
 #' @param spiderColorScheme Color scheme for spider plot lines and points.
@@ -1014,7 +1013,7 @@ waterfallBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param seed Random seed for the reproducible bootstrap confidence interval
 #'   of the median response (used when 'Show Confidence Interval' is enabled).
 #'   Change it to draw a different bootstrap sample; the default (123)
-#'   reproduces the previous fixed behaviour.
+#'   reproduces the previous fixed behavior.
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$guidedAnalysis} \tab \tab \tab \tab \tab a html \cr

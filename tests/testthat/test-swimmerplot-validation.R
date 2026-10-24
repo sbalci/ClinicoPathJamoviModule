@@ -61,7 +61,7 @@ test_that("C01-C05 hand-calculated cohort summary and duration statistics match 
     expect_equal(val_summary(s, "Number of Patients"), 4)
     expect_equal(val_summary(s, "Total Observations"), 4)
     expect_equal(val_summary(s, "Mean Duration"), 25.0)
-    expect_equal(val_summary(s, "Median Duration \\(observed\\)"), 25.0)
+    expect_equal(val_summary(s, "Median duration \\(observed\\)"), 25.0)
     expect_equal(val_summary(s, "Total Person-Time"), 100.0)
 })
 

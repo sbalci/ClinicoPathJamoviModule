@@ -913,7 +913,7 @@ datetimeconverterClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     type = "WARNING",
                     title = .("Invalid Timezone"),
                     content = .fmt(
-                        .("Timezone {requested} is not a recognised Olson timezone. Falling back to the system default ({fallback})."),
+                        .("Timezone {requested} is not a recognized Olson timezone. Falling back to the system default ({fallback})."),
                         requested = tz_option, fallback = system_label)
                 )
                 return(list(

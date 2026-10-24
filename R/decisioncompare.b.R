@@ -2788,7 +2788,7 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
                 # (VAL-decisioncompare-11).
                 diffTable$setNote(
                     "direction",
-                    jmvcore::.("Each difference is the first-named test minus the second: for 'A vs B', a positive value favours A and a negative value favours B.")
+                    jmvcore::.("Each difference is the first-named test minus the second: for 'A vs B', a positive value favors A and a negative value favors B.")
                 )
 
                 comp <- private$.extractComparisonVectors(test_results, test1, test2)
@@ -3362,7 +3362,7 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
                     # cases, which are not the sample when some of its results are missing or
                     # excluded; name that denominator rather than "this sample".
                     sprintf(
-                        jmvcore::.("At the %1$s%% disease prevalence among the %2$d cases analysed for %3$s, %4$s positive predictive value, %5$s negative predictive value, and %6$s overall accuracy were observed; predictive values and accuracy change with prevalence and would need to be recomputed for a population with a different disease rate."),
+                        jmvcore::.("At the %1$s%% disease prevalence among the %2$d cases analyzed for %3$s, %4$s positive predictive value, %5$s negative predictive value, and %6$s overall accuracy were observed; predictive values and accuracy change with prevalence and would need to be recomputed for a population with a different disease rate."),
                         private$.pctAdaptive(sample_prev_pct / 100), as.integer(n_total_best),
                         private$.safeHtmlOutput(best_test), ppv_pct, npv_pct, acc_pct)
                 }
@@ -4001,7 +4001,7 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
                             # A significant result implies b != c.
                             first_better <- paired$only1 > paired$only2
                             html <- paste0(html, sprintf(
-                                jmvcore::.("<span style='color:inherit;'><b>Significant difference detected.</b></span> %1$s classified significantly more cases correctly than %2$s: of the %3$d cases where exactly one test was correct, %4$d favoured %1$s. McNemar's test compares overall correctness only; the two tests may still differ in the sensitivity/specificity balance.</p>"),
+                                jmvcore::.("<span style='color:inherit;'><b>Significant difference detected.</b></span> %1$s classified significantly more cases correctly than %2$s: of the %3$d cases where exactly one test was correct, %4$d favored %1$s. McNemar's test compares overall correctness only; the two tests may still differ in the sensitivity/specificity balance.</p>"),
                                 if (first_better) name1 else name2,
                                 if (first_better) name2 else name1,
                                 paired$only1 + paired$only2,

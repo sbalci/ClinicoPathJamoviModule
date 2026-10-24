@@ -109,7 +109,7 @@ test_that("W15/W16: a follow-up row with a missing measurement does not make the
   w <- res$waterfallplot$state$data$waterfall
   expect_equal(as.character(w$recist_category[w$pid == "P5"]), "Unknown")
   expect_equal(wf_metric(res, "Evaluable"), "4")
-  expect_match(wf_notices(res), "NOT RESPONSE-EVALUABLE")
+  expect_match(wf_notices(res), "Not response-evaluable")
 })
 
 test_that("W17: several rows per patient without a time variable are reported", {
@@ -142,7 +142,7 @@ test_that("W33: a cohort with no evaluable patient stops with one clear message"
 test_that("W34/W35: with percentage input the exclusion reason is the missing value, not the baseline", {
   d <- data.frame(pid = paste0("P", 1:6), chg = c(-40, -10, 5, 30, NA, -50))
   txt <- wf_notices(wf_run(d, patientID = "pid", responseVar = "chg"))
-  expect_match(txt, "PATIENTS EXCLUDED")
+  expect_match(txt, "Patients excluded")
   expect_match(txt, "no non-missing response value")
   expect_false(grepl("baseline could not be established", txt))
 })
@@ -217,7 +217,7 @@ test_that("W10/GW07/W20: the headline DoR is the Kaplan-Meier median with its CI
   res <- wf_run(d, patientID = "pid", responseVar = "size", timeVar = "time",
                 inputType = "raw", showResponseDuration = TRUE)
   cm <- res$clinicalMetrics$asDF
-  row <- cm[grepl("Duration of Response", cm$metric), ]
+  row <- cm[grepl("duration of response", cm$metric), ]
   expect_equal(nrow(row), 1)
   expect_match(row$metric, "Kaplan-Meier")
   expect_match(row$value, "not reached")
@@ -258,12 +258,12 @@ test_that("W21/GW10: no responders -> the DoR table explains itself; empty categ
 
 test_that("GW02: percent change entered as proportions is flagged", {
   d <- data.frame(pid = paste0("P", 1:10), chg = c(-0.35, -0.5, -0.1, 0.05, 0.2, -0.8, -1, 0.3, -0.45, 0))
-  expect_match(wf_notices(wf_run(d, patientID = "pid", responseVar = "chg")), "PROPORTIONS")
+  expect_match(wf_notices(wf_run(d, patientID = "pid", responseVar = "chg")), "Percent change looks like proportions")
 })
 
 test_that("GW02: partly proportion-scaled entry is flagged", {
   d <- data.frame(pid = paste0("P", 1:10), chg = c(-35, -0.5, -10, 0.2, 20, -0.8, -60, 0.3, -45, 5))
-  expect_match(wf_notices(wf_run(d, patientID = "pid", responseVar = "chg")), "PROPORTIONS")
+  expect_match(wf_notices(wf_run(d, patientID = "pid", responseVar = "chg")), "Some values look like proportions")
 })
 
 test_that("W04: raw measurements under the default percentage input stop the run", {
@@ -271,12 +271,12 @@ test_that("W04: raw measurements under the default percentage input stop the run
   # the run now stops with the reason.
   d <- raw4                                            # sizes 40-70 mm, time 0 rows are not 0%
   expect_error(wf_run(d, patientID = "pid", responseVar = "size", timeVar = "time"),
-               "these look like raw tumour measurements", fixed = TRUE)
+               "these look like raw tumor measurements", fixed = TRUE)
 })
 
 test_that("GW08: percent change multiplied by 100 is flagged", {
   d <- data.frame(pid = paste0("P", 1:8), chg = c(-3500, -4500, 1000, -9000, 2500, -500, -3000, 800))
-  expect_match(wf_notices(wf_run(d, patientID = "pid", responseVar = "chg")), "MULTIPLIED BY 100")
+  expect_match(wf_notices(wf_run(d, patientID = "pid", responseVar = "chg")), "multiplied by 100")
 })
 
 test_that("GW09: shrinkage and growth outliers are each reported once when they occur together", {
@@ -284,16 +284,16 @@ test_that("GW09: shrinkage and growth outliers are each reported once when they 
   # validation panel and by the capping notice; only the capping notice remains.
   d <- data.frame(pid = paste0("P", 1:10), chg = c(-150, 250, -30, 20, -10, 5, -45, 60, -70, 15))
   txt <- wf_notices(wf_run(d, patientID = "pid", responseVar = "chg"))
-  expect_match(txt, "IMPOSSIBLE SHRINKAGE CAPPED")
+  expect_match(txt, "Impossible shrinkage capped")
   expect_false(grepl("Invalid Tumor Shrinkage Values Detected", txt, fixed = TRUE))
   expect_match(txt, "Unusually Large Growth Values Detected")
-  expect_false(grepl("EXTREME VALUES DETECTED", txt, fixed = TRUE))
+  expect_false(grepl("Extreme values detected", txt, fixed = TRUE))
 })
 
 test_that("well-scaled percent change raises no scale warning", {
   d <- data.frame(pid = paste0("P", 1:8), chg = c(-35, -45, 10, -90, 25, -5, -30, 8))
   txt <- wf_notices(wf_run(d, patientID = "pid", responseVar = "chg"))
-  expect_false(grepl("PROPORTIONS|MULTIPLIED BY 100|RAW MEASUREMENTS", txt))
+  expect_false(grepl("like proportions|multiplied by 100|RAW MEASUREMENTS", txt))
 })
 
 # ---- Slice D: group comparison ---------------------------------------------------------------
@@ -358,7 +358,7 @@ test_that("W13: rates are reported with their CI, without efficacy verdicts", {
 
 test_that("W18: one factual disclaimer, no regulatory claims", {
   txt <- wf_notices(wf_run(grp_data(), patientID = "pid", responseVar = "chg"))
-  expect_match(txt, "EXPLORATORY RESPONSE CATEGORIES")
+  expect_match(txt, "Exploratory response categories")
   expect_false(grepl("REGULATORY USE PROHIBITED|RECIST COMPLIANCE LIMITATION|CONFIRMATION NOT REQUIRED", txt))
   expect_false(grepl("FDA|EMA|certified", txt))
 })
@@ -389,13 +389,13 @@ test_that("W22: the median-CI notice counts evaluable patients, as the plot does
   d <- data.frame(pid = paste0("P", 1:12), chg = c(-40, -10, 5, 30, -35, -50, 20, -5, 15,
                                                    NA, NA, NA))
   txt <- wf_notices(wf_run(d, patientID = "pid", responseVar = "chg", showCI = TRUE))
-  expect_match(txt, "MEDIAN CI NOT DRAWN")
+  expect_match(txt, "Median CI not drawn")
 })
 
 test_that("W32: the reused-marker-shapes notice reaches the notices panel", {
   d <- grp_data(); d$conf <- rep(letters[1:7], length.out = 20)
   txt <- wf_notices(wf_run(d, patientID = "pid", responseVar = "chg", confirmationVar = "conf"))
-  expect_match(txt, "MARKER SHAPES REUSED")
+  expect_match(txt, "Marker shapes reused")
 })
 
 test_that("W29: plot states carry small plot-ready frames only", {
@@ -455,7 +455,7 @@ test_that("R2-notime: several rows per patient without a time variable get a str
   pct <- data.frame(pid = rep(c("P1", "P2", "P3", "P4"), each = 3),
                     chg = c(0, 20, 40, 0, -40, -60, 0, 10, 30, 0, -10, -4))
   txt <- wf_notices(wf_run(pct, patientID = "pid", responseVar = "chg"))
-  expect_match(txt, "SEVERAL ROWS PER PATIENT")
+  expect_match(txt, "Several rows per patient")
   expect_match(txt, "a 0% baseline row")
 })
 
@@ -483,7 +483,7 @@ test_that("R2-KM: missing CI limits are spelled out; a not-reached median keeps 
   }))
   res <- wf_run(d, patientID = "pid", responseVar = "size", timeVar = "time", inputType = "raw")
   ref <- summary(survival::survfit(survival::Surv(ifelse(is.na(dor), 10, dor), !is.na(dor)) ~ 1))$table
-  row <- wf_metric(res, "Duration of Response")
+  row <- wf_metric(res, "duration of response")
   expect_true(is.na(ref["median"]))
   expect_match(row, "not reached")
   expect_match(row, sprintf("%.1f", ref["0.95LCL"]))           # the finite lower limit is kept
@@ -533,9 +533,9 @@ test_that("R2-notices: processing errors appear once; plot-only notices follow t
 
 test_that("R2-scale: raw sizes with a 0 mm value are still recognised; progression-heavy data are not 'x100'", {
   sizes <- data.frame(pid = paste0("P", 1:8), size = c(45, 0, 30, 60, 25, 52, 18, 40))
-  expect_match(wf_notices(wf_run(sizes, patientID = "pid", responseVar = "size")), "NO NEGATIVE CHANGES")
+  expect_match(wf_notices(wf_run(sizes, patientID = "pid", responseVar = "size")), "No negative changes")
   prog <- data.frame(pid = paste0("P", 1:8), chg = c(110, 150, 240, 130, 180, 95, 200, 160))
-  expect_false(grepl("MULTIPLIED BY 100", wf_notices(wf_run(prog, patientID = "pid", responseVar = "chg"))))
+  expect_false(grepl("multiplied by 100", wf_notices(wf_run(prog, patientID = "pid", responseVar = "chg"))))
 })
 
 # ---- Round 3: best response until progression, ITT rate, remaining review items -------------
@@ -574,7 +574,7 @@ test_that("R3-no-follow-up: no assessment after the first response is not 'not r
   d <- data.frame(pid = rep(paste0("R", 1:5), each = 2), time = rep(c(0, 2), 5),
                   size = rep(c(100, 50), 5))                       # every responder's last scan
   res <- wf_run(d, patientID = "pid", responseVar = "size", timeVar = "time", inputType = "raw")
-  row <- wf_metric(res, "Duration of Response")
+  row <- wf_metric(res, "duration of response")
   expect_false(isTRUE(grepl("not reached", row)))
 })
 
@@ -582,7 +582,7 @@ test_that("R3-baseline-time: 0% rows at the earliest visit that is not time 0 ar
   d <- data.frame(pid = rep(paste0("P", 1:4), each = 3), time = rep(c(1, 43, 85), 4),
                   chg = c(0, 20, 40, 0, -40, -60, 0, 10, 30, 0, -10, -4))
   expect_match(wf_notices(wf_run(d, patientID = "pid", responseVar = "chg", timeVar = "time")),
-               "BASELINE NOT AT TIME 0")
+               "Baseline not at time 0")
 })
 
 test_that("R3-fields: override conflicts ignore case/space; ongoing uses the latest status", {
@@ -592,7 +592,7 @@ test_that("R3-fields: override conflicts ignore case/space; ongoing uses the lat
   d$ongoing <- rep(c("Yes", "Yes", "No"), 4)                       # stopped treatment by the last visit
   res <- wf_run(d, patientID = "pid", responseVar = "size", timeVar = "time", inputType = "raw",
                 responseCategoryVar = "override", ongoingVar = "ongoing")
-  expect_false(grepl("CONFLICTING CATEGORY OVERRIDES", wf_notices(res)))
+  expect_false(grepl("Conflicting category overrides", wf_notices(res)))
   w <- res$waterfallplot$state$data$waterfall
   expect_false(any(w$ongoing_flag))
 })
@@ -653,7 +653,7 @@ test_that("best response, category and DoR agree with an independent RECIST refe
 
 test_that("R3-scale: integer +/-1% changes are not taken for proportions", {
   d <- data.frame(pid = paste0("P", 1:10), chg = c(-1, 1, -1, -45, 12, -60, 1, 25, -33, 8))
-  expect_false(grepl("PROPORTIONS", wf_notices(wf_run(d, patientID = "pid", responseVar = "chg"))))
+  expect_false(grepl("look(s)? like proportions", wf_notices(wf_run(d, patientID = "pid", responseVar = "chg"))))
 })
 
 test_that("R3-annotation: conflicting per-visit annotation values are reported", {
@@ -661,5 +661,5 @@ test_that("R3-annotation: conflicting per-visit annotation values are reported",
   d$kras <- rep(c("WT", "WT", "MUT"), 4)                            # recorded differently at the last visit
   txt <- wf_notices(wf_run(d, patientID = "pid", responseVar = "size", timeVar = "time",
                            inputType = "raw", annotationVars = "kras"))
-  expect_match(txt, "CONFLICTING ANNOTATION VALUES")
+  expect_match(txt, "Conflicting annotation values")
 })

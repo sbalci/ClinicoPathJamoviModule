@@ -167,7 +167,7 @@ test_that("multisurvival handles constant explanatory variable", {
       outcome = "outcome",
       explanatory = "constant_var"
     )),
-    "has only one value in the analysed rows"
+    "has only one value in the analyzed rows"
   )
 })
 

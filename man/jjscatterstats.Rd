@@ -99,7 +99,7 @@ quantifies evidence strength for clinical decision-making.}
 posterior sampling (robust tests, Bayesian estimates, and some
 nonparametric effect-size intervals). The plot caption names the seed
 whenever it affected the numbers shown. The default reproduces the previous
-fixed behaviour.}
+fixed behavior.}
 
 \item{mytitle}{.}
 
@@ -115,7 +115,7 @@ fixed behaviour.}
 and 0.999).}
 
 \item{bfmessage}{Adds a caption below the plot reporting log(BF01), the
-Bayes factor in favour of the NULL hypothesis of no association. Note the
+Bayes factor in favor of the NULL hypothesis of no association. Note the
 direction: BF01 is the RECIPROCAL of the more commonly quoted BF10, so a
 large negative log(BF01) is strong evidence FOR an association, not against
 it. This applies to the parametric (Pearson) test only; under the Bayesian

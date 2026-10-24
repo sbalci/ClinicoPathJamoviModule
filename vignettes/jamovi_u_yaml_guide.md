@@ -404,6 +404,7 @@ individually and visible on every panel collectively.
 | CheckBox label | name the **thing**, not the action | `Show residual plot`, `Perform chi-square test`, `Apply LOESS smoothing`, `Calculate partial AUC` | `Residual plot`, `Chi-square test`, `LOESS smoothing`, `Partial AUC` |
 | Individual controls (TextBox, ComboBox, CheckBox) | **sentence case** | `Ridge Height Scale`, `X-axis Title` | `Ridge height scale`, `X-axis title` |
 | `CollapseBox` / `TargetLayoutBox` headings | **Title Case** | — | `Statistical Options` |
+| `List` option titles (the choices, in `.a.yaml`) | **sentence case**, as jmv does | `Duration (Longest First)`, `Raw Values (numeric)` | `Duration (longest first)`, `Raw values (numeric)` |
 | Panel title (`.u.yaml` line 1) | must **match** the `.a.yaml` `title:` | panel says `Treatment Response Analysis`, menu says `Treatment Response: Patient-Level Burden` | identical in both |
 
 Title-cased *individual* controls read as headings, which is why the convention
@@ -421,7 +422,10 @@ an action on the dataset. `Add test pattern to data` is accurate and should stay
 
 - **Variable selection comes first** in every panel — the `VariableSupplier` /
   `TargetLayoutBox` block, before anything else.
-- Everything else goes in `CollapseBox` groups with `collapsed: true`.
+- Everything else goes in **top-level** `CollapseBox` groups with `collapsed: true`.
+  Not always-open `Label` sections inside one `LayoutBox` with a `CollapseBox` between
+  them: opening it pushes the rest of the panel down (2026-10-23 OncoPath,
+  `diagnosticmeta.u.yaml`). `check_collapsebox_nested` FAILs a shipped nested one.
 - `margin: large` throughout.
 - Every control type must match its option type: `Bool` → `CheckBox`, `List` →
   `ComboBox` / `RadioButton`, `Variables` → `VariablesListBox`, `File` →

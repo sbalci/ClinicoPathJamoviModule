@@ -310,16 +310,16 @@ test_that("notice levels render distinctly and most severe first", {
   res <- benford(data = data.frame(v = c(benford_data(20, 61), Inf, -Inf, NaN)),
                  var = "v", digits = 1)
   txt <- as.character(res$notices$content)
-  expect_match(txt, "ERROR: ", fixed = TRUE)
-  expect_match(txt, "WARNING: ", fixed = TRUE)
-  expect_lt(regexpr("ERROR: ", txt, fixed = TRUE),      # ERROR precedes WARNING
-            regexpr("WARNING: ", txt, fixed = TRUE))
+  expect_match(txt, "Error: ", fixed = TRUE)
+  expect_match(txt, "Warning: ", fixed = TRUE)
+  expect_lt(regexpr("Error: ", txt, fixed = TRUE),      # ERROR precedes WARNING
+            regexpr("Warning: ", txt, fixed = TRUE))
   # the retired level must not leak its internal code into the rendered text
   expect_false(grepl("STRONG_WARNING", txt, fixed = TRUE))
 
   # INFO renders as its own prefix, not as a warning
   ok <- benford(data = data.frame(v = benford_data(400, 62)), var = "v", digits = 2)
-  expect_match(as.character(ok$notices$content), "NOTE: ", fixed = TRUE)
+  expect_match(as.character(ok$notices$content), "Note: ", fixed = TRUE)
 })
 
 test_that("the plot state carries no per-observation table", {

@@ -184,7 +184,7 @@ options:
       default: false
       description:
           ui: >
-            Display the 2x2 table and level-combination counts of the analysed cases, and a summary
+            Display the 2x2 table and level-combination counts of the analyzed cases, and a summary
             of the cases excluded for missing values or unselected levels.
             Useful for verifying data entry and understanding the underlying counts.
           R: >

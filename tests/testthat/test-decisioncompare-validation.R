@@ -329,7 +329,7 @@ test_that("VAL-decisioncompare-01: the 'significantly more accurate' test is the
     rp <- val_text(res$reportSentence$content)
     expect_match(sm, "t2 classified significantly more cases correctly than t1", fixed = TRUE)
     expect_match(sm, "on the 100 cases with a determinate result for both tests and the reference standard: accuracy 55.0% vs 75.0%", fixed = TRUE)
-    expect_match(sm, "of the 30 cases where exactly one test was correct, 25 favoured t2", fixed = TRUE)
+    expect_match(sm, "of the 30 cases where exactly one test was correct, 25 favored t2", fixed = TRUE)
     expect_match(rp, "t2 classified significantly more cases correctly than t1", fixed = TRUE)
     expect_match(rp, "(n = 100 paired cases;", fixed = TRUE)
     expect_match(rp, "the difference, t1 minus t2, was -20.0 percentage points", fixed = TRUE)

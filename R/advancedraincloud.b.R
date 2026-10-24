@@ -1951,7 +1951,7 @@ advancedraincloudClass <- if (requireNamespace("jmvcore")) {
                 itt_warning <- if (identical(pop_type, "itt") && !is.na(n_dropped) && n_dropped > 0)
                     paste0(
                         "<div style='background-color: rgba(216, 33, 50, 0.18);color: inherit;padding:12px;border-radius:6px;margin:10px 0;'>",
-                        sprintf(.("%d of %d supplied rows (%.1f%%) were excluded before analysis because of missing values in the selected variables. An intention-to-treat analysis retains all randomised participants, so these results are a COMPLETE-CASE analysis and should not be reported as ITT without imputation or another accounting for the missing outcomes."),
+                        sprintf(.("%d of %d supplied rows (%.1f%%) were excluded before analysis because of missing values in the selected variables. An intention-to-treat analysis retains all randomized participants, so these results are a COMPLETE-CASE analysis and should not be reported as ITT without imputation or another accounting for the missing outcomes."),
                                 n_dropped, n_supplied, 100 * n_dropped / n_supplied),
                         "</div>")
                 else ""
@@ -1963,7 +1963,7 @@ advancedraincloudClass <- if (requireNamespace("jmvcore")) {
                     "<p>Analysis population as declared: <strong>", pop_label, "</strong>",
                     if (!is.na(n_dropped)) paste0(
                         " - ",
-                        sprintf(.("%d of %d supplied rows analysed"), n_analysed, n_supplied)) else "",
+                        sprintf(.("%d of %d supplied rows analyzed"), n_analysed, n_supplied)) else "",
                     "</p>",
                     pop_caveat,
                     itt_warning,

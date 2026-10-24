@@ -45,10 +45,10 @@ vartreeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # output item renders this literally (no markup, no injection surface).
             blocks <- vapply(private$.noticeList, function(notice) {
                 prefix <- switch(notice$type,
-                    ERROR          = paste0(.("ERROR"), ": "),
-                    STRONG_WARNING = paste0(.("STRONG WARNING"), ": "),
-                    WARNING        = paste0(.("WARNING"), ": "),
-                    INFO           = paste0(.("INFO"), ": "),
+                    ERROR          = paste0(.("Error"), ": "),
+                    STRONG_WARNING = paste0(.("Strong warning"), ": "),
+                    WARNING        = paste0(.("Warning"), ": "),
+                    INFO           = paste0(.("Info"), ": "),
                     "")
                 paste0(prefix, notice$title, "\n", notice$content)
             }, character(1))
@@ -140,7 +140,7 @@ vartreeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     "<li>", .("How cases are distributed across combinations of risk factors"), "</li>",
                     "<li>", .("How often each treatment-and-response combination occurs"), "</li>",
                     "<li>", .("Which combinations of candidate prognostic factors are well represented, and which are near-empty"), "</li>",
-                    "<li>", .("Checking data completeness and coding before modelling"), "</li>",
+                    "<li>", .("Checking data completeness and coding before modeling"), "</li>",
                     "</ul>",
                     
                     "<p><b> ", .("Tip:"), "</b> ", .("Start with 2-3 most important variables. You can always add more complexity later."), "</p>",
@@ -848,13 +848,13 @@ vartreeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             }
 
             if (identical(self$options$palette, "colorblind") && identical(self$options$style, "default")) {
-                interp_parts <- c(interp_parts, paste0("\u{2022} ", .("Colour-blind-safe palette applied: blue, orange, purple and brown shades in place of the default red/green rotation"), "<br>"))
+                interp_parts <- c(interp_parts, paste0("\u{2022} ", .("Color-blind-safe palette applied: blue, orange, purple and brown shades in place of the default red/green rotation"), "<br>"))
             }
 
             # Style-specific notes
             style_note <- switch(self$options$style,
                 "clean" = paste0("\u{2022} ", .("Clean style applied: minimal colors, focus on data structure"), "<br>"),
-                "minimal" = paste0("\u{2022} ", .("Minimal style applied: one flat tone per level instead of a gradient, no label colouring, and more space between nodes"), "<br>"),
+                "minimal" = paste0("\u{2022} ", .("Minimal style applied: one flat tone per level instead of a gradient, no label coloring, and more space between nodes"), "<br>"),
                 NULL
             )
 

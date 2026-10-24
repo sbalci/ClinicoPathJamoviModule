@@ -491,7 +491,7 @@ jjsegmentedtotalbarResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6:
                         `type`="integer"),
                     list(
                         `name`="rows_analysed", 
-                        `title`="Rows Analysed", 
+                        `title`="Rows Analyzed", 
                         `type`="integer"),
                     list(
                         `name`="total_observations", 

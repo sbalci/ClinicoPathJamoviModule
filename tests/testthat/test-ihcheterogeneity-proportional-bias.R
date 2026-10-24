@@ -15,7 +15,8 @@ txt <- function(html) gsub("\\s+", " ", gsub("<[^>]+>", " ", paste(html, collaps
 verdict_of <- function(res) {
     t <- txt(res$interpretation$content)
     regmatches(t, regexpr(
-        "(AGREEMENT THRESHOLDS MET, NOT CONFIRMED|AGREEMENT THRESHOLDS MET|MODERATE SAMPLING|INADEQUATE SAMPLING|NOT ADEQUATE FOR SUBSTITUTION|INSUFFICIENT DATA)", t))
+        "(Agreement thresholds met, not confirmed|Agreement thresholds met|Moderate sampling|Inadequate sampling|Not adequate for substitution|Insufficient data):", t)) |>
+        sub(pattern = ":$", replacement = "")  # labels are sentence case; the colon marks the verdict
 }
 ihc <- function(d, ...) ClinicoPath::ihcheterogeneity(showInterpretation = TRUE, data = d, ...)
 note_text <- function(tbl) paste(vapply(tbl$notes, function(n) n$note, ""), collapse = " | ")
@@ -53,7 +54,7 @@ test_that("a compressing single region is no longer 'met' and both ends are name
     expect_true(all(abs(fitted_ends) > 0.05 * mean(d$ref)))
     # unequal error in the two measurements can make such a slope: the level can
     # stop "ruled out" but never make it material
-    expect_equal(verdict_of(res), "AGREEMENT THRESHOLDS MET, NOT CONFIRMED")
+    expect_equal(verdict_of(res), "Agreement thresholds met, not confirmed")
     imp <- res$samplingbiastable$asDF$clinical_impact[1]
     expect_match(imp, sprintf("%+.1f at %.1f", fitted_ends[1], ends[1]), fixed = TRUE)
     expect_match(imp, sprintf("%+.1f at %.1f", fitted_ends[2], ends[2]), fixed = TRUE)
@@ -69,7 +70,7 @@ test_that("with two regions a compressing region is not confirmed, never materia
     res <- ihc(d, wholesection = "ws", biopsy1 = "b1", biopsy2 = "b2", generate_recommendations = TRUE)
     # a slope only stops 'ruled out': with one reading per method it cannot be told
     # from a regression-to-the-mean artefact (release review 2026-09-19)
-    expect_equal(verdict_of(res), "AGREEMENT THRESHOLDS MET, NOT CONFIRMED")
+    expect_equal(verdict_of(res), "Agreement thresholds met, not confirmed")
     b <- res$samplingbiastable$asDF
     # every reference row, the mean of all regions included, is regressed on the mean
     # of the two measurements compared (was: on the reference, until 2026-10-19)
@@ -95,7 +96,7 @@ test_that("a slope that unequal measurement error alone produces never makes a r
     expect_length(b$slope_p, 3)
     expect_equal(b$slope[1], unname(coef(lm(I(b1 - ws) ~ I((b1 + ws) / 2), data = d))[2]), tolerance = 1e-10)
     expect_lt(b$slope[1], -0.05)                     # the artefact is there
-    expect_false(verdict_of(res) == "NOT ADEQUATE FOR SUBSTITUTION")
+    expect_false(verdict_of(res) == "Not adequate for substitution")
     expect_false(any(grepl("shown to exceed", b$clinical_impact, fixed = TRUE)))
 })
 
@@ -111,7 +112,7 @@ test_that("regions sharing a site effect are never made material by the slope (A
     d$r2 <- T + u + rnorm(n, 0, s)
     d$ref <- T + rnorm(n, 0, 0.5 * s)
     res <- ihc(d, wholesection = "ref", biopsy1 = "r1", biopsy2 = "r2")
-    expect_false(verdict_of(res) == "NOT ADEQUATE FOR SUBSTITUTION")
+    expect_false(verdict_of(res) == "Not adequate for substitution")
     expect_false(grepl("Material systematic difference", txt(res$notices$content), fixed = TRUE))
 })
 
@@ -128,8 +129,8 @@ test_that("a sparse second region cannot make the level check weaker (A3-P6)", {
     d$r2[1:33] <- NA
     alone <- ihc(d[, c("ref", "r1")], wholesection = "ref", biopsy1 = "r1")
     both <- ihc(d, wholesection = "ref", biopsy1 = "r1", biopsy2 = "r2")
-    expect_equal(verdict_of(alone), "AGREEMENT THRESHOLDS MET, NOT CONFIRMED")
-    expect_false(verdict_of(both) == "AGREEMENT THRESHOLDS MET")
+    expect_equal(verdict_of(alone), "Agreement thresholds met, not confirmed")
+    expect_false(verdict_of(both) == "Agreement thresholds met")
     expect_equal(both$samplingbiastable$asDF$slope[1], alone$samplingbiastable$asDF$slope[1], tolerance = 1e-10)
 })
 
@@ -155,7 +156,7 @@ test_that("comparisons without a level check are named beside 'not detected' (A3
     b <- res$samplingbiastable$asDF
     expect_true(is.na(b$slope[3]))
     expect_false(anyNA(b$slope[c(1, 2, 4)]))
-    expect_equal(verdict_of(res), "AGREEMENT THRESHOLDS MET")
+    expect_equal(verdict_of(res), "Agreement thresholds met")
     expect_match(txt(res$interpretation$content),
                  "Not checked for a difference that changes with the level (too few cases or distinct values): 'b3'.", fixed = TRUE)
 })
@@ -197,7 +198,7 @@ test_that("'met' claims only what was tested", {
     d <- data.frame(whole = w, b1 = w + rnorm(n, 0, 1), b2 = w + rnorm(n, 0, 1))
     res <- ihc(d, wholesection = "whole", biopsy1 = "b1", biopsy2 = "b2", showReportSentences = TRUE,
                showAssumptions = TRUE, showGlossary = TRUE)
-    expect_equal(verdict_of(res), "AGREEMENT THRESHOLDS MET")
+    expect_equal(verdict_of(res), "Agreement thresholds met")
     it <- txt(res$interpretation$content)
     expect_match(it, "the average difference of every comparison with the reference was shown to lie within", fixed = TRUE)
     expect_match(it, "No difference that changes with the level was detected; this does not show that there is none.", fixed = TRUE)
@@ -232,7 +233,7 @@ test_that("between regions a compressing region blocks 'ruled out' but is never 
     fit <- lm(I(c3 - c2) ~ I((c2 + c3) / 2), data = d)
     expect_equal(b$slope[3], unname(coef(fit)[2]), tolerance = 1e-10)
     expect_match(b$clinical_impact[3], "inconclusive at the \u00b1", fixed = TRUE)
-    expect_equal(verdict_of(res), "AGREEMENT THRESHOLDS MET, NOT CONFIRMED")
+    expect_equal(verdict_of(res), "Agreement thresholds met, not confirmed")
 })
 
 test_that("a weak scaling shown by the slope can still be ruled out at both ends", {
@@ -242,7 +243,7 @@ test_that("a weak scaling shown by the slope can still be ruled out at both ends
     b <- res$samplingbiastable$asDF
     expect_lt(b$slope_p[1], 0.05 / 3)
     expect_match(b$clinical_impact[1], "ruled out, both 90% CIs within the margin", fixed = TRUE)
-    expect_equal(verdict_of(res), "AGREEMENT THRESHOLDS MET")
+    expect_equal(verdict_of(res), "Agreement thresholds met")
     expect_false(grepl("No difference that changes with the level was detected", txt(res$interpretation$content), fixed = TRUE))
 })
 
@@ -250,7 +251,7 @@ test_that("a region that reads the same value in every case is never green and i
     set.seed(24); n <- 60; w <- runif(n, 20, 80)
     d <- data.frame(whole = w, b1 = w + rnorm(n, 0, 1), b2 = w + rnorm(n, 0, 1), b3 = 50)
     res <- ihc(d, wholesection = "whole", biopsy1 = "b1", biopsy2 = "b2", biopsy3 = "b3")
-    expect_false(verdict_of(res) %in% c("AGREEMENT THRESHOLDS MET", "AGREEMENT THRESHOLDS MET, NOT CONFIRMED"))
+    expect_false(verdict_of(res) %in% c("Agreement thresholds met", "Agreement thresholds met, not confirmed"))
     expect_match(txt(res$interpretation$content), "'b3'", fixed = TRUE)
     expect_match(res$samplingbiastable$asDF$clinical_impact[3], "Changes with the level", fixed = TRUE)
 })
@@ -261,7 +262,7 @@ test_that("a single region with a plain offset against a noisy reference gets no
     set.seed(1); n <- 100; t <- runif(n, 10, 60)
     d <- data.frame(ws = t + rnorm(n, 0, 6), b1 = t + 0.10 * mean(t) + rnorm(n, 0, 2))
     res <- ihc(d, wholesection = "ws", biopsy1 = "b1", showReportSentences = TRUE, generate_recommendations = TRUE)
-    expect_equal(verdict_of(res), "NOT ADEQUATE FOR SUBSTITUTION")
+    expect_equal(verdict_of(res), "Not adequate for substitution")
     # the slope is taken on the pair mean (was: on the reference, where the noise
     # showed a slope at p < 0.05; on the pair mean the unequal-error slope is weaker)
     expect_equal(res$samplingbiastable$asDF$slope[1],
@@ -282,7 +283,7 @@ test_that("an offset region is material and a level-dependent region is not desc
                     b = mean(t) + 0.7 * (t - mean(t)) + rnorm(n, 0, 1), c = t + rnorm(n, 0, 1))
     res <- ihc(d, wholesection = "ws", biopsy1 = "a", biopsy2 = "b", biopsy3 = "c",
                showReportSentences = TRUE, generate_recommendations = TRUE)
-    expect_equal(verdict_of(res), "NOT ADEQUATE FOR SUBSTITUTION")
+    expect_equal(verdict_of(res), "Not adequate for substitution")
     notes <- txt(res$notices$content)
     expect_match(notes, "Region(s) 'a' are offset from the reference", fixed = TRUE)
     expect_false(grepl("'b'", notes, fixed = TRUE))

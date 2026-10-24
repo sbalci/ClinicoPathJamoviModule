@@ -401,7 +401,7 @@ jjhistostatsClass <- if (requireNamespace('jmvcore'))
                                .("one-sample test"))
                         warnings <- c(warnings, paste0(
                             .fmt(
-                                .("<strong>The statistical subtitle is testing against zero.</strong><br>The subtitle on the histogram is a <strong>{test}</strong> asking whether the centre of your data differs from <strong>0</strong>."),
+                                .("<strong>The statistical subtitle is testing against zero.</strong><br>The subtitle on the histogram is a <strong>{test}</strong> asking whether the center of your data differs from <strong>0</strong>."),
                                 test = test_name),
                             if (chose_it) "" else
                                 " ", .("This is the default null, because 'Custom null value' is switched off so no test value is supplied."),
@@ -434,7 +434,7 @@ jjhistostatsClass <- if (requireNamespace('jmvcore'))
                     }
                     if (!identical(self$options$alternative, "two.sided")) {
                         warnings <- c(warnings, .fmt(
-                            .("<strong>One-sided test in use.</strong> The reported p-value tests only whether the centre is {direction} than the test value, not whether it differs in either direction. A one-sided test is only valid if the direction was chosen before seeing these data."),
+                            .("<strong>One-sided test in use.</strong> The reported p-value tests only whether the center is {direction} than the test value, not whether it differs in either direction. A one-sided test is only valid if the direction was chosen before seeing these data."),
                             direction = if (identical(self$options$alternative, "greater"))
                                 .("greater") else .("less")))
                     }
@@ -590,7 +590,7 @@ jjhistostatsClass <- if (requireNamespace('jmvcore'))
                         " ", .("so a single title would be stamped on all of them. Select one variable with no Split by variable to use your own title.")))
                 }
                 if (nzchar(self$options$xlab) && length(self$options$dep) > 1) {
-                    warnings <- c(warnings, .("<strong>Your X-axis label was not used.</strong> With more than one variable selected, each panel is labelled with its own variable name."))
+                    warnings <- c(warnings, .("<strong>Your X-axis label was not used.</strong> With more than one variable selected, each panel is labeled with its own variable name."))
                 }
                 # The fourth member of this set. ggstatsplot writes the Bayes factor into
                 # the CAPTION slot (not the subtitle) for every non-Bayesian test, so a
@@ -777,7 +777,7 @@ jjhistostatsClass <- if (requireNamespace('jmvcore'))
                     }
 
                     implications_text <- if (sd_val == 0) {
-                        .("This variable is constant - every observation has the same value. There is no distribution to summarise and no test to run on it.")
+                        .("This variable is constant - every observation has the same value. There is no distribution to summarize and no test to run on it.")
                     } else if (is_normal) {
                         .("No evidence of a departure from normality was found, so parametric statistics (t-tests, ANOVA) are reasonable here. Absence of evidence against normality does not establish that the distribution is normal, particularly at small n or when the Shapiro-Wilk test could not be run. Mean and SD are appropriate summary measures.")
                     } else {
@@ -926,7 +926,7 @@ jjhistostatsClass <- if (requireNamespace('jmvcore'))
                     "<ul style='margin: 10px 0; padding-left: 20px;'>",
                     "<li>", .("<strong>Lab values:</strong> cholesterol levels, blood glucose, biomarker concentrations."), "</li>",
                     "<li>", .("<strong>Patient characteristics:</strong> age distribution, BMI, vital signs."), "</li>",
-                    "<li>", .("<strong>Pathology scores:</strong> tumour grades, staging scores, severity ratings."), "</li>",
+                    "<li>", .("<strong>Pathology scores:</strong> tumor grades, staging scores, severity ratings."), "</li>",
                     "<li>", .("<strong>Treatment outcomes:</strong> response measurements, survival times, quality scores."), "</li>",
                     "</ul></div>",
                     "<p style='font-size: 14px; margin: 20px 0 0 0;'><strong>", .("Documentation"), ":</strong> ",

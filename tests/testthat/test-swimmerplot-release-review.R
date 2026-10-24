@@ -21,7 +21,7 @@ test_that("the summary table uses one estimator throughout", {
     censorVar = "cens", personTimeAnalysis = TRUE))
 
   s <- as.data.frame(r$summary$asDF)
-  med  <- as.numeric(s$value[grepl("Median Duration", s$metric)][1])
+  med  <- as.numeric(s$value[grepl("Median duration", s$metric)][1])
   mean <- as.numeric(s$value[grepl("Mean Duration", s$metric)][1])
 
   fu <- d$end
@@ -340,7 +340,7 @@ test_that("relative display anchors each PATIENT at 0, not each row", {
         # ("Mean Follow-up" row was dropped: identical statistic to Mean Duration)
         expect_equal(unname(v[["Mean Duration"]]), 17.5, tolerance = 1e-8,
                      info = mode)
-        expect_equal(unname(v[["Median Duration (observed)"]]), 17.5,
+        expect_equal(unname(v[["Median duration (observed)"]]), 17.5,
                      tolerance = 1e-8, info = mode)
     }
 })

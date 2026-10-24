@@ -797,7 +797,7 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     private$.addNotice(
                         jmvcore::NoticeType$INFO,
                         .fmt(
-                            .("Entered as continuous: {variables}. Each is modelled as one odds ratio per one-unit increase, which assumes a constant step in log odds between consecutive values. To estimate a separate odds ratio for each level instead, change the variable's measure type to Nominal or Ordinal in the data setup."),
+                            .("Entered as continuous: {variables}. Each is modeled as one odds ratio per one-unit increase, which assumes a constant step in log odds between consecutive values. To estimate a separate odds ratio for each level instead, change the variable's measure type to Nominal or Ordinal in the data setup."),
                             variables = paste(vapply(few_level_numeric, function(v)
                                 sprintf("%s (%d values)",
                                         private$.originalNames(v, all_labels),

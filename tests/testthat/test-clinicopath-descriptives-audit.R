@@ -511,3 +511,16 @@ test_that("the venn summary table is scaffolded before .run()", {
   suppressWarnings(suppressMessages(a$init()))
   expect_identical(unlist(a$results$summary$rowKeys), c("var1", "var2", "var4"))
 })
+
+# library-audit 2026-10-23 OncoPath [LOW] DONE (same class): descriptions name only what ships; the
+#   crosstable description listed features "planned but not yet available" (guide section 27)
+test_that("audited descriptions do not promise unreleased features", {
+  skip_if_not(audit_source_available, "package source tree not available")
+  promise <- "upcoming release|future release|coming soon|will be available|not yet available"
+  for (analysis in audit_analyses) {
+    path <- file.path(audit_root, "jamovi", paste0(analysis, ".a.yaml"))
+    if (!file.exists(path)) next
+    text <- unlist(read_definition(analysis, "a")$description)
+    expect_false(any(grepl(promise, text, ignore.case = TRUE)), info = analysis)
+  }
+})

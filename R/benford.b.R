@@ -96,9 +96,9 @@ benfordClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 # values are printed. ": " is composed outside .() so no
                 # translatable string carries trailing punctuation.
                 prefix <- switch(notice$type,
-                    ERROR   = .("ERROR"),
-                    WARNING = .("WARNING"),
-                    INFO    = .("NOTE"),
+                    ERROR   = .("Error"),
+                    WARNING = .("Warning"),
+                    INFO    = .("Note"),
                     "")
                 if (nzchar(prefix))
                     prefix <- paste0(prefix, ": ")
@@ -219,7 +219,7 @@ benfordClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 self$results$dataWarning$setContent(html)
                 self$results$dataWarning$setVisible(TRUE)
                 private$.addNotice("ERROR", .("Analysis stopped: non-positive values present"),
-                    .fmt(.("The selected variable contains {zeros} zero and {negatives} negative values. A leading digit is undefined for these, so nothing below was computed. Filter them out, analyse increases and decreases separately if the variable is a change score, or choose a naturally positive measurement."),
+                    .fmt(.("The selected variable contains {zeros} zero and {negatives} negative values. A leading digit is undefined for these, so nothing below was computed. Filter them out, analyze increases and decreases separately if the variable is a change score, or choose a naturally positive measurement."),
                             zeros = zero_count, negatives = negative_count))
                 return(FALSE)
             }
@@ -448,10 +448,10 @@ benfordClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             } else if (n_total < 100) {
                 private$.addNotice("WARNING", .("Sample small: only a very large departure would be detected"),
-                    .fmt(.("Only {n} observations were analysed. The digit-frequency tests below are computed, but at this size they resolve only very large departures, and the MAD conformity label is biased upward by sampling noise. Neither a departure nor its absence is established at this sample size."),
+                    .fmt(.("Only {n} observations were analyzed. The digit-frequency tests below are computed, but at this size they resolve only very large departures, and the MAD conformity label is biased upward by sampling noise. Neither a departure nor its absence is established at this sample size."),
                             n = n_total))
                 clinical_interpretation <- .fmt(
-                    .("Only {n} observations were analysed. At this size the digit-frequency tests detect only very large departures, so neither a departure nor its absence is established here. The statistics above are reported for completeness."),
+                    .("Only {n} observations were analyzed. At this size the digit-frequency tests detect only very large departures, so neither a departure nor its absence is established here. The statistics above are reported for completeness."),
                     n = n_total)
                 considerations <- .("A larger sample, typically several hundred observations or more, is needed before a leading-digit result carries much weight either way.")
                 finding <- .("Limited evidence")
@@ -1179,7 +1179,7 @@ benfordClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             # Add key statistics
             enhanced_text <- paste0(
-                "\n", .("DATA SUMMARY:"), "\n",
+                "\n", .("Data summary:"), "\n",
                 "  ", .fmt(.("Total observations: {n}"),
                               n = base::format(length(cleaned_data), big.mark = ",")), "\n",
                 "  ", .fmt(.("Data range: {min} to {max}"),
@@ -1189,7 +1189,7 @@ benfordClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                               ratio = base::format(round(max(cleaned_data)/min(cleaned_data), 2), big.mark = ",")), "\n",
                 dist_table,
                 "\n",
-                .("STATISTICAL TESTS:"), "\n",
+                .("Statistical tests:"), "\n",
                 # MAD.conformity is benford.analysis's own English label, and is
                 # interpolated here as DATA, not as a translatable literal.
                 "  ", .fmt(.("Chi-square: {stat} (p = {p})"),
@@ -1279,9 +1279,9 @@ benfordClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # They are now one .() per sentence, wrapped at render time by
             # private$.wrapText(), which lays out whatever the translation is.
             suspects_text <- paste0(
-                .("LEADING-DIGIT BIN MEMBERSHIP"), "\n",
+                .("Leading-digit bin membership"), "\n",
                 paste(rep("=", 50), collapse = ""), "\n\n",
-                .("WHAT THIS LIST IS:"), "\n",
+                .("What this list is:"), "\n",
                 private$.wrapText(.("The 2 leading-digit bins whose observed frequency deviates most from Benford's Law were selected, and every observation falling in them is listed below. An observation appears here because of its leading digits, not because it is individually unusual.")), "\n\n",
                 if (nzchar(bins_text)) paste0("  ",
                     .fmt(.("Bins selected: {bins}"), bins = bins_text), "\n") else "",
@@ -1291,7 +1291,7 @@ benfordClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 "  ", .fmt(.("Share expected in those same bins under Benford's Law: {pct}"),
                                       pct = expected_text), "\n\n",
                 private$.wrapText(.("A percentage close to the expected share is what conforming data looks like. Whether the data depart from Benford's Law is answered by the MAD and chi-square results in the summary table, not by this count.")), "\n\n",
-                .("OBSERVATIONS IN THOSE BINS:"), "\n",
+                .("Observations in those bins:"), "\n",
                 listing_text, "\n\n",
                 # The Row column holds positions in the ANALYSIS dataset, i.e.
                 # the rows left after any jamovi row filter, not spreadsheet row

@@ -69,7 +69,7 @@ displayed anywhere in this analysis.}
 posterior sampling (robust tests, Bayesian estimates, and some
 nonparametric effect-size intervals). The plot caption names the seed
 whenever it affected the numbers shown. The default reproduces the previous
-fixed behaviour.}
+fixed behavior.}
 
 \item{centralityline}{Whether to display a vertical line indicating the
 measure of central tendency (mean for parametric, median for
@@ -112,7 +112,7 @@ clinically relevant threshold (e.g., reference range limit, treatment
 cutoff, or population norm) for meaningful hypothesis testing.}
 
 \item{alternative}{Direction of the one-sample test. 'two.sided' asks
-whether the centre differs from the test value in either direction;
+whether the center differs from the test value in either direction;
 'greater' and 'less' are one-sided. Two-sided is the conventional default
 and the conservative choice - only pick a one-sided test if the direction
 was specified before seeing the data.}

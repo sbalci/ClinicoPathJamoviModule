@@ -58,7 +58,7 @@ test_that("a patient with no post-baseline assessment is not scored as SD", {
   expect_equal(as.character(w$recist_category[w$id == "B"]), "Unknown")
   expect_true(is.na(w$response[w$id == "B"]))
   expect_equal(as.character(w$recist_category[w$id == "A"]), "PR")
-  expect_true("NOT RESPONSE-EVALUABLE" %in% notice_titles(p))
+  expect_true("Not response-evaluable" %in% notice_titles(p))
 
   # and the unevaluable patient must not sit in the rate denominator
   expect_equal(p$.calculateMetrics(w)$n, 1)
@@ -75,8 +75,8 @@ test_that("a patient with an unusable baseline is excluded WITH an explanation",
     p$.processData(z, "id", "raw", "size", "tm", NULL)$waterfall, z, "id", "tm")
 
   expect_false("A" %in% w$id)
-  expect_true("PATIENTS EXCLUDED" %in% notice_titles(p))
-  expect_match(p$.noticeList[[which(notice_titles(p) == "PATIENTS EXCLUDED")[1]]]$content,
+  expect_true("Patients excluded" %in% notice_titles(p))
+  expect_match(p$.noticeList[[which(notice_titles(p) == "Patients excluded")[1]]]$content,
                "1 of 2 patients")
 })
 
@@ -91,8 +91,8 @@ test_that("a complete cohort raises no exclusion notices and is unchanged", {
   expect_equal(nrow(w), 3)
   # No patient is dropped and none is unevaluable; the only notice is the
   # small-cohort caveat, which is expected at n = 3.
-  expect_false("PATIENTS EXCLUDED" %in% notice_titles(p))
-  expect_false("NOT RESPONSE-EVALUABLE" %in% notice_titles(p))
+  expect_false("Patients excluded" %in% notice_titles(p))
+  expect_false("Not response-evaluable" %in% notice_titles(p))
   expect_false("NO EVALUABLE PATIENTS" %in% notice_titles(p))
   # best response per patient = min percent change from baseline
   expect_equal(sort(round(w$response, 4)), c(-45, -10, -2))
@@ -243,7 +243,7 @@ test_that("unrecognised response-category overrides are rejected, not fatal", {
   out <- p$.applyCategoryOverride(w, d, "id", "cat")
   expect_equal(sum(is.na(out$recist_category)), 0)
   expect_equal(as.character(out$recist_category), as.character(w$recist_category))
-  expect_true("RESPONSE CATEGORY OVERRIDE IGNORED" %in% notice_titles(p))
+  expect_true("Response category override ignored" %in% notice_titles(p))
 })
 
 test_that("valid response-category overrides are applied case-insensitively", {
@@ -434,7 +434,7 @@ test_that("non-fatal validation warnings reach the notices panel", {
   d <- data.frame(pid = paste0("P", 1:15),
                   resp = c(-45, -10, 25, -60, 5, NA, -35, 80, NA, 0, 30, -75, 15, NA, -20))
   res <- ClinicoPath::waterfall(data = d, patientID = "pid", responseVar = "resp")
-  expect_match(rr_txt(res), "DATA VALIDATION WARNINGS")
+  expect_match(rr_txt(res), "Data validation warnings")
   expect_match(rr_txt(res), "3 missing response values")
 })
 
@@ -478,7 +478,7 @@ test_that("clinicalMetrics has exactly one DoR row, from the nadir-based method"
   res <- ClinicoPath::waterfall(data = rawd, patientID = "pid", responseVar = "meas",
                                 timeVar = "time", inputType = "raw")
   cm <- res$clinicalMetrics$asDF
-  expect_equal(sum(grepl("Median Duration of Response", cm$metric)), 1)
+  expect_equal(sum(grepl("Median duration of response", cm$metric)), 1)
   expect_false(any(grepl("rapid response|durable response", cm$value)))
 })
 

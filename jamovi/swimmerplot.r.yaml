@@ -126,7 +126,7 @@ items:
       rows: 0
       columns:
           - name: response_type
-            title: "Response Type"
+            title: "Response type"
             type: text
           - name: n_patients
             title: "Patients"
@@ -248,7 +248,7 @@ items:
             title: "Duration"
             type: number
           - name: response
-            title: "Best Response"
+            title: "Best response"
             type: text
       clearWith:
           - exportTimeline

@@ -56,7 +56,7 @@ test_that("P-03: one notice states every excluded row, whatever the number of pr
     n <- prod_titled(prod_run(d, predictors = "a"), "Rows Excluded")
     expect_length(n, 1L)
     expect_identical(n[[1]]$type, "INFO")
-    expect_match(n[[1]]$content, "190 of 200 rows can be analysed", fixed = TRUE)
+    expect_match(n[[1]]$content, "190 of 200 rows can be analyzed", fixed = TRUE)
     expect_match(n[[1]]$content, "7 rows had a missing outcome", fixed = TRUE)
     expect_match(n[[1]]$content, "3 further rows had a missing value of a selected predictor (a: 3)", fixed = TRUE)
     d$b[20] <- NA

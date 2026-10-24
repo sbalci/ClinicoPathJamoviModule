@@ -1854,9 +1854,9 @@ sequentialtestsClass <- if (requireNamespace('jmvcore'))
                     # cannot see trailing whitespace, and a catalog that drops it silently
                     # runs the label into the title.
                     label <- switch(notice$type,
-                        ERROR          = .("ERROR"),
-                        STRONG_WARNING = .("STRONG WARNING"),
-                        WARNING        = .("WARNING"),
+                        ERROR          = .("Error"),
+                        STRONG_WARNING = .("Strong warning"),
+                        WARNING        = .("Warning"),
                         "")
                     prefix <- if (nzchar(label)) paste0(label, ": ") else ""
                     paste0(prefix, notice$title, "\n", notice$content)

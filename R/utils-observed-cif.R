@@ -11,7 +11,8 @@
   cutpoints <- sort(unique(cutpoints[is.finite(cutpoints) & cutpoints >= 0]))
   rows <- list()
   omitted <- character()
-  for (g in unique(as.character(group))) {
+  group_levels <- if (is.factor(group)) levels(droplevels(group)) else unique(as.character(group))
+  for (g in group_levels) {
     keep <- as.character(group) == g
     d <- data.frame(time = time[keep], status = status[keep])
     max_t <- max(d$time)

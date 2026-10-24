@@ -438,7 +438,7 @@ test_that("IR-02a a reversed positive level on the weaker test is named, with it
     expect_true(startsWith(inv$content, paste0(
         "Test 2 classifies worse than chance in this sample, beyond sampling variation: ",
         "Youden's J = -0.433 (Agresti-Caffo 95% CI ", .ir_f3(ci[1, "lwr.ci"]), " to ",
-        .ir_f3(ci[1, "upr.ci"]), ") on the 100 complete cases analysed here.")))
+        .ir_f3(ci[1, "upr.ci"]), ") on the 100 complete cases analyzed here.")))
     expect_identical(.ir_f3(14 / 40 + 13 / 60 - 1), "-0.433")
     expect_match(inv$content, "Every combination that uses such a test is affected as well.",
                  fixed = TRUE)
@@ -455,7 +455,7 @@ test_that("IR-02a a reversed positive level on the weaker test is named, with it
     expect_true(startsWith(inv3, paste0(
         "Test 3 classifies worse than chance in this sample, beyond sampling variation: ",
         "Youden's J = -0.433 (Agresti-Caffo 95% CI ", .ir_f3(ci3[1, "lwr.ci"]), " to ",
-        .ir_f3(ci3[1, "upr.ci"]), ") on the 150 complete cases analysed here.")))
+        .ir_f3(ci3[1, "upr.ci"]), ") on the 150 complete cases analyzed here.")))
 
     # Controls: the correctly coded tables raise no inversion warning.
     expect_false("Positive Levels May Be Inverted" %in% .ir_notices(.ir_run(d2))$title)
@@ -478,7 +478,7 @@ test_that("IR-02b a correctly coded useless test gets a chance-level note, not a
     expect_true(startsWith(chance$content, paste0(
         "Youden's J is below 0 but within sampling variation of 0 for Test 2 (J = -0.010, 95% CI ",
         .ir_f3(ci[1, "lwr.ci"]), " to ", .ir_f3(ci[1, "upr.ci"]),
-        "), on the 200 complete cases analysed here.")))
+        "), on the 200 complete cases analyzed here.")))
 
     # The same test analysed alone (>= 10 cases in both groups) gets the same quiet note. It
     # used to get the serious "No Rule Performs Better Than Chance" instead, fired on the bare
@@ -492,7 +492,7 @@ test_that("IR-02b a correctly coded useless test gets a chance-level note, not a
     expect_true(startsWith(chance1$content, paste0(
         "Youden's J is below 0 but within sampling variation of 0 for Test 1 (J = -0.010, 95% CI ",
         .ir_f3(ci[1, "lwr.ci"]), " to ", .ir_f3(ci[1, "upr.ci"]),
-        "), on the 200 complete cases analysed here.")))
+        "), on the 200 complete cases analyzed here.")))
     expect_identical(nt1$severity[nt1$title == "Poor Discrimination"], "Serious warning")
     expect_false(any(c("Positive Levels May Be Inverted", "No Rule Performs Better Than Chance") %in%
                          nt1$title))
@@ -509,7 +509,7 @@ test_that("IR-02c a small single-test sample below chance beyond sampling error 
     expect_true(startsWith(inv$content, paste0(
         "Test 1 classifies worse than chance in this sample, beyond sampling variation: ",
         "Youden's J = -0.500 (Agresti-Caffo 95% CI ", .ir_f3(ci[1, "lwr.ci"]), " to ",
-        .ir_f3(ci[1, "upr.ci"]), ") on the 20 complete cases analysed here.")))
+        .ir_f3(ci[1, "upr.ci"]), ") on the 20 complete cases analyzed here.")))
     # No pattern rows, so no sentence about combinations.
     expect_false(grepl("Every combination", inv$content, fixed = TRUE))
     expect_false("Test Performs at Chance Level" %in% nt$title)
@@ -543,7 +543,7 @@ test_that("IR-02e several reversed tests are listed together in one warning", {
     ci3 <- .ir_ac(24, 60, 75, 90, conf.level = 0.95, method = "ac")
     expect_true(startsWith(inv, paste0(
         "Several tests classify worse than chance in this sample, beyond sampling variation, ",
-        "on the 150 complete cases analysed here: ",
+        "on the 150 complete cases analyzed here: ",
         "Test 2 (J = -0.483, 95% CI ", .ir_f3(ci2[1, "lwr.ci"]), " to ", .ir_f3(ci2[1, "upr.ci"]), "); ",
         "Test 3 (J = -0.433, 95% CI ", .ir_f3(ci3[1, "lwr.ci"]), " to ", .ir_f3(ci3[1, "upr.ci"]), ").")))
     expect_match(inv, "Every combination that uses such a test is affected as well.", fixed = TRUE)
@@ -720,7 +720,7 @@ test_that("IR-R2-2 both positive levels swapped: one inversion warning, naming b
     expect_lt(max(ci1[1, "upr.ci"], ci2[1, "upr.ci"]), 0)
     expect_true(startsWith(.ir_notice(res, "Positive Levels May Be Inverted"), paste0(
         "Several tests classify worse than chance in this sample, beyond sampling variation, ",
-        "on the 100 complete cases analysed here: ",
+        "on the 100 complete cases analyzed here: ",
         "Test 1 (J = -0.533, 95% CI ", .ir_f3(ci1[1, "lwr.ci"]), " to ", .ir_f3(ci1[1, "upr.ci"]), "); ",
         "Test 2 (J = -0.433, 95% CI ", .ir_f3(ci2[1, "lwr.ci"]), " to ", .ir_f3(ci2[1, "upr.ci"]), ").")))
     expect_identical(.ir_f3(12 / 40 + 10 / 60 - 1), "-0.533")
@@ -759,7 +759,7 @@ test_that("IR-R2-3 the collective signature is graded: it fires only when its pa
         "Youden's J is below 0 but within sampling variation of 0 for ",
         "Test 1 (J = -0.060, 95% CI ", .ir_f3(ci1[1, "lwr.ci"]), " to ", .ir_f3(ci1[1, "upr.ci"]), "); ",
         "Test 2 (J = -0.040, 95% CI ", .ir_f3(ci2[1, "lwr.ci"]), " to ", .ir_f3(ci2[1, "upr.ci"]), "), ",
-        "on the 200 complete cases analysed here.")))
+        "on the 200 complete cases analyzed here.")))
 
     # (ii) The all-negative pattern tops the table, clearly above chance, while a named rule is
     # above chance.
@@ -795,7 +795,7 @@ test_that("IR-R2-4 a single test clearly below chance gets the inversion warning
     expect_true(startsWith(inv$content, paste0(
         "Test 1 classifies worse than chance in this sample, beyond sampling variation: ",
         "Youden's J = -0.500 (Agresti-Caffo 95% CI ", .ir_f3(ci[1, "lwr.ci"]), " to ",
-        .ir_f3(ci[1, "upr.ci"]), ") on the 80 complete cases analysed here.")))
+        .ir_f3(ci[1, "upr.ci"]), ") on the 80 complete cases analyzed here.")))
     expect_false(any(c("No Rule Performs Better Than Chance", "Test Performs at Chance Level") %in%
                          nt$title))
 })
@@ -814,7 +814,7 @@ test_that("IR-R2-5 a single test below 0 within sampling variation in a small gr
     expect_true(startsWith(chance$content, paste0(
         "Youden's J is below 0 but within sampling variation of 0 for Test 1 (J = -0.208, 95% CI ",
         .ir_f3(ci[1, "lwr.ci"]), " to ", .ir_f3(ci[1, "upr.ci"]),
-        "), on the 20 complete cases analysed here.")))
+        "), on the 20 complete cases analyzed here.")))
     expect_false(any(c("Positive Levels May Be Inverted", "No Rule Performs Better Than Chance") %in%
                          nt$title))
 })

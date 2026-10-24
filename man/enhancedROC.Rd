@@ -110,7 +110,7 @@ patient: every interval and test assumes independent rows.}
 (condition present), matched exactly. Pass NULL to leave it unset: a
 numeric outcome coded 0/1 then reads 1 as positive, and any other outcome
 leaves the analysis waiting for a choice, because levels are never chosen
-from their order. Every other level is analysed as negative (pooled when
+from their order. Every other level is analyzed as negative (pooled when
 there are more than two). A numeric outcome must have exactly two values;
 to choose among more, make it a factor.}
 
@@ -138,7 +138,7 @@ exploratory screening of markers whose direction is genuinely unknown, and
 say so.
 }}
 
-\item{youdenOptimization}{Find the optimal cutoff by maximising the Youden
+\item{youdenOptimization}{Find the optimal cutoff by maximizing the Youden
 index (sensitivity + specificity - 1), subject to the minimum
 sensitivity/specificity below. When off, the cutoff closest to the top-left
 corner of the ROC curve is reported instead. The minimum sensitivity and
@@ -181,7 +181,7 @@ uniformly best (Obuchowski and Lieber 1998; Feng et al. 2017).}
 \item{bootstrapPartialAUC}{Bootstrap confidence interval for the partial
 AUC, using the resample count, interval type (BCa/percentile/basic) and
 stratification set above. The interval is for the raw partial AUC on the
-chosen focus range, not for the McClish-normalised value.}
+chosen focus range, not for the McClish-normalized value.}
 
 \item{stratifiedBootstrap}{Resample cases and controls separately, keeping
 the outcome proportions, in every bootstrap of this analysis: the AUC and
@@ -385,7 +385,7 @@ probability, and how many of those actually have the event.}
 \item{impactCutoffs}{Fixed score cutoffs on the marker's own scale, comma
 separated. The default 0.5 is meant for predicted probabilities (Prediction
 scale = probability); for a raw marker enter cutoffs inside its observed
-range. A warning names any cutoff that classifies every analysed patient
+range. A warning names any cutoff that classifies every analyzed patient
 the same way.}
 
 \item{utilityThreshold}{Threshold probability for net benefit: the risk at
@@ -397,10 +397,10 @@ clinical impact and workload tables; it is not a score cutoff.}
 \item{workloadPopulationSize}{Size of the population the projected workload
 counts are scaled to. Used for every projected row: the main prevalence
 when Observed prevalence is unticked, and every additional target
-prevalence. Observed rows count the analysed patients instead.}
+prevalence. Observed rows count the analyzed patients instead.}
 
 \item{analysisUnit}{What one row is (slide, core, patient...). Printed in
-the frozen-model report; every analysed row weighs equally in its metrics.}
+the frozen-model report; every analyzed row weighs equally in its metrics.}
 
 \item{prevalenceScenarios}{Extra target-population prevalences, as
 proportions between 0 and 1 separated by commas (for example 0.05, 0.2).
@@ -456,7 +456,7 @@ Frozen-model validation report treats each row as an independent patient,
 so their intervals and tests are too narrow then. Only the Frozen-model
 validation report resamples whole patients.}
 
-\item{siteID}{Optional site or centre of each row. The frozen-model report
+\item{siteID}{Optional site or center of each row. The frozen-model report
 then adds one set of metrics per site, conditional on the observed sites,
 and resamples within sites. Every row needs a site, and a patient may not
 appear at two sites.}

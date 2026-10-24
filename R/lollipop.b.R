@@ -257,7 +257,7 @@ lollipopClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                         'INFO',
                         .("Conditional Coloring"),
                         .fmt(
-                            .("Values above {thr} are drawn in orange and the rest in blue, so colour encodes the threshold rather than the group."),
+                            .("Values above {thr} are drawn in orange and the rest in blue, so color encodes the threshold rather than the group."),
                             thr = base::format(self$options$colorThreshold, digits = 3))
                     )
 
@@ -266,7 +266,7 @@ lollipopClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                         private$.addNotice(
                             'INFO',
                             .("Highlighting Ignored"),
-                            .("Conditional colouring is active, so the highlighted category is not drawn differently; turn conditional colouring off to use highlighting.")
+                            .("Conditional coloring is active, so the highlighted category is not drawn differently; turn conditional coloring off to use highlighting.")
                         )
                     }
                 }

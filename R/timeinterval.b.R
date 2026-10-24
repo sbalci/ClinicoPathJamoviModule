@@ -554,7 +554,7 @@ timeintervalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             success_rate <- successful / total_non_missing
             if (success_rate < 0.8) {
                 jmvcore::reject(.fmt(
-                    .("Only {percent}% of non-missing values in '{column}' were parsed with format '{format}'. Please verify that the selected format matches all values or standardise the column."),
+                    .("Only {percent}% of non-missing values in '{column}' were parsed with format '{format}'. Please verify that the selected format matches all values or standardize the column."),
                     percent = round(100 * success_rate, 1), column = column_name, format = format_label
                 ))
             }
@@ -887,7 +887,7 @@ timeintervalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                          count = length(negative_idx),
                          total = length(calculated_time_raw),
                          pct = round(100 * length(negative_idx) / length(calculated_time_raw), 1)),
-                    .("These rows cannot be analysed: a negative interval subtracts from total person-time and would corrupt any incidence rate computed from that denominator."),
+                    .("These rows cannot be analyzed: a negative interval subtracts from total person-time and would corrupt any incidence rate computed from that denominator."),
                     .("Usual causes are that the start and end date columns are swapped, or that the date format was mis-detected - a wrong day/month order flips only the rows whose day-of-month is 12 or less, which is why a few rows can be negative while the rest look correct."),
                     .("A third cause makes every row negative by less than a day: a start column carrying a time of day against an end column recorded at midnight, which is what many laboratory systems export - check the Examples below for a time component on one side only."),
                     .("Correct the dates at source, or tick 'Remove negative intervals' under Data Quality & Statistics to drop these rows from every statistic including person-time."),

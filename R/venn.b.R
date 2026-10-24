@@ -678,8 +678,8 @@ vennClass <- if (requireNamespace('jmvcore'))
                             if (!private$.isColour(self$options[[nm]])) {
                                 private$.addNotice(
                                     "WARNING",
-                                    .("Colour Not Recognised"),
-                                    sprintf(.("'%s' is not a colour R recognises, so the ggVennDiagram plot below is drawn with black instead. Use a colour name from the standard R palette (for example red, steelblue, grey40) or a hex code such as #2C7FB8."),
+                                    .("Color Not Recognized"),
+                                    sprintf(.("'%s' is not a color R recognizes, so the ggVennDiagram plot below is drawn with black instead. Use a color name from the standard R palette (for example red, steelblue, grey40) or a hex code such as #2C7FB8."),
                                             as.character(self$options[[nm]])))
                             }
                         }
@@ -2249,7 +2249,7 @@ vennClass <- if (requireNamespace('jmvcore'))
                 if (any(rare)) {
                     add(
                         .("Low Prevalence"),
-                        sprintf(.("%d of %d selected variables are positive in fewer than 5%% of the %d analysed cases (%s). The Venn shapes this analysis draws are fixed geometry: a region holding one case is drawn the same size as a region holding a hundred, so a rare set is easy to over-read. Go by the counts and percentages printed inside the regions, by the Summary of True Counts table, and by the UpSet plots if you switch them on."),
+                        sprintf(.("%d of %d selected variables are positive in fewer than 5%% of the %d analyzed cases (%s). The Venn shapes this analysis draws are fixed geometry: a region holding one case is drawn the same size as a region holding a hundred, so a rare set is easy to over-read. Go by the counts and percentages printed inside the regions, by the Summary of True Counts table, and by the UpSet plots if you switch them on."),
                                 sum(rare), nrow(intersection_data), total_n,
                                 paste(intersection_data$Variable[rare], collapse = ", ")))
                 }
@@ -2266,7 +2266,7 @@ vennClass <- if (requireNamespace('jmvcore'))
                 if (any(saturated)) {
                     add(
                         .("Very High Prevalence"),
-                        sprintf(.("%d of %d selected variables are positive in more than 95%% of the %d analysed cases (%s). A set that contains almost every case fills the diagram, leaving the regions outside it nearly empty, so the picture separates almost nothing. Check that the level nominated as positive is the one you meant, and read the Summary of True Counts table rather than the shapes."),
+                        sprintf(.("%d of %d selected variables are positive in more than 95%% of the %d analyzed cases (%s). A set that contains almost every case fills the diagram, leaving the regions outside it nearly empty, so the picture separates almost nothing. Check that the level nominated as positive is the one you meant, and read the Summary of True Counts table rather than the shapes."),
                                 sum(saturated), nrow(intersection_data), total_n,
                                 paste(intersection_data$Variable[saturated], collapse = ", ")))
                 }

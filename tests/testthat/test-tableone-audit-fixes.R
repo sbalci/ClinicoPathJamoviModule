@@ -40,7 +40,7 @@ test_that("unsupported classes are omitted before exclusion and reporting", {
     }
   }
   result <- tableone(d, "VisitDate", showSummary = TRUE, showReportSentence = TRUE)
-  expect_match(result$todo$content, "Nothing to summarise")
+  expect_match(result$todo$content, "Nothing to summarize")
   expect_identical(result$reportSentence$content, "")
   expect_identical(result$summary$content, "")
   expect_match(result$assumptions$content, "Data quality check not performed")

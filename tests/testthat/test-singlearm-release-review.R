@@ -10,6 +10,31 @@
 
 library(testthat)
 
+if (!("ClinicoPath" %in% loadedNamespaces()) || !exists("singlearm_test")) {
+  suppressPackageStartupMessages({
+    library(jmvcore)
+    library(R6)
+    library(dplyr)
+    library(survival)
+  })
+  root_dir <- normalizePath(testthat::test_path("..", ".."), mustWork = FALSE)
+  for (f in list.files(file.path(root_dir, "R"), pattern = "^utils.*\\.R$", full.names = TRUE)) {
+    source(f)
+  }
+  source(file.path(root_dir, "R", "singlearm.h.R"))
+  source(file.path(root_dir, "R", "singlearm.b.R"))
+  for (d in list.files(file.path(root_dir, "data"), pattern = "^singlearm.*\\.rda$", full.names = TRUE)) {
+    load(d, envir = .GlobalEnv)
+  }
+  if (!("ClinicoPath" %in% loadedNamespaces()) && requireNamespace("pkgload", quietly = TRUE)) {
+    ns <- pkgload:::create_ns_env(root_dir)
+    for (nm in ls(.GlobalEnv, all.names = TRUE)) {
+      assign(nm, get(nm, envir = .GlobalEnv), envir = ns)
+    }
+    base::namespaceExport(ns, ls(ns))
+  }
+}
+
 sa_rr_args <- function(...) {
   defaults <- list(
     data = as.data.frame(get("singlearm_test")),
@@ -205,7 +230,7 @@ test_that("survival plots and KMunicate use conf.type = 'log-log' matching survT
   cls <- get("singlearmClass", envir = asNamespace("ClinicoPath"))
   ggsurv <- cls$private_methods$.survPlotLogLog(
     .data = d_small,
-    dependent = "survival::Surv(mytime, myoutcome)",
+    dependent = "Surv(mytime, myoutcome)",
     explanatory = "myfactor",
     conf.int = TRUE,
     risk.table = FALSE
@@ -232,4 +257,45 @@ test_that("survival plots and KMunicate use conf.type = 'log-log' matching survT
 test_that("VariableSupplier is the first top-level control in singlearm.u.yaml", {
   ui <- yaml::read_yaml(testthat::test_path("..", "..", "jamovi", "singlearm.u.yaml"))
   expect_identical(ui$children[[1]]$type, "VariableSupplier")
+})
+
+test_that(".sourcifyOption escapes quote-breaking String/Level options in asSource()", {
+  df <- data.frame(
+    time = c(5, 10, 15, 20),
+    status = factor(c("1", "0", "1", "0"))
+  )
+  opts_fn <- get("singlearmOptions", envir = asNamespace("ClinicoPath"))
+  cls <- get("singlearmClass", envir = asNamespace("ClinicoPath"))
+  opts <- opts_fn$new(
+    elapsedtime = "time",
+    outcome = "status",
+    outcomeLevel = "1",
+    cutp = '1", ); system("id"); #',
+    time_intervals = '6, 12", ); system("whoami"); #'
+  )
+  an <- cls$new(options = opts, data = df)
+  src <- an$asSource()
+  parsed <- parse(text = src)
+  # Must parse to a single call to ClinicoPath::singlearm, never a second expression
+  expect_length(parsed, 1L)
+  expect_identical(deparse(parsed[[1]][[1]]), "ClinicoPath::singlearm")
+})
+
+test_that("disabled plots do not serialize plotData state unnecessarily", {
+  r_off <- do.call(ClinicoPath::singlearm, sa_rr_args(
+    sc = FALSE, ce = FALSE, ch = FALSE, kmunicate = FALSE,
+    baseline_hazard = FALSE, hazard_smoothing = FALSE
+  ))
+  for (nm in c("plot", "plot_cif", "plot2", "plot3", "plot6",
+               "baselineHazardPlot", "smoothedHazardPlot")) {
+    expect_null(r_off[[nm]]$state, info = nm)
+  }
+
+  r_on <- do.call(ClinicoPath::singlearm, sa_rr_args(
+    sc = TRUE, baseline_hazard = TRUE
+  ))
+  expect_false(is.null(r_on$plot$state))
+  expect_false(is.null(r_on$baselineHazardPlot$state))
+  expect_null(r_on$plot2$state)
+  expect_null(r_on$smoothedHazardPlot$state)
 })

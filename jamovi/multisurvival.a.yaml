@@ -680,7 +680,7 @@ options:
       # If the keys are ever renamed, it is a BREAKING CHANGE and needs a
       # migration path for saved files, not just a find-and-replace.
       options:
-        - title: Standardised over cohort (g-computation)
+        - title: Standardized over cohort (g-computation)
           name: average
         - title: At reference covariate profile
           name: conditional
@@ -727,7 +727,7 @@ options:
       default: average
       description:
           R: >
-            Estimand for the adjusted survival curves. "Standardised over cohort"
+            Estimand for the adjusted survival curves. "Standardized over cohort"
             sets every observed patient to each level in turn and averages the
             model-predicted curves (g-computation), so the curves differ only by
             the adjustment variable. "At reference covariate profile" predicts a

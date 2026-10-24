@@ -56,42 +56,17 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
         .ordinal = FALSE,
         .noticeList = list(),
 
-        # library-audit 2026-09-22 OncoPath [LOW] REJECTED: Notice renders single-line plain text and dynamic
-        #   insert() in .run() accumulates across runs (Group$remove cannot drop items) (guide section 13)
+        # library-audit 2026-09-22 OncoPath [LOW] REJECTED: a jmvcore::Notice holds one plain-text string
+        #   with no title; these panels are a title plus a paragraph (agreed 2026-10-23). Guide section 13.
         .addNotice = function(type, title, content) {
-            private$.noticeList[[length(private$.noticeList) + 1]] <- list(
-                type = type, title = title, content = content)
+            private$.noticeList <- notice_append(private$.noticeList, type, title, content)
             # Render immediately so a notice added before an early return survives.
             private$.renderNotices()
         },
 
         .renderNotices = function() {
-            if (length(private$.noticeList) == 0) {
-                self$results$notices$setContent("")
-                self$results$notices$setVisible(FALSE)
-                return()
-            }
-            # library-audit 2026-09-16 OncoPath [INFO] DONE: titles inherit the pane colour - fixed hues fell to
-            #   2.7-2.9:1 on the dark theme; the translucent tint and the border carry the severity
-            typeStyles <- list(
-                ERROR = list(bgcolor = "rgba(220, 38, 38, 0.10)", border = "#fca5a5"),
-                STRONG_WARNING = list(bgcolor = "rgba(234, 88, 12, 0.10)", border = "#fdba74"),
-                WARNING = list(bgcolor = "rgba(202, 138, 4, 0.12)", border = "#fde047"),
-                INFO = list(bgcolor = "rgba(37, 99, 235, 0.08)", border = "#93c5fd")
-            )
-            html <- "<div style='margin: 10px 0;'>"
-            severity <- match(vapply(private$.noticeList, function(n) n$type, ""), names(typeStyles), nomatch = 4L)
-            for (notice in private$.noticeList[order(severity)]) {
-                style <- typeStyles[[notice$type]]
-                if (is.null(style)) style <- typeStyles$INFO
-                html <- paste0(html,
-                    "<div style='background-color: ", style$bgcolor, "; border-left: 4px solid ", style$border,
-                    "; padding: 12px; margin: 8px 0; border-radius: 4px;'>",
-                    "<strong style='color: inherit;'>", htmltools::htmlEscape(notice$title), "</strong><br>",
-                    "<span style='color: inherit;'>", htmltools::htmlEscape(notice$content), "</span></div>")
-            }
-            self$results$notices$setContent(paste0(html, "</div>"))
-            self$results$notices$setVisible(TRUE)
+            self$results$notices$setVisible(length(private$.noticeList) > 0)
+            self$results$notices$setContent(notice_panel_html(self, private$.noticeList))
         },
 
         # One paired comparison: x minus y, as a percentage of the mean of z - the
@@ -886,11 +861,11 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
             if (has_reference) whole_section <- whole_section[usable]
             biopsy_data <- biopsy_data[usable, , drop = FALSE]
             if (n_rows > n_usable) {
-                private$.addNotice("INFO", .("Cases not analysed"), sprintf(
+                private$.addNotice("INFO", .("Cases not analyzed"), sprintf(
                     if (has_reference)
-                        .("%d of %d rows were not analysed because they lack a reference value or any regional measurement.")
+                        .("%d of %d rows were not analyzed because they lack a reference value or any regional measurement.")
                     else
-                        .("%d of %d rows were not analysed because they have fewer than 2 regional measurements."),
+                        .("%d of %d rows were not analyzed because they have fewer than 2 regional measurements."),
                     n_rows - n_usable, n_rows))
             }
 
@@ -971,7 +946,7 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
             reference <- self$options$wholesection
             if (!is.null(reference) && reference %in% biopsy_columns) {
                 private$.addNotice("WARNING", .("Variable selected twice"), sprintf(
-                    .("%s is the reference measurement and was also selected as a regional measurement; it is analysed as the reference only."),
+                    .("%s is the reference measurement and was also selected as a regional measurement; it is analyzed as the reference only."),
                     reference))
                 biopsy_columns <- setdiff(biopsy_columns, reference)
                 if (length(biopsy_columns) == 0)
@@ -980,7 +955,7 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
             repeated <- unique(biopsy_columns[duplicated(biopsy_columns)])
             if (length(repeated) > 0) {
                 private$.addNotice("WARNING", .("Variable selected twice"), sprintf(
-                    .("%s was selected more than once as a regional measurement and is analysed once."),
+                    .("%s was selected more than once as a regional measurement and is analyzed once."),
                     paste(repeated, collapse = ", ")))
                 biopsy_columns <- unique(biopsy_columns)
             }
@@ -1033,7 +1008,7 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
             strategy_note <- if (sampling_strategy == "random") {
                 .("Sampling strategy recorded as random, which matches the analysis's assumption that the regions are exchangeable samples of each case.")
             } else if (sampling_strategy == "systematic") {
-                .("Sampling strategy recorded as systematic. The analysis treats the regions as exchangeable measurements of each case and applies no design-based adjustment; if the sampling pattern follows tissue architecture, the CV and ICC describe that pattern rather than the tumour as a whole.")
+                .("Sampling strategy recorded as systematic. The analysis treats the regions as exchangeable measurements of each case and applies no design-based adjustment; if the sampling pattern follows tissue architecture, the CV and ICC describe that pattern rather than the tumor as a whole.")
             } else if (sampling_strategy == "stratified") {
                 .("Note: Stratified sampling was reported. This analysis applies NO design-based adjustment: all estimates treat the measurements as a simple sample, so stratification effects (if any) remain in the results.")
             }
@@ -1213,7 +1188,7 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
                         as.integer(icc$n), as.integer(icc$n_incomplete)))
                 if (icc$n < 10 && icc$n < nrow(biopsy_data))
                     private$.addNotice("STRONG_WARNING", .("Small sample for the ICC"), sprintf(
-                        .("The ICCs rest on only %d cases with every measurement (of %d analysed); treat them as provisional."),
+                        .("The ICCs rest on only %d cases with every measurement (of %d analyzed); treat them as provisional."),
                         as.integer(icc$n), nrow(biopsy_data)))
             } else {
                 repro_table$addRow(rowKey = 2, values = private$.tableValues(list(
@@ -1835,7 +1810,7 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
             private$.missingCompartmentNote(spatial_table, groups)
             if (!is.null(groups$skipped)) {
                 spatial_table$setNote("skipped_regions", sprintf(
-                    .("Compartments with fewer than %d cases are not analysed: %s."),
+                    .("Compartments with fewer than %d cases are not analyzed: %s."),
                     groups$min_n, groups$skipped))
             }
             if (length(groups$keep) < 2) {
@@ -2305,7 +2280,7 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
             rr <- private$.biasReach(rows)
             status_text <- switch(verdict,
                 bias = paste0(
-                    "<p><strong>", .("NOT ADEQUATE FOR SUBSTITUTION:"), "</strong> ",
+                    "<p><strong>", .("Not adequate for substitution:"), "</strong> ",
                     if (!metrics$has_reference)
                         .("A clinically material systematic difference between regions is present.")
                     else if (thresholds_met)
@@ -2320,11 +2295,11 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
                          else .("Calibrate the affected measurement against the reference before using it in its place."),
                     "</p>"),
                 ordinal = paste0(
-                    "<p><strong>", .("NOT GRADED:"), "</strong> ",
+                    "<p><strong>", .("Not graded:"), "</strong> ",
                     .("The measurements are an ordinal score (5 or fewer whole-number values), so no sampling verdict is given: the CV and the percentage-difference margin assume a continuous scale. Assess agreement of an ordinal score with weighted kappa or the proportion of cases in the same category."),
                     "</p>"),
                 insufficient = paste0(
-                    "<p><strong>", .("INSUFFICIENT DATA:"), "</strong> ",
+                    "<p><strong>", .("Insufficient data:"), "</strong> ",
                     if (isTRUE(metrics$reference_constant))
                         htmltools::htmlEscape(sprintf(.("The reference variable '%s' has the same value in every case, so agreement with it cannot be judged. Check the data."),
                                                       metrics$reference_name))
@@ -2332,7 +2307,7 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
                         .("Unable to evaluate sampling quality because the correlation or the variability could not be estimated; the notes under the Reproducibility Assessment table give the reason."),
                     "</p>"),
                 met = paste0(
-                    "<p><strong>", .("AGREEMENT THRESHOLDS MET:"), "</strong> ",
+                    "<p><strong>", .("Agreement thresholds met:"), "</strong> ",
                     if (!metrics$has_reference)
                         sprintf(.("Regional measurements agree with one another in this dataset (correlation \u2265 %s, CV \u2264 %s%%), and the average difference of every comparison between regions was shown to lie within the %s%% margin (90%% CI)."), correlation_threshold, cv_threshold, margin)
                     else
@@ -2341,7 +2316,7 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
                         .("This concerns average agreement: an individual case can still differ by as much as the limits of agreement."),
                         caveat), collapse = " ")), "</p>"),
                 met_uncertain = paste0(
-                    "<p><strong>", .("AGREEMENT THRESHOLDS MET, NOT CONFIRMED:"), "</strong> ",
+                    "<p><strong>", .("Agreement thresholds met, not confirmed:"), "</strong> ",
                     sprintf(.("Regional measurements meet the correlation and CV thresholds on average (mean correlation \u2265 %s, CV \u2264 %s%%), but agreement is not confirmed."), correlation_threshold, cv_threshold),
                     " ", htmltools::htmlEscape(paste(not_confirmed, collapse = " ")),
                     # Only where an interval exists to narrow (not for identical differences).
@@ -2350,14 +2325,14 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
                         paste0(" ", .("More cases would narrow the interval.")) else "",
                     " ", caveat, "</p>"),
                 moderate = paste0(
-                    "<p><strong>", .("MODERATE SAMPLING:"), "</strong> ",
+                    "<p><strong>", .("Moderate sampling:"), "</strong> ",
                     sprintf(.("The thresholds are met only after relaxing them to correlation \u2265 %s and CV \u2264 %s%%."),
                             signif(correlation_threshold - 0.2, 6), signif(cv_threshold * 1.5, 6)),
                     " ", .("This relaxed band (correlation threshold minus 0.2, CV threshold times 1.5) is a heuristic of this analysis, not a published criterion."),
                     " ", .("Consider averaging more than one region per case or revising the sampling protocol."),
                     "</p>"),
                 inadequate = paste0(
-                    "<p><strong>", .("INADEQUATE SAMPLING:"), "</strong> ",
+                    "<p><strong>", .("Inadequate sampling:"), "</strong> ",
                     sprintf(.("Sampling does not meet quality thresholds (correlation \u2265 %s, CV \u2264 %s%%)."), correlation_threshold, cv_threshold),
                     " ", .("Review the sampling strategy; averaging several regions per case may be needed."),
                     "</p>")
@@ -2755,12 +2730,12 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
                     any(vapply(metrics$bias_rows, function(r) !is.null(r$prop), logical(1))))
                     li(.("Proportional bias:"), private$.levelMethodText(metrics$has_reference)),
                 if (metrics$has_reference)
-                    li(.("Reference measurement:"), .("The reference (whole section, hotspot or overall score) is treated as the comparison standard; its own measurement error is not modelled.")),
+                    li(.("Reference measurement:"), .("The reference (whole section, hotspot or overall score) is treated as the comparison standard; its own measurement error is not modeled.")),
                 if (isTRUE(private$.vc_done))
                     li(.("Variance components:"), .("Two-way random-effects decomposition into case, method and residual variance on cases with every measurement."))
             )
             requirements <- c(
-                li(.("Sample size:"), sprintf(.("At least 5 cases are required; this run analysed %d cases."), as.integer(metrics$n_cases))),
+                li(.("Sample size:"), sprintf(.("At least 5 cases are required; this run analyzed %d cases."), as.integer(metrics$n_cases))),
                 li(.("Measurement scale:"), .("Continuous biomarker values (percentages, scores or quantitative units).")),
                 li(.("Independence:"), .("Regional measurements of a case are treated as exchangeable, independently sampled measurements of that case.")),
                 li(.("Normality:"), .("The t-test CIs and the limits of agreement assume roughly normal differences.")),
@@ -2770,7 +2745,7 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
                 li(.("Biomarker specificity:"), .("Findings may not generalise to other biomarkers or tissue types.")),
                 li(.("Pre-analytical factors:"), .("Fixation, processing and staining variation are not separated from sampling variation.")),
                 li(.("Observers:"), .("Inter- and intra-observer variation is not separated from regional variation.")),
-                li(.("Scope:"), sprintf(.("The quality thresholds (correlation %s, CV %s%%) are set in the analysis options; results describe the cases analysed and are not an external validation."),
+                li(.("Scope:"), sprintf(.("The quality thresholds (correlation %s, CV %s%%) are set in the analysis options; results describe the cases analyzed and are not an external validation."),
                                         self$options$correlation_threshold, self$options$cv_threshold))
             )
             references <- c(
@@ -2820,9 +2795,9 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
                     entry(.("Moderate sampling:"), .("The thresholds are met only after relaxing them to the correlation threshold minus 0.2 and 1.5 times the CV threshold. This band is a heuristic of this analysis, not a published criterion.")),
                     entry(.("Not adequate for substitution:"), .("A systematic difference was shown to exceed your margin (Bonferroni-adjusted CI entirely beyond it); correlation and CV cannot rescue it.")))),
                 block(.("IHC terms"), "#805ad5", c(
-                    entry(.("Spatial heterogeneity:"), .("Variation in biomarker expression across regions of the same tumour.")),
+                    entry(.("Spatial heterogeneity:"), .("Variation in biomarker expression across regions of the same tumor.")),
                     entry(.("H-score:"), .("(1 \u00d7 % weak) + (2 \u00d7 % moderate) + (3 \u00d7 % strong) staining; range 0 to 300.")),
-                    entry(.("Proliferation index:"), .("Percentage of tumour cells staining positive (for example Ki67); range 0 to 100."))))
+                    entry(.("Proliferation index:"), .("Percentage of tumor cells staining positive (for example Ki67); range 0 to 100."))))
             , "</div>")
             self$results$glossary$setContent(glossary_content)
         },
@@ -2936,10 +2911,10 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
             }
 
             opening <- if (metrics$n_biopsies == 1) {
-                sprintf(.("We analysed %d cases, each measured in one region and by a reference measurement, to see how well the regional measurement represents the biomarker expression of a case."),
+                sprintf(.("We analyzed %d cases, each measured in one region and by a reference measurement, to see how well the regional measurement represents the biomarker expression of a case."),
                         as.integer(metrics$n_cases))
             } else {
-                sprintf(.("We analysed %d cases, each measured in up to %d regions, to see how well regional measurements represent the biomarker expression of a case."),
+                sprintf(.("We analyzed %d cases, each measured in up to %d regions, to see how well regional measurements represent the biomarker expression of a case."),
                         as.integer(metrics$n_cases), as.integer(metrics$n_biopsies))
             }
 
@@ -2994,7 +2969,7 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
             is_constant <- private$.isConstant
             if (has_reference && is_constant(whole_section)) {
                 private$.addNotice("WARNING", .("Constant reference measurement"), sprintf(
-                    .("The reference variable '%s' is constant (the same value in every analysed case), so no correlation with it can be estimated. Check the data."),
+                    .("The reference variable '%s' is constant (the same value in every analyzed case), so no correlation with it can be estimated. Check the data."),
                     self$options$wholesection))
             }
             constant_regions <- names(biopsy_data)[vapply(biopsy_data, is_constant, logical(1))]

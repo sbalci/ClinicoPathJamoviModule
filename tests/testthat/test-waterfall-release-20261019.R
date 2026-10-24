@@ -28,7 +28,7 @@ test_that("WF-2: a supplied NE is not evaluable, not a threshold responder", {
     d <- data.frame(id = paste0("p", 1:5), v = c(-50, -45, 0, 10, 30), cat = c("NE", NA, NA, NA, NA))
     r <- wr2(d, patientID = "id", responseVar = "v", responseCategoryVar = "cat")
     expect_match(wr2_metric(r, "Objective Response Rate (CR+PR)"), "25.0%", fixed = TRUE)   # 1/4
-    expect_false(grepl("OVERRIDE IGNORED", paste(r$notices$content, collapse = " "), fixed = TRUE))
+    expect_false(grepl("override ignored", paste(r$notices$content, collapse = " "), fixed = TRUE))
 })
 
 test_that("WF-4: an all-patients DCR row and an exclusion count beside the categories", {
@@ -36,13 +36,13 @@ test_that("WF-4: an all-patients DCR row and an exclusion count beside the categ
     r <- wr2(d, patientID = "id", responseVar = "v")
     expect_match(wr2_metric(r, "Disease Control Rate, all 6 patients"), "66.7%", fixed = TRUE)
     notes <- vapply(r$summaryTable$notes, function(n) n$note, "")
-    expect_true(any(grepl("2 further patient(s) could not be analysed", notes, fixed = TRUE)))
+    expect_true(any(grepl("2 further patient(s) could not be analyzed", notes, fixed = TRUE)))
 })
 
 test_that("WF-5: raw sizes entered as percentage changes stop the run", {
     d <- data.frame(id = rep(paste0("p", 1:3), each = 2), t = rep(c(0, 2), 3), v = c(50, 20, 30, 40, 20, 0))
     expect_error(ClinicoPath::waterfall(data = d, patientID = "id", responseVar = "v", timeVar = "t"),
-                 "these look like raw tumour measurements", fixed = TRUE)
+                 "these look like raw tumor measurements", fixed = TRUE)
 })
 
 test_that("WF-3: the ongoing flag documentation matches the code (last value)", {

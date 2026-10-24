@@ -65,12 +65,12 @@ test_that("both levels empty: INFO waiting with counts, nothing drawn, no name o
         info <- paste(cs$counts, deparse(unset))
         expect_no_error(res <- pg_run(cs$d, female = unset, male = unset))
         notices <- res$notices$content
-        expect_match(notices, "NOTE: Choose the Female and Male levels", fixed = TRUE, info = info)
+        expect_match(notices, "Note: Choose the Female and Male levels", fixed = TRUE, info = info)
         expect_match(notices, "'Female level'", fixed = TRUE, info = info)
         expect_match(notices, "'Male level'", fixed = TRUE, info = info)
         expect_match(notices, cs$counts, fixed = TRUE, info = info)
-        expect_false(grepl("ERROR", notices, fixed = TRUE), info = info)
-        expect_false(grepl("WARNING", notices, fixed = TRUE), info = info)
+        expect_false(grepl("Error:", notices, fixed = TRUE), info = info)
+        expect_false(grepl("Warning:", notices, fixed = TRUE), info = info)
         pg_expect_nothing_drawn(res, info)
     }
 })
@@ -80,18 +80,18 @@ test_that("one level chosen while another observed level remains: waiting, never
     d3$sex <- factor(c(rep("Female", 30), rep("Male", 35), rep("Unknown", 5)))
     cases <- list(
         list(d = pg_data(), female = "Female", male = NULL,
-             title = "NOTE: Choose the Male level", others = "Male (n = 40)"),
+             title = "Note: Choose the Male level", others = "Male (n = 40)"),
         list(d = pg_data(), female = NULL, male = "Male",
-             title = "NOTE: Choose the Female level", others = "Female (n = 30)"),
+             title = "Note: Choose the Female level", others = "Female (n = 30)"),
         list(d = d3, female = "Female", male = NULL,
-             title = "NOTE: Choose the Male level", others = "Male (n = 35), Unknown (n = 5)"))
+             title = "Note: Choose the Male level", others = "Male (n = 35), Unknown (n = 5)"))
     for (cs in cases) {
         info <- cs$title
         expect_no_error(res <- pg_run(cs$d, female = cs$female, male = cs$male))
         notices <- res$notices$content
         expect_match(notices, cs$title, fixed = TRUE, info = info)
         expect_match(notices, cs$others, fixed = TRUE, info = info)
-        expect_false(grepl("ERROR", notices, fixed = TRUE), info = info)
+        expect_false(grepl("Error:", notices, fixed = TRUE), info = info)
         pg_expect_nothing_drawn(res, info)
     }
 })
@@ -134,7 +134,7 @@ test_that("both levels chosen: the table follows the user's assignment", {
 
 test_that("the same level on both sides keeps the existing error and draws nothing", {
     res <- pg_run(pg_data(), female = "Female", male = "Female")
-    expect_match(res$notices$content, "ERROR: Female and Male levels must be different", fixed = TRUE)
+    expect_match(res$notices$content, "Error: Female and Male levels must be different", fixed = TRUE)
     pg_expect_nothing_drawn(res)
 })
 
@@ -143,9 +143,9 @@ test_that("a chosen level the variable does not have is an error, never a reason
     for (args in list(list(female = "Missing", male = NULL), list(female = "Female", male = "Missing"))) {
         res <- do.call(pg_run, c(list(d = pg_data()), args))
         notices <- res$notices$content
-        expect_match(notices, "ERROR: Gender level not found", fixed = TRUE)
+        expect_match(notices, "Error: Gender level not found", fixed = TRUE)
         expect_match(notices, "The level 'Missing' chosen under", fixed = TRUE)
-        expect_false(grepl("NOTE: Choose the", notices, fixed = TRUE))
+        expect_false(grepl("Note: Choose the", notices, fixed = TRUE))
         pg_expect_nothing_drawn(res)
     }
     # a declared but unused level is still a level: a male-only cohort may name both sides
@@ -157,7 +157,7 @@ test_that("a chosen level the variable does not have is an error, never a reason
 
 test_that("a vector of levels is not one level: it waits instead of being recycled", {
     res <- pg_run(pg_data(), female = c("Female", "Male"), male = NULL)
-    expect_match(res$notices$content, "NOTE: Choose the Female and Male levels", fixed = TRUE)
+    expect_match(res$notices$content, "Note: Choose the Female and Male levels", fixed = TRUE)
     pg_expect_nothing_drawn(res)
 })
 

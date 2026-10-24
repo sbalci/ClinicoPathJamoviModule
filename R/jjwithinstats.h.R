@@ -716,7 +716,7 @@ jjwithinstatsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   posterior sampling (robust tests, Bayesian estimates, and some
 #'   nonparametric effect-size intervals). The plot caption names the seed
 #'   whenever it affected the numbers shown. The default reproduces the previous
-#'   fixed behaviour.
+#'   fixed behavior.
 #' @param pairwisecomparisons Enable to see which specific time points differ
 #'   significantly (e.g., baseline vs month 3, month 3 vs month 6).  Useful for
 #'   identifying when changes occur during treatment or disease progression.
@@ -768,7 +768,7 @@ jjwithinstatsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   plot shows individual trajectories.
 #' @param ggpubrPalette Color palette for the ggpubr plot. Applies to the
 #'   boxplot, violin and paired plot types; the line plot draws a single mean
-#'   trajectory, so a categorical palette has nothing to colour there.
+#'   trajectory, so a categorical palette has nothing to color there.
 #' @param ggpubrAddStats Add statistical comparison p-values to ggpubr plot.
 #' @param ggpubrShowLines Show individual subject trajectories for paired
 #'   plot.

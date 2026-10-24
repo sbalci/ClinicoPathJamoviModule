@@ -127,7 +127,7 @@ options:
             actually truncate follow-up and reset event status, and lets the event
             hierarchy keep the earliest priority event per patient instead of
             writing a later one back onto earlier records. Leave empty to keep the
-            previous behaviour.
+            previous behavior.
 
     - name: analysistype
       title: 'Survival Analysis Type'

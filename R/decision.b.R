@@ -317,7 +317,7 @@ decisionClass <- if (requireNamespace("jmvcore"))
             # interval with nothing on screen to show it. One sentence, used in the About panel
             # and as an always-on note under the counts.
             .independenceText = function() {
-                .("Each row must be a different, independent patient. If patients contribute several specimens (cores, blocks, lesions), the confidence intervals are too narrow: analyse one specimen per patient or use a method for clustered data.")
+                .("Each row must be a different, independent patient. If patients contribute several specimens (cores, blocks, lesions), the confidence intervals are too narrow: analyze one specimen per patient or use a method for clustered data.")
             },
 
             # "Equivalent AUC" for a binary test is (1 + Youden) / 2. It is printed as the exact
@@ -860,8 +860,8 @@ decisionClass <- if (requireNamespace("jmvcore"))
                         private$.addNotice(
                             type = "ERROR",
                             title = if (.diagReferenceMode(self$options$referenceType)$comparator)
-                                .("The reference has only one level among the analysed cases")
-                            else .("The gold standard has only one level among the analysed cases"),
+                                .("The reference has only one level among the analyzed cases")
+                            else .("The gold standard has only one level among the analyzed cases"),
                             content = .fmt(if (.diagReferenceMode(self$options$referenceType)$comparator)
                                 .('Every analysed case has reference level "{pos}". No reference-negative denominator is available; check exclusions and level selection.')
                             else .('Every analysed case has the gold-standard level "{pos}", so there are no disease-absent cases to estimate specificity from. Check the data, any exclusions reported in the warnings, and the level selection.'),
@@ -887,7 +887,7 @@ decisionClass <- if (requireNamespace("jmvcore"))
                     if (length(test_candidates) == 0)
                         private$.addNotice(
                             type = "ERROR",
-                            title = .("The test has only one level among the analysed cases"),
+                            title = .("The test has only one level among the analyzed cases"),
                             content = .fmt(.('Every analysed case has the test level "{pos}", so there are no negative test results to compare. Check the data, any exclusions reported in the warnings, and the level selection.'),
                                            pos = self$options$testPositive)
                         )
@@ -990,7 +990,7 @@ decisionClass <- if (requireNamespace("jmvcore"))
                 if (any(dim(test_table) != c(2, 2))) {
                     private$.addNotice(
                         type = "ERROR",
-                        title = .("No analysed cases at one of the positive or negative levels"),
+                        title = .("No analyzed cases at one of the positive or negative levels"),
                         content = .("After missing values and unselected levels are removed, the test or the gold standard has no cases at its positive or its negative level, so a 2x2 table cannot be formed. Check the data, any exclusions reported in the warnings, and the level selection.")
                     )
                     return(NULL)
@@ -1002,7 +1002,7 @@ decisionClass <- if (requireNamespace("jmvcore"))
                 if (nrow(mydata) < 4) {
                     private$.addNotice(
                         type = "ERROR",
-                        title = .fmt(.("Insufficient data after exclusions: {n} cases analysed"),
+                        title = .fmt(.("Insufficient data after exclusions: {n} cases analyzed"),
                                      n = sprintf("%d", nrow(mydata))),
                         content = .("At least 4 cases are required for diagnostic test analysis once missing values and unselected levels have been removed.")
                     )
@@ -1100,7 +1100,7 @@ decisionClass <- if (requireNamespace("jmvcore"))
                                            pct = paste0(base::format(pct(level_excluded)), "%")))
 
                 .fmt(
-                    .("Case exclusion summary: {details}. {analysed} of {total} cases analysed."),
+                    .("Case exclusion summary: {details}. {analyzed} of {total} cases analyzed."),
                     details = paste(parts, collapse = "; "),
                     analysed = nrow(processed_data),
                     total = n_orig)
@@ -1367,7 +1367,7 @@ decisionClass <- if (requireNamespace("jmvcore"))
                     "<ul>",
                     "<li><strong>", .("95% Confidence Intervals"), ":</strong> ", .("Provides uncertainty estimates: exact Clopper-Pearson intervals for sensitivity, specificity and the predictive values and log-scale intervals for the likelihood ratios and the diagnostic odds ratio (computed by the epiR package), and the Agresti-Caffo interval for Youden's index, from which the number needed to diagnose interval follows. These intervals describe the observed sample; when a population prevalence is supplied they do not apply to the prior-adjusted predictive values in the main table."), "</li>",
                     "<li><strong>", .("Explanatory Footnotes"), ":</strong> ", .("Adds definitions and interpretation notes to the totals table, the main statistics table and the two confidence-interval tables."), "</li>",
-                    "<li><strong>", .("Raw Data Tables"), ":</strong> ", .("Displays the analysed contingency table and combination counts, and a summary of excluded cases, for verification."), "</li>",
+                    "<li><strong>", .("Raw Data Tables"), ":</strong> ", .("Displays the analyzed contingency table and combination counts, and a summary of excluded cases, for verification."), "</li>",
                     "<li><strong>", .("Population Prevalence"), ":</strong> ", .("Use when your study sample doesn't represent the target population prevalence. Affects PPV/NPV calculations using Bayes' theorem. Enter as proportion (e.g., 0.05 for 5%, 0.15 for 15%)."), "</li>",
                     "<li><strong>", .("Fagan Nomogram"), ":</strong> ", .("Visual tool showing how test results change disease probability. Shows relationship between pre-test probability, likelihood ratios, and post-test probability."), "</li>",
                     "</ul>",
@@ -1582,7 +1582,7 @@ decisionClass <- if (requireNamespace("jmvcore"))
                 # nTable footnotes
                 nTable <- self$results$nTable
                 footnotes_n <- list(
-                    TotalPop = .("Number of cases analysed. Excluded: cases with a missing test or reference result, or with a level other than the selected positive and negative levels."),
+                    TotalPop = .("Number of cases analyzed. Excluded: cases with a missing test or reference result, or with a level other than the selected positive and negative levels."),
                     DiseaseP = .("Number of cases with the target condition (Reference Positive)"),
                     DiseaseN = .("Number of cases without the target condition (Reference Negative); they may have other diseases"),
                     TestP = .("Total Number of Positive Test Results"),
@@ -2400,7 +2400,7 @@ decisionClass <- if (requireNamespace("jmvcore"))
                 # its only explanation behind an off-by-default switch.
                 ratioTable$setNote("sample_accuracy", .fmt(
                     if (isTRUE(pp))
-                        .("Sample Accuracy is the proportion of concordant results at the prevalence observed in this sample ({prevalence}), NOT at the population prior you supplied. Unlike the predictive values it is not standardised to that prior, and it changes with case mix.")
+                        .("Sample Accuracy is the proportion of concordant results at the prevalence observed in this sample ({prevalence}), NOT at the population prior you supplied. Unlike the predictive values it is not standardized to that prior, and it changes with case mix.")
                     else
                         .("Sample Accuracy is the proportion of concordant results at the prevalence observed in this sample ({prevalence}), and it changes with case mix."),
                     prevalence = private$.fmtPct(PrevalenceD)))
@@ -3169,7 +3169,7 @@ decisionClass <- if (requireNamespace("jmvcore"))
                 html <- paste0("<h3>", .("Understanding Misclassifications"), "</h3>")
                 if (total_errors == 0) {
                     self$results$misclassificationInterpretation$setContent(
-                        paste0(html, "<p>", .("The test and the reference standard agree on every analysed case."), "</p>"))
+                        paste0(html, "<p>", .("The test and the reference standard agree on every analyzed case."), "</p>"))
                     return(invisible(NULL))
                 }
 

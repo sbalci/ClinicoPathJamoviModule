@@ -193,8 +193,8 @@ test_that("VAL C39-C45: guard thresholds fire on the side the code states", {
     fires <- function(title, ...) grepl(title, val_run(...)$notices$content, fixed = TRUE)
     expect_equal(c(fires("Prevalence Very Low", prevalence = .009), fires("Prevalence Very Low", prevalence = .01),
                    fires("Prevalence Very Low", prevalence = .011)), c(TRUE, TRUE, FALSE))
-    expect_equal(c(fires("STRONG WARNING: Prevalence Low", prevalence = .049),
-                   fires("STRONG WARNING: Prevalence Low", prevalence = .05)), c(TRUE, FALSE))
+    expect_equal(c(fires("Strong warning: Prevalence Low", prevalence = .049),
+                   fires("Strong warning: Prevalence Low", prevalence = .05)), c(TRUE, FALSE))
     expect_equal(c(fires("Prevalence Very High", prevalence = .899), fires("Prevalence Very High", prevalence = .9)), c(FALSE, TRUE))
     expect_equal(c(fires("Test 1 Low Performance", test1_sens = .49), fires("Test 1 Low Performance", test1_sens = .5)), c(TRUE, FALSE))
     expect_equal(c(fires("Illustrative Population Too Small", prevalence = .099, population_size = 100),

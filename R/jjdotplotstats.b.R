@@ -538,7 +538,7 @@ jjdotplotstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                                .("partial eta-squared")),
                 nonparametric = if (n_groups == 2) .("the rank-biserial correlation")
                                 else .("ordinal epsilon-squared"),
-                robust        = if (n_groups == 2) .("the robust (AKP) standardised difference")
+                robust        = if (n_groups == 2) .("the robust (AKP) standardized difference")
                                 else .("the explanatory measure of effect size (xi)"),
                 bayes         = .("the posterior median difference"),
                 .("the selected effect size"))

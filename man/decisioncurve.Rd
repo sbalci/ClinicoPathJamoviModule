@@ -152,8 +152,8 @@ strategies: the models and, if one is supplied, the clinical decision rule.
 The p-values are approximate and should not replace comparison at
 prespecified clinically relevant thresholds or independent validation.}
 
-\item{weightedAUC}{Summarise each decision curve by the area under it,
-normalised by the width of the threshold range - that is, the model's
+\item{weightedAUC}{Summarize each decision curve by the area under it,
+normalized by the width of the threshold range - that is, the model's
 average net benefit over that range. The option is named weightedAUC for
 historical reasons but the average is UNWEIGHTED: every threshold in the
 range counts equally. The value therefore depends entirely on the threshold

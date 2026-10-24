@@ -120,3 +120,7 @@ i18n-plans/
 # Generated default R graphics-device output
 /Rplots.pdf
 /tests/testthat/Rplots.pdf
+promotion/
+
+# testthat writes this only when tests fail (library-audit 2026-10-23 OncoPath)
+tests/testthat/testthat-problems.rds

@@ -202,7 +202,7 @@ options:
       default: 20250101
       description:
           R: >
-            Random seed for the statistics computed by resampling or posterior sampling (robust tests, Bayesian estimates, and some nonparametric effect-size intervals). The plot caption names the seed whenever it affected the numbers shown. The default reproduces the previous fixed behaviour.
+            Random seed for the statistics computed by resampling or posterior sampling (robust tests, Bayesian estimates, and some nonparametric effect-size intervals). The plot caption names the seed whenever it affected the numbers shown. The default reproduces the previous fixed behavior.
 
     - name: pairwisecomparisons
       title: "Pairwise comparisons"
@@ -452,7 +452,7 @@ options:
             Type of ggpubr plot for within-subjects data. Paired plot shows individual trajectories.
 
     - name: ggpubrPalette
-      title: ggpubr colour palette
+      title: ggpubr color palette
       type: List
       options:
         - title: Journal of Clinical Oncology (jco)
@@ -472,7 +472,7 @@ options:
           R: >
             Color palette for the ggpubr plot. Applies to the boxplot, violin and
             paired plot types; the line plot draws a single mean trajectory, so a
-            categorical palette has nothing to colour there.
+            categorical palette has nothing to color there.
 
     - name: ggpubrAddStats
       title: Statistical comparisons

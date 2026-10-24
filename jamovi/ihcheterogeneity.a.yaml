@@ -111,7 +111,7 @@ options:
         - numeric
       description:
           R: >
-            Further regional measurements, any number, analysed like Regional Measurements 1 to 4.
+            Further regional measurements, any number, analyzed like Regional Measurements 1 to 4.
       default: NULL
 
     - name: spatial_id
@@ -128,7 +128,7 @@ options:
             case and compartment count each case once per row, as if they were different patients,
             which overstates the sample and narrows every interval. Compartments are listed in the level order of the variable;
             cases without an identifier are left out of the compartment tables. In R, convert a
-            haven-labelled code column with haven::as_factor() first, or the codes are shown
+            haven-labeled code column with haven::as_factor() first, or the codes are shown
             instead of the labels.
       default: NULL
 

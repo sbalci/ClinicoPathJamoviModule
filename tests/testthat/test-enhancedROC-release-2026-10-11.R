@@ -40,7 +40,7 @@ test_that("F-02: repeated patient IDs raise a WARNING naming the independence as
     w <- Filter(function(n) identical(n$title, "Several Rows per Patient"), rel11_notices(a))
     expect_length(w, 1L)
     expect_identical(w[[1]]$type, "WARNING")
-    expect_match(w[[1]]$content, "The 120 analysed rows that carry a patient identifier (pid) come from 30 patients", fixed = TRUE)
+    expect_match(w[[1]]$content, "The 120 analyzed rows that carry a patient identifier (pid) come from 30 patients", fixed = TRUE)
     expect_match(w[[1]]$content, "assumes that each row is an independent patient", fixed = TRUE)
     expect_match(w[[1]]$content, "too narrow", fixed = TRUE)
     expect_match(w[[1]]$content, "one row per patient", fixed = TRUE)
@@ -185,14 +185,14 @@ test_that("F-09: a fixed cutoff outside the marker's range raises a WARNING nami
     w <- rel11_titled(a, "Fixed Cutoff Flags Every Patient")
     expect_length(w, 1L)
     expect_identical(w[[1]]$type, "WARNING")
-    expect_match(w[[1]]$content, "m at cutoff 0.5 (analysed values 1.7 to 9.1)", fixed = TRUE)
+    expect_match(w[[1]]$content, "m at cutoff 0.5 (analyzed values 1.7 to 9.1)", fixed = TRUE)
     expect_match(w[[1]]$content, "the default 0.5 suits predicted probabilities only", fixed = TRUE)
 
     # above the range flags no one; a cutoff inside the range is silent
     a <- rel11_obj(d, outcome = "y", positiveClass = "Malignant", predictors = "m", clinicalImpact = TRUE, impactCutoffs = "5, 20")
     w <- rel11_titled(a, "Fixed Cutoff Flags No Patient")
     expect_length(w, 1L)
-    expect_match(w[[1]]$content, "m at cutoff 20 (analysed values 1.7 to 9.1)", fixed = TRUE)
+    expect_match(w[[1]]$content, "m at cutoff 20 (analyzed values 1.7 to 9.1)", fixed = TRUE)
     expect_false(grepl("at cutoff 5 ", w[[1]]$content, fixed = TRUE))
     expect_length(rel11_titled(a, "Fixed Cutoff Flags Every Patient"), 0L)
 
@@ -207,7 +207,7 @@ test_that("F-09: a fixed cutoff outside the marker's range raises a WARNING nami
     expect_gt(a$results$results$frozenMetrics$rowCount, 0)
     w <- rel11_titled(a, "Fixed Cutoff Flags Every Patient")
     expect_length(w, 1L)
-    expect_match(w[[1]]$content, "m at cutoff 0.5 (analysed values 1.7 to 9.1)", fixed = TRUE)
+    expect_match(w[[1]]$content, "m at cutoff 0.5 (analyzed values 1.7 to 9.1)", fixed = TRUE)
 })
 
 test_that("F-10: minimum sensitivity/specificity with Youden off are announced, not silently ignored", {
@@ -248,7 +248,7 @@ test_that("F-12: the copy-ready Results sentence prints the cut-point to 4 signi
     j <- vapply(cand, function(c) mean(x1 >= c) + mean(x0 < c) - 1, 0)
     expect_true(any(abs(cand[abs(j - max(j)) < 1e-12] - cut) < 1e-24))
     report <- a$results$results$clinicalReport$content
-    expect_match(report, sprintf("At the cutoff that maximised the Youden index, %s, sensitivity", signif(cut, 4)), fixed = TRUE)
+    expect_match(report, sprintf("At the cutoff that maximized the Youden index, %s, sensitivity", signif(cut, 4)), fixed = TRUE)
     expect_false(grepl("Youden index, 0.000,", report, fixed = TRUE))
 })
 
@@ -463,7 +463,7 @@ rel11_delong <- function(cases, controls, level = 0.95) {
 test_that("F-00: the Methods texts and the instructions say each row is an independent patient", {
     r <- rel11_obj(rel11_k(), outcome = "y", positiveClass = "Malignant", predictors = "m", comprehensive_output = TRUE)$results$results
     for (txt in c(r$clinicalReport$content, r$methodsExplanation$content))
-        expect_match(txt, "Each row was analysed as a separate, independent patient; the confidence intervals and tests assume this.", fixed = TRUE)
+        expect_match(txt, "Each row was analyzed as a separate, independent patient; the confidence intervals and tests assume this.", fixed = TRUE)
     expect_match(r$instructions$content, "Each row must be a different patient", fixed = TRUE)
 })
 
@@ -624,9 +624,9 @@ test_that("F-20 / F-47: the frozen panel marks defaults as defaults and states t
     expect_identical(v$value[v$setting == "Sampling design"], "Other / unknown (default setting)")  # default changed to Other / unknown (F-20); labels, not keys (release review)
     expect_identical(v$value[v$setting == "Threshold source"], "Prespecified independently (default setting)")
     expect_identical(v$value[v$setting == "Cohort role (declared, not verified)"], "Frozen external / temporal evaluation (default setting)")
-    expect_match(v$value[v$setting == "Interpretation"], "Every analysed row (patient) weighs equally", fixed = TRUE)
+    expect_match(v$value[v$setting == "Interpretation"], "Every analyzed row (patient) weighs equally", fixed = TRUE)
     note <- rel11_note(ctx$results$results$frozenMetrics, "scope")
-    expect_match(note, "Counts and metrics weight every analysed row equally (unit of observation: patient).", fixed = TRUE)
+    expect_match(note, "Counts and metrics weight every analyzed row equally (unit of observation: patient).", fixed = TRUE)
     for (txt in c(note, v$value)) expect_false(grepl("slide", txt, ignore.case = TRUE))
     set_by_user <- rel11_frozen(samplingDesign = "enriched")$results$results$validationContext$asDF
     expect_identical(set_by_user$value[set_by_user$setting == "Sampling design"], "Enriched")

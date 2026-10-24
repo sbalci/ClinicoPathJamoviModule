@@ -173,6 +173,6 @@ test_that("the refusal message reads cleanly", {
   d$Hemoglobin <- NA
 
   res <- tableone(data = d, vars = "Hemoglobin")
-  expect_match(as.character(res$todo$content), "Nothing to summarise")
+  expect_match(as.character(res$todo$content), "Nothing to summarize")
   expect_false(grepl("\\.\\.", as.character(res$todo$content)))
 })

@@ -52,7 +52,7 @@ in tree nodes.}
 
 \item{summarylocation}{Where to display statistical summaries in the tree.}
 
-\item{style}{Visual style preset: default (gradient-coloured nodes and
+\item{style}{Visual style preset: default (gradient-colored nodes and
 labels), clean (white nodes, uncoloured labels), minimal (vtree's plain
 layout - one flat tone per level, uncoloured labels, and more space between
 nodes).}
@@ -60,7 +60,7 @@ nodes).}
 \item{palette}{Node fill palette for the default style. 'default' uses
 vtree's own rotation (reds, blues, greens, ...); 'colorblind' rotates
 single-hue blue, orange, purple and brown palettes that stay distinct under
-the common colour-vision deficiencies. Ignored by the clean and minimal
+the common color-vision deficiencies. Ignored by the clean and minimal
 styles.}
 
 \item{prunebelow}{Variable for conditional pruning of tree branches.}

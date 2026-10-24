@@ -210,14 +210,14 @@ test_that("high missingness and very small samples produce strong notices", {
                       vars = "marker")
   high_notice <- as.character(high$notices$content)
 
-  expect_match(high_notice, "STRONG WARNING: High missingness", fixed = TRUE)
+  expect_match(high_notice, "Strong warning: High missingness", fixed = TRUE)
   expect_match(high_notice, "3 missing values among 10 records (30.0%)",
                fixed = TRUE)
   expect_match(high_notice, "7 available observations", fixed = TRUE)
 
   small <- summarydata(data = data.frame(marker = c(1, 2, NA)), vars = "marker")
   small_notice <- as.character(small$notices$content)
-  expect_match(small_notice, "STRONG WARNING: Very small sample", fixed = TRUE)
+  expect_match(small_notice, "Strong warning: Very small sample", fixed = TRUE)
   expect_match(small_notice, "only 2 non-missing observation(s)", fixed = TRUE)
 })
 
@@ -232,7 +232,7 @@ test_that("a simplified visual summary is disclosed", {
   visual_raw <- as.character(res$text1$content)
   visual <- sd_txt(visual_raw)
 
-  expect_match(notice, "WARNING: Visual summary simplified", fixed = TRUE)
+  expect_match(notice, "Warning: Visual summary simplified", fixed = TRUE)
   expect_match(notice, "inline distribution plots could not be rendered",
                fixed = TRUE)
   expect_match(visual, "Dataset Summary", fixed = TRUE)
@@ -263,7 +263,7 @@ test_that("multiple Shapiro-Wilk tests are labelled exploratory and unadjusted",
   res <- summarydata(data = d, vars = c("a", "b"), distr = TRUE)
   notice <- as.character(res$notices$content)
 
-  expect_match(notice, "NOTE: Multiple distribution diagnostics", fixed = TRUE)
+  expect_match(notice, "Note: Multiple distribution diagnostics", fixed = TRUE)
   expect_match(notice, "without multiplicity adjustment", fixed = TRUE)
   expect_match(notice, "not confirmatory hypothesis tests", fixed = TRUE)
 })

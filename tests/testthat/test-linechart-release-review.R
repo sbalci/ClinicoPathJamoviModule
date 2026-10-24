@@ -68,7 +68,7 @@ test_that("infinite values are excluded and explained, not crashed on", {
     t <- lc_todo(linechart(data = d, xvar = "t", yvar = "y"))
     expect_match(t, "infinite values")
     expect_match(t, "2 row")
-    expect_match(t, "38 rows were analysed")
+    expect_match(t, "38 rows were analyzed")
     expect_false(grepl("missing value where TRUE/FALSE needed", t, fixed = TRUE))
 })
 
@@ -78,7 +78,7 @@ test_that("rows dropped for missing values are disclosed", {
     t <- lc_todo(linechart(data = d, xvar = "t", yvar = "y"))
     expect_match(t, "4 row")
     expect_match(t, "excluded because of missing values")
-    expect_match(t, "36 rows were analysed")
+    expect_match(t, "36 rows were analyzed")
 })
 
 test_that("complete data raises no exclusion notice", {

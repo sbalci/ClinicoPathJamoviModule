@@ -22,7 +22,7 @@ test_that("assumptions panel is never a visible empty heading", {
   expect_match(tableone(data.frame(x = numeric()), "x")$assumptions$content, "no rows")
   # nothing summarisable
   expect_match(tableone(data.frame(x = rep(NA_real_, 40)), "x")$assumptions$content,
-               "could be summarised")
+               "could be summarized")
   # listwise deletion emptied the frame
   expect_match(tableone(data.frame(x = c(NA, 2), y = c(1, NA)), c("x", "y"),
                         excl = TRUE)$assumptions$content, "left no cases")

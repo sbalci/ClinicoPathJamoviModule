@@ -101,10 +101,6 @@ Benjamini-Yekutieli)
 \item Variable name safety (special characters, spaces)
 \item Data quality validation warnings
 }
-
-Note: Advanced features (pairwise comparisons, effect sizes, residual
-analysis,
-correspondence analysis) are planned but not yet available.
 }
 \examples{
 \donttest{

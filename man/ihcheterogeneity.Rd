@@ -52,7 +52,7 @@ analysis}
 
 \item{biopsy4}{Fourth tissue region biomarker measurement}
 
-\item{biopsies}{Further regional measurements, any number, analysed like
+\item{biopsies}{Further regional measurements, any number, analyzed like
 Regional Measurements 1 to 4.}
 
 \item{spatial_id}{The compartment each case was sampled from (e.g.,
@@ -61,7 +61,7 @@ per case. Data with one row per case and compartment count each case once
 per row, as if they were different patients, which overstates the sample
 and narrows every interval. Compartments are listed in the level order of
 the variable; cases without an identifier are left out of the compartment
-tables. In R, convert a haven-labelled code column with haven::as_factor()
+tables. In R, convert a haven-labeled code column with haven::as_factor()
 first, or the codes are shown instead of the labels.}
 
 \item{compareCompartments}{Compares the ICC, the within-case CV and, when a

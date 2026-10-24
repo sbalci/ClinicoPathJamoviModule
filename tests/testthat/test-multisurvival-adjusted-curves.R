@@ -215,7 +215,7 @@ test_that("a stratified Cox fit is standardised over the union time grid, not av
 test_that("the estimand is named alongside every adjusted table", {
     d <- .msac_data()
     expect_match(as.character(.msac_run(d, ac_method = "average")$adjustedSurvTableSummary$content),
-                 "standardised over the observed patients")
+                 "standardized over the observed patients")
     expect_match(as.character(.msac_run(d, ac_method = "conditional")$adjustedMedianSummary$content),
                  "one reference patient")
 })

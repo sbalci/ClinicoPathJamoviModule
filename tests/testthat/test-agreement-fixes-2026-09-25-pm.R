@@ -46,8 +46,8 @@ test_that("the three heatmaps draw a colour key for their fixed scale", {
     expect_true(p$.agreementHeatmap(a$results$agreementHeatmapPlot, NULL, NULL))
     expect_true(p$.raterClusterHeatmap(a$results$raterClusterHeatmap, NULL, NULL))
     expect_true(p$.caseClusterHeatmap(a$results$caseClusterHeatmap, NULL, NULL))
-    expect_identical(rec$keys, c("Cell colour: share of all rated cases",
-                                 rep("Cell colour: similarity (1 - distance)", 2)))
+    expect_identical(rec$keys, c("Cell color: share of all rated cases",
+                                 rep("Cell color: similarity (1 - distance)", 2)))
 })
 
 test_that("the Lin's CCC fallback matches Lin's asymptotic estimate and interval", {

@@ -41,7 +41,9 @@ test_that("the Notices panel is hidden when there is nothing to say", {
   # run lifts those cells to 5.
   d <- af_data(); d$fn[c(4, 6, 10)] <- 5; d$fp[6] <- 5
   clean <- af_run(d)
-  expect_equal(nchar(paste(clean$notices$content, collapse = "")), 0)
+  # "<div></div>", not "": the jamovi client skips an empty Html update and keeps the old notices
+  # (library-audit 2026-10-23 OncoPath [LOW]: shared renderer, R/utils-notices.R)
+  expect_identical(clean$notices$content, "<div></div>")
   expect_false(isTRUE(clean$notices$visible))
 
   noisy <- af_run(bivariate_analysis = FALSE)

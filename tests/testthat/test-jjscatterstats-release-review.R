@@ -286,7 +286,7 @@ test_that("the grouped ggpubr panel honours the journal palette", {
     f <- tempfile(fileext = ".png"); grDevices::png(f, 500, 400)
     try(a$.__enclos_env__$private$.plotGGPubr(a$results$ggpubrPlot), silent = TRUE)
     grDevices::dev.off()
-    expect_match(warn_of(a), "Colour palette not applied")
+    expect_match(warn_of(a), "Color palette not applied")
 })
 
 

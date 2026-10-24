@@ -90,10 +90,10 @@ colors reflect the response variable, not the group.}
 \item{timeType}{Select whether time values are raw numbers or dates/times.}
 
 \item{dateFormat}{Select the date/time format in your data (only used when
-Time Input Type is Date/Time).}
+Time Input Type is Date/time).}
 
-\item{timeUnit}{With Raw Values input, the unit your start and end times
-are already recorded in; the values are not rescaled. With Date/Time input,
+\item{timeUnit}{With Raw values input, the unit your start and end times
+are already recorded in; the values are not rescaled. With Date/time input,
 the unit durations are calculated in.}
 
 \item{timeDisplay}{Choose whether to align all start times to 0 or use
@@ -148,7 +148,7 @@ deliberate swimmer-plot look and remain the default.}
 that color the lanes; it has no effect unless a Response/Status variable is
 selected, and the grouping variable is never used for color. Colorblind
 Safe uses perceptually uniform colors distinguishable by all color vision
-types. High Contrast is optimized for projectors and printing, and gives
+types. High contrast is optimized for projectors and printing, and gives
 way to Colorblind Safe above its eight colors. Monochrome ensures clarity
 in grayscale publications.}
 
@@ -163,7 +163,7 @@ are omitted and a note explains why.}
 \item{customReferenceTime}{Custom time point to mark with a reference line
 (only used when Reference Lines is set to Custom).}
 
-\item{customReferenceDate}{When using Date/Time with Absolute display,
+\item{customReferenceDate}{When using Date/time with Absolute display,
 provide a calendar date (e.g., 2023-06-01) to draw a custom reference line.
 If left blank, the Custom Reference Time is used as an offset from the
 earliest start date.}
@@ -174,7 +174,7 @@ duration, patient ID or response.}
 
 \item{sortOrder}{How to order patients in the visualization, read from the
 top of the plot down. Ignored while a Sort by variable is selected.
-Response Type falls back to duration order when no Response/Status variable
+Response type falls back to duration order when no Response/Status variable
 is supplied.}
 
 \item{showInterpretation}{Whether to display automated clinical

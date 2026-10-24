@@ -62,7 +62,10 @@ if (!exists("multisurvival", mode = "function")) {
 for (.d in c("data", "../data", "../../data", testthat::test_path("..", "..", "data"))) {
   if (dir.exists(.d)) {
     for (.rda in list.files(.d, pattern = "^multisurvival.*\\.rda$", full.names = TRUE)) {
-      load(.rda, envir = parent.env(environment()))
+      # Under load_all() the parent is the locked package namespace: loading there stopped
+      # every test_dir() run with "cannot add bindings to a locked environment".
+      if (!environmentIsLocked(parent.env(environment())))
+        load(.rda, envir = parent.env(environment()))
       load(.rda, envir = environment())
     }
     break

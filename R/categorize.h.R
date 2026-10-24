@@ -384,7 +384,7 @@ categorizeBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' using equal-width intervals, sample quantiles, hand-entered break points, 
 #' mean +/- SD bands, a median split, or Fisher-Jenks natural breaks. Reports 
 #' the break points and the resulting category frequencies, draws the 
-#' distribution with the boundaries marked, and can add the categorised 
+#' distribution with the boundaries marked, and can add the categorized 
 #' variable straight to the dataset.
 #' 
 #'
@@ -420,7 +420,7 @@ categorizeBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param seed Random seed for natural breaks (Jenks) above 20000
 #'   observations, where the break points are computed on a random subsample.
 #'   The break points table names the seed whenever it was used. The default
-#'   reproduces the previous fixed behaviour.
+#'   reproduces the previous fixed behavior.
 #' @param labels How to label the resulting categories.
 #' @param customlabels Comma-separated custom labels (e.g., "Low, Medium,
 #'   High"). Must match the number of categories.

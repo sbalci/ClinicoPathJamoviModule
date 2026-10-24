@@ -1128,12 +1128,12 @@ linechartClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             # survived, so the reader needs to know how many did not.
             if (private$.n_excluded_missing > 0)
                 warnings <- c(warnings, sprintf(
-                    .("%d row(s) were excluded because of missing values; %d rows were analysed."),
+                    .("%d row(s) were excluded because of missing values; %d rows were analyzed."),
                     private$.n_excluded_missing, private$.n_rows_analysed))
 
             if (private$.n_excluded_nonfinite > 0)
                 warnings <- c(warnings, sprintf(
-                    .("%d row(s) held infinite values (Inf or -Inf) and were excluded; %d rows were analysed. Infinite values are usually a division by zero or a log of zero upstream - check the source variable."),
+                    .("%d row(s) held infinite values (Inf or -Inf) and were excluded; %d rows were analyzed. Infinite values are usually a division by zero or a log of zero upstream - check the source variable."),
                     private$.n_excluded_nonfinite, private$.n_rows_analysed))
 
             # A line needs at least two distinct x positions. With one, the chart is

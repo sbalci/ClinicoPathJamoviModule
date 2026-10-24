@@ -31,7 +31,7 @@ test_that("patients with a missing response are excluded and reported", {
     patientID = "patientID",
     responseVar = "best_response"
   )
-  expect_match(wf_text(result), "PATIENTS EXCLUDED")
+  expect_match(wf_text(result), "Patients excluded")
 })
 
 test_that("waterfall handles missing group values", {
@@ -110,7 +110,7 @@ test_that("waterfall handles impossible shrinkage values (< -100%)", {
   expect_true(sum(cats$n) > 0)
   # The validation panel that records the capping is cleared whenever validation
   # otherwise passes, so the disclosure has to be in the always-visible notices.
-  expect_match(wf_text(result), "IMPOSSIBLE SHRINKAGE CAPPED")
+  expect_match(wf_text(result), "Impossible shrinkage capped")
 })
 
 test_that("waterfall handles extreme progressive disease (> 200%)", {
@@ -221,7 +221,7 @@ test_that("negative raw measurements are refused, not sign-inverted", {
   result <- waterfall(data = d, patientID = "patientID", responseVar = "size",
                       timeVar = "tm", inputType = "raw")
 
-  expect_match(wf_text(result), "NEGATIVE TUMOUR MEASUREMENTS")
+  expect_match(wf_text(result), "Negative tumor measurements")
   # the affected patient is unevaluable, not a complete responder
   cats <- as.data.frame(result$summaryTable$asDF)
   expect_equal(cats$n[cats$category == "CR"], 0)
@@ -254,7 +254,7 @@ test_that("a single-patient cohort completes and is flagged as uninformative", {
     responseVar = "best_response"
   )
   expect_equal(result$summaryTable$rowCount, 4)
-  expect_match(wf_text(result), "VERY SMALL SAMPLE")
+  expect_match(wf_text(result), "Very small sample")
 })
 
 test_that("waterfall handles large dataset (n=200)", {

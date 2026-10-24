@@ -138,9 +138,9 @@ options:
       title: "Time input type"
       type: List
       options:
-        - title: "Raw Values (numeric)"
+        - title: "Raw values (numeric)"
           name: raw
-        - title: "Date/Time"
+        - title: "Date/time"
           name: datetime
       default: raw
       description:
@@ -168,7 +168,7 @@ options:
       default: ymd
       description:
           R: >
-            Select the date/time format in your data (only used when Time Input Type is Date/Time).
+            Select the date/time format in your data (only used when Time Input Type is Date/time).
 
     - name: timeUnit
       title: "Time unit"
@@ -185,8 +185,8 @@ options:
       default: months
       description:
           R: >
-            With Raw Values input, the unit your start and end times are already recorded in;
-            the values are not rescaled. With Date/Time input, the unit durations are calculated in.
+            With Raw values input, the unit your start and end times are already recorded in;
+            the values are not rescaled. With Date/time input, the unit durations are calculated in.
 
     - name: timeDisplay
       title: "Time display mode"
@@ -360,9 +360,9 @@ options:
       options:
         - title: "jamovi (follow global)"
           name: jamovi
-        - title: "ggswim (Light)"
+        - title: "ggswim (light)"
           name: ggswim
-        - title: "ggswim (Dark)"
+        - title: "ggswim (dark)"
           name: ggswim_dark
         - title: "Minimal"
           name: minimal
@@ -382,16 +382,16 @@ options:
           name: jamovi
         - title: "Default"
           name: default
-        - title: "Colorblind Safe (Viridis)"
+        - title: "Color-blind safe (viridis)"
           name: viridis
-        - title: "High Contrast"
+        - title: "High contrast"
           name: contrast
         - title: "Monochrome"
           name: monochrome
       default: default
       description:
           R: >
-            Select the color palette for the response categories that color the lanes; it has no effect unless a Response/Status variable is selected, and the grouping variable is never used for color. Colorblind Safe uses perceptually uniform colors distinguishable by all color vision types. High Contrast is optimized for projectors and printing, and gives way to Colorblind Safe above its eight colors. Monochrome ensures clarity in grayscale publications.
+            Select the color palette for the response categories that color the lanes; it has no effect unless a Response/Status variable is selected, and the grouping variable is never used for color. Colorblind Safe uses perceptually uniform colors distinguishable by all color vision types. High contrast is optimized for projectors and printing, and gives way to Colorblind Safe above its eight colors. Monochrome ensures clarity in grayscale publications.
 
     - name: showLegend
       title: "Legend"
@@ -408,11 +408,11 @@ options:
       options:
         - title: "None"
           name: none
-        - title: "Median Duration"
+        - title: "Median duration"
           name: median
         - title: "Protocol times (3/6/9/12/18/24/36 months)"
           name: protocol
-        - title: "Custom Time"
+        - title: "Custom time"
           name: custom
       default: none
       description:
@@ -433,7 +433,7 @@ options:
       default: ""
       description:
           R: >
-            When using Date/Time with Absolute display, provide a calendar date (e.g., 2023-06-01) to draw a custom reference line. If left blank, the Custom Reference Time is used as an offset from the earliest start date.
+            When using Date/time with Absolute display, provide a calendar date (e.g., 2023-06-01) to draw a custom reference line. If left blank, the Custom Reference Time is used as an offset from the earliest start date.
 
     # === Sorting and Display ===
     - name: sortVariable
@@ -449,18 +449,18 @@ options:
       title: "Sort order"
       type: List
       options:
-        - title: "Duration (Longest First)"
+        - title: "Duration (longest first)"
           name: duration_desc
-        - title: "Duration (Shortest First)"
+        - title: "Duration (shortest first)"
           name: duration_asc
         - title: "Patient ID"
           name: patient_id
-        - title: "Response Type"
+        - title: "Response type"
           name: response
       default: duration_desc
       description:
           R: >
-            How to order patients in the visualization, read from the top of the plot down. Ignored while a Sort by variable is selected. Response Type falls back to duration order when no Response/Status variable is supplied.
+            How to order patients in the visualization, read from the top of the plot down. Ignored while a Sort by variable is selected. Response type falls back to duration order when no Response/Status variable is supplied.
 
     # === Analysis Options ===
     - name: showInterpretation

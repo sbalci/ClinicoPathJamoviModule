@@ -235,7 +235,7 @@ test_that("spider plot without a time variable explains itself", {
     responseVar = "best_response",
     showSpiderPlot = TRUE
   )
-  expect_match(wf_text(result), "SPIDER PLOT NEEDS A TIME VARIABLE")
+  expect_match(wf_text(result), "Spider plot needs a time variable")
 })
 
 # ═══════════════════════════════════════════════════════════
@@ -381,5 +381,5 @@ test_that("a single-patient cohort is flagged as uninformative", {
     patientID = "patientID",
     responseVar = "best_response"
   )
-  expect_match(wf_text(result), "VERY SMALL SAMPLE")
+  expect_match(wf_text(result), "Very small sample")
 })

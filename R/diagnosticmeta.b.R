@@ -120,14 +120,10 @@ diagnosticmetaClass <- R6::R6Class(
         # between runs, so the same banner accumulated once per run cycle.
         # Notices now render into a dedicated always-visible `notices` Html
         # item, rebuilt from scratch each run.
-        # library-audit 2026-09-22 OncoPath [LOW] REJECTED: Notice renders single-line plain text and dynamic
-        #   insert() in .run() accumulates across runs (Group$remove cannot drop items) (guide section 13)
+        # library-audit 2026-09-22 OncoPath [LOW] REJECTED: a jmvcore::Notice holds one plain-text string
+        #   with no title; these panels are a title plus a paragraph (agreed 2026-10-23). Guide section 13.
         .addNotice = function(type, title, content) {
-            private$.noticeList[[length(private$.noticeList) + 1]] <- list(
-                type = type,
-                title = title,
-                content = content
-            )
+            private$.noticeList <- notice_append(private$.noticeList, type, title, content)
             # Render immediately so a notice added just before an early return
             # is never lost.
             private$.renderNotices()
@@ -139,40 +135,7 @@ diagnosticmetaClass <- R6::R6Class(
             # run. There is no declarative `visible:` that can express
             # "the notice list is non-empty".
             self$results$notices$setVisible(length(private$.noticeList) > 0)
-
-            if (length(private$.noticeList) == 0) {
-                # Clear any content left from a previous run cycle.
-                self$results$notices$setContent("")
-                return()
-            }
-
-            # library-audit 2026-09-16 OncoPath [INFO] DONE: titles inherit the pane colour - fixed hues fell to
-            #   2.7-2.9:1 on the dark theme; the translucent tint and the border carry the severity
-            typeStyles <- list(
-                ERROR = list(bgcolor = "rgba(220, 38, 38, 0.10)", border = "#fca5a5"),
-                STRONG_WARNING = list(bgcolor = "rgba(234, 88, 12, 0.10)", border = "#fdba74"),
-                WARNING = list(bgcolor = "rgba(202, 138, 4, 0.12)", border = "#fde047"),
-                INFO = list(bgcolor = "rgba(37, 99, 235, 0.08)", border = "#93c5fd")
-            )
-
-            html <- "<div style='margin: 10px 0;'>"
-            for (notice in private$.noticeList) {
-                style <- typeStyles[[notice$type]] %||% typeStyles$INFO
-                html <- paste0(
-                    html,
-                    "<div style='background-color: ", style$bgcolor, "; ",
-                    "border-left: 4px solid ", style$border, "; ",
-                    "padding: 12px; margin: 8px 0; border-radius: 4px;'>",
-                    "<strong style='color: inherit;'>",
-                    htmltools::htmlEscape(notice$title), "</strong><br>",
-                    "<span style='color: inherit;'>",
-                    htmltools::htmlEscape(notice$content), "</span>",
-                    "</div>"
-                )
-            }
-            html <- paste0(html, "</div>")
-
-            self$results$notices$setContent(html)
+            self$results$notices$setContent(notice_panel_html(self, private$.noticeList))
         },
 
         .renderSymbols = function(text) {
@@ -593,7 +556,7 @@ diagnosticmetaClass <- R6::R6Class(
                 }
                 if (any(unnamed)) {
                     private$.addNotice("WARNING", .("Missing study identifiers"), sprintf(
-                        .("%d study/studies have no identifier; they are labelled 'Unnamed study' in the tables and the forest plot."),
+                        .("%d study/studies have no identifier; they are labeled 'Unnamed study' in the tables and the forest plot."),
                         sum(unnamed)))
                 }
                 meta_data$study[unnamed] <- .("Unnamed study")
@@ -947,7 +910,7 @@ diagnosticmetaClass <- R6::R6Class(
                     .("The bivariate model did NOT converge within 5000 iterations, so no estimates are reported: the last iterate is not the estimator's solution, and it changes with the iteration limit."))
                 if (!biv_fit$converged)
                     private$.addNotice("STRONG_WARNING", .("Bivariate model did not converge"),
-                        .("The bivariate (Reitsma) model did not converge, even with an iteration limit of 5000. No pooled sensitivity, specificity, likelihood ratio, prediction interval or SROC curve is reported, because they would come from an unfinished optimisation. Try the method-of-moments estimator (it is not iterative), check the studies for an extreme or repeated 2x2 table, or restrict the study set."))
+                        .("The bivariate (Reitsma) model did not converge, even with an iteration limit of 5000. No pooled sensitivity, specificity, likelihood ratio, prediction interval or SROC curve is reported, because they would come from an unfinished optimization. Try the method-of-moments estimator (it is not iterative), check the studies for an extreme or repeated 2x2 table, or restrict the study set."))
             }
 
             # Same as the PHM model: an unconverged fit fills no cell, sets no
@@ -1619,7 +1582,7 @@ diagnosticmetaClass <- R6::R6Class(
                             .("The proportional-hazards SROC model did NOT converge within 5000 profile-likelihood iterations, so no estimates are reported: the last iterate is not a maximum-likelihood solution, and it can change substantially with a different iteration limit.")
                         if (!phm_converged)
                             private$.addNotice("STRONG_WARNING", .("Proportional-hazards SROC model did not converge"), paste(
-                                .("The proportional-hazards SROC model did not converge, so its theta, tau-squared and area under the curve are not reported: they would be the last iterate of an unfinished optimisation, and on data like this the unconverged value and the converged one have differed by an order of magnitude."),
+                                .("The proportional-hazards SROC model did not converge, so its theta, tau-squared and area under the curve are not reported: they would be the last iterate of an unfinished optimization, and on data like this the unconverged value and the converged one have differed by an order of magnitude."),
                                 switch(biv_state,
                                     pooled = .("Use the bivariate model and its SROC curve instead, or reduce the heterogeneity by restricting the study set."),
                                     off = .("Tick 'Bivariate random-effects model' for the bivariate SROC curve instead, or reduce the heterogeneity by restricting the study set."),
@@ -1961,7 +1924,7 @@ diagnosticmetaClass <- R6::R6Class(
                             .("Each row is a separate univariate FIXED-effect model on the logit of that measure, because that is the method selected; a fixed-effect model assumes there is no between-study variance, so tau-squared is 0 by construction and the I-squared beside it is not an estimate from that model.")
                         else
                             .("Each row is a separate univariate random-effects model on the logit of that measure."),
-                        .("The I-squared is the proportion of variance in THAT margin alone that is not attributable to sampling error; it does not describe the bivariate model and should not be read as an overall heterogeneity figure (Cochrane DTA Handbook, chapter 10). In diagnostic accuracy meta-analysis a high I-squared is expected whenever studies used different positivity thresholds - it signals a threshold effect to be modelled by the SROC curve, not necessarily a defect."),
+                        .("The I-squared is the proportion of variance in THAT margin alone that is not attributable to sampling error; it does not describe the bivariate model and should not be read as an overall heterogeneity figure (Cochrane DTA Handbook, chapter 10). In diagnostic accuracy meta-analysis a high I-squared is expected whenever studies used different positivity thresholds - it signals a threshold effect to be modeled by the SROC curve, not necessarily a defect."),
                         if (identical(self$options$method, "fixed"))
                             .("A significant Q or a large I-squared here contradicts the fixed-effect assumption: switch to REML.")
                         else
@@ -2718,7 +2681,7 @@ diagnosticmetaClass <- R6::R6Class(
                 # convention). Pooled point + CIs come from the serialized state
                 # (see .populateForestPlot), so they persist across .omv reloads.
                 pooled_data <- NULL
-                pooled_label <- .("POOLED ESTIMATE")
+                pooled_label <- .("Pooled estimate")
                 if (!is.null(pooled_sens) && !is.null(pooled_spec) &&
                     is.finite(pooled_sens) && is.finite(pooled_spec)) {
 
@@ -3472,7 +3435,7 @@ diagnosticmetaClass <- R6::R6Class(
                 "</li>\n                <li>",
                 .("<strong>Variable Performance:</strong> high heterogeneity indicates that accuracy differed across the included populations and protocols"),
                 "</li>\n                <li>",
-                .("<strong>Not external validation:</strong> a meta-analysis summarises existing published evidence and inherits any publication, spectrum or reference-standard bias of the included studies; it is not a prospective evaluation in an intended-use population with a pre-specified threshold"),
+                .("<strong>Not external validation:</strong> a meta-analysis summarizes existing published evidence and inherits any publication, spectrum or reference-standard bias of the included studies; it is not a prospective evaluation in an intended-use population with a pre-specified threshold"),
                 "</li>\n            </ul>\n            \n            <h4>",
                 .("Predictive Values in Clinical Practice:"),
                 "</h4>\n            <p>",
@@ -4370,7 +4333,7 @@ diagnosticmetaClass <- R6::R6Class(
                 "</li>\n                    </ul>\n                </div>\n\n                <div style='background-color: rgba(33, 163, 188, 0.21); padding: 15px; border-radius: 5px; margin: 10px 0; color: inherit;'>\n                    <h5>",
                 .("Clinical Decision Making"),
                 "</h5>\n                    <p>",
-                .("<strong>Use this plot to:</strong> Compare the studies' operating points, see the trade-off between sensitivity and specificity across them, and assess consistency across study populations and settings. The curve summarises studies with unknown and differing positivity thresholds and carries no threshold values, so it does not identify a cut-off for a laboratory to adopt."),
+                .("<strong>Use this plot to:</strong> Compare the studies' operating points, see the trade-off between sensitivity and specificity across them, and assess consistency across study populations and settings. The curve summarizes studies with unknown and differing positivity thresholds and carries no threshold values, so it does not identify a cut-off for a laboratory to adopt."),
                 "</p>\n                </div>\n            </div>\n            "
             )
 

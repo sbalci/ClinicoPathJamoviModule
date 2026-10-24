@@ -1262,7 +1262,7 @@ checkdataClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     "<h3>", .("ClinicoPath Data Quality Assessment"), "</h3>",
                     "<p>", .("<strong>Purpose:</strong> Comprehensive evaluation of data completeness, accuracy, and patterns for clinical research."), "</p>",
                     "<p>", .fmt(.("<strong>IMPORTANT:</strong> Outlier detection uses a <strong>consensus approach</strong> - points are only flagged if detected by {ge}2 of 3 methods (Z-score, IQR, Modified Z-score). Points flagged by only 1 method are <strong>not shown</strong>, even if they exceed |z|>3."), ge = "\u{2265}"), " ",
-                    .("Two exceptions: below n = 10 single-method flags ARE shown, labelled informative-only and excluded from the quality grade; and the Modified Z-score needs more than 3 complete values and a non-zero MAD, so only the other two methods run when it is unavailable."), "</p>",
+                    .("Two exceptions: below n = 10 single-method flags ARE shown, labeled informative-only and excluded from the quality grade; and the Modified Z-score needs more than 3 complete values and a non-zero MAD, so only the other two methods run when it is unavailable."), "</p>",
                     "<h4>", .("Required Input:"), "</h4>",
                     "<ul><li>", .("<strong>Variable to Check:</strong> Select any variable for quality assessment"), "</li></ul>",
                     "<h4>", .("Analysis Options:"), "</h4>",
@@ -1496,7 +1496,7 @@ checkdataClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                             .("<b>Clinical Validation rows are heuristic screening flags, not clinical judgements.</b>"),
                             .("Plausibility bounds come from general-population rules of thumb rather than validated reference ranges, and may not suit paediatric, ICU, oncology or athlete populations, or differing measurement methods and demographics."),
                             .("Which checks run is decided by pattern-matching the variable NAME (for example 'age', 'glucose', 'systolic'), so non-standard naming can silently skip a check or apply the wrong one."),
-                            .fmt(.("Units are inferred from the data range (centimetres against metres, mg/dL against {mu}mol/L); a misread unit will flag correct values as implausible."), mu = "\u{B5}"),
+                            .fmt(.("Units are inferred from the data range (centimeters against metres, mg/dL against {mu}mol/L); a misread unit will flag correct values as implausible."), mu = "\u{B5}"),
                             .("Confirm every flag against your own study protocol before excluding or correcting a value."),
                             sep = " "))
                 }
@@ -1660,7 +1660,7 @@ checkdataClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             component_scores$outliers <- list(
                 penalty = outlier_penalty, max_penalty = 30,
                 description = if (outliers_scored) .fmt(.("Outlier rate {pct}%"), pct = sprintf("%.1f", outlier_rate * 100))
-                              else .fmt(.("NOT ASSESSED - {reason}"), reason = outlier_skip_reason))
+                              else .fmt(.("Not assessed - {reason}"), reason = outlier_skip_reason))
             quality_score <- quality_score - outlier_penalty
 
             # Component 3: Variability assessment (max penalty: 25 points)
@@ -1929,7 +1929,7 @@ checkdataClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     units = .("inferred from the data range"))
                 # Wrapping and indentation are applied here, never inside .()
                 quality_text <- paste0(quality_text,
-                    "  ", .("NOTE ON THE CLINICAL PENALTY"), "\n",
+                    "  ", .("Note on the clinical penalty"), "\n",
                     paste(strwrap(clinical_note, width = 78, prefix = "  "),
                           collapse = "\n"),
                     "\n\n")

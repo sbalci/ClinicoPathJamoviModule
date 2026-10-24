@@ -344,13 +344,13 @@ jjdotchartBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' "Horizontal Box-Violin Comparison" instead.
 #' 
 #' Best suited to many labels each contributing one meaningful summary -
-#' mean turnaround time across 20 laboratories, median biomarker by centre -
+#' mean turnaround time across 20 laboratories, median biomarker by center -
 #' which is what a Cleveland dot plot is designed for. With only two or three
 #' groups the test has 1-2 degrees of freedom and is of little value, even
 #' though the chart itself is still a fair picture of the group averages.
 #' 
 #' @param data The data as a data frame.
-#' @param dep The continuous variable to summarise. Each group is reduced to
+#' @param dep The continuous variable to summarize. Each group is reduced to
 #'   one point on the chart - its mean, median, trimmed mean or MAP estimate,
 #'   whichever matches the Statistical Test selected below.
 #' @param group The grouping variable. Every level becomes one point on the
@@ -361,7 +361,7 @@ jjdotchartBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   something clinically meaningful on the scale of your measurement - an upper
 #'   limit of normal, a target turnaround time, a published benchmark. The
 #'   default of 0 is rarely the right choice: for a measurement that is not
-#'   centred near zero it makes the standardised effect enormous, and the
+#'   centered near zero it makes the standardized effect enormous, and the
 #'   statistics package then fails to compute a confidence interval for the
 #'   effect size and returns NO statistics at all. The analysis detects this and
 #'   says so rather than showing an empty result.
@@ -382,20 +382,20 @@ jjdotchartBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param showSummaryTable Show the per-group table behind the chart - the
 #'   number of observations, the plotted summary value, and its spread. This is
 #'   what makes the aggregation auditable: it states how many observations each
-#'   single plotted point represents. The summary column is labelled with the
+#'   single plotted point represents. The summary column is labeled with the
 #'   statistic actually used, which changes with the Statistical Test.
-#' @param centralityplotting Draw a SECOND vertical line at the centre of the
+#' @param centralityplotting Draw a SECOND vertical line at the center of the
 #'   k plotted summaries - i.e. the average of the group averages. This is not
 #'   the Reference Value; the Reference Value line is always drawn and is
-#'   labelled. Off by default deliberately. The statistics package draws this
+#'   labeled. Off by default deliberately. The statistics package draws this
 #'   line by default and draws NO line at the reference value, so the only
-#'   vertical line on an unmodified figure sits at the centre of the data while
+#'   vertical line on an unmodified figure sits at the center of the data while
 #'   the user believes it marks the threshold they typed in (measured: identical
 #'   line position for reference values of 0, 12 and 999). This analysis inverts
 #'   that - the reference line is always present, and this optional second line
 #'   is drawn in a different style and named in the caption.
-#' @param centralitytype Which centre to use for the optional second line,
-#'   when 'Also mark the centre of the plotted points' is ticked. It affects
+#' @param centralitytype Which center to use for the optional second line,
+#'   when 'Also mark the center of the plotted points' is ticked. It affects
 #'   that line ONLY - the plotted points always follow the Statistical Test.
 #'   Leave it matching your Statistical Test unless you have a specific reason.
 #' @param originaltheme Use the original ggstatsplot theme rather than
@@ -407,7 +407,7 @@ jjdotchartBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   Leave blank to use the variable name.
 #' @param plotwidth Width of the plot in pixels.
 #' @param plotheight Height of the plot in pixels. Increase it when there are
-#'   many groups, since each one needs a labelled row.
+#'   many groups, since each one needs a labeled row.
 #' @param seed Seed for reproducible bootstrap intervals and stochastic
 #'   statistical methods.
 #' @return A results object containing:

@@ -731,7 +731,7 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
             }
             private$.addNotice(
                 type = "WARNING",
-                title = .("Table thresholds outside the analysed range"),
+                title = .("Table thresholds outside the analyzed range"),
                 content = content
             )
             invisible(NULL)
@@ -1991,7 +1991,7 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                 # noticed (IR-decisioncurve-01).
                 li(.("Prevalence"), paste(
                    paste0(round(mean(outcomes == outcome_positive) * 100, 1), "%"),
-                   .("Net benefit and the treat-all line use this sample prevalence, so they are valid only when the analysed rows have the outcome rate of the target population (a cohort or consecutive series)."),
+                   .("Net benefit and the treat-all line use this sample prevalence, so they are valid only when the analyzed rows have the outcome rate of the target population (a cohort or consecutive series)."),
                    .("In a case-control or otherwise enriched sample the curves do not describe the source population."))),
                 li(.("Unit of Analysis"),
                    .("Each row is treated as an independent patient, so the data must have one row per patient; several specimens, blocks or lesions from one patient make the bootstrap intervals and p-values too narrow.")),
@@ -2939,7 +2939,7 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
             # Net benefit and treat-all take the outcome prevalence from these rows. That is only
             # the population's prevalence for a cohort or consecutive series (IR-decisioncurve-01).
             footnotes <- paste0(footnotes, item(.("Sampling Design"), paste(
-                .("Net benefit and the treat-all line use the outcome prevalence of the analysed sample, so they describe the target population only when the sample is a cohort or consecutive series from it."),
+                .("Net benefit and the treat-all line use the outcome prevalence of the analyzed sample, so they describe the target population only when the sample is a cohort or consecutive series from it."),
                 .("For a case-control or otherwise enriched sample the curves do not apply to the source population; this analysis does not accept an external prevalence."))))
 
             footnotes <- paste0(footnotes, item(.("Prediction Scale"), paste(
@@ -3261,7 +3261,7 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
             # range starts from, so one curve could dive to several hundred below zero and flatten
             # the others. Zoom (coord_cartesian keeps every point) no lower than -100 per 100 and
             # name the strategies that leave the panel. -100 is a display floor, not a bound.
-            caption <- .("Positive values favour the model; negative values favour treating everyone.")
+            caption <- .("Positive values favor the model; negative values favor treating everyone.")
             y_floor <- -100
             y_vals <- avoided_data$interventions_avoided[is.finite(avoided_data$interventions_avoided)]
             zoom <- length(y_vals) > 0 && min(y_vals) < y_floor

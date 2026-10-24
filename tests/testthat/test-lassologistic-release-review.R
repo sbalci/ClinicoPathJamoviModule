@@ -295,7 +295,7 @@ test_that("a predictor constant among the complete cases is dropped and reported
   expect_equal(with_both$coefficients$asDF, without$coefficients$asDF)
   expect_equal(with_both$modelSummary$asDF, without$modelSummary$asDF)
   txt <- with_both$notices$content
-  expect_match(txt, "Predictors constant among the analysed cases", fixed = TRUE)
+  expect_match(txt, "Predictors constant among the analyzed cases", fixed = TRUE)
   expect_match(txt, "Removed before fitting: coexist_carcinoma, marker.", fixed = TRUE)
   expect_false(grepl("same value in every case", txt, fixed = TRUE))
   # fewer than two left is still a refusal, with the existing message

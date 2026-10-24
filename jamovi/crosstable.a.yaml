@@ -17,9 +17,6 @@ description:
         - Multiple testing correction (Bonferroni, Holm, Benjamini-Hochberg, Benjamini-Yekutieli)
         - Variable name safety (special characters, spaces)
         - Data quality validation warnings
-
-        Note: Advanced features (pairwise comparisons, effect sizes, residual analysis,
-        correspondence analysis) are planned but not yet available.
     R:
         dontrun: true
         usage: |
@@ -100,7 +97,7 @@ options:
             In the gtsummary style it changes the displayed statistic only, because
             gtsummary always tests continuous variables with a rank-based test.
           jamovi: >
-            Whether continuous variables are summarised as mean (SD) or median (Q1, Q3).
+            Whether continuous variables are summarized as mean (SD) or median (Q1, Q3).
             In the arsenal and finalfit styles this also selects the test (ANOVA vs
             Kruskal-Wallis); in gtsummary it changes the displayed statistic only.
     - name: pcat

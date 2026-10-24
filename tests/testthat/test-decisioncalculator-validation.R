@@ -317,14 +317,14 @@ test_that("CFF-01 an inverted table is flagged whether or not the nomogram is on
   # (21/112 - 81/112) +/- z * se lies wholly below 0. Before the fix only fagan = TRUE raised anything.
   for (fagan in c(FALSE, TRUE)) {
     r <- val_dc(TP = 20, FN = 90, FP = 80, TN = 30, fagan = fagan)
-    expect_match(val_notices(r), "STRONG WARNING: Test performs worse than chance", fixed = TRUE, info = fagan)
+    expect_match(val_notices(r), "Strong warning: Test performs worse than chance", fixed = TRUE, info = fagan)
     expect_match(val_notices(r), "Youden's index is -0.545 (95% CI", fixed = TRUE, info = fagan)
   }
   # the jamovi int32 path decides the same way
   expect_match(val_notices(val_dc(TP = 20L, FN = 90L, FP = 80L, TN = 30L)), "worse than chance", fixed = TRUE)
   # J < 0 within sampling variation (3/7/7/3: J = -0.4, n = 10 + 10) and fractional counts are INFO
   for (r in list(val_dc(TP = 3, FN = 7, FP = 7, TN = 3), val_dc(TP = 20.5, FN = 90, FP = 80, TN = 30))) {
-    expect_match(val_notices(r), "INFO: Youden's index below 0", fixed = TRUE)
+    expect_match(val_notices(r), "Info: Youden's index below 0", fixed = TRUE)
     expect_false(grepl("worse than chance", val_notices(r)))
   }
   # J = 0 exactly is not below 0, including sens 1/3 + spec 2/3, whose double sum is 0.9999999999999999
@@ -411,8 +411,8 @@ test_that("a never-positive or never-negative test has no likelihood ratio, DOR 
 })
 
 test_that("a supplied low prevalence is INFO; a sample prevalence below 5% stays a STRONG WARNING", {
-  expect_match(val_notices(val_dc(pp = TRUE, pprob = 0.01)), "INFO: Extreme prevalence", fixed = TRUE)
-  expect_match(val_notices(val_dc(TP = 4, FN = 1, FP = 10, TN = 185)), "STRONG WARNING: Extreme prevalence", fixed = TRUE)
+  expect_match(val_notices(val_dc(pp = TRUE, pprob = 0.01)), "Info: Extreme prevalence", fixed = TRUE)
+  expect_match(val_notices(val_dc(TP = 4, FN = 1, FP = 10, TN = 185)), "Strong warning: Extreme prevalence", fixed = TRUE)
 })
 
 test_that("counts in notices are never printed in scientific notation", {

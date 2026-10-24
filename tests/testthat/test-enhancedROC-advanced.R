@@ -168,8 +168,8 @@ test_that("tied scores get the selected tie note with the AUC bounds", {
   expect_equal(aucs$asDF$auc[1], o$auc, tolerance = 1e-12)   # ties still count one half
   note <- aucs$notes[["ties"]]$note
   expect_match(note, sprintf("tied_marker: %s%% of case-control pairs are tied", base::format(signif(100 * o$share, 2))), fixed = TRUE)
-  expect_match(note, paste0("If every tie favoured the cases the AUC would be ", o$hi), fixed = TRUE)
-  expect_match(note, paste0("if every tie favoured the non-cases ", o$lo), fixed = TRUE)
+  expect_match(note, paste0("If every tie favored the cases the AUC would be ", o$hi), fixed = TRUE)
+  expect_match(note, paste0("if every tie favored the non-cases ", o$lo), fixed = TRUE)
   expect_match(note, "not a confidence interval", fixed = TRUE)
 })
 
@@ -189,7 +189,7 @@ test_that("the tie bounds follow the declared direction", {
   aucs <- result$results$aucSummary
   expect_equal(aucs$asDF$auc[1], o$auc, tolerance = 1e-12)
   expect_match(aucs$notes[["ties"]]$note,
-               sprintf("the AUC would be %s, if every tie favoured the non-cases %s", o$hi, o$lo), fixed = TRUE)
+               sprintf("the AUC would be %s, if every tie favored the non-cases %s", o$hi, o$lo), fixed = TRUE)
 })
 
 test_that("a marker with no tied case-control pair gets no tie note", {

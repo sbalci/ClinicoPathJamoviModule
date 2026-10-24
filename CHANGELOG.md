@@ -5,6 +5,66 @@ prevents them. Newest first. Release notes for users live in `NEWS.md`.
 
 ---
 
+## 2026-10-24 — library audit round 7 (OncoPath 1.1.2): warnings that cannot stop a release, and a retraction nobody ran
+
+### Three of five October releases published "Release <v>." as their notes
+
+- **Failure mode:** `release.yaml` runs on push, does not wait for "R validation", and falls back to
+  a placeholder when no `NEWS.md` heading matches. OncoPath 1.1.2, meddecide 1.1.2 and jsurvival
+  1.1.1 went out as *Latest* with `Release <v>.`; OncoPath's validation run was red on the release
+  commit.
+- **Detection signal:** the library reviewer (`2026-10-23 OncoPath` [LOW]), for the second round
+  running. `check_news` WARNed and the module's own audit test failed; neither can stop a push.
+- **Prevention rule:** run `release_gate.py --root <sibling>` before the version bump and treat its
+  `NEWS.md` WARN as blocking (review guide §1, §30). `check_news` now also WARNs on a four-component
+  newest heading.
+
+### A shipped red suite, and the tests that made it red
+
+- **Failure mode:** testthat's `_problems/` and `testthat-problems.rds` were committed (three failing
+  tests). Two of the failing tests were ours from round 5: one required a `library-audit` tag in
+  README/DESCRIPTION, one pinned a README heading the rewrite improved. `.claude/settings.local.json`
+  was tracked in all five siblings.
+- **Detection signal:** the reviewer; no local check looked at tracked scratch or at what tests assert.
+- **Prevention rule:** tests assert claims, never bookkeeping or wording (guide §14); `check_artifacts`
+  and `check_review_breadcrumbs` WARN.
+
+### "Run-time notices accumulate across runs" was never run
+
+- **Failure mode:** our round-5 response retracted one unmeasured Notice mechanism and asserted another
+  in the same paragraph; the breadcrumbs above three `.addNotice()` helpers carried it. A three-cycle
+  experiment (fresh analysis, `fromProtoBuf` restore) shows one Notice per cycle, while appended Html
+  content grows 1 → 2 → 3: the pattern we kept is the one that accumulates.
+- **Detection signal:** the reviewer disputed it; their own counter-example was mislocated too (both
+  `jmv` sites insert from `.init()`).
+- **Prevention rule:** every "X because Y" in a response, breadcrumb or test has an executed check or
+  says *inferred*; `tests/testthat/test-zzz-jmvcore-notice-run-cycle.R`; guide §13.6.
+
+### Polish the reviewer had to point out
+
+- **Failure mode:** 37 all-caps notice titles in `waterfall`; mixed spellings in every module; a nested
+  `CollapseBox` in `diagnosticmeta`; a description promising an analysis that has not shipped.
+- **Prevention rule:** guide §12 and §27; `check_label_case`, `check_collapsebox_nested`,
+  `check_forward_refs` (WARN). Spelling waits for a project-wide choice.
+
+### Cross-module text sweep: five ways a mechanical edit went wrong
+
+- **Mirroring whole files ships umbrella drift.** `mirror_to_submodule.R` copied 23 ClinicoPathDescriptives
+  files to carry a spelling fix and brought 600+ lines of unreviewed umbrella work with them
+  (`agepyramid.b.R` 246, `venn.b.R` 124). Detection: the `CHANGED since <snapshot>` stat. Rule: for a
+  text-only change, restore and apply the same deterministic transform to the sibling's own files.
+- **`--regen` flips `\donttest` to `\dontrun`** in every header it touches (the updater's rewrite), so
+  10 unrelated headers changed. Rule: revert a flip wherever the snapshot had no `\dontrun`.
+- **A word map applied to tests hits data and code.** `"Tumour status"` was a fixture column name and
+  `get_scales("colour")` names ggplot's internal aesthetic; both broke. Rule: change only assertion
+  strings on display text; review every changed test line that is not an `expect_*`.
+- **Re-keying skipped msgids that already existed untranslated** ("Gray", "Statistical tests:"), so
+  those strings lost their Turkish. Rule: when the new msgid exists with an empty msgstr, fill it.
+- **Unreliable test runs.** `pgrep -f test_dir` matched the waiter's own shell and never returned;
+  relaunching into the same output files interleaved two runs; `load_helpers = FALSE` turned 337
+  helper-dependent tests into errors. Rule: harness-tracked background jobs, fresh output files, helpers
+  on (the `helper-multisurvival.R` locked-environment bug that forced them off is fixed).
+
 ## 2026-10-21 — meddecide release review: a regression filed as a fix, and audits that judged by text
 
 - **Failure mode 1 (zero cells, 4 analyses).** The same LR/DOR zero-cell rule lived in four

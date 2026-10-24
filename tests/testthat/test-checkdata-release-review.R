@@ -169,7 +169,7 @@ table_note <- function(tbl, key) {
 test_that("the quality score explains the clinical penalty it just applied", {
   qt <- as.character(cd_clinical()$qualityText$content)
 
-  expect_match(qt, "NOTE ON THE CLINICAL PENALTY")
+  expect_match(qt, "Note on the clinical penalty")
   expect_match(qt, "not validated reference ranges")
   expect_match(qt, "matching the variable NAME")
   expect_match(qt, "Confirm each flag against your study protocol")
@@ -177,7 +177,7 @@ test_that("the quality score explains the clinical penalty it just applied", {
   expect_match(qt, "This component cost [0-9]+ points")
 
   # and it must sit AFTER the grade, not split the component breakdown
-  expect_lt(regexpr("HEURISTIC GRADE", qt), regexpr("NOTE ON THE CLINICAL PENALTY", qt))
+  expect_lt(regexpr("HEURISTIC GRADE", qt), regexpr("Note on the clinical penalty", qt))
 })
 
 test_that("the note says units were inferred from the data range", {
@@ -191,7 +191,7 @@ test_that("no clinical note appears when no clinical penalty was applied", {
   d <- data.frame(widget_count = rnorm(80, 50, 5))
   qt <- as.character(checkdata(data = d, var = "widget_count",
                                showPatterns = TRUE)$qualityText$content)
-  expect_false(grepl("NOTE ON THE CLINICAL PENALTY", qt))
+  expect_false(grepl("Note on the clinical penalty", qt))
 })
 
 test_that("clinical validation rows carry a footnote on the patterns table", {

@@ -216,7 +216,7 @@ kappaSizeFixedNBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
 #' kappa (kappa0); every value below it is excluded. Solved from the 
 #' goodness-of-fit models of the kappaSize package; with three or more raters 
 #' or categories it also allows for re-estimating the category proportions 
-#' when the study is analysed. Use kappaSizePower to size a study for a 
+#' when the study is analyzed. Use kappaSizePower to size a study for a 
 #' hypothesis test and kappaSizeCI to size it for target confidence limits.
 #' 
 #'

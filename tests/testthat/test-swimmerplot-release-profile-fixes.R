@@ -232,7 +232,7 @@ test_that("R58: a sparse event column does not report rows without events as hid
 test_that("R62: implausible follow-up is a WARNING, not an information note", {
     d <- data.frame(id = sprintf("P%d", 1:4), start = 0, end = c(400, 500, 600, 700))
     nt <- sp_txt(sp(data = d, patientID = "id", startTime = "start", endTime = "end")$notices$content)
-    expect_match(nt, "WARNING: Implausible follow-up Total follow-up exceeds 10 years", fixed = TRUE)
+    expect_match(nt, "Warning: Implausible follow-up Total follow-up exceeds 10 years", fixed = TRUE)
 })
 
 test_that("R64: the export panel describes the tables it shows", {

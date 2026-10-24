@@ -1294,11 +1294,11 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
         if (!positiveClass %in% levels(classVar)) {
           if (is.null(subGroup)) {
             private$.throwError("missing_positive_class",
-              sprintf(.("No case of the positive class (%1$s) has a value of %2$s, so %2$s cannot be analysed."), positiveClass, var),
+              sprintf(.("No case of the positive class (%1$s) has a value of %2$s, so %2$s cannot be analyzed."), positiveClass, var),
               .("Check the missing values of this test variable, or remove it from the analysis."))
           }
           private$.throwError("missing_positive_class",
-            sprintf(.("Subgroup %1$s has no case of the positive class (%2$s) with a value of %3$s, so %3$s cannot be analysed in that subgroup."), groupName, positiveClass, varName),
+            sprintf(.("Subgroup %1$s has no case of the positive class (%2$s) with a value of %3$s, so %3$s cannot be analyzed in that subgroup."), groupName, positiveClass, varName),
             .("Remove the subgroup variable, or use one in which every subgroup contains cases of the positive class."))
         }
 
@@ -1313,13 +1313,13 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
         if (pos_count < 2 || neg_count < 2) {
           details <- if (is.null(subGroup)) {
             if (pos_count < 2)
-              sprintf(.("%1$s has a value for %2$d case(s) of the positive class (%3$s); at least 2 are needed to analyse it."), var, pos_count, positiveClass)
+              sprintf(.("%1$s has a value for %2$d case(s) of the positive class (%3$s); at least 2 are needed to analyze it."), var, pos_count, positiveClass)
             else
-              sprintf(.("%1$s has a value for %2$d case(s) of the negative class (%3$s); at least 2 are needed to analyse it."), var, neg_count, negativeClass)
+              sprintf(.("%1$s has a value for %2$d case(s) of the negative class (%3$s); at least 2 are needed to analyze it."), var, neg_count, negativeClass)
           } else if (pos_count < 2) {
-            sprintf(.("Subgroup %1$s has %2$d case(s) of the positive class (%3$s) with a value of %4$s; at least 2 are needed to analyse %4$s in that subgroup."), groupName, pos_count, positiveClass, varName)
+            sprintf(.("Subgroup %1$s has %2$d case(s) of the positive class (%3$s) with a value of %4$s; at least 2 are needed to analyze %4$s in that subgroup."), groupName, pos_count, positiveClass, varName)
           } else {
-            sprintf(.("Subgroup %1$s has %2$d case(s) of the negative class (%3$s) with a value of %4$s; at least 2 are needed to analyse %4$s in that subgroup."), groupName, neg_count, negativeClass, varName)
+            sprintf(.("Subgroup %1$s has %2$d case(s) of the negative class (%3$s) with a value of %4$s; at least 2 are needed to analyze %4$s in that subgroup."), groupName, neg_count, negativeClass, varName)
           }
           private$.throwError("insufficient_data", details,
             if (is.null(subGroup)) .("Check the missing values of this test variable, or remove it from the analysis.")
@@ -1335,7 +1335,7 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
         # calls to this method for the same variable produce one message.
         if (pos_count < 10 || neg_count < 10) {
           private$.warnUser(.fmt(
-            .("'{var}' was analysed with only {pos} positive and {neg} negative case(s). Below about 10 per class the AUC, its confidence interval and the selected cutpoint are unstable; treat these results as exploratory."),
+            .("'{var}' was analyzed with only {pos} positive and {neg} negative case(s). Below about 10 per class the AUC, its confidence interval and the selected cutpoint are unstable; treat these results as exploratory."),
             var = var, pos = pos_count, neg = neg_count),
             type = jmvcore::NoticeType$STRONG_WARNING)
         }
@@ -1378,7 +1378,7 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
           # Fallback: manual ROC calculation. Say so -- it ignores the selected method,
           # metric and tolerance, and used to replace them silently.
           private$.warnUser(sprintf(
-            .("cutpointr could not analyse %1$s (%2$s). A built-in Youden-index search was used instead, so the selected cutpoint method, metric and tolerance were not applied to that marker."),
+            .("cutpointr could not analyze %1$s (%2$s). A built-in Youden-index search was used instead, so the selected cutpoint method, metric and tolerance were not applied to that marker."),
             var_label, result_message))
           response <- as.numeric(classVar == positiveClass)
           # Emit the fallback curve with cutpointr's OWN geometry so it is interchangeable
@@ -1583,7 +1583,7 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
           key = "no_usable_cutpoint",
           note = if (!any(is.finite(resultsToDisplay))) {
             if (separates)
-              .("No usable cut-point is shown for this marker: the cut-point chosen by the selected method lies beyond the observed values, so every patient would be classified negative, although some cut-points do separate the groups better than chance in the classification direction currently selected. This happens, for example, when accuracy, a misclassification cost or a total utility is optimised in an imbalanced sample, when at the cost ratio entered the cost-benefit method finds classifying every patient negative the least costly choice, or when Metric Tolerance is wide enough to count that choice as tied with the best cut-point. If a cut-point is needed, lower Metric Tolerance or choose another Cutpoint Method or Optimization Metric. The AUC and its confidence interval in the Area Under the ROC Curve table are unaffected.")
+              .("No usable cut-point is shown for this marker: the cut-point chosen by the selected method lies beyond the observed values, so every patient would be classified negative, although some cut-points do separate the groups better than chance in the classification direction currently selected. This happens, for example, when accuracy, a misclassification cost or a total utility is optimized in an imbalanced sample, when at the cost ratio entered the cost-benefit method finds classifying every patient negative the least costly choice, or when Metric Tolerance is wide enough to count that choice as tied with the best cut-point. If a cut-point is needed, lower Metric Tolerance or choose another Cutpoint Method or Optimization Metric. The AUC and its confidence interval in the Area Under the ROC Curve table are unaffected.")
             else
               sprintf(.("No usable cut-point exists for this marker in the classification direction currently selected: no threshold separates the groups better than chance. First check Positive Class: is %1$s the level that means the condition is present? Only if it is, check Classification Direction. The AUC and its confidence interval in the Area Under the ROC Curve table are unaffected."), .rocLabel(positiveClass))
           },
@@ -2112,7 +2112,7 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
             .rocLabel(coding$positive), .rocLabel(coding$negative)))
           table$setNote("source", .("Chosen in Positive Class and Negative Class."))
         }
-        table$setNote("n", .("N counts every row with each outcome value before exclusions. Each test is analysed on its complete cases within the two selected classes."))
+        table$setNote("n", .("N counts every row with each outcome value before exclusions. Each test is analyzed on its complete cases within the two selected classes."))
         coding
       },
 
@@ -2152,7 +2152,7 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
             "metric_tolerance",
             # Was raw English. The msgid is now one literal; the substituted values are
             # numbers and option keys, not grammar, so %s interpolation is safe here.
-            sprintf(.("Metric tolerance is %1$s: every cutpoint scoring within %2$s of the best %3$s was treated as equivalent and the reported cutpoint is their %4$s. It is therefore <i>not</i> necessarily the cutpoint that maximises the metric, and its sensitivity and specificity can differ appreciably from the maximum. Set the tolerance to 0 to report the maximising cutpoint itself."),
+            sprintf(.("Metric tolerance is %1$s: every cutpoint scoring within %2$s of the best %3$s was treated as equivalent and the reported cutpoint is their %4$s. It is therefore <i>not</i> necessarily the cutpoint that maximizes the metric, and its sensitivity and specificity can differ appreciably from the maximum. Set the tolerance to 0 to report the maximizing cutpoint itself."),
               base::format(tol), base::format(tol),
               tryCatch(self$options$metric, error = function(e) "metric"),
               tryCatch(self$options$break_ties, error = function(e) "average"))),
@@ -2294,7 +2294,7 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
         } else {
           .("the criterion belonging to the cutpoint method you selected")
         }
-        note <- sprintf(.("The cutpoint was chosen to optimise %s on these same data. The sensitivity, specificity and other metrics reported at that cutpoint are therefore optimistically biased and will typically be lower in a new sample; the bias grows as the sample gets smaller and as more candidate cutpoints are searched. Use bootstrap or split-sample validation before quoting these figures."), metric_txt)
+        note <- sprintf(.("The cutpoint was chosen to optimize %s on these same data. The sensitivity, specificity and other metrics reported at that cutpoint are therefore optimistically biased and will typically be lower in a new sample; the bias grows as the sample gets smaller and as more candidate cutpoints are searched. Use bootstrap or split-sample validation before quoting these figures."), metric_txt)
         if (isTRUE(self$options$allObserved)) {
           note <- paste(note, .("This table lists every observed test value as a candidate cutpoint, not only the selected one; the bias above applies to whichever row you report as the cutpoint."))
         }
@@ -2614,7 +2614,7 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
           !is.null(attr(self$data[[marker]], "values")),
           unique(c(self$options$dependentVars, self$options$refVar)))
         if (length(coded_markers)) private$.setNotice("numericCodes", sprintf(
-          .("%s: an integer column set to Nominal or Ordinal was analysed by its numeric values, as ordered codes read in the direction set under Direction. This is right for an ordinal rating scale; if the numbers merely label unordered categories, the AUC depends on the arbitrary numbering and is meaningless."),
+          .("%s: an integer column set to Nominal or Ordinal was analyzed by its numeric values, as ordered codes read in the direction set under Direction. This is right for an ordinal rating scale; if the numbers merely label unordered categories, the AUC depends on the arbitrary numbering and is meaningless."),
           paste(coded_markers, collapse = ", ")))
         patient_data <- tryCatch(.psychopdaPatientData(self$data, coding$included,
           self$options$patientID,
@@ -2637,7 +2637,7 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
           .("Patient-level analysis: {rows} included rows were reduced to {patients} patients using the prespecified {method} of available scores for each marker. All cutpoints, models, intervals and resamples use these patient summaries. This estimates accuracy of the patient summary, not of individual lesions or visits. Patients with no observed score for a marker are excluded for that marker."),
           rows = patient_data$rows, patients = patient_data$patients,
           method = if (identical(self$options$analysisUnit, "patientMedian")) .("median") else .("mean"))
-        else .("Independent-row analysis: each analysed row must represent an independent observation.")
+        else .("Independent-row analysis: each analyzed row must represent an independent observation.")
         private$.setNotice("analysisUnit", unit_note)
         self$results$outcomeCoding$setNote("analysis_unit", unit_note)
         positiveClass <- coding$positive
@@ -2710,7 +2710,7 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
               .("The '%1$s' metric is best at its %2$s, so the cut-point was found by %3$s it; the Cutpoint method setting asked for the opposite direction."),
               self$options$metric,
               if (startsWith(methodName, "minimize")) .("minimum") else .("maximum"),
-              if (startsWith(methodName, "minimize")) .("minimising") else .("maximising")),
+              if (startsWith(methodName, "minimize")) .("minimizing") else .("maximizing")),
               type = jmvcore::NoticeType$INFO)
           }
           if (methodName == "maximize_metric") {
@@ -3561,7 +3561,7 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
           aucSummaryTable$setNote("ci_method", .("AUC 95% confidence intervals and tests use the asymptotic DeLong approximation. Nominal coverage and type-I error are not guaranteed in modest or imbalanced samples, even with ten or more observations per class. Interpret the uncertainty cautiously; a bootstrap interval is not automatically a remedy (Obuchowski and Lieber, 1998)."))
         }
         aucSummaryTable$setNote("inference_scale", if (identical(self$options$aucInference, "logit"))
-          .("Single-AUC 95% intervals and two-sided tests against AUC 0.5 use a logit delta transformation of the DeLong standard error (or the explicitly labelled fallback standard error). This improves the audited small-sample coverage but remains an asymptotic approximation. It does not change paired DeLong comparisons. Boundary AUCs or zero variance have unavailable inference.")
+          .("Single-AUC 95% intervals and two-sided tests against AUC 0.5 use a logit delta transformation of the DeLong standard error (or the explicitly labeled fallback standard error). This improves the audited small-sample coverage but remains an asymptotic approximation. It does not change paired DeLong comparisons. Boundary AUCs or zero variance have unavailable inference.")
         else .("Single-AUC inference uses the legacy untransformed normal approximation. Boundary AUCs or zero variance have unavailable inference. This method undercovered in the audited small, imbalanced sample."))
 
         aucSummaryTable$setNote("auc_bands",
@@ -5239,8 +5239,8 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
         # The header cells were raw English buried in the HTML literal, so a translated
         # analysis showed translated tables next to an English confusion matrix. Broken out
         # so each is an extractable msgid.
-        lblDecision <- .("DECISION BASED ON MEASURE")
-        lblCriterion <- .("CRITERION")
+        lblDecision <- .("Decision based on measure")
+        lblCriterion <- .("Criterion")
         # "Positive (<level>)" / "Negative (<level>)": level names are user data, and this is Html.
         lblNegative <- jmvcore::htmlEscape(labels[["negative"]])
         lblPositive <- jmvcore::htmlEscape(labels[["positive"]])

@@ -25,7 +25,7 @@ test_that("a patient with no censoring value does not kill the analysis above 10
   # the analysis completed: a plot state exists and no error reached the notices
   expect_false(is.null(r$plot$state))
   expect_false(grepl("Column 6 of result", sw_strip(r$notices$content), fixed = TRUE))
-  expect_false(grepl("ERROR", sw_strip(r$notices$content), fixed = TRUE))
+  expect_false(grepl("Error:", sw_strip(r$notices$content), fixed = TRUE))
 
   # 999 rows takes the slow path and must keep working
   r2 <- suppressWarnings(ClinicoPath::swimmerplot(
@@ -649,14 +649,14 @@ test_that("a table that is visible and empty says why", {
     data = d, patientID = "id", startTime = "start", endTime = "end",
     milestone1Name = "S", milestone1Date = "ms"))
   expect_match(paste(sw_notes(r2$milestoneTable), collapse = " "),
-               "No milestones to summarise")
+               "No milestones to summarize")
 
   # event markers switched on with no event variable
   r3 <- suppressWarnings(ClinicoPath::swimmerplot(
     data = d, patientID = "id", startTime = "start", endTime = "end",
     showEventMarkers = TRUE))
   expect_match(paste(sw_notes(r3$eventMarkerTable), collapse = " "),
-               "No event markers to summarise")
+               "No event markers to summarize")
 })
 
 
@@ -772,7 +772,7 @@ test_that("a parsing failure names the cause, not a downstream symptom", {
   m <- raw_msg(sprintf("%d/5/2023", 1:4), sprintf("%d/9/2023", 1:4))
   expect_match(m, "None of the start/end values are numbers")
   expect_match(m, "1/5/2023", fixed = TRUE)          # shows the offending value
-  expect_match(m, "switch Time Input Type to Date/Time")
+  expect_match(m, "switch Time Input Type to Date/time")
   expect_match(raw_msg(sprintf("1%d.01.2023", 5:8), sprintf("1%d.05.2023", 5:8)),
                "None of the start/end values are numbers")
 
@@ -998,9 +998,9 @@ test_that("a STRONG_WARNING is not printed as a plain WARNING", {
                   stringsAsFactors = FALSE)
   n <- sw_strip(suppressWarnings(ClinicoPath::swimmerplot(
     data = d, patientID = "id", startTime = "start", endTime = "end"))$notices$content)
-  expect_match(n, "STRONG WARNING: Small sample size", fixed = TRUE)
+  expect_match(n, "Strong warning: Small sample size", fixed = TRUE)
   # ordinary notices keep their own prefixes
-  expect_match(n, "NOTE: Time units", fixed = TRUE)
+  expect_match(n, "Note: Time units", fixed = TRUE)
 })
 
 
@@ -1539,8 +1539,8 @@ test_that("an untouched swimmerplot shows guidance, not an error", {
     for (p in partials) {
         r <- do.call(run, p$opts)
         txt <- err(r)
-        expect_false(grepl("ERROR", txt, fixed = TRUE))
-        expect_match(txt, "NOTE", fixed = TRUE)
+        expect_false(grepl("Error:", txt, fixed = TRUE))
+        expect_match(txt, "Note:", fixed = TRUE)
         # names exactly the boxes that are still empty, and no others
         for (s in p$empty)  expect_match(txt, s, fixed = TRUE)
         expect_false(grepl(p$filled, txt, fixed = TRUE))
@@ -1550,6 +1550,6 @@ test_that("an untouched swimmerplot shows guidance, not an error", {
 
     # all three assigned: no notice at all, the analysis proceeds
     done <- run(patientID = "id", startTime = "st", endTime = "en")
-    expect_false(grepl("ERROR", err(done), fixed = TRUE))
+    expect_false(grepl("Error:", err(done), fixed = TRUE))
     expect_false(grepl("is still empty", err(done), fixed = TRUE))
 })

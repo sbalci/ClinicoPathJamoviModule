@@ -104,7 +104,6 @@ children:
                       - type: ComboBox
                         name: timetypeoutput
                         label: Output time type
-                        enable: (tint)
       - type: Label
         label: Landmark Analysis
         fitToGrid: true

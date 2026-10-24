@@ -58,9 +58,9 @@ it, and how to interpret results.}
 table for manuscript reporting.}
 
 \item{nonnormal}{Applies only to the 'tableone' style. When TRUE,
-continuous variables are summarised as median (Q1, Q3) instead of mean
+continuous variables are summarized as median (Q1, Q3) instead of mean
 (SD), which is the appropriate summary for right-skewed measurements such
-as Ki-67 index, tumour size or marker concentrations. Categorical variables
+as Ki-67 index, tumor size or marker concentrations. Categorical variables
 are unaffected.}
 }
 \value{

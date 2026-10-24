@@ -126,9 +126,9 @@ options:
       title: Color palette
       type: List
       options:
-        - title: Dark2 (colour-blind safe)
+        - title: Dark2 (color-blind safe)
           name: Dark2
-        - title: Set2 (colour-blind safe)
+        - title: Set2 (color-blind safe)
           name: Set2
         - title: Paired
           name: Paired
@@ -309,7 +309,7 @@ options:
           name: jco
         - title: Lancet
           name: lancet
-        - title: Grey scale
+        - title: Gray scale
           name: grey
       default: jco
       description:

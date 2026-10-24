@@ -114,6 +114,10 @@ https://www.mdpi.com/2072-6643/15/8/1834
 
 # jsurvival
 
+
+- Cancer-Specific Survival in Octogenarian Breast Cancer Patients: A Competing Risk Analysis of Prognostic Factors.
+Current Oncology, 33(10), 636. https://doi.org/10.3390/curroncol33100636
+
 - Prognostic significance of necrosis in ampullary carcinomas https://link.springer.com/article/10.1007/s11845-024-03740-3
 
 - Bioinformatic Analysis of Gene Expression Related to Sialic Acid Biosynthesis in Patients With Medulloblastoma 
@@ -265,6 +269,10 @@ https://www.sciencedirect.com/science/article/pii/S0967586823001224
  https://www.mdpi.com/2076-328X/14/7/523
 
 # jjstatsplot 
+
+- Histopathological and Molecular Features of Adenomatous and Serrated Colon Adenomas, Characteristics and Overlapping Features, Challenges in the Nomenclature 
+https://www.turkjpath.org/text.php?doi=10.5146/tjpath.2026.13786
+
 
 - α-Klotho is associated with cardiovascular and all-cause mortality in patients with stage 3b and 4 chronic kidney disease (CKD): a long-term prospective cohort study https://link.springer.com/article/10.1007/s40620-024-02069-5 
 

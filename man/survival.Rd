@@ -248,8 +248,9 @@ adjusting as a covariate. Allows different baseline hazards for each age
 group without assuming a linear age effect.}
 
 \item{age_group_cutpoints}{Comma-separated age cutpoints for creating age
-groups. For example, 50, 65, 75 creates groups less than 50, 50-64, 65-74,
-75 and above.}
+groups. For example, 50, 65, 75 creates groups 50 or younger, over 50 to
+65, over 65 to 75, and over 75. Each upper cutpoint is included in the
+preceding group.}
 
 \item{age_time_scale}{Use biological age as the time axis instead of
 follow-up time. The Cox model becomes Surv(age_at_entry, age_at_event,
@@ -309,8 +310,8 @@ allow more flexible hazard shapes but may lead to overfitting. Used only
 for Royston-Parmar splines.}
 
 \item{spline_scale}{Scale for spline-based models. Hazard scale models log
-hazard function, odds scale models log cumulative odds, normal scale models
-normal scores.}
+cumulative hazard, odds scale models log cumulative odds, normal scale
+models normal scores.}
 
 \item{compare_distributions}{Fit and compare multiple parametric
 distributions using AIC/BIC criteria. Helps select the best-fitting
@@ -349,9 +350,10 @@ tumor size, biomarker levels, and follow-up duration.}
 
 \item{rcs_knots}{Number of knots for restricted cubic splines. 3 knots = 2
 df (simplest), 4 knots = 3 df (recommended default), 5 knots = 4 df (more
-flexible). Knots are placed at Harrell-recommended percentiles. More knots
-allow detection of complex non-linear patterns but may overfit with small
-samples.}
+flexible). Uses natural splines with interior knots at equally spaced
+quantiles and boundary knots at the observed minimum and maximum, as in
+splines::ns(). More knots allow detection of complex non-linear patterns
+but may overfit with small samples.}
 
 \item{bootstrapValidation}{Performs bootstrap internal validation of
 discrimination and calibration slope.}
@@ -361,7 +363,7 @@ validation.}
 
 \item{seed}{Random seed for the reproducible bootstrap internal validation.
 Change this value to obtain a different bootstrap draw; the default (42)
-reproduces the previous fixed behaviour.}
+reproduces the previous fixed behavior.}
 }
 \value{
 A results object containing:

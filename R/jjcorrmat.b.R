@@ -923,7 +923,7 @@ jjcorrmatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
     # Say whether that N is pooled or per group: with a Split By variable the
     # figure and table are per group, so a bare pooled count misdescribes them.
     if (!is.null(self$options$grvar))
-        n_label <- sprintf(.("%s, analysed separately within each level of %s"),
+        n_label <- sprintf(.("%s, analyzed separately within each level of %s"),
                            n_label, htmltools::htmlEscape(self$options$grvar))
     method_name <- private$.methodName(options_data$typestatistics)
 

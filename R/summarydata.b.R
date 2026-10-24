@@ -46,10 +46,10 @@ summarydataClass <- if (requireNamespace("jmvcore")) R6::R6Class("summarydataCla
             }
             blocks <- vapply(private$.noticeList, function(notice) {
                 level <- switch(notice$type,
-                    ERROR          = .("ERROR"),
-                    STRONG_WARNING = .("STRONG WARNING"),
-                    WARNING        = .("WARNING"),
-                    INFO           = .("NOTE"),
+                    ERROR          = .("Error"),
+                    STRONG_WARNING = .("Strong warning"),
+                    WARNING        = .("Warning"),
+                    INFO           = .("Note"),
                     "")
                 if (nzchar(level)) {
                     .fmt(

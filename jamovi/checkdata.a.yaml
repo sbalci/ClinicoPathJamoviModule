@@ -11,7 +11,7 @@ description:
         Screens a single variable for data-quality problems before it is used in
         analysis: completeness and the shape of its missingness, consensus outlier
         detection (at n = 10 or more a point is flagged only when at least 2 methods
-        agree; below n = 10 single-method flags are shown, labelled informative-only
+        agree; below n = 10 single-method flags are shown, labeled informative-only
         and excluded from the grade; the MAD-based method is unavailable when there
         are 3 or fewer complete values or the MAD is zero, leaving 2 methods),
         distribution summaries, duplicate or repeated values, and optional
@@ -60,7 +60,7 @@ options:
             Detect potential outliers using three methods - z-score (|z| > 3), the IQR
             fence (1.5 x IQR), and the modified Z-score (|M| > 3.5, MAD-based) - and report
             points flagged by at least two of them. Below n = 10 single-method flags are
-            shown and labelled informative-only.
+            shown and labeled informative-only.
 
     - name: showDistribution
       title: Distribution analysis

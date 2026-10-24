@@ -1771,7 +1771,7 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                     private$.addHtmlMessage(
                         type = "info",
                         title = .("Methodology Reference"),
-                        message = .("The cut-off is the value that maximises the standardised log-rank statistic (maximally selected rank statistic, survminer::surv_cutpoint / maxstat). No multiplicity-adjusted p-value is computed or reported for the selected cut-off; the group comparison p-values shown after the split are exploratory because the split was chosen from these same data. Report the continuous Cox model as the primary analysis and validate the cut-off in independent data. When publishing, cite survminer and maxstat.")
+                        message = .("The cut-off is the value that maximizes the standardized log-rank statistic (maximally selected rank statistic, survminer::surv_cutpoint / maxstat). No multiplicity-adjusted p-value is computed or reported for the selected cut-off; the group comparison p-values shown after the split are exploratory because the split was chosen from these same data. Report the continuous Cox model as the primary analysis and validate the cut-off in independent data. When publishing, cite survminer and maxstat.")
                     )
                 }
             }
@@ -2068,7 +2068,7 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                     # Reporting it as "no significant associations" invented a
                     # substantive negative finding out of an empty result.
                     self$results$coxSummary$setContent(
-                        .("No Cox regression results are available to summarise. This usually means the model could not be fitted, or every hazard ratio was missing."))
+                        .("No Cox regression results are available to summarize. This usually means the model could not be fitted, or every hazard ratio was missing."))
                 }
             }
 
@@ -2144,7 +2144,7 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                 }
 
                 # Multiplicity caution (plain text)
-                rescutTable$setNote("multiplicity", .("The statistic is the maximally selected standardised log-rank statistic; no multiplicity-adjusted p-value is reported for this cut-off. Downstream group comparisons are exploratory and should be validated in independent data."))
+                rescutTable$setNote("multiplicity", .("The statistic is the maximally selected standardized log-rank statistic; no multiplicity-adjusted p-value is reported for this cut-off. Downstream group comparisons are exploratory and should be validated in independent data."))
 
                 data_frame <- rescut_summary
                 for (i in seq_along(data_frame[, 1, drop = TRUE])) {
@@ -4228,7 +4228,7 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                 mydata[[".strata"]] <- droplevels(as.factor(mydata[[".strata"]]))
 
                 if (nlevels(mydata[[".strata"]]) < 2) {
-                    tbl$setNote("onelevel", .("The stratification variable has fewer than two levels in the analysed rows."))
+                    tbl$setNote("onelevel", .("The stratification variable has fewer than two levels in the analyzed rows."))
                     return()
                 }
 
@@ -4241,7 +4241,7 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                 n_strata <- nlevels(mydata[[".strata"]])
                 if (n_strata > max(10, floor(nrow(mydata) / 10))) {
                     tbl$setNote("toomany", sprintf(
-                        .("Not fitted: '%s' has %d levels across %d analysed rows (about %.1f patients per stratum). Stratification needs a small number of reasonably sized groups; a near-continuous variable gives one stratum per patient and no estimable hazard ratio. Use a categorical variable, or add this variable as a covariate in Multivariable Survival Analysis instead."),
+                        .("Not fitted: '%s' has %d levels across %d analyzed rows (about %.1f patients per stratum). Stratification needs a small number of reasonably sized groups; a near-continuous variable gives one stratum per patient and no estimable hazard ratio. Use a categorical variable, or add this variable as a covariate in Multivariable Survival Analysis instead."),
                         strata_var, n_strata, nrow(mydata), nrow(mydata) / n_strata))
                     return()
                 }

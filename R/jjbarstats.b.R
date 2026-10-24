@@ -175,7 +175,7 @@ jjbarstatsClass <- if (requireNamespace('jmvcore'))
                     # next to "Statistical Method: Chi-square test of independence"
                     # and still drew a chart.
                     if (sum(self$data[[counts_var]], na.rm = TRUE) <= 0) {
-                        jmvcore::reject(.("Counts variable '{var}' sums to zero - there are no observations to analyse."),
+                        jmvcore::reject(.("Counts variable '{var}' sums to zero - there are no observations to analyze."),
                                         var = counts_var)
                     }
                 }

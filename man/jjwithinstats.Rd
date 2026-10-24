@@ -83,7 +83,7 @@ p-values.}
 posterior sampling (robust tests, Bayesian estimates, and some
 nonparametric effect-size intervals). The plot caption names the seed
 whenever it affected the numbers shown. The default reproduces the previous
-fixed behaviour.}
+fixed behavior.}
 
 \item{pairwisecomparisons}{Enable to see which specific time points differ
 significantly (e.g., baseline vs month 3, month 3 vs month 6).  Useful for
@@ -161,7 +161,7 @@ plot shows individual trajectories.}
 
 \item{ggpubrPalette}{Color palette for the ggpubr plot. Applies to the
 boxplot, violin and paired plot types; the line plot draws a single mean
-trajectory, so a categorical palette has nothing to colour there.}
+trajectory, so a categorical palette has nothing to color there.}
 
 \item{ggpubrAddStats}{Add statistical comparison p-values to ggpubr plot.}
 

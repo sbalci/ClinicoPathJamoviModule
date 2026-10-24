@@ -125,8 +125,8 @@ options:
       description:
           ui: >
             By default a numeric variable with 15 or fewer distinct whole-number
-            values (scores, counts, grades) is analysed as categorical. Enable to
-            analyse every numeric variable as continuous.
+            values (scores, counts, grades) is analyzed as categorical. Enable to
+            analyze every numeric variable as continuous.
           R: >
             If TRUE, every numeric variable is treated as continuous. By default a
             numeric variable with 15 or fewer distinct whole-number values is
@@ -208,7 +208,7 @@ options:
           ui: Datasets with more rows than this are randomly subsampled when sampling is enabled.
           R: >
             Row count above which sampling is applied, when 'Sample large datasets'
-            is enabled. Datasets at or below this size are always analysed in full.
+            is enabled. Datasets at or below this size are always analyzed in full.
 
     - name: sampleSize
       title: 'Rows to keep'
@@ -233,7 +233,7 @@ options:
             Random seed used for the sampling of large datasets (when 'Sample large
             datasets' is enabled) and for any resampling inside the plot statistics
             (robust and Bayesian approaches). Change it to draw a different sample;
-            the default (42) reproduces the previous fixed behaviour.
+            the default (42) reproduces the previous fixed behavior.
             
 
 

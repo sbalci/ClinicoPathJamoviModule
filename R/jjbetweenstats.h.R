@@ -527,7 +527,7 @@ jjbetweenstatsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
 #'   posterior sampling (robust tests, Bayesian estimates, and some
 #'   nonparametric effect-size intervals). The plot caption names the seed
 #'   whenever it affected the numbers shown. The default reproduces the previous
-#'   fixed behaviour.
+#'   fixed behavior.
 #' @param pairwisecomparisons .
 #' @param pairwisedisplay .
 #' @param padjustmethod .

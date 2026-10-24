@@ -132,7 +132,7 @@ test_that("IR2-03: the prevalence sentence names its denominator when it is not 
     d <- rf_fixP(); d$t2 <- factor(ifelse(d$gold == "D", "-", "+"), levels = c("+", "-"))
     r <- rf_dc(d, statComp = TRUE, showDescriptiveReport = TRUE)
     txt <- rf_text(r$res$clinicalReport$content)
-    expect_match(txt, "At the 41.2% disease prevalence among the 68 cases analysed for t1", fixed = TRUE)
+    expect_match(txt, "At the 41.2% disease prevalence among the 68 cases analyzed for t1", fixed = TRUE)
     expect_false(grepl("41.2% disease prevalence observed in this sample", txt, fixed = TRUE))
 })
 

@@ -219,7 +219,7 @@ test_that("a metric tolerance that averages cutpoints says so", {
     d <- ps_data()
     wide <- run_ps(data = d, dependentVars = "biomarker", tol_metric = 0.05)
     expect_match(tnote(wide$resultsTable[[1]], "metric_tolerance"), "not</i> necessarily")
-    expect_match(tnote(wide$resultsTable[[1]], "metric_tolerance"), "maximises the metric")
+    expect_match(tnote(wide$resultsTable[[1]], "metric_tolerance"), "maximizes the metric")
 
     tight <- run_ps(data = d, dependentVars = "biomarker", tol_metric = 0)
     expect_equal(tnote(tight$resultsTable[[1]], "metric_tolerance"), "(none)")
@@ -530,7 +530,7 @@ test_that("a cutpointr failure is disclosed, not silently replaced by the Youden
                                    score = NULL, metric = cutpointr::youden, direction = ">=",
                                    tol_metric = 0, boot_runs = 0, break_ties = mean, var_label = "biomarker")
     expect_true(is.finite(r$results$AUC))
-    expect_match(pr$p$.userWarnings, "cutpointr could not analyse biomarker (boom)", fixed = TRUE)
+    expect_match(pr$p$.userWarnings, "cutpointr could not analyze biomarker (boom)", fixed = TRUE)
 })
 
 

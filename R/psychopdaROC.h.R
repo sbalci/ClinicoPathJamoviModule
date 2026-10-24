@@ -2215,7 +2215,7 @@ psychopdaROCBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' Advanced ROC Analysis
 #'
 #' Exploratory Receiver Operating Characteristic (ROC) curve analysis with 
-#' optimal cutpoint determination. Analyse independent rows or a prespecified 
+#' optimal cutpoint determination. Analyze independent rows or a prespecified 
 #' mean or median per patient. Patient summaries require an ID and a 
 #' consistent outcome within each patient; all calculations and resampling 
 #' then use one summary per patient. Nominal coverage is not guaranteed in 
@@ -2255,7 +2255,7 @@ psychopdaROCBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   performance. Multiple variables can be selected for comparison.
 #' @param classVar Classification variable representing the true class (gold
 #'   standard). Choose one positive and one negative level. Only observations in
-#'   those two levels are analysed; other levels and missing outcomes are
+#'   those two levels are analyzed; other levels and missing outcomes are
 #'   excluded and counted.
 #' @param positiveClass Level of classVar treated as the positive class
 #'   (condition present). Required: NULL leaves the analysis waiting for a
@@ -2276,14 +2276,14 @@ psychopdaROCBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param specifyCutScore Specific cutpoint value to use when method is set to
 #'   'Manual cutpoint'.
 #' @param tol_metric Cutpoints whose metric is within this tolerance of the
-#'   best value are treated as equivalent and averaged together. BEHAVIOUR
-#'   CHANGE (1.0.4) - the default was 0.05, which is 50000 times wider than the
-#'   1e-06 used by the underlying cutpointr package and meant the reported
-#'   "optimal" cutpoint was usually not the one maximising the metric. On the
-#'   bundled example data 39 of 200 candidate thresholds, spanning 52.1 to 67.7,
-#'   fell within 0.05 Youden of the optimum and were averaged, giving a cutpoint
-#'   with 84.5 percent sensitivity in place of the 94.4 percent available at the
-#'   true optimum. Raise it deliberately if you want that averaging as a guard
+#'   best value are treated as equivalent and averaged together. BEHAVIOR CHANGE
+#'   (1.0.4) - the default was 0.05, which is 50000 times wider than the 1e-06
+#'   used by the underlying cutpointr package and meant the reported "optimal"
+#'   cutpoint was usually not the one maximizing the metric. On the bundled
+#'   example data 39 of 200 candidate thresholds, spanning 52.1 to 67.7, fell
+#'   within 0.05 Youden of the optimum and were averaged, giving a cutpoint with
+#'   84.5 percent sensitivity in place of the 94.4 percent available at the true
+#'   optimum. Raise it deliberately if you want that averaging as a guard
 #'   against over-fitting one threshold.
 #' @param break_ties Method for handling ties when multiple cutpoints achieve
 #'   the same metric value.

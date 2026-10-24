@@ -146,7 +146,7 @@ test_that("swimmerplot handles different time types", {
       data = swimmerplot_test, patientID = "PatientID",
       startTime = "StartTime", endTime = "EndTime", timeType = "datetime"
     ),
-    "Date/Time input type was selected but the time variables contain numeric values",
+    "Date/time input type was selected but the time variables contain numeric values",
     fixed = TRUE
   )
 })

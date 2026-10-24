@@ -46,7 +46,7 @@ test_that("a margin emptied by the other variable's excluded level stops with th
     r <- diagnostic_error_results("decision", data = cases[[nm]], gold = "g",
       goldPositive = "P", goldNegative = "N", newtest = "t", testPositive = "P",
       testNegative = "N", pp = TRUE)
-    expect_match(r$notices$content, "No analysed cases at one of the positive or negative levels",
+    expect_match(r$notices$content, "No analyzed cases at one of the positive or negative levels",
                  fixed = TRUE, info = nm)
     expect_identical(fc_severities(r$notices$content)[1], "Error", info = nm)
     # the ERROR now renders above the exclusion warnings it refers to, so its text must not

@@ -219,7 +219,7 @@ options:
           name: minimal
         - title: Classic
           name: classic
-        - title: Grey
+        - title: Gray
           name: grey
         - title: Black & White
           name: bw

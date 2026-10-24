@@ -330,7 +330,7 @@ test_that("VAL-lassologistic-08 an explicit NA factor level is treated as missin
   g <- as.character(factor(sample(c("a", "b"), 60, TRUE))); g[1:6] <- NA
   d$g <- addNA(factor(g, levels = c("a", "b", "unused")))       # an unused level must survive as well
   res <- val_run(d, outcome = "y", outcomeLevel = "ev", explanatory = c("x1", "x2", "g"), showVariableImportance = TRUE)
-  expect_equal(val_stat(res, "Complete cases analysed"), "54")
+  expect_equal(val_stat(res, "Complete cases analyzed"), "54")
   expect_true("gb" %in% res$variableImportance$asDF$variable)       # the real level is still a term
   expect_false(any(grepl("NA$", res$variableImportance$asDF$variable)))
   # a missing OUTCOME behind an NA level is reported as missing
@@ -338,7 +338,7 @@ test_that("VAL-lassologistic-08 an explicit NA factor level is treated as missin
   d2$y <- addNA(factor(yy, levels = c("no", "ev")))
   ms <- val_run(d2, outcome = "y", outcomeLevel = "ev", explanatory = c("x1", "x2"))$modelSummary$asDF
   expect_equal(ms$value[ms$statistic == "  - outcome missing"], "3")
-  expect_false(any(ms$statistic == "  - outcome level not modelled"))
+  expect_false(any(ms$statistic == "  - outcome level not modeled"))
 })
 
 test_that("VAL-lassologistic-09 a predictor raised from 0 to 1 point is disclosed", {

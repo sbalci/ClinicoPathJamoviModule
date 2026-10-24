@@ -93,7 +93,7 @@ test_that("an unrecognised timezone falls back to system with a warning", {
                                          timezone = "Mars/Olympus_Mons")
     an <- datetimeconverterClass$new(options = opts, data = data.frame(d = "2024-01-15"))
     quietly(an$run())
-    expect_match(strip_html(an$results$notices$content), "not a recognised Olson timezone")
+    expect_match(strip_html(an$results$notices$content), "not a recognized Olson timezone")
 })
 
 test_that("datetime components match lubridate", {

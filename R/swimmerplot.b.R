@@ -44,67 +44,16 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
         # those a recognised best response hides.
         .nonRecistRowLabels = character(0),
 
+        # library-audit 2026-09-22 OncoPath [LOW] REJECTED: a jmvcore::Notice holds one plain-text string
+        #   with no title; these panels are a title plus a paragraph (agreed 2026-10-23). Guide section 13.
         .addNotice = function(type, title, content) {
-            # Skip exact duplicates: shared helpers (.responseRates) run once per
-            # consumer within a cycle and must not double-report.
-            for (n in private$.noticeList)
-                if (identical(n$type, type) && identical(n$title, title) &&
-                    identical(n$content, content))
-                    return(invisible(NULL))
-            private$.noticeList[[length(private$.noticeList) + 1]] <- list(
-                type = type,
-                title = title,
-                content = content
-            )
+            private$.noticeList <- notice_append(private$.noticeList, type, title, content)
             # Render immediately so early-return validation aborts still display the notice
             private$.renderNotices()
         },
 
         .renderNotices = function() {
-            if (length(private$.noticeList) == 0) {
-                self$results$notices$setContent("<div></div>")
-                return()
-            }
-
-            # STRONG_WARNING must not print as a plain "WARNING: " too, or the level
-            # has no effect: a clinician cannot tell "n = 3 patients, treat as
-            # exploratory" from "a milestone date could not be parsed". The two
-            # analyses here that already distinguish them (jjbarstats,
-            # nogoldstandard) print "STRONG WARNING: ", so that is what this uses.
-            #
-            # ": " is composed OUTSIDE .(): the bare words are existing msgids, already
-            # translated in the UMBRELLA catalog (HATA / GUCLU UYARI / UYARI / NOT),
-            # whereas ".(\"ERROR: \")" would mint a new msgid shipping with an empty
-            # msgstr. The submodule catalogs do not carry them yet, so until
-            # jmvtools::i18nUpdate() runs there a non-English user sees an English
-            # prefix on a translated title. Hoisted out of the closure so the .()
-            # calls evaluate in this method's frame.
-            prefix_error   <- paste0(.("ERROR"), ": ")
-            prefix_strong  <- paste0(.("STRONG WARNING"), ": ")
-            prefix_warning <- paste0(.("WARNING"), ": ")
-            prefix_note    <- paste0(.("NOTE"), ": ")
-            # Most severe first. The list is in insertion order, which put a
-            # fatal ERROR underneath three routine NOTEs; the prefix work gave
-            # the levels distinct names but not distinct positions.
-            sev <- vapply(private$.noticeList, function(n) n$type, "")
-            ordered <- private$.noticeList[order(match(
-                sev, c("ERROR", "STRONG_WARNING", "WARNING", "INFO")))]
-            blocks <- vapply(ordered, function(notice) {
-                prefix <- switch(notice$type,
-                    ERROR          = prefix_error,
-                    STRONG_WARNING = prefix_strong,
-                    WARNING        = prefix_warning,
-                    INFO           = prefix_note,
-                    "")
-                paste0(prefix, notice$title, "\n", notice$content)
-            }, character(1))
-
-            self$results$notices$setContent(paste0(
-                '<div style="max-width:100%;white-space:pre-wrap;',
-                'overflow-wrap:anywhere;word-break:break-word;color:inherit;">',
-                htmltools::htmlEscape(paste(blocks, collapse = "\n\n")),
-                '</div>'
-            ))
+            self$results$notices$setContent(notice_panel_html(self, private$.noticeList))
         },
 
         # Row index of each patient's EARLIEST start, one entry per row.
@@ -297,9 +246,9 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
                     detected_type = "numeric",
                     examples = sample_data[seq_len(min(3, length(sample_data)))],
                     message = switch(variable_type,
-                        milestone = sprintf(.("The milestone values are numbers (%s), but Time Input Type is Date/Time."), ex),
-                        event = sprintf(.("The event time values are numbers (%s), but Time Input Type is Date/Time."), ex),
-                        sprintf(.("The start or end values are numbers (%s), but Time Input Type is Date/Time."), ex))
+                        milestone = sprintf(.("The milestone values are numbers (%s), but Time Input Type is Date/time."), ex),
+                        event = sprintf(.("The event time values are numbers (%s), but Time Input Type is Date/time."), ex),
+                        sprintf(.("The start or end values are numbers (%s), but Time Input Type is Date/time."), ex))
                 ))
             }
 
@@ -686,10 +635,10 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
                                          is.na(patient_data$end_time)])
                         if (all(is.na(patient_data$start_time)) || all(is.na(patient_data$end_time)))
                             return(list(error = TRUE, message = sprintf(
-                                .("None of the start/end values are numbers (for example '%s'). Time Input Type is set to Raw Values, which expects a number of %s. If these are calendar dates, switch Time Input Type to Date/Time and choose the matching Date Format."),
+                                .("None of the start/end values are numbers (for example '%s'). Time Input Type is set to Raw values, which expects a number of %s. If these are calendar dates, switch Time Input Type to Date/time and choose the matching Date Format."),
                                 as.character(bad[1]), private$.timeUnitWord())))
                         private$.addNotice("WARNING", .("Values that are not numbers"), sprintf(
-                            .("%d start/end values are not numbers (for example '%s') and those rows are excluded. Time Input Type is set to Raw Values; if these are calendar dates, switch it to Date/Time."),
+                            .("%d start/end values are not numbers (for example '%s') and those rows are excluded. Time Input Type is set to Raw values; if these are calendar dates, switch it to Date/time."),
                             n_nan, as.character(bad[1])))
                     }
 
@@ -938,7 +887,7 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
                     "INFO",
                     .("Milestone names repeated"),
                     sprintf(
-                        .("Milestone slot(s) %s share a name, so each is labelled with the variable it came from to keep them apart in the summary."),
+                        .("Milestone slot(s) %s share a name, so each is labeled with the variable it came from to keep them apart in the summary."),
                         paste(which(dup), collapse = ", ")))
             }
 
@@ -1028,7 +977,7 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
                                 "WARNING",
                                 .("Milestone skipped: calendar dates on a numeric timeline"),
                                 sprintf(
-                                    .("Milestone '%s' contains calendar dates, but the timeline uses raw numeric times, so these dates cannot be placed on the time axis. The milestone was skipped. Switch Time Input Type to Date/Time (or supply numeric milestone times) to show it."),
+                                    .("Milestone '%s' contains calendar dates, but the timeline uses raw numeric times, so these dates cannot be placed on the time axis. The milestone was skipped. Switch Time Input Type to Date/time (or supply numeric milestone times) to show it."),
                                     milestone_label))
                             next
                         }
@@ -1297,7 +1246,7 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
                                 private$.addNotice(
                                     "WARNING",
                                     .("Event markers skipped: calendar dates on a numeric timeline"),
-                                    .("The event time variable contains calendar dates, but the timeline uses raw numeric times, so these events cannot be placed on the time axis. Switch Time Input Type to Date/Time (or supply numeric event times) to show them."))
+                                    .("The event time variable contains calendar dates, but the timeline uses raw numeric times, so these events cannot be placed on the time axis. Switch Time Input Type to Date/time (or supply numeric event times) to show them."))
                                 return(NULL)
                             }
                             event_data$time <- suppressWarnings(as.numeric(as.character(event_data$time)))
@@ -2191,7 +2140,7 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
                     .("The censoring variable '%s' has the values %s, and no Censoring coding reads them. Recode it to 0 = censored and 1 = event, or to the words censored/alive and event/dead. Until then no status arrows are drawn and median follow-up is the plain median of observed durations."),
                     var, q(coding$values))),
                 empty = private$.addNotice("WARNING", .("Censoring variable has no values"), sprintf(
-                    .("The censoring variable '%s' has no value for any analysed row, so no status arrows are drawn and median follow-up is the plain median of observed durations."),
+                    .("The censoring variable '%s' has no value for any analyzed row, so no status arrows are drawn and median follow-up is the plain median of observed durations."),
                     var)),
                 NULL)
             invisible(NULL)
@@ -2481,7 +2430,7 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
             c(
                 .("Number of Patients"),
                 .("Total Observations"),
-                .("Median Duration (observed)"),
+                .("Median duration (observed)"),
                 .("Mean Duration"),
                 .("Total Person-Time")
             )
@@ -2645,7 +2594,7 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
                 mismatch_guidance <- swimmerplot_mismatch_guidance_html(self, safe_examples)
                 self$results$instructions$setContent(mismatch_guidance)
                 jmvcore::reject(
-                    .("Date/Time input type was selected but the time variables contain numeric values. Switch Time Input Type to Raw Values (or correct the data) and re-run."),
+                    .("Date/time input type was selected but the time variables contain numeric values. Switch Time Input Type to Raw values (or correct the data) and re-run."),
                     code = "time_type_mismatch")
             }
 
@@ -2665,7 +2614,7 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
                 # the page was "Time units", and every summary value came
                 # out NA with nothing saying why.
                 jmvcore::reject(sprintf(
-                    .("The start/end variables look like calendar dates (%s), but Time Input Type is set to Raw Values, so no timeline could be built. Switch Time Input Type to Date/Time and choose the matching Date Format."),
+                    .("The start/end variables look like calendar dates (%s), but Time Input Type is set to Raw values, so no timeline could be built. Switch Time Input Type to Date/time and choose the matching Date Format."),
                     as.character(validation_result$format %||% "")),
                     code = "dates_on_raw_timeline")
             }
@@ -2727,9 +2676,9 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
                 if (!private$.isDurationAxis(patient_data) &&
                     self$options$referenceLines %in% c("median", "protocol")) {
                     advice <- if (is_date_scale)
-                        .("Use 'Custom Time' with 'Custom Reference Date' or a time offset instead.")
+                        .("Use 'Custom time' with 'Custom Reference Date' or a time offset instead.")
                     else
-                        .("Switch Time Display to 'Relative (all start from 0)' to show them, or use 'Custom Time'.")
+                        .("Switch Time Display to 'Relative (all start from 0)' to show them, or use 'Custom time'.")
                     private$.addNotice("WARNING",
                         .("Reference lines on an absolute axis"),
                         paste(.("Median/Protocol reference lines measure a duration from each patient's own start, so they cannot be placed on an absolute axis where patients begin at different points."),
@@ -2839,7 +2788,7 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
                         as.character(patient_data$response_label))))
                     if (n_lvl > 8)
                         private$.addNotice("INFO", .("Palette changed"), sprintf(
-                            .("The High Contrast palette provides 8 colours and the response variable has %d categories, so the plot uses the Viridis palette instead. Group the response categories to keep High Contrast."),
+                            .("The High contrast palette provides 8 colors and the response variable has %d categories, so the plot uses the Viridis palette instead. Group the response categories to keep High contrast."),
                             n_lvl))
                 }
                 
@@ -3068,7 +3017,7 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
             # an empty one has to say why instead of sitting there blank.
             if (nrow(milestone_data) == 0) {
                 self$results$milestoneTable$setNote("empty",
-                    .("No milestones to summarise. The milestone variable has no usable value for any patient in the analysis, or every milestone slot was skipped - see the notices above."))
+                    .("No milestones to summarize. The milestone variable has no usable value for any patient in the analysis, or every milestone slot was skipped - see the notices above."))
                 return()
             }
 
@@ -3084,7 +3033,7 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
 
             if (nrow(milestone_stats_data) == 0) {
                 self$results$milestoneTable$setNote("empty",
-                    .("No milestones to summarise: none of the milestone values could be converted to a time on this timeline."))
+                    .("No milestones to summarize: none of the milestone values could be converted to a time on this timeline."))
                 return()
             }
 
@@ -3124,7 +3073,7 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
             if (!self$options$showEventMarkers) return()
             if (is.null(event_data) || nrow(event_data) == 0) {
                 self$results$eventMarkerTable$setNote("empty",
-                    .("No event markers to summarise. Either no event type/time variable is selected, or none of the events falls inside a patient's timeline - see the notices above."))
+                    .("No event markers to summarize. Either no event type/time variable is selected, or none of the events falls inside a patient's timeline - see the notices above."))
                 return()
             }
 
@@ -3140,7 +3089,7 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
 
             if (nrow(event_stats_data) == 0) {
                 self$results$eventMarkerTable$setNote("empty",
-                    .("No event markers to summarise: none of the event times could be converted to a time on this timeline."))
+                    .("No event markers to summarize: none of the event times could be converted to a time on this timeline."))
                 return()
             }
 
@@ -4236,7 +4185,7 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
                     private$.addNotice(
                         "INFO",
                         .("Response sorting unavailable"),
-                        .("Sort order 'Response Type' requires a Response/Status variable; none is selected, so patients are sorted by duration (longest first)."))
+                        .("Sort order 'Response type' requires a Response/Status variable; none is selected, so patients are sorted by duration (longest first)."))
                 }
                 # duration_desc, and any fallthrough, sorts longest-first; only
                 # an explicit duration_asc sorts shortest-first.
@@ -4473,7 +4422,7 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
                     # sentence used to paste literal "{orr_n}"/"{orr_ci}" into
                     # manuscripts.
                     trimws(paste(sprintf(
-                        .("Response evaluation showed an objective response rate (ORR) of %.1f%% (%d/%d patients%s) and a disease control rate (DCR) of %.1f%% (%d/%d patients%s). Rates are over all patients analysed, with not-evaluable and unrecorded responses counted as non-responders (RECIST 1.1 section 4.9.1)."),
+                        .("Response evaluation showed an objective response rate (ORR) of %.1f%% (%d/%d patients%s) and a disease control rate (DCR) of %.1f%% (%d/%d patients%s). Rates are over all patients analyzed, with not-evaluable and unrecorded responses counted as non-responders (RECIST 1.1 section 4.9.1)."),
                         orr_pct, orr_count, n_eval, orr_ci_text,
                         dcr_pct, dcr_count, n_eval, dcr_ci_text),
                         if (isTRUE((stats$n_response_derived %||% 0) > 0))

@@ -9,7 +9,8 @@ ihc <- function(d, ...) ClinicoPath::ihcheterogeneity(data = d, ...)
 verdict_of <- function(res) {
     t <- txt(res$interpretation$content)
     regmatches(t, regexpr(
-        "(AGREEMENT THRESHOLDS MET, NOT CONFIRMED|AGREEMENT THRESHOLDS MET|MODERATE SAMPLING|INADEQUATE SAMPLING|NOT ADEQUATE FOR SUBSTITUTION|INSUFFICIENT DATA)", t))
+        "(Agreement thresholds met, not confirmed|Agreement thresholds met|Moderate sampling|Inadequate sampling|Not adequate for substitution|Insufficient data):", t)) |>
+        sub(pattern = ":$", replacement = "")  # labels are sentence case; the colon marks the verdict
 }
 # The CI of the percentage difference, by inverting the paired t-test of d - R z (root finding).
 ratio_ci <- function(d, z, level) {
@@ -116,7 +117,7 @@ test_that("identical differences in every case are never ruled out (R30)", {
     expect_match(b$clinical_impact[1], "its precision cannot be estimated, so it is not ruled out", fixed = TRUE)
     expect_true(is.na(b$ci_lower[1]) && is.na(b$loa_lower[1]) && is.na(b$loa_lower_lcl[1]))
     expect_length(verdict_of(res), 1)
-    expect_false(identical(verdict_of(res), "AGREEMENT THRESHOLDS MET"))
+    expect_false(identical(verdict_of(res), "Agreement thresholds met"))
     icc <- res$reproducibilitytable$asDF
     expect_true(all(is.na(icc$ci_lower[grepl("^ICC", icc$metric)])))
     # an offset beyond the margin is material only with enough cases for the sign
@@ -142,7 +143,7 @@ test_that("agreement between regions is claimed only when every pair agrees (R31
     set.seed(3); n <- 60; t <- runif(n, 30, 80)
     d <- data.frame(c1 = t * 1.03 + rnorm(n, 0, 0.3), c2 = t * 0.97 + rnorm(n, 0, 0.3), c3 = t + rnorm(n, 0, 0.3))
     res <- ihc(d, biopsy1 = "c1", biopsy2 = "c2", biopsy3 = "c3", showInterpretation = TRUE, showReportSentences = TRUE)
-    expect_equal(verdict_of(res), "NOT ADEQUATE FOR SUBSTITUTION")
+    expect_equal(verdict_of(res), "Not adequate for substitution")
     expect_false(grepl("every comparison between regions was shown", txt(res$report_sentences$content), fixed = TRUE))
     expect_match(res$samplingbiastable$asDF$clinical_impact[1], "shown to exceed", fixed = TRUE)
 })
@@ -210,7 +211,7 @@ test_that("the ICCs state the complete cases they rest on (R36)", {
     d$b3[1:6] <- w[1:6] + rnorm(6, 0, 2)
     res <- ihc(d, wholesection = "whole", biopsy1 = "b1", biopsy2 = "b2", biopsy3 = "b3", showReportSentences = TRUE)
     expect_match(notes_of(res$reproducibilitytable), "The ICCs use the 6 cases with every measurement; 24 case(s)", fixed = TRUE)
-    expect_match(txt(res$notices$content), "The ICCs rest on only 6 cases with every measurement (of 30 analysed)", fixed = TRUE)
+    expect_match(txt(res$notices$content), "The ICCs rest on only 6 cases with every measurement (of 30 analyzed)", fixed = TRUE)
     expect_match(txt(res$report_sentences$content), "The ICC was computed on the 6 cases with every measurement.", fixed = TRUE)
 })
 

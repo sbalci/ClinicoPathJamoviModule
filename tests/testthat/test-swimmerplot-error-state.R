@@ -25,7 +25,7 @@ test_that("both fatal time-type mismatches enter jamovi's error state", {
   expect_identical(numeric_analysis$status, "error")
   expect_true(numeric_analysis$errored)
   expect_null(numeric_analysis$results$plot$state)
-  expect_match(numeric_analysis$results$instructions$content, "Raw Values")
+  expect_match(numeric_analysis$results$instructions$content, "Raw values")
 
   date_data <- data.frame(
     id = c("A", "B"), start = c("2023-01-01", "2023-02-01"),
@@ -36,7 +36,7 @@ test_that("both fatal time-type mismatches enter jamovi's error state", {
   expect_identical(date_analysis$status, "error")
   expect_true(date_analysis$errored)
   expect_null(date_analysis$results$plot$state)
-  expect_match(date_analysis$results$instructions$content, "Date/Time")
+  expect_match(date_analysis$results$instructions$content, "Date/time")
 })
 
 test_that("a failed rerun clears the previous timeline and can recover", {

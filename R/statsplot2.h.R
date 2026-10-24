@@ -370,14 +370,14 @@ statsplot2Base <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   rows only.
 #' @param sampleThreshold Row count above which sampling is applied, when
 #'   'Sample large datasets' is enabled. Datasets at or below this size are
-#'   always analysed in full.
+#'   always analyzed in full.
 #' @param sampleSize Number of rows to retain when sampling. Larger values
 #'   keep more statistical power at the cost of plotting speed. Statistics are
 #'   computed on the retained rows only.
 #' @param seed Random seed used for the sampling of large datasets (when
 #'   'Sample large datasets' is enabled) and for any resampling inside the plot
 #'   statistics (robust and Bayesian approaches). Change it to draw a different
-#'   sample; the default (42) reproduces the previous fixed behaviour.
+#'   sample; the default (42) reproduces the previous fixed behavior.
 #' @param originaltheme Use the original ggstatsplot theme rather than
 #'   jamovi's default.
 #' @return A results object containing:

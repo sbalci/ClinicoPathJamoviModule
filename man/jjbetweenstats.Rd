@@ -57,7 +57,7 @@ jjbetweenstats(
 posterior sampling (robust tests, Bayesian estimates, and some
 nonparametric effect-size intervals). The plot caption names the seed
 whenever it affected the numbers shown. The default reproduces the previous
-fixed behaviour.}
+fixed behavior.}
 
 \item{pairwisecomparisons}{.}
 

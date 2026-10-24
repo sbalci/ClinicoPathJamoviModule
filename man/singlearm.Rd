@@ -136,7 +136,7 @@ When a pre-calculated elapsed-time variable is supplied, no conversion is
 possible (the column carries no unit), so this option DECLARES the unit
 that variable is already recorded in. Either way it determines how
 cutpoints and plausibility checks are interpreted, and how axes are
-labelled - so selecting the wrong unit for pre-calculated time changes the
+labeled, so selecting the wrong unit for pre-calculated time changes the
 reported results, not just the labels.}
 
 \item{uselandmark}{Performs a conditional landmark description: only

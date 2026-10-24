@@ -232,7 +232,7 @@ test_that("teaching examples are labelled as examples, not clinical guidance", {
         n <- ClinicoPath::sequentialtests(preset = ps)$notices$content
         expect_match(n, "Teaching Example Values Are Not Clinical Guidance", info = ps)
         expect_match(n, "NOT validated clinical parameters", info = ps)
-        expect_match(n, "STRONG WARNING: Teaching Example Values Are Not Clinical Guidance",
+        expect_match(n, "Strong warning: Teaching Example Values Are Not Clinical Guidance",
                      fixed = TRUE, info = ps)
         expect_match(n, "not clinical guidance", ignore.case = TRUE, info = ps)
     }
@@ -310,9 +310,9 @@ test_that("boundary warnings are reachable and severity is preserved", {
     low <- run_st(prevalence = 0.001)$notices$content
     high_accuracy <- run_st(test1_sens = 0.99, test2_spec = 0.99)$notices$content
 
-    expect_match(low, "STRONG WARNING: Prevalence Very Low", fixed = TRUE)
-    expect_match(high_accuracy, "WARNING: Test 1 Sensitivity High", fixed = TRUE)
-    expect_match(high_accuracy, "WARNING: Test 2 Specificity High", fixed = TRUE)
+    expect_match(low, "Strong warning: Prevalence Very Low", fixed = TRUE)
+    expect_match(high_accuracy, "Warning: Test 1 Sensitivity High", fixed = TRUE)
+    expect_match(high_accuracy, "Warning: Test 2 Specificity High", fixed = TRUE)
 })
 
 
@@ -673,8 +673,8 @@ test_that("an imperfect combined value is never printed as 100.0% or 0.0%", {
 
 test_that("name similarity is a WARNING, not a STRONG WARNING", {
     n <- run_st(test1_name = "PCR", test2_name = "RT-PCR")$notices$content
-    expect_match(n, "(^|\n)WARNING: Test Correlation Risk")
-    expect_false(grepl("STRONG WARNING: Test Correlation Risk", n, fixed = TRUE))
+    expect_match(n, "(^|\n)Warning: Test Correlation Risk")
+    expect_false(grepl("Strong warning: Test Correlation Risk", n, fixed = TRUE))
 })
 
 test_that("an empty test name falls back to a label instead of blocking the analysis", {
@@ -773,7 +773,7 @@ test_that("test order changes no combined figure, and the notice says so (IR-01)
         expect_match(noisy$notices$content,
                      sprintf("about %s per 1,000 people in this order, about %s if the two tests were swapped",
                              round(max(n2)), round(min(n2))), fixed = TRUE, label = s)
-        expect_false(grepl("WARNING: Test Order", noisy$notices$content, fixed = TRUE))
+        expect_false(grepl("Warning: Test Order", noisy$notices$content, fixed = TRUE))
     }
     # Parallel testing gives everyone both tests: order means nothing, so no notice.
     expect_false(grepl("Test Order", run_st(strategy = "parallel")$notices$content, fixed = TRUE))

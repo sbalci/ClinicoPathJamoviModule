@@ -68,7 +68,7 @@ test_that("a mild expected-count violation gets a default-visible warning", {
   expect_true(sum(ex < 5) == 1 && all(ex >= 1))
 
   notes <- cq(d)$notices$content
-  expect_match(notes, "WARNING: Some expected counts are below 5", fixed = TRUE)
+  expect_match(notes, "Warning: Some expected counts are below 5", fixed = TRUE)
   expect_match(notes, "1 of 6 cells (17%)", fixed = TRUE)
   expect_false(grepl("too low for the chi-square approximation", notes, fixed = TRUE))
   expect_false(grepl("At least one expected count is below 1", notes, fixed = TRUE))

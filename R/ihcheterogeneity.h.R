@@ -835,7 +835,7 @@ ihcheterogeneityBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
 #'   analysis
 #' @param biopsy3 Third tissue region biomarker measurement
 #' @param biopsy4 Fourth tissue region biomarker measurement
-#' @param biopsies Further regional measurements, any number, analysed like
+#' @param biopsies Further regional measurements, any number, analyzed like
 #'   Regional Measurements 1 to 4.
 #' @param spatial_id The compartment each case was sampled from (e.g.,
 #'   Central/Invasive, Preinvasive/Invasive): one row per case, one compartment
@@ -843,7 +843,7 @@ ihcheterogeneityBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
 #'   per row, as if they were different patients, which overstates the sample
 #'   and narrows every interval. Compartments are listed in the level order of
 #'   the variable; cases without an identifier are left out of the compartment
-#'   tables. In R, convert a haven-labelled code column with haven::as_factor()
+#'   tables. In R, convert a haven-labeled code column with haven::as_factor()
 #'   first, or the codes are shown instead of the labels.
 #' @param compareCompartments Compares the ICC, the within-case CV and, when a
 #'   reference is supplied, the mean bias between spatial compartments. Requires

@@ -82,7 +82,7 @@ test_that("IR26-04: every predictor failing rejects the analysis", {
     env <- pr$p
     unlockBinding(".calculateOptimalCutoff", env)
     assign(".calculateOptimalCutoff", function(roc_obj, data, predictor) stop("boom"), envir = env)
-    expect_error(env$.run(), "No Predictor Could Be Analysed.*boom")
+    expect_error(env$.run(), "No Predictor Could Be Analyzed.*boom")
 })
 
 test_that("XA-03: an entered prevalence of 0.0004 is not shown as 0.000", {

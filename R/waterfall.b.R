@@ -69,60 +69,15 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         .cappedIds = NULL,
 
         # Add a notice to the collection
-        # library-audit 2026-09-22 OncoPath [LOW] REJECTED: Notice renders single-line plain text and dynamic
-        #   insert() in .run() accumulates across runs (Group$remove cannot drop items) (guide section 13)
+        # library-audit 2026-09-22 OncoPath [LOW] REJECTED: a jmvcore::Notice holds one plain-text string
+        #   with no title; these panels are a title plus a paragraph (agreed 2026-10-23). Guide section 13.
         .addNotice = function(type, title, content) {
-          private$.noticeList[[length(private$.noticeList) + 1]] <- list(
-            type = type,
-            title = title,
-            content = content
-          )
+          private$.noticeList <- notice_append(private$.noticeList, type, title, content)
         },
 
-        # Render collected notices as HTML
+        # Render collected notices (shared renderer, R/utils-notices.R)
         .renderNotices = function() {
-          if (length(private$.noticeList) == 0) {
-            # Clear a panel left over from a previous run (e.g. the welcome path).
-            self$results$notices$setContent("")
-            return()
-          }
-
-          # library-audit 2026-09-16 OncoPath [INFO] DONE: titles inherit the pane colour - fixed hues fell to
-          #   2.7-2.9:1 on the dark theme; the translucent tint and the border carry the severity
-          typeStyles <- list(
-            ERROR = list(bgcolor = "rgba(220, 38, 38, 0.10)", border = "#fca5a5", icon = ""),
-            STRONG_WARNING = list(bgcolor = "rgba(234, 88, 12, 0.10)", border = "#fdba74", icon = ""),
-            WARNING = list(bgcolor = "rgba(202, 138, 4, 0.12)", border = "#fde047", icon = ""),
-            INFO = list(bgcolor = "rgba(37, 99, 235, 0.08)", border = "#93c5fd", icon = "")
-          )
-
-          html <- "<div style='margin: 10px 0;'>"
-
-          # Most severe first: a STRONG_WARNING that every category is wrong
-          # (proportions typed for percentages) rendered below the always-on
-          # methods disclaimer. order() is stable, so ties keep their order.
-          sev <- c(ERROR = 1, STRONG_WARNING = 2, WARNING = 3, INFO = 4)
-          rank <- vapply(private$.noticeList, function(n) {
-            r <- unname(sev[n$type]); if (is.na(r)) 5 else r
-          }, numeric(1))
-
-          for (notice in private$.noticeList[order(rank)]) {
-            style <- typeStyles[[notice$type]] %||% typeStyles$INFO
-
-            html <- paste0(html,
-              "<div style='background-color: ", style$bgcolor, "; ",
-              "border-left: 4px solid ", style$border, "; ",
-              "padding: 12px; margin: 8px 0; border-radius: 4px;'>",
-              "<strong style='color: inherit;'>",
-              style$icon, " ", private$.safeHtmlOutput(notice$title), "</strong><br>",
-              "<span style='color: inherit;'>", private$.safeHtmlOutput(notice$content), "</span>",
-              "</div>"
-            )
-          }
-
-          html <- paste0(html, "</div>")
-
-          self$results$notices$setContent(html)
+          self$results$notices$setContent(notice_panel_html(self, private$.noticeList))
         },
 
         # Calculate statistical power for response rates
@@ -291,7 +246,7 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # response-duration table simply vanish with no explanation.
             private$.addNotice(
               type = "WARNING",
-              title = .("TIME-TO-EVENT CALCULATION FAILED"),
+              title = .("Time-to-event calculation failed"),
               content = sprintf(
                 .("Time to response and duration of response could not be computed (%s). The related rows and the Time-to-Response & Duration of Response table are omitted."),
                 conditionMessage(e))
@@ -333,7 +288,7 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             wdf$confirm_status <- as.character(
               f$value[match(wdf[[pidCol]], f$ids)])
             if (length(f$conflicts) > 0) {
-              private$.addNotice("WARNING", .("CONFLICTING CONFIRMATION VALUES"), sprintf(
+              private$.addNotice("WARNING", .("Conflicting confirmation values"), sprintf(
                 .("%d patient(s) have more than one confirmation value across their rows: %s. The first recorded value is used for the marker."),
                 length(f$conflicts), paste(utils::head(f$conflicts, 10), collapse = ", ")))
             }
@@ -364,7 +319,7 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
           if (length(field$conflicts) > 0) {
             private$.addNotice(
               type = "WARNING",
-              title = .("CONFLICTING CATEGORY OVERRIDES"),
+              title = .("Conflicting category overrides"),
               content = sprintf(
                 .("%d patient(s) have more than one response category override across their rows: %s. The first recorded value is used. Enter one category per patient."),
                 length(field$conflicts), paste(utils::head(field$conflicts, 10), collapse = ", "))
@@ -388,7 +343,7 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
           if (length(rejected) > 0) {
             private$.addNotice(
               type = "WARNING",
-              title = .("RESPONSE CATEGORY OVERRIDE IGNORED"),
+              title = .("Response category override ignored"),
               content = sprintf(
                 .("The response category override contained %d unrecognised label(s): %s. Only CR, PR, SD, PD and Unknown are accepted. Those patients keep their computed category; no patient was dropped."),
                 length(rejected), paste(rejected, collapse = ", "))
@@ -571,9 +526,9 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         }
                         private$.addNotice(
                             # the run proceeds without them: a warning, not an error
-                            "STRONG_WARNING", .("NEGATIVE TUMOUR MEASUREMENTS"),
+                            "STRONG_WARNING", .("Negative tumor measurements"),
                             sprintf(
-                                .("%d patient(s) have a negative raw measurement, which is not a possible tumour size: %s. A negative baseline inverts the sign of the percent change, so a growing tumour would be reported as a response. These patients are reported as \"Unknown\" rather than guessed at. Check the measurement column for data-entry errors."),
+                                .("%d patient(s) have a negative raw measurement, which is not a possible tumor size: %s. A negative baseline inverts the sign of the percent change, so a growing tumor would be reported as a response. These patients are reported as \"Unknown\" rather than guessed at. Check the measurement column for data-entry errors."),
                                 length(bad_ids),
                                 paste(.patientIDLabels(utils::head(bad_ids, 10)), collapse = ", "))
                         )
@@ -612,9 +567,9 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     waterfall_data$recist_category <-
                         private$.categorizeRECIST(waterfall_data$response, waterfall_data$min_abs_pct)
                     private$.addNotice(
-                        "WARNING", .("IMPOSSIBLE SHRINKAGE CAPPED"),
+                        "WARNING", .("Impossible shrinkage capped"),
                         sprintf(
-                            .("%d patient(s) had a change below -100%%, which is not physically possible: -100%% already means the tumour has disappeared completely. The most extreme was %.1f%%. These values were capped at -100%% in the analysis and the plot; such a patient counts as a complete response only when a capped value is their best response: %s. Check the response column for data-entry errors."),
+                            .("%d patient(s) had a change below -100%%, which is not physically possible: -100%% already means the tumor has disappeared completely. The most extreme was %.1f%%. These values were capped at -100%% in the analysis and the plot; such a patient counts as a complete response only when a capped value is their best response: %s. Check the response column for data-entry errors."),
                             length(ids), worst,
                             paste(.patientIDLabels(utils::head(ids, 10)), collapse = ", "))
                     )
@@ -726,7 +681,7 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             if (length(untimed_idx) > 0) {
               private$.addNotice(
                 type = "WARNING",
-                title = .("NOT RESPONSE-EVALUABLE"),
+                title = .("Not response-evaluable"),
                 content = sprintf(
                   .("%d patient(s) have no timed, measured post-baseline assessment, and some of their measured rows have no time, so they are not response-evaluable: %s. They are reported as \"Unknown\". Fill in the visit times to include them."),
                   length(untimed_idx),
@@ -737,7 +692,7 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             if (length(uneval_idx) > 0) {
               private$.addNotice(
                 type = "WARNING",
-                title = .("NOT RESPONSE-EVALUABLE"),
+                title = .("Not response-evaluable"),
                 content = sprintf(
                   .("%d patient(s) have a baseline but no post-baseline measurement (no later row, or the later measurements are missing) and are therefore not response-evaluable: %s. They are reported as \"Unknown\" rather than as stable disease, so they do not inflate the disease control rate."),
                   length(uneval_idx),
@@ -762,7 +717,7 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
               .("%d of %d patients were excluded from the response analysis because they have no non-missing response value. Excluded: %s. The response rates are computed over the %d evaluable patients, except the all-patients ORR row, which counts the not-evaluable and excluded patients as non-responders.")
             private$.addNotice(
               type = "WARNING",
-              title = .("PATIENTS EXCLUDED"),
+              title = .("Patients excluded"),
               content = sprintf(template,
                 length(dropped), length(all_ids),
                 paste(utils::head(.patientIDLabels(dropped), 10), collapse = ", "),
@@ -798,10 +753,10 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
           # data legitimately contain integer changes of -1 and +1.
           fractional <- abs(nz) < 1
           if (length(nz) >= 3 && all(small)) {
-            private$.addNotice("STRONG_WARNING", .("PERCENT CHANGE LOOKS LIKE PROPORTIONS"),
+            private$.addNotice("STRONG_WARNING", .("Percent change looks like proportions"),
               .("Every response value lies between -1 and 1. Percent change must be entered as -35 for a 35% decrease; these look like proportions (for example from a spreadsheet percent format), which makes every patient stable disease. Multiply the values by 100."))
           } else if (sum(fractional) >= 3 && mean(fractional) >= 0.25) {
-            private$.addNotice("WARNING", .("SOME VALUES LOOK LIKE PROPORTIONS"),
+            private$.addNotice("WARNING", .("Some values look like proportions"),
               sprintf(.("%d of %d non-zero response values lie strictly between -1 and 1, while the others look like percentages. If some rows were entered as proportions (-0.35 for -35%%), multiply those rows by 100."),
                       sum(fractional), length(nz)))
           }
@@ -810,8 +765,8 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
           # magnitude; progression-heavy data alone (+110 .. +240) are not "x100".
           if (length(nz) >= 3 &&
               ((any(x < -100) && stats::median(abs(nz)) > 100) || mean(x < -100 | x > 500) >= 0.25)) {
-            private$.addNotice("STRONG_WARNING", .("PERCENT CHANGE LOOKS MULTIPLIED BY 100"),
-              sprintf(.("The typical absolute response value is %.0f, and a tumour cannot shrink by more than 100%%. The values look multiplied by 100 (for example -3500 for -35%%); values below -100 are capped to -100%% and counted as complete responses. Check the scale of the response column."),
+            private$.addNotice("STRONG_WARNING", .("Percent change looks multiplied by 100"),
+              sprintf(.("The typical absolute response value is %.0f, and a tumor cannot shrink by more than 100%%. The values look multiplied by 100 (for example -3500 for -35%%); values below -100 are capped to -100%% and counted as complete responses. Check the scale of the response column."),
                       stats::median(abs(nz))))
           }
 
@@ -827,7 +782,7 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
               t_first <- tvv[okr][ord][first_row]
               v_first <- v[okr][ord][first_row]
               if (length(t_first) >= 2 && all(v_first == 0) && all(t_first != 0)) {
-                private$.addNotice("STRONG_WARNING", .("BASELINE NOT AT TIME 0"),
+                private$.addNotice("STRONG_WARNING", .("Baseline not at time 0"),
                   sprintf(.("Every patient's earliest row is 0%% at time %s rather than time 0. If these rows are baselines, recode the baseline time as 0: rows after time 0 are treated as assessments, so a 0%% baseline row takes part in the best response and hides progression."),
                           paste(unique(t_first), collapse = ", ")))
               }
@@ -844,11 +799,11 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
           if (raw_like) {
             # Fatal: every category and rate computed from raw sizes read as
             # percentages is wrong (an example saved this way showed ORR 0%).
-            private$.rejectRun(.("The data input type is Percentage Changes, but the time = 0 values are not 0%: these look like raw tumour measurements. Set Data Input Type to Raw Measurements so percent changes are computed from the baseline."))
+            private$.rejectRun(.("The data input type is Percentage changes, but the time = 0 values are not 0%: these look like raw tumor measurements. Set Data Input Type to Raw measurements so percent changes are computed from the baseline."))
           } else if (is.null(timeVar) && all(x >= 0) && any(x > 0)) {
             # (>= 0: raw sizes include 0 mm for a complete response)
-            private$.addNotice("WARNING", .("NO NEGATIVE CHANGES"),
-              .("Every response value is positive, so no patient shrank at all. If these are raw tumour sizes rather than percent changes, set Data Input Type to Raw Measurements and add a time variable."))
+            private$.addNotice("WARNING", .("No negative changes"),
+              .("Every response value is positive, so no patient shrank at all. If these are raw tumor sizes rather than percent changes, set Data Input Type to Raw measurements and add a time variable."))
           }
           invisible(NULL)
         },
@@ -878,7 +833,7 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             if (abs_rule)
               .("Progression also requires the RECIST v1.1 absolute increase of at least 5 mm over the nadir.")
             else
-              .("The RECIST v1.1 requirement of an absolute increase of at least 5 mm is not applied, so with small tumour sums or after deep responses progression is called more often than RECIST v1.1 would; unseen new or non-target lesions push the other way."),
+              .("The RECIST v1.1 requirement of an absolute increase of at least 5 mm is not applied, so with small tumor sums or after deep responses progression is called more often than RECIST v1.1 would; unseen new or non-target lesions push the other way."),
             if (private$.nOverridden > 0)
               sprintf(.("Categories for %d patient(s) were taken from the response-category variable, not derived from the thresholds."),
                       private$.nOverridden))
@@ -1034,7 +989,7 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         if (inputType == "raw") {
           if (is.null(timeVar)) {
             validation_messages <- c(validation_messages, paste0(
-              "<br>", .("Time Variable Required for Raw Measurements:"),
+              "<br>", .("Time variable required for raw measurements:"),
               "<br>", .("When using raw tumor measurements, a time variable is essential to:"),
               "<br>- ", .("Identify baseline measurements (time = 0)"),
               "<br>- ", .("Calculate accurate percentage changes"),
@@ -1106,7 +1061,7 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                   "<br>- ", .("Without baseline values, percentage changes cannot be calculated accurately"),
                   "<br><br>", .("Recommended actions:"),
                   "<br>1. ", .("Add time=0 measurements for each patient, OR"),
-                  "<br>2. ", .("Switch to 'Percentage Changes' input format if changes are pre-calculated, OR"),
+                  "<br>2. ", .("Switch to 'Percentage changes' input format if changes are pre-calculated, OR"),
                   "<br>3. ", .("Remove patients without baseline from analysis"),
                   "<br><br>", .("Example data format with baseline:"),
                   "<br>PatientID  Time  Measurement",
@@ -1186,7 +1141,7 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
               # exclusion with its own notice).
               if (any(response_values < 0, na.rm = TRUE)) {
                 validation_messages <- c(validation_messages,
-                  paste0("<br>", .("Warning: Some measurements are negative, which is not a possible tumour size. Please verify these values.")))
+                  paste0("<br>", .("Warning: Some measurements are negative, which is not a possible tumor size. Please verify these values.")))
               }
             }
           }
@@ -1434,9 +1389,9 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # follow-up, so it competes in the minimum and hides progression.
             private$.addNotice(
               type = "STRONG_WARNING",
-              title = .("SEVERAL ROWS PER PATIENT"),
+              title = .("Several rows per patient"),
               content = sprintf(
-                .("%d patient(s) have more than one row but no time variable is selected: %s. The smallest value was used as each patient's best response. If the rows are visits, a 0%% baseline row takes part in that minimum, so a tumour that only grew is scored SD instead of PD. Select the visit time as the Time Variable."),
+                .("%d patient(s) have more than one row but no time variable is selected: %s. The smallest value was used as each patient's best response. If the rows are visits, a 0%% baseline row takes part in that minimum, so a tumor that only grew is scored SD instead of PD. Select the visit time as the Time Variable."),
                 length(multi), paste(utils::head(multi, 10), collapse = ", "))
             )
           }
@@ -1450,7 +1405,7 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             untimed_ids <- .patientIDLabels(unique(valued[[patientID]][untimed]))
             private$.addNotice(
               type = "WARNING",
-              title = .("ASSESSMENTS WITHOUT A TIME"),
+              title = .("Assessments without a time"),
               content = sprintf(
                 .("%d assessment(s) for %d patient(s) have a response value but no time, so they were not used for best response, progression or duration of response: %s. Fill in the visit time to include them."),
                 sum(untimed), length(untimed_ids),
@@ -1463,7 +1418,7 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             dup_ids <- .patientIDLabels(unique(timed[[patientID]][dup_visit]))
             private$.addNotice(
               type = "WARNING",
-              title = .("REPEATED VISIT TIMES"),
+              title = .("Repeated visit times"),
               content = sprintf(
                 .("%d patient(s) have more than one assessment at the same time point: %s. Rows at one time point are read as one visit, largest value first, so the result does not depend on the row order and a repeated row cannot by itself count as progression. Check for duplicated rows."),
                 length(dup_ids), paste(utils::head(dup_ids, 10), collapse = ", "))
@@ -1488,7 +1443,7 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
           if (length(g$conflicts) > 0) {
             private$.addNotice(
               type = "WARNING",
-              title = .("GROUP CHANGES WITHIN PATIENT"),
+              title = .("Group changes within patient"),
               content = sprintf(
                 .("%d patient(s) have more than one value of the group variable across their rows: %s. Each patient is counted once, in the group of their first recorded value. Check the group column."),
                 length(g$conflicts), paste(utils::head(g$conflicts, 10), collapse = ", "))
@@ -1664,7 +1619,7 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         todo <- paste0(
           "<br>", .("Welcome to Treatment Response: Patient-Level Burden"),
           "<br><br>",
-          .("This tool creates waterfall and spider plots from ONE tumour burden value per patient (or per visit). Response categories use percent-change thresholds adapted from RECIST v1.1, but this is not a RECIST v1.1 implementation: it never sees individual lesions, so it cannot sum target lesions, detect new lesions, or judge non-target progression. If your data list each lesion separately, use the lesion-level RECIST v1.1 analysis. It will be available in upcoming releases."),
+          .("This tool creates waterfall and spider plots from ONE tumor burden value per patient (or per visit). Response categories use percent-change thresholds adapted from RECIST v1.1, but this is not a RECIST v1.1 implementation: it never sees individual lesions, so it cannot sum target lesions, detect new lesions, or judge non-target progression. If your data list each lesion separately, sum the target lesions per patient and visit first."),
           "<br><br>",
           "<b> ", .("Visualization Types:"), "</b>",
           "<br><br>",
@@ -1680,12 +1635,12 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
           "<br><br>",
           "<b> ", .("Data Input Options:"), "</b>",
           "<br><br>",
-          "<b>", .("Percentage Changes:"), "</b>",
+          "<b>", .("Percentage changes:"), "</b>",
           "<br>- ", .("Pre-calculated percent changes from baseline"),
           "<br>- ", .("Negative values = tumor shrinkage (improvement)"),
           "<br>- ", .("Example: -30 means 30% decrease from baseline"),
           "<br><br>",
-          "<b>", .("Raw Measurements:"), "</b>",
+          "<b>", .("Raw measurements:"), "</b>",
           "<br>- ", .("Actual tumor measurements (mm, cm, sum of diameters)"),
           "<br>- ", .("Tool automatically calculates percent changes"),
           "<br>- ", .("Baseline assumed at Time = 0"),
@@ -1812,7 +1767,7 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             analysis_data <- analysis_data[!no_id, , drop = FALSE]
             private$.addNotice(
               type = "WARNING",
-              title = .("ROWS WITHOUT PATIENT ID"),
+              title = .("Rows without patient ID"),
               content = sprintf(
                 .("%d row(s) with no patient ID were excluded from the analysis; they cannot be assigned to a patient. Fill in the patient ID if they belong to a patient."),
                 sum(no_id))
@@ -1885,7 +1840,7 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
           if (nzchar(plain)) {
             private$.addNotice(
               type = "WARNING",
-              title = .("DATA VALIDATION WARNINGS"),
+              title = .("Data validation warnings"),
               content = plain
             )
           }
@@ -1966,11 +1921,11 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         # glossary. WARNING rather than STRONG_WARNING: it is shown on every run.
         private$.addNotice(
           type = "WARNING",
-          title = .("EXPLORATORY RESPONSE CATEGORIES"),
+          title = .("Exploratory response categories"),
           # The rule actually applied: the first-progression window (with a time
           # variable), whether the 5 mm rule ran, and any supplied categories.
           content = paste(c(
-            .("Categories are thresholds applied to one tumour burden value per patient and visit (CR -100%, PR at least -30%, PD at least +20%)."),
+            .("Categories are thresholds applied to one tumor burden value per patient and visit (CR -100%, PR at least -30%, PD at least +20%)."),
             private$.bestResponseRule(),
             .("This is not a RECIST v1.1 assessment: there is no target-lesion summation, no new-lesion or non-target assessment, no confirmation of response and no minimum duration for stable disease, so threshold-derived ORR and DCR are unconfirmed. Use the results for exploratory description; trial endpoints need a lesion-level RECIST v1.1 assessment.")),
             collapse = " ")
@@ -1980,8 +1935,8 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         if (self$options$inputType == "raw") {
           private$.addNotice(
             type = "WARNING",
-            title = .("SINGLE-LESION ASSUMPTION"),
-            content = .("Raw measurements assume one target lesion per patient timepoint. If your data contains multiple lesions, percent changes will be INCORRECT. RECIST v1.1 requires summing diameters of up to 5 target lesions (max 2 per organ). Pre-process your data to sum target lesions before using this analysis, or switch to 'Percentage Changes' input with pre-calculated RECIST-compliant values.")
+            title = .("Single-lesion assumption"),
+            content = .("Raw measurements assume one target lesion per patient timepoint. If your data contains multiple lesions, percent changes will be INCORRECT. RECIST v1.1 requires summing diameters of up to 5 target lesions (max 2 per organ). Pre-process your data to sum target lesions before using this analysis, or switch to 'Percentage changes' input with pre-calculated RECIST-compliant values.")
           )
         }
 
@@ -1991,8 +1946,8 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             (is.null(self$options$timeVar) || identical(self$options$timeVar, ""))) {
           private$.addNotice(
             type = "WARNING",
-            title = .("SPIDER PLOT NEEDS A TIME VARIABLE"),
-            content = .("The spider plot draws each patient's tumour trajectory over time, so it requires a Time Variable. None is selected, so no spider plot can be produced. Assign the visit/assessment time column to \"Time Variable\" to enable it.")
+            title = .("Spider plot needs a time variable"),
+            content = .("The spider plot draws each patient's tumor trajectory over time, so it requires a Time Variable. None is selected, so no spider plot can be produced. Assign the visit/assessment time column to \"Time Variable\" to enable it.")
           )
         }
 
@@ -2001,7 +1956,7 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             (is.null(self$options$timeVar) || identical(self$options$timeVar, ""))) {
           private$.addNotice(
             type = "WARNING",
-            title = .("RESPONSE DURATION NEEDS A TIME VARIABLE"),
+            title = .("Response duration needs a time variable"),
             content = .("Time to response and duration of response are computed from per-visit assessment times, so they require a Time Variable. None is selected, so the Time-to-Response & Duration of Response table cannot be populated.")
           )
         }
@@ -2013,7 +1968,7 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         if (!is.null(self$options$timeVar) && self$options$timeVar != "") {
           private$.addNotice(
             type = "WARNING",
-            title = .("TIME-TO-EVENT LIMITATIONS"),
+            title = .("Time-to-event limitations"),
             content = .("The headline duration of response is the censoring-aware Kaplan-Meier median; the crude median in the Time-to-Response table ignores censoring and understates DoR. Progression is detected as a >=20% increase over the NADIR (the smallest burden recorded so far), or any reappearance after a complete response, following RECIST v1.1. Two limitations remain. (1) The >=5 mm absolute increase that RECIST v1.1 also requires is applied only to raw measurements with a stated unit; without it small sums are called progression more often than RECIST would, which shortens DoR, while unseen new-lesion or non-target progression pushes the other way. (2) No log-rank test or Cox regression for covariates is provided. For formal progression-free survival (PFS) or duration of response analysis, use dedicated survival analysis functions. Current calculations are exploratory only.")
           )
         }
@@ -2022,7 +1977,7 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         if (self$options$inputType == "raw" && !is.null(self$options$timeVar) && self$options$timeVar != "") {
           private$.addNotice(
             type = "INFO",
-            title = .("BASELINE ASSUMPTION"),
+            title = .("Baseline assumption"),
             content = .("Percent changes calculated assuming time=0 is baseline for each patient. Duplicate time=0 rows are rejected during validation. Verify: (1) No measurements before time=0; (2) time=0 is the pre-treatment baseline (not post-treatment). A patient with no time=0 row stops the analysis; a patient whose time=0 value is missing, zero or non-numeric is excluded and listed in a notice.")
           )
         }
@@ -2042,7 +1997,7 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
           if (n_patients > 0 && n_patients < 10) {
             private$.addNotice(
               type = "STRONG_WARNING",
-              title = .("VERY SMALL SAMPLE"),
+              title = .("Very small sample"),
               content = sprintf(
                 .("Only n=%d evaluable patients: a single patient changes each rate by %.0f percentage points and the confidence intervals are very wide. Treat the rates as descriptive."),
                 n_patients, 100 / n_patients)
@@ -2051,7 +2006,7 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # (n = 0 is reported once, as NO EVALUABLE PATIENTS.)
             private$.addNotice(
               type = "WARNING",
-              title = .("SMALL SAMPLE"),
+              title = .("Small sample"),
               content = sprintf(
                 .("n=%d evaluable patients: the confidence intervals for ORR and DCR are wide. Interpret the rates with their intervals."),
                 n_patients)
@@ -2068,7 +2023,7 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             if (n_growth > 0) {
               private$.addNotice(
                 type = "WARNING",
-                title = .("EXTREME VALUES DETECTED"),
+                title = .("Extreme values detected"),
                 content = paste(
                   sprintf(.("%d patient(s) with tumor growth >200%% (verify data accuracy)."), n_growth),
                   .("Possible causes: (1) Data entry errors; (2) Multi-lesion summation issues; (3) New lesions added during followup; (4) Measurement variability. Verify raw data before interpreting results. Extreme values can distort plot scaling and statistical summaries.")))
@@ -2139,7 +2094,7 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         # (release review WF-4).
         n_excl <- (processed_data$n_supplied %||% 0) - nrow(processed_data$waterfall)
         self$results$summaryTable$setNote("excluded", if (n_excl > 0)
-          sprintf(.("%d further patient(s) could not be analysed (no usable value or baseline) and are in no row of this table; the notices name them."), n_excl)
+          sprintf(.("%d further patient(s) could not be analyzed (no usable value or baseline) and are in no row of this table; the notices name them."), n_excl)
           else NULL)
 
         # Patients in the waterfall but not evaluable (all-missing responses,
@@ -2317,7 +2272,7 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
           # median ignores responders still in response and understates DoR.
           if (!is.null(km_text)) {
             add_metric_row(list(
-              metric = .("Median Duration of Response (Kaplan-Meier)"),
+              metric = .("Median duration of response (Kaplan-Meier)"),
               value = km_text
             ))
           }
@@ -2407,7 +2362,7 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
           }, error = function(e) {
             private$.addNotice(
               type = "WARNING",
-              title = .("PERSON-TIME ANALYSIS FAILED"),
+              title = .("Person-time analysis failed"),
               content = sprintf(
                 .("Person-time metrics could not be computed (%s). The Person-Time Analysis table is omitted."),
                 e$message)
@@ -2511,7 +2466,7 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             "confirm_status" %in% names(processed_data$waterfall)) {
           nlev <- length(unique(stats::na.omit(processed_data$waterfall$confirm_status)))
           if (nlev > 6) {
-            private$.addNotice("INFO", .("MARKER SHAPES REUSED"), sprintf(
+            private$.addNotice("INFO", .("Marker shapes reused"), sprintf(
               .("Confirmation variable has %d levels; markers reuse shapes beyond %d distinct symbols."),
               nlev, 6L))
           }
@@ -2527,7 +2482,7 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             if (length(f$conflicts)) sprintf("%s (%s)", v, paste(utils::head(f$conflicts, 5), collapse = ", "))
           }))
           if (length(conflicts) > 0) {
-            private$.addNotice("INFO", .("CONFLICTING ANNOTATION VALUES"), sprintf(
+            private$.addNotice("INFO", .("Conflicting annotation values"), sprintf(
               .("Some annotation variables have more than one value for a patient across rows: %s. The track shows the first recorded value."),
               paste(conflicts, collapse = "; ")))
           }
@@ -2595,7 +2550,7 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # cannot promise an interval the plot then leaves out.
             private$.addNotice(
               type = "WARNING",
-              title = .("MEDIAN CI NOT DRAWN"),
+              title = .("Median CI not drawn"),
               content = sprintf(
                 .("The bootstrap confidence interval for the median response requires at least 10 evaluable patients; only %d are available, so no CI annotation is drawn on the waterfall plot."),
                 n_ci)
@@ -2603,7 +2558,7 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
           } else if (n_ci < 20) {
             private$.addNotice(
               type = "INFO",
-              title = .("BOOTSTRAP CI STABILITY"),
+              title = .("Bootstrap CI stability"),
               content = sprintf(
                 .("The bootstrap confidence interval for the median response is computed from %d evaluable patients; below 20 it can be unstable, so interpret it with caution."),
                 n_ci)
@@ -2622,7 +2577,7 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
           if (self$options$inputType == "percentage") {
             private$.addNotice(
               type = "INFO",
-              title = .("SPIDER PLOT WITH PERCENTAGE DATA"),
+              title = .("Spider plot with percentage data"),
               content = .("With percentage input the spider plot connects the pre-calculated percent changes at each visit. If you have raw per-visit measurements, the raw input type gives trajectories computed against the time = 0 baseline.")
             )
           }
@@ -3544,7 +3499,7 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         if (length(parts) > 0)
           private$.addNotice(
             type = "STRONG_WARNING",
-            title = .("VERY WIDE CONFIDENCE INTERVAL"),
+            title = .("Very wide confidence interval"),
             content = paste(c(parts, .("The data are compatible with rates anywhere in such a range. Report the interval with the rate.")),
                             collapse = " "))
         invisible(NULL)
@@ -3695,11 +3650,11 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
           (self$options$measurementUnit %||% "unspecified") %in% c("mm", "cm")
         methods_text <- paste(c(
           if (has_time)
-            .("Best response was the smallest percent change in tumour burden from baseline over the post-baseline assessments up to and including the first progression (at least 20% over the nadir, or regrowth after a complete response); later assessments were not used.")
+            .("Best response was the smallest percent change in tumor burden from baseline over the post-baseline assessments up to and including the first progression (at least 20% over the nadir, or regrowth after a complete response); later assessments were not used.")
           else if (private$.multiNoTime)
             .("Without a time variable, best response was the smallest value over all of each patient's rows, a 0% baseline row included.")
           else
-            .("Best response was the smallest percent change in tumour burden from baseline over the post-baseline assessments."),
+            .("Best response was the smallest percent change in tumor burden from baseline over the post-baseline assessments."),
           if (abs_rule)
             .("Categories used thresholds adapted from RECIST v1.1 (complete response -100%, partial response at least -30%, progressive disease at least +20% and at least 5 mm).")
           else
@@ -3776,7 +3731,7 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                            n_missing_group)
             self$results$groupComparisonTable$setNote("missing_group", msg)
             self$results$groupComparisonTest$setNote("missing_group", msg)
-            private$.addNotice("WARNING", .("NO GROUP COMPARISON"), msg)
+            private$.addNotice("WARNING", .("No group comparison"), msg)
           }
           return()
         }
@@ -3946,7 +3901,7 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
           "<ul style='margin: 0; padding-left: 15px; line-height: 1.6;'>",
           "<li><strong>", .("ORR (Objective Response Rate - Unconfirmed):"), "</strong> ", .("Percentage of patients achieving threshold-based CR (\u2264-100%) or PR (\u2264-30%) without RECIST v1.1 confirmation requirement. May overestimate true confirmed ORR."), "</li>",
           "<li><strong>", .("DCR (Disease Control Rate - Unconfirmed):"), "</strong> ", .("Percentage achieving threshold-based response or stable disease (CR + PR + SD) without confirmation. Exploratory endpoint only."), "</li>",
-          "<li><strong>", .("Best Response (Simplified):"), "</strong> ", paste(c(private$.bestResponseRule()[1], .("Not equivalent to RECIST v1.1 'Best Overall Response', which requires confirmation.")), collapse = " "), "</li>",
+          "<li><strong>", .("Best response (simplified):"), "</strong> ", paste(c(private$.bestResponseRule()[1], .("Not equivalent to RECIST v1.1 'Best Overall Response', which requires confirmation.")), collapse = " "), "</li>",
           "<li><strong>", .("Person-Time:"), "</strong> ", .("Total time patients are followed, accounting for different follow-up durations"), "</li>",
           "</ul>",
           "</div>",
@@ -4025,7 +3980,7 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
           "<h5>", .("Clinical Context:"), "</h5>",
           "<ul>",
-          "<li>", .("Judge the response rate against the rate expected without benefit in your tumour type and line of therapy (the null rate of your study design), using the confidence interval above, rather than against generic cut-offs."), "</li>",
+          "<li>", .("Judge the response rate against the rate expected without benefit in your tumor type and line of therapy (the null rate of your study design), using the confidence interval above, rather than against generic cut-offs."), "</li>",
           "<li>", .("ORR and DCR here are unconfirmed, threshold-based rates over evaluable patients."), "</li>",
           "</ul>",
 
@@ -4045,7 +4000,7 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         input_type <- self$options$inputType
         # Status tags: the words translate, the brackets do not.
         tag <- function(word) paste0("[", word, "]")
-        tag_done <- tag(.("DONE")); tag_todo <- tag(.("TODO")); tag_info <- tag(.("INFO"))
+        tag_done <- tag(.("DONE")); tag_todo <- tag(.("TODO")); tag_info <- tag(.("Info"))
         tag_optional <- tag(.("OPTIONAL")); tag_ready <- tag(.("READY"))
         tag_stopped <- tag(.("STOPPED")); tag_waiting <- tag(.("WAITING"))
 
@@ -4084,9 +4039,9 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
           tag_info, " <strong>", .("Choose Input Type"), "</strong>",
           "<br><small>",
           if (input_type == "percentage") {
-            .("Percentage Changes selected - good for most analyses")
+            .("Percentage changes selected - good for most analyses")
           } else {
-            .("Raw Measurements selected - make sure you have a time variable")
+            .("Raw measurements selected - make sure you have a time variable")
           },
           "</small></li>",
 
@@ -4124,7 +4079,7 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
           "<div style='background-color: rgba(33, 126, 249, 0.16); padding: 10px; border-radius: 3px; margin: 10px 0; color: inherit;'>",
           "<h5 style='margin-top: 0;'>", .("Quick Tips:"), "</h5>",
           "<ul style='margin: 5px 0; margin-left: 20px;'>",
-          "<li>", .("Most studies use 'Percentage Changes' format"), "</li>",
+          "<li>", .("Most studies use 'Percentage changes' format"), "</li>",
           "<li>", .("Keep 'RECIST thresholds' on to see the -30% and +20% lines on the plots"), "</li>",
           "<li>", .("Use a group variable to compare biomarker-defined cohorts"), "</li>",
           "<li>", .("Report each response rate with the confidence interval shown in Clinical Response Metrics"), "</li>",
@@ -4142,7 +4097,7 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
       # Helper functions for interpretation ----
       .interpretORR = function(orr, k = NULL, n = NULL) {
         private$.interpretRate(orr, k, n,
-          .("Response rates from %.1f%% to %.1f%% are compatible with these data (exact 95%% CI). There is no universal benchmark: compare them with the response rate expected in your tumour type and treatment setting."))
+          .("Response rates from %.1f%% to %.1f%% are compatible with these data (exact 95%% CI). There is no universal benchmark: compare them with the response rate expected in your tumor type and treatment setting."))
       },
 
       .interpretDCR = function(dcr, k = NULL, n = NULL) {
@@ -4157,7 +4112,7 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         if (is.null(rate) || is.na(rate)) return(.("Not available"))
         ci <- if (!is.null(k) && !is.null(n) && isTRUE(n > 0))
           tryCatch(stats::binom.test(k, n)$conf.int * 100, error = function(e) NULL)
-        if (is.null(ci)) return(.("No universal benchmark: compare the rate with the rate expected in your tumour type and treatment setting."))
+        if (is.null(ci)) return(.("No universal benchmark: compare the rate with the rate expected in your tumor type and treatment setting."))
         sprintf(template, ci[1], ci[2])
       }
 

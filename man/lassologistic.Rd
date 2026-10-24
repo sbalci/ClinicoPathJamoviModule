@@ -100,11 +100,11 @@ integer points. Beta10: multiply by 10 and round (the Beta10/integer method
 of Mehta et al. 2016). Smallest: divide by the smallest contribution and
 round, a Sullivan-type scale with one point per smallest contribution
 (Sullivan et al. 2004); contributions below 1e-8 of the largest are not
-used as the divisor. This option was previously labelled "Schneeweiss";
+used as the divisor. This option was previously labeled "Schneeweiss";
 Schneeweiss et al. 2003 instead add one point per 0.3 increase in the log
 odds ratio. Max-scaled: divide by the largest absolute coefficient and
 multiply by scoringMaxPoints, so the strongest predictor scores exactly the
-maximum. This option was previously labelled "Sullivan/D'Agostino"; it is
+maximum. This option was previously labeled "Sullivan/D'Agostino"; it is
 not the Sullivan 2004 Framingham procedure, which awards points per
 category of each factor relative to a reference factor's per-category
 distance. Compare: generate all three and show performance comparison; the

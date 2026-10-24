@@ -124,8 +124,8 @@ test_that("R-07: 'Rows Excluded' never claims rows were analysed when nothing wa
     expect_length(rv_titled(a, "Choose the positive class"), 1L)
     n <- rv_titled(a, "Rows Excluded")
     expect_length(n, 1L)                                                 # still worth knowing before choosing
-    expect_false(grepl("were analysed", n[[1]]$content, fixed = TRUE))
-    expect_match(n[[1]]$content, "108 of 113 rows can be analysed", fixed = TRUE)
+    expect_false(grepl("were analyzed", n[[1]]$content, fixed = TRUE))
+    expect_match(n[[1]]$content, "108 of 113 rows can be analyzed", fixed = TRUE)
 })
 
 test_that("R-08: every seed-dependent table shows its seed", {

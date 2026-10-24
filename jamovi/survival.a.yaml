@@ -1,10 +1,10 @@
 ---
 name:  survival
 title: Survival Analysis
-menuGroup: Survival
+menuGroup: SurvivalT
 menuSubgroup: ClinicoPath Survival
 menuSubtitle: 'Univariate Survival Analysis, Cox, Kaplan-Meier, 1,3,5-yr'
-version: '1.1.1'
+version: '1.1.2'
 jas: '1.2'
 
 description:
@@ -579,7 +579,8 @@ options:
       default: '50, 65, 75'
       description: >-
         Comma-separated age cutpoints for creating age groups. For example,
-        50, 65, 75 creates groups less than 50, 50-64, 65-74, 75 and above.
+        50, 65, 75 creates groups 50 or younger, over 50 to 65, over 65 to 75,
+        and over 75. Each upper cutpoint is included in the preceding group.
 
     - name: age_time_scale
       title: "Age as time scale"
@@ -747,7 +748,7 @@ options:
           name: normal
       default: hazard
       description: >-
-        Scale for spline-based models. Hazard scale models log hazard function,
+        Scale for spline-based models. Hazard scale models log cumulative hazard,
         odds scale models log cumulative odds, normal scale models normal scores.
 
     # REMOVED: parametric_extrapolation, extrapolation_time, parametric_diagnostics,
@@ -844,8 +845,10 @@ options:
       description: >-
         Number of knots for restricted cubic splines. 3 knots = 2 df (simplest),
         4 knots = 3 df (recommended default), 5 knots = 4 df (more flexible).
-        Knots are placed at Harrell-recommended percentiles. More knots allow
-        detection of complex non-linear patterns but may overfit with small samples.
+        Uses natural splines with interior knots at equally spaced quantiles and
+        boundary knots at the observed minimum and maximum, as in splines::ns().
+        More knots allow detection of complex non-linear patterns but may overfit
+        with small samples.
 
     - name: bootstrapValidation
       title: Bootstrap internal validation
@@ -873,7 +876,7 @@ options:
           R: >
             Random seed for the reproducible bootstrap internal validation.
             Change this value to obtain a different bootstrap draw; the default
-            (42) reproduces the previous fixed behaviour.
+            (42) reproduces the previous fixed behavior.
 
 
 ...

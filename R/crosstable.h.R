@@ -384,10 +384,6 @@ crosstableBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' - Variable name safety (special characters, spaces)
 #' - Data quality validation warnings
 #' 
-#' Note: Advanced features (pairwise comparisons, effect sizes, residual 
-#' analysis,
-#' correspondence analysis) are planned but not yet available.
-#' 
 #'
 #' @examples
 #' \donttest{

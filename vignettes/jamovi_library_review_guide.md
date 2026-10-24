@@ -16,6 +16,7 @@ reviewer against this project's submodules, with external learning sources ident
 | `jamovi-library-audit/2026-09-15 jsurvival.md` | jsurvival (round 3) | 2026-09-15 |
 | `jamovi-library-audit/2026-09-16 <Module>.md` (×4) | OncoPath, ClinicoPathDescriptives, jjstatsplot, meddecide (round 4) | 2026-09-16 |
 | `jamovi-library-audit/2026-09-22 OncoPath.md` | OncoPath (round 5) | 2026-09-22 |
+| `jamovi-library-audit/2026-10-23 jamovi library OncoPath 1.1.2 is on its way.md` | OncoPath (round 7; the report arrives in the library's "on its way" email for a release it is already publishing) | 2026-10-23 |
 | User-supplied `2026-10-03 jYS.md` and `MODIFICATIONS_REPORT_EN.md` | external jYS 1.1.5; audit plus remediation account, not our closure evidence | 2026-10-03 / 2026-10-10 |
 
 Every rule below is something the reviewer *actually raised*, on real files, with
@@ -167,7 +168,27 @@ Plus the cheap metadata gates the reviewer checks first:
   `CITATION.cff`, `0000.yaml` and every `.a.yaml` on every regeneration and never touches
   `NEWS.md`. **Write the heading before the version bump** - the workflow skips a version whose
   tag exists, so a release cannot be re-cut (2026-09-16 and 2026-09-22 OncoPath; 14 of the 16
-  workflow-era releases shipped with the placeholder).
+  workflow-era releases shipped with the placeholder). The release *body* can still be corrected
+  afterwards with `gh release edit v<version> --notes-file <file>`; only the tag is fixed. Round 7
+  (2026-10-23): `check_news` warned, the tag went out anyway, and three of the five October
+  releases (OncoPath 1.1.2, meddecide 1.1.2, jsurvival 1.1.1) were published as *Latest* with the
+  placeholder. The release workflow runs on push and does not read the gate, so run
+  `release_gate.py --root <sibling>` and write the heading **before** the version bump. The **newest** heading must also be three-component (`check_news` WARNs on a
+  four-component one; older four-component headings are history and are not judged).
+- The module's own test suite is green at the commit you tag, and nothing under
+  `tests/testthat/_problems/` or `testthat-problems.rds` is tracked. testthat writes both only
+  when tests fail, so a committed copy is proof the release shipped a red suite (2026-10-23
+  OncoPath: three failing tests). No personal config either: `.claude/settings.local.json` holds
+  a local absolute path, and it was tracked in all five siblings. A `.gitignore` entry does not
+  untrack a file; `git rm --cached` does. `check_artifacts` FAILs on all three (since 2026-10-24,
+  when all six repositories were cleaned).
+- User-visible text: notice titles in sentence case, one spelling convention, one name per
+  concept, and no pointer to an analysis that has not shipped
+  ([section 12](#12-rule-ui-label-conventions), [section 27](#27-rule-the-modules-own-prose-must-agree-with-itself)).
+- Every panel puts variables first and every other group in a **top-level** `CollapseBox`
+  ([section 12](#12-rule-ui-label-conventions)).
+- No `library-audit` tag in `README.md`, `DESCRIPTION` or `NEWS.md`, and no test that requires one
+  ([section 14](#14-encoding-review-findings-as-tests)).
 - `description: main:` is one `>` folded paragraph with no blank line, in every `.a.yaml`
   ([section 27](#27-rule-the-modules-own-prose-must-agree-with-itself)).
 - One bug-report URL across `DESCRIPTION`, `jamovi/0000.yaml`, `README.md` and `CITATION.cff`, and
@@ -199,13 +220,15 @@ problems, not one-off bugs** — when one function does it, the whole module doe
 | 10 | Dead code referencing commented-out schema | 2 of 5 | MEDIUM |
 | 11 | `requiresData: true` on renderers that draw from state only | 5 of 5 (rounds 3–4) | LOW |
 | 12 | Translation catalogs inherited from the umbrella | 3 of 5 (round 4) | MEDIUM–LOW |
-| 13 | `NEWS.md` behind the `DESCRIPTION` version | 2 of 5 (round 4) | LOW–INFO |
+| 13 | `NEWS.md` behind the `DESCRIPTION` version | 3 of 5 (rounds 4–7); round 7: 3 of the 5 October releases published the placeholder | LOW–INFO |
 | 14 | Tabular data drawn as hand-built HTML instead of a `Table` | 5 of 5 (round 5 sweep) | MEDIUM |
 | 15 | Red ERROR on an analysis the user has not configured yet; fatal condition via a banner instead of `jmvcore::reject()` | 4 of 5 (rounds 1, 2, 5) | MEDIUM |
 | 16 | `description: main:` keeps newlines, so the library listing breaks or truncates | 4 of 5 (round 5 sweep) | LOW |
 | 17 | The module's own prose disagrees with itself (capability claims, bug-report URL) | 4 of 6 trees (round 5) | LOW |
 | 18 | Bare `set.seed()` leaking a fixed RNG stream into the shared engine process | 1 of 5 (round 4) | LOW |
 | 19 | Config or a test derived from which analyses a module holds today (`prune_imports`, hard-coded analysis lists) | 4 of 5 (round 6) | LOW |
+| 20 | Committed local scratch: failing-test output, personal editor config | 5 of 5 (`.claude/settings.local.json`, round 7 sweep) | LOW |
+| 21 | All-caps notice titles; British and American spelling mixed in one module | caps 3 of 5, spelling 5 of 5 (round 7 sweep) | LOW |
 
 **The lesson:** when a review names one instance, grep for the class and fix all
 of it. The reviewer explicitly rewards this — "several of them by fixing the
@@ -921,11 +944,47 @@ expression so the compiler keeps you honest.
 | Options panel title (`.u.yaml:1`) | **Must match** `.a.yaml` `title:` | otherwise the user clicks one name and lands on a panel labelled another |
 | `menuSubgroup` | Must describe the analysis | a diagnostic-accuracy meta-analysis does not belong under "IHC Analysis" |
 
+| Notice titles and status labels | Sentence case, never capitals | "Bivariate model did not converge", not "PERCENT CHANGE LOOKS LIKE PROPORTIONS" |
+| `List` option titles (the choices) | Sentence case, as jmv does | "Equal variances assumed", "Duration (longest first)" |
+| One concept, one name | The same words in every analysis of the module | one colour-blind palette name, not "Color-blind safe" / "Colorblind-Safe (Okabe-Ito)" / "Colorblind Safe (Viridis)" |
+| Spelling | One convention per module, in `.()` strings and `.a.yaml`/`.r.yaml` titles | not "tumour" in one analysis and "tumor" in the next |
+
 Exception: a verb is correct when the checkbox really performs an action on the
 dataset — "Add test pattern to data" is fine.
 
 Variable selection comes **first** in every panel; everything else goes in
-collapsed `CollapseBox` groups.
+collapsed `CollapseBox` groups **at the top level**. 2026-10-23 OncoPath [LOW]:
+`diagnosticmeta.u.yaml` put seventeen controls under three always-open `Label`
+sections inside one `LayoutBox`, with its only `CollapseBox` between the first two;
+opening it pushed the plot and reporting options down. Make each section its own
+top-level `CollapseBox` (`collapsed: true` for all but the first), as
+`waterfall.u.yaml` and jamovi's own `jmvplots/scat.u.yaml` do. `enable:` conditions
+carry over unchanged.
+
+Capitals read as shouting in the results and are harder to translate; 37 of
+`waterfall`'s notice titles were capitals while the module's other analyses used
+sentence case, so the module read as if different people wrote it. Changing a
+title or a `List` title renames no option, so no saved analysis breaks, but each
+changed msgid orphans its Turkish translation: re-key `tr.po` (section 9).
+
+**Spelling: American** (project decision, 2026-10-24): `tumor`, `analyzed`, `color`,
+`labeled`, `modeled`, `summarize`, `millimeter`. "Analyses" (plural noun) and
+"characteristic" are American too; a regex for `analys`/`characteris` flags them
+falsely. OncoPath was swept first (2026-10-23 OncoPath [LOW]), then the other four modules on
+2026-10-24, and `check_label_case` now FAILs on any British form in shipped text (not only
+on a module that mixes both). Sweep with an explicit word map, never a regex on
+stems: `analys`, `characteris`, `optimis` and `organis` also match "analyses",
+"characteristic", "optimism" and "organism".
+Changing a msgid needs the Turkish re-keyed: add the new msgid with the old
+translation (sentence-cased when the casing changed) and keep the old entry, because
+another module may still use it; `i18nUpdate()` drops it where it is unused.
+
+**Enforce it:** `tools/release_gate.py` `check_label_case` (all-caps `.()` strings;
+when added: OncoPath 46, ClinicoPathDescriptives 8, meddecide 4, jjstatsplot and
+jsurvival 0; **FAIL** since 2026-10-24, when the sweep reached 0 shipped everywhere), `check_collapsebox_nested` (**FAIL** since 2026-10-24: it found exactly
+the reviewer's one site, `diagnosticmeta`, which is regrouped; 0 shipped everywhere, 32 in
+parked analyses as promotion debt) and `check_collapsebox_titlecase`. List-title casing
+and "one concept, one name" have no detector: judging them needs a reader.
 
 ---
 
@@ -1001,10 +1060,15 @@ never enters into it. The body of `Group$insert` is byte-identical in every jmvc
 | a notice on an `Array` | `array$setHeader(notice)` | `array$insert(...)` — Arrays have no `insert` |
 | the content | `notice$setContent(...)` after construction | `Notice$new(..., content = )` alone — it leaves `.stale = TRUE`, `results$isFilled()` goes FALSE and the analysis never reaches `complete` |
 
-Two more measured properties: notices **accumulate** across runs (three inserts of the same `name`
-ship as three elements), and `Group$remove()` removes nothing — its own `after` slice re-includes
-the item it was asked to drop. jamovi's four `jmv` sites are all in `.init()`/`.initPlots()`,
-never in `.run()`, which is why upstream never meets either problem.
+Two more measured properties, both **within one results tree**: three inserts of the same `name`
+ship as three elements, and `Group$remove()` removes nothing — its own `after` slice re-includes
+the item it was asked to drop. Neither carries over **between run cycles**: each cycle builds a
+fresh tree, and `Group$fromProtoBuf()` restores only items that tree already declares, so a
+`Notice` inserted in `.run()` appears exactly once per cycle. What *does* pile up across cycles is
+the hand-rolled pattern, appending to a declared `Html` item's content: that item is restored
+every cycle with its old content (measured 2026-10-24, `tests/testthat/test-zzz-jmvcore-notice-run-cycle.R`;
+section 13.6). jamovi's `jmv` sites we have read (`conttables`, `linreg`'s Mahalanobis note) insert
+from `.init()` or an `.init*()` helper it calls.
 
 ### 13.4 How the false claim happened, and what it cost
 
@@ -1035,6 +1099,41 @@ experiment never touched: notice content renders as **escaped plain text** and t
 newlines** (standing user decision, reaffirmed), and this project wants multi-line panels. The
 rendering side has never been measured. Change it only on evidence about *rendering*, not about
 serialization.
+
+### 13.6 Round 7: the retraction invented a second mechanism
+
+Our 2026-09-22 response retracted the serialization claim and, in the same paragraph, gave a new
+reason to keep the HTML helpers: *"Dynamic notices accumulate across run cycles … `jmv` analyses
+like `conttables.b.R` only insert notices during `.init()`."* The breadcrumb above three
+`.addNotice()` helpers said *"insert() in .run() accumulates across runs (Group$remove cannot drop
+items)"*. Nobody ran it. The reviewer disputed it on 2026-10-23.
+
+The experiment took ten minutes (`test-zzz-jmvcore-notice-run-cycle.R`): a `Notice` inserted in
+`.run()`, three cycles, each a fresh analysis restored from the previous cycle's protobuf, gives
+one notice every time. Appended `Html` content gives one, two, three. Our stated reason was
+backwards: the pattern we kept is the one that accumulates, and our own `survival`, `bayesianci`
+and `categorize` already reset their notice Html at the top of `.run()` for exactly that reason.
+
+The reviewer's counter-example was not exact either. Both `jmv` sites they cited insert from
+`.init()` (`conttables` directly, `linreg` via `.initMahalTable()`), not from `.run()`. Our
+location claim was right and our mechanism was wrong; their mechanism was right and their
+location was wrong. Write down only what was run.
+
+What stands: one `Notice` holds one plain-text content string with no separate title, which
+cannot express a bold title plus a paragraph. The reviewer agrees that is a real limit. Their two
+suggestions are both cheap:
+
+1. **Ask jamovi** for a Notice with a title and a multi-paragraph body
+  (<https://github.com/jamovi/jamovi/issues>). OncoPath alone has 60+ distinct notices across four
+  analyses, each a short title plus a paragraph, ordered by severity.
+2. **Until then, one presentation.** OncoPath had two: three analyses drew `rgba()` banners with
+   fixed-hue borders, and `swimmerplot` wrote a plain-text block with `ERROR:` / `STRONG WARNING:`
+   prefixes. Done 2026-10-24: `R/utils-notices.R` (`notice_append()`, `notice_panel_html(self, …)`)
+   is the one renderer. It draws the banner, puts the severity in words in the title (so it does not
+   rest on colour alone), sorts most severe first, keeps newlines, and returns `"<div></div>"` for an
+   empty panel. That last point fixed a real bug: `waterfall` cleared with `""`, which the client
+   skips, so the previous run's notices stayed on screen. A new module with notice panels should
+   call these helpers, not copy a renderer.
 
 ### Where this leaves you
 
@@ -1097,6 +1196,30 @@ Every audit finding becomes a test **before** you fix it, at the level of the
 
 A test written at the class level is what turns "we fixed the four `venn`
 renderers" into "this can't come back anywhere in the module."
+
+### What a finding test must not assert
+
+2026-10-23 OncoPath [LOW]: OncoPath 1.1.2 shipped with three failing audit tests, and their
+`tests/testthat/_problems/` output committed alongside. Only one of the three caught a real defect
+(the missing `NEWS.md` heading). The other two were bad tests:
+
+- **A breadcrumb in a file users read.** One test required
+  `library-audit 2026-09-22 OncoPath [LOW] DONE:` to appear in `README.md` or `DESCRIPTION`, and
+  another asserted one in `NEWS.md`, which is the GitHub release body. Breadcrumbs go in code
+  comments, never in user-facing files (the library-audit breadcrumb conventions
+  already said so). A test that *requires* one there turns review bookkeeping into published
+  text. Test the claim the finding was about.
+- **The wording instead of the claim.** A test pinned the README heading
+  `Adapted RECIST (v1.1 )?Thresholds`. The README was rewritten more accurately, with a section that
+  says plainly the analysis is not a RECIST v1.1 implementation, and the test failed. Assert what
+  must be true (the disclaimer sentence exists; the unqualified claim does not), never a heading
+  someone may improve.
+- **A red suite at the tag.** A failing test is a release blocker. If a test is wrong, fix the
+  test in the same commit, with a breadcrumb saying why.
+
+`tools/release_gate.py` `check_review_breadcrumbs` (**FAIL** since 2026-10-24) flags a `library-audit` tag in
+`README.md`/`README.Rmd`/`DESCRIPTION`/`NEWS.md` and on a test line that greps for one in those
+files. `check_artifacts` FAILs on tracked `_problems/` and `testthat-problems.rds`.
 
 ---
 
@@ -1425,6 +1548,35 @@ code. Both were reporting a `menuGroup` suffix.
 
 The lesson is narrower than "be careful": a measurement taken while an analysis is parked
 is not a measurement of the module. Check the routing before believing the instrument.
+
+### Round 7 (2026-10-23 OncoPath, release 1.1.2)
+
+The report arrived in the library's "1.1.2 is on its way" email, so every finding below shipped.
+Both round-5 MEDIUMs held; nothing was above LOW.
+
+| Finding | Rule existed? | Why it came back |
+|---|---|---|
+| No `NEWS.md` heading for 1.1.2 (LOW) | Yes: §1, `check_news`, and an OncoPath audit test | **RECURRED, WARN-SKIMMED.** Three instruments flagged it (the gate's WARN, the module's own test and the red "R validation" run on the release commit); none can stop `release.yaml`, which runs on push, does not wait for validation, and falls back to a placeholder. Swept: meddecide 1.1.2 and jsurvival 1.1.1 shipped the same placeholder, both as *Latest*. |
+| Failing-test output and personal config committed; two bad tests (LOW) | Conventions forbade breadcrumbs in user-facing files; no check | **NEW + OUR-FIX.** Our round-5 remediation wrote the README/DESCRIPTION breadcrumb test and the `NEWS.md` breadcrumb. `.claude/settings.local.json` was tracked in all five siblings, not one. Now §14 and `check_artifacts` / `check_review_breadcrumbs`. |
+| All-caps notice titles, mixed spellings, list casing (LOW) | §12 covered controls and CollapseBoxes, not notices or `List` titles | **NEW, NO-RULE.** Swept: caps in 3 of 5 modules, mixed spelling in all five. Now §12 and `check_label_case`; spelling waits for a project decision. |
+| Notices hand-styled two ways (LOW) | §13 | **NO-CHANNEL worked; WRONG-DONE content again.** The reviewer read the breadcrumb and answered it. Our reason ("accumulates across runs") was never run, and an experiment shows the opposite (§13.6). The other reason (no title in a Notice) is accepted. |
+| `diagnosticmeta` panel mostly ungrouped (LOW) | §12 said "collapsed `CollapseBox` groups", nothing about where | **NEW, NO-CHECK.** Now `check_collapsebox_nested`; it finds exactly the reviewer's one site. |
+| `waterfall` description points to an unshipped analysis (LOW) | §27 covered agreement between files, not promises | **NEW.** Now §27 and `check_forward_refs`, which also finds `crosstable`. |
+| Long functions, the largest grew (LOW) | Known | DEFERRED, standing decision. The reviewer's next concrete step: lift `diagnosticmeta` `.run()`'s input cleaning (about lines 456–613) into `.prepareMetaData()`. |
+
+**What to do differently (round 7):**
+
+1. **A WARN is only read if someone runs the gate before the bump.** `check_news` was right twice
+   and ignored twice; the release workflow publishes on push and never sees it. Run
+   `release_gate.py --root <sibling>` before changing `Version:`, and treat a `NEWS.md` WARN there
+   as blocking.
+2. **A retraction is new code; measure it as such.** Round 5 replaced one unmeasured mechanism
+   with another in the same paragraph. Any sentence of the form "X happens because Y" in a response
+   or breadcrumb needs a run behind it, or the word *inferred*.
+3. **Tests written to close a finding are code under review too.** Two of the three failing tests
+   asserted bookkeeping and wording, not behaviour.
+4. **Sweep the reviewer's finding across all five siblings before answering.** The reviewer saw
+   one tracked `settings.local.json` and one placeholder release; there were five and three.
 
 ---
 
@@ -2000,8 +2152,18 @@ apart in the data picker. OncoPath's `waterfall_percentage_basic.omv` and
 `waterfall_raw_longitudinal.omv` — the two input modes the waterfall description itself
 distinguishes — both read *"Example analysis for Waterfall Plot."*
 
+**No pointer to what has not shipped.** 2026-10-23 OncoPath [LOW]: the `waterfall` description in
+`0000.yaml`, `waterfall.a.yaml` and the in-analysis guide (`R/waterfall.b.R`) ended *"use the
+lesion-level RECIST v1.1 analysis. It will be available in upcoming releases."* The library listing
+shows that text, and the user who follows it finds an empty menu. End the sentence at what the user
+can do now ("sum the target lesions per visit first"), and add the pointer when the analysis ships.
+The same sweep found `ClinicoPathDescriptives` `crosstable.a.yaml`: *"… are planned but not yet
+available."*
+
 ### Enforce it
 
+`check_forward_refs` (WARN; OncoPath 3, ClinicoPathDescriptives 1 when added; 0 in all five siblings since
+2026-10-24. Promote to FAIL once the umbrella's generated `0000.yaml` is regenerated).
 `tools/release_gate.py`: `check_description_newlines` (23 shipped / 139 debt when added — WARN
 until the sweep clears it, then FAIL), `check_issue_urls` (4 of 6 trees red when added),
 `check_dataset_descriptions` (1 hit; also FAILs a `datasets:` entry whose `.omv` is missing).
@@ -2297,6 +2459,10 @@ Two notes for this project:
 
 - `_updateModules.R` already stamps one version into `DESCRIPTION`, `CITATION.cff`, `0000.yaml`
   and every `.a.yaml` (§1), so step 1 is done on every regeneration.
+- `.github/workflows/release.yaml` runs on push, independently of "R validation", and writes the
+  placeholder `Release <v>.` when no `NEWS.md` heading matches. 1.1.2 was tagged while validation
+  was red on the same commit (2026-10-23). A published body can still be replaced with
+  `gh release edit v<version> --notes-file <file>`; the tag cannot be re-cut.
 - The page asks for [Semantic Versioning](https://semver.org/), e.g. `1.0.1` → `1.0.2`. Our
   versions are four components and zero-padded (`1.0.83.06`). SemVer allows three components
   and no leading zeros, and §1 already notes that the release workflow publishes nothing for a

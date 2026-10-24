@@ -981,11 +981,11 @@ kappaSizeCIClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 # 120 binary designs (3-6 raters, p .05-.5, kappa0 .4-.8, half-width .1/.2) the
                 # beta-binomial needed 0.55 to 1.04 times as many subjects, fewer in 119.
                 if (isTRUE(outcome == 2 && raters >= 3))
-                    paste0(.("With three or more raters, the sample size for a binary finding also depends on how agreement among more than two raters is modelled. This analysis uses the model of Altaye, Donner and Klar; the Dirichlet-multinomial model used for three to five categories, which for two categories is the beta-binomial, describes the same \u03ba but usually needs fewer subjects (in the designs checked, as few as about half when the finding is rare), so the figure shown is generally the more cautious of the two."), " "),
+                    paste0(.("With three or more raters, the sample size for a binary finding also depends on how agreement among more than two raters is modeled. This analysis uses the model of Altaye, Donner and Klar; the Dirichlet-multinomial model used for three to five categories, which for two categories is the beta-binomial, describes the same \u03ba but usually needs fewer subjects (in the designs checked, as few as about half when the finding is rare), so the figure shown is generally the more cautious of the two."), " "),
                 # IR-kappaSizeCI-05: "0.92 to 0.93" was narrower than the simulations (0.909, 0.912
                 # in the independent review; 0.929, 0.915 in the validation).
                 if (private$.reestimationApplies(outcome, raters))
-                    paste0(.("When the study is analysed, estimate the category prevalences by maximum likelihood at each candidate value of \u03ba: with three or more raters, or three or more categories, plugging in the overall proportions of ratings gives an interval that covers \u03ba less often than stated (about 0.91 to 0.93 instead of 0.95 in the designs simulated for this analysis)."), " "),
+                    paste0(.("When the study is analyzed, estimate the category prevalences by maximum likelihood at each candidate value of \u03ba: with three or more raters, or three or more categories, plugging in the overall proportions of ratings gives an interval that covers \u03ba less often than stated (about 0.91 to 0.93 instead of 0.95 in the designs simulated for this analysis)."), " "),
                 "</div>")
             else ""
 

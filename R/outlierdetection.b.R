@@ -1020,7 +1020,7 @@ outlierdetectionClass <- if (requireNamespace("jmvcore")) R6::R6Class("outlierde
                     all(vapply(outlier_data[flag_cols], function(x) all(is.na(x)), logical(1)))) {
                     jmvcore::reject(
                         .fmt(
-                            .("{method} returned no classification for any of the {n} observations analysed, so no outlier result can be shown. This happens when the method cannot be estimated at the requested setting rather than because the data are clean - reporting it as zero outliers would be misleading. Lower the confidence level, or select Robust Z-score or the Interquartile range method, and run the analysis again."),
+                            .("{method} returned no classification for any of the {n} observations analyzed, so no outlier result can be shown. This happens when the method cannot be estimated at the requested setting rather than because the data are clean - reporting it as zero outliers would be misleading. Lower the confidence level, or select Robust Z-score or the Interquartile range method, and run the analysis again."),
                             method = private$.get_method_description(),
                             n = nrow(data)),
                         code = "no_classification_returned")

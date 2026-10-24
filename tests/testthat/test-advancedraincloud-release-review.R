@@ -98,7 +98,7 @@ test_that("an ITT label on a complete-case analysis is contradicted out loud", {
                              generate_report = TRUE, population_type = "itt")
     t <- arc_txt(res$clinical_report$content)
     expect_match(t, "as declared")
-    expect_match(t, "51 of 60 supplied rows analysed")
+    expect_match(t, "51 of 60 supplied rows analyzed")
     expect_match(t, "were excluded before analysis")
     expect_match(t, "COMPLETE-CASE")
 })

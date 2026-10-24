@@ -572,14 +572,14 @@ vartreeBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param summaryvar Continuous variable for statistical summaries (mean, SD)
 #'   in tree nodes.
 #' @param summarylocation Where to display statistical summaries in the tree.
-#' @param style Visual style preset: default (gradient-coloured nodes and
+#' @param style Visual style preset: default (gradient-colored nodes and
 #'   labels), clean (white nodes, uncoloured labels), minimal (vtree's plain
 #'   layout - one flat tone per level, uncoloured labels, and more space between
 #'   nodes).
 #' @param palette Node fill palette for the default style. 'default' uses
 #'   vtree's own rotation (reds, blues, greens, ...); 'colorblind' rotates
 #'   single-hue blue, orange, purple and brown palettes that stay distinct under
-#'   the common colour-vision deficiencies. Ignored by the clean and minimal
+#'   the common color-vision deficiencies. Ignored by the clean and minimal
 #'   styles.
 #' @param prunebelow Variable for conditional pruning of tree branches.
 #' @param pruneLevel1 First level for pruning condition.

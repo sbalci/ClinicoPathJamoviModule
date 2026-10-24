@@ -67,7 +67,7 @@ items:
           title: 'Segments'
           type: integer
         - name: rows_analysed
-          title: 'Rows Analysed'
+          title: 'Rows Analyzed'
           type: integer
         - name: total_observations
           title: 'Summed Value'

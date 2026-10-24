@@ -37,7 +37,7 @@ test_that("backend counts and rates use the inclusive PD boundary", {
 test_that("out-of-range shrinkage is capped and disclosed by the analysis", {
   result <- wf_boundary_run(c(-150, -120, -100, -105, -110))
   expect_equal(unname(wf_boundary_counts(result)), c(5, 0, 0, 0))
-  expect_match(result$notices$content, "IMPOSSIBLE SHRINKAGE CAPPED", fixed = TRUE)
+  expect_match(result$notices$content, "Impossible shrinkage capped", fixed = TRUE)
   result <- wf_boundary_run(c(20, 30, 50, 100, 200))
   expect_equal(unname(wf_boundary_counts(result)), c(0, 0, 0, 5))
   expect_identical(as.character(wf_boundary_categories(c(-100, -30, 20))),

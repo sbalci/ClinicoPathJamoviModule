@@ -325,7 +325,7 @@ options:
       default: false
       description:
           R: >
-            Summarise each decision curve by the area under it, normalised by the width of
+            Summarize each decision curve by the area under it, normalized by the width of
             the threshold range - that is, the model's average net benefit over that range.
             The option is named weightedAUC for historical reasons but the average is
             UNWEIGHTED: every threshold in the range counts equally. The value therefore

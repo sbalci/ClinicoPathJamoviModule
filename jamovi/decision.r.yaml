@@ -57,7 +57,7 @@ items:
         - maxCasesShow
 
     - name: rawContingency
-      title: Analysed Contingency Table
+      title: Analyzed Contingency Table
       type: Table
       visible: (referenceType:legacy && (od) || referenceType:disease && (od))
       rows: 0
@@ -86,7 +86,7 @@ items:
         - testNegative
 
     - name: rawCounts
-      title: Analysed Combination Counts
+      title: Analyzed Combination Counts
       type: Table
       visible: (referenceType:legacy && (od) || referenceType:disease && (od))
       rows: 0

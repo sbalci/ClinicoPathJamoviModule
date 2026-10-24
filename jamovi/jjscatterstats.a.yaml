@@ -220,7 +220,7 @@ options:
       default: 20250101
       description:
           R: >
-            Random seed for the statistics computed by resampling or posterior sampling (robust tests, Bayesian estimates, and some nonparametric effect-size intervals). The plot caption names the seed whenever it affected the numbers shown. The default reproduces the previous fixed behaviour.
+            Random seed for the statistics computed by resampling or posterior sampling (robust tests, Bayesian estimates, and some nonparametric effect-size intervals). The plot caption names the seed whenever it affected the numbers shown. The default reproduces the previous fixed behavior.
 
     - name: mytitle
       title: Title
@@ -269,10 +269,10 @@ options:
       default: false
       description:
           ui: >
-            Adds a caption reporting the Bayes factor in favour of NO association.
+            Adds a caption reporting the Bayes factor in favor of NO association.
             Applies to the parametric (Pearson) test only.
           R: >
-            Adds a caption below the plot reporting log(BF01), the Bayes factor in favour
+            Adds a caption below the plot reporting log(BF01), the Bayes factor in favor
             of the NULL hypothesis of no association. Note the direction: BF01 is the
             RECIPROCAL of the more commonly quoted BF10, so a large negative log(BF01) is
             strong evidence FOR an association, not against it. This applies to the

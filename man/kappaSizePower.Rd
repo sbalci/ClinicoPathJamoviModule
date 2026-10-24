@@ -53,7 +53,7 @@ A results object containing:
 }
 \description{
 Sample size for an interobserver agreement study sized to reject a null
-kappa (kappa0) in favour of an alternative kappa (kappa1) at a given
+kappa (kappa0) in favor of an alternative kappa (kappa1) at a given
 two-sided significance level and power - the power approach of the
 kappaSize package. Use kappaSizeCI for a target confidence-interval width,
 and kappaSizeFixedN when the number of subjects is already fixed.

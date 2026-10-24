@@ -398,7 +398,7 @@ test_that("pct_base = 'total' gives gender shares that sum to 100 across both co
   expect_equal(tot$Female_Pct, 33.3)
   expect_equal(tot$Male_Pct, 66.7)
   expect_equal(sum(b$Female_Pct) + sum(b$Male_Pct), 100, tolerance = 0.2)
-  expect_match(res$pyramidTable$notes$pct$note, "of all 60 analysed observations")
+  expect_match(res$pyramidTable$notes$pct$note, "of all 60 analyzed observations")
   # the default keeps each column at 100
   res2 <- ap(d, bin_width = 5)
   tot2 <- res2$pyramidTable$asDF

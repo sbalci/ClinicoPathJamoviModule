@@ -693,7 +693,7 @@ nogoldstandardBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
 #' @param seed Base random seed for the reproducible latent-class multi-start
 #'   search and bootstrap resampling. Each start is offset from this base, so
 #'   changing it shifts the whole reproducible sequence; the default (0)
-#'   reproduces the previous behaviour.
+#'   reproduces the previous behavior.
 #' @param showSummary Show an optional plain-language summary. The summary
 #'   describes the fitted quantities and their assumptions; it is not clinical
 #'   guidance.

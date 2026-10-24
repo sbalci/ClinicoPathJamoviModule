@@ -5,7 +5,7 @@ Every check corresponds to something the jamovi library reviewer verifies (see
 vignettes/jamovi_library_review_guide.md section 1). Exit status is non-zero if
 any BLOCKING check fails.
 """
-import os, re, sys, glob, subprocess
+import os, re, sys, glob, subprocess, functools
 import yaml
 
 # --root <dir> runs every check against another module tree, e.g. a generated submodule
@@ -72,6 +72,14 @@ def check_news():
         return
     dv = re.search(r'^Version:\s*(\S+)', open('DESCRIPTION', encoding='utf-8').read(), re.M).group(1)
     parts = dv.split('.')
+    # The newest heading names what users read as "the current release"; a four-component one names a
+    # dev build the workflow never publishes (2026-09-22 and 2026-10-23 OncoPath [LOW]). Older
+    # four-component headings are history - every module has them - so only the newest is judged.
+    newest = re.search(r'^#+ .*?\b(\d+(?:\.\d+)+)\b', open('NEWS.md', encoding='utf-8').read(), re.M)
+    if newest and newest.group(1).count('.') >= 3:
+        WARN.append('newest NEWS.md heading is %s, a four-component dev build the release workflow never '
+                    'publishes; changelog headings name the three-component versions in DESCRIPTION'
+                    % newest.group(1))
     if len(parts) != 3 or not all(x.isdigit() for x in parts):
         print('  NEWS.md: %s is a %d-part dev build - the release workflow publishes nothing' % (dv, len(parts)))
         return
@@ -193,7 +201,18 @@ def check_artifacts():
     arts = [f for f in files if f.endswith(('.tar.gz', '.jmo')) or f.startswith(('build/', 'dist/'))]
     if arts:
         FAIL.append('committed build artifacts: %s' % ', '.join(cap(sorted(set(arts)), 6)))
-    print('  build artifacts committed: %d' % len(set(arts)))
+    # testthat writes _problems/ and testthat-problems.rds only when tests FAIL, so a tracked copy
+    # means the commit shipped a red suite; settings.local.json holds a personal absolute path.
+    # Tracked files stay tracked after a .gitignore entry: `git rm --cached` (2026-10-23 OncoPath [LOW]).
+    tracked = set(subprocess.run(['git', 'ls-files'], capture_output=True, text=True).stdout.split('\n')) - \
+        set(subprocess.run(['git', 'ls-files', '--deleted'], capture_output=True, text=True).stdout.split('\n'))
+    scratch = [f for f in sorted(tracked) if '/_problems/' in f or f.endswith('testthat-problems.rds')
+               or f in ('.claude/settings.local.json', '.Rhistory', '.RData')]
+    # FAIL since 2026-10-24: untracked in all six repositories
+    if scratch:
+        FAIL.append('%d tracked local scratch file(s) - failing-test output or personal config; '
+                    'git rm --cached and .gitignore them: %s' % (len(scratch), ', '.join(cap(scratch, 6))))
+    print('  build artifacts committed: %d; tracked scratch: %d' % (len(set(arts)), len(scratch)))
 
 
 def check_tame():
@@ -262,6 +281,7 @@ def _safe_yaml(p):
         return None
 
 
+@functools.lru_cache(maxsize=None)
 def _shipped(name):
     """Production menuGroups carry no D (draft), P (pending) or T (JamoviTest) suffix."""
     a = _safe_yaml('jamovi/%s.a.yaml' % name) or {}
@@ -1138,6 +1158,113 @@ def check_init_row_structure():
     print('  fixed rows built in .run(): %d tables (%d shipped)' % (len(hits), len(ship)))
 
 
+# British/American pairs seen mixed in one module's user-visible text (2026-10-23 OncoPath [LOW]).
+_SPELLING = [('tumour', 'tumor'), ('analysed', 'analyzed'), ('colour', 'color'), ('behaviour', 'behavior'),
+             ('centre', 'center'), ('randomis', 'randomiz'), ('normalis', 'normaliz'), ('summaris', 'summariz')]
+
+
+def check_label_case():
+    """All-caps notice titles read as shouting and are harder to translate; the module's other
+    notices are sentence case, as jmv's are (2026-10-23 OncoPath [LOW]: 34 of waterfall's 38).
+    Spelling is American (project decision 2026-10-24); all five modules were swept the same day, so a
+    British form in shipped text FAILs (section 12)."""
+    hits = []
+    text = []
+    for p, i, s in _dot_literals():
+        t = re.sub(r'<[^>]*>|\{[^}]*\}|%[-+ #0-9.]*[a-z]', ' ', s)
+        text.append((p, t))
+        words = re.findall(r'[A-Za-z]{2,}', t)
+        if len(words) >= 2 and any(len(w) >= 5 for w in words) and all(w.isupper() for w in words):
+            hits.append((p, '%s:%d "%s"' % (os.path.basename(p), i, s[:40])))
+    ship = [x for p, x in hits if _file_shipped(p)]
+    UNSHIPPED['label_caps'] = len(hits) - len(ship)
+    # FAIL since 2026-10-24: 0 shipped in the umbrella and all five siblings after the cross-module sweep
+    if ship:
+        FAIL.append('%d shipped all-caps .() strings (notice titles are sentence case): %s'
+                    % (len(ship), ', '.join(cap(ship))))
+    low = ' '.join(t for p, t in text if _file_shipped(p)).lower()
+    for p in glob.glob('jamovi/*.a.yaml') + glob.glob('jamovi/*.r.yaml'):
+        if _shipped(os.path.basename(p).split('.')[0]):
+            low += ' ' + ' '.join(re.findall(r'^\s*(?:title|label|description):\s*(.+)$',
+                                             open(p, encoding='utf-8').read(), re.M)).lower()
+    # American spelling is the project convention (2026-10-24) and every module is swept, so any British
+    # form in shipped text is a FAIL, not just a module that mixes both.
+    british = [b for b, a in _SPELLING if re.search(r'\b' + b, low)]
+    if british:
+        FAIL.append('British spelling in shipped user-visible text (convention: American): %s' % ', '.join(british))
+    print('  all-caps .() strings: %d (%d shipped); British spellings: %s'
+          % (len(hits), len(ship), ', '.join(british) or 'none'))
+
+
+def check_collapsebox_nested():
+    """Variables first, then top-level CollapseBoxes. A CollapseBox inside a LayoutBox of
+    always-open Label sections pushes the rest of the panel down when opened
+    (2026-10-23 OncoPath [LOW], diagnosticmeta.u.yaml)."""
+    hits = []
+    for p in glob.glob('jamovi/*.u.yaml'):
+        for top in (_safe_yaml(p) or {}).get('children') or []:
+            if isinstance(top, dict) and any(d.get('type') == 'CollapseBox' for d in _dicts(top.get('children') or [])):
+                hits.append(os.path.basename(p)[:-7])
+                break
+    ship = sorted(n for n in hits if _shipped(n))
+    UNSHIPPED['collapsebox_nested'] = len(hits) - len(ship)
+    # FAIL since 2026-10-24: 0 shipped in the umbrella and all five siblings after diagnosticmeta was regrouped
+    if ship:
+        FAIL.append('%d shipped panels nest a CollapseBox below the top level: %s' % (len(ship), ', '.join(cap(ship))))
+    print('  nested CollapseBox: %d panels (%d shipped)' % (len(hits), len(ship)))
+
+
+_FWD = re.compile(r'upcoming release|future release|coming soon|will be available|not yet available|'
+                  r'planned for a future', re.I)
+
+
+def check_forward_refs():
+    """User-visible text must not point to an analysis or feature the user cannot find. The library
+    listing shows the description, so "use the lesion-level analysis. It will be available in
+    upcoming releases." sends the reader to an empty menu (2026-10-23 OncoPath [LOW]; section 27).
+    Add the pointer back when the thing ships."""
+    hits = []
+    for p in glob.glob('jamovi/*.a.yaml') + glob.glob('jamovi/*.r.yaml') + ['jamovi/0000.yaml', 'DESCRIPTION', 'README.md']:
+        if not os.path.exists(p):
+            continue
+        name = os.path.basename(p).split('.')[0]
+        live = _shipped(name) if p.endswith(('.a.yaml', '.r.yaml')) else True
+        for i, l in enumerate(open(p, encoding='utf-8', errors='replace'), 1):
+            if _FWD.search(l) and not l.lstrip().startswith('#'):
+                hits.append((live, '%s:%d' % (p, i)))
+    for p, i, s in _dot_literals():
+        if _FWD.search(s):
+            hits.append((_file_shipped(p), '%s:%d' % (p, i)))
+    ship = [x for live, x in hits if live]
+    UNSHIPPED['forward_refs'] = len(hits) - len(ship)
+    if ship:
+        WARN.append('%d shipped user-visible strings promise something not yet released: %s'
+                    % (len(ship), ', '.join(cap(ship))))
+    print('  forward references: %d (%d shipped)' % (len(hits), len(ship)))
+
+
+_TAG = re.compile(r'library-audit \d{4}-\d{2}-\d{2}')  # the tag, not prose about the tests
+
+
+def check_review_breadcrumbs():
+    """A library-audit tag is for the reviewer reading code. README/DESCRIPTION/NEWS.md are read by
+    users, and NEWS.md is the GitHub release body; a test that REQUIRES a tag there makes the user
+    files carry review bookkeeping to stay green (2026-10-23 OncoPath [LOW]). Test the claim
+    the finding was about instead."""
+    files = [f for f in ('README.md', 'README.Rmd', 'DESCRIPTION', 'NEWS.md')
+             if os.path.exists(f) and _TAG.search(open(f, encoding='utf-8', errors='replace').read())]
+    tests = []
+    for p in sorted(glob.glob('tests/testthat/*.R')):
+        for i, l in enumerate(open(p, encoding='utf-8', errors='replace'), 1):
+            if 'library-audit' in l and 'grepl' in l and re.search(r'readme|desc|news', l, re.I):
+                tests.append('%s:%d' % (os.path.basename(p), i))
+    # FAIL since 2026-10-24: 0 in all six trees
+    if files or tests:
+        FAIL.append('review breadcrumbs in user-facing files %s; tests requiring one: %s'
+                    % (files or 'none', ', '.join(cap(tests)) or 'none'))
+    print('  review breadcrumbs: %d user-facing files, %d test assertions' % (len(files), len(tests)))
+
+
 if __name__ == '__main__':
     print('RELEASE GATE  %s\n' % ROOT)
     for fn in (check_versions, check_news, check_license, check_refs, check_clearwith, check_renderfun,
@@ -1147,7 +1274,8 @@ if __name__ == '__main__':
                check_i18n_po_formats, check_notice_title_colour, check_min_app,
                check_column_formats, check_fabricated_stats, check_state_payload,
                check_description_newlines, check_issue_urls, check_dataset_descriptions,
-               check_sentinel_insert, check_init_row_structure):
+               check_sentinel_insert, check_init_row_structure, check_label_case,
+               check_collapsebox_nested, check_forward_refs, check_review_breadcrumbs):
         try:
             fn()
         except Exception as e:

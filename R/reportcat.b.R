@@ -91,7 +91,7 @@ reportcatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 if (length(empty_vars) == length(myvars)) {
                     jmvcore::reject(
                         .fmt(
-                            .("Every selected variable was empty or all-missing, so there is nothing to summarise: {vars}. Select at least one variable that has observed categories."),
+                            .("Every selected variable was empty or all-missing, so there is nothing to summarize: {vars}. Select at least one variable that has observed categories."),
                             vars = paste(empty_vars, collapse = ", ")),
                         code = "all_empty")
                 }

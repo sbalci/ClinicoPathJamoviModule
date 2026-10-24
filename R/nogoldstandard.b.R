@@ -128,10 +128,10 @@ nogoldstandardClass <- if (requireNamespace("jmvcore")) {
                 # body was translated -- and the severity marker is what a skimming reader
                 # triages on. Built once here so `.()` is not called inside the vapply.
                 labels <- c(
-                    ERROR          = .("ERROR"),
-                    STRONG_WARNING = .("STRONG WARNING"),
-                    WARNING        = .("WARNING"),
-                    INFO           = .("INFO")
+                    ERROR          = .("Error"),
+                    STRONG_WARNING = .("Strong warning"),
+                    WARNING        = .("Warning"),
+                    INFO           = .("Info")
                 )
 
                 blocks <- vapply(private$.noticeList[notice_order], function(notice) {
@@ -568,7 +568,7 @@ nogoldstandardClass <- if (requireNamespace("jmvcore")) {
                 } else {
                     private$.addNotice(
                         "INFO",
-                        sprintf(.("Analysing %d cases"), n_after),
+                        sprintf(.("Analyzing %d cases"), n_after),
                         sprintf(.("All %d cases have a result for every selected test."), n_after)
                     )
                 }
@@ -611,7 +611,7 @@ nogoldstandardClass <- if (requireNamespace("jmvcore")) {
                     constant <- names(binary_data)[vapply(binary_data,
                         function(x) length(unique(x)) < 2, logical(1))]
                     if (length(constant) > 0)
-                        jmvcore::reject(.("Latent class analysis needs both positive and not-positive results for every test among the analysed cases. Only one result was observed for: {}. Such a test carries no information about the latent classes. Check that the correct positive level is selected, or remove the test."),
+                        jmvcore::reject(.("Latent class analysis needs both positive and not-positive results for every test among the analyzed cases. Only one result was observed for: {}. Such a test carries no information about the latent classes. Check that the correct positive level is selected, or remove the test."),
                                         code = NULL, paste0("'", constant, "'", collapse = ", "))
                 }
 

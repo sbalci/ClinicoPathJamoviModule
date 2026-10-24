@@ -618,7 +618,7 @@ outcomeorganizerBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
 #'   administrative censoring actually truncate follow-up and reset event
 #'   status, and lets the event hierarchy keep the earliest priority event per
 #'   patient instead of writing a later one back onto earlier records. Leave
-#'   empty to keep the previous behaviour.
+#'   empty to keep the previous behavior.
 #' @param analysistype The type of survival analysis to prepare the outcome
 #'   for.
 #' @param multievent If true, allows for multiple event types (e.g., death

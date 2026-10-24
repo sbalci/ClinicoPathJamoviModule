@@ -363,7 +363,7 @@ jjsegmentedtotalbarClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R
                 # Variable is a frequency. Calling sum(y) "observations" reported
                 # 26678 "observations" for 90 patients when y was a cost in dollars.
                 private$.addNotice("INFO", "Analysis Info",
-                    sprintf(.("Analysed %s rows across %s categories and %s segments. The bars total %s of '%s' - a summed quantity, which is the sample size only if that variable counts cases."),
+                    sprintf(.("Analyzed %s rows across %s categories and %s segments. The bars total %s of '%s' - a summed quantity, which is the sample size only if that variable counts cases."),
                             private$.fmtTotal(private$.n_rows_analysed %||% NA_real_),
                             n_categories, n_segments,
                             private$.fmtTotal(n_total), self$options$y_var))

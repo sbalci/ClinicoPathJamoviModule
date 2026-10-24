@@ -9,7 +9,7 @@ jas: '1.2'
 
 description:
     main: >
-        Use this when you have one tumour burden number per patient: either a percent
+        Use this when you have one tumor burden number per patient: either a percent
         change from baseline you have already calculated (one row per patient), or a single
         measurement recorded at each visit (one row per patient per visit). It draws waterfall
         and spider plots, assigns each patient a best response from their largest shrinkage
@@ -22,8 +22,8 @@ description:
         lesions it cannot sum target lesions, detect a new lesion, or judge non-target
         progression, and it cannot apply the 4-week confirmation rule (a confirmation column
         only adds markers to the plot; to count confirmed responses, supply confirmed
-        categories through the category override). If your data list each lesion separately, use the
-        lesion-level RECIST v1.1 analysis. It will be available in upcoming releases.
+        categories through the category override). If your data list each lesion separately, sum the
+        target lesions per patient and visit first.
     # Kept commented, as in the great majority of this module's .a.yaml files:
     # `dontrun: false` emits a BARE \examples{} block, so R CMD check runs it.
     # waterfall ships to OncoPath, which does NOT carry waterfall_test (only
@@ -110,19 +110,19 @@ options:
       description:
           R: >
             Optional grouping variable for coloring bars by patient groups (e.g., treatment arms, disease subtypes).
-            Bars are coloured by group when Color by is set to Patient Groups (jamovi sets it when a group is chosen; from R, set colorBy = "group").
+            Bars are colored by group when Color by is set to Patient groups (jamovi sets it when a group is chosen; from R, set colorBy = "group").
           jamovi: >
             Optional grouping variable for coloring bars by patient groups (e.g., treatment arms, disease subtypes).
-            Bars are coloured by group when Color by is set to Patient Groups (jamovi sets it when a group is chosen; from R, set colorBy = "group").
+            Bars are colored by group when Color by is set to Patient groups (jamovi sets it when a group is chosen; from R, set colorBy = "group").
 
 
     - name: inputType
       title: Data input type
       type: List
       options:
-        - title: "Percentage Changes"
+        - title: "Percentage changes"
           name: percentage
-        - title: "Raw Measurements"
+        - title: "Raw measurements"
           name: raw
       default: percentage
       description:
@@ -142,14 +142,14 @@ options:
       options:
         - title: "Not stated (5 mm rule not applied)"
           name: unspecified
-        - title: "Millimetres (mm)"
+        - title: "Millimeters (mm)"
           name: mm
-        - title: "Centimetres (cm)"
+        - title: "Centimeters (cm)"
           name: cm
       default: unspecified
       description:
           R: >
-            Unit of the raw tumour measurements (raw input only). When stated, progression also
+            Unit of the raw tumor measurements (raw input only). When stated, progression also
             requires the RECIST v1.1 absolute increase of at least 5 mm over the nadir, for the PD
             category and for progression in time to response and duration of response. Without
             it a small sum can be called progression on the 20 percent rule alone. Percentage input
@@ -160,7 +160,7 @@ options:
       title: Sort by
       type: List
       options:
-        - title: Best Response
+        - title: Best response
           name: response
         - title: Patient ID
           name: id
@@ -266,7 +266,7 @@ options:
           R: >
             Print the response category (CR, PR, SD, PD) above each waterfall bar, so
             the category can be read directly instead of being mapped back from the
-            bar colour.
+            bar color.
 
     - name: showSpiderLabels
       title: Patient ID labels on spider lines
@@ -283,12 +283,12 @@ options:
       default: NULL
       description:
           R: >
-            Optional patient-level variables drawn as coloured tracks beneath the
+            Optional patient-level variables drawn as colored tracks beneath the
             waterfall bars, aligned to the same patient ordering. One row of tiles per
             variable. Use for biomarker status, mutation, prior therapy, treatment arm
             or any covariate you want read off against each patient's response.
           jamovi: >
-            Optional. Variables shown as coloured annotation rows under the waterfall,
+            Optional. Variables shown as colored annotation rows under the waterfall,
             aligned with each patient's bar.
 
     - name: showThresholds
@@ -353,9 +353,9 @@ options:
       title: Color by
       type: List
       options:
-        - title: RECIST Categories (CR/PR/SD/PD)
+        - title: RECIST categories (CR/PR/SD/PD)
           name: recist
-        - title: Patient Groups
+        - title: Patient groups
           name: group
       default: recist
       description:
@@ -372,9 +372,9 @@ options:
           name: recist
         - title: Simple (teal response, orange progression)
           name: simple
-        - title: Colorful (Group Colors)
+        - title: Colorful (group colors)
           name: colorful
-        - title: Colorblind-Safe (Okabe-Ito)
+        - title: Color-blind safe (Okabe-Ito)
           name: colorblind
         - title: jamovi (follow global)
           name: jamovi
@@ -382,12 +382,12 @@ options:
       description:
           R: >
             Color scheme for waterfall plot. 'Colorful' provides distinct colors for group-based coloring;
-            'jamovi (follow global)' takes its colours from the palette set in jamovi's preferences, so the
+            'jamovi (follow global)' takes its colors from the palette set in jamovi's preferences, so the
             figure matches every other plot in the document. The former 'jamovi' choice drew the RECIST
-            colours and was identical to 'RECIST'; it was removed in favour of that name.
+            colors and was identical to 'RECIST'; it was removed in favor of that name.
           jamovi: >
             Color scheme for waterfall plot. 'Colorful' provides distinct colors for group-based coloring;
-            'jamovi (follow global)' takes its colours from the palette set in jamovi's preferences, so the
+            'jamovi (follow global)' takes its colors from the palette set in jamovi's preferences, so the
             figure matches every other plot in the document.
 
 
@@ -441,15 +441,15 @@ options:
       options:
         - title: "Assessment change (-30% or less vs above -30%)"
           name: response
-        - title: Patient Groups
+        - title: Patient groups
           name: group
       default: response
       description:
           R: >
-            Colouring for the spider plot: each point by its own change from baseline (-30 percent or
+            Coloring for the spider plot: each point by its own change from baseline (-30 percent or
             less vs above -30 percent), or each patient by group.
           jamovi: >
-            Colouring for the spider plot: each point by its own change from baseline (-30 percent or
+            Coloring for the spider plot: each point by its own change from baseline (-30 percent or
             less vs above -30 percent), or each patient by group.
 
     - name: spiderColorScheme
@@ -462,7 +462,7 @@ options:
           name: vivid
         - title: Colorful (for groups)
           name: colorful
-        - title: Colorblind-Safe (Okabe-Ito)
+        - title: Color-blind safe (Okabe-Ito)
           name: colorblind
         - title: jamovi (follow global)
           name: jamovi
@@ -477,7 +477,7 @@ options:
       title: Time unit
       type: List
       options:
-        - title: Generic (Time)
+        - title: Generic (time)
           name: generic
         - title: Days
           name: days
@@ -613,7 +613,7 @@ options:
             Random seed for the reproducible bootstrap confidence interval of the
             median response (used when 'Show Confidence Interval' is enabled).
             Change it to draw a different bootstrap sample; the default (123)
-            reproduces the previous fixed behaviour.
+            reproduces the previous fixed behavior.
 
 
 

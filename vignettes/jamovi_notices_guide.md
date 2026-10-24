@@ -3149,7 +3149,10 @@ More generally, `setVisible(FALSE)` is **not** an error mechanism — see
 ### 13.6 Reset accumulating notice elements at the top of `.run()`
 
 An append-style `.addHtmlMessage()` / `.addNotice()` helper accumulates the same
-notice N times over N run cycles. Reset every notice `Html` output at the start of
+notice N times over N run cycles. The cause is the declared `Html` item: jamovi restores it every cycle
+with its old content. A `jmvcore::Notice` inserted in `.run()` does **not** accumulate,
+because each cycle builds a fresh results tree and restores only declared items
+(measured 2026-10-24, `tests/testthat/test-zzz-jmvcore-notice-run-cycle.R`; review guide §13.6). Reset every notice `Html` output at the start of
 `.run()`. And remember that N `setContent()` calls to **one** `Html` item in a
 single `.run()` keep only the **last** — compose onto an accumulated local and
 write once:

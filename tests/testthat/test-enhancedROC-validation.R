@@ -411,7 +411,7 @@ test_that("C50 the Methods text names the cut-point criterion actually used (VAL
     expect_false(grepl("maximizing the Youden Index", r$results$methodsExplanation$content, fixed = TRUE))
     # and it names the criterion that ran
     expect_match(r$results$methodsExplanation$content, "top-left corner", fixed = TRUE)
-    expect_false(grepl("maximise the Youden index", r$results$methodsExplanation$content, fixed = TRUE))
+    expect_false(grepl("maximize the Youden index", r$results$methodsExplanation$content, fixed = TRUE))
 })
 
 test_that("C107/C108 the impact plots draw something at the default single cutoff (VAL-enhancedROC-11)", {
@@ -445,12 +445,12 @@ test_that("C113 ties count one half and a note gives the bounds for how they are
     note <- tb$notes[["ties"]]$note
     expect_match(note, "marker: 5% of case-control pairs are tied", fixed = TRUE)
     expect_match(note, "the AUC would be 0.850", fixed = TRUE)
-    expect_match(note, "favoured the non-cases 0.800", fixed = TRUE)
+    expect_match(note, "favored the non-cases 0.800", fixed = TRUE)
     expect_match(note, "not a confidence interval", fixed = TRUE)
     # Direction lower reads the same ties from the other side: AUC 0.175, bounds 0.200 and 0.150.
     lo <- erv_run(erv_d1(), "status", "marker", "Malignant", direction = "lower")$results$aucSummary
     expect_equal(erv_cell(lo, "marker", "auc"), 0.175, tolerance = 1e-12)
-    expect_match(lo$notes[["ties"]]$note, "the AUC would be 0.200, if every tie favoured the non-cases 0.150", fixed = TRUE)
+    expect_match(lo$notes[["ties"]]$note, "the AUC would be 0.200, if every tie favored the non-cases 0.150", fixed = TRUE)
     # no tied pair, no note
     expect_null(erv_run(erv_cont(), "y", "m1", "pos")$results$aucSummary$notes[["ties"]])
 })
@@ -1093,7 +1093,7 @@ test_that("a blank outcome value is missing, as an NA is, in the table, the noti
     expect_equal(erv_cell(r$results$outcomeCoding, "missing", "n"), 6)
     txt <- erv_notices(r)
     expect_match(txt, "6 rows had a missing outcome (a blank value or a missing-value level is missing, not a category).", fixed = TRUE)
-    expect_match(txt, "A predictor analysed on its own could use up to 60 rows.", fixed = TRUE)   # blanks have no outcome
+    expect_match(txt, "A predictor analyzed on its own could use up to 60 rows.", fixed = TRUE)   # blanks have no outcome
 })
 
 test_that("the missing-outcome notice counts the rows the (missing) row counts, also one that lacks a predictor", {

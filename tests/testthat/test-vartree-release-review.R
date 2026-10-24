@@ -164,8 +164,8 @@ test_that("the colour-blind palette changes node fills and the interpretation sa
   def <- vt(d, vars = c("a", "b"))
   cb  <- vt(d, vars = c("a", "b"), palette = "colorblind")
   expect_false(identical(as.character(def$text1$content), as.character(cb$text1$content)))
-  expect_match(as.character(cb$interpretation$content), "Colour-blind-safe palette applied")
-  expect_false(grepl("Colour-blind-safe", as.character(def$interpretation$content)))
+  expect_match(as.character(cb$interpretation$content), "Color-blind-safe palette applied")
+  expect_false(grepl("Color-blind-safe", as.character(def$interpretation$content)))
   # clean style overrides fills, so the palette must make no difference there
   expect_identical(as.character(vt(d, vars = "a", style = "clean")$text1$content),
                    as.character(vt(d, vars = "a", style = "clean", palette = "colorblind")$text1$content))
