@@ -1413,3 +1413,34 @@ test_that("plot states hold drawing data, and old saved states still render", {
   }
   audit_skip_unloaded(wanted)
 })
+
+# 2026-10-23 meddecide [LOW], not applicable as raised: every table named there already lists its own
+#   clearWith (placed after columns:), and no display-only toggle is in it, so ticking one restores the
+#   cells instead of clearing them. This keeps it that way (and guards the 2026-09-16 fix).
+test_that("display-only toggles are not in the clearWith of the result tables", {
+  root <- audit_source_root()
+  skip_if_not_installed("yaml")
+  named <- list(decision = c("cTable", "nTable", "ratioTable"),
+                lassologistic = c("modelSummary", "coefficients", "performance"),
+                agreement = c("irrtable", "krippTable"))
+  absent <- audit_absent(root, names(named), "jamovi/%s.r.yaml")
+  find <- function(n, name) {
+    if (!is.list(n)) return(NULL)
+    if (identical(n$name, name)) return(n)
+    for (x in n) { hit <- find(x, name); if (!is.null(hit)) return(hit) }
+    NULL
+  }
+  for (a in setdiff(names(named), absent)) {
+    r <- yaml::read_yaml(file.path(root, "jamovi", paste0(a, ".r.yaml")))
+    opts <- vapply(yaml::read_yaml(file.path(root, "jamovi", paste0(a, ".a.yaml")))$options,
+                   function(o) o$name %||% "", "")
+    toggles <- grep("^show|Guide$|Explanations$|Guidance$|Methodology|NaturalLanguage|ReportTemplate|AboutAnalysis",
+                    opts, value = TRUE)
+    for (t in named[[a]]) {
+      cw <- find(r$items, t)$clearWith
+      expect_gt(length(cw), 0L, label = paste(a, t, "has clearWith"))
+      expect_identical(intersect(toggles, unlist(cw)), character(0), label = paste(a, t))
+    }
+  }
+  audit_skip_absent(absent, root)
+})
