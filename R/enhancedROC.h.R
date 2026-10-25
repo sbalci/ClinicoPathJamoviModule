@@ -953,7 +953,7 @@ enhancedROCResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                             options=options,
                             name="instructions",
                             title="Instructions",
-                            visible=TRUE,
+                            visible="(length(outcome) == 0 || length(predictors) == 0)",
                             clearWith=list(
                                 "outcome",
                                 "predictors",

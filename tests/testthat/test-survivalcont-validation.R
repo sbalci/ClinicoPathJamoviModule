@@ -547,4 +547,81 @@ test_that("IR-survivalcont-01 to IR-survivalcont-07: Independent cold-audit regr
   low_row <- rmst_df[rmst_df$group == "low", , drop = FALSE]
   expect_equal(low_row$rmst, tau_small, tolerance = 1e-10)
   expect_equal(low_row$se, 0, tolerance = 1e-10)
+
+  # SEC-survivalcont-01: asSource() and .sourcifyOption() resist quote breakouts and undeclared options
+  payload <- 'a", system("id"), "'
+  for (opt_def in r_fc$options$options) {
+    nm <- opt_def$name
+    if (nm == "data") next
+    opts <- survivalcontOptions$new(
+      elapsedtime = "time",
+      outcome = "status",
+      outcomeLevel = "Dead",
+      contexpl = "marker"
+    )
+    opt <- opts$option(nm)
+    tryCatch({ opt$value <- payload }, error = function(e) NULL)
+    an_sec <- survivalcontClass$new(options = opts, data = d)
+    src <- an_sec$asSource()
+    parsed <- parse(text = src)
+    expect_equal(length(parsed), 1L, label = paste("asSource single expression for", nm))
+    call_fn <- parsed[[1]][[1]]
+    expect_true(is.call(call_fn) && identical(as.character(call_fn[[3]]), "survivalcont"),
+                label = paste("asSource top-level call for", nm))
+  }
+  opts_undec <- survivalcontOptions$new(
+    elapsedtime = "time",
+    outcome = "status",
+    outcomeLevel = "Dead",
+    contexpl = "marker"
+  )
+  injected_opt <- jmvcore::OptionString$new("injected_opt", "pwned", default = "")
+  opts_undec$.addOption(injected_opt)
+  an_undec <- survivalcontClass$new(options = opts_undec, data = d)
+  expect_false(grepl("injected_opt", an_undec$asSource(), fixed = TRUE))
+
+  # SEC-survivalcont-02: HTML escaping in Html outputs and single-escaping in .addHtmlMessage()
+  d_xss <- d
+  d_xss[["marker <script>alert(1)</script>"]] <- d$marker
+  r_xss <- .sc_val_run(
+    d_xss,
+    contexpl = "marker <script>alert(1)</script>",
+    person_time = TRUE,
+    showSummaries = TRUE
+  )
+  expect_false(grepl("<script>", r_xss$coxSummary$content, fixed = TRUE))
+  expect_match(r_xss$coxSummary$content, "&lt;script&gt;", fixed = TRUE)
+  expect_false(grepl("&amp;lt;script&amp;gt;", r_xss$coxSummary$content, fixed = TRUE))
+
+  # SEC-survivalcont-03: R reserved-word column name ('in') works with findcut = TRUE
+  d_res <- d
+  d_res[["in"]] <- d$marker
+  r_res <- .sc_val_run(d_res, contexpl = "in", findcut = TRUE)
+  expect_gt(nrow(r_res$coxTable$asDF), 0L)
+  expect_equal(nrow(r_res$rescutTable$asDF), 1L)
+
+  # SEC-survivalcont-04: Numeric option range backstops (rate_multiplier, rmst_tau, min_group_size, .plotYLim)
+  an_bad_num <- .sc_val_run(
+    d,
+    person_time = TRUE,
+    rmst_analysis = TRUE,
+    findcut = TRUE,
+    return_analysis = TRUE
+  )
+  opt_rm <- an_bad_num$options$option("rate_multiplier")
+  opt_rm$value <- -10L
+  opt_tau <- an_bad_num$options$option("rmst_tau")
+  opt_tau$value <- -5
+  opt_mgs <- an_bad_num$options$option("min_group_size")
+  opt_mgs$value <- 90
+  opt_yb <- an_bad_num$options$option("ybegin_plot")
+  opt_yb$value <- 0.8
+  opt_ye <- an_bad_num$options$option("yend_plot")
+  opt_ye$value <- 0.2
+  suppressWarnings(suppressMessages(an_bad_num$run()))
+  expect_match(.sc_strip_html(an_bad_num$results$warnings$content), "Invalid rate multiplier", fixed = TRUE)
+  expect_match(.sc_strip_html(an_bad_num$results$errors$content), "Invalid RMST horizon", fixed = TRUE)
+  expect_equal(nrow(an_bad_num$results$rmstTable$asDF), 0L)
+  expect_match(.sc_strip_html(an_bad_num$results$warnings$content), "Invalid minimum group size", fixed = TRUE)
+  expect_equal(an_bad_num$.__enclos_env__$private$.plotYLim(), c(0, 1))
 })

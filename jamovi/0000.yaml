@@ -1568,8 +1568,8 @@ analyses:
       test 2 only, both positive, both negative), optionally allowing the two
       tests to be conditionally dependent. For tests performed one after
       another, where the second is ordered only after a particular first result,
-      use Sequential Test Analysis instead. Note that Sequential Test Analysis
-      also offers a parallel strategy, but its combined figures assume
+      use Sequential Testing Analysis instead. Note that Sequential Testing
+      Analysis also offers a parallel strategy, but its combined figures assume
       conditional independence; this analysis is the one that models conditional
       dependence numerically.
     ribbon: analyses

@@ -22,10 +22,12 @@ items:
                - recommendPRC
                - showImbalanceWarning
 
+          # library-audit 2026-10-23 meddecide [LOW] DONE: help belongs to the empty state; shown only until
+          #   an outcome and a predictor are chosen (decisioncurve's model).
           - name: instructions
             title: Instructions
             type: Html
-            visible: true
+            visible: (length(outcome) == 0 || length(predictors) == 0)
             clearWith:
                 - outcome
                 - predictors

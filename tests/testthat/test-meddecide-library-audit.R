@@ -1353,3 +1353,24 @@ test_that("notice panels name their severity, errors are reported once, no stale
   }
   audit_skip_absent(absent, root)
 })
+
+# library-audit 2026-10-23 meddecide [LOW] DONE: help sits in the empty state - cotest's guidance is off
+#   by default (it has no empty state) and enhancedROC's instructions show only until inputs are chosen.
+test_that("instructional panels do not sit above every result", {
+  wanted <- c("cotest", "enhancedROC")
+  loaded <- audit_loaded(wanted)
+  if ("cotest" %in% loaded) expect_false(cotestOptions$new()$showGuidance)
+  if ("enhancedROC" %in% loaded) {
+    set.seed(2)
+    d <- data.frame(y = factor(rep(c("neg", "pos"), each = 20)), s = c(stats::rnorm(20), stats::rnorm(20, 1)))
+    # outcome chosen, no predictor yet: still the empty state (no variables at all trips jmvcore's select())
+    empty <- enhancedROCClass$new(options = enhancedROCOptions$new(outcome = "y"), data = d)
+    suppressWarnings(empty$init())
+    expect_true(empty$results$results$instructions$visible)
+    full <- enhancedROCClass$new(options = enhancedROCOptions$new(outcome = "y", positiveClass = "pos",
+                                                                  predictors = "s"), data = d)
+    suppressWarnings(full$init())
+    expect_false(full$results$results$instructions$visible)
+  }
+  audit_skip_unloaded(wanted)
+})

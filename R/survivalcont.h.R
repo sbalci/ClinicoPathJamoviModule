@@ -285,6 +285,7 @@ survivalcontOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
             private$..rate_multiplier <- jmvcore::OptionInteger$new(
                 "rate_multiplier",
                 rate_multiplier,
+                min=1,
                 default=100)
             private$..rmst_analysis <- jmvcore::OptionBool$new(
                 "rmst_analysis",

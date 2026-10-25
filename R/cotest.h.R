@@ -16,7 +16,7 @@ cotestOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             cond_dep_pos = 0.05,
             cond_dep_neg = 0.05,
             prevalence = 0.1,
-            showGuidance = TRUE,
+            showGuidance = FALSE,
             fnote = FALSE,
             fagan = FALSE,
             preset = "custom", ...) {
@@ -84,7 +84,7 @@ cotestOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             private$..showGuidance <- jmvcore::OptionBool$new(
                 "showGuidance",
                 showGuidance,
-                default=TRUE)
+                default=FALSE)
             private$..fnote <- jmvcore::OptionBool$new(
                 "fnote",
                 fnote,
@@ -328,8 +328,8 @@ cotestBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' only, both positive, both negative), optionally allowing the two tests to 
 #' be conditionally dependent. For tests performed one after another, where 
 #' the second is ordered only after a particular first result, use Sequential 
-#' Test Analysis instead. Note that Sequential Test Analysis also offers a 
-#' parallel strategy, but its combined figures assume conditional 
+#' Testing Analysis instead. Note that Sequential Testing Analysis also offers 
+#' a parallel strategy, but its combined figures assume conditional 
 #' independence; this analysis is the one that models conditional dependence 
 #' numerically.
 #' 
@@ -456,7 +456,7 @@ cotest <- function(
     cond_dep_pos = 0.05,
     cond_dep_neg = 0.05,
     prevalence = 0.1,
-    showGuidance = TRUE,
+    showGuidance = FALSE,
     fnote = FALSE,
     fagan = FALSE,
     preset = "custom") {

@@ -15,7 +15,7 @@ cotest(
   cond_dep_pos = 0.05,
   cond_dep_neg = 0.05,
   prevalence = 0.1,
-  showGuidance = TRUE,
+  showGuidance = FALSE,
   fnote = FALSE,
   fagan = FALSE,
   preset = "custom"
@@ -115,8 +115,8 @@ for every result combination (either test positive, test 1 only, test 2
 only, both positive, both negative), optionally allowing the two tests to
 be conditionally dependent. For tests performed one after another, where
 the second is ordered only after a particular first result, use Sequential
-Test Analysis instead. Note that Sequential Test Analysis also offers a
-parallel strategy, but its combined figures assume conditional
+Testing Analysis instead. Note that Sequential Testing Analysis also offers
+a parallel strategy, but its combined figures assume conditional
 independence; this analysis is the one that models conditional dependence
 numerically.
 }

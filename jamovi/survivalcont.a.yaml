@@ -451,6 +451,7 @@ options:
     - name: rate_multiplier
       title: "Rate multiplier"
       type: Integer
+      min: 1
       default: 100
       description: >-
         Specify the multiplier for incidence rates (for example, 100 reports events per

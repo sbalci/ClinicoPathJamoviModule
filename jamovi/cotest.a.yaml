@@ -15,7 +15,7 @@ description:
         (either test positive, test 1 only, test 2 only, both positive, both negative),
         optionally allowing the two tests to be conditionally dependent. For tests performed
         one after another, where the second is ordered only after a particular first result,
-        use Sequential Test Analysis instead. Note that Sequential Test Analysis also offers a
+        use Sequential Testing Analysis instead. Note that Sequential Testing Analysis also offers a
         parallel strategy, but its combined figures assume conditional independence; this
         analysis is the one that models conditional dependence numerically.
     R:
@@ -183,10 +183,12 @@ options:
             Requires a value between 0.001 and 0.999.
 
     # Display options
+    # library-audit 2026-10-23 meddecide [LOW] DONE: off by default - cotest has no empty state, so the
+    #   welcome panel sat above every result.
     - name: showGuidance
       title: Guidance and explanations
       type: Bool
-      default: true
+      default: false
       description:
           R: >
             Show the introductory guidance panel and the explanation of conditional dependence.
