@@ -452,7 +452,7 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
             },
 
             # ======================================================================
-            # Notice Management Helper Methods (HTML output to avoid serialization)
+            # Notice Management Helper Methods (Html panels: a Notice has no title or body)
             # ======================================================================
 
             # Initialize notice collection list
@@ -490,12 +490,14 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
                     return()
                 }
 
-                # Map notice types to colors and icons
+                # Map notice types to tints and severity words
                 typeStyles <- list(
-                    ERROR = list(bgcolor = "rgba(220, 38, 38, 0.10)", border = "#fca5a5", icon = ""),
-                    STRONG_WARNING = list(bgcolor = "rgba(234, 88, 12, 0.10)", border = "#fdba74", icon = ""),
-                    WARNING = list(bgcolor = "rgba(202, 138, 4, 0.12)", border = "#fde047", icon = ""),
-                    INFO = list(bgcolor = "rgba(37, 99, 235, 0.08)", border = "#93c5fd", icon = "")
+                    # library-audit 2026-10-23 meddecide [LOW] DONE: the severity is a word in the title, not colour
+                    #   alone (the empty icon left an error and a note looking alike to a colour-blind reader).
+                    ERROR = list(bgcolor = "rgba(220, 38, 38, 0.10)", border = "#fca5a5", label = .("Error")),
+                    STRONG_WARNING = list(bgcolor = "rgba(234, 88, 12, 0.10)", border = "#fdba74", label = .("Important warning")),
+                    WARNING = list(bgcolor = "rgba(202, 138, 4, 0.12)", border = "#fde047", label = .("Warning")),
+                    INFO = list(bgcolor = "rgba(37, 99, 235, 0.08)", border = "#93c5fd", label = .("Note"))
                 )
 
                 html <- "<div style='margin: 10px 0;'>"
@@ -512,7 +514,7 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
                         "border-left: 4px solid ", style$border, "; ",
                         "padding: 12px; margin: 8px 0; border-radius: 4px;'>",
                         "<strong>",
-                        style$icon, " ", private$.safeHtmlOutput(notice$title), "</strong><br>",
+                        private$.safeHtmlOutput(style$label), ": ", private$.safeHtmlOutput(notice$title), "</strong><br>",
                         "<span style='color: inherit;'>", private$.safeHtmlOutput(notice$content), "</span>",
                         "</div>"
                     )

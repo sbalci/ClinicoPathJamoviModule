@@ -34,7 +34,9 @@ ir_notices <- function(res) {
   map <- c("rgba(220, 38, 38, 0.10)" = "ERROR", "rgba(234, 88, 12, 0.10)" = "STRONG_WARNING",
            "rgba(202, 138, 4, 0.12)" = "WARNING", "rgba(37, 99, 235, 0.08)" = "INFO")
   data.frame(type = unname(map[sub(";.*$", "", chunks)]),
-             title = trimws(sub("^.*?<strong> ?(.*?)</strong>.*$", "\\1", chunks, perl = TRUE)),
+             # library-audit 2026-10-23 meddecide [LOW]: titles now start with the severity in words
+             title = sub("^(Error|Important warning|Warning|Note): ", "",
+                         trimws(sub("^.*?<strong> ?(.*?)</strong>.*$", "\\1", chunks, perl = TRUE))),
              stringsAsFactors = FALSE)
 }
 

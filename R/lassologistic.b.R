@@ -158,16 +158,10 @@ lassologisticClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                     }
                 }
 
-                if (!requireNamespace("glmnet", quietly = TRUE)) {
-                    # Was the only raw untranslated panel in an otherwise fully
-                    # translated file: a non-English user hit an English-only wall.
-                    self$results$todo$setContent(paste0(
-                        "<div class='alert alert-danger'><h4>", .("Missing Dependency"), "</h4>",
-                        "<p>", .("Package 'glmnet' is required. Install with: install.packages('glmnet')"),
-                        "</p></div>"
-                    ))
-                    return()
-                }
+                # library-audit 2026-10-23 meddecide [LOW] DONE: a missing required package is fatal, so it is a
+                #   reject(), not a banner followed by a normal return.
+                if (!requireNamespace("glmnet", quietly = TRUE))
+                    jmvcore::reject(.("Package 'glmnet' is required. Install with: install.packages('glmnet')"))
 
                 if (is.null(self$options$outcome) ||
                     is.null(self$options$explanatory) ||
@@ -274,15 +268,8 @@ lassologisticClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                     # arrives here as an error carrying code = "restart" and must
                     # leave before anything is rendered.
                     if (identical(e$code, "restart")) stop(e)
-                    msg_html <- jmvcore::htmlEscape(e$message)
-                    self$results$todo$setContent(paste0(
-                        "<div class='alert alert-danger'><h4>", .("Data Error"), "</h4><p>",
-                        msg_html, "</p></div>"
-                    ))
-                    private$.addNotice(
-                        "ERROR", .("Data Error"),
-                        sprintf(.("Data preparation failed: %s"), e$message)
-                    )
+                    # Reported once: the re-raised error is jamovi's error message, so no red banner
+                    # or ERROR notice repeats it (library-audit 2026-10-23 meddecide [LOW]).
                     private$.renderNotices()
                     # .cleanData() refuses through jmvcore::reject(), which is a plain
                     # simpleError. Swallowing it made .run() return NORMALLY, so jamovi
@@ -316,16 +303,7 @@ lassologisticClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                     # jamovi's error state instead of being downgraded to a normal
                     # return with blank tables underneath it.
                     if (identical(e$code, "restart")) stop(e)
-                    msg_html <- jmvcore::htmlEscape(e$message)
-                    self$results$todo$setContent(paste0(
-                        "<div class='alert alert-danger'><h4>", .("Model Fitting Error"), "</h4><p>",
-                        msg_html, "</p></div>"
-                    ))
-                    private$.addNotice(
-                        "ERROR", .("Model Fitting Error"),
-                        sprintf(.("Penalized model fitting failed: %s"), e$message)
-                    )
-                    private$.renderNotices()
+                    private$.renderNotices()   # reported once, by the re-raised error
                     stop(e)
                 })
 

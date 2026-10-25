@@ -413,7 +413,9 @@ kappaSizeFixedNClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
                 red   = "<div style='margin:6px 0; padding:8px 10px; border-left:3px solid #d9534f; background-color: rgba(222, 55, 55, 0.06); color: inherit;'>",
                 amber = "<div style='margin:6px 0; padding:8px 10px; border-left:3px solid #ec971f; background-color: rgba(227, 144, 33, 0.07); color: inherit;'>",
                 info  = "<div style='margin:6px 0; padding:8px 10px; border-left:3px solid #3c8dbc; background-color: rgba(72, 138, 188, 0.06); color: inherit;'>")
-            paste0(div, "<b>", title, "</b> ", paste(c(...), collapse = " "), "</div>")
+            # library-audit 2026-10-23 meddecide [LOW] DONE: the severity is a word in the title, not the border colour alone.
+            label <- switch(kind, red = .("Important warning"), amber = .("Warning"), info = .("Note"))
+            paste0(div, "<b>", label, ": ", title, "</b> ", paste(c(...), collapse = " "), "</div>")
         },
 
         # IR-04: TRUE when some design within the option limits (n 1e6, alpha 0.20, the current number of

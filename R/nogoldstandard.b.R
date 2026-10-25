@@ -13,10 +13,10 @@ nogoldstandardClass <- if (requireNamespace("jmvcore")) {
         private = list(
             .preset_info = NULL,
 
-            # Notice collection helpers. A single Preformatted (plain-text) output item:
-            # avoids BOTH the jmvcore::Notice serialization error from
-            # self$results$insert(999, Notice) AND any HTML in notices (project convention:
-            # notice content must be plain text). ====
+            # Notice collection helpers. A single Preformatted (plain-text) output item, because
+            # a jmvcore::Notice holds one plain-text string with no title and these cautions
+            # need a title and a paragraph (jmvcore::Notice itself serializes fine; the old
+            # crash was Group$insert() past the end of the results - review guide section 13).
             .noticeList = list(),
             # One bootstrap pass per run, shared by prevalence and every test metric.
             .boot_cache = NULL,
@@ -143,8 +143,8 @@ nogoldstandardClass <- if (requireNamespace("jmvcore")) {
                 self$results$notices$setContent(paste(blocks, collapse = "\n"))
             },
 
-            # The Preformatted notice accumulator is deliberate: dynamic Notice objects are
-            # not serializable in this result tree. LCA identifiability, small-sample,
+            # The Preformatted notice accumulator is deliberate: each caution has a title and a
+            # paragraph, which a Notice cannot carry yet. LCA identifiability, small-sample,
             # conditional-independence and multi-start convergence cautions are regression-tested.
 
             .init = function() {

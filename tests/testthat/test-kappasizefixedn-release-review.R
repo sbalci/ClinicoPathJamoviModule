@@ -122,7 +122,9 @@ test_that("kappaSize's walk past the model floor is never shown as the bound", {
 })
 
 
-test_that("stale results do not survive a rejected re-run", {
+# library-audit 2026-10-23 meddecide [MEDIUM] DONE: a rejected re-run leaves the panels to jamovi's error
+#   state (greyed in place, guide section 5); a successful run rewrites them.
+test_that("a rejected re-run keeps the previous result for jamovi's error presentation", {
     o <- ClinicoPath:::kappaSizeFixedNOptions$new(outcome = "2", kappa0 = 0.60,
              props = "0.30, 0.70", raters = "2", alpha = 0.05, n = 100)
     a <- ClinicoPath:::kappaSizeFixedNClass$new(options = o, data = data.frame(x = 1))
@@ -133,8 +135,10 @@ test_that("stale results do not survive a rejected re-run", {
 
     op <- o$option("props"); op$value <- "0.30, 0.60"     # no longer sums to 1
     expect_error(p$.run(), "sum to 1")
-    expect_equal(a$results$text1$content, "")             # previous numbers must be gone
-    expect_equal(a$results$text2$content, "")
+    expect_match(a$results$text1$content, "lower limit for kappa")   # greyed under the error
+    op$value <- "0.40, 0.60"
+    p$.run()
+    expect_match(a$results$text1$content, "lower limit for kappa")
 })
 
 

@@ -942,7 +942,8 @@ kappaSizeCIClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 # (n = 118, kappa0 = 0.60, target [0.40, 0.80]) gives [0.400, 0.749] at
                 # khat = 0.60 but [0.348, 0.708] at khat = 0.55 -- only 0.54 SD below kappa0 and
                 # already short of the 0.40 floor.
-                "<b>", .("This is a planning expectation, not a guarantee."), "</b> ",
+                # library-audit 2026-10-23 meddecide [LOW] DONE: the severity is a word in the title, not the border colour alone.
+                "<b>", .("Note"), ": ", .("This is a planning expectation, not a guarantee."), "</b> ",
                 .("The sample size delivers the stated limits only if the study observes the anticipated kappa. Roughly half of such studies observe less and finish with a lower limit short of the target, so plan on a conservative anticipated kappa or enrol above the figure shown."), " ",
                 # Agreement software rarely computes the goodness-of-fit interval: ClinicoPath's own
                 # agreement analysis gives Cohen's kappa a Wald or Fisher-z interval and pooled Fleiss'
@@ -1012,7 +1013,7 @@ kappaSizeCIClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                     .("Consider using fewer raters, or recruiting more subjects than the figure shown.")
                 warn <- paste0(warn,
                     "<div style='margin:6px 0; padding:8px 10px; border-left:3px solid #ec971f; background-color: rgba(227, 144, 33, 0.07); color: inherit;'>",
-                    "<b>", .("Sparse categories."), "</b> ",
+                    "<b>", .("Warning"), ": ", .("Sparse categories."), "</b> ",
                     .fmt(
                         # "{below} of {total} cells are below 5" printed "1 of 4 cells are below 5":
                         # worded so the count needs no singular/plural agreement.
@@ -1033,7 +1034,7 @@ kappaSizeCIClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             if (isTRUE(min_prop < 0.05) && isTRUE(is.finite(required_n))) {
                 warn <- paste0(warn,
                     "<div style='margin:6px 0; padding:8px 10px; border-left:3px solid #ec971f; background-color: rgba(227, 144, 33, 0.07); color: inherit;'>",
-                    "<b>", .("Rare category."), "</b> ",
+                    "<b>", .("Warning"), ": ", .("Rare category."), "</b> ",
                     .fmt(
                         .("The rarest category is expected in {share} of ratings, so each rater is expected to place only about {k} of the {n} subjects in it. Kappa depends strongly on prevalence (Byrt, Bishop and Carlin): when a category is this rare, high raw agreement can coexist with a low kappa, the estimate rests on those few subjects, and a kappa measured here cannot be assumed to generalize to a setting where the category is more common. Report the prevalence and the category-specific agreement (the proportion of that category's ratings that another rater matched) beside kappa."),
                         share = paste0(private$.fmtNum(100 * min_prop, 3), "%"),
@@ -1052,7 +1053,7 @@ kappaSizeCIClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             if (!is.na(required_n) && required_n < 25) {
                 warn <- paste0(warn,
                     "<div style='margin:6px 0; padding:8px 10px; border-left:3px solid #ec971f; background-color: rgba(227, 144, 33, 0.07); color: inherit;'>",
-                    "<b>", .("Small sample."), "</b> ",
+                    "<b>", .("Warning"), ": ", .("Small sample."), "</b> ",
                     .("The required sample size is below 25. For a binary outcome, the goodness-of-fit interval this calculation assumes was found close to its stated coverage from about 25 subjects when the rarer category makes up at least about a fifth of the ratings (Donner and Eliasziw; Altaye, Donner and Klar); for three to five categories no such figure was given, and the expected cell counts are the guide (Rotondi and Donner). Below 25 subjects it has not been shown to hold, so consider enrolling at least 25 subjects."),
                     "</div>")
             }
@@ -1071,7 +1072,7 @@ kappaSizeCIClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                     .("Consider a wider confidence interval (lower precision), revisiting the expected category proportions, or increasing the number of raters.")
                 warn <- paste0(warn,
                     "<div style='margin:6px 0; padding:8px 10px; border-left:3px solid #d9534f; background-color: rgba(222, 55, 55, 0.06); color: inherit;'>",
-                    "<b>", .("Warning."), "</b> ",
+                    "<b>", .("Important warning"), ": ", .("Very large sample size."), "</b> ",
                     .fmt(
                         .("The computed sample size ({n}) is very large and may be impractical for a typical interobserver-agreement study."),
                         n = private$.fmtN(required_n)), " ",

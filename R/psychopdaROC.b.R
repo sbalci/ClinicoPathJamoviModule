@@ -470,8 +470,7 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
           full_message <- paste0(full_message, " \n", .("Suggestion:"), " ", suggestion)
         }
 
-        private$.setNotice("validation", full_message, jmvcore::NoticeType$ERROR)
-        jmvcore::reject(full_message)
+        jmvcore::reject(full_message)   # reported once (library-audit 2026-10-23 meddecide [LOW])
       },
 
       # Safe variable name handling for data frame bracket access
@@ -2498,9 +2497,8 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
           # Strict Validation
           val <- private$.validateInputs()
           if (!is.null(val)) {
-            self$results$runSummary$setContent(paste("<b>Error:</b>", val))
+            # library-audit 2026-10-23 meddecide [LOW] DONE: an error is reported once, by reject(); no summary line or ERROR notice beside it.
             self$results$instructions$setVisible(FALSE)
-            private$.setNotice("validation", val, jmvcore::NoticeType$ERROR)
             jmvcore::reject(val)
           }
 

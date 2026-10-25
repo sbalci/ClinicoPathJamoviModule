@@ -1321,3 +1321,35 @@ test_that("enhancedROC presets grey the controls they override", {
   }
   audit_skip_absent(absent, root)
 })
+
+# library-audit 2026-10-23 meddecide [LOW] PARTIAL: the notice panels stay Html until jamovi's Notice takes
+#   a title and a body, but each states its severity in words, an error is reported once (by reject()),
+#   and no comment still gives the retracted "Notice cannot be serialized" reason (guide section 13).
+test_that("notice panels name their severity, errors are reported once, no stale Notice reason", {
+  root <- audit_source_root()
+  absent <- audit_absent(root, audit_analyses)
+  for (name in setdiff(audit_analyses, absent)) {
+    raw <- readLines(file.path(root, "R", paste0(name, ".b.R")), warn = FALSE)
+    code <- raw[!grepl("^\\s*#", raw)]
+    expect_false(any(grepl('icon = ""', code, fixed = TRUE)), label = paste(name, "empty severity icon"))
+    expect_false(any(grepl("alert-danger", code, fixed = TRUE)), label = paste(name, "red banner"))
+    expect_false(any(grepl("<b>Error:</b>", code, fixed = TRUE)), label = paste(name, "summary error line"))
+    for (i in grep("seriali[sz]", raw, ignore.case = TRUE)) {
+      near <- paste(raw[max(1, i - 2):min(length(raw), i + 2)], collapse = " ")
+      if (grepl("^\\s*#", raw[i]) && grepl("Notice", near))
+        expect_match(near, "retract|corrected|fine|not about|never existed|fails identically",
+                     label = paste0(name, ".b.R:", i))
+    }
+  }
+  if ("lassologistic" %in% audit_loaded("lassologistic") && requireNamespace("glmnet", quietly = TRUE)) {
+    d <- data.frame(y = factor(rep(c("a", "b"), 3)), x1 = 1:6, x2 = c(2, 1, 4, 3, 6, 5))  # far too few rows
+    a <- lassologisticClass$new(options = lassologisticOptions$new(outcome = "y", outcomeLevel = "b",
+                                                                   explanatory = c("x1", "x2")), data = d)
+    suppressWarnings(a$init()); suppressWarnings(a$run(noThrow = TRUE))
+    if (identical(a$status, "error")) {
+      expect_false(grepl("alert-danger", a$results$todo$content, fixed = TRUE))
+      expect_false(grepl("Data Error", a$results$notices$content, fixed = TRUE))
+    }
+  }
+  audit_skip_absent(absent, root)
+})

@@ -209,8 +209,12 @@ kappaSizePowerClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                                  marg_sparse = FALSE, est = NULL) {
             warn_div <- "<div style='margin:6px 0; padding:8px 10px; border-left:3px solid #ec971f; background-color: rgba(227, 144, 33, 0.07); color: inherit;'>"
             info_div <- "<div style='margin:6px 0; padding:8px 10px; border-left:3px solid #3c8dbc; background-color: rgba(72, 138, 188, 0.06); color: inherit;'>"
+            # library-audit 2026-10-23 meddecide [LOW] DONE: the severity is a word in the title, not the border colour alone.
+            warn_label <- .("Warning")
+            note_label <- .("Note")
             block <- function(div, title, ...)
-                paste0(div, "<b>", title, "</b> ", paste(c(...), collapse = " "), "</div>")
+                paste0(div, "<b>", if (identical(div, warn_div)) warn_label else note_label, ": ", title, "</b> ",
+                       paste(c(...), collapse = " "), "</div>")
 
             warn <- ""
             has_n <- length(n_required) == 1 && is.finite(n_required)

@@ -4744,9 +4744,9 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                                     setdiff(all_levels, positive_category))
                             } else {
                                 collapse_negative <- TRUE
-                                negative_label <- sprintf("Not %s", positive_category)
+                                negative_label <- sprintf(.("Not %s"), positive_category)
                                 if (negative_label %in% all_levels) {
-                                    negative_label <- sprintf("Not %s (all other categories)", positive_category)
+                                    negative_label <- sprintf(.("Not %s (all other categories)"), positive_category)
                                 }
                                 categories_to_analyze <- c(positive_category, negative_label)
                             }
@@ -12098,14 +12098,18 @@ agreementClass <- if (requireNamespace("jmvcore")) {
 
                 if (self$options$consensusVar) {
                     var_name <- self$options$consensusName
+                    # library-audit 2026-10-23 meddecide [LOW] DONE: every line is one translatable sentence;
+                    #   these were English fragments spliced around the variable name.
                     rule_text <- switch(self$options$consensusRule,
-                        "majority" = "Simple Majority (>50%)",
-                        "supermajority" = "Supermajority (>=75%)",
-                        "unanimous" = "Unanimous (100%)"
+                        "majority" = .("simple majority, more than 50%"),
+                        "supermajority" = .("supermajority, at least 75%"),
+                        "unanimous" = .("unanimous, 100%")
                     )
                     info_html <- paste0(
-                        info_html,
-                        "<li><strong>", jmvcore::htmlEscape(var_name), "</strong>: Consensus rating (", rule_text, ")</li>"
+                        info_html, "<li>",
+                        sprintf(.("%1$s: consensus rating (%2$s)"),
+                            paste0("<strong>", jmvcore::htmlEscape(var_name), "</strong>"), rule_text),
+                        "</li>"
                     )
                 }
 
@@ -12118,18 +12122,23 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                     if (detail_mode == "simple") {
                         threshold <- self$options$simpleThreshold
                         info_html <- paste0(
-                            info_html,
-                            "<li><strong>", jmvcore::htmlEscape(var_name), "</strong>: Case Agreement (Simple mode - threshold: ", threshold, "%)</li>"
+                            info_html, "<li>",
+                            sprintf(.("%1$s: case agreement, simple mode (threshold %2$s%%)"),
+                                paste0("<strong>", jmvcore::htmlEscape(var_name), "</strong>"), threshold),
+                            "</li>"
                         )
                     } else {
                         method_text <- switch(self$options$loaThresholds,
-                            "custom" = paste0("Custom (High: ", self$options$loaHighThreshold, "%, Low: ", self$options$loaLowThreshold, "%)"),
-                            "quartiles" = "Quartile-based (data-driven)",
-                            "tertiles" = "Tertile-based (data-driven)"
+                            "custom" = sprintf(.("custom cutoffs, high %1$s%%, low %2$s%%"),
+                                self$options$loaHighThreshold, self$options$loaLowThreshold),
+                            "quartiles" = .("quartile-based, from the data"),
+                            "tertiles" = .("tertile-based, from the data")
                         )
                         info_html <- paste0(
-                            info_html,
-                            "<li><strong>", jmvcore::htmlEscape(var_name), "</strong>: Case Agreement (Detailed mode - ", method_text, ")</li>"
+                            info_html, "<li>",
+                            sprintf(.("%1$s: case agreement, detailed mode (%2$s)"),
+                                paste0("<strong>", jmvcore::htmlEscape(var_name), "</strong>"), method_text),
+                            "</li>"
                         )
                     }
                 }
@@ -12138,7 +12147,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                 info_html <- paste0(
                     info_html,
                     "<p style='color: inherit; font-size: 12px;'>",
-                    "These variables are now available in your dataset for further analysis.",
+                    .("These variables are now available in your dataset for further analysis."),
                     "</p></div>"
                 )
 
@@ -16182,72 +16191,8 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                             .("Cohen's/Fleiss' kappa was not computed: at least one selected variable is a continuous measurement, so there is no category for the raters to agree on. Use ICC, Lin's CCC, Bland-Altman limits of agreement, TDI or Krippendorff's alpha instead. If these numbers are category codes rather than measurements, change the variables to Nominal or Ordinal - or wrap them in factor() when calling from R - and kappa will be computed.")
                         )
 
-                        # Check if any continuous-appropriate analyses are enabled. Every
-                        # analysis that runs on measurements counts: the panel used to ask
-                        # the user to "enable these options" above a computed Kendall's W.
-                        has_continuous_analysis <- self$options$icc || self$options$meanPearson ||
-                            self$options$linCCC || self$options$tdi || self$options$blandAltmanPlot ||
-                            self$options$kripp || self$options$kendallW || self$options$robinsonA ||
-                            self$options$meanSpearman || self$options$hierarchicalKappa ||
-                            self$options$mixedEffectsComparison
-
-                        if (!has_continuous_analysis) {
-                            # Show guidance when no appropriate analysis is enabled
-                            self$results$welcome$setVisible(TRUE)
-                            self$results$welcome$setContent(
-                                paste0(
-                    "<div style='font-family: Arial, sans-serif; max-width: 800px; line-height: 1.4;'>\n                        <div style='background-color: rgba(255, 202, 33, 0.23); border: 2px solid #856404; padding: 20px; margin-bottom: 20px; color: inherit;'>\n                        <h2 style='margin: 0 0 10px 0; font-size: 18px; color: inherit;'>",
-                    .("Continuous Data Detected"),
-                    "</h2>\n                        <p style='margin: 0; font-size: 14px; color: inherit;'>",
-                    .("At least one variable you selected is a continuous measurement. Cohen's/Fleiss' Kappa requires categorical data, so it has been skipped. If these numbers are category codes, set the variables to Nominal or Ordinal, or wrap them in factor() when calling from R."),
-                    "</p>\n                        </div>\n\n                        <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #0d6efd; padding: 15px; margin-bottom: 20px; color: inherit;'>\n                        <h3 style='margin: 0 0 10px 0; color: inherit; font-size: 16px;'>",
-                    .("Recommended Analyses for Continuous Data"),
-                    "</h3>\n                        <table style='width: 100%; border-collapse: collapse;'>\n                        <tr><td style='padding: 8px; border-bottom: 1px solid #ddd;'>",
-                    jmvcore::format(.("{tag1}ICC{tag2}"), tag1 = "<strong>", tag2 = "</strong>"),
-                    "</td><td style='padding: 8px; border-bottom: 1px solid #ddd;'>",
-                    .("Intraclass Correlation Coefficient - standard measure for continuous rater agreement"),
-                    "</td></tr>\n                        <tr><td style='padding: 8px; border-bottom: 1px solid #ddd;'>",
-                    jmvcore::format(.("{tag1}Lin's CCC{tag2}"), tag1 = "<strong>", tag2 = "</strong>"),
-                    "</td><td style='padding: 8px; border-bottom: 1px solid #ddd;'>",
-                    .("Concordance Correlation Coefficient - assesses both precision and accuracy (2 raters)"),
-                    "</td></tr>\n                        <tr><td style='padding: 8px; border-bottom: 1px solid #ddd;'>",
-                    jmvcore::format(.("{tag1}Bland-Altman{tag2}"), tag1 = "<strong>", tag2 = "</strong>"),
-                    "</td><td style='padding: 8px; border-bottom: 1px solid #ddd;'>",
-                    .("Limits of Agreement plot - visualizes systematic bias and agreement range (2 raters)"),
-                    "</td></tr>\n                        <tr><td style='padding: 8px; border-bottom: 1px solid #ddd;'>",
-                    jmvcore::format(.("{tag1}TDI{tag2}"), tag1 = "<strong>", tag2 = "</strong>"),
-                    "</td><td style='padding: 8px; border-bottom: 1px solid #ddd;'>",
-                    .("Total Deviation Index - boundary within which a proportion of differences fall"),
-                    "</td></tr>\n                        <tr><td style='padding: 8px; border-bottom: 1px solid #ddd;'>",
-                    jmvcore::format(.("{tag1}Krippendorff's Alpha{tag2}"), tag1 = "<strong>", tag2 = "</strong>"),
-                    "</td><td style='padding: 8px; border-bottom: 1px solid #ddd;'>",
-                    .("Works with any data type including continuous (interval/ratio level)"),
-                    "</td></tr>\n                        <tr><td style='padding: 8px; border-bottom: 1px solid #ddd;'>",
-                    jmvcore::format(.("{tag1}Mean Pearson / Mean Spearman{tag2}"), tag1 = "<strong>", tag2 = "</strong>"),
-                    "</td><td style='padding: 8px; border-bottom: 1px solid #ddd;'>",
-                    .("Average pairwise linear or rank correlation - association between raters, not absolute agreement"),
-                    "</td></tr>\n                        <tr><td style='padding: 8px; border-bottom: 1px solid #ddd;'>",
-                    jmvcore::format(.("{tag1}Kendall's W{tag2}"), tag1 = "<strong>", tag2 = "</strong>"),
-                    "</td><td style='padding: 8px; border-bottom: 1px solid #ddd;'>",
-                    .("Concordance of the raters' rankings of the cases (3+ raters)"),
-                    "</td></tr>\n                        <tr><td style='padding: 8px; border-bottom: 1px solid #ddd;'>",
-                    jmvcore::format(.("{tag1}Robinson's A{tag2}"), tag1 = "<strong>", tag2 = "</strong>"),
-                    "</td><td style='padding: 8px; border-bottom: 1px solid #ddd;'>",
-                    .("Agreement index for measurements, related to the ICC"),
-                    "</td></tr>\n                        <tr><td style='padding: 8px; border-bottom: 1px solid #ddd;'>",
-                    jmvcore::format(.("{tag1}Hierarchical/multilevel kappa{tag2}"), tag1 = "<strong>", tag2 = "</strong>"),
-                    "</td><td style='padding: 8px; border-bottom: 1px solid #ddd;'>",
-                    .("For continuous scores, ICC(2,1) and ICC(2,k) from a mixed model with raters nested in institutions (needs a cluster variable)"),
-                    "</td></tr>\n                        <tr><td style='padding: 8px;'>",
-                    jmvcore::format(.("{tag1}Mixed-effects condition comparison{tag2}"), tag1 = "<strong>", tag2 = "</strong>"),
-                    "</td><td style='padding: 8px;'>",
-                    .("Tests whether measurements differ between conditions (e.g., two platforms), with case and rater as random effects"),
-                    "</td></tr>\n                        </table>\n                        </div>\n\n                        <p style='font-size: 13px; color: inherit;'>",
-                    .("Enable these options from the panels on the left to analyze your continuous measurements."),
-                    "</p>\n                        </div>"
-                )
-                            )
-                        }
+                        # library-audit 2026-10-23 meddecide [LOW] DONE: the note above is the one place that says
+                        #   kappa was skipped and what to use instead; the welcome panel no longer repeats it.
                     } else {
                         self$results$irrtableHeading$setVisible(TRUE)
 
