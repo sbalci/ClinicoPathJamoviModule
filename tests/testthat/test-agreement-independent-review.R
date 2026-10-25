@@ -99,7 +99,7 @@ test_that("IR-02b: Finn recodes both raters against ONE shared level set", {
     B = factor(c("Low","High","High"), levels = c("High","Moderate","Low"))
   )
   rb <- q(agreement(data = bad, vars = c("A","B"), finn = TRUE))
-  expect_true("error" %in% note_keys(rb$finnTable))
+  expect_true(nzchar(agreement_subanalysis_notice(rb$finnTable)))
   expect_true(is.na(as.numeric(rb$finnTable$asDF$finn_value[1])))
 })
 
@@ -873,8 +873,8 @@ test_that("FIX-13: 8 raters produces the module's translated guard, not the upst
 
   # Refused, not fabricated: the guard returns before any row is written.
   expect_true(all(is.na(as.numeric(tb$asDF$value))))
-  expect_true("error" %in% note_keys(tb))
-  txt <- note_text(tb)
+  txt <- agreement_subanalysis_notice(tb)
+  expect_true(nzchar(txt))
   expect_true(grepl("validated kappa sample size formulas cover 2 to 6 raters", txt, fixed = TRUE))
   expect_true(grepl("but 8 were requested", txt, fixed = TRUE))
   # kappaSize's own message is English whatever the locale, so it must not survive.

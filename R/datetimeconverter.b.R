@@ -71,10 +71,10 @@ datetimeconverterClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 # forced an explicit dark body colour that then had to be maintained.
                 # These composite to the same shade over white and stay legible on any
                 # ground because the body text inherits.
-                ERROR = list(color = "#dc2626", bgcolor = "rgba(220, 38, 38, 0.10)", border = "#fca5a5"),
-                STRONG_WARNING = list(color = "#ea580c", bgcolor = "rgba(234, 88, 12, 0.10)", border = "#fdba74"),
-                WARNING = list(color = "#ca8a04", bgcolor = "rgba(202, 138, 4, 0.12)", border = "#fde047"),
-                INFO = list(color = "#2563eb", bgcolor = "rgba(37, 99, 235, 0.09)", border = "#93c5fd")
+                ERROR = list(bgcolor = "rgba(220, 38, 38, 0.10)", border = "#fca5a5"),
+                STRONG_WARNING = list(bgcolor = "rgba(234, 88, 12, 0.10)", border = "#fdba74"),
+                WARNING = list(bgcolor = "rgba(202, 138, 4, 0.12)", border = "#fde047"),
+                INFO = list(bgcolor = "rgba(37, 99, 235, 0.09)", border = "#93c5fd")
             )
 
             html <- "<div style='margin: 10px 0;'>"
@@ -97,7 +97,7 @@ datetimeconverterClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     "<div style='background-color: ", style$bgcolor, "; ",
                     "border-left: 4px solid ", style$border, "; ",
                     "padding: 12px; margin: 8px 0; border-radius: 4px;'>",
-                    "<strong style='color: ", style$color, ";'>",
+                    "<strong style='color: inherit;'>",
                     safe_title, "</strong><br>",
                     "<span style='color: inherit;'>", safe_content, "</span>",
                     "</div>"
@@ -132,7 +132,9 @@ datetimeconverterClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 return(list(format = "unsure", warnings = 'Auto-detection unavailable: all values missing.'))
             }
 
-            sample_dates <- head(sample_dates, min(40, length(sample_dates)))
+            if (length(sample_dates) > 200L) {
+                sample_dates <- sample_dates[round(seq(1, length(sample_dates), length.out = 200L))]
+            }
             formats_to_try <- c(
                 "ymd_hms", "dmy_hms", "mdy_hms",
                 "ymd_hm", "dmy_hm", "mdy_hm",
@@ -271,7 +273,13 @@ datetimeconverterClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             primary <- eval_results[[primary_fmt]]
             alternate <- eval_results[[alt_fmt]]
-            if (alternate$success_rate <= 0.8)
+            if (alternate$success_rate < 0.8)
+                return(character())
+
+            parsed_inputs <- trimws(as.character(primary$input[!is.na(primary$parsed)]))
+            if (identical(primary_fmt, "ymd") && identical(alt_fmt, "ydm") &&
+                length(parsed_inputs) > 0L &&
+                all(grepl("^[0-9]{4}[-/. ]", parsed_inputs)))
                 return(character())
 
             disagree <- any(!is.na(primary$parsed) & !is.na(alternate$parsed) & primary$parsed != alternate$parsed)
@@ -515,7 +523,7 @@ datetimeconverterClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             }
 
             numeric_ratio <- if (sum(non_blank) == 0) 0 else sum(!is.na(numeric_guess[non_blank])) / sum(non_blank)
-            if (numeric_ratio >= 0.8) {
+            if (identical(manual_format, "auto") && numeric_ratio >= 0.8) {
                 notes <- c(notes, 'Detected numeric serial values stored as text; automatically converted before parsing.')
                 return(private$.processNumericVector(
                     numeric_vector = numeric_guess,
@@ -582,6 +590,31 @@ datetimeconverterClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             # Honor manual override: force the requested numeric interpretation
             # regardless of the range-based heuristics below.
+            if (!is.null(force_format) && force_format %in% c('excel_serial', 'excel_serial_1904')) {
+                .origin_forced <- if (identical(force_format, 'excel_serial_1904')) '1904-01-01' else '1899-12-30'
+                .too_small_f <- max(non_missing) < 10000
+                .too_large_f <- min(non_missing) > 55000
+                if (.too_small_f || .too_large_f) {
+                    .edge_f <- if (.too_small_f) max(non_missing) else min(non_missing)
+                    max_date_f <- as.POSIXct(.edge_f * 86400, origin = .origin_forced, tz = 'UTC')
+                    private$.addNotice(
+                        type = "WARNING",
+                        title = .("Numeric Column May Not Be Dates"),
+                        class = "date-suspect",
+                        content = if (.too_small_f) .fmt(
+                            .("This column was converted as Excel serial dates, but its largest value ({value}) converts to {date}, so every converted date falls in {year} or earlier. \u2022 Genuine Excel dates from clinical spreadsheets are normally between 20000 and 50000 (1954 to 2036). \u2022 If this column holds measurements - age, counts, scores, lab values, days of follow-up - the converted dates are meaningless; select a real date column instead. \u2022 If these really are early dates, no action is needed."),
+                            value = base::format(.edge_f, trim = TRUE, scientific = FALSE),
+                            date = base::format(max_date_f, '%Y-%m-%d'),
+                            year = base::format(max_date_f, '%Y')) else .fmt(
+                            .("This column was converted as Excel serial dates, but its smallest value ({value}) converts to {date}, so every converted date falls on or after {year}. \u2022 Genuine Excel dates from clinical spreadsheets are normally between 20000 and 50000 (1954 to 2036). \u2022 If this column holds measurements - platelet counts, lab values, scores - the converted dates are meaningless; select a real date column instead. \u2022 If these really are dates that far ahead, no action is needed."),
+                            value = base::format(.edge_f, trim = TRUE, scientific = FALSE),
+                            date = base::format(max_date_f, '%Y-%m-%d'),
+                            year = base::format(max_date_f, '%Y')
+                        )
+                    )
+                }
+            }
+
             if (!is.null(force_format) && force_format == 'excel_serial') {
                 # Excel serials count DAYS; as.POSIXct.numeric reads SECONDS. Without
                 # the * 86400 every Excel date collapsed onto the origin itself.
@@ -662,8 +695,16 @@ datetimeconverterClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # serial 1, 1904 at serial 0). Negatives are masked to NA just above, so
             # one -99 missing-data sentinel no longer decides the epoch for the
             # whole column.
-            excel_like <- all(non_missing >= 0 & non_missing <= 600000)
-            unix_like <- all(non_missing >= 1e9 & non_missing <= 4e9)
+            manual_fmt <- self$options$datetime_format %||% "auto"
+            .sample_non_missing <- head(original_display[!is.na(numeric_vector)], 40L)
+            compact_6digit <- !identical(manual_fmt, "auto") &&
+                all(non_missing >= 100000 & non_missing <= 999999 & non_missing == floor(non_missing)) &&
+                private$.evaluateFormat(.sample_non_missing, manual_fmt)$success_rate >= 0.8
+            compact_10digit_dt <- manual_fmt %in% c("ymdhm", "dmyhm", "mdyhm", "ymdhms", "dmyhms", "mdyhms") &&
+                all(non_missing >= 1e9 & non_missing <= 9999999999 & non_missing == floor(non_missing)) &&
+                private$.evaluateFormat(.sample_non_missing, manual_fmt)$success_rate >= 0.8
+            excel_like <- all(non_missing >= 0 & non_missing <= 600000) && !compact_6digit
+            unix_like <- all(non_missing >= 1e8 & non_missing <= 4e9) && !compact_10digit_dt
             unix_ms_like <- all(non_missing >= 1e12 & non_missing <= 4e12)
 
             # SMALL SERIALS ARE MEASUREMENTS, NOT DATES.
@@ -845,7 +886,7 @@ datetimeconverterClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             tryCatch({
                 # Apply timezone if parser supports it
-                parsed_dates <- parser(datetime_vector, tz = tz)
+                parsed_dates <- suppressWarnings(parser(datetime_vector, tz = tz))
                 # Plausibility check: flag years out of range
                 # base::format, NOT the bare `format` -- see the note in
                 # .prepareDatetimeInput(). Unqualified, `format(parsed_dates, "%Y")`
@@ -1015,7 +1056,7 @@ datetimeconverterClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             }
 
             if (self$options$extract_monthname || self$options$monthname_out) {
-                monthname_factor <- lubridate::month(parsed_dates, label = TRUE, abbr = FALSE)
+                monthname_factor <- lubridate::month(parsed_dates, label = TRUE, abbr = FALSE, locale = "C")
                 # Ensure NA values are preserved, not converted to empty strings or zeros
                 monthname_factor[is.na(parsed_dates)] <- NA
                 components$monthname <- monthname_factor
@@ -1038,7 +1079,7 @@ datetimeconverterClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             }
 
             if (self$options$extract_dayname || self$options$dayname_out) {
-                dayname_factor <- lubridate::wday(parsed_dates, label = TRUE, abbr = FALSE)
+                dayname_factor <- lubridate::wday(parsed_dates, label = TRUE, abbr = FALSE, locale = "C")
                 # Ensure NA values are preserved, not converted to empty strings or zeros
                 dayname_factor[is.na(parsed_dates)] <- NA
                 components$dayname <- dayname_factor
@@ -1073,7 +1114,7 @@ datetimeconverterClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             fmt <- function(template) {
                 if (is.null(template))
                     return(NULL)
-                gsub('\\$?\\{ *datetime_var *\\}', datetime_var, template)
+                gsub("{datetime_var}", datetime_var, template, fixed = TRUE)
             }
 
             update_output <- function(result, title_template = NULL, description_template = NULL) {
@@ -1421,19 +1462,27 @@ datetimeconverterClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             missing_clause <- if (quality$original_missing > 0)
                 paste0("; ", .fmt(.("{missing} of the {total} rows were missing"),
                      missing = quality$original_missing, total = quality$total_observations)) else ""
+            pct_text <- if (is.na(quality$success_rate)) "0%" else paste0(round(quality$success_rate, 1), "%")
+            format_label <- if (identical(detected_format, "unsure")) "Undetermined" else private$.formatLabel(detected_format)
+            action_clause <- if (length(extractions) > 0) paste0("We extracted ", extraction_text) else "We standardized timestamps"
+            copy_ready_sentence <- if (isTRUE(quality$successfully_parsed > 0) && !identical(detected_format, "unsure")) {
+                glue::glue("{action_clause} from {n_values} datetime values in column '{datetime_var_safe}' using {format_label} ({detected_format}) format, with {pct_text} producing a valid date{missing_clause}.")
+            } else {
+                glue::glue("No valid dates could be parsed from the {n_values} non-missing values in column '{datetime_var_safe}'{missing_clause}; please select the matching DateTime Format manually.")
+            }
             summary_html <- glue::glue("
                 <div style='background-color: rgba(33, 137, 255, 0.07); padding: 15px; border: 1px solid #b3d9ff; border-radius: 5px; color: inherit;'>
                     <h4 style='margin-top: 0;'> Analysis Summary</h4>
                     <p><strong>Source column:</strong> {datetime_var_safe}</p>
-                    <p><strong>Format detected/used:</strong> {detected_format}</p>
+                    <p><strong>Format detected/used:</strong> {format_label} ({detected_format})</p>
                     <p><strong>Timezone:</strong> {tz_display_safe}</p>
-                    <p><strong>Successful conversions:</strong> {quality$successfully_parsed}/{n_values} non-missing ({round(quality$success_rate, 1)}%)</p>
+                    <p><strong>Successful conversions:</strong> {quality$successfully_parsed}/{n_values} non-missing ({pct_text})</p>
                     <p><strong>Components extracted:</strong> {extraction_text}</p>
 
                     <div style='background-color: rgba(33, 149, 188, 0.1); padding: 10px; margin-top: 15px; border-radius: 3px; color: inherit;'>
                         <p style='margin: 0;'><strong> Copy-Ready Summary:</strong></p>
                         <p style='font-family: monospace; font-size: 0.9em; margin: 10px 0;'>
-                        We extracted {extraction_text} from {n_values} datetime values in column '{datetime_var_safe}' using {detected_format} format, with {round(quality$success_rate, 1)}% producing a valid date{missing_clause}.
+                        {copy_ready_sentence}
                         </p>
                     </div>
                 </div>
@@ -1700,6 +1749,13 @@ datetimeconverterClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # no two-digit years at all. Reset every field that survives a run here.
             private$.twoDigitYearSource <- FALSE
             private$.pivotSuspected <- FALSE
+            self$results$welcome$setContent("")
+            self$results$formatInfo$setContent("")
+            self$results$qualityMetrics$setContent("")
+            self$results$previewTable$setContent("")
+            self$results$componentPreview$setContent("")
+            self$results$qualityAssessment$setContent("")
+            self$results$nlSummary$setContent("")
 
             # Show welcome message if no variable selected
             if (is.null(self$options$datetime_var) || self$options$datetime_var == "") {
@@ -1796,6 +1852,17 @@ datetimeconverterClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             }
 
             prepared <- private$.prepareDatetimeInput(datetime_vector)
+            if (all(is.na(prepared$quality_vector))) {
+                private$.addNotice(
+                    type = "ERROR",
+                    title = .("All Values Missing"),
+                    content = .fmt(
+                        .("All values in {name} are missing (NA). \u2022 Please select a column with valid datetime entries before proceeding."),
+                        name = datetime_var)
+                )
+                private$.renderNotices()
+                return()
+            }
 
             original_display <- prepared$original_display
             parsing_vector <- prepared$parsing_vector
@@ -2063,8 +2130,8 @@ datetimeconverterClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             if (!is.na(quality$min_datetime)) {
                 quality_html <- paste0(quality_html,
-                    "<tr><td style='padding: 6px; border: 1px solid #ddd;'><strong>Minimum DateTime:</strong></td><td style='padding: 6px; border: 1px solid #ddd;'>", quality$min_datetime, "</td></tr>",
-                    "<tr><td style='padding: 6px; border: 1px solid #ddd;'><strong>Maximum DateTime:</strong></td><td style='padding: 6px; border: 1px solid #ddd;'>", quality$max_datetime, "</td></tr>",
+                    "<tr><td style='padding: 6px; border: 1px solid #ddd;'><strong>Minimum DateTime:</strong></td><td style='padding: 6px; border: 1px solid #ddd;'>", private$.datetimeText(quality$min_datetime), "</td></tr>",
+                    "<tr><td style='padding: 6px; border: 1px solid #ddd;'><strong>Maximum DateTime:</strong></td><td style='padding: 6px; border: 1px solid #ddd;'>", private$.datetimeText(quality$max_datetime), "</td></tr>",
                     "<tr><td style='padding: 6px; border: 1px solid #ddd;'><strong>Date Range:</strong></td><td style='padding: 6px; border: 1px solid #ddd;'>", quality$range_days, " days (", quality$range_years, " years)</td></tr>"
                 )
             }

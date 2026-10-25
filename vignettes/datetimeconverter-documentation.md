@@ -24,6 +24,7 @@
 | `data` | `Data` | `NULL` |  |
 | `datetime_var` | `Variable` | `NULL` | DateTime Variable |
 | `datetime_format` | `List` | `auto` | DateTime Format |
+| `two_digit_year` | `List` | `standard` | Two-Digit Year Rule |
 | `timezone` | `String` | `system` | Timezone |
 | `preview_rows` | `Number` | `20` | Number of Rows to Preview |
 | `extract_year` | `Bool` | `FALSE` | Extract year |

@@ -175,14 +175,14 @@ test_that("L403 clustering refuses a mix of continuous and categorical raters an
     expect_equal(sum(stats::complete.cases(d)), 30L)
     a <- agreement_run(d, vars = names(d), raterClustering = TRUE, nClusters = 2)
     expect_equal(nrow(a$results$raterClusterTable$asDF), 0L)
-    notes <- agreement_notes(a$results$raterClusterTable)
-    expect_false(any(grepl("fewer than 3 complete cases", notes, fixed = TRUE)))
-    expect_true(grepl("R1", notes[["error"]], fixed = TRUE))
+    notice <- agreement_subanalysis_notice(a$results$raterClusterTable)
+    expect_false(grepl("fewer than 3 complete cases", notice, fixed = TRUE))
+    expect_true(grepl("R1", notice, fixed = TRUE))
 
     a <- agreement_run(d, vars = names(d), caseClustering = TRUE, nCaseClusters = 2)
     expect_equal(nrow(a$results$caseClusterTable$asDF), 0L)
-    notes <- agreement_notes(a$results$caseClusterTable)
-    expect_true(grepl("continuous measurements", notes[["error"]], fixed = TRUE))
+    expect_true(grepl("continuous measurements", agreement_subanalysis_notice(a$results$caseClusterTable),
+                      fixed = TRUE))
 })
 
 test_that("L402 rater and case cluster heatmaps colour similarity on a fixed -1..1 scale", {

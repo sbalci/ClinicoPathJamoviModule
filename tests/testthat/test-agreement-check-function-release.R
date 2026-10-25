@@ -156,7 +156,7 @@ test_that("the directional discordance test refuses fewer than 3 complete pairs"
                         B = factor(c("High", "Low", NA), levels = g, ordered = TRUE))
   for (d in list(two, partial)) {
     tb <- agreement(data = d, vars = vars(A, B), raterBias = TRUE)$raterBiasTable
-    expect_true(grepl("At least 3 cases", .note_text(tb), fixed = TRUE))
+    expect_true(grepl("At least 3 cases", agreement_subanalysis_notice(tb), fixed = TRUE))
     df <- tb$asDF
     expect_true(nrow(df) == 0 || all(is.na(df$chisq)))
   }

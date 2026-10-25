@@ -1444,3 +1444,25 @@ test_that("display-only toggles are not in the clearWith of the result tables", 
   }
   audit_skip_absent(absent, root)
 })
+
+# library-audit 2026-10-23 meddecide [LOW] DONE: an optional agreement sub-analysis that cannot run raises
+#   a WARNING notice naming it, not an "error" footnote on a table whose cells stay empty.
+test_that("agreement reports a failed sub-analysis as a named warning notice", {
+  root <- audit_source_root()
+  absent <- audit_absent(root, "agreement")
+  if (!length(absent)) {
+    src <- readLines(file.path(root, "R", "agreement.b.R"), warn = FALSE)
+    code <- paste(src[!grepl("^\\s*#", src)], collapse = "\n")
+    expect_false(grepl('setNote\\(\\s*"error"\\s*,(?!\\s*NULL)', code, perl = TRUE))
+  }
+  if ("agreement" %in% audit_loaded("agreement")) {
+    set.seed(21)
+    d <- data.frame(r1 = factor(sample(c("a", "b"), 30, TRUE)), r2 = factor(sample(c("a", "b"), 30, TRUE)))
+    a <- agreementClass$new(options = agreementOptions$new(vars = c("r1", "r2"), raterClustering = TRUE), data = d)
+    suppressWarnings({ a$init(); a$run() })
+    notices <- Filter(function(x) inherits(x, "Notice") && isTRUE(x$visible), a$results$items)
+    expect_true(any(vapply(notices, function(x) grepl("3 raters", x$content, fixed = TRUE), logical(1))))
+    expect_false("error" %in% names(a$results$raterClusterTable$notes))
+  }
+  audit_skip_absent(absent, root)
+})

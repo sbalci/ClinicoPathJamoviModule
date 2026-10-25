@@ -19,6 +19,28 @@
 agreementClass <- if (requireNamespace("jmvcore")) {
     R6::R6Class("agreementClass",
         inherit = agreementBase, private = list(
+            # library-audit 2026-10-23 meddecide [LOW] DONE: an optional sub-analysis that cannot run raises a
+            #   WARNING notice that names it, instead of a footnote on a table whose cells stay empty; one
+            #   notice per table, reused across runs. reject() stays for the analysis-wide input checks.
+            .subAnalysisFailed = function(table, message) {
+                name <- paste0("agreement_", table$name)
+                notice <- self$results$items[[name]]
+                if (is.null(notice)) {
+                    notice <- jmvcore::Notice$new(self$options, name = name, type = jmvcore::NoticeType$WARNING)
+                    self$results$insert(1, notice)
+                }
+                text <- trimws(gsub("<[^>]+>", "", gsub("[\r\n]+", " ", message)))
+                notice$set(jmvcore::NoticeType$WARNING, sprintf(.("%1$s: %2$s"), table$title, text))
+                notice$setVisible(TRUE)
+                invisible(NULL)
+            },
+            .resetSubAnalysisNotices = function() {
+                for (notice in self$results$items)
+                    if (inherits(notice, "Notice") && startsWith(notice$name, "agreement_")) {
+                        notice$setContent("")
+                        notice$setVisible(FALSE)
+                    }
+            },
             .sourcifyOption = function(option) {
                 source <- .sourcifyDiagnosticOption(option)
                 if (!is.null(source)) return(source)
@@ -1402,8 +1424,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
 
                 # Validate minimum number of raters
                 if (ncol(ratings) < 3) {
-                    self$results$lightKappaTable$setNote(
-                        "error",
+                    private$.subAnalysisFailed(self$results$lightKappaTable,
                         .("Light's kappa requires at least 3 raters. You have selected only 2 raters. Use Cohen's kappa instead.")
                     )
                     return()
@@ -1418,8 +1439,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                 # partial ones it passed here and printed kappa NaN, Cases 1, no note.
                 n_complete_lk <- sum(stats::complete.cases(ratings_clean))
                 if (n_complete_lk < 2) {
-                    self$results$lightKappaTable$setNote(
-                        "error",
+                    private$.subAnalysisFailed(self$results$lightKappaTable,
                         .("Insufficient complete cases for Light's kappa calculation. At least 2 cases required.")
                     )
                     return()
@@ -1495,8 +1515,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                             else NULL)
                     },
                     error = function(e) {
-                        self$results$lightKappaTable$setNote(
-                            "error",
+                        private$.subAnalysisFailed(self$results$lightKappaTable,
                             sprintf(.("Error calculating Light's kappa: %s"), private$.noteSafe(e$message))
                         )
                     }
@@ -1702,8 +1721,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                     # vars = c(B, A). Neither declaration places G2 against G4.
                     lv_info_finn <- private$.orderedLevelsInfo(ratings)
                     if (isTRUE(lv_info_finn$ambiguous)) {
-                        self$results$finnTable$setNote(
-                            "error",
+                        private$.subAnalysisFailed(self$results$finnTable,
                             .("Finn's coefficient divides by the variance of a uniform rating on one s-point scale, so every rater has to sit on one common category order, and the selected rater variables do not determine one. Either they contradict each other, or they never place some pair of categories relative to each other: if one variable declares Absent and Diffuse and another declares Absent and Focal, nothing in either declaration says whether Focal comes before or after Diffuse. Declare the same full set of categories, in the same sequence, on every rater variable and run again.")
                         )
                         return()
@@ -1728,8 +1746,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
 
                 # Validate minimum number of raters (need at least 2)
                 if (ncol(ratings) < 2) {
-                    self$results$finnTable$setNote(
-                        "error",
+                    private$.subAnalysisFailed(self$results$finnTable,
                         .("Finn coefficient requires at least 2 raters.")
                     )
                     return()
@@ -1761,8 +1778,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                 ratings_clean <- ratings_numeric[complete_idx, , drop = FALSE]
 
                 if (nrow(ratings_clean) < 2) {
-                    self$results$finnTable$setNote(
-                        "error",
+                    private$.subAnalysisFailed(self$results$finnTable,
                         .("Insufficient complete cases for Finn coefficient calculation. At least 2 cases required.")
                     )
                     return()
@@ -1882,8 +1898,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                         )
                     },
                     error = function(e) {
-                        self$results$finnTable$setNote(
-                            "error",
+                        private$.subAnalysisFailed(self$results$finnTable,
                             sprintf(.("Error calculating Finn coefficient: %1$s. Ensure data are categorical and properly coded (1 to %2$d)."), private$.noteSafe(e$message), n_levels)
                         )
                     }
@@ -2045,8 +2060,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                 # reported with no warning at all. Rank-based concordance needs a
                 # scale; refuse rather than compute a meaningless coefficient.
                 if (!all(sapply(ratings, function(x) is.numeric(x) || is.ordered(x)))) {
-                    self$results$kendallWTable$setNote(
-                        "error",
+                    private$.subAnalysisFailed(self$results$kendallWTable,
                         .("Kendall's W ranks the ratings, so it needs a continuous variable or an ordinal one whose categories carry an order. One or more selected raters is a nominal (unordered) variable: change its measure type to Continuous or Ordinal if the categories really are ordered, otherwise use Fleiss' kappa or Krippendorff's alpha for nominal agreement.")
                     )
                     return()
@@ -2060,8 +2074,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                 # apply() over a single row returns a vector and the user saw the raw
                 # "incorrect number of dimensions". Count complete cases, not rows.
                 if (sum(stats::complete.cases(ratings_clean)) < 2) {
-                    self$results$kendallWTable$setNote(
-                        "error",
+                    private$.subAnalysisFailed(self$results$kendallWTable,
                         .("Insufficient complete cases for Kendall's W calculation. At least 2 cases required.")
                     )
                     return()
@@ -2182,8 +2195,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                         )
                     },
                     error = function(e) {
-                        self$results$kendallWTable$setNote(
-                            "error",
+                        private$.subAnalysisFailed(self$results$kendallWTable,
                             sprintf(.("Error calculating Kendall's W: %s"), private$.noteSafe(e$message))
                         )
                     }
@@ -2263,8 +2275,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                 # computed on an alphabetical pseudo-scale with no warning. Enforce
                 # what the note promises.
                 if (!all(sapply(ratings, function(x) is.numeric(x) || is.ordered(x)))) {
-                    self$results$robinsonATable$setNote(
-                        "error",
+                    private$.subAnalysisFailed(self$results$robinsonATable,
                         .("Robinson's A treats the ratings as numbers, so it needs a continuous variable or an ordinal one whose categories carry an order. One or more selected raters is a nominal (unordered) variable: change its measure type to Continuous or Ordinal if the categories really are ordered, otherwise use Fleiss' kappa or Krippendorff's alpha for nominal agreement.")
                     )
                     return()
@@ -2275,8 +2286,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                 ratings_clean <- ratings[complete_idx, , drop = FALSE]
 
                 if (nrow(ratings_clean) < 2) {
-                    self$results$robinsonATable$setNote(
-                        "error",
+                    private$.subAnalysisFailed(self$results$robinsonATable,
                         .("Insufficient complete cases for Robinson's A calculation. At least 2 cases required.")
                     )
                     return()
@@ -2399,8 +2409,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                         # code = "restart"; re-raise it so a cancel restarts the analysis
                         # instead of becoming an error footnote.
                         if (identical(e$code, "restart")) stop(e)
-                        self$results$robinsonATable$setNote(
-                            "error",
+                        private$.subAnalysisFailed(self$results$robinsonATable,
                             sprintf(.("Error calculating Robinson's A: %s"), private$.noteSafe(e$message))
                         )
                     }
@@ -2618,8 +2627,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                 # codes, so a nominal variable (tumour type) yielded a plausible-looking rho
                 # computed on a pseudo-scale. Same hardening as Kendall's W and Robinson's A.
                 if (!all(sapply(ratings, function(x) is.numeric(x) || is.ordered(x)))) {
-                    self$results$meanSpearmanTable$setNote(
-                        "error",
+                    private$.subAnalysisFailed(self$results$meanSpearmanTable,
                         .("Mean Spearman's rho needs a rankable scale, so every rater column must be continuous or an ORDERED factor. An unordered (nominal) factor has no order to rank, and ranking its level codes would produce a meaningless coefficient. Set the measure type to continuous or ordinal, or use Fleiss' kappa or Krippendorff's alpha for nominal agreement.")
                     )
                     return()
@@ -2632,8 +2640,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                 ratings_clean <- ratings[usable_idx, , drop = FALSE]
 
                 if (nrow(ratings_clean) < 3) {
-                    self$results$meanSpearmanTable$setNote(
-                        "error",
+                    private$.subAnalysisFailed(self$results$meanSpearmanTable,
                         .("Insufficient data for Spearman correlation. At least 3 cases rated by the same two raters are required.")
                     )
                     return()
@@ -2654,8 +2661,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                 n_subjects <- nrow(ratings_matrix)
 
                 if (n_raters < 2) {
-                    self$results$meanSpearmanTable$setNote(
-                        "error",
+                    private$.subAnalysisFailed(self$results$meanSpearmanTable,
                         .("At least 2 raters required for correlation analysis.")
                     )
                     return()
@@ -2668,8 +2674,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                         pairwise_rho <- pc$r
 
                         if (length(pairwise_rho) == 0) {
-                            self$results$meanSpearmanTable$setNote(
-                                "error",
+                            private$.subAnalysisFailed(self$results$meanSpearmanTable,
                                 .("No rater pair has at least 3 commonly rated cases with variation in both raters, so no rank correlation could be computed.")
                             )
                             return()
@@ -2762,8 +2767,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                         )
                     },
                     error = function(e) {
-                        self$results$meanSpearmanTable$setNote(
-                            "error",
+                        private$.subAnalysisFailed(self$results$meanSpearmanTable,
                             sprintf(.("Error calculating Mean Spearman Rho: %s"), private$.noteSafe(e$message))
                         )
                     }
@@ -2956,8 +2960,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
 
                 # Validate data is numeric
                 if (!all(sapply(ratings, function(x) is.numeric(x)))) {
-                    self$results$meanPearsonTable$setNote(
-                        "error",
+                    private$.subAnalysisFailed(self$results$meanPearsonTable,
                         .("Mean Pearson Correlation requires numeric (continuous) data.")
                     )
                     return()
@@ -2970,8 +2973,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                 ratings_clean <- ratings[usable_idx, , drop = FALSE]
 
                 if (nrow(ratings_clean) < 3) {
-                    self$results$meanPearsonTable$setNote(
-                        "error",
+                    private$.subAnalysisFailed(self$results$meanPearsonTable,
                         .("Insufficient data for Pearson correlation. At least 3 cases rated by the same two raters are required.")
                     )
                     return()
@@ -2981,8 +2983,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                 n_subjects <- nrow(ratings_clean)
 
                 if (n_raters < 2) {
-                    self$results$meanPearsonTable$setNote(
-                        "error",
+                    private$.subAnalysisFailed(self$results$meanPearsonTable,
                         .("At least 2 raters required for correlation analysis.")
                     )
                     return()
@@ -2996,8 +2997,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                         pairwise_r <- pc$r
 
                         if (length(pairwise_r) == 0) {
-                            self$results$meanPearsonTable$setNote(
-                                "error",
+                            private$.subAnalysisFailed(self$results$meanPearsonTable,
                                 .("No rater pair has at least 3 commonly rated cases with variation in both raters, so no correlation could be computed.")
                             )
                             return()
@@ -3083,8 +3083,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                         )
                     },
                     error = function(e) {
-                        self$results$meanPearsonTable$setNote(
-                            "error",
+                        private$.subAnalysisFailed(self$results$meanPearsonTable,
                             sprintf(.("Error calculating Mean Pearson Correlation: %s"), private$.noteSafe(e$message))
                         )
                     }
@@ -3343,16 +3342,14 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                         n_raters <- ncol(ratings_complete)
 
                         if (n_cases < 10) {
-                            self$results$linCCCTable$setNote(
-                                "error",
+                            private$.subAnalysisFailed(self$results$linCCCTable,
                                 sprintf(.("Lin's CCC requires at least 10 paired observations. Found %d cases with two or more ratings."), n_cases)
                             )
                             return()
                         }
 
                         if (n_raters < 2) {
-                            self$results$linCCCTable$setNote(
-                                "error",
+                            private$.subAnalysisFailed(self$results$linCCCTable,
                                 .("Lin's CCC requires at least 2 raters/methods for comparison.")
                             )
                             return()
@@ -3362,8 +3359,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                         is_all_numeric <- all(sapply(ratings_complete, function(x) is.numeric(x) && !is.factor(x)))
 
                         if (!is_all_numeric) {
-                            self$results$linCCCTable$setNote(
-                                "error",
+                            private$.subAnalysisFailed(self$results$linCCCTable,
                                 .("Lin's CCC requires continuous numeric data. Categorical data found.")
                             )
                             return()
@@ -3565,8 +3561,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                         )
                     },
                     error = function(e) {
-                        self$results$linCCCTable$setNote(
-                            "error",
+                        private$.subAnalysisFailed(self$results$linCCCTable,
                             sprintf(.("Error calculating Lin's CCC: %s"), private$.noteSafe(e$message))
                         )
                     }
@@ -3976,8 +3971,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                         n_cases <- if (length(pair_n) > 0) max(pair_n) else 0L
 
                         if (n_cases < 10) {
-                            self$results$tdiTable$setNote(
-                                "error",
+                            private$.subAnalysisFailed(self$results$tdiTable,
                                 sprintf(.("TDI requires at least 10 paired observations. The best-observed rater pair has %d."), n_cases)
                             )
                             return()
@@ -3997,8 +3991,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                         }
 
                         if (n_raters < 2) {
-                            self$results$tdiTable$setNote(
-                                "error",
+                            private$.subAnalysisFailed(self$results$tdiTable,
                                 .("TDI requires at least 2 raters/methods for comparison.")
                             )
                             return()
@@ -4008,8 +4001,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                         is_all_numeric <- all(sapply(ratings, function(x) is.numeric(x) && !is.factor(x)))
 
                         if (!is_all_numeric) {
-                            self$results$tdiTable$setNote(
-                                "error",
+                            private$.subAnalysisFailed(self$results$tdiTable,
                                 .("TDI requires continuous numeric data. Categorical data found.")
                             )
                             return()
@@ -4158,8 +4150,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                         # arrives as an error carrying code = "restart". Re-raise it
                         # before writing anything.
                         if (identical(e$code, "restart")) stop(e)
-                        self$results$tdiTable$setNote(
-                            "error",
+                        private$.subAnalysisFailed(self$results$tdiTable,
                             sprintf(.("Error calculating TDI: %s"), private$.noteSafe(e$message))
                         )
                     }
@@ -4656,8 +4647,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
 
                         n_raters <- ncol(ratings)
                         if (n_raters < 2) {
-                            self$results$specificAgreementTable$setNote(
-                                "error",
+                            private$.subAnalysisFailed(self$results$specificAgreementTable,
                                 .("Specific agreement requires at least 2 raters for comparison.")
                             )
                             return()
@@ -4684,8 +4674,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                         max_pair_n <- if (length(pair_counts) > 0) max(pair_counts) else 0L
 
                         if (max_pair_n < 10) {
-                            self$results$specificAgreementTable$setNote(
-                                "error",
+                            private$.subAnalysisFailed(self$results$specificAgreementTable,
                                 sprintf(.("Specific agreement requires at least 10 complete observations. Found %d."), max_pair_n)
                             )
                             return()
@@ -4698,8 +4687,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                         is_categorical <- !private$.ratingsAreContinuous(ratings)
 
                         if (!is_categorical) {
-                            self$results$specificAgreementTable$setNote(
-                                "error",
+                            private$.subAnalysisFailed(self$results$specificAgreementTable,
                                 .("Specific agreement requires categorical data. At least one selected variable is a continuous measurement. Use TDI or Lin's CCC instead. If these numbers are category codes rather than measurements, set the variables to Nominal or Ordinal - or wrap them in factor() when calling from R - and specific agreement will be computed.")
                             )
                             return()
@@ -4723,8 +4711,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                             hit <- if (typed %in% all_levels) typed else all_levels[tolower(all_levels) == tolower(typed)]
                             if (length(hit) == 1L) positive_category <- hit
                             if (!(positive_category %in% all_levels)) {
-                                self$results$specificAgreementTable$setNote(
-                                    "error",
+                                private$.subAnalysisFailed(self$results$specificAgreementTable,
                                     sprintf(.("Specified positive category '%1$s' not found in data. Available: %2$s"), private$.noteSafe(positive_category), paste(private$.noteSafe(all_levels), collapse = ", "))
                                 )
                                 return()
@@ -4925,8 +4912,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                     },
                     error = function(e) {
                         if (identical(e$code, "restart")) stop(e)
-                        self$results$specificAgreementTable$setNote(
-                            "error",
+                        private$.subAnalysisFailed(self$results$specificAgreementTable,
                             sprintf(.("Error calculating specific agreement: %s"), private$.noteSafe(e$message))
                         )
                     }
@@ -5940,7 +5926,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                         # Get subgroup variable from data
                         subgroup <- self$data[[subgroup_var]]
                         if (is.null(subgroup)) {
-                            self$results$subgroupAgreementTable$setNote("error", sprintf(.("Subgroup variable '%s' not found"), private$.noteSafe(subgroup_var)))
+                            private$.subAnalysisFailed(self$results$subgroupAgreementTable, sprintf(.("Subgroup variable '%s' not found"), private$.noteSafe(subgroup_var)))
                             return()
                         }
 
@@ -6324,7 +6310,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                         }
                     },
                     error = function(e) {
-                        self$results$subgroupAgreementTable$setNote("error", sprintf(.("Error in subgroup analysis: %s"), private$.noteSafe(e$message)))
+                        private$.subAnalysisFailed(self$results$subgroupAgreementTable, sprintf(.("Error in subgroup analysis: %s"), private$.noteSafe(e$message)))
                     }
                 )
             },
@@ -6477,7 +6463,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
             .mixedScaleRefusal = function(ratings, table) {
                 cont <- private$.continuousRatingNames(ratings)
                 if (length(cont) == 0 || length(cont) == ncol(ratings)) return(FALSE)
-                table$setNote("error", .fmt(
+                private$.subAnalysisFailed(table, .fmt(
                     .("Clustering needs every rating on the same kind of scale, but these variables are continuous measurements while the others are categories: {vars}. Select only the measurements or only the categorical ratings."),
                     vars = paste(private$.noteSafe(cont), collapse = ", ")))
                 TRUE
@@ -6506,7 +6492,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                         rater_names <- names(ratings)
 
                         if (n_raters < 3) {
-                            self$results$raterClusterTable$setNote("error", .("Clustering requires at least 3 raters"))
+                            private$.subAnalysisFailed(self$results$raterClusterTable, .("Clustering requires at least 3 raters"))
                             return()
                         }
 
@@ -6669,7 +6655,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                         } else {
                             # K-means clustering (for continuous data only)
                             if (is_categorical) {
-                                self$results$raterClusterTable$setNote("error", .("K-means clustering requires continuous data"))
+                                private$.subAnalysisFailed(self$results$raterClusterTable, .("K-means clustering requires continuous data"))
                                 return()
                             }
 
@@ -6678,7 +6664,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                             # the cases every rater scored and say how many were left out.
                             cc <- stats::complete.cases(ratings)
                             if (sum(cc) < 3) {
-                                self$results$raterClusterTable$setNote("error", .fmt(
+                                private$.subAnalysisFailed(self$results$raterClusterTable, .fmt(
                                     .("K-means needs cases scored by every rater, and only {n} such case(s) are available; at least 3 are needed."),
                                     n = sum(cc)))
                                 return()
@@ -6790,7 +6776,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                         }
                     },
                     error = function(e) {
-                        self$results$raterClusterTable$setNote("error", sprintf(.("Error in rater clustering: %s"), private$.noteSafe(e$message)))
+                        private$.subAnalysisFailed(self$results$raterClusterTable, sprintf(.("Error in rater clustering: %s"), private$.noteSafe(e$message)))
                     }
                 )
             },
@@ -6974,7 +6960,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                         }
 
                         if (n_cases < 3 || n_raters < 2) {
-                            self$results$caseClusterTable$setNote("error", .("Clustering requires at least 3 cases and 2 raters"))
+                            private$.subAnalysisFailed(self$results$caseClusterTable, .("Clustering requires at least 3 cases and 2 raters"))
                             return()
                         }
 
@@ -6985,7 +6971,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                         # case sets are ever needed.
                         max_cases <- 5000L
                         if (n_cases > max_cases) {
-                            self$results$caseClusterTable$setNote("error", sprintf(
+                            private$.subAnalysisFailed(self$results$caseClusterTable, sprintf(
                                 .("Case clustering is limited to %1$d cases: it compares every case with every other case, so its memory and run time grow with the square of the case count. %2$d cases were supplied. Filter the data to a subset of cases to cluster them."),
                                 max_cases, n_cases))
                             return()
@@ -7055,7 +7041,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                                 # product. Refuse rather than cluster a coin flip; a silent
                                 # fallback to euclidean is the pattern this audit already punished.
                                 if (n_raters < 3) {
-                                    self$results$caseClusterTable$setNote("error", .("Correlation distance compares a case's rating profile across raters, and with two raters that profile has two points, so the correlation between any two cases is exactly +1 or -1 and the metric cannot separate them. Choose the Euclidean or Manhattan metric, or add a third rater."))
+                                    private$.subAnalysisFailed(self$results$caseClusterTable, .("Correlation distance compares a case's rating profile across raters, and with two raters that profile has two points, so the correlation between any two cases is exactly +1 or -1 and the metric cannot separate them. Choose the Euclidean or Manhattan metric, or add a third rater."))
                                     return()
                                 }
                                 # Correlation between rating vectors across raters
@@ -7138,7 +7124,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                             cluster_assign <- cutree(hc, k = k)
 
                             if (any(is.na(cluster_assign))) {
-                                self$results$caseClusterTable$setNote("error", .("Error: Missing values in cluster assignments. Try fewer clusters or check data."))
+                                private$.subAnalysisFailed(self$results$caseClusterTable, .("Error: Missing values in cluster assignments. Try fewer clusters or check data."))
                                 return()
                             }
 
@@ -7157,7 +7143,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                         } else {
                             # K-means clustering (for continuous data only)
                             if (is_categorical) {
-                                self$results$caseClusterTable$setNote("error", .("K-means clustering requires continuous data"))
+                                private$.subAnalysisFailed(self$results$caseClusterTable, .("K-means clustering requires continuous data"))
                                 return()
                             }
 
@@ -7166,7 +7152,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                             # gets no cluster (a blank cell) and is counted in a note.
                             cc <- stats::complete.cases(ratings)
                             if (sum(cc) <= k) {
-                                self$results$caseClusterTable$setNote("error", .fmt(
+                                private$.subAnalysisFailed(self$results$caseClusterTable, .fmt(
                                     .("K-means needs more cases scored by every rater than clusters: {n} such case(s) are available for {k} clusters."),
                                     n = sum(cc), k = k))
                                 return()
@@ -7291,7 +7277,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                         # code = "restart"; re-raise it so a cancel restarts the analysis
                         # instead of becoming an error footnote.
                         if (identical(e$code, "restart")) stop(e)
-                        self$results$caseClusterTable$setNote("error", sprintf(.("Error in case clustering: %s"), private$.noteSafe(e$message)))
+                        private$.subAnalysisFailed(self$results$caseClusterTable, sprintf(.("Error in case clustering: %s"), private$.noteSafe(e$message)))
                     }
                 )
             },
@@ -7629,8 +7615,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                         ))
                     },
                     error = function(e) {
-                        self$results$maxwellRETable$setNote(
-                            "error",
+                        private$.subAnalysisFailed(self$results$maxwellRETable,
                             sprintf(.("Error in the variance decomposition: %s"), private$.noteSafe(e$message))
                         )
                     }
@@ -7872,8 +7857,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                         # an empty separator made "PathA_T1" rater "P" with time point
                         # "athA_T1" and pooled every column into one fake rater.
                         if (is.null(separator) || !nzchar(separator)) {
-                            self$results$interIntraRaterIntraTable$setNote(
-                                "error",
+                            private$.subAnalysisFailed(self$results$interIntraRaterIntraTable,
                                 .("The time-point separator is empty, so the rater and the time point cannot be told apart in the column names. Enter the character that separates them, for example an underscore for columns named Rater1_Time1 and Rater1_Time2.")
                             )
                             return()
@@ -7897,8 +7881,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                         parsed <- Filter(Negate(is.null), parsed)
 
                         if (length(parsed) < 2) {
-                            self$results$interIntraRaterIntraTable$setNote(
-                                "error",
+                            private$.subAnalysisFailed(self$results$interIntraRaterIntraTable,
                                 sprintf(.("Need at least 2 columns with separator '%1$s' in their names. Found %2$d. Example: Rater1%3$sTime1, Rater1%4$sTime2"), private$.noteSafe(separator), length(parsed), private$.noteSafe(separator), private$.noteSafe(separator))
                             )
                             self$results$interIntraRaterIntraTable$setNote("scale", NULL)
@@ -7914,8 +7897,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                         valid_raters <- names(rater_timepoints[rater_timepoints >= 2])
 
                         if (length(valid_raters) == 0) {
-                            self$results$interIntraRaterIntraTable$setNote(
-                                "error",
+                            private$.subAnalysisFailed(self$results$interIntraRaterIntraTable,
                                 .("No rater has multiple time points. Each rater needs at least 2 time points for test-retest analysis.")
                             )
                             self$results$interIntraRaterIntraTable$setNote("scale", NULL)
@@ -8481,8 +8463,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                         } else {
                             self$results$interIntraRaterIntraTable
                         }
-                        failed_table$setNote(
-                            "error",
+                        private$.subAnalysisFailed(failed_table,
                             sprintf(.("Error calculating Inter/Intra-Rater Reliability: %s"), private$.noteSafe(e$message))
                         )
                     }
@@ -8592,8 +8573,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
 
                 # irr::rater.bias only works with exactly 2 raters
                 if (ncol(ratings) != 2) {
-                    self$results$raterBiasTable$setNote(
-                        "error",
+                    private$.subAnalysisFailed(self$results$raterBiasTable,
                         sprintf(.("The directional discordance test requires exactly 2 raters. You have %d. For 3+ raters, use pairwise analyses or rater profile plots."), ncol(ratings))
                     )
                     return()
@@ -8627,8 +8607,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                 # c x c count table, so exactly 2 cases x 2 raters would be scored
                 # as a 2 x 2 contingency table of counts. Refuse below 3 cases.
                 if (nrow(ratings_clean) < 3) {
-                    self$results$raterBiasTable$setNote(
-                        "error",
+                    private$.subAnalysisFailed(self$results$raterBiasTable,
                         .("Insufficient complete cases for the directional discordance test. At least 3 cases are required.")
                     )
                     return()
@@ -8736,8 +8715,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                         }
                     },
                     error = function(e) {
-                        self$results$raterBiasTable$setNote(
-                            "error",
+                        private$.subAnalysisFailed(self$results$raterBiasTable,
                             sprintf(.("Error calculating the directional discordance test: %s"), private$.noteSafe(e$message))
                         )
                     }
@@ -8933,8 +8911,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
 
                 # Validate exactly 2 raters
                 if (ncol(ratings) != 2) {
-                    self$results$bhapkarTable$setNote(
-                        "error",
+                    private$.subAnalysisFailed(self$results$bhapkarTable,
                         sprintf(.("Bhapkar test requires exactly 2 raters. You selected %d; for three or more raters use prespecified pairwise comparisons or inspect rater-profile distributions."), ncol(ratings))
                     )
                     return()
@@ -8945,8 +8922,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                 ratings_clean <- ratings[complete_idx, , drop = FALSE]
 
                 if (nrow(ratings_clean) < 5) {
-                    self$results$bhapkarTable$setNote(
-                        "error",
+                    private$.subAnalysisFailed(self$results$bhapkarTable,
                         .("Insufficient complete cases for Bhapkar test. At least 5 cases required.")
                     )
                     return()
@@ -9047,8 +9023,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                         }
                     },
                     error = function(e) {
-                        self$results$bhapkarTable$setNote(
-                            "error",
+                        private$.subAnalysisFailed(self$results$bhapkarTable,
                             sprintf(.("Error calculating Bhapkar test: %s"), private$.noteSafe(e$message))
                         )
                     }
@@ -9236,8 +9211,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
 
                 # Validate exactly 2 raters
                 if (ncol(ratings) != 2) {
-                    self$results$stuartMaxwellTable$setNote(
-                        "error",
+                    private$.subAnalysisFailed(self$results$stuartMaxwellTable,
                         sprintf(.("Stuart-Maxwell test requires exactly 2 raters. You selected %d; for three or more raters use prespecified pairwise comparisons or inspect rater-profile distributions."), ncol(ratings))
                     )
                     return()
@@ -9248,8 +9222,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                 ratings_clean <- ratings[complete_idx, , drop = FALSE]
 
                 if (nrow(ratings_clean) < 5) {
-                    self$results$stuartMaxwellTable$setNote(
-                        "error",
+                    private$.subAnalysisFailed(self$results$stuartMaxwellTable,
                         .("Insufficient complete cases for Stuart-Maxwell test. At least 5 cases required.")
                     )
                     return()
@@ -9356,8 +9329,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                         }
                     },
                     error = function(e) {
-                        self$results$stuartMaxwellTable$setNote(
-                            "error",
+                        private$.subAnalysisFailed(self$results$stuartMaxwellTable,
                             sprintf(.("Error calculating Stuart-Maxwell test: %s"), private$.noteSafe(e$message))
                         )
                     }
@@ -9505,8 +9477,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
 
                 # Validate reference rater is provided
                 if (is.null(reference_ratings) || length(reference_ratings) == 0) {
-                    self$results$pairwiseKappaTable$setNote(
-                        "error",
+                    private$.subAnalysisFailed(self$results$pairwiseKappaTable,
                         .("Please select a reference rater variable.")
                     )
                     return()
@@ -9530,8 +9501,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                              name = private$.noteSafe(ref_name))
                     else NULL)
                 if (ncol(ratings) == 0) {
-                    self$results$pairwiseKappaTable$setNote(
-                        "error",
+                    private$.subAnalysisFailed(self$results$pairwiseKappaTable,
                         .("The only rater selected is the reference rater itself. Select at least one other rater to compare with the reference.")
                     )
                     return()
@@ -10804,8 +10774,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
 
                 # Validate that data is numeric
                 if (!all(sapply(ratings, is.numeric))) {
-                    self$results$iccTable$setNote(
-                        "error",
+                    private$.subAnalysisFailed(self$results$iccTable,
                         .("ICC requires continuous (numeric) data. Your data appears to be categorical. Use kappa instead.")
                     )
                     return()
@@ -10857,8 +10826,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                 ratings_clean <- ratings[complete_idx, , drop = FALSE]
 
                 if (nrow(ratings_clean) < 2) {
-                    self$results$iccTable$setNote(
-                        "error",
+                    private$.subAnalysisFailed(self$results$iccTable,
                         .("Insufficient complete cases for ICC calculation. At least 2 complete cases required.")
                     )
                     return()
@@ -10951,8 +10919,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                         )
                     },
                     error = function(e) {
-                        self$results$iccTable$setNote(
-                            "error",
+                        private$.subAnalysisFailed(self$results$iccTable,
                             sprintf(.("Error calculating ICC: %s"), private$.noteSafe(e$message))
                         )
                     }
@@ -10977,8 +10944,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
 
                 # iota needs at least two raters of the variable
                 if (n_raters < 2) {
-                    self$results$iotaTable$setNote(
-                        "error",
+                    private$.subAnalysisFailed(self$results$iotaTable,
                         .("Iota needs at least two rater columns for one variable. Select two or more raters, or use ICC for continuous ratings and kappa for categorical ratings.")
                     )
                     return()
@@ -10995,8 +10961,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                 # so numeric category codes need no conversion here.
                 if (private$.ratingsAreContinuous(ratings)) {
                     if (!all(sapply(ratings, is.numeric))) {
-                        self$results$iotaTable$setNote(
-                            "error",
+                        private$.subAnalysisFailed(self$results$iotaTable,
                             .("Iota requires all variables to be the same type (all numeric OR all categorical). Your data contains mixed types.")
                         )
                         return()
@@ -11129,8 +11094,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                         }
                     },
                     error = function(e) {
-                        self$results$iotaTable$setNote(
-                            "error",
+                        private$.subAnalysisFailed(self$results$iotaTable,
                             sprintf(.("Error calculating Iota: %s"), private$.noteSafe(e$message))
                         )
                     }
@@ -11227,8 +11191,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                     {
                         n_raters <- ncol(ratings)
                         if (n_raters != 2) {
-                            self$results$pabakTable$setNote(
-                                "error",
+                            private$.subAnalysisFailed(self$results$pabakTable,
                                 .("PABAK requires exactly 2 raters. Please select only 2 rater variables.")
                             )
                             return()
@@ -11241,8 +11204,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                         n <- length(r1)
 
                         if (n < 2) {
-                            self$results$pabakTable$setNote(
-                                "error",
+                            private$.subAnalysisFailed(self$results$pabakTable,
                                 .("Insufficient complete cases for PABAK calculation.")
                             )
                             return()
@@ -11372,8 +11334,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                         ))
                     },
                     error = function(e) {
-                        self$results$pabakTable$setNote(
-                            "error",
+                        private$.subAnalysisFailed(self$results$pabakTable,
                             sprintf(.("Error calculating PABAK: %s"), private$.noteSafe(e$message))
                         )
                     }
@@ -11395,8 +11356,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                 ratings_clean <- ratings[complete_idx, , drop = FALSE]
 
                 if (nrow(ratings_clean) == 0) {
-                    self$results$gwetTable$setNote(
-                        "error",
+                    private$.subAnalysisFailed(self$results$gwetTable,
                         .("No complete cases available for Gwet's AC calculation.")
                     )
                     return()
@@ -11535,8 +11495,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                         )
                     },
                     error = function(e) {
-                        self$results$gwetTable$setNote(
-                            "error",
+                        private$.subAnalysisFailed(self$results$gwetTable,
                             sprintf(.("Error calculating Gwet's AC: %s"), private$.noteSafe(e$message))
                         )
                     }
@@ -11634,8 +11593,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                     propBiasP = NA, normalityW = NA, normalityP = NA))
                 self$results$blandAltman$setState(NULL)
                 if (ncol(ratings) != 2) {
-                    self$results$blandAltmanStats$setNote(
-                        "error",
+                    private$.subAnalysisFailed(self$results$blandAltmanStats,
                         .("Bland-Altman analysis requires exactly 2 raters. Please select only 2 variables.")
                     )
                     return()
@@ -11643,8 +11601,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
 
                 # Check if data is numeric/continuous
                 if (!is.numeric(ratings[[1]]) || !is.numeric(ratings[[2]])) {
-                    self$results$blandAltmanStats$setNote(
-                        "error",
+                    private$.subAnalysisFailed(self$results$blandAltmanStats,
                         .("Bland-Altman analysis requires continuous (numeric) data. Your data appears to be categorical.")
                     )
                     return()
@@ -11662,7 +11619,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                 # Two pairs give an SD on 1 df and limits with no usable precision (the
                 # small-n note below needs 3), and one pair gives no limits at all.
                 if (length(rater1) < 3) {
-                    self$results$blandAltmanStats$setNote("error",
+                    private$.subAnalysisFailed(self$results$blandAltmanStats,
                         sprintf(.("Bland-Altman limits of agreement need at least 3 cases rated by both raters; %d were available."),
                                 as.integer(length(rater1))))
                     return()
@@ -12515,13 +12472,13 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                 for (nm in c("hierarchicalOverallTable", "clusterSpecificTable",
                              "varianceDecompositionTable", "hierarchicalICCTable",
                              "homogeneityTestTable")) {
-                    self$results[[nm]]$setNote("error", note)
+                    private$.subAnalysisFailed(self$results[[nm]], note)
                 }
                 invisible(NULL)
             },
             .mixedEffectsBlankNote = function(note) {
                 for (nm in c("mixedEffectsTable", "mixedEffectsVarianceTable")) {
-                    self$results[[nm]]$setNote("error", note)
+                    private$.subAnalysisFailed(self$results[[nm]], note)
                 }
                 invisible(NULL)
             },
@@ -13619,8 +13576,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                         .("The interpretation column applies this module's own cut-points to each component's share of the total variance. They are a reading aid, not a published standard, so judge each share against the purpose of the study."))
                 } else {
                     # The scaffolded rows stay blank; say why.
-                    var_table$setNote(
-                        "error",
+                    private$.subAnalysisFailed(var_table,
                         .("Total variance is effectively zero; all scores appear identical.")
                     )
                 }
@@ -13804,7 +13760,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                             100 * sum(diag(cm)) / sum(cm)))
                     },
                     error = function(e) {
-                        self$results$confusionMatrixTable$setNote("error", sprintf(.("Confusion matrix error: %s"), private$.noteSafe(e$message)))
+                        private$.subAnalysisFailed(self$results$confusionMatrixTable, sprintf(.("Confusion matrix error: %s"), private$.noteSafe(e$message)))
                     }
                 )
             },
@@ -14267,7 +14223,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                         # arrives as an error carrying code = "restart". Re-raise it
                         # before writing anything.
                         if (identical(e$code, "restart")) stop(e)
-                        self$results$bootstrapCITable$setNote("error", sprintf(.("Bootstrap CI error: %s"), private$.noteSafe(e$message)))
+                        private$.subAnalysisFailed(self$results$bootstrapCITable, sprintf(.("Bootstrap CI error: %s"), private$.noteSafe(e$message)))
                     }
                 )
             },
@@ -14305,8 +14261,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
 
                         pred_col <- self$options$predictionColumn
                         if (pred_col > n_raters) {
-                            self$results$concordanceF1Table$setNote(
-                                "error",
+                            private$.subAnalysisFailed(self$results$concordanceF1Table,
                                 sprintf(.("Prediction column %1$d exceeds number of raters (%2$d). Using last rater column instead."), pred_col, n_raters)
                             )
                             pred_col <- n_raters
@@ -14527,7 +14482,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                         table$setNote("scale", .("The word beside strict accuracy uses the 0.70, 0.80 and 0.90 cut-points. No published source defines interpretive bands for an accuracy, so these are a display convention of this module and not a standard; report the accuracy itself."))
                     },
                     error = function(e) {
-                        self$results$concordanceF1Table$setNote("error", sprintf(.("Concordance F1 error: %s"), private$.noteSafe(e$message)))
+                        private$.subAnalysisFailed(self$results$concordanceF1Table, sprintf(.("Concordance F1 error: %s"), private$.noteSafe(e$message)))
                     }
                 )
             },
@@ -14558,7 +14513,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
 
                         condB_vars <- self$options$conditionBVars
                         if (is.null(condB_vars) || length(condB_vars) < 2) {
-                            self$results$pairedAgreementTable$setNote("error", .("Select at least 2 rater variables for Condition B."))
+                            private$.subAnalysisFailed(self$results$pairedAgreementTable, .("Select at least 2 rater variables for Condition B."))
                             return()
                         }
 
@@ -14580,7 +14535,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                         cont_cols <- c(private$.continuousRatingNames(ratings_A),
                                        private$.continuousRatingNames(ratings_B))
                         if (length(cont_cols) > 0) {
-                            self$results$pairedAgreementTable$setNote("error",
+                            private$.subAnalysisFailed(self$results$pairedAgreementTable,
                                 .fmt(.("Paired agreement comparison compares kappa and exact-match agreement, which need categories, and these variables are continuous measurements: {cols}. Compare an ICC or Lin's CCC computed separately in each condition instead."),
                                      cols = paste(private$.noteSafe(unique(cont_cols)), collapse = ", ")))
                             return()
@@ -14594,7 +14549,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                         table <- self$results$pairedAgreementTable
 
                         if (n_cases < 10) {
-                            table$setNote("error", sprintf(.("Too few complete cases (%s). Need at least 10."), n_cases))
+                            private$.subAnalysisFailed(table, sprintf(.("Too few complete cases (%s). Need at least 10."), n_cases))
                             return()
                         }
 
@@ -14842,7 +14797,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                         # does. Without this the checkpoint added to the loop above
                         # would be caught here and shown as "Paired agreement error".
                         if (identical(e$code, "restart")) stop(e)
-                        self$results$pairedAgreementTable$setNote("error", sprintf(.("Paired agreement error: %s"), private$.noteSafe(e$message)))
+                        private$.subAnalysisFailed(self$results$pairedAgreementTable, sprintf(.("Paired agreement error: %s"), private$.noteSafe(e$message)))
                     }
                 )
             },
@@ -14878,7 +14833,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                         n_cat <- self$options$ssNCategories
 
                         if (k1 <= k0) {
-                            self$results$agreementSampleSizeTable$setNote("error", .("Expected kappa (H1) must be greater than null kappa (H0)."))
+                            private$.subAnalysisFailed(self$results$agreementSampleSizeTable, .("Expected kappa (H1) must be greater than null kappa (H0)."))
                             return()
                         }
 
@@ -14889,32 +14844,28 @@ agreementClass <- if (requireNamespace("jmvcore")) {
 
                         if (metric == "kappa" || metric == "fleiss") {
                             if (!requireNamespace("kappaSize", quietly = TRUE)) {
-                                self$results$agreementSampleSizeTable$setNote(
-                                    "error",
+                                private$.subAnalysisFailed(self$results$agreementSampleSizeTable,
                                     .("kappaSize package is required for validated kappa sample size calculations.")
                                 )
                                 return()
                             }
 
                             if (metric == "kappa" && n_raters != 2) {
-                                self$results$agreementSampleSizeTable$setNote(
-                                    "error",
+                                private$.subAnalysisFailed(self$results$agreementSampleSizeTable,
                                     .("Cohen's kappa sample size requires exactly 2 raters. Use Fleiss' kappa for 3+ raters.")
                                 )
                                 return()
                             }
 
                             if (metric == "fleiss" && n_raters < 3) {
-                                self$results$agreementSampleSizeTable$setNote(
-                                    "error",
+                                private$.subAnalysisFailed(self$results$agreementSampleSizeTable,
                                     .("Fleiss' kappa sample size requires at least 3 raters.")
                                 )
                                 return()
                             }
 
                             if (n_cat < 2 || n_cat > 5) {
-                                self$results$agreementSampleSizeTable$setNote(
-                                    "error",
+                                private$.subAnalysisFailed(self$results$agreementSampleSizeTable,
                                     .("Validated kappa sample size formulas are currently available for 2 to 5 categories.")
                                 )
                                 return()
@@ -14932,8 +14883,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                             # ranges: alpha 0.001-0.2, power 0.5-0.999 and props = rep(1/q, q)
                             # can never breach the engines' other checks.
                             if (n_raters > 6) {
-                                self$results$agreementSampleSizeTable$setNote(
-                                    "error",
+                                private$.subAnalysisFailed(self$results$agreementSampleSizeTable,
                                     .fmt(.("The validated kappa sample size formulas cover 2 to 6 raters, but {raters} were requested. Enter 6 or fewer raters, or size the study by another method; the ICC option accepts more raters but needs ratings that can be treated as numeric."),
                                          raters = n_raters)
                                 )
@@ -14941,8 +14891,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                             }
 
                             if (k0 <= 0 || k0 >= 1 || k1 <= 0 || k1 >= 1) {
-                                self$results$agreementSampleSizeTable$setNote(
-                                    "error",
+                                private$.subAnalysisFailed(self$results$agreementSampleSizeTable,
                                     .("Both kappa values must lie strictly between 0 and 1. A kappa of 0 (chance agreement) or 1 (perfect agreement) cannot serve as a hypothesis value for this method; enter for example 0.40 under H0 and 0.70 under H1.")
                                 )
                                 return()
@@ -14976,15 +14925,13 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                             rho1 <- k1
                             k <- n_raters
                             if (abs(rho1 - rho0) < 1e-6) {
-                                self$results$agreementSampleSizeTable$setNote(
-                                    "error",
+                                private$.subAnalysisFailed(self$results$agreementSampleSizeTable,
                                     .("H0 and H1 ICC values are too close together. Increase the difference to get a valid sample size.")
                                 )
                                 return()
                             }
                             if (rho1 >= 1 || rho0 >= 1) {
-                                self$results$agreementSampleSizeTable$setNote(
-                                    "error",
+                                private$.subAnalysisFailed(self$results$agreementSampleSizeTable,
                                     .("An ICC of 1 means perfect reliability with no measurement error, which no finite sample can demonstrate. Enter an expected ICC below 1.")
                                 )
                                 return()
@@ -15095,7 +15042,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                         }
                     },
                     error = function(e) {
-                        self$results$agreementSampleSizeTable$setNote("error", sprintf(.("Sample size error: %s"), private$.noteSafe(e$message)))
+                        private$.subAnalysisFailed(self$results$agreementSampleSizeTable, sprintf(.("Sample size error: %s"), private$.noteSafe(e$message)))
                     }
                 )
             },
@@ -15934,21 +15881,9 @@ agreementClass <- if (requireNamespace("jmvcore")) {
             },
 
             .run = function() {
-                # TODO (UX, file-wide): error reporting throughout this file uses
-                # `self$results$<table>$setNote("error", .("..."))` + `return()` rather
-                # than `jmvcore::reject(...)`. Find the sites with
-                # `grep -n 'setNote("error"' R/agreement.b.R` - the hard-coded line
-                # list this TODO used to carry had drifted out of date and was worse
-                # than no list at all. The current pattern attaches an "error" note to
-                # a table while the analysis continues with empty cells: users see
-                # results that look fine until they spot the small note.
-                # Decision is methodological:
-                #   - Keep the current pattern where the intent is "best-effort,
-                #     partial results" (per-subgroup / per-cluster failures in loops).
-                #   - Switch to jmvcore::reject for hard input validation, where
-                #     continuing produces meaningless output.
-                # Do NOT wrap reject() in a catch-all tryCatch when converting: it
-                # raises a plain simpleError and the handler would swallow it.
+                # A failed optional sub-analysis is a WARNING notice naming it (.subAnalysisFailed);
+                # analysis-wide input checks reject(). Last run's notices go before anything is computed.
+                private$.resetSubAnalysisNotices()
 
                 # Every rows:0 table below is rebuilt with addRow(), and jmvcore never checks
                 # for duplicate row keys, so an option toggle absent from a table's clearWith
@@ -17174,8 +17109,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                             reference_ratings <- jmvcore::select(mydata, self$options$referenceRater)
                             private$.calculatePairwiseKappa(ratings, reference_ratings)
                         } else {
-                            self$results$pairwiseKappaTable$setNote(
-                                "error",
+                            private$.subAnalysisFailed(self$results$pairwiseKappaTable,
                                 .("Please select a reference rater variable to perform pairwise kappa analysis.")
                             )
                         }

@@ -10,6 +10,7 @@
 | `data` | UI Control `data` | `self$options$data` | Output item / Table |
 | `datetime_var` | UI Control `datetime_var` | `self$options$datetime_var` | Output item / Table |
 | `datetime_format` | UI Control `datetime_format` | `self$options$datetime_format` | Output item / Table |
+| `two_digit_year` | UI Control `two_digit_year` | `self$options$two_digit_year` | Output item / Table |
 | `timezone` | UI Control `timezone` | `self$options$timezone` | Output item / Table |
 | `preview_rows` | UI Control `preview_rows` | `self$options$preview_rows` | Output item / Table |
 | `extract_year` | UI Control `extract_year` | `self$options$extract_year` | Output item / Table |

@@ -55,7 +55,7 @@ test_that("L321 a rerun that refuses mean Spearman leaves no rho from the previo
     expect_true(is.finite(a$results$meanSpearmanTable$asDF$meanRho))   # control: it ran
     rr_rerun(a, d_nom)
     expect_true(is.na(a$results$meanSpearmanTable$asDF$meanRho))
-    expect_true("error" %in% names(agreement_notes(a$results$meanSpearmanTable)))
+    expect_true(nzchar(agreement_subanalysis_notice(a$results$meanSpearmanTable)))
 })
 
 test_that("L361 a continuous rerun blanks the headline kappa, interval and p", {

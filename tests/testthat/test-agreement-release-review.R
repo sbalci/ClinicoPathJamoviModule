@@ -386,7 +386,7 @@ test_that("the mixed-effects comparison refuses categorical ratings instead of c
   d <- agr_fixture()
   d$cond <- factor(rep(c("AI", "Manual"), length.out = nrow(d)))
   res <- agreement(data = d, vars = c("r1", "r2"), mixedEffectsComparison = TRUE, conditionVariable = "cond")
-  expect_match(agr_note(res$mixedEffectsTable, "error"), "requires continuous numeric ratings", fixed = TRUE)
+  expect_match(agreement_subanalysis_notice(res$mixedEffectsTable), "requires continuous numeric ratings", fixed = TRUE)
   expect_equal(nrow(res$mixedEffectsTable$asDF), 0)
 })
 

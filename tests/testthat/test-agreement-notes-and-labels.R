@@ -303,8 +303,7 @@ test_that("case clustering refuses the correlation metric below three raters", {
                      caseClusterDistance = "correlation",
                      nCaseClusters = 2))$caseClusterTable
   expect_equal(nrow(tb2$asDF), 0)
-  expect_true("error" %in% note_keys(tb2))
-  expect_true(grepl("exactly +1 or -1", note_text(tb2), fixed = TRUE))
+  expect_true(grepl("exactly +1 or -1", agreement_subanalysis_notice(tb2), fixed = TRUE))
 
   # Three raters is the boundary, and it runs: this is a guard, not a ban.
   tb3 <- q(agreement(data = d[, c("M1", "M2", "M3")], vars = c("M1", "M2", "M3"),

@@ -70,7 +70,7 @@ test_that("kendallW option calculates Kendall's W", {
   # Kendall's W ranks the ratings, so an UNORDERED factor has no defensible rank
   # order and the analysis refuses rather than ranking arbitrary level codes.
   expect_true(is.na(result$kendallWTable$asDF$w[1]))
-  expect_true("error" %in% names(result$kendallWTable$notes))
+  expect_true(nzchar(agreement_subanalysis_notice(result$kendallWTable)))
 
   # On an ORDERED factor the rank order is declared, so it computes.
   d_ord <- agreement_threeRater
@@ -89,7 +89,7 @@ test_that("robinsonA option calculates Robinson's A", {
   expect_s3_class(result, "agreementResults")
   # Robinson's A treats the ratings as numbers; an unordered factor is refused.
   expect_true(is.na(result$robinsonATable$asDF$robinsonA[1]))
-  expect_true("error" %in% names(result$robinsonATable$notes))
+  expect_true(nzchar(agreement_subanalysis_notice(result$robinsonATable)))
 
   d_ord <- agreement_threeRater
   for (v in c("Rater1", "Rater2", "Rater3"))

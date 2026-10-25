@@ -274,12 +274,10 @@ test_that("D1-D6, E1-E6, H1: Guard boundaries, filtered rownames, option wiring,
 })
 
 # =============================================================================
-# CONFIRMED OPEN DEFECTS (Guarded by skip() with exact expected assertions per Rule E6)
+# REGRESSION TESTS FOR VAL-datetimeconverter-01 THROUGH VAL-datetimeconverter-07
 # =============================================================================
 
 test_that("VAL-datetimeconverter-01 (S1): Explicit text datetime_format is not overridden by Excel/Unix numeric heuristics", {
-  skip("VAL-datetimeconverter-01 open defect: .prepareDatetimeInput() runs Excel/Unix serial heuristics even when user explicitly selects a text format (mdy, ymdhm, etc.). Remove this skip when fixed.")
-
   df_mdy <- data.frame(dt = c("011521", "022021", "032521", "043021"))
   res_mdy <- dtc_fn(data = df_mdy, datetime_var = "dt", datetime_format = "mdy", timezone = "UTC")
   expect_identical(out_vals(res_mdy$corrected_datetime_char),
@@ -292,8 +290,6 @@ test_that("VAL-datetimeconverter-01 (S1): Explicit text datetime_format is not o
 })
 
 test_that("VAL-datetimeconverter-02 (S1): Auto-detection is invariant to row order and does not misparse chronologically sorted MM/DD/YYYY or DD/MM/YY columns", {
-  skip("VAL-datetimeconverter-02 open defect: .detectDatetimeFormat() truncates to head(sample_dates, 40), misparsing chronologically sorted MM/DD/YYYY and DD/MM/YY columns. Remove this skip when fixed.")
-
   dates_mdy <- c(sprintf("01/%02d/2024", rep(1:10, each = 4)), sprintf("01/%02d/2024", 13:31))
   res_asc  <- dtc_fn(data = data.frame(dt = dates_mdy), datetime_var = "dt", datetime_format = "auto", timezone = "UTC")
   res_desc <- dtc_fn(data = data.frame(dt = rev(dates_mdy)), datetime_var = "dt", datetime_format = "auto", timezone = "UTC")
@@ -308,8 +304,6 @@ test_that("VAL-datetimeconverter-02 (S1): Auto-detection is invariant to row ord
 })
 
 test_that("VAL-datetimeconverter-03 (S2): Whitespace-only character column triggers All Values Missing error and never renders 'NA%' in nlSummary", {
-  skip("VAL-datetimeconverter-03 open defect: all(is.na(datetime_vector)) runs before whitespace trimming, emitting zero notices on manual format and rendering '0/0 non-missing (NA%)' in nlSummary. Remove this skip when fixed.")
-
   df_blank <- data.frame(dt = c("", "   ", "\t"))
   res_man <- dtc_fn(data = df_blank, datetime_var = "dt", datetime_format = "ymd", timezone = "UTC", show_summary = TRUE)
   expect_true(grepl("All Values Missing", html_text(res_man$notices), fixed = TRUE))
@@ -317,8 +311,6 @@ test_that("VAL-datetimeconverter-03 (S2): Whitespace-only character column trigg
 })
 
 test_that("VAL-datetimeconverter-04 (S3): Unambiguous ISO-8601 YYYY-MM-DD dates with days <= 12 do not trigger false ydm ambiguity warning", {
-  skip("VAL-datetimeconverter-04 open defect: .warnAmbiguousFormat() pits ydm (YYYY-DD-MM) against ymd on ISO-8601 dates when sampled days <= 12, firing a false ambiguity warning and withholding the Excellent grade. Remove this skip when fixed.")
-
   df_iso <- data.frame(dt = c("2024-01-02", "2024-03-05", "2024-06-10", "2024-09-12", "2024-11-08"))
   res_iso <- dtc_fn(data = df_iso, datetime_var = "dt", datetime_format = "auto", timezone = "UTC", show_quality_metrics = TRUE)
   expect_false(grepl("Ambiguous Format Detected", html_text(res_iso$notices), fixed = TRUE))
@@ -326,8 +318,6 @@ test_that("VAL-datetimeconverter-04 (S3): Unambiguous ISO-8601 YYYY-MM-DD dates 
 })
 
 test_that("VAL-datetimeconverter-05 (S3): qualityMetrics HTML table formats midnight Minimum/Maximum DateTime with 00:00:00 via .datetimeText()", {
-  skip("VAL-datetimeconverter-05 open defect: qualityMetrics interpolates quality$min_datetime via bare paste0(), dropping 00:00:00 on midnight dates in R >= 4.3. Remove this skip when fixed.")
-
   df_mid <- data.frame(dt = c("2024-01-01 00:00:00", "2024-01-01 14:30:00"))
   res_mid <- dtc_fn(data = df_mid, datetime_var = "dt", datetime_format = "ymdhms", timezone = "UTC", show_quality_metrics = TRUE)
   qm <- html_text(res_mid$qualityMetrics)
@@ -335,8 +325,6 @@ test_that("VAL-datetimeconverter-05 (S3): qualityMetrics HTML table formats midn
 })
 
 test_that("VAL-datetimeconverter-06 (S4): .warnAmbiguousFormat() fires at exact 80% tie and copy-ready summary uses human-readable format label", {
-  skip("VAL-datetimeconverter-06 open defect: .warnAmbiguousFormat() uses `<= 0.8` instead of `< 0.8` and .populateNaturalLanguageSummary() prints raw format code and 'We extracted none (preview only)'. Remove this skip when fixed.")
-
   df_tie <- data.frame(dt = c(rep("01/02/2024", 16), rep("03/04/2024", 16), rep("not_a_date", 8)))
   res_tie <- suppressWarnings(dtc_fn(data = df_tie, datetime_var = "dt", datetime_format = "auto", timezone = "UTC", show_summary = TRUE))
   expect_true(grepl("Ambiguous Format Detected", html_text(res_tie$notices), fixed = TRUE))
@@ -344,8 +332,105 @@ test_that("VAL-datetimeconverter-06 (S4): .warnAmbiguousFormat() fires at exact 
 })
 
 test_that("VAL-datetimeconverter-07 (S3): Manual excel_serial / excel_serial_1904 applies the <10000 / >55000 magnitude guard", {
-  skip("VAL-datetimeconverter-07 open defect: force_format == 'excel_serial' and 'excel_serial_1904' return early at R/datetimeconverter.b.R:590/614 before the <10000 / >55000 magnitude guard. Remove this skip when fixed.")
-
   res_age <- dtc_fn(data = data.frame(age = c(45, 62, 71)), datetime_var = "age", datetime_format = "excel_serial", timezone = "UTC")
   expect_true(grepl("Numeric Column May Not Be Dates", html_text(res_age$notices), fixed = TRUE))
+})
+
+# =============================================================================
+# REGRESSION TESTS FOR IR-datetimeconverter-01 THROUGH IR-datetimeconverter-06
+# =============================================================================
+
+test_that("IR-datetimeconverter-01 (S2): Numeric 6-digit YYMMDD and 10-digit YYMMDDHHMM columns honor explicit text formats", {
+  df_num6 <- data.frame(dt_num6 = c(210115L, 210220L, 210325L))
+  res_num6 <- dtc_fn(data = df_num6, datetime_var = "dt_num6", datetime_format = "ymd",
+                     two_digit_year = "past", timezone = "UTC", extract_year = TRUE, extract_month = TRUE, extract_day = TRUE)
+  expect_identical(as.integer(out_vals(res_num6$year_out)), c(2021L, 2021L, 2021L))
+  expect_identical(as.integer(out_vals(res_num6$month_out)), c(1L, 2L, 3L))
+  expect_identical(as.integer(out_vals(res_num6$day_out)), c(15L, 20L, 25L))
+
+  df_num10 <- data.frame(dt_num10 = c(2401151430, 2402200915, 2403251845))
+  res_num10 <- dtc_fn(data = df_num10, datetime_var = "dt_num10", datetime_format = "ymdhm",
+                      timezone = "UTC", extract_year = TRUE, extract_month = TRUE, extract_day = TRUE)
+  expect_identical(as.integer(out_vals(res_num10$year_out)), c(2024L, 2024L, 2024L))
+  expect_identical(as.integer(out_vals(res_num10$month_out)), c(1L, 2L, 3L))
+  expect_identical(as.integer(out_vals(res_num10$day_out)), c(15L, 20L, 25L))
+})
+
+test_that("IR-datetimeconverter-02 (S3): Pre-2001 Unix epoch timestamps in [1e8, 1e9) auto-detect as unix_epoch", {
+  df_ep <- data.frame(epoch_2000 = c(946684800, 978307200, 1009843200))
+  res_ep <- dtc_fn(data = df_ep, datetime_var = "epoch_2000", datetime_format = "auto",
+                   timezone = "UTC", extract_year = TRUE)
+  expect_identical(as.integer(out_vals(res_ep$year_out)), c(2000L, 2001L, 2002L))
+})
+
+test_that("IR-datetimeconverter-03 (S3): 4-digit-year ISO-8601 column with >=1 unparseable row does not trigger false ydm ambiguity warning", {
+  df_iso_mix <- data.frame(dt = c(sprintf("2024-%02d-%02d", (0:18 %% 11) + 1, ((0:18 + 1) %% 11) + 1), "unknown"))
+  res_iso_mix <- suppressWarnings(dtc_fn(data = df_iso_mix, datetime_var = "dt", datetime_format = "auto",
+                                         timezone = "UTC", show_quality_metrics = TRUE))
+  expect_false(grepl("Ambiguous Format Detected", html_text(res_iso_mix$notices), fixed = TRUE))
+})
+
+test_that("IR-datetimeconverter-04 (S3): nlSummary does not claim standardization using 'UNSURE (unsure) format' when 0 values parse", {
+  df_bad <- data.frame(dt = c("not_a_date", "pending_lab", "cancelled"))
+  res_bad <- suppressWarnings(dtc_fn(data = df_bad, datetime_var = "dt", datetime_format = "auto", show_summary = TRUE))
+  expect_false(grepl("UNSURE (unsure) format", html_text(res_bad$nlSummary), fixed = TRUE))
+  expect_true(grepl("No valid dates could be parsed", html_text(res_bad$nlSummary), fixed = TRUE))
+})
+
+test_that("IR-datetimeconverter-05 (S3): Re-running on an all-NA column clears stale previewTable and qualityMetrics HTML", {
+  df_rerun <- data.frame(
+    valid_dt = c("2024-01-15", "2024-02-20", "2024-03-25"),
+    all_na_dt = c(NA_character_, NA_character_, NA_character_)
+  )
+  opts_r <- datetimeconverterOptions$new(
+    datetime_var = "valid_dt",
+    datetime_format = "ymd",
+    extract_year = TRUE,
+    show_quality_metrics = TRUE,
+    show_summary = TRUE
+  )
+  ana_r <- datetimeconverterClass$new(options = opts_r, data = df_rerun)
+  ana_r$run()
+  expect_true(nzchar(html_text(ana_r$results$previewTable)))
+  opts_r$.__enclos_env__$private$..datetime_var$.__enclos_env__$private$.value <- "all_na_dt"
+  ana_r$.__enclos_env__$private$.run()
+  expect_false(nzchar(html_text(ana_r$results$previewTable)))
+  expect_false(nzchar(html_text(ana_r$results$qualityMetrics)))
+})
+
+test_that("IR-datetimeconverter-06 (S4): monthname and dayname extraction pass explicit C locale", {
+  df_loc <- data.frame(dt = c("2024-01-15", "2024-02-20"))
+  res_loc <- dtc_fn(data = df_loc, datetime_var = "dt", datetime_format = "ymd",
+                    timezone = "UTC", extract_monthname = TRUE, extract_dayname = TRUE)
+  expect_identical(as.character(out_vals(res_loc$monthname_out)), c("January", "February"))
+  expect_identical(as.character(out_vals(res_loc$dayname_out)), c("Monday", "Tuesday"))
+})
+
+test_that("CF-datetimeconverter-01: 10-digit Unix epoch with manual ymdhms/ymdhm converts as unix_epoch without lubridate warnings", {
+  expect_silent({
+    res_unix_hms <- dtc_fn(
+      data = datetimeconverter_clinical,
+      datetime_var = "lab_timestamp",
+      datetime_format = "ymdhms",
+      timezone = "UTC",
+      extract_year = TRUE
+    )
+  })
+  expect_true(all(!is.na(out_vals(res_unix_hms$year_out))))
+  expect_true(grepl("text date format is selected but this column is numeric", html_text(res_unix_hms$notices), fixed = TRUE))
+})
+
+test_that("CF-datetimeconverter-02: .updateOutputTitles preserves literal backslashes and .renderNotices uses theme-safe title color", {
+  df_bs <- data.frame(check.names = FALSE, "Date\\1Time" = c("2024-01-15", "not_a_date"))
+  expect_silent({
+    res_bs <- dtc_fn(
+      data = df_bs,
+      datetime_var = "Date\\1Time",
+      datetime_format = "ymd",
+      timezone = "UTC",
+      extract_year = TRUE
+    )
+  })
+  expect_identical(res_bs$year_out$.__enclos_env__$private$.titles[1], "Year - from Date\\1Time")
+  expect_true(grepl("<strong style='color: inherit;'>", html_text(res_bs$notices), fixed = TRUE))
 })

@@ -22,6 +22,13 @@ agreement_notes <- function(table) {
     vapply(table$notes, function(n) n$note, character(1))
 }
 
+# The WARNING notice a failed optional sub-analysis raises for `table` ("" when there is none).
+# They used to be an "error" footnote on the empty table (library-audit 2026-10-23 meddecide [LOW]).
+agreement_subanalysis_notice <- function(table) {
+    notice <- table$analysis$results$items[[paste0("agreement_", table$name)]]
+    if (is.null(notice) || !isTRUE(notice$visible)) "" else notice$content
+}
+
 # The names of every declared column, hidden ones included (asDF drops hidden
 # columns, so a "column is gone" check against asDF passes vacuously).
 agreement_column_names <- function(table) {

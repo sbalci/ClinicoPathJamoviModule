@@ -196,7 +196,7 @@ test_that("C1 paired agreement comparison refuses continuous measurements", {
     t <- agreement_run(d, vars = c("A1", "A2"), pairedAgreementTest = TRUE,
                        conditionBVars = c("B1", "B2"))$results$pairedAgreementTable
     expect_equal(t$rowCount, 0)                                   # was 0.000 vs 0.017, "no difference"
-    expect_match(agreement_notes(t)[["error"]], "continuous measurements", fixed = TRUE)
+    expect_match(agreement_subanalysis_notice(t), "continuous measurements", fixed = TRUE)
 })
 
 test_that("A6 nominal Krippendorff's alpha is refused on measurements; interval alpha still runs", {
@@ -444,7 +444,7 @@ test_that("B9 B10 two-way Finn uses the residual df, and a tiny p is not printed
 test_that("B13 Bland-Altman needs three complete pairs", {
     d <- data.frame(a = c(10.2, 11.5, NA, 12.1), b = c(10.0, 11.9, 12.4, NA))
     r <- agreement_run(d, vars = c("a", "b"), blandAltmanPlot = TRUE)$results
-    expect_match(agreement_notes(r$blandAltmanStats)[["error"]], "at least 3 cases", fixed = TRUE)
+    expect_match(agreement_subanalysis_notice(r$blandAltmanStats), "at least 3 cases", fixed = TRUE)
     expect_true(all(is.na(unlist(r$blandAltmanStats$asDF[, -1]))))
 })
 

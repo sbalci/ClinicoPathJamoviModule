@@ -69,7 +69,7 @@ test_that("L333 an empty time-point separator is refused, not split into charact
     d <- data.frame(PathA_T1 = jit(.9), PathB_T1 = jit(.5), PathA_T2 = jit(.9), PathB_T2 = jit(.5))
     r <- agreement_run(d, vars = names(d), interIntraRater = TRUE, interIntraSeparator = "")$results
     expect_equal(nrow(r$interIntraRaterIntraTable$asDF), 0L)
-    expect_match(agreement_notes(r$interIntraRaterIntraTable)[["error"]], "separator is empty", fixed = TRUE)
+    expect_match(agreement_subanalysis_notice(r$interIntraRaterIntraTable), "separator is empty", fixed = TRUE)
 })
 
 test_that("L411 the intra weight_override note survives a later ordinal rater", {
@@ -164,8 +164,8 @@ test_that("L380 Finn gives the same answer whatever the variable order", {
     ab <- agreement_run(d, vars = c("A", "B"), finn = TRUE, finnLevels = 4)$results$finnTable
     ba <- agreement_run(d, vars = c("B", "A"), finn = TRUE, finnLevels = 4)$results$finnTable
     expect_true(is.na(ab$asDF$finn_value) && is.na(ba$asDF$finn_value))
-    expect_identical(agreement_notes(ab)[["error"]], agreement_notes(ba)[["error"]])
-    expect_match(agreement_notes(ba)[["error"]], "do not determine one", fixed = TRUE)
+    expect_identical(agreement_subanalysis_notice(ab), agreement_subanalysis_notice(ba))
+    expect_match(agreement_subanalysis_notice(ba), "do not determine one", fixed = TRUE)
 })
 
 test_that("L320 Finn does not warn for 0-based codes at the right number of categories", {
@@ -201,9 +201,10 @@ test_that("L377 Kendall's W and Light's kappa count complete cases and disclose 
     skip_if_not_installed("irr")
     one <- data.frame(a = c(1, 2, NA, NA), b = c(1, NA, 2, NA), c = c(2, 3, 1, 3))
     r <- agreement_run(one, vars = c("a", "b", "c"), kendallW = TRUE, lightKappa = TRUE)$results
-    expect_match(agreement_notes(r$kendallWTable)[["error"]], "Insufficient complete cases", fixed = TRUE)
-    expect_false(grepl("incorrect number of dimensions", note_txt(r$kendallWTable), fixed = TRUE))
-    expect_match(agreement_notes(r$lightKappaTable)[["error"]], "Insufficient complete cases", fixed = TRUE)
+    expect_match(agreement_subanalysis_notice(r$kendallWTable), "Insufficient complete cases", fixed = TRUE)
+    expect_false(grepl("incorrect number of dimensions", agreement_subanalysis_notice(r$kendallWTable),
+                       fixed = TRUE))
+    expect_match(agreement_subanalysis_notice(r$lightKappaTable), "Insufficient complete cases", fixed = TRUE)
     expect_false(isTRUE(is.nan(r$lightKappaTable$asDF$kappa)))
 
     set.seed(11)
