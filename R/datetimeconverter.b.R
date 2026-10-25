@@ -804,20 +804,22 @@ datetimeconverterClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             }
 
             if (unix_ms_like) {
-                parsed_dates <- as.POSIXct(numeric_vector/1000, origin = '1970-01-01', tz = 'UTC')
-                notes <- c(notes, 'Detected Unix epoch milliseconds; converted using origin 1970-01-01 (UTC).')
+                parsed_dates <- as.POSIXct(numeric_vector / 1000, origin = "1970-01-01", tz = "UTC")
+                notes <- c(notes, "Detected Unix epoch milliseconds; converted using origin 1970-01-01 (UTC).")
                 return(list(
                     original_display = original_display,
                     parsing_vector = parsed_dates,
                     quality_vector = quality_vector,
                     parsed_dates = parsed_dates,
                     already_parsed = TRUE,
-                    format_hint = 'unix_epoch_ms',
+                    format_hint = "unix_epoch_ms",
                     notes = notes
                 ))
             }
 
-            char_vals <- if (!is.null(original_display)) original_display else {
+            char_vals <- if (!is.null(original_display)) {
+                original_display
+            } else {
                 tmp <- base::format(numeric_vector, trim = TRUE, scientific = FALSE)
                 tmp[is.na(numeric_vector)] <- NA_character_
                 tmp
@@ -1195,7 +1197,7 @@ datetimeconverterClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 "</tr></thead><tbody>"
             )
 
-            for (i in 1:n_show) {
+            for (i in seq_len(n_show)) {
                 row_bg <- if (i %% 2 == 0) "transparent" else "rgba(138, 155, 172, 0.07)"
 
                 original_val <- if (is.na(original[i])) {
@@ -1254,6 +1256,9 @@ datetimeconverterClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             }
 
             n_show <- min(n, length(components[[1]]))
+            if (n_show == 0) {
+                return("<p>No data to preview.</p>")
+            }
 
             table_html <- paste0(
                 "<div style='background-color: rgba(138, 155, 172, 0.06); padding: 15px; border-radius: 8px; overflow-x: auto; color: inherit;'>",
@@ -1287,7 +1292,7 @@ datetimeconverterClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             table_html <- paste0(table_html, "</tr></thead><tbody>")
 
             # Add data rows
-            for (i in 1:n_show) {
+            for (i in seq_len(n_show)) {
                 row_bg <- if (i %% 2 == 0) "transparent" else "rgba(138, 155, 172, 0.07)"
 
                 table_html <- paste0(table_html,
@@ -1310,7 +1315,13 @@ datetimeconverterClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 table_html <- paste0(table_html, "</tr>")
             }
 
-            table_html <- paste0(table_html, "</tbody></table></div>")
+            week_note <- if ("weeknum" %in% names(components)) {
+                "<p style='font-size: 11px; opacity: 0.78; margin: 8px 0 0 0;'><em>Note: Week # counts 7-day blocks from 1 January (lubridate::week), not ISO-8601 weeks.</em></p>"
+            } else {
+                ""
+            }
+
+            table_html <- paste0(table_html, "</tbody></table>", week_note, "</div>")
 
             return(table_html)
         },
@@ -1353,8 +1364,9 @@ datetimeconverterClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # "Excellent" while all 40 rows were up to 18 years out. The grade is now
             # withheld whenever a notice is questioning the dates themselves, so it can
             # no longer contradict the warning printed directly above it.
-            .grade_unsafe <- any(vapply(private$.noticeList, function(n)
-                identical(n$class, "date-suspect"), logical(1)))
+            .grade_unsafe <- any(vapply(private$.noticeList, function(n) {
+                identical(n$class, "date-suspect")
+            }, logical(1)))
             quality_summary <- if (is.na(quality$success_rate)) {
                 "N/A (no non-missing values)"
             } else if (.grade_unsafe) {
@@ -1382,42 +1394,50 @@ datetimeconverterClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             parsing_bg <- if (quality$failed_parsing > 0)
                 "rgba(220, 53, 69, 0.14); color: inherit;" else "rgba(40, 167, 69, 0.13); color: inherit;"
 
-            quality_html <- glue::glue("
-                <div style='background-color: rgba(33, 137, 255, 0.07); padding: 15px; border-left: 4px solid #2196F3; color: inherit;'>
-                    <h4 style='margin-top: 0;'> Data Quality Assessment</h4>
+            misuse_html <- if (length(misuse_warnings) > 0) {
+                paste0(
+                    "<div style=\"background-color: rgba(255, 202, 33, 0.23); color: inherit; padding: 10px; margin-top: 10px; border-left: 3px solid #ffc107;\"><strong> Warnings:</strong><ul>",
+                    paste0('<li>', misuse_warnings, '</li>', collapse = ''),
+                    "</ul></div>"
+                )
+            } else {
+                ""
+            }
 
-                    <table style='width: 100%; border-collapse: collapse; margin-top: 10px;'>
-                        <tr style='background-color: rgba(33, 152, 239, 0.13); color: inherit;'>
-                            <th style='padding: 8px; text-align: left; border: 1px solid #90caf9;'>Metric</th>
-                            <th style='padding: 8px; text-align: right; border: 1px solid #90caf9;'>Count</th>
-                            <th style='padding: 8px; text-align: right; border: 1px solid #90caf9;'>%</th>
-                        </tr>
-                        <tr>
-                            <td style='padding: 8px; border: 1px solid #90caf9;'>Total Observations</td>
-                            <td style='padding: 8px; text-align: right; border: 1px solid #90caf9;'>{quality$total_observations}</td>
-                            <td style='padding: 8px; text-align: right; border: 1px solid #90caf9;'>100%</td>
-                        </tr>
-                        <tr style='background-color: {missing_bg}'>
-                            <td style='padding: 8px; border: 1px solid #90caf9;'>Missing Values</td>
-                            <td style='padding: 8px; text-align: right; border: 1px solid #90caf9;'>{quality$original_missing}</td>
-                            <td style='padding: 8px; text-align: right; border: 1px solid #90caf9;'>{missing_pct}%</td>
-                        </tr>
-                        <tr style='background-color: {parsing_bg}'>
-                            <td style='padding: 8px; border: 1px solid #90caf9;'>Successful Parses</td>
-                            <td style='padding: 8px; text-align: right; border: 1px solid #90caf9;'>{quality$successfully_parsed}</td>
-                            <td style='padding: 8px; text-align: right; border: 1px solid #90caf9;'>{parsed_pct}%</td>
-                        </tr>
-                        <tr>
-                            <td style='padding: 8px; border: 1px solid #90caf9;'>Failed Parsing</td>
-                            <td style='padding: 8px; text-align: right; border: 1px solid #90caf9;'>{quality$failed_parsing}</td>
-                            <td style='padding: 8px; text-align: right; border: 1px solid #90caf9;'>-</td>
-                        </tr>
-                    </table>
-
-                    <p style='margin-top: 10px;'><strong>Parse rate:</strong> {quality_summary}</p>
-                    {if (length(misuse_warnings) > 0) paste0('<div style=\"background-color: rgba(255, 202, 33, 0.23); color: inherit; padding: 10px; margin-top: 10px; border-left: 3px solid #ffc107;\"><strong> Warnings:</strong><ul>', paste0('<li>', misuse_warnings, '</li>', collapse=''), '</ul></div>') else ''}
-                </div>
-            ")
+            quality_html <- paste0(
+                "<div style='background-color: rgba(33, 137, 255, 0.07); padding: 15px; border-left: 4px solid #2196F3; color: inherit;'>\n",
+                "    <h4 style='margin-top: 0;'> Data Quality Assessment</h4>\n\n",
+                "    <table style='width: 100%; border-collapse: collapse; margin-top: 10px;'>\n",
+                "        <tr style='background-color: rgba(33, 152, 239, 0.13); color: inherit;'>\n",
+                "            <th style='padding: 8px; text-align: left; border: 1px solid #90caf9;'>Metric</th>\n",
+                "            <th style='padding: 8px; text-align: right; border: 1px solid #90caf9;'>Count</th>\n",
+                "            <th style='padding: 8px; text-align: right; border: 1px solid #90caf9;'>%</th>\n",
+                "        </tr>\n",
+                "        <tr>\n",
+                "            <td style='padding: 8px; border: 1px solid #90caf9;'>Total Observations</td>\n",
+                "            <td style='padding: 8px; text-align: right; border: 1px solid #90caf9;'>", quality$total_observations, "</td>\n",
+                "            <td style='padding: 8px; text-align: right; border: 1px solid #90caf9;'>100%</td>\n",
+                "        </tr>\n",
+                "        <tr style='background-color: ", missing_bg, "'>\n",
+                "            <td style='padding: 8px; border: 1px solid #90caf9;'>Missing Values</td>\n",
+                "            <td style='padding: 8px; text-align: right; border: 1px solid #90caf9;'>", quality$original_missing, "</td>\n",
+                "            <td style='padding: 8px; text-align: right; border: 1px solid #90caf9;'>", missing_pct, "%</td>\n",
+                "        </tr>\n",
+                "        <tr style='background-color: ", parsing_bg, "'>\n",
+                "            <td style='padding: 8px; border: 1px solid #90caf9;'>Successful Parses</td>\n",
+                "            <td style='padding: 8px; text-align: right; border: 1px solid #90caf9;'>", quality$successfully_parsed, "</td>\n",
+                "            <td style='padding: 8px; text-align: right; border: 1px solid #90caf9;'>", parsed_pct, "%</td>\n",
+                "        </tr>\n",
+                "        <tr>\n",
+                "            <td style='padding: 8px; border: 1px solid #90caf9;'>Failed Parsing</td>\n",
+                "            <td style='padding: 8px; text-align: right; border: 1px solid #90caf9;'>", quality$failed_parsing, "</td>\n",
+                "            <td style='padding: 8px; text-align: right; border: 1px solid #90caf9;'>-</td>\n",
+                "        </tr>\n",
+                "    </table>\n\n",
+                "    <p style='margin-top: 10px;'><strong>Parse rate:</strong> ", quality_summary, "</p>\n",
+                "    ", misuse_html, "\n",
+                "</div>"
+            )
 
             self$results$qualityAssessment$setContent(quality_html)
         },
@@ -1468,27 +1488,34 @@ datetimeconverterClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             format_label <- if (identical(detected_format, "unsure")) "Undetermined" else private$.formatLabel(detected_format)
             action_clause <- if (length(extractions) > 0) paste0("We extracted ", extraction_text) else "We standardized timestamps"
             copy_ready_sentence <- if (isTRUE(quality$successfully_parsed > 0) && !identical(detected_format, "unsure")) {
-                glue::glue("{action_clause} from {n_values} datetime values in column '{datetime_var_safe}' using {format_label} ({detected_format}) format, with {pct_text} producing a valid date{missing_clause}.")
+                paste0(
+                    action_clause, " from ", n_values, " datetime values in column '",
+                    datetime_var_safe, "' using ", format_label, " (", detected_format,
+                    ") format, with ", pct_text, " producing a valid date", missing_clause, "."
+                )
             } else {
-                glue::glue("No valid dates could be parsed from the {n_values} non-missing values in column '{datetime_var_safe}'{missing_clause}; please select the matching DateTime Format manually.")
+                paste0(
+                    "No valid dates could be parsed from the ", n_values,
+                    " non-missing values in column '", datetime_var_safe, "'",
+                    missing_clause, "; please select the matching DateTime Format manually."
+                )
             }
-            summary_html <- glue::glue("
-                <div style='background-color: rgba(33, 137, 255, 0.07); padding: 15px; border: 1px solid #b3d9ff; border-radius: 5px; color: inherit;'>
-                    <h4 style='margin-top: 0;'> Analysis Summary</h4>
-                    <p><strong>Source column:</strong> {datetime_var_safe}</p>
-                    <p><strong>Format detected/used:</strong> {format_label} ({detected_format})</p>
-                    <p><strong>Timezone:</strong> {tz_display_safe}</p>
-                    <p><strong>Successful conversions:</strong> {quality$successfully_parsed}/{n_values} non-missing ({pct_text})</p>
-                    <p><strong>Components extracted:</strong> {extraction_text}</p>
-
-                    <div style='background-color: rgba(33, 149, 188, 0.1); padding: 10px; margin-top: 15px; border-radius: 3px; color: inherit;'>
-                        <p style='margin: 0;'><strong> Copy-Ready Summary:</strong></p>
-                        <p style='font-family: monospace; font-size: 0.9em; margin: 10px 0;'>
-                        {copy_ready_sentence}
-                        </p>
-                    </div>
-                </div>
-            ")
+            summary_html <- paste0(
+                "<div style='background-color: rgba(33, 137, 255, 0.07); padding: 15px; border: 1px solid #b3d9ff; border-radius: 5px; color: inherit;'>\n",
+                "    <h4 style='margin-top: 0;'> Analysis Summary</h4>\n",
+                "    <p><strong>Source column:</strong> ", datetime_var_safe, "</p>\n",
+                "    <p><strong>Format detected/used:</strong> ", format_label, " (", detected_format, ")</p>\n",
+                "    <p><strong>Timezone:</strong> ", tz_display_safe, "</p>\n",
+                "    <p><strong>Successful conversions:</strong> ", quality$successfully_parsed, "/", n_values, " non-missing (", pct_text, ")</p>\n",
+                "    <p><strong>Components extracted:</strong> ", extraction_text, "</p>\n\n",
+                "    <div style='background-color: rgba(33, 149, 188, 0.1); padding: 10px; margin-top: 15px; border-radius: 3px; color: inherit;'>\n",
+                "        <p style='margin: 0;'><strong> Copy-Ready Summary:</strong></p>\n",
+                "        <p style='font-family: monospace; font-size: 0.9em; margin: 10px 0;'>\n",
+                "        ", copy_ready_sentence, "\n",
+                "        </p>\n",
+                "    </div>\n",
+                "</div>"
+            )
 
             self$results$nlSummary$setContent(summary_html)
         },
@@ -1977,9 +2004,9 @@ datetimeconverterClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                             .yrs <- lubridate::year(parsed_dates)
                             if (!any(!is.na(.yrs) & (.yrs < 1900 |
                                     .yrs > as.integer(base::format(Sys.Date() + 365, "%Y")))))
-                                private$.noticeList <- Filter(function(n)
-                                    !identical(n$title, .("Implausible Dates Detected")),
-                                    private$.noticeList)
+                                private$.noticeList <- Filter(function(n) {
+                                    !identical(n$title, .("Implausible Dates Detected"))
+                                }, private$.noticeList)
                         }
                     }
                 }

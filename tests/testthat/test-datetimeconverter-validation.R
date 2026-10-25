@@ -434,3 +434,16 @@ test_that("CF-datetimeconverter-02: .updateOutputTitles preserves literal backsl
   expect_identical(res_bs$year_out$.__enclos_env__$private$.titles[1], "Year - from Date\\1Time")
   expect_true(grepl("<strong style='color: inherit;'>", html_text(res_bs$notices), fixed = TRUE))
 })
+
+test_that("RV-datetimeconverter-01: .generateComponentPreview handles n=0 safely and appends weeknum definition note", {
+  res_wk <- dtc_fn(
+    data = data.frame(dt = c("2024-01-15", "2024-02-20")),
+    datetime_var = "dt",
+    datetime_format = "ymd",
+    timezone = "UTC",
+    extract_weeknum = TRUE
+  )
+  expect_true(grepl("lubridate::week", html_text(res_wk$componentPreview), fixed = TRUE))
+  gen_comp <- dtc_class$private_methods$.generateComponentPreview
+  expect_identical(gen_comp(list(year = integer(0)), n = 10), "<p>No data to preview.</p>")
+})
