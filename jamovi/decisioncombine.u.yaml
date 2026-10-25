@@ -56,7 +56,7 @@ children:
             enable: (test3)
 
   - type: CollapseBox
-    label: Display Options
+    label: Tables
     collapsed: true
     children:
       - type: CheckBox
@@ -68,6 +68,18 @@ children:
       - type: CheckBox
         name: showCITables
         label: Confidence interval tables
+      - type: CheckBox
+        name: showPairedComparison
+        label: Combinations vs each test alone
+        enable: (test2)
+      - type: CheckBox
+        name: showAbout
+        label: About this analysis
+
+  - type: CollapseBox
+    label: Rule ranking
+    collapsed: true
+    children:
       - type: CheckBox
         name: showRecommendation
         label: Descriptive candidate-rule ranking
@@ -85,40 +97,38 @@ children:
                 name: seed
                 format: number
                 enable: (showRecommendation && test2 && optimismCorrection)
-      - type: CheckBox
-        name: showPairedComparison
-        label: Combinations vs each test alone
-        enable: (test2)
-      - type: CheckBox
-        name: showAbout
-        label: About this analysis
-      - type: Output
-        name: addedPattern
-      - type: Label
-        label: Visualizations
-        children:
-          - type: CheckBox
-            name: showBarPlot
-            label: Bar chart
-          - type: CheckBox
-            name: showHeatmap
-            label: Heatmap
-          - type: CheckBox
-            name: showForest
-            label: Forest plot
-          - type: CheckBox
-            name: showDecisionTree
-            label: Decision space (sensitivity vs specificity)
 
   - type: CollapseBox
-    label: Filters
+    label: Plots
     collapsed: true
     children:
-      - type: ComboBox
-        name: filterStatistic
-        label: Statistic
-        enable: (showBarPlot || showHeatmap || showForest)
-      - type: ComboBox
-        name: filterPattern
-        label: Pattern type
-        enable: (showBarPlot || showHeatmap || showForest)
+      - type: CheckBox
+        name: showBarPlot
+        label: Bar chart
+      - type: CheckBox
+        name: showHeatmap
+        label: Heatmap
+      - type: CheckBox
+        name: showForest
+        label: Forest plot
+      - type: CheckBox
+        name: showDecisionTree
+        label: Decision space (sensitivity vs specificity)
+      - type: Label
+        label: Filters
+        children:
+          - type: ComboBox
+            name: filterStatistic
+            label: Statistic
+            enable: (showBarPlot || showHeatmap || showForest)
+          - type: ComboBox
+            name: filterPattern
+            label: Pattern type
+            enable: (showBarPlot || showHeatmap || showForest)
+
+  - type: CollapseBox
+    label: Save to data
+    collapsed: true
+    children:
+      - type: Output
+        name: addedPattern

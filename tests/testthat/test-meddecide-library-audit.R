@@ -1488,3 +1488,54 @@ test_that("the validation-context boxes are greyed until their table is shown", 
   }
   audit_skip_absent(absent, root)
 })
+
+# library-audit 2026-10-23 meddecide [LOW] DONE: panels are grouped by the question asked, each
+#   heading wraps the controls under it, and a control sits beside the option that enables it.
+test_that("panels group controls by question and keep dependants beside their option", {
+  root <- audit_source_root()
+  panels <- c("agreement", "cotest", "decisioncombine", "decisioncompare", "psychopdaROC", "nogoldstandard")
+  absent <- audit_absent(root, panels, "jamovi/%s.u.yaml")
+  # Every node, with the name or label of each container above it.
+  flatten <- function(analysis) {
+    out <- list()
+    walk <- function(node, path) {
+      if (!is.list(node)) return()
+      if (!is.null(node$type)) out[[length(out) + 1]] <<- list(node = node, path = path)
+      here <- c(path, node$name %||% node$label %||% "")
+      for (child in c(node$children, if (is.null(names(node))) node)) walk(child, here)
+    }
+    walk(yaml::read_yaml(file.path(root, "jamovi", paste0(analysis, ".u.yaml")))$children, character())
+    out
+  }
+  find <- function(nodes, name) Filter(function(x) identical(x$node$name, name), nodes)[[1]]
+  box_of <- function(nodes, name) find(nodes, name)$path[2]  # the top-level container
+  parent_of <- function(nodes, name) utils::tail(find(nodes, name)$path, 1)
+  for (name in setdiff(panels, absent)) {
+    nodes <- flatten(name)
+    childless <- Filter(function(x) identical(x$node$type, "Label") && !length(x$node$children), nodes)
+    expect_length(childless, 0)
+    if (name == "agreement") {
+      top <- yaml::read_yaml(file.path(root, "jamovi", "agreement.u.yaml"))$children
+      expect_lte(sum(vapply(top, function(n) identical(n$type, "CollapseBox"), logical(1))), 10)
+      expect_identical(parent_of(nodes, "nBoot"), parent_of(nodes, "bootstrapCI"))
+      for (shared in c("exct", "multipleTestCorrection"))
+        expect_identical(box_of(nodes, shared), "General Options", label = shared)
+    }
+    if (name == "psychopdaROC") {
+      expect_false(any(vapply(nodes, function(x) identical(x$node$name, "metaAnalysis"), logical(1))))
+      opts <- yaml::read_yaml(file.path(root, "jamovi", "psychopdaROC.a.yaml"))$options
+      expect_true(isTRUE(Filter(function(o) o$name == "metaAnalysis", opts)[[1]]$hidden))
+      expect_identical(parent_of(nodes, "costratioFP"), parent_of(nodes, "method"))
+    }
+    if (name == "decisioncombine")
+      expect_identical(box_of(nodes, "filterStatistic"), box_of(nodes, "showBarPlot"))
+    if (name == "cotest") {
+      display <- Filter(function(x) identical(x$node$label, "Display Options"), nodes)[[1]]$node
+      expect_identical(display$type, "CollapseBox")
+      expect_true(isTRUE(display$collapsed))
+    }
+    if (name == "nogoldstandard")
+      expect_null(find(nodes, "method")$node$options)
+  }
+  audit_skip_absent(absent, root)
+})

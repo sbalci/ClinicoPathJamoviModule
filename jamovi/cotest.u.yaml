@@ -99,8 +99,9 @@ children:
             format: number
             enable: (preset:custom)
 
-  - type: Label
+  - type: CollapseBox
     label: Display Options
+    collapsed: true
     children:
       - type: LayoutBox
         margin: large

@@ -25,6 +25,37 @@ datetimeconverterClass <- if (requireNamespace('jmvcore')) R6::R6Class(
     "datetimeconverterClass",
     inherit = datetimeconverterBase,
     private = list(
+        .sourcifyOption = function(option) {
+            .declared <- setdiff(
+                names(datetimeconverterOptions$active),
+                c("data", "version")
+            )
+            if (is.null(option$name) || !(option$name %in% .declared))
+                return("")
+            val <- option$value
+            if (is.null(val))
+                return("")
+            if (is.character(val)) {
+                if (length(val) == 0 || (length(val) == 1 && !nzchar(val)))
+                    return("")
+                if (identical(val, option$default))
+                    return("")
+                rhs <- if (length(val) == 1) {
+                    deparse(val, backtick = FALSE, width.cutoff = 500L)
+                } else {
+                    paste0(
+                        "c(",
+                        paste(vapply(val, deparse, character(1),
+                                     backtick = FALSE, width.cutoff = 500L),
+                              collapse = ", "),
+                        ")"
+                    )
+                }
+                return(paste0(option$name, " = ", rhs))
+            }
+            super$.sourcifyOption(option)
+        },
+
         # Initialize notice collection list
         .noticeList = list(),
         .twoDigitYearSource = FALSE,
@@ -486,7 +517,7 @@ datetimeconverterClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             non_blank <- !is.na(char_vals)
             numeric_guess <- suppressWarnings(as.numeric(char_vals))
-            numeric_guess[!non_blank] <- NA_real_
+            numeric_guess[!non_blank | !is.finite(numeric_guess)] <- NA_real_
             
             # Check for manual override of heuristics via datetime_format option
             manual_format <- self$options$datetime_format
@@ -551,6 +582,14 @@ datetimeconverterClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             if (is.null(original_display)) {
                 original_display <- base::format(numeric_vector, trim = TRUE, scientific = FALSE)
                 original_display[is.na(numeric_vector)] <- NA_character_
+            }
+
+            .inf <- is.infinite(numeric_vector)
+            if (any(.inf)) {
+                numeric_vector[.inf] <- NA_real_
+                notes <- c(notes, .fmt(
+                    .('Set {count} infinite value(s) (Inf/-Inf) to missing before numeric date conversion.'),
+                    count = sum(.inf)))
             }
 
             # A NEGATIVE SERIAL IS NOT A DATE IN EITHER EXCEL EPOCH.
@@ -1179,7 +1218,10 @@ datetimeconverterClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         .generatePreviewTable = function(original, parsed, n = 50) {
             # Generate HTML preview table
 
-            n_show <- min(n, length(original))
+            n_clean <- suppressWarnings(as.integer(n)[1])
+            if (is.na(n_clean) || n_clean < 0L)
+                n_clean <- 50L
+            n_show <- min(n_clean, length(original))
 
             if (n_show == 0) {
                 return("<p>No data to preview.</p>")
@@ -1255,7 +1297,10 @@ datetimeconverterClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 return("<p>No components selected for extraction.</p>")
             }
 
-            n_show <- min(n, length(components[[1]]))
+            n_clean <- suppressWarnings(as.integer(n)[1])
+            if (is.na(n_clean) || n_clean < 0L)
+                n_clean <- 50L
+            n_show <- min(n_clean, length(components[[1]]))
             if (n_show == 0) {
                 return("<p>No data to preview.</p>")
             }
@@ -1397,7 +1442,7 @@ datetimeconverterClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             misuse_html <- if (length(misuse_warnings) > 0) {
                 paste0(
                     "<div style=\"background-color: rgba(255, 202, 33, 0.23); color: inherit; padding: 10px; margin-top: 10px; border-left: 3px solid #ffc107;\"><strong> Warnings:</strong><ul>",
-                    paste0('<li>', misuse_warnings, '</li>', collapse = ''),
+                    paste0('<li>', htmltools::htmlEscape(misuse_warnings), '</li>', collapse = ''),
                     "</ul></div>"
                 )
             } else {

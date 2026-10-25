@@ -90,650 +90,645 @@ children:
           - type: TextBox
             name: seed
             format: number
-  - type: CollapseBox
-    label: Weighted Kappa (Ordinal)
-    collapsed: false
-    children:
-      - type: LayoutBox
-        margin: large
-        children:
-          - type: ComboBox
-            name: wght
           - type: CheckBox
             name: exct
-          - type: CheckBox
-            name: showLevelInfo
-  - type: CollapseBox
-    label: Pathologist Grading Analysis [Ordinal/Categorical]
-    collapsed: true
-    children:
-      - type: LayoutBox
-        margin: large
-        children:
-          - type: CheckBox
-            name: gradingDesign
-          - type: CheckBox
-            name: perPathologist
-          - type: CheckBox
-            name: severityModel
-          - type: CheckBox
-            name: latentModel
-          - type: CheckBox
-            name: showGradingGuide
-  - type: CollapseBox
-    label: Krippendorff's Alpha (Any Data Type)
-    collapsed: true
-    children:
-      - type: LayoutBox
-        margin: large
-        children:
-          - type: CheckBox
-            name: kripp
-          - type: ComboBox
-            name: krippMethod
-            enable: (kripp)
-          - type: CheckBox
-            name: bootstrap
-            enable: (kripp)
-          - type: CheckBox
-            name: showKrippGuide
-  - type: CollapseBox
-    label: Light's Kappa [Categorical] (3+ Raters)
-    collapsed: true
-    children:
-      - type: LayoutBox
-        margin: large
-        children:
-          - type: CheckBox
-            name: lightKappa
-          - type: CheckBox
-            name: showLightKappaGuide
-  - type: CollapseBox
-    label: Gwet's AC1/AC2 (Categorical/Ordinal)
-    collapsed: true
-    children:
-      - type: LayoutBox
-        margin: large
-        children:
-          - type: CheckBox
-            name: gwet
-          - type: ComboBox
-            name: gwetWeights
-            enable: (gwet)
-          - type: CheckBox
-            name: showGwetGuide
-  - type: CollapseBox
-    label: PABAK & Prevalence/Bias Indices (2 Raters)
-    collapsed: true
-    children:
-      - type: LayoutBox
-        margin: large
-        children:
-          - type: CheckBox
-            name: pabak
-          - type: CheckBox
-            name: showPABAKGuide
-  - type: CollapseBox
-    label: Finn Coefficient [Categorical] (Variance-Based)
-    collapsed: true
-    children:
-      - type: LayoutBox
-        margin: large
-        children:
-          - type: CheckBox
-            name: finn
-          - type: TextBox
-            name: finnLevels
-            format: number
-            enable: (finn)
-          - type: ComboBox
-            name: finnModel
-            enable: (finn)
-          - type: CheckBox
-            name: showFinnGuide
-  - type: CollapseBox
-    label: Kendall's W [Ordinal] (Concordance for Rankings)
-    collapsed: true
-    children:
-      - type: LayoutBox
-        margin: large
-        children:
-          - type: CheckBox
-            name: kendallW
-          - type: CheckBox
-            name: showKendallWGuide
-  - type: CollapseBox
-    label: Robinson's A [Ordinal] (Agreement Index)
-    collapsed: true
-    children:
-      - type: LayoutBox
-        margin: large
-        children:
-          - type: CheckBox
-            name: robinsonA
-          - type: CheckBox
-            name: showRobinsonAGuide
-  - type: CollapseBox
-    label: Mean Spearman Rho [Ordinal] (Average Rank Correlation)
-    collapsed: true
-    children:
-      - type: LayoutBox
-        margin: large
-        children:
-          - type: CheckBox
-            name: meanSpearman
-          - type: CheckBox
-            name: showMeanSpearmanGuide
-  - type: CollapseBox
-    label: ICC [Continuous] (Intraclass Correlation)
-    collapsed: true
-    children:
-      - type: LayoutBox
-        margin: large
-        children:
-          - type: CheckBox
-            name: icc
-          - type: CheckBox
-            name: showICCGuide
-          - type: ComboBox
-            name: iccType
-            enable: (icc || bootstrapCI)
-  - type: CollapseBox
-    label: Mean Pearson Correlation [Continuous] (Linear Association)
-    collapsed: true
-    children:
-      - type: LayoutBox
-        margin: large
-        children:
-          - type: CheckBox
-            name: meanPearson
-          - type: CheckBox
-            name: showMeanPearsonGuide
-  - type: CollapseBox
-    label: Lin's CCC [Continuous] (Concordance - Method Comparison)
-    collapsed: true
-    children:
-      - type: LayoutBox
-        margin: large
-        children:
-          - type: CheckBox
-            name: linCCC
-          - type: CheckBox
-            name: showLinCCCGuide
-  - type: CollapseBox
-    label: Empirical TDI [Continuous] (Prespecified Difference Limit)
-    collapsed: true
-    children:
-      - type: LayoutBox
-        margin: large
-        children:
-          - type: CheckBox
-            name: tdi
-          - type: TextBox
-            name: tdiCoverage
-            format: number
-            enable: (tdi)
-          - type: TextBox
-            name: tdiLimit
-            format: number
-            enable: (tdi)
-          - type: CheckBox
-            name: showTDIGuide
-  - type: CollapseBox
-    label: Iota Coefficient [Continuous or Categorical] (Single Variable)
-    collapsed: true
-    children:
-      - type: LayoutBox
-        margin: large
-        children:
-          - type: CheckBox
-            name: iota
-          - type: CheckBox
-            name: iotaStandardize
-            enable: (iota)
-          - type: CheckBox
-            name: showIotaGuide
-  - type: CollapseBox
-    label: Bland-Altman Analysis [Continuous] (Limits of Agreement)
-    collapsed: true
-    children:
-      - type: LayoutBox
-        margin: large
-        children:
-          - type: CheckBox
-            name: blandAltmanPlot
-          - type: TextBox
-            name: baConfidenceLevel
-            format: number
-            enable: (blandAltmanPlot)
-          - type: CheckBox
-            name: proportionalBias
-            enable: (blandAltmanPlot)
-          - type: CheckBox
-            name: showBlandAltmanGuide
-  - type: CollapseBox
-    label: Agreement Heatmap [Categorical] (Confusion Matrix Visualization)
-    collapsed: true
-    children:
-      - type: LayoutBox
-        margin: large
-        children:
-          - type: CheckBox
-            name: agreementHeatmap
-          - type: ComboBox
-            name: heatmapColorScheme
-            enable: (agreementHeatmap)
-          - type: CheckBox
-            name: heatmapShowPercentages
-            enable: (agreementHeatmap)
-          - type: CheckBox
-            name: heatmapShowCounts
-            enable: (agreementHeatmap)
-          - type: TextBox
-            name: heatmapAnnotationSize
-            format: number
-            enable: (agreementHeatmap)
-          - type: CheckBox
-            name: showAgreementHeatmapGuide
-  - type: CollapseBox
-    label: Rater Variance Decomposition [Continuous] (Systematic vs Random Disagreement)
-    collapsed: true
-    children:
-      - type: LayoutBox
-        margin: large
-        children:
-          - type: CheckBox
-            name: maxwellRE
-          - type: CheckBox
-            name: showMaxwellREGuide
-  - type: CollapseBox
-    label: Hierarchical/Multilevel Kappa [Categorical] (Multi-Center Studies)
-    collapsed: true
-    children:
-      - type: LayoutBox
-        margin: large
-        children:
-          - type: CheckBox
-            name: hierarchicalKappa
-      - type: LayoutBox
-        margin: large
-        children:
-          - type: CheckBox
-            name: clusterSpecificKappa
-            enable: (hierarchicalKappa)
-          - type: CheckBox
-            name: iccHierarchical
-            enable: (hierarchicalKappa)
-          - type: CheckBox
-            name: varianceDecomposition
-            enable: (hierarchicalKappa)
-          - type: CheckBox
-            name: testClusterHomogeneity
-            enable: (hierarchicalKappa)
-          - type: CheckBox
-            name: clusterRankings
-            enable: (hierarchicalKappa)
-          - type: CheckBox
-            name: showHierarchicalGuide
-  - type: CollapseBox
-    label: >-
-      Mixed-Effects Condition Comparison [Continuous] (AI vs Manual, Pre vs
-      Post)
-    collapsed: true
-    children:
-      - type: LayoutBox
-        margin: large
-        children:
-          - type: CheckBox
-            name: mixedEffectsComparison
-      - type: LayoutBox
-        margin: large
-        children:
           - type: ComboBox
             name: multipleTestCorrection
             enable: (mixedEffectsComparison || allPairsKappa)
-          - type: CheckBox
-            name: showMixedEffectsGuide
+      - type: Label
+        label: Bootstrap Confidence Intervals (Any Data Type)
+        children:
+          - type: LayoutBox
+            margin: large
+            children:
+              - type: CheckBox
+                name: bootstrapCI
+              - type: TextBox
+                name: nBoot
+                format: number
+                enable: (bootstrapCI || bootstrap || robinsonA || tdi || (specificAgreement && specificConfidenceIntervals && specificCIMethod:bootstrap))
+              - type: CheckBox
+                name: showBootstrapCIGuide
   - type: CollapseBox
-    label: Multi-Class Confusion Matrix [Categorical] (Classification Evaluation)
+    label: Categorical
     collapsed: true
     children:
-      - type: LayoutBox
-        margin: large
+      - type: Label
+        label: Light's Kappa [Categorical] (3+ Raters)
         children:
-          - type: CheckBox
-            name: confusionMatrix
-          - type: ComboBox
-            name: confusionNormalize
-            enable: (confusionMatrix)
-          - type: CheckBox
-            name: showConfusionMatrixGuide
+          - type: LayoutBox
+            margin: large
+            children:
+              - type: CheckBox
+                name: lightKappa
+              - type: CheckBox
+                name: showLightKappaGuide
+      - type: Label
+        label: Gwet's AC1/AC2 (Categorical/Ordinal)
+        children:
+          - type: LayoutBox
+            margin: large
+            children:
+              - type: CheckBox
+                name: gwet
+              - type: ComboBox
+                name: gwetWeights
+                enable: (gwet)
+              - type: CheckBox
+                name: showGwetGuide
+      - type: Label
+        label: PABAK & Prevalence/Bias Indices (2 Raters)
+        children:
+          - type: LayoutBox
+            margin: large
+            children:
+              - type: CheckBox
+                name: pabak
+              - type: CheckBox
+                name: showPABAKGuide
+      - type: Label
+        label: Finn Coefficient [Categorical] (Variance-Based)
+        children:
+          - type: LayoutBox
+            margin: large
+            children:
+              - type: CheckBox
+                name: finn
+              - type: TextBox
+                name: finnLevels
+                format: number
+                enable: (finn)
+              - type: ComboBox
+                name: finnModel
+                enable: (finn)
+              - type: CheckBox
+                name: showFinnGuide
+      - type: Label
+        label: Specific Agreement Indices [Categorical] (Category-Focused)
+        children:
+          - type: LayoutBox
+            margin: large
+            children:
+              - type: CheckBox
+                name: specificAgreement
+              - type: TextBox
+                name: specificPositiveCategory
+                format: string
+                enable: (specificAgreement)
+              - type: CheckBox
+                name: specificAllCategories
+                enable: (specificAgreement)
+              - type: CheckBox
+                name: specificConfidenceIntervals
+                enable: (specificAgreement)
+              - type: ComboBox
+                name: specificCIMethod
+                enable: (specificAgreement && specificConfidenceIntervals)
+              - type: CheckBox
+                name: showSpecificAgreementGuide
+      - type: Label
+        label: Pairwise Kappa [Categorical] (vs Reference Rater)
+        children:
+          - type: LayoutBox
+            margin: large
+            children:
+              - type: CheckBox
+                name: pairwiseKappa
+              - type: CheckBox
+                name: rankRaters
+                enable: (pairwiseKappa)
+              - type: CheckBox
+                name: showPairwiseKappaGuide
+              - type: CheckBox
+                name: allPairsKappa
+              - type: CheckBox
+                name: allPairsCI
+                enable: (allPairsKappa)
+              - type: CheckBox
+                name: showAllPairsKappaGuide
+              - type: CheckBox
+                name: itemModalCategoryAgreement
+              - type: CheckBox
+                name: showItemModalGuide
+      - type: Label
+        label: Hierarchical/Multilevel Kappa [Categorical] (Multi-Center Studies)
+        children:
+          - type: LayoutBox
+            margin: large
+            children:
+              - type: CheckBox
+                name: hierarchicalKappa
+          - type: LayoutBox
+            margin: large
+            children:
+              - type: CheckBox
+                name: clusterSpecificKappa
+                enable: (hierarchicalKappa)
+              - type: CheckBox
+                name: iccHierarchical
+                enable: (hierarchicalKappa)
+              - type: CheckBox
+                name: varianceDecomposition
+                enable: (hierarchicalKappa)
+              - type: CheckBox
+                name: testClusterHomogeneity
+                enable: (hierarchicalKappa)
+              - type: CheckBox
+                name: clusterRankings
+                enable: (hierarchicalKappa)
+              - type: CheckBox
+                name: showHierarchicalGuide
+      - type: Label
+        label: Multi-Class Confusion Matrix [Categorical] (Classification Evaluation)
+        children:
+          - type: LayoutBox
+            margin: large
+            children:
+              - type: CheckBox
+                name: confusionMatrix
+              - type: ComboBox
+                name: confusionNormalize
+                enable: (confusionMatrix)
+              - type: CheckBox
+                name: showConfusionMatrixGuide
+      - type: Label
+        label: Multi-Annotator Concordance [Categorical] (AI Validation)
+        children:
+          - type: LayoutBox
+            margin: large
+            children:
+              - type: CheckBox
+                name: multiAnnotatorConcordance
+              - type: TextBox
+                name: predictionColumn
+                format: number
+                enable: (multiAnnotatorConcordance)
+              - type: CheckBox
+                name: showConcordanceF1Guide
   - type: CollapseBox
-    label: Bootstrap Confidence Intervals (Any Data Type)
+    label: Ordinal
     collapsed: true
     children:
-      - type: LayoutBox
-        margin: large
+      - type: Label
+        label: Weighted Kappa (Ordinal)
         children:
-          - type: CheckBox
-            name: bootstrapCI
-          - type: TextBox
-            name: nBoot
-            format: number
-            enable: (bootstrapCI || bootstrap || robinsonA || tdi || (specificAgreement && specificConfidenceIntervals && specificCIMethod:bootstrap))
-          - type: CheckBox
-            name: showBootstrapCIGuide
+          - type: LayoutBox
+            margin: large
+            children:
+              - type: ComboBox
+                name: wght
+              - type: CheckBox
+                name: showLevelInfo
+      - type: Label
+        label: Pathologist Grading Analysis [Ordinal/Categorical]
+        children:
+          - type: LayoutBox
+            margin: large
+            children:
+              - type: CheckBox
+                name: gradingDesign
+              - type: CheckBox
+                name: perPathologist
+              - type: CheckBox
+                name: severityModel
+              - type: CheckBox
+                name: latentModel
+              - type: CheckBox
+                name: showGradingGuide
+      - type: Label
+        label: Kendall's W [Ordinal] (Concordance for Rankings)
+        children:
+          - type: LayoutBox
+            margin: large
+            children:
+              - type: CheckBox
+                name: kendallW
+              - type: CheckBox
+                name: showKendallWGuide
+      - type: Label
+        label: Robinson's A [Ordinal] (Agreement Index)
+        children:
+          - type: LayoutBox
+            margin: large
+            children:
+              - type: CheckBox
+                name: robinsonA
+              - type: CheckBox
+                name: showRobinsonAGuide
+      - type: Label
+        label: Mean Spearman Rho [Ordinal] (Average Rank Correlation)
+        children:
+          - type: LayoutBox
+            margin: large
+            children:
+              - type: CheckBox
+                name: meanSpearman
+              - type: CheckBox
+                name: showMeanSpearmanGuide
   - type: CollapseBox
-    label: Multi-Annotator Concordance [Categorical] (AI Validation)
+    label: Continuous
     collapsed: true
     children:
-      - type: LayoutBox
-        margin: large
+      - type: Label
+        label: ICC [Continuous] (Intraclass Correlation)
         children:
-          - type: CheckBox
-            name: multiAnnotatorConcordance
-          - type: TextBox
-            name: predictionColumn
-            format: number
-            enable: (multiAnnotatorConcordance)
-          - type: CheckBox
-            name: showConcordanceF1Guide
+          - type: LayoutBox
+            margin: large
+            children:
+              - type: CheckBox
+                name: icc
+              - type: CheckBox
+                name: showICCGuide
+              - type: ComboBox
+                name: iccType
+                enable: (icc || bootstrapCI)
+      - type: Label
+        label: Mean Pearson Correlation [Continuous] (Linear Association)
+        children:
+          - type: LayoutBox
+            margin: large
+            children:
+              - type: CheckBox
+                name: meanPearson
+              - type: CheckBox
+                name: showMeanPearsonGuide
+      - type: Label
+        label: Lin's CCC [Continuous] (Concordance - Method Comparison)
+        children:
+          - type: LayoutBox
+            margin: large
+            children:
+              - type: CheckBox
+                name: linCCC
+              - type: CheckBox
+                name: showLinCCCGuide
+      - type: Label
+        label: Empirical TDI [Continuous] (Prespecified Difference Limit)
+        children:
+          - type: LayoutBox
+            margin: large
+            children:
+              - type: CheckBox
+                name: tdi
+              - type: TextBox
+                name: tdiCoverage
+                format: number
+                enable: (tdi)
+              - type: TextBox
+                name: tdiLimit
+                format: number
+                enable: (tdi)
+              - type: CheckBox
+                name: showTDIGuide
+      - type: Label
+        label: Bland-Altman Analysis [Continuous] (Limits of Agreement)
+        children:
+          - type: LayoutBox
+            margin: large
+            children:
+              - type: CheckBox
+                name: blandAltmanPlot
+              - type: TextBox
+                name: baConfidenceLevel
+                format: number
+                enable: (blandAltmanPlot)
+              - type: CheckBox
+                name: proportionalBias
+                enable: (blandAltmanPlot)
+              - type: CheckBox
+                name: showBlandAltmanGuide
+      - type: Label
+        label: Rater Variance Decomposition [Continuous] (Systematic vs Random Disagreement)
+        children:
+          - type: LayoutBox
+            margin: large
+            children:
+              - type: CheckBox
+                name: maxwellRE
+              - type: CheckBox
+                name: showMaxwellREGuide
   - type: CollapseBox
-    label: Pairwise Kappa [Categorical] (vs Reference Rater)
+    label: Any data type
     collapsed: true
     children:
-      - type: LayoutBox
-        margin: large
+      - type: Label
+        label: Krippendorff's Alpha (Any Data Type)
         children:
-          - type: CheckBox
-            name: pairwiseKappa
-          - type: CheckBox
-            name: rankRaters
-            enable: (pairwiseKappa)
-          - type: CheckBox
-            name: showPairwiseKappaGuide
-          - type: CheckBox
-            name: allPairsKappa
-          - type: CheckBox
-            name: allPairsCI
-            enable: (allPairsKappa)
-          - type: CheckBox
-            name: showAllPairsKappaGuide
-          - type: CheckBox
-            name: itemModalCategoryAgreement
-          - type: CheckBox
-            name: showItemModalGuide
+          - type: LayoutBox
+            margin: large
+            children:
+              - type: CheckBox
+                name: kripp
+              - type: ComboBox
+                name: krippMethod
+                enable: (kripp)
+              - type: CheckBox
+                name: bootstrap
+                enable: (kripp)
+              - type: CheckBox
+                name: showKrippGuide
+      - type: Label
+        label: Iota Coefficient [Continuous or Categorical] (Single Variable)
+        children:
+          - type: LayoutBox
+            margin: large
+            children:
+              - type: CheckBox
+                name: iota
+              - type: CheckBox
+                name: iotaStandardize
+                enable: (iota)
+              - type: CheckBox
+                name: showIotaGuide
+      - type: Label
+        label: Inter/Intra-Rater Reliability [Any Data Type] (Test-Retest Studies)
+        children:
+          - type: LayoutBox
+            margin: large
+            children:
+              - type: CheckBox
+                name: interIntraRater
+              - type: TextBox
+                name: interIntraSeparator
+                format: string
+                enable: (interIntraRater)
+              - type: CheckBox
+                name: showInterIntraRaterGuide
   - type: CollapseBox
-    label: Directional Discordance [Ordinal] (2 Raters)
+    label: Tests
     collapsed: true
     children:
-      - type: LayoutBox
-        margin: large
+      - type: Label
+        label: Directional Discordance [Ordinal] (2 Raters)
         children:
-          - type: CheckBox
-            name: raterBias
-          - type: CheckBox
-            name: showRaterBiasGuide
+          - type: LayoutBox
+            margin: large
+            children:
+              - type: CheckBox
+                name: raterBias
+              - type: CheckBox
+                name: showRaterBiasGuide
+      - type: Label
+        label: Bhapkar Test [Categorical] (Marginal Homogeneity, 2 Raters)
+        children:
+          - type: LayoutBox
+            margin: large
+            children:
+              - type: CheckBox
+                name: bhapkar
+              - type: CheckBox
+                name: showBhapkarGuide
+      - type: Label
+        label: Stuart-Maxwell Test [Categorical] (Marginal Homogeneity, 2 Raters)
+        children:
+          - type: LayoutBox
+            margin: large
+            children:
+              - type: CheckBox
+                name: stuartMaxwell
+              - type: CheckBox
+                name: showStuartMaxwellGuide
+      - type: Label
+        label: Paired Agreement Comparison [Categorical] (With vs Without AI)
+        children:
+          - type: LayoutBox
+            margin: large
+            children:
+              - type: CheckBox
+                name: pairedAgreementTest
+              - type: TextBox
+                name: pairedBootN
+                format: number
+                enable: (pairedAgreementTest)
+              - type: CheckBox
+                name: showPairedAgreementGuide
+      - type: Label
+        label: >-
+          Mixed-Effects Condition Comparison [Continuous] (AI vs Manual, Pre vs
+          Post)
+        children:
+          - type: LayoutBox
+            margin: large
+            children:
+              - type: CheckBox
+                name: mixedEffectsComparison
+          - type: LayoutBox
+            margin: large
+            children:
+              - type: CheckBox
+                name: showMixedEffectsGuide
   - type: CollapseBox
-    label: Bhapkar Test [Categorical] (Marginal Homogeneity, 2 Raters)
+    label: Rater and case diagnostics
     collapsed: true
     children:
-      - type: LayoutBox
-        margin: large
+      - type: Label
+        label: Agreement Heatmap [Categorical] (Confusion Matrix Visualization)
         children:
-          - type: CheckBox
-            name: bhapkar
-          - type: CheckBox
-            name: showBhapkarGuide
+          - type: LayoutBox
+            margin: large
+            children:
+              - type: CheckBox
+                name: agreementHeatmap
+              - type: ComboBox
+                name: heatmapColorScheme
+                enable: (agreementHeatmap)
+              - type: CheckBox
+                name: heatmapShowPercentages
+                enable: (agreementHeatmap)
+              - type: CheckBox
+                name: heatmapShowCounts
+                enable: (agreementHeatmap)
+              - type: TextBox
+                name: heatmapAnnotationSize
+                format: number
+                enable: (agreementHeatmap)
+              - type: CheckBox
+                name: showAgreementHeatmapGuide
+      - type: Label
+        label: Rater Profile Plots (Distribution Comparison)
+        children:
+          - type: LayoutBox
+            margin: large
+            children:
+              - type: CheckBox
+                name: raterProfiles
+              - type: ComboBox
+                name: raterProfileType
+                enable: (raterProfiles)
+              - type: CheckBox
+                name: raterProfileShowPoints
+                enable: (raterProfiles)
+              - type: CheckBox
+                name: showRaterProfileGuide
+      - type: Label
+        label: Agreement by Subgroup (Stratified Analysis)
+        children:
+          - type: LayoutBox
+            margin: large
+            children:
+              - type: CheckBox
+                name: agreementBySubgroup
+              - type: CheckBox
+                name: subgroupForestPlot
+                enable: (agreementBySubgroup)
+              - type: TextBox
+                name: subgroupMinCases
+                format: number
+                enable: (agreementBySubgroup)
+              - type: CheckBox
+                name: showSubgroupGuide
+      - type: Label
+        label: Rater Clustering (Identify Rating Pattern Groups)
+        children:
+          - type: LayoutBox
+            margin: large
+            children:
+              - type: CheckBox
+                name: raterClustering
+              - type: ComboBox
+                name: clusterMethod
+                enable: (raterClustering)
+              - type: ComboBox
+                name: clusterDistance
+                enable: (raterClustering)
+              - type: ComboBox
+                name: clusterLinkage
+                enable: (raterClustering && clusterMethod:hierarchical)
+              - type: TextBox
+                name: nClusters
+                format: number
+                enable: (raterClustering)
+              - type: CheckBox
+                name: showDendrogram
+                enable: (raterClustering && clusterMethod:hierarchical)
+              - type: CheckBox
+                name: showClusterHeatmap
+                enable: (raterClustering)
+              - type: CheckBox
+                name: showRaterClusterGuide
+      - type: Label
+        label: Case Clustering (Identify Rating Pattern Groups)
+        children:
+          - type: LayoutBox
+            margin: large
+            children:
+              - type: CheckBox
+                name: caseClustering
+              - type: ComboBox
+                name: caseClusterMethod
+                enable: (caseClustering)
+              - type: ComboBox
+                name: caseClusterDistance
+                enable: (caseClustering)
+              - type: ComboBox
+                name: caseClusterLinkage
+                enable: (caseClustering && caseClusterMethod:hierarchical)
+              - type: TextBox
+                name: nCaseClusters
+                format: number
+                enable: (caseClustering)
+              - type: CheckBox
+                name: showCaseDendrogram
+                enable: (caseClustering && caseClusterMethod:hierarchical)
+              - type: CheckBox
+                name: showCaseClusterHeatmap
+                enable: (caseClustering)
+              - type: CheckBox
+                name: showCaseClusterGuide
   - type: CollapseBox
-    label: Stuart-Maxwell Test [Categorical] (Marginal Homogeneity, 2 Raters)
+    label: Computed variables
     collapsed: true
     children:
-      - type: LayoutBox
-        margin: large
+      - type: Label
+        label: Create Consensus Variable (Any Data Type)
         children:
-          - type: CheckBox
-            name: stuartMaxwell
-          - type: CheckBox
-            name: showStuartMaxwellGuide
+          - type: LayoutBox
+            margin: large
+            children:
+              - type: TextBox
+                name: consensusName
+                format: string
+                width: largest
+              - type: ComboBox
+                name: consensusRule
+              - type: ComboBox
+                name: tieBreaker
+              - type: Output
+                name: consensusVar
+      - type: Label
+        label: Case Agreement Categorization (Any Data Type)
+        children:
+          - type: LayoutBox
+            margin: large
+            children:
+              - type: CheckBox
+                name: loaVariable
+              - type: ComboBox
+                name: detailLevel
+                enable: (loaVariable)
+              - type: TextBox
+                name: simpleThreshold
+                format: number
+                enable: (loaVariable && detailLevel:simple)
+              - type: ComboBox
+                name: loaThresholds
+                enable: (loaVariable && detailLevel:detailed)
+              - type: TextBox
+                name: loaHighThreshold
+                format: number
+                enable: (loaVariable && detailLevel:detailed && loaThresholds:custom)
+              - type: TextBox
+                name: loaLowThreshold
+                format: number
+                enable: (loaVariable && detailLevel:detailed && loaThresholds:custom)
+              - type: TextBox
+                name: loaVariableName
+                format: string
+                enable: (loaVariable)
+              - type: CheckBox
+                name: showLoaTable
+                enable: (loaVariable)
+              - type: Output
+                name: loaOutput
+                enable: (loaVariable)
   - type: CollapseBox
-    label: Inter/Intra-Rater Reliability [Any Data Type] (Test-Retest Studies)
+    label: Study design
     collapsed: true
     children:
-      - type: LayoutBox
-        margin: large
+      - type: Label
+        label: Sample Size for Agreement Study (Design)
         children:
-          - type: CheckBox
-            name: interIntraRater
-          - type: TextBox
-            name: interIntraSeparator
-            format: string
-            enable: (interIntraRater)
-          - type: CheckBox
-            name: showInterIntraRaterGuide
-  - type: CollapseBox
-    label: Create Consensus Variable (Any Data Type)
-    collapsed: true
-    children:
-      - type: LayoutBox
-        margin: large
-        children:
-          - type: TextBox
-            name: consensusName
-            format: string
-            width: largest
-          - type: ComboBox
-            name: consensusRule
-          - type: ComboBox
-            name: tieBreaker
-          - type: Output
-            name: consensusVar
-  - type: CollapseBox
-    label: Case Agreement Categorization (Any Data Type)
-    collapsed: true
-    children:
-      - type: LayoutBox
-        margin: large
-        children:
-          - type: CheckBox
-            name: loaVariable
-          - type: ComboBox
-            name: detailLevel
-            enable: (loaVariable)
-          - type: TextBox
-            name: simpleThreshold
-            format: number
-            enable: (loaVariable && detailLevel:simple)
-          - type: ComboBox
-            name: loaThresholds
-            enable: (loaVariable && detailLevel:detailed)
-          - type: TextBox
-            name: loaHighThreshold
-            format: number
-            enable: (loaVariable && detailLevel:detailed && loaThresholds:custom)
-          - type: TextBox
-            name: loaLowThreshold
-            format: number
-            enable: (loaVariable && detailLevel:detailed && loaThresholds:custom)
-          - type: TextBox
-            name: loaVariableName
-            format: string
-            enable: (loaVariable)
-          - type: CheckBox
-            name: showLoaTable
-            enable: (loaVariable)
-          - type: Output
-            name: loaOutput
-            enable: (loaVariable)
-  - type: CollapseBox
-    label: Specific Agreement Indices [Categorical] (Category-Focused)
-    collapsed: true
-    children:
-      - type: LayoutBox
-        margin: large
-        children:
-          - type: CheckBox
-            name: specificAgreement
-          - type: TextBox
-            name: specificPositiveCategory
-            format: string
-            enable: (specificAgreement)
-          - type: CheckBox
-            name: specificAllCategories
-            enable: (specificAgreement)
-          - type: CheckBox
-            name: specificConfidenceIntervals
-            enable: (specificAgreement)
-          - type: ComboBox
-            name: specificCIMethod
-            enable: (specificAgreement && specificConfidenceIntervals)
-          - type: CheckBox
-            name: showSpecificAgreementGuide
-  - type: CollapseBox
-    label: Rater Profile Plots (Distribution Comparison)
-    collapsed: true
-    children:
-      - type: LayoutBox
-        margin: large
-        children:
-          - type: CheckBox
-            name: raterProfiles
-          - type: ComboBox
-            name: raterProfileType
-            enable: (raterProfiles)
-          - type: CheckBox
-            name: raterProfileShowPoints
-            enable: (raterProfiles)
-          - type: CheckBox
-            name: showRaterProfileGuide
-  - type: CollapseBox
-    label: Agreement by Subgroup (Stratified Analysis)
-    collapsed: true
-    children:
-      - type: LayoutBox
-        margin: large
-        children:
-          - type: CheckBox
-            name: agreementBySubgroup
-          - type: CheckBox
-            name: subgroupForestPlot
-            enable: (agreementBySubgroup)
-          - type: TextBox
-            name: subgroupMinCases
-            format: number
-            enable: (agreementBySubgroup)
-          - type: CheckBox
-            name: showSubgroupGuide
-  - type: CollapseBox
-    label: Rater Clustering (Identify Rating Pattern Groups)
-    collapsed: true
-    children:
-      - type: LayoutBox
-        margin: large
-        children:
-          - type: CheckBox
-            name: raterClustering
-          - type: ComboBox
-            name: clusterMethod
-            enable: (raterClustering)
-          - type: ComboBox
-            name: clusterDistance
-            enable: (raterClustering)
-          - type: ComboBox
-            name: clusterLinkage
-            enable: (raterClustering && clusterMethod:hierarchical)
-          - type: TextBox
-            name: nClusters
-            format: number
-            enable: (raterClustering)
-          - type: CheckBox
-            name: showDendrogram
-            enable: (raterClustering && clusterMethod:hierarchical)
-          - type: CheckBox
-            name: showClusterHeatmap
-            enable: (raterClustering)
-          - type: CheckBox
-            name: showRaterClusterGuide
-  - type: CollapseBox
-    label: Case Clustering (Identify Rating Pattern Groups)
-    collapsed: true
-    children:
-      - type: LayoutBox
-        margin: large
-        children:
-          - type: CheckBox
-            name: caseClustering
-          - type: ComboBox
-            name: caseClusterMethod
-            enable: (caseClustering)
-          - type: ComboBox
-            name: caseClusterDistance
-            enable: (caseClustering)
-          - type: ComboBox
-            name: caseClusterLinkage
-            enable: (caseClustering && caseClusterMethod:hierarchical)
-          - type: TextBox
-            name: nCaseClusters
-            format: number
-            enable: (caseClustering)
-          - type: CheckBox
-            name: showCaseDendrogram
-            enable: (caseClustering && caseClusterMethod:hierarchical)
-          - type: CheckBox
-            name: showCaseClusterHeatmap
-            enable: (caseClustering)
-          - type: CheckBox
-            name: showCaseClusterGuide
-  - type: CollapseBox
-    label: Paired Agreement Comparison [Categorical] (With vs Without AI)
-    collapsed: true
-    children:
-      - type: LayoutBox
-        margin: large
-        children:
-          - type: CheckBox
-            name: pairedAgreementTest
-          - type: TextBox
-            name: pairedBootN
-            format: number
-            enable: (pairedAgreementTest)
-          - type: CheckBox
-            name: showPairedAgreementGuide
-  - type: CollapseBox
-    label: Sample Size for Agreement Study (Design)
-    collapsed: true
-    children:
-      - type: LayoutBox
-        margin: large
-        children:
-          - type: CheckBox
-            name: agreementSampleSize
-          - type: ComboBox
-            name: ssMetric
-            enable: (agreementSampleSize)
-          - type: TextBox
-            name: ssKappaNull
-            format: number
-            enable: (agreementSampleSize)
-          - type: TextBox
-            name: ssKappaAlt
-            format: number
-            enable: (agreementSampleSize)
-          - type: TextBox
-            name: ssNRaters
-            format: number
-            enable: (agreementSampleSize)
-          - type: TextBox
-            name: ssNCategories
-            format: number
-            enable: (agreementSampleSize)
-          - type: TextBox
-            name: ssAlpha
-            format: number
-            enable: (agreementSampleSize)
-          - type: TextBox
-            name: ssPower
-            format: number
-            enable: (agreementSampleSize)
-          - type: CheckBox
-            name: showSampleSizeGuide
+          - type: LayoutBox
+            margin: large
+            children:
+              - type: CheckBox
+                name: agreementSampleSize
+              - type: ComboBox
+                name: ssMetric
+                enable: (agreementSampleSize)
+              - type: TextBox
+                name: ssKappaNull
+                format: number
+                enable: (agreementSampleSize)
+              - type: TextBox
+                name: ssKappaAlt
+                format: number
+                enable: (agreementSampleSize)
+              - type: TextBox
+                name: ssNRaters
+                format: number
+                enable: (agreementSampleSize)
+              - type: TextBox
+                name: ssNCategories
+                format: number
+                enable: (agreementSampleSize)
+              - type: TextBox
+                name: ssAlpha
+                format: number
+                enable: (agreementSampleSize)
+              - type: TextBox
+                name: ssPower
+                format: number
+                enable: (agreementSampleSize)
+              - type: CheckBox
+                name: showSampleSizeGuide

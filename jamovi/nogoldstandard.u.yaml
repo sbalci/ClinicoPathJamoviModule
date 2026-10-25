@@ -69,17 +69,6 @@ children:
           - type: ComboBox
             name: method
             label: "Analysis method"
-            options:
-              - name: latent_class
-                title: "Latent Class Analysis"
-              - name: bayesian  
-                title: "Penalized EM (MAP-like; fixed priors; 3+ tests)"
-              - name: composite
-                title: "Composite Reference (strict majority)"
-              - name: all_positive
-                title: "All Tests Positive"
-              - name: any_positive
-                title: "Any Test Positive"
 
   - type: CollapseBox
     label: Uncertainty and Diagnostics

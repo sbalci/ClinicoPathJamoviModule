@@ -65,11 +65,11 @@ children:
   # ==============================================
   # 2. ANALYSIS CONFIGURATION (always visible)
   # ==============================================
-  - type: LayoutBox
+  - type: CollapseBox
+    label: Analysis Configuration
     margin: normal
+    collapsed: false
     children:
-      - type: Label
-        label: Analysis Configuration
       - type: ComboBox
         name: clinicalMode
         label: Guidance level
@@ -103,11 +103,6 @@ children:
             format: number
             label: Prior prevalence value (0-1)
             enable: (usePriorPrev)
-          - type: TextBox
-            name: costratioFP
-            format: number
-            label: "Cost Ratio (False Positive : False Negative)"
-            enable: (method:oc_cost_ratio)
 
   # ==============================================
   # 4. CUTPOINT OPTIMIZATION
@@ -134,37 +129,43 @@ children:
             format: string
             enable: (method:oc_manual)
             label: Manual cut score
+          - type: TextBox
+            name: costratioFP
+            format: number
+            label: "Cost Ratio (False Positive : False Negative)"
+            enable: (method:oc_cost_ratio)
       - type: LayoutBox
         margin: large
         children:
           - type: Label
             label: Advanced Cutpoint Settings
-          - type: TextBox
-            name: tol_metric
-            format: number
-            label: Metric tolerance
-            enable: >-
-              (method:maximize_metric || method:minimize_metric ||
-              method:maximize_loess_metric || method:minimize_loess_metric ||
-              method:maximize_boot_metric || method:minimize_boot_metric)
-          - type: ComboBox
-            name: break_ties
-            label: Tie breaking method
-          - type: TextBox
-            name: boot_runs
-            format: number
-            label: Bootstrap iterations
-            enable: (method:maximize_boot_metric || method:minimize_boot_metric)
-          - type: TextBox
-            name: seed
-            format: number
-            label: Random seed
-            enable: >-
-              (method:maximize_boot_metric || method:minimize_boot_metric ||
-              bootstrapCI || calculateIDI || calculateNRI || bayesianAnalysis)
-          - type: CheckBox
-            name: allObserved
-            label: All observed cutpoints
+            children:
+              - type: TextBox
+                name: tol_metric
+                format: number
+                label: Metric tolerance
+                enable: >-
+                  (method:maximize_metric || method:minimize_metric ||
+                  method:maximize_loess_metric || method:minimize_loess_metric ||
+                  method:maximize_boot_metric || method:minimize_boot_metric)
+              - type: ComboBox
+                name: break_ties
+                label: Tie breaking method
+              - type: TextBox
+                name: boot_runs
+                format: number
+                label: Bootstrap iterations
+                enable: (method:maximize_boot_metric || method:minimize_boot_metric)
+              - type: TextBox
+                name: seed
+                format: number
+                label: Random seed
+                enable: >-
+                  (method:maximize_boot_metric || method:minimize_boot_metric ||
+                  bootstrapCI || calculateIDI || calculateNRI || bayesianAnalysis)
+              - type: CheckBox
+                name: allObserved
+                label: All observed cutpoints
 
   # ==============================================
   # 5. FIXED SENSITIVITY / SPECIFICITY ANALYSIS
@@ -253,46 +254,48 @@ children:
                 children:
                   - type: Label
                     label: ROC Curve Settings
-                  - type: CheckBox
-                    name: plotROC
-                    label: ROC curves
-                  - type: CheckBox
-                    name: combinePlots
-                    label: Combined ROC curves
-                    enable: (plotROC)
-                  - type: CheckBox
-                    name: showOptimalPoint
-                    label: Selected cutpoint
-                    enable: (plotROC)
-                  - type: CheckBox
-                    name: directLabel
-                    label: Direct curve labels
-                    enable: (plotROC && combinePlots)
+                    children:
+                      - type: CheckBox
+                        name: plotROC
+                        label: ROC curves
+                      - type: CheckBox
+                        name: combinePlots
+                        label: Combined ROC curves
+                        enable: (plotROC)
+                      - type: CheckBox
+                        name: showOptimalPoint
+                        label: Selected cutpoint
+                        enable: (plotROC)
+                      - type: CheckBox
+                        name: directLabel
+                        label: Direct curve labels
+                        enable: (plotROC && combinePlots)
               - type: LayoutBox
                 margin: large
                 children:
                   - type: Label
                     label: Plot Style
-                  - type: CheckBox
-                    name: cleanPlot
-                    label: Publication-quality plot
-                    enable: (plotROC)
-                  - type: ComboBox
-                    name: legendPosition
-                    label: Legend position
-                    enable: (plotROC && combinePlots && !directLabel)
-                  - type: CheckBox
-                    name: smoothing
-                    label: LOESS smoothing
-                    enable: (plotROC)
-                  - type: CheckBox
-                    name: displaySE
-                    label: Smoothed-curve confidence band (95%)
-                    enable: (plotROC && smoothing && !cleanPlot)
-                  - type: CheckBox
-                    name: interactiveROC
-                    label: Additional static ROC plot
-                    enable: (plotROC)
+                    children:
+                      - type: CheckBox
+                        name: cleanPlot
+                        label: Publication-quality plot
+                        enable: (plotROC)
+                      - type: ComboBox
+                        name: legendPosition
+                        label: Legend position
+                        enable: (plotROC && combinePlots && !directLabel)
+                      - type: CheckBox
+                        name: smoothing
+                        label: LOESS smoothing
+                        enable: (plotROC)
+                      - type: CheckBox
+                        name: displaySE
+                        label: Smoothed-curve confidence band (95%)
+                        enable: (plotROC && smoothing && !cleanPlot)
+                      - type: CheckBox
+                        name: interactiveROC
+                        label: Additional static ROC plot
+                        enable: (plotROC)
           - type: LayoutBox
             cell: { column: 1, row: 0 }
             stretchFactor: 1
@@ -302,36 +305,38 @@ children:
                 children:
                   - type: Label
                     label: Confidence Intervals on Plot
-                  - type: CheckBox
-                    name: showConfidenceBands
-                    label: Confidence bands
-                    enable: (plotROC && !cleanPlot)
-                  - type: CheckBox
-                    name: quantileCIs
-                    label: CIs at quantiles
-                    enable: (plotROC && !cleanPlot)
-                  - type: TextBox
-                    name: quantiles
-                    format: string
-                    label: Quantile positions
-                    enable: (quantileCIs)
+                    children:
+                      - type: CheckBox
+                        name: showConfidenceBands
+                        label: Confidence bands
+                        enable: (plotROC && !cleanPlot)
+                      - type: CheckBox
+                        name: quantileCIs
+                        label: CIs at quantiles
+                        enable: (plotROC && !cleanPlot)
+                      - type: TextBox
+                        name: quantiles
+                        format: string
+                        label: Quantile positions
+                        enable: (quantileCIs)
               - type: LayoutBox
                 margin: large
                 children:
                   - type: Label
                     label: Diagnostic Plots
-                  - type: CheckBox
-                    name: showCriterionPlot
-                    label: Sensitivity/specificity vs. threshold
-                  - type: CheckBox
-                    name: showPrevalencePlot
-                    label: Predictive values vs. prevalence
-                  - type: CheckBox
-                    name: showDotPlot
-                    label: Test values distribution
-                  - type: CheckBox
-                    name: precisionRecallCurve
-                    label: Precision-recall curve
+                    children:
+                      - type: CheckBox
+                        name: showCriterionPlot
+                        label: Sensitivity/specificity vs. threshold
+                      - type: CheckBox
+                        name: showPrevalencePlot
+                        label: Predictive values vs. prevalence
+                      - type: CheckBox
+                        name: showDotPlot
+                        label: Test values distribution
+                      - type: CheckBox
+                        name: precisionRecallCurve
+                        label: Precision-recall curve
 
   # ==============================================
   # 8. ADVANCED ROC ANALYSIS
@@ -346,35 +351,37 @@ children:
         children:
           - type: Label
             label: Partial AUC
-          - type: CheckBox
-            name: partialAUC
-            label: Partial AUC
-          - type: TextBox
-            name: partialAUCfrom
-            format: number
-            label: From specificity
-            enable: (partialAUC)
-          - type: TextBox
-            name: partialAUCto
-            format: number
-            label: To specificity
-            enable: (partialAUC)
+            children:
+              - type: CheckBox
+                name: partialAUC
+                label: Partial AUC
+              - type: TextBox
+                name: partialAUCfrom
+                format: number
+                label: From specificity
+                enable: (partialAUC)
+              - type: TextBox
+                name: partialAUCto
+                format: number
+                label: To specificity
+                enable: (partialAUC)
       - type: LayoutBox
         margin: large
         children:
           - type: Label
             label: ROC Smoothing
-          - type: ComboBox
-            name: rocSmoothingMethod
-            label: Smoothing method
-          - type: CheckBox
-            name: bootstrapCI
-            label: Bootstrap confidence intervals
-          - type: TextBox
-            name: bootstrapReps
-            format: number
-            label: Bootstrap replications
-            enable: (bootstrapCI)
+            children:
+              - type: ComboBox
+                name: rocSmoothingMethod
+                label: Smoothing method
+              - type: CheckBox
+                name: bootstrapCI
+                label: Bootstrap confidence intervals
+              - type: TextBox
+                name: bootstrapReps
+                format: number
+                label: Bootstrap replications
+                enable: (bootstrapCI)
 
   # ==============================================
   # 9. MODEL COMPARISON
@@ -398,22 +405,23 @@ children:
         children:
           - type: Label
             label: Discrimination and Reclassification
-          - type: CheckBox
-            name: calculateIDI
-            label: IDI (integrated discrimination improvement)
-          - type: CheckBox
-            name: calculateNRI
-            label: NRI (net reclassification index)
-          - type: TextBox
-            name: nriThresholds
-            format: string
-            label: NRI thresholds (comma-separated)
-            enable: (calculateNRI)
-          - type: TextBox
-            name: idiNriBootRuns
-            format: number
-            label: Bootstrap iterations for IDI/NRI
-            enable: (calculateIDI || calculateNRI)
+            children:
+              - type: CheckBox
+                name: calculateIDI
+                label: IDI (integrated discrimination improvement)
+              - type: CheckBox
+                name: calculateNRI
+                label: NRI (net reclassification index)
+              - type: TextBox
+                name: nriThresholds
+                format: string
+                label: NRI thresholds (comma-separated)
+                enable: (calculateNRI)
+              - type: TextBox
+                name: idiNriBootRuns
+                format: number
+                label: Bootstrap iterations for IDI/NRI
+                enable: (calculateIDI || calculateNRI)
 
   # ==============================================
   # 10. POWER AND SAMPLE SIZE ANALYSIS
@@ -509,7 +517,3 @@ children:
             name: interventionCost
             label: Intervention cost analysis
             enable: (clinicalUtilityAnalysis)
-
-  - type: CheckBox
-    name: metaAnalysis
-    label: Explain why within-cohort meta-analysis is unavailable

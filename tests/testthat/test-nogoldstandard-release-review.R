@@ -443,7 +443,8 @@ test_that("scenario examples and method labels describe their actual scope", {
     expect_match(a_yaml, "not clinical guides")
     expect_match(a_yaml, "Penalized EM \\(MAP-like; fixed priors; 3\\+ tests\\)")
     expect_match(a_yaml, "Composite Reference \\(strict majority\\)")
-    expect_match(u_yaml, "Composite Reference \\(strict majority\\)")
+    # The ComboBox takes its titles from the .a.yaml; a copy in the .u.yaml could only drift.
+    expect_false(grepl("Composite Reference", u_yaml, fixed = TRUE))
     expect_false(grepl("name: alpha[\\s\\S]{0,180}enable: \\(bootstrap\\)", u_yaml))
     expect_false(grepl("name: verbose[\\s\\S]{0,180}enable: \\(bootstrap\\)", u_yaml))
     expect_match(r_yaml, "title: Estimated Class or Rule Proportion")

@@ -447,3 +447,77 @@ test_that("RV-datetimeconverter-01: .generateComponentPreview handles n=0 safely
   gen_comp <- dtc_class$private_methods$.generateComponentPreview
   expect_identical(gen_comp(list(year = integer(0)), n = 10), "<p>No data to preview.</p>")
 })
+
+test_that("SA-datetimeconverter-01: .sourcifyOption escapes quote-breaking strings and drops undeclared options, and .populateQualityAssessment escapes misuse_warnings", {
+  df_sa <- data.frame(dt = c("2024-01-15", "2024-02-20"))
+  payload <- 'UTC", datetime_var = {system("id")}, timezone = "UTC'
+  opts <- datetimeconverterOptions$new(datetime_var = "dt", timezone = payload)
+  opt_evil <- jmvcore::OptionString$new("evil", value = payload)
+  opts$.__enclos_env__$super$.addOption(opt_evil)
+  an <- dtc_class$new(options = opts, data = df_sa)
+
+  src <- an$asSource()
+  expect_false(grepl("evil", src, fixed = TRUE))
+  parsed_expr <- parse(text = src)
+  expect_length(parsed_expr, 1L)
+  call_obj <- parsed_expr[[1]]
+  expect_true(is.call(call_obj))
+  expect_identical(call_obj[["timezone"]], payload)
+  expect_identical(call_obj[["datetime_var"]], "dt")
+
+  opts_qa <- datetimeconverterOptions$new(datetime_var = "dt", show_quality_metrics = TRUE)
+  an_qa <- dtc_class$new(options = opts_qa, data = df_sa)
+  an_qa$.__enclos_env__$private$.populateQualityAssessment(
+    quality = list(
+      total_observations = 2L,
+      original_missing = 0L,
+      successfully_parsed = 2L,
+      failed_parsing = 0L,
+      success_rate = 100
+    ),
+    parsed_dates = as.POSIXct(c("2024-01-15", "2024-02-20"), tz = "UTC"),
+    misuse_warnings = "<img src=x onerror=alert(1)>"
+  )
+  qa_html <- html_text(an_qa$results$qualityAssessment)
+  expect_false(grepl("<img src=x", qa_html, fixed = TRUE))
+  expect_true(grepl("&lt;img src=x onerror=alert(1)&gt;", qa_html, fixed = TRUE))
+})
+
+test_that("FF-datetimeconverter-01: infinite numeric values (Inf/-Inf) are masked to NA without breaking Excel/Unix conversion or leaking Inf into outputs", {
+  df_inf_auto <- data.frame(dt = c(45000, 45100, 45200, Inf))
+  res_inf_auto <- dtc_fn(
+    data = df_inf_auto,
+    datetime_var = "dt",
+    datetime_format = "auto",
+    extract_year = TRUE
+  )
+  expect_equal(out_vals(res_inf_auto$year_out), c(2023, 2023, 2023, NA))
+  expect_equal(
+    out_vals(res_inf_auto$corrected_datetime_char),
+    c("2023-03-15 00:00:00", "2023-06-23 00:00:00", "2023-10-01 00:00:00", NA)
+  )
+  expect_true(all(!is.infinite(out_vals(res_inf_auto$corrected_datetime_numeric))))
+
+  df_inf_unix <- data.frame(dt = c(1700000000, 1710000000, Inf, -Inf))
+  res_inf_unix <- dtc_fn(
+    data = df_inf_unix,
+    datetime_var = "dt",
+    datetime_format = "unix_epoch",
+    extract_year = TRUE
+  )
+  expect_equal(out_vals(res_inf_unix$year_out), c(2023, 2024, NA, NA))
+  expect_true(all(!is.infinite(out_vals(res_inf_unix$corrected_datetime_numeric))))
+  expect_false(grepl("Inf days", html_text(res_inf_unix$qualityMetrics), fixed = TRUE))
+})
+
+test_that("FF-datetimeconverter-02: preview table helpers guard against NA/negative preview_rows", {
+  df_prev <- data.frame(dt = c("2024-01-15", "2024-02-20"))
+  opts_prev <- datetimeconverterOptions$new(datetime_var = "dt")
+  an_prev <- dtc_class$new(options = opts_prev, data = df_prev)
+  priv <- an_prev$.__enclos_env__$private
+  dt_vec <- as.POSIXct(c("2024-01-15", "2024-02-20"), tz = "UTC")
+  expect_true(grepl("Showing first 2 of 2 observations", priv$.generatePreviewTable(c("2024-01-15", "2024-02-20"), dt_vec, n = NA), fixed = TRUE))
+  expect_true(grepl("Showing first 2 of 2 observations", priv$.generatePreviewTable(c("2024-01-15", "2024-02-20"), dt_vec, n = -5), fixed = TRUE))
+  expect_true(grepl("Showing first 2 of 2 observations", priv$.generateComponentPreview(list(year = c(2024L, 2024L)), n = NA), fixed = TRUE))
+  expect_true(grepl("Showing first 2 of 2 observations", priv$.generateComponentPreview(list(year = c(2024L, 2024L)), n = -5), fixed = TRUE))
+})

@@ -985,7 +985,9 @@ options:
     # ==========================================
 
     # Retained for saved analyses and R-call compatibility. No within-cohort pooling is valid.
+    # Hidden: the panel no longer offers it (library-audit 2026-10-23 meddecide [LOW]).
     - name: metaAnalysis
+      hidden: true
       title: Explain meta-analysis limitation
       type: Bool
       default: false

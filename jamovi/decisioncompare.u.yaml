@@ -68,6 +68,11 @@ children:
             name: stratify
             maxItemCount: 1
             isTarget: true
+  - type: Label
+    label: Select exact positive and negative levels. Recode ordinal cutoffs before analysis.
+    children:
+      - type: CheckBox
+        name: excludeIndeterminate
   - type: CollapseBox
     label: Reference Interpretation
     collapsed: false
@@ -80,13 +85,6 @@ children:
       - type: TextBox
         name: targetDefinition
         format: string
-  - type: LayoutBox
-    margin: normal
-    children:
-      - type: CheckBox
-        name: excludeIndeterminate
-  - type: Label
-    label: Select exact positive and negative levels. Recode ordinal cutoffs before analysis.
   - type: CollapseBox
     label: Statistical Options
     collapsed: true
