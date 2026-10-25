@@ -151,15 +151,20 @@ children:
     - type: TextBox
       name: cohortRole
       format: string
+      enable: (showValidationContext)
     - type: TextBox
       name: samplingDesign
       format: string
+      enable: (showValidationContext)
     - type: TextBox
       name: thresholdSource
       format: string
+      enable: (showValidationContext)
     - type: TextBox
       name: modelVersion
       format: string
+      enable: (showValidationContext)
     - type: TextBox
       name: analysisUnit
       format: string
+      enable: (showValidationContext)

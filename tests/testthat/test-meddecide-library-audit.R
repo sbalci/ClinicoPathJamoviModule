@@ -1466,3 +1466,25 @@ test_that("agreement reports a failed sub-analysis as a named warning notice", {
   }
   audit_skip_absent(absent, root)
 })
+
+# library-audit 2026-10-23 meddecide [LOW] PARTIAL: the validation-context boxes stay (they are a
+#   structured reporting block in the results and the R output), and in decision they are now greyed
+#   with "Show validation context" off, as decisioncompare's already were.
+test_that("the validation-context boxes are greyed until their table is shown", {
+  root <- audit_source_root()
+  pair <- c("decision", "decisioncompare")
+  absent <- audit_absent(root, pair, "jamovi/%s.u.yaml")
+  boxes <- c("cohortRole", "samplingDesign", "thresholdSource", "modelVersion", "analysisUnit")
+  for (name in setdiff(pair, absent)) {
+    nodes <- list()
+    walk <- function(node) {
+      if (!is.list(node)) return()
+      if (!is.null(node$name)) nodes[[node$name]] <<- node
+      for (child in c(node$children, if (is.null(names(node))) node)) walk(child)
+    }
+    walk(yaml::read_yaml(file.path(root, "jamovi", paste0(name, ".u.yaml")))$children)
+    for (box in boxes)
+      expect_identical(nodes[[box]]$enable, "(showValidationContext)", label = paste(name, box))
+  }
+  audit_skip_absent(absent, root)
+})

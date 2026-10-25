@@ -381,8 +381,10 @@ datetimeconverterClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 "ydm" = lubridate::ydm,
                 "myd" = lubridate::myd,
                 "dym" = lubridate::dym,
-                stop("Unsupported datetime format: ", format)
+                NULL
             )
+            if (is.null(parser))
+                stop("Unsupported datetime format: ", format)
             return(parser)
         },
 
