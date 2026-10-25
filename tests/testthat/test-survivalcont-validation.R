@@ -625,3 +625,53 @@ test_that("IR-survivalcont-01 to IR-survivalcont-07: Independent cold-audit regr
   expect_match(.sc_strip_html(an_bad_num$results$warnings$content), "Invalid minimum group size", fixed = TRUE)
   expect_equal(an_bad_num$.__enclos_env__$private$.plotYLim(), c(0, 1))
 })
+
+test_that("FIX-survivalcont-01 and FIX-survivalcont-02: Plot label/stdout hygiene and clearWith completeness", {
+  d <- .make_sc_cohort()
+
+  # FIX-survivalcont-01: Plot renderers (.plot4, .plot5, .plot2, .plot3, .plot6, .plot7) emit no stdout leak ($varname) or warnings
+  d_lbl <- d
+  d_lbl[["Ki-67 (index)"]] <- d$marker
+  an_lbl <- .sc_val_run(
+    d_lbl,
+    contexpl = "Ki-67 (index)",
+    findcut = TRUE,
+    sc = TRUE,
+    ce = TRUE,
+    ch = TRUE,
+    kmunicate = TRUE,
+    loglog = TRUE,
+    return_analysis = TRUE
+  )
+  priv_lbl <- an_lbl$.__enclos_env__$private
+  tf_lbl <- tempfile(fileext = ".pdf")
+  grDevices::pdf(tf_lbl)
+  plot_warns <- character(0)
+  out_lines <- utils::capture.output(invisible(
+    withCallingHandlers({
+      priv_lbl$.plot4(an_lbl$results$plot4, ggtheme = ggplot2::theme_bw(), theme = list())
+      priv_lbl$.plot5(an_lbl$results$plot5, ggtheme = ggplot2::theme_bw(), theme = list())
+      priv_lbl$.plot2(an_lbl$results$plot2, ggtheme = ggplot2::theme_bw(), theme = list())
+      priv_lbl$.plot3(an_lbl$results$plot3, ggtheme = ggplot2::theme_bw(), theme = list())
+      priv_lbl$.plot6(an_lbl$results$plot6, ggtheme = ggplot2::theme_bw(), theme = list())
+      priv_lbl$.plot7(an_lbl$results$plot7, ggtheme = ggplot2::theme_bw(), theme = list())
+    }, warning = function(w) {
+      plot_warns <<- c(plot_warns, conditionMessage(w))
+      invokeRestart("muffleWarning")
+    })
+  ))
+  grDevices::dev.off()
+  unlink(tf_lbl)
+  expect_length(out_lines, 0L)
+  expect_length(plot_warns, 0L)
+
+  # FIX-survivalcont-02: survivalcont.r.yaml has no duplicate clearWith entries and includes min_group_size/seed on RMST & residual items
+  r_spec <- yaml::read_yaml(file.path(.sc_root, "jamovi", "survivalcont.r.yaml"))
+  for (it in r_spec$items) {
+    cw <- unlist(it$clearWith)
+    expect_false(any(duplicated(cw)), label = paste("unique clearWith in", it$name))
+    if (it$name %in% c("rmstTable", "rmstSummary", "residualsTable", "schoenfeldResidualsTable", "residualsPlot")) {
+      expect_true(all(c("min_group_size", "seed") %in% cw), label = paste("min_group_size/seed in clearWith of", it$name))
+    }
+  }
+})

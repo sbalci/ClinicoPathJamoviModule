@@ -2730,11 +2730,28 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                 res.cut <- plotData$res.cut
 
                 name3contexpl <- plotData$name3contexpl
+                display_contexpl <- if (!is.null(self$options$contexpl) && nzchar(self$options$contexpl)) {
+                    self$options$contexpl
+                } else {
+                    as.character(name3contexpl)
+                }
 
                 plot4 <-
                     plot(res.cut, name3contexpl, palette = "npg")
 
-                print(plot4)
+                p4 <- if (is.list(plot4) && !inherits(plot4, "plot_surv_cutpoint") && length(plot4) >= 1L) {
+                    plot4[[1]]
+                } else {
+                    plot4
+                }
+                if (inherits(p4, "plot_surv_cutpoint")) {
+                    if (!is.null(p4$maxstat))
+                        p4$maxstat <- p4$maxstat + ggplot2::labs(x = display_contexpl)
+                    if (!is.null(p4$distribution))
+                        p4$distribution <- p4$distribution + ggplot2::labs(x = display_contexpl)
+                }
+
+                .quietly(print(p4))
                 TRUE
             }
 
@@ -2802,6 +2819,7 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                     fit,
                     data = res.cat,
                     xlab = private$.timeAxisLabel(),
+                    legend.title = if (!is.null(self$options$contexpl) && nzchar(self$options$contexpl)) self$options$contexpl else as.character(mycontexpl),
                     break.time.by = private$.plotBy(),
                     xlim = c(0, private$.plotEndTime()),
                     ylim = private$.plotYLim(),
@@ -2855,9 +2873,13 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                           private$.escapeVariableNames(myoutcome),
                           ')')
 
-                title2 <- as.character(mycontexpl)
+                title2 <- if (!is.null(self$options$contexpl) && nzchar(self$options$contexpl)) {
+                    self$options$contexpl
+                } else {
+                    as.character(mycontexpl)
+                }
 
-                plot2 <- res.cat %>%
+                plot2 <- .quietly(res.cat %>%
                     finalfit::surv_plot(
                         .data = .,
                         dependent = myformula,
@@ -2875,10 +2897,10 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                         censor = self$options$censored,
                         surv.median.line = self$options$medianline
 
-                    )
+                    ))
 
 
-                print(plot2)
+                .quietly(print(plot2))
                 TRUE
             }
 
@@ -2922,9 +2944,13 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                           private$.escapeVariableNames(myoutcome),
                           ')')
 
-                title2 <- as.character(mycontexpl)
+                title2 <- if (!is.null(self$options$contexpl) && nzchar(self$options$contexpl)) {
+                    self$options$contexpl
+                } else {
+                    as.character(mycontexpl)
+                }
 
-                plot3 <- res.cat %>%
+                plot3 <- .quietly(res.cat %>%
                     finalfit::surv_plot(
                         .data = .,
                         dependent = myformula,
@@ -2943,10 +2969,10 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                         conf.int = self$options$ci95,
                         censor = self$options$censored,
                         surv.median.line = self$options$medianline
-                    )
+                    ))
 
 
-                print(plot3)
+                .quietly(print(plot3))
                 TRUE
             }
 
@@ -3002,14 +3028,20 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
 
 
                 plot6 <-
-                    KMunicate::KMunicate(
-                        fit = km_fit,
-                        time_scale = time_scale,
-                        .xlab = paste0("Time in ", self$options$timetypeoutput)
+                    .quietly(
+                        KMunicate::KMunicate(
+                            fit = km_fit,
+                            time_scale = time_scale,
+                            .xlab = private$.timeAxisLabel()
+                        ),
+                        deprecation_pattern = "deprecat|defunct|superseded|geom_stepribbon|Removed [0-9]+ row"
                     )
 
 
-                print(plot6)
+                .quietly(
+                    print(plot6),
+                    deprecation_pattern = "deprecat|defunct|superseded|geom_stepribbon|Removed [0-9]+ row"
+                )
                 TRUE
             }
 
@@ -4488,7 +4520,7 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                         fit,
                         data = res.cat,
                         fun = "cloglog",
-                        xlab = paste0("log(Time in ", self$options$timetypeoutput, ")"),
+                        xlab = paste0("log(", private$.timeAxisLabel(), ")"),
                         ylab = "log(-log(Survival))",
                         title = paste0("Log-Log Plot for ", self$options$contexpl),
                         legend.title = self$options$contexpl,
@@ -4515,7 +4547,7 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                         loglog_plot <- ggplot2::ggplot(surv_data, ggplot2::aes(x = log_time, y = cloglog, color = strata)) +
                             ggplot2::geom_line() +
                             ggplot2::labs(
-                                x = paste0("log(Time in ", self$options$timetypeoutput, ")"),
+                                x = paste0("log(", private$.timeAxisLabel(), ")"),
                                 y = "log(-log(Survival))",
                                 title = paste0("Log-Log Plot for ", self$options$contexpl),
                                 color = self$options$contexpl

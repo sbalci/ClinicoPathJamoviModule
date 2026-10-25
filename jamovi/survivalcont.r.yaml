@@ -259,9 +259,6 @@ items:
           type: number
           format: zto
       clearWith:
-        - outcome
-        - outcomeLevel
-        - elapsedtime
         - rate_multiplier
         - time_intervals
         - person_time
@@ -291,9 +288,6 @@ items:
       type: Html
       visible: (person_time && showSummaries)
       clearWith:
-        - outcome
-        - outcomeLevel
-        - elapsedtime
         - rate_multiplier
         - time_intervals
         - person_time
@@ -380,6 +374,8 @@ items:
         - multievent
         - findcut
         - multiple_cutoffs
+        - min_group_size
+        - seed
         - uselandmark
         - landmark
         - analysistype
@@ -407,6 +403,8 @@ items:
         - multievent
         - findcut
         - multiple_cutoffs
+        - min_group_size
+        - seed
         - uselandmark
         - landmark
         - analysistype
@@ -476,6 +474,8 @@ items:
         - tint
         - multievent
         - findcut
+        - min_group_size
+        - seed
         - uselandmark
         - landmark
         - analysistype
@@ -511,6 +511,8 @@ items:
         - tint
         - multievent
         - findcut
+        - min_group_size
+        - seed
         - uselandmark
         - landmark
         - analysistype
@@ -1091,6 +1093,8 @@ items:
         - tint
         - multievent
         - findcut
+        - min_group_size
+        - seed
         - uselandmark
         - landmark
         - analysistype
@@ -1108,9 +1112,6 @@ items:
       varTitle: '`Calculated Time in Continuous Survival Function - from ${ dxdate } to ${ fudate }`'
       varDescription: Calculated time from the selected dates in the continuous survival function
       clearWith:
-          - tint
-          - dxdate
-          - fudate
           - sc
           - endplot
           - byplot
@@ -1144,9 +1145,6 @@ items:
       varTitle: '`Redefined Outcome in Continuous Survival Function - from ${ outcome } for analysis ${ analysistype }`'
       varDescription: Redefined Outcome from Outcome based on Analysis Type in Continuous Survival Function
       clearWith:
-          - outcome
-          - analysistype
-          - multievent
           - sc
           - endplot
           - byplot
@@ -1180,11 +1178,6 @@ items:
       varTitle: '`Calculated Cut-off Group - from ${ contexpl }`'
       varDescription: Calculated Cut-off Group from given Cut-off in Continuous Survival Function
       clearWith:
-          - outcome
-          - analysistype
-          - multievent
-          - contexpl
-          - findcut
           - sc
           - endplot
           - byplot
@@ -1234,8 +1227,6 @@ items:
           - multiple_cutoffs
           - num_cutoffs
           - cutoff_method
-          - min_group_size
-          - seed
           - contexpl
           - outcome
           - outcomeLevel
@@ -1293,8 +1284,6 @@ items:
           - multiple_cutoffs
           - num_cutoffs
           - cutoff_method
-          - min_group_size
-          - seed
           - contexpl
           - outcome
           - outcomeLevel
@@ -1373,8 +1362,6 @@ items:
           - multiple_cutoffs
           - num_cutoffs
           - cutoff_method
-          - min_group_size
-          - seed
           - contexpl
           - outcome
           - outcomeLevel
@@ -1413,8 +1400,6 @@ items:
           - multiple_cutoffs
           - num_cutoffs
           - cutoff_method
-          - min_group_size
-          - seed
           - contexpl
           - outcome
           - outcomeLevel
@@ -1453,8 +1438,6 @@ items:
           - multiple_cutoffs
           - num_cutoffs
           - cutoff_method
-          - min_group_size
-          - seed
           - contexpl
           - outcome
           - outcomeLevel
@@ -1496,12 +1479,7 @@ items:
           - multiple_cutoffs
           - num_cutoffs
           - cutoff_method
-          - min_group_size
-          - seed
           - contexpl
-          - outcome
-          - analysistype
-          - multievent
           - findcut
           - sc
           - endplot

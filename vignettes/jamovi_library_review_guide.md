@@ -1577,7 +1577,15 @@ the renderer, keeping only scalars (threshold, direction, labels) in state
 round-5 `waterfall` trade-off, where one value per patient was the cheaper choice. jmvcore itself
 prints `WARNING: state object … is too large` above 500 KB of **compressed** state
 (`ResultsElement$asProtoBuf`), so the runtime check is
-`length(memCompress(serialize(image$state, NULL)))` at a realistic n, not a name match.
+`length(memCompress(serialize(image$state, NULL)))` at a realistic n, not a name match. What we did (2026-10-25), and why
+it differs between the two plots: `agreement`'s rater profile draws bars, so its state now holds the
+counts per rater and category (about 250 bytes whatever n is). `psychopdaROC`'s dot plot draws one point
+per patient, so the values are the drawing data; rebuilding them from `self$data` would rerun the
+outcome coding, which writes the outcome-coding table, from inside a renderer, and a renderer must have
+no side effects. It keeps one value and one class flag per patient (about 3 KB per 1,000 patients,
+compressed) with the threshold, direction and labels stored once. **Read at render time only when the
+rows can be rebuilt without the analysis's own side effects; otherwise keep the marks, drop the repeated
+columns, and measure.** Both renderers still draw a state saved in the old shape.
 
 ---
 

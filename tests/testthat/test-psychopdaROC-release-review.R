@@ -743,8 +743,9 @@ test_that("confusion matrices and dot plots name the actual levels", {
     expect_identical(cm$getColumn("neg")$title, "Negative (Healthy)")
     expect_identical(cm$asDF$decision[1:2], c("Positive (Disease)", "Negative (Healthy)"))
     st <- res$dotPlot$get(key = "biomarker")$state
-    expect_equal(as.vector(table(st$label)[c("Negative (Healthy)", "Positive (Disease)")]),
-                 as.vector(table(d$disease_status)))
+    # library-audit 2026-10-23 meddecide [LOW]: the dot-plot state is one value + class flag per patient, labels once
+    expect_identical(unname(st$labels), c("Positive (Disease)", "Negative (Healthy)"))
+    expect_equal(c(sum(!st$positive), sum(st$positive)), as.vector(table(d$disease_status)))
 
     three <- run_ps(data = ps_data3(), dependentVars = "biomarker", classVar = "ds3",
                     positiveClass = "Severe", negativeClass = "Healthy", sensSpecTable = TRUE)
@@ -823,7 +824,7 @@ test_that("'All tied cutpoints' gives one confusion matrix per tie and a dot plo
     cm <- res$sensSpecTable$get(key = "marker")$asDF    # two rows per tied cut-point
     expect_equal(nrow(cm), 6)
     expect_equal(sort(unique(cm$cutpoint)), c(8, 9, 11))
-    expect_equal(nrow(res$dotPlot$get(key = "marker")$state), 20)
+    expect_equal(length(res$dotPlot$get(key = "marker")$state$value), 20)
 })
 
 test_that("power analysis counts only rows with a class value; an explicit NA level is missing, not negative", {

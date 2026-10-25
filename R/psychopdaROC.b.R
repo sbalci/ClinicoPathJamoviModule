@@ -3121,20 +3121,19 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
             }
 
             if (self$options$showDotPlot) {
-              # Get raw data for dot plot
-              rawData <- data.frame(
-                value = dependentVar,
-                class = ifelse(classVar == positiveClass, "Positive", "Negative"),
-                label = ifelse(classVar == positiveClass, classLabels[["positive"]], classLabels[["negative"]]),
-                # unlist: a list column under 'All tied cutpoints'; the renderer draws threshold[1]
-                threshold = rep(unlist(results$optimal_cutpoint)[1], length(dependentVar)),
-                direction = rep(direction, length(dependentVar)),
-                stringsAsFactors = FALSE
-              )
-
+              # library-audit 2026-10-23 meddecide [LOW] PARTIAL: state holds one value and one class flag
+              #   per analyzed patient (the points drawn) and the threshold, direction and labels once.
+              #   Rebuilding the points from self$data at render would rerun the outcome coding, which
+              #   writes outcomeCoding, from inside a renderer. Measured: about 3 KB per 1,000 patients.
               dotImage <- self$results$dotPlot$get(key = var)
               dotImage$setTitle(paste("Dot Plot:", var))
-              dotImage$setState(rawData)
+              dotImage$setState(list(
+                value = dependentVar,
+                positive = classVar == positiveClass,
+                # unlist: a list column under 'All tied cutpoints'; the plot draws the first cutpoint
+                threshold = unlist(results$optimal_cutpoint)[1],
+                direction = direction,
+                labels = classLabels))
             }
           }
         } # End of loop through variables
@@ -4938,9 +4937,20 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
       # @param theme Additional theme elements
       # @param ... Additional parameters
       .plotDot = function(image, ggtheme, theme, ...) {
-        plotData <- image$state
+        state <- image$state
+        if (is.null(state)) return(FALSE)
+        # A saved analysis from before 2026-10-25 holds the per-row data frame itself.
+        plotData <- if (is.data.frame(state)) state else {
+          if (!length(state$value)) return(FALSE)
+          data.frame(
+            value = state$value,
+            class = ifelse(state$positive, "Positive", "Negative"),
+            label = ifelse(state$positive, state$labels[["positive"]], state$labels[["negative"]]),
+            threshold = state$threshold, direction = state$direction,
+            stringsAsFactors = FALSE)
+        }
 
-        if (is.null(plotData) || nrow(plotData) == 0) {
+        if (nrow(plotData) == 0) {
           return(FALSE)
         }
 

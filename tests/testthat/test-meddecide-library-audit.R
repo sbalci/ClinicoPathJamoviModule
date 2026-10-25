@@ -1374,3 +1374,42 @@ test_that("instructional panels do not sit above every result", {
   }
   audit_skip_unloaded(wanted)
 })
+
+# library-audit 2026-10-23 meddecide [LOW] PARTIAL: image state holds what the plot draws. The rater
+#   profile's bars keep counts, not every rating; the dot plot keeps one value and class flag per
+#   analyzed patient (its points) with the threshold, direction and labels once. Old saved states render.
+test_that("plot states hold drawing data, and old saved states still render", {
+  wanted <- c("psychopdaROC", "agreement")
+  loaded <- audit_loaded(wanted)
+  draw <- function(img) { f <- tempfile(fileext = ".png"); on.exit(unlink(f)); img$saveAs(f); file.exists(f) }
+  if ("psychopdaROC" %in% loaded) {
+    set.seed(12)
+    cls <- factor(rep(c("H", "D"), c(50, 30)), levels = c("H", "D"))
+    d <- data.frame(m = stats::rnorm(80, ifelse(cls == "D", 1, 0)), cls = cls)
+    a <- psychopdaROCClass$new(options = psychopdaROCOptions$new(dependentVars = "m", classVar = "cls",
+      positiveClass = "D", negativeClass = "H", showDotPlot = TRUE, run = TRUE), data = d)
+    suppressWarnings({ a$init(); a$run() })
+    img <- a$results$dotPlot$get(key = "m")
+    st <- img$state
+    expect_false(is.data.frame(st))
+    expect_identical(lengths(st[c("value", "positive")]), c(value = 80L, positive = 80L))
+    expect_length(st$threshold, 1L)
+    expect_true(draw(img))
+    img$setState(data.frame(value = d$m, class = ifelse(cls == "D", "Positive", "Negative"),
+                            threshold = 0.5, direction = ">=", stringsAsFactors = FALSE))   # pre-2026-10-25 shape
+    expect_true(draw(img))
+  }
+  if ("agreement" %in% loaded) {
+    set.seed(13)
+    lv <- c("Benign", "Atypical", "Malignant")
+    d <- as.data.frame(replicate(4, factor(sample(lv, 120, TRUE), lv), simplify = FALSE))
+    names(d) <- paste0("R", 1:4)
+    a <- agreementClass$new(options = agreementOptions$new(vars = names(d), raterProfiles = TRUE), data = d)
+    suppressWarnings({ a$init(); a$run() })
+    img <- a$results$raterProfilePlot
+    expect_identical(nrow(img$state$plot_data), 4L * 3L)        # raters x categories, not 480 ratings
+    expect_equal(sum(img$state$plot_data$n), 480)
+    expect_true(draw(img))
+  }
+  audit_skip_unloaded(wanted)
+})

@@ -1198,8 +1198,11 @@ validateFactorVariable <- function(data, var_name, min_levels = 2) {
 State is saved into the `.omv`. A plot that needs one mark per row (a dot plot of patients, every
 rating in long format) and stores those rows in state copies the dataset into the file once per
 image - per marker for an Array (2026-10-23 meddecide [LOW]: `psychopdaROC` `dotPlot`, `agreement`
-`raterProfilePlot`). Declare `requiresData: true`, build the frame from `self$data` in the
-renderer, and keep only scalars in state (<https://dev.jamovi.org/tutorial/tuts0301-image-state-performance>).
+`raterProfilePlot`). Store what the plot draws, not more: a bar chart needs counts, not every row
+(the rater profile now keeps a raters x categories table), and repeated per-row columns become scalars.
+Declare `requiresData: true` and build the frame from `self$data` in the renderer only when the rows can
+be rebuilt without the analysis's own side effects (<https://dev.jamovi.org/tutorial/tuts0301-image-state-performance>);
+the dot plot keeps its per-patient values because rebuilding them would rerun the outcome coding.
 jmvcore prints `WARNING: state object ... is too large` above 500 KB compressed; measure with
 `length(memCompress(serialize(image$state, NULL)))` at a realistic n. Draw with the `ggtheme`
 jamovi passes; a module-level theme option makes the plots disagree with the document

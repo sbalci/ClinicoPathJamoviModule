@@ -5713,11 +5713,18 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                 # a bar-plot request there fell into this branch and died at render with
                 # "object 'Category' not found"; it now gets the box plot below.
                 if (isTRUE(is_categorical)) {
+                    # Bar plot for categorical data: counts per rater and category (a saved analysis
+                    # from before 2026-10-25 holds one row per rating instead, with no n column).
+                    if (is.null(plot_data$n)) {
+                        rater_levels <- levels(factor(plot_data$Rater))
+                        plot_data <- as.data.frame(table(Rater = plot_data$Rater, Category = plot_data$Category),
+                                                   stringsAsFactors = FALSE, responseName = "n")
+                        plot_data$Rater <- factor(plot_data$Rater, levels = rater_levels)
+                    }
                     if (!is.null(plotState$category_levels))
                         plot_data$Category <- factor(plot_data$Category, levels = plotState$category_levels)
-                    # Bar plot for categorical data
-                    p <- ggplot2::ggplot(plot_data, ggplot2::aes(x = Rater, fill = Category)) +
-                        ggplot2::geom_bar(position = "fill", stat = "count") +
+                    p <- ggplot2::ggplot(plot_data, ggplot2::aes(x = Rater, y = n, fill = Category)) +
+                        ggplot2::geom_col(position = "fill") +
                         ggplot2::scale_y_continuous(labels = scales::percent) +
                         ggplot2::labs(
                             title = "Rater Profile: Category Distribution",
@@ -5817,6 +5824,13 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                             decl <- private$.orderedLevelsInfo(ratings)$levels
                             seen <- unique(plot_data$Category)
                             category_levels <- c(decl[decl %in% seen], sort(setdiff(seen, decl)))
+                            # library-audit 2026-10-23 meddecide [LOW] DONE: the bars need only the counts per
+                            #   rater and category, so state holds those, not every rating (constant size).
+                            counts <- as.data.frame(table(Rater = plot_data$Rater,
+                                Category = factor(plot_data$Category, levels = category_levels)),
+                                stringsAsFactors = FALSE, responseName = "n")
+                            counts$Rater <- factor(counts$Rater, levels = rater_names)
+                            plot_data <- counts
                         } else {
                             # For continuous data, create long format
                             plot_data <- data.frame()

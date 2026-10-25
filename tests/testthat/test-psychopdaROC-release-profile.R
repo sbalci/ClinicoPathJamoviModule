@@ -54,7 +54,7 @@ test_that("diagnostic plots work with ROC curves unchecked", {
       expect_match(result$dotPlotMessage$content, "aren't available in combined plot mode",
         fixed = TRUE)
     } else {
-      expect_equal(nrow(result$dotPlot$get(key = key)$state), nrow(.relROC_data()))
+      expect_equal(length(result$dotPlot$get(key = key)$state$value), nrow(.relROC_data()))
     }
   }
 })
