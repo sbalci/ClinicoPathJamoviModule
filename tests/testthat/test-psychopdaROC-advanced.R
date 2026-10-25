@@ -217,7 +217,7 @@ test_that("clinical utility respects treatment threshold range", {
       classVar = "diagnosis",
       positiveClass = "Positive", negativeClass = "Negative",
       clinicalUtilityAnalysis = TRUE,
-      treatmentThreshold = "0.1,0.4,0.1"
+      treatmentThresholdMin = 0.1, treatmentThresholdMax = 0.4, treatmentThresholdStep = 0.1
     )
   })
 })

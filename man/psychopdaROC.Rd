@@ -73,7 +73,9 @@ psychopdaROC(
   priorAUC = 0.7,
   priorPrecision = 10,
   clinicalUtilityAnalysis = FALSE,
-  treatmentThreshold = "0.05,0.5,0.05",
+  treatmentThresholdMin = 0.05,
+  treatmentThresholdMax = 0.5,
+  treatmentThresholdStep = 0.05,
   harmBenefitRatio = 0.25,
   interventionCost = FALSE,
   fixedSensSpecAnalysis = FALSE,
@@ -342,9 +344,14 @@ confident prior).}
 net benefit curves, decision curve analysis, and clinical impact
 assessment.}
 
-\item{treatmentThreshold}{Treatment threshold range for decision curve
-analysis (min,max,step). Example: "0.05,0.5,0.05" creates thresholds from 5
-percent to 50 percent in 5 percent steps.}
+\item{treatmentThresholdMin}{Lowest treatment threshold probability for the
+decision curve.}
+
+\item{treatmentThresholdMax}{Highest treatment threshold probability for
+the decision curve.}
+
+\item{treatmentThresholdStep}{Step between thresholds. The defaults give
+thresholds from 5 to 50 percent in 5 percent steps.}
 
 \item{harmBenefitRatio}{Ratio of harm from unnecessary treatment to benefit
 from necessary treatment. Lower values favor more aggressive treatment

@@ -2,7 +2,7 @@
 
 library(testthat)
 
-rf_run <- function(...) suppressWarnings(do.call(ClinicoPath::enhancedROC, list(...)))
+rf_run <- function(...) suppressWarnings(do.call(ClinicoPath::enhancedROC, utils::modifyList(list(validationNegative = NULL), list(...), keep.null = TRUE)))
 rf_private <- function(d, ...) {
     o <- do.call(ClinicoPath:::enhancedROCOptions$new, list(...))
     a <- ClinicoPath:::enhancedROCClass$new(options = o, data = d)

@@ -520,9 +520,9 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                         # Also handle factor level names (e.g., "variable_name=level")
                         for (clean_name in names(name_mapping)) {
                             original_name <- name_mapping[clean_name]
-                            pattern <- paste0("^", clean_name, "([=:].*)?$")
-                            if (grepl(pattern, current_name)) {
-                                table_data[i, 1] <- sub(clean_name, original_name, current_name, fixed = TRUE)
+                            if (startsWith(current_name, paste0(clean_name, "=")) ||
+                                startsWith(current_name, paste0(clean_name, ":"))) {
+                                table_data[i, 1] <- paste0(original_name, substr(current_name, nchar(clean_name) + 1L, nchar(current_name)))
                                 break
                             }
                         }
@@ -1032,20 +1032,6 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
             ,
             .handleIncompleteAnalysis = function() {
                 private$.todo()
-                # Hide all analysis results
-                self$results$coxSummary$setVisible(FALSE)
-                self$results$coxTable$setVisible(FALSE)
-                self$results$tCoxtext2$setVisible(FALSE)
-                self$results$rescutTable$setVisible(FALSE)
-                self$results$medianSummary$setVisible(FALSE)
-                self$results$medianTable$setVisible(FALSE)
-                self$results$survTableSummary$setVisible(FALSE)
-                self$results$survTable$setVisible(FALSE)
-                self$results$plot4$setVisible(FALSE)
-                self$results$plot5$setVisible(FALSE)
-                self$results$plot2$setVisible(FALSE)
-                self$results$plot3$setVisible(FALSE)
-                self$results$plot6$setVisible(FALSE)
                 self$results$todo$setVisible(TRUE)
             }
 
@@ -2240,8 +2226,6 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                     replacement = " and ",
                     x = results1html[, 1]
                 )
-
-                results1table <- results1html
 
                 results1table <- results1html
 
@@ -4047,11 +4031,28 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                         )
                         km_fit <- survival::survfit(surv_obj ~ 1, data = group_data)
 
-                        rmean_tbl <- summary(km_fit, rmean = tau, extend = TRUE)$table
-                        rmst <- if (is.matrix(rmean_tbl))
-                            unname(rmean_tbl[1, "rmean"]) else unname(rmean_tbl[["rmean"]])
-                        se_rmst <- if (is.matrix(rmean_tbl))
-                            unname(rmean_tbl[1, "se(rmean)"]) else unname(rmean_tbl[["se(rmean)"]])
+                        min_obs_time <- min(group_data[[mytime]], na.rm = TRUE)
+                        if (is.finite(min_obs_time) && tau < min_obs_time) {
+                            # No events or censorings occur before tau: S(t) = 1 on [0, tau],
+                            # so RMST(tau) = tau with SE = 0 (survival:::survmean otherwise
+                            # stops with "Truncation point ... is < smallest survival").
+                            rmst <- tau
+                            se_rmst <- 0
+                        } else {
+                            rmean_tbl <- tryCatch(
+                                summary(km_fit, rmean = tau, extend = TRUE)$table,
+                                error = function(e) NULL
+                            )
+                            if (is.null(rmean_tbl)) {
+                                rmst <- NA_real_
+                                se_rmst <- NA_real_
+                            } else {
+                                rmst <- if (is.matrix(rmean_tbl))
+                                    unname(rmean_tbl[1, "rmean"]) else unname(rmean_tbl[["rmean"]])
+                                se_rmst <- if (is.matrix(rmean_tbl))
+                                    unname(rmean_tbl[1, "se(rmean)"]) else unname(rmean_tbl[["se(rmean)"]])
+                            }
+                        }
 
                         if (!is.finite(rmst)) {
                             private$.addHtmlMessage(
@@ -4259,19 +4260,13 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                     self$results$residualsPlot$setState(residuals_state)
 
                 }, error = function(e) {
-                    # If residual calculation fails, show error message
-                    residuals_table <- self$results$residualsTable
-                    residuals_table$addRow(rowKey = 1, values = list(
-                        observation = 1,
-                        martingale = NA,
-                        deviance = NA,
-                        score = NA,
-                        schoenfeld = NA
-                    ))
-                    residuals_table$setNote("error", sprintf(.("Residual calculation failed: %s"), htmltools::htmlEscape(e$message)))
-                    self$results$schoenfeldResidualsTable$setNote(
-                        "error",
-                        sprintf(.("Schoenfeld residual calculation failed: %s"), htmltools::htmlEscape(e$message))
+                    private$.addHtmlMessage(
+                        "warning",
+                        .("Residual diagnostics could not be computed"),
+                        .fmt(
+                            .("Cox model residual calculation failed: {msg}"),
+                            msg = htmltools::htmlEscape(conditionMessage(e))
+                        )
                     )
                 })
             }
@@ -4416,7 +4411,14 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                 }, error = function(e) e)
 
                 if (inherits(fit, "error")) {
-                    tbl$setNote("err", sprintf(.("Stratified Cox model could not be fitted: %s"), conditionMessage(fit)))
+                    private$.addHtmlMessage(
+                        "warning",
+                        .("Stratified Cox model could not be fitted"),
+                        .fmt(
+                            .("Stratified Cox regression failed: {msg}"),
+                            msg = htmltools::htmlEscape(conditionMessage(fit))
+                        )
+                    )
                     return()
                 }
 

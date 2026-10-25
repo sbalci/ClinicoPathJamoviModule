@@ -592,7 +592,8 @@ items:
                 - predictors
                 - positiveClass
                 - direction
-                - partialRange
+                - partialAucFrom
+                - partialAucTo
                 - partialAucType
                 - bootstrapPartialAUC
                 - bootstrapSamples

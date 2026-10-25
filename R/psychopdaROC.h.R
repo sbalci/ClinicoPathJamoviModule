@@ -73,7 +73,9 @@ psychopdaROCOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
             priorAUC = 0.7,
             priorPrecision = 10,
             clinicalUtilityAnalysis = FALSE,
-            treatmentThreshold = "0.05,0.5,0.05",
+            treatmentThresholdMin = 0.05,
+            treatmentThresholdMax = 0.5,
+            treatmentThresholdStep = 0.05,
             harmBenefitRatio = 0.25,
             interventionCost = FALSE,
             fixedSensSpecAnalysis = FALSE,
@@ -477,10 +479,24 @@ psychopdaROCOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                 "clinicalUtilityAnalysis",
                 clinicalUtilityAnalysis,
                 default=FALSE)
-            private$..treatmentThreshold <- jmvcore::OptionString$new(
-                "treatmentThreshold",
-                treatmentThreshold,
-                default="0.05,0.5,0.05")
+            private$..treatmentThresholdMin <- jmvcore::OptionNumber$new(
+                "treatmentThresholdMin",
+                treatmentThresholdMin,
+                default=0.05,
+                min=0.001,
+                max=0.99)
+            private$..treatmentThresholdMax <- jmvcore::OptionNumber$new(
+                "treatmentThresholdMax",
+                treatmentThresholdMax,
+                default=0.5,
+                min=0.01,
+                max=0.999)
+            private$..treatmentThresholdStep <- jmvcore::OptionNumber$new(
+                "treatmentThresholdStep",
+                treatmentThresholdStep,
+                default=0.05,
+                min=0.001,
+                max=0.5)
             private$..harmBenefitRatio <- jmvcore::OptionNumber$new(
                 "harmBenefitRatio",
                 harmBenefitRatio,
@@ -626,7 +642,9 @@ psychopdaROCOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
             self$.addOption(private$..priorAUC)
             self$.addOption(private$..priorPrecision)
             self$.addOption(private$..clinicalUtilityAnalysis)
-            self$.addOption(private$..treatmentThreshold)
+            self$.addOption(private$..treatmentThresholdMin)
+            self$.addOption(private$..treatmentThresholdMax)
+            self$.addOption(private$..treatmentThresholdStep)
             self$.addOption(private$..harmBenefitRatio)
             self$.addOption(private$..interventionCost)
             self$.addOption(private$..fixedSensSpecAnalysis)
@@ -710,7 +728,9 @@ psychopdaROCOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
         priorAUC = function() private$..priorAUC$value,
         priorPrecision = function() private$..priorPrecision$value,
         clinicalUtilityAnalysis = function() private$..clinicalUtilityAnalysis$value,
-        treatmentThreshold = function() private$..treatmentThreshold$value,
+        treatmentThresholdMin = function() private$..treatmentThresholdMin$value,
+        treatmentThresholdMax = function() private$..treatmentThresholdMax$value,
+        treatmentThresholdStep = function() private$..treatmentThresholdStep$value,
         harmBenefitRatio = function() private$..harmBenefitRatio$value,
         interventionCost = function() private$..interventionCost$value,
         fixedSensSpecAnalysis = function() private$..fixedSensSpecAnalysis$value,
@@ -793,7 +813,9 @@ psychopdaROCOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
         ..priorAUC = NA,
         ..priorPrecision = NA,
         ..clinicalUtilityAnalysis = NA,
-        ..treatmentThreshold = NA,
+        ..treatmentThresholdMin = NA,
+        ..treatmentThresholdMax = NA,
+        ..treatmentThresholdStep = NA,
         ..harmBenefitRatio = NA,
         ..interventionCost = NA,
         ..fixedSensSpecAnalysis = NA,
@@ -1782,7 +1804,9 @@ psychopdaROCResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                     "classVar",
                     "positiveClass",
                     "negativeClass",
-                    "treatmentThreshold",
+                    "treatmentThresholdMin",
+                    "treatmentThresholdMax",
+                    "treatmentThresholdStep",
                     "harmBenefitRatio",
                     "interventionCost",
                     "direction"),
@@ -1909,7 +1933,9 @@ psychopdaROCResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                     "classVar",
                     "positiveClass",
                     "negativeClass",
-                    "treatmentThreshold",
+                    "treatmentThresholdMin",
+                    "treatmentThresholdMax",
+                    "treatmentThresholdStep",
                     "harmBenefitRatio",
                     "interventionCost",
                     "direction"),
@@ -2174,7 +2200,9 @@ psychopdaROCResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                         "classVar",
                         "positiveClass",
                         "negativeClass",
-                        "treatmentThreshold",
+                        "treatmentThresholdMin",
+                        "treatmentThresholdMax",
+                        "treatmentThresholdStep",
                         "harmBenefitRatio",
                         "interventionCost",
                         "direction"))))
@@ -2428,9 +2456,12 @@ psychopdaROCBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param clinicalUtilityAnalysis Perform clinical utility analysis including
 #'   net benefit curves, decision curve analysis, and clinical impact
 #'   assessment.
-#' @param treatmentThreshold Treatment threshold range for decision curve
-#'   analysis (min,max,step). Example: "0.05,0.5,0.05" creates thresholds from 5
-#'   percent to 50 percent in 5 percent steps.
+#' @param treatmentThresholdMin Lowest treatment threshold probability for the
+#'   decision curve.
+#' @param treatmentThresholdMax Highest treatment threshold probability for
+#'   the decision curve.
+#' @param treatmentThresholdStep Step between thresholds. The defaults give
+#'   thresholds from 5 to 50 percent in 5 percent steps.
 #' @param harmBenefitRatio Ratio of harm from unnecessary treatment to benefit
 #'   from necessary treatment. Lower values favor more aggressive treatment
 #'   policies.
@@ -2582,7 +2613,9 @@ psychopdaROC <- function(
     priorAUC = 0.7,
     priorPrecision = 10,
     clinicalUtilityAnalysis = FALSE,
-    treatmentThreshold = "0.05,0.5,0.05",
+    treatmentThresholdMin = 0.05,
+    treatmentThresholdMax = 0.5,
+    treatmentThresholdStep = 0.05,
     harmBenefitRatio = 0.25,
     interventionCost = FALSE,
     fixedSensSpecAnalysis = FALSE,
@@ -2686,7 +2719,9 @@ psychopdaROC <- function(
         priorAUC = priorAUC,
         priorPrecision = priorPrecision,
         clinicalUtilityAnalysis = clinicalUtilityAnalysis,
-        treatmentThreshold = treatmentThreshold,
+        treatmentThresholdMin = treatmentThresholdMin,
+        treatmentThresholdMax = treatmentThresholdMax,
+        treatmentThresholdStep = treatmentThresholdStep,
         harmBenefitRatio = harmBenefitRatio,
         interventionCost = interventionCost,
         fixedSensSpecAnalysis = fixedSensSpecAnalysis,

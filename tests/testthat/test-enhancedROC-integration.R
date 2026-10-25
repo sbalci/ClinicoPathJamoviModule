@@ -27,14 +27,14 @@ data(enhancedroc_comparative, package = "ClinicoPath")
 
 test_that("enhancedROC produces consistent results across runs", {
   # Run the same analysis twice
-  result1 <- enhancedROC(
+  result1 <- enhancedROC(validationNegative = NULL, 
     data = enhancedroc_biomarker,
     outcome = "disease_status",
     positiveClass = "Disease",
     predictors = "biomarker1"
   )
 
-  result2 <- enhancedROC(
+  result2 <- enhancedROC(validationNegative = NULL, 
     data = enhancedroc_biomarker,
     outcome = "disease_status",
     positiveClass = "Disease",
@@ -48,7 +48,7 @@ test_that("enhancedROC produces consistent results across runs", {
 
 test_that("enhancedROC workflow: basic → plots → metrics", {
   # Step 1: Basic ROC analysis
-  basic <- enhancedROC(
+  basic <- enhancedROC(validationNegative = NULL, 
     data = enhancedroc_biomarker,
     outcome = "disease_status",
     positiveClass = "Disease",
@@ -57,7 +57,7 @@ test_that("enhancedROC workflow: basic → plots → metrics", {
   expect_s3_class(basic, "enhancedROCResults")
 
   # Step 2: Add visualizations
-  with_plots <- enhancedROC(
+  with_plots <- enhancedROC(validationNegative = NULL, 
     data = enhancedroc_biomarker,
     outcome = "disease_status",
     positiveClass = "Disease",
@@ -68,7 +68,7 @@ test_that("enhancedROC workflow: basic → plots → metrics", {
   expect_s3_class(with_plots, "enhancedROCResults")
 
   # Step 3: Add comprehensive metrics
-  with_metrics <- enhancedROC(
+  with_metrics <- enhancedROC(validationNegative = NULL, 
     data = enhancedroc_biomarker,
     outcome = "disease_status",
     positiveClass = "Disease",
@@ -83,7 +83,7 @@ test_that("enhancedROC workflow: basic → plots → metrics", {
 
 test_that("enhancedROC workflow: single → comparative → pairwise", {
   # Step 1: Single biomarker analysis
-  single <- enhancedROC(
+  single <- enhancedROC(validationNegative = NULL, 
     data = enhancedroc_comparative,
     outcome = "cancer_status",
     positiveClass = "Cancer",
@@ -93,7 +93,7 @@ test_that("enhancedROC workflow: single → comparative → pairwise", {
   expect_s3_class(single, "enhancedROCResults")
 
   # Step 2: Add comparative analysis
-  comparative <- enhancedROC(
+  comparative <- enhancedROC(validationNegative = NULL, 
     data = enhancedroc_comparative,
     outcome = "cancer_status",
     positiveClass = "Cancer",
@@ -103,7 +103,7 @@ test_that("enhancedROC workflow: single → comparative → pairwise", {
   expect_s3_class(comparative, "enhancedROCResults")
 
   # Step 3: Add pairwise statistical comparison
-  with_comparison <- enhancedROC(
+  with_comparison <- enhancedROC(validationNegative = NULL, 
     data = enhancedroc_comparative,
     outcome = "cancer_status",
     positiveClass = "Cancer",
@@ -119,7 +119,7 @@ test_that("enhancedROC workflow: screening application", {
   data(enhancedroc_screening, package = "ClinicoPath")
 
   # Complete screening workflow
-  result <- enhancedROC(
+  result <- enhancedROC(validationNegative = NULL, 
     data = enhancedroc_screening,
     outcome = "screening_indication",
     positiveClass = "Screen Positive",
@@ -141,7 +141,7 @@ test_that("enhancedROC workflow: confirmatory testing", {
   data(enhancedroc_confirmatory, package = "ClinicoPath")
 
   # Complete confirmatory workflow
-  result <- enhancedROC(
+  result <- enhancedROC(validationNegative = NULL, 
     data = enhancedroc_confirmatory,
     outcome = "confirmed_diagnosis",
     positiveClass = "Confirmed",
@@ -160,7 +160,7 @@ test_that("enhancedROC workflow: confirmatory testing", {
 
 test_that("enhancedROC workflow: biomarker validation study", {
   # Complete biomarker validation
-  result <- enhancedROC(
+  result <- enhancedROC(validationNegative = NULL, 
     data = enhancedroc_comparative,
     outcome = "cancer_status",
     positiveClass = "Cancer",
@@ -187,7 +187,7 @@ test_that("enhancedROC workflow: calibration assessment", {
   data(enhancedroc_calibration, package = "ClinicoPath")
 
   # Calibration workflow
-  result <- enhancedROC(
+  result <- enhancedROC(validationNegative = NULL, 
     data = enhancedroc_calibration,
     outcome = "outcome",
     positiveClass = "Event",
@@ -206,7 +206,7 @@ test_that("enhancedROC workflow: class imbalance handling", {
   data(enhancedroc_imbalanced, package = "ClinicoPath")
 
   # Imbalanced data workflow
-  result <- enhancedROC(
+  result <- enhancedROC(validationNegative = NULL, 
     data = enhancedroc_imbalanced,
     outcome = "rare_disease",
     positiveClass = "Positive",
@@ -230,7 +230,7 @@ test_that("enhancedROC workflow: multi-class ROC analysis", {
 
   # Multi-class workflow. No positive class (the local wrapper sends ""): the multi-class
   # tables run on their own and the binary tables wait for a positive class.
-  result <- enhancedROC(
+  result <- enhancedROC(validationNegative = NULL, 
     data = enhancedroc_multiclass,
     outcome = "disease_severity",
     predictors = c("biomarker_A", "biomarker_B", "imaging_severity_score"),
@@ -256,7 +256,7 @@ test_that("enhancedROC handles data from CSV import", {
   # Read it back
   csv_data <- read.csv(temp_csv)
 
-  result <- enhancedROC(
+  result <- enhancedROC(validationNegative = NULL, 
     data = csv_data,
     outcome = "disease_status",
     positiveClass = "Disease",
@@ -277,7 +277,7 @@ test_that("enhancedROC handles data from Excel import", {
   # Read it back
   xlsx_data <- readxl::read_excel(temp_xlsx)
 
-  result <- enhancedROC(
+  result <- enhancedROC(validationNegative = NULL, 
     data = as.data.frame(xlsx_data),
     outcome = "disease_status",
     positiveClass = "Disease",
@@ -295,7 +295,7 @@ test_that("enhancedROC handles different data structures consistently", {
   library(tibble)
   tibble_data <- as_tibble(enhancedroc_biomarker)
 
-  result_tibble <- enhancedROC(
+  result_tibble <- enhancedROC(validationNegative = NULL, 
     data = tibble_data,
     outcome = "disease_status",
     positiveClass = "Disease",
@@ -307,7 +307,7 @@ test_that("enhancedROC handles different data structures consistently", {
   # Test with data.frame
   df_data <- as.data.frame(enhancedroc_biomarker)
 
-  result_df <- enhancedROC(
+  result_df <- enhancedROC(validationNegative = NULL, 
     data = df_data,
     outcome = "disease_status",
     positiveClass = "Disease",
@@ -319,7 +319,7 @@ test_that("enhancedROC handles different data structures consistently", {
 
 test_that("enhancedROC workflow: complete publication-ready analysis", {
   # Comprehensive analysis for publication
-  result <- enhancedROC(
+  result <- enhancedROC(validationNegative = NULL, 
     data = enhancedroc_comparative,
     outcome = "cancer_status",
     positiveClass = "Cancer",
@@ -354,7 +354,7 @@ test_that("enhancedROC workflow: complete publication-ready analysis", {
 
 test_that("enhancedROC workflow: iterative cutoff optimization", {
   # Step 1: Find Youden optimal cutoff
-  youden_result <- enhancedROC(
+  youden_result <- enhancedROC(validationNegative = NULL, 
     data = enhancedroc_biomarker,
     outcome = "disease_status",
     positiveClass = "Disease",
@@ -365,7 +365,7 @@ test_that("enhancedROC workflow: iterative cutoff optimization", {
   expect_s3_class(youden_result, "enhancedROCResults")
 
   # Step 2: Evaluate custom cutoffs around optimal
-  custom_result <- enhancedROC(
+  custom_result <- enhancedROC(validationNegative = NULL, 
     data = enhancedroc_biomarker,
     outcome = "disease_status",
     positiveClass = "Disease",
@@ -376,7 +376,7 @@ test_that("enhancedROC workflow: iterative cutoff optimization", {
   expect_s3_class(custom_result, "enhancedROCResults")
 
   # Step 3: Apply sensitivity/specificity constraints
-  constrained_result <- enhancedROC(
+  constrained_result <- enhancedROC(validationNegative = NULL, 
     data = enhancedroc_biomarker,
     outcome = "disease_status",
     positiveClass = "Disease",
@@ -390,27 +390,27 @@ test_that("enhancedROC workflow: iterative cutoff optimization", {
 
 test_that("enhancedROC workflow: partial AUC for specific ranges", {
   # High-specificity partial AUC (e.g., for confirmatory testing)
-  high_spec_result <- enhancedROC(
+  high_spec_result <- enhancedROC(validationNegative = NULL, 
     data = enhancedroc_biomarker,
     outcome = "disease_status",
     positiveClass = "Disease",
     predictors = "biomarker1",
     partialAuc = TRUE,
     partialAucType = "specificity",
-    partialRange = "0.9,1.0",
+    partialAucFrom = 0.9, partialAucTo = 1.0,
     rocCurve = TRUE
   )
   expect_s3_class(high_spec_result, "enhancedROCResults")
 
   # High-sensitivity partial AUC (e.g., for screening)
-  high_sens_result <- enhancedROC(
+  high_sens_result <- enhancedROC(validationNegative = NULL, 
     data = enhancedroc_biomarker,
     outcome = "disease_status",
     positiveClass = "Disease",
     predictors = "biomarker1",
     partialAuc = TRUE,
     partialAucType = "sensitivity",
-    partialRange = "0.9,1.0",
+    partialAucFrom = 0.9, partialAucTo = 1.0,
     rocCurve = TRUE
   )
   expect_s3_class(high_sens_result, "enhancedROCResults")
@@ -418,7 +418,7 @@ test_that("enhancedROC workflow: partial AUC for specific ranges", {
 
 test_that("enhancedROC workflow: comparing old vs new biomarker", {
   # Simulate clinical validation of new biomarker against gold standard
-  result <- enhancedROC(
+  result <- enhancedROC(validationNegative = NULL, 
     data = enhancedroc_comparative,
     outcome = "cancer_status",
     positiveClass = "Cancer",
@@ -441,7 +441,7 @@ test_that("enhancedROC workflow: comparing old vs new biomarker", {
 test_that("enhancedROC workflow: subgroup analysis", {
   # Analyze different subgroups
   male_subset <- enhancedroc_biomarker[enhancedroc_biomarker$sex == "Male", ]
-  result_male <- enhancedROC(
+  result_male <- enhancedROC(validationNegative = NULL, 
     data = male_subset,
     outcome = "disease_status",
     positiveClass = "Disease",
@@ -450,7 +450,7 @@ test_that("enhancedROC workflow: subgroup analysis", {
   expect_s3_class(result_male, "enhancedROCResults")
 
   female_subset <- enhancedroc_biomarker[enhancedroc_biomarker$sex == "Female", ]
-  result_female <- enhancedROC(
+  result_female <- enhancedROC(validationNegative = NULL, 
     data = female_subset,
     outcome = "disease_status",
     positiveClass = "Disease",
@@ -464,7 +464,7 @@ test_that("enhancedROC workflow: sensitivity analysis with different prevalences
   prevalences <- c(0.05, 0.10, 0.20, 0.30)
 
   for (prev in prevalences) {
-    result <- enhancedROC(
+    result <- enhancedROC(validationNegative = NULL, 
       data = enhancedroc_biomarker,
       outcome = "disease_status",
       positiveClass = "Disease",
@@ -480,7 +480,7 @@ test_that("enhancedROC integrates with small dataset workflow", {
   data(enhancedroc_small, package = "ClinicoPath")
 
   # Quick analysis with small dataset
-  result <- enhancedROC(
+  result <- enhancedROC(validationNegative = NULL, 
     data = enhancedroc_small,
     outcome = "disease",
     positiveClass = "Positive",

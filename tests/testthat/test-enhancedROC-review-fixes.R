@@ -5,7 +5,7 @@
 library(testthat)
 
 er_run <- function(...) suppressWarnings(do.call(ClinicoPath::enhancedROC,
-    utils::modifyList(list(showTableNotes = TRUE, showAnalysisSummary = TRUE, showClinicalReport = TRUE),
+    utils::modifyList(list(validationNegative = NULL, showTableNotes = TRUE, showAnalysisSummary = TRUE, showClinicalReport = TRUE),
         list(...), keep.null = TRUE)))
 er_strip <- function(x) trimws(gsub("[[:space:]]+", " ", gsub("<[^>]+>", " ", if (is.null(x)) "" else x)))
 

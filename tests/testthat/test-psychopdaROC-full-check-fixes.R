@@ -203,13 +203,16 @@ test_that("F11 one-marker effect sizes give an actionable notice", {
 })
 
 test_that("F12 decision curve grids are bounded before allocation and preserved", {
-  for (text in c("0.2,0.2,0.05", "0.05,0.5,1e-12", "0.05,0.5,1e-320")) {
-    r <- .fullROC_run(clinicalUtilityAnalysis = TRUE, treatmentThreshold = text)
+  # library-audit 2026-10-23 meddecide [MEDIUM] DONE: the range is three Number options; the step's
+  #   own minimum (0.001) still gives a 451-point request, so the 100-point cap is still exercised.
+  for (rng in list(c(0.2, 0.2, 0.05), c(0.05, 0.5, 0.001))) {
+    r <- .fullROC_run(clinicalUtilityAnalysis = TRUE, treatmentThresholdMin = rng[1],
+                      treatmentThresholdMax = rng[2], treatmentThresholdStep = rng[3])
     grid <- r$decisionCurvePlot$get("marker_a")$state$threshold_range
     expect_lte(length(grid), 100L)
     plot <- .fullROC_capture(r, "decisionCurvePlot", ".plotDecisionCurve")$plot
     expect_equal(sort(unique(plot$data$threshold)), grid)
-    if (startsWith(text, "0.2")) {
+    if (rng[1] == 0.2) {
       expect_equal(grid, 0.2)
       expect_s3_class(plot$layers[[1]]$geom, "GeomPoint")
     } else {
@@ -217,9 +220,10 @@ test_that("F12 decision curve grids are bounded before allocation and preserved"
       expect_equal(range(grid), c(0.05, 0.5))
     }
   }
-  r <- .fullROC_run(clinicalUtilityAnalysis = TRUE, treatmentThreshold = "abc")
+  r <- .fullROC_run(clinicalUtilityAnalysis = TRUE, treatmentThresholdMin = 0.4,
+                    treatmentThresholdMax = 0.3, treatmentThresholdStep = 0.1)   # reversed
   expect_true("range_fallback" %in% names(r$decisionCurveTable$notes))
-  .fullROC_change(r, "treatmentThreshold", "0.1,0.3,0.1")
+  .fullROC_change(r, "treatmentThresholdMin", 0.1)
   expect_false("range_fallback" %in% names(r$decisionCurveTable$notes))
 })
 

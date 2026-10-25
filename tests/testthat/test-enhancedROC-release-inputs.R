@@ -12,7 +12,7 @@ test_that("enhancedROC distinguishes pending, fatal and valid input", {
     a$init()
     a
   }
-  expect_error(do.call(ns$enhancedROC, c(list(data = d),
+  expect_error(do.call(ns$enhancedROC, c(list(data = d, validationNegative = NULL),
     utils::modifyList(args, list(positiveClass = "NotObserved")))), "NotObserved", fixed = TRUE)
   invalid <- make(list(positiveClass = "NotObserved"))
   # noThrow uses the real jmvcore handler: an ERROR banner alone cannot pass.

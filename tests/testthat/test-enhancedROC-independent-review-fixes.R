@@ -125,7 +125,7 @@ test_that("colliding legacy marker names preserve all public tables and associat
         h <- ir_roc_object(d, predictors = markers, analysisType = "comparative",
             pairwiseComparisons = TRUE, statisticalComparison = TRUE, showMetricsDiff = TRUE,
             cutoffTable = TRUE, customCutoffs = "0.5",
-            clinicalMetrics = TRUE, partialAuc = TRUE, partialRange = "0.4,0.9",
+            clinicalMetrics = TRUE, partialAuc = TRUE, partialAucFrom = 0.4, partialAucTo = 0.9,
             crocAnalysis = TRUE, convexHull = TRUE, detectImbalance = TRUE)
         suppressWarnings(h$p$.run())
         r <- h$a$results$results

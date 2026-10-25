@@ -106,7 +106,7 @@ test_that("clinical utility workflow: decision curves + fixed sens/spec", {
       positiveClass = "Positive", negativeClass = "Negative",
       # Clinical utility
       clinicalUtilityAnalysis = TRUE,
-      treatmentThreshold = "0.05,0.5,0.05",
+      treatmentThresholdMin = 0.05, treatmentThresholdMax = 0.5, treatmentThresholdStep = 0.05,
       harmBenefitRatio = 0.25,
       # Fixed sensitivity
       fixedSensSpecAnalysis = TRUE,

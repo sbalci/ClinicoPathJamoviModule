@@ -6,7 +6,7 @@ test_that("installed ROC wrappers agree with an independent pair-count AUC", {
   pos <- d$score[d$y == "P"]
   differences <- outer(pos, neg, "-")
   expected <- mean((differences > 0) + .5 * (differences == 0))
-  e <- suppressWarnings(enhancedROC(data = d, outcome = "y", positiveClass = "P",
+  e <- suppressWarnings(enhancedROC(validationNegative = NULL, data = d, outcome = "y", positiveClass = "P",
                                      predictors = "score", direction = "higher"))
   expect_equal(e$results$aucSummary$asDF$auc[1], expected)
   ns <- environment(enhancedROC)

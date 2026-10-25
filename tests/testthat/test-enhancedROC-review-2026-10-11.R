@@ -98,7 +98,7 @@ test_that("R-05: with table notes off, a blank cell keeps the footnote that says
     d <- data.frame(y = factor(rep(c("neg", "pos"), each = 40)),
                     m = c(runif(36), rep(10, 4), runif(40, 0.5, 1.5)))
     a <- rv_obj(d, outcome = "y", positiveClass = "pos", predictors = "m", partialAuc = TRUE,
-                partialRange = "0.9,1.0", partialAucType = "specificity", showTableNotes = FALSE)
+                partialAucFrom = 0.9, partialAucTo = 1.0, partialAucType = "specificity", showTableNotes = FALSE)
     cell <- a$results$results$partialAucAnalysis$getCell(rowNo = 1, "normalized_pauc")
     expect_identical(cell$value, "")
     expect_gt(length(cell$footnotes), 0L)

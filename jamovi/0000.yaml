@@ -77,7 +77,7 @@ analyses:
   - title: Age Pyramid
     name: agepyramid
     ns: ClinicoPath
-    menuGroup: Exploration
+    menuGroup: ExplorationT
     menuTitle: Age Pyramid
     menuSubgroup: ClinicoPath Descriptive Plots
     ribbon: analyses
@@ -1068,7 +1068,7 @@ analyses:
   - title: Survival Analysis for Continuous Explanatory Variable
     name: survivalcont
     ns: ClinicoPath
-    menuGroup: Survival
+    menuGroup: SurvivalT
     menuSubgroup: ClinicoPath Survival
     menuTitle: Survival Analysis for Continuous Explanatory Variable
     menuSubtitle: Cut-off & Univariate Survival Analysis

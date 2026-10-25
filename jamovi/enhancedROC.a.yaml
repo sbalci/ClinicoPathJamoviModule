@@ -18,11 +18,13 @@ description:
         dontrun: true
         usage: |
             # pROC::aSAH ships with pROC, an Import, so the example runs in every module that
-            # carries this analysis. positiveClass is a Level option: always a required argument.
+            # carries this analysis. positiveClass and validationNegative are Level options: always
+            # required arguments (validationNegative = NULL unless the frozen-model report is used).
             enhancedROC(
                 data = pROC::aSAH,
                 outcome = "outcome",
                 positiveClass = "Poor",
+                validationNegative = NULL,
                 predictors = c("s100b", "ndka"))
 
 options:
@@ -341,11 +343,23 @@ options:
       default: specificity
       description: 'Whether to calculate pAUC over a specificity or sensitivity range'
 
-    - name: partialRange
-      title: 'Partial AUC range'
-      type: String
-      default: '0.8,1.0'
-      description: 'Range for partial AUC (min,max) - e.g., 0.8,1.0 for high specificity or sensitivity'
+    # library-audit 2026-10-23 meddecide [MEDIUM] DONE: two Number options, whose boxes check their own
+    #   input and carry min/max, not one "min,max" string parsed in R (was partialRange).
+    - name: partialAucFrom
+      title: 'Partial AUC from'
+      type: Number
+      default: 0.8
+      min: 0
+      max: 1
+      description: 'Lower end of the partial AUC range, on the specificity or sensitivity scale chosen above, for example 0.8 for high specificity.'
+
+    - name: partialAucTo
+      title: 'Partial AUC to'
+      type: Number
+      default: 1
+      min: 0
+      max: 1
+      description: 'Upper end of the partial AUC range; it must be greater than the lower end.'
 
     # CROC Options
     - name: crocAnalysis
@@ -925,14 +939,17 @@ options:
           refitting or choosing a cutoff from these data, and replaces every other output with the
           validation context, denominator ledger and frozen-model metrics. Needs a positive class, an
           explicit negative level, an explicit Direction and the fixed score cutoffs.
+    # library-audit 2026-10-23 meddecide [MEDIUM] DONE: a Level with a LevelSelector, not typed text - a typo
+    #   named no level. Level options take no default, so R callers pass validationNegative (NULL when unused).
     - name: validationNegative
       title: Explicit negative reference level
-      type: String
-      default: ''
+      type: Level
+      variable: (outcome)
+      allowNone: true
       description: >
-          The outcome level that means the condition is absent, typed exactly as it appears in the
-          data. Required by the frozen-model report, which refuses any outcome level that is neither
-          this nor the positive class instead of pooling it as negative.
+          The outcome level that means the condition is absent. Required by the frozen-model report,
+          which refuses any outcome level that is neither this nor the positive class instead of
+          pooling it as negative.
     - name: referenceDescription
       title: Reference standard and blinding
       type: String

@@ -171,7 +171,7 @@ Analysis 1.0.89; all optional checkboxes default to false. `data` is supplied th
 | `priorAUC` | `Number` | `0.7` | Prior AUC Belief |
 | `priorPrecision` | `Number` | `10` | Prior Precision |
 | `clinicalUtilityAnalysis` | `Bool` | `FALSE` | Clinical utility analysis |
-| `treatmentThreshold` | `String` | `0.05,0.5,0.05` | Treatment Threshold Range |
+| `treatmentThresholdMin` / `Max` / `Step` | `Number` | `0.05` / `0.5` / `0.05` | Treatment Threshold Range |
 | `harmBenefitRatio` | `Number` | `0.25` | Harm-to-Benefit Ratio |
 | `interventionCost` | `Bool` | `FALSE` | Intervention cost analysis |
 | `fixedSensSpecAnalysis` | `Bool` | `FALSE` | Fixed sensitivity/Specificity analysis |

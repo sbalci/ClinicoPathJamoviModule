@@ -535,4 +535,16 @@ test_that("IR-survivalcont-01 to IR-survivalcont-07: Independent cold-audit regr
     list(marker_1_score = lit_bs)
   )
   expect_identical(restored_df$Explanatory[1], lit_bs)
+
+  # CFF-survivalcont-01: RMST handles tau smaller than a group's minimum observed survival time
+  d_sep <- d
+  d_sep$time <- ifelse(d_sep$marker <= median(d_sep$marker), d_sep$time + 20, pmax(1, d_sep$time))
+  min_low <- min(d_sep$time[d_sep$marker <= median(d_sep$marker)])
+  tau_small <- round(min_low / 2, 1)
+  r_rmst_small <- .sc_val_run(d_sep, findcut = TRUE, rmst_analysis = TRUE, rmst_tau = tau_small)
+  rmst_df <- r_rmst_small$rmstTable$asDF
+  expect_equal(nrow(rmst_df), 2L)
+  low_row <- rmst_df[rmst_df$group == "low", , drop = FALSE]
+  expect_equal(low_row$rmst, tau_small, tolerance = 1e-10)
+  expect_equal(low_row$se, 0, tolerance = 1e-10)
 })

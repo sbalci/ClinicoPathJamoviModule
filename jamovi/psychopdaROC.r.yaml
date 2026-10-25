@@ -896,7 +896,9 @@ items:
         - classVar
         - positiveClass
         - negativeClass
-        - treatmentThreshold
+        - treatmentThresholdMin
+        - treatmentThresholdMax
+        - treatmentThresholdStep
         - harmBenefitRatio
         - interventionCost
         - direction
@@ -1008,7 +1010,9 @@ items:
         - classVar
         - positiveClass
         - negativeClass
-        - treatmentThreshold
+        - treatmentThresholdMin
+        - treatmentThresholdMax
+        - treatmentThresholdStep
         - harmBenefitRatio
         - interventionCost
         - direction
@@ -1257,7 +1261,9 @@ items:
           - classVar
           - positiveClass
           - negativeClass
-          - treatmentThreshold
+          - treatmentThresholdMin
+          - treatmentThresholdMax
+          - treatmentThresholdStep
           - harmBenefitRatio
           - interventionCost
           - direction

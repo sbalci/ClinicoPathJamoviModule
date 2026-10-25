@@ -32,20 +32,22 @@ test_that("X-01: the Detailed Cutoff Analysis lists only usable (finite) cut-off
 })
 
 test_that("X-02: an invalid Partial AUC range warns and skips only the partial AUC", {
-    for (rng in c("0.8", "0.9,0.8", "abc,1", "")) {
+    # library-audit 2026-10-23 meddecide [MEDIUM] DONE: two Number options; only their order can be wrong
+    for (rng in list(c(0.9, 0.8), c(0.8, 0.8))) {
         a <- fx_run(fx_asah(), outcome = "outcome", positiveClass = "Poor", predictors = "s100b",
-                    partialAuc = TRUE, partialRange = rng, cutoffTable = TRUE, comprehensive_output = TRUE)
+                    partialAuc = TRUE, partialAucFrom = rng[1], partialAucTo = rng[2],
+                    cutoffTable = TRUE, comprehensive_output = TRUE)
         r <- a$results$results
         notice <- fx_notices(a, "Invalid Partial AUC Range")
         expect_length(notice, 1L)
-        expect_identical(notice[[1]]$type, "WARNING", info = rng)
+        expect_identical(notice[[1]]$type, "WARNING", info = paste(rng, collapse = ","))
         expect_gt(r$aucSummary$rowCount, 0L)
         expect_gt(r$cutoffAnalysis$rowCount, 0L)
         expect_equal(r$partialAucAnalysis$rowCount, 0)
-        expect_false(grepl("partial AUC", r$methodsExplanation$content, ignore.case = TRUE), info = rng)
+        expect_false(grepl("partial AUC", r$methodsExplanation$content, ignore.case = TRUE), info = paste(rng, collapse = ","))
     }
     ok <- fx_run(fx_asah(), outcome = "outcome", positiveClass = "Poor", predictors = "s100b",
-                 partialAuc = TRUE, partialRange = "0.8,1.0", comprehensive_output = TRUE)
+                 partialAuc = TRUE, partialAucFrom = 0.8, partialAucTo = 1.0, comprehensive_output = TRUE)
     expect_length(fx_notices(ok, "Invalid Partial AUC Range"), 0L)
     expect_equal(ok$results$results$partialAucAnalysis$rowCount, 1)
     expect_match(ok$results$results$methodsExplanation$content, "partial AUC", fixed = TRUE)   # the check above is not vacuous

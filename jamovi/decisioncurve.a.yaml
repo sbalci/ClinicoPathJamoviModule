@@ -140,6 +140,7 @@ options:
           R: >
             Display table with net benefit values at selected thresholds.
 
+    # number-list: open-ended - any number of values; jamovi has no number-list control
     - name: selectedThresholds
       title: Selected thresholds for table
       type: String
@@ -341,6 +342,8 @@ options:
           R: >
             Add clinical decision rule analysis and comparison with models.
 
+    # library-audit 2026-10-23 meddecide [MEDIUM] DONE: the rule variable is in the top
+    #   VariableSupplier, greyed until clinicalDecisionRule is ticked
     - name: decisionRuleVar
       title: Clinical decision rule (binary)
       type: Variable

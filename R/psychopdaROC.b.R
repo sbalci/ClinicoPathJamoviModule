@@ -6007,10 +6007,11 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
         harm_benefit_ratio <- self$options$harmBenefitRatio # Default: 0.25
         intervention_cost <- self$options$interventionCost # Default: false
 
-        grid <- .psychopdaThresholdGrid(self$options$treatmentThreshold)
+        grid <- .psychopdaThresholdGrid(self$options$treatmentThresholdMin,
+          self$options$treatmentThresholdMax, self$options$treatmentThresholdStep)
         threshold_range <- grid$values
         if (grid$fallback) {
-          msg <- .("The Treatment Threshold Range could not be read as \"min,max,step\" with 0 < min <= max < 1 and a positive step. The default range 0.05 to 0.50 in steps of 0.05 was used instead.")
+          msg <- .("Treatment threshold from is greater than Treatment threshold to. The default range 0.05 to 0.50 in steps of 0.05 was used instead.")
           self$results$decisionCurveTable$setNote("range_fallback", msg, init = FALSE)
           private$.warnUser(msg)
         }

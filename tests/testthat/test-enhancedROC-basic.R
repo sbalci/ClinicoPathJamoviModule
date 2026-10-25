@@ -30,7 +30,7 @@ test_that("enhancedROC function exists", {
 })
 
 test_that("enhancedROC runs with minimal required arguments", {
-  result <- enhancedROC(
+  result <- enhancedROC(validationNegative = NULL, 
     data = enhancedroc_biomarker,
     outcome = "disease_status",
     positiveClass = "Disease",
@@ -42,7 +42,7 @@ test_that("enhancedROC runs with minimal required arguments", {
 })
 
 test_that("enhancedROC handles single predictor", {
-  result <- enhancedROC(
+  result <- enhancedROC(validationNegative = NULL, 
     data = enhancedroc_biomarker,
     outcome = "disease_status",
     positiveClass = "Disease",
@@ -54,7 +54,7 @@ test_that("enhancedROC handles single predictor", {
 })
 
 test_that("enhancedROC handles multiple predictors", {
-  result <- enhancedROC(
+  result <- enhancedROC(validationNegative = NULL, 
     data = enhancedroc_biomarker,
     outcome = "disease_status",
     positiveClass = "Disease",
@@ -66,7 +66,7 @@ test_that("enhancedROC handles multiple predictors", {
 
 test_that("enhancedROC errors on missing outcome", {
   expect_error(
-    enhancedROC(
+    enhancedROC(validationNegative = NULL, 
       data = enhancedroc_biomarker,
       predictors = "biomarker1"
     ),
@@ -77,7 +77,7 @@ test_that("enhancedROC errors on missing outcome", {
 
 test_that("enhancedROC errors on missing predictors", {
   expect_error(
-    enhancedROC(
+    enhancedROC(validationNegative = NULL, 
       data = enhancedroc_biomarker,
       outcome = "disease_status",
       positiveClass = "Disease"
@@ -88,7 +88,7 @@ test_that("enhancedROC errors on missing predictors", {
 })
 
 test_that("enhancedROC handles binary outcome correctly", {
-  result <- enhancedROC(
+  result <- enhancedROC(validationNegative = NULL, 
     data = enhancedroc_biomarker,
     outcome = "disease_status",
     positiveClass = "Disease",
@@ -99,7 +99,7 @@ test_that("enhancedROC handles binary outcome correctly", {
 })
 
 test_that("enhancedROC handles continuous predictor", {
-  result <- enhancedROC(
+  result <- enhancedROC(validationNegative = NULL, 
     data = enhancedroc_biomarker,
     outcome = "disease_status",
     positiveClass = "Disease",
@@ -110,7 +110,7 @@ test_that("enhancedROC handles continuous predictor", {
 })
 
 test_that("enhancedROC produces expected output structure", {
-  result <- enhancedROC(
+  result <- enhancedROC(validationNegative = NULL, 
     data = enhancedroc_biomarker,
     outcome = "disease_status",
     positiveClass = "Disease",
@@ -121,7 +121,7 @@ test_that("enhancedROC produces expected output structure", {
 })
 
 test_that("enhancedROC handles auto direction detection", {
-  result <- enhancedROC(
+  result <- enhancedROC(validationNegative = NULL, 
     data = enhancedroc_biomarker,
     outcome = "disease_status",
     positiveClass = "Disease",
@@ -133,7 +133,7 @@ test_that("enhancedROC handles auto direction detection", {
 })
 
 test_that("enhancedROC handles specified direction (higher)", {
-  result <- enhancedROC(
+  result <- enhancedROC(validationNegative = NULL, 
     data = enhancedroc_biomarker,
     outcome = "disease_status",
     positiveClass = "Disease",
@@ -145,7 +145,7 @@ test_that("enhancedROC handles specified direction (higher)", {
 })
 
 test_that("enhancedROC handles specified direction (lower)", {
-  result <- enhancedROC(
+  result <- enhancedROC(validationNegative = NULL, 
     data = enhancedroc_biomarker,
     outcome = "disease_status",
     positiveClass = "Disease",
@@ -159,7 +159,7 @@ test_that("enhancedROC handles specified direction (lower)", {
 test_that("enhancedROC handles small dataset", {
   data(enhancedroc_small, package = "ClinicoPath")
 
-  result <- enhancedROC(
+  result <- enhancedROC(validationNegative = NULL, 
     data = enhancedroc_small,
     outcome = "disease",
     positiveClass = "Positive",
@@ -171,7 +171,7 @@ test_that("enhancedROC handles small dataset", {
 
 test_that("enhancedROC accepts default options", {
   # Test with all default options
-  result <- enhancedROC(
+  result <- enhancedROC(validationNegative = NULL, 
     data = enhancedroc_biomarker,
     outcome = "disease_status",
     positiveClass = "Disease",
@@ -184,7 +184,7 @@ test_that("enhancedROC accepts default options", {
 
 test_that("enhancedROC handles different positive class selections", {
   # Test with "Healthy" as positive class
-  result <- enhancedROC(
+  result <- enhancedROC(validationNegative = NULL, 
     data = enhancedroc_biomarker,
     outcome = "disease_status",
     positiveClass = "Healthy",
@@ -195,7 +195,7 @@ test_that("enhancedROC handles different positive class selections", {
 })
 
 test_that("enhancedROC handles risk score predictor", {
-  result <- enhancedROC(
+  result <- enhancedROC(validationNegative = NULL, 
     data = enhancedroc_biomarker,
     outcome = "disease_status",
     positiveClass = "Disease",

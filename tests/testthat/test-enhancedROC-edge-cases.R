@@ -29,7 +29,7 @@ test_that("enhancedROC handles missing values in predictor", {
   test_data_na$biomarker1[1:10] <- NA
 
   result <- suppressWarnings(
-    enhancedROC(
+    enhancedROC(validationNegative = NULL, 
       data = test_data_na,
       outcome = "disease_status",
       positiveClass = "Disease",
@@ -44,7 +44,7 @@ test_that("enhancedROC handles missing values in outcome", {
   test_data_na$disease_status[1:10] <- NA
 
   result <- suppressWarnings(
-    enhancedROC(
+    enhancedROC(validationNegative = NULL, 
       data = test_data_na,
       outcome = "disease_status",
       positiveClass = "Disease",
@@ -89,7 +89,7 @@ test_that("enhancedROC handles constant predictor", {
   test_data_const$constant_marker <- 10  # All same value
 
   result <- suppressWarnings(
-    enhancedROC(
+    enhancedROC(validationNegative = NULL, 
       data = test_data_const,
       outcome = "disease_status",
       positiveClass = "Disease",
@@ -132,7 +132,7 @@ test_that("enhancedROC handles extreme class imbalance", {
   data(enhancedroc_imbalanced, package = "ClinicoPath")
 
   # 5% prevalence should still work but may warn
-  result <- enhancedROC(
+  result <- enhancedROC(validationNegative = NULL, 
     data = enhancedroc_imbalanced,
     outcome = "rare_disease",
     positiveClass = "Positive",
@@ -146,7 +146,7 @@ test_that("enhancedROC handles negative predictor values", {
   test_data_neg <- enhancedroc_biomarker
   test_data_neg$biomarker1 <- test_data_neg$biomarker1 - 20  # Make some values negative
 
-  result <- enhancedROC(
+  result <- enhancedROC(validationNegative = NULL, 
     data = test_data_neg,
     outcome = "disease_status",
     positiveClass = "Disease",
@@ -160,7 +160,7 @@ test_that("enhancedROC handles very large predictor values", {
   test_data_large <- enhancedroc_biomarker
   test_data_large$biomarker1 <- test_data_large$biomarker1 * 1000
 
-  result <- enhancedROC(
+  result <- enhancedROC(validationNegative = NULL, 
     data = test_data_large,
     outcome = "disease_status",
     positiveClass = "Disease",
@@ -174,7 +174,7 @@ test_that("enhancedROC handles tied predictor values", {
   test_data_ties <- enhancedroc_biomarker
   test_data_ties$biomarker1 <- round(test_data_ties$biomarker1)  # Create many ties
 
-  result <- enhancedROC(
+  result <- enhancedROC(validationNegative = NULL, 
     data = test_data_ties,
     outcome = "disease_status",
     positiveClass = "Disease",
@@ -192,7 +192,7 @@ test_that("enhancedROC handles perfect separation", {
   )
 
   result <- suppressWarnings(
-    enhancedROC(
+    enhancedROC(validationNegative = NULL, 
       data = test_data_perfect,
       outcome = "disease_status",
       positiveClass = "Disease",
@@ -210,7 +210,7 @@ test_that("enhancedROC handles no discrimination (AUC ~ 0.5)", {
   test_data_random <- enhancedroc_biomarker
   test_data_random$random_marker <- rnorm(nrow(enhancedroc_biomarker))
 
-  result <- enhancedROC(
+  result <- enhancedROC(validationNegative = NULL, 
     data = test_data_random,
     outcome = "disease_status",
     positiveClass = "Disease",
@@ -222,7 +222,7 @@ test_that("enhancedROC handles no discrimination (AUC ~ 0.5)", {
 
 test_that("enhancedROC handles invalid cutoff range", {
   # Cutoffs outside predictor range
-  result <- enhancedROC(
+  result <- enhancedROC(validationNegative = NULL, 
     data = enhancedroc_biomarker,
     outcome = "disease_status",
     positiveClass = "Disease",
@@ -236,7 +236,7 @@ test_that("enhancedROC handles invalid cutoff range", {
 
 test_that("enhancedROC handles extreme prevalence values", {
   # Very low prevalence
-  result1 <- enhancedROC(
+  result1 <- enhancedROC(validationNegative = NULL, 
     data = enhancedroc_biomarker,
     outcome = "disease_status",
     positiveClass = "Disease",
@@ -247,7 +247,7 @@ test_that("enhancedROC handles extreme prevalence values", {
   expect_s3_class(result1, "enhancedROCResults")
 
   # Very high prevalence
-  result2 <- enhancedROC(
+  result2 <- enhancedROC(validationNegative = NULL, 
     data = enhancedroc_biomarker,
     outcome = "disease_status",
     positiveClass = "Disease",
@@ -260,7 +260,7 @@ test_that("enhancedROC handles extreme prevalence values", {
 
 test_that("enhancedROC handles extreme sensitivity threshold", {
   # Very high sensitivity requirement
-  result <- enhancedROC(
+  result <- enhancedROC(validationNegative = NULL, 
     data = enhancedroc_biomarker,
     outcome = "disease_status",
     positiveClass = "Disease",
@@ -273,7 +273,7 @@ test_that("enhancedROC handles extreme sensitivity threshold", {
 
 test_that("enhancedROC handles extreme specificity threshold", {
   # Very high specificity requirement
-  result <- enhancedROC(
+  result <- enhancedROC(validationNegative = NULL, 
     data = enhancedroc_biomarker,
     outcome = "disease_status",
     positiveClass = "Disease",
@@ -285,7 +285,7 @@ test_that("enhancedROC handles extreme specificity threshold", {
 })
 
 test_that("enhancedROC rejects wrong positive class specification", {
-  expect_error(enhancedROC(data = enhancedroc_biomarker, outcome = "disease_status",
+  expect_error(enhancedROC(validationNegative = NULL, data = enhancedroc_biomarker, outcome = "disease_status",
     positiveClass = "InvalidLevel", predictors = "biomarker1"),
     "Invalid Positive Class Selection", fixed = TRUE)
 })
@@ -294,7 +294,7 @@ test_that("enhancedROC handles duplicate observations", {
   # Create exact duplicates
   test_data_dup <- rbind(enhancedroc_biomarker, enhancedroc_biomarker[1:20, ])
 
-  result <- enhancedROC(
+  result <- enhancedROC(validationNegative = NULL, 
     data = test_data_dup,
     outcome = "disease_status",
     positiveClass = "Disease",
@@ -305,23 +305,23 @@ test_that("enhancedROC handles duplicate observations", {
 })
 
 test_that("enhancedROC handles partial AUC with invalid range", {
-  # Range outside [0,1]
-  result <- suppressWarnings(
-    enhancedROC(
+  # Range outside [0,1]: the Number option's max refuses it before the analysis runs
+  # (library-audit 2026-10-23 meddecide [MEDIUM]: two Number options, not a parsed string)
+  expect_error(suppressWarnings(
+    enhancedROC(validationNegative = NULL,
       data = enhancedroc_biomarker,
       outcome = "disease_status",
       positiveClass = "Disease",
       predictors = "biomarker1",
       partialAuc = TRUE,
-      partialRange = "0.5,1.5"  # Invalid (> 1)
+      partialAucFrom = 0.5, partialAucTo = 1.5
     )
-  )
-  expect_s3_class(result, "enhancedROCResults")
+  ), "partialAucTo")
 })
 
 test_that("enhancedROC handles very small bootstrap samples", {
   # Minimum bootstrap samples
-  result <- enhancedROC(
+  result <- enhancedROC(validationNegative = NULL, 
     data = enhancedroc_biomarker,
     outcome = "disease_status",
     positiveClass = "Disease",
@@ -339,7 +339,7 @@ test_that("enhancedROC handles multiclass outcome with binary analysis", {
   # Try to use multiclass data without multiClassROC enabled
   # Should error or convert to binary
   result <- suppressWarnings(
-    enhancedROC(
+    enhancedROC(validationNegative = NULL, 
       data = enhancedroc_multiclass,
       outcome = "disease_severity",
       positiveClass = "Severe",
@@ -357,7 +357,7 @@ test_that("enhancedROC handles extremely unbalanced groups in comparison", {
   )
 
   result <- suppressWarnings(
-    enhancedROC(
+    enhancedROC(validationNegative = NULL, 
       data = test_data_unbal,
       outcome = "disease_status",
       positiveClass = "Disease",
@@ -377,7 +377,7 @@ test_that("enhancedROC handles predictor with single unique value per class", {
   )
 
   result <- suppressWarnings(
-    enhancedROC(
+    enhancedROC(validationNegative = NULL, 
       data = test_data_extreme,
       outcome = "disease_status",
       positiveClass = "Disease",
@@ -394,7 +394,7 @@ test_that("enhancedROC handles conflicting direction and actual data", {
   test_data_inverse <- enhancedroc_biomarker
   test_data_inverse$inverse_marker <- -test_data_inverse$biomarker1
 
-  result <- enhancedROC(
+  result <- enhancedROC(validationNegative = NULL, 
     data = test_data_inverse,
     outcome = "disease_status",
     positiveClass = "Disease",

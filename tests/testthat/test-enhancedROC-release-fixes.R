@@ -2,7 +2,7 @@
 
 library(testthat)
 
-rl_run <- function(...) suppressWarnings(do.call(ClinicoPath::enhancedROC, list(...)))
+rl_run <- function(...) suppressWarnings(do.call(ClinicoPath::enhancedROC, utils::modifyList(list(validationNegative = NULL), list(...), keep.null = TRUE)))
 rl_strip <- function(x) trimws(gsub("[[:space:]]+", " ", gsub("<[^>]+>", " ", if (is.null(x)) "" else x)))
 # Source-text checks need the package tree; the installed (R CMD check) copy has no R/.
 rl_src <- function() {
@@ -75,17 +75,17 @@ test_that("the multi-class outcome is cleared at the top of every run", {
 
 # ── H-9  Validation must not fire for a switched-off feature ──────────────────
 
-test_that("a malformed partial-AUC range does not abort when partial AUC is off", {
+test_that("a reversed partial-AUC range does not abort when partial AUC is off", {
     d <- rl_data()
     r <- rl_run(data = d, outcome = "gold", predictors = "m1", positiveClass = "Positive",
-                partialAuc = FALSE, partialRange = "not,numbers")
+                partialAuc = FALSE, partialAucFrom = 0.9, partialAucTo = 0.8)
     expect_equal(nrow(as.data.frame(r$results$aucSummary)), 1L)
 })
 
 test_that("...but it is still reported when partial AUC is on", {
     d <- rl_data()
     r <- rl_run(data = d, outcome = "gold", predictors = "m1", positiveClass = "Positive",
-                partialAuc = TRUE, partialRange = "not,numbers")
+                partialAuc = TRUE, partialAucFrom = 0.9, partialAucTo = 0.8)
     expect_match(rl_strip(r$results$notices$content), "Invalid Partial AUC Range")
 })
 

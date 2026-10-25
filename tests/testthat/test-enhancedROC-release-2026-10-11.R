@@ -3,8 +3,8 @@
 # each written to FAIL on the code before its fix.
 
 rel11_run <- function(data, ...) suppressWarnings(do.call(enhancedROC,
-    utils::modifyList(list(data = data, showTableNotes = TRUE, showAnalysisSummary = TRUE,
-                          showClinicalReport = TRUE), list(...), keep.null = TRUE)))
+    utils::modifyList(list(data = data, validationNegative = NULL, showTableNotes = TRUE,
+                          showAnalysisSummary = TRUE, showClinicalReport = TRUE), list(...), keep.null = TRUE)))
 
 # Builds and runs the analysis object, to read the typed notice list behind the Html panel.
 rel11_obj <- function(data, ..., .fatal = FALSE) {
@@ -742,7 +742,8 @@ test_that("SEC-3: the Methods quote the partial AUC range only when it parses", 
     me <- function(...) rel11_obj(rel11_k(), outcome = "y", positiveClass = "Malignant", predictors = "m",
                                   comprehensive_output = TRUE, partialAuc = TRUE, ...)$results$results$methodsExplanation$content
     expect_match(me(), "from 0.8 to 1.0", fixed = TRUE)
-    expect_false(grepl("NA to NA", me(partialRange = ""), fixed = TRUE))
+    # library-audit 2026-10-23 meddecide [MEDIUM] DONE: the range is two Number options; a reversed one is not quoted
+    expect_false(grepl("from 0.9 to 0.8", me(partialAucFrom = 0.9, partialAucTo = 0.8), fixed = TRUE))
 })
 
 test_that("multi-class orientation notes survive with table notes off (2026-10-21)", {

@@ -4715,7 +4715,13 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                         negative_label <- ""
                         if (all_categories) {
                             categories_to_analyze <- all_levels
-                        } else if (nzchar(positive_category)) {
+                        } else if (nzchar(trimws(positive_category))) {
+                            # Typed, because a LevelSelector draws on one variable and these categories come
+                            # from every rater (see the option in agreement.a.yaml): a stray space or other
+                            # capitalisation still names the category; an exact match wins.
+                            typed <- trimws(positive_category)
+                            hit <- if (typed %in% all_levels) typed else all_levels[tolower(all_levels) == tolower(typed)]
+                            if (length(hit) == 1L) positive_category <- hit
                             if (!(positive_category %in% all_levels)) {
                                 self$results$specificAgreementTable$setNote(
                                     "error",

@@ -14,7 +14,7 @@ er_data <- function(seed = 1, n = 200) {
 
 run_er <- function(...) {
     args <- utils::modifyList(
-        list(outcome = "status", positiveClass = "pos", showTableNotes = TRUE), list(...))
+        list(outcome = "status", positiveClass = "pos", validationNegative = NULL, showTableNotes = TRUE), list(...))
     do.call(ClinicoPath::enhancedROC, args)
 }
 

@@ -1217,3 +1217,83 @@ test_that("option-fixed rows exist after .init() and .run() keeps the same keys"
   }
   audit_skip_unloaded(wanted)
 })
+
+# library-audit 2026-10-23 meddecide [MEDIUM] DONE: every variable role sits in the panel's first,
+#   top-level VariableSupplier (optional roles greyed with enable:), as jmv's linreg does - never a
+#   second supplier inside a collapsed box, never another control above the variables.
+test_that("variable boxes come first, all in one top-level supplier", {
+  root <- audit_source_root()
+  skip_if_not_installed("yaml")
+  absent <- audit_absent(root, audit_analyses, "jamovi/%s.u.yaml")
+  suppliers_below <- function(node, depth = 0L) {
+    if (!is.list(node)) return(0L)
+    here <- if (identical(node$type, "VariableSupplier") && depth > 0L) 1L else 0L
+    here + sum(vapply(node$children %||% list(), suppliers_below, integer(1), depth = depth + 1L))
+  }
+  for (name in setdiff(audit_analyses, absent)) {
+    top <- yaml::read_yaml(file.path(root, "jamovi", paste0(name, ".u.yaml")))$children
+    types <- vapply(top, function(x) x$type %||% "", "")
+    if (!"VariableSupplier" %in% types) next   # calculators take no variables
+    expect_identical(types[1], "VariableSupplier", label = paste(name, "first control"))
+    expect_identical(sum(vapply(top, suppliers_below, integer(1))), 0L, label = paste(name, "nested suppliers"))
+  }
+  audit_skip_absent(absent, root)
+})
+
+# library-audit 2026-10-23 meddecide [MEDIUM] DONE: enhancedROC's negative reference level is a Level
+#   (LevelSelector) bound to the outcome, so it lists the levels instead of matching typed text; an unset
+#   one is written as NULL in the syntax, because a Level is a required argument of the R function.
+test_that("enhancedROC's negative reference level is chosen from the outcome's levels", {
+  wanted <- "enhancedROC"
+  if ("enhancedROC" %in% audit_loaded(wanted)) {
+    opts <- enhancedROCOptions$new(outcome = "y", positiveClass = "pos", predictors = "s")
+    # jmvcore's OptionLevel is its OptionString class, so read the schema instead
+    root <- normalizePath(file.path(testthat::test_path(), "..", ".."), mustWork = FALSE)
+    if (file.exists(file.path(root, "jamovi", "enhancedROC.a.yaml"))) {
+      a_yaml <- yaml::read_yaml(file.path(root, "jamovi", "enhancedROC.a.yaml"))$options
+      vn <- Filter(function(o) identical(o$name, "validationNegative"), a_yaml)[[1]]
+      expect_identical(c(vn$type, vn$variable), c("Level", "(outcome)"))
+    }
+    expect_null(opts$validationNegative)
+    set.seed(9)
+    d <- data.frame(y = factor(rep(c("neg", "pos"), each = 30)), s = c(stats::rnorm(30), stats::rnorm(30, 1)))
+    a <- enhancedROCClass$new(options = opts, data = d)
+    src <- a$asSource()
+    expect_match(src, "validationNegative = NULL", fixed = TRUE)
+    call <- str2lang(src)
+    call[[1]] <- quote(enhancedROC)
+    res <- suppressWarnings(eval(call, envir = list2env(list(data = d), parent = environment())))
+    expect_true(inherits(res, "enhancedROCResults"))
+  }
+  audit_skip_unloaded(wanted)
+})
+
+# library-audit 2026-10-23 meddecide [MEDIUM] DONE: a fixed number of numbers is Number options, whose
+#   boxes check their own input (enhancedROC partialAucFrom/To, psychopdaROC treatmentThresholdMin/Max/Step);
+#   a String holding a number list must say why it stays one (`# number-list:` above its option).
+test_that("fixed number ranges are Number options; number-list Strings are marked", {
+  root <- audit_source_root()
+  absent <- audit_absent(root, audit_analyses, "jamovi/%s.a.yaml")
+  for (name in setdiff(audit_analyses, absent)) {
+    lines <- readLines(file.path(root, "jamovi", paste0(name, ".a.yaml")), warn = FALSE)
+    opts <- yaml::read_yaml(file.path(root, "jamovi", paste0(name, ".a.yaml")))$options
+    for (o in opts) {
+      d <- as.character(o$default %||% "")
+      if (!identical(o$type, "String") || !grepl("^\\s*-?[0-9.]+(\\s*[,;]\\s*-?[0-9.]+){1,5}\\s*$", d)) next
+      at <- grep(paste0("^\\s*- name: ", o$name, "\\s*$"), lines)[1]
+      expect_true(any(grepl("number-list:", lines[max(1, at - 3):(at - 1)], fixed = TRUE)),
+                  label = paste(name, o$name, "marked"))
+    }
+  }
+  if ("enhancedROC" %in% audit_loaded("enhancedROC")) {
+    o <- enhancedROCOptions$new(outcome = "y", positiveClass = "p", predictors = "s")
+    expect_identical(c(o$partialAucFrom, o$partialAucTo), c(0.8, 1))
+  }
+  if ("psychopdaROC" %in% audit_loaded("psychopdaROC")) {
+    o <- psychopdaROCOptions$new()
+    expect_identical(c(o$treatmentThresholdMin, o$treatmentThresholdMax, o$treatmentThresholdStep), c(0.05, 0.5, 0.05))
+    expect_identical(.psychopdaThresholdGrid(0.1, 0.3, 0.1)$values, c(0.1, 0.2, 0.3))
+    expect_true(.psychopdaThresholdGrid(0.4, 0.2, 0.1)$fallback)   # reversed: default grid + note
+  }
+  audit_skip_absent(absent, root)
+})

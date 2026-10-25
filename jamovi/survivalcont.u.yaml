@@ -15,6 +15,7 @@ children:
             name: elapsedtime
             maxItemCount: 1
             isTarget: true
+            enable: (!tint)
       - type: TargetLayoutBox
         label: Outcome
         children:
@@ -33,6 +34,30 @@ children:
             name: contexpl
             maxItemCount: 1
             isTarget: true
+      - type: TargetLayoutBox
+        label: Diagnosis Date
+        children:
+          - type: VariablesListBox
+            name: dxdate
+            maxItemCount: 1
+            isTarget: true
+            enable: (tint)
+      - type: TargetLayoutBox
+        label: Follow-up Date
+        children:
+          - type: VariablesListBox
+            name: fudate
+            maxItemCount: 1
+            isTarget: true
+            enable: (tint)
+      - type: TargetLayoutBox
+        label: Stratification Variable
+        children:
+          - type: VariablesListBox
+            name: strata_variable
+            maxItemCount: 1
+            isTarget: true
+            enable: (stratified_cox)
   - type: CollapseBox
     label: Finding Cut-off
     collapsed: true
@@ -51,7 +76,7 @@ children:
                 name: calculatedcutoff
                 enable: (findcut)
       - type: Label
-        label: Cut-off Options
+        label: Multiple Cut-off Detection
         children:
           - type: LayoutBox
             margin: large
@@ -68,14 +93,20 @@ children:
                 name: cutoff_method
                 enable: (multiple_cutoffs)
                 label: Multiple cut-off method
+              - type: Output
+                name: calculatedmulticut
+                enable: (multiple_cutoffs)
+      - type: Label
+        label: Cut-off Constraints
+        children:
+          - type: LayoutBox
+            margin: large
+            children:
               - type: TextBox
                 name: min_group_size
                 format: number
                 enable: (findcut || multiple_cutoffs)
-                label: Minimum Group Size (%)
-              - type: Output
-                name: calculatedmulticut
-                enable: (multiple_cutoffs)
+                label: Minimum group size (%)
   - type: CollapseBox
     label: Advanced Elapsed Time Options
     collapsed: true
@@ -90,28 +121,6 @@ children:
                 name: tint
                 label: Time from dates
               - type: Label
-                label: Date Variables
-                enable: (tint)
-                children:
-                  - type: VariableSupplier
-                    persistentItems: false
-                    stretchFactor: 1
-                    children:
-                      - type: TargetLayoutBox
-                        label: Diagnosis Date
-                        children:
-                          - type: VariablesListBox
-                            name: dxdate
-                            maxItemCount: 1
-                            isTarget: true
-                      - type: TargetLayoutBox
-                        label: Follow-up Date
-                        children:
-                          - type: VariablesListBox
-                            name: fudate
-                            maxItemCount: 1
-                            isTarget: true
-              - type: Label
                 label: Date Format in Data
                 enable: (tint)
                 children:
@@ -124,7 +133,7 @@ children:
               - type: Output
                 name: calculatedtime
                 enable: (tint)
-                label: Calculated Time Preview
+                label: Calculated survival time
       - type: Label
         label: Time Unit of the Analysis
         children:
@@ -147,7 +156,7 @@ children:
                   - type: TextBox
                     name: landmark
                     format: number
-                    label: Landmark Time
+                    label: Landmark time
                     enable: (uselandmark)
   - type: CollapseBox
     label: Analysis with Multiple Outcomes
@@ -172,16 +181,16 @@ children:
                     children:
                       - type: LevelSelector
                         name: dod
-                        label: Dead of Disease
+                        label: Dead of disease
                       - type: LevelSelector
                         name: dooc
-                        label: Dead of Other Causes
+                        label: Dead of other causes
                       - type: LevelSelector
                         name: awd
-                        label: Alive with Disease
+                        label: Alive with disease
                       - type: LevelSelector
                         name: awod
-                        label: Alive without Disease
+                        label: Alive without disease
               - type: ComboBox
                 name: analysistype
                 enable: (outcome && multievent)
@@ -189,7 +198,7 @@ children:
               - type: Output
                 name: outcomeredefined
                 enable: (outcome && multievent)
-                label: Redefined Outcome Preview
+                label: Redefined survival outcome
   - type: CollapseBox
     label: Plots
     collapsed: true
@@ -230,22 +239,22 @@ children:
                 name: endplot
                 format: number
                 enable: (findcut || multiple_cutoffs)
-                label: Plot End Time
+                label: Plot end time
               - type: TextBox
                 name: byplot
                 enable: (findcut || multiple_cutoffs)
                 format: number
-                label: Time Interval
+                label: Time interval
               - type: TextBox
                 name: ybegin_plot
                 enable: (findcut || multiple_cutoffs)
                 format: number
-                label: Y-axis Start
+                label: Y-axis start
               - type: TextBox
                 name: yend_plot
                 format: number
                 enable: (findcut || multiple_cutoffs)
-                label: Y-axis End
+                label: Y-axis end
               - type: CheckBox
                 name: ci95
                 enable: (findcut || multiple_cutoffs)
@@ -277,7 +286,7 @@ children:
                 format: string
                 enable: (findcut || multiple_cutoffs)
                 width: large
-                label: "Survival Time Points (default: 1,3,5 years)"
+                label: "Survival time points (default: 1, 3, 5 years)"
   - type: CollapseBox
     label: Advanced Analysis Options
     collapsed: true
@@ -294,18 +303,6 @@ children:
               - type: CheckBox
                 name: residual_diagnostics
                 label: Model residual diagnostics (outlier detection)
-              - type: VariableSupplier
-                persistentItems: false
-                stretchFactor: 1
-                children:
-                  - type: TargetLayoutBox
-                    label: Stratification Variable
-                    children:
-                      - type: VariablesListBox
-                        name: strata_variable
-                        maxItemCount: 1
-                        isTarget: true
-                        enable: (stratified_cox)
       - type: Label
         label: Restricted Mean Survival Time
         children:
@@ -318,7 +315,7 @@ children:
               - type: TextBox
                 name: rmst_tau
                 format: number
-                label: Tau (Restriction Time)
+                label: Tau (restriction time)
                 enable: (rmst_analysis)
   - type: CollapseBox
     label: Person-Time Analysis
@@ -338,11 +335,11 @@ children:
                 format: string
                 enable: (person_time)
                 width: large
-                label: Time Intervals
+                label: Time intervals
               - type: TextBox
                 name: rate_multiplier
                 format: number
-                label: Rate Multiplier
+                label: Rate multiplier
                 enable: (person_time)
   - type: CollapseBox
     label: Detailed Output
@@ -363,4 +360,4 @@ children:
               - type: TextBox
                 name: seed
                 format: number
-                label: Random Seed
+                label: Random seed

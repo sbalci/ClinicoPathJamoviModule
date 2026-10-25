@@ -14,7 +14,14 @@ items:
       clearWith:
           - outcome
           - outcomeLevel
+          - elapsedtime
+          - contexpl
+          - fudate
+          - dxdate
+          - tint
           - multievent
+          - uselandmark
+          - landmark
           - analysistype
           - dod
           - dooc
@@ -51,11 +58,6 @@ items:
       title: Information
       type:  Html
       visible: false
-
-    - name:  coxRegressionHeading
-      title: Cox Regression for Continuous Variables
-      type:  Preformatted
-      
 
     - name:  coxSummary
       title: '`Cox Regression Summary and Table - ${contexpl}`'
@@ -185,7 +187,8 @@ items:
     - name:  tCoxtext2
       title: ''
       type:  Html
-      refs: finalfit
+      refs:
+          - finalfit
       clearWith:
           - sc
           - endplot
@@ -214,15 +217,6 @@ items:
           - timetypeoutput
           - timetypedata
 
-
-
-    - name:  coxRegressionHeading3
-      title: Cox Regression Explanations
-      type:  Preformatted
-      visible: (showExplanations)
-
-
-
     # Cox Regression Explanation
     - name: coxRegressionExplanation
       title: 'Understanding Cox Regression for Continuous Variables'
@@ -233,20 +227,6 @@ items:
           - outcome
           - timetypeoutput
           - timetypedata
-
-
-
-
-
-
-
-
-
-    - name:  personTimeHeading
-      title: Person-Time Analysis
-      type:  Preformatted
-      visible: (person_time)
-      
 
     - name: personTimeTable
       title: 'Person-Time Analysis'
@@ -353,18 +333,6 @@ items:
           - timetypeoutput
           - timetypedata
 
-
-
-
-
-
-
-    - name:  rmstHeading
-      title: RMST Analysis
-      type:  Preformatted
-      visible: (rmst_analysis)
-      
-
     - name: rmstTable
       title: 'Restricted Mean Survival Time'
       type: Table
@@ -436,6 +404,7 @@ items:
         - fudate
         - dxdate
         - tint
+        - multievent
         - findcut
         - multiple_cutoffs
         - uselandmark
@@ -540,6 +509,7 @@ items:
         - fudate
         - dxdate
         - tint
+        - multievent
         - findcut
         - uselandmark
         - landmark
@@ -569,12 +539,6 @@ items:
 
 
 
-
-    - name:  cutoffAnalysisHeading
-      title: Cut-off Point Analysis
-      type:  Preformatted
-      visible: (findcut)
-      
 
     - name:  rescutTable
       title: Cut Point
@@ -618,17 +582,6 @@ items:
           - seed
           - timetypeoutput
           - timetypedata
-
-
-
-
-    - name:  cutoffAnalysisHeading3
-      title: Cut-off Analysis Explanations
-      type:  Preformatted
-      visible: (findcut && showExplanations)
-
-
-
 
     # Cut-off Point Analysis Explanation  
     - name: cutoffAnalysisExplanation
@@ -1043,14 +996,6 @@ items:
       refs:
           - KMunicate
           - KMunicate2
-
-
-
-
-    - name:  survivalPlotsHeading3
-      title: Survival Plots Explanations
-      type:  Preformatted
-      visible: (((sc && (findcut || multiple_cutoffs)) || (findcut && (ce || ch || kmunicate))) && showExplanations)
 
     # Survival Plots Explanation
     - name: survivalPlotsExplanation

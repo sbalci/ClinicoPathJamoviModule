@@ -497,27 +497,21 @@ survivalcontResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
         strongWarnings = function() private$.items[["strongWarnings"]],
         warnings = function() private$.items[["warnings"]],
         infoMessages = function() private$.items[["infoMessages"]],
-        coxRegressionHeading = function() private$.items[["coxRegressionHeading"]],
         coxSummary = function() private$.items[["coxSummary"]],
         coxTable = function() private$.items[["coxTable"]],
         stratifiedCoxTable = function() private$.items[["stratifiedCoxTable"]],
         tCoxtext2 = function() private$.items[["tCoxtext2"]],
-        coxRegressionHeading3 = function() private$.items[["coxRegressionHeading3"]],
         coxRegressionExplanation = function() private$.items[["coxRegressionExplanation"]],
-        personTimeHeading = function() private$.items[["personTimeHeading"]],
         personTimeTable = function() private$.items[["personTimeTable"]],
         personTimeSummary = function() private$.items[["personTimeSummary"]],
         personTimeExplanation = function() private$.items[["personTimeExplanation"]],
-        rmstHeading = function() private$.items[["rmstHeading"]],
         rmstTable = function() private$.items[["rmstTable"]],
         rmstSummary = function() private$.items[["rmstSummary"]],
         rmstExplanation = function() private$.items[["rmstExplanation"]],
         residualsTable = function() private$.items[["residualsTable"]],
         schoenfeldResidualsTable = function() private$.items[["schoenfeldResidualsTable"]],
         residualDiagnosticsExplanation = function() private$.items[["residualDiagnosticsExplanation"]],
-        cutoffAnalysisHeading = function() private$.items[["cutoffAnalysisHeading"]],
         rescutTable = function() private$.items[["rescutTable"]],
-        cutoffAnalysisHeading3 = function() private$.items[["cutoffAnalysisHeading3"]],
         cutoffAnalysisExplanation = function() private$.items[["cutoffAnalysisExplanation"]],
         plot4 = function() private$.items[["plot4"]],
         plot5 = function() private$.items[["plot5"]],
@@ -528,7 +522,6 @@ survivalcontResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
         plot2 = function() private$.items[["plot2"]],
         plot3 = function() private$.items[["plot3"]],
         plot6 = function() private$.items[["plot6"]],
-        survivalPlotsHeading3 = function() private$.items[["survivalPlotsHeading3"]],
         survivalPlotsExplanation = function() private$.items[["survivalPlotsExplanation"]],
         plot7 = function() private$.items[["plot7"]],
         loglogPlotExplanation = function() private$.items[["loglogPlotExplanation"]],
@@ -575,7 +568,14 @@ survivalcontResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                 clearWith=list(
                     "outcome",
                     "outcomeLevel",
+                    "elapsedtime",
+                    "contexpl",
+                    "fudate",
+                    "dxdate",
+                    "tint",
                     "multievent",
+                    "uselandmark",
+                    "landmark",
                     "analysistype",
                     "dod",
                     "dooc",
@@ -612,10 +612,6 @@ survivalcontResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                 name="infoMessages",
                 title="Information",
                 visible=FALSE))
-            self$add(jmvcore::Preformatted$new(
-                options=options,
-                name="coxRegressionHeading",
-                title="Cox Regression for Continuous Variables"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="coxSummary",
@@ -755,7 +751,8 @@ survivalcontResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                 options=options,
                 name="tCoxtext2",
                 title="",
-                refs="finalfit",
+                refs=list(
+                    "finalfit"),
                 clearWith=list(
                     "sc",
                     "endplot",
@@ -783,11 +780,6 @@ survivalcontResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                     "seed",
                     "timetypeoutput",
                     "timetypedata")))
-            self$add(jmvcore::Preformatted$new(
-                options=options,
-                name="coxRegressionHeading3",
-                title="Cox Regression Explanations",
-                visible="(showExplanations)"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="coxRegressionExplanation",
@@ -798,11 +790,6 @@ survivalcontResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                     "outcome",
                     "timetypeoutput",
                     "timetypedata")))
-            self$add(jmvcore::Preformatted$new(
-                options=options,
-                name="personTimeHeading",
-                title="Person-Time Analysis",
-                visible="(person_time)"))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="personTimeTable",
@@ -910,11 +897,6 @@ survivalcontResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                     "outcome",
                     "timetypeoutput",
                     "timetypedata")))
-            self$add(jmvcore::Preformatted$new(
-                options=options,
-                name="rmstHeading",
-                title="RMST Analysis",
-                visible="(rmst_analysis)"))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="rmstTable",
@@ -994,6 +976,7 @@ survivalcontResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                     "fudate",
                     "dxdate",
                     "tint",
+                    "multievent",
                     "findcut",
                     "multiple_cutoffs",
                     "uselandmark",
@@ -1094,6 +1077,7 @@ survivalcontResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                     "fudate",
                     "dxdate",
                     "tint",
+                    "multievent",
                     "findcut",
                     "uselandmark",
                     "landmark",
@@ -1116,11 +1100,6 @@ survivalcontResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                     "showExplanations",
                     "timetypeoutput",
                     "timetypedata")))
-            self$add(jmvcore::Preformatted$new(
-                options=options,
-                name="cutoffAnalysisHeading",
-                title="Cut-off Point Analysis",
-                visible="(findcut)"))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="rescutTable",
@@ -1166,11 +1145,6 @@ survivalcontResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                     "seed",
                     "timetypeoutput",
                     "timetypedata")))
-            self$add(jmvcore::Preformatted$new(
-                options=options,
-                name="cutoffAnalysisHeading3",
-                title="Cut-off Analysis Explanations",
-                visible="(findcut && showExplanations)"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="cutoffAnalysisExplanation",
@@ -1576,11 +1550,6 @@ survivalcontResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                 refs=list(
                     "KMunicate",
                     "KMunicate2")))
-            self$add(jmvcore::Preformatted$new(
-                options=options,
-                name="survivalPlotsHeading3",
-                title="Survival Plots Explanations",
-                visible="(((sc && (findcut || multiple_cutoffs)) || (findcut && (ce || ch || kmunicate))) && showExplanations)"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="survivalPlotsExplanation",
@@ -2281,27 +2250,21 @@ survivalcontBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   \code{results$strongWarnings} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$warnings} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$infoMessages} \tab \tab \tab \tab \tab a html \cr
-#'   \code{results$coxRegressionHeading} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$coxSummary} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$coxTable} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$stratifiedCoxTable} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$tCoxtext2} \tab \tab \tab \tab \tab a html \cr
-#'   \code{results$coxRegressionHeading3} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$coxRegressionExplanation} \tab \tab \tab \tab \tab a html \cr
-#'   \code{results$personTimeHeading} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$personTimeTable} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$personTimeSummary} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$personTimeExplanation} \tab \tab \tab \tab \tab a html \cr
-#'   \code{results$rmstHeading} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$rmstTable} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$rmstSummary} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$rmstExplanation} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$residualsTable} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$schoenfeldResidualsTable} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$residualDiagnosticsExplanation} \tab \tab \tab \tab \tab a html \cr
-#'   \code{results$cutoffAnalysisHeading} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$rescutTable} \tab \tab \tab \tab \tab a table \cr
-#'   \code{results$cutoffAnalysisHeading3} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$cutoffAnalysisExplanation} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$plot4} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$plot5} \tab \tab \tab \tab \tab an image \cr
@@ -2312,7 +2275,6 @@ survivalcontBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   \code{results$plot2} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$plot3} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$plot6} \tab \tab \tab \tab \tab an image \cr
-#'   \code{results$survivalPlotsHeading3} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$survivalPlotsExplanation} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$plot7} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$loglogPlotExplanation} \tab \tab \tab \tab \tab a html \cr

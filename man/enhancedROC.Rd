@@ -33,7 +33,8 @@ enhancedROC(
   smoothMethod = "none",
   partialAuc = FALSE,
   partialAucType = "specificity",
-  partialRange = "0.8,1.0",
+  partialAucFrom = 0.8,
+  partialAucTo = 1,
   crocAnalysis = FALSE,
   crocAlpha = 7,
   convexHull = FALSE,
@@ -83,7 +84,7 @@ enhancedROC(
   analysisUnit = "slide",
   prevalenceScenarios = "",
   validationPanel = FALSE,
-  validationNegative = "",
+  validationNegative,
   referenceDescription = "",
   modelVersion = "",
   cohortRole = "frozen",
@@ -226,8 +227,12 @@ sensitivity/specificity ranges}
 \item{partialAucType}{Whether to calculate pAUC over a specificity or
 sensitivity range}
 
-\item{partialRange}{Range for partial AUC (min,max) - e.g., 0.8,1.0 for
-high specificity or sensitivity}
+\item{partialAucFrom}{Lower end of the partial AUC range, on the
+specificity or sensitivity scale chosen above, for example 0.8 for high
+specificity.}
+
+\item{partialAucTo}{Upper end of the partial AUC range; it must be greater
+than the lower end.}
 
 \item{crocAnalysis}{Calculate Concentrated ROC curves for early retrieval
 analysis}
@@ -414,9 +419,9 @@ denominator ledger and frozen-model metrics. Needs a positive class, an
 explicit negative level, an explicit Direction and the fixed score cutoffs.}
 
 \item{validationNegative}{The outcome level that means the condition is
-absent, typed exactly as it appears in the data. Required by the
-frozen-model report, which refuses any outcome level that is neither this
-nor the positive class instead of pooling it as negative.}
+absent. Required by the frozen-model report, which refuses any outcome
+level that is neither this nor the positive class instead of pooling it as
+negative.}
 
 \item{referenceDescription}{Free text describing the reference standard and
 whether its readers were blinded to the score (for example histology,
@@ -532,11 +537,13 @@ test evaluation, and clinical decision support in medical research.
 \examples{
 \donttest{
 # pROC::aSAH ships with pROC, an Import, so the example runs in every module that
-# carries this analysis. positiveClass is a Level option: always a required argument.
+# carries this analysis. positiveClass and validationNegative are Level options: always
+# required arguments (validationNegative = NULL unless the frozen-model report is used).
 enhancedROC(
     data = pROC::aSAH,
     outcome = "outcome",
     positiveClass = "Poor",
+    validationNegative = NULL,
     predictors = c("s100b", "ndka"))
 }
 }

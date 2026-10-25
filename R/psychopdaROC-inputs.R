@@ -9,8 +9,8 @@
 }
 
 # Bound the number of points BEFORE allocating a user-specified threshold grid.
-.psychopdaThresholdGrid <- function(text, max_points = 100L) {
-  parts <- suppressWarnings(as.numeric(strsplit(text, ",", fixed = TRUE)[[1]]))
+.psychopdaThresholdGrid <- function(from, to, step, max_points = 100L) {
+  parts <- suppressWarnings(as.numeric(c(from, to, step)))
   valid <- length(parts) == 3L && all(is.finite(parts)) &&
     parts[1] > 0 && parts[2] < 1 && parts[1] <= parts[2] && parts[3] > 0
   if (!valid)

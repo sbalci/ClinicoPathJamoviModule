@@ -26,7 +26,7 @@ data(enhancedroc_biomarker, package = "ClinicoPath")
 data(enhancedroc_comparative, package = "ClinicoPath")
 
 test_that("enhancedROC performs Youden Index optimization", {
-  result <- enhancedROC(
+  result <- enhancedROC(validationNegative = NULL, 
     data = enhancedroc_biomarker,
     outcome = "disease_status",
     positiveClass = "Disease",
@@ -38,7 +38,7 @@ test_that("enhancedROC performs Youden Index optimization", {
 })
 
 test_that("enhancedROC evaluates custom cutoffs", {
-  result <- enhancedROC(
+  result <- enhancedROC(validationNegative = NULL, 
     data = enhancedroc_biomarker,
     outcome = "disease_status",
     positiveClass = "Disease",
@@ -50,7 +50,7 @@ test_that("enhancedROC evaluates custom cutoffs", {
 })
 
 test_that("enhancedROC applies sensitivity threshold", {
-  result <- enhancedROC(
+  result <- enhancedROC(validationNegative = NULL, 
     data = enhancedroc_biomarker,
     outcome = "disease_status",
     positiveClass = "Disease",
@@ -62,7 +62,7 @@ test_that("enhancedROC applies sensitivity threshold", {
 })
 
 test_that("enhancedROC applies specificity threshold", {
-  result <- enhancedROC(
+  result <- enhancedROC(validationNegative = NULL, 
     data = enhancedroc_biomarker,
     outcome = "disease_status",
     positiveClass = "Disease",
@@ -75,7 +75,7 @@ test_that("enhancedROC applies specificity threshold", {
 
 test_that("enhancedROC uses different confidence levels", {
   # Test with 90% CI
-  result1 <- enhancedROC(
+  result1 <- enhancedROC(validationNegative = NULL, 
     data = enhancedroc_biomarker,
     outcome = "disease_status",
     positiveClass = "Disease",
@@ -85,7 +85,7 @@ test_that("enhancedROC uses different confidence levels", {
   expect_s3_class(result1, "enhancedROCResults")
 
   # Test with 99% CI
-  result2 <- enhancedROC(
+  result2 <- enhancedROC(validationNegative = NULL, 
     data = enhancedroc_biomarker,
     outcome = "disease_status",
     positiveClass = "Disease",
@@ -96,7 +96,7 @@ test_that("enhancedROC uses different confidence levels", {
 })
 
 test_that("enhancedROC uses bootstrap confidence intervals", {
-  result <- enhancedROC(
+  result <- enhancedROC(validationNegative = NULL, 
     data = enhancedroc_biomarker,
     outcome = "disease_status",
     positiveClass = "Disease",
@@ -110,7 +110,7 @@ test_that("enhancedROC uses bootstrap confidence intervals", {
 
 test_that("enhancedROC handles different bootstrap methods", {
   # Test percentile method
-  result1 <- enhancedROC(
+  result1 <- enhancedROC(validationNegative = NULL, 
     data = enhancedroc_biomarker,
     outcome = "disease_status",
     positiveClass = "Disease",
@@ -122,7 +122,7 @@ test_that("enhancedROC handles different bootstrap methods", {
   expect_s3_class(result1, "enhancedROCResults")
 
   # Test BCa method
-  result2 <- enhancedROC(
+  result2 <- enhancedROC(validationNegative = NULL, 
     data = enhancedroc_biomarker,
     outcome = "disease_status",
     positiveClass = "Disease",
@@ -135,7 +135,7 @@ test_that("enhancedROC handles different bootstrap methods", {
 })
 
 test_that("enhancedROC performs comparative ROC analysis", {
-  result <- enhancedROC(
+  result <- enhancedROC(validationNegative = NULL, 
     data = enhancedroc_comparative,
     outcome = "cancer_status",
     positiveClass = "Cancer",
@@ -147,7 +147,7 @@ test_that("enhancedROC performs comparative ROC analysis", {
 })
 
 test_that("enhancedROC performs pairwise comparisons", {
-  result <- enhancedROC(
+  result <- enhancedROC(validationNegative = NULL, 
     data = enhancedroc_comparative,
     outcome = "cancer_status",
     positiveClass = "Cancer",
@@ -160,7 +160,7 @@ test_that("enhancedROC performs pairwise comparisons", {
 
 test_that("enhancedROC handles different comparison methods", {
   # DeLong method
-  result1 <- enhancedROC(
+  result1 <- enhancedROC(validationNegative = NULL, 
     data = enhancedroc_comparative,
     outcome = "cancer_status",
     positiveClass = "Cancer",
@@ -171,7 +171,7 @@ test_that("enhancedROC handles different comparison methods", {
   expect_s3_class(result1, "enhancedROCResults")
 
   # Bootstrap method
-  result2 <- enhancedROC(
+  result2 <- enhancedROC(validationNegative = NULL, 
     data = enhancedroc_comparative,
     outcome = "cancer_status",
     positiveClass = "Cancer",
@@ -183,7 +183,7 @@ test_that("enhancedROC handles different comparison methods", {
 })
 
 test_that("enhancedROC generates ROC curve plot", {
-  result <- enhancedROC(
+  result <- enhancedROC(validationNegative = NULL, 
     data = enhancedroc_biomarker,
     outcome = "disease_status",
     positiveClass = "Disease",
@@ -195,7 +195,7 @@ test_that("enhancedROC generates ROC curve plot", {
 })
 
 test_that("enhancedROC displays AUC table", {
-  result <- enhancedROC(
+  result <- enhancedROC(validationNegative = NULL, 
     data = enhancedroc_biomarker,
     outcome = "disease_status",
     positiveClass = "Disease",
@@ -207,7 +207,7 @@ test_that("enhancedROC displays AUC table", {
 })
 
 test_that("enhancedROC displays cutoff analysis table", {
-  result <- enhancedROC(
+  result <- enhancedROC(validationNegative = NULL, 
     data = enhancedroc_biomarker,
     outcome = "disease_status",
     positiveClass = "Disease",
@@ -219,7 +219,7 @@ test_that("enhancedROC displays cutoff analysis table", {
 })
 
 test_that("enhancedROC displays optimal cutoffs", {
-  result <- enhancedROC(
+  result <- enhancedROC(validationNegative = NULL, 
     data = enhancedroc_biomarker,
     outcome = "disease_status",
     positiveClass = "Disease",
@@ -232,7 +232,7 @@ test_that("enhancedROC displays optimal cutoffs", {
 })
 
 test_that("enhancedROC displays diagnostic metrics", {
-  result <- enhancedROC(
+  result <- enhancedROC(validationNegative = NULL, 
     data = enhancedroc_biomarker,
     outcome = "disease_status",
     positiveClass = "Disease",
@@ -244,7 +244,7 @@ test_that("enhancedROC displays diagnostic metrics", {
 })
 
 test_that("enhancedROC displays clinical metrics (PPV, NPV, LR)", {
-  result <- enhancedROC(
+  result <- enhancedROC(validationNegative = NULL, 
     data = enhancedroc_biomarker,
     outcome = "disease_status",
     positiveClass = "Disease",
@@ -257,7 +257,7 @@ test_that("enhancedROC displays clinical metrics (PPV, NPV, LR)", {
 })
 
 test_that("enhancedROC uses observed prevalence", {
-  result <- enhancedROC(
+  result <- enhancedROC(validationNegative = NULL, 
     data = enhancedroc_biomarker,
     outcome = "disease_status",
     positiveClass = "Disease",
@@ -270,14 +270,14 @@ test_that("enhancedROC uses observed prevalence", {
 })
 
 test_that("enhancedROC performs partial AUC analysis", {
-  result <- enhancedROC(
+  result <- enhancedROC(validationNegative = NULL, 
     data = enhancedroc_biomarker,
     outcome = "disease_status",
     positiveClass = "Disease",
     predictors = "biomarker1",
     partialAuc = TRUE,
     partialAucType = "specificity",
-    partialRange = "0.8,1.0"
+    partialAucFrom = 0.8, partialAucTo = 1.0
   )
 
   expect_s3_class(result, "enhancedROCResults")
@@ -285,7 +285,7 @@ test_that("enhancedROC performs partial AUC analysis", {
 
 test_that("enhancedROC handles different smoothing methods", {
   # No smoothing
-  result1 <- enhancedROC(
+  result1 <- enhancedROC(validationNegative = NULL, 
     data = enhancedroc_biomarker,
     outcome = "disease_status",
     positiveClass = "Disease",
@@ -295,7 +295,7 @@ test_that("enhancedROC handles different smoothing methods", {
   expect_s3_class(result1, "enhancedROCResults")
 
   # Binormal smoothing
-  result2 <- enhancedROC(
+  result2 <- enhancedROC(validationNegative = NULL, 
     data = enhancedroc_biomarker,
     outcome = "disease_status",
     positiveClass = "Disease",
@@ -307,7 +307,7 @@ test_that("enhancedROC handles different smoothing methods", {
 
 test_that("enhancedROC applies clinical context", {
   # Screening context
-  result1 <- enhancedROC(
+  result1 <- enhancedROC(validationNegative = NULL, 
     data = enhancedroc_biomarker,
     outcome = "disease_status",
     positiveClass = "Disease",
@@ -317,7 +317,7 @@ test_that("enhancedROC applies clinical context", {
   expect_s3_class(result1, "enhancedROCResults")
 
   # Diagnosis context
-  result2 <- enhancedROC(
+  result2 <- enhancedROC(validationNegative = NULL, 
     data = enhancedroc_biomarker,
     outcome = "disease_status",
     positiveClass = "Disease",
@@ -329,7 +329,7 @@ test_that("enhancedROC applies clinical context", {
 
 test_that("enhancedROC applies clinical presets", {
   # Biomarker screening preset
-  result1 <- enhancedROC(
+  result1 <- enhancedROC(validationNegative = NULL, 
     data = enhancedroc_biomarker,
     outcome = "disease_status",
     positiveClass = "Disease",
@@ -339,7 +339,7 @@ test_that("enhancedROC applies clinical presets", {
   expect_s3_class(result1, "enhancedROCResults")
 
   # Confirmatory testing preset
-  result2 <- enhancedROC(
+  result2 <- enhancedROC(validationNegative = NULL, 
     data = enhancedroc_biomarker,
     outcome = "disease_status",
     positiveClass = "Disease",
@@ -351,7 +351,7 @@ test_that("enhancedROC applies clinical presets", {
 
 test_that("enhancedROC handles different plot themes", {
   # Clinical theme
-  result1 <- enhancedROC(
+  result1 <- enhancedROC(validationNegative = NULL, 
     data = enhancedroc_biomarker,
     outcome = "disease_status",
     positiveClass = "Disease",
@@ -362,7 +362,7 @@ test_that("enhancedROC handles different plot themes", {
   expect_s3_class(result1, "enhancedROCResults")
 
   # Modern theme
-  result2 <- enhancedROC(
+  result2 <- enhancedROC(validationNegative = NULL, 
     data = enhancedroc_biomarker,
     outcome = "disease_status",
     positiveClass = "Disease",
@@ -374,7 +374,7 @@ test_that("enhancedROC handles different plot themes", {
 })
 
 test_that("enhancedROC shows cutoff points on plot", {
-  result <- enhancedROC(
+  result <- enhancedROC(validationNegative = NULL, 
     data = enhancedroc_biomarker,
     outcome = "disease_status",
     positiveClass = "Disease",
@@ -388,7 +388,7 @@ test_that("enhancedROC shows cutoff points on plot", {
 })
 
 test_that("enhancedROC shows confidence bands", {
-  result <- enhancedROC(
+  result <- enhancedROC(validationNegative = NULL, 
     data = enhancedroc_biomarker,
     outcome = "disease_status",
     positiveClass = "Disease",
@@ -405,7 +405,7 @@ test_that("enhancedROC shows confidence bands", {
 test_that("enhancedROC detects class imbalance", {
   data(enhancedroc_imbalanced, package = "ClinicoPath")
 
-  result <- enhancedROC(
+  result <- enhancedROC(validationNegative = NULL, 
     data = enhancedroc_imbalanced,
     outcome = "rare_disease",
     positiveClass = "Positive",
@@ -419,7 +419,7 @@ test_that("enhancedROC detects class imbalance", {
 
 test_that("enhancedROC combines multiple features", {
   # Comprehensive analysis with many options
-  result <- enhancedROC(
+  result <- enhancedROC(validationNegative = NULL, 
     data = enhancedroc_biomarker,
     outcome = "disease_status",
     positiveClass = "Disease",

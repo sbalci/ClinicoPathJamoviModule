@@ -5,7 +5,13 @@
 
 library(testthat)
 
-cc_run  <- function(f, ...) suppressWarnings(do.call(f, list(...)))
+cc_run  <- function(f, ...) {
+    args <- list(...)
+    # validationNegative is a Level, so a required argument of enhancedROC() (library-audit 2026-10-23)
+    if ("validationNegative" %in% names(formals(f)) && !"validationNegative" %in% names(args))
+        args["validationNegative"] <- list(NULL)
+    suppressWarnings(do.call(f, args))
+}
 cc_strip <- function(x) trimws(gsub("[[:space:]]+", " ", gsub("<[^>]+>", " ", if (is.null(x)) "" else x)))
 
 cc_data <- function(seed = 101, n = 300) {
@@ -56,7 +62,7 @@ test_that("the DeLong comparison agrees between the two analyses and with pROC",
 test_that("partial AUC agrees between the two analyses and with pROC", {
     d <- cc_data()
     E <- cc_run(ClinicoPath::enhancedROC, data = d, outcome = "gold", predictors = c("m1", "m2"),
-                positiveClass = "Positive", partialAuc = TRUE, partialRange = "0.8,1.0")
+                positiveClass = "Positive", partialAuc = TRUE, partialAucFrom = 0.8, partialAucTo = 1.0)
     P <- cc_run(ClinicoPath::psychopdaROC, run = TRUE, data = d, classVar = "gold", dependentVars = c("m1", "m2"),
                 positiveClass = "Positive", negativeClass = "Negative", refVar = NULL, partialAUC = TRUE,
                 partialAUCfrom = 0.8, partialAUCto = 1.0)

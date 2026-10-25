@@ -40,7 +40,7 @@
 | `smoothMethod` | UI Control `smoothMethod` | `self$options$smoothMethod` | Output item / Table |
 | `partialAuc` | UI Control `partialAuc` | `self$options$partialAuc` | Output item / Table |
 | `partialAucType` | UI Control `partialAucType` | `self$options$partialAucType` | Output item / Table |
-| `partialRange` | UI Control `partialRange` | `self$options$partialRange` | Output item / Table |
+| `partialAucFrom` / `partialAucTo` | UI Control `partialAucFrom` / `partialAucTo` | `self$options$partialAucFrom/partialAucTo` | Output item / Table |
 | `crocAnalysis` | UI Control `crocAnalysis` | `self$options$crocAnalysis` | Output item / Table |
 | `crocAlpha` | UI Control `crocAlpha` | `self$options$crocAlpha` | Output item / Table |
 | `convexHull` | UI Control `convexHull` | `self$options$convexHull` | Output item / Table |

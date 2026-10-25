@@ -29,6 +29,18 @@ children:
             name: modelNames
             label: Model Names (optional)
             format: string
+      - type: TargetLayoutBox
+        label: Clinical decision rule (binary)
+        children:
+          - type: VariablesListBox
+            name: decisionRuleVar
+            isTarget: true
+            maxItemCount: 1
+            enable: (clinicalDecisionRule)
+          - type: LevelSelector
+            name: decisionRulePositive
+            label: Positive rule level
+            enable: (clinicalDecisionRule && decisionRuleVar)
   - type: CollapseBox
     label: Analysis Options
     margin: normal
@@ -57,33 +69,14 @@ children:
                 name: thresholdStep
                 format: number
                 label: Step Size
-      # decisionRuleVar is a target VariablesListBox, and a target box takes its source
-      # list from the nearest ancestor VariableSupplier. It used to sit under a plain
-      # Label/LayoutBox with no supplier anywhere above it, so nothing could be dragged
-      # into it and the whole clinical-rule backend was unreachable from jamovi. Wrapped
-      # in its own VariableSupplier/TargetLayoutBox, as the Outcome/Models block above.
+      # decisionRuleVar's box is in the top VariableSupplier (a target box takes its
+      # source list from the nearest ancestor supplier), greyed until this is ticked.
       - type: LayoutBox
         margin: large
         children:
           - type: CheckBox
             name: clinicalDecisionRule
             label: Clinical decision rule
-      - type: VariableSupplier
-        persistentItems: false
-        stretchFactor: 1
-        children:
-          - type: TargetLayoutBox
-            label: Clinical decision rule (binary)
-            children:
-              - type: VariablesListBox
-                name: decisionRuleVar
-                isTarget: true
-                maxItemCount: 1
-                enable: (clinicalDecisionRule)
-              - type: LevelSelector
-                name: decisionRulePositive
-                label: Positive rule level
-                enable: (clinicalDecisionRule && decisionRuleVar)
       - type: LayoutBox
         margin: large
         children:

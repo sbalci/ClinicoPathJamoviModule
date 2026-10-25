@@ -303,6 +303,7 @@ options:
           R: >
             Population size used for the projected workload rows.
 
+    # number-list: open-ended - any number of values; jamovi has no number-list control
     - name: prevalenceScenarios
       title: Target prevalences (comma-separated proportions)
       type: String

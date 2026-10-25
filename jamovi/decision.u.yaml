@@ -5,20 +5,6 @@ name: decision
 stage: 0
 compilerMode: tame
 children:
-  - type: CollapseBox
-    label: Reference Interpretation
-    collapsed: false
-    children:
-      - type: ComboBox
-        name: referenceType
-      - type: TextBox
-        name: referenceDescription
-        format: string
-        width: large
-      - type: TextBox
-        name: targetDefinition
-        format: string
-        width: large
   - type: VariableSupplier
     persistentItems: false
     stretchFactor: 1
@@ -53,6 +39,20 @@ children:
             name: testNegative
             label: Negative level
             enable: (newtest)
+  - type: CollapseBox
+    label: Reference Interpretation
+    collapsed: false
+    children:
+      - type: ComboBox
+        name: referenceType
+      - type: TextBox
+        name: referenceDescription
+        format: string
+        width: large
+      - type: TextBox
+        name: targetDefinition
+        format: string
+        width: large
   - type: CollapseBox
     label: Analysis Options
     collapsed: true

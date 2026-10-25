@@ -36,7 +36,7 @@ erv_perfect <- function() data.frame(y = factor(rep(c("neg", "pos"), each = 15),
 erv_run <- function(data, outcome, predictors, positiveClass, ...)
     suppressWarnings(suppressMessages(do.call(ClinicoPath::enhancedROC,
         utils::modifyList(list(data = data, outcome = outcome, predictors = predictors,
-            positiveClass = positiveClass, showTableNotes = TRUE,
+            positiveClass = positiveClass, validationNegative = NULL, showTableNotes = TRUE,
             showAnalysisSummary = TRUE, showClinicalReport = TRUE), list(...), keep.null = TRUE))))
 erv_error <- function(data, outcome, predictors, positiveClass, ...)
     suppressWarnings(suppressMessages(do.call(diagnostic_error_results,
@@ -824,14 +824,14 @@ test_that("a multi-class AUC with a one-patient class says why its interval is b
 test_that("partial-AUC bootstrap limits that cannot be formed are blank with a footnote", {
     # perfect separation: every resample has the same partial AUC, so boot.ci forms no interval
     invisible(utils::capture.output(r <- erv_run(erv_perfect(), "y", "x", "pos", partialAuc = TRUE, bootstrapPartialAUC = TRUE,
-                                                 partialRange = "0.8,1.0", bootstrapSamples = 200, seed = 1)))
+                                                 partialAucFrom = 0.8, partialAucTo = 1.0, bootstrapSamples = 200, seed = 1)))
     tb <- r$results$partialAucAnalysis
     for (col in c("partial_auc_lower", "partial_auc_upper")) {
         expect_identical(tb$getCell(col, rowKey = "x")$value, "", label = col)
         expect_match(erv_footnotes(tb, col, "x"), "No bootstrap interval could be formed for this partial AUC", fixed = TRUE)
     }
     # no bootstrap requested: the hidden columns carry no footnote
-    off <- erv_run(erv_perfect(), "y", "x", "pos", partialAuc = TRUE, partialRange = "0.8,1.0")$results$partialAucAnalysis
+    off <- erv_run(erv_perfect(), "y", "x", "pos", partialAuc = TRUE, partialAucFrom = 0.8, partialAucTo = 1.0)$results$partialAucAnalysis
     expect_identical(erv_footnotes(off, "partial_auc_lower", "x"), "")
 })
 

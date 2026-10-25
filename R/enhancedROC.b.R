@@ -903,20 +903,11 @@ enhancedROCClass <- R6::R6Class(
                 }
             }
 
-            # Validate partialRange only when partial AUC is actually being computed. This used
-            # to run unconditionally, so leftover text in a box the user had since switched off
-            # aborted the entire analysis. A bad range skips the partial AUC only (F-51), as a bad
-            # impactCutoffs / prevalenceScenarios skips only its own tables.
+            # Checked only when partial AUC is actually being computed. A bad range skips the
+            # partial AUC only (F-51), as a bad impactCutoffs / prevalenceScenarios skips only its
+            # own tables. The two boxes keep each end within 0-1; only their order is left to check.
             if (isTRUE(self$options$partialAuc) && is.null(private$.partialRangeValues())) {
-                range_parts <- trimws(strsplit(self$options$partialRange %||% "", ",", fixed = TRUE)[[1]])
-                range_values <- suppressWarnings(as.numeric(range_parts))
-                problem <- if (length(range_parts) != 2) {
-                    .("Partial AUC range must contain exactly two comma-separated numbers, for example 0.8,1.0.")
-                } else if (anyNA(range_values)) {
-                    .("Partial AUC range values must be numeric, for example 0.8,1.0.")
-                } else {
-                    .("Partial AUC range must be valid: the first value must be less than the second, and both must lie between 0 and 1, for example 0.8,1.0.")
-                }
+                problem <- .("Partial AUC from must be less than Partial AUC to.")
                 private$.addNotice(
                     type = "WARNING",
                     title = .("Invalid Partial AUC Range"),
@@ -3146,10 +3137,10 @@ enhancedROCClass <- R6::R6Class(
                 }
             }
         },
-        # The Partial AUC range as c(min, max), or NULL when it does not parse to 0 <= min < max <= 1.
+        # The Partial AUC range as c(from, to), or NULL unless 0 <= from < to <= 1.
         .partialRangeValues = function() {
-            x <- suppressWarnings(as.numeric(trimws(strsplit(self$options$partialRange %||% "", ",", fixed = TRUE)[[1]])))
-            if (length(x) != 2L || anyNA(x) || x[1] >= x[2] || x[1] < 0 || x[2] > 1) return(NULL)
+            x <- c(self$options$partialAucFrom, self$options$partialAucTo)
+            if (length(x) != 2L || !all(is.finite(x)) || x[1] >= x[2] || x[1] < 0 || x[2] > 1) return(NULL)
             x
         },
         .populatePartialAUC = function() {
@@ -3652,8 +3643,8 @@ enhancedROCClass <- R6::R6Class(
             # Only a range the partial AUC table used: a cleared box printed "from NA to NA", a
             # reversed one described a partial AUC that was never computed.
             if (isTRUE(o$partialAuc) && !is.null(private$.partialRangeValues())) {
-                # the user's own notation ("1.0", not "1")
-                rng <- private$.safeHtmlOutput(trimws(strsplit(o$partialRange, ",", fixed = TRUE)[[1]]))
+                # "1.0", not "1": at least one decimal, as the range is a proportion
+                rng <- base::format(private$.partialRangeValues(), nsmall = 1, trim = TRUE)
                 out <- c(out, para(.("Partial AUC"), sprintf(if (identical(o$partialAucType, "sensitivity")) {
                     .("The partial AUC was computed over sensitivities from %1$s to %2$s and standardized with the McClish correction (McClish, 1989) to a 0.5-1 scale.")
                 } else {

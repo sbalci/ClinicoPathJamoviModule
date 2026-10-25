@@ -95,6 +95,7 @@ agepyramidClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # data aggregation below can be interrupted between phases.
             # Check if required options (age and gender) are provided
             if (is.null(self$options$age) || is.null(self$options$gender)) {
+                private$.clearResults()
                 esc <- htmltools::htmlEscape
                 li <- function(head, body = NULL) {
                     paste0("<li><strong>", esc(head), "</strong>",

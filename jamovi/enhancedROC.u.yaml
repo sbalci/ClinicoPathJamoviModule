@@ -236,8 +236,12 @@ children:
                 name: partialAucType
                 enable: (partialAuc)
               - type: TextBox
-                name: partialRange
-                format: string
+                name: partialAucFrom
+                format: number
+                enable: (partialAuc)
+              - type: TextBox
+                name: partialAucTo
+                format: number
                 enable: (partialAuc)
               # Moved here from 'Statistical Options': it drives the partial-AUC interval and
               # did nothing at all unless partialAuc was also ticked, with no notice.
@@ -474,9 +478,9 @@ children:
     children:
     - type: CheckBox
       name: validationPanel
-    - type: TextBox
+    - type: LevelSelector
       name: validationNegative
-      format: string
+      enable: (validationPanel && outcome)
     - type: TextBox
       name: referenceDescription
       format: string

@@ -71,7 +71,7 @@ The results column includes both top-level and array-template `clearWith` and `v
 | `priorAUC` | TextBox | [line 5745](../R/psychopdaROC.b.R#L5745) | `bayesianROCTable`, `bayesianTracePlot` |
 | `priorPrecision` | TextBox | [line 5746](../R/psychopdaROC.b.R#L5746) | `bayesianROCTable`, `bayesianTracePlot` |
 | `clinicalUtilityAnalysis` | CheckBox | [line 3988](../R/psychopdaROC.b.R#L3988) | `clinicalUtilityTable`, `decisionCurveTable`, `decisionCurvePlot` |
-| `treatmentThreshold` | TextBox | [line 5897](../R/psychopdaROC.b.R#L5897) | `clinicalUtilityTable`, `decisionCurveTable`, `decisionCurvePlot` |
+| `treatmentThresholdMin` / `Max` / `Step` | TextBox | [line 5897](../R/psychopdaROC.b.R#L5897) | `clinicalUtilityTable`, `decisionCurveTable`, `decisionCurvePlot` |
 | `harmBenefitRatio` | TextBox | [line 5894](../R/psychopdaROC.b.R#L5894) | `clinicalUtilityTable`, `decisionCurveTable`, `decisionCurvePlot` |
 | `interventionCost` | CheckBox | [line 5895](../R/psychopdaROC.b.R#L5895) | `clinicalUtilityTable`, `decisionCurveTable`, `decisionCurvePlot` |
 | `fixedSensSpecAnalysis` | CheckBox | [line 881](../R/psychopdaROC.b.R#L881) | `fixedSensSpecTable`, `fixedSensSpecExplanation`, `fixedSensSpecROC` |

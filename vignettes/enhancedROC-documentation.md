@@ -83,7 +83,7 @@
 | `smoothMethod` | `List` | `none` | ROC Curve Smoothing |
 | `partialAuc` | `Bool` | `FALSE` | Partial AUC analysis |
 | `partialAucType` | `List` | `specificity` | Partial AUC Type |
-| `partialRange` | `String` | `0.8,1.0` | Partial AUC Range |
+| `partialAucFrom` / `partialAucTo` | `Number` | `0.8` / `1` | Partial AUC Range |
 | `crocAnalysis` | `Bool` | `FALSE` | CROC analysis |
 | `crocAlpha` | `Number` | `7` | CROC Alpha Parameter |
 | `convexHull` | `Bool` | `FALSE` | ROC convex hull |

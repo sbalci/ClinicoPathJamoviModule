@@ -489,9 +489,16 @@ children:
             name: clinicalUtilityAnalysis
             label: Clinical utility analysis
           - type: TextBox
-            name: treatmentThreshold
-            format: string
-            label: Treatment threshold (min,max,step)
+            name: treatmentThresholdMin
+            format: number
+            enable: (clinicalUtilityAnalysis)
+          - type: TextBox
+            name: treatmentThresholdMax
+            format: number
+            enable: (clinicalUtilityAnalysis)
+          - type: TextBox
+            name: treatmentThresholdStep
+            format: number
             enable: (clinicalUtilityAnalysis)
           - type: TextBox
             name: harmBenefitRatio

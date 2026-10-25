@@ -29,7 +29,7 @@ test_that("net benefit matches Vickers & Elkin, not a frozen Youden rule", {
     for (pt in c(0.10, 0.20, 0.30)) {
         r <- pc_run(data = d, classVar = "gold", dependentVars = "m1", positiveClass = "Positive", negativeClass = "Negative",
                     refVar = NULL, clinicalUtilityAnalysis = TRUE,
-                    treatmentThreshold = sprintf("%s,%s,0.1", pt, pt))
+                    treatmentThresholdMin = pt, treatmentThresholdMax = pt, treatmentThresholdStep = 0.1)
         cu <- as.data.frame(r$clinicalUtilityTable)
         expect_equal(as.numeric(cu$net_benefit[1]), pc_hand_nb(d, pt), tolerance = 1e-9,
                      info = paste("pt =", pt))
@@ -39,11 +39,11 @@ test_that("net benefit matches Vickers & Elkin, not a frozen Youden rule", {
 test_that("psychopdaROC and enhancedROC agree on net benefit at a matched threshold", {
     d <- pc_data()
     P <- pc_run(data = d, classVar = "gold", dependentVars = "m1", positiveClass = "Positive", negativeClass = "Negative",
-                refVar = NULL, clinicalUtilityAnalysis = TRUE, treatmentThreshold = "0.1,0.1,0.1")
+                refVar = NULL, clinicalUtilityAnalysis = TRUE, treatmentThresholdMin = 0.1, treatmentThresholdMax = 0.1, treatmentThresholdStep = 0.1)
     # Supply the same fitted risks explicitly; enhancedROC no longer fits them silently.
     y <- as.integer(d$gold == "Positive")
     d$risk <- as.numeric(stats::fitted(stats::glm(y ~ d$m1, family = stats::binomial())))
-    E <- suppressWarnings(do.call(ClinicoPath::enhancedROC, list(
+    E <- suppressWarnings(do.call(ClinicoPath::enhancedROC, list(validationNegative = NULL,
         data = d, outcome = "gold", predictors = "risk", positiveClass = "Positive",
         clinicalImpact = TRUE, useObservedPrevalence = TRUE,
         impactCutoffs = "0.1", utilityThreshold = 0.1)))
@@ -61,19 +61,21 @@ test_that("the treatment threshold range actually drives the decision curve", {
         dc <- as.data.frame(pc_run(data = d, classVar = "gold", dependentVars = "m1",
                                    positiveClass = "Positive", negativeClass = "Negative", refVar = NULL,
                                    clinicalUtilityAnalysis = TRUE,
-                                   treatmentThreshold = rng)$decisionCurveTable)
+                                   treatmentThresholdMin = rng[1], treatmentThresholdMax = rng[2],
+                                   treatmentThresholdStep = rng[3])$decisionCurveTable)
         round(as.numeric(dc$threshold), 6)
     }
-    expect_equal(grab("0.1,0.3,0.1"), c(0.1, 0.2, 0.3))
-    expect_equal(grab("0.2,0.4,0.05"), c(0.20, 0.25, 0.30, 0.35, 0.40))
-    expect_false(identical(grab("0.1,0.3,0.1"), grab("0.2,0.4,0.05")))
+    expect_equal(grab(c(0.1, 0.3, 0.1)), c(0.1, 0.2, 0.3))
+    expect_equal(grab(c(0.2, 0.4, 0.05)), c(0.20, 0.25, 0.30, 0.35, 0.40))
+    expect_false(identical(grab(c(0.1, 0.3, 0.1)), grab(c(0.2, 0.4, 0.05))))
 })
 
-test_that("a malformed threshold range falls back instead of aborting", {
+test_that("a reversed threshold range falls back instead of aborting", {
     d <- pc_data()
     r <- expect_no_error(pc_run(data = d, classVar = "gold", dependentVars = "m1",
                                 positiveClass = "Positive", negativeClass = "Negative", refVar = NULL,
-                                clinicalUtilityAnalysis = TRUE, treatmentThreshold = "garbage"))
+                                clinicalUtilityAnalysis = TRUE, treatmentThresholdMin = 0.4,
+                                treatmentThresholdMax = 0.2, treatmentThresholdStep = 0.1))
     expect_gt(nrow(as.data.frame(r$decisionCurveTable)), 0)
 })
 
@@ -82,7 +84,7 @@ test_that("each decision-curve row names the strategies it has to beat", {
     dc <- as.data.frame(pc_run(data = d, classVar = "gold", dependentVars = "m1",
                                positiveClass = "Positive", negativeClass = "Negative", refVar = NULL,
                                clinicalUtilityAnalysis = TRUE,
-                               treatmentThreshold = "0.1,0.2,0.1")$decisionCurveTable)
+                               treatmentThresholdMin = 0.1, treatmentThresholdMax = 0.2, treatmentThresholdStep = 0.1)$decisionCurveTable)
     expect_true(all(grepl("treat all", dc$clinical_value, fixed = TRUE)))
     expect_true(all(grepl("treat none", dc$clinical_value, fixed = TRUE)))
 })
@@ -112,7 +114,7 @@ test_that("AUC verbal bands match enhancedROC across the whole range", {
         m <- g * sh + rnorm(n)
         if (target < 0.5) m <- -m
         d <- data.frame(y = factor(ifelse(g == 1, "P", "N"), levels = c("N", "P")), m = m)
-        E <- suppressWarnings(do.call(ClinicoPath::enhancedROC, list(
+        E <- suppressWarnings(do.call(ClinicoPath::enhancedROC, list(validationNegative = NULL,
             data = d, outcome = "y", predictors = "m", positiveClass = "P", direction = "higher")))
         P <- pc_run(data = d, classVar = "y", dependentVars = "m", positiveClass = "P", negativeClass = "N", refVar = NULL)
         eb <- as.character(as.data.frame(E$results$aucSummary)$auc_interpretation[1])
@@ -135,7 +137,7 @@ test_that("AUC bands read the AUC as displayed, also exactly at a band edge", {
         expect_equal(as.numeric(as.data.frame(P$aucSummaryTable)$auc[1]), k / 100, tolerance = 1e-12)
         expect_identical(as.character(ci$performance_level[1]), want, info = paste("AUC", k / 100))
         expect_match(ci$interpretation_text[1], paste("indicating", tolower(want)), fixed = TRUE)
-        E <- suppressWarnings(do.call(ClinicoPath::enhancedROC, list(
+        E <- suppressWarnings(do.call(ClinicoPath::enhancedROC, list(validationNegative = NULL,
             data = d, outcome = "y", predictors = "m", positiveClass = "P", direction = "higher")))
         expect_identical(as.character(as.data.frame(E$results$aucSummary)$auc_interpretation[1]), want,
                          info = paste("enhancedROC, AUC", k / 100))

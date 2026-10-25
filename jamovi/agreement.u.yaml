@@ -14,6 +14,61 @@ children:
           - type: VariablesListBox
             name: vars
             isTarget: true
+      - type: TargetLayoutBox
+        label: Cluster/Institution Variable
+        children:
+          - type: VariablesListBox
+            name: clusterVariable
+            maxItemCount: 1
+            isTarget: true
+            enable: (hierarchicalKappa || latentModel)
+      - type: TargetLayoutBox
+        label: Condition Variable (e.g., AI vs Manual)
+        children:
+          - type: VariablesListBox
+            name: conditionVariable
+            maxItemCount: 1
+            isTarget: true
+            enable: (mixedEffectsComparison)
+      - type: TargetLayoutBox
+        label: Case ID (same case on several rows)
+        children:
+          - type: VariablesListBox
+            name: caseIdVariable
+            maxItemCount: 1
+            isTarget: true
+            enable: (mixedEffectsComparison)
+      - type: TargetLayoutBox
+        label: Reference Rater
+        children:
+          - type: VariablesListBox
+            name: referenceRater
+            maxItemCount: 1
+            isTarget: true
+            enable: (pairwiseKappa)
+      - type: TargetLayoutBox
+        label: Patient/cluster ID (optional)
+        children:
+          - type: VariablesListBox
+            name: specificCluster
+            isTarget: true
+            maxItemCount: 1
+            enable: (specificAgreement && specificCIMethod:bootstrap)
+      - type: TargetLayoutBox
+        label: Subgroup Variable
+        children:
+          - type: VariablesListBox
+            name: subgroupVariable
+            maxItemCount: 1
+            isTarget: true
+            enable: (agreementBySubgroup)
+      - type: TargetLayoutBox
+        label: Condition B Raters (e.g., AI-assisted)
+        children:
+          - type: VariablesListBox
+            name: conditionBVars
+            isTarget: true
+            enable: (pairedAgreementTest)
   - type: CollapseBox
     label: General Options
     collapsed: false
@@ -300,18 +355,6 @@ children:
         children:
           - type: CheckBox
             name: hierarchicalKappa
-          - type: VariableSupplier
-            persistentItems: false
-            stretchFactor: 1
-            children:
-              - type: TargetLayoutBox
-                label: Cluster/Institution Variable
-                children:
-                  - type: VariablesListBox
-                    name: clusterVariable
-                    maxItemCount: 1
-                    isTarget: true
-                    enable: (hierarchicalKappa || latentModel)
       - type: LayoutBox
         margin: large
         children:
@@ -343,26 +386,6 @@ children:
         children:
           - type: CheckBox
             name: mixedEffectsComparison
-          - type: VariableSupplier
-            persistentItems: false
-            stretchFactor: 1
-            children:
-              - type: TargetLayoutBox
-                label: Condition Variable (e.g., AI vs Manual)
-                children:
-                  - type: VariablesListBox
-                    name: conditionVariable
-                    maxItemCount: 1
-                    isTarget: true
-                    enable: (mixedEffectsComparison)
-              - type: TargetLayoutBox
-                label: Case ID (same case on several rows)
-                children:
-                  - type: VariablesListBox
-                    name: caseIdVariable
-                    maxItemCount: 1
-                    isTarget: true
-                    enable: (mixedEffectsComparison)
       - type: LayoutBox
         margin: large
         children:
@@ -424,18 +447,6 @@ children:
         children:
           - type: CheckBox
             name: pairwiseKappa
-          - type: VariableSupplier
-            persistentItems: false
-            stretchFactor: 1
-            children:
-              - type: TargetLayoutBox
-                label: Reference Rater
-                children:
-                  - type: VariablesListBox
-                    name: referenceRater
-                    maxItemCount: 1
-                    isTarget: true
-                    enable: (pairwiseKappa)
           - type: CheckBox
             name: rankRaters
             enable: (pairwiseKappa)
@@ -576,17 +587,6 @@ children:
           - type: ComboBox
             name: specificCIMethod
             enable: (specificAgreement && specificConfidenceIntervals)
-          - type: VariableSupplier
-            persistentItems: false
-            children:
-              - type: TargetLayoutBox
-                label: Patient/cluster ID (optional)
-                children:
-                  - type: VariablesListBox
-                    name: specificCluster
-                    isTarget: true
-                    maxItemCount: 1
-                    enable: (specificAgreement && specificCIMethod:bootstrap)
           - type: CheckBox
             name: showSpecificAgreementGuide
   - type: CollapseBox
@@ -615,18 +615,6 @@ children:
         children:
           - type: CheckBox
             name: agreementBySubgroup
-          - type: VariableSupplier
-            persistentItems: false
-            stretchFactor: 1
-            children:
-              - type: TargetLayoutBox
-                label: Subgroup Variable
-                children:
-                  - type: VariablesListBox
-                    name: subgroupVariable
-                    maxItemCount: 1
-                    isTarget: true
-                    enable: (agreementBySubgroup)
           - type: CheckBox
             name: subgroupForestPlot
             enable: (agreementBySubgroup)
@@ -705,17 +693,6 @@ children:
         children:
           - type: CheckBox
             name: pairedAgreementTest
-          - type: VariableSupplier
-            persistentItems: false
-            stretchFactor: 1
-            children:
-              - type: TargetLayoutBox
-                label: Condition B Raters (e.g., AI-assisted)
-                children:
-                  - type: VariablesListBox
-                    name: conditionBVars
-                    isTarget: true
-                    enable: (pairedAgreementTest)
           - type: TextBox
             name: pairedBootN
             format: number

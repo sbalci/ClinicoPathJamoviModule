@@ -9,7 +9,7 @@
 
 run_er <- function(...) {
     args <- utils::modifyList(
-        list(outcome = "outcome", positiveClass = "Case", analysisType = "single"),
+        list(outcome = "outcome", positiveClass = "Case", validationNegative = NULL, analysisType = "single"),
         list(...))
     do.call(ClinicoPath::enhancedROC, args)
 }

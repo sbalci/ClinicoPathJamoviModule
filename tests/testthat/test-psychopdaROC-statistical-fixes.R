@@ -45,7 +45,7 @@ test_that("patient summaries remove repeat-count effects from all selected analy
   d <- .statROC_data(); d$ref <- d$z + sin(d$id)
   args <- list(delongTest = TRUE, calculateIDI = TRUE, calculateNRI = TRUE,
     refVar = "ref", idiNriBootRuns = 100, clinicalUtilityAnalysis = TRUE,
-    treatmentThreshold = "0.1,0.9,0.2", compareClassifiers = TRUE,
+    treatmentThresholdMin = 0.1, treatmentThresholdMax = 0.9, treatmentThresholdStep = 0.2, compareClassifiers = TRUE,
     effectSizeAnalysis = TRUE, fixedSensSpecAnalysis = TRUE,
     bootstrapCI = TRUE, bootstrapReps = 100)
   original <- do.call(.statROC_run, c(list(data = d), args))

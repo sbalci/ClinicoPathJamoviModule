@@ -27,7 +27,7 @@ er_data <- function(seed = 9, n = 300) {
 run_er <- function(...) {
     suppressWarnings(do.call(ClinicoPath::enhancedROC, utils::modifyList(
         list(data = er_data(), outcome = "gold", predictors = c("m1", "m2"),
-             positiveClass = "Positive", showTableNotes = TRUE),
+             positiveClass = "Positive", validationNegative = NULL, showTableNotes = TRUE),
         list(...))))
 }
 

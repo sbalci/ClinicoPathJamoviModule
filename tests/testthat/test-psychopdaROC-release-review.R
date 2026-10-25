@@ -301,13 +301,13 @@ test_that("psychopdaROC agrees with enhancedROC once both are told the same dire
     d <- ps_data()
     d$inv <- -d$biomarker
 
-    e <- ClinicoPath::enhancedROC(data = d, outcome = "disease_status",
+    e <- ClinicoPath::enhancedROC(validationNegative = NULL, data = d, outcome = "disease_status",
                                   positiveClass = "Disease", predictors = "inv",
                                   direction = "lower")$results$aucSummary$asDF$auc[1]
     p <- run_ps(data = d, dependentVars = "inv", direction = "<=")$aucSummaryTable$asDF$auc[1]
     expect_equal(e, p, tolerance = 1e-9)
 
-    e2 <- ClinicoPath::enhancedROC(data = d, outcome = "disease_status",
+    e2 <- ClinicoPath::enhancedROC(validationNegative = NULL, data = d, outcome = "disease_status",
                                    positiveClass = "Disease", predictors = "biomarker",
                                    direction = "higher")$results$aucSummary$asDF$auc[1]
     p2 <- run_ps(data = d, dependentVars = "biomarker", direction = ">=")$aucSummaryTable$asDF$auc[1]

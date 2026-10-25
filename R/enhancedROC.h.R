@@ -33,7 +33,8 @@ enhancedROCOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
             smoothMethod = "none",
             partialAuc = FALSE,
             partialAucType = "specificity",
-            partialRange = "0.8,1.0",
+            partialAucFrom = 0.8,
+            partialAucTo = 1,
             crocAnalysis = FALSE,
             crocAlpha = 7,
             convexHull = FALSE,
@@ -83,7 +84,7 @@ enhancedROCOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
             analysisUnit = "slide",
             prevalenceScenarios = "",
             validationPanel = FALSE,
-            validationNegative = "",
+            validationNegative = NULL,
             referenceDescription = "",
             modelVersion = "",
             cohortRole = "frozen",
@@ -250,10 +251,18 @@ enhancedROCOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                     "specificity",
                     "sensitivity"),
                 default="specificity")
-            private$..partialRange <- jmvcore::OptionString$new(
-                "partialRange",
-                partialRange,
-                default="0.8,1.0")
+            private$..partialAucFrom <- jmvcore::OptionNumber$new(
+                "partialAucFrom",
+                partialAucFrom,
+                default=0.8,
+                min=0,
+                max=1)
+            private$..partialAucTo <- jmvcore::OptionNumber$new(
+                "partialAucTo",
+                partialAucTo,
+                default=1,
+                min=0,
+                max=1)
             private$..crocAnalysis <- jmvcore::OptionBool$new(
                 "crocAnalysis",
                 crocAnalysis,
@@ -494,10 +503,11 @@ enhancedROCOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                 "validationPanel",
                 validationPanel,
                 default=FALSE)
-            private$..validationNegative <- jmvcore::OptionString$new(
+            private$..validationNegative <- jmvcore::OptionLevel$new(
                 "validationNegative",
                 validationNegative,
-                default="")
+                variable="(outcome)",
+                allowNone=TRUE)
             private$..referenceDescription <- jmvcore::OptionString$new(
                 "referenceDescription",
                 referenceDescription,
@@ -602,7 +612,8 @@ enhancedROCOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
             self$.addOption(private$..smoothMethod)
             self$.addOption(private$..partialAuc)
             self$.addOption(private$..partialAucType)
-            self$.addOption(private$..partialRange)
+            self$.addOption(private$..partialAucFrom)
+            self$.addOption(private$..partialAucTo)
             self$.addOption(private$..crocAnalysis)
             self$.addOption(private$..crocAlpha)
             self$.addOption(private$..convexHull)
@@ -693,7 +704,8 @@ enhancedROCOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
         smoothMethod = function() private$..smoothMethod$value,
         partialAuc = function() private$..partialAuc$value,
         partialAucType = function() private$..partialAucType$value,
-        partialRange = function() private$..partialRange$value,
+        partialAucFrom = function() private$..partialAucFrom$value,
+        partialAucTo = function() private$..partialAucTo$value,
         crocAnalysis = function() private$..crocAnalysis$value,
         crocAlpha = function() private$..crocAlpha$value,
         convexHull = function() private$..convexHull$value,
@@ -783,7 +795,8 @@ enhancedROCOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
         ..smoothMethod = NA,
         ..partialAuc = NA,
         ..partialAucType = NA,
-        ..partialRange = NA,
+        ..partialAucFrom = NA,
+        ..partialAucTo = NA,
         ..crocAnalysis = NA,
         ..crocAlpha = NA,
         ..convexHull = NA,
@@ -1542,7 +1555,8 @@ enhancedROCResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                                 "predictors",
                                 "positiveClass",
                                 "direction",
-                                "partialRange",
+                                "partialAucFrom",
+                                "partialAucTo",
                                 "partialAucType",
                                 "bootstrapPartialAUC",
                                 "bootstrapSamples",
@@ -2632,11 +2646,13 @@ enhancedROCBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @examples
 #' \donttest{
 #' # pROC::aSAH ships with pROC, an Import, so the example runs in every module that
-#' # carries this analysis. positiveClass is a Level option: always a required argument.
+#' # carries this analysis. positiveClass and validationNegative are Level options: always
+#' # required arguments (validationNegative = NULL unless the frozen-model report is used).
 #' enhancedROC(
 #'     data = pROC::aSAH,
 #'     outcome = "outcome",
 #'     positiveClass = "Poor",
+#'     validationNegative = NULL,
 #'     predictors = c("s100b", "ndka"))
 #'}
 #' @param data The data as a data frame.
@@ -2737,8 +2753,11 @@ enhancedROCBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   sensitivity/specificity ranges
 #' @param partialAucType Whether to calculate pAUC over a specificity or
 #'   sensitivity range
-#' @param partialRange Range for partial AUC (min,max) - e.g., 0.8,1.0 for
-#'   high specificity or sensitivity
+#' @param partialAucFrom Lower end of the partial AUC range, on the
+#'   specificity or sensitivity scale chosen above, for example 0.8 for high
+#'   specificity.
+#' @param partialAucTo Upper end of the partial AUC range; it must be greater
+#'   than the lower end.
 #' @param crocAnalysis Calculate Concentrated ROC curves for early retrieval
 #'   analysis
 #' @param crocAlpha Concentration parameter for CROC exponential magnifier
@@ -2875,9 +2894,9 @@ enhancedROCBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   denominator ledger and frozen-model metrics. Needs a positive class, an
 #'   explicit negative level, an explicit Direction and the fixed score cutoffs.
 #' @param validationNegative The outcome level that means the condition is
-#'   absent, typed exactly as it appears in the data. Required by the
-#'   frozen-model report, which refuses any outcome level that is neither this
-#'   nor the positive class instead of pooling it as negative.
+#'   absent. Required by the frozen-model report, which refuses any outcome
+#'   level that is neither this nor the positive class instead of pooling it as
+#'   negative.
 #' @param referenceDescription Free text describing the reference standard and
 #'   whether its readers were blinded to the score (for example histology,
 #'   blinded). Printed in the frozen-model validation context.
@@ -3000,7 +3019,8 @@ enhancedROC <- function(
     smoothMethod = "none",
     partialAuc = FALSE,
     partialAucType = "specificity",
-    partialRange = "0.8,1.0",
+    partialAucFrom = 0.8,
+    partialAucTo = 1,
     crocAnalysis = FALSE,
     crocAlpha = 7,
     convexHull = FALSE,
@@ -3050,7 +3070,7 @@ enhancedROC <- function(
     analysisUnit = "slide",
     prevalenceScenarios = "",
     validationPanel = FALSE,
-    validationNegative = "",
+    validationNegative,
     referenceDescription = "",
     modelVersion = "",
     cohortRole = "frozen",
@@ -3109,7 +3129,8 @@ enhancedROC <- function(
         smoothMethod = smoothMethod,
         partialAuc = partialAuc,
         partialAucType = partialAucType,
-        partialRange = partialRange,
+        partialAucFrom = partialAucFrom,
+        partialAucTo = partialAucTo,
         crocAnalysis = crocAnalysis,
         crocAlpha = crocAlpha,
         convexHull = convexHull,

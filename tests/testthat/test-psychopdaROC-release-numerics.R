@@ -5,7 +5,7 @@
 .releaseROC_run <- function(data = .releaseROC_data()) {
   suppressMessages(ClinicoPath::psychopdaROC(run = TRUE, data = data, dependentVars = "marker",
     classVar = "outcome", positiveClass = "positive", negativeClass = "negative",
-    refVar = NULL, clinicalUtilityAnalysis = TRUE, treatmentThreshold = "0.1,0.9,0.2"))
+    refVar = NULL, clinicalUtilityAnalysis = TRUE, treatmentThresholdMin = 0.1, treatmentThresholdMax = 0.9, treatmentThresholdStep = 0.2))
 }
 
 test_that("decision curves are invariant to affine changes of marker units", {

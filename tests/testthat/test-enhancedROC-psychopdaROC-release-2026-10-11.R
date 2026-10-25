@@ -1,7 +1,7 @@
 source(testthat::test_path("helper-roc-release-oracles.R"), local = TRUE)
 
 .dualRunE <- function(d, direction = "higher", ...) suppressMessages(
-  ClinicoPath::enhancedROC(data = d, outcome = "disease", positiveClass = "Case",
+  ClinicoPath::enhancedROC(validationNegative = NULL, data = d, outcome = "disease", positiveClass = "Case",
     predictors = "score1", direction = direction, rocCurve = FALSE,
     detectImbalance = TRUE, ...))
 .dualRunP <- function(d, direction = "higher", ...) suppressMessages(

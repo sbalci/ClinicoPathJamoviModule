@@ -112,6 +112,9 @@ options:
               strictly above kappa0. Ignored when citype is 'one_sided' (passed to
               kappaSize as NA, which is how that package requests a one-sided bound).
 
+    # library-audit 2026-10-23 meddecide [MEDIUM] REJECTED: one proportion per outcome category, 2-5 by the
+    #   outcome option; five greyed p1..p5 boxes would show unused ones and break saved props (guide section 12)
+    # number-list: one value per outcome category (2-5)
     - name: props
       title: Proportions of outcome level
       type: String

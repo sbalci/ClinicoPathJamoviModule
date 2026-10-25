@@ -1,7 +1,7 @@
 ---
 name:  survivalcont
 title: Survival Analysis for Continuous Explanatory Variable
-menuGroup: Survival
+menuGroup: SurvivalT
 menuSubgroup: ClinicoPath Survival
 menuSubtitle: 'Cut-off & Univariate Survival Analysis'
 version: '1.1.1'
@@ -150,6 +150,7 @@ options:
         interest and "Censored" for patients who were lost to follow-up or experienced a
         competing event.
 
+    # number-list: open-ended
     - name: cutp
       title: Survival estimate time points
       type: String
@@ -361,9 +362,10 @@ options:
       title: Calculated cut-off marker group
       type: Output
       description: >-
-        If you enable this option, the calculated cut-off group will be added to your data as a new variable. This variable will have
-        two levels: "Below Cut-off" and "Above Cut-off" based on the data-derived cut-off point found using the maximally selected rank
-        statistic. This option is only available if you enable the "Find Cut-off for Continuous Explanatory Variable" option.
+        If you enable this option, the calculated cut-off group will be added to your data as a new variable with
+        two levels ("low" for values less than or equal to the cut-off and "high" for values strictly above the cut-off)
+        based on the data-derived cut-off point found using the maximally selected rank statistic.
+        This option is only available if you enable the "Find Cut-off for Continuous Explanatory Variable" option.
 
     - name: calculatedmulticut
       title: Multiple cut-off marker groups
@@ -436,6 +438,7 @@ options:
         total follow-up time and incidence rates. These metrics help quantify the
         rate of events per unit of time in your study population.
 
+    # number-list: open-ended
     - name: time_intervals
       title: "Time interval stratification"
       type: String

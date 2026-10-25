@@ -646,6 +646,7 @@ options:
           R: >
             Display confidence intervals at specific quantiles of the test variable.
 
+    # number-list: open-ended - any number of values; jamovi has no number-list control
     - name: quantiles
       title: Quantile positions
       type: String
@@ -847,14 +848,37 @@ options:
             Perform clinical utility analysis including net benefit curves,
             decision curve analysis, and clinical impact assessment.
 
-    - name: treatmentThreshold
-      title: Treatment threshold range
-      type: String
-      default: "0.05,0.5,0.05"
+    # library-audit 2026-10-23 meddecide [MEDIUM] DONE: three Number options (from, to, step), whose boxes
+    #   check their own input, not one "min,max,step" string parsed in R (was treatmentThreshold).
+    - name: treatmentThresholdMin
+      title: Treatment threshold from
+      type: Number
+      default: 0.05
+      min: 0.001
+      max: 0.99
       description:
           R: >
-            Treatment threshold range for decision curve analysis (min,max,step).
-            Example: "0.05,0.5,0.05" creates thresholds from 5 percent to 50 percent in 5 percent steps.
+            Lowest treatment threshold probability for the decision curve.
+
+    - name: treatmentThresholdMax
+      title: Treatment threshold to
+      type: Number
+      default: 0.5
+      min: 0.01
+      max: 0.999
+      description:
+          R: >
+            Highest treatment threshold probability for the decision curve.
+
+    - name: treatmentThresholdStep
+      title: Treatment threshold step
+      type: Number
+      default: 0.05
+      min: 0.001
+      max: 0.5
+      description:
+          R: >
+            Step between thresholds. The defaults give thresholds from 5 to 50 percent in 5 percent steps.
 
     - name: harmBenefitRatio
       title: Harm-to-benefit ratio

@@ -24,6 +24,8 @@ options:
           R: The data as a data frame. The data frame should contain the variables specified in the 'variables' option.
 
 
+    # library-audit 2026-10-23 meddecide [MEDIUM] DONE: the variable boxes come first; Reference
+    #   Interpretation sits directly below them
     - name: referenceType
       title: Reference interpretation
       type: List
