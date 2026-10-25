@@ -2068,10 +2068,10 @@ enhancedROCClass <- R6::R6Class(
                     spec_threshold <- config$spec_threshold
                 }
 
-                # A preset overwrites the minimum-sensitivity and minimum-specificity boxes and
-                # forces Youden optimisation on, but those controls stay visible and keep showing
-                # the user's own values - so the analysis silently ignored what they typed. Say
-                # what the preset actually did, once, and only when it really changed something.
+                # A preset overrides the minimum-sensitivity and minimum-specificity boxes and forces
+                # Youden optimization on. The panel greys those controls (enable: in the .u.yaml),
+                # but they still show the user's own values, so say what the preset used instead,
+                # once, and only when it really changed something.
                 changed <- character(0)
                 if (!isTRUE(all.equal(user_sens, sens_threshold))) {
                     changed <- c(changed, sprintf(.("minimum sensitivity %1$s -> %2$s"), user_sens, sens_threshold))

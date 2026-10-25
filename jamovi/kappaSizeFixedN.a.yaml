@@ -61,8 +61,9 @@ options:
               observe. kappaSize documents this argument as "the preliminary value of
               kappa". Contrast kappaSizePower, where kappa0 IS the null being tested.
 
-    # library-audit 2026-10-23 meddecide [MEDIUM] REJECTED: one proportion per outcome category, 2-5 by the
-    #   outcome option; five greyed p1..p5 boxes would show unused ones and break saved props (guide section 12)
+    # library-audit 2026-10-23 meddecide [MEDIUM] REJECTED: one proportion per outcome category,
+    #   2-5 by the outcome option; five greyed p1..p5 boxes would show unused ones and break saved
+    #   props (guide section 12)
     # number-list: one value per outcome category (2-5)
     - name: props
       title: Expected proportion of cases in each category

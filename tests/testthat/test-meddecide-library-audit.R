@@ -1297,3 +1297,27 @@ test_that("fixed number ranges are Number options; number-list Strings are marke
   }
   audit_skip_absent(absent, root)
 })
+
+# library-audit 2026-10-23 meddecide [MEDIUM] DONE: a clinical preset greys the controls it overrides,
+#   so the panel never shows a value the analysis is not using as if it were in force.
+test_that("enhancedROC presets grey the controls they override", {
+  root <- audit_source_root()
+  absent <- audit_absent(root, "enhancedROC", "jamovi/%s.u.yaml")
+  if (!length(absent)) {
+    u <- yaml::read_yaml(file.path(root, "jamovi", "enhancedROC.u.yaml"))
+    enable_of <- function(node, name) {
+      if (!is.list(node)) return(NULL)
+      if (identical(node$name, name)) return(node$enable %||% "")
+      for (child in c(node$children, if (is.null(names(node))) node)) {
+        hit <- enable_of(child, name)
+        if (!is.null(hit)) return(hit)
+      }
+      NULL
+    }
+    expect_identical(enable_of(u$children, "youdenOptimization"), "(clinicalPresets:custom)")
+    for (box in c("sensitivityThreshold", "specificityThreshold"))
+      expect_identical(enable_of(u$children, box),
+                       "(clinicalPresets:custom || clinicalPresets:research_comprehensive)", label = box)
+  }
+  audit_skip_absent(absent, root)
+})

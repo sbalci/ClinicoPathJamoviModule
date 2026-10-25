@@ -1217,9 +1217,10 @@ options:
             disagreements equally, specific agreement focuses on agreement within each category,
             revealing which categories have reliable agreement and which need attention.
 
-    # library-audit 2026-10-23 meddecide [MEDIUM] DEFERRED: a String, not a Level - a LevelSelector lists one
-    #   variable's levels and this category is chosen across all raters; revisit when jamovi offers a level
-    #   selector over a set of variables (feature request drafted 2026-10-24). Matched ignoring spaces and case.
+    # library-audit 2026-10-23 meddecide [MEDIUM] DEFERRED: a String, not a Level - a
+    #   LevelSelector lists one variable's levels and this category is chosen across all raters;
+    #   revisit when jamovi offers a level selector over a set of variables (feature request drafted
+    #   2026-10-24). Matched ignoring spaces and case.
     - name: specificPositiveCategory
       title: "Positive category (binary analysis)"
       type: String

@@ -2788,7 +2788,7 @@ enhancedROCBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   sensitivity 0.90; Diagnostic validation: 0.80 and 0.80; Confirmatory:
 #'   specificity 0.95; Research: keeps the minimums you enter, so it differs
 #'   from Custom only by switching Youden optimization on). No other option
-#'   changes.
+#'   changes. The controls a preset overrides are greyed while it is selected.
 #' @param comprehensive_output Include comprehensive statistical details
 #' @param clinical_interpretation Provide clinical context for ROC analysis
 #'   results

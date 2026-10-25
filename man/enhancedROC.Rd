@@ -274,7 +274,7 @@ preset turns Youden index optimization on and sets the minimums (Screening:
 sensitivity 0.90; Diagnostic validation: 0.80 and 0.80; Confirmatory:
 specificity 0.95; Research: keeps the minimums you enter, so it differs
 from Custom only by switching Youden optimization on). No other option
-changes.}
+changes. The controls a preset overrides are greyed while it is selected.}
 
 \item{comprehensive_output}{Include comprehensive statistical details}
 

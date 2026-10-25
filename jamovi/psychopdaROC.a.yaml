@@ -848,8 +848,9 @@ options:
             Perform clinical utility analysis including net benefit curves,
             decision curve analysis, and clinical impact assessment.
 
-    # library-audit 2026-10-23 meddecide [MEDIUM] DONE: three Number options (from, to, step), whose boxes
-    #   check their own input, not one "min,max,step" string parsed in R (was treatmentThreshold).
+    # library-audit 2026-10-23 meddecide [MEDIUM] DONE: three Number options (from, to, step),
+    #   whose boxes check their own input, not one "min,max,step" string parsed in R (was
+    #   treatmentThreshold).
     - name: treatmentThresholdMin
       title: Treatment threshold from
       type: Number

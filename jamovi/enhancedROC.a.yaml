@@ -343,8 +343,8 @@ options:
       default: specificity
       description: 'Whether to calculate pAUC over a specificity or sensitivity range'
 
-    # library-audit 2026-10-23 meddecide [MEDIUM] DONE: two Number options, whose boxes check their own
-    #   input and carry min/max, not one "min,max" string parsed in R (was partialRange).
+    # library-audit 2026-10-23 meddecide [MEDIUM] DONE: two Number options, whose boxes check
+    #   their own input and carry min/max, not one "min,max" string parsed in R (was partialRange).
     - name: partialAucFrom
       title: 'Partial AUC from'
       type: Number
@@ -460,6 +460,9 @@ options:
       default: general
       description: 'Clinical application context for interpretation'
 
+    # library-audit 2026-10-23 meddecide [MEDIUM] DONE: a preset greys the controls it overrides
+    #   (Youden optimization under every preset; both minimums except under Research), so the panel
+    #   shows they are not in play.
     - name: clinicalPresets
       title: 'Clinical presets'
       type: List
@@ -479,7 +482,8 @@ options:
           Sets how the optimal cutoff is searched for: each preset turns Youden index optimization
           on and sets the minimums (Screening: sensitivity 0.90; Diagnostic validation: 0.80 and
           0.80; Confirmatory: specificity 0.95; Research: keeps the minimums you enter, so it differs
-          from Custom only by switching Youden optimization on). No other option changes.
+          from Custom only by switching Youden optimization on). No other option changes. The
+          controls a preset overrides are greyed while it is selected.
 
     # Advanced Output Options
     - name: comprehensive_output
@@ -939,8 +943,9 @@ options:
           refitting or choosing a cutoff from these data, and replaces every other output with the
           validation context, denominator ledger and frozen-model metrics. Needs a positive class, an
           explicit negative level, an explicit Direction and the fixed score cutoffs.
-    # library-audit 2026-10-23 meddecide [MEDIUM] DONE: a Level with a LevelSelector, not typed text - a typo
-    #   named no level. Level options take no default, so R callers pass validationNegative (NULL when unused).
+    # library-audit 2026-10-23 meddecide [MEDIUM] DONE: a Level with a LevelSelector, not typed
+    #   text - a typo named no level. Level options take no default, so R callers pass
+    #   validationNegative (NULL when unused).
     - name: validationNegative
       title: Explicit negative reference level
       type: Level

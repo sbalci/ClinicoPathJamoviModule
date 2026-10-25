@@ -67,6 +67,7 @@ children:
                 name: predictionScale
               - type: CheckBox
                 name: youdenOptimization
+                enable: (clinicalPresets:custom)
               - type: ComboBox
                 name: clinicalContext
               - type: ComboBox
@@ -77,9 +78,11 @@ children:
               - type: TextBox
                 name: sensitivityThreshold
                 format: number
+                enable: (clinicalPresets:custom || clinicalPresets:research_comprehensive)
               - type: TextBox
                 name: specificityThreshold
                 format: number
+                enable: (clinicalPresets:custom || clinicalPresets:research_comprehensive)
               - type: TextBox
                 name: customCutoffs
                 format: string
