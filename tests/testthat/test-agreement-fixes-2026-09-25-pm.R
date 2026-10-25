@@ -12,8 +12,8 @@ test_that("an exact proportional relation (B = 2A) gets no slope p-value, and sa
 
     a <- agreement_run(data.frame(A = x, B = 2 * x), vars = c("A", "B"),
                        blandAltmanPlot = TRUE, proportionalBias = TRUE)
-    expect_true(is.na(a$results$blandAltmanStats$asDF$propBiasP))
-    notes <- agreement_notes(a$results$blandAltmanStats)
+    expect_true(is.na(a$results$blandAltmanGroup$blandAltmanStats$asDF$propBiasP))
+    notes <- agreement_notes(a$results$blandAltmanGroup$blandAltmanStats)
     expect_match(notes[["prop_bias_failed"]], "lie exactly on a line", fixed = TRUE)
     expect_false("prop_bias_assumption" %in% names(notes))
 })
@@ -23,9 +23,9 @@ test_that("a noisy proportional relation still gets its slope p-value", {
     x <- runif(40, 1, 10)
     a <- agreement_run(data.frame(A = x, B = 2 * x + rnorm(40, 0, 0.5)), vars = c("A", "B"),
                        blandAltmanPlot = TRUE, proportionalBias = TRUE)
-    p <- a$results$blandAltmanStats$asDF$propBiasP
+    p <- a$results$blandAltmanGroup$blandAltmanStats$asDF$propBiasP
     expect_true(is.finite(p))
-    expect_false("prop_bias_failed" %in% names(agreement_notes(a$results$blandAltmanStats)))
+    expect_false("prop_bias_failed" %in% names(agreement_notes(a$results$blandAltmanGroup$blandAltmanStats)))
 })
 
 test_that("the three heatmaps draw a colour key for their fixed scale", {
@@ -44,8 +44,8 @@ test_that("the three heatmaps draw a colour key for their fixed scale", {
     f <- tempfile(fileext = ".png"); grDevices::png(f)
     on.exit(grDevices::dev.off(), add = TRUE)
     expect_true(p$.agreementHeatmap(a$results$agreementHeatmapPlot, NULL, NULL))
-    expect_true(p$.raterClusterHeatmap(a$results$raterClusterHeatmap, NULL, NULL))
-    expect_true(p$.caseClusterHeatmap(a$results$caseClusterHeatmap, NULL, NULL))
+    expect_true(p$.raterClusterHeatmap(a$results$raterClusterGroup$raterClusterHeatmap, NULL, NULL))
+    expect_true(p$.caseClusterHeatmap(a$results$raterClusterGroup$caseClusterHeatmap, NULL, NULL))
     expect_identical(rec$keys, c("Cell color: share of all rated cases",
                                  rep("Cell color: similarity (1 - distance)", 2)))
 })
@@ -56,7 +56,7 @@ test_that("the Lin's CCC fallback matches Lin's asymptotic estimate and interval
     x <- rnorm(40, 50, 10); y <- x + 4 + rnorm(40, 0, 5)       # an offset pair: u != 0
     ref <- DescTools::CCC(x, y, ci = "asymptotic", conf.level = 0.95)$rho.c
     testthat::local_mocked_bindings(CCC = function(...) stop("forced fallback"), .package = "DescTools")
-    t <- agreement_run(data.frame(A = x, B = y), vars = c("A", "B"), linCCC = TRUE)$results$linCCCTable
+    t <- agreement_run(data.frame(A = x, B = y), vars = c("A", "B"), linCCC = TRUE)$results$iccGroup$linCCCTable
     df <- t$asDF
     expect_equal(df$ccc, ref$est, tolerance = 1e-10)
     expect_equal(c(df$ci_lower, df$ci_upper), c(ref$lwr.ci, ref$upr.ci), tolerance = 1e-10)
@@ -86,7 +86,7 @@ test_that("hierarchical ICC(2,k) uses the harmonic mean of ratings per case when
     k <- 1 / mean(1 / c(rep(2, 60), rep(3, 60)))                  # 2.4, not 3
     icc2k <- g("case_id") / (g("case_id") + (g("rater") + g("Residual")) / k)
 
-    it <- r$hierarchicalICCTable
+    it <- r$hierarchicalGroup$hierarchicalICCTable
     expect_equal(it$asDF$icc_value[2], icc2k, tolerance = 1e-4)
     expect_match(agreement_notes(it)[["info"]], "mean of 2.40 (the harmonic mean", fixed = TRUE)
 })
@@ -103,7 +103,7 @@ test_that("ICC labels in the inter/intra and subgroup tables name the bands thei
     expect_false(identical(koo(oracle$lbound), koo(oracle$ubound)))   # the fixture's CI crosses a band
 
     r <- agreement_run(d, vars = names(d), interIntraRater = TRUE, interIntraSeparator = "_")$results
-    intra <- r$interIntraRaterIntraTable$asDF
+    intra <- r$maxwellREGroup$interIntraRaterIntraTable$asDF
     expect_identical(intra$interpretation[intra$rater == "A"],
                      sprintf("%s (CI spans %s to %s)", koo(oracle$value), koo(oracle$lbound), koo(oracle$ubound)))
 
@@ -126,13 +126,13 @@ test_that("a rater column with no ratings is named in the grading section, not l
     f <- function() factor(ifelse(stats::runif(60) < 0.8, x, sample(lv, 60, TRUE)), lv, ordered = TRUE)
     d <- data.frame(P1 = f(), P2 = f(), P3 = f(), P4 = factor(rep(NA, 60), lv, ordered = TRUE))
     r <- agreement_run(d, vars = names(d), perPathologist = TRUE, gradingDesign = TRUE)$results
-    pt <- r$pathologistTable$asDF
+    pt <- r$gradingGroup$pathologistTable$asDF
     expect_true(is.na(pt$cases_read[pt$pathologist == "P4"]))      # the blank row the note explains
-    for (tbl in list(r$pathologistTable, r$designSummaryTable))
+    for (tbl in list(r$gradingGroup$pathologistTable, r$gradingGroup$designSummaryTable))
         expect_match(agreement_notes(tbl)[["no_ratings"]], "No ratings from P4", fixed = TRUE)
 
     r2 <- agreement_run(d[1:3], vars = c("P1", "P2", "P3"), perPathologist = TRUE)$results
-    expect_false("no_ratings" %in% names(agreement_notes(r2$pathologistTable)))
+    expect_false("no_ratings" %in% names(agreement_notes(r2$gradingGroup$pathologistTable)))
 })
 
 test_that("the CCC fallback's location shift does not overflow on very large values", {
@@ -140,6 +140,6 @@ test_that("the CCC fallback's location shift does not overflow on very large val
     x <- (1:12) * 1e80; y <- (2:13) * 1e80
     ref <- DescTools::CCC(x / 1e80, y / 1e80, ci = "asymptotic")$rho.c$est   # scale-free oracle
     testthat::local_mocked_bindings(CCC = function(...) stop("forced fallback"), .package = "DescTools")
-    t <- agreement_run(data.frame(A = x, B = y), vars = c("A", "B"), linCCC = TRUE)$results$linCCCTable
+    t <- agreement_run(data.frame(A = x, B = y), vars = c("A", "B"), linCCC = TRUE)$results$iccGroup$linCCCTable
     expect_equal(t$asDF$ccc, ref, tolerance = 1e-10)
 })

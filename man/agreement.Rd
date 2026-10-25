@@ -103,7 +103,7 @@ agreement(
   nBoot = 1000,
   showBootstrapCIGuide = FALSE,
   multiAnnotatorConcordance = FALSE,
-  predictionColumn = 1,
+  predictionRater = NULL,
   showConcordanceF1Guide = FALSE,
   specificAgreement = FALSE,
   specificPositiveCategory = "",
@@ -716,10 +716,9 @@ annotate the same cases and no single ground truth exists (e.g., Ottl et
 al. 2025 HER2 scoring). Reports concordance accuracy, per-class concordance
 F1, and comparison to strict consensus-based evaluation.}
 
-\item{predictionColumn}{Which rater column contains the predictions to
-evaluate. Default is column 1 (first rater). Remaining columns are treated
-as reference annotators. For AI validation, set this to the column
-containing AI predictions.}
+\item{predictionRater}{The rater column whose ratings are the predictions
+to evaluate, for example the AI model's calls. It must also be one of the
+raters; the other raters are the reference annotators.}
 
 \item{showConcordanceF1Guide}{Show educational guide for concordance
 metrics in AI validation with multiple reference annotators.}
@@ -1038,98 +1037,85 @@ outputs keep their own documented inference.}
 A results object containing:
 \tabular{llllll}{
 \code{results$welcome} \tab \tab \tab \tab \tab a html \cr
-\code{results$irrtableHeading} \tab \tab \tab \tab \tab a preformatted \cr
 \code{results$irrtable} \tab \tab \tab \tab \tab a table \cr
-\code{results$contingencyTableHeading} \tab \tab \tab \tab \tab a preformatted \cr
-\code{results$contingencyTable} \tab \tab \tab \tab \tab a table \cr
-\code{results$ratingCombinationsTable} \tab \tab \tab \tab \tab a table \cr
-\code{results$contingencyTableExplanation} \tab \tab \tab \tab \tab a html \cr
-\code{results$gradingHeading} \tab \tab \tab \tab \tab a preformatted \cr
-\code{results$designSummaryTable} \tab \tab \tab \tab \tab a table \cr
-\code{results$categoryDistributionTable} \tab \tab \tab \tab \tab a table \cr
-\code{results$pathologistTable} \tab \tab \tab \tab \tab a table \cr
-\code{results$boundaryTable} \tab \tab \tab \tab \tab a table \cr
-\code{results$severityPlot} \tab \tab \tab \tab \tab an image \cr
-\code{results$latentModelTable} \tab \tab \tab \tab \tab a table \cr
-\code{results$gradingGuide} \tab \tab \tab \tab \tab a html \cr
-\code{results$blandAltmanHeading} \tab \tab \tab \tab \tab a preformatted \cr
-\code{results$blandAltman} \tab \tab \tab \tab \tab an image \cr
+\code{results$contingencyTableGroup$contingencyTable} \tab \tab \tab \tab \tab a table \cr
+\code{results$contingencyTableGroup$ratingCombinationsTable} \tab \tab \tab \tab \tab a table \cr
+\code{results$contingencyTableGroup$contingencyTableExplanation} \tab \tab \tab \tab \tab a html \cr
+\code{results$gradingGroup$designSummaryTable} \tab \tab \tab \tab \tab a table \cr
+\code{results$gradingGroup$categoryDistributionTable} \tab \tab \tab \tab \tab a table \cr
+\code{results$gradingGroup$pathologistTable} \tab \tab \tab \tab \tab a table \cr
+\code{results$gradingGroup$boundaryTable} \tab \tab \tab \tab \tab a table \cr
+\code{results$gradingGroup$severityPlot} \tab \tab \tab \tab \tab an image \cr
+\code{results$gradingGroup$latentModelTable} \tab \tab \tab \tab \tab a table \cr
+\code{results$gradingGroup$gradingGuide} \tab \tab \tab \tab \tab a html \cr
+\code{results$blandAltmanGroup$blandAltman} \tab \tab \tab \tab \tab an image \cr
+\code{results$blandAltmanGroup$blandAltmanExplanation} \tab \tab \tab \tab \tab a html \cr
+\code{results$blandAltmanGroup$blandAltmanStats} \tab \tab \tab \tab \tab a table \cr
 \code{results$agreementHeatmapPlot} \tab \tab \tab \tab \tab an image \cr
 \code{results$agreementHeatmapExplanation} \tab \tab \tab \tab \tab a html \cr
-\code{results$blandAltmanExplanation} \tab \tab \tab \tab \tab a html \cr
-\code{results$blandAltmanStats} \tab \tab \tab \tab \tab a table \cr
-\code{results$krippTableHeading} \tab \tab \tab \tab \tab a preformatted \cr
-\code{results$krippTable} \tab \tab \tab \tab \tab a table \cr
-\code{results$krippExplanation} \tab \tab \tab \tab \tab a html \cr
-\code{results$lightKappaTableHeading} \tab \tab \tab \tab \tab a preformatted \cr
-\code{results$lightKappaTable} \tab \tab \tab \tab \tab a table \cr
-\code{results$lightKappaExplanation} \tab \tab \tab \tab \tab a html \cr
-\code{results$finnTable} \tab \tab \tab \tab \tab a table \cr
-\code{results$finnExplanation} \tab \tab \tab \tab \tab a html \cr
-\code{results$kendallWTable} \tab \tab \tab \tab \tab a table \cr
-\code{results$kendallWExplanation} \tab \tab \tab \tab \tab a html \cr
-\code{results$robinsonATable} \tab \tab \tab \tab \tab a table \cr
-\code{results$robinsonAExplanation} \tab \tab \tab \tab \tab a html \cr
-\code{results$meanSpearmanTable} \tab \tab \tab \tab \tab a table \cr
-\code{results$meanSpearmanExplanation} \tab \tab \tab \tab \tab a html \cr
-\code{results$raterBiasHeading} \tab \tab \tab \tab \tab a preformatted \cr
-\code{results$raterBiasTable} \tab \tab \tab \tab \tab a table \cr
-\code{results$raterBiasExplanation} \tab \tab \tab \tab \tab a html \cr
-\code{results$bhapkarTable} \tab \tab \tab \tab \tab a table \cr
-\code{results$bhapkarExplanation} \tab \tab \tab \tab \tab a html \cr
-\code{results$stuartMaxwellTable} \tab \tab \tab \tab \tab a table \cr
-\code{results$stuartMaxwellExplanation} \tab \tab \tab \tab \tab a html \cr
+\code{results$krippTableGroup$krippTable} \tab \tab \tab \tab \tab a table \cr
+\code{results$krippTableGroup$krippExplanation} \tab \tab \tab \tab \tab a html \cr
+\code{results$lightKappaTableGroup$lightKappaTable} \tab \tab \tab \tab \tab a table \cr
+\code{results$lightKappaTableGroup$lightKappaExplanation} \tab \tab \tab \tab \tab a html \cr
+\code{results$lightKappaTableGroup$finnTable} \tab \tab \tab \tab \tab a table \cr
+\code{results$lightKappaTableGroup$finnExplanation} \tab \tab \tab \tab \tab a html \cr
+\code{results$lightKappaTableGroup$kendallWTable} \tab \tab \tab \tab \tab a table \cr
+\code{results$lightKappaTableGroup$kendallWExplanation} \tab \tab \tab \tab \tab a html \cr
+\code{results$lightKappaTableGroup$robinsonATable} \tab \tab \tab \tab \tab a table \cr
+\code{results$lightKappaTableGroup$robinsonAExplanation} \tab \tab \tab \tab \tab a html \cr
+\code{results$lightKappaTableGroup$meanSpearmanTable} \tab \tab \tab \tab \tab a table \cr
+\code{results$lightKappaTableGroup$meanSpearmanExplanation} \tab \tab \tab \tab \tab a html \cr
+\code{results$raterBiasGroup$raterBiasTable} \tab \tab \tab \tab \tab a table \cr
+\code{results$raterBiasGroup$raterBiasExplanation} \tab \tab \tab \tab \tab a html \cr
+\code{results$raterBiasGroup$bhapkarTable} \tab \tab \tab \tab \tab a table \cr
+\code{results$raterBiasGroup$bhapkarExplanation} \tab \tab \tab \tab \tab a html \cr
+\code{results$raterBiasGroup$stuartMaxwellTable} \tab \tab \tab \tab \tab a table \cr
+\code{results$raterBiasGroup$stuartMaxwellExplanation} \tab \tab \tab \tab \tab a html \cr
 \code{results$pairwiseKappaTable} \tab \tab \tab \tab \tab a table \cr
 \code{results$pairwiseKappaExplanation} \tab \tab \tab \tab \tab a html \cr
 \code{results$allPairsKappaTable} \tab \tab \tab \tab \tab a table \cr
 \code{results$allPairsKappaExplanation} \tab \tab \tab \tab \tab a html \cr
 \code{results$itemModalAgreementTable} \tab \tab \tab \tab \tab a table \cr
 \code{results$itemModalAgreementExplanation} \tab \tab \tab \tab \tab a html \cr
-\code{results$hierarchicalHeading} \tab \tab \tab \tab \tab a preformatted \cr
-\code{results$hierarchicalOverallTable} \tab \tab \tab \tab \tab a table \cr
-\code{results$clusterSpecificTable} \tab \tab \tab \tab \tab a table \cr
-\code{results$varianceDecompositionTable} \tab \tab \tab \tab \tab a table \cr
-\code{results$hierarchicalICCTable} \tab \tab \tab \tab \tab a table \cr
-\code{results$homogeneityTestTable} \tab \tab \tab \tab \tab a table \cr
-\code{results$hierarchicalExplanation} \tab \tab \tab \tab \tab a html \cr
-\code{results$advancedHeading} \tab \tab \tab \tab \tab a preformatted \cr
-\code{results$mixedEffectsTable} \tab \tab \tab \tab \tab a table \cr
-\code{results$mixedEffectsVarianceTable} \tab \tab \tab \tab \tab a table \cr
-\code{results$mixedEffectsExplanation} \tab \tab \tab \tab \tab a html \cr
-\code{results$confusionMatrixTable} \tab \tab \tab \tab \tab a table \cr
-\code{results$perClassMetricsTable} \tab \tab \tab \tab \tab a table \cr
-\code{results$confusionMatrixExplanation} \tab \tab \tab \tab \tab a html \cr
-\code{results$bootstrapCITable} \tab \tab \tab \tab \tab a table \cr
-\code{results$bootstrapCIExplanation} \tab \tab \tab \tab \tab a html \cr
-\code{results$concordanceF1Table} \tab \tab \tab \tab \tab a table \cr
-\code{results$concordanceF1PerClassTable} \tab \tab \tab \tab \tab a table \cr
-\code{results$concordanceF1Explanation} \tab \tab \tab \tab \tab a html \cr
-\code{results$gwetHeading} \tab \tab \tab \tab \tab a preformatted \cr
-\code{results$gwetTable} \tab \tab \tab \tab \tab a table \cr
-\code{results$gwetExplanation} \tab \tab \tab \tab \tab a html \cr
-\code{results$pabakTable} \tab \tab \tab \tab \tab a table \cr
-\code{results$pabakExplanation} \tab \tab \tab \tab \tab a html \cr
-\code{results$iccHeading} \tab \tab \tab \tab \tab a preformatted \cr
-\code{results$iccTable} \tab \tab \tab \tab \tab a table \cr
-\code{results$iccExplanation} \tab \tab \tab \tab \tab a html \cr
-\code{results$meanPearsonTable} \tab \tab \tab \tab \tab a table \cr
-\code{results$meanPearsonExplanation} \tab \tab \tab \tab \tab a html \cr
-\code{results$linCCCTable} \tab \tab \tab \tab \tab a table \cr
-\code{results$linCCCExplanation} \tab \tab \tab \tab \tab a html \cr
-\code{results$tdiTable} \tab \tab \tab \tab \tab a table \cr
-\code{results$tdiExplanation} \tab \tab \tab \tab \tab a html \cr
-\code{results$maxwellREHeading} \tab \tab \tab \tab \tab a preformatted \cr
-\code{results$maxwellRETable} \tab \tab \tab \tab \tab a table \cr
-\code{results$maxwellREExplanation} \tab \tab \tab \tab \tab a html \cr
-\code{results$interIntraRaterIntraTable} \tab \tab \tab \tab \tab a table \cr
-\code{results$interIntraRaterInterTable} \tab \tab \tab \tab \tab a table \cr
-\code{results$interIntraRaterExplanation} \tab \tab \tab \tab \tab a html \cr
-\code{results$iotaTable} \tab \tab \tab \tab \tab a table \cr
-\code{results$iotaExplanation} \tab \tab \tab \tab \tab a html \cr
+\code{results$hierarchicalGroup$hierarchicalOverallTable} \tab \tab \tab \tab \tab a table \cr
+\code{results$hierarchicalGroup$clusterSpecificTable} \tab \tab \tab \tab \tab a table \cr
+\code{results$hierarchicalGroup$varianceDecompositionTable} \tab \tab \tab \tab \tab a table \cr
+\code{results$hierarchicalGroup$hierarchicalICCTable} \tab \tab \tab \tab \tab a table \cr
+\code{results$hierarchicalGroup$homogeneityTestTable} \tab \tab \tab \tab \tab a table \cr
+\code{results$hierarchicalGroup$hierarchicalExplanation} \tab \tab \tab \tab \tab a html \cr
+\code{results$advancedGroup$mixedEffectsTable} \tab \tab \tab \tab \tab a table \cr
+\code{results$advancedGroup$mixedEffectsVarianceTable} \tab \tab \tab \tab \tab a table \cr
+\code{results$advancedGroup$mixedEffectsExplanation} \tab \tab \tab \tab \tab a html \cr
+\code{results$advancedGroup$confusionMatrixTable} \tab \tab \tab \tab \tab a table \cr
+\code{results$advancedGroup$perClassMetricsTable} \tab \tab \tab \tab \tab a table \cr
+\code{results$advancedGroup$confusionMatrixExplanation} \tab \tab \tab \tab \tab a html \cr
+\code{results$advancedGroup$bootstrapCITable} \tab \tab \tab \tab \tab a table \cr
+\code{results$advancedGroup$bootstrapCIExplanation} \tab \tab \tab \tab \tab a html \cr
+\code{results$advancedGroup$concordanceF1Table} \tab \tab \tab \tab \tab a table \cr
+\code{results$advancedGroup$concordanceF1PerClassTable} \tab \tab \tab \tab \tab a table \cr
+\code{results$advancedGroup$concordanceF1Explanation} \tab \tab \tab \tab \tab a html \cr
+\code{results$gwetGroup$gwetTable} \tab \tab \tab \tab \tab a table \cr
+\code{results$gwetGroup$gwetExplanation} \tab \tab \tab \tab \tab a html \cr
+\code{results$gwetGroup$pabakTable} \tab \tab \tab \tab \tab a table \cr
+\code{results$gwetGroup$pabakExplanation} \tab \tab \tab \tab \tab a html \cr
+\code{results$iccGroup$iccTable} \tab \tab \tab \tab \tab a table \cr
+\code{results$iccGroup$iccExplanation} \tab \tab \tab \tab \tab a html \cr
+\code{results$iccGroup$meanPearsonTable} \tab \tab \tab \tab \tab a table \cr
+\code{results$iccGroup$meanPearsonExplanation} \tab \tab \tab \tab \tab a html \cr
+\code{results$iccGroup$linCCCTable} \tab \tab \tab \tab \tab a table \cr
+\code{results$iccGroup$linCCCExplanation} \tab \tab \tab \tab \tab a html \cr
+\code{results$iccGroup$tdiTable} \tab \tab \tab \tab \tab a table \cr
+\code{results$iccGroup$tdiExplanation} \tab \tab \tab \tab \tab a html \cr
+\code{results$maxwellREGroup$maxwellRETable} \tab \tab \tab \tab \tab a table \cr
+\code{results$maxwellREGroup$maxwellREExplanation} \tab \tab \tab \tab \tab a html \cr
+\code{results$maxwellREGroup$interIntraRaterIntraTable} \tab \tab \tab \tab \tab a table \cr
+\code{results$maxwellREGroup$interIntraRaterInterTable} \tab \tab \tab \tab \tab a table \cr
+\code{results$maxwellREGroup$interIntraRaterExplanation} \tab \tab \tab \tab \tab a html \cr
+\code{results$maxwellREGroup$iotaTable} \tab \tab \tab \tab \tab a table \cr
+\code{results$maxwellREGroup$iotaExplanation} \tab \tab \tab \tab \tab a html \cr
 \code{results$weightedKappaGuide} \tab \tab \tab \tab \tab a html \cr
-\code{results$specificAgreementHeading} \tab \tab \tab \tab \tab a preformatted \cr
-\code{results$specificAgreementTable} \tab \tab \tab \tab \tab a table \cr
-\code{results$specificAgreementExplanation} \tab \tab \tab \tab \tab a html \cr
+\code{results$specificAgreementGroup$specificAgreementTable} \tab \tab \tab \tab \tab a table \cr
+\code{results$specificAgreementGroup$specificAgreementExplanation} \tab \tab \tab \tab \tab a html \cr
 \code{results$levelInfoTable} \tab \tab \tab \tab \tab a table \cr
 \code{results$summary} \tab \tab \tab \tab \tab a html \cr
 \code{results$about} \tab \tab \tab \tab \tab a html \cr
@@ -1145,20 +1131,18 @@ A results object containing:
 \code{results$subgroupAgreementTable} \tab \tab \tab \tab \tab a table \cr
 \code{results$subgroupForestPlotImage} \tab \tab \tab \tab \tab an image \cr
 \code{results$subgroupExplanation} \tab \tab \tab \tab \tab a html \cr
-\code{results$raterClusterHeading} \tab \tab \tab \tab \tab a preformatted \cr
-\code{results$raterClusterTable} \tab \tab \tab \tab \tab a table \cr
-\code{results$raterDendrogram} \tab \tab \tab \tab \tab an image \cr
-\code{results$raterClusterHeatmap} \tab \tab \tab \tab \tab an image \cr
-\code{results$raterClusterExplanation} \tab \tab \tab \tab \tab a html \cr
-\code{results$caseClusterTable} \tab \tab \tab \tab \tab a table \cr
-\code{results$caseDendrogram} \tab \tab \tab \tab \tab an image \cr
-\code{results$caseClusterHeatmap} \tab \tab \tab \tab \tab an image \cr
-\code{results$caseClusterExplanation} \tab \tab \tab \tab \tab a html \cr
-\code{results$pairedAgreementHeading} \tab \tab \tab \tab \tab a preformatted \cr
-\code{results$pairedAgreementTable} \tab \tab \tab \tab \tab a table \cr
-\code{results$pairedAgreementExplanation} \tab \tab \tab \tab \tab a html \cr
-\code{results$agreementSampleSizeTable} \tab \tab \tab \tab \tab a table \cr
-\code{results$agreementSampleSizeExplanation} \tab \tab \tab \tab \tab a html \cr
+\code{results$raterClusterGroup$raterClusterTable} \tab \tab \tab \tab \tab a table \cr
+\code{results$raterClusterGroup$raterDendrogram} \tab \tab \tab \tab \tab an image \cr
+\code{results$raterClusterGroup$raterClusterHeatmap} \tab \tab \tab \tab \tab an image \cr
+\code{results$raterClusterGroup$raterClusterExplanation} \tab \tab \tab \tab \tab a html \cr
+\code{results$raterClusterGroup$caseClusterTable} \tab \tab \tab \tab \tab a table \cr
+\code{results$raterClusterGroup$caseDendrogram} \tab \tab \tab \tab \tab an image \cr
+\code{results$raterClusterGroup$caseClusterHeatmap} \tab \tab \tab \tab \tab an image \cr
+\code{results$raterClusterGroup$caseClusterExplanation} \tab \tab \tab \tab \tab a html \cr
+\code{results$pairedAgreementGroup$pairedAgreementTable} \tab \tab \tab \tab \tab a table \cr
+\code{results$pairedAgreementGroup$pairedAgreementExplanation} \tab \tab \tab \tab \tab a html \cr
+\code{results$pairedAgreementGroup$agreementSampleSizeTable} \tab \tab \tab \tab \tab a table \cr
+\code{results$pairedAgreementGroup$agreementSampleSizeExplanation} \tab \tab \tab \tab \tab a html \cr
 }
 
 Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:

@@ -55,7 +55,7 @@ test_that("L441: whole-number codes in the hierarchical linear model are flagged
 
     a <- agreement_run(d, vars = vars, hierarchicalKappa = TRUE,
                        clusterVariable = "site", iccHierarchical = TRUE)
-    for (tbl in list(a$results$hierarchicalOverallTable, a$results$hierarchicalICCTable)) {
+    for (tbl in list(a$results$hierarchicalGroup$hierarchicalOverallTable, a$results$hierarchicalGroup$hierarchicalICCTable)) {
         notes <- agreement_notes(tbl)
         expect_true("coded_numeric" %in% names(notes))
         expect_match(notes[["coded_numeric"]], "R1, R2, R3", fixed = TRUE)
@@ -71,10 +71,10 @@ test_that("L443: hierarchical cases and clusters are counted from the model data
     expect_equal(c(n_cases, n_clusters), c(24, 3))
 
     a <- agreement_run(d, vars = vars, hierarchicalKappa = TRUE, clusterVariable = "site")
-    row <- a$results$hierarchicalOverallTable$asDF
+    row <- a$results$hierarchicalGroup$hierarchicalOverallTable$asDF
     expect_equal(row$cases, n_cases)
     expect_equal(row$clusters, n_clusters)
-    expect_match(a$results$homogeneityTestTable$asDF$conclusion,
+    expect_match(a$results$hierarchicalGroup$homogeneityTestTable$asDF$conclusion,
                  sprintf("%d institutions", n_clusters), fixed = TRUE)
 })
 
@@ -85,15 +85,15 @@ test_that("L442: a singular fit is disclosed; the fallback leaves the rater vari
     expect_true(lme4::isSingular(oracle))
     a <- agreement_run(d, vars = c("R1", "R2", "R3"), hierarchicalKappa = TRUE,
                        clusterVariable = "site")
-    expect_true("singular" %in% names(agreement_notes(a$results$hierarchicalOverallTable)))
+    expect_true("singular" %in% names(agreement_notes(a$results$hierarchicalGroup$hierarchicalOverallTable)))
 
     # Fallback: the full model fails outright, which is not a singular fit.
     panels_fail_rater_models()
     b <- agreement_run(panels_continuous_clustered(), vars = c("R1", "R2", "R3"),
                        hierarchicalKappa = TRUE, clusterVariable = "site")
-    vt <- b$results$varianceDecompositionTable$asDF
+    vt <- b$results$hierarchicalGroup$varianceDecompositionTable$asDF
     expect_true(is.na(vt["rater", "variance"]))
-    note <- agreement_notes(b$results$hierarchicalOverallTable)[["model_note"]]
+    note <- agreement_notes(b$results$hierarchicalGroup$hierarchicalOverallTable)[["model_note"]]
     expect_match(note, "could not be fitted", fixed = TRUE)
     expect_no_match(note, "singular", fixed = TRUE)
 })
@@ -101,7 +101,7 @@ test_that("L442: a singular fit is disclosed; the fallback leaves the rater vari
 test_that("L444: both variance tables say the cut-points are the module's own", {
     a <- agreement_run(panels_continuous_clustered(), vars = c("R1", "R2", "R3"),
                        hierarchicalKappa = TRUE, clusterVariable = "site")
-    expect_match(agreement_notes(a$results$varianceDecompositionTable)[["cutpoints"]],
+    expect_match(agreement_notes(a$results$hierarchicalGroup$varianceDecompositionTable)[["cutpoints"]],
                  "not a published standard", fixed = TRUE)
 
     set.seed(4)
@@ -109,7 +109,7 @@ test_that("L444: both variance tables say the cut-points are the module's own", 
     d$R2 <- d$R1 + rnorm(40, 0, 2); d$R3 <- d$R1 + rnorm(40, 1, 2)
     b <- agreement_run(d, vars = c("R1", "R2", "R3"), mixedEffectsComparison = TRUE,
                        conditionVariable = "cond")
-    expect_match(agreement_notes(b$results$mixedEffectsVarianceTable)[["cutpoints"]],
+    expect_match(agreement_notes(b$results$advancedGroup$mixedEffectsVarianceTable)[["cutpoints"]],
                  "not a published standard", fixed = TRUE)
 })
 
@@ -125,7 +125,7 @@ test_that("L445: the homogeneity LRT drops only the cluster term from the model 
     panels_fail_rater_models()
     a <- agreement_run(d, vars = c("R1", "R2", "R3"), hierarchicalKappa = TRUE,
                        clusterVariable = "site")
-    row <- a$results$homogeneityTestTable$asDF
+    row <- a$results$hierarchicalGroup$homogeneityTestTable$asDF
     expect_equal(row$statistic, chi, tolerance = 1e-4)
     expect_equal(row$p_value, 0.5 * pchisq(chi, 1, lower.tail = FALSE), tolerance = 1e-4)
 })
@@ -139,10 +139,10 @@ test_that("L447: a failed lmerTest step is disclosed and p comes from z", {
     d$R2 <- d$R1 + rnorm(40, 0, 2); d$R3 <- d$R1 + rnorm(40, 1, 2)
     a <- agreement_run(d, vars = c("R1", "R2", "R3"), mixedEffectsComparison = TRUE,
                        conditionVariable = "cond")
-    tbl <- a$results$mixedEffectsTable$asDF
+    tbl <- a$results$advancedGroup$mixedEffectsTable$asDF
     expect_true(all(is.na(tbl$df)))
     expect_equal(tbl$p_value, 2 * pnorm(-abs(tbl$t_value)))
-    expect_true("df_method" %in% names(agreement_notes(a$results$mixedEffectsTable)))
+    expect_true("df_method" %in% names(agreement_notes(a$results$advancedGroup$mixedEffectsTable)))
 })
 
 test_that("L436: constant differences get no proportional-bias p-value, and say why", {
@@ -152,8 +152,8 @@ test_that("L436: constant differences get no proportional-bias p-value, and say 
         expect_equal(sd(x - (x + offset)), 0)                # oracle: constant
         a <- agreement_run(data.frame(A = x, B = x + offset), vars = c("A", "B"),
                            blandAltmanPlot = TRUE, proportionalBias = TRUE)
-        expect_true(is.na(a$results$blandAltmanStats$asDF$propBiasP))
-        notes <- agreement_notes(a$results$blandAltmanStats)
+        expect_true(is.na(a$results$blandAltmanGroup$blandAltmanStats$asDF$propBiasP))
+        notes <- agreement_notes(a$results$blandAltmanGroup$blandAltmanStats)
         expect_match(notes[["prop_bias_failed"]], "constant", fixed = TRUE)
         expect_false("prop_bias_assumption" %in% names(notes))
     }
@@ -167,8 +167,8 @@ test_that("R8: the bootstrap floor counts cases rated at least twice", {
     n_usable <- sum(complete.cases(d))
     expect_equal(n_usable, 6)
     a <- agreement_run(d, vars = c("R1", "R2"), bootstrapCI = TRUE, nBoot = 100)
-    expect_equal(nrow(a$results$bootstrapCITable$asDF), 0)
-    expect_match(agreement_notes(a$results$bootstrapCITable)[["insufficient"]],
+    expect_equal(nrow(a$results$advancedGroup$bootstrapCITable$asDF), 0)
+    expect_match(agreement_notes(a$results$advancedGroup$bootstrapCITable)[["insufficient"]],
                  sprintf("; %d were available", n_usable), fixed = TRUE)
 })
 
@@ -185,7 +185,7 @@ test_that("L462: a significant paired difference names its direction, not an imp
     expect_gt(diff_oracle, 0)
     a <- agreement_run(d, vars = c("A1", "A2"), pairedAgreementTest = TRUE,
                        conditionBVars = c("B1", "B2"), pairedBootN = 500)
-    row <- a$results$pairedAgreementTable$asDF[1, ]
+    row <- a$results$pairedAgreementGroup$pairedAgreementTable$asDF[1, ]
     expect_equal(row$difference, diff_oracle)
     expect_equal(row$interpretation, "Significantly higher under Condition B")
 })
@@ -194,7 +194,7 @@ test_that("L463: the paired agreement row is labelled as the proportion it holds
     d <- paired_panel_data()
     a <- agreement_run(d, vars = c("A1", "A2"), pairedAgreementTest = TRUE,
                        conditionBVars = c("B1", "B2"), pairedBootN = 500)
-    row <- a$results$pairedAgreementTable$asDF[1, ]
+    row <- a$results$pairedAgreementGroup$pairedAgreementTable$asDF[1, ]
     expect_equal(row$condition_a, mean(d$A1 == d$A2))       # a proportion, not a percent
     expect_equal(row$metric, "Proportion of exact agreement")
 })
@@ -202,7 +202,7 @@ test_that("L463: the paired agreement row is labelled as the proportion it holds
 test_that("L466: the Bland-Altman guide ties the limits to the chosen coverage", {
     a <- agreement_run(data.frame(A = c(1.5, 2.5, 3.1, 4.2, 5.3), B = c(1.4, 2.7, 3.0, 4.5, 5.1)),
                        vars = c("A", "B"), showBlandAltmanGuide = TRUE)
-    html <- a$results$blandAltmanExplanation$content
+    html <- a$results$blandAltmanGroup$blandAltmanExplanation$content
     expect_true(nzchar(html))
     expect_no_match(html, "1.96 SD; 95% of differences", fixed = TRUE)
     expect_match(html, "z comes from the coverage you choose (1.96 at the default 95%)", fixed = TRUE)
@@ -217,8 +217,8 @@ test_that("L467: the PABAK guide gives the q-category formula the table computes
     a <- agreement_run(data.frame(R1 = r1, R2 = r2), vars = c("R1", "R2"),
                        pabak = TRUE, showPABAKGuide = TRUE)
     po <- mean(r1 == r2); q <- 3
-    expect_equal(a$results$pabakTable$asDF$pabak[1], (q * po - 1) / (q - 1))
-    html <- a$results$pabakExplanation$content
+    expect_equal(a$results$gwetGroup$pabakTable$asDF$pabak[1], (q * po - 1) / (q - 1))
+    html <- a$results$gwetGroup$pabakExplanation$content
     expect_match(html, "(qP<sub>o</sub> − 1) / (q − 1)", fixed = TRUE)
     expect_match(html, "2P<sub>o</sub> − 1 with two categories", fixed = TRUE)
 })
@@ -248,7 +248,7 @@ test_that("L484/L485: the six categorical guides render on continuous data", {
                        showGwetGuide = TRUE, showPABAKGuide = TRUE)
     for (nm in c("raterBiasExplanation", "bhapkarExplanation", "stuartMaxwellExplanation",
                  "pairwiseKappaExplanation", "gwetExplanation", "pabakExplanation"))
-        expect_true(nzchar(a$results[[nm]]$content), info = nm)
+        expect_true(nzchar(agreement_item(a$results, nm)$content), info = nm)
 })
 
 mixed_linked_data <- function() {
@@ -267,8 +267,8 @@ test_that("ME-A: linked cases get a case-by-condition term (paired t-test oracle
     p_oracle <- t.test(m[, "AI"], m[, "Manual"], paired = TRUE)$p.value   # 0.207
     a <- agreement_run(w, vars = c("R1", "R2", "R3"), conditionVariable = "cond",
                        caseIdVariable = "case", mixedEffectsComparison = TRUE)
-    expect_equal(a$results$mixedEffectsTable$asDF$p_value[2], p_oracle, tolerance = 0.02)
-    expect_match(agreement_notes(a$results$mixedEffectsVarianceTable)[["case_condition"]],
+    expect_equal(a$results$advancedGroup$mixedEffectsTable$asDF$p_value[2], p_oracle, tolerance = 0.02)
+    expect_match(agreement_notes(a$results$advancedGroup$mixedEffectsVarianceTable)[["case_condition"]],
                  "case-by-condition variance", fixed = TRUE)
 })
 
@@ -276,6 +276,6 @@ test_that("ME-B: the mixed-effects model note counts distinct case IDs", {
     w <- mixed_linked_data()
     a <- agreement_run(w, vars = c("R1", "R2", "R3"), conditionVariable = "cond",
                        caseIdVariable = "case", mixedEffectsComparison = TRUE)
-    expect_match(agreement_notes(a$results$mixedEffectsTable)[["model"]],
+    expect_match(agreement_notes(a$results$advancedGroup$mixedEffectsTable)[["model"]],
                  sprintf("; %d cases;", length(unique(w$case))), fixed = TRUE)
 })

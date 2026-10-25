@@ -108,22 +108,22 @@ test_that("a note raised by a sentinel case is gone when the same object re-runs
   invisible(a$run())
 
   # The disclosure has to be RAISED first, or its later absence proves nothing.
-  expect_true("influential_case" %in% note_keys(a$results$iccTable))
-  expect_true(grepl("99999", note_text(a$results$iccTable), fixed = TRUE))
-  for (tb in list(a$results$linCCCTable, a$results$tdiTable))
+  expect_true("influential_case" %in% note_keys(a$results$iccGroup$iccTable))
+  expect_true(grepl("99999", note_text(a$results$iccGroup$iccTable), fixed = TRUE))
+  for (tb in list(a$results$iccGroup$linCCCTable, a$results$iccGroup$tdiTable))
     expect_true("influential_case" %in% note_keys(tb))
 
   agr_rerun_with(a, clean)
 
   # Same object, clean data: the note used to survive, so the table printed
   # "its ratings: 99999, 99999" over data containing no 99999.
-  for (tb in list(a$results$iccTable, a$results$linCCCTable, a$results$tdiTable)) {
+  for (tb in list(a$results$iccGroup$iccTable, a$results$iccGroup$linCCCTable, a$results$iccGroup$tdiTable)) {
     expect_false("influential_case" %in% note_keys(tb))
     expect_false(grepl("99999", note_text(tb), fixed = TRUE))
   }
   # ... and the second run really did produce a coefficient, so the notes did not
   # simply vanish along with the whole table.
-  expect_true(is.finite(as.numeric(a$results$iccTable$asDF$icc_value[1])))
+  expect_true(is.finite(as.numeric(a$results$iccGroup$iccTable$asDF$icc_value[1])))
 })
 
 test_that("the headline table cannot claim kappa was not computed while printing a kappa", {
@@ -165,9 +165,9 @@ test_that("one weighted kappa gets one name across the headline, intra-rater, pa
 
   expected <- paste0("Linear-weighted ", KAPPA)
   headline <- as.character(r$irrtable$asDF$method[1])
-  intra    <- r$interIntraRaterIntraTable$asDF
-  boot     <- r$bootstrapCITable$asDF
-  paired   <- r$pairedAgreementTable$asDF
+  intra    <- r$maxwellREGroup$interIntraRaterIntraTable$asDF
+  boot     <- r$advancedGroup$bootstrapCITable$asDF
+  paired   <- r$pairedAgreementGroup$pairedAgreementTable$asDF
   # Every table has to have produced the row whose label is under test, or the
   # comparison below is between two absent strings.
   expect_gt(nrow(intra), 0)
@@ -244,7 +244,7 @@ test_that("the default rater metric separates readers with a large systematic of
   tb <- q(agreement(data = d, vars = names(d), raterClustering = TRUE,
                     clusterMethod = "hierarchical", clusterLinkage = "average",
                     nClusters = 2, showDendrogram = FALSE,
-                    showClusterHeatmap = FALSE))$raterClusterTable
+                    showClusterHeatmap = FALSE))$raterClusterGroup$raterClusterTable
   df <- tb$asDF
   expect_equal(nrow(df), ncol(d))
   expect_false(any(is.na(df$cluster)))
@@ -264,7 +264,7 @@ test_that("an explicit correlation metric still groups the offset readers and di
   tb <- q(agreement(data = d, vars = names(d), raterClustering = TRUE,
                     clusterDistance = "correlation", clusterMethod = "hierarchical",
                     clusterLinkage = "average", nClusters = 2, showDendrogram = FALSE,
-                    showClusterHeatmap = FALSE))$raterClusterTable
+                    showClusterHeatmap = FALSE))$raterClusterGroup$raterClusterTable
   df <- tb$asDF
   expect_equal(nrow(df), ncol(d))
   cl <- function(v) df$cluster[match(v, df$rater)]
@@ -301,7 +301,7 @@ test_that("case clustering refuses the correlation metric below three raters", {
   tb2 <- q(agreement(data = d[, c("M1", "M3")], vars = c("M1", "M3"),
                      caseClustering = TRUE, caseClusterMethod = "hierarchical",
                      caseClusterDistance = "correlation",
-                     nCaseClusters = 2))$caseClusterTable
+                     nCaseClusters = 2))$raterClusterGroup$caseClusterTable
   expect_equal(nrow(tb2$asDF), 0)
   expect_true(grepl("exactly +1 or -1", agreement_subanalysis_notice(tb2), fixed = TRUE))
 
@@ -309,7 +309,7 @@ test_that("case clustering refuses the correlation metric below three raters", {
   tb3 <- q(agreement(data = d[, c("M1", "M2", "M3")], vars = c("M1", "M2", "M3"),
                      caseClustering = TRUE, caseClusterMethod = "hierarchical",
                      caseClusterDistance = "correlation",
-                     nCaseClusters = 2))$caseClusterTable
+                     nCaseClusters = 2))$raterClusterGroup$caseClusterTable
   expect_equal(nrow(tb3$asDF), nrow(d))
   expect_false("error" %in% note_keys(tb3))
 
@@ -317,7 +317,7 @@ test_that("case clustering refuses the correlation metric below three raters", {
   # table - the refusal is scoped to the metric the user chose, not to the setup.
   tbd <- q(agreement(data = d[, c("M1", "M3")], vars = c("M1", "M3"),
                      caseClustering = TRUE, caseClusterMethod = "hierarchical",
-                     nCaseClusters = 2))$caseClusterTable
+                     nCaseClusters = 2))$raterClusterGroup$caseClusterTable
   expect_equal(nrow(tbd$asDF), nrow(d))
   expect_false("error" %in% note_keys(tbd))
 })
@@ -354,12 +354,12 @@ test_that("FIX-19: every multipleTestCorrection level runs and is named in the n
                        conditionVariable = "condition",
                        mixedEffectsComparison = TRUE, icc = TRUE,
                        multipleTestCorrection = lvl))
-    tb <- res$mixedEffectsTable$asDF
+    tb <- res$advancedGroup$mixedEffectsTable$asDF
     # Non-vacuous: the path must actually have produced rows, or the absence of
     # an error proves nothing at all.
     expect_gt(nrow(tb), 0)
     expect_true(all(is.finite(tb$p_value)))
-    seen[[lvl]] <- note_text(res$mixedEffectsTable)
+    seen[[lvl]] <- note_text(res$advancedGroup$mixedEffectsTable)
   }
 
   # `none` writes no correction note; the other three name themselves in words a

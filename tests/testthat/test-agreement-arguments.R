@@ -69,15 +69,15 @@ test_that("kendallW option calculates Kendall's W", {
   expect_s3_class(result, "agreementResults")
   # Kendall's W ranks the ratings, so an UNORDERED factor has no defensible rank
   # order and the analysis refuses rather than ranking arbitrary level codes.
-  expect_true(is.na(result$kendallWTable$asDF$w[1]))
-  expect_true(nzchar(agreement_subanalysis_notice(result$kendallWTable)))
+  expect_true(is.na(result$lightKappaTableGroup$kendallWTable$asDF$w[1]))
+  expect_true(nzchar(agreement_subanalysis_notice(result$lightKappaTableGroup$kendallWTable)))
 
   # On an ORDERED factor the rank order is declared, so it computes.
   d_ord <- agreement_threeRater
   for (v in c("Rater1", "Rater2", "Rater3"))
     d_ord[[v]] <- factor(d_ord[[v]], levels = levels(d_ord[[v]]), ordered = TRUE)
   ord <- agreement(data = d_ord, vars = c("Rater1", "Rater2", "Rater3"), kendallW = TRUE)
-  expect_false(is.na(ord$kendallWTable$asDF$w[1]))
+  expect_false(is.na(ord$lightKappaTableGroup$kendallWTable$asDF$w[1]))
 })
 
 test_that("robinsonA option calculates Robinson's A", {
@@ -88,14 +88,14 @@ test_that("robinsonA option calculates Robinson's A", {
   )
   expect_s3_class(result, "agreementResults")
   # Robinson's A treats the ratings as numbers; an unordered factor is refused.
-  expect_true(is.na(result$robinsonATable$asDF$robinsonA[1]))
-  expect_true(nzchar(agreement_subanalysis_notice(result$robinsonATable)))
+  expect_true(is.na(result$lightKappaTableGroup$robinsonATable$asDF$robinsonA[1]))
+  expect_true(nzchar(agreement_subanalysis_notice(result$lightKappaTableGroup$robinsonATable)))
 
   d_ord <- agreement_threeRater
   for (v in c("Rater1", "Rater2", "Rater3"))
     d_ord[[v]] <- factor(d_ord[[v]], levels = levels(d_ord[[v]]), ordered = TRUE)
   ord <- agreement(data = d_ord, vars = c("Rater1", "Rater2", "Rater3"), robinsonA = TRUE)
-  expect_false(is.na(ord$robinsonATable$asDF$robinsonA[1]))
+  expect_false(is.na(ord$lightKappaTableGroup$robinsonATable$asDF$robinsonA[1]))
 })
 
 test_that("meanSpearman option calculates Mean Spearman Rho", {
@@ -107,13 +107,13 @@ test_that("meanSpearman option calculates Mean Spearman Rho", {
   )
   expect_s3_class(result, "agreementResults")
   # Spearman's rho ranks the ratings; an unordered factor is refused.
-  expect_true(is.na(result$meanSpearmanTable$asDF$meanRho[1]))
+  expect_true(is.na(result$lightKappaTableGroup$meanSpearmanTable$asDF$meanRho[1]))
 
   d_ord <- agreement_ordinal
   for (v in c("PathologistA", "PathologistB"))
     d_ord[[v]] <- factor(d_ord[[v]], levels = levels(d_ord[[v]]), ordered = TRUE)
   ord <- agreement(data = d_ord, vars = c("PathologistA", "PathologistB"), meanSpearman = TRUE)
-  expect_false(is.na(ord$meanSpearmanTable$asDF$meanRho[1]))
+  expect_false(is.na(ord$lightKappaTableGroup$meanSpearmanTable$asDF$meanRho[1]))
 })
 
 # Weighted Kappa Options
@@ -299,7 +299,7 @@ test_that("ordinal factor raters are ranked by level, not by label", {
   expected_w <- irr::kendall(
     vapply(d, as.numeric, numeric(nrow(d))), correct = TRUE)$value
 
-  expect_equal(result$kendallWTable$asDF$w[1], expected_w, tolerance = 1e-8)
-  expect_false(is.na(result$robinsonATable$asDF$robinsonA[1]))
-  expect_false(is.na(result$meanSpearmanTable$asDF$meanRho[1]))
+  expect_equal(result$lightKappaTableGroup$kendallWTable$asDF$w[1], expected_w, tolerance = 1e-8)
+  expect_false(is.na(result$lightKappaTableGroup$robinsonATable$asDF$robinsonA[1]))
+  expect_false(is.na(result$lightKappaTableGroup$meanSpearmanTable$asDF$meanRho[1]))
 })

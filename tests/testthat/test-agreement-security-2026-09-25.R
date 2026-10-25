@@ -22,7 +22,7 @@ test_that("a free-text positive category and data labels are escaped in the not-
     a <- agreement_run(data.frame(R1 = r1, R2 = r2), vars = c("R1", "R2"),
                        specificAgreement = TRUE, specificAllCategories = FALSE,
                        specificPositiveCategory = "<b>x</b>")
-    note <- agreement_subanalysis_notice(a$results$specificAgreementTable)
+    note <- agreement_subanalysis_notice(a$results$specificAgreementGroup$specificAgreementTable)
     expect_true(nzchar(note))
     expect_match(note, "'&lt;b&gt;x&lt;/b&gt;' not found", fixed = TRUE)
     expect_match(note, "&lt;1%", fixed = TRUE)
@@ -62,11 +62,11 @@ test_that("case clustering refuses more than 5000 cases instead of building an n
     r2 <- r1; r2[1:500] <- sample(c("G1", "G2", "G3"), 500, TRUE)
     a <- agreement_run(data.frame(R1 = r1, R2 = r2), vars = c("R1", "R2"),
                        caseClustering = TRUE)
-    note <- agreement_subanalysis_notice(a$results$caseClusterTable)
+    note <- agreement_subanalysis_notice(a$results$raterClusterGroup$caseClusterTable)
     expect_match(note, "limited to 5000 cases", fixed = TRUE)
     expect_match(note, "5001 cases were supplied", fixed = TRUE)
     # Without the limit this run builds the matrix (about 140 s) and fills 1000 rows.
-    expect_equal(a$results$caseClusterTable$rowCount, 0)
+    expect_equal(a$results$raterClusterGroup$caseClusterTable$rowCount, 0)
 })
 
 # setError() text and table cells are shown as plain text (jamovi's client renders an
@@ -113,7 +113,7 @@ test_that("the homogeneity test's failure reason is not HTML-escaped in its tabl
         .package = "ClinicoPath")
     a <- agreement_run(d, vars = c("R1", "R2", "R3"), hierarchicalKappa = TRUE,
                        clusterVariable = "site", testClusterHomogeneity = TRUE)
-    expect_identical(a$results$homogeneityTestTable$asDF$conclusion[1],
+    expect_identical(a$results$hierarchicalGroup$homogeneityTestTable$asDF$conclusion[1],
                      "Test could not be computed: bad <1% & x")
 })
 

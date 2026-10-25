@@ -4,7 +4,7 @@ test_that("specific agreement bootstrap uses complete reader rows and whole clus
   d$a[1] <- NA
   r <- agreement_run(d, vars = c("a", "b"), specificAgreement = TRUE,
     specificPositiveCategory = "Y", specificAllCategories = FALSE,
-    specificCluster = "id", specificCIMethod = "bootstrap", nBoot = 100, seed = 81)$results$specificAgreementTable
+    specificCluster = "id", specificCIMethod = "bootstrap", nBoot = 100, seed = 81)$results$specificAgreementGroup$specificAgreementTable
   x <- r$asDF
   expect_equal(x$n_cases, c(39, 39))
   expect_equal(x$units, c(20, 20))
@@ -18,7 +18,7 @@ test_that("specific agreement bootstrap uses complete reader rows and whole clus
   expect_equal(x$ci_lower[pos], expected$lower)
   expect_match(agreement_notes(r)[["ci_bootstrap"]], "fixed readers")
   legacy <- agreement_run(d, vars = c("a", "b"), specificAgreement = TRUE,
-    specificCIMethod = "legacy")$results$specificAgreementTable
+    specificCIMethod = "legacy")$results$specificAgreementGroup$specificAgreementTable
   expect_true(all(legacy$asDF$ci_method == "Approximate Wilson (legacy)"))
   expect_match(agreement_notes(legacy)[["ci_approx"]], "approx", ignore.case = TRUE)
 })

@@ -549,6 +549,7 @@ psychopdaROCOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
             private$..metaAnalysis <- jmvcore::OptionBool$new(
                 "metaAnalysis",
                 metaAnalysis,
+                hidden=TRUE,
                 default=FALSE)
             private$..metaAnalysisMethod <- jmvcore::OptionList$new(
                 "metaAnalysisMethod",

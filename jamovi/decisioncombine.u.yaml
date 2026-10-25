@@ -77,7 +77,7 @@ children:
         label: About this analysis
 
   - type: CollapseBox
-    label: Rule ranking
+    label: Rule Ranking
     collapsed: true
     children:
       - type: CheckBox
@@ -127,7 +127,7 @@ children:
             enable: (showBarPlot || showHeatmap || showForest)
 
   - type: CollapseBox
-    label: Save to data
+    label: Save to Data
     collapsed: true
     children:
       - type: Output

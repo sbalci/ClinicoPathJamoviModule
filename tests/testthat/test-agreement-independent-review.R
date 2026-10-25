@@ -61,18 +61,18 @@ test_that("IR-02: Finn uses the declared scale size, not the finnLevels default"
 
   # finnLevels still defaults to 3; the point is that it is no longer believed.
   r <- q(agreement(data = d, vars = c("A","B"), finn = TRUE))
-  got <- as.numeric(r$finnTable$asDF$finn_value[1])
+  got <- as.numeric(r$lightKappaTableGroup$finnTable$asDF$finn_value[1])
 
   expect_equal(got, irr::finn(num, s.levels = 2)$value, tolerance = 1e-8)
   # The old behaviour was not merely different - it flipped the sign.
   expect_lt(got, 0)
   expect_gt(irr::finn(num, s.levels = 3)$value, 0)
-  expect_true("levels_from_data" %in% note_keys(r$finnTable))
+  expect_true("levels_from_data" %in% note_keys(r$lightKappaTableGroup$finnTable))
 
   # Agreeing option -> value unchanged and no note to explain away.
   r3 <- q(agreement(data = d, vars = c("A","B"), finn = TRUE, finnLevels = 2))
-  expect_equal(as.numeric(r3$finnTable$asDF$finn_value[1]), got, tolerance = 1e-12)
-  expect_false("levels_from_data" %in% note_keys(r3$finnTable))
+  expect_equal(as.numeric(r3$lightKappaTableGroup$finnTable$asDF$finn_value[1]), got, tolerance = 1e-12)
+  expect_false("levels_from_data" %in% note_keys(r3$lightKappaTableGroup$finnTable))
 })
 
 test_that("IR-02b: Finn recodes both raters against ONE shared level set", {
@@ -90,7 +90,7 @@ test_that("IR-02b: Finn recodes both raters against ONE shared level set", {
   r <- q(agreement(data = data.frame(A = A, B = B), vars = c("A","B"), finn = TRUE))
   shared <- irr::finn(data.frame(a = c(1,3,1,3,1,3), b = c(1,3,1,3,3,1)), s.levels = 3)$value
   percol <- irr::finn(data.frame(a = c(1,3,1,3,1,3), b = c(1,2,1,2,2,1)), s.levels = 3)$value
-  expect_equal(as.numeric(r$finnTable$asDF$finn_value[1]), shared, tolerance = 1e-8)
+  expect_equal(as.numeric(r$lightKappaTableGroup$finnTable$asDF$finn_value[1]), shared, tolerance = 1e-8)
   expect_false(isTRUE(all.equal(shared, percol)))   # the fixture really does trigger it
 
   # Conflicting declared orders cannot be reconciled without inventing a scale.
@@ -99,8 +99,8 @@ test_that("IR-02b: Finn recodes both raters against ONE shared level set", {
     B = factor(c("Low","High","High"), levels = c("High","Moderate","Low"))
   )
   rb <- q(agreement(data = bad, vars = c("A","B"), finn = TRUE))
-  expect_true(nzchar(agreement_subanalysis_notice(rb$finnTable)))
-  expect_true(is.na(as.numeric(rb$finnTable$asDF$finn_value[1])))
+  expect_true(nzchar(agreement_subanalysis_notice(rb$lightKappaTableGroup$finnTable)))
+  expect_true(is.na(as.numeric(rb$lightKappaTableGroup$finnTable$asDF$finn_value[1])))
 })
 
 # ---- IR-03 measurement level on the R API path -------------------------------
@@ -145,9 +145,9 @@ test_that("IR-03: a non-integer numeric measure takes the same branch at any sam
   extras <- q(agreement(
     data = data.frame(R1 = c(1.5, 2.5, 1.5, 2.5, 1.5), R2 = c(1.5, 2.5, 2.5, 2.5, 1.5)),
     vars = c("R1","R2"), finn = TRUE, raterBias = TRUE))
-  expect_true("type_error" %in% note_keys(extras$finnTable))
-  expect_true(is.na(as.numeric(extras$finnTable$asDF$finn_value[1])))
-  expect_true("type_error" %in% note_keys(extras$raterBiasTable))
+  expect_true("type_error" %in% note_keys(extras$lightKappaTableGroup$finnTable))
+  expect_true(is.na(as.numeric(extras$lightKappaTableGroup$finnTable$asDF$finn_value[1])))
+  expect_true("type_error" %in% note_keys(extras$raterBiasGroup$raterBiasTable))
 
   # The same numbers declared as categories DO get kappa.
   fac <- q(agreement(data = data.frame(R1 = factor(c(1,2,1,2,1)), R2 = factor(c(1,2,2,2,1))),
@@ -255,17 +255,17 @@ test_that("IR-05: the rater-bias table names its own hypothesis and shows df = 1
 
   r <- q(agreement(data = d, vars = c("R1","R2"), raterBias = TRUE,
                    bhapkar = TRUE, showRaterBiasGuide = TRUE))
-  tb <- r$raterBiasTable$asDF
+  tb <- r$raterBiasGroup$raterBiasTable$asDF
 
   expect_equal(as.numeric(tb$df[1]), 1)                       # was blank: no $parameter
   expect_false(grepl("marginal homogeneity", as.character(tb$method[1]), ignore.case = TRUE))
-  expect_true("scope" %in% note_keys(r$raterBiasTable))
-  expect_match(note_text(r$raterBiasTable), "Bhapkar", fixed = TRUE)
+  expect_true("scope" %in% note_keys(r$raterBiasGroup$raterBiasTable))
+  expect_match(note_text(r$raterBiasGroup$raterBiasTable), "Bhapkar", fixed = TRUE)
 
   # The general question is answered by the test that actually asks it.
-  expect_lt(as.numeric(r$bhapkarTable$asDF$p[1]), .05)
+  expect_lt(as.numeric(r$raterBiasGroup$bhapkarTable$asDF$p[1]), .05)
   expect_equal(as.numeric(tb$p[1]), 1, tolerance = 1e-12)
-  guide <- paste(as.character(r$raterBiasExplanation$content), collapse = " ")
+  guide <- paste(as.character(r$raterBiasGroup$raterBiasExplanation$content), collapse = " ")
   expect_false(grepl("all raters simultaneously", guide, ignore.case = TRUE))
 
   # On nominal variables "higher" is undefined, so the directional test must
@@ -276,21 +276,21 @@ test_that("IR-05: the rater-bias table names its own hypothesis and shows df = 1
   )
   rn <- q(agreement(data = nominal, vars = c("R1","R2"),
                     raterBias = TRUE, bhapkar = TRUE))
-  expect_true("ordinal_required" %in% note_keys(rn$raterBiasTable))
-  expect_true(is.na(as.numeric(rn$raterBiasTable$asDF$p[1])))
-  expect_lt(as.numeric(rn$bhapkarTable$asDF$p[1]), .05)
+  expect_true("ordinal_required" %in% note_keys(rn$raterBiasGroup$raterBiasTable))
+  expect_true(is.na(as.numeric(rn$raterBiasGroup$raterBiasTable$asDF$p[1])))
+  expect_lt(as.numeric(rn$raterBiasGroup$bhapkarTable$asDF$p[1]), .05)
 
   mismatched <- data.frame(
     R1 = ordered(c("A","B","C","A"), levels = c("A","B","C")),
     R2 = ordered(c("A","B","C","B"), levels = c("A","C","B"))
   )
   rm <- q(agreement(data = mismatched, vars = c("R1","R2"), raterBias = TRUE))
-  expect_true("scale_mismatch" %in% note_keys(rm$raterBiasTable))
-  expect_true(is.na(as.numeric(rm$raterBiasTable$asDF$p[1])))
+  expect_true("scale_mismatch" %in% note_keys(rm$raterBiasGroup$raterBiasTable))
+  expect_true(is.na(as.numeric(rm$raterBiasGroup$raterBiasTable$asDF$p[1])))
 
   three <- data.frame(R1 = d$R1, R2 = d$R2, R3 = d$R1)
   r3 <- q(agreement(data = three, vars = names(three), bhapkar = TRUE))
-  expect_false(grepl("Rater Bias Test", note_text(r3$bhapkarTable), fixed = TRUE))
+  expect_false(grepl("Rater Bias Test", note_text(r3$raterBiasGroup$bhapkarTable), fixed = TRUE))
 })
 
 # ---- IR-06 / F-07 Bland-Altman disclosures -----------------------------------
@@ -304,18 +304,18 @@ test_that("IR-06: the proportional-bias confound and the LoA coverage are disclo
 
   # D on M shares measurement error with its own regressor: unequal precision alone
   # produces a slope. The estimator is unchanged, so the caveat must be present.
-  expect_true("prop_bias_assumption" %in% note_keys(r$blandAltmanStats))
+  expect_true("prop_bias_assumption" %in% note_keys(r$blandAltmanGroup$blandAltmanStats))
 
   # baConfidenceLevel is a COVERAGE proportion; changing it moves the limits.
-  expect_true("loa_coverage" %in% note_keys(r$blandAltmanStats))
+  expect_true("loa_coverage" %in% note_keys(r$blandAltmanGroup$blandAltmanStats))
   wide <- q(agreement(data = d, vars = c("M1","M2"),
                       blandAltmanPlot = TRUE, baConfidenceLevel = 0.99))
-  expect_gt(as.numeric(wide$blandAltmanStats$asDF$upperLoA[1]),
-            as.numeric(r$blandAltmanStats$asDF$upperLoA[1]))
+  expect_gt(as.numeric(wide$blandAltmanGroup$blandAltmanStats$asDF$upperLoA[1]),
+            as.numeric(r$blandAltmanGroup$blandAltmanStats$asDF$upperLoA[1]))
 
   # No proportional-bias request -> no caveat about a test that was not run.
   off <- q(agreement(data = d, vars = c("M1","M2"), blandAltmanPlot = TRUE))
-  expect_false("prop_bias_assumption" %in% note_keys(off$blandAltmanStats))
+  expect_false("prop_bias_assumption" %in% note_keys(off$blandAltmanGroup$blandAltmanStats))
 })
 
 # ---- F-08 empirical TDI scope -------------------------------------------------
@@ -325,9 +325,9 @@ test_that("IR-07: empirical TDI does not claim equivalence or future coverage", 
   d <- data.frame(M1 = rnorm(50, 20, 4), M2 = rnorm(50, 20, 4))
   r <- q(agreement(data = d, vars = c("M1","M2"), tdi = TRUE,
                    tdiCoverage = 90, tdiLimit = 10, nBoot = 100))
-  expect_true("scope" %in% note_keys(r$tdiTable))
-  expect_match(note_text(r$tdiTable), "unconditional empirical quantile", ignore.case = TRUE)
-  interpretation <- as.character(r$tdiTable$asDF$interpretation[1])
+  expect_true("scope" %in% note_keys(r$iccGroup$tdiTable))
+  expect_match(note_text(r$iccGroup$tdiTable), "unconditional empirical quantile", ignore.case = TRUE)
+  interpretation <- as.character(r$iccGroup$tdiTable$asDF$interpretation[1])
   expect_false(grepl("equivalence criterion", interpretation, ignore.case = TRUE))
   expect_match(interpretation, "Observed criterion", ignore.case = TRUE)
 })
@@ -409,7 +409,7 @@ test_that("FIX-01: the iota table is scoped to one variable and no multivariate 
                   mit_P1 = pmax(0, mit + sample(-1:1, m, TRUE)),
                   mit_P2 = pmax(0, mit + sample(-1:1, m, TRUE)))
   r <- q(agreement(data = d, vars = names(d), iota = TRUE))
-  tb <- r$iotaTable
+  tb <- r$maxwellREGroup$iotaTable
 
   # (a) the scope note is present and states the withdrawal in so many words
   expect_true("scope" %in% note_keys(tb))
@@ -430,8 +430,10 @@ test_that("FIX-01: the iota table is scoped to one variable and no multivariate 
   root <- agr_src_root()
   skip_if_not(nzchar(root), "agreement source files not reachable from the test working directory")
   ry <- readLines(file.path(root, "jamovi", "agreement.r.yaml"), warn = FALSE)
-  beg <- grep("^    - name: iotaTable$", ry)[1]
-  end <- grep("^    - name: ", ry); end <- end[end > beg][1]
+  # iotaTable sits inside a section Group, so its block ends at the next line indented no deeper.
+  beg <- grep("^ +- name: iotaTable$", ry)[1]
+  lead <- nchar(ry) - nchar(sub("^ +", "", ry))
+  end <- which(seq_along(ry) > beg & nzchar(trimws(ry)) & lead <= lead[beg])[1]
   expect_false(any(grepl("- name: variables", ry[beg:(end - 1L)], fixed = TRUE)))
 
   # (d) every surviving occurrence of "multivariate" is a code comment or an
@@ -468,7 +470,7 @@ test_that("FIX-02: Condition A kappa is the headline kappa under every wght sett
                      pairedAgreementTest = TRUE, conditionBVars = c("B1", "B2"),
                      pairedBootN = 500, seed = 1))
     c(head = as.numeric(r$irrtable$asDF$kappa[1]),
-      paired = as.numeric(row_by_key(r$pairedAgreementTable$asDF, "kappa")$condition_a))
+      paired = as.numeric(row_by_key(r$pairedAgreementGroup$pairedAgreementTable$asDF, "kappa")$condition_a))
   }, c(0, 0))
 
   # irr::kappa2() was called with no weight=, so Condition A carried the
@@ -490,7 +492,7 @@ test_that("FIX-03: unequal rater panels drop the kappa row; a non-estimable kapp
   # chance agreement, so their difference has no estimand and there is no row.
   r <- q(agreement(data = d, vars = c("A1", "A2"), pairedAgreementTest = TRUE,
                    conditionBVars = c("B1", "B2", "B3"), pairedBootN = 500, seed = 1))
-  tb <- r$pairedAgreementTable
+  tb <- r$pairedAgreementGroup$pairedAgreementTable
   expect_false(has_row_key(tb$asDF, "kappa"))
   expect_true(has_row_key(tb$asDF, "pct_agree"))      # comparable across panel sizes
   expect_true("kappa_panel" %in% note_keys(tb))
@@ -503,7 +505,7 @@ test_that("FIX-03: unequal rater panels drop the kappa row; a non-estimable kapp
   dc$C2 <- dc$C1
   r2 <- q(agreement(data = dc, vars = c("A1", "A2"), pairedAgreementTest = TRUE,
                     conditionBVars = c("C1", "C2"), pairedBootN = 500, seed = 1))
-  tb2 <- r2$pairedAgreementTable
+  tb2 <- r2$pairedAgreementGroup$pairedAgreementTable
   expect_true(has_row_key(tb2$asDF, "kappa"))
   kr <- row_by_key(tb2$asDF, "kappa")
   expect_true(all(is.na(c(kr$condition_a, kr$condition_b, kr$difference,
@@ -541,13 +543,13 @@ test_that("FIX-04: every avg_similarity lies in [-1, 1] on every level of both d
                      raterClustering = TRUE, clusterMethod = "hierarchical",
                      clusterDistance = dm, clusterLinkage = "average", nClusters = 2,
                      showDendrogram = FALSE, showClusterHeatmap = FALSE))
-    in_unit(r$raterClusterTable, paste("rater metric", dm))
+    in_unit(r$raterClusterGroup$raterClusterTable, paste("rater metric", dm))
   }
   for (dm in c("euclidean", "manhattan", "correlation", "agreement")) {
     r <- q(agreement(data = d, vars = names(d),
                      caseClustering = TRUE, caseClusterMethod = "hierarchical",
                      caseClusterDistance = dm, nCaseClusters = 2))
-    in_unit(r$caseClusterTable, paste("case metric", dm))
+    in_unit(r$raterClusterGroup$caseClusterTable, paste("case metric", dm))
   }
   # `ccc` is not a level of caseClusterDistance: it must be refused, not accepted
   # and not silently mapped onto another metric.
@@ -564,7 +566,7 @@ test_that("FIX-05: the correlation metric discloses the systematic offset and qu
   tb <- q(agreement(data = d, vars = names(d), raterClustering = TRUE,
                     clusterMethod = "hierarchical", clusterDistance = "correlation",
                     clusterLinkage = "average", nClusters = 2,
-                    showDendrogram = FALSE, showClusterHeatmap = FALSE))$raterClusterTable
+                    showDendrogram = FALSE, showClusterHeatmap = FALSE))$raterClusterGroup$raterClusterTable
 
   # Correlation distance is 1 - r, so it removes any systematic offset: readers
   # 25 Ki-67 points apart on every case still land in one cluster.
@@ -596,7 +598,7 @@ test_that("FIX-05: the correlation metric discloses the systematic offset and qu
   eu <- q(agreement(data = d, vars = names(d), raterClustering = TRUE,
                     clusterMethod = "hierarchical", clusterDistance = "euclidean",
                     clusterLinkage = "average", nClusters = 2,
-                    showDendrogram = FALSE, showClusterHeatmap = FALSE))$raterClusterTable
+                    showDendrogram = FALSE, showClusterHeatmap = FALSE))$raterClusterGroup$raterClusterTable
   expect_false("offset_blind" %in% note_keys(eu))
 })
 
@@ -613,7 +615,7 @@ test_that("FIX-05b: under the DEFAULT metric the offset readers separate and not
   tb <- q(agreement(data = d, vars = names(d), raterClustering = TRUE,
                     clusterMethod = "hierarchical", clusterLinkage = "average",
                     nClusters = 2, showDendrogram = FALSE,
-                    showClusterHeatmap = FALSE))$raterClusterTable
+                    showClusterHeatmap = FALSE))$raterClusterGroup$raterClusterTable
   df <- tb$asDF
   # A missing row or an NA cluster id would make every `!=` below NA, not FALSE.
   expect_equal(nrow(df), ncol(d))
@@ -645,7 +647,7 @@ test_that("FIX-05b: under the DEFAULT metric the offset readers separate and not
   expl <- q(agreement(data = d, vars = names(d), raterClustering = TRUE,
                       clusterDistance = "ccc", clusterMethod = "hierarchical",
                       clusterLinkage = "average", nClusters = 2,
-                      showDendrogram = FALSE, showClusterHeatmap = FALSE))$raterClusterTable
+                      showDendrogram = FALSE, showClusterHeatmap = FALSE))$raterClusterGroup$raterClusterTable
   expect_equal(expl$asDF, df)
 })
 
@@ -666,7 +668,7 @@ test_that("FIX-06: one kappa gets one Landis & Koch word in the summary, subgrou
   summary_txt <- gsub("<[^>]*>", " ", paste(as.character(r$summary$content), collapse = " "))
   expect_true(grepl(paste0(tolower(lk_band(k)), " agreement"), summary_txt, fixed = TRUE))
 
-  intra <- r$interIntraRaterIntraTable$asDF
+  intra <- r$maxwellREGroup$interIntraRaterIntraTable$asDF
   expect_equal(as.numeric(intra$value[1]), k, tolerance = 1e-9)
   expect_identical(as.character(intra$interpretation[1]), lk_band(k))
 
@@ -677,7 +679,7 @@ test_that("FIX-06: one kappa gets one Landis & Koch word in the summary, subgrou
                    vapply(as.numeric(sub$agreement_stat), lk_band, ""))
 
   # Both tables name the scale they used, so the reader is not left to guess.
-  expect_true("scale" %in% note_keys(r$interIntraRaterIntraTable))
+  expect_true("scale" %in% note_keys(r$maxwellREGroup$interIntraRaterIntraTable))
   expect_true("scale" %in% note_keys(r$subgroupAgreementTable))
 })
 
@@ -693,8 +695,8 @@ test_that("FIX-07: ordered factors and their own integer codes give the identica
   dOrd <- data.frame(P1 = mk(0), P2 = mk(.45), P3 = mk(.25))
   dNum <- as.data.frame(lapply(dOrd, function(x) as.integer(x) - 1L))
 
-  vOrd <- q(agreement(data = dOrd, vars = names(dOrd), maxwellRE = TRUE))$maxwellRETable
-  vNum <- q(agreement(data = dNum, vars = names(dNum), maxwellRE = TRUE))$maxwellRETable
+  vOrd <- q(agreement(data = dOrd, vars = names(dOrd), maxwellRE = TRUE))$maxwellREGroup$maxwellRETable
+  vNum <- q(agreement(data = dNum, vars = names(dNum), maxwellRE = TRUE))$maxwellREGroup$maxwellRETable
   cells <- c("re_value", "systematic_prop", "random_prop",
              "total_variance", "systematic_var", "random_var")
 
@@ -711,7 +713,7 @@ test_that("FIX-07: ordered factors and their own integer codes give the identica
 
   # An unordered factor has no scale for an offset to sit on and is still refused.
   dNom <- as.data.frame(lapply(dOrd, function(x) factor(as.character(x), levels = lv)))
-  vNom <- q(agreement(data = dNom, vars = names(dNom), maxwellRE = TRUE))$maxwellRETable
+  vNom <- q(agreement(data = dNom, vars = names(dNom), maxwellRE = TRUE))$maxwellREGroup$maxwellRETable
   expect_true(is.na(as.numeric(vNom$asDF$re_value[1])))
   expect_true("scale" %in% note_keys(vNom))
 })
@@ -730,7 +732,7 @@ test_that("FIX-08: a clamped negative rater variance blanks the shares and discl
   raw <- (SSr / (nr - 1) - (SSt - SSc - SSr) / ((nc - 1) * (nr - 1))) / nc
   expect_lt(raw, 0)
 
-  tb <- q(agreement(data = d, vars = names(d), maxwellRE = TRUE))$maxwellRETable
+  tb <- q(agreement(data = d, vars = names(d), maxwellRE = TRUE))$maxwellREGroup$maxwellRETable
   row <- tb$asDF
   # A share taken from a component truncated at its boundary is 0% and 100% by
   # construction, not by measurement, so the three share cells are withheld.
@@ -753,7 +755,7 @@ test_that("FIX-09: the sparse-cell note fires on the 3-category 4-rater design a
   d <- data.frame(a = factor(rep(c("x", "y"), 6)), b = factor(rep(c("x", "y", "x"), 4)))
   tb <- q(agreement(data = d, vars = c("a", "b"), agreementSampleSize = TRUE,
                     ssMetric = "fleiss", ssNCategories = 3, ssNRaters = 4,
-                    ssKappaNull = 0.4, ssKappaAlt = 0.7))$agreementSampleSizeTable
+                    ssKappaNull = 0.4, ssKappaAlt = 0.7))$pairedAgreementGroup$agreementSampleSizeTable
   n <- as.numeric(row_by_key(tb$asDF, "n_required")$value)
   expect_equal(n, 18)
 
@@ -766,7 +768,7 @@ test_that("FIX-09: the sparse-cell note fires on the 3-category 4-rater design a
   # A design whose cells are NOT sparse must not carry the caveat.
   ok <- q(agreement(data = d, vars = c("a", "b"), agreementSampleSize = TRUE,
                     ssMetric = "kappa", ssNCategories = 2, ssNRaters = 2,
-                    ssKappaNull = 0.4, ssKappaAlt = 0.7))$agreementSampleSizeTable
+                    ssKappaNull = 0.4, ssKappaAlt = 0.7))$pairedAgreementGroup$agreementSampleSizeTable
   expect_false("sparse" %in% note_keys(ok))
 })
 
@@ -775,7 +777,7 @@ test_that("FIX-10: the sample-size table states the calculation is for unweighte
   skip_unless_agreement()
   d <- data.frame(a = factor(rep(c("x", "y"), 6)), b = factor(rep(c("x", "y", "x"), 4)))
   tb <- q(agreement(data = d, vars = c("a", "b"),
-                    agreementSampleSize = TRUE))$agreementSampleSizeTable
+                    agreementSampleSize = TRUE))$pairedAgreementGroup$agreementSampleSizeTable
   expect_true("unweighted" %in% note_keys(tb))
   expect_true(grepl("unweighted", note_text(tb), fixed = TRUE))
   expect_true(grepl("does not apply to weighted kappa", note_text(tb), fixed = TRUE))
@@ -783,7 +785,7 @@ test_that("FIX-10: the sample-size table states the calculation is for unweighte
   # The ICC branch sizes a different study, so the kappa-only note is cleared.
   icc <- q(agreement(data = d, vars = c("a", "b"), agreementSampleSize = TRUE,
                      ssMetric = "icc", ssKappaNull = 0.6, ssKappaAlt = 0.8,
-                     ssNRaters = 2))$agreementSampleSizeTable
+                     ssNRaters = 2))$pairedAgreementGroup$agreementSampleSizeTable
   expect_false("unweighted" %in% note_keys(icc))
 })
 
@@ -837,7 +839,7 @@ test_that("FIX-12: clusterDistance is a documented no-op on categorical ratings"
     q(agreement(data = d, vars = names(d), raterClustering = TRUE,
                 clusterMethod = "hierarchical", clusterDistance = dm,
                 clusterLinkage = "average", nClusters = 2,
-                showDendrogram = FALSE, showClusterHeatmap = FALSE))$raterClusterTable)
+                showDendrogram = FALSE, showClusterHeatmap = FALSE))$raterClusterGroup$raterClusterTable)
 
   # The choice genuinely cannot act on categorical ratings - the distance is
   # always 1 minus the proportion of cases two raters placed alike - so the
@@ -858,7 +860,7 @@ test_that("FIX-12: clusterDistance is a documented no-op on categorical ratings"
                       raterClustering = TRUE, clusterMethod = "hierarchical",
                       clusterDistance = "agreement", clusterLinkage = "average",
                       nClusters = 2, showDendrogram = FALSE,
-                      showClusterHeatmap = FALSE))$raterClusterTable
+                      showClusterHeatmap = FALSE))$raterClusterGroup$raterClusterTable
   expect_true("exact_match" %in% note_keys(cont))
   expect_false("metric_ignored" %in% note_keys(cont))
 })
@@ -869,7 +871,7 @@ test_that("FIX-13: 8 raters produces the module's translated guard, not the upst
   d <- data.frame(a = factor(rep(c("x", "y"), 6)), b = factor(rep(c("x", "y", "x"), 4)))
   tb <- q(agreement(data = d, vars = c("a", "b"), agreementSampleSize = TRUE,
                     ssMetric = "fleiss", ssNCategories = 3,
-                    ssNRaters = 8))$agreementSampleSizeTable
+                    ssNRaters = 8))$pairedAgreementGroup$agreementSampleSizeTable
 
   # Refused, not fabricated: the guard returns before any row is written.
   expect_true(all(is.na(as.numeric(tb$asDF$value))))

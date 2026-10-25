@@ -52,10 +52,10 @@ test_that("L321 a rerun that refuses mean Spearman leaves no rho from the previo
     d_nom <- as.data.frame(lapply(d_ord, function(x) factor(as.character(x), lv)))
     a <- rr_object(d_ord, vars = c("R1", "R2", "R3"), meanSpearman = TRUE)
     rr_rerun(a, d_ord)
-    expect_true(is.finite(a$results$meanSpearmanTable$asDF$meanRho))   # control: it ran
+    expect_true(is.finite(a$results$lightKappaTableGroup$meanSpearmanTable$asDF$meanRho))   # control: it ran
     rr_rerun(a, d_nom)
-    expect_true(is.na(a$results$meanSpearmanTable$asDF$meanRho))
-    expect_true(nzchar(agreement_subanalysis_notice(a$results$meanSpearmanTable)))
+    expect_true(is.na(a$results$lightKappaTableGroup$meanSpearmanTable$asDF$meanRho))
+    expect_true(nzchar(agreement_subanalysis_notice(a$results$lightKappaTableGroup$meanSpearmanTable)))
 })
 
 test_that("L361 a continuous rerun blanks the headline kappa, interval and p", {
@@ -72,7 +72,7 @@ test_that("L361 a continuous rerun blanks the headline kappa, interval and p", {
     rr_rerun(a, cont_d)
     h <- a$results$irrtable$asDF
     expect_true(all(is.na(c(h$kappa, h$ci_lower, h$ci_upper, h$z, h$p))))
-    expect_true(is.na(a$results$lightKappaTable$asDF$kappa))
+    expect_true(is.na(a$results$lightKappaTableGroup$lightKappaTable$asDF$kappa))
 })
 
 test_that("L340 a categorical rerun drops the continuous-data refusal notes", {
@@ -97,7 +97,7 @@ test_that("L476 the two-rater frequency table keeps ER- and ER+ apart", {
     lv <- c("ER-", "ER+")
     d <- data.frame(R1 = factor(c(rep("ER-", 6), rep("ER+", 4)), lv),
                     R2 = factor(c("ER-", "ER-", "ER-", "ER-", "ER+", "ER+", "ER+", "ER+", "ER+", "ER-"), lv))
-    tb <- agreement_run(d, vars = c("R1", "R2"), sft = TRUE)$results$contingencyTable
+    tb <- agreement_run(d, vars = c("R1", "R2"), sft = TRUE)$results$contingencyTableGroup$contingencyTable
     oracle <- table(d$R1, d$R2)
     df <- tb$asDF
     titles <- vapply(tb$columns, function(cl) cl$title, character(1))
@@ -115,7 +115,7 @@ test_that("L477 the combination table lists the most frequent patterns first", {
     unanimous <- data.frame(R1 = rep("E", 60), R2 = rep("E", 60), R3 = rep("E", 60))
     noise <- data.frame(R1 = sample(lv, 150, TRUE), R2 = sample(lv, 150, TRUE), R3 = sample(lv, 150, TRUE))
     d <- as.data.frame(lapply(rbind(noise, unanimous), factor, levels = lv))
-    tb <- agreement_run(d, vars = c("R1", "R2", "R3"), sft = TRUE)$results$ratingCombinationsTable
+    tb <- agreement_run(d, vars = c("R1", "R2", "R3"), sft = TRUE)$results$contingencyTableGroup$ratingCombinationsTable
     patterns <- table(paste(d$R1, d$R2, d$R3))
     df <- tb$asDF
     expect_equal(as.integer(df$count[1]), as.integer(max(patterns)))    # was: EEE (60) not shown
@@ -129,7 +129,7 @@ test_that("L482 alpha is not reported as 1 when every rating is one category", {
     d <- data.frame(R1 = factor(rep("Neg", 20), c("Neg", "Pos")),
                     R2 = factor(rep("Neg", 20), c("Neg", "Pos")),
                     R3 = factor(rep("Neg", 20), c("Neg", "Pos")))
-    kt <- agreement_run(d, vars = c("R1", "R2", "R3"), kripp = TRUE)$results$krippTable
+    kt <- agreement_run(d, vars = c("R1", "R2", "R3"), kripp = TRUE)$results$krippTableGroup$krippTable
     expect_true(is.na(kt$asDF$alpha))                               # was 1.000 "Reliable"
     expect_true("single_category" %in% names(agreement_notes(kt)))
 })
@@ -141,7 +141,7 @@ test_that("L482 bootstrap resamples holding one category no longer pull the uppe
     d$R1[c(1, 2)] <- "Pos"; d$R2[1] <- "Pos"                        # the rare call sits in 2 cases
     d <- as.data.frame(lapply(d, factor, levels = lv))
     kt <- agreement_run(d, vars = c("R1", "R2", "R3"), kripp = TRUE, bootstrap = TRUE,
-                        nBoot = 400, seed = 42)$results$krippTable
+                        nBoot = 400, seed = 42)$results$krippTableGroup$krippTable
     # Oracle: redo the resampling with the formula, dropping resamples with one category.
     m <- sapply(d, as.integer)
     withr::local_seed(42)
@@ -164,7 +164,7 @@ test_that("irr complete-data bias: alpha with 3 raters matches the coincidence-m
     d <- as.data.frame(lapply(as.data.frame(m), function(x) factor(x, lv)))
     names(d) <- c("R1", "R2", "R3")
     a <- agreement_run(d, vars = names(d), kripp = TRUE, krippMethod = "nominal")
-    expect_equal(a$results$krippTable$asDF$alpha, kripp_oracle(m, "nominal"), tolerance = 1e-8)
+    expect_equal(a$results$krippTableGroup$krippTable$asDF$alpha, kripp_oracle(m, "nominal"), tolerance = 1e-8)
     expect_equal(kripp_oracle(m, "nominal"),
                  irrCAC::krippen.alpha.raw(as.data.frame(m), categ.labels = 0:3)$est$coeff.val,
                  tolerance = 1e-4)                               # the oracle agrees with irrCAC
@@ -179,8 +179,8 @@ test_that("R1 the bootstrap Krippendorff row is the headline statistic", {
     a <- agreement_run(num, vars = names(num), kripp = TRUE, krippMethod = "ratio",
                        bootstrapCI = TRUE, nBoot = 100)
     oracle <- kripp_oracle(as.matrix(num), "ratio")
-    expect_equal(a$results$krippTable$asDF$alpha, oracle, tolerance = 1e-8)
-    bt <- a$results$bootstrapCITable$asDF
+    expect_equal(a$results$krippTableGroup$krippTable$asDF$alpha, oracle, tolerance = 1e-8)
+    bt <- a$results$advancedGroup$bootstrapCITable$asDF
     expect_equal(bt$estimate[grepl("Krippendorff", bt$metric)], oracle, tolerance = 1e-8)   # was 0.844
 })
 
@@ -191,11 +191,11 @@ test_that("R5 interval alpha scores numerically labelled categories by their val
                       R3 = ifelse(runif(40) < .8, t0, sample(c(1, 2, 5, 6), 40, TRUE)))
     fac <- as.data.frame(lapply(num, function(x) factor(x, levels = c(1, 2, 5, 6), ordered = TRUE)))
     oracle <- kripp_oracle(as.matrix(num), "interval")
-    kt <- agreement_run(fac, vars = names(fac), kripp = TRUE, krippMethod = "interval")$results$krippTable
+    kt <- agreement_run(fac, vars = names(fac), kripp = TRUE, krippMethod = "interval")$results$krippTableGroup$krippTable
     expect_equal(kt$asDF$alpha, oracle, tolerance = 1e-8)        # was scored on positions 1..4
     expect_false("positions" %in% names(agreement_notes(kt)))
     txt <- data.frame(lapply(fac, function(x) factor(c("a", "b", "c", "d")[as.integer(x)], c("a", "b", "c", "d"), ordered = TRUE)))
-    kt2 <- agreement_run(txt, vars = names(txt), kripp = TRUE, krippMethod = "interval")$results$krippTable
+    kt2 <- agreement_run(txt, vars = names(txt), kripp = TRUE, krippMethod = "interval")$results$krippTableGroup$krippTable
     expect_true("positions" %in% names(agreement_notes(kt2)))    # positions are disclosed
 })
 
@@ -213,8 +213,8 @@ tie_fixture <- function() {
 test_that("L458 strict accuracy does not depend on the order of the annotator variables", {
     d <- tie_fixture()
     run <- function(vars) {
-        tb <- agreement_run(d, vars = vars, multiAnnotatorConcordance = TRUE, predictionColumn = 1,
-                            tieBreaker = "highest")$results$concordanceF1Table$asDF
+        tb <- agreement_run(d, vars = vars, multiAnnotatorConcordance = TRUE, predictionRater = "P",
+                            tieBreaker = "highest")$results$advancedGroup$concordanceF1Table$asDF
         tb$value[tb$metric == tb$metric[2]]
     }
     # Oracle: plurality with ties broken to the higher grade on Low < Moderate < High.
@@ -233,7 +233,7 @@ test_that("L437 the modal rating's tie-break does not depend on variable order",
 
 test_that("L459 the strict reference is labelled a plurality, not a majority", {
     tb <- agreement_run(tie_fixture(), vars = c("P", "A1", "A2"), multiAnnotatorConcordance = TRUE,
-                        predictionColumn = 1)$results$concordanceF1Table$asDF
+                        predictionRater = "P")$results$advancedGroup$concordanceF1Table$asDF
     expect_true(any(grepl("Plurality", tb$comparison, fixed = TRUE)))
     expect_false(any(grepl("Majority consensus", tb$comparison, fixed = TRUE)))
 })
@@ -302,7 +302,7 @@ test_that("#6 Stuart-Maxwell and Bhapkar run when the categories form disconnect
     # Oracle 1: the groups never exchange cases, so SM is the sum of their McNemar tests.
     mc <- function(b, c) (b - c)^2 / (b + c)
     sm_oracle <- mc(3, 2) + mc(4, 1)
-    sm <- r$stuartMaxwellTable$asDF
+    sm <- r$raterBiasGroup$stuartMaxwellTable$asDF
     expect_equal(sm$chisq, sm_oracle, tolerance = 1e-10)               # was refused (singular)
     expect_equal(sm$df, 2)
     expect_equal(sm$p, pchisq(sm_oracle, 2, lower.tail = FALSE), tolerance = 1e-10)
@@ -310,7 +310,7 @@ test_that("#6 Stuart-Maxwell and Bhapkar run when the categories form disconnect
     n <- sum(tab); p <- tab / n; dd <- rowSums(p) - colSums(p)
     S <- -(p + t(p)) - outer(dd, dd)
     diag(S) <- rowSums(p) + colSums(p) - 2 * diag(p) - dd^2
-    expect_equal(r$bhapkarTable$asDF$chisq, n * drop(t(dd) %*% MASS::ginv(S) %*% dd), tolerance = 1e-8)
+    expect_equal(r$raterBiasGroup$bhapkarTable$asDF$chisq, n * drop(t(dd) %*% MASS::ginv(S) %*% dd), tolerance = 1e-8)
 })
 
 test_that("L500 Bhapkar on a connected table matches DescTools", {
@@ -318,7 +318,7 @@ test_that("L500 Bhapkar on a connected table matches DescTools", {
     lv <- c("G1", "G2", "G3")
     tab <- matrix(c(14, 1, 4, 4, 12, 2, 0, 5, 12), 3, byrow = TRUE)
     d <- tab_to_raters(tab, lv)
-    b <- agreement_run(d, vars = c("R1", "R2"), bhapkar = TRUE)$results$bhapkarTable$asDF
+    b <- agreement_run(d, vars = c("R1", "R2"), bhapkar = TRUE)$results$raterBiasGroup$bhapkarTable$asDF
     o <- DescTools::BhapkarTest(d$R1, d$R2)
     expect_equal(b$chisq, as.numeric(o$statistic), tolerance = 1e-6)
     expect_equal(b$df, as.numeric(o$parameter))
@@ -332,7 +332,7 @@ test_that("L500 Light's kappa equals the mean of the pairwise Cohen kappas", {
     d <- data.frame(R1 = factor(ifelse(runif(60) < .8, t0, sample(lv, 60, TRUE)), lv),
                     R2 = factor(ifelse(runif(60) < .7, t0, sample(lv, 60, TRUE)), lv),
                     R3 = factor(ifelse(runif(60) < .6, t0, sample(lv, 60, TRUE)), lv))
-    lk <- agreement_run(d, vars = names(d), lightKappa = TRUE)$results$lightKappaTable$asDF$kappa
+    lk <- agreement_run(d, vars = names(d), lightKappa = TRUE)$results$lightKappaTableGroup$lightKappaTable$asDF$kappa
     oracle <- mean(combn(3, 2, function(ix)
         vcd::Kappa(table(d[[ix[1]]], d[[ix[2]]]))$Unweighted[["value"]]))
     expect_equal(lk, oracle, tolerance = 1e-8)
@@ -347,14 +347,14 @@ test_that("L500 the kappa sample size is kappaSize's N", {
                      list(m = "fleiss", r = 5, q = 5, f = kappaSize::Power5Cats))) {
         tb <- agreement_run(d, vars = c("A", "B"), agreementSampleSize = TRUE, ssMetric = cfg$m,
                             ssKappaNull = 0.4, ssKappaAlt = 0.7, ssNRaters = cfg$r,
-                            ssNCategories = cfg$q)$results$agreementSampleSizeTable$asDF
+                            ssNCategories = cfg$q)$results$pairedAgreementGroup$agreementSampleSizeTable$asDF
         oracle <- max(ceiling(cfg$f(kappa0 = .4, kappa1 = .7, props = rep(1 / cfg$q, cfg$q),
                                     raters = cfg$r, alpha = .05, power = .8)$N[1]), 2 * cfg$r)
         expect_equal(as.numeric(tb$value[2]), oracle)
     }
     # ICC: Walter, Eliasziw & Donner (1998) eq. 2 written out, two-sided alpha.
     tb <- agreement_run(d, vars = c("A", "B"), agreementSampleSize = TRUE, ssMetric = "icc",
-                        ssKappaNull = 0.7, ssKappaAlt = 0.9, ssNRaters = 2)$results$agreementSampleSizeTable$asDF
+                        ssKappaNull = 0.7, ssKappaAlt = 0.9, ssNRaters = 2)$results$pairedAgreementGroup$agreementSampleSizeTable$asDF
     C <- function(rho) 1 + 2 * rho / (1 - rho)
     expect_equal(as.numeric(tb$value[2]),
                  ceiling(1 + 2 * 2 * (qnorm(.975) + qnorm(.8))^2 / ((2 - 1) * log(C(.9) / C(.7))^2)))
@@ -377,7 +377,7 @@ test_that("concordance per-class rows follow the declared order", {
                     A1 = factor(t0, lv, ordered = TRUE),
                     A2 = factor(ifelse(runif(40) < .9, t0, sample(lv, 40, TRUE)), lv, ordered = TRUE))
     pc <- agreement_run(d, vars = names(d), multiAnnotatorConcordance = TRUE,
-                        predictionColumn = 1)$results$concordanceF1PerClassTable$asDF
+                        predictionRater = "P")$results$advancedGroup$concordanceF1PerClassTable$asDF
     expect_equal(as.character(pc$class_label), lv)                    # was Negative, Strong, Weak
 })
 
@@ -406,7 +406,7 @@ test_that("L427 identical measurements on the ICC table: ICC 1, no F/p/CI, no se
     withr::local_seed(9)
     for (x in list(c(12, 18, 25, 31, 40, 47, 55, 63, 70, 85), round(runif(25, 5, 95), 1))) {
         d <- data.frame(R1 = x, R2 = x, R3 = x)
-        tb <- agreement_run(d, vars = names(d), icc = TRUE, iccType = "icc21")$results$iccTable
+        tb <- agreement_run(d, vars = names(d), icc = TRUE, iccType = "icc21")$results$iccGroup$iccTable
         v <- tb$asDF
         expect_equal(v$icc_value, 1)
         expect_true(all(is.na(c(v$ci_lower, v$ci_upper, v$f_value, v$p))))

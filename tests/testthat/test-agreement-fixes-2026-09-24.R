@@ -27,20 +27,20 @@ test_that("FIX-01 continuous ICC(2,1) and ICC(2,k) condition on institution; G r
     icc21 <- g("case_id") / (g("case_id") + g("rater") + g("Residual"))
     icc2k <- g("case_id") / (g("case_id") + (g("rater") + g("Residual")) / 3)
 
-    expect_equal(r$hierarchicalOverallTable$asDF$overall_kappa[1], icc21, tolerance = 1e-4)
-    it <- r$hierarchicalICCTable
+    expect_equal(r$hierarchicalGroup$hierarchicalOverallTable$asDF$overall_kappa[1], icc21, tolerance = 1e-4)
+    it <- r$hierarchicalGroup$hierarchicalICCTable
     expect_identical(vapply(it$rowKeys, as.character, ""), c("icc1", "icc2"))
     expect_equal(it$asDF$icc_value, c(icc21, icc2k), tolerance = 1e-4)
-    expect_match(r$hierarchicalOverallTable$getColumn("overall_kappa")$title, "ICC(2,1)", fixed = TRUE)
+    expect_match(r$hierarchicalGroup$hierarchicalOverallTable$getColumn("overall_kappa")$title, "ICC(2,1)", fixed = TRUE)
 
     # The overall value is now the pooled counterpart of the per-cluster ICCs. The old
     # sigma2_case / sigma2_total put the institution effect in the denominator only and
     # sat BELOW every per-cluster value when institutions differ in level.
-    per <- r$clusterSpecificTable$asDF$kappa
+    per <- r$hierarchicalGroup$clusterSpecificTable$asDF$kappa
     expect_true(all(is.finite(per)))
-    expect_gt(r$hierarchicalOverallTable$asDF$overall_kappa[1], min(per) - 0.05)
+    expect_gt(r$hierarchicalGroup$hierarchicalOverallTable$asDF$overall_kappa[1], min(per) - 0.05)
 
-    expect_false("shrinkage_kappa" %in% agreement_column_names(r$clusterSpecificTable))
+    expect_false("shrinkage_kappa" %in% agreement_column_names(r$hierarchicalGroup$clusterSpecificTable))
     expect_false("shrinkageEstimates" %in% names(formals(ClinicoPath::agreement)))
 })
 
@@ -61,13 +61,13 @@ test_that("FIX-02 categorical hierarchical: stratified Fleiss kappa on the shipp
     nn <- as.numeric(table(d$institution)[names(per)])
     oracle <- sum(nn * per) / sum(nn)
 
-    ov <- r$hierarchicalOverallTable
+    ov <- r$hierarchicalGroup$hierarchicalOverallTable
     expect_equal(ov$asDF$overall_kappa[1], oracle, tolerance = 1e-10)
     expect_match(ov$title, "Stratified", fixed = TRUE)
     pooled <- irr::kappam.fleiss(chr(d[rc]))$value
     expect_true(any(grepl(sprintf("%.3f", pooled), agreement_notes(ov), fixed = TRUE)))
 
-    cs <- r$clusterSpecificTable$asDF
+    cs <- r$hierarchicalGroup$clusterSpecificTable$asDF
     expect_equal(unname(cs$kappa), unname(per[cs$cluster]), tolerance = 1e-10)
     expect_identical(as.integer(cs$rank), as.integer(rank(-per[cs$cluster], ties.method = "min")))
 
@@ -75,8 +75,8 @@ test_that("FIX-02 categorical hierarchical: stratified Fleiss kappa on the shipp
     # when the binary glmer route was retired). Since 2026-09-25 the three linear-model
     # tables are hidden and ONE note on the overall table points to the ordinal engine.
     for (nm in c("varianceDecompositionTable", "hierarchicalICCTable", "homogeneityTestTable"))
-        expect_false(r[[nm]]$visible, info = nm)
-    expect_match(agreement_notes(r$hierarchicalOverallTable)[["categorical_route"]],
+        expect_false(agreement_item(r, nm)$visible, info = nm)
+    expect_match(agreement_notes(r$hierarchicalGroup$hierarchicalOverallTable)[["categorical_route"]],
                  "Model-based agreement", fixed = TRUE)
 })
 
@@ -90,7 +90,7 @@ test_that("FIX-03 categorical hierarchical, two raters: per-cluster weighted Coh
     d$site <- sample(c("X", "Y", "Z"), n, TRUE)
     r <- agreement_run(d, vars = c("a", "b"), wght = "equal", hierarchicalKappa = TRUE,
                        clusterVariable = "site", clusterSpecificKappa = TRUE)$results
-    cs <- r$clusterSpecificTable$asDF
+    cs <- r$hierarchicalGroup$clusterSpecificTable$asDF
     vk <- vapply(cs$cluster, function(s) {
         x <- d[d$site == s, ]
         vcd::Kappa(table(x$a, x$b), weights = "Equal-Spacing")$Weighted[["value"]]
@@ -98,8 +98,8 @@ test_that("FIX-03 categorical hierarchical, two raters: per-cluster weighted Coh
     expect_equal(unname(cs$kappa), unname(vk), tolerance = 1e-8)
     expect_true(all(is.finite(cs$ci_lower)) && all(cs$ci_lower < cs$kappa))
     nn <- as.numeric(table(d$site)[cs$cluster])
-    expect_equal(r$hierarchicalOverallTable$asDF$overall_kappa[1], sum(nn * vk) / sum(nn), tolerance = 1e-8)
-    expect_true(grepl("confidence interval is", agreement_notes(r$hierarchicalOverallTable)[["model"]], fixed = TRUE))
+    expect_equal(r$hierarchicalGroup$hierarchicalOverallTable$asDF$overall_kappa[1], sum(nn * vk) / sum(nn), tolerance = 1e-8)
+    expect_true(grepl("confidence interval is", agreement_notes(r$hierarchicalGroup$hierarchicalOverallTable)[["model"]], fixed = TRUE))
 })
 
 # FIX-04 used to pin the binary lme4::glmer latent-scale route (ICC vs a direct glmer
@@ -131,18 +131,18 @@ test_that("FIX-04 binary hierarchical: decomposition tables point to Model-based
     chr <- function(x) as.data.frame(lapply(x, as.character), stringsAsFactors = FALSE)
     per <- vapply(split(b[rv], b$site), function(x) irr::kappam.fleiss(chr(x))$value, 0)
     nn <- as.numeric(table(b$site)[names(per)])
-    expect_equal(r$hierarchicalOverallTable$asDF$overall_kappa[1], sum(nn * per) / sum(nn), tolerance = 1e-10)
+    expect_equal(r$hierarchicalGroup$hierarchicalOverallTable$asDF$overall_kappa[1], sum(nn * per) / sum(nn), tolerance = 1e-10)
 
     # Retired route: the three tables are hidden (2026-09-25), one pointer on the overall table.
     for (nm in c("varianceDecompositionTable", "hierarchicalICCTable", "homogeneityTestTable"))
-        expect_false(r[[nm]]$visible, info = nm)
-    route <- agreement_notes(r$hierarchicalOverallTable)[["categorical_route"]]
+        expect_false(agreement_item(r, nm)$visible, info = nm)
+    route <- agreement_notes(r$hierarchicalGroup$hierarchicalOverallTable)[["categorical_route"]]
     expect_match(route, "Model-based agreement", fixed = TRUE)
 
     # Binary calls are outside the latent model's validated range (grid v2, 2026-09-24: biased at every
     # tested design), so the pointer says so and the target refuses with a sentence - never a number.
     expect_true(grepl("binary calls", route, fixed = TRUE))
-    lt <- r$latentModelTable
+    lt <- r$gradingGroup$latentModelTable
     expect_true(all(is.na(lt$asDF$estimate[vapply(lt$rowKeys, as.character, "") %in% c("rho", "kappa_m")])))
     expect_true(grepl("With two categories the latent model is not computed",
                       agreement_notes(lt)[["refuse_model"]], fixed = TRUE))
@@ -156,7 +156,7 @@ test_that("FIX-04 binary hierarchical: decomposition tables point to Model-based
     names(g) <- rv; g$site <- cl
     ro <- agreement_run(g, vars = rv, hierarchicalKappa = TRUE, clusterVariable = "site",
                         varianceDecomposition = TRUE, latentModel = TRUE)$results
-    lo <- ro$latentModelTable
+    lo <- ro$gradingGroup$latentModelTable
     expect_true("cluster_var" %in% vapply(lo$rowKeys, as.character, ""))
     expect_true(is.finite(lo$getCell(rowKey = "cluster_var", "estimate")$value))
     expect_true(is.finite(lo$getCell(rowKey = "rho", "estimate")$value))
@@ -183,19 +183,19 @@ test_that("FIX-05 Krippendorff ordinal alpha uses the merged declared order, not
     r <- agreement_run(d, vars = c("a", "b"), kripp = TRUE, krippMethod = "ordinal")$results
     codes <- sapply(d, function(x) match(as.character(x), c("G1", "G2", "G3")))
     oracle <- irr::kripp.alpha(t(codes), method = "ordinal")$value
-    expect_equal(r$krippTable$asDF$alpha[1], oracle, tolerance = 1e-10)
-    expect_match(r$krippTable$asDF$method[1], "ordinal", fixed = TRUE)
+    expect_equal(r$krippTableGroup$krippTable$asDF$alpha[1], oracle, tolerance = 1e-10)
+    expect_match(r$krippTableGroup$krippTable$asDF$method[1], "ordinal", fixed = TRUE)
 })
 
 test_that("FIX-06 Krippendorff refuses an order the declarations do not determine, only for ordered metrics", {
     d <- data.frame(a = factor(rep(c("Absent", "Diffuse"), 20), levels = c("Absent", "Diffuse"), ordered = TRUE),
                     b = factor(rep(c("Absent", "Focal"), 20), levels = c("Absent", "Focal"), ordered = TRUE))
     r <- agreement_run(d, vars = c("a", "b"), kripp = TRUE, krippMethod = "ordinal")$results
-    expect_true(is.na(r$krippTable$asDF$alpha[1]))
-    expect_true("scale_order" %in% names(agreement_notes(r$krippTable)))
+    expect_true(is.na(r$krippTableGroup$krippTable$asDF$alpha[1]))
+    expect_true("scale_order" %in% names(agreement_notes(r$krippTableGroup$krippTable)))
     r2 <- agreement_run(d, vars = c("a", "b"), kripp = TRUE, krippMethod = "nominal")$results
-    expect_true(is.finite(r2$krippTable$asDF$alpha[1]))
-    expect_false("scale_order" %in% names(agreement_notes(r2$krippTable)))
+    expect_true(is.finite(r2$krippTableGroup$krippTable$asDF$alpha[1]))
+    expect_false("scale_order" %in% names(agreement_notes(r2$krippTableGroup$krippTable)))
 })
 
 test_that("FIX-07 the bootstrap table's Krippendorff row is the headline statistic, not an auto-selected one", {
@@ -205,13 +205,13 @@ test_that("FIX-07 the bootstrap table's Krippendorff row is the headline statist
     a <- sample(lv, n, TRUE); b <- ifelse(stats::runif(n) < .7, a, sample(lv, n, TRUE))
     d <- data.frame(a = factor(a, levels = lv, ordered = TRUE), b = factor(b, levels = lv, ordered = TRUE))
     r <- agreement_run(d, vars = c("a", "b"), kripp = TRUE, bootstrapCI = TRUE, nBoot = 200)$results
-    head_alpha <- r$krippTable$asDF$alpha[1]
-    bt <- r$bootstrapCITable$asDF
+    head_alpha <- r$krippTableGroup$krippTable$asDF$alpha[1]
+    bt <- r$advancedGroup$bootstrapCITable$asDF
     row <- bt[grepl("Krippendorff", bt$metric, fixed = TRUE), ]
     expect_equal(nrow(row), 1L)
     expect_equal(row$estimate, head_alpha, tolerance = 1e-10)
-    expect_identical(row$metric, r$krippTable$asDF$method[1])
-    expect_true("method_choice" %in% names(agreement_notes(r$krippTable)))   # ordered raters, nominal method
+    expect_identical(row$metric, r$krippTableGroup$krippTable$asDF$method[1])
+    expect_true("method_choice" %in% names(agreement_notes(r$krippTableGroup$krippTable)))   # ordered raters, nominal method
 })
 
 test_that("FIX-08 Gwet AC2 weights sit on the merged declared order; an undetermined order drops to AC1", {
@@ -221,14 +221,14 @@ test_that("FIX-08 Gwet AC2 weights sit on the merged declared order; an undeterm
     m <- sapply(d, as.character)
     oracle <- irrCAC::gwet.ac1.raw(m, weights = "linear", categ.labels = c("G1", "G2", "G3"),
                                    conflev = 0.95, N = Inf)$est$coeff.val
-    expect_equal(r$gwetTable$asDF$coefficient[1], oracle, tolerance = 1e-8)
+    expect_equal(r$gwetGroup$gwetTable$asDF$coefficient[1], oracle, tolerance = 1e-8)
 
     amb <- data.frame(a = factor(rep(c("Absent", "Diffuse"), 20), levels = c("Absent", "Diffuse"), ordered = TRUE),
                       b = factor(rep(c("Absent", "Focal"), 20), levels = c("Absent", "Focal"), ordered = TRUE))
     r2 <- agreement_run(amb, vars = c("a", "b"), gwet = TRUE, gwetWeights = "linear")$results
     ac1 <- irrCAC::gwet.ac1.raw(sapply(amb, as.character), weights = "unweighted", conflev = 0.95, N = Inf)$est$coeff.val
-    expect_equal(r2$gwetTable$asDF$coefficient[1], ac1, tolerance = 1e-8)
-    expect_true("scale_ambiguous" %in% names(agreement_notes(r2$gwetTable)))
+    expect_equal(r2$gwetGroup$gwetTable$asDF$coefficient[1], ac1, tolerance = 1e-8)
+    expect_true("scale_ambiguous" %in% names(agreement_notes(r2$gwetGroup$gwetTable)))
 })
 
 test_that("FIX-09 Robinson's A codes every rater on one declared order; refuses a mix and an undetermined order", {
@@ -240,14 +240,14 @@ test_that("FIX-09 Robinson's A codes every rater on one declared order; refuses 
     r <- agreement_run(d, vars = c("a", "b"), robinsonA = TRUE, nBoot = 100)$results
     m <- sapply(d, function(v) match(as.character(v), lv))
     oracle <- 1 - sum((m - rowMeans(m))^2) / sum((m - mean(m))^2)
-    expect_equal(r$robinsonATable$asDF$robinsonA[1], oracle, tolerance = 1e-10)
+    expect_equal(r$lightKappaTableGroup$robinsonATable$asDF$robinsonA[1], oracle, tolerance = 1e-10)
     # Per-column codes would have put a one-grade offset on every case:
     expect_lt(1 - sum((sapply(d, as.numeric) - rowMeans(sapply(d, as.numeric)))^2) /
                   sum((sapply(d, as.numeric) - mean(sapply(d, as.numeric)))^2), oracle)
 
     mix <- data.frame(a = factor(x, levels = lv, ordered = TRUE), b = stats::rnorm(n))
     rm <- agreement_run(mix, vars = c("a", "b"), robinsonA = TRUE, nBoot = 100)$results
-    expect_true("scale_order" %in% names(agreement_notes(rm$robinsonATable)))
+    expect_true("scale_order" %in% names(agreement_notes(rm$lightKappaTableGroup$robinsonATable)))
 })
 
 # --- Small correctness -----------------------------------------------------------
@@ -257,9 +257,9 @@ test_that("FIX-10 Finn discloses a declared scale that is too WIDE, not only one
     d <- data.frame(r1 = sample(1:3, 60, TRUE), r2 = sample(1:3, 60, TRUE))
     wide <- agreement_run(d, vars = c("r1", "r2"), finn = TRUE, finnLevels = 10)$results
     right <- agreement_run(d, vars = c("r1", "r2"), finn = TRUE, finnLevels = 3)$results
-    expect_gt(wide$finnTable$asDF$finn_value[1], right$finnTable$asDF$finn_value[1] + 0.5)
-    expect_true("warning" %in% names(agreement_notes(wide$finnTable)))
-    expect_false("warning" %in% names(agreement_notes(right$finnTable)))
+    expect_gt(wide$lightKappaTableGroup$finnTable$asDF$finn_value[1], right$lightKappaTableGroup$finnTable$asDF$finn_value[1] + 0.5)
+    expect_true("warning" %in% names(agreement_notes(wide$lightKappaTableGroup$finnTable)))
+    expect_false("warning" %in% names(agreement_notes(right$lightKappaTableGroup$finnTable)))
 })
 
 test_that("FIX-11 simple majority is strict: an exact half is a plurality, and the count is disclosed", {
@@ -281,14 +281,14 @@ test_that("FIX-12 per-class precision with no denominator is empty, not 0, and l
     d <- data.frame(r1 = factor(c(rep("A", 10), rep("B", 10), rep("C", 5)), levels = c("A", "B", "C")),
                     r2 = factor(c(rep("A", 9), "B", rep("B", 10), rep("A", 5)), levels = c("A", "B", "C")))
     r <- agreement_run(d, vars = c("r1", "r2"), confusionMatrix = TRUE)$results
-    pc <- r$perClassMetricsTable$asDF
+    pc <- r$advancedGroup$perClassMetricsTable$asDF
     c_row <- pc[pc$class_label == "C", ]
     expect_true(is.na(c_row$precision))                       # rater 2 never assigned C
     expect_equal(c_row$recall, 0)                              # rater 1 did, rater 2 missed all 5
     prec <- c(A = 9 / 14, B = 10 / 11)
     macro <- pc[!pc$class_label %in% c("A", "B", "C"), ]
     expect_equal(macro$precision, mean(prec), tolerance = 1e-10)
-    expect_true("undefined" %in% names(agreement_notes(r$perClassMetricsTable)))
+    expect_true("undefined" %in% names(agreement_notes(r$advancedGroup$perClassMetricsTable)))
 })
 
 test_that("FIX-13 an item-modal interval with no spread is left empty, not zero-width", {
@@ -309,8 +309,8 @@ test_that("FIX-14 test-retest and pooled inter-rater rows say what they are comp
     jit <- function() factor(ifelse(stats::runif(n) < .85, base, sample(c("L", "M", "H"), n, TRUE)))
     d <- data.frame(R1_T1 = jit(), R1_T2 = jit(), R1_T3 = jit(), R2_T1 = jit(), R2_T2 = jit(), R2_T3 = jit())
     r <- agreement_run(d, vars = names(d), interIntraRater = TRUE, interIntraSeparator = "_")$results
-    expect_true("pair_used" %in% names(agreement_notes(r$interIntraRaterIntraTable)))
-    pool <- agreement_notes(r$interIntraRaterInterTable)[["pooling"]]
+    expect_true("pair_used" %in% names(agreement_notes(r$maxwellREGroup$interIntraRaterIntraTable)))
+    pool <- agreement_notes(r$maxwellREGroup$interIntraRaterInterTable)[["pooling"]]
     expect_true(grepl("6 reads made by 2 raters, not 6 raters", pool, fixed = TRUE))
 })
 
@@ -329,7 +329,7 @@ test_that("FIX-16 the sample-size calculator runs with no rater variables select
     # selection in the R harness before .run() is reached).
     d <- data.frame(x = factor(c("a", "b", "a", "b", "a")))
     r <- agreement_run(d, vars = "x", agreementSampleSize = TRUE)$results
-    v <- r$agreementSampleSizeTable$asDF
+    v <- r$pairedAgreementGroup$agreementSampleSizeTable$asDF
     n_req <- v$value[v$parameter == "Required Sample Size (subjects)"]
     expect_length(n_req, 1L)
     expect_true(nzchar(as.character(n_req)) && !is.na(n_req))
@@ -375,7 +375,9 @@ test_that("FIX-18 clearWith, enable and refs carry the dependencies the backend 
     rp <- function(...) test_path("..", "..", ...)
     skip_if_not(file.exists(rp("jamovi", "agreement.r.yaml")))
     ry <- yaml::read_yaml(rp("jamovi", "agreement.r.yaml"))
-    item <- function(nm) Filter(function(it) identical(it$name, nm), ry$items)[[1]]
+    flat <- unlist(lapply(ry$items, function(it) if (identical(it$type, "Group")) it$items else list(it)),
+                   recursive = FALSE)  # sections are Groups since 2026-10-25
+    item <- function(nm) Filter(function(it) identical(it$name, nm), flat)[[1]]
     needs <- list(pairwiseKappaTable = "wght", bootstrapCITable = c("wght", "krippMethod"),
                   interIntraRaterIntraTable = "wght", subgroupAgreementTable = "wght",
                   concordanceF1Table = "tieBreaker", concordanceF1PerClassTable = "tieBreaker",
@@ -421,10 +423,10 @@ test_that("FIX-20 ICC on category-code-looking columns says it read them as meas
     n <- 50
     codes <- data.frame(a = sample(0:1, n, TRUE)); codes$b <- ifelse(stats::runif(n) < .8, codes$a, 1 - codes$a)
     r <- agreement_run(codes, vars = c("a", "b"), icc = TRUE)$results
-    expect_true("coded_numeric" %in% names(agreement_notes(r$iccTable)))
+    expect_true("coded_numeric" %in% names(agreement_notes(r$iccGroup$iccTable)))
     meas <- data.frame(a = stats::rnorm(n, 50, 10)); meas$b <- meas$a + stats::rnorm(n, 0, 3)
     r2 <- agreement_run(meas, vars = c("a", "b"), icc = TRUE)$results
-    expect_false("coded_numeric" %in% names(agreement_notes(r2$iccTable)))
+    expect_false("coded_numeric" %in% names(agreement_notes(r2$iccGroup$iccTable)))
 })
 
 test_that("FIX-21 the level-of-agreement table keeps categories with zero cases", {
@@ -441,7 +443,7 @@ test_that("FIX-21 the level-of-agreement table keeps categories with zero cases"
 test_that("FIX-22 the bootstrap guide states the chosen level and the correct reading of an interval", {
     d <- data.frame(a = factor(rep(c("P", "N"), 20)), b = factor(rep(c("P", "N"), 20)))
     r <- agreement_run(d, vars = c("a", "b"), showBootstrapCIGuide = TRUE, confLevel = 0.80)$results
-    html <- r$bootstrapCIExplanation$content
+    html <- r$advancedGroup$bootstrapCIExplanation$content
     expect_true(nzchar(html))
     expect_match(html, "80% CI", fixed = TRUE)
     expect_false(grepl("with 95% confidence", html, fixed = TRUE))
@@ -456,7 +458,7 @@ test_that("FIX-23 the case-cluster seed is shown whenever the heatmap subsample 
     d <- data.frame(r1 = j(), r2 = j(), r3 = j())
     r <- agreement_run(d, vars = c("r1", "r2", "r3"), caseClustering = TRUE,
                        caseClusterMethod = "hierarchical", showCaseClusterHeatmap = TRUE, seed = 99)$results
-    expect_match(agreement_notes(r$caseClusterTable)[["seed"]], "99", fixed = TRUE)
+    expect_match(agreement_notes(r$raterClusterGroup$caseClusterTable)[["seed"]], "99", fixed = TRUE)
 })
 
 # --- Second adversarial pass: one kappa for 3+ raters everywhere -----------------
@@ -479,7 +481,7 @@ test_that("bootstrap kappa for 3+ raters is the headline statistic (every rating
     for (ex in c(FALSE, TRUE)) {
         r <- agreement_run(d, vars = names(d), exct = ex, bootstrapCI = TRUE, nBoot = 100)$results
         head_k <- r$irrtable$asDF$kappa[1]
-        bt <- r$bootstrapCITable$asDF
+        bt <- r$advancedGroup$bootstrapCITable$asDF
         row <- grepl("κ", bt$metric)
         expect_equal(sum(row), 1L)
         expect_equal(bt$estimate[row], head_k, tolerance = 1e-10, info = paste("exct", ex))
@@ -502,9 +504,9 @@ test_that("hierarchical 3+ raters: per-institution kappa on every rating, with i
         e <- irrCAC::fleiss.kappa.raw(as.matrix(as.data.frame(lapply(x, as.character))))$est
         (e$pa - e$pe) / (1 - e$pe)
     }, 0)
-    cs <- r$clusterSpecificTable$asDF
+    cs <- r$hierarchicalGroup$clusterSpecificTable$asDF
     expect_equal(unname(cs$kappa), unname(oracle[cs$cluster]), tolerance = 1e-10)
     expect_true(all(is.finite(cs$ci_lower) & is.finite(cs$ci_upper)))
     expect_equal(cs$n_cases, rep(30L, 3))          # no case dropped for a missing rating
-    expect_true(grepl("confidence interval is", agreement_notes(r$hierarchicalOverallTable)[["model"]], fixed = TRUE))
+    expect_true(grepl("confidence interval is", agreement_notes(r$hierarchicalGroup$hierarchicalOverallTable)[["model"]], fixed = TRUE))
 })

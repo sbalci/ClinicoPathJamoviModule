@@ -82,7 +82,7 @@ test_that("the intra-rater table uses the interval kappaCIMethod selects, not a 
   se <- unname(vcd::Kappa(table(d$A_1, d$A_2))$Unweighted[["ASE"]])
   r <- agreement(data = d, vars = names(d), interIntraRater = TRUE,
                  kappaCIMethod = "fisherz")
-  tb <- r$interIntraRaterIntraTable$asDF
+  tb <- r$maxwellREGroup$interIntraRaterIntraTable$asDF
   a <- tb[tb$rater == "A", ]
   expect_equal(nrow(a), 1L)
   k <- a$value
@@ -99,7 +99,7 @@ test_that("the hierarchical tables declare no confidence-interval columns", {
   for (nm in c("hierarchicalOverallTable", "hierarchicalICCTable")) {
     # $columns lists every DECLARED column, hidden or not; asDF drops hidden
     # ones, so an asDF check also passed when the columns were declared and hidden.
-    cols <- names(r[[nm]]$columns)
+    cols <- names(agreement_item(r, nm)$columns)
     expect_true(length(cols) > 0, info = nm)
     expect_false(any(c("ci_lower", "ci_upper") %in% cols), info = nm)
   }
@@ -112,7 +112,7 @@ test_that("the hierarchical tables declare no confidence-interval columns", {
   r <- agreement(data = d, vars = names(d), gwet = TRUE)
   up <- irrCAC::gwet.ac1.raw(as.matrix(d), weights = "unweighted",
                              categ.labels = lv, conflev = 0.95, N = Inf)$est
-  list(tb = r$gwetTable$asDF, up = up,
+  list(tb = r$gwetGroup$gwetTable$asDF, up = up,
        oracle = 2 * stats::pt(-abs(up$coeff.val / up$coeff.se), nrow(d) - 1))
 }
 
@@ -155,7 +155,7 @@ test_that("the directional discordance test refuses fewer than 3 complete pairs"
   partial <- data.frame(A = factor(c("Low", "High", "Low"), levels = g, ordered = TRUE),
                         B = factor(c("High", "Low", NA), levels = g, ordered = TRUE))
   for (d in list(two, partial)) {
-    tb <- agreement(data = d, vars = vars(A, B), raterBias = TRUE)$raterBiasTable
+    tb <- agreement(data = d, vars = vars(A, B), raterBias = TRUE)$raterBiasGroup$raterBiasTable
     expect_true(grepl("At least 3 cases", agreement_subanalysis_notice(tb), fixed = TRUE))
     df <- tb$asDF
     expect_true(nrow(df) == 0 || all(is.na(df$chisq)))
@@ -164,7 +164,7 @@ test_that("the directional discordance test refuses fewer than 3 complete pairs"
 
 test_that("Light's kappa reports no p-value and says why", {
   r <- agreement(data = .three_raters(), vars = vars(A, B, C), lightKappa = TRUE)
-  tb <- r$lightKappaTable
+  tb <- r$lightKappaTableGroup$lightKappaTable
   expect_false("p" %in% names(tb$columns))
   expect_true(is.finite(tb$asDF$kappa[1]))
   expect_true(grepl("kappam.light", .note_text(tb), fixed = TRUE))
@@ -205,7 +205,7 @@ test_that("the continuous cluster test is boundary-corrected and labelled as a t
   d$r2 <- d$r1 + rnorm(n, 0, 5)
   r <- agreement(data = d, vars = c("r1", "r2"), hierarchicalKappa = TRUE,
                  clusterVariable = "lab", testClusterHomogeneity = TRUE)
-  tb <- r$homogeneityTestTable
+  tb <- r$hierarchicalGroup$homogeneityTestTable
   row <- tb$asDF
   expect_equal(nrow(row), 1L)
   expect_true(grepl("institution variance", row$test_name[1], fixed = TRUE))

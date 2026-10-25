@@ -100,7 +100,7 @@
 | `nBoot` | UI Control `nBoot` | `self$options$nBoot` | Output item / Table |
 | `showBootstrapCIGuide` | UI Control `showBootstrapCIGuide` | `self$options$showBootstrapCIGuide` | Output item / Table |
 | `multiAnnotatorConcordance` | UI Control `multiAnnotatorConcordance` | `self$options$multiAnnotatorConcordance` | Output item / Table |
-| `predictionColumn` | UI Control `predictionColumn` | `self$options$predictionColumn` | Output item / Table |
+| `predictionRater` | UI Control `predictionRater` | `self$options$predictionRater` | Output item / Table |
 | `showConcordanceF1Guide` | UI Control `showConcordanceF1Guide` | `self$options$showConcordanceF1Guide` | Output item / Table |
 | `specificAgreement` | UI Control `specificAgreement` | `self$options$specificAgreement` | Output item / Table |
 | `specificPositiveCategory` | UI Control `specificPositiveCategory` | `self$options$specificPositiveCategory` | Output item / Table |

@@ -47,6 +47,14 @@ children:
             isTarget: true
             enable: (pairwiseKappa)
       - type: TargetLayoutBox
+        label: Prediction rater (multi-annotator concordance)
+        children:
+          - type: VariablesListBox
+            name: predictionRater
+            maxItemCount: 1
+            isTarget: true
+            enable: (multiAnnotatorConcordance)
+      - type: TargetLayoutBox
         label: Patient/cluster ID (optional)
         children:
           - type: VariablesListBox
@@ -259,10 +267,6 @@ children:
             children:
               - type: CheckBox
                 name: multiAnnotatorConcordance
-              - type: TextBox
-                name: predictionColumn
-                format: number
-                enable: (multiAnnotatorConcordance)
               - type: CheckBox
                 name: showConcordanceF1Guide
   - type: CollapseBox
@@ -408,7 +412,7 @@ children:
               - type: CheckBox
                 name: showMaxwellREGuide
   - type: CollapseBox
-    label: Any data type
+    label: Any Data Type
     collapsed: true
     children:
       - type: Label
@@ -435,9 +439,6 @@ children:
             children:
               - type: CheckBox
                 name: iota
-              - type: CheckBox
-                name: iotaStandardize
-                enable: (iota)
               - type: CheckBox
                 name: showIotaGuide
       - type: Label
@@ -518,7 +519,7 @@ children:
               - type: CheckBox
                 name: showMixedEffectsGuide
   - type: CollapseBox
-    label: Rater and case diagnostics
+    label: Rater and Case Diagnostics
     collapsed: true
     children:
       - type: Label
@@ -636,7 +637,7 @@ children:
               - type: CheckBox
                 name: showCaseClusterGuide
   - type: CollapseBox
-    label: Computed variables
+    label: Computed Variables
     collapsed: true
     children:
       - type: Label
@@ -692,7 +693,7 @@ children:
                 name: loaOutput
                 enable: (loaVariable)
   - type: CollapseBox
-    label: Study design
+    label: Study Design
     collapsed: true
     children:
       - type: Label

@@ -208,8 +208,8 @@ test_that("bootstrap keeps the ICC row at typical study sizes", {
 
   res <- ClinicoPath::agreement(data = d, vars = c("A", "B"),
                                 bootstrapCI = TRUE, nBoot = 100)
-  if (res$bootstrapCITable$rowCount > 0) {
-    tb <- res$bootstrapCITable$asDF
+  if (res$advancedGroup$bootstrapCITable$rowCount > 0) {
+    tb <- res$advancedGroup$bootstrapCITable$asDF
     expect_true(any(grepl("ICC", tb[[1]], ignore.case = TRUE)))
   }
 })
@@ -267,7 +267,7 @@ test_that("Robinson's A is 1 - within-case variance / total variance (Robinson 1
   d$r2 <- d$r1 + sample(c(-1, 0, 0, 1), 60, TRUE)
   d$r3 <- d$r1 + sample(c(-1, 0, 1), 60, TRUE)
   res <- agreement(data = d, vars = c("r1", "r2", "r3"), robinsonA = TRUE)
-  tb <- res$robinsonATable$asDF
+  tb <- res$lightKappaTableGroup$robinsonATable$asDF
   expect_equal(tb$robinsonA[1], robinson_ref(d), tolerance = 1e-10)
   expect_true(tb$ci_lower[1] <= tb$robinsonA[1] && tb$robinsonA[1] <= tb$ci_upper[1])
   expect_false("se" %in% names(tb))                       # the old SE/z/p belonged to gamma
@@ -277,11 +277,11 @@ test_that("Robinson's A penalises a constant offset that a rank correlation igno
   d <- data.frame(r1 = rep(1:4, each = 10))
   d$r2 <- d$r1 + 1                                          # perfectly correlated, never equal
   res <- agreement(data = d, vars = c("r1", "r2"), robinsonA = TRUE)
-  a <- res$robinsonATable$asDF$robinsonA[1]
+  a <- res$lightKappaTableGroup$robinsonATable$asDF$robinsonA[1]
   expect_lt(a, 0.9)                                         # gamma would report 1.0 here
   expect_equal(a, robinson_ref(d), tolerance = 1e-10)
   same <- data.frame(r1 = d$r1, r2 = d$r1)
-  expect_equal(agreement(data = same, vars = c("r1", "r2"), robinsonA = TRUE)$robinsonATable$asDF$robinsonA[1], 1)
+  expect_equal(agreement(data = same, vars = c("r1", "r2"), robinsonA = TRUE)$lightKappaTableGroup$robinsonATable$asDF$robinsonA[1], 1)
 })
 
 test_that("the confusion-matrix heatmap renders (seq_len diagonal path)", {
@@ -290,7 +290,7 @@ test_that("the confusion-matrix heatmap renders (seq_len diagonal path)", {
   d <- agr_fixture(n = 50, seed = 3)
   res <- agreement(data = d, vars = c("r1", "r2"),
                    confusionMatrix = TRUE, agreementHeatmap = TRUE)
-  expect_gt(nrow(res$confusionMatrixTable$asDF), 0)
+  expect_gt(nrow(res$advancedGroup$confusionMatrixTable$asDF), 0)
   expect_silent(invisible(res$agreementHeatmapPlot$.render()))
 })
 
@@ -318,7 +318,7 @@ test_that("undefined case correlations are reported, not silently zeroed", {
     caseClustering = TRUE, caseClusterMethod = "hierarchical",
     caseClusterDistance = "correlation", nCaseClusters = 2
   )
-  tbl <- res$caseClusterTable
+  tbl <- res$raterClusterGroup$caseClusterTable
   expect_equal(nrow(tbl$asDF), 12)
   expect_true("undefined_cor" %in% names(tbl$notes))
   note <- vapply(tbl$notes, function(n) n$note, character(1))
@@ -333,7 +333,7 @@ test_that("fully defined case correlations produce clusters and no note", {
     caseClustering = TRUE, caseClusterMethod = "hierarchical",
     caseClusterDistance = "correlation", nCaseClusters = 2
   )
-  tbl <- res$caseClusterTable
+  tbl <- res$raterClusterGroup$caseClusterTable
   expect_equal(nrow(tbl$asDF), 12)
   expect_equal(sort(unique(tbl$asDF$cluster)), c(1L, 2L))
   expect_false("undefined_cor" %in% names(tbl$notes))
@@ -359,8 +359,8 @@ test_that("re-running on the same object does not duplicate rows or columns", {
   set.seed(12)
   d$r3 <- factor(ifelse(runif(nrow(d)) < 0.7, as.character(d$r1), sample(levels(d$r1), nrow(d), TRUE)), levels = levels(d$r1))
   pr <- agr_private(d, vars = c("r1", "r2", "r3"), allPairsKappa = TRUE, specificAgreement = TRUE)
-  counts <- function() c(nrow(pr$a$results$contingencyTable$asDF), ncol(pr$a$results$contingencyTable$asDF),
-                         nrow(pr$a$results$allPairsKappaTable$asDF), nrow(pr$a$results$specificAgreementTable$asDF))
+  counts <- function() c(nrow(pr$a$results$contingencyTableGroup$contingencyTable$asDF), ncol(pr$a$results$contingencyTableGroup$contingencyTable$asDF),
+                         nrow(pr$a$results$allPairsKappaTable$asDF), nrow(pr$a$results$specificAgreementGroup$specificAgreementTable$asDF))
   pr$p$.run()
   n1 <- counts()
   pr$p$.run()                                               # any guide toggle re-runs .run() on the same object
@@ -374,8 +374,8 @@ test_that("the variance decomposition separates rater offsets from random disagr
   base <- rnorm(80, 50, 10)
   offset <- data.frame(r1 = base, r2 = base + 5)            # pure systematic offset
   noise  <- data.frame(r1 = base, r2 = base + rnorm(80, 0, 3))   # pure random disagreement
-  o <- agreement(data = offset, vars = c("r1", "r2"), maxwellRE = TRUE)$maxwellRETable$asDF
-  n <- agreement(data = noise,  vars = c("r1", "r2"), maxwellRE = TRUE)$maxwellRETable$asDF
+  o <- agreement(data = offset, vars = c("r1", "r2"), maxwellRE = TRUE)$maxwellREGroup$maxwellRETable$asDF
+  n <- agreement(data = noise,  vars = c("r1", "r2"), maxwellRE = TRUE)$maxwellREGroup$maxwellRETable$asDF
   expect_gt(o$systematic_prop[1], 0.99)                     # one-way version put case variance in "random"
   expect_lt(n$systematic_prop[1], 0.15)
   expect_match(o$method[1], "Two-way", fixed = TRUE)
@@ -386,8 +386,8 @@ test_that("the mixed-effects comparison refuses categorical ratings instead of c
   d <- agr_fixture()
   d$cond <- factor(rep(c("AI", "Manual"), length.out = nrow(d)))
   res <- agreement(data = d, vars = c("r1", "r2"), mixedEffectsComparison = TRUE, conditionVariable = "cond")
-  expect_match(agreement_subanalysis_notice(res$mixedEffectsTable), "requires continuous numeric ratings", fixed = TRUE)
-  expect_equal(nrow(res$mixedEffectsTable$asDF), 0)
+  expect_match(agreement_subanalysis_notice(res$advancedGroup$mixedEffectsTable), "requires continuous numeric ratings", fixed = TRUE)
+  expect_equal(nrow(res$advancedGroup$mixedEffectsTable$asDF), 0)
 })
 
 test_that("the TDI interval is reproducible and needs no seed", {
@@ -395,8 +395,8 @@ test_that("the TDI interval is reproducible and needs no seed", {
   # percentile bootstrap (whose upper bound under-covered), so it is identical under any seed.
   set.seed(2)
   d <- data.frame(a = rnorm(60, 10, 2)); d$b <- d$a + rnorm(60, 0, 1)
-  t1 <- agreement(data = d, vars = c("a", "b"), tdi = TRUE, nBoot = 200)$tdiTable$asDF
-  t3 <- agreement(data = d, vars = c("a", "b"), tdi = TRUE, nBoot = 200, seed = 7)$tdiTable$asDF
+  t1 <- agreement(data = d, vars = c("a", "b"), tdi = TRUE, nBoot = 200)$iccGroup$tdiTable$asDF
+  t3 <- agreement(data = d, vars = c("a", "b"), tdi = TRUE, nBoot = 200, seed = 7)$iccGroup$tdiTable$asDF
   expect_equal(t1$ci_lower, t3$ci_lower)
   expect_equal(t1$ci_upper, t3$ci_upper)
   v <- sort(abs(d$a - d$b)); cdf <- pbinom(0:60, 60, 0.9)
@@ -407,16 +407,16 @@ test_that("the paired comparison interval follows confLevel", {
   d <- agr_fixture()
   d$s1 <- d$r1; d$s2 <- factor(ifelse(runif(nrow(d)) < 0.6, as.character(d$r1), sample(levels(d$r1), nrow(d), TRUE)), levels = levels(d$r1))
   w95 <- agreement(data = d, vars = c("r1", "r2"), pairedAgreementTest = TRUE, conditionBVars = c("s1", "s2"),
-                   pairedBootN = 500)$pairedAgreementTable$asDF
+                   pairedBootN = 500)$pairedAgreementGroup$pairedAgreementTable$asDF
   w80 <- agreement(data = d, vars = c("r1", "r2"), pairedAgreementTest = TRUE, conditionBVars = c("s1", "s2"),
-                   pairedBootN = 500, confLevel = 0.80)$pairedAgreementTable$asDF
+                   pairedBootN = 500, confLevel = 0.80)$pairedAgreementGroup$pairedAgreementTable$asDF
   expect_lt(w80$ci_upper[1] - w80$ci_lower[1], w95$ci_upper[1] - w95$ci_lower[1])   # was: hard-coded 0.025/0.975
 })
 
 test_that("the bootstrap ICC row is labelled with the chosen ICC model", {
   set.seed(5)
   d <- data.frame(a = rnorm(40, 10, 2)); d$b <- d$a + rnorm(40, 0, 1)
-  tb <- agreement(data = d, vars = c("a", "b"), bootstrapCI = TRUE, nBoot = 100, iccType = "icc31")$bootstrapCITable$asDF
+  tb <- agreement(data = d, vars = c("a", "b"), bootstrapCI = TRUE, nBoot = 100, iccType = "icc31")$advancedGroup$bootstrapCITable$asDF
   expect_true("ICC(3,1)" %in% tb$metric)                     # was: fixed "ICC (two-way, agreement)"
 })
 
@@ -447,10 +447,10 @@ test_that("small samples and sparse discordant cells are flagged on the tables t
   # 11 discordant cases, so it is no longer flagged, and Bhapkar stays estimable.
   cnt <- matrix(c(12, 2, 1,  3, 10, 2,  1, 2, 9), 3, byrow = TRUE, dimnames = lv)
   res2 <- agreement(data = from_counts(cnt), vars = c("r1", "r2"), bhapkar = TRUE)
-  expect_false("sparse" %in% names(res2$bhapkarTable$notes))
-  expect_false(is.na(res2$bhapkarTable$asDF$chisq[1]))
+  expect_false("sparse" %in% names(res2$raterBiasGroup$bhapkarTable$notes))
+  expect_false(is.na(res2$raterBiasGroup$bhapkarTable$asDF$chisq[1]))
   # Six discordant cases: flagged, with the count.
   cnt3 <- matrix(c(12, 1, 1,  1, 10, 1,  1, 1, 9), 3, byrow = TRUE, dimnames = lv)
   res3 <- agreement(data = from_counts(cnt3), vars = c("r1", "r2"), bhapkar = TRUE)
-  expect_match(agr_note(res3$bhapkarTable, "sparse"), "Only 6 discordant cases", fixed = TRUE)
+  expect_match(agr_note(res3$raterBiasGroup$bhapkarTable, "sparse"), "Only 6 discordant cases", fixed = TRUE)
 })

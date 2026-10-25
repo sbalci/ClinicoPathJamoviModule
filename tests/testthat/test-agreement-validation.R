@@ -59,7 +59,7 @@ test_that("VAL-agreement-C06 Krippendorff's alpha reproduces the published worke
   for (m in names(published)) {
     r <- suppressWarnings(suppressMessages(
       agreement(data = d, vars = names(d), kripp = TRUE, krippMethod = m)))
-    expect_equal(round(as.numeric(r$krippTable$asDF$alpha[1]), 3), unname(published[[m]]),
+    expect_equal(round(as.numeric(r$krippTableGroup$krippTable$asDF$alpha[1]), 3), unname(published[[m]]),
                  tolerance = 1e-9, info = m)
   }
 })
@@ -81,7 +81,7 @@ test_that("VAL-agreement-C07 Gwet's AC2 uses the factor level order, not alphabe
   expect_false(isTRUE(all.equal(correct, alpha_default)))  # the trap is live for this fixture
   r <- suppressWarnings(suppressMessages(
     agreement(data = d, vars = c("R1","R2"), gwet = TRUE, gwetWeights = "linear")))
-  expect_equal(round(as.numeric(r$gwetTable$asDF$coefficient[1]), 6),
+  expect_equal(round(as.numeric(r$gwetGroup$gwetTable$asDF$coefficient[1]), 6),
                round(as.numeric(correct), 6), tolerance = 1e-4)
 })
 
@@ -99,7 +99,7 @@ test_that("VAL-agreement-C08 ICC(2,1) matches psych::ICC", {
   expect_true(is.finite(icc21))
   r <- suppressWarnings(suppressMessages(
     agreement(data = d, vars = c("R1","R2","R3"), icc = TRUE, iccType = "icc21")))
-  expect_equal(round(as.numeric(r$iccTable$asDF$icc_value[1]), 6), round(icc21, 6), tolerance = 1e-4)
+  expect_equal(round(as.numeric(r$iccGroup$iccTable$asDF$icc_value[1]), 6), round(icc21, 6), tolerance = 1e-4)
 })
 
 test_that("VAL-agreement-C09 PABAK uses the scale category count, not the observed one", {
@@ -112,7 +112,7 @@ test_that("VAL-agreement-C09 PABAK uses the scale category count, not the observ
     R2 = factor(c(rep("G1", 80), rep("G4", 20)), levels = lv4, ordered = TRUE))
   r <- suppressWarnings(suppressMessages(
     agreement(data = d, vars = c("R1","R2"), pabak = TRUE)))
-  tb <- r$pabakTable$asDF
+  tb <- r$gwetGroup$pabakTable$asDF
   expect_equal(as.numeric(tb$observedAgreement[1]), 0.80, tolerance = 1e-9)
   expect_equal(round(as.numeric(tb$pabak[1]), 6), round((4 * 0.80 - 1) / 3, 6), tolerance = 1e-5)
 })
@@ -254,10 +254,10 @@ test_that("VAL-agreement-C12 Gwet's AC1/AC2 match the hand formula on the declar
   Wl <- outer(1:q, 1:q, function(a, b) 1 - abs(a - b) / (q - 1))
   # irrCAC rounds coeff.val to 4 dp before the module sees it, hence tolerance 1e-4.
   expect_equal(as.numeric(.val_q(agreement(data = d, vars = names(d), gwet = TRUE,
-                 gwetWeights = "unweighted"))$gwetTable$asDF$coefficient[1]),
+                 gwetWeights = "unweighted"))$gwetGroup$gwetTable$asDF$coefficient[1]),
                hand(diag(q)), tolerance = 1e-4)
   expect_equal(as.numeric(.val_q(agreement(data = d, vars = names(d), gwet = TRUE,
-                 gwetWeights = "linear"))$gwetTable$asDF$coefficient[1]),
+                 gwetWeights = "linear"))$gwetGroup$gwetTable$asDF$coefficient[1]),
                hand(Wl), tolerance = 1e-4)
 })
 
@@ -269,7 +269,7 @@ test_that("VAL-agreement-C13 Kendall's W is tie-corrected and its chi-square fol
   Rs <- rowSums(apply(M, 2, rank)); n <- nrow(M); m <- ncol(M)
   S <- sum((Rs - mean(Rs))^2)
   Tc <- sum(vapply(seq_len(m), function(j) { tt <- table(M[, j]); sum(tt^3 - tt) }, numeric(1)))
-  tw <- .val_q(agreement(data = d, vars = names(d), kendallW = TRUE))$kendallWTable$asDF
+  tw <- .val_q(agreement(data = d, vars = names(d), kendallW = TRUE))$lightKappaTableGroup$kendallWTable$asDF
   expect_equal(as.numeric(tw$w[1]), 12 * S / (m^2 * (n^3 - n) - m * Tc), tolerance = 1e-9)
   expect_equal(as.numeric(tw$chisq[1]), m * (n - 1) * as.numeric(tw$w[1]), tolerance = 1e-9)
   expect_equal(as.numeric(tw$df[1]), n - 1)
@@ -280,7 +280,7 @@ test_that("VAL-agreement-C14 specific agreement follows de Vet's definition", {
   d <- .val_F3[, 1:2]
   tb <- table(d$r1, d$r2)
   sa <- .val_q(agreement(data = d, vars = names(d),
-                         specificAgreement = TRUE))$specificAgreementTable$asDF
+                         specificAgreement = TRUE))$specificAgreementGroup$specificAgreementTable$asDF
   for (i in seq_along(.val_LV)) {
     row <- sa[sa$category == .val_LV[i], , drop = FALSE]
     expect_equal(as.numeric(row$specific_agreement[1]),
@@ -293,7 +293,7 @@ test_that("VAL-agreement-C15 per-class precision, recall and F1 follow from the 
   d <- .val_F3[, 1:2]
   tb <- table(d$r1, d$r2)
   pc <- .val_q(agreement(data = d, vars = names(d),
-                         confusionMatrix = TRUE))$perClassMetricsTable$asDF
+                         confusionMatrix = TRUE))$advancedGroup$perClassMetricsTable$asDF
   for (i in seq_along(.val_LV)) {
     row <- pc[pc$class_label == .val_LV[i], , drop = FALSE]
     prec <- tb[i, i] / sum(tb[, i]); rec <- tb[i, i] / sum(tb[i, ])
@@ -324,13 +324,13 @@ test_that("VAL-agreement-C17 Bland-Altman statistics are the hand values and mir
   d <- data.frame(a = c(5,12,30,45,8,22,60,15,35,70,3,50,28,18,40),
                   b = c(7,10,34,41,12,20,58,19,30,66,6,55,25,21,44))
   dif <- d$a - d$b
-  ba <- .val_q(agreement(data = d, vars = c("a","b"), blandAltmanPlot = TRUE))$blandAltmanStats$asDF
+  ba <- .val_q(agreement(data = d, vars = c("a","b"), blandAltmanPlot = TRUE))$blandAltmanGroup$blandAltmanStats$asDF
   expect_equal(as.numeric(ba$meanDiff[1]), mean(dif), tolerance = 1e-10)
   expect_equal(as.numeric(ba$sdDiff[1]),   sd(dif),   tolerance = 1e-10)
   expect_equal(as.numeric(ba$lowerLoA[1]), mean(dif) - qnorm(0.975) * sd(dif), tolerance = 1e-8)
   expect_equal(as.numeric(ba$upperLoA[1]), mean(dif) + qnorm(0.975) * sd(dif), tolerance = 1e-8)
   ba2 <- .val_q(agreement(data = d[, c(2,1)], vars = c("b","a"),
-                          blandAltmanPlot = TRUE))$blandAltmanStats$asDF
+                          blandAltmanPlot = TRUE))$blandAltmanGroup$blandAltmanStats$asDF
   expect_equal(as.numeric(ba2$meanDiff[1]), -as.numeric(ba$meanDiff[1]), tolerance = 1e-12)
   expect_equal(c(as.numeric(ba2$lowerLoA[1]), as.numeric(ba2$upperLoA[1])),
                c(-as.numeric(ba$upperLoA[1]), -as.numeric(ba$lowerLoA[1])), tolerance = 1e-12)
@@ -343,7 +343,7 @@ test_that("VAL-agreement-C18 Lin's CCC matches the 1989 definition", {
   x <- d$a; y <- d$b
   ccc <- 2 * mean((x - mean(x)) * (y - mean(y))) /
          (mean((x - mean(x))^2) + mean((y - mean(y))^2) + (mean(x) - mean(y))^2)
-  tc <- .val_q(agreement(data = d, vars = c("a","b"), linCCC = TRUE))$linCCCTable$asDF
+  tc <- .val_q(agreement(data = d, vars = c("a","b"), linCCC = TRUE))$iccGroup$linCCCTable$asDF
   expect_equal(as.numeric(tc$ccc[1]), ccc, tolerance = 1e-8)
   expect_equal(as.numeric(tc$pearson_r[1]), cor(x, y), tolerance = 1e-10)
   expect_equal(as.numeric(tc$ccc[1]),
@@ -368,7 +368,7 @@ test_that("VAL-agreement-C19 the kappa interval scales as the theory requires", 
 test_that("VAL-agreement-C20 bootstraps are seeded and do not disturb the caller's RNG", {
   d <- .val_F3[, 1:2]
   g <- function(s) .val_q(agreement(data = d, vars = names(d), bootstrapCI = TRUE,
-                                    nBoot = 100, seed = s))$bootstrapCITable$asDF
+                                    nBoot = 100, seed = s))$advancedGroup$bootstrapCITable$asDF
   a <- g(42); b <- g(42); cc <- g(43)
   expect_identical(a$ci_lower, b$ci_lower)
   expect_identical(as.numeric(a$estimate), as.numeric(cc$estimate))   # point estimates seed-free
@@ -410,14 +410,14 @@ test_that("VAL-agreement-04 intra-rater kappa honours the Weighting option", {
                   check.names = FALSE)
   tA <- table(d$A_1, d$A_2)
   it <- .val_q(agreement(data = d, vars = names(d), interIntraRater = TRUE,
-                         interIntraSeparator = "_"))$interIntraRaterIntraTable$asDF
+                         interIntraSeparator = "_"))$maxwellREGroup$interIntraRaterIntraTable$asDF
   expect_equal(as.numeric(it$value[1]), .val_hand_kappa(tA), tolerance = 1e-8)
   # The divergence the defect caused: this table returned the quadratic kappa while
   # the headline table returned whatever was selected. Pin the weighted branch too.
   wq <- outer(seq_along(.val_LV), seq_along(.val_LV),
               function(i, j) 1 - (i - j)^2 / (length(.val_LV) - 1)^2)
   itQ <- .val_q(agreement(data = d, vars = names(d), interIntraRater = TRUE,
-                          interIntraSeparator = "_", wght = "squared"))$interIntraRaterIntraTable$asDF
+                          interIntraSeparator = "_", wght = "squared"))$maxwellREGroup$interIntraRaterIntraTable$asDF
   expect_equal(as.numeric(itQ$value[1]), .val_hand_kappa(tA, wq), tolerance = 1e-8)
 })
 
@@ -447,18 +447,18 @@ test_that("VAL-agreement-06 hierarchical kappa fills what it can on categorical 
   # (stratified kappa) and per-cluster tables; the three that need a variance
   # decomposition cannot be filled for a three-category scale and must still say why -
   # the full set, so a regression that drops one explanation cannot pass.
-  cs <- r$clusterSpecificTable$asDF
+  cs <- r$hierarchicalGroup$clusterSpecificTable$asDF
   expect_equal(nrow(cs), 4L)
   per <- vapply(split(d, d$lab), function(x) vcd::Kappa(table(x$r1, x$r2))$Unweighted[["value"]], 0)
   expect_equal(unname(cs$kappa), unname(per[as.character(cs$cluster)]), tolerance = 1e-8)
-  expect_true(is.finite(r$hierarchicalOverallTable$asDF$overall_kappa[1]))
-  expect_true(nn(r$hierarchicalOverallTable))
+  expect_true(is.finite(r$hierarchicalGroup$hierarchicalOverallTable$asDF$overall_kappa[1]))
+  expect_true(nn(r$hierarchicalGroup$hierarchicalOverallTable))
   # Since 2026-09-25 the three tables that need a variance decomposition are hidden on
   # this route and the overall table carries the explanation for all of them.
-  expect_true("categorical_route" %in% names(r$hierarchicalOverallTable$notes))
-  expect_false(r$varianceDecompositionTable$visible)
-  expect_false(r$hierarchicalICCTable$visible)
-  expect_false(r$homogeneityTestTable$visible)
+  expect_true("categorical_route" %in% names(r$hierarchicalGroup$hierarchicalOverallTable$notes))
+  expect_false(r$hierarchicalGroup$varianceDecompositionTable$visible)
+  expect_false(r$hierarchicalGroup$hierarchicalICCTable$visible)
+  expect_false(r$hierarchicalGroup$homogeneityTestTable$visible)
 })
 
 test_that("VAL-agreement-07 the hierarchical overall value is labelled as the ICC it is", {
@@ -468,7 +468,7 @@ test_that("VAL-agreement-07 the hierarchical overall value is labelled as the IC
   d$r2 <- d$r1 + rnorm(n, 0, 5)
   r <- .val_q(agreement(data = d, vars = c("r1","r2"), hierarchicalKappa = TRUE,
                         clusterVariable = "lab"))
-  tbl <- r$hierarchicalOverallTable
+  tbl <- r$hierarchicalGroup$hierarchicalOverallTable
   # The cell is ICC(2,1) within institution, sigma2_case / (sigma2_case + sigma2_rater
   # + sigma2_resid) (changed 2026-09-24 from sigma2_case / sigma2_total; the formula
   # itself is pinned in test-agreement-fixes-2026-09-24.R). Neither the table title
@@ -495,7 +495,7 @@ test_that("VAL-agreement-08 a dominating case is disclosed on every continuous m
   r <- .val_q(agreement(data = d, vars = names(d), icc = TRUE, linCCC = TRUE,
                         robinsonA = TRUE, meanPearson = TRUE))
   ntxt <- function(tb) paste(vapply(tb$notes, function(n) n$note, character(1)), collapse = " || ")
-  for (tb in list(r$iccTable, r$linCCCTable, r$robinsonATable, r$meanPearsonTable)) {
+  for (tb in list(r$iccGroup$iccTable, r$iccGroup$linCCCTable, r$lightKappaTableGroup$robinsonATable, r$iccGroup$meanPearsonTable)) {
     txt <- ntxt(tb)
     expect_true(nzchar(txt))                      # an unnoted table passes grepl() vacuously
     expect_true(grepl("between-case variance", txt, fixed = TRUE))
@@ -504,7 +504,7 @@ test_that("VAL-agreement-08 a dominating case is disclosed on every continuous m
   # ...and stays silent on clean data with the same raters.
   d2 <- data.frame(pathA = a, pathB = b)
   r2 <- .val_q(agreement(data = d2, vars = names(d2), icc = TRUE))
-  expect_false(grepl("between-case variance", ntxt(r2$iccTable), fixed = TRUE))
+  expect_false(grepl("between-case variance", ntxt(r2$iccGroup$iccTable), fixed = TRUE))
 })
 
 test_that("VAL-agreement-09 ICC stays in [-1,1] and an impossible F is blanked, not shown", {
@@ -514,7 +514,7 @@ test_that("VAL-agreement-09 ICC stays in [-1,1] and an impossible F is blanked, 
   skip_if_not_installed("irr")
   d <- data.frame(a = c(1e-12, 1, 1e12, 5, 7, 9, 11, 13),
                   b = c(1e-12, 1, 1e12, 5, 7, 9, 11, 14))
-  r <- .val_q(agreement(data = d, vars = c("a","b"), icc = TRUE))$iccTable
+  r <- .val_q(agreement(data = d, vars = c("a","b"), icc = TRUE))$iccGroup$iccTable
   ti <- r$asDF
   expect_lte(as.numeric(ti$icc_value[1]), 1)
   expect_gte(as.numeric(ti$icc_value[1]), -1)

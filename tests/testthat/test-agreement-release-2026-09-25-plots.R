@@ -86,7 +86,7 @@ test_that("L395 agreement heatmap colours cells on a fixed 0-100% scale and the 
 test_that("L325 specific-agreement guide attributes a PSA/NSA gap to prevalence, not diagnostic bias", {
     d <- data.frame(R1 = factor(rep(c("A", "B"), 10)), R2 = factor(rep(c("A", "B"), 10)))
     a <- agreement_run(d, vars = c("R1", "R2"), showSpecificAgreementGuide = TRUE)
-    html <- a$results$specificAgreementExplanation$content
+    html <- a$results$specificAgreementGroup$specificAgreementExplanation$content
     expect_true(nzchar(html))
     expect_false(grepl("over-diagnosis", html, fixed = TRUE))
     expect_false(grepl("under-diagnosis", html, fixed = TRUE))
@@ -101,9 +101,9 @@ test_that("L329 rater clustering runs when one rater never used a category", {
                     R2 = factor(ifelse(runif(40) < .8, b, sample(lv, 40, TRUE)), lv),
                     R3 = factor(ifelse(b == "G3", "G2", b)))
     a <- agreement_run(d, vars = c("R1", "R2", "R3"), raterClustering = TRUE, nClusters = 2)
-    tab <- a$results$raterClusterTable$asDF
+    tab <- a$results$raterClusterGroup$raterClusterTable$asDF
     expect_equal(nrow(tab), 3L)
-    expect_false("error" %in% names(agreement_notes(a$results$raterClusterTable)))
+    expect_false("error" %in% names(agreement_notes(a$results$raterClusterGroup$raterClusterTable)))
     # Oracle: pairwise proportion of identical labels.
     agree <- function(x, y) mean(as.character(x) == as.character(y))
     for (i in seq_len(3)) {
@@ -122,29 +122,29 @@ test_that("L332 k-means rater and case clustering survive a missing rating", {
     cc <- stats::complete.cases(d)
 
     a <- agreement_run(d, vars = names(d), raterClustering = TRUE, clusterMethod = "kmeans", nClusters = 2)
-    tab <- a$results$raterClusterTable$asDF
+    tab <- a$results$raterClusterGroup$raterClusterTable$asDF
     expect_equal(nrow(tab), 4L)
     set.seed(42)
     oracle <- stats::kmeans(t(as.matrix(d[cc, ])), centers = 2, nstart = 25)$cluster
     expect_true(same_partition(as.integer(tab$cluster), unname(oracle)))
-    notes <- agreement_notes(a$results$raterClusterTable)
+    notes <- agreement_notes(a$results$raterClusterGroup$raterClusterTable)
     expect_true(grepl("1 case(s) with a missing rating", notes[["kmeans_missing"]], fixed = TRUE))
 
     a <- agreement_run(d, vars = names(d), caseClustering = TRUE, caseClusterMethod = "kmeans",
                        nCaseClusters = 2, showCaseClusterHeatmap = TRUE)
-    tab <- a$results$caseClusterTable$asDF
+    tab <- a$results$raterClusterGroup$caseClusterTable$asDF
     expect_equal(nrow(tab), 30L)
     set.seed(42)
     oracle <- rep(NA_integer_, 30)
     oracle[cc] <- stats::kmeans(as.matrix(d[cc, ]), centers = 2, nstart = 25)$cluster
     expect_true(is.na(tab$cluster[5]))
     expect_true(same_partition(suppressWarnings(as.integer(tab$cluster)), oracle))
-    notes <- agreement_notes(a$results$caseClusterTable)
+    notes <- agreement_notes(a$results$raterClusterGroup$caseClusterTable)
     expect_true("kmeans_missing" %in% names(notes))
     # The heatmap renderer takes the NA label (order() puts it last).
     priv <- a$.__enclos_env__$private
     f <- tempfile(fileext = ".png"); grDevices::png(f)
-    ok <- priv$.caseClusterHeatmap(image = list(state = a$results$caseClusterHeatmap$state),
+    ok <- priv$.caseClusterHeatmap(image = list(state = a$results$raterClusterGroup$caseClusterHeatmap$state),
                                    ggtheme = NULL, theme = NULL)
     grDevices::dev.off()
     expect_true(ok)
@@ -155,9 +155,9 @@ test_that("L331 correlation distance with a constant rater does not stop hclust"
     d <- data.frame(R1 = x, R2 = x + rnorm(30, 0, 3), R3 = x + rnorm(30, 0, 3), R4 = rep(50, 30))
     a <- agreement_run(d, vars = names(d), raterClustering = TRUE,
                        clusterDistance = "correlation", nClusters = 2)
-    tab <- a$results$raterClusterTable$asDF
+    tab <- a$results$raterClusterGroup$raterClusterTable$asDF
     expect_equal(nrow(tab), 4L)
-    notes <- agreement_notes(a$results$raterClusterTable)
+    notes <- agreement_notes(a$results$raterClusterGroup$raterClusterTable)
     expect_false("error" %in% names(notes))
     expect_true(grepl("^3 rater pair", notes[["undefined_cor"]]))
     # Oracle: R1-R3 share a cluster and their similarity is the mean correlation.
@@ -174,14 +174,14 @@ test_that("L403 clustering refuses a mix of continuous and categorical raters an
                     R3 = factor(sample(lv, 30, TRUE), levels = lv, ordered = TRUE))
     expect_equal(sum(stats::complete.cases(d)), 30L)
     a <- agreement_run(d, vars = names(d), raterClustering = TRUE, nClusters = 2)
-    expect_equal(nrow(a$results$raterClusterTable$asDF), 0L)
-    notice <- agreement_subanalysis_notice(a$results$raterClusterTable)
+    expect_equal(nrow(a$results$raterClusterGroup$raterClusterTable$asDF), 0L)
+    notice <- agreement_subanalysis_notice(a$results$raterClusterGroup$raterClusterTable)
     expect_false(grepl("fewer than 3 complete cases", notice, fixed = TRUE))
     expect_true(grepl("R1", notice, fixed = TRUE))
 
     a <- agreement_run(d, vars = names(d), caseClustering = TRUE, nCaseClusters = 2)
-    expect_equal(nrow(a$results$caseClusterTable$asDF), 0L)
-    expect_true(grepl("continuous measurements", agreement_subanalysis_notice(a$results$caseClusterTable),
+    expect_equal(nrow(a$results$raterClusterGroup$caseClusterTable$asDF), 0L)
+    expect_true(grepl("continuous measurements", agreement_subanalysis_notice(a$results$raterClusterGroup$caseClusterTable),
                       fixed = TRUE))
 })
 
@@ -206,8 +206,8 @@ test_that("L402 rater and case cluster heatmaps colour similarity on a fixed -1.
 
     d <- data.frame(R1 = rnorm(10), R2 = rnorm(10), R3 = rnorm(10))
     a <- agreement_run(d, vars = names(d), showRaterClusterGuide = TRUE, showCaseClusterGuide = TRUE)
-    expect_false(grepl("Dark diagonal blocks", a$results$raterClusterExplanation$content, fixed = TRUE))
-    expect_true(grepl("fixed scale", a$results$caseClusterExplanation$content, fixed = TRUE))
+    expect_false(grepl("Dark diagonal blocks", a$results$raterClusterGroup$raterClusterExplanation$content, fixed = TRUE))
+    expect_true(grepl("fixed scale", a$results$raterClusterGroup$caseClusterExplanation$content, fixed = TRUE))
 })
 
 test_that("L404 k-means notes say the distance metric does not drive the clusters", {
@@ -215,14 +215,14 @@ test_that("L404 k-means notes say the distance metric does not drive the cluster
     d <- data.frame(R1 = x, R2 = x + rnorm(30, 0, 3), R3 = x + rnorm(30, 0, 3), R4 = x + 5 + rnorm(30, 0, 3))
     a <- agreement_run(d, vars = names(d), raterClustering = TRUE, clusterMethod = "kmeans",
                        clusterDistance = "agreement", nClusters = 2)
-    notes <- agreement_notes(a$results$raterClusterTable)
+    notes <- agreement_notes(a$results$raterClusterGroup$raterClusterTable)
     expect_true("kmeans_metric" %in% names(notes))
     expect_false(grepl("Use the Euclidean", notes[["exact_match"]], fixed = TRUE))
     expect_false(grepl("\\s$", notes[["exact_match"]]))
 
     a <- agreement_run(d, vars = names(d), caseClustering = TRUE, caseClusterMethod = "kmeans",
                        caseClusterDistance = "correlation", nCaseClusters = 2)
-    notes <- agreement_notes(a$results$caseClusterTable)
+    notes <- agreement_notes(a$results$raterClusterGroup$caseClusterTable)
     expect_true("kmeans_metric" %in% names(notes))
     expect_false("offset_blind" %in% names(notes))
 })
@@ -231,20 +231,20 @@ test_that("L406 a one-member cluster's blank similarity is explained", {
     set.seed(4); x <- rnorm(30, 50, 10)
     d <- data.frame(R1 = x, R2 = x + rnorm(30, 0, 3), R3 = x + rnorm(30, 0, 3), R4 = x + 40 + rnorm(30, 0, 3))
     a <- agreement_run(d, vars = names(d), raterClustering = TRUE, nClusters = 2)
-    tab <- a$results$raterClusterTable$asDF
+    tab <- a$results$raterClusterGroup$raterClusterTable$asDF
     sizes <- table(tab$cluster)
     expect_true(any(sizes == 1))
     lone <- tab$cluster %in% names(sizes)[sizes == 1]
     expect_true(all(is.na(tab$avg_similarity[lone])))
-    expect_true("singleton" %in% names(agreement_notes(a$results$raterClusterTable)))
+    expect_true("singleton" %in% names(agreement_notes(a$results$raterClusterGroup$raterClusterTable)))
 
     d2 <- d[, 1:3]
     d2[30, ] <- d2[30, ] + 500
     a <- agreement_run(d2, vars = names(d2), caseClustering = TRUE, nCaseClusters = 2)
-    tab <- a$results$caseClusterTable$asDF
+    tab <- a$results$raterClusterGroup$caseClusterTable$asDF
     expect_equal(sum(tab$cluster == tab$cluster[30]), 1L)
     expect_true(is.na(tab$avg_similarity[30]))
-    expect_true("singleton" %in% names(agreement_notes(a$results$caseClusterTable)))
+    expect_true("singleton" %in% names(agreement_notes(a$results$raterClusterGroup$caseClusterTable)))
 })
 
 test_that("L400 a single-category subgroup shows NA and 'Not estimable' with a note (2 and 3 raters)", {

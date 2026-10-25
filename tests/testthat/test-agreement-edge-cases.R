@@ -51,7 +51,7 @@ test_that("agreement handles perfect continuous agreement (ICC = 1.0)", {
 
   expect_s3_class(result, "agreementResults")
   # Identical measurements: every ICC form is 1.
-  expect_equal(result$iccTable$asDF$icc_value[1], 1, tolerance = 1e-10)
+  expect_equal(result$iccGroup$iccTable$asDF$icc_value[1], 1, tolerance = 1e-10)
 })
 
 # ═══════════════════════════════════════════════════════════

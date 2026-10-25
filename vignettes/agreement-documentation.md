@@ -117,7 +117,7 @@
 | `nBoot` | `Integer` | `1000` | Number of Bootstrap Samples |
 | `showBootstrapCIGuide` | `Bool` | `FALSE` | When to use bootstrap CIs |
 | `multiAnnotatorConcordance` | `Bool` | `FALSE` | Multi-annotator concordance |
-| `predictionColumn` | `Integer` | `1` | Prediction column (first rater) |
+| `predictionRater` | `Variable` | `NULL` | Prediction rater (multi-annotator concordance) |
 | `showConcordanceF1Guide` | `Bool` | `FALSE` | When to use multi-annotator concordance |
 | `specificAgreement` | `Bool` | `FALSE` | Specific agreement indices (category-focused) |
 | `specificPositiveCategory` | `String` | `` | Positive category (binary analysis) |

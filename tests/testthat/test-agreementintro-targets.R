@@ -32,9 +32,9 @@ test_that("categorical recipes produce their named Cohen, Conger, Fleiss and alp
   s <- c(target_guide_recipe(nRaters = 3L, missingRatings = "yes"), list(vars = names(d)))
   r <- target_guide_run("agreement", d, s)
   numeric_ratings <- vapply(d, as.integer, integer(nrow(d)))
-  expect_equal(r$krippTable$asDF$alpha,
+  expect_equal(r$krippTableGroup$krippTable$asDF$alpha,
     irr::kripp.alpha(cbind(t(numeric_ratings), NA), method = "nominal")$value, tolerance = 1e-10)
-  expect_equal(r$krippTable$asDF$subjects, nrow(d))
+  expect_equal(r$krippTableGroup$krippTable$asDF$subjects, nrow(d))
   expect_equal(r$irrtable$asDF$subjects, nrow(d))
   expect_gt(nrow(d), sum(stats::complete.cases(d)))
 })
@@ -52,7 +52,7 @@ test_that("all six recommended ICC settings reproduce the explicit model definit
       type = if (base == "3") "consistency" else "agreement", unit = unit)$value
     for (recipe in recipes) {
       r <- target_guide_run(recipe$target, d, c(recipe$settings, list(vars = names(d))))
-      value <- if (recipe$target == "agreement") r$iccTable$asDF$icc_value else
+      value <- if (recipe$target == "agreement") r$iccGroup$iccTable$asDF$icc_value else
         r$icc_results$asDF$icc_value
       expect_length(value, 1L)
       expect_equal(value, expected, tolerance = 1e-10)
@@ -66,17 +66,17 @@ test_that("measurement, ranking and marginal recipes populate their intended out
   s <- c(target_guide_recipe(purpose = "measurement", scale = "continuous"),
     list(vars = names(d)))
   r <- target_guide_run("agreement", d, s)
-  expect_equal(r$linCCCTable$asDF$ccc, epiR::epi.ccc(d$A, d$B)$rho.c$est, tolerance = 1e-10)
+  expect_equal(r$iccGroup$linCCCTable$asDF$ccc, epiR::epi.ccc(d$A, d$B)$rho.c$est, tolerance = 1e-10)
   ranks <- data.frame(A = c(1:8, 10, 9), B = c(1:7, 10, 8, 9))
   s <- c(target_guide_recipe(purpose = "ranking", scale = "rankings"), list(vars = names(ranks)))
   r <- target_guide_run("agreement", ranks, s)
-  expect_equal(r$kendallWTable$asDF$w, irr::kendall(ranks)$value, tolerance = 1e-10)
+  expect_equal(r$lightKappaTableGroup$kendallWTable$asDF$w, irr::kendall(ranks)$value, tolerance = 1e-10)
   d <- data.frame(A = factor(rep(c("a", "b", "c", "a", "b"), 10)),
     B = factor(rep(c("b", "b", "c", "a", "a"), 10)))
   r <- target_guide_run("agreement", d, c(target_guide_recipe(purpose = "bias"),
     list(vars = names(d))))
-  expect_equal(nrow(r$stuartMaxwellTable$asDF), 1L)
-  expect_true(is.finite(r$stuartMaxwellTable$asDF$chisq))
+  expect_equal(nrow(r$raterBiasGroup$stuartMaxwellTable$asDF), 1L)
+  expect_true(is.finite(r$raterBiasGroup$stuartMaxwellTable$asDF$chisq))
 })
 
 test_that("reader recipes preserve comparator semantics, threshold direction and cluster units", {
@@ -137,10 +137,10 @@ test_that("weighted recipes respect a nonalphabetic declared order", {
       categoryOrder = "confirmed", weights = weight))$recommendations
     codes <- vapply(d, as.integer, integer(nrow(d)))
     r <- target_guide_run("agreement", d, c(recipes[[1]]$settings, list(vars = names(d))))
-    expect_equal(r$krippTable$asDF$alpha,
+    expect_equal(r$krippTableGroup$krippTable$asDF$alpha,
       irr::kripp.alpha(cbind(t(codes), NA), method = "ordinal")$value, tolerance = 1e-10)
     r <- target_guide_run("agreement", d, c(recipes[[2]]$settings, list(vars = names(d))))
-    expect_equal(r$gwetTable$asDF$coefficient,
+    expect_equal(r$gwetGroup$gwetTable$asDF$coefficient,
       irrCAC::gwet.ac1.raw(codes, weights = weight, categ.labels = seq_along(lev))$est$coeff.val,
       tolerance = 1e-10)
   }
@@ -153,7 +153,7 @@ test_that("paired agreement recipe compares the requested two-rater coefficients
     D = rep(c("no", "no", "no", "no", "yes"), 10))
   s <- c(target_guide_recipe(purpose = "paired", comparisonGoal = "agreement"),
     list(vars = c("A", "B"), conditionBVars = c("C", "D"), pairedBootN = 500L, seed = 31L))
-  r <- target_guide_run("agreement", d, s)$pairedAgreementTable$asDF
+  r <- target_guide_run("agreement", d, s)$pairedAgreementGroup$pairedAgreementTable$asDF
   kappa <- rownames(r) == '"kappa"'
   expect_equal(sum(kappa), 1L)
   expect_equal(r$condition_a[kappa], irr::kappa2(d[1:2])$value, tolerance = 1e-10)

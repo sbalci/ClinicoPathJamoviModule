@@ -560,7 +560,10 @@ options:
             analysis, because no option here can say which columns belong to which variable; enter the
             rater columns of one variable at a time.
 
+    # Hidden: single-variable iota is unchanged by standardizing, so the panel no longer offers it
+    # (library-audit 2026-10-23 meddecide [LOW]). Kept for saved analyses and R calls.
     - name: iotaStandardize
+      hidden: true
       title: "Standardize quantitative ratings (no effect on a single variable)"
       type: Bool
       default: true
@@ -1182,18 +1185,17 @@ options:
             concordance accuracy, per-class concordance F1, and comparison to
             strict consensus-based evaluation.
 
-    - name: predictionColumn
-      title: "Prediction column (first rater)"
-      type: Integer
-      default: 1
-      min: 1
-      max: 100
+    - name: predictionRater
+      title: "Prediction rater (multi-annotator concordance)"
+      type: Variable
+      suggested: [nominal, ordinal]
+      permitted: [factor, numeric]
+      default: NULL
       description:
           R: >
-            Which rater column contains the predictions to evaluate. Default is
-            column 1 (first rater). Remaining columns are treated as reference
-            annotators. For AI validation, set this to the column containing AI
-            predictions.
+            The rater column whose ratings are the predictions to evaluate, for example the AI
+            model's calls. It must also be one of the raters; the other raters are the reference
+            annotators.
 
     - name: showConcordanceF1Guide
       title: "When to use multi-annotator concordance"

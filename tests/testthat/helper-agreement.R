@@ -22,6 +22,16 @@ agreement_notes <- function(table) {
     vapply(table$notes, function(n) n$note, character(1))
 }
 
+# A result item by name, at the top or inside a section Group (the headings became Groups,
+# library-audit 2026-10-23 meddecide [LOW]). Works on any analysis's results.
+agreement_item <- function(results, name) {
+    hit <- results$items[[name]]
+    if (!is.null(hit)) return(hit)
+    for (group in results$items)
+        if (inherits(group, "Group") && !is.null(group$items[[name]])) return(group$items[[name]])
+    NULL
+}
+
 # The WARNING notice a failed optional sub-analysis raises for `table` ("" when there is none).
 # They used to be an "error" footnote on the empty table (library-audit 2026-10-23 meddecide [LOW]).
 agreement_subanalysis_notice <- function(table) {

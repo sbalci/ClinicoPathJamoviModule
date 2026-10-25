@@ -637,17 +637,17 @@ test_that("rater and case clustering cap k below the number of units, and dendro
     vars = c("r1", "r2", "r3"), raterClustering = TRUE, clusterMethod = "hierarchical",
     showDendrogram = TRUE, nClusters = 3), data = raters)
   quiet(rc$init()); quiet(rc$run())
-  expect_identical(draw(rc, rc$results$raterDendrogram), TRUE)
-  expect_true("k_capped" %in% names(rc$results$raterClusterTable$notes))
-  expect_equal(length(unique(rc$results$raterDendrogram$state$cluster_labels[[1]])), 2)
+  expect_identical(draw(rc, rc$results$raterClusterGroup$raterDendrogram), TRUE)
+  expect_true("k_capped" %in% names(rc$results$raterClusterGroup$raterClusterTable$notes))
+  expect_equal(length(unique(rc$results$raterClusterGroup$raterDendrogram$state$cluster_labels[[1]])), 2)
 
   cases <- raters[1:3, ]
   cc <- agreementClass$new(options = agreementOptions$new(
     vars = c("r1", "r2", "r3"), caseClustering = TRUE, caseClusterMethod = "hierarchical",
     showCaseDendrogram = TRUE, nCaseClusters = 3), data = cases)
   quiet(cc$init()); quiet(cc$run())
-  expect_identical(draw(cc, cc$results$caseDendrogram), TRUE)
-  expect_true("k_capped" %in% names(cc$results$caseClusterTable$notes))
+  expect_identical(draw(cc, cc$results$raterClusterGroup$caseDendrogram), TRUE)
+  expect_true("k_capped" %in% names(cc$results$raterClusterGroup$caseClusterTable$notes))
 })
 
 # library-audit 2026-09-16 meddecide [LOW] DONE: every Imports package is used by the code; unused ones
@@ -736,15 +736,15 @@ test_that("every seed-dependent meddecide result shows the seed that drew it", {
               raterClustering = TRUE, clusterMethod = "kmeans", nClusters = 2,
               caseClustering = TRUE, caseClusterMethod = "kmeans", nCaseClusters = 2)
     for (t in c("krippTable", "raterClusterTable", "caseClusterTable"))
-      expect_true(shown %in% notes(ag$results[[t]]), info = paste("agreement", t))
+      expect_true(shown %in% notes(agreement_item(ag$results, t)), info = paste("agreement", t))
     # TDI's interval is a distribution-free order-statistic bound: nothing is resampled, so no seed
-    expect_false(shown %in% notes(ag$results$tdiTable))
+    expect_false(shown %in% notes(ag$results$iccGroup$tdiTable))
     nominal <- run("agreement", data.frame(r1 = m1, r2 = m1 + 0.2, r3 = m1 - 0.2)[1:30, ],
                    vars = c("r1", "r2", "r3"), seed = 777, kripp = TRUE, bootstrap = TRUE, nBoot = 100)
-    expect_false(shown %in% notes(nominal$results$krippTable))
+    expect_false(shown %in% notes(nominal$results$krippTableGroup$krippTable))
     hier <- run("agreement", data.frame(r1 = m1, r2 = m1 + 0.1, r3 = m1 - 0.1)[1:30, ],
                 vars = c("r1", "r2", "r3"), seed = 777, raterClustering = TRUE, clusterMethod = "hierarchical")
-    expect_false(shown %in% notes(hier$results$raterClusterTable))
+    expect_false(shown %in% notes(hier$results$raterClusterGroup$raterClusterTable))
   }
 
   if ("decisioncurve" %in% loaded) {
@@ -934,7 +934,7 @@ test_that("fixed-row tables across meddecide are scaffolded before .run()", {
   after_init <- function(name, data, ...) {
     a <- get(paste0(name, "Class"))$new(options = get(paste0(name, "Options"))$new(...), data = data)
     suppressWarnings(suppressMessages(a$init()))
-    function(table) unlist(a$results[[table]]$rowKeys)
+    function(table) unlist(agreement_item(a$results, table)$rowKeys)
   }
   set.seed(8)
   n <- 40
@@ -1462,7 +1462,7 @@ test_that("agreement reports a failed sub-analysis as a named warning notice", {
     suppressWarnings({ a$init(); a$run() })
     notices <- Filter(function(x) inherits(x, "Notice") && isTRUE(x$visible), a$results$items)
     expect_true(any(vapply(notices, function(x) grepl("3 raters", x$content, fixed = TRUE), logical(1))))
-    expect_false("error" %in% names(a$results$raterClusterTable$notes))
+    expect_false("error" %in% names(a$results$raterClusterGroup$raterClusterTable$notes))
   }
   audit_skip_absent(absent, root)
 })
@@ -1536,6 +1536,46 @@ test_that("panels group controls by question and keep dependants beside their op
     }
     if (name == "nogoldstandard")
       expect_null(find(nodes, "method")$node$options)
+  }
+  audit_skip_absent(absent, root)
+})
+
+# library-audit 2026-10-23 meddecide [LOW] PARTIAL: agreement's section headings are result Groups
+#   (no empty Preformatted), iotaStandardize is hidden, and the prediction column is a named variable.
+#   The test-retest separator stays.
+test_that("agreement sections are Groups and the prediction rater is a variable", {
+  root <- audit_source_root()
+  absent <- audit_absent(root, "agreement", c("jamovi/%s.r.yaml", "jamovi/%s.a.yaml", "jamovi/%s.u.yaml"))
+  if (!length(absent)) {
+    items <- yaml::read_yaml(file.path(root, "jamovi", "agreement.r.yaml"))$items
+    types <- vapply(items, function(i) i$type, "")
+    expect_false(any(grepl("Heading$", vapply(items, function(i) i$name, ""))))
+    expect_gte(sum(types == "Group"), 10)
+    expect_false(any(types == "Preformatted"))
+    opts <- yaml::read_yaml(file.path(root, "jamovi", "agreement.a.yaml"))$options
+    opt <- function(n) Filter(function(o) o$name == n, opts)
+    expect_length(opt("predictionColumn"), 0)
+    expect_identical(opt("predictionRater")[[1]]$type, "Variable")
+    expect_true(isTRUE(opt("iotaStandardize")[[1]]$hidden))
+    ui <- paste(readLines(file.path(root, "jamovi", "agreement.u.yaml")), collapse = "\n")
+    expect_false(grepl("name: iotaStandardize", ui, fixed = TRUE))
+  }
+  if (length(audit_loaded("agreement"))) {
+    set.seed(4)
+    cls <- c("A", "B", "C")
+    ann <- replicate(3, sample(cls, 40, TRUE))
+    d <- data.frame(P1 = factor(ann[, 1], cls), AI = factor(ann[, 2], cls), P2 = factor(ann[, 3], cls))
+    # Literal arguments: the generated wrapper reads a Variable argument by NSE, so a symbol
+    # passed through a helper's formals would be taken for a column name.
+    first <- agreement(data = d, vars = c("AI", "P1", "P2"), multiAnnotatorConcordance = TRUE,
+                       predictionRater = "AI")$advancedGroup$concordanceF1Table$asDF
+    middle <- agreement(data = d, vars = c("P1", "AI", "P2"), multiAnnotatorConcordance = TRUE,
+                        predictionRater = "AI")$advancedGroup$concordanceF1Table$asDF
+    expect_gt(nrow(first), 0)
+    expect_equal(middle$value, first$value)
+    unset <- agreement(data = d, vars = c("P1", "AI", "P2"), multiAnnotatorConcordance = TRUE)
+    expect_match(agreement_subanalysis_notice(unset$advancedGroup$concordanceF1Table),
+                 "Select the prediction rater", fixed = TRUE)
   }
   audit_skip_absent(absent, root)
 })

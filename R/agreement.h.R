@@ -103,7 +103,7 @@ agreementOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             nBoot = 1000,
             showBootstrapCIGuide = FALSE,
             multiAnnotatorConcordance = FALSE,
-            predictionColumn = 1,
+            predictionRater = NULL,
             showConcordanceF1Guide = FALSE,
             specificAgreement = FALSE,
             specificPositiveCategory = "",
@@ -384,6 +384,7 @@ agreementOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             private$..iotaStandardize <- jmvcore::OptionBool$new(
                 "iotaStandardize",
                 iotaStandardize,
+                hidden=TRUE,
                 default=TRUE)
             private$..showIotaGuide <- jmvcore::OptionBool$new(
                 "showIotaGuide",
@@ -637,12 +638,16 @@ agreementOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 "multiAnnotatorConcordance",
                 multiAnnotatorConcordance,
                 default=FALSE)
-            private$..predictionColumn <- jmvcore::OptionInteger$new(
-                "predictionColumn",
-                predictionColumn,
-                default=1,
-                min=1,
-                max=100)
+            private$..predictionRater <- jmvcore::OptionVariable$new(
+                "predictionRater",
+                predictionRater,
+                suggested=list(
+                    "nominal",
+                    "ordinal"),
+                permitted=list(
+                    "factor",
+                    "numeric"),
+                default=NULL)
             private$..showConcordanceF1Guide <- jmvcore::OptionBool$new(
                 "showConcordanceF1Guide",
                 showConcordanceF1Guide,
@@ -1078,7 +1083,7 @@ agreementOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..nBoot)
             self$.addOption(private$..showBootstrapCIGuide)
             self$.addOption(private$..multiAnnotatorConcordance)
-            self$.addOption(private$..predictionColumn)
+            self$.addOption(private$..predictionRater)
             self$.addOption(private$..showConcordanceF1Guide)
             self$.addOption(private$..specificAgreement)
             self$.addOption(private$..specificPositiveCategory)
@@ -1240,7 +1245,7 @@ agreementOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         nBoot = function() private$..nBoot$value,
         showBootstrapCIGuide = function() private$..showBootstrapCIGuide$value,
         multiAnnotatorConcordance = function() private$..multiAnnotatorConcordance$value,
-        predictionColumn = function() private$..predictionColumn$value,
+        predictionRater = function() private$..predictionRater$value,
         showConcordanceF1Guide = function() private$..showConcordanceF1Guide$value,
         specificAgreement = function() private$..specificAgreement$value,
         specificPositiveCategory = function() private$..specificPositiveCategory$value,
@@ -1401,7 +1406,7 @@ agreementOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..nBoot = NA,
         ..showBootstrapCIGuide = NA,
         ..multiAnnotatorConcordance = NA,
-        ..predictionColumn = NA,
+        ..predictionRater = NA,
         ..showConcordanceF1Guide = NA,
         ..specificAgreement = NA,
         ..specificPositiveCategory = NA,
@@ -1471,98 +1476,28 @@ agreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     inherit = jmvcore::Group,
     active = list(
         welcome = function() private$.items[["welcome"]],
-        irrtableHeading = function() private$.items[["irrtableHeading"]],
         irrtable = function() private$.items[["irrtable"]],
-        contingencyTableHeading = function() private$.items[["contingencyTableHeading"]],
-        contingencyTable = function() private$.items[["contingencyTable"]],
-        ratingCombinationsTable = function() private$.items[["ratingCombinationsTable"]],
-        contingencyTableExplanation = function() private$.items[["contingencyTableExplanation"]],
-        gradingHeading = function() private$.items[["gradingHeading"]],
-        designSummaryTable = function() private$.items[["designSummaryTable"]],
-        categoryDistributionTable = function() private$.items[["categoryDistributionTable"]],
-        pathologistTable = function() private$.items[["pathologistTable"]],
-        boundaryTable = function() private$.items[["boundaryTable"]],
-        severityPlot = function() private$.items[["severityPlot"]],
-        latentModelTable = function() private$.items[["latentModelTable"]],
-        gradingGuide = function() private$.items[["gradingGuide"]],
-        blandAltmanHeading = function() private$.items[["blandAltmanHeading"]],
-        blandAltman = function() private$.items[["blandAltman"]],
+        contingencyTableGroup = function() private$.items[["contingencyTableGroup"]],
+        gradingGroup = function() private$.items[["gradingGroup"]],
+        blandAltmanGroup = function() private$.items[["blandAltmanGroup"]],
         agreementHeatmapPlot = function() private$.items[["agreementHeatmapPlot"]],
         agreementHeatmapExplanation = function() private$.items[["agreementHeatmapExplanation"]],
-        blandAltmanExplanation = function() private$.items[["blandAltmanExplanation"]],
-        blandAltmanStats = function() private$.items[["blandAltmanStats"]],
-        krippTableHeading = function() private$.items[["krippTableHeading"]],
-        krippTable = function() private$.items[["krippTable"]],
-        krippExplanation = function() private$.items[["krippExplanation"]],
-        lightKappaTableHeading = function() private$.items[["lightKappaTableHeading"]],
-        lightKappaTable = function() private$.items[["lightKappaTable"]],
-        lightKappaExplanation = function() private$.items[["lightKappaExplanation"]],
-        finnTable = function() private$.items[["finnTable"]],
-        finnExplanation = function() private$.items[["finnExplanation"]],
-        kendallWTable = function() private$.items[["kendallWTable"]],
-        kendallWExplanation = function() private$.items[["kendallWExplanation"]],
-        robinsonATable = function() private$.items[["robinsonATable"]],
-        robinsonAExplanation = function() private$.items[["robinsonAExplanation"]],
-        meanSpearmanTable = function() private$.items[["meanSpearmanTable"]],
-        meanSpearmanExplanation = function() private$.items[["meanSpearmanExplanation"]],
-        raterBiasHeading = function() private$.items[["raterBiasHeading"]],
-        raterBiasTable = function() private$.items[["raterBiasTable"]],
-        raterBiasExplanation = function() private$.items[["raterBiasExplanation"]],
-        bhapkarTable = function() private$.items[["bhapkarTable"]],
-        bhapkarExplanation = function() private$.items[["bhapkarExplanation"]],
-        stuartMaxwellTable = function() private$.items[["stuartMaxwellTable"]],
-        stuartMaxwellExplanation = function() private$.items[["stuartMaxwellExplanation"]],
+        krippTableGroup = function() private$.items[["krippTableGroup"]],
+        lightKappaTableGroup = function() private$.items[["lightKappaTableGroup"]],
+        raterBiasGroup = function() private$.items[["raterBiasGroup"]],
         pairwiseKappaTable = function() private$.items[["pairwiseKappaTable"]],
         pairwiseKappaExplanation = function() private$.items[["pairwiseKappaExplanation"]],
         allPairsKappaTable = function() private$.items[["allPairsKappaTable"]],
         allPairsKappaExplanation = function() private$.items[["allPairsKappaExplanation"]],
         itemModalAgreementTable = function() private$.items[["itemModalAgreementTable"]],
         itemModalAgreementExplanation = function() private$.items[["itemModalAgreementExplanation"]],
-        hierarchicalHeading = function() private$.items[["hierarchicalHeading"]],
-        hierarchicalOverallTable = function() private$.items[["hierarchicalOverallTable"]],
-        clusterSpecificTable = function() private$.items[["clusterSpecificTable"]],
-        varianceDecompositionTable = function() private$.items[["varianceDecompositionTable"]],
-        hierarchicalICCTable = function() private$.items[["hierarchicalICCTable"]],
-        homogeneityTestTable = function() private$.items[["homogeneityTestTable"]],
-        hierarchicalExplanation = function() private$.items[["hierarchicalExplanation"]],
-        advancedHeading = function() private$.items[["advancedHeading"]],
-        mixedEffectsTable = function() private$.items[["mixedEffectsTable"]],
-        mixedEffectsVarianceTable = function() private$.items[["mixedEffectsVarianceTable"]],
-        mixedEffectsExplanation = function() private$.items[["mixedEffectsExplanation"]],
-        confusionMatrixTable = function() private$.items[["confusionMatrixTable"]],
-        perClassMetricsTable = function() private$.items[["perClassMetricsTable"]],
-        confusionMatrixExplanation = function() private$.items[["confusionMatrixExplanation"]],
-        bootstrapCITable = function() private$.items[["bootstrapCITable"]],
-        bootstrapCIExplanation = function() private$.items[["bootstrapCIExplanation"]],
-        concordanceF1Table = function() private$.items[["concordanceF1Table"]],
-        concordanceF1PerClassTable = function() private$.items[["concordanceF1PerClassTable"]],
-        concordanceF1Explanation = function() private$.items[["concordanceF1Explanation"]],
-        gwetHeading = function() private$.items[["gwetHeading"]],
-        gwetTable = function() private$.items[["gwetTable"]],
-        gwetExplanation = function() private$.items[["gwetExplanation"]],
-        pabakTable = function() private$.items[["pabakTable"]],
-        pabakExplanation = function() private$.items[["pabakExplanation"]],
-        iccHeading = function() private$.items[["iccHeading"]],
-        iccTable = function() private$.items[["iccTable"]],
-        iccExplanation = function() private$.items[["iccExplanation"]],
-        meanPearsonTable = function() private$.items[["meanPearsonTable"]],
-        meanPearsonExplanation = function() private$.items[["meanPearsonExplanation"]],
-        linCCCTable = function() private$.items[["linCCCTable"]],
-        linCCCExplanation = function() private$.items[["linCCCExplanation"]],
-        tdiTable = function() private$.items[["tdiTable"]],
-        tdiExplanation = function() private$.items[["tdiExplanation"]],
-        maxwellREHeading = function() private$.items[["maxwellREHeading"]],
-        maxwellRETable = function() private$.items[["maxwellRETable"]],
-        maxwellREExplanation = function() private$.items[["maxwellREExplanation"]],
-        interIntraRaterIntraTable = function() private$.items[["interIntraRaterIntraTable"]],
-        interIntraRaterInterTable = function() private$.items[["interIntraRaterInterTable"]],
-        interIntraRaterExplanation = function() private$.items[["interIntraRaterExplanation"]],
-        iotaTable = function() private$.items[["iotaTable"]],
-        iotaExplanation = function() private$.items[["iotaExplanation"]],
+        hierarchicalGroup = function() private$.items[["hierarchicalGroup"]],
+        advancedGroup = function() private$.items[["advancedGroup"]],
+        gwetGroup = function() private$.items[["gwetGroup"]],
+        iccGroup = function() private$.items[["iccGroup"]],
+        maxwellREGroup = function() private$.items[["maxwellREGroup"]],
         weightedKappaGuide = function() private$.items[["weightedKappaGuide"]],
-        specificAgreementHeading = function() private$.items[["specificAgreementHeading"]],
-        specificAgreementTable = function() private$.items[["specificAgreementTable"]],
-        specificAgreementExplanation = function() private$.items[["specificAgreementExplanation"]],
+        specificAgreementGroup = function() private$.items[["specificAgreementGroup"]],
         levelInfoTable = function() private$.items[["levelInfoTable"]],
         summary = function() private$.items[["summary"]],
         about = function() private$.items[["about"]],
@@ -1578,20 +1513,8 @@ agreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         subgroupAgreementTable = function() private$.items[["subgroupAgreementTable"]],
         subgroupForestPlotImage = function() private$.items[["subgroupForestPlotImage"]],
         subgroupExplanation = function() private$.items[["subgroupExplanation"]],
-        raterClusterHeading = function() private$.items[["raterClusterHeading"]],
-        raterClusterTable = function() private$.items[["raterClusterTable"]],
-        raterDendrogram = function() private$.items[["raterDendrogram"]],
-        raterClusterHeatmap = function() private$.items[["raterClusterHeatmap"]],
-        raterClusterExplanation = function() private$.items[["raterClusterExplanation"]],
-        caseClusterTable = function() private$.items[["caseClusterTable"]],
-        caseDendrogram = function() private$.items[["caseDendrogram"]],
-        caseClusterHeatmap = function() private$.items[["caseClusterHeatmap"]],
-        caseClusterExplanation = function() private$.items[["caseClusterExplanation"]],
-        pairedAgreementHeading = function() private$.items[["pairedAgreementHeading"]],
-        pairedAgreementTable = function() private$.items[["pairedAgreementTable"]],
-        pairedAgreementExplanation = function() private$.items[["pairedAgreementExplanation"]],
-        agreementSampleSizeTable = function() private$.items[["agreementSampleSizeTable"]],
-        agreementSampleSizeExplanation = function() private$.items[["agreementSampleSizeExplanation"]]),
+        raterClusterGroup = function() private$.items[["raterClusterGroup"]],
+        pairedAgreementGroup = function() private$.items[["pairedAgreementGroup"]]),
     private = list(),
     public=list(
         initialize=function(options) {
@@ -1615,10 +1538,6 @@ agreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 options=options,
                 name="welcome",
                 title=""))
-            self$add(jmvcore::Preformatted$new(
-                options=options,
-                name="irrtableHeading",
-                title="Interrater Reliability"))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="irrtable",
@@ -1677,268 +1596,337 @@ agreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "Gwet2008",
                     "irrCAC",
                     "LandisKoch1977")))
-            self$add(jmvcore::Preformatted$new(
-                options=options,
-                name="contingencyTableHeading",
-                title="Data Summary",
-                visible="(sft)",
-                clearWith=list(
-                    "sft")))
-            self$add(jmvcore::Table$new(
-                options=options,
-                name="contingencyTable",
-                title="Contingency Table (2 Raters)",
-                visible="(sft)",
-                rows=0,
-                columns=list(),
-                clearWith=list(
-                    "vars",
-                    "wght",
-                    "exct")))
-            self$add(jmvcore::Table$new(
-                options=options,
-                name="ratingCombinationsTable",
-                title="Rating Combinations (3+ Raters)",
-                visible="(sft)",
-                rows=0,
-                columns=list(),
-                clearWith=list(
-                    "vars",
-                    "wght",
-                    "exct")))
-            self$add(jmvcore::Html$new(
-                options=options,
-                name="contingencyTableExplanation",
-                title="About Contingency Table & Rating Combinations",
-                visible="(sft && showAbout)"))
-            self$add(jmvcore::Preformatted$new(
-                options=options,
-                name="gradingHeading",
-                title="Pathologist Grading Analysis",
-                visible="(gradingDesign || perPathologist || severityModel || latentModel || showGradingGuide)",
-                clearWith=list(
-                    "gradingDesign",
-                    "perPathologist",
-                    "severityModel",
-                    "latentModel",
-                    "showGradingGuide")))
-            self$add(jmvcore::Table$new(
-                options=options,
-                name="designSummaryTable",
-                title="Study Design",
-                visible="(gradingDesign)",
-                rows=0,
-                columns=list(
-                    list(
-                        `name`="item", 
-                        `title`="Design Feature", 
-                        `type`="text"),
-                    list(
-                        `name`="value", 
-                        `title`="Value", 
-                        `type`="text")),
-                clearWith=list(
-                    "vars",
-                    "clusterVariable")))
-            self$add(jmvcore::Table$new(
-                options=options,
-                name="categoryDistributionTable",
-                title="Category Distribution by Pathologist",
-                visible="(gradingDesign)",
-                rows=0,
-                columns=list(
-                    list(
-                        `name`="pathologist", 
-                        `title`="Pathologist", 
-                        `type`="text"),
-                    list(
-                        `name`="n", 
-                        `title`="Ratings", 
-                        `type`="integer")),
-                clearWith=list(
-                    "vars")))
-            self$add(jmvcore::Table$new(
-                options=options,
-                name="pathologistTable",
-                title="Per-Pathologist Agreement and Grading Tendency",
-                visible="(perPathologist || severityModel)",
-                rows=0,
-                columns=list(
-                    list(
-                        `name`="pathologist", 
-                        `title`="Pathologist", 
-                        `type`="text"),
-                    list(
-                        `name`="cases_read", 
-                        `title`="Cases Read", 
-                        `type`="integer", 
-                        `visible`="(perPathologist)"),
-                    list(
-                        `name`="pct_exact", 
-                        `title`="Exact agreement with colleagues %", 
-                        `type`="number", 
-                        `visible`="(perPathologist)"),
-                    list(
-                        `name`="mean_kappa", 
-                        `title`="Mean pairwise kappa", 
-                        `type`="number", 
-                        `visible`="(perPathologist)"),
-                    list(
-                        `name`="shift", 
-                        `title`="Grading tendency", 
-                        `type`="number", 
-                        `visible`="(severityModel)"),
-                    list(
-                        `name`="se", 
-                        `title`="SE", 
-                        `type`="number", 
-                        `visible`="(severityModel)"),
-                    list(
-                        `name`="ci_lower", 
-                        `title`="95% CI Lower", 
-                        `type`="number", 
-                        `visible`="(severityModel)"),
-                    list(
-                        `name`="ci_upper", 
-                        `title`="95% CI Upper", 
-                        `type`="number", 
-                        `visible`="(severityModel)"),
-                    list(
-                        `name`="p_holm", 
-                        `title`="p (Holm)", 
-                        `type`="number", 
-                        `format`="zto,pvalue", 
-                        `visible`="(severityModel)"),
-                    list(
-                        `name`="tendency", 
-                        `title`="Tendency", 
-                        `type`="text", 
-                        `visible`="(severityModel)")),
-                clearWith=list(
-                    "vars",
-                    "confLevel",
-                    "perPathologist",
-                    "severityModel"),
-                refs=list(
-                    "Nelson2015",
-                    "ordinal",
-                    "holm1979")))
-            self$add(jmvcore::Table$new(
-                options=options,
-                name="boundaryTable",
-                title="Boundary Excess over Colleagues",
-                visible="(perPathologist)",
-                rows=0,
-                columns=list(
-                    list(
-                        `name`="pathologist", 
-                        `title`="Pathologist", 
-                        `type`="text", 
-                        `combineBelow`=TRUE),
-                    list(
-                        `name`="boundary", 
-                        `title`="Boundary", 
-                        `type`="text"),
-                    list(
-                        `name`="n", 
-                        `title`="Shared Cases", 
-                        `type`="integer"),
-                    list(
-                        `name`="excess", 
-                        `title`="Excess over colleagues", 
-                        `type`="number"),
-                    list(
-                        `name`="ci_lower", 
-                        `title`="95% CI Lower", 
-                        `type`="number"),
-                    list(
-                        `name`="ci_upper", 
-                        `title`="95% CI Upper", 
-                        `type`="number")),
-                clearWith=list(
-                    "vars",
-                    "confLevel")))
-            self$add(jmvcore::Image$new(
-                options=options,
-                name="severityPlot",
-                title="Grading Tendency per Pathologist",
-                width=600,
-                height=400,
-                renderFun=".severityPlot",
-                requiresData=FALSE,
-                visible="(severityModel)",
-                clearWith=list(
-                    "vars",
-                    "confLevel",
-                    "severityModel"),
-                refs=list(
-                    "Nelson2015",
-                    "ordinal")))
-            self$add(jmvcore::Table$new(
-                options=options,
-                name="latentModelTable",
-                title="Model-Based Agreement (Latent Probit Model)",
-                visible="(latentModel)",
-                rows=0,
-                columns=list(
-                    list(
-                        `name`="quantity", 
-                        `title`="Quantity", 
-                        `type`="text"),
-                    list(
-                        `name`="estimate", 
-                        `title`="Estimate", 
-                        `type`="number"),
-                    list(
-                        `name`="se", 
-                        `title`="SE", 
-                        `type`="number"),
-                    list(
-                        `name`="ci_lower", 
-                        `title`="95% CI Lower", 
-                        `type`="number"),
-                    list(
-                        `name`="ci_upper", 
-                        `title`="95% CI Upper", 
-                        `type`="number")),
-                clearWith=list(
-                    "vars",
-                    "clusterVariable",
-                    "confLevel"),
-                refs=list(
-                    "Nelson2015",
-                    "ordinal")))
-            self$add(jmvcore::Html$new(
-                options=options,
-                name="gradingGuide",
-                title="About the Pathologist Grading Analysis",
-                visible="(showGradingGuide)",
-                clearWith=list(
-                    "showGradingGuide"),
-                refs=list(
-                    "Nelson2015")))
-            self$add(jmvcore::Preformatted$new(
-                options=options,
-                name="blandAltmanHeading",
-                title="Bland-Altman Method Comparison",
-                visible="(blandAltmanPlot || showBlandAltmanGuide)",
-                clearWith=list(
-                    "blandAltmanPlot",
-                    "showBlandAltmanGuide")))
-            self$add(jmvcore::Image$new(
-                options=options,
-                name="blandAltman",
-                title="Bland-Altman Plot",
-                width=500,
-                height=400,
-                renderFun=".blandAltman",
-                visible="(blandAltmanPlot)",
-                clearWith=list(
-                    "vars",
-                    "baConfidenceLevel",
-                    "proportionalBias"),
-                refs=list(
-                    "BlandAltman1986")))
+            self$add(R6::R6Class(
+                inherit = jmvcore::Group,
+                active = list(
+                    contingencyTable = function() private$.items[["contingencyTable"]],
+                    ratingCombinationsTable = function() private$.items[["ratingCombinationsTable"]],
+                    contingencyTableExplanation = function() private$.items[["contingencyTableExplanation"]]),
+                private = list(),
+                public=list(
+                    initialize=function(options) {
+                        super$initialize(
+                            options=options,
+                            name="contingencyTableGroup",
+                            title="Data Summary")
+                        self$add(jmvcore::Table$new(
+                            options=options,
+                            name="contingencyTable",
+                            title="Contingency Table (2 Raters)",
+                            visible="(sft)",
+                            rows=0,
+                            columns=list(),
+                            clearWith=list(
+                                "vars",
+                                "wght",
+                                "exct")))
+                        self$add(jmvcore::Table$new(
+                            options=options,
+                            name="ratingCombinationsTable",
+                            title="Rating Combinations (3+ Raters)",
+                            visible="(sft)",
+                            rows=0,
+                            columns=list(),
+                            clearWith=list(
+                                "vars",
+                                "wght",
+                                "exct")))
+                        self$add(jmvcore::Html$new(
+                            options=options,
+                            name="contingencyTableExplanation",
+                            title="About Contingency Table & Rating Combinations",
+                            visible="(sft && showAbout)"))}))$new(options=options))
+            self$add(R6::R6Class(
+                inherit = jmvcore::Group,
+                active = list(
+                    designSummaryTable = function() private$.items[["designSummaryTable"]],
+                    categoryDistributionTable = function() private$.items[["categoryDistributionTable"]],
+                    pathologistTable = function() private$.items[["pathologistTable"]],
+                    boundaryTable = function() private$.items[["boundaryTable"]],
+                    severityPlot = function() private$.items[["severityPlot"]],
+                    latentModelTable = function() private$.items[["latentModelTable"]],
+                    gradingGuide = function() private$.items[["gradingGuide"]]),
+                private = list(),
+                public=list(
+                    initialize=function(options) {
+                        super$initialize(
+                            options=options,
+                            name="gradingGroup",
+                            title="Pathologist Grading Analysis")
+                        self$add(jmvcore::Table$new(
+                            options=options,
+                            name="designSummaryTable",
+                            title="Study Design",
+                            visible="(gradingDesign)",
+                            rows=0,
+                            columns=list(
+                                list(
+                                    `name`="item", 
+                                    `title`="Design Feature", 
+                                    `type`="text"),
+                                list(
+                                    `name`="value", 
+                                    `title`="Value", 
+                                    `type`="text")),
+                            clearWith=list(
+                                "vars",
+                                "clusterVariable")))
+                        self$add(jmvcore::Table$new(
+                            options=options,
+                            name="categoryDistributionTable",
+                            title="Category Distribution by Pathologist",
+                            visible="(gradingDesign)",
+                            rows=0,
+                            columns=list(
+                                list(
+                                    `name`="pathologist", 
+                                    `title`="Pathologist", 
+                                    `type`="text"),
+                                list(
+                                    `name`="n", 
+                                    `title`="Ratings", 
+                                    `type`="integer")),
+                            clearWith=list(
+                                "vars")))
+                        self$add(jmvcore::Table$new(
+                            options=options,
+                            name="pathologistTable",
+                            title="Per-Pathologist Agreement and Grading Tendency",
+                            visible="(perPathologist || severityModel)",
+                            rows=0,
+                            columns=list(
+                                list(
+                                    `name`="pathologist", 
+                                    `title`="Pathologist", 
+                                    `type`="text"),
+                                list(
+                                    `name`="cases_read", 
+                                    `title`="Cases Read", 
+                                    `type`="integer", 
+                                    `visible`="(perPathologist)"),
+                                list(
+                                    `name`="pct_exact", 
+                                    `title`="Exact agreement with colleagues %", 
+                                    `type`="number", 
+                                    `visible`="(perPathologist)"),
+                                list(
+                                    `name`="mean_kappa", 
+                                    `title`="Mean pairwise kappa", 
+                                    `type`="number", 
+                                    `visible`="(perPathologist)"),
+                                list(
+                                    `name`="shift", 
+                                    `title`="Grading tendency", 
+                                    `type`="number", 
+                                    `visible`="(severityModel)"),
+                                list(
+                                    `name`="se", 
+                                    `title`="SE", 
+                                    `type`="number", 
+                                    `visible`="(severityModel)"),
+                                list(
+                                    `name`="ci_lower", 
+                                    `title`="95% CI Lower", 
+                                    `type`="number", 
+                                    `visible`="(severityModel)"),
+                                list(
+                                    `name`="ci_upper", 
+                                    `title`="95% CI Upper", 
+                                    `type`="number", 
+                                    `visible`="(severityModel)"),
+                                list(
+                                    `name`="p_holm", 
+                                    `title`="p (Holm)", 
+                                    `type`="number", 
+                                    `format`="zto,pvalue", 
+                                    `visible`="(severityModel)"),
+                                list(
+                                    `name`="tendency", 
+                                    `title`="Tendency", 
+                                    `type`="text", 
+                                    `visible`="(severityModel)")),
+                            clearWith=list(
+                                "vars",
+                                "confLevel",
+                                "perPathologist",
+                                "severityModel"),
+                            refs=list(
+                                "Nelson2015",
+                                "ordinal",
+                                "holm1979")))
+                        self$add(jmvcore::Table$new(
+                            options=options,
+                            name="boundaryTable",
+                            title="Boundary Excess over Colleagues",
+                            visible="(perPathologist)",
+                            rows=0,
+                            columns=list(
+                                list(
+                                    `name`="pathologist", 
+                                    `title`="Pathologist", 
+                                    `type`="text", 
+                                    `combineBelow`=TRUE),
+                                list(
+                                    `name`="boundary", 
+                                    `title`="Boundary", 
+                                    `type`="text"),
+                                list(
+                                    `name`="n", 
+                                    `title`="Shared Cases", 
+                                    `type`="integer"),
+                                list(
+                                    `name`="excess", 
+                                    `title`="Excess over colleagues", 
+                                    `type`="number"),
+                                list(
+                                    `name`="ci_lower", 
+                                    `title`="95% CI Lower", 
+                                    `type`="number"),
+                                list(
+                                    `name`="ci_upper", 
+                                    `title`="95% CI Upper", 
+                                    `type`="number")),
+                            clearWith=list(
+                                "vars",
+                                "confLevel")))
+                        self$add(jmvcore::Image$new(
+                            options=options,
+                            name="severityPlot",
+                            title="Grading Tendency per Pathologist",
+                            width=600,
+                            height=400,
+                            renderFun=".severityPlot",
+                            requiresData=FALSE,
+                            visible="(severityModel)",
+                            clearWith=list(
+                                "vars",
+                                "confLevel",
+                                "severityModel"),
+                            refs=list(
+                                "Nelson2015",
+                                "ordinal")))
+                        self$add(jmvcore::Table$new(
+                            options=options,
+                            name="latentModelTable",
+                            title="Model-Based Agreement (Latent Probit Model)",
+                            visible="(latentModel)",
+                            rows=0,
+                            columns=list(
+                                list(
+                                    `name`="quantity", 
+                                    `title`="Quantity", 
+                                    `type`="text"),
+                                list(
+                                    `name`="estimate", 
+                                    `title`="Estimate", 
+                                    `type`="number"),
+                                list(
+                                    `name`="se", 
+                                    `title`="SE", 
+                                    `type`="number"),
+                                list(
+                                    `name`="ci_lower", 
+                                    `title`="95% CI Lower", 
+                                    `type`="number"),
+                                list(
+                                    `name`="ci_upper", 
+                                    `title`="95% CI Upper", 
+                                    `type`="number")),
+                            clearWith=list(
+                                "vars",
+                                "clusterVariable",
+                                "confLevel"),
+                            refs=list(
+                                "Nelson2015",
+                                "ordinal")))
+                        self$add(jmvcore::Html$new(
+                            options=options,
+                            name="gradingGuide",
+                            title="About the Pathologist Grading Analysis",
+                            visible="(showGradingGuide)",
+                            clearWith=list(
+                                "showGradingGuide"),
+                            refs=list(
+                                "Nelson2015")))}))$new(options=options))
+            self$add(R6::R6Class(
+                inherit = jmvcore::Group,
+                active = list(
+                    blandAltman = function() private$.items[["blandAltman"]],
+                    blandAltmanExplanation = function() private$.items[["blandAltmanExplanation"]],
+                    blandAltmanStats = function() private$.items[["blandAltmanStats"]]),
+                private = list(),
+                public=list(
+                    initialize=function(options) {
+                        super$initialize(
+                            options=options,
+                            name="blandAltmanGroup",
+                            title="Bland-Altman Method Comparison")
+                        self$add(jmvcore::Image$new(
+                            options=options,
+                            name="blandAltman",
+                            title="Bland-Altman Plot",
+                            width=500,
+                            height=400,
+                            renderFun=".blandAltman",
+                            visible="(blandAltmanPlot)",
+                            clearWith=list(
+                                "vars",
+                                "baConfidenceLevel",
+                                "proportionalBias"),
+                            refs=list(
+                                "BlandAltman1986")))
+                        self$add(jmvcore::Html$new(
+                            options=options,
+                            name="blandAltmanExplanation",
+                            title="About Bland-Altman Analysis",
+                            visible="(showBlandAltmanGuide)",
+                            clearWith=list(
+                                "showBlandAltmanGuide")))
+                        self$add(jmvcore::Table$new(
+                            options=options,
+                            name="blandAltmanStats",
+                            title="Bland-Altman Statistics",
+                            visible="(blandAltmanPlot)",
+                            rows=1,
+                            columns=list(
+                                list(
+                                    `name`="meanDiff", 
+                                    `title`="Mean Difference", 
+                                    `type`="number"),
+                                list(
+                                    `name`="sdDiff", 
+                                    `title`="SD of Difference", 
+                                    `type`="number"),
+                                list(
+                                    `name`="lowerLoA", 
+                                    `title`="Lower LoA", 
+                                    `type`="number"),
+                                list(
+                                    `name`="upperLoA", 
+                                    `title`="Upper LoA", 
+                                    `type`="number"),
+                                list(
+                                    `name`="propBiasP", 
+                                    `title`="Difference-Mean Slope (p)", 
+                                    `type`="number", 
+                                    `format`="zto,pvalue", 
+                                    `visible`="(proportionalBias)"),
+                                list(
+                                    `name`="normalityW", 
+                                    `title`="Shapiro-Wilk W", 
+                                    `type`="number"),
+                                list(
+                                    `name`="normalityP", 
+                                    `title`="Normality (p)", 
+                                    `type`="number", 
+                                    `format`="zto,pvalue")),
+                            clearWith=list(
+                                "vars",
+                                "baConfidenceLevel",
+                                "proportionalBias"),
+                            refs=list(
+                                "BlandAltman1986",
+                                "BlandAltman1999")))}))$new(options=options))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="agreementHeatmapPlot",
@@ -1960,511 +1948,473 @@ agreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 visible="(showAgreementHeatmapGuide)",
                 clearWith=list(
                     "showAgreementHeatmapGuide")))
-            self$add(jmvcore::Html$new(
-                options=options,
-                name="blandAltmanExplanation",
-                title="About Bland-Altman Analysis",
-                visible="(showBlandAltmanGuide)",
-                clearWith=list(
-                    "showBlandAltmanGuide")))
-            self$add(jmvcore::Table$new(
-                options=options,
-                name="blandAltmanStats",
-                title="Bland-Altman Statistics",
-                visible="(blandAltmanPlot)",
-                rows=1,
-                columns=list(
-                    list(
-                        `name`="meanDiff", 
-                        `title`="Mean Difference", 
-                        `type`="number"),
-                    list(
-                        `name`="sdDiff", 
-                        `title`="SD of Difference", 
-                        `type`="number"),
-                    list(
-                        `name`="lowerLoA", 
-                        `title`="Lower LoA", 
-                        `type`="number"),
-                    list(
-                        `name`="upperLoA", 
-                        `title`="Upper LoA", 
-                        `type`="number"),
-                    list(
-                        `name`="propBiasP", 
-                        `title`="Difference-Mean Slope (p)", 
-                        `type`="number", 
-                        `format`="zto,pvalue", 
-                        `visible`="(proportionalBias)"),
-                    list(
-                        `name`="normalityW", 
-                        `title`="Shapiro-Wilk W", 
-                        `type`="number"),
-                    list(
-                        `name`="normalityP", 
-                        `title`="Normality (p)", 
-                        `type`="number", 
-                        `format`="zto,pvalue")),
-                clearWith=list(
-                    "vars",
-                    "baConfidenceLevel",
-                    "proportionalBias"),
-                refs=list(
-                    "BlandAltman1986",
-                    "BlandAltman1999")))
-            self$add(jmvcore::Preformatted$new(
-                options=options,
-                name="krippTableHeading",
-                title="Krippendorff's Alpha",
-                visible="(kripp || showKrippGuide)",
-                clearWith=list(
-                    "kripp",
-                    "showKrippGuide")))
-            self$add(jmvcore::Table$new(
-                options=options,
-                name="krippTable",
-                title="Krippendorff's Alpha Results",
-                visible="(kripp)",
-                rows=1,
-                columns=list(
-                    list(
-                        `name`="method", 
-                        `title`="Method", 
-                        `type`="text"),
-                    list(
-                        `name`="subjects", 
-                        `title`="Cases", 
-                        `type`="integer"),
-                    list(
-                        `name`="raters", 
-                        `title`="Raters", 
-                        `type`="integer"),
-                    list(
-                        `name`="alpha", 
-                        `title`="Alpha", 
-                        `type`="number"),
-                    list(
-                        `name`="ci_lower", 
-                        `title`="CI Lower", 
-                        `type`="number", 
-                        `visible`="(bootstrap)"),
-                    list(
-                        `name`="ci_upper", 
-                        `title`="CI Upper", 
-                        `type`="number", 
-                        `visible`="(bootstrap)"),
-                    list(
-                        `name`="interpretation", 
-                        `title`="Interpretation", 
-                        `type`="text")),
-                clearWith=list(
-                    "vars",
-                    "krippMethod",
-                    "bootstrap",
-                    "nBoot",
-                    "confLevel",
-                    "seed"),
-                refs=list(
-                    "Krippendorff2004")))
-            self$add(jmvcore::Html$new(
-                options=options,
-                name="krippExplanation",
-                title="About Krippendorff's Alpha",
-                visible="(showKrippGuide)",
-                clearWith=list(
-                    "showKrippGuide")))
-            self$add(jmvcore::Preformatted$new(
-                options=options,
-                name="lightKappaTableHeading",
-                title="Additional Categorical Agreement Measures",
-                visible="(lightKappa || showLightKappaGuide || finn || showFinnGuide || kendallW || showKendallWGuide || robinsonA || showRobinsonAGuide)",
-                clearWith=list(
-                    "lightKappa",
-                    "showLightKappaGuide",
-                    "finn",
-                    "showFinnGuide",
-                    "kendallW",
-                    "showKendallWGuide",
-                    "robinsonA",
-                    "showRobinsonAGuide")))
-            self$add(jmvcore::Table$new(
-                options=options,
-                name="lightKappaTable",
-                title="Light's Kappa Results",
-                visible="(lightKappa)",
-                rows=1,
-                columns=list(
-                    list(
-                        `name`="method", 
-                        `title`="Method", 
-                        `type`="text"),
-                    list(
-                        `name`="subjects", 
-                        `title`="Cases", 
-                        `type`="integer"),
-                    list(
-                        `name`="raters", 
-                        `title`="Raters", 
-                        `type`="integer"),
-                    list(
-                        `name`="kappa", 
-                        `title`="Kappa", 
-                        `type`="number")),
-                clearWith=list(
-                    "wght",
-                    "vars"),
-                refs=list(
-                    "LandisKoch1977",
-                    "Light1971")))
-            self$add(jmvcore::Html$new(
-                options=options,
-                name="lightKappaExplanation",
-                title="About Light's Kappa",
-                visible="(showLightKappaGuide)",
-                clearWith=list(
-                    "showLightKappaGuide")))
-            self$add(jmvcore::Table$new(
-                options=options,
-                name="finnTable",
-                title="Finn Coefficient Results (Variance-Based Agreement)",
-                visible="(finn)",
-                rows=1,
-                columns=list(
-                    list(
-                        `name`="method", 
-                        `title`="Method", 
-                        `type`="text"),
-                    list(
-                        `name`="subjects", 
-                        `title`="Cases", 
-                        `type`="integer"),
-                    list(
-                        `name`="raters", 
-                        `title`="Raters", 
-                        `type`="integer"),
-                    list(
-                        `name`="levels", 
-                        `title`="Categories", 
-                        `type`="integer"),
-                    list(
-                        `name`="finn_value", 
-                        `title`="Finn Coefficient", 
-                        `type`="number"),
-                    list(
-                        `name`="f_statistic", 
-                        `title`="F-statistic", 
-                        `type`="number"),
-                    list(
-                        `name`="df", 
-                        `title`="df", 
-                        `type`="text"),
-                    list(
-                        `name`="p", 
-                        `title`="p-value", 
-                        `type`="number", 
-                        `format`="zto,pvalue"),
-                    list(
-                        `name`="interpretation", 
-                        `title`="Interpretation", 
-                        `type`="text")),
-                clearWith=list(
-                    "vars",
-                    "finnLevels",
-                    "finnModel"),
-                refs=list(
-                    "Finn1970",
-                    "Cicchetti1994")))
-            self$add(jmvcore::Html$new(
-                options=options,
-                name="finnExplanation",
-                title="About Finn Coefficient",
-                visible="(showFinnGuide)",
-                clearWith=list(
-                    "showFinnGuide")))
-            self$add(jmvcore::Table$new(
-                options=options,
-                name="kendallWTable",
-                title="Kendall's Coefficient of Concordance (W) Results",
-                visible="(kendallW)",
-                rows=1,
-                columns=list(
-                    list(
-                        `name`="method", 
-                        `title`="Method", 
-                        `type`="text"),
-                    list(
-                        `name`="subjects", 
-                        `title`="Cases", 
-                        `type`="integer"),
-                    list(
-                        `name`="raters", 
-                        `title`="Raters", 
-                        `type`="integer"),
-                    list(
-                        `name`="w", 
-                        `title`="W", 
-                        `type`="number"),
-                    list(
-                        `name`="chisq", 
-                        `title`="Chi-square", 
-                        `type`="number"),
-                    list(
-                        `name`="df", 
-                        `title`="df", 
-                        `type`="integer"),
-                    list(
-                        `name`="p", 
-                        `title`="p-value", 
-                        `type`="number", 
-                        `format`="zto,pvalue")),
-                clearWith=list(
-                    "vars"),
-                refs=list(
-                    "Kendall1939")))
-            self$add(jmvcore::Html$new(
-                options=options,
-                name="kendallWExplanation",
-                title="About Kendall's W",
-                visible="(showKendallWGuide)",
-                clearWith=list(
-                    "showKendallWGuide")))
-            self$add(jmvcore::Table$new(
-                options=options,
-                name="robinsonATable",
-                title="Robinson's A (Ordinal Agreement Index) Results",
-                visible="(robinsonA)",
-                rows=1,
-                columns=list(
-                    list(
-                        `name`="method", 
-                        `title`="Method", 
-                        `type`="text"),
-                    list(
-                        `name`="subjects", 
-                        `title`="Cases", 
-                        `type`="integer"),
-                    list(
-                        `name`="raters", 
-                        `title`="Raters", 
-                        `type`="integer"),
-                    list(
-                        `name`="robinsonA", 
-                        `title`="A", 
-                        `type`="number"),
-                    list(
-                        `name`="ci_lower", 
-                        `title`="95% CI Lower", 
-                        `type`="number"),
-                    list(
-                        `name`="ci_upper", 
-                        `title`="95% CI Upper", 
-                        `type`="number"),
-                    list(
-                        `name`="interpretation", 
-                        `title`="Interpretation", 
-                        `type`="text")),
-                clearWith=list(
-                    "vars",
-                    "nBoot",
-                    "seed",
-                    "confLevel"),
-                refs=list(
-                    "Robinson1957")))
-            self$add(jmvcore::Html$new(
-                options=options,
-                name="robinsonAExplanation",
-                title="About Robinson's A",
-                visible="(showRobinsonAGuide)",
-                clearWith=list(
-                    "showRobinsonAGuide")))
-            self$add(jmvcore::Table$new(
-                options=options,
-                name="meanSpearmanTable",
-                title="Mean Spearman Rho (Average Rank Correlation) Results",
-                visible="(meanSpearman)",
-                rows=1,
-                columns=list(
-                    list(
-                        `name`="method", 
-                        `title`="Method", 
-                        `type`="text"),
-                    list(
-                        `name`="subjects", 
-                        `title`="Cases", 
-                        `type`="integer"),
-                    list(
-                        `name`="raters", 
-                        `title`="Raters", 
-                        `type`="integer"),
-                    list(
-                        `name`="meanRho", 
-                        `title`="Mean \u03C1", 
-                        `type`="number"),
-                    list(
-                        `name`="minRho", 
-                        `title`="Min \u03C1", 
-                        `type`="number"),
-                    list(
-                        `name`="maxRho", 
-                        `title`="Max \u03C1", 
-                        `type`="number"),
-                    list(
-                        `name`="interpretation", 
-                        `title`="Interpretation", 
-                        `type`="text")),
-                clearWith=list(
-                    "vars"),
-                refs=list(
-                    "Spearman1904",
-                    "Mukaka2012")))
-            self$add(jmvcore::Html$new(
-                options=options,
-                name="meanSpearmanExplanation",
-                title="About Mean Spearman Rho",
-                visible="(showMeanSpearmanGuide)",
-                clearWith=list(
-                    "showMeanSpearmanGuide")))
-            self$add(jmvcore::Preformatted$new(
-                options=options,
-                name="raterBiasHeading",
-                title="Directional Discordance and Marginal Homogeneity Tests",
-                visible="(raterBias || showRaterBiasGuide || bhapkar || showBhapkarGuide || stuartMaxwell || showStuartMaxwellGuide)",
-                clearWith=list(
-                    "raterBias",
-                    "showRaterBiasGuide",
-                    "bhapkar",
-                    "showBhapkarGuide",
-                    "stuartMaxwell",
-                    "showStuartMaxwellGuide")))
-            self$add(jmvcore::Table$new(
-                options=options,
-                name="raterBiasTable",
-                title="Directional Discordance Test (ordinal, 2 raters)",
-                visible="(raterBias)",
-                rows=1,
-                columns=list(
-                    list(
-                        `name`="method", 
-                        `title`="Test", 
-                        `type`="text"),
-                    list(
-                        `name`="chisq", 
-                        `title`="Chi-square", 
-                        `type`="number"),
-                    list(
-                        `name`="df", 
-                        `title`="df", 
-                        `type`="integer"),
-                    list(
-                        `name`="p", 
-                        `title`="p-value", 
-                        `type`="number", 
-                        `format`="zto,pvalue")),
-                clearWith=list(
-                    "vars"),
-                refs=list(
-                    "agresti2013")))
-            self$add(jmvcore::Html$new(
-                options=options,
-                name="raterBiasExplanation",
-                title="About Directional Discordance Test",
-                visible="(showRaterBiasGuide)",
-                clearWith=list(
-                    "showRaterBiasGuide")))
-            self$add(jmvcore::Table$new(
-                options=options,
-                name="bhapkarTable",
-                title="Bhapkar Test for Marginal Homogeneity",
-                visible="(bhapkar)",
-                rows=1,
-                columns=list(
-                    list(
-                        `name`="method", 
-                        `title`="Test", 
-                        `type`="text"),
-                    list(
-                        `name`="subjects", 
-                        `title`="Cases", 
-                        `type`="integer"),
-                    list(
-                        `name`="raters", 
-                        `title`="Raters", 
-                        `type`="integer"),
-                    list(
-                        `name`="chisq", 
-                        `title`="Chi-square", 
-                        `type`="number"),
-                    list(
-                        `name`="df", 
-                        `title`="df", 
-                        `type`="integer"),
-                    list(
-                        `name`="p", 
-                        `title`="p-value", 
-                        `type`="number", 
-                        `format`="zto,pvalue"),
-                    list(
-                        `name`="interpretation", 
-                        `title`="Interpretation", 
-                        `type`="text")),
-                clearWith=list(
-                    "vars"),
-                refs=list(
-                    "agresti2013")))
-            self$add(jmvcore::Html$new(
-                options=options,
-                name="bhapkarExplanation",
-                title="About Bhapkar Test",
-                visible="(showBhapkarGuide)",
-                clearWith=list(
-                    "showBhapkarGuide")))
-            self$add(jmvcore::Table$new(
-                options=options,
-                name="stuartMaxwellTable",
-                title="Stuart-Maxwell Test for Marginal Homogeneity",
-                visible="(stuartMaxwell)",
-                rows=1,
-                columns=list(
-                    list(
-                        `name`="method", 
-                        `title`="Test", 
-                        `type`="text"),
-                    list(
-                        `name`="subjects", 
-                        `title`="Cases", 
-                        `type`="integer"),
-                    list(
-                        `name`="raters", 
-                        `title`="Raters", 
-                        `type`="integer"),
-                    list(
-                        `name`="chisq", 
-                        `title`="Chi-square", 
-                        `type`="number"),
-                    list(
-                        `name`="df", 
-                        `title`="df", 
-                        `type`="integer"),
-                    list(
-                        `name`="p", 
-                        `title`="p-value", 
-                        `type`="number", 
-                        `format`="zto,pvalue"),
-                    list(
-                        `name`="interpretation", 
-                        `title`="Interpretation", 
-                        `type`="text")),
-                clearWith=list(
-                    "vars"),
-                refs=list(
-                    "agresti2013")))
-            self$add(jmvcore::Html$new(
-                options=options,
-                name="stuartMaxwellExplanation",
-                title="About Stuart-Maxwell Test",
-                visible="(showStuartMaxwellGuide)",
-                clearWith=list(
-                    "showStuartMaxwellGuide")))
+            self$add(R6::R6Class(
+                inherit = jmvcore::Group,
+                active = list(
+                    krippTable = function() private$.items[["krippTable"]],
+                    krippExplanation = function() private$.items[["krippExplanation"]]),
+                private = list(),
+                public=list(
+                    initialize=function(options) {
+                        super$initialize(
+                            options=options,
+                            name="krippTableGroup",
+                            title="Krippendorff's Alpha")
+                        self$add(jmvcore::Table$new(
+                            options=options,
+                            name="krippTable",
+                            title="Krippendorff's Alpha Results",
+                            visible="(kripp)",
+                            rows=1,
+                            columns=list(
+                                list(
+                                    `name`="method", 
+                                    `title`="Method", 
+                                    `type`="text"),
+                                list(
+                                    `name`="subjects", 
+                                    `title`="Cases", 
+                                    `type`="integer"),
+                                list(
+                                    `name`="raters", 
+                                    `title`="Raters", 
+                                    `type`="integer"),
+                                list(
+                                    `name`="alpha", 
+                                    `title`="Alpha", 
+                                    `type`="number"),
+                                list(
+                                    `name`="ci_lower", 
+                                    `title`="CI Lower", 
+                                    `type`="number", 
+                                    `visible`="(bootstrap)"),
+                                list(
+                                    `name`="ci_upper", 
+                                    `title`="CI Upper", 
+                                    `type`="number", 
+                                    `visible`="(bootstrap)"),
+                                list(
+                                    `name`="interpretation", 
+                                    `title`="Interpretation", 
+                                    `type`="text")),
+                            clearWith=list(
+                                "vars",
+                                "krippMethod",
+                                "bootstrap",
+                                "nBoot",
+                                "confLevel",
+                                "seed"),
+                            refs=list(
+                                "Krippendorff2004")))
+                        self$add(jmvcore::Html$new(
+                            options=options,
+                            name="krippExplanation",
+                            title="About Krippendorff's Alpha",
+                            visible="(showKrippGuide)",
+                            clearWith=list(
+                                "showKrippGuide")))}))$new(options=options))
+            self$add(R6::R6Class(
+                inherit = jmvcore::Group,
+                active = list(
+                    lightKappaTable = function() private$.items[["lightKappaTable"]],
+                    lightKappaExplanation = function() private$.items[["lightKappaExplanation"]],
+                    finnTable = function() private$.items[["finnTable"]],
+                    finnExplanation = function() private$.items[["finnExplanation"]],
+                    kendallWTable = function() private$.items[["kendallWTable"]],
+                    kendallWExplanation = function() private$.items[["kendallWExplanation"]],
+                    robinsonATable = function() private$.items[["robinsonATable"]],
+                    robinsonAExplanation = function() private$.items[["robinsonAExplanation"]],
+                    meanSpearmanTable = function() private$.items[["meanSpearmanTable"]],
+                    meanSpearmanExplanation = function() private$.items[["meanSpearmanExplanation"]]),
+                private = list(),
+                public=list(
+                    initialize=function(options) {
+                        super$initialize(
+                            options=options,
+                            name="lightKappaTableGroup",
+                            title="Additional Categorical Agreement Measures")
+                        self$add(jmvcore::Table$new(
+                            options=options,
+                            name="lightKappaTable",
+                            title="Light's Kappa Results",
+                            visible="(lightKappa)",
+                            rows=1,
+                            columns=list(
+                                list(
+                                    `name`="method", 
+                                    `title`="Method", 
+                                    `type`="text"),
+                                list(
+                                    `name`="subjects", 
+                                    `title`="Cases", 
+                                    `type`="integer"),
+                                list(
+                                    `name`="raters", 
+                                    `title`="Raters", 
+                                    `type`="integer"),
+                                list(
+                                    `name`="kappa", 
+                                    `title`="Kappa", 
+                                    `type`="number")),
+                            clearWith=list(
+                                "wght",
+                                "vars"),
+                            refs=list(
+                                "LandisKoch1977",
+                                "Light1971")))
+                        self$add(jmvcore::Html$new(
+                            options=options,
+                            name="lightKappaExplanation",
+                            title="About Light's Kappa",
+                            visible="(showLightKappaGuide)",
+                            clearWith=list(
+                                "showLightKappaGuide")))
+                        self$add(jmvcore::Table$new(
+                            options=options,
+                            name="finnTable",
+                            title="Finn Coefficient Results (Variance-Based Agreement)",
+                            visible="(finn)",
+                            rows=1,
+                            columns=list(
+                                list(
+                                    `name`="method", 
+                                    `title`="Method", 
+                                    `type`="text"),
+                                list(
+                                    `name`="subjects", 
+                                    `title`="Cases", 
+                                    `type`="integer"),
+                                list(
+                                    `name`="raters", 
+                                    `title`="Raters", 
+                                    `type`="integer"),
+                                list(
+                                    `name`="levels", 
+                                    `title`="Categories", 
+                                    `type`="integer"),
+                                list(
+                                    `name`="finn_value", 
+                                    `title`="Finn Coefficient", 
+                                    `type`="number"),
+                                list(
+                                    `name`="f_statistic", 
+                                    `title`="F-statistic", 
+                                    `type`="number"),
+                                list(
+                                    `name`="df", 
+                                    `title`="df", 
+                                    `type`="text"),
+                                list(
+                                    `name`="p", 
+                                    `title`="p-value", 
+                                    `type`="number", 
+                                    `format`="zto,pvalue"),
+                                list(
+                                    `name`="interpretation", 
+                                    `title`="Interpretation", 
+                                    `type`="text")),
+                            clearWith=list(
+                                "vars",
+                                "finnLevels",
+                                "finnModel"),
+                            refs=list(
+                                "Finn1970",
+                                "Cicchetti1994")))
+                        self$add(jmvcore::Html$new(
+                            options=options,
+                            name="finnExplanation",
+                            title="About Finn Coefficient",
+                            visible="(showFinnGuide)",
+                            clearWith=list(
+                                "showFinnGuide")))
+                        self$add(jmvcore::Table$new(
+                            options=options,
+                            name="kendallWTable",
+                            title="Kendall's Coefficient of Concordance (W) Results",
+                            visible="(kendallW)",
+                            rows=1,
+                            columns=list(
+                                list(
+                                    `name`="method", 
+                                    `title`="Method", 
+                                    `type`="text"),
+                                list(
+                                    `name`="subjects", 
+                                    `title`="Cases", 
+                                    `type`="integer"),
+                                list(
+                                    `name`="raters", 
+                                    `title`="Raters", 
+                                    `type`="integer"),
+                                list(
+                                    `name`="w", 
+                                    `title`="W", 
+                                    `type`="number"),
+                                list(
+                                    `name`="chisq", 
+                                    `title`="Chi-square", 
+                                    `type`="number"),
+                                list(
+                                    `name`="df", 
+                                    `title`="df", 
+                                    `type`="integer"),
+                                list(
+                                    `name`="p", 
+                                    `title`="p-value", 
+                                    `type`="number", 
+                                    `format`="zto,pvalue")),
+                            clearWith=list(
+                                "vars"),
+                            refs=list(
+                                "Kendall1939")))
+                        self$add(jmvcore::Html$new(
+                            options=options,
+                            name="kendallWExplanation",
+                            title="About Kendall's W",
+                            visible="(showKendallWGuide)",
+                            clearWith=list(
+                                "showKendallWGuide")))
+                        self$add(jmvcore::Table$new(
+                            options=options,
+                            name="robinsonATable",
+                            title="Robinson's A (Ordinal Agreement Index) Results",
+                            visible="(robinsonA)",
+                            rows=1,
+                            columns=list(
+                                list(
+                                    `name`="method", 
+                                    `title`="Method", 
+                                    `type`="text"),
+                                list(
+                                    `name`="subjects", 
+                                    `title`="Cases", 
+                                    `type`="integer"),
+                                list(
+                                    `name`="raters", 
+                                    `title`="Raters", 
+                                    `type`="integer"),
+                                list(
+                                    `name`="robinsonA", 
+                                    `title`="A", 
+                                    `type`="number"),
+                                list(
+                                    `name`="ci_lower", 
+                                    `title`="95% CI Lower", 
+                                    `type`="number"),
+                                list(
+                                    `name`="ci_upper", 
+                                    `title`="95% CI Upper", 
+                                    `type`="number"),
+                                list(
+                                    `name`="interpretation", 
+                                    `title`="Interpretation", 
+                                    `type`="text")),
+                            clearWith=list(
+                                "vars",
+                                "nBoot",
+                                "seed",
+                                "confLevel"),
+                            refs=list(
+                                "Robinson1957")))
+                        self$add(jmvcore::Html$new(
+                            options=options,
+                            name="robinsonAExplanation",
+                            title="About Robinson's A",
+                            visible="(showRobinsonAGuide)",
+                            clearWith=list(
+                                "showRobinsonAGuide")))
+                        self$add(jmvcore::Table$new(
+                            options=options,
+                            name="meanSpearmanTable",
+                            title="Mean Spearman Rho (Average Rank Correlation) Results",
+                            visible="(meanSpearman)",
+                            rows=1,
+                            columns=list(
+                                list(
+                                    `name`="method", 
+                                    `title`="Method", 
+                                    `type`="text"),
+                                list(
+                                    `name`="subjects", 
+                                    `title`="Cases", 
+                                    `type`="integer"),
+                                list(
+                                    `name`="raters", 
+                                    `title`="Raters", 
+                                    `type`="integer"),
+                                list(
+                                    `name`="meanRho", 
+                                    `title`="Mean \u03C1", 
+                                    `type`="number"),
+                                list(
+                                    `name`="minRho", 
+                                    `title`="Min \u03C1", 
+                                    `type`="number"),
+                                list(
+                                    `name`="maxRho", 
+                                    `title`="Max \u03C1", 
+                                    `type`="number"),
+                                list(
+                                    `name`="interpretation", 
+                                    `title`="Interpretation", 
+                                    `type`="text")),
+                            clearWith=list(
+                                "vars"),
+                            refs=list(
+                                "Spearman1904",
+                                "Mukaka2012")))
+                        self$add(jmvcore::Html$new(
+                            options=options,
+                            name="meanSpearmanExplanation",
+                            title="About Mean Spearman Rho",
+                            visible="(showMeanSpearmanGuide)",
+                            clearWith=list(
+                                "showMeanSpearmanGuide")))}))$new(options=options))
+            self$add(R6::R6Class(
+                inherit = jmvcore::Group,
+                active = list(
+                    raterBiasTable = function() private$.items[["raterBiasTable"]],
+                    raterBiasExplanation = function() private$.items[["raterBiasExplanation"]],
+                    bhapkarTable = function() private$.items[["bhapkarTable"]],
+                    bhapkarExplanation = function() private$.items[["bhapkarExplanation"]],
+                    stuartMaxwellTable = function() private$.items[["stuartMaxwellTable"]],
+                    stuartMaxwellExplanation = function() private$.items[["stuartMaxwellExplanation"]]),
+                private = list(),
+                public=list(
+                    initialize=function(options) {
+                        super$initialize(
+                            options=options,
+                            name="raterBiasGroup",
+                            title="Directional Discordance and Marginal Homogeneity Tests")
+                        self$add(jmvcore::Table$new(
+                            options=options,
+                            name="raterBiasTable",
+                            title="Directional Discordance Test (ordinal, 2 raters)",
+                            visible="(raterBias)",
+                            rows=1,
+                            columns=list(
+                                list(
+                                    `name`="method", 
+                                    `title`="Test", 
+                                    `type`="text"),
+                                list(
+                                    `name`="chisq", 
+                                    `title`="Chi-square", 
+                                    `type`="number"),
+                                list(
+                                    `name`="df", 
+                                    `title`="df", 
+                                    `type`="integer"),
+                                list(
+                                    `name`="p", 
+                                    `title`="p-value", 
+                                    `type`="number", 
+                                    `format`="zto,pvalue")),
+                            clearWith=list(
+                                "vars"),
+                            refs=list(
+                                "agresti2013")))
+                        self$add(jmvcore::Html$new(
+                            options=options,
+                            name="raterBiasExplanation",
+                            title="About Directional Discordance Test",
+                            visible="(showRaterBiasGuide)",
+                            clearWith=list(
+                                "showRaterBiasGuide")))
+                        self$add(jmvcore::Table$new(
+                            options=options,
+                            name="bhapkarTable",
+                            title="Bhapkar Test for Marginal Homogeneity",
+                            visible="(bhapkar)",
+                            rows=1,
+                            columns=list(
+                                list(
+                                    `name`="method", 
+                                    `title`="Test", 
+                                    `type`="text"),
+                                list(
+                                    `name`="subjects", 
+                                    `title`="Cases", 
+                                    `type`="integer"),
+                                list(
+                                    `name`="raters", 
+                                    `title`="Raters", 
+                                    `type`="integer"),
+                                list(
+                                    `name`="chisq", 
+                                    `title`="Chi-square", 
+                                    `type`="number"),
+                                list(
+                                    `name`="df", 
+                                    `title`="df", 
+                                    `type`="integer"),
+                                list(
+                                    `name`="p", 
+                                    `title`="p-value", 
+                                    `type`="number", 
+                                    `format`="zto,pvalue"),
+                                list(
+                                    `name`="interpretation", 
+                                    `title`="Interpretation", 
+                                    `type`="text")),
+                            clearWith=list(
+                                "vars"),
+                            refs=list(
+                                "agresti2013")))
+                        self$add(jmvcore::Html$new(
+                            options=options,
+                            name="bhapkarExplanation",
+                            title="About Bhapkar Test",
+                            visible="(showBhapkarGuide)",
+                            clearWith=list(
+                                "showBhapkarGuide")))
+                        self$add(jmvcore::Table$new(
+                            options=options,
+                            name="stuartMaxwellTable",
+                            title="Stuart-Maxwell Test for Marginal Homogeneity",
+                            visible="(stuartMaxwell)",
+                            rows=1,
+                            columns=list(
+                                list(
+                                    `name`="method", 
+                                    `title`="Test", 
+                                    `type`="text"),
+                                list(
+                                    `name`="subjects", 
+                                    `title`="Cases", 
+                                    `type`="integer"),
+                                list(
+                                    `name`="raters", 
+                                    `title`="Raters", 
+                                    `type`="integer"),
+                                list(
+                                    `name`="chisq", 
+                                    `title`="Chi-square", 
+                                    `type`="number"),
+                                list(
+                                    `name`="df", 
+                                    `title`="df", 
+                                    `type`="integer"),
+                                list(
+                                    `name`="p", 
+                                    `title`="p-value", 
+                                    `type`="number", 
+                                    `format`="zto,pvalue"),
+                                list(
+                                    `name`="interpretation", 
+                                    `title`="Interpretation", 
+                                    `type`="text")),
+                            clearWith=list(
+                                "vars"),
+                            refs=list(
+                                "agresti2013")))
+                        self$add(jmvcore::Html$new(
+                            options=options,
+                            name="stuartMaxwellExplanation",
+                            title="About Stuart-Maxwell Test",
+                            visible="(showStuartMaxwellGuide)",
+                            clearWith=list(
+                                "showStuartMaxwellGuide")))}))$new(options=options))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="pairwiseKappaTable",
@@ -2629,1066 +2579,1097 @@ agreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 visible="(showItemModalGuide)",
                 clearWith=list(
                     "showItemModalGuide")))
-            self$add(jmvcore::Preformatted$new(
-                options=options,
-                name="hierarchicalHeading",
-                title="Hierarchical / Multilevel Agreement",
-                visible="(hierarchicalKappa || showHierarchicalGuide)",
-                clearWith=list(
-                    "hierarchicalKappa",
-                    "showHierarchicalGuide")))
-            self$add(jmvcore::Table$new(
-                options=options,
-                name="hierarchicalOverallTable",
-                title="Hierarchical Kappa - Overall Agreement",
-                visible="(hierarchicalKappa)",
-                rows=1,
-                columns=list(
-                    list(
-                        `name`="method", 
-                        `title`="Method", 
-                        `type`="text"),
-                    list(
-                        `name`="cases", 
-                        `title`="Cases", 
-                        `type`="integer"),
-                    list(
-                        `name`="raters", 
-                        `title`="Raters", 
-                        `type`="integer"),
-                    list(
-                        `name`="clusters", 
-                        `title`="Clusters", 
-                        `type`="integer"),
-                    list(
-                        `name`="overall_kappa", 
-                        `title`="Overall Kappa", 
-                        `type`="number")),
-                clearWith=list(
-                    "vars",
-                    "clusterVariable",
-                    "wght",
-                    "exct",
-                    "kappaCIMethod",
-                    "confLevel"),
-                refs=list(
-                    "Shrout1979",
-                    "McGraw1996",
-                    "Barlow1991")))
-            self$add(jmvcore::Table$new(
-                options=options,
-                name="clusterSpecificTable",
-                title="Cluster-Specific Kappa Estimates",
-                visible="(hierarchicalKappa && clusterSpecificKappa)",
-                rows=0,
-                columns=list(
-                    list(
-                        `name`="cluster", 
-                        `title`="Cluster/Institution", 
-                        `type`="text"),
-                    list(
-                        `name`="n_cases", 
-                        `title`="N Cases", 
-                        `type`="integer"),
-                    list(
-                        `name`="n_raters", 
-                        `title`="N Raters", 
-                        `type`="integer"),
-                    list(
-                        `name`="kappa", 
-                        `title`="Kappa", 
-                        `type`="number"),
-                    list(
-                        `name`="ci_lower", 
-                        `title`="95% CI Lower", 
-                        `type`="number"),
-                    list(
-                        `name`="ci_upper", 
-                        `title`="95% CI Upper", 
-                        `type`="number"),
-                    list(
-                        `name`="rank", 
-                        `title`="Rank", 
-                        `type`="integer", 
-                        `visible`="(clusterRankings)")),
-                clearWith=list(
-                    "vars",
-                    "clusterVariable",
-                    "clusterRankings",
-                    "confLevel",
-                    "wght",
-                    "exct",
-                    "kappaCIMethod"),
-                refs=list(
-                    "Shrout1979",
-                    "McGraw1996",
-                    "Barlow1991")))
-            self$add(jmvcore::Table$new(
-                options=options,
-                name="varianceDecompositionTable",
-                title="Variance Component Decomposition",
-                visible="(hierarchicalKappa && varianceDecomposition)",
-                rows=0,
-                columns=list(
-                    list(
-                        `name`="component", 
-                        `title`="Variance Component", 
-                        `type`="text"),
-                    list(
-                        `name`="variance", 
-                        `title`="Variance", 
-                        `type`="number"),
-                    list(
-                        `name`="sd", 
-                        `title`="SD", 
-                        `type`="number"),
-                    list(
-                        `name`="proportion", 
-                        `title`="Proportion of Total", 
-                        `type`="number", 
-                        `format`="pc"),
-                    list(
-                        `name`="interpretation", 
-                        `title`="Interpretation", 
-                        `type`="text")),
-                clearWith=list(
-                    "vars",
-                    "clusterVariable"),
-                refs=list(
-                    "Shrout1979",
-                    "McGraw1996")))
-            self$add(jmvcore::Table$new(
-                options=options,
-                name="hierarchicalICCTable",
-                title="Hierarchical ICC Decomposition",
-                visible="(hierarchicalKappa && iccHierarchical)",
-                rows=0,
-                columns=list(
-                    list(
-                        `name`="icc_type", 
-                        `title`="ICC Type", 
-                        `type`="text"),
-                    list(
-                        `name`="icc_value", 
-                        `title`="ICC", 
-                        `type`="number"),
-                    list(
-                        `name`="interpretation", 
-                        `title`="Interpretation", 
-                        `type`="text")),
-                clearWith=list(
-                    "vars",
-                    "clusterVariable"),
-                refs=list(
-                    "Shrout1979",
-                    "McGraw1996")))
-            self$add(jmvcore::Table$new(
-                options=options,
-                name="homogeneityTestTable",
-                title="Cluster Homogeneity Test Results",
-                visible="(hierarchicalKappa && testClusterHomogeneity)",
-                rows=1,
-                columns=list(
-                    list(
-                        `name`="test_name", 
-                        `title`="Test", 
-                        `type`="text"),
-                    list(
-                        `name`="statistic", 
-                        `title`="Test Statistic", 
-                        `type`="number"),
-                    list(
-                        `name`="df", 
-                        `title`="df", 
-                        `type`="integer"),
-                    list(
-                        `name`="p_value", 
-                        `title`="p-value", 
-                        `type`="number", 
-                        `format`="zto,pvalue"),
-                    list(
-                        `name`="conclusion", 
-                        `title`="Conclusion", 
-                        `type`="text")),
-                clearWith=list(
-                    "vars",
-                    "clusterVariable"),
-                refs=list(
-                    "Shrout1979",
-                    "McGraw1996",
-                    "Stram1994")))
-            self$add(jmvcore::Html$new(
-                options=options,
-                name="hierarchicalExplanation",
-                title="About Hierarchical/Multilevel Kappa",
-                visible="(showHierarchicalGuide)",
-                clearWith=list(
-                    "showHierarchicalGuide")))
-            self$add(jmvcore::Preformatted$new(
-                options=options,
-                name="advancedHeading",
-                title="Advanced Agreement Analyses",
-                visible="(mixedEffectsComparison || showMixedEffectsGuide || confusionMatrix || showConfusionMatrixGuide || bootstrapCI || showBootstrapCIGuide || multiAnnotatorConcordance || showConcordanceF1Guide)",
-                clearWith=list(
-                    "mixedEffectsComparison",
-                    "showMixedEffectsGuide",
-                    "confusionMatrix",
-                    "showConfusionMatrixGuide",
-                    "bootstrapCI",
-                    "showBootstrapCIGuide",
-                    "multiAnnotatorConcordance",
-                    "showConcordanceF1Guide")))
-            self$add(jmvcore::Table$new(
-                options=options,
-                name="mixedEffectsTable",
-                title="Mixed-Effects Condition Comparison",
-                visible="(mixedEffectsComparison)",
-                rows=0,
-                columns=list(
-                    list(
-                        `name`="term", 
-                        `title`="Term", 
-                        `type`="text"),
-                    list(
-                        `name`="estimate", 
-                        `title`="Estimate", 
-                        `type`="number"),
-                    list(
-                        `name`="se", 
-                        `title`="SE", 
-                        `type`="number"),
-                    list(
-                        `name`="ci_lower", 
-                        `title`="95% CI Lower", 
-                        `type`="number"),
-                    list(
-                        `name`="ci_upper", 
-                        `title`="95% CI Upper", 
-                        `type`="number"),
-                    list(
-                        `name`="t_value", 
-                        `title`="t", 
-                        `type`="number"),
-                    list(
-                        `name`="df", 
-                        `title`="df", 
-                        `type`="number"),
-                    list(
-                        `name`="p_value", 
-                        `title`="p", 
-                        `type`="number", 
-                        `format`="zto,pvalue")),
-                clearWith=list(
-                    "vars",
-                    "conditionVariable",
-                    "caseIdVariable",
-                    "multipleTestCorrection",
-                    "confLevel"),
-                refs=list(
-                    "Shrout1979",
-                    "McGraw1996")))
-            self$add(jmvcore::Table$new(
-                options=options,
-                name="mixedEffectsVarianceTable",
-                title="Mixed-Effects Variance Components",
-                visible="(mixedEffectsComparison)",
-                rows=0,
-                columns=list(
-                    list(
-                        `name`="component", 
-                        `title`="Component", 
-                        `type`="text"),
-                    list(
-                        `name`="variance", 
-                        `title`="Variance", 
-                        `type`="number"),
-                    list(
-                        `name`="sd", 
-                        `title`="SD", 
-                        `type`="number"),
-                    list(
-                        `name`="proportion", 
-                        `title`="Proportion", 
-                        `type`="number", 
-                        `format`="pc"),
-                    list(
-                        `name`="interpretation", 
-                        `title`="Interpretation", 
-                        `type`="text")),
-                clearWith=list(
-                    "vars",
-                    "conditionVariable",
-                    "caseIdVariable"),
-                refs=list(
-                    "Shrout1979",
-                    "McGraw1996")))
-            self$add(jmvcore::Html$new(
-                options=options,
-                name="mixedEffectsExplanation",
-                title="About Mixed-Effects Condition Comparison",
-                visible="(showMixedEffectsGuide)",
-                clearWith=list(
-                    "showMixedEffectsGuide")))
-            self$add(jmvcore::Table$new(
-                options=options,
-                name="confusionMatrixTable",
-                title="Confusion Matrix",
-                visible="(confusionMatrix)",
-                rows=0,
-                columns=list(
-                    list(
-                        `name`="reference_class", 
-                        `title`="Reference", 
-                        `type`="text"),
-                    list(
-                        `name`="predicted_class", 
-                        `title`="Predicted", 
-                        `type`="text"),
-                    list(
-                        `name`="count", 
-                        `title`="Count", 
-                        `type`="integer"),
-                    list(
-                        `name`="proportion", 
-                        `title`="Proportion", 
-                        `type`="number")),
-                clearWith=list(
-                    "vars",
-                    "confusionNormalize")))
-            self$add(jmvcore::Table$new(
-                options=options,
-                name="perClassMetricsTable",
-                title="Per-Class Classification Metrics",
-                visible="(confusionMatrix)",
-                rows=0,
-                columns=list(
-                    list(
-                        `name`="class_label", 
-                        `title`="Class", 
-                        `type`="text"),
-                    list(
-                        `name`="n", 
-                        `title`="Agreements (TP)", 
-                        `type`="integer"),
-                    list(
-                        `name`="precision", 
-                        `title`="Precision (PPV)", 
-                        `type`="number"),
-                    list(
-                        `name`="recall", 
-                        `title`="Recall (Sensitivity)", 
-                        `type`="number"),
-                    list(
-                        `name`="f1", 
-                        `title`="F1 Score", 
-                        `type`="number"),
-                    list(
-                        `name`="support", 
-                        `title`="Support", 
-                        `type`="integer")),
-                clearWith=list(
-                    "vars",
-                    "confusionNormalize")))
-            self$add(jmvcore::Html$new(
-                options=options,
-                name="confusionMatrixExplanation",
-                title="About Confusion Matrix",
-                visible="(showConfusionMatrixGuide)",
-                clearWith=list(
-                    "showConfusionMatrixGuide")))
-            self$add(jmvcore::Table$new(
-                options=options,
-                name="bootstrapCITable",
-                title="Bootstrap Confidence Intervals for Agreement Metrics",
-                visible="(bootstrapCI)",
-                rows=0,
-                columns=list(
-                    list(
-                        `name`="metric", 
-                        `title`="Metric", 
-                        `type`="text"),
-                    list(
-                        `name`="estimate", 
-                        `title`="Estimate", 
-                        `type`="number"),
-                    list(
-                        `name`="boot_se", 
-                        `title`="Boot SE", 
-                        `type`="number"),
-                    list(
-                        `name`="ci_lower", 
-                        `title`="Lower", 
-                        `type`="number"),
-                    list(
-                        `name`="ci_upper", 
-                        `title`="Upper", 
-                        `type`="number"),
-                    list(
-                        `name`="boot_bias", 
-                        `title`="Bias", 
-                        `type`="number"),
-                    list(
-                        `name`="ci_method", 
-                        `title`="CI Method", 
-                        `type`="text")),
-                clearWith=list(
-                    "exct",
-                    "vars",
-                    "nBoot",
-                    "confLevel",
-                    "seed",
-                    "iccType",
-                    "wght",
-                    "krippMethod")))
-            self$add(jmvcore::Html$new(
-                options=options,
-                name="bootstrapCIExplanation",
-                title="About Bootstrap Confidence Intervals",
-                visible="(showBootstrapCIGuide)",
-                clearWith=list(
-                    "showBootstrapCIGuide")))
-            self$add(jmvcore::Table$new(
-                options=options,
-                name="concordanceF1Table",
-                title="Multi-Annotator Concordance Metrics",
-                visible="(multiAnnotatorConcordance)",
-                rows=0,
-                columns=list(
-                    list(
-                        `name`="metric", 
-                        `title`="Metric", 
-                        `type`="text"),
-                    list(
-                        `name`="value", 
-                        `title`="Value", 
-                        `type`="number"),
-                    list(
-                        `name`="comparison", 
-                        `title`="Comparison", 
-                        `type`="text"),
-                    list(
-                        `name`="interpretation", 
-                        `title`="Interpretation", 
-                        `type`="text")),
-                clearWith=list(
-                    "vars",
-                    "predictionColumn",
-                    "tieBreaker")))
-            self$add(jmvcore::Table$new(
-                options=options,
-                name="concordanceF1PerClassTable",
-                title="Per-Class Concordance F1",
-                visible="(multiAnnotatorConcordance)",
-                rows=0,
-                columns=list(
-                    list(
-                        `name`="class_label", 
-                        `title`="Class", 
-                        `type`="text"),
-                    list(
-                        `name`="concordance_f1", 
-                        `title`="Concordance F1", 
-                        `type`="number"),
-                    list(
-                        `name`="strict_f1", 
-                        `title`="Strict F1", 
-                        `type`="number"),
-                    list(
-                        `name`="improvement", 
-                        `title`="Improvement", 
-                        `type`="number", 
-                        `format`="pc"),
-                    list(
-                        `name`="n_cases", 
-                        `title`="N Cases", 
-                        `type`="integer")),
-                clearWith=list(
-                    "vars",
-                    "predictionColumn",
-                    "tieBreaker")))
-            self$add(jmvcore::Html$new(
-                options=options,
-                name="concordanceF1Explanation",
-                title="About Multi-Annotator Concordance",
-                visible="(showConcordanceF1Guide)",
-                clearWith=list(
-                    "showConcordanceF1Guide")))
-            self$add(jmvcore::Preformatted$new(
-                options=options,
-                name="gwetHeading",
-                title="Chance-Corrected Agreement Variants",
-                visible="(gwet || showGwetGuide || pabak || showPABAKGuide)",
-                clearWith=list(
-                    "gwet",
-                    "showGwetGuide",
-                    "pabak",
-                    "showPABAKGuide")))
-            self$add(jmvcore::Table$new(
-                options=options,
-                name="gwetTable",
-                title="Gwet's AC1/AC2 Results",
-                visible="(gwet)",
-                rows=1,
-                columns=list(
-                    list(
-                        `name`="method", 
-                        `title`="Method", 
-                        `type`="text"),
-                    list(
-                        `name`="subjects", 
-                        `title`="Cases", 
-                        `type`="integer"),
-                    list(
-                        `name`="raters", 
-                        `title`="Raters", 
-                        `type`="integer"),
-                    list(
-                        `name`="coefficient", 
-                        `title`="Coefficient", 
-                        `type`="number"),
-                    list(
-                        `name`="se", 
-                        `title`="Std. Error", 
-                        `type`="number"),
-                    list(
-                        `name`="ci_lower", 
-                        `title`="95% CI Lower", 
-                        `type`="number"),
-                    list(
-                        `name`="ci_upper", 
-                        `title`="95% CI Upper", 
-                        `type`="number"),
-                    list(
-                        `name`="p", 
-                        `title`="p-value", 
-                        `type`="number", 
-                        `format`="zto,pvalue")),
-                clearWith=list(
-                    "vars",
-                    "gwetWeights",
-                    "confLevel"),
-                refs=list(
-                    "Gwet2008",
-                    "LandisKoch1977")))
-            self$add(jmvcore::Html$new(
-                options=options,
-                name="gwetExplanation",
-                title="About Gwet's AC Coefficient",
-                visible="(showGwetGuide)",
-                clearWith=list(
-                    "showGwetGuide")))
-            self$add(jmvcore::Table$new(
-                options=options,
-                name="pabakTable",
-                title="PABAK & Prevalence/Bias Indices",
-                visible="(pabak)",
-                rows=1,
-                columns=list(
-                    list(
-                        `name`="subjects", 
-                        `title`="Cases", 
-                        `type`="integer"),
-                    list(
-                        `name`="observedAgreement", 
-                        `title`="Observed Agreement", 
-                        `type`="number"),
-                    list(
-                        `name`="kappa", 
-                        `title`="Cohen's Kappa", 
-                        `type`="number"),
-                    list(
-                        `name`="pabak", 
-                        `title`="PABAK", 
-                        `type`="number"),
-                    list(
-                        `name`="prevalenceIndex", 
-                        `title`="Prevalence Index", 
-                        `type`="number"),
-                    list(
-                        `name`="biasIndex", 
-                        `title`="Bias Index", 
-                        `type`="number"),
-                    list(
-                        `name`="interpretation", 
-                        `title`="Interpretation", 
-                        `type`="text")),
-                clearWith=list(
-                    "vars",
-                    "wght"),
-                refs=list(
-                    "Byrt1993")))
-            self$add(jmvcore::Html$new(
-                options=options,
-                name="pabakExplanation",
-                title="About PABAK & Prevalence/Bias Indices",
-                visible="(showPABAKGuide)",
-                clearWith=list(
-                    "showPABAKGuide")))
-            self$add(jmvcore::Preformatted$new(
-                options=options,
-                name="iccHeading",
-                title="Continuous Agreement Measures",
-                visible="(icc || showICCGuide || meanPearson || linCCC || tdi)",
-                clearWith=list(
-                    "icc",
-                    "showICCGuide",
-                    "meanPearson",
-                    "linCCC",
-                    "tdi")))
-            self$add(jmvcore::Table$new(
-                options=options,
-                name="iccTable",
-                title="Intraclass Correlation Coefficient (ICC) Results",
-                visible="(icc)",
-                rows=1,
-                columns=list(
-                    list(
-                        `name`="model", 
-                        `title`="ICC Model", 
-                        `type`="text"),
-                    list(
-                        `name`="subjects", 
-                        `title`="Cases", 
-                        `type`="integer"),
-                    list(
-                        `name`="raters", 
-                        `title`="Raters", 
-                        `type`="integer"),
-                    list(
-                        `name`="icc_value", 
-                        `title`="ICC", 
-                        `type`="number"),
-                    list(
-                        `name`="ci_lower", 
-                        `title`="Lower", 
-                        `type`="number"),
-                    list(
-                        `name`="ci_upper", 
-                        `title`="Upper", 
-                        `type`="number"),
-                    list(
-                        `name`="f_value", 
-                        `title`="F", 
-                        `type`="number"),
-                    list(
-                        `name`="df1", 
-                        `title`="df1", 
-                        `type`="integer"),
-                    list(
-                        `name`="df2", 
-                        `title`="df2", 
-                        `type`="integer"),
-                    list(
-                        `name`="p", 
-                        `title`="p-value", 
-                        `type`="number", 
-                        `format`="zto,pvalue")),
-                clearWith=list(
-                    "vars",
-                    "iccType",
-                    "confLevel"),
-                refs=list(
-                    "Shrout1979",
-                    "McGraw1996",
-                    "Koo2016")))
-            self$add(jmvcore::Html$new(
-                options=options,
-                name="iccExplanation",
-                title="About Intraclass Correlation Coefficient (ICC)",
-                visible="(showICCGuide)",
-                clearWith=list(
-                    "showICCGuide")))
-            self$add(jmvcore::Table$new(
-                options=options,
-                name="meanPearsonTable",
-                title="Mean Pearson Correlation (Linear Association) Results",
-                visible="(meanPearson)",
-                rows=1,
-                columns=list(
-                    list(
-                        `name`="method", 
-                        `title`="Method", 
-                        `type`="text"),
-                    list(
-                        `name`="subjects", 
-                        `title`="Cases", 
-                        `type`="integer"),
-                    list(
-                        `name`="raters", 
-                        `title`="Raters", 
-                        `type`="integer"),
-                    list(
-                        `name`="meanR", 
-                        `title`="Mean r", 
-                        `type`="number"),
-                    list(
-                        `name`="minR", 
-                        `title`="Min r", 
-                        `type`="number"),
-                    list(
-                        `name`="maxR", 
-                        `title`="Max r", 
-                        `type`="number"),
-                    list(
-                        `name`="interpretation", 
-                        `title`="Interpretation", 
-                        `type`="text")),
-                clearWith=list(
-                    "vars"),
-                refs=list(
-                    "Pearson1895",
-                    "Mukaka2012")))
-            self$add(jmvcore::Html$new(
-                options=options,
-                name="meanPearsonExplanation",
-                title="About Mean Pearson Correlation",
-                visible="(showMeanPearsonGuide)",
-                clearWith=list(
-                    "showMeanPearsonGuide")))
-            self$add(jmvcore::Table$new(
-                options=options,
-                name="linCCCTable",
-                title="Lin's Concordance Correlation Coefficient (CCC)",
-                visible="(linCCC)",
-                rows=0,
-                columns=list(
-                    list(
-                        `name`="comparison", 
-                        `title`="Comparison", 
-                        `type`="text"),
-                    list(
-                        `name`="subjects", 
-                        `title`="Cases", 
-                        `type`="integer"),
-                    list(
-                        `name`="ccc", 
-                        `title`="CCC", 
-                        `type`="number"),
-                    list(
-                        `name`="ci_lower", 
-                        `title`="Lower", 
-                        `type`="number"),
-                    list(
-                        `name`="ci_upper", 
-                        `title`="Upper", 
-                        `type`="number"),
-                    list(
-                        `name`="pearson_r", 
-                        `title`="Precision (r)", 
-                        `type`="number"),
-                    list(
-                        `name`="bias_factor", 
-                        `title`="Accuracy (Cb)", 
-                        `type`="number"),
-                    list(
-                        `name`="interpretation", 
-                        `title`="Interpretation", 
-                        `type`="text")),
-                clearWith=list(
-                    "vars",
-                    "confLevel"),
-                refs=list(
-                    "Lin1989")))
-            self$add(jmvcore::Html$new(
-                options=options,
-                name="linCCCExplanation",
-                title="About Lin's Concordance Correlation Coefficient",
-                visible="(showLinCCCGuide)",
-                clearWith=list(
-                    "showLinCCCGuide")))
-            self$add(jmvcore::Table$new(
-                options=options,
-                name="tdiTable",
-                title="Empirical Total Deviation Index (TDI)",
-                visible="(tdi)",
-                rows=0,
-                columns=list(
-                    list(
-                        `name`="comparison", 
-                        `title`="Comparison", 
-                        `type`="text"),
-                    list(
-                        `name`="subjects", 
-                        `title`="Cases", 
-                        `type`="integer"),
-                    list(
-                        `name`="tdi_estimate", 
-                        `title`="TDI Estimate", 
-                        `type`="number"),
-                    list(
-                        `name`="coverage_prob", 
-                        `title`="Coverage %", 
-                        `type`="number", 
-                        `format`="pc"),
-                    list(
-                        `name`="acceptable_limit", 
-                        `title`="Acceptable Limit", 
-                        `type`="number"),
-                    list(
-                        `name`="meets_criteria", 
-                        `title`="Observed Criterion?", 
-                        `type`="text"),
-                    list(
-                        `name`="ci_lower", 
-                        `title`="95% CI Lower", 
-                        `type`="number"),
-                    list(
-                        `name`="ci_upper", 
-                        `title`="95% CI Upper", 
-                        `type`="number"),
-                    list(
-                        `name`="interpretation", 
-                        `title`="Interpretation", 
-                        `type`="text")),
-                clearWith=list(
-                    "vars",
-                    "tdiCoverage",
-                    "tdiLimit",
-                    "confLevel",
-                    "nBoot",
-                    "seed"),
-                refs=list(
-                    "Lin2000")))
-            self$add(jmvcore::Html$new(
-                options=options,
-                name="tdiExplanation",
-                title="About Total Deviation Index (TDI)",
-                visible="(showTDIGuide)",
-                clearWith=list(
-                    "showTDIGuide")))
-            self$add(jmvcore::Preformatted$new(
-                options=options,
-                name="maxwellREHeading",
-                title="Error Decomposition & Reliability",
-                visible="(maxwellRE || showMaxwellREGuide || interIntraRater || showInterIntraRaterGuide || iota || showIotaGuide)",
-                clearWith=list(
-                    "maxwellRE",
-                    "showMaxwellREGuide",
-                    "interIntraRater",
-                    "showInterIntraRaterGuide",
-                    "iota",
-                    "showIotaGuide")))
-            self$add(jmvcore::Table$new(
-                options=options,
-                name="maxwellRETable",
-                title="Rater Variance Decomposition - Systematic vs Random Disagreement",
-                visible="(maxwellRE)",
-                rows=1,
-                columns=list(
-                    list(
-                        `name`="method", 
-                        `title`="Method", 
-                        `type`="text"),
-                    list(
-                        `name`="subjects", 
-                        `title`="Cases", 
-                        `type`="integer"),
-                    list(
-                        `name`="raters", 
-                        `title`="Raters/Methods", 
-                        `type`="integer"),
-                    list(
-                        `name`="re_value", 
-                        `title`="Random share", 
-                        `type`="number"),
-                    list(
-                        `name`="systematic_prop", 
-                        `title`="Systematic %", 
-                        `type`="number", 
-                        `format`="pc"),
-                    list(
-                        `name`="random_prop", 
-                        `title`="Random %", 
-                        `type`="number", 
-                        `format`="pc"),
-                    list(
-                        `name`="total_variance", 
-                        `title`="Disagreement variance", 
-                        `type`="number"),
-                    list(
-                        `name`="systematic_var", 
-                        `title`="Systematic (rater) variance", 
-                        `type`="number"),
-                    list(
-                        `name`="random_var", 
-                        `title`="Random (residual) variance", 
-                        `type`="number"),
-                    list(
-                        `name`="interpretation", 
-                        `title`="Interpretation", 
-                        `type`="text")),
-                clearWith=list(
-                    "vars"),
-                refs=list(
-                    "Shrout1979",
-                    "McGraw1996")))
-            self$add(jmvcore::Html$new(
-                options=options,
-                name="maxwellREExplanation",
-                title="About the rater variance decomposition",
-                visible="(showMaxwellREGuide)",
-                clearWith=list(
-                    "showMaxwellREGuide")))
-            self$add(jmvcore::Table$new(
-                options=options,
-                name="interIntraRaterIntraTable",
-                title="Intra-Rater Reliability (Test-Retest Consistency)",
-                visible="(interIntraRater)",
-                rows=0,
-                columns=list(
-                    list(
-                        `name`="rater", 
-                        `title`="Rater", 
-                        `type`="text"),
-                    list(
-                        `name`="n_cases", 
-                        `title`="N Cases", 
-                        `type`="integer"),
-                    list(
-                        `name`="n_timepoints", 
-                        `title`="Time Points", 
-                        `type`="integer"),
-                    list(
-                        `name`="statistic_name", 
-                        `title`="Statistic", 
-                        `type`="text"),
-                    list(
-                        `name`="value", 
-                        `title`="Value", 
-                        `type`="number"),
-                    list(
-                        `name`="ci_lower", 
-                        `title`="95% CI Lower", 
-                        `type`="number"),
-                    list(
-                        `name`="ci_upper", 
-                        `title`="95% CI Upper", 
-                        `type`="number"),
-                    list(
-                        `name`="p", 
-                        `title`="p-value", 
-                        `type`="number", 
-                        `format`="zto,pvalue"),
-                    list(
-                        `name`="interpretation", 
-                        `title`="Interpretation", 
-                        `type`="text")),
-                clearWith=list(
-                    "vars",
-                    "interIntraSeparator",
-                    "confLevel",
-                    "kappaCIMethod",
-                    "wght"),
-                refs=list(
-                    "Shrout1979",
-                    "Koo2016",
-                    "Cohen1960",
-                    "LandisKoch1977")))
-            self$add(jmvcore::Table$new(
-                options=options,
-                name="interIntraRaterInterTable",
-                title="Inter-Rater Reliability (Between Raters)",
-                visible="(interIntraRater)",
-                rows=1,
-                columns=list(
-                    list(
-                        `name`="method", 
-                        `title`="Method", 
-                        `type`="text"),
-                    list(
-                        `name`="n_cases", 
-                        `title`="N Cases", 
-                        `type`="integer"),
-                    list(
-                        `name`="n_raters", 
-                        `title`="N Raters", 
-                        `type`="integer"),
-                    list(
-                        `name`="statistic_name", 
-                        `title`="Statistic", 
-                        `type`="text"),
-                    list(
-                        `name`="value", 
-                        `title`="Value", 
-                        `type`="number"),
-                    list(
-                        `name`="ci_lower", 
-                        `title`="95% CI Lower", 
-                        `type`="number"),
-                    list(
-                        `name`="ci_upper", 
-                        `title`="95% CI Upper", 
-                        `type`="number"),
-                    list(
-                        `name`="p", 
-                        `title`="p-value", 
-                        `type`="number", 
-                        `format`="zto,pvalue"),
-                    list(
-                        `name`="interpretation", 
-                        `title`="Interpretation", 
-                        `type`="text")),
-                clearWith=list(
-                    "vars",
-                    "interIntraSeparator",
-                    "confLevel",
-                    "kappaCIMethod",
-                    "wght"),
-                refs=list(
-                    "Shrout1979",
-                    "Koo2016",
-                    "Cohen1960",
-                    "LandisKoch1977")))
-            self$add(jmvcore::Html$new(
-                options=options,
-                name="interIntraRaterExplanation",
-                title="About Inter/Intra-Rater Reliability",
-                visible="(showInterIntraRaterGuide)",
-                clearWith=list(
-                    "showInterIntraRaterGuide")))
-            self$add(jmvcore::Table$new(
-                options=options,
-                name="iotaTable",
-                title="Iota Coefficient Results (Single Variable)",
-                visible="(iota)",
-                rows=1,
-                columns=list(
-                    list(
-                        `name`="method", 
-                        `title`="Method", 
-                        `type`="text"),
-                    list(
-                        `name`="subjects", 
-                        `title`="Cases", 
-                        `type`="integer"),
-                    list(
-                        `name`="raters", 
-                        `title`="Raters", 
-                        `type`="integer"),
-                    list(
-                        `name`="iota_value", 
-                        `title`="Iota", 
-                        `type`="number"),
-                    list(
-                        `name`="interpretation", 
-                        `title`="Interpretation", 
-                        `type`="text")),
-                refs=list(
-                    "Janson2001",
-                    "Conger1980",
-                    "LandisKoch1977",
-                    "Koo2016"),
-                clearWith=list(
-                    "vars",
-                    "iotaStandardize",
-                    "confLevel")))
-            self$add(jmvcore::Html$new(
-                options=options,
-                name="iotaExplanation",
-                title="About Iota Coefficient",
-                visible="(showIotaGuide)",
-                clearWith=list(
-                    "showIotaGuide")))
+            self$add(R6::R6Class(
+                inherit = jmvcore::Group,
+                active = list(
+                    hierarchicalOverallTable = function() private$.items[["hierarchicalOverallTable"]],
+                    clusterSpecificTable = function() private$.items[["clusterSpecificTable"]],
+                    varianceDecompositionTable = function() private$.items[["varianceDecompositionTable"]],
+                    hierarchicalICCTable = function() private$.items[["hierarchicalICCTable"]],
+                    homogeneityTestTable = function() private$.items[["homogeneityTestTable"]],
+                    hierarchicalExplanation = function() private$.items[["hierarchicalExplanation"]]),
+                private = list(),
+                public=list(
+                    initialize=function(options) {
+                        super$initialize(
+                            options=options,
+                            name="hierarchicalGroup",
+                            title="Hierarchical / Multilevel Agreement")
+                        self$add(jmvcore::Table$new(
+                            options=options,
+                            name="hierarchicalOverallTable",
+                            title="Hierarchical Kappa - Overall Agreement",
+                            visible="(hierarchicalKappa)",
+                            rows=1,
+                            columns=list(
+                                list(
+                                    `name`="method", 
+                                    `title`="Method", 
+                                    `type`="text"),
+                                list(
+                                    `name`="cases", 
+                                    `title`="Cases", 
+                                    `type`="integer"),
+                                list(
+                                    `name`="raters", 
+                                    `title`="Raters", 
+                                    `type`="integer"),
+                                list(
+                                    `name`="clusters", 
+                                    `title`="Clusters", 
+                                    `type`="integer"),
+                                list(
+                                    `name`="overall_kappa", 
+                                    `title`="Overall Kappa", 
+                                    `type`="number")),
+                            clearWith=list(
+                                "vars",
+                                "clusterVariable",
+                                "wght",
+                                "exct",
+                                "kappaCIMethod",
+                                "confLevel"),
+                            refs=list(
+                                "Shrout1979",
+                                "McGraw1996",
+                                "Barlow1991")))
+                        self$add(jmvcore::Table$new(
+                            options=options,
+                            name="clusterSpecificTable",
+                            title="Cluster-Specific Kappa Estimates",
+                            visible="(hierarchicalKappa && clusterSpecificKappa)",
+                            rows=0,
+                            columns=list(
+                                list(
+                                    `name`="cluster", 
+                                    `title`="Cluster/Institution", 
+                                    `type`="text"),
+                                list(
+                                    `name`="n_cases", 
+                                    `title`="N Cases", 
+                                    `type`="integer"),
+                                list(
+                                    `name`="n_raters", 
+                                    `title`="N Raters", 
+                                    `type`="integer"),
+                                list(
+                                    `name`="kappa", 
+                                    `title`="Kappa", 
+                                    `type`="number"),
+                                list(
+                                    `name`="ci_lower", 
+                                    `title`="95% CI Lower", 
+                                    `type`="number"),
+                                list(
+                                    `name`="ci_upper", 
+                                    `title`="95% CI Upper", 
+                                    `type`="number"),
+                                list(
+                                    `name`="rank", 
+                                    `title`="Rank", 
+                                    `type`="integer", 
+                                    `visible`="(clusterRankings)")),
+                            clearWith=list(
+                                "vars",
+                                "clusterVariable",
+                                "clusterRankings",
+                                "confLevel",
+                                "wght",
+                                "exct",
+                                "kappaCIMethod"),
+                            refs=list(
+                                "Shrout1979",
+                                "McGraw1996",
+                                "Barlow1991")))
+                        self$add(jmvcore::Table$new(
+                            options=options,
+                            name="varianceDecompositionTable",
+                            title="Variance Component Decomposition",
+                            visible="(hierarchicalKappa && varianceDecomposition)",
+                            rows=0,
+                            columns=list(
+                                list(
+                                    `name`="component", 
+                                    `title`="Variance Component", 
+                                    `type`="text"),
+                                list(
+                                    `name`="variance", 
+                                    `title`="Variance", 
+                                    `type`="number"),
+                                list(
+                                    `name`="sd", 
+                                    `title`="SD", 
+                                    `type`="number"),
+                                list(
+                                    `name`="proportion", 
+                                    `title`="Proportion of Total", 
+                                    `type`="number", 
+                                    `format`="pc"),
+                                list(
+                                    `name`="interpretation", 
+                                    `title`="Interpretation", 
+                                    `type`="text")),
+                            clearWith=list(
+                                "vars",
+                                "clusterVariable"),
+                            refs=list(
+                                "Shrout1979",
+                                "McGraw1996")))
+                        self$add(jmvcore::Table$new(
+                            options=options,
+                            name="hierarchicalICCTable",
+                            title="Hierarchical ICC Decomposition",
+                            visible="(hierarchicalKappa && iccHierarchical)",
+                            rows=0,
+                            columns=list(
+                                list(
+                                    `name`="icc_type", 
+                                    `title`="ICC Type", 
+                                    `type`="text"),
+                                list(
+                                    `name`="icc_value", 
+                                    `title`="ICC", 
+                                    `type`="number"),
+                                list(
+                                    `name`="interpretation", 
+                                    `title`="Interpretation", 
+                                    `type`="text")),
+                            clearWith=list(
+                                "vars",
+                                "clusterVariable"),
+                            refs=list(
+                                "Shrout1979",
+                                "McGraw1996")))
+                        self$add(jmvcore::Table$new(
+                            options=options,
+                            name="homogeneityTestTable",
+                            title="Cluster Homogeneity Test Results",
+                            visible="(hierarchicalKappa && testClusterHomogeneity)",
+                            rows=1,
+                            columns=list(
+                                list(
+                                    `name`="test_name", 
+                                    `title`="Test", 
+                                    `type`="text"),
+                                list(
+                                    `name`="statistic", 
+                                    `title`="Test Statistic", 
+                                    `type`="number"),
+                                list(
+                                    `name`="df", 
+                                    `title`="df", 
+                                    `type`="integer"),
+                                list(
+                                    `name`="p_value", 
+                                    `title`="p-value", 
+                                    `type`="number", 
+                                    `format`="zto,pvalue"),
+                                list(
+                                    `name`="conclusion", 
+                                    `title`="Conclusion", 
+                                    `type`="text")),
+                            clearWith=list(
+                                "vars",
+                                "clusterVariable"),
+                            refs=list(
+                                "Shrout1979",
+                                "McGraw1996",
+                                "Stram1994")))
+                        self$add(jmvcore::Html$new(
+                            options=options,
+                            name="hierarchicalExplanation",
+                            title="About Hierarchical/Multilevel Kappa",
+                            visible="(showHierarchicalGuide)",
+                            clearWith=list(
+                                "showHierarchicalGuide")))}))$new(options=options))
+            self$add(R6::R6Class(
+                inherit = jmvcore::Group,
+                active = list(
+                    mixedEffectsTable = function() private$.items[["mixedEffectsTable"]],
+                    mixedEffectsVarianceTable = function() private$.items[["mixedEffectsVarianceTable"]],
+                    mixedEffectsExplanation = function() private$.items[["mixedEffectsExplanation"]],
+                    confusionMatrixTable = function() private$.items[["confusionMatrixTable"]],
+                    perClassMetricsTable = function() private$.items[["perClassMetricsTable"]],
+                    confusionMatrixExplanation = function() private$.items[["confusionMatrixExplanation"]],
+                    bootstrapCITable = function() private$.items[["bootstrapCITable"]],
+                    bootstrapCIExplanation = function() private$.items[["bootstrapCIExplanation"]],
+                    concordanceF1Table = function() private$.items[["concordanceF1Table"]],
+                    concordanceF1PerClassTable = function() private$.items[["concordanceF1PerClassTable"]],
+                    concordanceF1Explanation = function() private$.items[["concordanceF1Explanation"]]),
+                private = list(),
+                public=list(
+                    initialize=function(options) {
+                        super$initialize(
+                            options=options,
+                            name="advancedGroup",
+                            title="Advanced Agreement Analyses")
+                        self$add(jmvcore::Table$new(
+                            options=options,
+                            name="mixedEffectsTable",
+                            title="Mixed-Effects Condition Comparison",
+                            visible="(mixedEffectsComparison)",
+                            rows=0,
+                            columns=list(
+                                list(
+                                    `name`="term", 
+                                    `title`="Term", 
+                                    `type`="text"),
+                                list(
+                                    `name`="estimate", 
+                                    `title`="Estimate", 
+                                    `type`="number"),
+                                list(
+                                    `name`="se", 
+                                    `title`="SE", 
+                                    `type`="number"),
+                                list(
+                                    `name`="ci_lower", 
+                                    `title`="95% CI Lower", 
+                                    `type`="number"),
+                                list(
+                                    `name`="ci_upper", 
+                                    `title`="95% CI Upper", 
+                                    `type`="number"),
+                                list(
+                                    `name`="t_value", 
+                                    `title`="t", 
+                                    `type`="number"),
+                                list(
+                                    `name`="df", 
+                                    `title`="df", 
+                                    `type`="number"),
+                                list(
+                                    `name`="p_value", 
+                                    `title`="p", 
+                                    `type`="number", 
+                                    `format`="zto,pvalue")),
+                            clearWith=list(
+                                "vars",
+                                "conditionVariable",
+                                "caseIdVariable",
+                                "multipleTestCorrection",
+                                "confLevel"),
+                            refs=list(
+                                "Shrout1979",
+                                "McGraw1996")))
+                        self$add(jmvcore::Table$new(
+                            options=options,
+                            name="mixedEffectsVarianceTable",
+                            title="Mixed-Effects Variance Components",
+                            visible="(mixedEffectsComparison)",
+                            rows=0,
+                            columns=list(
+                                list(
+                                    `name`="component", 
+                                    `title`="Component", 
+                                    `type`="text"),
+                                list(
+                                    `name`="variance", 
+                                    `title`="Variance", 
+                                    `type`="number"),
+                                list(
+                                    `name`="sd", 
+                                    `title`="SD", 
+                                    `type`="number"),
+                                list(
+                                    `name`="proportion", 
+                                    `title`="Proportion", 
+                                    `type`="number", 
+                                    `format`="pc"),
+                                list(
+                                    `name`="interpretation", 
+                                    `title`="Interpretation", 
+                                    `type`="text")),
+                            clearWith=list(
+                                "vars",
+                                "conditionVariable",
+                                "caseIdVariable"),
+                            refs=list(
+                                "Shrout1979",
+                                "McGraw1996")))
+                        self$add(jmvcore::Html$new(
+                            options=options,
+                            name="mixedEffectsExplanation",
+                            title="About Mixed-Effects Condition Comparison",
+                            visible="(showMixedEffectsGuide)",
+                            clearWith=list(
+                                "showMixedEffectsGuide")))
+                        self$add(jmvcore::Table$new(
+                            options=options,
+                            name="confusionMatrixTable",
+                            title="Confusion Matrix",
+                            visible="(confusionMatrix)",
+                            rows=0,
+                            columns=list(
+                                list(
+                                    `name`="reference_class", 
+                                    `title`="Reference", 
+                                    `type`="text"),
+                                list(
+                                    `name`="predicted_class", 
+                                    `title`="Predicted", 
+                                    `type`="text"),
+                                list(
+                                    `name`="count", 
+                                    `title`="Count", 
+                                    `type`="integer"),
+                                list(
+                                    `name`="proportion", 
+                                    `title`="Proportion", 
+                                    `type`="number")),
+                            clearWith=list(
+                                "vars",
+                                "confusionNormalize")))
+                        self$add(jmvcore::Table$new(
+                            options=options,
+                            name="perClassMetricsTable",
+                            title="Per-Class Classification Metrics",
+                            visible="(confusionMatrix)",
+                            rows=0,
+                            columns=list(
+                                list(
+                                    `name`="class_label", 
+                                    `title`="Class", 
+                                    `type`="text"),
+                                list(
+                                    `name`="n", 
+                                    `title`="Agreements (TP)", 
+                                    `type`="integer"),
+                                list(
+                                    `name`="precision", 
+                                    `title`="Precision (PPV)", 
+                                    `type`="number"),
+                                list(
+                                    `name`="recall", 
+                                    `title`="Recall (Sensitivity)", 
+                                    `type`="number"),
+                                list(
+                                    `name`="f1", 
+                                    `title`="F1 Score", 
+                                    `type`="number"),
+                                list(
+                                    `name`="support", 
+                                    `title`="Support", 
+                                    `type`="integer")),
+                            clearWith=list(
+                                "vars",
+                                "confusionNormalize")))
+                        self$add(jmvcore::Html$new(
+                            options=options,
+                            name="confusionMatrixExplanation",
+                            title="About Confusion Matrix",
+                            visible="(showConfusionMatrixGuide)",
+                            clearWith=list(
+                                "showConfusionMatrixGuide")))
+                        self$add(jmvcore::Table$new(
+                            options=options,
+                            name="bootstrapCITable",
+                            title="Bootstrap Confidence Intervals for Agreement Metrics",
+                            visible="(bootstrapCI)",
+                            rows=0,
+                            columns=list(
+                                list(
+                                    `name`="metric", 
+                                    `title`="Metric", 
+                                    `type`="text"),
+                                list(
+                                    `name`="estimate", 
+                                    `title`="Estimate", 
+                                    `type`="number"),
+                                list(
+                                    `name`="boot_se", 
+                                    `title`="Boot SE", 
+                                    `type`="number"),
+                                list(
+                                    `name`="ci_lower", 
+                                    `title`="Lower", 
+                                    `type`="number"),
+                                list(
+                                    `name`="ci_upper", 
+                                    `title`="Upper", 
+                                    `type`="number"),
+                                list(
+                                    `name`="boot_bias", 
+                                    `title`="Bias", 
+                                    `type`="number"),
+                                list(
+                                    `name`="ci_method", 
+                                    `title`="CI Method", 
+                                    `type`="text")),
+                            clearWith=list(
+                                "exct",
+                                "vars",
+                                "nBoot",
+                                "confLevel",
+                                "seed",
+                                "iccType",
+                                "wght",
+                                "krippMethod")))
+                        self$add(jmvcore::Html$new(
+                            options=options,
+                            name="bootstrapCIExplanation",
+                            title="About Bootstrap Confidence Intervals",
+                            visible="(showBootstrapCIGuide)",
+                            clearWith=list(
+                                "showBootstrapCIGuide")))
+                        self$add(jmvcore::Table$new(
+                            options=options,
+                            name="concordanceF1Table",
+                            title="Multi-Annotator Concordance Metrics",
+                            visible="(multiAnnotatorConcordance)",
+                            rows=0,
+                            columns=list(
+                                list(
+                                    `name`="metric", 
+                                    `title`="Metric", 
+                                    `type`="text"),
+                                list(
+                                    `name`="value", 
+                                    `title`="Value", 
+                                    `type`="number"),
+                                list(
+                                    `name`="comparison", 
+                                    `title`="Comparison", 
+                                    `type`="text"),
+                                list(
+                                    `name`="interpretation", 
+                                    `title`="Interpretation", 
+                                    `type`="text")),
+                            clearWith=list(
+                                "vars",
+                                "predictionRater",
+                                "tieBreaker")))
+                        self$add(jmvcore::Table$new(
+                            options=options,
+                            name="concordanceF1PerClassTable",
+                            title="Per-Class Concordance F1",
+                            visible="(multiAnnotatorConcordance)",
+                            rows=0,
+                            columns=list(
+                                list(
+                                    `name`="class_label", 
+                                    `title`="Class", 
+                                    `type`="text"),
+                                list(
+                                    `name`="concordance_f1", 
+                                    `title`="Concordance F1", 
+                                    `type`="number"),
+                                list(
+                                    `name`="strict_f1", 
+                                    `title`="Strict F1", 
+                                    `type`="number"),
+                                list(
+                                    `name`="improvement", 
+                                    `title`="Improvement", 
+                                    `type`="number", 
+                                    `format`="pc"),
+                                list(
+                                    `name`="n_cases", 
+                                    `title`="N Cases", 
+                                    `type`="integer")),
+                            clearWith=list(
+                                "vars",
+                                "predictionRater",
+                                "tieBreaker")))
+                        self$add(jmvcore::Html$new(
+                            options=options,
+                            name="concordanceF1Explanation",
+                            title="About Multi-Annotator Concordance",
+                            visible="(showConcordanceF1Guide)",
+                            clearWith=list(
+                                "showConcordanceF1Guide")))}))$new(options=options))
+            self$add(R6::R6Class(
+                inherit = jmvcore::Group,
+                active = list(
+                    gwetTable = function() private$.items[["gwetTable"]],
+                    gwetExplanation = function() private$.items[["gwetExplanation"]],
+                    pabakTable = function() private$.items[["pabakTable"]],
+                    pabakExplanation = function() private$.items[["pabakExplanation"]]),
+                private = list(),
+                public=list(
+                    initialize=function(options) {
+                        super$initialize(
+                            options=options,
+                            name="gwetGroup",
+                            title="Chance-Corrected Agreement Variants")
+                        self$add(jmvcore::Table$new(
+                            options=options,
+                            name="gwetTable",
+                            title="Gwet's AC1/AC2 Results",
+                            visible="(gwet)",
+                            rows=1,
+                            columns=list(
+                                list(
+                                    `name`="method", 
+                                    `title`="Method", 
+                                    `type`="text"),
+                                list(
+                                    `name`="subjects", 
+                                    `title`="Cases", 
+                                    `type`="integer"),
+                                list(
+                                    `name`="raters", 
+                                    `title`="Raters", 
+                                    `type`="integer"),
+                                list(
+                                    `name`="coefficient", 
+                                    `title`="Coefficient", 
+                                    `type`="number"),
+                                list(
+                                    `name`="se", 
+                                    `title`="Std. Error", 
+                                    `type`="number"),
+                                list(
+                                    `name`="ci_lower", 
+                                    `title`="95% CI Lower", 
+                                    `type`="number"),
+                                list(
+                                    `name`="ci_upper", 
+                                    `title`="95% CI Upper", 
+                                    `type`="number"),
+                                list(
+                                    `name`="p", 
+                                    `title`="p-value", 
+                                    `type`="number", 
+                                    `format`="zto,pvalue")),
+                            clearWith=list(
+                                "vars",
+                                "gwetWeights",
+                                "confLevel"),
+                            refs=list(
+                                "Gwet2008",
+                                "LandisKoch1977")))
+                        self$add(jmvcore::Html$new(
+                            options=options,
+                            name="gwetExplanation",
+                            title="About Gwet's AC Coefficient",
+                            visible="(showGwetGuide)",
+                            clearWith=list(
+                                "showGwetGuide")))
+                        self$add(jmvcore::Table$new(
+                            options=options,
+                            name="pabakTable",
+                            title="PABAK & Prevalence/Bias Indices",
+                            visible="(pabak)",
+                            rows=1,
+                            columns=list(
+                                list(
+                                    `name`="subjects", 
+                                    `title`="Cases", 
+                                    `type`="integer"),
+                                list(
+                                    `name`="observedAgreement", 
+                                    `title`="Observed Agreement", 
+                                    `type`="number"),
+                                list(
+                                    `name`="kappa", 
+                                    `title`="Cohen's Kappa", 
+                                    `type`="number"),
+                                list(
+                                    `name`="pabak", 
+                                    `title`="PABAK", 
+                                    `type`="number"),
+                                list(
+                                    `name`="prevalenceIndex", 
+                                    `title`="Prevalence Index", 
+                                    `type`="number"),
+                                list(
+                                    `name`="biasIndex", 
+                                    `title`="Bias Index", 
+                                    `type`="number"),
+                                list(
+                                    `name`="interpretation", 
+                                    `title`="Interpretation", 
+                                    `type`="text")),
+                            clearWith=list(
+                                "vars",
+                                "wght"),
+                            refs=list(
+                                "Byrt1993")))
+                        self$add(jmvcore::Html$new(
+                            options=options,
+                            name="pabakExplanation",
+                            title="About PABAK & Prevalence/Bias Indices",
+                            visible="(showPABAKGuide)",
+                            clearWith=list(
+                                "showPABAKGuide")))}))$new(options=options))
+            self$add(R6::R6Class(
+                inherit = jmvcore::Group,
+                active = list(
+                    iccTable = function() private$.items[["iccTable"]],
+                    iccExplanation = function() private$.items[["iccExplanation"]],
+                    meanPearsonTable = function() private$.items[["meanPearsonTable"]],
+                    meanPearsonExplanation = function() private$.items[["meanPearsonExplanation"]],
+                    linCCCTable = function() private$.items[["linCCCTable"]],
+                    linCCCExplanation = function() private$.items[["linCCCExplanation"]],
+                    tdiTable = function() private$.items[["tdiTable"]],
+                    tdiExplanation = function() private$.items[["tdiExplanation"]]),
+                private = list(),
+                public=list(
+                    initialize=function(options) {
+                        super$initialize(
+                            options=options,
+                            name="iccGroup",
+                            title="Continuous Agreement Measures")
+                        self$add(jmvcore::Table$new(
+                            options=options,
+                            name="iccTable",
+                            title="Intraclass Correlation Coefficient (ICC) Results",
+                            visible="(icc)",
+                            rows=1,
+                            columns=list(
+                                list(
+                                    `name`="model", 
+                                    `title`="ICC Model", 
+                                    `type`="text"),
+                                list(
+                                    `name`="subjects", 
+                                    `title`="Cases", 
+                                    `type`="integer"),
+                                list(
+                                    `name`="raters", 
+                                    `title`="Raters", 
+                                    `type`="integer"),
+                                list(
+                                    `name`="icc_value", 
+                                    `title`="ICC", 
+                                    `type`="number"),
+                                list(
+                                    `name`="ci_lower", 
+                                    `title`="Lower", 
+                                    `type`="number"),
+                                list(
+                                    `name`="ci_upper", 
+                                    `title`="Upper", 
+                                    `type`="number"),
+                                list(
+                                    `name`="f_value", 
+                                    `title`="F", 
+                                    `type`="number"),
+                                list(
+                                    `name`="df1", 
+                                    `title`="df1", 
+                                    `type`="integer"),
+                                list(
+                                    `name`="df2", 
+                                    `title`="df2", 
+                                    `type`="integer"),
+                                list(
+                                    `name`="p", 
+                                    `title`="p-value", 
+                                    `type`="number", 
+                                    `format`="zto,pvalue")),
+                            clearWith=list(
+                                "vars",
+                                "iccType",
+                                "confLevel"),
+                            refs=list(
+                                "Shrout1979",
+                                "McGraw1996",
+                                "Koo2016")))
+                        self$add(jmvcore::Html$new(
+                            options=options,
+                            name="iccExplanation",
+                            title="About Intraclass Correlation Coefficient (ICC)",
+                            visible="(showICCGuide)",
+                            clearWith=list(
+                                "showICCGuide")))
+                        self$add(jmvcore::Table$new(
+                            options=options,
+                            name="meanPearsonTable",
+                            title="Mean Pearson Correlation (Linear Association) Results",
+                            visible="(meanPearson)",
+                            rows=1,
+                            columns=list(
+                                list(
+                                    `name`="method", 
+                                    `title`="Method", 
+                                    `type`="text"),
+                                list(
+                                    `name`="subjects", 
+                                    `title`="Cases", 
+                                    `type`="integer"),
+                                list(
+                                    `name`="raters", 
+                                    `title`="Raters", 
+                                    `type`="integer"),
+                                list(
+                                    `name`="meanR", 
+                                    `title`="Mean r", 
+                                    `type`="number"),
+                                list(
+                                    `name`="minR", 
+                                    `title`="Min r", 
+                                    `type`="number"),
+                                list(
+                                    `name`="maxR", 
+                                    `title`="Max r", 
+                                    `type`="number"),
+                                list(
+                                    `name`="interpretation", 
+                                    `title`="Interpretation", 
+                                    `type`="text")),
+                            clearWith=list(
+                                "vars"),
+                            refs=list(
+                                "Pearson1895",
+                                "Mukaka2012")))
+                        self$add(jmvcore::Html$new(
+                            options=options,
+                            name="meanPearsonExplanation",
+                            title="About Mean Pearson Correlation",
+                            visible="(showMeanPearsonGuide)",
+                            clearWith=list(
+                                "showMeanPearsonGuide")))
+                        self$add(jmvcore::Table$new(
+                            options=options,
+                            name="linCCCTable",
+                            title="Lin's Concordance Correlation Coefficient (CCC)",
+                            visible="(linCCC)",
+                            rows=0,
+                            columns=list(
+                                list(
+                                    `name`="comparison", 
+                                    `title`="Comparison", 
+                                    `type`="text"),
+                                list(
+                                    `name`="subjects", 
+                                    `title`="Cases", 
+                                    `type`="integer"),
+                                list(
+                                    `name`="ccc", 
+                                    `title`="CCC", 
+                                    `type`="number"),
+                                list(
+                                    `name`="ci_lower", 
+                                    `title`="Lower", 
+                                    `type`="number"),
+                                list(
+                                    `name`="ci_upper", 
+                                    `title`="Upper", 
+                                    `type`="number"),
+                                list(
+                                    `name`="pearson_r", 
+                                    `title`="Precision (r)", 
+                                    `type`="number"),
+                                list(
+                                    `name`="bias_factor", 
+                                    `title`="Accuracy (Cb)", 
+                                    `type`="number"),
+                                list(
+                                    `name`="interpretation", 
+                                    `title`="Interpretation", 
+                                    `type`="text")),
+                            clearWith=list(
+                                "vars",
+                                "confLevel"),
+                            refs=list(
+                                "Lin1989")))
+                        self$add(jmvcore::Html$new(
+                            options=options,
+                            name="linCCCExplanation",
+                            title="About Lin's Concordance Correlation Coefficient",
+                            visible="(showLinCCCGuide)",
+                            clearWith=list(
+                                "showLinCCCGuide")))
+                        self$add(jmvcore::Table$new(
+                            options=options,
+                            name="tdiTable",
+                            title="Empirical Total Deviation Index (TDI)",
+                            visible="(tdi)",
+                            rows=0,
+                            columns=list(
+                                list(
+                                    `name`="comparison", 
+                                    `title`="Comparison", 
+                                    `type`="text"),
+                                list(
+                                    `name`="subjects", 
+                                    `title`="Cases", 
+                                    `type`="integer"),
+                                list(
+                                    `name`="tdi_estimate", 
+                                    `title`="TDI Estimate", 
+                                    `type`="number"),
+                                list(
+                                    `name`="coverage_prob", 
+                                    `title`="Coverage %", 
+                                    `type`="number", 
+                                    `format`="pc"),
+                                list(
+                                    `name`="acceptable_limit", 
+                                    `title`="Acceptable Limit", 
+                                    `type`="number"),
+                                list(
+                                    `name`="meets_criteria", 
+                                    `title`="Observed Criterion?", 
+                                    `type`="text"),
+                                list(
+                                    `name`="ci_lower", 
+                                    `title`="95% CI Lower", 
+                                    `type`="number"),
+                                list(
+                                    `name`="ci_upper", 
+                                    `title`="95% CI Upper", 
+                                    `type`="number"),
+                                list(
+                                    `name`="interpretation", 
+                                    `title`="Interpretation", 
+                                    `type`="text")),
+                            clearWith=list(
+                                "vars",
+                                "tdiCoverage",
+                                "tdiLimit",
+                                "confLevel",
+                                "nBoot",
+                                "seed"),
+                            refs=list(
+                                "Lin2000")))
+                        self$add(jmvcore::Html$new(
+                            options=options,
+                            name="tdiExplanation",
+                            title="About Total Deviation Index (TDI)",
+                            visible="(showTDIGuide)",
+                            clearWith=list(
+                                "showTDIGuide")))}))$new(options=options))
+            self$add(R6::R6Class(
+                inherit = jmvcore::Group,
+                active = list(
+                    maxwellRETable = function() private$.items[["maxwellRETable"]],
+                    maxwellREExplanation = function() private$.items[["maxwellREExplanation"]],
+                    interIntraRaterIntraTable = function() private$.items[["interIntraRaterIntraTable"]],
+                    interIntraRaterInterTable = function() private$.items[["interIntraRaterInterTable"]],
+                    interIntraRaterExplanation = function() private$.items[["interIntraRaterExplanation"]],
+                    iotaTable = function() private$.items[["iotaTable"]],
+                    iotaExplanation = function() private$.items[["iotaExplanation"]]),
+                private = list(),
+                public=list(
+                    initialize=function(options) {
+                        super$initialize(
+                            options=options,
+                            name="maxwellREGroup",
+                            title="Error Decomposition & Reliability")
+                        self$add(jmvcore::Table$new(
+                            options=options,
+                            name="maxwellRETable",
+                            title="Rater Variance Decomposition - Systematic vs Random Disagreement",
+                            visible="(maxwellRE)",
+                            rows=1,
+                            columns=list(
+                                list(
+                                    `name`="method", 
+                                    `title`="Method", 
+                                    `type`="text"),
+                                list(
+                                    `name`="subjects", 
+                                    `title`="Cases", 
+                                    `type`="integer"),
+                                list(
+                                    `name`="raters", 
+                                    `title`="Raters/Methods", 
+                                    `type`="integer"),
+                                list(
+                                    `name`="re_value", 
+                                    `title`="Random share", 
+                                    `type`="number"),
+                                list(
+                                    `name`="systematic_prop", 
+                                    `title`="Systematic %", 
+                                    `type`="number", 
+                                    `format`="pc"),
+                                list(
+                                    `name`="random_prop", 
+                                    `title`="Random %", 
+                                    `type`="number", 
+                                    `format`="pc"),
+                                list(
+                                    `name`="total_variance", 
+                                    `title`="Disagreement variance", 
+                                    `type`="number"),
+                                list(
+                                    `name`="systematic_var", 
+                                    `title`="Systematic (rater) variance", 
+                                    `type`="number"),
+                                list(
+                                    `name`="random_var", 
+                                    `title`="Random (residual) variance", 
+                                    `type`="number"),
+                                list(
+                                    `name`="interpretation", 
+                                    `title`="Interpretation", 
+                                    `type`="text")),
+                            clearWith=list(
+                                "vars"),
+                            refs=list(
+                                "Shrout1979",
+                                "McGraw1996")))
+                        self$add(jmvcore::Html$new(
+                            options=options,
+                            name="maxwellREExplanation",
+                            title="About the rater variance decomposition",
+                            visible="(showMaxwellREGuide)",
+                            clearWith=list(
+                                "showMaxwellREGuide")))
+                        self$add(jmvcore::Table$new(
+                            options=options,
+                            name="interIntraRaterIntraTable",
+                            title="Intra-Rater Reliability (Test-Retest Consistency)",
+                            visible="(interIntraRater)",
+                            rows=0,
+                            columns=list(
+                                list(
+                                    `name`="rater", 
+                                    `title`="Rater", 
+                                    `type`="text"),
+                                list(
+                                    `name`="n_cases", 
+                                    `title`="N Cases", 
+                                    `type`="integer"),
+                                list(
+                                    `name`="n_timepoints", 
+                                    `title`="Time Points", 
+                                    `type`="integer"),
+                                list(
+                                    `name`="statistic_name", 
+                                    `title`="Statistic", 
+                                    `type`="text"),
+                                list(
+                                    `name`="value", 
+                                    `title`="Value", 
+                                    `type`="number"),
+                                list(
+                                    `name`="ci_lower", 
+                                    `title`="95% CI Lower", 
+                                    `type`="number"),
+                                list(
+                                    `name`="ci_upper", 
+                                    `title`="95% CI Upper", 
+                                    `type`="number"),
+                                list(
+                                    `name`="p", 
+                                    `title`="p-value", 
+                                    `type`="number", 
+                                    `format`="zto,pvalue"),
+                                list(
+                                    `name`="interpretation", 
+                                    `title`="Interpretation", 
+                                    `type`="text")),
+                            clearWith=list(
+                                "vars",
+                                "interIntraSeparator",
+                                "confLevel",
+                                "kappaCIMethod",
+                                "wght"),
+                            refs=list(
+                                "Shrout1979",
+                                "Koo2016",
+                                "Cohen1960",
+                                "LandisKoch1977")))
+                        self$add(jmvcore::Table$new(
+                            options=options,
+                            name="interIntraRaterInterTable",
+                            title="Inter-Rater Reliability (Between Raters)",
+                            visible="(interIntraRater)",
+                            rows=1,
+                            columns=list(
+                                list(
+                                    `name`="method", 
+                                    `title`="Method", 
+                                    `type`="text"),
+                                list(
+                                    `name`="n_cases", 
+                                    `title`="N Cases", 
+                                    `type`="integer"),
+                                list(
+                                    `name`="n_raters", 
+                                    `title`="N Raters", 
+                                    `type`="integer"),
+                                list(
+                                    `name`="statistic_name", 
+                                    `title`="Statistic", 
+                                    `type`="text"),
+                                list(
+                                    `name`="value", 
+                                    `title`="Value", 
+                                    `type`="number"),
+                                list(
+                                    `name`="ci_lower", 
+                                    `title`="95% CI Lower", 
+                                    `type`="number"),
+                                list(
+                                    `name`="ci_upper", 
+                                    `title`="95% CI Upper", 
+                                    `type`="number"),
+                                list(
+                                    `name`="p", 
+                                    `title`="p-value", 
+                                    `type`="number", 
+                                    `format`="zto,pvalue"),
+                                list(
+                                    `name`="interpretation", 
+                                    `title`="Interpretation", 
+                                    `type`="text")),
+                            clearWith=list(
+                                "vars",
+                                "interIntraSeparator",
+                                "confLevel",
+                                "kappaCIMethod",
+                                "wght"),
+                            refs=list(
+                                "Shrout1979",
+                                "Koo2016",
+                                "Cohen1960",
+                                "LandisKoch1977")))
+                        self$add(jmvcore::Html$new(
+                            options=options,
+                            name="interIntraRaterExplanation",
+                            title="About Inter/Intra-Rater Reliability",
+                            visible="(showInterIntraRaterGuide)",
+                            clearWith=list(
+                                "showInterIntraRaterGuide")))
+                        self$add(jmvcore::Table$new(
+                            options=options,
+                            name="iotaTable",
+                            title="Iota Coefficient Results (Single Variable)",
+                            visible="(iota)",
+                            rows=1,
+                            columns=list(
+                                list(
+                                    `name`="method", 
+                                    `title`="Method", 
+                                    `type`="text"),
+                                list(
+                                    `name`="subjects", 
+                                    `title`="Cases", 
+                                    `type`="integer"),
+                                list(
+                                    `name`="raters", 
+                                    `title`="Raters", 
+                                    `type`="integer"),
+                                list(
+                                    `name`="iota_value", 
+                                    `title`="Iota", 
+                                    `type`="number"),
+                                list(
+                                    `name`="interpretation", 
+                                    `title`="Interpretation", 
+                                    `type`="text")),
+                            refs=list(
+                                "Janson2001",
+                                "Conger1980",
+                                "LandisKoch1977",
+                                "Koo2016"),
+                            clearWith=list(
+                                "vars",
+                                "iotaStandardize",
+                                "confLevel")))
+                        self$add(jmvcore::Html$new(
+                            options=options,
+                            name="iotaExplanation",
+                            title="About Iota Coefficient",
+                            visible="(showIotaGuide)",
+                            clearWith=list(
+                                "showIotaGuide")))}))$new(options=options))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="weightedKappaGuide",
@@ -3697,94 +3678,98 @@ agreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 clearWith=list(
                     "showAbout",
                     "wght")))
-            self$add(jmvcore::Preformatted$new(
-                options=options,
-                name="specificAgreementHeading",
-                title="Category-Specific Agreement",
-                visible="(specificAgreement || showSpecificAgreementGuide)",
-                clearWith=list(
-                    "specificAgreement",
-                    "showSpecificAgreementGuide")))
-            self$add(jmvcore::Table$new(
-                options=options,
-                name="specificAgreementTable",
-                title="Specific Agreement Indices (Category-Focused Agreement)",
-                visible="(specificAgreement)",
-                rows=0,
-                columns=list(
-                    list(
-                        `name`="category", 
-                        `title`="Category", 
-                        `type`="text"),
-                    list(
-                        `name`="rater_pair", 
-                        `title`="Rater Pair", 
-                        `type`="text"),
-                    list(
-                        `name`="n_both_positive", 
-                        `title`="Both Positive", 
-                        `type`="integer"),
-                    list(
-                        `name`="n_total_positive", 
-                        `title`="Total Positive", 
-                        `type`="integer"),
-                    list(
-                        `name`="specific_agreement", 
-                        `title`="Specific Agreement", 
-                        `type`="number"),
-                    list(
-                        `name`="ci_lower", 
-                        `title`="CI Lower", 
-                        `type`="number"),
-                    list(
-                        `name`="ci_upper", 
-                        `title`="CI Upper", 
-                        `type`="number"),
-                    list(
-                        `name`="interpretation", 
-                        `title`="Interpretation", 
-                        `type`="text"),
-                    list(
-                        `name`="n_cases", 
-                        `title`="Complete cases", 
-                        `type`="integer"),
-                    list(
-                        `name`="units", 
-                        `title`="Sampling units", 
-                        `type`="integer"),
-                    list(
-                        `name`="attempted", 
-                        `title`="Attempted draws", 
-                        `type`="integer"),
-                    list(
-                        `name`="valid", 
-                        `title`="Valid draws", 
-                        `type`="integer"),
-                    list(
-                        `name`="undefined", 
-                        `title`="Undefined draws", 
-                        `type`="integer"),
-                    list(
-                        `name`="ci_method", 
-                        `title`="CI method/status", 
-                        `type`="text")),
-                clearWith=list(
-                    "vars",
-                    "specificPositiveCategory",
-                    "specificAllCategories",
-                    "confLevel",
-                    "specificConfidenceIntervals",
-                    "specificCIMethod",
-                    "specificCluster",
-                    "nBoot",
-                    "seed")))
-            self$add(jmvcore::Html$new(
-                options=options,
-                name="specificAgreementExplanation",
-                title="About Specific Agreement Indices",
-                visible="(showSpecificAgreementGuide)",
-                clearWith=list(
-                    "showSpecificAgreementGuide")))
+            self$add(R6::R6Class(
+                inherit = jmvcore::Group,
+                active = list(
+                    specificAgreementTable = function() private$.items[["specificAgreementTable"]],
+                    specificAgreementExplanation = function() private$.items[["specificAgreementExplanation"]]),
+                private = list(),
+                public=list(
+                    initialize=function(options) {
+                        super$initialize(
+                            options=options,
+                            name="specificAgreementGroup",
+                            title="Category-Specific Agreement")
+                        self$add(jmvcore::Table$new(
+                            options=options,
+                            name="specificAgreementTable",
+                            title="Specific Agreement Indices (Category-Focused Agreement)",
+                            visible="(specificAgreement)",
+                            rows=0,
+                            columns=list(
+                                list(
+                                    `name`="category", 
+                                    `title`="Category", 
+                                    `type`="text"),
+                                list(
+                                    `name`="rater_pair", 
+                                    `title`="Rater Pair", 
+                                    `type`="text"),
+                                list(
+                                    `name`="n_both_positive", 
+                                    `title`="Both Positive", 
+                                    `type`="integer"),
+                                list(
+                                    `name`="n_total_positive", 
+                                    `title`="Total Positive", 
+                                    `type`="integer"),
+                                list(
+                                    `name`="specific_agreement", 
+                                    `title`="Specific Agreement", 
+                                    `type`="number"),
+                                list(
+                                    `name`="ci_lower", 
+                                    `title`="CI Lower", 
+                                    `type`="number"),
+                                list(
+                                    `name`="ci_upper", 
+                                    `title`="CI Upper", 
+                                    `type`="number"),
+                                list(
+                                    `name`="interpretation", 
+                                    `title`="Interpretation", 
+                                    `type`="text"),
+                                list(
+                                    `name`="n_cases", 
+                                    `title`="Complete cases", 
+                                    `type`="integer"),
+                                list(
+                                    `name`="units", 
+                                    `title`="Sampling units", 
+                                    `type`="integer"),
+                                list(
+                                    `name`="attempted", 
+                                    `title`="Attempted draws", 
+                                    `type`="integer"),
+                                list(
+                                    `name`="valid", 
+                                    `title`="Valid draws", 
+                                    `type`="integer"),
+                                list(
+                                    `name`="undefined", 
+                                    `title`="Undefined draws", 
+                                    `type`="integer"),
+                                list(
+                                    `name`="ci_method", 
+                                    `title`="CI method/status", 
+                                    `type`="text")),
+                            clearWith=list(
+                                "vars",
+                                "specificPositiveCategory",
+                                "specificAllCategories",
+                                "confLevel",
+                                "specificConfidenceIntervals",
+                                "specificCIMethod",
+                                "specificCluster",
+                                "nBoot",
+                                "seed")))
+                        self$add(jmvcore::Html$new(
+                            options=options,
+                            name="specificAgreementExplanation",
+                            title="About Specific Agreement Indices",
+                            visible="(showSpecificAgreementGuide)",
+                            clearWith=list(
+                                "showSpecificAgreementGuide")))}))$new(options=options))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="levelInfoTable",
@@ -4079,248 +4064,262 @@ agreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 visible="(showSubgroupGuide)",
                 clearWith=list(
                     "showSubgroupGuide")))
-            self$add(jmvcore::Preformatted$new(
-                options=options,
-                name="raterClusterHeading",
-                title="Rater & Case Clustering",
-                visible="(raterClustering || caseClustering)",
-                clearWith=list(
-                    "raterClustering",
-                    "caseClustering")))
-            self$add(jmvcore::Table$new(
-                options=options,
-                name="raterClusterTable",
-                title="Rater Cluster Assignments",
-                visible="(raterClustering)",
-                rows=0,
-                columns=list(
-                    list(
-                        `name`="rater", 
-                        `title`="Rater", 
-                        `type`="text"),
-                    list(
-                        `name`="cluster", 
-                        `title`="Cluster", 
-                        `type`="integer"),
-                    list(
-                        `name`="cluster_size", 
-                        `title`="Cluster Size", 
-                        `type`="integer"),
-                    list(
-                        `name`="avg_similarity", 
-                        `title`="Avg Within-Cluster Similarity", 
-                        `type`="number")),
-                clearWith=list(
-                    "vars",
-                    "clusterMethod",
-                    "clusterDistance",
-                    "clusterLinkage",
-                    "nClusters",
-                    "seed")))
-            self$add(jmvcore::Image$new(
-                options=options,
-                name="raterDendrogram",
-                title="Rater Clustering Dendrogram",
-                width=700,
-                height=500,
-                renderFun=".raterDendrogram",
-                visible="(raterClustering && clusterMethod:hierarchical && showDendrogram)",
-                clearWith=list(
-                    "vars",
-                    "clusterDistance",
-                    "clusterLinkage",
-                    "nClusters",
-                    "clusterMethod")))
-            self$add(jmvcore::Image$new(
-                options=options,
-                name="raterClusterHeatmap",
-                title="Rater Similarity Heatmap with Clusters",
-                width=600,
-                height=550,
-                renderFun=".raterClusterHeatmap",
-                visible="(raterClustering && showClusterHeatmap)",
-                clearWith=list(
-                    "vars",
-                    "clusterMethod",
-                    "clusterDistance",
-                    "clusterLinkage",
-                    "nClusters",
-                    "seed")))
-            self$add(jmvcore::Html$new(
-                options=options,
-                name="raterClusterExplanation",
-                title="About Rater Clustering",
-                visible="(showRaterClusterGuide)",
-                clearWith=list(
-                    "showRaterClusterGuide")))
-            self$add(jmvcore::Table$new(
-                options=options,
-                name="caseClusterTable",
-                title="Case Cluster Assignments",
-                visible="(caseClustering)",
-                rows=0,
-                columns=list(
-                    list(
-                        `name`="case_id", 
-                        `title`="Case ID", 
-                        `type`="text"),
-                    list(
-                        `name`="cluster", 
-                        `title`="Cluster", 
-                        `type`="integer"),
-                    list(
-                        `name`="avg_similarity", 
-                        `title`="Avg Within-Cluster Similarity", 
-                        `type`="number")),
-                clearWith=list(
-                    "vars",
-                    "caseClusterMethod",
-                    "caseClusterDistance",
-                    "caseClusterLinkage",
-                    "nCaseClusters",
-                    "seed")))
-            self$add(jmvcore::Image$new(
-                options=options,
-                name="caseDendrogram",
-                title="Case Clustering Dendrogram",
-                width=700,
-                height=500,
-                renderFun=".caseDendrogram",
-                visible="(caseClustering && caseClusterMethod:hierarchical && showCaseDendrogram)",
-                clearWith=list(
-                    "vars",
-                    "caseClusterDistance",
-                    "caseClusterLinkage",
-                    "nCaseClusters",
-                    "caseClusterMethod")))
-            self$add(jmvcore::Image$new(
-                options=options,
-                name="caseClusterHeatmap",
-                title="Case Similarity Heatmap with Clusters",
-                width=700,
-                height=600,
-                renderFun=".caseClusterHeatmap",
-                visible="(caseClustering && showCaseClusterHeatmap)",
-                clearWith=list(
-                    "vars",
-                    "caseClusterMethod",
-                    "caseClusterDistance",
-                    "caseClusterLinkage",
-                    "nCaseClusters",
-                    "seed")))
-            self$add(jmvcore::Html$new(
-                options=options,
-                name="caseClusterExplanation",
-                title="About Case Clustering",
-                visible="(showCaseClusterGuide)",
-                clearWith=list(
-                    "showCaseClusterGuide")))
-            self$add(jmvcore::Preformatted$new(
-                options=options,
-                name="pairedAgreementHeading",
-                title="Paired Agreement & Sample Size",
-                visible="(pairedAgreementTest || showPairedAgreementGuide || agreementSampleSize || showSampleSizeGuide)",
-                clearWith=list(
-                    "pairedAgreementTest",
-                    "showPairedAgreementGuide",
-                    "agreementSampleSize",
-                    "showSampleSizeGuide")))
-            self$add(jmvcore::Table$new(
-                options=options,
-                name="pairedAgreementTable",
-                title="Paired Agreement Comparison",
-                visible="(pairedAgreementTest)",
-                clearWith=list(
-                    "vars",
-                    "conditionBVars",
-                    "pairedBootN",
-                    "confLevel",
-                    "seed",
-                    "wght",
-                    "exct",
-                    "iccType"),
-                columns=list(
-                    list(
-                        `name`="metric", 
-                        `title`="Metric", 
-                        `type`="text"),
-                    list(
-                        `name`="condition_a", 
-                        `title`="Condition A", 
-                        `type`="number", 
-                        `format`="zto"),
-                    list(
-                        `name`="condition_b", 
-                        `title`="Condition B", 
-                        `type`="number", 
-                        `format`="zto"),
-                    list(
-                        `name`="difference", 
-                        `title`="Difference (B - A)", 
-                        `type`="number", 
-                        `format`="zto"),
-                    list(
-                        `name`="ci_lower", 
-                        `title`="95% CI Lower", 
-                        `type`="number", 
-                        `format`="zto"),
-                    list(
-                        `name`="ci_upper", 
-                        `title`="95% CI Upper", 
-                        `type`="number", 
-                        `format`="zto"),
-                    list(
-                        `name`="p_value", 
-                        `title`="p", 
-                        `type`="number", 
-                        `format`="zto,pvalue"),
-                    list(
-                        `name`="interpretation", 
-                        `title`="Interpretation", 
-                        `type`="text")),
-                refs=list(
-                    "Cohen1960",
-                    "agresti2013")))
-            self$add(jmvcore::Html$new(
-                options=options,
-                name="pairedAgreementExplanation",
-                title="About Paired Agreement Comparison",
-                visible="(showPairedAgreementGuide)",
-                clearWith=list(
-                    "showPairedAgreementGuide")))
-            self$add(jmvcore::Table$new(
-                options=options,
-                name="agreementSampleSizeTable",
-                title="Sample Size for Agreement Study",
-                visible="(agreementSampleSize)",
-                clearWith=list(
-                    "ssMetric",
-                    "ssKappaNull",
-                    "ssKappaAlt",
-                    "ssNRaters",
-                    "ssNCategories",
-                    "ssAlpha",
-                    "ssPower"),
-                columns=list(
-                    list(
-                        `name`="parameter", 
-                        `title`="Parameter", 
-                        `type`="text"),
-                    list(
-                        `name`="value", 
-                        `title`="Value", 
-                        `type`="text")),
-                refs=list(
-                    "Walter1998",
-                    "donnerEliasziwKappaGOF",
-                    "rotondiDonnerKappaCI")))
-            self$add(jmvcore::Html$new(
-                options=options,
-                name="agreementSampleSizeExplanation",
-                title="About Agreement Sample Size",
-                visible="(showSampleSizeGuide)",
-                clearWith=list(
-                    "showSampleSizeGuide")))}))
+            self$add(R6::R6Class(
+                inherit = jmvcore::Group,
+                active = list(
+                    raterClusterTable = function() private$.items[["raterClusterTable"]],
+                    raterDendrogram = function() private$.items[["raterDendrogram"]],
+                    raterClusterHeatmap = function() private$.items[["raterClusterHeatmap"]],
+                    raterClusterExplanation = function() private$.items[["raterClusterExplanation"]],
+                    caseClusterTable = function() private$.items[["caseClusterTable"]],
+                    caseDendrogram = function() private$.items[["caseDendrogram"]],
+                    caseClusterHeatmap = function() private$.items[["caseClusterHeatmap"]],
+                    caseClusterExplanation = function() private$.items[["caseClusterExplanation"]]),
+                private = list(),
+                public=list(
+                    initialize=function(options) {
+                        super$initialize(
+                            options=options,
+                            name="raterClusterGroup",
+                            title="Rater & Case Clustering")
+                        self$add(jmvcore::Table$new(
+                            options=options,
+                            name="raterClusterTable",
+                            title="Rater Cluster Assignments",
+                            visible="(raterClustering)",
+                            rows=0,
+                            columns=list(
+                                list(
+                                    `name`="rater", 
+                                    `title`="Rater", 
+                                    `type`="text"),
+                                list(
+                                    `name`="cluster", 
+                                    `title`="Cluster", 
+                                    `type`="integer"),
+                                list(
+                                    `name`="cluster_size", 
+                                    `title`="Cluster Size", 
+                                    `type`="integer"),
+                                list(
+                                    `name`="avg_similarity", 
+                                    `title`="Avg Within-Cluster Similarity", 
+                                    `type`="number")),
+                            clearWith=list(
+                                "vars",
+                                "clusterMethod",
+                                "clusterDistance",
+                                "clusterLinkage",
+                                "nClusters",
+                                "seed")))
+                        self$add(jmvcore::Image$new(
+                            options=options,
+                            name="raterDendrogram",
+                            title="Rater Clustering Dendrogram",
+                            width=700,
+                            height=500,
+                            renderFun=".raterDendrogram",
+                            visible="(raterClustering && clusterMethod:hierarchical && showDendrogram)",
+                            clearWith=list(
+                                "vars",
+                                "clusterDistance",
+                                "clusterLinkage",
+                                "nClusters",
+                                "clusterMethod")))
+                        self$add(jmvcore::Image$new(
+                            options=options,
+                            name="raterClusterHeatmap",
+                            title="Rater Similarity Heatmap with Clusters",
+                            width=600,
+                            height=550,
+                            renderFun=".raterClusterHeatmap",
+                            visible="(raterClustering && showClusterHeatmap)",
+                            clearWith=list(
+                                "vars",
+                                "clusterMethod",
+                                "clusterDistance",
+                                "clusterLinkage",
+                                "nClusters",
+                                "seed")))
+                        self$add(jmvcore::Html$new(
+                            options=options,
+                            name="raterClusterExplanation",
+                            title="About Rater Clustering",
+                            visible="(showRaterClusterGuide)",
+                            clearWith=list(
+                                "showRaterClusterGuide")))
+                        self$add(jmvcore::Table$new(
+                            options=options,
+                            name="caseClusterTable",
+                            title="Case Cluster Assignments",
+                            visible="(caseClustering)",
+                            rows=0,
+                            columns=list(
+                                list(
+                                    `name`="case_id", 
+                                    `title`="Case ID", 
+                                    `type`="text"),
+                                list(
+                                    `name`="cluster", 
+                                    `title`="Cluster", 
+                                    `type`="integer"),
+                                list(
+                                    `name`="avg_similarity", 
+                                    `title`="Avg Within-Cluster Similarity", 
+                                    `type`="number")),
+                            clearWith=list(
+                                "vars",
+                                "caseClusterMethod",
+                                "caseClusterDistance",
+                                "caseClusterLinkage",
+                                "nCaseClusters",
+                                "seed")))
+                        self$add(jmvcore::Image$new(
+                            options=options,
+                            name="caseDendrogram",
+                            title="Case Clustering Dendrogram",
+                            width=700,
+                            height=500,
+                            renderFun=".caseDendrogram",
+                            visible="(caseClustering && caseClusterMethod:hierarchical && showCaseDendrogram)",
+                            clearWith=list(
+                                "vars",
+                                "caseClusterDistance",
+                                "caseClusterLinkage",
+                                "nCaseClusters",
+                                "caseClusterMethod")))
+                        self$add(jmvcore::Image$new(
+                            options=options,
+                            name="caseClusterHeatmap",
+                            title="Case Similarity Heatmap with Clusters",
+                            width=700,
+                            height=600,
+                            renderFun=".caseClusterHeatmap",
+                            visible="(caseClustering && showCaseClusterHeatmap)",
+                            clearWith=list(
+                                "vars",
+                                "caseClusterMethod",
+                                "caseClusterDistance",
+                                "caseClusterLinkage",
+                                "nCaseClusters",
+                                "seed")))
+                        self$add(jmvcore::Html$new(
+                            options=options,
+                            name="caseClusterExplanation",
+                            title="About Case Clustering",
+                            visible="(showCaseClusterGuide)",
+                            clearWith=list(
+                                "showCaseClusterGuide")))}))$new(options=options))
+            self$add(R6::R6Class(
+                inherit = jmvcore::Group,
+                active = list(
+                    pairedAgreementTable = function() private$.items[["pairedAgreementTable"]],
+                    pairedAgreementExplanation = function() private$.items[["pairedAgreementExplanation"]],
+                    agreementSampleSizeTable = function() private$.items[["agreementSampleSizeTable"]],
+                    agreementSampleSizeExplanation = function() private$.items[["agreementSampleSizeExplanation"]]),
+                private = list(),
+                public=list(
+                    initialize=function(options) {
+                        super$initialize(
+                            options=options,
+                            name="pairedAgreementGroup",
+                            title="Paired Agreement & Sample Size")
+                        self$add(jmvcore::Table$new(
+                            options=options,
+                            name="pairedAgreementTable",
+                            title="Paired Agreement Comparison",
+                            visible="(pairedAgreementTest)",
+                            clearWith=list(
+                                "vars",
+                                "conditionBVars",
+                                "pairedBootN",
+                                "confLevel",
+                                "seed",
+                                "wght",
+                                "exct",
+                                "iccType"),
+                            columns=list(
+                                list(
+                                    `name`="metric", 
+                                    `title`="Metric", 
+                                    `type`="text"),
+                                list(
+                                    `name`="condition_a", 
+                                    `title`="Condition A", 
+                                    `type`="number", 
+                                    `format`="zto"),
+                                list(
+                                    `name`="condition_b", 
+                                    `title`="Condition B", 
+                                    `type`="number", 
+                                    `format`="zto"),
+                                list(
+                                    `name`="difference", 
+                                    `title`="Difference (B - A)", 
+                                    `type`="number", 
+                                    `format`="zto"),
+                                list(
+                                    `name`="ci_lower", 
+                                    `title`="95% CI Lower", 
+                                    `type`="number", 
+                                    `format`="zto"),
+                                list(
+                                    `name`="ci_upper", 
+                                    `title`="95% CI Upper", 
+                                    `type`="number", 
+                                    `format`="zto"),
+                                list(
+                                    `name`="p_value", 
+                                    `title`="p", 
+                                    `type`="number", 
+                                    `format`="zto,pvalue"),
+                                list(
+                                    `name`="interpretation", 
+                                    `title`="Interpretation", 
+                                    `type`="text")),
+                            refs=list(
+                                "Cohen1960",
+                                "agresti2013")))
+                        self$add(jmvcore::Html$new(
+                            options=options,
+                            name="pairedAgreementExplanation",
+                            title="About Paired Agreement Comparison",
+                            visible="(showPairedAgreementGuide)",
+                            clearWith=list(
+                                "showPairedAgreementGuide")))
+                        self$add(jmvcore::Table$new(
+                            options=options,
+                            name="agreementSampleSizeTable",
+                            title="Sample Size for Agreement Study",
+                            visible="(agreementSampleSize)",
+                            clearWith=list(
+                                "ssMetric",
+                                "ssKappaNull",
+                                "ssKappaAlt",
+                                "ssNRaters",
+                                "ssNCategories",
+                                "ssAlpha",
+                                "ssPower"),
+                            columns=list(
+                                list(
+                                    `name`="parameter", 
+                                    `title`="Parameter", 
+                                    `type`="text"),
+                                list(
+                                    `name`="value", 
+                                    `title`="Value", 
+                                    `type`="text")),
+                            refs=list(
+                                "Walter1998",
+                                "donnerEliasziwKappaGOF",
+                                "rotondiDonnerKappaCI")))
+                        self$add(jmvcore::Html$new(
+                            options=options,
+                            name="agreementSampleSizeExplanation",
+                            title="About Agreement Sample Size",
+                            visible="(showSampleSizeGuide)",
+                            clearWith=list(
+                                "showSampleSizeGuide")))}))$new(options=options))}))
 
 agreementBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "agreementBase",
@@ -4813,10 +4812,9 @@ agreementBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   annotate the same cases and no single ground truth exists (e.g., Ottl et
 #'   al. 2025 HER2 scoring). Reports concordance accuracy, per-class concordance
 #'   F1, and comparison to strict consensus-based evaluation.
-#' @param predictionColumn Which rater column contains the predictions to
-#'   evaluate. Default is column 1 (first rater). Remaining columns are treated
-#'   as reference annotators. For AI validation, set this to the column
-#'   containing AI predictions.
+#' @param predictionRater The rater column whose ratings are the predictions
+#'   to evaluate, for example the AI model's calls. It must also be one of the
+#'   raters; the other raters are the reference annotators.
 #' @param showConcordanceF1Guide Show educational guide for concordance
 #'   metrics in AI validation with multiple reference annotators.
 #' @param specificAgreement Calculate category-specific agreement indices for
@@ -5073,98 +5071,85 @@ agreementBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$welcome} \tab \tab \tab \tab \tab a html \cr
-#'   \code{results$irrtableHeading} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$irrtable} \tab \tab \tab \tab \tab a table \cr
-#'   \code{results$contingencyTableHeading} \tab \tab \tab \tab \tab a preformatted \cr
-#'   \code{results$contingencyTable} \tab \tab \tab \tab \tab a table \cr
-#'   \code{results$ratingCombinationsTable} \tab \tab \tab \tab \tab a table \cr
-#'   \code{results$contingencyTableExplanation} \tab \tab \tab \tab \tab a html \cr
-#'   \code{results$gradingHeading} \tab \tab \tab \tab \tab a preformatted \cr
-#'   \code{results$designSummaryTable} \tab \tab \tab \tab \tab a table \cr
-#'   \code{results$categoryDistributionTable} \tab \tab \tab \tab \tab a table \cr
-#'   \code{results$pathologistTable} \tab \tab \tab \tab \tab a table \cr
-#'   \code{results$boundaryTable} \tab \tab \tab \tab \tab a table \cr
-#'   \code{results$severityPlot} \tab \tab \tab \tab \tab an image \cr
-#'   \code{results$latentModelTable} \tab \tab \tab \tab \tab a table \cr
-#'   \code{results$gradingGuide} \tab \tab \tab \tab \tab a html \cr
-#'   \code{results$blandAltmanHeading} \tab \tab \tab \tab \tab a preformatted \cr
-#'   \code{results$blandAltman} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$contingencyTableGroup$contingencyTable} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$contingencyTableGroup$ratingCombinationsTable} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$contingencyTableGroup$contingencyTableExplanation} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$gradingGroup$designSummaryTable} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$gradingGroup$categoryDistributionTable} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$gradingGroup$pathologistTable} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$gradingGroup$boundaryTable} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$gradingGroup$severityPlot} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$gradingGroup$latentModelTable} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$gradingGroup$gradingGuide} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$blandAltmanGroup$blandAltman} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$blandAltmanGroup$blandAltmanExplanation} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$blandAltmanGroup$blandAltmanStats} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$agreementHeatmapPlot} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$agreementHeatmapExplanation} \tab \tab \tab \tab \tab a html \cr
-#'   \code{results$blandAltmanExplanation} \tab \tab \tab \tab \tab a html \cr
-#'   \code{results$blandAltmanStats} \tab \tab \tab \tab \tab a table \cr
-#'   \code{results$krippTableHeading} \tab \tab \tab \tab \tab a preformatted \cr
-#'   \code{results$krippTable} \tab \tab \tab \tab \tab a table \cr
-#'   \code{results$krippExplanation} \tab \tab \tab \tab \tab a html \cr
-#'   \code{results$lightKappaTableHeading} \tab \tab \tab \tab \tab a preformatted \cr
-#'   \code{results$lightKappaTable} \tab \tab \tab \tab \tab a table \cr
-#'   \code{results$lightKappaExplanation} \tab \tab \tab \tab \tab a html \cr
-#'   \code{results$finnTable} \tab \tab \tab \tab \tab a table \cr
-#'   \code{results$finnExplanation} \tab \tab \tab \tab \tab a html \cr
-#'   \code{results$kendallWTable} \tab \tab \tab \tab \tab a table \cr
-#'   \code{results$kendallWExplanation} \tab \tab \tab \tab \tab a html \cr
-#'   \code{results$robinsonATable} \tab \tab \tab \tab \tab a table \cr
-#'   \code{results$robinsonAExplanation} \tab \tab \tab \tab \tab a html \cr
-#'   \code{results$meanSpearmanTable} \tab \tab \tab \tab \tab a table \cr
-#'   \code{results$meanSpearmanExplanation} \tab \tab \tab \tab \tab a html \cr
-#'   \code{results$raterBiasHeading} \tab \tab \tab \tab \tab a preformatted \cr
-#'   \code{results$raterBiasTable} \tab \tab \tab \tab \tab a table \cr
-#'   \code{results$raterBiasExplanation} \tab \tab \tab \tab \tab a html \cr
-#'   \code{results$bhapkarTable} \tab \tab \tab \tab \tab a table \cr
-#'   \code{results$bhapkarExplanation} \tab \tab \tab \tab \tab a html \cr
-#'   \code{results$stuartMaxwellTable} \tab \tab \tab \tab \tab a table \cr
-#'   \code{results$stuartMaxwellExplanation} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$krippTableGroup$krippTable} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$krippTableGroup$krippExplanation} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$lightKappaTableGroup$lightKappaTable} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$lightKappaTableGroup$lightKappaExplanation} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$lightKappaTableGroup$finnTable} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$lightKappaTableGroup$finnExplanation} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$lightKappaTableGroup$kendallWTable} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$lightKappaTableGroup$kendallWExplanation} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$lightKappaTableGroup$robinsonATable} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$lightKappaTableGroup$robinsonAExplanation} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$lightKappaTableGroup$meanSpearmanTable} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$lightKappaTableGroup$meanSpearmanExplanation} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$raterBiasGroup$raterBiasTable} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$raterBiasGroup$raterBiasExplanation} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$raterBiasGroup$bhapkarTable} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$raterBiasGroup$bhapkarExplanation} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$raterBiasGroup$stuartMaxwellTable} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$raterBiasGroup$stuartMaxwellExplanation} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$pairwiseKappaTable} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$pairwiseKappaExplanation} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$allPairsKappaTable} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$allPairsKappaExplanation} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$itemModalAgreementTable} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$itemModalAgreementExplanation} \tab \tab \tab \tab \tab a html \cr
-#'   \code{results$hierarchicalHeading} \tab \tab \tab \tab \tab a preformatted \cr
-#'   \code{results$hierarchicalOverallTable} \tab \tab \tab \tab \tab a table \cr
-#'   \code{results$clusterSpecificTable} \tab \tab \tab \tab \tab a table \cr
-#'   \code{results$varianceDecompositionTable} \tab \tab \tab \tab \tab a table \cr
-#'   \code{results$hierarchicalICCTable} \tab \tab \tab \tab \tab a table \cr
-#'   \code{results$homogeneityTestTable} \tab \tab \tab \tab \tab a table \cr
-#'   \code{results$hierarchicalExplanation} \tab \tab \tab \tab \tab a html \cr
-#'   \code{results$advancedHeading} \tab \tab \tab \tab \tab a preformatted \cr
-#'   \code{results$mixedEffectsTable} \tab \tab \tab \tab \tab a table \cr
-#'   \code{results$mixedEffectsVarianceTable} \tab \tab \tab \tab \tab a table \cr
-#'   \code{results$mixedEffectsExplanation} \tab \tab \tab \tab \tab a html \cr
-#'   \code{results$confusionMatrixTable} \tab \tab \tab \tab \tab a table \cr
-#'   \code{results$perClassMetricsTable} \tab \tab \tab \tab \tab a table \cr
-#'   \code{results$confusionMatrixExplanation} \tab \tab \tab \tab \tab a html \cr
-#'   \code{results$bootstrapCITable} \tab \tab \tab \tab \tab a table \cr
-#'   \code{results$bootstrapCIExplanation} \tab \tab \tab \tab \tab a html \cr
-#'   \code{results$concordanceF1Table} \tab \tab \tab \tab \tab a table \cr
-#'   \code{results$concordanceF1PerClassTable} \tab \tab \tab \tab \tab a table \cr
-#'   \code{results$concordanceF1Explanation} \tab \tab \tab \tab \tab a html \cr
-#'   \code{results$gwetHeading} \tab \tab \tab \tab \tab a preformatted \cr
-#'   \code{results$gwetTable} \tab \tab \tab \tab \tab a table \cr
-#'   \code{results$gwetExplanation} \tab \tab \tab \tab \tab a html \cr
-#'   \code{results$pabakTable} \tab \tab \tab \tab \tab a table \cr
-#'   \code{results$pabakExplanation} \tab \tab \tab \tab \tab a html \cr
-#'   \code{results$iccHeading} \tab \tab \tab \tab \tab a preformatted \cr
-#'   \code{results$iccTable} \tab \tab \tab \tab \tab a table \cr
-#'   \code{results$iccExplanation} \tab \tab \tab \tab \tab a html \cr
-#'   \code{results$meanPearsonTable} \tab \tab \tab \tab \tab a table \cr
-#'   \code{results$meanPearsonExplanation} \tab \tab \tab \tab \tab a html \cr
-#'   \code{results$linCCCTable} \tab \tab \tab \tab \tab a table \cr
-#'   \code{results$linCCCExplanation} \tab \tab \tab \tab \tab a html \cr
-#'   \code{results$tdiTable} \tab \tab \tab \tab \tab a table \cr
-#'   \code{results$tdiExplanation} \tab \tab \tab \tab \tab a html \cr
-#'   \code{results$maxwellREHeading} \tab \tab \tab \tab \tab a preformatted \cr
-#'   \code{results$maxwellRETable} \tab \tab \tab \tab \tab a table \cr
-#'   \code{results$maxwellREExplanation} \tab \tab \tab \tab \tab a html \cr
-#'   \code{results$interIntraRaterIntraTable} \tab \tab \tab \tab \tab a table \cr
-#'   \code{results$interIntraRaterInterTable} \tab \tab \tab \tab \tab a table \cr
-#'   \code{results$interIntraRaterExplanation} \tab \tab \tab \tab \tab a html \cr
-#'   \code{results$iotaTable} \tab \tab \tab \tab \tab a table \cr
-#'   \code{results$iotaExplanation} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$hierarchicalGroup$hierarchicalOverallTable} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$hierarchicalGroup$clusterSpecificTable} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$hierarchicalGroup$varianceDecompositionTable} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$hierarchicalGroup$hierarchicalICCTable} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$hierarchicalGroup$homogeneityTestTable} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$hierarchicalGroup$hierarchicalExplanation} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$advancedGroup$mixedEffectsTable} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$advancedGroup$mixedEffectsVarianceTable} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$advancedGroup$mixedEffectsExplanation} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$advancedGroup$confusionMatrixTable} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$advancedGroup$perClassMetricsTable} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$advancedGroup$confusionMatrixExplanation} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$advancedGroup$bootstrapCITable} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$advancedGroup$bootstrapCIExplanation} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$advancedGroup$concordanceF1Table} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$advancedGroup$concordanceF1PerClassTable} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$advancedGroup$concordanceF1Explanation} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$gwetGroup$gwetTable} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$gwetGroup$gwetExplanation} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$gwetGroup$pabakTable} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$gwetGroup$pabakExplanation} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$iccGroup$iccTable} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$iccGroup$iccExplanation} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$iccGroup$meanPearsonTable} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$iccGroup$meanPearsonExplanation} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$iccGroup$linCCCTable} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$iccGroup$linCCCExplanation} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$iccGroup$tdiTable} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$iccGroup$tdiExplanation} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$maxwellREGroup$maxwellRETable} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$maxwellREGroup$maxwellREExplanation} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$maxwellREGroup$interIntraRaterIntraTable} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$maxwellREGroup$interIntraRaterInterTable} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$maxwellREGroup$interIntraRaterExplanation} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$maxwellREGroup$iotaTable} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$maxwellREGroup$iotaExplanation} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$weightedKappaGuide} \tab \tab \tab \tab \tab a html \cr
-#'   \code{results$specificAgreementHeading} \tab \tab \tab \tab \tab a preformatted \cr
-#'   \code{results$specificAgreementTable} \tab \tab \tab \tab \tab a table \cr
-#'   \code{results$specificAgreementExplanation} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$specificAgreementGroup$specificAgreementTable} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$specificAgreementGroup$specificAgreementExplanation} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$levelInfoTable} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$summary} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$about} \tab \tab \tab \tab \tab a html \cr
@@ -5180,20 +5165,18 @@ agreementBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   \code{results$subgroupAgreementTable} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$subgroupForestPlotImage} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$subgroupExplanation} \tab \tab \tab \tab \tab a html \cr
-#'   \code{results$raterClusterHeading} \tab \tab \tab \tab \tab a preformatted \cr
-#'   \code{results$raterClusterTable} \tab \tab \tab \tab \tab a table \cr
-#'   \code{results$raterDendrogram} \tab \tab \tab \tab \tab an image \cr
-#'   \code{results$raterClusterHeatmap} \tab \tab \tab \tab \tab an image \cr
-#'   \code{results$raterClusterExplanation} \tab \tab \tab \tab \tab a html \cr
-#'   \code{results$caseClusterTable} \tab \tab \tab \tab \tab a table \cr
-#'   \code{results$caseDendrogram} \tab \tab \tab \tab \tab an image \cr
-#'   \code{results$caseClusterHeatmap} \tab \tab \tab \tab \tab an image \cr
-#'   \code{results$caseClusterExplanation} \tab \tab \tab \tab \tab a html \cr
-#'   \code{results$pairedAgreementHeading} \tab \tab \tab \tab \tab a preformatted \cr
-#'   \code{results$pairedAgreementTable} \tab \tab \tab \tab \tab a table \cr
-#'   \code{results$pairedAgreementExplanation} \tab \tab \tab \tab \tab a html \cr
-#'   \code{results$agreementSampleSizeTable} \tab \tab \tab \tab \tab a table \cr
-#'   \code{results$agreementSampleSizeExplanation} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$raterClusterGroup$raterClusterTable} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$raterClusterGroup$raterDendrogram} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$raterClusterGroup$raterClusterHeatmap} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$raterClusterGroup$raterClusterExplanation} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$raterClusterGroup$caseClusterTable} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$raterClusterGroup$caseDendrogram} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$raterClusterGroup$caseClusterHeatmap} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$raterClusterGroup$caseClusterExplanation} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$pairedAgreementGroup$pairedAgreementTable} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$pairedAgreementGroup$pairedAgreementExplanation} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$pairedAgreementGroup$agreementSampleSizeTable} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$pairedAgreementGroup$agreementSampleSizeExplanation} \tab \tab \tab \tab \tab a html \cr
 #' }
 #'
 #' Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
@@ -5302,7 +5285,7 @@ agreement <- function(
     nBoot = 1000,
     showBootstrapCIGuide = FALSE,
     multiAnnotatorConcordance = FALSE,
-    predictionColumn = 1,
+    predictionRater = NULL,
     showConcordanceF1Guide = FALSE,
     specificAgreement = FALSE,
     specificPositiveCategory = "",
@@ -5372,6 +5355,7 @@ agreement <- function(
     if ( ! missing(clusterVariable)) clusterVariable <- jmvcore::resolveQuo(jmvcore::enquo(clusterVariable))
     if ( ! missing(conditionVariable)) conditionVariable <- jmvcore::resolveQuo(jmvcore::enquo(conditionVariable))
     if ( ! missing(caseIdVariable)) caseIdVariable <- jmvcore::resolveQuo(jmvcore::enquo(caseIdVariable))
+    if ( ! missing(predictionRater)) predictionRater <- jmvcore::resolveQuo(jmvcore::enquo(predictionRater))
     if ( ! missing(subgroupVariable)) subgroupVariable <- jmvcore::resolveQuo(jmvcore::enquo(subgroupVariable))
     if ( ! missing(conditionBVars)) conditionBVars <- jmvcore::resolveQuo(jmvcore::enquo(conditionBVars))
     if ( ! missing(specificCluster)) specificCluster <- jmvcore::resolveQuo(jmvcore::enquo(specificCluster))
@@ -5383,6 +5367,7 @@ agreement <- function(
             `if`( ! missing(clusterVariable), clusterVariable, NULL),
             `if`( ! missing(conditionVariable), conditionVariable, NULL),
             `if`( ! missing(caseIdVariable), caseIdVariable, NULL),
+            `if`( ! missing(predictionRater), predictionRater, NULL),
             `if`( ! missing(subgroupVariable), subgroupVariable, NULL),
             `if`( ! missing(conditionBVars), conditionBVars, NULL),
             `if`( ! missing(specificCluster), specificCluster, NULL))
@@ -5489,7 +5474,7 @@ agreement <- function(
         nBoot = nBoot,
         showBootstrapCIGuide = showBootstrapCIGuide,
         multiAnnotatorConcordance = multiAnnotatorConcordance,
-        predictionColumn = predictionColumn,
+        predictionRater = predictionRater,
         showConcordanceF1Guide = showConcordanceF1Guide,
         specificAgreement = specificAgreement,
         specificPositiveCategory = specificPositiveCategory,

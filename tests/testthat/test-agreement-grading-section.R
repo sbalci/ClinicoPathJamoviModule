@@ -31,34 +31,34 @@ test_that("ordinal 150 x 6 x 5: every grading table fills", {
     d <- grading_sim()
     r <- grading_run(d, names(d))
 
-    des <- by_key(r$designSummaryTable$asDF)
+    des <- by_key(r$gradingGroup$designSummaryTable$asDF)
     expect_equal(des["cases", "value"], "150")
     expect_equal(des["connected", "value"], "Yes")
     expect_equal(des["model_scope", "value"], "Every model-based estimate, with confidence intervals.")
 
-    dist <- r$categoryDistributionTable$asDF
+    dist <- r$gradingGroup$categoryDistributionTable$asDF
     expect_equal(nrow(dist), 7L)                       # 6 pathologists + all
     expect_equal(dist$n[7], 900L)
     expect_equal(sum(unlist(dist[7, paste0("cat", 1:5, "_n")])), 900)
 
-    pt <- r$pathologistTable$asDF
+    pt <- r$gradingGroup$pathologistTable$asDF
     expect_equal(pt$pathologist, names(d))             # vars order, not ranked
     expect_equal(sum(pt$shift), 0, tolerance = 1e-8)   # centred on the panel average
     expect_gt(pt$shift[1], 0)                          # P1 simulated +0.6: grades higher
     expect_equal(pt$tendency[1], "Grades higher than the panel average")
     expect_true(all(is.finite(pt$p_holm)))
 
-    expect_equal(nrow(r$boundaryTable$asDF), 6L * 4L)  # 4 boundaries per pathologist
+    expect_equal(nrow(r$gradingGroup$boundaryTable$asDF), 6L * 4L)  # 4 boundaries per pathologist
 
-    lat <- by_key(r$latentModelTable$asDF)
+    lat <- by_key(r$gradingGroup$latentModelTable$asDF)
     expect_true(all(is.finite(lat[c("rho", "kappa_m"), "ci_lower"])))
     expect_lt(lat["kappa_m", "estimate"], lat["rho", "estimate"])
     expect_equal(lat["kappa_m", "estimate"],
                  agreement_kappa_m(lat["rho", "estimate"], 5L), tolerance = 1e-8)
-    expect_false(is.null(r$severityPlot$state))
+    expect_false(is.null(r$gradingGroup$severityPlot$state))
     # The conservative label quotes the simulated region; the 95%-only and no-institution
     # caveats appear only when they apply (95% here, no cluster variable).
-    ln <- agreement_notes(r$latentModelTable)
+    ln <- agreement_notes(r$gradingGroup$latentModelTable)
     expect_true(grepl("at least 100 cases and 3 pathologists", ln[["ci_conservative"]], fixed = TRUE))
     expect_false(any(c("ci_level", "ci_cluster") %in% names(ln)))
     expect_false(grepl("seconds", ln[["model"]], fixed = TRUE))   # no run-dependent timing
@@ -69,30 +69,30 @@ test_that("nominal ratings: model parts refused with a note, model-free tables f
     data("agreement_hierarchical", package = "ClinicoPath", envir = environment())
     v <- grep("Rater", names(agreement_hierarchical), value = TRUE)
     r <- grading_run(agreement_hierarchical, v)
-    expect_equal(nrow(r$boundaryTable$asDF), 6L * 4L)
-    expect_true(all(is.finite(r$pathologistTable$asDF$pct_exact)))
-    expect_true(all(is.na(r$pathologistTable$asDF$shift)))
-    expect_true(all(is.na(r$latentModelTable$asDF$estimate)))
-    expect_match(r$latentModelTable$notes$refuse_model$note, "nominal")
-    expect_match(r$pathologistTable$notes$refuse_severity$note, "nominal")
-    expect_null(r$severityPlot$state)
+    expect_equal(nrow(r$gradingGroup$boundaryTable$asDF), 6L * 4L)
+    expect_true(all(is.finite(r$gradingGroup$pathologistTable$asDF$pct_exact)))
+    expect_true(all(is.na(r$gradingGroup$pathologistTable$asDF$shift)))
+    expect_true(all(is.na(r$gradingGroup$latentModelTable$asDF$estimate)))
+    expect_match(r$gradingGroup$latentModelTable$notes$refuse_model$note, "nominal")
+    expect_match(r$gradingGroup$pathologistTable$notes$refuse_severity$note, "nominal")
+    expect_null(r$gradingGroup$severityPlot$state)
 })
 
 test_that("2 raters and binary with 4 raters: latent model refused with the design reason", {
     skip_on_cran()
     d <- grading_sim()
     r2 <- grading_run(d, c("P1", "P2"))
-    expect_true(all(is.na(r2$latentModelTable$asDF$estimate)))
-    expect_match(r2$latentModelTable$notes$refuse_model$note, "this study has 2")
+    expect_true(all(is.na(r2$gradingGroup$latentModelTable$asDF$estimate)))
+    expect_match(r2$gradingGroup$latentModelTable$notes$refuse_model$note, "this study has 2")
 
     set.seed(7)
     u <- stats::rnorm(100, 0, 1.2)
     b <- as.data.frame(lapply(1:4, function(j) factor(ifelse(u + stats::rnorm(100) > 0.3, "pos", "neg"))))
     names(b) <- paste0("R", 1:4)
     r4 <- grading_run(b, names(b))
-    expect_true(all(is.na(r4$latentModelTable$asDF$estimate)))
-    expect_match(r4$latentModelTable$notes$refuse_model$note, "two categories")
-    expect_match(r4$pathologistTable$notes$refuse_severity$note, "unordered")
+    expect_true(all(is.na(r4$gradingGroup$latentModelTable$asDF$estimate)))
+    expect_match(r4$gradingGroup$latentModelTable$notes$refuse_model$note, "two categories")
+    expect_match(r4$gradingGroup$pathologistTable$notes$refuse_severity$note, "unordered")
 })
 
 # --- Review fixes, 2026-09-24 (second adversarial pass) ------------------------
@@ -100,7 +100,7 @@ test_that("2 raters and binary with 4 raters: latent model refused with the desi
 test_that("grading guide quotes the gate constants, not stale figures", {
     d <- grading_sim(I = 20, J = 3)
     r <- agreement_run(d, vars = names(d), showGradingGuide = TRUE)$results
-    html <- r$gradingGuide$content
+    html <- r$gradingGroup$gradingGuide$content
     G <- AGREEMENT_LATENT_GATES
     expect_true(grepl(sprintf("Model-based kappa: at least %d pathologists", G$kappa_m_min_raters), html, fixed = TRUE))
     expect_true(grepl(sprintf("Latent ICC: %d cases, or %d when", G$rho_min_cases, G$rho_min_cases_incomplete), html, fixed = TRUE))
@@ -120,10 +120,10 @@ test_that("incomplete design below its case limit: kappa_m shown, latent ICC ref
     set.seed(7)
     for (i in seq_len(nrow(d))) d[i, sample(8, 5)] <- NA      # 3 of 8 read each case
     r <- agreement_run(d, vars = names(d), latentModel = TRUE)$results
-    lat <- by_key(r$latentModelTable$asDF)
+    lat <- by_key(r$gradingGroup$latentModelTable$asDF)
     expect_true(is.finite(lat["kappa_m", "estimate"]))
     expect_true(is.na(lat["rho", "estimate"]))
-    notes <- agreement_notes(r$latentModelTable)
+    notes <- agreement_notes(r$gradingGroup$latentModelTable)
     expect_true(grepl("Not every pathologist read every case", notes[["refuse_rho"]], fixed = TRUE))
 })
 
@@ -137,9 +137,9 @@ test_that("undetermined category order: boundary table has one row per category,
                     P2 = factor(y, rev(lv), ordered = TRUE),   # declares the reverse order
                     P3 = factor(z, lv, ordered = TRUE))
     r <- agreement_run(d, vars = names(d), perPathologist = TRUE, gradingDesign = TRUE)$results
-    expect_equal(nrow(r$boundaryTable$asDF), 3L * 3L)
-    expect_true(grepl("do not declare one common order", by_key(r$designSummaryTable$asDF)["scale", "value"], fixed = TRUE))
-    expect_true(grepl("order is not determined", agreement_notes(r$boundaryTable)[["excess"]], fixed = TRUE))
+    expect_equal(nrow(r$gradingGroup$boundaryTable$asDF), 3L * 3L)
+    expect_true(grepl("do not declare one common order", by_key(r$gradingGroup$designSummaryTable$asDF)["scale", "value"], fixed = TRUE))
+    expect_true(grepl("order is not determined", agreement_notes(r$gradingGroup$boundaryTable)[["excess"]], fixed = TRUE))
 })
 
 test_that("single-read cases do not lift a small study over the case minimum (runtime review repro)", {
@@ -148,12 +148,12 @@ test_that("single-read cases do not lift a small study over the case minimum (ru
     d <- grading_sim(I = 30 + 25, J = 4)
     for (i in 31:55) d[i, sample(4, 3)] <- NA                      # 25 cases read by one pathologist
     r <- agreement_run(d, vars = names(d), latentModel = TRUE, severityModel = TRUE)$results
-    lat <- by_key(r$latentModelTable$asDF)
+    lat <- by_key(r$gradingGroup$latentModelTable$asDF)
     expect_true(is.na(lat["kappa_m", "estimate"]))
-    note <- agreement_notes(r$latentModelTable)[["refuse_model"]]
+    note <- agreement_notes(r$gradingGroup$latentModelTable)[["refuse_model"]]
     expect_true(grepl("this study has 30", note, fixed = TRUE))
     expect_true(grepl("25 cases here were read by one", note, fixed = TRUE))
-    expect_true(all(is.na(r$pathologistTable$asDF$shift)))
+    expect_true(all(is.na(r$gradingGroup$pathologistTable$asDF$shift)))
 })
 
 test_that("a large panel: grading tendency refused before fitting, with the runtime reason", {
@@ -161,6 +161,6 @@ test_that("a large panel: grading tendency refused before fitting, with the runt
     t0 <- proc.time()[["elapsed"]]
     r <- agreement_run(d, vars = names(d), severityModel = TRUE)$results
     expect_lt(proc.time()[["elapsed"]] - t0, 60)                  # the 20 x 500 fit takes minutes
-    expect_true(grepl("would take minutes to fit", agreement_notes(r$pathologistTable)[["refuse_severity"]], fixed = TRUE))
-    expect_true(all(is.na(r$pathologistTable$asDF$shift)))
+    expect_true(grepl("would take minutes to fit", agreement_notes(r$gradingGroup$pathologistTable)[["refuse_severity"]], fixed = TRUE))
+    expect_true(all(is.na(r$gradingGroup$pathologistTable$asDF$shift)))
 })

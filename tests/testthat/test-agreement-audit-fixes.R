@@ -73,7 +73,7 @@ test_that("agreement guides use translation while preserving markup", {
   expect_match(about, "Bu analiz hakkında", fixed = TRUE)
   expect_match(about, "<h3", fixed = TRUE)
   private$.populateGwetExplanation()
-  expect_match(a$results$gwetExplanation$content, "Gwet AC katsayısı nedir?", fixed = TRUE)
+  expect_match(a$results$gwetGroup$gwetExplanation$content, "Gwet AC katsayısı nedir?", fixed = TRUE)
   expect_false(grepl("\\{tag[0-9]+\\}", about))
 })
 
@@ -85,7 +85,7 @@ test_that("agreement guide headings use the packaged Turkish catalog", {
   a$init()
   private <- a$.__enclos_env__$private
   private$.populateGwetExplanation()
-  expect_match(a$results$gwetExplanation$content, "Gwet AC katsayısı nedir?", fixed = TRUE)
+  expect_match(a$results$gwetGroup$gwetExplanation$content, "Gwet AC katsayısı nedir?", fixed = TRUE)
   expect_match(private$.createAboutPanel(), "Bu [Aa]naliz [Hh]akkında")
-  expect_false(grepl("\\{tag[0-9]+\\}", a$results$gwetExplanation$content))
+  expect_false(grepl("\\{tag[0-9]+\\}", a$results$gwetGroup$gwetExplanation$content))
 })
