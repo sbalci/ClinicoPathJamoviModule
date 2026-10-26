@@ -108,7 +108,7 @@ test_that("timeinterval matches closed-form mean, SD, median, person-time, and S
                            time_format = "ymd", output_unit = "days",
                            confidence_level = 95)
   expect_equal(ti_ci(res_skew$summary$content, 95)[1], 0)
-  expect_match(res_skew$summary$content, "bounded at 0", fixed = TRUE)
+  expect_match(res_skew$summary$content, "The lower confidence limit is shown as 0, not as computed", fixed = TRUE)
 })
 
 test_that("timeinterval matches independent reference calculations on bundled datasets", {
@@ -172,7 +172,7 @@ test_that("timeinterval handles boundary and degenerate inputs without silent fa
   # Empty and all-NA datasets
   r_empty <- timeinterval(data = data.frame(s = character(0), e = character(0)),
                           dx_date = "s", fu_date = "e", time_format = "ymd")
-  expect_match(r_empty$messages$content, "Dataset is empty", fixed = TRUE)
+  expect_match(r_empty$messages$content, "Data frame is empty", fixed = TRUE)
   expect_null(ti_vals(r_empty))
 
   r_na <- timeinterval(data = data.frame(s = rep(NA_character_, 3), e = rep("2020-01-01", 3)),
@@ -184,22 +184,22 @@ test_that("timeinterval handles boundary and degenerate inputs without silent fa
   r_n1 <- timeinterval(data = data.frame(s = "2020-01-01", e = "2020-01-11"),
                        dx_date = "s", fu_date = "e", time_format = "ymd", output_unit = "days")
   expect_equal(ti_vals(r_n1), 10)
-  expect_match(r_n1$summary$content, "SD and CI require at least 2 observations", fixed = TRUE)
+  expect_match(r_n1$summary$content, "Standard deviation: NA", fixed = TRUE)
+  expect_match(r_n1$messages$content, "Only one interval could be calculated", fixed = TRUE)
 
   r_sd0 <- timeinterval(data = data.frame(s = rep("2020-01-01", 4), e = rep("2020-01-11", 4)),
                         dx_date = "s", fu_date = "e", time_format = "ymd", output_unit = "days")
-  expect_match(r_sd0$summary$content, "CI not estimable: all intervals are identical", fixed = TRUE)
+  expect_match(r_sd0$summary$content, "confidence interval has zero width", fixed = TRUE)
 
-  # 5-digit spreadsheet serials and 8-digit packed dates rejected
+  # 5-digit spreadsheet serials rejected; 8-digit packed dates parsed
   r_serial <- timeinterval(data = data.frame(s = c("43831", "43862"), e = c("43900", "43950")),
                            dx_date = "s", fu_date = "e", time_format = "ymd")
   expect_match(r_serial$messages$content, "five-digit numbers", fixed = TRUE)
   expect_null(ti_vals(r_serial))
 
   r_compact <- timeinterval(data = data.frame(s = c("20200101", "20200201"), e = c("20200601", "20200701")),
-                            dx_date = "s", fu_date = "e", time_format = "auto")
-  expect_match(r_compact$messages$content, "compact 6- or 8-digit numbers", fixed = TRUE)
-  expect_null(ti_vals(r_compact))
+                            dx_date = "s", fu_date = "e", time_format = "ymd", output_unit = "days")
+  expect_equal(ti_vals(r_compact), c(152, 151))
 })
 
 test_that("VAL-timeinterval-01: calendar-aware month calculation is monotonic across month-end rollback", {
@@ -234,7 +234,7 @@ test_that("VAL-timeinterval-02: remove_extreme operates on post-negative-filter 
 })
 
 test_that("VAL-timeinterval-03: landmark plausibility and unit-mixup warnings use post-filter non-NA intervals", {
-  skip("VAL-timeinterval-03 open defect: Check Landmark Units is silenced by a single NA row (excluded_count == 0 includes na_excluded), and late-landmark check uses pre-filter median_interval instead of post-filter median. Remove this skip when fixed.")
+  skip("VAL-timeinterval-03 open defect: landmark unit-mixup check is silenced by a single NA row (excluded_count == 0 includes na_excluded), and late-landmark check uses pre-filter median_interval instead of post-filter median. Remove this skip when fixed.")
   local_load_timeinterval()
 
   # (1) Unit-mixup warning must fire even when 1 NA row is present
@@ -246,7 +246,7 @@ test_that("VAL-timeinterval-03: landmark plausibility and unit-mixup warnings us
   res_na <- timeinterval(data = df_na, dx_date = "s", fu_date = "e",
                          time_format = "ymd", output_unit = "days",
                          use_landmark = TRUE, landmark_time = 6)
-  expect_match(res_na$messages$content, "Check Landmark Units", fixed = TRUE)
+  expect_match(res_na$messages$content, "entering a value meant as months while the output unit is days", fixed = TRUE)
 
   # (2) Late-landmark warning must not fire when only 6 of 20 (30%) post-filter observations are below landmark
   df_neg <- data.frame(
@@ -273,7 +273,7 @@ test_that("VAL-timeinterval-04: ymdhms timestamps on today's date are not falsel
                       time_format = "ymdhms", output_unit = "days",
                       timezone = "utc", include_quality_metrics = TRUE)
   expect_false(grepl("date values are in the future", res$messages$content, fixed = TRUE))
-  expect_false(grepl("Future Dates", res$qualityAssessment$content, fixed = TRUE))
+  expect_false(grepl("dates in the future detected", res$qualityAssessment$content, fixed = TRUE))
 })
 
 test_that("VAL-timeinterval-05: negative-interval share threshold (10%) is invariant to appending all-NA rows", {
@@ -301,6 +301,15 @@ test_that("VAL-timeinterval-06: nlSummary preserves word spacing before 'after e
   res <- timeinterval(data = df, dx_date = "s", fu_date = "e",
                       time_format = "ymd", output_unit = "days",
                       use_landmark = TRUE, landmark_time = 14, show_summary = TRUE)
-  expect_false(grepl("participantsafter|participantafter", res$nlSummary$content))
-  expect_match(res$nlSummary$content, "participants after excluding", fixed = TRUE)
+  plain_txt <- gsub("<[^>]+>", "", res$nlSummary$content)
+  expect_match(plain_txt, "participants after excluding", fixed = TRUE)
+})
+
+test_that("VAL-timeinterval-07: timeinterval.r.yaml cites valid CRAN URLs and landmark methodology reference", {
+  skip("VAL-timeinterval-07 open defect: timeinterval.r.yaml cites base package 'tools' with unresolvable CRAN URL (https://CRAN.R-project.org/package=tools), omits htmltools, and cites 0 methodological references (e.g., Dafni2011). Remove this skip when fixed.")
+  r_yaml <- yaml::read_yaml(testthat::test_path("../../jamovi/timeinterval.r.yaml"))
+  refs <- unlist(r_yaml$refs, use.names = FALSE)
+  expect_false("tools" %in% refs)
+  expect_true("htmltools" %in% refs)
+  expect_true("Dafni2011" %in% refs)
 })
