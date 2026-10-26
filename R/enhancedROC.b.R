@@ -4115,8 +4115,11 @@ enhancedROCClass <- R6::R6Class(
             # a white panel and grey grid for Clinical - a white box on jamovi's dark theme. The
             # Clinical grid now lives here, for all twelve plots, in translucent grey that reads on
             # either background; nothing sets a panel fill.
+            # library-audit 2026-10-23 meddecide [LOW] PARTIAL: "jamovi" (the default) adds nothing, so
+            #   these plots follow the global theme; the other three are explicit overrides.
             grid_major <- ggplot2::element_line(colour = "#80808040")
             switch(as.character(self$options$plotTheme),
+                jamovi = NULL,
                 classic = ggplot2::theme(
                     panel.grid.major = ggplot2::element_blank(),
                     panel.grid.minor = ggplot2::element_blank(),
@@ -4129,7 +4132,7 @@ enhancedROCClass <- R6::R6Class(
                     panel.border     = ggplot2::element_rect(fill = NA, colour = NULL),
                     axis.line        = ggplot2::element_blank()
                 ),
-                ggplot2::theme(
+                clinical = ggplot2::theme(
                     panel.grid.major = grid_major,
                     panel.grid.minor = ggplot2::element_line(colour = "#80808020")
                 )

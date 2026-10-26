@@ -918,7 +918,6 @@ test_that("J1: Methodological citations AustinLeeFine2016 and AalenJohansen1978 
 # =============================================================================
 
 test_that("VAL-outcomeorganizer-01: Unset ('') or non-matching recurrenceLevel in rfs/pfs/dfs/ttp halts instead of silently erasing events", {
-  skip("VAL-outcomeorganizer-01 open defect: recurrenceLevel == '' or non-matching level silently evaluates recurrence_outcome == recurrence_level to FALSE. Remove this skip when fixed.")
   d_val01 <- data.frame(
     vital = factor(c("Alive","Alive","Alive","Alive","Alive","Dead","Dead","Dead","Dead","Dead"),
                    levels = c("Alive","Dead")),
@@ -936,7 +935,6 @@ test_that("VAL-outcomeorganizer-01: Unset ('') or non-matching recurrenceLevel i
 })
 
 test_that("VAL-outcomeorganizer-02: eventRecodeInfo updates after administrative censoring or event hierarchy modifies myoutcome", {
-  skip("VAL-outcomeorganizer-02 open defect: private$.eventRecode stays frozen at pre-censoring/pre-hierarchy counts while outputTable updates. Remove this skip when fixed.")
   d_a5 <- data.frame(
     vital   = factor(c("Dead","Dead","Dead","Dead","Dead","Alive","Alive","Alive","Alive","Alive"),
                      levels = c("Alive","Dead")),
@@ -947,12 +945,11 @@ test_that("VAL-outcomeorganizer-02: eventRecodeInfo updates after administrative
                   analysistype = "os", adminCensoring = TRUE,
                   followupTime = "fu_num", adminDate = "cut_num", outputTable = TRUE)
   rec_html <- .val_html(res$results$eventRecodeInfo)
-  expect_match(rec_html, "Event level \"Dead\":</b> 3", fixed = TRUE)
-  expect_match(rec_html, "Censored \"Alive\":</b> 7", fixed = TRUE)
+  expect_match(rec_html, "Event level</td><td>\"Dead\"</td><td align='right'>3</td>", fixed = TRUE)
+  expect_match(rec_html, "Censored</td><td>\"Alive\"</td><td align='right'>7</td>", fixed = TRUE)
 })
 
 test_that("VAL-outcomeorganizer-03: Input column named 'myoutcome' is not overwritten before recurrence/secondary variable read", {
-  skip("VAL-outcomeorganizer-03 open defect: mydata[['myoutcome']] <- res$status overwrites user recurrence column named 'myoutcome'. Remove this skip when fixed.")
   d_val03 <- data.frame(
     vital     = factor(c("Alive","Alive","Alive","Alive","Alive","Dead","Dead","Dead","Dead","Dead"),
                        levels = c("Alive","Dead")),
@@ -966,7 +963,6 @@ test_that("VAL-outcomeorganizer-03: Input column named 'myoutcome' is not overwr
 })
 
 test_that("VAL-outcomeorganizer-04: Zero-death cohorts (all 'Alive' factor with Dead level or RFS with recurrences) recode without error", {
-  skip("VAL-outcomeorganizer-04 open defect: .validateInputs() rejects any outcome with <2 observed values, blocking 0-death RFS/TTP and outcomeorganizer_censored. Remove this skip when fixed.")
   d_rfs0 <- data.frame(
     vital = factor(rep("Alive", 20), levels = c("Alive", "Dead")),
     rec   = factor(c(rep("Yes", 6), rep("No", 14)), levels = c("No", "Yes"))
@@ -977,7 +973,6 @@ test_that("VAL-outcomeorganizer-04: Zero-death cohorts (all 'Alive' factor with 
 })
 
 test_that("VAL-outcomeorganizer-05: Factor with explicit NA level (addNA) is treated as missing in multievent and single-event modes", {
-  skip("VAL-outcomeorganizer-05 open defect: addNA() factor has is.na(x)==FALSE and as.character(x)==NA, breaking multievent and eventRecodeInfo. Remove this skip when fixed.")
   d_val05 <- data.frame(
     vital_na = addNA(factor(c(rep("Alive", 10), rep("Dead", 10), rep(NA, 5)), levels = c("Alive", "Dead")))
   )
@@ -991,7 +986,6 @@ test_that("VAL-outcomeorganizer-05: Factor with explicit NA level (addNA) is tre
 })
 
 test_that("VAL-outcomeorganizer-06: Event hierarchy keeps 1 event per patient when priority and non-priority rows tie at earliest time", {
-  skip("VAL-outcomeorganizer-06 open defect: .hier_t == .first_pri promotes tied non-priority rows to highest_priority (producing two events 1,1 for one patient). Remove this skip when fixed.")
   d_val06 <- data.frame(
     pid    = c(1, 1,  2, 2,  3, 3,  4, 4,  5, 5),
     status = factor(c("Dead","Alive",  "Alive","Dead",  "Alive","Alive",  "Dead","Dead",  "Alive","Dead"),
@@ -1006,13 +1000,11 @@ test_that("VAL-outcomeorganizer-06: Event hierarchy keeps 1 event per patient wh
 })
 
 test_that("VAL-outcomeorganizer-07: Initial state with outcome = NULL and no other Variable options shows todo welcome without crashing", {
-  skip("VAL-outcomeorganizer-07 open defect: .prepareData() crashes on row.names(cleaned_data) <- row.names(raw_data) when 0 Variable options are set. Remove this skip when fixed.")
   res <- run_outcomeorganizer(data = outcomeorganizer_basic, outcome = NULL)
   expect_match(.val_html(res$todo), "Welcome to Enhanced Outcome Organizer", fixed = TRUE)
 })
 
 test_that("VAL-outcomeorganizer-08: Few-events (<5) warning checks post-recode event count rather than raw min(table(outcome))", {
-  skip("VAL-outcomeorganizer-08 open defect: .validateInputs() checks min(table(outcome)) before recoding, causing false positives when censored<5 and false negatives on >2-level multievent. Remove this skip when fixed.")
   d_fp <- data.frame(num01 = c(rep(0, 3), rep(1, 17)))
   d_fn <- data.frame(status3 = factor(c(rep("DOD", 2), rep("AWD", 10), rep("AWOD", 18)),
                                       levels = c("AWOD", "AWD", "DOD")))
@@ -1024,7 +1016,6 @@ test_that("VAL-outcomeorganizer-08: Few-events (<5) warning checks post-recode e
 })
 
 test_that("VAL-outcomeorganizer-09: outcomeorganizer.r.yaml declares only used package refs", {
-  skip("VAL-outcomeorganizer-09 open defect: outcomeorganizer.r.yaml declares unused survminer/finalfit refs. Remove this skip when fixed.")
   skip_if_not_installed("yaml")
   r_yaml <- yaml::read_yaml(file.path(.val_root, "jamovi/outcomeorganizer.r.yaml"))
   b_src  <- paste(readLines(file.path(.val_root, "R/outcomeorganizer.b.R"), warn = FALSE), collapse = "\n")

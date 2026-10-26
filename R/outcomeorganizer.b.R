@@ -6,6 +6,16 @@
 outcomeorganizerClass <- if (requireNamespace('jmvcore')) R6::R6Class(
     "outcomeorganizerClass",
     inherit = outcomeorganizerBase,
+    public = list(
+        init = function(noThrow = FALSE) {
+            # Guard against jmvcore::select(private$.data, character(0)) crashing
+            # with "invalid 'row.names' length" when 0 Variable options are set.
+            if (!is.null(private$.data) && length(self$options$varsRequired) == 0L) {
+                private$.data <- data.frame()
+            }
+            super$init(noThrow = noThrow)
+        }
+    ),
     private = list(
 
         # Result of .defineEventIndicator(), kept so .run() can render the
@@ -121,6 +131,16 @@ outcomeorganizerClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         .getData = function() {
             # Get the data
             mydata <- self$data
+
+            # Normalize any factor columns that include an explicit NA level (e.g. via addNA())
+            # so is.na() and as.character() agree on missingness across validation and recoding.
+            for (.col in names(mydata)) {
+                .x <- mydata[[.col]]
+                if (is.factor(.x) && (anyNA(levels(.x)) || any(is.na(as.character(.x)) & !is.na(.x)))) {
+                    .lvls <- levels(.x)[!is.na(levels(.x))]
+                    mydata[[.col]] <- factor(as.character(.x), levels = .lvls, ordered = is.ordered(.x))
+                }
+            }
 
             # Add row names if missing
             if (is.null(rownames(mydata))) {
@@ -250,8 +270,23 @@ outcomeorganizerClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     # Check unique values
                     unique_outcomes <- unique(outcome_data_clean)
                     outcome_count <- length(unique_outcomes)
-                    
-                    if (outcome_count < 2) {
+
+                    # Allow a single observed value when it is a legitimate 0-event or
+                    # all-event cohort (a factor with >= 2 declared levels, a numeric 0/1
+                    # vector, a logical vector, a matched outcomeLevel/multievent level,
+                    # or an RFS/PFS/DFS/TTP composite with a recurrence variable).
+                    single_val_ok <- (is.factor(outcome_data) && length(levels(outcome_data)) >= 2L) ||
+                        (is.numeric(outcome_data) && all(unique_outcomes %in% c(0, 1))) ||
+                        is.logical(outcome_data) ||
+                        (!multievent && !is.null(self$options$outcomeLevel) &&
+                            nzchar(as.character(self$options$outcomeLevel)) &&
+                            as.character(self$options$outcomeLevel) %in% as.character(unique_outcomes)) ||
+                        (multievent && any(as.character(unlist(list(
+                            self$options$dod, self$options$dooc, self$options$awd, self$options$awod
+                        ))) %in% as.character(unique_outcomes))) ||
+                        (analysistype %in% c("rfs", "pfs", "dfs", "ttp") && !is.null(recurrence_var))
+
+                    if (outcome_count < 2 && !single_val_ok) {
                         validation_results$errors <- c(validation_results$errors,
                             .("Outcome variable must have at least 2 different values."))
                         validation_results$should_stop <- TRUE
@@ -326,32 +361,6 @@ outcomeorganizerClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                                 missing = missing_outcome,
                                 total = total_rows))
                     }
-                    
-                    # Few events: Kaplan-Meier / Cox estimates are unstable below ~5
-                    # events. table() drops NA, so a 2-level outcome with missing
-                    # values is still checked (unique() would have counted NA as a
-                    # third level and skipped it). Count the selected event level
-                    # when there is one; otherwise fall back to the rarest level.
-                    tbl <- table(mydata[[outcome_var]])
-                    n_nonmissing <- sum(tbl)
-                    event_lvl <- if (multievent) NULL else self$options$outcomeLevel
-                    if (!is.null(event_lvl) && as.character(event_lvl) %in% names(tbl)) {
-                        n_ev <- as.integer(tbl[[as.character(event_lvl)]])
-                        rare_lvl <- as.character(event_lvl)
-                    } else if (length(tbl) == 2) {
-                        n_ev <- as.integer(min(tbl))
-                        rare_lvl <- names(tbl)[which.min(tbl)]
-                    } else {
-                        n_ev <- NA_integer_
-                    }
-                    if (!is.na(n_ev) && n_nonmissing > 0 && n_ev < 5) {
-                        validation_results$warnings <- c(validation_results$warnings,
-                            .fmt(.("Few events: only {nEv} of {nTotal} non-missing outcomes ({pct}%) are '{level}'. Kaplan-Meier and Cox estimates are unstable with fewer than 5 events."), 
-                                nEv = n_ev,
-                                nTotal = n_nonmissing,
-                                pct = round(100 * n_ev / n_nonmissing, 1),
-                                level = rare_lvl))
-                    }
                 }
             }
 
@@ -373,6 +382,11 @@ outcomeorganizerClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 labelled_data <- private$.getData()
             }
             mydata <- labelled_data$mydata_labelled
+            # Snapshot input columns and labels before writing mydata[["myoutcome"]],
+            # so a user column named "myoutcome" (e.g. a recurrence column) is never
+            # overwritten before it is read.
+            input_mydata <- mydata
+            all_labels_cache <- labelled::var_label(input_mydata)
             outcome_var <- labelled_data$outcome_var
             recurrence_var <- labelled_data$recurrence_var
             id_var <- labelled_data$id_var
@@ -402,7 +416,7 @@ outcomeorganizerClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 # Delegated to the shared coder in utils-eventindicator.R so the five
                 # analyses that build an event indicator agree on validation.
                 res <- .defineEventIndicator(
-                    outcome      = mydata[[outcome_var]],
+                    outcome      = input_mydata[[outcome_var]],
                     outcomeLevel = outcomeLevel,
                     multievent   = FALSE,
                     outcome_name = self$options$outcome
@@ -432,18 +446,31 @@ outcomeorganizerClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 # Special handling for RFS/PFS/DFS if selected
                 if (analysistype %in% c('rfs', 'pfs', 'dfs') && !is.null(recurrence_var)) {
                     # For these analyses, also consider recurrence/progression as events
-                    recurrence_outcome <- mydata[[recurrence_var]]
+                    recurrence_outcome <- input_mydata[[recurrence_var]]
                     recurrence_level <- self$options$recurrenceLevel
 
                     # Guard: a recurrence/progression variable is selected but no event
-                    # level was chosen. Without this, `recurrence_outcome == NULL` yields
-                    # logical(0); ifelse -> length 0; pmax -> numeric(0); and the
-                    # assignment mydata[["myoutcome"]] <- numeric(0) errors with
-                    # "replacement has 0 rows, data has n".
-                    if (is.null(recurrence_level)) {
+                    # level was chosen, or the chosen level is not a level of the
+                    # recurrence variable. Without this, `recurrence_outcome == NULL` yields
+                    # logical(0); ifelse -> length 0; pmax -> numeric(0); and an empty ""
+                    # or non-matching level silently evaluates to FALSE on every row.
+                    if (is.null(recurrence_level) || length(recurrence_level) == 0 ||
+                        !nzchar(as.character(recurrence_level))) {
                         jmvcore::reject(.fmt(
                             .('A recurrence/progression variable is selected for {analysis} analysis, but no recurrence event level was chosen. Please select the level that indicates recurrence/progression in the "Event Level" option under the Recurrence/Progression Variable.'),
                             analysis = toupper(analysistype)))
+                    }
+                    rec_declared <- if (is.factor(recurrence_outcome)) {
+                        levels(recurrence_outcome)
+                    } else {
+                        unique(as.character(recurrence_outcome[!is.na(recurrence_outcome)]))
+                    }
+                    if (!as.character(recurrence_level) %in% as.character(rec_declared)) {
+                        jmvcore::reject(.fmt(
+                            .("Selected recurrence/progression event level '{level}' is not a level of '{var}'. Levels available: {levels}."),
+                            level = as.character(recurrence_level),
+                            var = self$options$recurrence,
+                            levels = paste(rec_declared, collapse = ", ")))
                     }
 
                     # Mark recurrences as events (1)
@@ -524,13 +551,27 @@ outcomeorganizerClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     }
                 } else if (analysistype == 'ttp' && !is.null(recurrence_var)) {
                     # Time to progression: only progression counts as event, deaths are censored
-                    recurrence_outcome <- mydata[[recurrence_var]]
+                    recurrence_outcome <- input_mydata[[recurrence_var]]
                     recurrence_level <- self$options$recurrenceLevel
 
                     # Guard: recurrence variable selected but no progression event level
-                    # chosen -> logical(0) recode that crashes the assignment (see above).
-                    if (is.null(recurrence_level)) {
+                    # chosen or level not in recurrence_outcome -> reject instead of
+                    # silently censoring every patient.
+                    if (is.null(recurrence_level) || length(recurrence_level) == 0 ||
+                        !nzchar(as.character(recurrence_level))) {
                         jmvcore::reject(.('A recurrence/progression variable is selected for TTP analysis, but no progression event level was chosen. Please select the level that indicates progression in the "Event Level" option under the Recurrence/Progression Variable.'))
+                    }
+                    rec_declared <- if (is.factor(recurrence_outcome)) {
+                        levels(recurrence_outcome)
+                    } else {
+                        unique(as.character(recurrence_outcome[!is.na(recurrence_outcome)]))
+                    }
+                    if (!as.character(recurrence_level) %in% as.character(rec_declared)) {
+                        jmvcore::reject(.fmt(
+                            .("Selected recurrence/progression event level '{level}' is not a level of '{var}'. Levels available: {levels}."),
+                            level = as.character(recurrence_level),
+                            var = self$options$recurrence,
+                            levels = paste(rec_declared, collapse = ", ")))
                     }
 
                     # Only progression counts as an event
@@ -565,7 +606,7 @@ outcomeorganizerClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             } else {
                 # Multiple event types
-                outcome1 <- mydata[[outcome_var]]
+                outcome1 <- input_mydata[[outcome_var]]
                 dod <- self$options$dod
                 dooc <- self$options$dooc
                 awd <- self$options$awd
@@ -730,7 +771,7 @@ outcomeorganizerClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                             # warning below describes.
                             fu_var_h <- labelled_data$followup_var
                             has_time <- !is.null(fu_var_h) && length(fu_var_h) > 0 &&
-                                        fu_var_h[1] %in% names(mydata)
+                                        fu_var_h[1] %in% names(input_mydata)
 
                             # A priority code that the recode never produced makes the
                             # hierarchy a no-op -- every branch below falls through to
@@ -775,15 +816,19 @@ outcomeorganizerClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                             } else
 
                             if (has_time) {
-                                mydata[[".hier_t"]] <- jmvcore::toNumeric(mydata[[fu_var_h[1]]])
+                                mydata[[".hier_t"]] <- jmvcore::toNumeric(input_mydata[[fu_var_h[1]]])
                                 mydata <- mydata %>%
                                     dplyr::group_by(!!dplyr::sym(id_var)) %>%
                                     dplyr::mutate(
                                         .first_pri = suppressWarnings(min(
-                                            .hier_t[myoutcome == highest_priority], na.rm = TRUE)),
+                                            .hier_t[!is.na(myoutcome) & myoutcome == highest_priority], na.rm = TRUE)),
+                                        .pri_idx = if (is.finite(.first_pri[1L]))
+                                            which(!is.na(myoutcome) & myoutcome == highest_priority &
+                                                  !is.na(.hier_t) & .hier_t == .first_pri)[1L]
+                                        else NA_integer_,
                                         myoutcome = dplyr::case_when(
-                                            !is.finite(.first_pri)          ~ myoutcome,
-                                            .hier_t == .first_pri           ~ highest_priority,
+                                            !is.finite(.first_pri)                  ~ myoutcome,
+                                            dplyr::row_number() == .pri_idx         ~ highest_priority,
                                             # `TRUE ~ 0` here overwrote EVERY other row,
                                             # earlier ones included -- so a competing
                                             # event (code 2) recorded BEFORE the priority
@@ -792,15 +837,15 @@ outcomeorganizerClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                                             # substantive statistical error, not a
                                             # bookkeeping one. It also made the notice
                                             # below ("their later rows were censored")
-                                            # false. Censor only what actually comes
-                                            # after the retained event; leave earlier
-                                            # records as they were coded.
-                                            .hier_t > .first_pri            ~ 0,
-                                            TRUE                            ~ myoutcome
+                                            # false. Censor only tied or later rows once
+                                            # the first priority record is retained;
+                                            # leave strictly earlier records as coded.
+                                            !is.na(.hier_t) & .hier_t >= .first_pri ~ 0,
+                                            TRUE                                    ~ myoutcome
                                         )
                                     ) %>%
                                     dplyr::ungroup() %>%
-                                    dplyr::select(-".first_pri", -".hier_t")
+                                    dplyr::select(-".first_pri", -".pri_idx", -".hier_t")
                             } else {
                                 mydata <- mydata %>%
                                     dplyr::group_by(!!dplyr::sym(id_var)) %>%
@@ -814,6 +859,7 @@ outcomeorganizerClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                             }
 
                             n_affected <- duplicate_ids %>%
+                                dplyr::filter(!is.na(myoutcome) & myoutcome == highest_priority) %>%
                                 dplyr::distinct(!!dplyr::sym(id_var)) %>%
                                 nrow()
 
@@ -869,9 +915,6 @@ outcomeorganizerClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 }
             }
 
-            # Cache labelled data lookups for efficiency (used multiple times)
-            all_labels_cache <- labelled::var_label(mydata)
-
             # Apply interval censoring if specified
             # A ticked checkbox whose partner variable is missing produced output
             # byte-identical to leaving it unticked, with no notice and no diagnostic
@@ -892,8 +935,8 @@ outcomeorganizerClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
                 if (length(start_var) > 0 && length(end_var) > 0) {
                     # Add interval variables to output for use with survival::Surv()
-                    mydata[["interval_L"]] <- mydata[[start_var[1]]]
-                    mydata[["interval_R"]] <- mydata[[end_var[1]]]
+                    mydata[["interval_L"]] <- input_mydata[[start_var[1]]]
+                    mydata[["interval_R"]] <- input_mydata[[end_var[1]]]
 
                     # An interval must run forwards. Surv(type="interval2") requires
                     # left <= right; hand it an inverted pair and it errors, or worse
@@ -978,7 +1021,7 @@ outcomeorganizerClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 }
 
                 if (length(admin_date_var) > 0) {
-                    mydata[["admin_censor_date"]] <- mydata[[admin_date_var[1]]]
+                    mydata[["admin_censor_date"]] <- input_mydata[[admin_date_var[1]]]
 
                     # With a follow-up time supplied we can actually apply the
                     # cut-off: truncate follow-up at it and reset the status of
@@ -987,7 +1030,7 @@ outcomeorganizerClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     # more.
                     fu_var <- labelled_data$followup_var
 
-                    if (!is.null(fu_var) && length(fu_var) > 0 && fu_var[1] %in% names(mydata)) {
+                    if (!is.null(fu_var) && length(fu_var) > 0 && fu_var[1] %in% names(input_mydata)) {
                         # as.numeric() explicitly, not jmvcore::toNumeric() alone:
                         # toNumeric is a NO-OP on a Date/character column (it only
                         # unwraps a `values` attribute), so `cut` stayed a Date here and
@@ -1012,7 +1055,7 @@ outcomeorganizerClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         # administrative window is legitimately in the same units was
                         # refused with a message telling the user to do what they had
                         # already done. Classify the columns instead.
-                        fu_s  <- private$.timeScale(mydata[[fu_var[1]]])
+                        fu_s  <- private$.timeScale(input_mydata[[fu_var[1]]])
                         # A NEGATIVE FOLLOW-UP IS NOT A TIME.
                         # pmin() happily carries -5 through, and this analysis WRITES
                         # THAT COLUMN BACK, so the negative value lands in the
@@ -1195,6 +1238,20 @@ outcomeorganizerClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 } else {
                     diagnostics$admin_censoring <- .("Administrative censoring: date variable not found in dataset")
                 }
+            }
+
+            # Keep private$.eventRecode synchronized with the final recoded outcome
+            # whenever event hierarchy or administrative censoring modified myoutcome,
+            # so eventRecodeInfo matches outputTable, naturalSummary, and addOutcome.
+            if ((isTRUE(applied$hierarchy) || isTRUE(applied$admin)) && !is.null(private$.eventRecode)) {
+                final_status <- mydata[["myoutcome"]]
+                private$.eventRecode$status     <- final_status
+                private$.eventRecode$n_event    <- sum(final_status == 1, na.rm = TRUE)
+                private$.eventRecode$n_censored <- sum(final_status == 0, na.rm = TRUE)
+                if (isTRUE(private$.eventRecode$has_competing)) {
+                    private$.eventRecode$n_competing <- sum(final_status == 2, na.rm = TRUE)
+                }
+                private$.eventRecode$n_missing  <- sum(is.na(final_status))
             }
 
             # Create a data frame with row names and recoded outcome
@@ -1500,6 +1557,37 @@ outcomeorganizerClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             mydata <- results$mydata
             diagnostics <- results$diagnostics
             applied <- results$applied
+
+            # Post-recode few-events check: Kaplan-Meier / Cox estimates are unstable
+            # below ~5 events. Checking the recoded `myoutcome` avoids false positives
+            # when the censored group has < 5 rows on a numeric 0/1 outcome, and catches
+            # < 5 events in multi-event modes as well.
+            n_nonmissing_rec <- sum(!is.na(mydata[["myoutcome"]]))
+            n_ev_rec <- sum(mydata[["myoutcome"]] == 1, na.rm = TRUE)
+            if (!identical(self$options$analysistype, "multistate") &&
+                n_nonmissing_rec > 0 && n_ev_rec > 0 && n_ev_rec < 5) {
+                rare_lvl <- if (!self$options$multievent &&
+                                !is.null(self$options$outcomeLevel) &&
+                                nzchar(as.character(self$options$outcomeLevel))) {
+                    as.character(self$options$outcomeLevel)
+                } else if (!is.null(private$.eventRecode) &&
+                           !is.null(private$.eventRecode$event_label) &&
+                           nzchar(as.character(private$.eventRecode$event_label))) {
+                    as.character(private$.eventRecode$event_label)
+                } else if (self$options$multievent &&
+                           !is.null(self$options$dod) &&
+                           nzchar(as.character(self$options$dod))) {
+                    as.character(self$options$dod)
+                } else {
+                    "1"
+                }
+                private$.addNotice(jmvcore::NoticeType$WARNING,
+                    .fmt(.("Few events: only {nEv} of {nTotal} non-missing outcomes ({pct}%) are '{level}'. Kaplan-Meier and Cox estimates are unstable with fewer than 5 events."),
+                        nEv = n_ev_rec,
+                        nTotal = n_nonmissing_rec,
+                        pct = round(100 * n_ev_rec / n_nonmissing_rec, 1),
+                        level = rare_lvl))
+            }
 
             # Create summary text describing the recoding
             analysistype <- self$options$analysistype

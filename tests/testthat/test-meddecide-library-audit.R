@@ -1579,3 +1579,27 @@ test_that("agreement sections are Groups and the prediction rater is a variable"
   }
   audit_skip_absent(absent, root)
 })
+
+# library-audit 2026-10-23 meddecide [LOW] PARTIAL: enhancedROC's plots follow jamovi's theme by
+#   default; Classic, Modern and Clinical remain as explicit overrides.
+test_that("enhancedROC plots follow the jamovi theme unless a theme is chosen", {
+  root <- audit_source_root()
+  absent <- audit_absent(root, "enhancedROC", "jamovi/%s.a.yaml")
+  if (!length(absent)) {
+    opts <- yaml::read_yaml(file.path(root, "jamovi", "enhancedROC.a.yaml"))$options
+    theme <- Filter(function(o) o$name == "plotTheme", opts)[[1]]
+    expect_identical(theme$default, "jamovi")
+    expect_identical(theme$options[[1]]$name, "jamovi")
+  }
+  if (length(audit_loaded("enhancedROC"))) {
+    added <- function(...) {
+      a <- enhancedROCClass$new(options = enhancedROCOptions$new(...), data = data.frame(y = factor(c("a", "b"))))
+      a$.__enclos_env__$private$.plotThemeFor()
+    }
+    expect_null(added())
+    expect_null(added(plotTheme = "jamovi"))
+    for (choice in c("classic", "modern", "clinical"))
+      expect_s3_class(added(plotTheme = choice), "theme")
+  }
+  audit_skip_absent(absent, root)
+})

@@ -51,7 +51,7 @@ enhancedROC(
   showAnalysisSummary = FALSE,
   showClinicalReport = FALSE,
   showTableNotes = FALSE,
-  plotTheme = "clinical",
+  plotTheme = "jamovi",
   plotWidth = 600,
   plotHeight = 600,
   showCutoffPoints = FALSE,
@@ -294,7 +294,10 @@ a report.}
 results tables, including methods, definitions and cautions for reading
 each table. The random seed of a resampled result is always shown.}
 
-\item{plotTheme}{Visual theme for ROC plots}
+\item{plotTheme}{Visual theme for the ROC plots. "jamovi (follow global)"
+draws them with the theme chosen in jamovi, like every other plot in the
+document. Classic, Modern and Clinical adjust the grid lines and border on
+top of it.}
 
 \item{plotWidth}{Width of ROC plots}
 

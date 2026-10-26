@@ -1470,10 +1470,15 @@ def check_uyaml_structure():
 def check_plot_theme_option():
     """jamovi passes the user's chosen theme to every render function as ggtheme; a module-level
     theme option makes these plots disagree with the rest of the document (2026-10-23 meddecide
-    [LOW]: enhancedROC plotTheme; section 23)."""
+    [LOW]: enhancedROC plotTheme; section 23). A list whose DEFAULT is jamovi's own theme is the
+    section 23 pattern - named looks as explicit overrides - and is not a hit."""
+    def follows_jamovi(o):
+        return o.get('default') == 'jamovi' and any(
+            isinstance(x, dict) and x.get('name') == o.get('default') for x in o.get('options', []))
     hits = [(_shipped(n), '%s::%s' % (n, o['name']))
             for n in sorted(os.path.basename(p)[:-7] for p in glob.glob('jamovi/*.a.yaml'))
-            for o in _options(n) if o.get('type') == 'List' and re.search(r'theme', o['name'], re.I)]
+            for o in _options(n) if o.get('type') == 'List' and re.search(r'theme', o['name'], re.I)
+            and not follows_jamovi(o)]
     _report('plot_theme_option', 'module-level plot theme options', hits, 'List options replace jamovi\'s plot theme')
 
 

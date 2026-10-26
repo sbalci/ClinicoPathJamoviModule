@@ -529,14 +529,19 @@ options:
       title: 'Plot theme'
       type: List
       options:
+          - title: 'jamovi (follow global)'
+            name: jamovi
           - title: 'Classic'
             name: classic
           - title: 'Modern'
             name: modern
           - title: 'Clinical'
             name: clinical
-      default: clinical
-      description: 'Visual theme for ROC plots'
+      default: jamovi
+      description: >
+          Visual theme for the ROC plots. "jamovi (follow global)" draws them with the theme chosen
+          in jamovi, like every other plot in the document. Classic, Modern and Clinical adjust
+          the grid lines and border on top of it.
 
     - name: plotWidth
       title: 'Plot width'

@@ -294,8 +294,6 @@ items:
 refs:
     - ClinicoPathJamoviModule
     - survival
-    - survminer
-    - finalfit
     - cmprsk
     - mstate
     - survivaltutorial

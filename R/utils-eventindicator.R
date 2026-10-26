@@ -79,6 +79,13 @@
     if (is.null(outcome) || length(outcome) == 0)
         return(fail("No outcome variable available. Please select an outcome variable."))
 
+    # Normalize factors with an explicit NA level (e.g. from addNA()) so is.na(x)
+    # and as.character(x) agree on missingness across all paths.
+    if (is.factor(outcome) && (anyNA(levels(outcome)) || any(is.na(as.character(outcome)) & !is.na(outcome)))) {
+        lvls <- levels(outcome)[!is.na(levels(outcome))]
+        outcome <- factor(as.character(outcome), levels = lvls, ordered = is.ordered(outcome))
+    }
+
     # Ordered factors compare awkwardly against a plain level string.
     if (is.ordered(outcome)) outcome <- factor(outcome, ordered = FALSE)
 

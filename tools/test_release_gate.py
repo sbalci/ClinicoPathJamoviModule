@@ -61,6 +61,12 @@ options:
   - name: plotTheme
     type: List
     options: [a, b]
+  - name: lookTheme
+    type: List
+    options:
+      - name: jamovi
+      - name: classic
+    default: jamovi
 ''')
     write(m, 'jamovi/bad.u.yaml', '''children:
   - type: CollapseBox
@@ -134,7 +140,7 @@ options:
     assert 'bad::someHeading' in warns and 'bad::filled' not in warns, warns
     assert '1 shipped setNote' in warns, warns                        # setNote("error", NULL) is a clear
     assert 'method options:' in warns and '"Plot Style"' in warns, warns
-    assert 'bad::plotTheme' in warns, warns
+    assert 'bad::plotTheme' in warns and 'bad::lookTheme' not in warns, warns  # follows jamovi by default
     assert 'bad.u.yaml:15' in warns and 'bad.b.R:' in warns, warns    # "Explain ..." label; bare eponym
     assert '1 shipped cells receive R-formatted numbers' in warns, warns
     assert '1 shipped comments repeat' in warns, warns                # the corrected comment is not a hit

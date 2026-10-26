@@ -51,7 +51,7 @@ enhancedROCOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
             showAnalysisSummary = FALSE,
             showClinicalReport = FALSE,
             showTableNotes = FALSE,
-            plotTheme = "clinical",
+            plotTheme = "jamovi",
             plotWidth = 600,
             plotHeight = 600,
             showCutoffPoints = FALSE,
@@ -349,10 +349,11 @@ enhancedROCOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                 "plotTheme",
                 plotTheme,
                 options=list(
+                    "jamovi",
                     "classic",
                     "modern",
                     "clinical"),
-                default="clinical")
+                default="jamovi")
             private$..plotWidth <- jmvcore::OptionInteger$new(
                 "plotWidth",
                 plotWidth,
@@ -2802,7 +2803,10 @@ enhancedROCBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param showTableNotes Show explanatory notes and cell footnotes below the
 #'   results tables, including methods, definitions and cautions for reading
 #'   each table. The random seed of a resampled result is always shown.
-#' @param plotTheme Visual theme for ROC plots
+#' @param plotTheme Visual theme for the ROC plots. "jamovi (follow global)"
+#'   draws them with the theme chosen in jamovi, like every other plot in the
+#'   document. Classic, Modern and Clinical adjust the grid lines and border on
+#'   top of it.
 #' @param plotWidth Width of ROC plots
 #' @param plotHeight Height of ROC plots
 #' @param showCutoffPoints Highlight optimal cutoff points on ROC curve
@@ -3037,7 +3041,7 @@ enhancedROC <- function(
     showAnalysisSummary = FALSE,
     showClinicalReport = FALSE,
     showTableNotes = FALSE,
-    plotTheme = "clinical",
+    plotTheme = "jamovi",
     plotWidth = 600,
     plotHeight = 600,
     showCutoffPoints = FALSE,
