@@ -94,6 +94,9 @@ children:
         name: fagan
         enable: (referenceType:legacy || referenceType:disease)
         label: Fagan nomogram
+      - type: ComboBox
+        name: faganColors
+        enable: (fagan && (referenceType:legacy || referenceType:disease))
   - type: CollapseBox
     label: Output Options
     collapsed: true

@@ -28,6 +28,10 @@
 #'   string; this function is file-level, so it cannot translate one itself.
 #' @param PriorLabel Character. Name of the left (prior probability) axis.
 #' @param PosteriorLabel Character. Name of the right (posterior probability) axis.
+#' @param Colors Named character vector with the colors of the \code{pos} and \code{neg} lines.
+#'   Callers pass \code{.faganColors(choice, theme)} so the lines can follow jamovi's palette.
+#' @param LegendLabels Named character vector (\code{pos}, \code{neg}) naming the two lines. When
+#'   given, a legend is drawn at the bottom; colour is then not the only key to the lines.
 #' @param DetailLabels Named character vector with the words used in the \code{Detail} text:
 #'   \code{prevalence}, \code{plr}, \code{nlr}, \code{post_pos}, \code{post_neg}. Callers inside a
 #'   jamovi analysis pass translated strings (this function cannot translate them itself).
@@ -110,7 +114,9 @@ nomogrammer <- function(Prevalence,
                         PriorLabel = "Prior\nProb.\n(%)",
                         PosteriorLabel = "Posterior\nProb.\n(%)",
                         DetailLabels = c(prevalence = "Prevalence", plr = "PLR", nlr = "NLR",
-                                         post_pos = "Post(+)", post_neg = "Post(-)")) {
+                                         post_pos = "Post(+)", post_neg = "Post(-)"),
+                        Colors = c(pos = "red", neg = "blue"),
+                        LegendLabels = NULL) {
 
     ######################################
     ########## Helper Functions ##########
@@ -321,7 +327,8 @@ nomogrammer <- function(Prevalence,
             axis.title.y.right = element_text(angle = 0, vjust = 0.5),
             axis.line = element_blank(),
             panel.grid = element_blank(),
-            legend.position = "none",
+            legend.position = if (is.null(LegendLabels)) "none" else "bottom",
+            legend.title = element_blank(),
             plot.title = element_text(hjust = 0.5, size = rel(1.2)),
             plot.margin = margin(20, 20, 20, 20)
         )
@@ -440,7 +447,8 @@ nomogrammer <- function(Prevalence,
             )
         ) +
         ggplot2::coord_cartesian(ylim = ylim, expand = FALSE) +
-        scale_color_manual(values = c("pos" = "red", "neg" = "blue")) +
+        scale_color_manual(values = Colors, breaks = c("pos", "neg"),
+                           labels = if (is.null(LegendLabels)) ggplot2::waiver() else LegendLabels) +
         ggtitle(Title, subtitle = detailed_annotation) +
         theme_nomogram +
         theme(plot.subtitle = element_text(hjust = 0.5, size = rel(0.85)))
@@ -484,4 +492,13 @@ nomogrammer <- function(Prevalence,
     }
 
     return(p)
+}
+
+# library-audit 2026-10-23 meddecide [INFO] DONE (the decisioncalculator palette note): the Fagan lines
+#   follow jamovi's palette by default ("jamovi"); "classic" keeps red for positive, blue for negative.
+#   The callers also pass LegendLabels, because without a legend colour was the lines' only key.
+.faganColors <- function(choice, theme = NULL) {
+    if (identical(choice, "classic")) return(c(pos = "red", neg = "blue"))
+    palette <- jmvcore::colorPalette(2, if (is.null(theme$palette)) "jmv" else theme$palette, type = "color")
+    c(pos = palette[[1]], neg = palette[[2]])
 }

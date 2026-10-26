@@ -21,6 +21,7 @@ decision(
   fnote = FALSE,
   ci = FALSE,
   fagan = FALSE,
+  faganColors = "jamovi",
   showNaturalLanguage = FALSE,
   showClinicalInterpretation = FALSE,
   showReportTemplate = FALSE,
@@ -93,6 +94,10 @@ footnotes.}
 confidence intervals.}
 
 \item{fagan}{Boolean selection whether to generate a Fagan nomogram plot.}
+
+\item{faganColors}{Colors of the Fagan nomogram's lines: "jamovi" follows
+the global palette, "classic" draws the positive-result line red and the
+negative-result line blue.}
 
 \item{showNaturalLanguage}{Boolean selection whether to show the natural
 language clinical summary.}

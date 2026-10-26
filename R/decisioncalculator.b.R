@@ -1535,7 +1535,7 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) {
                 # after the user corrects an input not covered by the notices clearWith.
                 private$.renderNotices()
             },
-            .plot1 = function(image1, ggtheme, ...) {
+            .plot1 = function(image1, ggtheme, theme = NULL, ...) {
                 plotData1 <- image1$state
                 if (is.null(plotData1)) return(FALSE)
                 # Set in .run() when LR+ < 1; the explanatory notice is raised there, because
@@ -1559,31 +1559,18 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) {
                     LabelSize = (14 / 5),
                     # Verbose only cat()s a summary block to stdout, which jamovi never
                     # shows; that reading is rendered as faganSummary instead.
-                    Verbose = FALSE
+                    Verbose = FALSE,
+                    # jamovi's theme as the base, the nomogram's structural theme on top (inside
+                    # nomogrammer), and the figure's text translated here, as decision and cotest do.
+                    Theme = ggtheme,
+                    Title = .("Fagan Nomogram"),
+                    PriorLabel = .("Prior\nProb.\n(%)"),
+                    PosteriorLabel = .("Posterior\nProb.\n(%)"),
+                    DetailLabels = c(prevalence = .("Prevalence"), plr = .("PLR"), nlr = .("NLR"),
+                                     post_pos = .("Post(+)"), post_neg = .("Post(-)")),
+                    Colors = .faganColors(self$options$faganColors, theme),
+                    LegendLabels = c(pos = .("Positive result"), neg = .("Negative result"))
                 )
-
-                # A ggtheme is a COMPLETE theme, so it replaced nomogrammer's theme_nomogram:
-                # the meaningless x axis (internal log-odds layout coordinates) came back and
-                # the "line: pos/neg" legend reappeared and squeezed the figure. jamovi's
-                # ggtheme is also a LIST carrying a colour scale, which replaced
-                # scale_color_manual and repainted the red positive / blue negative
-                # trajectories -- the only thing distinguishing the two lines. Apply the
-                # ggtheme first, then re-apply the scale and the blanking tweaks.
-                # TODO (UX): no "jamovi (follow global)" palette choice for the two
-                # trajectories (review guide §23, jmvcore::colorPalette(2, theme$palette)).
-                plot1 <- plot1 + ggtheme +
-                    ggplot2::scale_color_manual(values = c("pos" = "red", "neg" = "blue")) +
-                    ggplot2::theme(
-                        axis.text.x = ggplot2::element_blank(),
-                        axis.ticks.x = ggplot2::element_blank(),
-                        axis.title.x = ggplot2::element_blank(),
-                        axis.title.y = ggplot2::element_text(angle = 0, vjust = 0.5),
-                        axis.title.y.right = ggplot2::element_text(angle = 0, vjust = 0.5),
-                        axis.line = ggplot2::element_blank(),
-                        panel.grid = ggplot2::element_blank(),
-                        legend.position = "none",
-                        plot.title = ggplot2::element_text(hjust = 0.5, size = ggplot2::rel(1.2))
-                    )
 
                 print(plot1)
                 TRUE

@@ -131,6 +131,7 @@ items:
           - cond_dep_pos
           - cond_dep_neg
           - preset
+          - faganColors
 
 refs:
     - ClinicoPathJamoviModule

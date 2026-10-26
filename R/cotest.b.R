@@ -401,7 +401,7 @@ cotestClass <- if (requireNamespace("jmvcore"))
 
             # `ggtheme = NULL`, not a bare parameter: a guard on a missing promise forces it and
             # errors when the renderer is called outside jamovi's engine.
-            .plot1 = function(image1, ggtheme = NULL, ...) {
+            .plot1 = function(image1, ggtheme = NULL, theme = NULL, ...) {
                 plotData <- image1$state
 
                 # .prepareFaganPlotData() already explained the reason in a notice.
@@ -432,7 +432,9 @@ cotestClass <- if (requireNamespace("jmvcore"))
                     PriorLabel = .("Prior\nProb.\n(%)"),
                     PosteriorLabel = .("Posterior\nProb.\n(%)"),
                     DetailLabels = c(prevalence = .("Prevalence"), plr = .("PLR"), nlr = .("NLR"),
-                                     post_pos = .("Post(+)"), post_neg = .("Post(-)"))
+                                     post_pos = .("Post(+)"), post_neg = .("Post(-)")),
+                    Colors = .faganColors(self$options$faganColors, theme),
+                    LegendLabels = c(pos = .("Positive result"), neg = .("Negative result"))
                 )
 
                 # After the theme, so it is not replaced by it. The colour is left to the theme:

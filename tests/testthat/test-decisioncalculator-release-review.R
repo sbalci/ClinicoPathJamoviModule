@@ -312,7 +312,9 @@ test_that("UI dependencies, references, and theme behavior match the repaired co
 
     backend <- paste(readLines(testthat::test_path("..", "..", "R",
                                                   "decisioncalculator.b.R")), collapse = "\n")
-    expect_match(backend, "plot1 <- plot1 \\+ ggtheme")
+    # jamovi's theme reaches the nomogram through nomogrammer(Theme = ggtheme), as in decision and
+    # cotest (library-audit 2026-10-23 meddecide [INFO], Fagan line colors).
+    expect_match(backend, "Theme = ggtheme", fixed = TRUE)
     expect_false(grepl("YOUDEN_EXCELLENT|ACCURACY_EXCELLENT|>25 strong|>0.8 excellent",
                        backend, ignore.case = TRUE))
 })

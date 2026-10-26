@@ -14,6 +14,7 @@ decisioncalculator(
   fnote = FALSE,
   ci = FALSE,
   fagan = FALSE,
+  faganColors = "jamovi",
   showWelcome = FALSE,
   showSummary = FALSE,
   showAbout = FALSE,
@@ -61,6 +62,10 @@ footnotes.}
 intervals.}
 
 \item{fagan}{Boolean selection whether to generate a Fagan nomogram plot.}
+
+\item{faganColors}{Colors of the Fagan nomogram's lines: "jamovi" follows
+the global palette, "classic" draws the positive-result line red and the
+negative-result line blue.}
 
 \item{showWelcome}{Boolean selection whether to show welcome message.}
 

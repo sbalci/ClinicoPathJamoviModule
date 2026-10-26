@@ -21,6 +21,7 @@ decisionOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             fnote = FALSE,
             ci = FALSE,
             fagan = FALSE,
+            faganColors = "jamovi",
             showNaturalLanguage = FALSE,
             showClinicalInterpretation = FALSE,
             showReportTemplate = FALSE,
@@ -119,6 +120,13 @@ decisionOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 "fagan",
                 fagan,
                 default=FALSE)
+            private$..faganColors <- jmvcore::OptionList$new(
+                "faganColors",
+                faganColors,
+                options=list(
+                    "jamovi",
+                    "classic"),
+                default="jamovi")
             private$..showNaturalLanguage <- jmvcore::OptionBool$new(
                 "showNaturalLanguage",
                 showNaturalLanguage,
@@ -187,6 +195,7 @@ decisionOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..fnote)
             self$.addOption(private$..ci)
             self$.addOption(private$..fagan)
+            self$.addOption(private$..faganColors)
             self$.addOption(private$..showNaturalLanguage)
             self$.addOption(private$..showClinicalInterpretation)
             self$.addOption(private$..showReportTemplate)
@@ -217,6 +226,7 @@ decisionOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         fnote = function() private$..fnote$value,
         ci = function() private$..ci$value,
         fagan = function() private$..fagan$value,
+        faganColors = function() private$..faganColors$value,
         showNaturalLanguage = function() private$..showNaturalLanguage$value,
         showClinicalInterpretation = function() private$..showClinicalInterpretation$value,
         showReportTemplate = function() private$..showReportTemplate$value,
@@ -246,6 +256,7 @@ decisionOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..fnote = NA,
         ..ci = NA,
         ..fagan = NA,
+        ..faganColors = NA,
         ..showNaturalLanguage = NA,
         ..showClinicalInterpretation = NA,
         ..showReportTemplate = NA,
@@ -699,7 +710,8 @@ decisionResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "goldPositive",
                     "testPositive",
                     "goldNegative",
-                    "testNegative"),
+                    "testNegative",
+                    "faganColors"),
                 refs=list(
                     "Fagan1975",
                     "Fagan")))
@@ -1245,6 +1257,9 @@ decisionBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param ci Boolean selection whether to calculate and display 95 percent
 #'   confidence intervals.
 #' @param fagan Boolean selection whether to generate a Fagan nomogram plot.
+#' @param faganColors Colors of the Fagan nomogram's lines: "jamovi" follows
+#'   the global palette, "classic" draws the positive-result line red and the
+#'   negative-result line blue.
 #' @param showNaturalLanguage Boolean selection whether to show the natural
 #'   language clinical summary.
 #' @param showClinicalInterpretation Boolean selection whether to show the
@@ -1319,6 +1334,7 @@ decision <- function(
     fnote = FALSE,
     ci = FALSE,
     fagan = FALSE,
+    faganColors = "jamovi",
     showNaturalLanguage = FALSE,
     showClinicalInterpretation = FALSE,
     showReportTemplate = FALSE,
@@ -1362,6 +1378,7 @@ decision <- function(
         fnote = fnote,
         ci = ci,
         fagan = fagan,
+        faganColors = faganColors,
         showNaturalLanguage = showNaturalLanguage,
         showClinicalInterpretation = showClinicalInterpretation,
         showReportTemplate = showReportTemplate,

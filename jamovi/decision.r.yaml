@@ -370,6 +370,7 @@ items:
           - testPositive
           - goldNegative
           - testNegative
+          - faganColors
       refs:
           - Fagan1975
           - Fagan

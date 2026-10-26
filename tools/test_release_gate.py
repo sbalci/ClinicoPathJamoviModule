@@ -83,6 +83,10 @@ options:
     label: Plot Style
   - type: Label
     label: 'Explain the warning'
+  - type: TargetLayoutBox
+    label: Patient identifier
+  - type: TargetLayoutBox
+    label: Outcome Variable (Optional)
 ''')
     write(m, 'jamovi/bad.r.yaml', '''items:
   - name: instructions
@@ -111,6 +115,7 @@ options:
         tbl$setNote("error", NULL)
         tbl$setRow(rowKey = "k", values = list(value = format(k0, digits = 3)))
         x <- .("Fleiss kappa")
+        y <- .("Standardization exists to equalise the contribution; the optimism correction")
     }
     # avoids the jmvcore::Notice serialization error
     #
@@ -127,7 +132,7 @@ options:
                rg.check_level_as_string, rg.check_number_list_strings, rg.check_default_guidance,
                rg.check_empty_preformatted, rg.check_setnote_errors, rg.check_uyaml_structure,
                rg.check_plot_theme_option, rg.check_label_notation, rg.check_text_number_cells,
-               rg.check_notice_myths):
+               rg.check_notice_myths, rg.check_collapsebox_titlecase, rg.check_label_case):
         fn()
     warns = '\n'.join(rg.WARN)
     assert 'bad::.grid (1)' in warns and '.populateInstructions' not in warns, warns  # help is exempt by name
@@ -144,5 +149,8 @@ options:
     assert 'bad.u.yaml:15' in warns and 'bad.b.R:' in warns, warns    # "Explain ..." label; bare eponym
     assert '1 shipped cells receive R-formatted numbers' in warns, warns
     assert '1 shipped comments repeat' in warns, warns                # the corrected comment is not a hit
+    assert 'bad: Patient identifier' in warns and 'Outcome Variable' not in warns, warns  # variable boxes too
+    fails = '\n'.join(rg.FAIL)
+    assert 'equalis' in fails and 'optimis' not in fails, fails        # "optimism" is not British
 
 print('round-8 checks: ok')

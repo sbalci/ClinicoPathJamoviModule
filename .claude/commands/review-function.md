@@ -358,6 +358,7 @@ Checklist:
 | en.po up to date | ☐ | Reflects current code |
 | Placeholders match in msgid/msgstr | ☐ | `{n}` in both |
 | No fuzzy entries | ☐ | Review `#, fuzzy` markers |
+| Reworded strings kept their Turkish | ☐ | `python3 tools/i18n_carry_translations.py <module> --base <rev>` reads 0 to carry, 0 obsolete |
 | UTF-8 encoding | ☐ | Turkish characters display |
 | **Testing** | | |
 | Tested with Turkish language | ☐ | Change jamovi language setting |

@@ -47,6 +47,7 @@
 | `showNaturalSummary` | `Bool` | `FALSE` | Natural language summary |
 | `showGlossary` | `Bool` | `FALSE` | Survival analysis glossary |
 | `addOutcome` | `Output` | `NULL` | Add Recoded Outcome to Data |
+| `addAdminTime` | `Output` | `NULL` | Add Administratively Censored Follow-up Time to Data |
 
 ## 3. Results Definition (`.r.yaml`)
 
@@ -65,6 +66,7 @@
 | `naturalSummary` | `Html` | `Natural Language Summary (Copy-Ready)` |  |
 | `glossary` | `Html` | `Survival Analysis Glossary` |  |
 | `addOutcome` | `Output` | `Add Recoded Outcome to Data` |  |
+| `addAdminTime` | `Output` | `Add Administratively Censored Follow-up Time to Data` |  |
 
 ## 4. Architecture & Data Flow Diagram
 

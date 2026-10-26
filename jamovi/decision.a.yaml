@@ -230,6 +230,24 @@ options:
           R: >
             Boolean selection whether to generate a Fagan nomogram plot.
 
+    - name: faganColors
+      title: Fagan line colors
+      type: List
+      options:
+        - name: jamovi
+          title: jamovi (follow global)
+        - name: classic
+          title: Red / blue (classic)
+      default: jamovi
+      description:
+          ui: >
+            Colors of the Fagan nomogram's positive-result and negative-result lines. "jamovi
+            (follow global)" uses the palette chosen in jamovi, like the other plots; a legend
+            names the two lines.
+          R: >
+            Colors of the Fagan nomogram's lines: "jamovi" follows the global palette, "classic"
+            draws the positive-result line red and the negative-result line blue.
+
     - name: showNaturalLanguage
       title: "Clinical summary"
       type: Bool

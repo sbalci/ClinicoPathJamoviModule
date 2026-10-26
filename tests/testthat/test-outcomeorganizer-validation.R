@@ -1104,3 +1104,20 @@ test_that("Release-gate UI and comment hygiene: single top-level VariableSupplie
   comment_lines <- grep("^\\s*#", b_lines, value = TRUE)
   expect_false(any(grepl("protobuf serialization error", comment_lines, fixed = TRUE)))
 })
+
+test_that("Security: .sourcifyOption escapes quote-breaking strings and drops undeclared/list options", {
+  df <- data.frame(a = factor(c("Alive", "Dead")), b = c(10, 20))
+  payload <- 'Dead", eventPriority = {stop("X"); 1}, analysistype = "os'
+  opts <- .oo_fn("outcomeorganizerOptions")$new(outcome = "a", outcomeLevel = "Dead")
+  an <- .oo_fn("outcomeorganizerClass")$new(options = opts, data = df)
+
+  o <- an$options$option("outcomeLevel")
+  o$value <- payload
+  ex <- parse(text = an$asSource())[[1]]
+  expect_identical(ex$outcomeLevel, payload)
+  expect_false("eventPriority" %in% names(ex))
+
+  an$options$.addOption(jmvcore:::Option$new('outcome = "a", eventPriority = {stop("X"); 1}, analysistype', "os"))
+  ex2 <- parse(text = an$asSource())[[1]]
+  expect_false("eventPriority" %in% names(ex2))
+})

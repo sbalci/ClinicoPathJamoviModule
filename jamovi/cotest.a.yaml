@@ -215,6 +215,24 @@ options:
             "Either Test Positive" row of the results table, not to "Both Tests Positive".
 
     # Clinical presets
+    - name: faganColors
+      title: Fagan line colors
+      type: List
+      options:
+        - name: jamovi
+          title: jamovi (follow global)
+        - name: classic
+          title: Red / blue (classic)
+      default: jamovi
+      description:
+          ui: >
+            Colors of the Fagan nomogram's positive-result and negative-result lines. "jamovi
+            (follow global)" uses the palette chosen in jamovi, like the other plots; a legend
+            names the two lines.
+          R: >
+            Colors of the Fagan nomogram's lines: "jamovi" follows the global palette, "classic"
+            draws the positive-result line red and the negative-result line blue.
+
     - name: preset
       title: Worked example
       type: List

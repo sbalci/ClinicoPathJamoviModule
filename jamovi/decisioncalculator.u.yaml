@@ -119,6 +119,9 @@ children:
             children:
               - type: CheckBox
                 name: fagan
+              - type: ComboBox
+                name: faganColors
+                enable: (fagan)
 
   - type: CollapseBox
     label: Advanced Options

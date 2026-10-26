@@ -1697,3 +1697,36 @@ test_that("enhancedROC shows a predictor whose name starts with < in its table c
   expect_false(lod %in% r$aucSummary$asDF$predictor)
   expect_true(shown %in% c(r$rocComparisons$asDF$predictor1, r$rocComparisons$asDF$predictor2))
 })
+
+# library-audit 2026-10-23 meddecide [INFO] DONE (decisioncalculator palette note): the three Fagan
+#   nomograms follow jamovi's palette by default and name their lines in a legend; "classic" keeps
+#   red for positive and blue for negative.
+test_that("Fagan nomogram lines follow the jamovi palette and carry a legend", {
+  wanted <- c("decision", "decisioncalculator", "cotest")
+  loaded <- audit_loaded(wanted)
+  skip_if(!length(loaded), "none of the Fagan analyses is loaded")
+  grDevices::pdf(NULL)
+  on.exit(grDevices::dev.off(), add = TRUE)
+  d <- data.frame(g = factor(rep(c("D", "H"), c(40, 60))),
+                  t = factor(c(rep(c("P", "N"), c(30, 10)), rep(c("P", "N"), c(12, 48)))))
+  build <- function(name, colors) {
+    opts <- switch(name,
+      decision = decisionOptions$new(gold = "g", goldPositive = "D", newtest = "t", testPositive = "P",
+                                     fagan = TRUE, faganColors = colors),
+      decisioncalculator = decisioncalculatorOptions$new(TP = 30, FP = 12, TN = 48, FN = 10,
+                                                         fagan = TRUE, faganColors = colors),
+      cotest = cotestOptions$new(fagan = TRUE, faganColors = colors))
+    a <- get(paste0(name, "Class"))$new(options = opts, data = if (name == "decision") d else data.frame())
+    suppressWarnings(suppressMessages(a$run()))
+    a$results$plot1$saveAs(tempfile(fileext = ".png"))
+    p <- ggplot2::last_plot()
+    list(colours = unique(ggplot2::layer_data(p, 1)$colour), legend = p$theme$legend.position)
+  }
+  global <- unname(jmvcore::colorPalette(2, "jmv", type = "color"))
+  for (name in loaded) {
+    follow <- build(name, "jamovi")
+    expect_setequal(follow$colours, global)
+    expect_identical(follow$legend, "bottom")
+    expect_setequal(build(name, "classic")$colours, c("red", "blue"))
+  }
+})

@@ -15,6 +15,7 @@ decisioncalculatorOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::
             fnote = FALSE,
             ci = FALSE,
             fagan = FALSE,
+            faganColors = "jamovi",
             showWelcome = FALSE,
             showSummary = FALSE,
             showAbout = FALSE,
@@ -79,6 +80,13 @@ decisioncalculatorOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::
                 "fagan",
                 fagan,
                 default=FALSE)
+            private$..faganColors <- jmvcore::OptionList$new(
+                "faganColors",
+                faganColors,
+                options=list(
+                    "jamovi",
+                    "classic"),
+                default="jamovi")
             private$..showWelcome <- jmvcore::OptionBool$new(
                 "showWelcome",
                 showWelcome,
@@ -167,6 +175,7 @@ decisioncalculatorOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::
             self$.addOption(private$..fnote)
             self$.addOption(private$..ci)
             self$.addOption(private$..fagan)
+            self$.addOption(private$..faganColors)
             self$.addOption(private$..showWelcome)
             self$.addOption(private$..showSummary)
             self$.addOption(private$..showAbout)
@@ -197,6 +206,7 @@ decisioncalculatorOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::
         fnote = function() private$..fnote$value,
         ci = function() private$..ci$value,
         fagan = function() private$..fagan$value,
+        faganColors = function() private$..faganColors$value,
         showWelcome = function() private$..showWelcome$value,
         showSummary = function() private$..showSummary$value,
         showAbout = function() private$..showAbout$value,
@@ -226,6 +236,7 @@ decisioncalculatorOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::
         ..fnote = NA,
         ..ci = NA,
         ..fagan = NA,
+        ..faganColors = NA,
         ..showWelcome = NA,
         ..showSummary = NA,
         ..showAbout = NA,
@@ -647,7 +658,8 @@ decisioncalculatorResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::
                     "FN",
                     "pp",
                     "pprob",
-                    "fagan"),
+                    "fagan",
+                    "faganColors"),
                 refs=list(
                     "Fagan",
                     "Fagan1975")))
@@ -852,6 +864,9 @@ decisioncalculatorBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
 #' @param ci Boolean selection whether to calculate 95 percent confidence
 #'   intervals.
 #' @param fagan Boolean selection whether to generate a Fagan nomogram plot.
+#' @param faganColors Colors of the Fagan nomogram's lines: "jamovi" follows
+#'   the global palette, "classic" draws the positive-result line red and the
+#'   negative-result line blue.
 #' @param showWelcome Boolean selection whether to show welcome message.
 #' @param showSummary Boolean selection whether to show plain-language summary
 #'   of results.
@@ -915,6 +930,7 @@ decisioncalculator <- function(
     fnote = FALSE,
     ci = FALSE,
     fagan = FALSE,
+    faganColors = "jamovi",
     showWelcome = FALSE,
     showSummary = FALSE,
     showAbout = FALSE,
@@ -949,6 +965,7 @@ decisioncalculator <- function(
         fnote = fnote,
         ci = ci,
         fagan = fagan,
+        faganColors = faganColors,
         showWelcome = showWelcome,
         showSummary = showSummary,
         showAbout = showAbout,

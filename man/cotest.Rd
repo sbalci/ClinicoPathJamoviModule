@@ -18,6 +18,7 @@ cotest(
   showGuidance = FALSE,
   fnote = FALSE,
   fagan = FALSE,
+  faganColors = "jamovi",
   preset = "custom"
 )
 }
@@ -78,6 +79,10 @@ likelihood ratio and post-test probability means.}
 if either test is positive, negative only if both are negative). Its
 positive arm corresponds to the "Either Test Positive" row of the results
 table, not to "Both Tests Positive".}
+
+\item{faganColors}{Colors of the Fagan nomogram's lines: "jamovi" follows
+the global palette, "classic" draws the positive-result line red and the
+negative-result line blue.}
 
 \item{preset}{Select a worked example, or "custom" to enter your own
 values. Selecting a worked example OVERRIDES test1_sens, test1_spec,

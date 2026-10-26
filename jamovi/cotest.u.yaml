@@ -115,3 +115,6 @@ children:
           - type: CheckBox
             name: fagan
             label: "Fagan nomogram"
+          - type: ComboBox
+            name: faganColors
+            enable: (fagan)

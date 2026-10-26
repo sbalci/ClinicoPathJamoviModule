@@ -2951,7 +2951,7 @@ decisionClass <- if (requireNamespace("jmvcore"))
             }
 
             ,
-            .plot1 = function(image1, ggtheme, ...) {
+            .plot1 = function(image1, ggtheme, theme = NULL, ...) {
                 # Validate plot state data structure
                 plotData1 <- private$.validatePlotState(image1$state)
 
@@ -2984,7 +2984,9 @@ decisionClass <- if (requireNamespace("jmvcore"))
                     PriorLabel = .("Prior\nProb.\n(%)"),
                     PosteriorLabel = .("Posterior\nProb.\n(%)"),
                     DetailLabels = c(prevalence = .("Prevalence"), plr = .("PLR"), nlr = .("NLR"),
-                                     post_pos = .("Post(+)"), post_neg = .("Post(-)"))
+                                     post_pos = .("Post(+)"), post_neg = .("Post(-)")),
+                    Colors = .faganColors(self$options$faganColors, theme),
+                    LegendLabels = c(pos = .("Positive result"), neg = .("Negative result"))
                 )
 
                 print(plot1)

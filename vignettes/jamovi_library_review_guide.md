@@ -1078,14 +1078,24 @@ stems: `analys`, `characteris`, `optimis` and `organis` also match "analyses",
 "characteristic", "optimism" and "organism".
 Changing a msgid needs the Turkish re-keyed: add the new msgid with the old
 translation (sentence-cased when the casing changed) and keep the old entry, because
-another module may still use it; `i18nUpdate()` drops it where it is unused.
+another module may still use it; `i18nUpdate()` drops it where it is unused. After
+`i18nUpdate()`, `python3 tools/i18n_carry_translations.py <module> --base <rev>` lists what the
+rewording lost. It carries case and spelling changes with `--write`. It lists meaning changes, where
+a copied translation would keep the dropped "(kappa0)", for a person to rewrite. It also lists live
+msgids that duplicate an obsolete `#~` entry, which make `msgfmt -c` fail. i18n guide §11.4. In the
+meddecide 250-label pass, a one-off script read the old strings out of the R source and lost 4
+translations to `\u2014` escapes; the tool found them.
 
 **Enforce it:** `tools/release_gate.py` `check_label_case` (all-caps `.()` strings;
 when added: OncoPath 46, ClinicoPathDescriptives 8, meddecide 4, jjstatsplot and
 jsurvival 0; **FAIL** since 2026-10-24, when the sweep reached 0 shipped everywhere), `check_collapsebox_nested` (**FAIL** since 2026-10-24: it found exactly
 the reviewer's one site, `diagnosticmeta`, which is regrouped; 0 shipped everywhere, 32 in
-parked analyses as promotion debt) and `check_collapsebox_titlecase`. List-title casing
-and "one concept, one name" have no detector: judging them needs a reader.
+parked analyses as promotion debt) and `check_collapsebox_titlecase`, which covers variable boxes
+(`TargetLayoutBox`) as well as `CollapseBox` headings since 2026-10-26. Its parenthetical-stripping
+still lets "Test 1 (required)" through; meddecide's audit test checks the words inside the parentheses
+too. The British-spelling list gained `equalis` and `standardis` that day. `optimis` was tried and
+dropped, because it also matches "optimism" and would have failed jsurvival. List-title casing and
+"one concept, one name" have no detector: judging them needs a reader.
 
 ### Round 8: labels a clinician reads (2026-10-23 meddecide [LOW])
 
@@ -2173,6 +2183,14 @@ defect one layer up — `enhancedROC`'s `plotTheme` (Classic / Modern / Clinical
 disagree with the document. Draw with the `ggtheme` jamovi passes. **Enforce it:**
 `check_plot_theme_option` (WARN; a `List` option whose name contains "theme") — MD 1, OP 1,
 CPD 1, JJ 5, JS 0 on 2026-10-24.
+
+The author kept `enhancedROC`'s option (2026-10-25) by giving it a first choice `jamovi` ("jamovi
+(follow global)") that is also the default and adds nothing to `ggtheme`. Classic, Modern and Clinical
+stay as explicit overrides. That is this section's palette pattern applied to themes, and the check
+now accepts it: a theme list whose `default` is `jamovi` is not a hit. A default named `default` is
+still a hit, because in several modules it means ggplot's own theme, not jamovi's. The umbrella still
+has 4 shipped hits: hullplot, jjridges, raincloud, and swimmerplot, whose list has the jamovi choice
+but not as its default.
 
 ---
 

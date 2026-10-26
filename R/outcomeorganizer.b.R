@@ -1453,6 +1453,17 @@ outcomeorganizerClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             html$setContent(todo)
         },
 
+        .sourcifyOption = function(option) {
+            if (!option$name %in% names(formals(outcomeorganizer)))
+                return("")
+            value <- option$value
+            if (is.list(value))
+                return("")
+            if (is.character(value) && length(value) == 1L && !is.na(value) && !identical(value, option$default))
+                return(paste0(option$name, " = ", encodeString(value, quote = '"')))
+            super$.sourcifyOption(option)
+        },
+
         .run = function() {
             # Reset notices at start of each run
             private$.resetNotices()
@@ -1463,6 +1474,7 @@ outcomeorganizerClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # Censored/Event/Competing column instead of the current outcome.
             private$.causeFactor <- NULL
             private$.eventRecode <- NULL
+            private$.adminTime <- NULL
 
             # Initial validation
             if (is.null(self$options$outcome)) {
@@ -2115,17 +2127,17 @@ outcomeorganizerClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 )
 
                 # Add proper labels based on analysis type using private method
-                plot_df$Label <- sapply(plot_df$Outcome, function(val) {
+                plot_df$Label <- vapply(plot_df$Outcome, function(val) {
                     private$.getOutcomeLabel(val, plotData$analysis_type, plotData$multi_event, plotData$codes_present)
-                })
+                }, character(1))
 
                 # Color-blind safe palette
                 cb_palette <- c("#0072B2", "#E69F00", "#009E73", "#F0E442", "#CC79A7", "#56B4E9")
 
                 # Create the plot
-                plot <- ggplot2::ggplot(plot_df, ggplot2::aes(x = Label, y = Count, fill = Label)) +
+                plot <- ggplot2::ggplot(plot_df, ggplot2::aes(x = .data$Label, y = .data$Count, fill = .data$Label)) +
                     ggplot2::geom_bar(stat = "identity") +
-                    ggplot2::geom_text(ggplot2::aes(label = Count), vjust = -0.5, size = 5) +
+                    ggplot2::geom_text(ggplot2::aes(label = .data$Count), vjust = -0.5, size = 5) +
                     ggplot2::labs(
                         title = .("Distribution of Recoded Outcome Values"),
                         x = .("Outcome Category"),

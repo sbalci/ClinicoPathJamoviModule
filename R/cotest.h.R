@@ -19,6 +19,7 @@ cotestOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             showGuidance = FALSE,
             fnote = FALSE,
             fagan = FALSE,
+            faganColors = "jamovi",
             preset = "custom", ...) {
 
             super$initialize(
@@ -93,6 +94,13 @@ cotestOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 "fagan",
                 fagan,
                 default=FALSE)
+            private$..faganColors <- jmvcore::OptionList$new(
+                "faganColors",
+                faganColors,
+                options=list(
+                    "jamovi",
+                    "classic"),
+                default="jamovi")
             private$..preset <- jmvcore::OptionList$new(
                 "preset",
                 preset,
@@ -119,6 +127,7 @@ cotestOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..showGuidance)
             self$.addOption(private$..fnote)
             self$.addOption(private$..fagan)
+            self$.addOption(private$..faganColors)
             self$.addOption(private$..preset)
         }),
     active = list(
@@ -135,6 +144,7 @@ cotestOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         showGuidance = function() private$..showGuidance$value,
         fnote = function() private$..fnote$value,
         fagan = function() private$..fagan$value,
+        faganColors = function() private$..faganColors$value,
         preset = function() private$..preset$value),
     private = list(
         ..test1_name = NA,
@@ -150,6 +160,7 @@ cotestOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..showGuidance = NA,
         ..fnote = NA,
         ..fagan = NA,
+        ..faganColors = NA,
         ..preset = NA)
 )
 
@@ -296,7 +307,8 @@ cotestResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "indep",
                     "cond_dep_pos",
                     "cond_dep_neg",
-                    "preset")))}))
+                    "preset",
+                    "faganColors")))}))
 
 cotestBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "cotestBase",
@@ -418,6 +430,9 @@ cotestBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   if either test is positive, negative only if both are negative). Its
 #'   positive arm corresponds to the "Either Test Positive" row of the results
 #'   table, not to "Both Tests Positive".
+#' @param faganColors Colors of the Fagan nomogram's lines: "jamovi" follows
+#'   the global palette, "classic" draws the positive-result line red and the
+#'   negative-result line blue.
 #' @param preset Select a worked example, or "custom" to enter your own
 #'   values. Selecting a worked example OVERRIDES test1_sens, test1_spec,
 #'   test2_sens, test2_spec, prevalence, indep, cond_dep_pos and cond_dep_neg;
@@ -459,6 +474,7 @@ cotest <- function(
     showGuidance = FALSE,
     fnote = FALSE,
     fagan = FALSE,
+    faganColors = "jamovi",
     preset = "custom") {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
@@ -479,6 +495,7 @@ cotest <- function(
         showGuidance = showGuidance,
         fnote = fnote,
         fagan = fagan,
+        faganColors = faganColors,
         preset = preset)
 
     analysis <- cotestClass$new(

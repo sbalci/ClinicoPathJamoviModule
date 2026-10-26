@@ -5,6 +5,50 @@ prevents them. Newest first. Release notes for users live in `NEWS.md`.
 
 ---
 
+## 2026-10-26 — library audit round 8, implement pass (meddecide): three traps in our own remediation
+
+### A test helper reached for `$root` and 18 rewired assertions errored at once
+
+- **Failure mode:** finding 12 moved agreement's failure messages from footnotes into notices. The
+  test helper that read them looked them up through `table$root$items`. In jmvcore 2.7.38
+  `ResultsElement$root` walks past the top results Group and returns the Analysis, so every call
+  errored with `'items' does not exist in this results element`.
+- **Detection signal:** the full agreement suite, after a 20-minute run. A one-line probe of `$root`
+  was started and then killed under load, so the helper went unverified.
+- **Prevention rule:** reach the results tree with `$analysis$results`. Look items up through one
+  resolver once headings are Groups. `jamovi_b_R_guide.md` → "Looking Results Up by Name"; this
+  skill's pitfall 31. No detector: the mistake errors loudly on its first call.
+
+### A 250-label pass silently lost Turkish translations and broke `msgfmt -c`
+
+- **Failure mode:** `i18nUpdate()` gives a reworded msgid an empty `msgstr` (it never writes
+  `#, fuzzy`). A one-off carry script read the old strings out of the R source. There a literal holds
+  `\u2014` where the `.po` holds "—", so the script missed 4 translated sentences (cut-point →
+  cutoff) and classed them as never translated. Two relabels ("Class Variable (Gold Standard)",
+  "Test Variables") matched obsolete `#~` entries, which `msgfmt -c` rejects as duplicate
+  definitions, in catalog.pot, en.po and tr.po. The i18n guide's §11.4 also said the opposite of the
+  measured behaviour (that jmvtools marks fuzzy).
+- **Detection signal:** writing the reusable tool and running it against the pre-change commit
+  (848f5c4^): 7 CARRY, 2 OBSOLETE, both missed by the one-off pass and by every test.
+- **Prevention rule:** after any relabel, `python3 tools/i18n_carry_translations.py <module> --base
+  <rev>` reads 0 to carry and 0 obsolete. Write REVIEW lines by hand for the new meaning, then run
+  `msgfmt -c`. i18n guide §11.4 rewritten; review guide §12; review-function checklist row; skill
+  pitfall 12. The tool has `--selftest`.
+
+### Two gate checks were too wide or too narrow for the fix the author chose
+
+- **Failure mode:** `check_plot_theme_option` flagged every theme `List`. It still flagged
+  enhancedROC after its default became `jamovi` (follow global), the section 23 pattern. The Title
+  Case check read only `CollapseBox` labels, so 17 variable boxes in sentence case passed. The
+  spelling list missed "equalise". Its first widening, `optimis`, also matched "optimism" and would
+  have failed jsurvival.
+- **Detection signal:** the gate re-run after each finding (16 and 17), and a gate run over all five
+  siblings before keeping the new spelling word.
+- **Prevention rule:** a theme list defaulting to `jamovi` is not a hit; `default` still is, because
+  it means ggplot's theme in several modules. `TargetLayoutBox` labels are in the Title Case check.
+  Spelling adds `equalis` and `standardis`, not `optimis`. Each case is in `tools/test_release_gate.py`
+  with its clean twin. Review guide §12 and §23.
+
 ## 2026-10-24 — library audit round 8 (meddecide 1.1.2): a clean gate on a module the reviewer read in a new way
 
 ### 20 findings on a build the gate called "0 blocking"

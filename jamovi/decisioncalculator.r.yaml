@@ -347,6 +347,7 @@ items:
           - pp
           - pprob
           - fagan
+          - faganColors
       refs:
           - Fagan
           - Fagan1975

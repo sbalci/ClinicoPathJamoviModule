@@ -2170,6 +2170,33 @@ advancedSurvivalClass <- if (requireNamespace('jmvcore', quietly = TRUE))
 }
 ```
 
+### Looking Results Up by Name When Some Sit in a Group
+
+`self$results[[name]]` and `for (item in self$results$items)` see only the **top level**. Once a
+section heading becomes a `type: Group` (library review, meddecide `agreement`, 2026-10-25), its
+tables are one level down: the lookup returns `NULL` and the loop silently skips them, so code that
+blanks or clears "every table" stops reaching the grouped ones. Route both through one resolver:
+
+```R
+.resultItem = function(name) {
+    for (item in self$results$items) {
+        if (identical(item$name, name)) return(item)
+        if (inherits(item, "Group") && !is.null(item$items[[name]])) return(item$items[[name]])
+    }
+    NULL
+},
+.allTables = function() {
+    items <- unlist(lapply(self$results$items, function(item)
+        if (inherits(item, "Group")) item$items else list(item)), recursive = FALSE)
+    Filter(function(item) inherits(item, "Table"), items)
+},
+```
+
+From an element (a table handed to a helper), reach the tree with **`table$analysis$results`**, not
+`table$root`. In jmvcore 2.7.38 `ResultsElement$root` loops `while (inherits(parent, "ResultsElement"))`,
+so it walks past the top results Group and returns the Analysis; `table$root$items` errors with
+`'items' does not exist in this results element`. `table$parent` is only the immediate container.
+
 ## 12. Performance Optimization
 
 ### Efficient Data Processing

@@ -788,7 +788,8 @@ msgstr[1] "{n} gözlem"  # Turkish: same form for plural
 - Missing translations (empty `msgstr`)
 - Placeholder consistency (`{var}` in both msgid and msgstr)
 - Encoding (must be UTF-8)
-- Fuzzy entries (marked with `#, fuzzy` - need review)
+- Fuzzy entries (marked with `#, fuzzy` - need review; `i18nUpdate()` itself never writes them)
+- Translations lost to a reworded string: `python3 tools/i18n_carry_translations.py <module>` (§11.4)
 
 **Command line check:**
 ```bash
@@ -1536,24 +1537,35 @@ private$.run = function() {
 }
 ```
 
-### 11.4 Fuzzy Translations
+### 11.4 A Reworded String Loses Its Translation
 
-**Symptom:** .po file has `#, fuzzy` markers
+**Symptom:** after a label or sentence is reworded, Turkish users see it in English.
 
-**Cause:** jmvtools detected string changed since last translation
+**Cause:** `jmvtools::i18nUpdate()` has no fuzzy matching. A changed `msgid` arrives with
+`msgstr ""`, and the old entry is dropped (or kept as an obsolete `#~` block). Nothing in `en.po`, the
+build or the tests shows it, because English falls back to the msgid. Changing "Youden Index" to
+"Youden's index", or "cut-point" to "cutoff", is enough.
 
-**Example:**
-```po
-#, fuzzy
-msgid "Analysis completed"
-msgstr "Analiz tamamlandı"
+**Solution:** after `i18nUpdate()`, compare the catalog with the last commit:
+
+```bash
+python3 tools/i18n_carry_translations.py <module> [--base REV]           # list
+python3 tools/i18n_carry_translations.py <module> [--base REV] --write   # restore
+Rscript --vanilla tools/i18n_rebuild_json.R <module>
+msgfmt -c -o /dev/null <module>/jamovi/i18n/tr.po
 ```
 
-**Solution:**
-1. Review if translation still appropriate
-2. Update if needed
-3. Remove `#, fuzzy` line
-4. Rebuild module
+- **CARRY**: the new wording differs only in case, spelling (British/American, cut-off/cutoff) or
+  quote marks from a translated entry. `--write` copies the old Turkish, editing only that `msgstr`.
+- **REVIEW**: the meaning changed: a dropped parenthetical, a merged phrase, a corrected range.
+  Rewrite the Turkish by hand. A copied translation would still say "(kappa0)" or "[Kategorik]".
+- **OBSOLETE**: a live `msgid` also survives as a `#~` entry (a label renamed back to an earlier
+  wording). `msgfmt -c` rejects that as a duplicate definition; delete the `#~` block. A later
+  `i18nUpdate()` does not bring it back.
+
+Match on the catalog's text, not on the R source. An R literal holds `—` where the `.po` holds
+"—", so a script that reads old strings out of `.b.R` misses those entries. That is how four
+translations went missing in a 250-label pass, until the tool found them (meddecide, 2026-10-26).
 
 ### 11.5 Special Characters Not Displaying
 
