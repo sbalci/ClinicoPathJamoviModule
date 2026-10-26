@@ -7,6 +7,33 @@ prevents them. Newest first. Release notes for users live in `NEWS.md`.
 
 ## 2026-10-26 — library audit round 8, implement pass (meddecide): three traps in our own remediation
 
+### Every Turkish fix of the round lived only in the sibling, which the next regeneration overwrites
+
+- **Failure mode:** `_updateModules_config.yaml` lists `i18n_files` for meddecide,
+  ClinicoPathDescriptives and OncoPath. Regeneration copies the **umbrella's** `jamovi/i18n/tr.po`
+  into the module and trims it. Throughout the round the translations were written into the
+  sibling's `tr.po`: about 250 relabels, the kappa symbols, and the new strings of three follow-up
+  fixes. The umbrella catalog therefore lacked 220 of them, and the next `_updateModules.R` run
+  would have shipped those strings in English.
+- **Detection signal:** `test-decisioncombine-independent-review.R` "IR-R2-8b", which checks every
+  `.()` string of decisioncombine against the **umbrella** catalog. It failed on one reworded
+  sentence, and that led to the other 219.
+- **Prevention rule:** for a module with `i18n_files`, translate in the umbrella catalog first,
+  then in the sibling, or copy back. `tools/i18n_carry_translations.py` on both, then compare the two.
+  Skill pitfall 12; i18n guide §11.4.
+
+### Test selection by grepping for old strings missed tests that build them at runtime
+
+- **Failure mode:** after finding 17's relabels, the tests run were picked by grepping for the old
+  wording. Three files build it instead (`paste0("(", id, ")")`, a regex holding `kappa1`), so they
+  were never run and failed later. A kappaSize test, "every option named in a validation message is
+  named on screen", rightly flagged that the labels said kappa-sub-0 while about 30 notes still
+  said kappa0. A second test, "F4", had decided that kappaSizeFixedN says "kappa" with no symbol.
+- **Detection signal:** running the whole kappaSize set during a later follow-up.
+- **Prevention rule:** after a label or message change, run every test file of each analysis
+  touched, not a grep-picked subset. A relabel must keep the labels and the messages that name the
+  same input in step.
+
 ### A test helper reached for `$root` and 18 rewired assertions errored at once
 
 - **Failure mode:** finding 12 moved agreement's failure messages from footnotes into notices. The

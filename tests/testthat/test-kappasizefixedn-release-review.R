@@ -225,7 +225,7 @@ test_that("the Notes panel states the method and the kappa0 hazard", {
     expect_match(plain, "Methodology")
     expect_match(plain, "intraclass \\(Fleiss-type\\) kappa")
     expect_match(plain, "steps of 0.001")
-    expect_match(plain, "kappa0 here is the agreement you anticipate")
+    expect_match(plain, "the anticipated kappa here is the agreement you expect")
     expect_match(plain, "kappaSizePower", fixed = TRUE)
     expect_false(grepl("Sparse categories", plain, fixed = TRUE))
     expect_false(grepl("cannot demonstrate agreement", plain, fixed = TRUE))
@@ -354,7 +354,7 @@ test_that("the Notes panel says the bound is a best case, not a guarantee", {
     # kappa0; about half of such studies do worse. Without this a planner reads the bound
     # as a floor the study is guaranteed to clear.
     notes <- fn_run()$methodology$content
-    expect_match(notes, "lands exactly on kappa0", fixed = TRUE)
+    expect_match(notes, "lands exactly on the anticipated kappa", fixed = TRUE)
     # and only if the proportions are the anticipated ones: observed kappa exactly 0.6, n 250, two raters gives
     # 0.510 at prevalence .5 and 0.489 at .2 (/fix-function 2026-10-17)
     expect_match(notes, "and its category proportions match the anticipated ones", fixed = TRUE)

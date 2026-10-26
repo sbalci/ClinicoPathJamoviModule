@@ -293,8 +293,8 @@ outcomeorganizerClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         validation_results$info <- c(validation_results$info,
                             .fmt(.("Outcome variable has {count} unique values: {values}{more}"), 
                                 count = outcome_count,
-                                values = paste(head(unique_outcomes, 5), collapse=", "),
-                                more = if(outcome_count > 5) "..." else ""))
+                                values = paste(head(unique_outcomes, 5), collapse = ", "),
+                                more = if (outcome_count > 5) "..." else ""))
                     }
                 }
             }
@@ -305,7 +305,7 @@ outcomeorganizerClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 validation_results$errors <- c(validation_results$errors,
                     .fmt(.("Invalid analysis type '{type}'. Must be one of: {valid}"), 
                         type = analysistype,
-                        valid = paste(valid_analysis_types, collapse=", ")))
+                        valid = paste(valid_analysis_types, collapse = ", ")))
                 validation_results$should_stop <- TRUE
             }
             
@@ -738,7 +738,7 @@ outcomeorganizerClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                                   collapse = ", ")))
                     diagnostics$recoding_warning <- sprintf(.("Only %d/%d (%.1f%%) outcomes successfully recoded"),
                                                              n_recoded, length(outcome1),
-                                                             n_recoded/length(outcome1) * 100)
+                                                             n_recoded / length(outcome1) * 100)
                 }
 
                 # Apply event hierarchy if specified
@@ -914,13 +914,14 @@ outcomeorganizerClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                                     sprintf(
                                         .("%d patient(s) have more than one row. For each, the EARLIEST record carrying the priority outcome (%s) was kept as the event and their tied or later rows were censored, so the event is not moved earlier in time. However, this analysis does not collapse the dataset to one row per patient: passing multiple rows per patient into an unclustered survival analysis (Surv(time, status)) treats repeated rows as independent subjects and double-counts censored person-time. Reduce your data to one row per patient (or use a clustered/counting-process model) before running downstream survival analyses."),
                                         n_affected, highest_priority))
-                            } else
-                            private$.addHtmlMessage(
-                                "warning",
-                                .("Event hierarchy applied to repeated patient records"),
-                                sprintf(
-                                    .("%d patient(s) have more than one row. For each of them the priority outcome (%s) has been written to EVERY one of their rows. Because this analysis has no follow-up-time variable it cannot order those rows, so if they are successive time points a later event is copied back onto the earlier ones - which in a survival model would place the event earlier than it happened, and count it once per row. Reduce your data to one row per patient (keeping the earliest priority event and its date) before using this option."),
-                                    n_affected, highest_priority))
+                            } else {
+                                private$.addHtmlMessage(
+                                    "warning",
+                                    .("Event hierarchy applied to repeated patient records"),
+                                    sprintf(
+                                        .("%d patient(s) have more than one row. For each of them the priority outcome (%s) has been written to EVERY one of their rows. Because this analysis has no follow-up-time variable it cannot order those rows, so if they are successive time points a later event is copied back onto the earlier ones - which in a survival model would place the event earlier than it happened, and count it once per row. Reduce your data to one row per patient (keeping the earliest priority event and its date) before using this option."),
+                                        n_affected, highest_priority))
+                            }
                             }
                             applied$hierarchy <- hierarchy_ran
                         }
@@ -1871,7 +1872,7 @@ outcomeorganizerClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     count <- outcome_counts[i]
                     label <- private$.getOutcomeLabel(value, analysistype, self$options$multievent, codes_present)
 
-                    outcome_table$addRow(rowKey=i, values=list(
+                    outcome_table$addRow(rowKey = i, values = list(
                         outcome = value,
                         label = label,
                         count = count,
@@ -1888,7 +1889,7 @@ outcomeorganizerClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 # Add each diagnostic as a row
                 i <- 1
                 for (key in names(diagnostics)) {
-                    diagnostics_table$addRow(rowKey=i, values=list(
+                    diagnostics_table$addRow(rowKey = i, values = list(
                         check = key,
                         result = diagnostics[[key]]
                     ))

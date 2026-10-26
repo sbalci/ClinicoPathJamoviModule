@@ -463,7 +463,7 @@ kappaSizeFixedNClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
                 .("This is a planning expectation, not a guarantee."),
                 # The bound conditions on the proportions too: two raters, n 250, observed kappa exactly
                 # 0.6 give 0.510 at prevalence .5 and 0.489 at .2 (/fix-function 2026-10-17).
-                .("This is the bound the study reaches if the agreement it observes lands exactly on kappa0 and its category proportions match the anticipated ones. Roughly half of such studies will observe less agreement than anticipated and end with a lower bound below the figure shown, so read it as a planning expectation rather than a guarantee."),
+                .("This is the bound the study reaches if the agreement it observes lands exactly on the anticipated kappa and its category proportions match the anticipated ones. Roughly half of such studies will observe less agreement than anticipated and end with a lower bound below the figure shown, so read it as a planning expectation rather than a guarantee."),
                 # As kappaSizeCI: ClinicoPath's own agreement analysis gives Cohen's kappa a Wald or
                 # Fisher-z interval, not this one (R/agreement.b.R, 2026-10-16).
                 .("This bound is for the model-based goodness-of-fit interval; the Wald, Fisher-z or bootstrap intervals that agreement software usually reports for Cohen's or Fleiss' kappa can give a different lower limit for the same data. Report the goodness-of-fit interval, or plan for the interval that will be reported."),
@@ -472,7 +472,7 @@ kappaSizeFixedNClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
                 if (reest && identical(rml, "failed"))
                     .("For this design the proportions could not be re-estimated, so the bound holds them at their anticipated values only."),
                 .("For any pair of raters this kappa equals Cohen's kappa when the raters share the same category frequencies (no rater bias); when their frequencies differ, it does not."),
-                .("Note that kappa0 here is the agreement you anticipate observing, not a null hypothesis value as it is in kappaSizePower."),
+                .("Note that the anticipated kappa here is the agreement you expect to observe, not a null hypothesis value as it is in kappaSizePower."),
                 # The engine prints its own "expected cell count is less than five" line into the
                 # Summary pane from a DIFFERENT and looser check - kappaSize inspects the category
                 # proportions typed (for a binary design only props[1]), not the goodness-of-fit
@@ -606,7 +606,7 @@ kappaSizeFixedNClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
             # Backstops: kappa0 in (0, 1), the range the model needs (the compiled 0.01-0.99 is the
             # interface's); alpha in its compiled (0.001, 0.20).
             if (!is.finite(kappa0) || kappa0 <= 0 || kappa0 >= 1)
-                jmvcore::reject(.("kappa0 must be strictly between 0 and 1."), code = NULL)
+                jmvcore::reject(.("The anticipated kappa must be strictly between 0 and 1."), code = NULL)
 
             if (!is.finite(alpha) || alpha < 0.001 || alpha > 0.20)
                 jmvcore::reject(

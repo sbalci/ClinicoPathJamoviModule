@@ -1563,6 +1563,11 @@ msgfmt -c -o /dev/null <module>/jamovi/i18n/tr.po
   wording). `msgfmt -c` rejects that as a duplicate definition; delete the `#~` block. A later
   `i18nUpdate()` does not bring it back.
 
+Run it on the **umbrella** catalog as well as the module's. For meddecide, ClinicoPathDescriptives
+and OncoPath, `_updateModules.R` copies the umbrella's `jamovi/i18n/tr.po` over the module's
+(`i18n_files` in `_updateModules_config.yaml`). A translation written only in the module is
+overwritten at the next regeneration.
+
 Match on the catalog's text, not on the R source. An R literal holds `—` where the `.po` holds
 "—", so a script that reads old strings out of `.b.R` misses those entries. That is how four
 translations went missing in a 250-label pass, until the tool found them (meddecide, 2026-10-26).

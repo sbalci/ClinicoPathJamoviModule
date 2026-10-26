@@ -624,7 +624,7 @@ test_that("no number reaches the prose in scientific notation (check-function-fu
     skip_if_not_installed("kappaSize")
     # the refusal read "The limit that governs the sample size is 1e-04 away from kappa0"
     msg <- tryCatch(ci_run(kappaL = 0.5999), error = conditionMessage)
-    expect_match(msg, "is 0.0001 away from kappa0", fixed = TRUE)
+    expect_match(msg, "is 0.0001 away from \u03ba\u2080", fixed = TRUE)
     expect_false(grepl("[0-9]e-[0-9]", msg))
     # n above about 38,000 makes the per-subject slope < 1e-04, which the Study Explanation printed
     # as "3.84146 / 8.1...e-05"
@@ -754,7 +754,9 @@ test_that("every option named in a validation message is named on screen; kappaL
         walk <- function(n) c(n$label, unlist(lapply(n$children, walk)))
         walk(x)
     }))
-    for (id in c("kappa0", "kappaL", "kappaU"))
+    # The labels and the messages both write the symbols kappa-sub-0, kappa-L and kappa-U, not the R
+    # argument names (library-audit 2026-10-23 meddecide [LOW], labels pass).
+    for (id in c("\u03ba\u2080", "\u03baL", "\u03baU"))
         expect_true(any(grepl(paste0("(", id, ")"), labels, fixed = TRUE)), info = id)
     # kappa0 .75 on [.60, .85] needs 167 whatever the nearer kappaU is: the help may not say otherwise
     opt <- Filter(function(o) identical(o$name, "kappaL"), yaml::read_yaml(ay)$options)[[1]]

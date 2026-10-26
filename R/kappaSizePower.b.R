@@ -185,7 +185,7 @@ kappaSizePowerClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
 
             paste0(
                 private$.wrap(paste(
-                    .("This is a POWER calculation: it returns the number of subjects needed to REJECT kappa0 in favor of kappa1 in a two-sided test at the stated significance level and power."),
+                    .("This is a POWER calculation: it returns the number of subjects needed to REJECT \u03ba\u2080 in favor of \u03ba\u2081 in a two-sided test at the stated significance level and power."),
                     .("It answers a different question from the confidence-interval approach (kappaSizeCI), which sizes a study so that the expected confidence limits around an anticipated kappa fall at chosen values, so the two will not agree on a sample size for the same study - pick the one that matches how the result will be reported."))),
                 "\n\n",
                 private$.wrap(.fmt(
@@ -242,7 +242,7 @@ kappaSizePowerClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                 warn <- paste0(warn, block(warn_div,
                     .("Small kappa difference."),
                     .fmt(
-                        .("The null and alternative kappa differ by only {delta}. Check that kappa0 is the agreement you want to rule OUT (not the agreement you expect to observe) and that kappa1 is a clinically meaningful difference from it; very close values need very large studies."),
+                        .("The null and alternative kappa differ by only {delta}. Check that \u03ba\u2080 is the agreement you want to rule OUT (not the agreement you expect to observe) and that \u03ba\u2081 is a clinically meaningful difference from it; very close values need very large studies."),
                         delta = signif(abs(kappa1 - kappa0), 3))))
             }
 
@@ -256,7 +256,7 @@ kappaSizePowerClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                 warn <- paste0(warn, block(warn_div,
                     .("Very large sample size."),
                     .fmt(
-                        .("The design needs {n} subjects; few agreement studies can enrol this many. Moving kappa1 closer to kappa0 from the same side, or raising the power target, always inflates the sample size, and a rare finding usually does too (for a binary outcome, a prevalence far from 0.5; with more categories, very unequal category proportions) - revisit whichever of these is not a firm requirement."),
+                        .("The design needs {n} subjects; few agreement studies can enrol this many. Moving \u03ba\u2081 closer to \u03ba\u2080 from the same side, or raising the power target, always inflates the sample size, and a rare finding usually does too (for a binary outcome, a prevalence far from 0.5; with more categories, very unequal category proportions) - revisit whichever of these is not a firm requirement."),
                         n = private$.fmtN(n_required))))
             }
 
@@ -282,7 +282,7 @@ kappaSizePowerClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                 warn <- paste0(warn, block(warn_div,
                     .("Simulated power below the stated power."),
                     .fmt(
-                        .("The published formula behind this sample size is a large-sample approximation that treats the expected proportions as known. In {R} simulated studies of {n} subjects analyzed with the recommended goodness-of-fit test (prevalence estimated by maximum likelihood with kappa held at kappa0), the power to reject kappa0 when kappa equals kappa1 was about {sim}, short of the stated {power}."),
+                        .("The published formula behind this sample size is a large-sample approximation that treats the expected proportions as known. In {R} simulated studies of {n} subjects analyzed with the recommended goodness-of-fit test (prevalence estimated by maximum likelihood with kappa held at \u03ba\u2080), the power to reject \u03ba\u2080 when kappa equals \u03ba\u2081 was about {sim}, short of the stated {power}."),
                         R = private$.fmtN(est$R), n = private$.fmtN(n_required),
                         # nsmall, not .fmtPower(): "0.80" beside "0.75", but a typed 0.825 stays 0.825
                         sim = private$.fmtPower(est$power), power = base::format(power, nsmall = 2)),
@@ -380,7 +380,7 @@ kappaSizePowerClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
             #   which gives 0.89 to 12.5 times the subjects of this N at the same kappa (VAL-08).
             info <- block(info_div,
                 .("Methodology."),
-                .("Power-based sample size for a two-sided test of H0: kappa = kappa0 against H1: kappa = kappa1, using the goodness-of-fit (non-central chi-square) approach of Donner and Eliasziw (two raters, binary outcome), Altaye, Donner and Klar (binary outcome, more raters) and Altaye, Donner and Eliasziw (three to five categories), as implemented in the kappaSize package (Rotondi and Donner)."),
+                .("Power-based sample size for a two-sided test of H0: kappa = \u03ba\u2080 against H1: kappa = \u03ba\u2081, using the goodness-of-fit (non-central chi-square) approach of Donner and Eliasziw (two raters, binary outcome), Altaye, Donner and Klar (binary outcome, more raters) and Altaye, Donner and Eliasziw (three to five categories), as implemented in the kappaSize package (Rotondi and Donner)."),
                 .("Kappa here is the unweighted intraclass kappa for nominal categories (Scott's pi for two raters, Fleiss' kappa for more), which assumes that all raters share the same category prevalences; when raters differ systematically (rater bias), other methods are more appropriate."),
                 .("The sample size is for the papers' goodness-of-fit chi-square test on one degree of freedom, computed over the cells in which all raters agree on a category plus one pooled cell for any disagreement; a likelihood-ratio test of kappa is an approximate alternative."),
                 # KSP-IR-01: simulated power at the published N was 0.74-0.83 with two raters and as low as 0.28
@@ -388,31 +388,31 @@ kappaSizePowerClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                 # 3-5 categories and 3+ raters 0.64-0.74 in 8 of 12 designs, balanced ones too (KSP-21-01).
                 .("Like the published formulas, it treats the expected proportions as known and rests on a large-sample approximation, so the power actually achieved can differ from the stated power in either direction: by several percentage points in many designs, and by much more with several raters or a rare finding. For a binary outcome the analysis therefore simulates the recommended test at the sample size shown and, when the simulated power falls more than 0.03 short, gives a simulated sample size; with three to five categories and three or more raters, where the simulated power at the published sample size was below 0.75 for a stated 0.80 in 8 of 12 designs checked, a note asks for the sample size to be confirmed by simulation (both from 10 subjects upwards)."),
                 if (isTRUE(outcome == 2L && raters >= 3))
-                    .("With three or more raters, do not compute the chi-square over every count of raters calling the finding present (none, one, ..., all): that statistic has more than one degree of freedom and, read on one, rejects a true kappa0 much more often than the stated significance level."),
+                    .("With three or more raters, do not compute the chi-square over every count of raters calling the finding present (none, one, ..., all): that statistic has more than one degree of freedom and, read on one, rejects a true \u03ba\u2080 much more often than the stated significance level."),
                 # VAL-10: DE 1992 p.1513 and ADK 2001 p.585 plug in the overall proportion of positive
                 # ratings; simulated size 0.096-0.164 at a nominal 0.05 with 4-6 raters and a 1-10%
                 # finding, 0.046-0.050 with the ML estimate (validation 2026-10-14, N5).
                 if (isTRUE(outcome == 2L && raters >= 3))
-                    .("Estimate the prevalence for that test by maximum likelihood from the same pooled cells, with kappa held at kappa0: the published procedure plugs in the overall proportion of positive ratings, which makes the test reject a true kappa0 too often with four or more raters and a rare finding."),
+                    .("Estimate the prevalence for that test by maximum likelihood from the same pooled cells, with kappa held at \u03ba\u2080: the published procedure plugs in the overall proportion of positive ratings, which makes the test reject a true \u03ba\u2080 too often with four or more raters and a rare finding."),
                 # KSP-IR-02: DE 1992 p.1513 plugs in the overall proportion of positive ratings. Simulated (R = 20000,
                 # p .01-.05, kappa0 .2-.6, nominal 0.05): size 0.057-0.066, ML at kappa0 0.043-0.051 at equal power.
                 # A second run (release review 2026-10-15, R = 20000, the 9 designs p x kappa0 at the published N
                 # for kappa1 = kappa0 + 0.2) gave plug-in 0.055-0.066 and ML 0.046-0.052; the sentence states the union.
                 # Rates, not percentages: a literal "%" in a msgid can be read as a C format directive.
                 if (isTRUE(outcome == 2L && raters == 2L))
-                    .("With two raters, estimate the prevalence for the test by maximum likelihood with kappa held at kappa0 rather than plugging in the overall proportion of positive ratings, as the published procedure does: in simulations of a rare finding (1 to 5 cases in 100) at a 0.05 level, the plug-in test rejected a true kappa0 at a rate of 0.055-0.066 and the maximum-likelihood version at 0.043-0.052."),
+                    .("With two raters, estimate the prevalence for the test by maximum likelihood with kappa held at \u03ba\u2080 rather than plugging in the overall proportion of positive ratings, as the published procedure does: in simulations of a rare finding (1 to 5 cases in 100) at a 0.05 level, the plug-in test rejected a true \u03ba\u2080 at a rate of 0.055-0.066 and the maximum-likelihood version at 0.043-0.052."),
                 if (isTRUE(outcome >= 3L && raters >= 3))
-                    .("With three or more raters, estimate the category prevalences by maximum likelihood with kappa held at kappa0, as Altaye, Donner and Eliasziw do; plugging in the overall proportions of ratings makes the test reject a true kappa0 too often."),
+                    .("With three or more raters, estimate the category prevalences by maximum likelihood with kappa held at \u03ba\u2080, as Altaye, Donner and Eliasziw do; plugging in the overall proportions of ratings makes the test reject a true \u03ba\u2080 too often."),
                 if (isTRUE(outcome == 2L && raters >= 3))
                     .("For a binary outcome with three or more raters the calculation uses the rater-dependence model of Altaye, Donner and Klar: with probability kappa all raters give one shared call, otherwise each rater calls independently. Other models with the same kappa, such as the beta-binomial (the two-category case of the model of Altaye, Donner and Eliasziw), can need a markedly different number of subjects."),
                 # Beta-binomial ratings at the same pairwise kappa: the mixture-model GOF test rejected a
                 # true kappa0 in 9-81% of simulated studies, Fleiss' kappa with a jackknife Wald test in
                 # 6-7% (validation 2026-10-14, N6).
                 if (isTRUE(outcome == 2L && raters >= 3))
-                    .("The goodness-of-fit test also tests that model: if the raters follow another model with the same kappa, it can reject a true kappa0 far more often than the stated significance level, whereas Fleiss' kappa with a jackknife or bootstrap interval that resamples subjects is not tied to the model."),
+                    .("The goodness-of-fit test also tests that model: if the raters follow another model with the same kappa, it can reject a true \u03ba\u2080 far more often than the stated significance level, whereas Fleiss' kappa with a jackknife or bootstrap interval that resamples subjects is not tied to the model."),
                 .("It does not apply to weighted kappa for ordered grades; for an ordinal grading study either treat the grades as nominal categories or use a dedicated weighted-kappa method."),
-                .("It answers 'how many subjects do I need to reject kappa0 in favor of kappa1?' - not how precisely kappa will be estimated; to plan the expected confidence limits around an anticipated kappa, use kappaSizeCI instead."),
-                .("Note that kappa0 here is the null hypothesis value, whereas in kappaSizeCI and kappaSizeFixedN it is the agreement you anticipate observing."))
+                .("It answers 'how many subjects do I need to reject \u03ba\u2080 in favor of \u03ba\u2081?' - not how precisely kappa will be estimated; to plan the expected confidence limits around an anticipated kappa, use kappaSizeCI instead."),
+                .("Note that \u03ba\u2080 here is the null hypothesis value, whereas in kappaSizeCI and kappaSizeFixedN it is the agreement you anticipate observing."))
 
             # The bold figure is what gets copied into a protocol, so when the simulation found the published N
             # short it carries the simulated N too, not the published one alone. Its own block, between the
@@ -462,10 +462,10 @@ kappaSizePowerClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
             raters <- as.integer(raters)
 
             if (!is.finite(kappa0) || kappa0 <= 0 || kappa0 >= 1)
-                jmvcore::reject(.("kappa0 must be strictly between 0 and 1."), code = "invalid_kappa0")
+                jmvcore::reject(.("\u03ba\u2080 must be strictly between 0 and 1."), code = "invalid_kappa0")
 
             if (!is.finite(kappa1) || kappa1 <= 0 || kappa1 >= 1)
-                jmvcore::reject(.("kappa1 must be strictly between 0 and 1."), code = "invalid_kappa1")
+                jmvcore::reject(.("\u03ba\u2081 must be strictly between 0 and 1."), code = "invalid_kappa1")
 
             if (!is.finite(alpha) || alpha < 0.001 || alpha > 0.20)
                 jmvcore::reject(.("Significance level (alpha) must be between 0.001 and 0.20."), code = "invalid_alpha")
@@ -555,7 +555,7 @@ kappaSizePowerClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
             # --- Validate the kappa relationship ------------------------------
             if (isTRUE(kappa0 == kappa1))
                 jmvcore::reject(
-                    .("kappa0 (null) and kappa1 (alternative) must differ; equal values make the required sample size undefined."),
+                    .("\u03ba\u2080 (null) and \u03ba\u2081 (alternative) must differ; equal values make the required sample size undefined."),
                     code = "kappa_equal")
 
             # --- Select the engine for the chosen cardinality -----------------

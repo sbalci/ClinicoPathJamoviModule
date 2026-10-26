@@ -114,13 +114,20 @@ cotestClass <- if (requireNamespace("jmvcore"))
                 t1_name <- private$.testLabel(self$options$test1_name, .("Test 1"))
                 t2_name <- private$.testLabel(self$options$test2_name, .("Test 2"))
                 # A worked example names its own tests, unless the user typed something.
-                # (events.js writes the same names into the boxes, so the GUI agrees.)
+                # library-audit 2026-10-23 meddecide [INFO] DONE: events.js writes the example's names
+                #   into the boxes in English, so a box that still holds that name (in English or as
+                #   translated) shows the translated name; only a name the user typed wins.
                 if (self$options$preset != "custom") {
                     pv <- private$.getPresetValues(self$options$preset)
                     if (!is.null(pv)) {
-                        if (!nzchar(trimws(self$options$test1_name)) && !is.null(pv$test1_name))
+                        example_own <- function(typed, example) {
+                            typed <- trimws(typed)
+                            !nzchar(typed) || tolower(typed) == tolower(example) ||
+                                tolower(self$options$translate(typed)) == tolower(example)
+                        }
+                        if (!is.null(pv$test1_name) && example_own(self$options$test1_name, pv$test1_name))
                             t1_name <- pv$test1_name
-                        if (!nzchar(trimws(self$options$test2_name)) && !is.null(pv$test2_name))
+                        if (!is.null(pv$test2_name) && example_own(self$options$test2_name, pv$test2_name))
                             t2_name <- pv$test2_name
                     }
                 }
@@ -1228,9 +1235,8 @@ cotestClass <- if (requireNamespace("jmvcore"))
             # calculation, not a pooled estimate from a meta-analysis and not a value anyone
             # should carry into patient care. `note` says what each example is meant to show.
             .getPresetValues = function(preset) {
-                # TODO (i18n): events.js writes these names into the boxes in English and a typed
-                # name wins, so in the GUI the translated test names below are never displayed
-                # (only from R syntax with blank names). Decide which one the GUI should show.
+                # The test names are shown translated even though events.js writes them into the
+                # boxes in English: .run() treats a box still holding the example's name as unset.
                 presets <- list(
                     hpv_pap = list(
                         test1_sens = 0.95, test1_spec = 0.85,

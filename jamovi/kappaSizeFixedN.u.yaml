@@ -68,7 +68,7 @@ children:
         children:
           - type: TextBox
             name: kappa0
-            label: 'Anticipated kappa (κ₀)'
+            label: 'Anticipated kappa'
             format: number
 
 

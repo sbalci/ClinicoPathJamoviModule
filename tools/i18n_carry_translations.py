@@ -7,7 +7,7 @@
 #   python3 tools/i18n_carry_translations.py --selftest
 #
 # Compares jamovi/i18n/tr.po in the working tree with the one at REV (default HEAD). An entry that is
-# empty now, has no translation at REV, and matches a translated REV entry once case, spelling and
+# empty now, whose wording did not exist at REV, and matches a translated REV entry once case, spelling and
 # punctuation are folded (`fold()`), is a CARRY: --write copies the old translation into it. Any other
 # empty entry whose wording replaced a translated one is printed as REVIEW - its meaning changed, so a
 # person rewrites the Turkish. Edits touch only the matched msgstr lines (no polib re-wrap).
@@ -36,11 +36,11 @@ def plan(old_text, new_text):
     translated = {fold(k): v for k, (v, _) in old.items() if k and v}
     carry, review = [], []
     for k, (v, m) in new.items():
-        if not k or v or old.get(k, ('', None))[0]:
-            continue                     # translated, or already untranslated before this change
+        if not k or v or k in old:
+            continue                     # translated, or this wording already existed at REV
         if fold(k) in translated:
             carry.append((k, translated[fold(k)], m))
-        elif k not in old:
+        else:
             review.append(k)
     return carry, review
 

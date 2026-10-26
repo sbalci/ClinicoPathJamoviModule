@@ -229,7 +229,7 @@ test_that("VAL C17: the Methodology names the test the N is valid for when there
     expect_match(res$notices$content, "every count of raters calling the finding present", fixed = TRUE)
     # 3+ categories with 3+ raters: prevalences re-estimated by ML at kappa0 (ADE p.2483)
     cat3 <- vkp_run(outcome = "3", props = "0.3, 0.6, 0.1", raters = "4")$notices$content
-    expect_match(cat3, "maximum likelihood with kappa held at kappa0", fixed = TRUE)
+    expect_match(cat3, "maximum likelihood with kappa held at \u03ba\u2080", fixed = TRUE)
     expect_false(grepl("every count of raters", cat3, fixed = TRUE))
     # two raters: the published test is already 1 df on three cells, so neither warning shows
     two <- vkp_run(props = "0.3")$notices$content
@@ -401,7 +401,7 @@ test_that("VAL C39: with 3+ raters and 3-5 categories, plugged-in proportions ov
     skip_on_cran()
     props <- c(0.1, 0.2, 0.2, 0.2, 0.3); n <- 3; k0 <- 0.4
     res <- vkp_run(outcome = "5", props = "0.1, 0.2, 0.2, 0.2, 0.3", raters = "3")
-    expect_match(res$notices$content, "maximum likelihood with kappa held at kappa0", fixed = TRUE)
+    expect_match(res$notices$content, "maximum likelihood with kappa held at \u03ba\u2080", fixed = TRUE)
     N <- vkp_n(res); expect_equal(N, 45)
     m <- vkp_pmf_dm(n, props, k0)
     set.seed(20261014); R <- 1000
@@ -427,7 +427,7 @@ test_that("VAL C39: with 3+ raters and 3-5 categories, plugged-in proportions ov
 
 vkp_sim <- function(res) {
     no <- gsub("<[^>]+>", "", res$notices$content)
-    list(power = vkp_num(no, "kappa equals kappa1 was about ([0-9.]+), short"),
+    list(power = vkp_num(no, "kappa equals \u03ba\u2081 was about ([0-9.]+), short"),
          n = vkp_num(no, "About ([0-9,]+) subjects gave a simulated power"),
          power_n = vkp_num(no, "gave a simulated power of about ([0-9.]+)"))
 }
@@ -506,7 +506,7 @@ test_that("KSP-IR-02: two raters, binary - the Notes recommend ML for the preval
     # positive ratings, DE 1992 p.1513) rejected a true kappa0 at 0.057-0.066, ML with kappa at kappa0 at 0.043-0.051.
     # The release review's second run (R = 20000, kappa1 = kappa0 + 0.2) gave 0.055-0.066 and 0.046-0.052: the union.
     notes <- vkp_run(props = "0.05")$notices$content
-    expect_match(notes, "With two raters, estimate the prevalence for the test by maximum likelihood with kappa held at kappa0", fixed = TRUE)
+    expect_match(notes, "With two raters, estimate the prevalence for the test by maximum likelihood with kappa held at \u03ba\u2080", fixed = TRUE)
     expect_match(notes, "rate of 0.055-0.066 and the maximum-likelihood version at 0.043-0.052.", fixed = TRUE)
     expect_false(grepl("from the same pooled cells", notes, fixed = TRUE))
     for (r in list(vkp_run(props = "0.05", raters = "3"), vkp_run(outcome = "3", props = "0.2, 0.3, 0.5")))
@@ -520,7 +520,7 @@ test_that("VAL C36: binary 3+ raters - the Notes say how to estimate the prevale
     # ML estimate at kappa0 gave 0.046-0.050. Under beta-binomial ratings at the same kappa the
     # mixture-model GOF test rejected a true kappa0 in 9-81% of studies (validation N5, N6).
     notes <- vkp_run(props = "0.05", raters = "6")$notices$content
-    expect_match(notes, "maximum likelihood from the same pooled cells, with kappa held at kappa0", fixed = TRUE)
+    expect_match(notes, "maximum likelihood from the same pooled cells, with kappa held at \u03ba\u2080", fixed = TRUE)
     expect_match(notes, "The goodness-of-fit test also tests that model", fixed = TRUE)
     expect_match(notes, "resamples subjects", fixed = TRUE)
     for (r in list(vkp_run(props = "0.05"), vkp_run(outcome = "3", props = "0.3, 0.6, 0.1", raters = "4"))) {
@@ -567,7 +567,7 @@ test_that("VAL C42: the 'Very large sample size' note claims 'always' only for a
     expect_lt(up, down)
     notes <- vkp_run(props = "0.01")$notices$content
     expect_false(grepl("and a high power target always inflate the sample size", notes, fixed = TRUE))
-    expect_match(notes, "Moving kappa1 closer to kappa0 from the same side, or raising the power target, always inflates", fixed = TRUE)
+    expect_match(notes, "Moving \u03ba\u2081 closer to \u03ba\u2080 from the same side, or raising the power target, always inflates", fixed = TRUE)
 })
 
 

@@ -26884,7 +26884,7 @@ msgstr ""
 
 #: bayesiannetworkma/results/pairwiseComparisons.title
 msgid "All Pairwise Comparisons"
-msgstr ""
+msgstr "Tüm ikili karşılaştırmalar"
 
 #: psychopdaROC/results/effectSizePlot.template.title
 msgid "All pairwise comparisons"
@@ -37555,7 +37555,7 @@ msgstr "Bootstrap Doğrulaması"
 #: stagemigration/ui[8][13]/frailtyBootstrap.label
 #: stagemigration/ui[9][3][0]/forestBootstrap.label
 msgid "Bootstrap validation"
-msgstr ""
+msgstr "Bootstrap Doğrulaması"
 
 #: R/stagemigration-part2.R
 #: R/stagemigration-part4.R
@@ -37770,7 +37770,7 @@ msgstr "Her İki Yöntem"
 
 #: decisionpanel/options/panelOptimization/both.title
 msgid "Both methods"
-msgstr ""
+msgstr "Her İki Yöntem"
 
 #: stagemigration/options/cureModelType/both.title
 msgid "Both Model Types"
@@ -51699,7 +51699,7 @@ msgstr "Tam Bağlantı (En Uzak Komşu)"
 #: pathagreement/options/clusteringMethod/complete.title
 #: pathagreement/ui[10][1]/clusteringMethod/complete.title
 msgid "Complete linkage (furthest neighbor)"
-msgstr ""
+msgstr "Tam Bağlantı (En Uzak Komşu)"
 
 #: assayoptimization/options/randomization/complete.title
 msgid "Complete Randomization"
@@ -55704,7 +55704,7 @@ msgstr "Süreklilik düzeltmesi uygulandı"
 #: gcomputation/options/outcomeType/continuous.title
 #: subgroupforest/options/outcomeType/continuous.title
 msgid "Continuous"
-msgstr ""
+msgstr "Sürekli"
 
 #: R/crosstable.b.R
 msgid "continuous"
@@ -76831,7 +76831,7 @@ msgstr "Öklid Uzaklığı"
 
 #: R/pathagreement.b.R
 msgid "Euclidean distance"
-msgstr ""
+msgstr "Öklid Uzaklığı"
 
 #: eurostatmap/options/dataset_id.title
 msgid "Eurostat Dataset ID"
@@ -100959,7 +100959,7 @@ msgstr "Iota katsayısı (tek değişken)"
 
 #: R/agreement.b.R
 msgid "Iota Coefficient (Single Variable)"
-msgstr ""
+msgstr "Iota katsayısı (tek değişken)"
 
 #: agreement/ui[16].label
 msgid "Iota Coefficient [Continuous or Categorical] (Single Variable)"
@@ -109991,7 +109991,7 @@ msgstr ""
 #: methodcomparison/results/descriptiveStats.columns.title
 #: tidydensity/options/uniform_max.title
 msgid "Maximum"
-msgstr ""
+msgstr "Maksimum"
 
 #: R/psychopdaROC.b.R
 #: patientreported/ui[2][0]/response_scale_max.suffix
@@ -118991,7 +118991,7 @@ msgstr "Çoklu işaretleyici uyumu"
 
 #: R/agreement.b.R
 msgid "Multi-Annotator Concordance"
-msgstr ""
+msgstr "Çoklu işaretleyici uyumu"
 
 #: agreement/ui[24].label
 msgid "Multi-Annotator Concordance [Categorical] (AI Validation)"
@@ -138468,7 +138468,7 @@ msgstr "Hasta Kimliği:"
 #: populationhealth/options/patientID.title
 #: populationhealth/ui[0][0].label
 msgid "Patient Identifier"
-msgstr ""
+msgstr "Hasta tanımlayıcısı"
 
 #: enhancedROC/options/patientID.title
 #: enhancedROC/ui[0][2].label
@@ -147094,7 +147094,7 @@ msgstr ""
 
 #: mlpathology/options/predicted_probabilities.title
 msgid "Predicted Probabilities"
-msgstr ""
+msgstr "Tahmin edilen olasılıklar"
 
 #: lassologistic/options/predictions.title
 #: lassologistic/results/predictions.title
@@ -171763,7 +171763,7 @@ msgstr "Tek Bağlantı (En Yakın Komşu)"
 #: pathagreement/options/clusteringMethod/single.title
 #: pathagreement/ui[10][1]/clusteringMethod/single.title
 msgid "Single linkage (nearest neighbor)"
-msgstr ""
+msgstr "Tek Bağlantı (En Yakın Komşu)"
 
 #: causalmediation/options/mediator.title
 msgid "Single Mediator"
@@ -179102,7 +179102,7 @@ msgstr ""
 #: studydiagram/options.menuSubgroup
 #: survivalPower/results/power_summary.columns.title
 msgid "Study Design"
-msgstr ""
+msgstr "Çalışma tasarımı"
 
 #: survivalPower/options/study_design.title
 msgid "Study design"
@@ -184958,7 +184958,7 @@ msgstr "Test Stratejisi Akış Diyagramı"
 #: contTables/ui[1][0][0][0][0].label
 #: decisionpanel/results/allCombinations.columns.title
 msgid "Tests"
-msgstr ""
+msgstr "Testler"
 
 #: R/nogoldstandard.b.R
 msgid "Tests analyzed:"
@@ -216593,8 +216593,6 @@ msgstr ""
 #~ msgid "CI Method for Agreement"
 #~ msgstr "Uyum için GA Yöntemi"
 
-#~ msgid "Class Variable (Gold Standard)"
-#~ msgstr "Sınıf Değişkeni (Altın Standart)"
 
 #~ msgid "Clinical Decision Rule (binary)"
 #~ msgstr "Klinik Karar Kuralı (ikili)"
@@ -216754,8 +216752,6 @@ msgstr ""
 #~ msgid "Test 3 Positive Level"
 #~ msgstr "Test 3 Pozitif Düzey"
 
-#~ msgid "Test Variables"
-#~ msgstr "Test Değişkenleri"
 
 #~ msgid "Threshold Step Size"
 #~ msgstr "Eşik Adım Boyutu"
@@ -220032,3 +220028,693 @@ msgstr ""
 "nasıl yorumlanacağını ve eksenlerin nasıl etiketleneceğini belirler - bu "
 "nedenle önceden hesaplanan süre için yanlış birim seçmek yalnızca etiketleri"
 " değil, bildirilen sonuçları da değiştirir."
+
+msgid "%1$s has an AUC of %2$s and its whole confidence interval lies below 0.5: it separates the groups, but in the opposite direction to the one assumed (%3$s). • First check Positive class: is %4$s the level that means the condition is present? Naming the wrong level turns the AUC into 1 minus its true value, exactly this pattern. • Only if it is, setting Direction to '%5$s' gives an AUC of %6$s and re-estimates the cutoff, sensitivity and specificity. • Change Direction only if that matches what the marker means clinically."
+msgstr "%1$s için AUC %2$s ve güven aralığının tamamı 0.5'in altında: grupları ayırıyor, ancak varsayılanın tersi yönde (%3$s). • Önce Pozitif sınıf seçeneğini kontrol edin: %4$s, durumun var olduğunu gösteren düzey mi? Yanlış düzeyin seçilmesi AUC'yi 1 eksi gerçek değerine dönüştürür; tam olarak bu örüntü. • Yalnızca öyleyse, Yön seçeneğini '%5$s' olarak ayarlamak AUC değerini %6$s yapar ve kesme noktasını, duyarlılığı ve özgüllüğü yeniden tahmin eder. • Yön seçeneğini yalnızca bu, belirtecin klinik olarak ifade ettiği anlamla uyumluysa değiştirin."
+
+msgid "%1$s has an AUC of 0: in these data it separates the groups perfectly, but in the opposite direction to the one assumed (%2$s). • First check Positive class: is %3$s the level that means the condition is present? Naming the wrong level turns the AUC into 1 minus its true value, exactly this pattern. • Only if it is, setting Direction to '%4$s' gives an AUC of 1 and re-estimates the cutoff, sensitivity and specificity. • Change Direction only if that matches what the marker means clinically."
+msgstr "%1$s için AUC 0: bu verilerde gruplar mükemmel biçimde ayrılmaktadır, ancak varsayılan yönün (%2$s) tersi yönde. • Önce Pozitif sınıf ayarını kontrol edin: %3$s, durumun var olduğunu gösteren düzey mi? Yanlış düzeyin seçilmesi AUC değerini 1 eksi gerçek değerine dönüştürür; bu tam olarak bu örüntüdür. • Yalnızca öyleyse, Yön ayarını '%4$s' yapmak 1 AUC değeri verir ve kesme noktası, duyarlılık ve özgüllüğü yeniden tahmin eder. • Yön ayarını yalnızca bu, belirtecin klinik anlamıyla örtüşüyorsa değiştirin."
+
+msgid "%1$s has the same value (%2$s) in every analyzed row, so it cannot separate the groups: its AUC is 0.5 by construction and no cutoff exists. Choose a predictor that varies, or check how the data were imported."
+msgstr "%1$s analiz edilen her satırda aynı değere (%2$s) sahip, bu nedenle grupları ayıramaz: AUC tanım gereği 0,5'tir ve kesme noktası yoktur. Değişkenlik gösteren bir öngörücü seçin ya da verilerin nasıl içe aktarıldığını kontrol edin."
+
+msgid "%s%% intervals for sensitivity and specificity are Clopper-Pearson exact binomial intervals (Clopper & Pearson, 1934); they treat the cutoff as fixed and do not reflect its selection on these data."
+msgstr "Duyarlılık ve özgüllük için %%%s aralıklar Clopper-Pearson kesin binom aralıklarıdır (Clopper & Pearson, 1934); kesme noktasını sabit kabul ederler ve bu verilerde seçilmiş olmasını yansıtmazlar."
+
+msgid "1SE rule (more parsimonious)"
+msgstr "1SE Kuralı (Daha Yalın)"
+
+msgid "About the Rater Variance Decomposition"
+msgstr "Değerlendirici varyans ayrıştırması hakkında"
+
+msgid "Agreement by Stratum"
+msgstr "Tabakaya göre uyum"
+
+msgid "Agreement Heatmap (Categorical, Confusion Matrix Visualization)"
+msgstr "Uyum Isı Haritası (Kategorik, Karışıklık Matrisi Görselleştirmesi)"
+
+msgid "Agreement metric: {metric}"
+msgstr "Uyum metriği: {metric}"
+
+msgid "Agreement with Comparator"
+msgstr "Karşılaştırıcı ile uyum"
+
+msgid "All patterns"
+msgstr "Tüm Paternler"
+
+msgid "All tests negative"
+msgstr "Tüm Testler Negatif"
+
+msgid "All tests positive"
+msgstr "Tüm Testler Pozitif"
+
+msgid "Alternative kappa (κ₁)"
+msgstr "Alternatif kappa (κ₁)"
+
+msgid "Analysis Result"
+msgstr "Analiz sonucu"
+
+msgid "Anticipated kappa (κ₀)"
+msgstr "Beklenen kappa (κ₀)"
+
+msgid "Any Data Type"
+msgstr "Her veri türü"
+
+msgid "Any test positive"
+msgstr "Herhangi Bir Test Pozitif"
+
+msgid "Average linkage (UPGMA)"
+msgstr "Ortalama Bağlantı (UPGMA)"
+
+msgid "Bar plot (category frequencies)"
+msgstr "Çubuk Grafik (Kategori Frekansları)"
+
+msgid "Basic bootstrap"
+msgstr "Temel Bootstrap"
+
+msgid "BCa (bias-corrected and accelerated)"
+msgstr "BCa (Yanlılık Düzeltmeli ve Hızlandırılmış)"
+
+msgid "Bhapkar Test (Categorical, Marginal Homogeneity, 2 Raters)"
+msgstr "Bhapkar Testi (Kategorik, Marjinal Homojenlik, 2 Değerlendirici)"
+
+msgid "Binary Comparator Counts"
+msgstr "İkili karşılaştırıcı sayıları"
+
+msgid "Biomarker + ECG (illustrative)"
+msgstr "Biyobelirteç + EKG (Açıklayıcı)"
+
+msgid "Biomarker screening (high sensitivity)"
+msgstr "Biyobelirteç Taraması (Yüksek Duyarlılık)"
+
+msgid "Bland-Altman Analysis (Limits of Agreement)"
+msgstr "Bland-Altman Analizi (Uyum Sınırları)"
+
+msgid "Bootstrap interval for Krippendorff's alpha"
+msgstr "Krippendorff alfa için bootstrap aralığı"
+
+msgid "Bootstrap Intervals (AUC and Youden's Index Reference)"
+msgstr "Bootstrap Aralıkları (AUC ve Youden Referansı)"
+
+msgid "Both fixed and random effects"
+msgstr "Hem Sabit Hem Rastgele Etkiler"
+
+msgid "Box plot (median + IQR)"
+msgstr "Kutu Grafiği (Medyan + Çeyrekler Açıklığı)"
+
+msgid "Breast imaging + tissue sampling (illustrative)"
+msgstr "Meme Görüntüleme + Doku Örneklemesi (Açıklayıcı)"
+
+msgid "Case ID (Same Case on Several Rows)"
+msgstr "Olgu Kimliği (aynı olgu birden çok satırda)"
+
+msgid "Chest imaging + culture (illustrative)"
+msgstr "Göğüs Görüntüleme + Kültür (Açıklayıcı)"
+
+msgid "Class Variable (Gold Standard)"
+msgstr "Sınıf Değişkeni (Altın Standart)"
+
+msgid "Clinical assessment + CT (illustrative)"
+msgstr "Klinik Değerlendirme + BT (Açıklayıcı)"
+
+msgid "Clinical Decision Rule (Binary)"
+msgstr "Klinik Karar Kuralı (ikili)"
+
+msgid "Colors of the Fagan nomogram's positive-result and negative-result lines. \"jamovi (follow global)\" uses the palette chosen in jamovi, like the other plots; a legend names the two lines."
+msgstr "Fagan nomogramının pozitif sonuç ve negatif sonuç çizgilerinin renkleri. \"jamovi (genel ayarı izle)\", diğer grafikler gibi jamovi'de seçilen paleti kullanır; bir lejant iki çizgiyi adlandırır."
+
+msgid "Comparative ROC analysis"
+msgstr "Karşılaştırmalı ROC Analizi"
+
+msgid "Comparator Agreement (Bar)"
+msgstr "Karşılaştırıcı ile uyum (çubuk)"
+
+msgid "Comparator Agreement (Heatmap)"
+msgstr "Karşılaştırıcı ile uyum (ısı haritası)"
+
+msgid "Comparator Agreement (Radar)"
+msgstr "Karşılaştırıcı ile uyum (radar)"
+
+msgid "Comparator Interpretation"
+msgstr "Karşılaştırıcı yorumu"
+
+msgid "Compare all methods"
+msgstr "Tüm Yöntemleri Karşılaştır"
+
+msgid "Comparison Populations"
+msgstr "Karşılaştırma popülasyonları"
+
+msgid "Composite reference (strict majority)"
+msgstr "Bileşik Referans (kesin çoğunluk)"
+
+msgid "Comprehensive diagnostic performance"
+msgstr "Kapsamlı Tanısal Performans"
+
+msgid "Computed Variables"
+msgstr "Hesaplanan değişkenler"
+
+msgid "Condition B Raters (e.g., AI-Assisted)"
+msgstr "Koşul B Değerlendiricileri (ör. YZ destekli)"
+
+msgid "Confidence interval type"
+msgstr "Güven Aralığı Türü"
+
+msgid "Confirmatory testing (high specificity)"
+msgstr "Doğrulayıcı Test (Yüksek Özgüllük)"
+
+msgid "Convex hull: operating points reachable by randomly mixing two cutoffs (Provost & Fawcett 2001); in-sample, so optimistic"
+msgstr "Dışbükey örtü: iki kesme noktasının rastgele karıştırılmasıyla ulaşılabilen çalışma noktaları (Provost & Fawcett 2001); örneklem içi olduğundan iyimser"
+
+msgid "Copy-ready report sentences were not generated because %1$s. Check Positive class (is %2$s the level that means the condition is present?), then Direction, before quoting any cutoff from this analysis."
+msgstr "Kopyalanmaya hazır rapor cümleleri oluşturulmadı, çünkü %1$s. Bu analizden herhangi bir kesme noktasını aktarmadan önce Pozitif sınıf ayarını (%2$s durumun var olduğunu ifade eden düzey mi?), ardından Yön ayarını kontrol edin."
+
+msgid "Cost ratio (false positive : false negative)"
+msgstr "Maliyet Oranı (Yanlış Pozitif : Yanlış Negatif)"
+
+msgid "Custom configuration"
+msgstr "Özel Yapılandırma"
+
+msgid "Custom thresholds"
+msgstr "Özel Eşikler"
+
+msgid "Cutoffs maximize the Youden index, J = sensitivity + specificity - 1 (Youden, 1950), over the thresholds midway between adjacent observed values: the empirical estimator of the Youden-optimal cutoff (Fluss et al., 2005). A patient is test-positive at or above the cutoff (at or below it when lower values are positive)."
+msgstr "Kesme noktaları, gözlenen komşu değerlerin orta noktalarındaki eşikler üzerinden Youden indeksini, J = duyarlılık + özgüllük - 1 (Youden, 1950), en büyük yapar: Youden-optimal kesme noktasının ampirik tahmincisi (Fluss ve ark., 2005). Hasta kesme noktasında veya üzerinde (düşük değerler pozitif olduğunda kesme noktasında veya altında) test-pozitif kabul edilir."
+
+msgid "Cutoffs minimize the squared distance to the top-left corner of the ROC plot, (1 - sensitivity)^2 + (1 - specificity)^2, over the thresholds midway between adjacent observed values (Perkins & Schisterman, 2006); Youden optimization was switched off. A patient is test-positive at or above the cutoff (at or below it when lower values are positive)."
+msgstr "Kesme noktaları, gözlenen komşu değerlerin orta noktalarındaki eşikler üzerinden ROC grafiğinin sol üst köşesine olan kare uzaklığı, (1 - duyarlılık)^2 + (1 - özgüllük)^2, en küçük yapar (Perkins ve Schisterman, 2006); Youden optimizasyonu kapatılmıştı. Hasta kesme noktasında veya üzerinde (düşük değerler pozitif olduğunda kesme noktasında veya altında) test-pozitif kabul edilir."
+
+msgid "Default metric set"
+msgstr "Varsayılan Metrik Seti"
+
+msgid "Diagnostic test validation (balanced)"
+msgstr "Tanısal Test Doğrulaması (Dengeli)"
+
+msgid "Diagnostic test validation (example)"
+msgstr "Tanı Testi Validasyonu (örnek)"
+
+msgid "Directional Discordance (Ordinal, 2 Raters)"
+msgstr "Yönlü Uyumsuzluk (Sıralı, 2 Değerlendirici)"
+
+msgid "Disease prevalence in target population (between 0 and 1)"
+msgstr "Hedef popülasyonda hastalık prevalansı (0 ile 1 arasında)"
+
+msgid "Elastic net"
+msgstr "Elastik Ağ"
+
+msgid "Empirical TDI (Prespecified Difference Limit)"
+msgstr "Ampirik TDI (Önceden Belirlenmiş Fark Sınırı)"
+
+msgid "Exact agreement (categorical)"
+msgstr "Birebir Uyum (kategorik)"
+
+msgid "Fagan line colors"
+msgstr "Fagan çizgi renkleri"
+
+msgid "Fagan Nomogram - Parallel Rule (Positive if Either Test Is Positive)"
+msgstr "Fagan nomogramı - paralel kural (herhangi bir test pozitifse pozitif)"
+
+msgid "False negative (FN)"
+msgstr "Yanlış Negatif (YN)"
+
+msgid "False positive (FP)"
+msgstr "Yanlış Pozitif (YP)"
+
+msgid "Finn Coefficient (Variance-Based)"
+msgstr "Finn Katsayısı (Varyansa Dayalı)"
+
+msgid "Fixed effects model"
+msgstr "Sabit Etkiler Modeli"
+
+msgid "Fixed sensitivity"
+msgstr "Sabit Duyarlılık"
+
+msgid "Fixed specificity"
+msgstr "Sabit Özgüllük"
+
+msgid "FN (cut-off 1)"
+msgstr "YN (Kesim Değeri 1)"
+
+msgid "FN (cut-off 2)"
+msgstr "YN (Kesim Değeri 2)"
+
+msgid "FP (cut-off 1)"
+msgstr "YP (Kesim Değeri 1)"
+
+msgid "FP (cut-off 2)"
+msgstr "YP (Kesim Değeri 2)"
+
+msgid "Frozen-Model Performance and Paired Differences"
+msgstr "Dondurulmuş model performansı ve eşleştirilmiş farklar"
+
+msgid "Grayscale (print-friendly)"
+msgstr "Gri Tonlamalı (Baskı Dostu)"
+
+msgid "Hierarchical (dendrogram)"
+msgstr "Hiyerarşik (Dendrogram)"
+
+msgid "Hierarchical/Multilevel Kappa (Multi-Center Studies)"
+msgstr "Hiyerarşik/Çok Düzeyli Kappa (Çok Merkezli Çalışmalar)"
+
+msgid "HIV Ag/Ab + differentiation assay (illustrative)"
+msgstr "HIV Ag/Ab + Farklılaşma Testi (Açıklayıcı)"
+
+msgid "ICC (Intraclass Correlation)"
+msgstr "ICC (Sınıf-İçi Korelasyon)"
+
+msgid "If that reading looks reversed for a marker, first check Positive class: is %s the level that means the condition is present? Only if it is, change Direction: the AUC becomes 1 minus the value shown, and the cutoff, sensitivity and specificity are re-estimated."
+msgstr "Bu okuma bir belirteç için ters görünüyorsa, önce Pozitif sınıf ayarını kontrol edin: %s, durumun var olduğunu gösteren düzey mi? Yalnızca öyleyse Yön ayarını değiştirin: AUC, 1 eksi gösterilen değer olur ve kesme noktası, duyarlılık ve özgüllük yeniden tahmin edilir."
+
+msgid "If the reference standard was obtained only after a positive result on some test, or only where the tests disagreed (discrepant resolution), sensitivity and specificity can be biased, in either direction, for every test and rule in the table, and so can the predictive values of each single test and each combined rule. The predictive values of an exact result pattern (a row such as +/-) are not biased by this, provided whether a case was verified depended only on its pattern and no reference result was filled in from the tests. These data cannot tell this from results withheld because of disease status, and a correction needs the reference standard on a random sample of the cases verified less often."
+msgstr "Referans standart yalnızca bir testte pozitif sonuç çıktıktan sonra ya da yalnızca testlerin uyuşmadığı durumlarda (uyuşmazlık çözümlemesi) elde edildiyse, tablodaki her test ve kural için duyarlılık ve özgüllük her iki yönde de yanlı olabilir; her tek testin ve her birleşik kuralın öngörü değerleri de öyle. Bir olgunun doğrulanıp doğrulanmaması yalnızca sonuç örüntüsüne bağlıysa ve hiçbir referans sonucu testlerden doldurulmadıysa, tam bir sonuç örüntüsünün (+/- gibi bir satır) öngörü değerleri bundan dolayı yanlı değildir. Bu veriler bunu hastalık durumu nedeniyle elde edilmeyen sonuçlardan ayıramaz; bir düzeltme, daha az doğrulanan olguların rastgele bir örnekleminde referans standardı gerektirir."
+
+msgid "Imbalance warning details"
+msgstr "Dengesizlik uyarısı ayrıntıları"
+
+msgid "In the simulations of Fluss et al. (2005) this empirical estimator, the most commonly used, had the worst overall bias and root mean square error of the four estimators compared (normal, transformed-normal, empirical and kernel); for the cutoff itself their results were more variable."
+msgstr "Fluss ve ark. (2005) simülasyonlarında, en yaygın kullanılan bu ampirik kestirici, karşılaştırılan dört kestirici (normal, dönüştürülmüş normal, ampirik ve çekirdek) arasında genel olarak en kötü yanlılığa ve kök ortalama kare hataya sahipti; kesme noktasının kendisi için sonuçları daha değişkendi."
+
+msgid "Inter/Intra-Rater Reliability (Test-Retest Studies)"
+msgstr "Değerlendiriciler-Arası / Değerlendirici-İçi Güvenilirlik (Test-Tekrar Test Çalışmaları)"
+
+msgid "Inverse net benefit and inverse Youden's index columns"
+msgstr "Ters net fayda ve ters Youden sütunları"
+
+msgid "Inverse Youden's index"
+msgstr "Ters Youden indeksi"
+
+msgid "Iota Coefficient (Continuous or Categorical, Single Variable)"
+msgstr "Iota Katsayısı (Sürekli veya Kategorik, Tek Değişken)"
+
+msgid "It is computed over all cutoffs and does not depend on which cutoff was selected."
+msgstr "Tüm kesme noktaları üzerinden hesaplanır ve hangi kesme noktasının seçildiğine bağlı değildir."
+
+msgid "K-means (requires K)"
+msgstr "K-ortalama (K Değeri Gerektirir)"
+
+msgid "Kendall's W (Concordance for Rankings)"
+msgstr "Kendall'ın W Katsayısı (Sıralamalar İçin Uyum)"
+
+msgid "Light's Kappa (3+ Raters)"
+msgstr "Light'ın Kappası (3+ Değerlendirici)"
+
+msgid "Lin's CCC (Concordance, Method Comparison)"
+msgstr "Lin'in CCC Katsayısı (Uyum, Yöntem Karşılaştırması)"
+
+msgid "Linear interpolation"
+msgstr "Doğrusal İnterpolasyon"
+
+msgid "Linear weights (equal steps)"
+msgstr "Doğrusal Ağırlıklar (Eşit Adımlar)"
+
+msgid "Linear weights (ordinal)"
+msgstr "Doğrusal Ağırlıklar (sıralı)"
+
+msgid "Lower confidence limit (κL)"
+msgstr "Alt güven sınırı (κL)"
+
+msgid "Macro average (unweighted)"
+msgstr "Makro Ortalama (ağırlıksız)"
+
+msgid "Manhattan distance"
+msgstr "Manhattan Uzaklığı"
+
+msgid "Mean Pearson Correlation (Linear Association)"
+msgstr "Ortalama Pearson Korelasyonu (Doğrusal İlişki)"
+
+msgid "Mean Spearman Rho (Average Rank Correlation)"
+msgstr "Ortalama Spearman Rho (Ortalama Sıra Korelasyonu)"
+
+msgid "Meta-analysis limitation"
+msgstr "Meta-analiz kısıtı"
+
+msgid "Mixed-Effects Condition Comparison (Continuous, AI vs Manual, Pre vs Post)"
+msgstr "Karma Etkilerle Koşul Karşılaştırması (Sürekli, YZ ve Manuel, Öncesi ve Sonrası)"
+
+msgid "Mixed/discordant"
+msgstr "Karışık/Uyumsuz"
+
+msgid "Model names (optional)"
+msgstr "Model Adları (isteğe bağlı)"
+
+msgid "Multi-Annotator Concordance (AI Validation)"
+msgstr "Çoklu İşaretleyici Uyumu (YZ Doğrulaması)"
+
+msgid "Multi-Class Confusion Matrix (Classification Evaluation)"
+msgstr "Çok Sınıflı Karışıklık Matrisi (Sınıflandırma Değerlendirmesi)"
+
+msgid "Nearest point"
+msgstr "En Yakın Nokta"
+
+msgid "Negative result"
+msgstr "Negatif sonuç"
+
+msgid "no usable cutoff exists - every threshold gives a Youden index of zero or less"
+msgstr "kullanılabilir kesme noktası yok - her eşik sıfır veya daha düşük bir Youden indeksi verir"
+
+msgid "Null kappa (κ₀)"
+msgstr "Sıfır hipotezi kappası (κ₀)"
+
+msgid "Observed and Projected Workload"
+msgstr "Gözlenen ve öngörülen iş yükü"
+
+msgid "Outcome Coding: Positive and Negative Classes"
+msgstr "Sonuç kodlaması: pozitif ve negatif sınıflar"
+
+msgid "Outcome Coding: Which Level Is Positive"
+msgstr "Sonlanım kodlaması: hangi düzey pozitif"
+
+msgid "Paired Agreement Comparison (Categorical, With vs Without AI)"
+msgstr "Eşleştirilmiş Uyum Karşılaştırması (Kategorik, YZ ile ve YZ olmadan)"
+
+msgid "Paired Agreement Differences"
+msgstr "Eşleştirilmiş uyum farkları"
+
+msgid "Pairwise Kappa (vs Reference Rater)"
+msgstr "İkili Kappa (Referans Değerlendiriciye Karşı)"
+
+msgid "Partition Identifier"
+msgstr "Bölümleme tanımlayıcısı"
+
+msgid "Pathologist agreement (example)"
+msgstr "Patolog Uyumu (örnek)"
+
+msgid "Pathologist Grading Analysis (Ordinal or Categorical)"
+msgstr "Patolog Derecelendirme Analizi (Sıralı veya Kategorik)"
+
+msgid "Percentile method"
+msgstr "Yüzdelik Yöntemi"
+
+msgid "Perkins & Schisterman (2006) show that this criterion and the Youden index can choose different cutoffs, and that only the Youden index is optimal with respect to the overall misclassification rate."
+msgstr "Perkins & Schisterman (2006), bu ölçüt ile Youden indeksinin farklı kesme noktaları seçebileceğini ve genel yanlış sınıflandırma oranı açısından yalnızca Youden indeksinin optimal olduğunu göstermektedir."
+
+msgid "Positive class: %1$s. Sensitivity, PPV, LR+, every cutoff and the AUC describe how well each test detects %1$s; specificity and NPV refer to %2$s."
+msgstr "Pozitif sınıf: %1$s. Duyarlılık, PÖD, LR+, her kesme noktası ve AUC, her testin %1$s durumunu ne kadar iyi saptadığını tanımlar; özgüllük ve NÖD %2$s için geçerlidir."
+
+msgid "Positive class: %1$s. Sensitivity, PPV, LR+, every cutoff and the AUC describe how well each test detects %1$s; specificity and NPV refer to the other levels combined (%2$s)."
+msgstr "Pozitif sınıf: %1$s. Duyarlılık, PÖD, LR+, her kesme noktası ve AUC, her testin %1$s düzeyini ne kadar iyi saptadığını tanımlar; özgüllük ve NÖD birleştirilmiş diğer düzeyleri (%2$s) ifade eder."
+
+msgid "Positive outcome"
+msgstr "Pozitif Sonuç"
+
+msgid "Positive result"
+msgstr "Pozitif sonuç"
+
+msgid "Prediction rater (multi-annotator concordance)"
+msgstr "Tahmin değerlendiricisi (çoklu açıklayıcı uyumu)"
+
+msgid "Prediction Rater (Multi-Annotator Concordance)"
+msgstr "Tahmin değerlendiricisi (çoklu açıklayıcı uyumu)"
+
+msgid "PSA + MRI (illustrative)"
+msgstr "PSA + MRG (Açıklayıcı)"
+
+msgid "Quadratic weights (ordinal)"
+msgstr "Karesel Ağırlıklar (sıralı)"
+
+msgid "Quartiles (data-driven)"
+msgstr "Çeyreklikler (Veriye Dayalı)"
+
+msgid "Random effects model (DerSimonian-Laird)"
+msgstr "Rastgele Etkiler Modeli (DerSimonian-Laird)"
+
+msgid "Rater and Case Diagnostics"
+msgstr "Değerlendirici ve olgu tanılamaları"
+
+msgid "Rater Variance Decomposition (Systematic vs Random Disagreement)"
+msgstr "Değerlendirici Varyans Ayrıştırması (Sistematik ve Rastgele Uyuşmazlık)"
+
+msgid "Red / blue (classic)"
+msgstr "Kırmızı / mavi (klasik)"
+
+msgid "Red-yellow-green (traffic light)"
+msgstr "Kırmızı-Sarı-Yeşil (Trafik Işığı)"
+
+msgid "Reference and Target"
+msgstr "Referans ve hedef"
+
+msgid "Reference Test for IDI/NRI (Optional)"
+msgstr "IDI/NRI için referans test (isteğe bağlı)"
+
+msgid "Reporting a cutoff and a sensitivity from this analysis would misdescribe the marker."
+msgstr "Bu analizden bir kesme noktası ve duyarlılık bildirmek belirteci yanlış tanımlayacaktır."
+
+msgid "Research (Youden's index with your minimums)"
+msgstr "Araştırma (Youden indeksi ve sizin minimumlarınız)"
+
+msgid "Respiratory testing (illustrative)"
+msgstr "Solunum Yolu Testi (Açıklayıcı)"
+
+msgid "Result by the Published Formula"
+msgstr "Yayımlanmış formüle göre sonuç"
+
+msgid "Robinson's A (Agreement Index)"
+msgstr "Robinson'ın A Katsayısı (Uyum İndeksi)"
+
+msgid "Rule Ranking"
+msgstr "Kural sıralaması"
+
+msgid "Save to Data"
+msgstr "Veriye kaydet"
+
+msgid "Screening test assessment (example)"
+msgstr "Tarama Testi Değerlendirmesi (örnek)"
+
+msgid "Select the prediction rater: the rater whose ratings are evaluated against the others."
+msgstr "Tahmin değerlendiricisini seçin: değerlendirmeleri diğerlerine karşı sınanan değerlendirici."
+
+msgid "Sensitivity %1$.2f and specificity %2$.2f, both at or above 0.80 at this cutoff."
+msgstr "Duyarlılık %1$.2f ve özgüllük %2$.2f; bu kesme noktasında her ikisi de 0.80 veya üzerindedir."
+
+msgid "Sensitivity %1$.2f, specificity %2$.2f at this cutoff."
+msgstr "Bu kesme noktasında duyarlılık %1$.2f, özgüllük %2$.2f."
+
+msgid "Sensitivity %1$.2f, specificity %2$.2f: at this cutoff few cases were missed in this sample. What share of the positive results are true positives is not fixed by these two numbers; it also depends on prevalence."
+msgstr "Duyarlılık %1$.2f, özgüllük %2$.2f: bu kesme noktasında bu örneklemde az sayıda olgu kaçırıldı. Pozitif sonuçların ne kadarının gerçek pozitif olduğu bu iki sayıyla belirlenmez; prevalansa da bağlıdır."
+
+msgid "Sensitivity range (for high-sensitivity applications)"
+msgstr "Duyarlılık Aralığı (yüksek duyarlılıklı uygulamalar için)"
+
+msgid "Sensitivity, PPV, LR+, every cutoff and the AUC describe the level you choose; every other level is analyzed as negative."
+msgstr "Duyarlılık, PÖD, LR+, her kesme noktası ve AUC seçtiğiniz düzeyi tanımlar; diğer tüm düzeyler negatif olarak analiz edilir."
+
+msgid "Sensitivity, specificity and accuracy are reported at a cutoff that was searched for on these same data, so they are optimistic; they are not cross-validated or externally validated estimates."
+msgstr "Duyarlılık, özgüllük ve doğruluk bu aynı veriler üzerinde aranan bir kesme noktasında bildirilmiştir, bu nedenle iyimserdir; çapraz doğrulanmış veya harici olarak doğrulanmış tahminler değildir."
+
+msgid "Sensitivity, specificity and accuracy compare each marker at its own cutoff, chosen on these same patients. McNemar's test (asymptotic, no continuity correction) treats both cutoffs as fixed in advance, so its p-values ignore that selection. Rows with fewer than 10 discordant patients are not tested."
+msgstr "Duyarlılık, özgüllük ve doğruluk, her belirteci bu aynı hastalarda seçilen kendi kesme noktasında karşılaştırır. McNemar testi (asimptotik, süreklilik düzeltmesi olmadan) her iki kesme noktasını da önceden sabitlenmiş kabul eder; bu nedenle p değerleri bu seçimi göz ardı eder. 10'dan az uyumsuz hastası olan satırlar test edilmez."
+
+msgid "Simple majority (>50 percent)"
+msgstr "Basit Çoğunluk (>%50)"
+
+msgid "Single ROC analysis"
+msgstr "Tekli ROC Analizi"
+
+msgid "Site Identifier"
+msgstr "Merkez tanımlayıcısı"
+
+msgid "Specific Agreement Indices (Category-Focused)"
+msgstr "Özgül Uyum İndeksleri (Kategori Odaklı)"
+
+msgid "Specificity range (for high-specificity applications)"
+msgstr "Özgüllük Aralığı (yüksek özgüllüklü uygulamalar için)"
+
+msgid "Squared weights (severity weighted)"
+msgstr "Karesel Ağırlıklar (Şiddet Ağırlıklı)"
+
+msgid "Step size"
+msgstr "Adım Boyutu"
+
+msgid "Stepwise (conservative)"
+msgstr "Adımlı (Muhafazakar)"
+
+msgid "Stuart-Maxwell Test (Categorical, Marginal Homogeneity, 2 Raters)"
+msgstr "Stuart-Maxwell Testi (Kategorik, Marjinal Homojenlik, 2 Değerlendirici)"
+
+msgid "Summary by the Published Formula"
+msgstr "Yayımlanmış formüle göre özet"
+
+msgid "Tertiles (data-driven)"
+msgstr "Üçte Birlikler (Veriye Dayalı)"
+
+msgid "Test Variables"
+msgstr "Test Değişkenleri"
+
+msgid "The %1$s analyzed rows that carry a patient identifier (%2$s) come from %3$s patients, so some patients contribute more than one row (slides, cores or lesions). Every panel except the Frozen-model validation report assumes that each row is an independent patient. Rows from one patient are correlated, so the AUC confidence intervals, the tests comparing markers and the confidence intervals for sensitivity and specificity are too narrow, and p-values too small. • Analyze one row per patient (for example a patient-level score), or • for a fixed model with a prespecified cutoff, enable the Frozen-model validation report, whose intervals resample whole patients (every row of a patient must then share one outcome)."
+msgstr "Hasta tanımlayıcısı (%2$s) taşıyan %1$s analiz edilmiş satır %3$s hastadan gelmektedir; dolayısıyla bazı hastalar birden fazla satırla temsil edilmektedir (lamlar, kor örnekleri veya lezyonlar). Dondurulmuş model doğrulama raporu dışındaki her panel, her satırın bağımsız bir hasta olduğunu varsayar. Aynı hastaya ait satırlar birbiriyle ilişkilidir; bu nedenle AUC güven aralıkları, belirteçleri karşılaştıran testler ve duyarlılık ile özgüllük için güven aralıkları gereğinden dar, p değerleri ise gereğinden küçüktür. • Hasta başına bir satır analiz edin (örneğin hasta düzeyinde bir skor) ya da • önceden belirlenmiş bir kesme noktasına sahip sabit bir model için, aralıkları hastaları bütün olarak yeniden örnekleyen Dondurulmuş model doğrulama raporunu etkinleştirin (bu durumda bir hastanın tüm satırları aynı sonlanımı paylaşmalıdır)."
+
+msgid "The Clopper-Pearson intervals for sensitivity and specificity in the Diagnostic Performance table treat this cutoff as fixed in advance, so they are centered on these optimistic values and understate the uncertainty."
+msgstr "Tanısal Performans tablosundaki duyarlılık ve özgüllük için Clopper-Pearson aralıkları bu kesme noktasını önceden sabitlenmiş kabul eder; bu nedenle bu iyimser değerler üzerinde merkezlenir ve belirsizliği olduğundan düşük gösterir."
+
+msgid "The cutoff was chosen on these same data, so the sensitivity, specificity and accuracy reported at it are optimistic."
+msgstr "Kesme noktası bu aynı veriler üzerinde seçildiğinden, bu noktada raporlanan duyarlılık, özgüllük ve doğruluk iyimserdir."
+
+msgid "The displayed ROC curve is smoothed (%s), but every reported statistic — AUC, confidence intervals, optimal cutoffs and all sensitivity/specificity values — is computed from the empirical curve. A smoothed curve carries no thresholds, so it cannot produce a cutoff."
+msgstr "Görüntülenen ROC eğrisi düzeltilmiştir (%s), ancak raporlanan her istatistik — AUC, güven aralıkları, optimal kesme noktaları ve tüm duyarlılık/özgüllük değerleri — ampirik eğriden hesaplanır. Düzeltilmiş bir eğri eşik taşımaz, bu nedenle kesme noktası üretemez."
+
+msgid "The hull is {gap} above the empirical AUC; points between empirical operating points are reachable only by randomly mixing two cutoffs (Provost & Fawcett 2001); in-sample and optimistic"
+msgstr "Örtü, ampirik AUC'nin {gap} üzerindedir; ampirik çalışma noktaları arasındaki noktalara yalnızca iki kesme noktası rastgele karıştırılarak ulaşılabilir (Provost & Fawcett 2001); örneklem içi ve iyimserdir"
+
+msgid "The prediction rater {name} must also be selected under Raters."
+msgstr "Tahmin değerlendiricisi {name}, Değerlendiriciler altında da seçilmelidir."
+
+msgid "The ROC tables read %1$s in the direction in which it ranks patients well (AUC %3$.3f), but its group means point the other way, so the slope of the fitted logistic risk of %2$s runs opposite to that direction. This happens with a skewed marker or an outlying value. Calibration, the Brier score, the Hosmer-Lemeshow test, the decision and clinical impact curves and internal validation use that fitted model, the risk model the data support, which ranks patients the opposite way to the ROC, cutoff and fixed-cutoff tables; they do not describe %1$s as those tables read it, and can disagree with them. A log or rank transformation of the marker usually removes the conflict."
+msgstr "ROC tabloları %1$s belirtecini hastaları iyi sıraladığı yönde okur (AUC %3$.3f), ancak grup ortalamaları ters yönü gösterir; bu nedenle %2$s için uyarlanan lojistik riskin eğimi o yönün tersine işler. Bu durum çarpık dağılımlı bir belirteçte ya da aykırı bir değerde ortaya çıkar. Kalibrasyon, Brier skoru, Hosmer-Lemeshow testi, karar ve klinik etki eğrileri ile iç doğrulama bu uyarlanmış modeli, yani verilerin desteklediği risk modelini kullanır; bu model hastaları ROC, kesim noktası ve sabit kesim değeri tablolarının tersine sıralar. Bu çıktılar %1$s belirtecini o tabloların okuduğu biçimde betimlemez ve onlarla çelişebilir. Belirtecin log ya da sıra (rank) dönüşümü genellikle bu çelişkiyi ortadan kaldırır."
+
+msgid "The search was restricted to cutoffs with sensitivity of at least %1$s and specificity of at least %2$s; where none met both, the unconstrained optimum was used and a notice says so."
+msgstr "Arama, duyarlılığı en az %1$s ve özgüllüğü en az %2$s olan kesme noktalarıyla sınırlandırıldı; hiçbiri her ikisini birden karşılamadığında kısıtsız optimum kullanıldı ve bir bildirim bunu belirtir."
+
+msgid "The sensitivity and specificity quoted at the selected cutoff are a separate matter: those ARE optimistic, because that cutoff was searched for on these same data."
+msgstr "Seçilen kesme noktasında belirtilen duyarlılık ve özgüllük ayrı bir konudur: bunlar GERÇEKTEN iyimserdir, çünkü bu kesme noktası bu aynı verilerde aranarak bulunmuştur."
+
+msgid "The smaller outcome group has %1$s patients (%2$s positive, %3$s negative); affected: %4$s. DeLong's interval is a large-sample approximation: for a single AUC it covers the true value less often than its stated level when the smaller group is small, and more so the closer the AUC is to 1 or 0 (Obuchowski & Lieber 1998: more than 200 patients for high-accuracy areas). Feng, Cortese & Baumgartner (2017) found that interval methods for the AUC disagree most when the AUC is high and the sample small. In this module's validation simulation, which drew equal-variance binormal data, a 95%% DeLong interval covered a true AUC of 0.80 in 91%% of datasets with 15 positive and 15 negative cases, and a true AUC of 0.95 in 87%% with 30 and 30 and in 93%% with 100 and 100; these are averages over all datasets of each size, and with unequal variances or skewed data they were about 90%%, 84%% and 92%%. Coverage followed the smaller group's size times the distance of the AUC from 1 (from 0 for an AUC below 0.5): it was about 93%% wherever that product was 6, so this warning appears when the smaller group has fewer than 30 patients or that product is below 6 (fewer than 60 patients at an AUC of 0.90, fewer than 120 at 0.95); the cutoff is a heuristic. • Read the interval as approximate and probably too narrow. • Bootstrap confidence intervals are an alternative, but no method is exact at this size, and no bootstrap interval can be formed when the groups are perfectly separated."
+msgstr "Küçük olan sonlanım grubunda %1$s hasta var (%2$s pozitif, %3$s negatif); etkilenen: %4$s. DeLong aralığı büyük örneklem yaklaşımıdır: tek bir AUC için, küçük olan grup az sayıda hasta içerdiğinde gerçek değeri belirtilen düzeyden daha seyrek kapsar ve AUC 1'e ya da 0'a yaklaştıkça bu durum belirginleşir (Obuchowski & Lieber 1998: yüksek doğruluklu alanlar için 200'den fazla hasta). Feng, Cortese & Baumgartner (2017), AUC için aralık yöntemlerinin en çok AUC yüksek ve örneklem küçük olduğunda birbirinden ayrıştığını buldu. Bu modülün eşit varyanslı binormal veriler çeken doğrulama simülasyonunda, %%95 DeLong aralığı gerçek 0.80 AUC değerini 15 pozitif ve 15 negatif olgulu veri setlerinin %%91'inde, gerçek 0.95 AUC değerini ise 30 ve 30 olgulu veri setlerinin %%87'sinde ve 100 ve 100 olgulu veri setlerinin %%93'ünde kapsadı; bunlar her büyüklükteki tüm veri setleri üzerinden alınan ortalamalardır ve eşit olmayan varyanslarda veya çarpık verilerde bu değerler yaklaşık %%90, %%84 ve %%92 idi. Kapsama, küçük grubun büyüklüğü ile AUC'nin 1'den uzaklığının (0.5'in altındaki bir AUC için 0'dan uzaklığının) çarpımını izledi: bu çarpımın 6 olduğu her durumda yaklaşık %%93 idi; bu nedenle bu uyarı, küçük grupta 30'dan az hasta olduğunda veya bu çarpım 6'nın altında olduğunda görünür (0.90 AUC'de 60'tan az, 0.95'te 120'den az hasta); bu sınır sezgisel bir kuraldır. • Aralığı yaklaşık ve muhtemelen fazla dar olarak yorumlayın. • Bootstrap güven aralıkları bir alternatiftir, ancak bu büyüklükte hiçbir yöntem kesin değildir ve gruplar tamamen ayrıştığında hiçbir bootstrap aralığı oluşturulamaz."
+
+msgid "This AUC is apparent (in-sample), and where a cutoff was searched for on these data the cutoff metrics are optimistic. Independent validation is needed before these figures describe performance in new patients."
+msgstr "Bu EAA görünürdür (örneklem içi) ve bu veriler üzerinde bir kesme noktası arandığında kesme noktası ölçütleri iyimserdir. Bu rakamların yeni hastalardaki performansı tanımlaması için bağımsız doğrulama gereklidir."
+
+msgid "This outcome is numeric with %s distinct values, so it looks like a measurement rather than a two-level outcome (condition present / absent). Choose a different outcome variable, or a 0/1 variable made from this one at a clinically justified cutoff."
+msgstr "Bu sonlanım %s farklı değere sahip sayısal bir değişkendir; bu nedenle iki düzeyli bir sonlanımdan (durum var / yok) çok bir ölçüme benzemektedir. Farklı bir sonlanım değişkeni ya da bu değişkenden klinik olarak gerekçelendirilmiş bir kesme noktasında oluşturulmuş 0/1 bir değişken seçin."
+
+msgid "TN (cut-off 1)"
+msgstr "GN (Kesim Değeri 1)"
+
+msgid "TN (cut-off 2)"
+msgstr "GN (Kesim Değeri 2)"
+
+msgid "TP (cut-off 1)"
+msgstr "GP (Kesim Değeri 1)"
+
+msgid "TP (cut-off 2)"
+msgstr "GP (Kesim Değeri 2)"
+
+msgid "True negative (TN)"
+msgstr "Gerçek Negatif (GN)"
+
+msgid "True positive (TP)"
+msgstr "Gerçek Pozitif (GP)"
+
+msgid "Tumor marker evaluation (example)"
+msgstr "Tümör Belirteci Değerlendirmesi (örnek)"
+
+msgid "Unweighted (standard)"
+msgstr "Ağırlıksız (Standart)"
+
+msgid "Upper confidence limit (κU)"
+msgstr "Üst güven sınırı (κU)"
+
+msgid "Validation Context"
+msgstr "Doğrulama bağlamı"
+
+msgid "Validation Denominator Ledger"
+msgstr "Doğrulama payda dökümü"
+
+msgid "Violin plot (full distribution)"
+msgstr "Keman Grafiği (Tam Dağılım)"
+
+msgid "Viridis (colorblind-friendly)"
+msgstr "Viridis (Renk Körü Dostu)"
+
+msgid "Visual theme for the ROC plots. \"jamovi (follow global)\" draws them with the theme chosen in jamovi, like every other plot in the document. Classic, Modern and Clinical adjust the grid lines and border on top of it."
+msgstr "ROC grafiklerinin görsel teması. \"jamovi (genel ayarı izle)\", grafikleri belgedeki diğer tüm grafikler gibi jamovi'de seçilen temayla çizer. Klasik, Modern ve Klinik, bunun üzerine ızgara çizgilerini ve çerçeveyi ayarlar."
+
+msgid "Wald (symmetric)"
+msgstr "Wald (simetrik)"
+
+msgid "Ward linkage (minimum variance)"
+msgstr "Ward Bağlantısı (Asgari Varyans)"
+
+msgid "Weighted average (by prevalence)"
+msgstr "Ağırlıklı Ortalama (prevalansa göre)"
+
+msgid "Where several cutoffs tie on this criterion (ties are found exactly from the counts), this module reports the one closest to the top-left corner and then the smallest cutoff; a notice lists the alternatives."
+msgstr "Birden fazla kesme noktası bu ölçütte eşit olduğunda (eşitlikler sayımlardan tam olarak belirlenir), bu modül önce sol üst köşeye en yakın olanı, ardından en küçük kesme noktasını raporlar; bir bildirim alternatifleri listeler."
+
+msgid "Youden index %1$.2f at this cutoff (sensitivity %2$.2f, specificity %3$.2f)."
+msgstr "Bu kesme noktasında Youden indeksi %1$.2f (duyarlılık %2$.2f, özgüllük %3$.2f)."
+
+msgid "Youden's index (kernel smoothed)"
+msgstr "Youden İndeksi (çekirdek düzeltilmiş)"
+
+msgid "Youden's index (parametric normal)"
+msgstr "Youden İndeksi (parametrik normal)"
+
+msgid "Youden's index (Sens + Spec - 1)"
+msgstr "Youden İndeksi (Duy + Özg - 1)"
+
+msgid "Youden's index optimization"
+msgstr "Youden indeksi optimizasyonu"
+
+msgid "Youden's Index Optimization Plot"
+msgstr "Youden İndeksi Optimizasyon Grafiği"
+
+msgid "κL must be less than κU"
+msgstr "κL, κU değerinden küçük olmalıdır"
+
+msgid "κ₀ must be strictly within the confidence interval (κL, κU)"
+msgstr "κ₀, güven aralığının (κL, κU) kesinlikle içinde olmalıdır"
+
+msgid "κ₀ must be greater than κL"
+msgstr "κ₀, κL değerinden büyük olmalıdır"
+
+msgid "The requested confidence interval is too narrow to size in reasonable time: it would need about {n} subjects. The limit that governs the sample size is {dist} away from κ₀, and the required sample size grows roughly as one over the square of that distance. Widen the interval, use more raters, or accept a lower confidence level. As a guide, halving that distance multiplies the required sample size by about four."
+msgstr "İstenen güven aralığı makul bir sürede hesaplanamayacak kadar dardır: yaklaşık {n} olgu gerektirir. Örneklem büyüklüğünü belirleyen sınır κ₀ değerinden {dist} uzaktadır ve gerekli örneklem büyüklüğü kabaca bu uzaklığın karesiyle ters orantılı olarak artar. Aralığı genişletin, daha fazla değerlendirici kullanın veya daha düşük bir güven düzeyini kabul edin. Yol gösterici olarak, bu uzaklığı yarıya indirmek gerekli örneklem büyüklüğünü yaklaşık dört katına çıkarır."
+
+msgid "The requested confidence interval is too narrow to size in reasonable time: no sample size can deliver it. The limit that governs the sample size is {dist} away from κ₀, and the required sample size grows roughly as one over the square of that distance. Widen the interval, use more raters, or accept a lower confidence level. As a guide, halving that distance multiplies the required sample size by about four."
+msgstr "İstenen güven aralığı makul bir sürede hesaplanamayacak kadar dardır: hiçbir örneklem büyüklüğü bunu sağlayamaz. Örneklem büyüklüğünü belirleyen sınır κ₀ değerinden {dist} uzaktadır ve gerekli örneklem büyüklüğü kabaca bu uzaklığın karesiyle ters orantılı olarak artar. Aralığı genişletin, daha fazla değerlendirici kullanın veya daha düşük bir güven düzeyini kabul edin. Yol gösterici olarak, bu uzaklığı yarıya indirmek gerekli örneklem büyüklüğünü yaklaşık dört katına çıkarır."
+
+msgid "This is the bound the study reaches if the agreement it observes lands exactly on the anticipated kappa and its category proportions match the anticipated ones. Roughly half of such studies will observe less agreement than anticipated and end with a lower bound below the figure shown, so read it as a planning expectation rather than a guarantee."
+msgstr "Bu, çalışmanın gözlemlediği uyum tam olarak beklenen kappa üzerine düşerse ve kategori oranları beklenenlerle örtüşürse ulaşacağı sınırdır. Bu tür çalışmaların yaklaşık yarısı beklenenden daha az uyum gözlemleyecek ve gösterilen değerin altında bir alt sınırla sonuçlanacaktır, bu nedenle bunu bir garanti yerine bir planlama beklentisi olarak okuyun."
+
+msgid "Note that the anticipated kappa here is the agreement you expect to observe, not a null hypothesis value as it is in kappaSizePower."
+msgstr "Burada beklenen kappa, gözlemlemeyi beklediğiniz uyumdur; kappaSizePower'daki gibi bir sıfır hipotezi değeri değildir."
+
+msgid "The anticipated kappa must be strictly between 0 and 1."
+msgstr "Beklenen kappa 0 ile 1 arasında (sınırlar hariç) olmalıdır."
+
+msgid "This is a POWER calculation: it returns the number of subjects needed to REJECT κ₀ in favor of κ₁ in a two-sided test at the stated significance level and power."
+msgstr "Bu bir GÜÇ hesaplamasıdır: belirtilen anlamlılık düzeyi ve güçte, iki yönlü bir testte κ₀'ı κ₁ lehine REDDETMEK için gereken olgu sayısını verir."
+
+msgid "The null and alternative kappa differ by only {delta}. Check that κ₀ is the agreement you want to rule OUT (not the agreement you expect to observe) and that κ₁ is a clinically meaningful difference from it; very close values need very large studies."
+msgstr "Sıfır hipotezi ve alternatif kappa yalnızca {delta} kadar farklıdır. κ₀'ın DIŞLAMAK istediğiniz uyum (gözlemlemeyi beklediğiniz uyum değil) ve κ₁'in bundan klinik olarak anlamlı bir fark olduğunu denetleyin; birbirine çok yakın değerler çok büyük çalışmalar gerektirir."
+
+msgid "The design needs {n} subjects; few agreement studies can enrol this many. Moving κ₁ closer to κ₀ from the same side, or raising the power target, always inflates the sample size, and a rare finding usually does too (for a binary outcome, a prevalence far from 0.5; with more categories, very unequal category proportions) - revisit whichever of these is not a firm requirement."
+msgstr "Tasarım {n} olgu gerektiriyor; çok az uyum çalışması bu kadar olgu toplayabilir. κ₁'i aynı taraftan κ₀'a yaklaştırmak veya güç hedefini yükseltmek örneklem büyüklüğünü her zaman artırır; nadir bir bulgu da genellikle artırır (ikili sonuçta 0.5'ten uzak bir prevalans, daha çok kategoride ise çok dengesiz kategori oranları). Bunlardan kesin bir gereklilik olmayanı gözden geçirin."
+
+msgid "The published formula behind this sample size is a large-sample approximation that treats the expected proportions as known. In {R} simulated studies of {n} subjects analyzed with the recommended goodness-of-fit test (prevalence estimated by maximum likelihood with kappa held at κ₀), the power to reject κ₀ when kappa equals κ₁ was about {sim}, short of the stated {power}."
+msgstr "Bu örneklem büyüklüğünün dayandığı yayımlanmış formül, beklenen oranları biliniyor kabul eden bir büyük örneklem yaklaşımıdır. Önerilen uyum iyiliği testiyle (prevalans, kappa κ₀'da sabit tutularak en çok olabilirlik yöntemiyle kestirilerek) çözümlenen {n} olguluk {R} simüle edilmiş çalışmada, kappa κ₁'e eşitken κ₀'ı reddetme gücü yaklaşık {sim} oldu ve belirtilen {power} değerinin altında kaldı."
+
+msgid "Power-based sample size for a two-sided test of H0: kappa = κ₀ against H1: kappa = κ₁, using the goodness-of-fit (non-central chi-square) approach of Donner and Eliasziw (two raters, binary outcome), Altaye, Donner and Klar (binary outcome, more raters) and Altaye, Donner and Eliasziw (three to five categories), as implemented in the kappaSize package (Rotondi and Donner)."
+msgstr "H0: kappa = κ₀ hipotezinin H1: kappa = κ₁ hipotezine karşı iki yönlü testi için, Donner ve Eliasziw (iki değerlendirici, ikili sonuç), Altaye, Donner ve Klar (ikili sonuç, daha çok değerlendirici) ile Altaye, Donner ve Eliasziw'in (üç ila beş kategori) uyum iyiliği (merkezi olmayan ki-kare) yaklaşımıyla, kappaSize paketinde (Rotondi ve Donner) uygulandığı biçimde hesaplanan güce dayalı örneklem büyüklüğü."
+
+msgid "With three or more raters, do not compute the chi-square over every count of raters calling the finding present (none, one, ..., all): that statistic has more than one degree of freedom and, read on one, rejects a true κ₀ much more often than the stated significance level."
+msgstr "Üç veya daha fazla değerlendirici olduğunda ki-kareyi, bulguyu var olarak bildiren değerlendirici sayısının her değeri (hiçbiri, biri, ..., tümü) üzerinden hesaplamayın: bu istatistiğin serbestlik derecesi birden fazladır ve bir serbestlik derecesiyle değerlendirildiğinde doğru bir κ₀'ı belirtilen anlamlılık düzeyinin öngördüğünden çok daha sık reddeder."
+
+msgid "Estimate the prevalence for that test by maximum likelihood from the same pooled cells, with kappa held at κ₀: the published procedure plugs in the overall proportion of positive ratings, which makes the test reject a true κ₀ too often with four or more raters and a rare finding."
+msgstr "Bu test için prevalansı, kappa κ₀'da sabit tutularak aynı birleştirilmiş hücrelerden en çok olabilirlik yöntemiyle kestirin: yayımlanmış yöntem pozitif değerlendirmelerin genel oranını doğrudan kullanır; bu da dört veya daha fazla değerlendirici ve nadir bir bulgu olduğunda testin doğru bir κ₀'ı çok sık reddetmesine yol açar."
+
+msgid "With two raters, estimate the prevalence for the test by maximum likelihood with kappa held at κ₀ rather than plugging in the overall proportion of positive ratings, as the published procedure does: in simulations of a rare finding (1 to 5 cases in 100) at a 0.05 level, the plug-in test rejected a true κ₀ at a rate of 0.055-0.066 and the maximum-likelihood version at 0.043-0.052."
+msgstr "İki değerlendirici olduğunda test için prevalansı, yayımlanmış yöntemin yaptığı gibi pozitif değerlendirmelerin genel oranını doğrudan kullanarak değil, kappa κ₀'da sabit tutularak en çok olabilirlik yöntemiyle kestirin: nadir bir bulgunun (100 olguda 1 ila 5) 0.05 düzeyindeki simülasyonlarında, genel oranı doğrudan kullanan test doğru bir κ₀'ı 0.055-0.066 oranında, en çok olabilirlik sürümü ise 0.043-0.052 oranında reddetti."
+
+msgid "With three or more raters, estimate the category prevalences by maximum likelihood with kappa held at κ₀, as Altaye, Donner and Eliasziw do; plugging in the overall proportions of ratings makes the test reject a true κ₀ too often."
+msgstr "Üç veya daha fazla değerlendirici olduğunda kategori prevalanslarını, Altaye, Donner ve Eliasziw'in yaptığı gibi, kappa κ₀'da sabit tutularak en çok olabilirlik yöntemiyle kestirin; tüm değerlendirmelerin genel oranlarını doğrudan kullanmak testin doğru bir κ₀'ı çok sık reddetmesine yol açar."
+
+msgid "The goodness-of-fit test also tests that model: if the raters follow another model with the same kappa, it can reject a true κ₀ far more often than the stated significance level, whereas Fleiss' kappa with a jackknife or bootstrap interval that resamples subjects is not tied to the model."
+msgstr "Uyum iyiliği testi bu modeli de sınar: değerlendiriciler aynı kappa değerine sahip başka bir modele uyuyorsa test, doğru bir κ₀'ı belirtilen anlamlılık düzeyinin öngördüğünden çok daha sık reddedebilir; olguları yeniden örnekleyen jackknife veya bootstrap aralığıyla Fleiss kappası ise modele bağlı değildir."
+
+msgid "It answers 'how many subjects do I need to reject κ₀ in favor of κ₁?' - not how precisely kappa will be estimated; to plan the expected confidence limits around an anticipated kappa, use kappaSizeCI instead."
+msgstr "'κ₀'ı κ₁ lehine reddetmek için kaç olguya ihtiyacım var?' sorusunu yanıtlar; kappanın ne kadar kesin kestirileceğini değil. Öngörülen bir kappa çevresindeki beklenen güven sınırlarını planlamak için kappaSizeCI kullanın."
+
+msgid "Note that κ₀ here is the null hypothesis value, whereas in kappaSizeCI and kappaSizeFixedN it is the agreement you anticipate observing."
+msgstr "Burada κ₀ sıfır hipotezi değeridir; kappaSizeCI ve kappaSizeFixedN'de ise gözlemlemeyi beklediğiniz uyum düzeyidir."
+
+msgid "κ₀ must be strictly between 0 and 1."
+msgstr "κ₀ 0 ile 1 arasında (sınırlar hariç) olmalıdır."
+
+msgid "κ₁ must be strictly between 0 and 1."
+msgstr "κ₁ kesinlikle 0 ile 1 arasında olmalıdır."
+
+msgid "κ₀ (null) and κ₁ (alternative) must differ; equal values make the required sample size undefined."
+msgstr "κ₀ (sıfır hipotezi) ile κ₁ (alternatif) farklı olmalıdır; eşit değerlerde gerekli örneklem büyüklüğü tanımsızdır."
+
+msgid "Anticipated kappa"
+msgstr "Beklenen kappa"

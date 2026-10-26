@@ -31,18 +31,18 @@ kappaSizeCIClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             # 0.5)" rather than "alpha must be between 0 and 1".
             if (!is_one_sided) {
                 if (self$options$kappaL >= self$options$kappaU) {
-                    errors <- c(errors, .("kappaL must be less than kappaU"))
+                    errors <- c(errors, .("\u03baL must be less than \u03baU"))
                 }
 
                 # kappaSize requires kappa0 to lie strictly inside the interval;
                 # kappa0 == kappaL or kappa0 == kappaU errors inside the engine.
                 if (self$options$kappa0 <= self$options$kappaL || self$options$kappa0 >= self$options$kappaU) {
-                    errors <- c(errors, .("kappa0 must be strictly within the confidence interval (kappaL, kappaU)"))
+                    errors <- c(errors, .("\u03ba\u2080 must be strictly within the confidence interval (\u03baL, \u03baU)"))
                 }
             } else {
                 # One-sided: kappaSize requires kappa0 strictly greater than the lower limit.
                 if (self$options$kappa0 <= self$options$kappaL) {
-                    errors <- c(errors, .("kappa0 must be greater than kappaL"))
+                    errors <- c(errors, .("\u03ba\u2080 must be greater than \u03baL"))
                 }
             }
 
@@ -563,11 +563,11 @@ kappaSizeCIClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 # the same way.
                 msg <- if (isTRUE(is.finite(minimum)))
                     .fmt(
-                        .("The requested confidence interval is too narrow to size in reasonable time: it would need about {n} subjects. The limit that governs the sample size is {dist} away from kappa0, and the required sample size grows roughly as one over the square of that distance. Widen the interval, use more raters, or accept a lower confidence level. As a guide, halving that distance multiplies the required sample size by about four."),
+                        .("The requested confidence interval is too narrow to size in reasonable time: it would need about {n} subjects. The limit that governs the sample size is {dist} away from \u03ba\u2080, and the required sample size grows roughly as one over the square of that distance. Widen the interval, use more raters, or accept a lower confidence level. As a guide, halving that distance multiplies the required sample size by about four."),
                         n = private$.fmtN(minimum), dist = private$.fmtNum(half_width, 3))
                 else
                     .fmt(
-                        .("The requested confidence interval is too narrow to size in reasonable time: no sample size can deliver it. The limit that governs the sample size is {dist} away from kappa0, and the required sample size grows roughly as one over the square of that distance. Widen the interval, use more raters, or accept a lower confidence level. As a guide, halving that distance multiplies the required sample size by about four."),
+                        .("The requested confidence interval is too narrow to size in reasonable time: no sample size can deliver it. The limit that governs the sample size is {dist} away from \u03ba\u2080, and the required sample size grows roughly as one over the square of that distance. Widen the interval, use more raters, or accept a lower confidence level. As a guide, halving that distance multiplies the required sample size by about four."),
                         dist = private$.fmtNum(half_width, 3))
                 jmvcore::reject(msg, code = NULL)
             }

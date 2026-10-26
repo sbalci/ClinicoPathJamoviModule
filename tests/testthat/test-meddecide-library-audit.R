@@ -1730,3 +1730,49 @@ test_that("Fagan nomogram lines follow the jamovi palette and carry a legend", {
     expect_setequal(build(name, "classic")$colours, c("red", "blue"))
   }
 })
+
+# library-audit 2026-10-23 meddecide [INFO] DONE (decisioncombine wording note): when the reference
+#   was obtained only after a positive test, the caution keeps sensitivity, specificity and the
+#   pooled rows' predictive values, and exempts an exact result pattern's predictive values.
+test_that("decisioncombine's verification caution exempts exact result patterns", {
+  skip_if(!length(audit_loaded("decisioncombine")), "decisioncombine not loaded")
+  set.seed(3)
+  n <- 240
+  t1 <- factor(sample(c("pos", "neg"), n, TRUE), c("pos", "neg"))
+  t2 <- factor(sample(c("pos", "neg"), n, TRUE), c("pos", "neg"))
+  gold <- factor(ifelse(runif(n) < ifelse(t1 == "pos" | t2 == "pos", 0.6, 0.1), "D", "N"), c("D", "N"))
+  gold[t1 == "neg" & t2 == "neg" & runif(n) < 0.9] <- NA   # verified mostly after a positive test
+  a <- decisioncombineClass$new(options = decisioncombineOptions$new(
+    gold = "gold", goldPositive = "D", test1 = "t1", test1Positive = "pos", test2 = "t2",
+    test2Positive = "pos", test3 = NULL, test3Positive = NULL), data = data.frame(gold, t1, t2))
+  suppressWarnings(suppressMessages(a$run()))
+  html <- a$results$notices$content
+  expect_match(html, "predictive values of an exact result pattern", fixed = TRUE)
+  expect_false(grepl("specificity and the predictive values can all be biased", html, fixed = TRUE))
+})
+
+# library-audit 2026-10-23 meddecide [INFO] DONE (cotest preset-name note): a worked example's test
+#   names are shown translated even though events.js fills the boxes in English; a name the user
+#   typed still wins.
+test_that("cotest shows a worked example's test names translated, unless the user typed one", {
+  skip_if(!length(audit_loaded("cotest")), "cotest not loaded")
+  turkish <- list(locale_data = list(messages = list(
+    `Rectal examination` = list("Rektal muayene"), PSA = list("PSA"))))
+  cells <- function(test1_name, test2_name, translate) {
+    a <- cotestClass$new(options = cotestOptions$new(preset = "psa_dre", test1_name = test1_name,
+                                                     test2_name = test2_name), data = data.frame())
+    if (translate) {
+      options <- a$options   # an active binding: assign through the object, not through a$options
+      options$.__enclos_env__$private$.translator <- jmvcore:::Translator$new(turkish)
+    }
+    suppressWarnings(suppressMessages(a$run()))
+    tables <- Filter(function(x) inherits(x, "Table"), a$results$items)
+    unlist(lapply(tables, function(t) Filter(is.character, as.list(t$asDF))))
+  }
+  # What the panel writes into the boxes for this example, in English.
+  expect_true("Rektal muayene" %in% cells("PSA", "Rectal examination", translate = TRUE))
+  expect_false("Rectal examination" %in% cells("PSA", "Rectal examination", translate = TRUE))
+  expect_true("Rectal examination" %in% cells("PSA", "Rectal examination", translate = FALSE))
+  # A name the user typed is kept as typed.
+  expect_true("DRE" %in% cells("PSA", "DRE", translate = TRUE))
+})
