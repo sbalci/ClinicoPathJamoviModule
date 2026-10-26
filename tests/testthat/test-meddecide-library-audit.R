@@ -1675,3 +1675,25 @@ test_that("agreement's sample-size table holds numbers, not formatted text", {
   }
   audit_skip_absent(absent, root)
 })
+
+# library-audit 2026-10-23 meddecide [INFO] DONE (the enhancedROC TODO): a table cell is parsed as HTML,
+#   so a predictor named "<LOD flag" reached 18 tables as a blank. Each name cell is .rocLabel()-safe.
+test_that("enhancedROC shows a predictor whose name starts with < in its table cells", {
+  skip_if(!length(audit_loaded("enhancedROC")), "enhancedROC not loaded")
+  set.seed(2)
+  y <- factor(rep(c("neg", "pos"), each = 60), levels = c("neg", "pos"))
+  lod <- "<LOD flag"
+  d <- data.frame(y = y, a = rnorm(120, ifelse(y == "pos", 1.2, 0)), b = rnorm(120, ifelse(y == "pos", 0.5, 0)))
+  names(d)[2] <- lod
+  a <- enhancedROCClass$new(options = enhancedROCOptions$new(outcome = "y", positiveClass = "pos",
+                                                             predictors = c(lod, "b"),
+                                                             analysisType = "comparative",
+                                                             pairwiseComparisons = TRUE),
+                            data = d)
+  suppressWarnings(a$run())
+  r <- a$results$results
+  shown <- "< LOD flag"
+  expect_true(shown %in% r$aucSummary$asDF$predictor)
+  expect_false(lod %in% r$aucSummary$asDF$predictor)
+  expect_true(shown %in% c(r$rocComparisons$asDF$predictor1, r$rocComparisons$asDF$predictor2))
+})

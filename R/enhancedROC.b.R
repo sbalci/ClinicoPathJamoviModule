@@ -2326,14 +2326,11 @@ enhancedROCClass <- R6::R6Class(
                 auc_interp <- private$.interpretAUC(auc_value)
                 clinical_utility <- private$.assessClinicalUtility(auc_value, roc_obj$direction)
 
-                # TODO (UX): predictor names reach cells raw, and a cell is parsed as HTML: a column
-                # named "<LOD flag" shows as blank (no XSS - the client keeps only em/i/sub/sup). Wrap
-                # with .rocLabel(x, note = FALSE) at the cell, never at the row key or a lookup, as
-                # outcomeCoding, .frozenRow() and the multi-class class cells do. Same at L2367,
-                # L2446, L2466, L2504, L2546, L2727, L2797-2798, L2899 (a/b), L3014 (a/b), L3132, L3183,
-                # L3222, L3469, L3981, L5517, L5623, L6050, L6120, L6325, L6333, L6341 (18 tables).
+                # library-audit 2026-10-23 meddecide [LOW] DONE: a cell is parsed as HTML, so every predictor
+                #   name reaches its cell through .rocLabel(x, note = FALSE) ("<LOD flag" showed blank).
+                #   Row keys and lookups keep the raw name.
                 row <- list(
-                    predictor = predictor,
+                    predictor = .rocLabel(predictor, note = FALSE),
                     auc = auc_value,
                     auc_lower = if (!is.null(roc_obj$ci)) roc_obj$ci[1] else NA,
                     auc_upper = if (!is.null(roc_obj$ci)) roc_obj$ci[3] else NA,
@@ -2403,7 +2400,7 @@ enhancedROCClass <- R6::R6Class(
                 )
 
                 row <- list(
-                    predictor = predictor,
+                    predictor = .rocLabel(predictor, note = FALSE),
                     optimal_cutoff = optimal$cutoff,
                     youden_index = optimal$youden_index,
                     sensitivity = optimal$sensitivity,
@@ -2482,7 +2479,7 @@ enhancedROCClass <- R6::R6Class(
 
                 # Add optimal cutoff first
                 row <- list(
-                    predictor = predictor,
+                    predictor = .rocLabel(predictor, note = FALSE),
                     cutoff = optimal$cutoff,
                     cutoff_type = if (identical(optimal$method, "closest_topleft")) .("Optimal (closest to top-left)") else .("Optimal (Youden)"),
                     sensitivity = optimal$sensitivity,
@@ -2502,7 +2499,7 @@ enhancedROCClass <- R6::R6Class(
                         custom_cm <- private$.calculateConfusionMatrix(predictor, custom_cutoffs$cutoff[i])
 
                         custom_row <- list(
-                            predictor = predictor,
+                            predictor = .rocLabel(predictor, note = FALSE),
                             cutoff = custom_cutoffs$cutoff[i],
                             cutoff_type = .fmt(.("Custom {i}"), i = i),
                             sensitivity = custom_cutoffs$sensitivity[i],
@@ -2543,7 +2540,7 @@ enhancedROCClass <- R6::R6Class(
                     cm <- private$.calculateConfusionMatrix(predictor, cutoff)
 
                     row <- list(
-                        predictor = predictor,
+                        predictor = .rocLabel(predictor, note = FALSE),
                         cutoff = cutoff,
                         cutoff_type = .("Sampled"),
                         sensitivity = sens,
@@ -2585,7 +2582,7 @@ enhancedROCClass <- R6::R6Class(
                 balanced_acc <- (optimal$sensitivity + optimal$specificity) / 2
 
                 row <- list(
-                    predictor = predictor,
+                    predictor = .rocLabel(predictor, note = FALSE),
                     cutoff = optimal$cutoff,
                     sensitivity = optimal$sensitivity,
                     sensitivity_ci = paste0("(", round(sens_ci[1], 3), ", ", round(sens_ci[2], 3), ")"),
@@ -2829,7 +2826,7 @@ enhancedROCClass <- R6::R6Class(
                 }
 
                 row <- list(
-                    predictor = predictor,
+                    predictor = .rocLabel(predictor, note = FALSE),
                     prevalence = prevalence,
                     ppv = ppv,
                     npv = npv,
@@ -2899,8 +2896,8 @@ enhancedROCClass <- R6::R6Class(
                             # No clinical-significance column: its 0.05 / 0.10 AUC-difference bands
                             # had no source (removed from the .r.yaml).
                             row <- list(
-                                predictor1 = pred1,
-                                predictor2 = pred2,
+                                predictor1 = .rocLabel(pred1, note = FALSE),
+                                predictor2 = .rocLabel(pred2, note = FALSE),
                                 auc_difference = auc_diff,
                                 test_statistic = comparison$statistic,
                                 p_value = comparison$p.value,
@@ -3116,7 +3113,8 @@ enhancedROCClass <- R6::R6Class(
                             }
 
                             row <- list(
-                                test_name = .fmt(.("{test} ({a} vs {b})"), test = test_name, a = pred1, b = pred2),
+                                test_name = .fmt(.("{test} ({a} vs {b})"), test = test_name, a = .rocLabel(pred1, note = FALSE),
+                                                 b = .rocLabel(pred2, note = FALSE)),
                                 test_statistic = test_stat,
                                 p_value = p_val,
                                 conclusion = conclusion,
@@ -3232,7 +3230,7 @@ enhancedROCClass <- R6::R6Class(
                         )
 
                         row <- list(
-                            predictor = predictor,
+                            predictor = .rocLabel(predictor, note = FALSE),
                             range_type = range_display,
                             range_min = range_min,
                             range_max = range_max,
@@ -3283,7 +3281,7 @@ enhancedROCClass <- R6::R6Class(
                         gain <- croc_result$croc_auc - croc_result$random
 
                         row <- list(
-                            predictor = predictor,
+                            predictor = .rocLabel(predictor, note = FALSE),
                             croc_auc = croc_result$croc_auc,
                             random_croc = croc_result$random,
                             roc_auc = as.numeric(roc_obj$auc),
@@ -3322,7 +3320,7 @@ enhancedROCClass <- R6::R6Class(
                         interpretation <- private$.interpretConvexHull(performance_gap)
 
                         row <- list(
-                            predictor = predictor,
+                            predictor = .rocLabel(predictor, note = FALSE),
                             hull_auc = hull_result$hull_auc,
                             empirical_auc = empirical_auc,
                             performance_gap = performance_gap,
@@ -4082,7 +4080,7 @@ enhancedROCClass <- R6::R6Class(
                 )
                 if (!is.null(pr)) {
                     prTable$addRow(rowKey = private$.escapeVar(predictor), values = list(
-                        predictor = predictor,
+                        predictor = .rocLabel(predictor, note = FALSE),
                         auc_pr = pr$auprc,
                         f1_score = pr$max_f1,
                         precision = pr$precision,
@@ -5622,7 +5620,7 @@ enhancedROCClass <- R6::R6Class(
 
                         # Populate Calibration Summary Table
                         row <- list(
-                            predictor = predictor,
+                            predictor = .rocLabel(predictor, note = FALSE),
                             brier_score = brier,
                             scaled_brier = scaled_brier,
                             calibration_slope = slope,
@@ -5732,7 +5730,7 @@ enhancedROCClass <- R6::R6Class(
                                 }
 
                                 hlTable$addRow(rowKey = key, values = list(
-                                    predictor = predictor,
+                                    predictor = .rocLabel(predictor, note = FALSE),
                                     chi_square = hl_stat,
                                     df = df,
                                     p_value = p_val,
@@ -6434,7 +6432,7 @@ enhancedROCClass <- R6::R6Class(
                     size <- if (observed) length(y) else population
                     w <- .dvWorkload(se, sp, prevalence, size, utility)
                     key <- paste(predictor, cut, sep = "_")
-                    values <- list(predictor = predictor,
+                    values <- list(predictor = .rocLabel(predictor, note = FALSE),
                         threshold = cut, nnt = if (is.finite(w$net_benefit) && w$net_benefit > 0)
                             1 / w$net_benefit else NA_real_,
                         nnd = if (is.finite(se+sp) && se+sp > 1) 1 / (se+sp-1) else NA_real_,
@@ -6442,7 +6440,7 @@ enhancedROCClass <- R6::R6Class(
                         false_positive_rate = 1-sp, net_benefit_per_100 = 100*w$net_benefit)
                     impact$addRow(rowKey = key, values = values)
                     private$.blankUndefined(impact, key, values, undefined)
-                    values <- list(predictor = predictor, threshold = cut,
+                    values <- list(predictor = .rocLabel(predictor, note = FALSE), threshold = cut,
                         n_high_risk = w$flags, n_high_risk_with_event = w$tp,
                         n_high_risk_without_event = w$fp, ppv = w$ppv, npv = w$npv)
                     decision$addRow(rowKey = key, values = values)
@@ -6450,7 +6448,7 @@ enhancedROCClass <- R6::R6Class(
                     scenarios <- c(prevalence, scenario)
                     for (i in seq_along(scenarios)) {
                         row <- .dvWorkload(se, sp, scenarios[i], if (i == 1) size else population, utility)
-                        values <- c(list(predictor = predictor, cutoff = cut,
+                        values <- c(list(predictor = .rocLabel(predictor, note = FALSE), cutoff = cut,
                                          source = if (i == 1 && observed) .("Observed") else .("Projected"),
                                          unit = .rocLabel(self$options$analysisUnit, note = FALSE)), as.list(row))
                         workload$addRow(rowKey = paste(key, i, sep = "_"), values = values)
