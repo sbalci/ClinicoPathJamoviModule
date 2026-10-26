@@ -756,7 +756,7 @@ lassologisticResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             self$add(jmvcore::Output$new(
                 options=options,
                 name="predictions",
-                title="Predicted probabilities",
+                title="Predicted Probabilities",
                 measureType="continuous",
                 varTitle="Predicted Probability from Penalized Logistic",
                 varDescription="Predicted Probability Based on Penalized Logistic Model",

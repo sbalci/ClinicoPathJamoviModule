@@ -64,7 +64,7 @@ children:
           children:
             - type: TextBox
               name: kappa0
-              label: 'Anticipated kappa (kappa0)'
+              label: 'Anticipated kappa (κ₀)'
               format: number
         - type: LayoutBox
           margin: large
@@ -74,7 +74,7 @@ children:
           children:
             - type: TextBox
               name: kappaL
-              label: 'Lower confidence limit (kappaL)'
+              label: 'Lower confidence limit (κL)'
               format: number
         - type: LayoutBox
           margin: large
@@ -84,7 +84,7 @@ children:
           children:
             - type: TextBox
               name: kappaU
-              label: 'Upper confidence limit (kappaU)'
+              label: 'Upper confidence limit (κU)'
               format: number
               enable: (citype:two_sided)
 

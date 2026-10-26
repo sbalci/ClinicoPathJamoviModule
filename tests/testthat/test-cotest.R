@@ -749,7 +749,7 @@ test_that("the Fagan nomogram is titled with the rule it actually plots", {
     # It is built from the parallel-rule likelihood ratios, so its positive arm is the
     # "Either Test Positive" row (42.5% at the defaults), not "Both Tests Positive" (89.1%).
     r_yaml <- paste(readLines("../../jamovi/cotest.r.yaml", warn = FALSE), collapse = "\n")
-    expect_match(r_yaml, "title: 'Fagan nomogram - parallel rule")
+    expect_match(r_yaml, "title: 'Fagan Nomogram - Parallel Rule")
 
     res <- ClinicoPath::cotest(fagan = TRUE)
     ct <- as.data.frame(res$cotestResultsTable)

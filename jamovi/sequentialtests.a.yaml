@@ -37,21 +37,21 @@ options:
       type: List
       options:
         - name: custom
-          title: Custom Values
+          title: Custom values
         - name: covid_screening_confirmation
-          title: Respiratory Testing (Illustrative)
+          title: Respiratory testing (illustrative)
         - name: breast_cancer_screening
-          title: Breast Imaging + Tissue Sampling (Illustrative)
+          title: Breast imaging + tissue sampling (illustrative)
         - name: mi_emergency_parallel
-          title: Biomarker + ECG (Illustrative)
+          title: Biomarker + ECG (illustrative)
         - name: tb_screening_confirmation
-          title: Chest Imaging + Culture (Illustrative)
+          title: Chest imaging + culture (illustrative)
         - name: prostate_screening_exclusion
-          title: PSA + MRI (Illustrative)
+          title: PSA + MRI (illustrative)
         - name: hiv_screening_confirmation
-          title: HIV Ag/Ab + Differentiation Assay (Illustrative)
+          title: HIV Ag/Ab + differentiation assay (illustrative)
         - name: stroke_emergency_parallel
-          title: Clinical Assessment + CT (Illustrative)
+          title: Clinical assessment + CT (illustrative)
       default: custom
       description:
           R: |

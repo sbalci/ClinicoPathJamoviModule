@@ -86,11 +86,11 @@ options:
       title: 'Analysis type'
       type: List
       options:
-          - title: 'Single ROC Analysis'
+          - title: 'Single ROC analysis'
             name: single
-          - title: 'Comparative ROC Analysis'
+          - title: 'Comparative ROC analysis'
             name: comparative
-          - title: 'Comprehensive Diagnostic Performance'
+          - title: 'Comprehensive diagnostic performance'
             name: comprehensive
       default: single
       description: >
@@ -123,7 +123,7 @@ options:
 
     # Youden Index Options
     - name: youdenOptimization
-      title: "Youden index optimization"
+      title: "Youden's index optimization"
       type: Bool
       default: true
       description: >
@@ -196,11 +196,11 @@ options:
       title: 'Bootstrap method'
       type: List
       options:
-          - title: 'Percentile Method'
+          - title: 'Percentile method'
             name: percentile
-          - title: 'BCa (Bias-Corrected and Accelerated)'
+          - title: 'BCa (bias-corrected and accelerated)'
             name: bca
-          - title: 'Basic Bootstrap'
+          - title: 'Basic bootstrap'
             name: basic
       default: bca
       description: >
@@ -336,9 +336,9 @@ options:
       title: 'Partial AUC type'
       type: List
       options:
-          - title: 'Specificity Range (for high-specificity applications)'
+          - title: 'Specificity range (for high-specificity applications)'
             name: specificity
-          - title: 'Sensitivity Range (for high-sensitivity applications)'
+          - title: 'Sensitivity range (for high-sensitivity applications)'
             name: sensitivity
       default: specificity
       description: 'Whether to calculate pAUC over a specificity or sensitivity range'
@@ -412,7 +412,7 @@ options:
       description: 'Ratio threshold for imbalance detection (e.g., 3.0 means 3:1 or 1:3 ratio)'
 
     - name: showImbalanceWarning
-      title: "Explain the imbalance warning in full"
+      title: "Imbalance warning details"
       type: Bool
       default: false
       description: >-
@@ -467,15 +467,15 @@ options:
       title: 'Clinical presets'
       type: List
       options:
-          - title: 'Custom Configuration'
+          - title: 'Custom configuration'
             name: custom
-          - title: 'Biomarker Screening (High Sensitivity)'
+          - title: 'Biomarker screening (high sensitivity)'
             name: biomarker_screening
-          - title: 'Diagnostic Test Validation (Balanced)'
+          - title: 'Diagnostic test validation (balanced)'
             name: diagnostic_validation
-          - title: 'Confirmatory Testing (High Specificity)'
+          - title: 'Confirmatory testing (high specificity)'
             name: confirmatory_testing
-          - title: 'Research (Youden with Your Minimums)'
+          - title: "Research (Youden's index with your minimums)"
             name: research_comprehensive
       default: custom
       description: >
@@ -709,9 +709,9 @@ options:
       title: 'Multi-class AUC averaging'
       type: List
       options:
-          - title: 'Macro Average (unweighted)'
+          - title: 'Macro average (unweighted)'
             name: macro
-          - title: 'Weighted Average (by prevalence)'
+          - title: 'Weighted average (by prevalence)'
             name: weighted
       default: macro
       description: >
@@ -756,7 +756,7 @@ options:
       description: 'Calculate observed or projected workload at independently supplied score cutoffs'
 
     - name: nntCalculation
-      title: "Inverse net benefit and inverse Youden columns"
+      title: "Inverse net benefit and inverse Youden's index columns"
       type: Bool
       default: false
       description: 'Show inverse net benefit and inverse Youden index; neither is a count of tests or reviews'
@@ -830,11 +830,11 @@ options:
       title: 'Validation method'
       type: List
       options:
-          - title: 'Bootstrap Validation'
+          - title: 'Bootstrap validation'
             name: bootstrap
           - title: 'Cross-Validation'
             name: cv
-          - title: 'Both Methods'
+          - title: 'Both methods'
             name: both
       default: bootstrap
       description: >

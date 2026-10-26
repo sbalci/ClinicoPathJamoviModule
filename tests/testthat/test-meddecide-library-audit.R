@@ -1603,3 +1603,49 @@ test_that("enhancedROC plots follow the jamovi theme unless a theme is chosen", 
   }
   audit_skip_absent(absent, root)
 })
+
+# library-audit 2026-10-23 meddecide [LOW] DONE: one label convention - variable boxes and headings in
+#   Title Case, controls and list items in sentence case - one name per statistic, no two different
+#   options with one title, and a percent box that says so.
+test_that("labels follow one convention and name each thing once", {
+  root <- audit_source_root()
+  analyses <- c("decision", "decisioncalculator", "decisioncombine", "decisioncompare", "decisioncurve",
+                "enhancedROC", "psychopdaROC", "agreement", "kappaSizeCI", "kappaSizeFixedN",
+                "kappaSizePower", "sequentialtests", "cotest", "nogoldstandard", "lassologistic")
+  absent <- audit_absent(root, analyses, c("jamovi/%s.a.yaml", "jamovi/%s.u.yaml", "jamovi/%s.r.yaml"))
+  small <- c("a", "an", "and", "as", "at", "by", "for", "from", "in", "of", "on", "or", "per", "the",
+             "to", "via", "vs", "with", "is", "e.g.")
+  nodes <- function(x) {
+    if (!is.list(x)) return(list())
+    c(if (!is.null(x$type)) list(x), unlist(lapply(x, nodes), recursive = FALSE))
+  }
+  read <- function(name, kind) yaml::read_yaml(file.path(root, "jamovi", sprintf("%s.%s.yaml", name, kind)))
+  for (name in setdiff(analyses, absent)) {
+    boxes <- Filter(function(n) identical(n$type, "TargetLayoutBox") && is.character(n$label),
+                    nodes(read(name, "u")$children))
+    for (b in boxes) {
+      words <- regmatches(b$label, gregexpr("[A-Za-z][A-Za-z.'-]*", b$label))[[1]]
+      lower <- words[substr(words, 1, 1) %in% letters & !(words %in% small)]
+      expect_length(lower, 0)
+    }
+    yaml_text <- paste(unlist(lapply(file.path(root, "jamovi", paste0(name, c(".a.yaml", ".r.yaml", ".u.yaml"))),
+                                     readLines)), collapse = "\n")
+    expect_false(grepl("title: ['\"]?Youden [Ii]ndex", yaml_text), label = paste(name, "Youden"))
+  }
+  # Two different things that shared one title (parallel controls under their own headings may).
+  title_of <- function(name, option) Filter(function(o) o$name == option, read(name, "a")$options)[[1]]$title
+  if (!("decisioncompare" %in% absent))
+    expect_false(identical(title_of("decisioncompare", "pp"), title_of("decisioncompare", "pprob")))
+  if (!("agreement" %in% absent))
+    expect_false(identical(title_of("agreement", "bootstrap"), title_of("agreement", "bootstrapCI")))
+  ci <- vapply(intersect(c("decision", "decisioncalculator", "decisioncompare"), setdiff(analyses, absent)),
+               function(name) Filter(function(o) o$name == "ci", read(name, "a")$options)[[1]]$title, "")
+  expect_length(unique(ci), 1)
+  if (!("agreement" %in% absent)) {
+    percent <- Filter(function(n) identical(n$name, "tdiCoverage") || identical(n$name, "simpleThreshold"),
+                      nodes(read("agreement", "u")$children))
+    expect_length(percent, 2)
+    for (n in percent) expect_identical(n$suffix, "%")
+  }
+  audit_skip_absent(absent, root)
+})

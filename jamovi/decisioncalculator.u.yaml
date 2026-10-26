@@ -31,11 +31,11 @@ children:
                   - type: TextBox
                     name: TP
                     format: number
-                    label: "True Positive (TP)"
+                    label: "True positive (TP)"
                   - type: TextBox
                     name: FN
                     format: number
-                    label: "False Negative (FN)"
+                    label: "False negative (FN)"
               - type: LayoutBox
                 margin: large
                 cell:
@@ -49,11 +49,11 @@ children:
                   - type: TextBox
                     name: FP
                     format: number
-                    label: "False Positive (FP)"
+                    label: "False positive (FP)"
                   - type: TextBox
                     name: TN
                     format: number
-                    label: "True Negative (TN)"
+                    label: "True negative (TN)"
 
   - type: CollapseBox
     label: Display Options

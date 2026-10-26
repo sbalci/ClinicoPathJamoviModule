@@ -20,7 +20,7 @@ items:
           - showSummary
 
     - name:  text1
-      title: Analysis result
+      title: Analysis Result
       type:  Preformatted
       clearWith:
           - outcome

@@ -12,13 +12,13 @@ children:
     stretchFactor: 1
     children:
       - type: TargetLayoutBox
-        label: Test variables
+        label: Test Variables
         children:
           - type: VariablesListBox
             name: dependentVars
             isTarget: true
       - type: TargetLayoutBox
-        label: Class variable (gold standard)
+        label: Class Variable (Gold Standard)
         children:
           - type: VariablesListBox
             name: classVar
@@ -33,7 +33,7 @@ children:
             label: Negative class
             enable: (classVar)
       - type: TargetLayoutBox
-        label: Group variable (optional)
+        label: Group Variable (Optional)
         children:
           - type: VariablesListBox
             name: subGroup
@@ -47,7 +47,7 @@ children:
             maxItemCount: 1
             isTarget: true
       - type: TargetLayoutBox
-        label: Reference test for IDI/NRI (optional)
+        label: Reference Test for IDI/NRI (Optional)
         children:
           - type: VariablesListBox
             name: refVar
@@ -132,7 +132,7 @@ children:
           - type: TextBox
             name: costratioFP
             format: number
-            label: "Cost Ratio (False Positive : False Negative)"
+            label: "Cost ratio (false positive : false negative)"
             enable: (method:oc_cost_ratio)
       - type: LayoutBox
         margin: large

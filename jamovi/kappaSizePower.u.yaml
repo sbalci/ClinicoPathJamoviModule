@@ -55,7 +55,7 @@ children:
           children:
             - type: TextBox
               name: kappa0
-              label: 'Null kappa (kappa0)'
+              label: 'Null kappa (κ₀)'
               format: number
         - type: LayoutBox
           margin: large
@@ -65,7 +65,7 @@ children:
           children:
             - type: TextBox
               name: kappa1
-              label: 'Alternative kappa (kappa1)'
+              label: 'Alternative kappa (κ₁)'
               format: number
 
   - type: Label

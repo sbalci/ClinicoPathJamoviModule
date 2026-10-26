@@ -83,7 +83,7 @@ children:
         label: Known population prevalence
       - type: TextBox
         name: pprob
-        label: Disease prevalence in target population (0.001-0.999)
+        label: Disease prevalence in target population (between 0 and 1)
         format: number
         enable: ((pp) && (referenceType:legacy || referenceType:disease))
   - type: CollapseBox

@@ -547,7 +547,7 @@ enhancedROCClass <- R6::R6Class(
                 pid <- pid[!is.na(pid) & nzchar(pid)]
                 if (anyDuplicated(pid) > 0L) {
                     private$.addNotice(type = "WARNING", title = .("Several Rows per Patient"),
-                        content = sprintf(.("The %1$s analyzed rows that carry a patient identifier (%2$s) come from %3$s patients, so some patients contribute more than one row (slides, cores or lesions). Every panel except the Frozen-model validation report assumes that each row is an independent patient. Rows from one patient are correlated, so the AUC confidence intervals, the tests comparing markers and the confidence intervals for sensitivity and specificity are too narrow, and p-values too small. \u2022 Analyze one row per patient (for example a patient-level score), or \u2022 for a fixed model with a prespecified cut-off, enable the Frozen-model validation report, whose intervals resample whole patients (every row of a patient must then share one outcome)."),
+                        content = sprintf(.("The %1$s analyzed rows that carry a patient identifier (%2$s) come from %3$s patients, so some patients contribute more than one row (slides, cores or lesions). Every panel except the Frozen-model validation report assumes that each row is an independent patient. Rows from one patient are correlated, so the AUC confidence intervals, the tests comparing markers and the confidence intervals for sensitivity and specificity are too narrow, and p-values too small. \u2022 Analyze one row per patient (for example a patient-level score), or \u2022 for a fixed model with a prespecified cutoff, enable the Frozen-model validation report, whose intervals resample whole patients (every row of a patient must then share one outcome)."),
                             length(pid), pid_name, length(unique(pid))))
                 } else {
                     private$.addNotice(type = "INFO", title = .("Patient clustering is inactive"),
@@ -607,7 +607,7 @@ enhancedROCClass <- R6::R6Class(
                     private$.addNotice(
                         type = "WARNING",
                         title = .("DeLong confidence intervals may be too narrow"),
-                        content = sprintf(.("The smaller outcome group has %1$s patients (%2$s positive, %3$s negative); affected: %4$s. DeLong's interval is a large-sample approximation: for a single AUC it covers the true value less often than its stated level when the smaller group is small, and more so the closer the AUC is to 1 or 0 (Obuchowski & Lieber 1998: more than 200 patients for high-accuracy areas). Feng, Cortese & Baumgartner (2017) found that interval methods for the AUC disagree most when the AUC is high and the sample small. In this module's validation simulation, which drew equal-variance binormal data, a 95%% DeLong interval covered a true AUC of 0.80 in 91%% of datasets with 15 positive and 15 negative cases, and a true AUC of 0.95 in 87%% with 30 and 30 and in 93%% with 100 and 100; these are averages over all datasets of each size, and with unequal variances or skewed data they were about 90%%, 84%% and 92%%. Coverage followed the smaller group's size times the distance of the AUC from 1 (from 0 for an AUC below 0.5): it was about 93%% wherever that product was 6, so this warning appears when the smaller group has fewer than 30 patients or that product is below 6 (fewer than 60 patients at an AUC of 0.90, fewer than 120 at 0.95); the cut-off is a heuristic. \u2022 Read the interval as approximate and probably too narrow. \u2022 Bootstrap confidence intervals are an alternative, but no method is exact at this size, and no bootstrap interval can be formed when the groups are perfectly separated."),
+                        content = sprintf(.("The smaller outcome group has %1$s patients (%2$s positive, %3$s negative); affected: %4$s. DeLong's interval is a large-sample approximation: for a single AUC it covers the true value less often than its stated level when the smaller group is small, and more so the closer the AUC is to 1 or 0 (Obuchowski & Lieber 1998: more than 200 patients for high-accuracy areas). Feng, Cortese & Baumgartner (2017) found that interval methods for the AUC disagree most when the AUC is high and the sample small. In this module's validation simulation, which drew equal-variance binormal data, a 95%% DeLong interval covered a true AUC of 0.80 in 91%% of datasets with 15 positive and 15 negative cases, and a true AUC of 0.95 in 87%% with 30 and 30 and in 93%% with 100 and 100; these are averages over all datasets of each size, and with unequal variances or skewed data they were about 90%%, 84%% and 92%%. Coverage followed the smaller group's size times the distance of the AUC from 1 (from 0 for an AUC below 0.5): it was about 93%% wherever that product was 6, so this warning appears when the smaller group has fewer than 30 patients or that product is below 6 (fewer than 60 patients at an AUC of 0.90, fewer than 120 at 0.95); the cutoff is a heuristic. \u2022 Read the interval as approximate and probably too narrow. \u2022 Bootstrap confidence intervals are an alternative, but no method is exact at this size, and no bootstrap interval can be formed when the groups are perfectly separated."),
                             n_min, n_class[[2]], n_class[[1]],
                             paste(sprintf("%s (AUC %.3f)", names(at_risk), at_risk), collapse = ", "))
                     )
@@ -619,7 +619,7 @@ enhancedROCClass <- R6::R6Class(
                     private$.addNotice(
                         type = "INFO",
                         title = .("Smoothing Applies to the Curve Only"),
-                        content = sprintf(.("The displayed ROC curve is smoothed (%s), but every reported statistic \u2014 AUC, confidence intervals, optimal cut-points and all sensitivity/specificity values \u2014 is computed from the empirical curve. A smoothed curve carries no thresholds, so it cannot produce a cut-point."), if (self$options$smoothMethod == "binormal") "binormal" else "kernel density")
+                        content = sprintf(.("The displayed ROC curve is smoothed (%s), but every reported statistic \u2014 AUC, confidence intervals, optimal cutoffs and all sensitivity/specificity values \u2014 is computed from the empirical curve. A smoothed curve carries no thresholds, so it cannot produce a cutoff."), if (self$options$smoothMethod == "binormal") "binormal" else "kernel density")
                     )
                 }
 
@@ -1037,7 +1037,7 @@ enhancedROCClass <- R6::R6Class(
                         sprintf(.("Outcome %1$s has the levels %2$s."), private$.outcome,
                                 paste0(coding$levels, " (n = ", coding$counts, ")", collapse = ", ")),
                         private$.unsetNote(coding),
-                        .("Sensitivity, PPV, LR+, every cut-point and the AUC describe the level you choose; every other level is analyzed as negative."),
+                        .("Sensitivity, PPV, LR+, every cutoff and the AUC describe the level you choose; every other level is analyzed as negative."),
                         if (length(coding$levels) > 2) .("To analyze every level without choosing one, tick Multi-class ROC analysis.")
                     ), collapse = " ")
                 )
@@ -1130,7 +1130,7 @@ enhancedROCClass <- R6::R6Class(
             if (private$.multiClassOnly(coding)) {
                 .("No positive class is chosen, so only the multi-class tables are computed. Choose the level that means the condition is present in Positive class to get the binary ROC tables as well.")
             } else if (coding$numeric && length(coding$levels) > 10L) {
-                sprintf(.("This outcome is numeric with %s distinct values, so it looks like a measurement rather than a two-level outcome (condition present / absent). Choose a different outcome variable, or a 0/1 variable made from this one at a clinically justified cut-off."), length(coding$levels))
+                sprintf(.("This outcome is numeric with %s distinct values, so it looks like a measurement rather than a two-level outcome (condition present / absent). Choose a different outcome variable, or a 0/1 variable made from this one at a clinically justified cutoff."), length(coding$levels))
             } else if (coding$numeric) {
                 sprintf(.("This outcome is numeric with values %s; only a 0/1 outcome is read without a choice (1 = positive). Set its measure type to Nominal in Data > Setup so Positive class lists its values, or recode it 0/1."), paste(.rocLabel(coding$levels), collapse = ", "))
             } else {
@@ -1174,9 +1174,9 @@ enhancedROCClass <- R6::R6Class(
             others <- .rocLabel(setdiff(lv, pos))
             table$setNote("positive", if (in_force) {
                 if (length(lv) == 2L)
-                    sprintf(.("Positive class: %1$s. Sensitivity, PPV, LR+, every cut-point and the AUC describe how well each test detects %1$s; specificity and NPV refer to %2$s."), .rocLabel(pos), others)
+                    sprintf(.("Positive class: %1$s. Sensitivity, PPV, LR+, every cutoff and the AUC describe how well each test detects %1$s; specificity and NPV refer to %2$s."), .rocLabel(pos), others)
                 else
-                    sprintf(.("Positive class: %1$s. Sensitivity, PPV, LR+, every cut-point and the AUC describe how well each test detects %1$s; specificity and NPV refer to the other levels combined (%2$s)."), .rocLabel(pos), paste(others, collapse = ", "))
+                    sprintf(.("Positive class: %1$s. Sensitivity, PPV, LR+, every cutoff and the AUC describe how well each test detects %1$s; specificity and NPV refer to the other levels combined (%2$s)."), .rocLabel(pos), paste(others, collapse = ", "))
             })
             table$setNote("source", switch(coding$status,
                 selected = .("Chosen in Positive class."),
@@ -1851,7 +1851,7 @@ enhancedROCClass <- R6::R6Class(
                             private$.addNotice(
                                 type = "ERROR",
                                 title = sprintf(.("Constant Predictor: %s"), predictor),
-                                content = sprintf(.("%1$s has the same value (%2$s) in every analyzed row, so it cannot separate the groups: its AUC is 0.5 by construction and no cut-point exists. Choose a predictor that varies, or check how the data were imported."), predictor, format(roc_obj$predictor[1]))
+                                content = sprintf(.("%1$s has the same value (%2$s) in every analyzed row, so it cannot separate the groups: its AUC is 0.5 by construction and no cutoff exists. Choose a predictor that varies, or check how the data were imported."), predictor, format(roc_obj$predictor[1]))
                             )
                         }
 
@@ -1910,9 +1910,9 @@ enhancedROCClass <- R6::R6Class(
                                     type = "ERROR",
                                     title = sprintf(.("Marker Reads Backwards: %s"), predictor),
                                     content = if (separated) {
-                                        sprintf(.("%1$s has an AUC of 0: in these data it separates the groups perfectly, but in the opposite direction to the one assumed (%2$s). \u2022 First check Positive class: is %3$s the level that means the condition is present? Naming the wrong level turns the AUC into 1 minus its true value, exactly this pattern. \u2022 Only if it is, setting Direction to '%4$s' gives an AUC of 1 and re-estimates the cut-point, sensitivity and specificity. \u2022 Change Direction only if that matches what the marker means clinically."), predictor, dir_now, pos, dir_alt)
+                                        sprintf(.("%1$s has an AUC of 0: in these data it separates the groups perfectly, but in the opposite direction to the one assumed (%2$s). \u2022 First check Positive class: is %3$s the level that means the condition is present? Naming the wrong level turns the AUC into 1 minus its true value, exactly this pattern. \u2022 Only if it is, setting Direction to '%4$s' gives an AUC of 1 and re-estimates the cutoff, sensitivity and specificity. \u2022 Change Direction only if that matches what the marker means clinically."), predictor, dir_now, pos, dir_alt)
                                     } else {
-                                        paste(c(sprintf(.("%1$s has an AUC of %2$s and its whole confidence interval lies below 0.5: it separates the groups, but in the opposite direction to the one assumed (%3$s). \u2022 First check Positive class: is %4$s the level that means the condition is present? Naming the wrong level turns the AUC into 1 minus its true value, exactly this pattern. \u2022 Only if it is, setting Direction to '%5$s' gives an AUC of %6$s and re-estimates the cut-point, sensitivity and specificity. \u2022 Change Direction only if that matches what the marker means clinically."), predictor, round(auc_value, 3), dir_now, pos, dir_alt, round(1 - auc_value, 3)),
+                                        paste(c(sprintf(.("%1$s has an AUC of %2$s and its whole confidence interval lies below 0.5: it separates the groups, but in the opposite direction to the one assumed (%3$s). \u2022 First check Positive class: is %4$s the level that means the condition is present? Naming the wrong level turns the AUC into 1 minus its true value, exactly this pattern. \u2022 Only if it is, setting Direction to '%5$s' gives an AUC of %6$s and re-estimates the cutoff, sensitivity and specificity. \u2022 Change Direction only if that matches what the marker means clinically."), predictor, round(auc_value, 3), dir_now, pos, dir_alt, round(1 - auc_value, 3)),
                                                 # The 3.6-in-100 figure was simulated at 95%; at another level only the direction of the error is known.
                                                 if (small_delong) paste("\u2022", if (isTRUE(all.equal(self$options$confidenceLevel, 95)))
                                                     sprintf(.("With %1$s patients in the smaller group DeLong's interval is approximate and tends to be too narrow, so a marker carrying no information at all is flagged here somewhat more often than the confidence level implies: about 3.6 in 100 such markers at 10 positive and 10 negative patients, against 2.5 in 100 for a 95%% interval."), min(n_positive, n_negative))
@@ -2377,9 +2377,9 @@ enhancedROCClass <- R6::R6Class(
             .deleteTableRows(cutoffTable)   # jamovi re-runs .run() on the same object; addRow() would stack duplicates
             cutoffTable$setNote(
                 "cutpoint_optimism",
-                paste(c(.("Sensitivity, specificity and accuracy are reported at a cutpoint that was searched for on these same data, so they are optimistic; they are not cross-validated or externally validated estimates."),
+                paste(c(.("Sensitivity, specificity and accuracy are reported at a cutoff that was searched for on these same data, so they are optimistic; they are not cross-validated or externally validated estimates."),
                         # the intervals ignore the search too (method-choice concern 3)
-                        if (isTRUE(self$options$diagnosticMetrics)) .("The Clopper-Pearson intervals for sensitivity and specificity in the Diagnostic Performance table treat this cutpoint as fixed in advance, so they are centered on these optimistic values and understate the uncertainty.")),
+                        if (isTRUE(self$options$diagnosticMetrics)) .("The Clopper-Pearson intervals for sensitivity and specificity in the Diagnostic Performance table treat this cutoff as fixed in advance, so they are centered on these optimistic values and understate the uncertainty.")),
                       collapse = " ")
             )
             # Which side of the cutoff is positive, and what a cutoff is: pROC's thresholds are the
@@ -2685,7 +2685,7 @@ enhancedROCClass <- R6::R6Class(
                     content = if (reversed[[p]] < 0.5) {
                         sprintf(.("In these data the fitted logistic risk of %2$s runs opposite to the direction in which the ROC tables read %1$s (AUC %3$.3f in that direction). A one-marker logistic model does not depend on Direction, so calibration, the Brier score, the Hosmer-Lemeshow test, the decision and clinical impact curves and internal validation use the risk model the data support. Under the direction selected, %1$s performs worse than those outputs show. Check Direction and Positive class."), p, pos, reversed[[p]])
                     } else {
-                        sprintf(.("The ROC tables read %1$s in the direction in which it ranks patients well (AUC %3$.3f), but its group means point the other way, so the slope of the fitted logistic risk of %2$s runs opposite to that direction. This happens with a skewed marker or an outlying value. Calibration, the Brier score, the Hosmer-Lemeshow test, the decision and clinical impact curves and internal validation use that fitted model, the risk model the data support, which ranks patients the opposite way to the ROC, cut-point and fixed-cutoff tables; they do not describe %1$s as those tables read it, and can disagree with them. A log or rank transformation of the marker usually removes the conflict."), p, pos, reversed[[p]])
+                        sprintf(.("The ROC tables read %1$s in the direction in which it ranks patients well (AUC %3$.3f), but its group means point the other way, so the slope of the fitted logistic risk of %2$s runs opposite to that direction. This happens with a skewed marker or an outlying value. Calibration, the Brier score, the Hosmer-Lemeshow test, the decision and clinical impact curves and internal validation use that fitted model, the risk model the data support, which ranks patients the opposite way to the ROC, cutoff and fixed-cutoff tables; they do not describe %1$s as those tables read it, and can disagree with them. A log or rank transformation of the marker usually removes the conflict."), p, pos, reversed[[p]])
                     })
             }
             if (!identical(o$predictionScale, "probability")) {
@@ -2944,7 +2944,7 @@ enhancedROCClass <- R6::R6Class(
             }
             detailTable$setNote("sign", .("Difference (1 - 2) = value 1 - value 2, as in ROC Curve Comparisons; Relative difference (%) = 100 \u00d7 (value 1 - value 2) / value 2. Value 1 belongs to the first predictor named in Metric."))
             # method-choice concern 2: both cut-points were chosen on these same patients
-            detailTable$setNote("cutpoints", .("Sensitivity, specificity and accuracy compare each marker at its own cut-point, chosen on these same patients. McNemar's test (asymptotic, no continuity correction) treats both cut-points as fixed in advance, so its p-values ignore that selection. Rows with fewer than 10 discordant patients are not tested."))
+            detailTable$setNote("cutpoints", .("Sensitivity, specificity and accuracy compare each marker at its own cutoff, chosen on these same patients. McNemar's test (asymptotic, no continuity correction) treats both cutoffs as fixed in advance, so its p-values ignore that selection. Rows with fewer than 10 discordant patients are not tested."))
             venkatraman <- identical(self$options$comparisonMethod, "venkatraman")
             detailTable$setNote("venkatraman", private$.venkatramanNote())
             # the AUC row's p comes from the same resampling test as ROC Curve Comparisons
@@ -3404,7 +3404,7 @@ enhancedROCClass <- R6::R6Class(
             if (gap < 0.005) {
                 .("Empirical curve is (almost) convex; the hull adds nothing")
             } else {
-                .fmt(.("The hull is {gap} above the empirical AUC; points between empirical operating points are reachable only by randomly mixing two cut-offs (Provost & Fawcett 2001); in-sample and optimistic"), gap = sprintf("%.3f", gap))
+                .fmt(.("The hull is {gap} above the empirical AUC; points between empirical operating points are reachable only by randomly mixing two cutoffs (Provost & Fawcett 2001); in-sample and optimistic"), gap = sprintf("%.3f", gap))
             }
         },
         .checkClassImbalance = function(analysisData) {
@@ -3610,33 +3610,33 @@ enhancedROCClass <- R6::R6Class(
 
             if (length(cuts) > 0) {
                 if (identical(cuts[[1]]$method, "closest_topleft")) {
-                    cp <- .("Cut-points minimize the squared distance to the top-left corner of the ROC plot, (1 - sensitivity)^2 + (1 - specificity)^2, over the thresholds midway between adjacent observed values (Perkins & Schisterman, 2006); Youden optimization was switched off. A patient is test-positive at or above the cutoff (at or below it when lower values are positive).")
+                    cp <- .("Cutoffs minimize the squared distance to the top-left corner of the ROC plot, (1 - sensitivity)^2 + (1 - specificity)^2, over the thresholds midway between adjacent observed values (Perkins & Schisterman, 2006); Youden optimization was switched off. A patient is test-positive at or above the cutoff (at or below it when lower values are positive).")
                     if (isTRUE(o$sensitivityThreshold > 0 || o$specificityThreshold > 0)) {
                         cp <- c(cp, .("The minimum sensitivity and specificity settings apply only to Youden optimization and were not used."))
                     }
                     # F-53b: the cited source's own conclusion goes with the citation.
-                    cp <- c(cp, .("Perkins & Schisterman (2006) show that this criterion and the Youden index can choose different cut-points, and that only the Youden index is optimal with respect to the overall misclassification rate."))
+                    cp <- c(cp, .("Perkins & Schisterman (2006) show that this criterion and the Youden index can choose different cutoffs, and that only the Youden index is optimal with respect to the overall misclassification rate."))
                     cited <- c(cited, "perkins")
                 } else {
-                    cp <- .("Cut-points maximize the Youden index, J = sensitivity + specificity - 1 (Youden, 1950), over the thresholds midway between adjacent observed values: the empirical estimator of the Youden-optimal cut-point (Fluss et al., 2005). A patient is test-positive at or above the cutoff (at or below it when lower values are positive).")
+                    cp <- .("Cutoffs maximize the Youden index, J = sensitivity + specificity - 1 (Youden, 1950), over the thresholds midway between adjacent observed values: the empirical estimator of the Youden-optimal cutoff (Fluss et al., 2005). A patient is test-positive at or above the cutoff (at or below it when lower values are positive).")
                     # F-53a: what the cited comparison found for this estimator.
-                    cp <- c(cp, .("In the simulations of Fluss et al. (2005) this empirical estimator, the most commonly used, had the worst overall bias and root mean square error of the four estimators compared (normal, transformed-normal, empirical and kernel); for the cut-point itself their results were more variable."))
+                    cp <- c(cp, .("In the simulations of Fluss et al. (2005) this empirical estimator, the most commonly used, had the worst overall bias and root mean square error of the four estimators compared (normal, transformed-normal, empirical and kernel); for the cutoff itself their results were more variable."))
                     applied <- Filter(function(k) isTRUE(k$min_sens > 0 || k$min_spec > 0), cuts)
                     if (length(applied) > 0) {
-                        cp <- c(cp, sprintf(.("The search was restricted to cut-points with sensitivity of at least %1$s and specificity of at least %2$s; where none met both, the unconstrained optimum was used and a notice says so."), applied[[1]]$min_sens, applied[[1]]$min_spec))
+                        cp <- c(cp, sprintf(.("The search was restricted to cutoffs with sensitivity of at least %1$s and specificity of at least %2$s; where none met both, the unconstrained optimum was used and a notice says so."), applied[[1]]$min_sens, applied[[1]]$min_spec))
                     }
                     if (!is.null(private$.presetConfig)) {
                         cp <- c(cp, sprintf(.("Clinical preset in force: %s (it turns Youden optimization on and may replace the minimum sensitivity and specificity)."), private$.choiceLabel("clinicalPresets", o$clinicalPresets)))
                     }
                     cited <- c(cited, "youden", "fluss")
                 }
-                cp <- c(cp, .("Where several cut-points tie on this criterion (ties are found exactly from the counts), this module reports the one closest to the top-left corner and then the smallest cutoff; a notice lists the alternatives."),
-                        .("The cut-point was chosen on these same data, so the sensitivity, specificity and accuracy reported at it are optimistic."))
+                cp <- c(cp, .("Where several cutoffs tie on this criterion (ties are found exactly from the counts), this module reports the one closest to the top-left corner and then the smallest cutoff; a notice lists the alternatives."),
+                        .("The cutoff was chosen on these same data, so the sensitivity, specificity and accuracy reported at it are optimistic."))
                 out <- c(out, para(.("Optimal Cutoff Selection"), cp))
             }
 
             if (isTRUE(o$diagnosticMetrics)) {
-                out <- c(out, para(.("Sensitivity and Specificity"), sprintf(.("%s%% intervals for sensitivity and specificity are Clopper-Pearson exact binomial intervals (Clopper & Pearson, 1934); they treat the cut-point as fixed and do not reflect its selection on these data."), o$confidenceLevel)))
+                out <- c(out, para(.("Sensitivity and Specificity"), sprintf(.("%s%% intervals for sensitivity and specificity are Clopper-Pearson exact binomial intervals (Clopper & Pearson, 1934); they treat the cutoff as fixed and do not reflect its selection on these data."), o$confidenceLevel)))
                 cited <- c(cited, "clopper")
             }
 
@@ -3839,7 +3839,7 @@ enhancedROCClass <- R6::R6Class(
             } else {
                 sprintf(.("This is what you specified (Direction = \"%s\")."), opt)
             }
-            advice <- sprintf(.("If that reading looks reversed for a marker, first check Positive class: is %s the level that means the condition is present? Only if it is, change Direction: the AUC becomes 1 minus the value shown, and the cutpoint, sensitivity and specificity are re-estimated."), pos)
+            advice <- sprintf(.("If that reading looks reversed for a marker, first check Positive class: is %s the level that means the condition is present? Only if it is, change Direction: the AUC becomes 1 minus the value shown, and the cutoff, sensitivity and specificity are re-estimated."), pos)
             tryCatch(table$setNote(key, paste(reading, chosen, advice)), error = function(e) NULL)
         },
 
@@ -3933,7 +3933,7 @@ enhancedROCClass <- R6::R6Class(
                     sprintf(.("Switch on 'Clinical metrics' to see the PPV at %s in the Clinical Application Metrics table."), prev_txt)
                 }
                 if (sens >= 0.90 && spec >= 0.70) {
-                    return(paste(sprintf(.("Sensitivity %1$.2f, specificity %2$.2f: at this cutpoint few cases were missed in this sample. What share of the positive results are true positives is not fixed by these two numbers; it also depends on prevalence."), sens, spec), ppv_hint))
+                    return(paste(sprintf(.("Sensitivity %1$.2f, specificity %2$.2f: at this cutoff few cases were missed in this sample. What share of the positive results are true positives is not fixed by these two numbers; it also depends on prevalence."), sens, spec), ppv_hint))
                 } else if (sens >= 0.85) {
                     return(paste(sprintf(.("Sensitivity %1$.2f, specificity %2$.2f: the false-positive burden depends on prevalence."), sens, spec), ppv_hint))
                 } else {
@@ -3941,16 +3941,16 @@ enhancedROCClass <- R6::R6Class(
                 }
             } else if (context == "diagnosis") {
                 if (sens >= 0.80 && spec >= 0.80) {
-                    return(sprintf(.("Sensitivity %1$.2f and specificity %2$.2f, both at or above 0.80 at this cutpoint."), sens, spec))
+                    return(sprintf(.("Sensitivity %1$.2f and specificity %2$.2f, both at or above 0.80 at this cutoff."), sens, spec))
                 } else if (spec >= 0.90) {
                     return(sprintf(.("Specificity %1$.2f with sensitivity %2$.2f: few false positives in this sample."), spec, sens))
                 } else {
-                    return(sprintf(.("Sensitivity %1$.2f, specificity %2$.2f at this cutpoint."), sens, spec))
+                    return(sprintf(.("Sensitivity %1$.2f, specificity %2$.2f at this cutoff."), sens, spec))
                 }
             } else {
                 # F-18: the 0.6 / 0.4 edges behind 'strong / moderate / limited separation' had no
                 # source; the value is restated, not graded (the table note says it is optimistic).
-                return(sprintf(.("Youden index %1$.2f at this cutpoint (sensitivity %2$.2f, specificity %3$.2f)."),
+                return(sprintf(.("Youden index %1$.2f at this cutoff (sensitivity %2$.2f, specificity %3$.2f)."),
                                round(optimal$youden_index, 2), sens, spec))
             }
         },
@@ -4263,7 +4263,7 @@ enhancedROCClass <- R6::R6Class(
                 summary_text <- paste0(
                     summary_text,
                     "<p><strong>", .("Note"), ":</strong> ",
-                    .("This AUC is apparent (in-sample), and where a cutpoint was searched for on these data the cutpoint metrics are optimistic. Independent validation is needed before these figures describe performance in new patients."), "</p>"
+                    .("This AUC is apparent (in-sample), and where a cutoff was searched for on these data the cutoff metrics are optimistic. Independent validation is needed before these figures describe performance in new patients."), "</p>"
                 )
             }
 
@@ -4321,20 +4321,20 @@ enhancedROCClass <- R6::R6Class(
                     .fmt(.("the best AUC is {auc}, below 0.5 - Positive class may name the wrong level, Direction may not match the marker, or the marker may not discriminate at all"),
                          auc = round(best_auc, 3))
                 } else {
-                    .("no usable cut-point exists - every threshold gives a Youden index of zero or less")
+                    .("no usable cutoff exists - every threshold gives a Youden index of zero or less")
                 }
                 self$results$results$clinicalReport$setContent(paste0(
                     "<div style='background-color: rgba(216, 33, 50, 0.18); border: 1px solid #f5c6cb; ",
                     "padding: 15px; margin: 10px 0; color: inherit;'>",
                     "<h4 style='margin-top: 0;'>", .("Clinical Report Sentences Not Generated"), "</h4>",
                     "<p>", sprintf(.("No report sentences were written, because %s."), private$.safeHtmlOutput(reason)), " ",
-                    .("Reporting a cut-point and a sensitivity from this analysis would misdescribe the marker."),
+                    .("Reporting a cutoff and a sensitivity from this analysis would misdescribe the marker."),
                     "</p></div>"
                 ))
                 private$.addNotice(
                     type = "WARNING",
                     title = .("Clinical Report Withheld"),
-                    content = sprintf(.("Copy-ready report sentences were not generated because %1$s. Check Positive class (is %2$s the level that means the condition is present?), then Direction, before quoting any cut-point from this analysis."), reason, private$.positiveClass)
+                    content = sprintf(.("Copy-ready report sentences were not generated because %1$s. Check Positive class (is %2$s the level that means the condition is present?), then Direction, before quoting any cutoff from this analysis."), reason, private$.positiveClass)
                 )
                 return()
             }
@@ -4436,7 +4436,7 @@ enhancedROCClass <- R6::R6Class(
             validated <- isTRUE(self$options$internalValidation)
             interpretation_text <- paste(
                 private$.aucMeaning(private$.rocObjects[[best_predictor]]$direction),
-                .("It is computed over all cutpoints and does not depend on which cutpoint was selected."),
+                .("It is computed over all cutoffs and does not depend on which cutoff was selected."),
                 # F-41: with Internal validation on, the panel below the summary validates it.
                 if (n_predictors > 1 && validated) {
                     sprintf(.("This is an in-sample estimate with no external validation behind it, and it is additionally optimistic because this predictor was picked as the highest-scoring of %d; the Internal Validation section reports its internal validation."), n_predictors)
@@ -4447,7 +4447,7 @@ enhancedROCClass <- R6::R6Class(
                 } else {
                     .("This is an in-sample estimate with no internal or external validation behind it.")
                 },
-                .("The sensitivity and specificity quoted at the selected cutpoint are a separate matter: those ARE optimistic, because that cutpoint was searched for on these same data."))
+                .("The sensitivity and specificity quoted at the selected cutoff are a separate matter: those ARE optimistic, because that cutoff was searched for on these same data."))
 
             report_html <- paste0(report_html, interpretation_text, "</div>")
 
@@ -5389,7 +5389,7 @@ enhancedROCClass <- R6::R6Class(
                             title = .("ROC Curve with Convex Hull"),
                             # Not "optimal achievable performance": the hull marks potentially optimal
                             # points, its edges need random mixing, and it is in-sample.
-                            subtitle = paste(strwrap(.("Convex hull: operating points reachable by randomly mixing two cut-offs (Provost & Fawcett 2001); in-sample, so optimistic"), width = 80), collapse = "\n"),
+                            subtitle = paste(strwrap(.("Convex hull: operating points reachable by randomly mixing two cutoffs (Provost & Fawcett 2001); in-sample, so optimistic"), width = 80), collapse = "\n"),
                             color = .("Predictor"),
                             fill = .("Predictor")
                         ) +

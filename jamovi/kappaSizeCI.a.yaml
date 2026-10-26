@@ -48,7 +48,7 @@ options:
 
 
     - name: citype
-      title: Confidence Interval Type
+      title: Confidence interval type
       type: List
       options:
         - name: two_sided

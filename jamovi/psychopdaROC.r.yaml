@@ -26,7 +26,7 @@ items:
     # Which class level is the positive class, and why (filled by .psychopdaClassCoding()).
     # rows: 0 - one row per observed level, added in .run() after .deleteTableRows().
     - name: outcomeCoding
-      title: 'Outcome coding: positive and negative classes'
+      title: 'Outcome Coding: Positive and Negative Classes'
       type: Table
       description: Class levels with their counts and the role each plays in the analysis
       rows: 0
@@ -1088,7 +1088,7 @@ items:
         - McClish1989
 
     - name: bootstrapCITable
-      title: Bootstrap Intervals (AUC and Youden Reference)
+      title: "Bootstrap Intervals (AUC and Youden's Index Reference)"
       type: Table
       rows: 0
       visible: (bootstrapCI)
@@ -1181,7 +1181,7 @@ items:
       template:
         # The single item holds ALL pairwise comparisons, so it must not be headed by an
         # item key that names one marker.
-        title: All pairwise comparisons
+        title: All Pairwise Comparisons
         type: Image
         width: 600
         height: 400

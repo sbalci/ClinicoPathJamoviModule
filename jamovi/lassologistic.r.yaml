@@ -395,7 +395,7 @@ items:
           - random_seed
 
     - name: predictions
-      title: Predicted probabilities
+      title: Predicted Probabilities
       type: Output
       measureType: continuous
       varTitle: 'Predicted Probability from Penalized Logistic'

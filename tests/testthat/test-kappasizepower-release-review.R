@@ -429,12 +429,13 @@ test_that("the stated power prints with two decimals in every sentence", {
 test_that("the kappa inputs carry the kappa0 / kappa1 names the output uses", {
     # Every note says kappa0 / kappa1 ("check that kappa0 is the agreement you want to rule OUT", "swap the two
     # values"); the controls were labelled "Null hypothesis" / "Alternative hypothesis" alone. The siblings
-    # label theirs "Anticipated kappa (kappa0)".
+    # label theirs "Anticipated kappa (kappa0)". The labels write kappa-sub-0 as a symbol, not the R
+    # argument name (library-audit 2026-10-23 meddecide [LOW]).
     f <- file.path("../../jamovi", "kappaSizePower.u.yaml")
     skip_if_not(file.exists(f), "jamovi/kappaSizePower.u.yaml not found from the test directory")
     labels <- unlist(lapply(yaml::read_yaml(f)$children, function(x) rapply(x, function(v) v, how = "unlist")))
-    expect_true("Null kappa (kappa0)" %in% labels)
-    expect_true("Alternative kappa (kappa1)" %in% labels)
+    expect_true("Null kappa (\u03ba\u2080)" %in% labels)
+    expect_true("Alternative kappa (\u03ba\u2081)" %in% labels)
 })
 
 
@@ -443,8 +444,8 @@ test_that("the two kappaSize panes say they hold the published-formula N", {
     # Notes give a larger simulated N (binary, 6 raters, 5% finding: 316 vs about 572), a pane titled
     # "Analysis result" read as the answer. Needs jmvtools::prepare() to reach R/kappaSizePower.h.R.
     res <- run_kp(props = "0.05", raters = "6")
-    expect_equal(res$text1$title, "Result by the published formula (kappaSize)")
-    expect_equal(res$text_summary$title, "Summary by the published formula (kappaSize)")
+    expect_equal(res$text1$title, "Result by the Published Formula")
+    expect_equal(res$text_summary$title, "Summary by the Published Formula")
     expect_match(res$text1$content, "A minimum of 316 subjects", fixed = TRUE)
 })
 

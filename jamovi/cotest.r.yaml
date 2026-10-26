@@ -113,7 +113,7 @@ items:
       # positive arm corresponds to the "Either Test Positive" row -- at the defaults 42.5%,
       # against 89.1% in the "Both Tests Positive" row directly above it. Titled simply
       # "Fagan nomogram" it read as though it applied to whichever row the eye landed on.
-      title: 'Fagan nomogram - parallel rule (positive if either test is positive)'
+      title: 'Fagan Nomogram - Parallel Rule (Positive if Either Test Is Positive)'
       type: Image
       width:  600
       height: 450

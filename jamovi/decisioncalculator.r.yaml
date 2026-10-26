@@ -193,7 +193,7 @@ items:
           title: ''
           type: text
         - name: youdenIndex
-          title: "Youden's Index"
+          title: "Youden's J"
           type: number
         - name: balancedAccuracy
           title: 'Balanced Accuracy'
@@ -331,7 +331,7 @@ items:
       description: 'Plain-language reading of the Fagan nomogram: the pre-test probability, the likelihood ratios, and where a positive or a negative result moves the probability of disease.'
 
     - name: plot1
-      title: 'Fagan nomogram'
+      title: 'Fagan Nomogram'
       type: Image
       width:  600
       height: 450
@@ -382,7 +382,7 @@ items:
           type: number
           format: pc
         - name: youden
-          title: "Youden Index"
+          title: "Youden's J"
           type: number
         - name: recommendation
           title: "Performance Summary"
@@ -407,7 +407,7 @@ items:
           - fn2
 
     - name: screeningWorkload
-      title: Observed and projected workload
+      title: Observed and Projected Workload
       type: Table
       visible: (showWorkload)
       clearWith:

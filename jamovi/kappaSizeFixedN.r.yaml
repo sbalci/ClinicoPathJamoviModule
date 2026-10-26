@@ -16,7 +16,7 @@ items:
           - 'n'
 
     - name:  text1
-      title: Analysis result
+      title: Analysis Result
       type:  Preformatted
       clearWith:
           - outcome
@@ -27,7 +27,7 @@ items:
           - 'n'
 
     - name:  text_summary
-      title: Summary by the published formula (kappaSize)
+      title: Summary by the Published Formula
       type:  Preformatted
       visible: (showSummary)
       clearWith:

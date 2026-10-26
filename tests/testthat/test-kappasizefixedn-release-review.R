@@ -756,7 +756,7 @@ test_that("F3 titles: the analysis names kappa, and the Summary pane names its s
     r <- yaml::read_yaml("../../jamovi/kappaSizeFixedN.r.yaml",
                          handlers = list("bool#yes" = function(x) x, "bool#no" = function(x) x))
     it <- setNames(r$items, vapply(r$items, function(x) x$name, ""))
-    expect_identical(it$text_summary$title, "Summary by the published formula (kappaSize)")
+    expect_identical(it$text_summary$title, "Summary by the Published Formula")
 })
 
 test_that("F4 the main result states its confidence level, and the analysis says kappa throughout", {

@@ -74,7 +74,7 @@ options:
       title: 'Kappa interval method'
       type: List
       options:
-        - title: Wald (symmetric, matches psych::cohen.kappa)
+        - title: Wald (symmetric)
           name: wald
         - title: Fisher z (asymmetric, better small-sample coverage)
           name: fisherz
@@ -150,11 +150,11 @@ options:
       options:
         - title: 'Blue-White-Red'
           name: bluered
-        - title: 'Red-Yellow-Green (Traffic Light)'
+        - title: 'Red-yellow-green (traffic light)'
           name: traffic
-        - title: 'Viridis (Colorblind-Friendly)'
+        - title: 'Viridis (colorblind-friendly)'
           name: viridis
-        - title: 'Gray Scale (Print-Friendly)'
+        - title: 'Grayscale (print-friendly)'
           name: grayscale
       default: bluered
       description:
@@ -222,11 +222,11 @@ options:
       title: Weighted kappa (ordinal data only)
       type: List
       options:
-        - title: Unweighted (Standard)
+        - title: Unweighted (standard)
           name: unweighted
-        - title: Linear Weights (Equal Steps)
+        - title: Linear weights (equal steps)
           name: equal
-        - title: Squared Weights (Severity Weighted)
+        - title: Squared weights (severity weighted)
           name: squared
       default: unweighted
       description:
@@ -339,7 +339,7 @@ options:
             Specifies the measurement level for Krippendorff's alpha calculation.
 
     - name: bootstrap
-      title: "Bootstrap confidence intervals"
+      title: "Bootstrap interval for Krippendorff's alpha"
       type: Bool
       default: false
       description:
@@ -370,9 +370,9 @@ options:
       options:
         - title: Unweighted (AC1 for nominal)
           name: unweighted
-        - title: Linear Weights (ordinal)
+        - title: Linear weights (ordinal)
           name: linear
-        - title: Quadratic Weights (ordinal)
+        - title: Quadratic weights (ordinal)
           name: quadratic
       default: unweighted
       description:
@@ -1302,7 +1302,7 @@ options:
       title: "Consensus rule"
       type: List
       options:
-        - title: 'Simple Majority (>50 percent)'
+        - title: 'Simple majority (>50 percent)'
           name: majority
         - title: 'Supermajority (>=75 percent)'
           name: supermajority
@@ -1381,11 +1381,11 @@ options:
       title: "Categorization method (detailed mode)"
       type: List
       options:
-        - title: Custom Thresholds
+        - title: Custom thresholds
           name: custom
-        - title: Quartiles (Data-Driven)
+        - title: Quartiles (data-driven)
           name: quartiles
-        - title: Tertiles (Data-Driven)
+        - title: Tertiles (data-driven)
           name: tertiles
       default: custom
       description:
@@ -1473,11 +1473,11 @@ options:
       title: "Profile plot type"
       type: List
       options:
-        - title: 'Box Plot (Median + IQR)'
+        - title: 'Box plot (median + IQR)'
           name: boxplot
-        - title: 'Violin Plot (Full Distribution)'
+        - title: 'Violin plot (full distribution)'
           name: violin
-        - title: 'Bar Plot (Category Frequencies)'
+        - title: 'Bar plot (category frequencies)'
           name: barplot
       default: boxplot
       description:
@@ -1592,9 +1592,9 @@ options:
       title: "Clustering method"
       type: List
       options:
-        - title: 'Hierarchical (Dendrogram)'
+        - title: 'Hierarchical (dendrogram)'
           name: hierarchical
-        - title: 'K-means (Requires K)'
+        - title: 'K-means (requires K)'
           name: kmeans
       default: hierarchical
       description:
@@ -1612,11 +1612,11 @@ options:
           name: ccc
         - title: "Correlation (1 - r), pattern only"
           name: correlation
-        - title: 'Euclidean Distance'
+        - title: 'Euclidean distance'
           name: euclidean
-        - title: 'Manhattan Distance'
+        - title: 'Manhattan distance'
           name: manhattan
-        - title: 'Exact Agreement (categorical)'
+        - title: 'Exact agreement (categorical)'
           name: agreement
       default: ccc
       description:
@@ -1643,13 +1643,13 @@ options:
       title: "Linkage method (hierarchical)"
       type: List
       options:
-        - title: 'Average Linkage (UPGMA)'
+        - title: 'Average linkage (UPGMA)'
           name: average
-        - title: 'Complete Linkage (Furthest Neighbor)'
+        - title: 'Complete linkage (furthest neighbor)'
           name: complete
-        - title: 'Single Linkage (Nearest Neighbor)'
+        - title: 'Single linkage (nearest neighbor)'
           name: single
-        - title: 'Ward Linkage (Minimum Variance)'
+        - title: 'Ward linkage (minimum variance)'
           name: ward
       default: average
       description:
@@ -1719,9 +1719,9 @@ options:
       title: "Clustering method"
       type: List
       options:
-        - title: 'Hierarchical (Dendrogram)'
+        - title: 'Hierarchical (dendrogram)'
           name: hierarchical
-        - title: 'K-means (Requires K)'
+        - title: 'K-means (requires K)'
           name: kmeans
       default: hierarchical
       description:
@@ -1733,13 +1733,13 @@ options:
       title: "Distance metric"
       type: List
       options:
-        - title: 'Euclidean Distance'
+        - title: 'Euclidean distance'
           name: euclidean
-        - title: 'Manhattan Distance'
+        - title: 'Manhattan distance'
           name: manhattan
         - title: "Correlation (1 - r), profile shape only"
           name: correlation
-        - title: 'Exact Agreement (categorical)'
+        - title: 'Exact agreement (categorical)'
           name: agreement
       default: euclidean
       description:
@@ -1764,13 +1764,13 @@ options:
       title: "Linkage method (hierarchical)"
       type: List
       options:
-        - title: 'Average Linkage (UPGMA)'
+        - title: 'Average linkage (UPGMA)'
           name: average
-        - title: 'Complete Linkage (Furthest Neighbor)'
+        - title: 'Complete linkage (furthest neighbor)'
           name: complete
-        - title: 'Single Linkage (Nearest Neighbor)'
+        - title: 'Single linkage (nearest neighbor)'
           name: single
-        - title: 'Ward Linkage (Minimum Variance)'
+        - title: 'Ward linkage (minimum variance)'
           name: ward
       default: average
       description:

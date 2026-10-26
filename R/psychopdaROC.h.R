@@ -904,7 +904,7 @@ psychopdaROCResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
             self$add(jmvcore::Table$new(
                 options=options,
                 name="outcomeCoding",
-                title="Outcome coding: positive and negative classes",
+                title="Outcome Coding: Positive and Negative Classes",
                 rows=0,
                 visible="(classVar)",
                 clearWith=list(
@@ -2022,7 +2022,7 @@ psychopdaROCResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
             self$add(jmvcore::Table$new(
                 options=options,
                 name="bootstrapCITable",
-                title="Bootstrap Intervals (AUC and Youden Reference)",
+                title="Bootstrap Intervals (AUC and Youden's Index Reference)",
                 rows=0,
                 visible="(bootstrapCI)",
                 clearWith=list(
@@ -2122,7 +2122,7 @@ psychopdaROCResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                 visible="(effectSizeAnalysis)",
                 template=jmvcore::Image$new(
                     options=options,
-                    title="All pairwise comparisons",
+                    title="All Pairwise Comparisons",
                     width=600,
                     height=400,
                     renderFun=".plotEffectSize",

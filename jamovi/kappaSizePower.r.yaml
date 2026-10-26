@@ -20,7 +20,7 @@ items:
     # the published-formula N. For a binary outcome the Notes can give a larger simulated N beside it, so
     # the titles say which figure these panes hold.
     - name:  text1
-      title: Result by the published formula (kappaSize)
+      title: Result by the Published Formula
       type:  Preformatted
       clearWith:
           - outcome
@@ -32,7 +32,7 @@ items:
           - power
 
     - name:  text_summary
-      title: Summary by the published formula (kappaSize)
+      title: Summary by the Published Formula
       type:  Preformatted
       clearWith:
           - outcome

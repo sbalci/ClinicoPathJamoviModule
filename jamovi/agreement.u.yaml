@@ -31,7 +31,7 @@ children:
             isTarget: true
             enable: (mixedEffectsComparison)
       - type: TargetLayoutBox
-        label: Case ID (same case on several rows)
+        label: Case ID (Same Case on Several Rows)
         children:
           - type: VariablesListBox
             name: caseIdVariable
@@ -47,7 +47,7 @@ children:
             isTarget: true
             enable: (pairwiseKappa)
       - type: TargetLayoutBox
-        label: Prediction rater (multi-annotator concordance)
+        label: Prediction Rater (Multi-Annotator Concordance)
         children:
           - type: VariablesListBox
             name: predictionRater
@@ -55,7 +55,7 @@ children:
             isTarget: true
             enable: (multiAnnotatorConcordance)
       - type: TargetLayoutBox
-        label: Patient/cluster ID (optional)
+        label: Patient/Cluster ID (Optional)
         children:
           - type: VariablesListBox
             name: specificCluster
@@ -71,7 +71,7 @@ children:
             isTarget: true
             enable: (agreementBySubgroup)
       - type: TargetLayoutBox
-        label: Condition B Raters (e.g., AI-assisted)
+        label: Condition B Raters (e.g., AI-Assisted)
         children:
           - type: VariablesListBox
             name: conditionBVars
@@ -122,7 +122,7 @@ children:
     collapsed: true
     children:
       - type: Label
-        label: Light's Kappa [Categorical] (3+ Raters)
+        label: "Light's Kappa (3+ Raters)"
         children:
           - type: LayoutBox
             margin: large
@@ -155,7 +155,7 @@ children:
               - type: CheckBox
                 name: showPABAKGuide
       - type: Label
-        label: Finn Coefficient [Categorical] (Variance-Based)
+        label: Finn Coefficient (Variance-Based)
         children:
           - type: LayoutBox
             margin: large
@@ -172,7 +172,7 @@ children:
               - type: CheckBox
                 name: showFinnGuide
       - type: Label
-        label: Specific Agreement Indices [Categorical] (Category-Focused)
+        label: Specific Agreement Indices (Category-Focused)
         children:
           - type: LayoutBox
             margin: large
@@ -195,7 +195,7 @@ children:
               - type: CheckBox
                 name: showSpecificAgreementGuide
       - type: Label
-        label: Pairwise Kappa [Categorical] (vs Reference Rater)
+        label: Pairwise Kappa (vs Reference Rater)
         children:
           - type: LayoutBox
             margin: large
@@ -219,7 +219,7 @@ children:
               - type: CheckBox
                 name: showItemModalGuide
       - type: Label
-        label: Hierarchical/Multilevel Kappa [Categorical] (Multi-Center Studies)
+        label: Hierarchical/Multilevel Kappa (Multi-Center Studies)
         children:
           - type: LayoutBox
             margin: large
@@ -247,7 +247,7 @@ children:
               - type: CheckBox
                 name: showHierarchicalGuide
       - type: Label
-        label: Multi-Class Confusion Matrix [Categorical] (Classification Evaluation)
+        label: Multi-Class Confusion Matrix (Classification Evaluation)
         children:
           - type: LayoutBox
             margin: large
@@ -260,7 +260,7 @@ children:
               - type: CheckBox
                 name: showConfusionMatrixGuide
       - type: Label
-        label: Multi-Annotator Concordance [Categorical] (AI Validation)
+        label: Multi-Annotator Concordance (AI Validation)
         children:
           - type: LayoutBox
             margin: large
@@ -284,7 +284,7 @@ children:
               - type: CheckBox
                 name: showLevelInfo
       - type: Label
-        label: Pathologist Grading Analysis [Ordinal/Categorical]
+        label: Pathologist Grading Analysis (Ordinal or Categorical)
         children:
           - type: LayoutBox
             margin: large
@@ -300,7 +300,7 @@ children:
               - type: CheckBox
                 name: showGradingGuide
       - type: Label
-        label: Kendall's W [Ordinal] (Concordance for Rankings)
+        label: "Kendall's W (Concordance for Rankings)"
         children:
           - type: LayoutBox
             margin: large
@@ -310,7 +310,7 @@ children:
               - type: CheckBox
                 name: showKendallWGuide
       - type: Label
-        label: Robinson's A [Ordinal] (Agreement Index)
+        label: "Robinson's A (Agreement Index)"
         children:
           - type: LayoutBox
             margin: large
@@ -320,7 +320,7 @@ children:
               - type: CheckBox
                 name: showRobinsonAGuide
       - type: Label
-        label: Mean Spearman Rho [Ordinal] (Average Rank Correlation)
+        label: Mean Spearman Rho (Average Rank Correlation)
         children:
           - type: LayoutBox
             margin: large
@@ -334,7 +334,7 @@ children:
     collapsed: true
     children:
       - type: Label
-        label: ICC [Continuous] (Intraclass Correlation)
+        label: ICC (Intraclass Correlation)
         children:
           - type: LayoutBox
             margin: large
@@ -347,7 +347,7 @@ children:
                 name: iccType
                 enable: (icc || bootstrapCI)
       - type: Label
-        label: Mean Pearson Correlation [Continuous] (Linear Association)
+        label: Mean Pearson Correlation (Linear Association)
         children:
           - type: LayoutBox
             margin: large
@@ -357,7 +357,7 @@ children:
               - type: CheckBox
                 name: showMeanPearsonGuide
       - type: Label
-        label: Lin's CCC [Continuous] (Concordance - Method Comparison)
+        label: "Lin's CCC (Concordance, Method Comparison)"
         children:
           - type: LayoutBox
             margin: large
@@ -367,7 +367,7 @@ children:
               - type: CheckBox
                 name: showLinCCCGuide
       - type: Label
-        label: Empirical TDI [Continuous] (Prespecified Difference Limit)
+        label: Empirical TDI (Prespecified Difference Limit)
         children:
           - type: LayoutBox
             margin: large
@@ -377,6 +377,7 @@ children:
               - type: TextBox
                 name: tdiCoverage
                 format: number
+                suffix: "%"
                 enable: (tdi)
               - type: TextBox
                 name: tdiLimit
@@ -385,7 +386,7 @@ children:
               - type: CheckBox
                 name: showTDIGuide
       - type: Label
-        label: Bland-Altman Analysis [Continuous] (Limits of Agreement)
+        label: Bland-Altman Analysis (Limits of Agreement)
         children:
           - type: LayoutBox
             margin: large
@@ -402,7 +403,7 @@ children:
               - type: CheckBox
                 name: showBlandAltmanGuide
       - type: Label
-        label: Rater Variance Decomposition [Continuous] (Systematic vs Random Disagreement)
+        label: Rater Variance Decomposition (Systematic vs Random Disagreement)
         children:
           - type: LayoutBox
             margin: large
@@ -432,7 +433,7 @@ children:
               - type: CheckBox
                 name: showKrippGuide
       - type: Label
-        label: Iota Coefficient [Continuous or Categorical] (Single Variable)
+        label: Iota Coefficient (Continuous or Categorical, Single Variable)
         children:
           - type: LayoutBox
             margin: large
@@ -442,7 +443,7 @@ children:
               - type: CheckBox
                 name: showIotaGuide
       - type: Label
-        label: Inter/Intra-Rater Reliability [Any Data Type] (Test-Retest Studies)
+        label: Inter/Intra-Rater Reliability (Test-Retest Studies)
         children:
           - type: LayoutBox
             margin: large
@@ -460,7 +461,7 @@ children:
     collapsed: true
     children:
       - type: Label
-        label: Directional Discordance [Ordinal] (2 Raters)
+        label: Directional Discordance (Ordinal, 2 Raters)
         children:
           - type: LayoutBox
             margin: large
@@ -470,7 +471,7 @@ children:
               - type: CheckBox
                 name: showRaterBiasGuide
       - type: Label
-        label: Bhapkar Test [Categorical] (Marginal Homogeneity, 2 Raters)
+        label: Bhapkar Test (Categorical, Marginal Homogeneity, 2 Raters)
         children:
           - type: LayoutBox
             margin: large
@@ -480,7 +481,7 @@ children:
               - type: CheckBox
                 name: showBhapkarGuide
       - type: Label
-        label: Stuart-Maxwell Test [Categorical] (Marginal Homogeneity, 2 Raters)
+        label: Stuart-Maxwell Test (Categorical, Marginal Homogeneity, 2 Raters)
         children:
           - type: LayoutBox
             margin: large
@@ -490,7 +491,7 @@ children:
               - type: CheckBox
                 name: showStuartMaxwellGuide
       - type: Label
-        label: Paired Agreement Comparison [Categorical] (With vs Without AI)
+        label: Paired Agreement Comparison (Categorical, With vs Without AI)
         children:
           - type: LayoutBox
             margin: large
@@ -504,9 +505,7 @@ children:
               - type: CheckBox
                 name: showPairedAgreementGuide
       - type: Label
-        label: >-
-          Mixed-Effects Condition Comparison [Continuous] (AI vs Manual, Pre vs
-          Post)
+        label: Mixed-Effects Condition Comparison (Continuous, AI vs Manual, Pre vs Post)
         children:
           - type: LayoutBox
             margin: large
@@ -523,7 +522,7 @@ children:
     collapsed: true
     children:
       - type: Label
-        label: Agreement Heatmap [Categorical] (Confusion Matrix Visualization)
+        label: Agreement Heatmap (Categorical, Confusion Matrix Visualization)
         children:
           - type: LayoutBox
             margin: large
@@ -670,6 +669,7 @@ children:
               - type: TextBox
                 name: simpleThreshold
                 format: number
+                suffix: "%"
                 enable: (loaVariable && detailLevel:simple)
               - type: ComboBox
                 name: loaThresholds
@@ -677,10 +677,12 @@ children:
               - type: TextBox
                 name: loaHighThreshold
                 format: number
+                suffix: "%"
                 enable: (loaVariable && detailLevel:detailed && loaThresholds:custom)
               - type: TextBox
                 name: loaLowThreshold
                 format: number
+                suffix: "%"
                 enable: (loaVariable && detailLevel:detailed && loaThresholds:custom)
               - type: TextBox
                 name: loaVariableName

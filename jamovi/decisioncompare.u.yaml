@@ -120,7 +120,7 @@ children:
         enable: ((!ci || pp) && (referenceType:legacy || referenceType:disease))
       - type: TextBox
         name: pprob
-        label: Prior Probability
+        label: Population disease prevalence
         format: number
         enable: ((pp) && (referenceType:legacy || referenceType:disease))
   - type: CollapseBox

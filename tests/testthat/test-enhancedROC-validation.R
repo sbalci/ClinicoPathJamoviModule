@@ -844,7 +844,7 @@ test_that("a marker read backwards: check Positive class first; Direction re-est
     expect_match(txt, "Marker Reads Backwards", fixed = TRUE)
     expect_match(txt, "First check Positive class: is Healthy the level that means the condition is present?", fixed = TRUE)
     expect_lt(regexpr("First check Positive class", txt, fixed = TRUE), regexpr("setting Direction to", txt, fixed = TRUE))
-    expect_match(txt, "re-estimates the cut-point, sensitivity and specificity", fixed = TRUE)
+    expect_match(txt, "re-estimates the cutoff, sensitivity and specificity", fixed = TRUE)
     expect_false(grepl("swapped", txt, fixed = TRUE))
     expect_match(txt, "Check Positive class (is Healthy the level that means the condition is present?), then Direction", fixed = TRUE)
     expect_match(erv_tnotes(r$results$outcomeCoding)[["reading"]], "first check Positive class: is Healthy the level", fixed = TRUE)
@@ -949,7 +949,7 @@ test_that("the AUC definition is one whole sentence, not a phrase spliced into '
     expect_identical(p$.aucMeaning("<", "A"),
                      "A: the AUC is the probability that a randomly chosen case has a HIGHER value than a randomly chosen non-case (ties count one half).")
     expect_match(erv_run(erv_d1(), "status", "marker", "Malignant")$results$clinicalReport$content,
-                 "(ties count one half). It is computed over all cutpoints", fixed = TRUE)
+                 "(ties count one half). It is computed over all cutoffs", fixed = TRUE)
 })
 
 test_that("tied Youden optima are found from exact counts (pROC rebuilds the counts with float noise)", {
@@ -1038,7 +1038,7 @@ test_that("the convex hull subtitle says 'randomly mixing two cut-offs' and 'in-
     r <- erv_run(erv_cont(), "y", "m1", "pos", convexHull = TRUE)
     r$results$convexHullPlot$saveAs(tempfile(fileext = ".png"))
     expect_identical(gsub("\n", " ", ggplot2::last_plot()$labels$subtitle, fixed = TRUE),
-                     "Convex hull: operating points reachable by randomly mixing two cut-offs (Provost & Fawcett 2001); in-sample, so optimistic")
+                     "Convex hull: operating points reachable by randomly mixing two cutoffs (Provost & Fawcett 2001); in-sample, so optimistic")
 })
 
 test_that("Methods lists Prentice & Pyke (1979) exactly when the decision curves shift the intercept", {

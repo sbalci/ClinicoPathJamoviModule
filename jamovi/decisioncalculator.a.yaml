@@ -38,7 +38,7 @@ options:
     # "Negative counts detected" ERROR notice unreachable dead code. Without it the
     # value reaches .run() and the user - GUI or R - gets the clinical notice instead.
     - name: TP
-      title: 'True Positive (TP)'
+      title: 'True positive (TP)'
       type: Number
       default: 90
       description:
@@ -48,7 +48,7 @@ options:
             True-positive frequency relative to the stated reference standard.
 
     - name: TN
-      title: 'True Negative (TN)'
+      title: 'True negative (TN)'
       type: Number
       default: 80
       description:
@@ -58,7 +58,7 @@ options:
             True-negative frequency relative to the stated reference standard.
 
     - name: FP
-      title: 'False Positive (FP)'
+      title: 'False positive (FP)'
       type: Number
       default: 30
       description:
@@ -68,7 +68,7 @@ options:
             False-positive frequency relative to the stated reference standard.
 
     - name: FN
-      title: 'False Negative (FN)'
+      title: 'False negative (FN)'
       type: Number
       default: 20
       description:
@@ -93,7 +93,7 @@ options:
 
 
     - name: pprob
-      title: Prior Probability (prevalence)
+      title: Prior probability (prevalence)
       type: Number
       default: 0.300
       min: 0.000000001
@@ -120,7 +120,7 @@ options:
             Boolean selection whether to show detailed explanatory footnotes.
 
     - name: ci
-      title: "95 percent confidence intervals"
+      title: "95% confidence intervals"
       type: Bool
       default: false
       description:
@@ -206,7 +206,7 @@ options:
             Name identifier for cut-off scenario 1.
       
     - name: tp1
-      title: 'TP (Cut-off 1)'
+      title: 'TP (cut-off 1)'
       type: Number
       default: 100
       description:
@@ -214,7 +214,7 @@ options:
           R: True-positive frequency for illustrative scenario 1.
       
     - name: fp1
-      title: 'FP (Cut-off 1)'
+      title: 'FP (cut-off 1)'
       type: Number
       default: 40
       description:
@@ -222,7 +222,7 @@ options:
           R: False-positive frequency for illustrative scenario 1.
       
     - name: tn1
-      title: 'TN (Cut-off 1)'
+      title: 'TN (cut-off 1)'
       type: Number
       default: 70
       description:
@@ -230,7 +230,7 @@ options:
           R: True-negative frequency for illustrative scenario 1.
       
     - name: fn1
-      title: 'FN (Cut-off 1)'
+      title: 'FN (cut-off 1)'
       type: Number
       default: 10
       description:
@@ -248,7 +248,7 @@ options:
             Name identifier for cut-off scenario 2.
       
     - name: tp2
-      title: 'TP (Cut-off 2)'
+      title: 'TP (cut-off 2)'
       type: Number
       default: 80
       description:
@@ -256,7 +256,7 @@ options:
           R: True-positive frequency for illustrative scenario 2.
       
     - name: fp2
-      title: 'FP (Cut-off 2)'
+      title: 'FP (cut-off 2)'
       type: Number
       default: 15
       description:
@@ -264,7 +264,7 @@ options:
           R: False-positive frequency for illustrative scenario 2.
       
     - name: tn2
-      title: 'TN (Cut-off 2)'
+      title: 'TN (cut-off 2)'
       type: Number
       default: 95
       description:
@@ -272,7 +272,7 @@ options:
           R: True-negative frequency for illustrative scenario 2.
       
     - name: fn2
-      title: 'FN (Cut-off 2)'
+      title: 'FN (cut-off 2)'
       type: Number
       default: 30
       description:

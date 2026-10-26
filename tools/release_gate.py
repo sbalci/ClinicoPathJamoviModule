@@ -491,13 +491,14 @@ _SMALL_WORDS = {'a', 'an', 'and', 'as', 'at', 'by', 'for', 'from', 'in', 'of', '
 
 
 def check_collapsebox_titlecase():
-    """Group headings are Title Case; individual controls are sentence case (section 12)."""
+    """Group headings and variable boxes are Title Case; individual controls are sentence case
+    (section 12; variable boxes added 2026-10-26, meddecide [LOW] labels)."""
     bad = []
     for p in glob.glob('jamovi/*.u.yaml'):
         name = os.path.basename(p)[:-7]
         for d in _dicts(_safe_yaml(p)):
             label = d.get('label')
-            if d.get('type') != 'CollapseBox' or not isinstance(label, str):
+            if d.get('type') not in ('CollapseBox', 'TargetLayoutBox') or not isinstance(label, str):
                 continue
             # parenthesised package names - "(ggpubr)", "(visdat)" - keep their own case
             words = re.findall(r"[A-Za-z][A-Za-z'-]*", re.sub(r'\([^)]*\)', '', label))
@@ -506,8 +507,8 @@ def check_collapsebox_titlecase():
                 bad.append((name, '%s: %s' % (name, label)))
     ship = sorted(x for n, x in bad if _shipped(n))
     if ship:
-        WARN.append('%d shipped CollapseBox headings not in Title Case: %s' % (len(ship), '; '.join(cap(ship))))
-    print('  CollapseBox Title Case: %d off-convention (%d shipped)' % (len(bad), len(ship)))
+        WARN.append('%d shipped headings or variable boxes not in Title Case: %s' % (len(ship), '; '.join(cap(ship))))
+    print('  CollapseBox/variable-box Title Case: %d off-convention (%d shipped)' % (len(bad), len(ship)))
 
 
 def check_i18n_padding():
@@ -1160,7 +1161,8 @@ def check_init_row_structure():
 
 # British/American pairs seen mixed in one module's user-visible text (2026-10-23 OncoPath [LOW]).
 _SPELLING = [('tumour', 'tumor'), ('analysed', 'analyzed'), ('colour', 'color'), ('behaviour', 'behavior'),
-             ('centre', 'center'), ('randomis', 'randomiz'), ('normalis', 'normaliz'), ('summaris', 'summariz')]
+             ('centre', 'center'), ('randomis', 'randomiz'), ('normalis', 'normaliz'), ('summaris', 'summariz'),
+             ('equalis', 'equaliz'), ('standardis', 'standardiz')]  # 2026-10-26 meddecide; not 'optimis': it matches 'optimism'
 
 
 def check_label_case():

@@ -510,7 +510,7 @@ decisioncalculatorResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::
                         `type`="text"),
                     list(
                         `name`="youdenIndex", 
-                        `title`="Youden's Index", 
+                        `title`="Youden's J", 
                         `type`="number"),
                     list(
                         `name`="balancedAccuracy", 
@@ -634,7 +634,7 @@ decisioncalculatorResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::
             self$add(jmvcore::Image$new(
                 options=options,
                 name="plot1",
-                title="Fagan nomogram",
+                title="Fagan Nomogram",
                 width=600,
                 height=450,
                 renderFun=".plot1",
@@ -689,7 +689,7 @@ decisioncalculatorResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::
                         `format`="pc"),
                     list(
                         `name`="youden", 
-                        `title`="Youden Index", 
+                        `title`="Youden's J", 
                         `type`="number"),
                     list(
                         `name`="recommendation", 
@@ -716,7 +716,7 @@ decisioncalculatorResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::
             self$add(jmvcore::Table$new(
                 options=options,
                 name="screeningWorkload",
-                title="Observed and projected workload",
+                title="Observed and Projected Workload",
                 visible="(showWorkload)",
                 clearWith=list(
                     "showWorkload",

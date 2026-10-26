@@ -280,7 +280,7 @@ cotestResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$add(jmvcore::Image$new(
                 options=options,
                 name="plot1",
-                title="Fagan nomogram - parallel rule (positive if either test is positive)",
+                title="Fagan Nomogram - Parallel Rule (Positive if Either Test Is Positive)",
                 width=600,
                 height=450,
                 renderFun=".plot1",

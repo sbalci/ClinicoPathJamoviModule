@@ -210,6 +210,19 @@ alluvialClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             return(data_agg)
         },
 
+        # Explicit NA factor levels must become missing codes before filtering.
+        .normalizeMissingFactors = function(data, vars) {
+            for (var in vars) {
+                values <- data[[var]]
+                if (is.factor(values) && anyNA(levels(values))) {
+                    old_levels <- levels(values)
+                    levels(values) <- old_levels
+                    data[[var]] <- values
+                }
+            }
+            data
+        },
+
         # Handle missing values according to the user-facing exclusion option.
         # What was dropped is reported once, by the "How to read this diagram"
         # notice (.addReadingNotice), not here.
@@ -759,6 +772,8 @@ alluvialClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             if (engine == "ggalluvial")
                 missing_vars <- unique(c(missing_vars, fill_var))
 
+            mydata <- private$.normalizeMissingFactors(mydata, missing_vars)
+
             # easyalluvial re-bins every NUMERIC column before drawing: it
             # centres, scales, Yeo-Johnson transforms and winsorises the values,
             # then cuts the result into equal-width intervals and replaces the
@@ -1047,7 +1062,7 @@ alluvialClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 n_cases <- private$.mainPlotRows
                 top_text <- if (has_weight && !is.na(top$w)) {
                     .fmt(
-                        .("Commonest path: {path} ({n} of {total} cases, {pct}%; weight total {weight}). Switch on 'Flow table' to list every path."),
+                        .("Largest weighted path: {path} ({n} of {total} cases, {pct}%; weight total {weight}). Switch on 'Flow table' to list every path."),
                         path = top$path, n = top$n, total = n_cases, pct = round(100 * top$pct, 1),
                         weight = round(top$w, 1))
                 } else {
@@ -1081,6 +1096,7 @@ alluvialClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             plot_vars <- utils::head(self$options$vars, self$options$maxvars)
             vars_name <- unique(c(cond_var, plot_vars))
             mydata <- jmvcore::select(self$data, vars_name)
+            mydata <- private$.normalizeMissingFactors(mydata, vars_name)
             cond_data <- mydata[[cond_var]]
 
             # Distinct non-missing values, counted the same way for every storage
@@ -1147,6 +1163,8 @@ alluvialClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
         .run = function() {
 
+            .deleteTableRows(self$results$flowTable)
+            self$results$flowTable$setNote("base", NULL)
             private$.noticeList <- list()
             private$.naLabel <- .("(Missing)")
             private$.mainPlotRows <- NULL

@@ -351,7 +351,7 @@ items:
           - anscombe1956
 
     - name: plot1
-      title: 'Fagan nomogram'
+      title: 'Fagan Nomogram'
       type: Image
       width:  600
       height: 450
@@ -598,7 +598,7 @@ items:
 
 
     - name: referenceDefinition
-      title: Reference and target
+      title: Reference and Target
       type: Table
       visible: true
       rows: 0
@@ -612,7 +612,7 @@ items:
           type: text
 
     - name: comparatorCounts
-      title: Binary comparator counts
+      title: Binary Comparator Counts
       type: Table
       visible: (referenceType:consensus || referenceType:method)
       rows: 0
@@ -632,7 +632,7 @@ items:
           type: integer
 
     - name: comparatorPopulation
-      title: Comparison populations
+      title: Comparison Populations
       type: Table
       visible: (referenceType:consensus || referenceType:method)
       rows: 0
@@ -652,7 +652,7 @@ items:
           type: integer
 
     - name: comparatorMetrics
-      title: Agreement with comparator
+      title: Agreement with Comparator
       type: Table
       visible: (referenceType:consensus || referenceType:method)
       rows: 0
@@ -687,13 +687,13 @@ items:
           type: text
 
     - name: comparatorReport
-      title: Comparator interpretation
+      title: Comparator Interpretation
       type: Html
       visible: (referenceType:consensus || referenceType:method)
       clearWith: [referenceType, referenceDescription, targetDefinition, gold, goldPositive, goldNegative, ci, pp, pprob, newtest, testPositive, testNegative, showMisclassified, saveClassifications]
 
     - name: comparatorCases
-      title: Discordant comparator calls
+      title: Discordant Comparator Calls
       type: Table
       visible: (referenceType:consensus && (showMisclassified) || referenceType:method && (showMisclassified))
       rows: 0
@@ -713,7 +713,7 @@ items:
           type: text
 
     - name: validationContext
-      title: Validation context
+      title: Validation Context
       type: Table
       visible: (showValidationContext)
       clearWith:

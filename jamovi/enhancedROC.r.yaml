@@ -36,7 +36,7 @@ items:
           # Which outcome level is the positive class, and why (filled by .rocOutcomeCoding()).
           # rows: 0 - one row per observed level, added in .run() after .deleteTableRows().
           - name: outcomeCoding
-            title: 'Outcome coding: which level is positive'
+            title: 'Outcome Coding: Which Level Is Positive'
             type: Table
             description: Outcome levels with their counts and the role each plays in the analysis
             visible: (length(outcome) > 0 && !validationPanel)
@@ -406,7 +406,7 @@ items:
                   title: 'Optimal Cutoff'
                   type: number
                 - name: youden_index
-                  title: 'Youden Index'
+                  title: "Youden's J"
                   type: number
                   format: zto
                 - name: sensitivity
@@ -466,7 +466,7 @@ items:
                   type: number
                   format: zto
                 - name: youden_index
-                  title: 'Youden Index'
+                  title: "Youden's J"
                   type: number
                   format: zto
                 - name: true_positive
@@ -869,7 +869,7 @@ items:
 
           # Youden Index Plot
           - name: youdenIndexPlot
-            title: Youden Index Optimization Plot
+            title: "Youden's Index Optimization Plot"
             type: Image
             description: Youden Index values across cutoff range
             visible: (youdenOptimization && !validationPanel)
@@ -1211,7 +1211,7 @@ items:
                   type: number
                   visible: (nntCalculation && !validationPanel)
                 - name: nnd
-                  title: 'Inverse Youden index'
+                  title: "Inverse Youden's index"
                   type: number
                   visible: (nntCalculation && !validationPanel)
                 - name: tested_positive
@@ -1328,7 +1328,7 @@ items:
             height: 600
 
           - name: screeningWorkload
-            title: Observed and projected workload
+            title: Observed and Projected Workload
             type: Table
             visible: (clinicalImpact)
             clearWith: &id001
@@ -1427,7 +1427,7 @@ items:
               type: number
               format: dp:6
           - name: validationContext
-            title: Validation context
+            title: Validation Context
             type: Table
             visible: (validationPanel)
             clearWith: *id001
@@ -1439,7 +1439,7 @@ items:
               title: Value
               type: text
           - name: denominatorLedger
-            title: Validation denominator ledger
+            title: Validation Denominator Ledger
             type: Table
             visible: (validationPanel)
             clearWith: *id001
@@ -1451,7 +1451,7 @@ items:
               title: Rows
               type: number
           - name: frozenMetrics
-            title: Frozen-model performance and paired differences
+            title: Frozen-Model Performance and Paired Differences
             type: Table
             visible: (validationPanel)
             clearWith: *id001

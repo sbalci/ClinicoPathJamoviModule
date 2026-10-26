@@ -962,7 +962,7 @@ enhancedROCResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                         self$add(jmvcore::Table$new(
                             options=options,
                             name="outcomeCoding",
-                            title="Outcome coding: which level is positive",
+                            title="Outcome Coding: Which Level Is Positive",
                             visible="(length(outcome) > 0 && !validationPanel)",
                             rows=0,
                             clearWith=list(
@@ -1348,7 +1348,7 @@ enhancedROCResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                                     `type`="number"),
                                 list(
                                     `name`="youden_index", 
-                                    `title`="Youden Index", 
+                                    `title`="Youden's J", 
                                     `type`="number", 
                                     `format`="zto"),
                                 list(
@@ -1416,7 +1416,7 @@ enhancedROCResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                                     `format`="zto"),
                                 list(
                                     `name`="youden_index", 
-                                    `title`="Youden Index", 
+                                    `title`="Youden's J", 
                                     `type`="number", 
                                     `format`="zto"),
                                 list(
@@ -1837,7 +1837,7 @@ enhancedROCResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                         self$add(jmvcore::Image$new(
                             options=options,
                             name="youdenIndexPlot",
-                            title="Youden Index Optimization Plot",
+                            title="Youden's Index Optimization Plot",
                             visible="(youdenOptimization && !validationPanel)",
                             renderFun=".plotYoudenIndex",
                             clearWith=list(
@@ -2192,7 +2192,7 @@ enhancedROCResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                                     `visible`="(nntCalculation && !validationPanel)"),
                                 list(
                                     `name`="nnd", 
-                                    `title`="Inverse Youden index", 
+                                    `title`="Inverse Youden's index", 
                                     `type`="number", 
                                     `visible`="(nntCalculation && !validationPanel)"),
                                 list(
@@ -2318,7 +2318,7 @@ enhancedROCResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                         self$add(jmvcore::Table$new(
                             options=options,
                             name="screeningWorkload",
-                            title="Observed and projected workload",
+                            title="Observed and Projected Workload",
                             visible="(clinicalImpact)",
                             clearWith=list(
                                 "showTableNotes",
@@ -2435,7 +2435,7 @@ enhancedROCResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                         self$add(jmvcore::Table$new(
                             options=options,
                             name="validationContext",
-                            title="Validation context",
+                            title="Validation Context",
                             visible="(validationPanel)",
                             clearWith=list(
                                 "showTableNotes",
@@ -2478,7 +2478,7 @@ enhancedROCResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                         self$add(jmvcore::Table$new(
                             options=options,
                             name="denominatorLedger",
-                            title="Validation denominator ledger",
+                            title="Validation Denominator Ledger",
                             visible="(validationPanel)",
                             clearWith=list(
                                 "showTableNotes",
@@ -2521,7 +2521,7 @@ enhancedROCResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                         self$add(jmvcore::Table$new(
                             options=options,
                             name="frozenMetrics",
-                            title="Frozen-model performance and paired differences",
+                            title="Frozen-Model Performance and Paired Differences",
                             visible="(validationPanel)",
                             clearWith=list(
                                 "showTableNotes",

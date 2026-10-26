@@ -131,7 +131,7 @@ kappaSizePowerResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
             self$add(jmvcore::Preformatted$new(
                 options=options,
                 name="text1",
-                title="Result by the published formula (kappaSize)",
+                title="Result by the Published Formula",
                 clearWith=list(
                     "outcome",
                     "kappa0",
@@ -143,7 +143,7 @@ kappaSizePowerResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
             self$add(jmvcore::Preformatted$new(
                 options=options,
                 name="text_summary",
-                title="Summary by the published formula (kappaSize)",
+                title="Summary by the Published Formula",
                 clearWith=list(
                     "outcome",
                     "kappa0",

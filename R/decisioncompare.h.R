@@ -1365,7 +1365,7 @@ decisioncompareResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
             self$add(jmvcore::Table$new(
                 options=options,
                 name="referenceDefinition",
-                title="Reference and target",
+                title="Reference and Target",
                 visible=TRUE,
                 rows=0,
                 clearWith=list(
@@ -1406,7 +1406,7 @@ decisioncompareResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
             self$add(jmvcore::Table$new(
                 options=options,
                 name="comparatorCounts",
-                title="Binary comparator counts",
+                title="Binary Comparator Counts",
                 visible="(referenceType:consensus || referenceType:method)",
                 rows=0,
                 clearWith=list(
@@ -1455,7 +1455,7 @@ decisioncompareResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
             self$add(jmvcore::Table$new(
                 options=options,
                 name="comparatorPopulation",
-                title="Comparison populations",
+                title="Comparison Populations",
                 visible="(referenceType:consensus || referenceType:method)",
                 rows=0,
                 clearWith=list(
@@ -1512,7 +1512,7 @@ decisioncompareResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
             self$add(jmvcore::Table$new(
                 options=options,
                 name="comparatorMetrics",
-                title="Agreement with comparator",
+                title="Agreement with Comparator",
                 visible="(referenceType:consensus || referenceType:method)",
                 rows=0,
                 clearWith=list(
@@ -1580,7 +1580,7 @@ decisioncompareResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
             self$add(jmvcore::Html$new(
                 options=options,
                 name="comparatorReport",
-                title="Comparator interpretation",
+                title="Comparator Interpretation",
                 visible="(referenceType:consensus || referenceType:method)",
                 clearWith=list(
                     "referenceType",
@@ -1611,7 +1611,7 @@ decisioncompareResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
             self$add(jmvcore::Table$new(
                 options=options,
                 name="comparatorDifferences",
-                title="Paired agreement differences",
+                title="Paired Agreement Differences",
                 visible="(referenceType:consensus && (statComp) || referenceType:method && (statComp))",
                 rows=0,
                 clearWith=list(
@@ -1685,7 +1685,7 @@ decisioncompareResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
             self$add(jmvcore::Table$new(
                 options=options,
                 name="comparatorStrata",
-                title="Agreement by stratum",
+                title="Agreement by Stratum",
                 visible="(referenceType:consensus && (length(stratify) > 0) || referenceType:method && (length(stratify) > 0))",
                 rows=0,
                 clearWith=list(
@@ -1743,7 +1743,7 @@ decisioncompareResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
             self$add(jmvcore::Image$new(
                 options=options,
                 name="comparatorPlot",
-                title="Comparator agreement (bar)",
+                title="Comparator Agreement (Bar)",
                 visible="(referenceType:consensus && (plot) || referenceType:method && (plot))",
                 width=600,
                 height=450,
@@ -1779,7 +1779,7 @@ decisioncompareResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
             self$add(jmvcore::Image$new(
                 options=options,
                 name="comparatorRadar",
-                title="Comparator agreement (radar)",
+                title="Comparator Agreement (Radar)",
                 visible="(referenceType:consensus && (radarplot) || referenceType:method && (radarplot))",
                 width=600,
                 height=450,
@@ -1815,7 +1815,7 @@ decisioncompareResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
             self$add(jmvcore::Image$new(
                 options=options,
                 name="comparatorHeatmap",
-                title="Comparator agreement (heatmap)",
+                title="Comparator Agreement (Heatmap)",
                 visible="(referenceType:consensus && (heatmap) || referenceType:method && (heatmap))",
                 width=600,
                 height=450,
@@ -1851,7 +1851,7 @@ decisioncompareResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
             self$add(jmvcore::Table$new(
                 options=options,
                 name="validationContext",
-                title="Validation context",
+                title="Validation Context",
                 visible="(showValidationContext)",
                 clearWith=list(
                     "showValidationContext",

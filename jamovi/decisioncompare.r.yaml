@@ -681,7 +681,7 @@ items:
 
 
     - name: referenceDefinition
-      title: Reference and target
+      title: Reference and Target
       type: Table
       visible: true
       rows: 0
@@ -695,7 +695,7 @@ items:
           type: text
 
     - name: comparatorCounts
-      title: Binary comparator counts
+      title: Binary Comparator Counts
       type: Table
       visible: (referenceType:consensus || referenceType:method)
       rows: 0
@@ -715,7 +715,7 @@ items:
           type: integer
 
     - name: comparatorPopulation
-      title: Comparison populations
+      title: Comparison Populations
       type: Table
       visible: (referenceType:consensus || referenceType:method)
       rows: 0
@@ -741,7 +741,7 @@ items:
           type: integer
 
     - name: comparatorMetrics
-      title: Agreement with comparator
+      title: Agreement with Comparator
       type: Table
       visible: (referenceType:consensus || referenceType:method)
       rows: 0
@@ -776,13 +776,13 @@ items:
           type: text
 
     - name: comparatorReport
-      title: Comparator interpretation
+      title: Comparator Interpretation
       type: Html
       visible: (referenceType:consensus || referenceType:method)
       clearWith: [referenceType, referenceDescription, targetDefinition, gold, goldPositive, goldNegative, ci, pp, pprob, test1, test1Positive, test1Negative, test2, test2Positive, test2Negative, test3, test3Positive, test3Negative, excludeIndeterminate, statComp, mcnemarMethod, stratify, plot, radarplot, heatmap]
 
     - name: comparatorDifferences
-      title: Paired agreement differences
+      title: Paired Agreement Differences
       type: Table
       visible: (referenceType:consensus && (statComp) || referenceType:method && (statComp))
       rows: 0
@@ -822,7 +822,7 @@ items:
           type: text
 
     - name: comparatorStrata
-      title: Agreement by stratum
+      title: Agreement by Stratum
       type: Table
       visible: (referenceType:consensus && (length(stratify) > 0) || referenceType:method && (length(stratify) > 0))
       rows: 0
@@ -849,7 +849,7 @@ items:
           format: pc
 
     - name: comparatorPlot
-      title: Comparator agreement (bar)
+      title: Comparator Agreement (Bar)
       type: Image
       visible: (referenceType:consensus && (plot) || referenceType:method && (plot))
       width: 600
@@ -860,7 +860,7 @@ items:
       clearWith: [referenceType, referenceDescription, targetDefinition, gold, goldPositive, goldNegative, ci, pp, pprob, test1, test1Positive, test1Negative, test2, test2Positive, test2Negative, test3, test3Positive, test3Negative, excludeIndeterminate, statComp, mcnemarMethod, stratify, plot, radarplot, heatmap]
 
     - name: comparatorRadar
-      title: Comparator agreement (radar)
+      title: Comparator Agreement (Radar)
       type: Image
       visible: (referenceType:consensus && (radarplot) || referenceType:method && (radarplot))
       width: 600
@@ -871,7 +871,7 @@ items:
       clearWith: [referenceType, referenceDescription, targetDefinition, gold, goldPositive, goldNegative, ci, pp, pprob, test1, test1Positive, test1Negative, test2, test2Positive, test2Negative, test3, test3Positive, test3Negative, excludeIndeterminate, statComp, mcnemarMethod, stratify, plot, radarplot, heatmap]
 
     - name: comparatorHeatmap
-      title: Comparator agreement (heatmap)
+      title: Comparator Agreement (Heatmap)
       type: Image
       visible: (referenceType:consensus && (heatmap) || referenceType:method && (heatmap))
       width: 600
@@ -882,7 +882,7 @@ items:
       clearWith: [referenceType, referenceDescription, targetDefinition, gold, goldPositive, goldNegative, ci, pp, pprob, test1, test1Positive, test1Negative, test2, test2Positive, test2Negative, test3, test3Positive, test3Negative, excludeIndeterminate, statComp, mcnemarMethod, stratify, plot, radarplot, heatmap]
 
     - name: validationContext
-      title: Validation context
+      title: Validation Context
       type: Table
       visible: (showValidationContext)
       clearWith:

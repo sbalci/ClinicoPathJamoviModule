@@ -206,7 +206,7 @@ options:
             Boolean selection whether to show detailed explanatory footnotes.
 
     - name: ci
-      title: "95 percent confidence intervals"
+      title: "95% confidence intervals"
       type: Bool
       default: false
       description:

@@ -9732,7 +9732,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                     "\n            <div style='font-family: Arial, sans-serif; max-width: 800px; line-height: 1.6;'>\n                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>\n                    <h3 style='margin: 0 0 10px 0; color: inherit;'>",
                     .("What is the All-Pairs Kappa table?"),
                     "</h3>\n                    <p style='margin: 0; color: inherit;'>",
-                    paste0("\n                        ", jmvcore::format(.("For studies with three or more raters, the All-Pairs table reports\n                        Cohen's kappa, observed agreement, standard error, a confidence\n                        interval at the confidence level set in the options, z, and p-value for {tag1}every pair{tag2} of raters\n                        (C(k,2) rows). This is the conventional supplementary table in\n                        interobserver reliability studies, complementing the single overall\n                        Fleiss kappa."), tag1 = "<strong>", tag2 = "</strong>"), "\n                    "),
+                    paste0("\n                        ", jmvcore::format(.("For studies with three or more raters, the All-Pairs table reports\n                        Cohen's kappa, observed agreement, standard error, a confidence\n                        interval at the confidence level set in the options, z, and p-value for {tag1}every pair{tag2} of raters\n                        (C(k,2) rows). This is the conventional supplementary table in\n                        interobserver reliability studies, complementing the single overall\n                        Fleiss' kappa."), tag1 = "<strong>", tag2 = "</strong>"), "\n                    "),
                     "</p>\n                </div>\n                <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>\n                    <h4 style='margin: 0 0 10px 0; color: inherit;'>",
                     .("When to use it"),
                     "</h4>\n                    <ul style='margin: 0; padding-left: 20px;'>\n                        <li>",
@@ -10334,7 +10334,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                     "</h4>\n                    <ul style='margin: 0; padding-left: 20px;'>\n                        <li>",
                     .("Identifying which categories are the agreement bottleneck (e.g., YSRB Category IV 'suspicious' in breast cytology)"),
                     "</li>\n                        <li>",
-                    .("Reporting per-category agreement alongside an overall Fleiss kappa"),
+                    .("Reporting per-category agreement alongside an overall Fleiss' kappa"),
                     "</li>\n                        <li>",
                     .("Quality assurance: where should category-specific training focus?"),
                     "</li>\n                    </ul>\n                </div>\n                <p style='font-size: 0.9em; color: inherit;'>",
@@ -11176,7 +11176,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                     "</li>\n                            <li>",
                     jmvcore::format(.("{tag1}For categorical ratings it duplicates an existing result.{tag2} It equals Conger's exact kappa, the {tag3}Exact kappa (3+ raters){tag4} option. Switching both on prints one number twice under two names."), tag1 = "<strong>", tag2 = "</strong>", tag3 = "<em>", tag4 = "</em>"),
                     "</li>\n                            <li>",
-                    jmvcore::format(.("{tag1}Standardizing does nothing in this scope.{tag2} Standardization exists to equalise the contribution of several variables. With one variable it is an affine rescaling, which leaves the coefficient unchanged."), tag1 = "<strong>", tag2 = "</strong>"),
+                    jmvcore::format(.("{tag1}Standardizing does nothing in this scope.{tag2} Standardization exists to equalize the contribution of several variables. With one variable it is an affine rescaling, which leaves the coefficient unchanged."), tag1 = "<strong>", tag2 = "</strong>"),
                     "</li>\n                            <li>",
                     jmvcore::format(.("{tag1}One measurement type only.{tag2} All selected columns must be numeric, or all must be categorical; a mixed selection is rejected."), tag1 = "<strong>", tag2 = "</strong>"),
                     "</li>\n                            <li>",
@@ -16426,7 +16426,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                         if (ncol(ratings) >= 3 && !identical(wght, "unweighted")) {
                             table2$setNote(
                                 "weights_unsupported",
-                                .("No headline kappa is reported: Fleiss' kappa for three or more raters is unweighted, so applying the selected weights would require a different coefficient and silently showing unweighted Fleiss kappa would not answer the request. Choose Unweighted for Fleiss' kappa, use ordinal Krippendorff's alpha or weighted Gwet's AC2, or enable All-Pairs Kappa for weighted Cohen kappa between each rater pair.")
+                                .("No headline kappa is reported: Fleiss' kappa for three or more raters is unweighted, so applying the selected weights would require a different coefficient and silently showing unweighted Fleiss' kappa would not answer the request. Choose Unweighted for Fleiss' kappa, use ordinal Krippendorff's alpha or weighted Gwet's AC2, or enable All-Pairs Kappa for weighted Cohen's kappa between each rater pair.")
                             )
                         }
 

@@ -27,13 +27,13 @@ options:
         - name: none
           title: No example
         - name: diagnostic_validation
-          title: Diagnostic Test Validation (example)
+          title: Diagnostic test validation (example)
         - name: pathology_agreement
-          title: Pathologist Agreement (example)
+          title: Pathologist agreement (example)
         - name: tumor_markers
-          title: Tumor Marker Evaluation (example)
+          title: Tumor marker evaluation (example)
         - name: screening_evaluation
-          title: Screening Test Assessment (example)
+          title: Screening test assessment (example)
       default: none
       description:
           R: >
@@ -143,13 +143,13 @@ options:
       title: Analysis method
       type: List
       options:
-        - title: Latent Class Analysis
+        - title: Latent class analysis
           name: latent_class
-        - title: Composite Reference (strict majority)
+        - title: Composite reference (strict majority)
           name: composite
-        - title: All Tests Positive
+        - title: All tests positive
           name: all_positive
-        - title: Any Test Positive
+        - title: Any test positive
           name: any_positive
         - title: Penalized EM (MAP-like; fixed priors; 3+ tests)
           name: bayesian

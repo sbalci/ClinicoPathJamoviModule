@@ -9,7 +9,7 @@ children:
     stretchFactor: 1
     children:
       - type: TargetLayoutBox
-        label: Outcome variable
+        label: Outcome Variable
         children:
           - type: VariablesListBox
             name: outcome
@@ -17,7 +17,7 @@ children:
             isTarget: true
           - type: LevelSelector
             name: outcomePositive
-            label: Positive Outcome
+            label: Positive outcome
             enable: (outcome)
       - type: TargetLayoutBox
         label: Prediction Models/Variables
@@ -27,10 +27,10 @@ children:
             isTarget: true
           - type: TextBox
             name: modelNames
-            label: Model Names (optional)
+            label: Model names (optional)
             format: string
       - type: TargetLayoutBox
-        label: Clinical decision rule (binary)
+        label: Clinical Decision Rule (Binary)
         children:
           - type: VariablesListBox
             name: decisionRuleVar
@@ -68,7 +68,7 @@ children:
               - type: TextBox
                 name: thresholdStep
                 format: number
-                label: Step Size
+                label: Step size
       # decisionRuleVar's box is in the top VariableSupplier (a target box takes its
       # source list from the nearest ancestor supplier), greyed until this is ticked.
       - type: LayoutBox

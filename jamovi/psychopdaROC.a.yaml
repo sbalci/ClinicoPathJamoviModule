@@ -213,9 +213,9 @@ options:
         - name: minimize_boot_metric
           title: Minimize metric (bootstrapped)
         - name: oc_youden_kernel
-          title: Youden Index (kernel smoothed)
+          title: "Youden's index (kernel smoothed)"
         - name: oc_youden_normal
-          title: Youden Index (parametric normal)
+          title: "Youden's index (parametric normal)"
         - name: oc_manual
           title: Manual cutpoint
         - name: oc_cost_ratio
@@ -235,7 +235,7 @@ options:
       type: List
       options:
         - name: youden
-          title: Youden Index (Sens + Spec - 1)
+          title: "Youden's index (Sens + Spec - 1)"
         - name: sum_sens_spec
           title: Sum of sensitivity and specificity
         - name: accuracy
@@ -253,7 +253,7 @@ options:
         - name: abs_d_ppv_npv
           title: Minimize |PPV - NPV|
         - name: F1_score
-          title: F1 Score
+          title: F1 score
         - name: odds_ratio
           title: Diagnostic odds ratio
         - name: risk_ratio
@@ -918,9 +918,9 @@ options:
       type: List
       options:
         - name: sensitivity
-          title: Fixed Sensitivity
+          title: Fixed sensitivity
         - name: specificity
-          title: Fixed Specificity
+          title: Fixed specificity
       default: sensitivity
       description:
           R: >
@@ -959,11 +959,11 @@ options:
       type: List
       options:
         - name: linear
-          title: Linear Interpolation
+          title: Linear interpolation
         - name: nearest
-          title: Nearest Point
+          title: Nearest point
         - name: stepwise
-          title: Stepwise (Conservative)
+          title: Stepwise (conservative)
       default: linear
       description:
           R: >
@@ -988,7 +988,7 @@ options:
     # Hidden: the panel no longer offers it (library-audit 2026-10-23 meddecide [LOW]).
     - name: metaAnalysis
       hidden: true
-      title: Explain meta-analysis limitation
+      title: Meta-analysis limitation
       type: Bool
       default: false
       description:
@@ -1002,11 +1002,11 @@ options:
       type: List
       options:
         - name: fixed
-          title: Fixed Effects Model
+          title: Fixed effects model
         - name: random
-          title: Random Effects Model (DerSimonian-Laird)
+          title: Random effects model (DerSimonian-Laird)
         - name: both
-          title: Both Fixed and Random Effects
+          title: Both fixed and random effects
       default: both
       description:
           R: Deprecated compatibility option. Within-cohort meta-analysis is unavailable.

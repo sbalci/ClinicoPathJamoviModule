@@ -310,7 +310,7 @@ options:
       type: List
       options:
         - name: all
-          title: Default Metric Set
+          title: Default metric set
         - name: prevalence
           title: Prevalence
         - name: sens
@@ -324,7 +324,7 @@ options:
         - name: acc
           title: Accuracy
         - name: balancedAccuracy
-          title: Balanced Accuracy
+          title: Balanced accuracy
         - name: youden
           title: Youden's J
         - name: lrPos
@@ -354,13 +354,13 @@ options:
       type: List
       options:
         - name: all
-          title: All Patterns
+          title: All patterns
         - name: allPositive
-          title: All Tests Positive
+          title: All tests positive
         - name: allNegative
-          title: All Tests Negative
+          title: All tests negative
         - name: mixed
-          title: Mixed/Discordant
+          title: Mixed/discordant
       default: all
       description:
           ui: >

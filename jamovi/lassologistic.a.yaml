@@ -70,7 +70,7 @@ options:
           name: lasso
         - title: Ridge (L2)
           name: ridge
-        - title: Elastic Net
+        - title: Elastic net
           name: elasticnet
       default: lasso
       description:
@@ -93,9 +93,9 @@ options:
       title: Lambda selection method
       type: List
       options:
-        - title: Minimum CV Error
+        - title: Minimum CV error
           name: lambda.min
-        - title: 1SE Rule (More Parsimonious)
+        - title: 1SE rule (more parsimonious)
           name: lambda.1se
       default: lambda.1se
       description:
@@ -201,7 +201,7 @@ options:
           name: smallest
         - title: "Max-scaled (strongest predictor = max points)"
           name: maxscaled
-        - title: "Compare All Methods"
+        - title: "Compare all methods"
           name: compare
       default: maxscaled
       description:

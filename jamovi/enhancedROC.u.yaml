@@ -28,21 +28,21 @@ children:
             isTarget: true
             itemDropBehaviour: emptyspace
       - type: TargetLayoutBox
-        label: Patient identifier
+        label: Patient Identifier
         children:
         - type: VariablesListBox
           name: patientID
           maxItemCount: 1
           isTarget: true
       - type: TargetLayoutBox
-        label: Site identifier
+        label: Site Identifier
         children:
         - type: VariablesListBox
           name: siteID
           maxItemCount: 1
           isTarget: true
       - type: TargetLayoutBox
-        label: Partition identifier
+        label: Partition Identifier
         children:
         - type: VariablesListBox
           name: partitionID

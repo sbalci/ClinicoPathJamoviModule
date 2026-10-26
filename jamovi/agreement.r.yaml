@@ -1673,7 +1673,7 @@ items:
               - McGraw1996
 
         - name: maxwellREExplanation
-          title: About the rater variance decomposition
+          title: About the Rater Variance Decomposition
           type: Html
           visible: (showMaxwellREGuide)
           clearWith:

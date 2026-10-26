@@ -162,7 +162,7 @@ kappaSizeCIResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
             self$add(jmvcore::Preformatted$new(
                 options=options,
                 name="text1",
-                title="Analysis result",
+                title="Analysis Result",
                 clearWith=list(
                     "outcome",
                     "citype",

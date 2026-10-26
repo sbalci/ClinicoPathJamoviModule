@@ -602,7 +602,7 @@ test_that("F-17: imbalance texts no longer call PRC 'more reliable' or blame spe
 
 test_that("F-18: the Performance Summary restates the Youden index without unsourced band words", {
     tb <- rel11_obj(rel11_k(), outcome = "y", positiveClass = "Malignant", predictors = "m")$results$results$optimalCutoffSummary
-    expect_identical(tb$asDF$clinical_recommendation, "Youden index 0.70 at this cutpoint (sensitivity 0.90, specificity 0.80).")
+    expect_identical(tb$asDF$clinical_recommendation, "Youden index 0.70 at this cutoff (sensitivity 0.90, specificity 0.80).")
 })
 
 test_that("F-19 / F-42 / F-43: the instructions drop survival status, the 'healthy' NPV and 'Full statistical analysis'", {

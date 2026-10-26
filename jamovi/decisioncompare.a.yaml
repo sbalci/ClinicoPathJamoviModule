@@ -244,7 +244,7 @@ options:
 
 
     - name: pp
-      title: Prior probability (prevalence)
+      title: Known population prevalence
       type: Bool
       default: false
       description:
@@ -256,7 +256,7 @@ options:
             Enable custom prior probability (prevalence) for predictive value calculations.
 
     - name: pprob
-      title: Prior probability (prevalence)
+      title: Population disease prevalence
       type: Number
       default: 0.300
       min: 0.000000001
@@ -286,7 +286,7 @@ options:
           R: Boolean indicating whether table footnotes should be displayed.
 
     - name: ci
-      title: '95 percent CI'
+      title: '95% confidence intervals'
       type: Bool
       default: false
       description:
@@ -387,11 +387,11 @@ options:
       title: CI method for agreement
       type: List
       options:
-        - title: Wilson Score
+        - title: Wilson score
           name: wilson
         - title: Logit
           name: logit
-        - title: Clopper-Pearson (Exact)
+        - title: Clopper-Pearson (exact)
           name: exact
       default: wilson
       description:

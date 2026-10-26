@@ -682,7 +682,7 @@ decisionResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$add(jmvcore::Image$new(
                 options=options,
                 name="plot1",
-                title="Fagan nomogram",
+                title="Fagan Nomogram",
                 width=600,
                 height=450,
                 renderFun=".plot1",
@@ -935,7 +935,7 @@ decisionResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$add(jmvcore::Table$new(
                 options=options,
                 name="referenceDefinition",
-                title="Reference and target",
+                title="Reference and Target",
                 visible=TRUE,
                 rows=0,
                 clearWith=list(
@@ -965,7 +965,7 @@ decisionResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$add(jmvcore::Table$new(
                 options=options,
                 name="comparatorCounts",
-                title="Binary comparator counts",
+                title="Binary Comparator Counts",
                 visible="(referenceType:consensus || referenceType:method)",
                 rows=0,
                 clearWith=list(
@@ -1003,7 +1003,7 @@ decisionResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$add(jmvcore::Table$new(
                 options=options,
                 name="comparatorPopulation",
-                title="Comparison populations",
+                title="Comparison Populations",
                 visible="(referenceType:consensus || referenceType:method)",
                 rows=0,
                 clearWith=list(
@@ -1041,7 +1041,7 @@ decisionResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$add(jmvcore::Table$new(
                 options=options,
                 name="comparatorMetrics",
-                title="Agreement with comparator",
+                title="Agreement with Comparator",
                 visible="(referenceType:consensus || referenceType:method)",
                 rows=0,
                 clearWith=list(
@@ -1098,7 +1098,7 @@ decisionResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$add(jmvcore::Html$new(
                 options=options,
                 name="comparatorReport",
-                title="Comparator interpretation",
+                title="Comparator Interpretation",
                 visible="(referenceType:consensus || referenceType:method)",
                 clearWith=list(
                     "referenceType",
@@ -1118,7 +1118,7 @@ decisionResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$add(jmvcore::Table$new(
                 options=options,
                 name="comparatorCases",
-                title="Discordant comparator calls",
+                title="Discordant Comparator Calls",
                 visible="(referenceType:consensus && (showMisclassified) || referenceType:method && (showMisclassified))",
                 rows=0,
                 clearWith=list(
@@ -1156,7 +1156,7 @@ decisionResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$add(jmvcore::Table$new(
                 options=options,
                 name="validationContext",
-                title="Validation context",
+                title="Validation Context",
                 visible="(showValidationContext)",
                 clearWith=list(
                     "showValidationContext",
