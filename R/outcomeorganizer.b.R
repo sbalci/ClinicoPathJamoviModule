@@ -337,10 +337,10 @@ outcomeorganizerClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 # Check for minimum sample size
                 if (total_rows < 10) {
                     validation_results$strong_warnings <- c(validation_results$strong_warnings,
-                        .fmt(.("Very small sample size: {n} observations. Results may be unreliable."), n = total_rows))
+                        .fmt(.("Very small sample size: {n} observations. As a general rule of thumb (< 10 observations), results may be unreliable."), n = total_rows))
                 } else if (total_rows < 30) {
                     validation_results$warnings <- c(validation_results$warnings,
-                        .fmt(.("Small sample size: {n} observations. Consider larger sample for more reliable estimates."), n = total_rows))
+                        .fmt(.("Small sample size: {n} observations. As a general rule of thumb (< 30 observations), consider a larger sample for more reliable estimates."), n = total_rows))
                 }
 
                 # Check for missing data patterns
@@ -350,7 +350,7 @@ outcomeorganizerClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
                     if (missing_proportion > 0.1) {
                         validation_results$warnings <- c(validation_results$warnings,
-                            .fmt(.("Large amount of missing outcome data: {pct}% ({missing} out of {total} rows)."), 
+                            .fmt(.("Large amount of missing outcome data: {pct}% ({missing} out of {total} rows). Complete-case analysis drops missing rows (general rule of thumb > 10% missing)."), 
                                 pct = round(missing_proportion * 100, 1),
                                 missing = missing_outcome,
                                 total = total_rows))
@@ -580,14 +580,28 @@ outcomeorganizerClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         yes = 1,
                         no = 0
                     )
-                    diagnostics$ttp_handling <- .("TTP: Only progression events counted, deaths censored")
+                    ttp <- mydata[["myoutcome"]]
+                    n_ttp <- sum(ttp == 1, na.rm = TRUE)
+                    diagnostics$ttp_handling <- sprintf(
+                        .("TTP: Only progression events counted, deaths censored (%d events, %d censored, %d missing). This analysis produces the STATUS only - pair it with time to progression (or last disease assessment/death for censored rows), not overall survival time."),
+                        n_ttp,
+                        sum(ttp == 0, na.rm = TRUE),
+                        sum(is.na(ttp)))
+
+                    if (n_ttp > 0) {
+                        private$.addHtmlMessage(
+                            "warning",
+                            .("TTP status produced - pair it with time to progression"),
+                            sprintf(
+                                .("The TTP status marks %d patient(s) as having progressed, while deaths without progression are coded 0 (censored). This analysis writes the STATUS only: it has no progression date variable. Pairing this status with overall survival or death time overstates time to progression for every patient who progressed before dying or last contact - their progression event is recorded at the later death/contact time. Supply time to progression (or time to last tumor assessment/death for non-progressing patients) as the time variable in downstream survival analyses."),
+                                n_ttp))
+                    }
 
                     # TTP replaces the outcome-derived indicator entirely.
                     if (!is.null(private$.eventRecode)) {
-                        ttp <- mydata[["myoutcome"]]
                         private$.eventRecode$estimand    <- .("time to progression (deaths censored)")
                         private$.eventRecode$event_label <- .("progression")
-                        private$.eventRecode$n_event     <- sum(ttp == 1, na.rm = TRUE)
+                        private$.eventRecode$n_event     <- n_ttp
                         private$.eventRecode$n_censored  <- sum(ttp == 0, na.rm = TRUE)
                         private$.eventRecode$n_missing   <- sum(is.na(ttp))
                     }
@@ -896,10 +910,10 @@ outcomeorganizerClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                             # open.
                             if (has_time) {
                                 private$.addHtmlMessage(
-                                    "info",
+                                    "warning",
                                     .("Event hierarchy applied using follow-up time"),
                                     sprintf(
-                                        .("%d patient(s) have more than one row. For each, the EARLIEST record carrying the priority outcome (%s) was kept as the event and their later rows were censored, so the event is not moved earlier in time."),
+                                        .("%d patient(s) have more than one row. For each, the EARLIEST record carrying the priority outcome (%s) was kept as the event and their tied or later rows were censored, so the event is not moved earlier in time. However, this analysis does not collapse the dataset to one row per patient: passing multiple rows per patient into an unclustered survival analysis (Surv(time, status)) treats repeated rows as independent subjects and double-counts censored person-time. Reduce your data to one row per patient (or use a clustered/counting-process model) before running downstream survival analyses."),
                                         n_affected, highest_priority))
                             } else
                             private$.addHtmlMessage(
@@ -1582,7 +1596,7 @@ outcomeorganizerClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     "1"
                 }
                 private$.addNotice(jmvcore::NoticeType$WARNING,
-                    .fmt(.("Few events: only {nEv} of {nTotal} non-missing outcomes ({pct}%) are '{level}'. Kaplan-Meier and Cox estimates are unstable with fewer than 5 events."),
+                    .fmt(.("Few events: only {nEv} of {nTotal} non-missing outcomes ({pct}%) are '{level}'. As a general rule of thumb (< 5 events), Kaplan-Meier and Cox estimates are unstable with fewer than 5 events."),
                         nEv = n_ev_rec,
                         nTotal = n_nonmissing_rec,
                         pct = round(100 * n_ev_rec / n_nonmissing_rec, 1),

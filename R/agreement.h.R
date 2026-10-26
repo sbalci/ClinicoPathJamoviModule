@@ -4308,7 +4308,7 @@ agreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                                 list(
                                     `name`="value", 
                                     `title`="Value", 
-                                    `type`="text")),
+                                    `type`="number")),
                             refs=list(
                                 "Walter1998",
                                 "donnerEliasziwKappaGOF",

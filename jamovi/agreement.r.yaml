@@ -2387,7 +2387,7 @@ items:
               type: text
             - name: value
               title: "Value"
-              type: text
+              type: number
           refs:
               - Walter1998
               - donnerEliasziwKappaGOF

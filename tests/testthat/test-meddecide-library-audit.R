@@ -1649,3 +1649,29 @@ test_that("labels follow one convention and name each thing once", {
   }
   audit_skip_absent(absent, root)
 })
+
+# library-audit 2026-10-23 meddecide [LOW] DONE: agreement's sample-size values are numbers in a
+#   number column, so the user's number format applies; the metric is named in its parameter cell.
+test_that("agreement's sample-size table holds numbers, not formatted text", {
+  root <- audit_source_root()
+  absent <- audit_absent(root, "agreement", "jamovi/%s.r.yaml")
+  if (!length(absent)) {
+    items <- yaml::read_yaml(file.path(root, "jamovi", "agreement.r.yaml"))$items
+    flat <- unlist(lapply(items, function(i) if (identical(i$type, "Group")) i$items else list(i)), recursive = FALSE)
+    table <- Filter(function(i) identical(i$name, "agreementSampleSizeTable"), flat)[[1]]
+    value <- Filter(function(c) c$name == "value", table$columns)[[1]]
+    expect_identical(value$type, "number")
+  }
+  if (length(audit_loaded("agreement"))) {
+    d <- data.frame(A = factor(rep(c("x", "y"), 10)), B = factor(rep(c("x", "y", "y", "x"), 5)))
+    df <- agreement(data = d, vars = c("A", "B"), agreementSampleSize = TRUE, ssMetric = "kappa",
+                    ssKappaNull = 0.4, ssKappaAlt = 0.7, ssNRaters = 2)$pairedAgreementGroup$agreementSampleSizeTable$asDF
+    expect_true(is.numeric(df$value))
+    rows <- stats::setNames(df$value, c("metric", "n_required", "n_raters", "n_cat", "kappa_null",
+                                        "kappa_alt", "alpha", "power", "total_reads"))
+    expect_equal(rows[["kappa_null"]], 0.4)
+    expect_equal(rows[["total_reads"]], rows[["n_required"]] * 2)
+    expect_match(df$parameter[1], "Agreement metric: Cohen's", fixed = TRUE)
+  }
+  audit_skip_absent(absent, root)
+})

@@ -412,9 +412,10 @@
             if (collapsed_terminal) paste0(
                 "If a collapsed level is a competing terminal event (for example death from ",
                 "another cause), Kaplan-Meier estimates net/cause-specific survival rather ",
-                "than absolute event risk and generally overstates the real-world probability ",
-                "of remaining event-free. Use Multiple Event Levels with survival type ",
-                "Competing Risk to estimate cumulative incidence."
+                "than real-world cumulative incidence: 1 - KM overstates the absolute risk ",
+                "(cumulative incidence) of the event, while KM overstates the probability of ",
+                "surviving free of both the target event and competing death. Use Multiple ",
+                "Event Levels with survival type Competing Risk to estimate cumulative incidence."
             ) else "This assumption cannot be verified from the displayed summaries.",
             "</p>")
     }

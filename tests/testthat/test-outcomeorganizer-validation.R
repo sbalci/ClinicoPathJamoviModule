@@ -1022,3 +1022,64 @@ test_that("VAL-outcomeorganizer-09: outcomeorganizer.r.yaml declares only used p
   unused <- Filter(function(ref) ref %in% c("survminer", "finalfit") && !grepl(ref, b_src, fixed = TRUE), r_yaml$refs)
   expect_length(unused, 0L)
 })
+
+test_that("IR-outcomeorganizer-01: TTP emits a visible warning to pair the TTP status indicator with time to progression", {
+  d_ir01 <- data.frame(
+    vital = factor(c("Alive","Alive","Alive","Dead","Dead"), levels = c("Alive","Dead")),
+    prog  = factor(c("Yes","No",NA,"Yes","No"), levels = c("No","Yes"))
+  )
+  res <- .val_run(data = d_ir01, outcome = "vital", outcomeLevel = "Dead",
+                  analysistype = "ttp", recurrence = "prog", recurrenceLevel = "Yes",
+                  outputTable = TRUE, diagnostics = TRUE)
+  warn_txt <- .val_html(res$results$warnings)
+  expect_match(warn_txt, "TTP status produced - pair it with time to progression", fixed = TRUE)
+  expect_match(warn_txt, "Pairing this status with overall survival or death time overstates time to progression", fixed = TRUE)
+  expect_match(res$org$diagnostics$ttp_handling, "(2 events, 2 censored, 1 missing)", fixed = TRUE)
+})
+
+test_that("IR-outcomeorganizer-02: Event hierarchy with followupTime emits a visible warning against unclustered multi-row survival analysis", {
+  d_ir02 <- data.frame(
+    pid    = c(1, 1, 2, 2, 3, 3, 4, 4, 5, 5),
+    status = factor(c("Dead","Alive", "Alive","Dead", "Alive","Alive", "Dead","Dead", "Alive","Dead"),
+                    levels = c("Alive", "Dead")),
+    time   = c(10, 10, 5, 10, 8, 12, 6, 15, 4, 9)
+  )
+  res <- .val_run(data = d_ir02, outcome = "status", multievent = TRUE,
+                  dod = "Dead", awod = "Alive", analysistype = "os",
+                  useHierarchy = TRUE, eventPriority = 1,
+                  patientID = "pid", followupTime = "time", outputTable = TRUE)
+  warn_txt <- .val_html(res$results$warnings)
+  expect_match(warn_txt, "Event hierarchy applied using follow-up time", fixed = TRUE)
+  expect_match(warn_txt, "does not collapse the dataset to one row per patient", fixed = TRUE)
+  expect_match(warn_txt, "double-counts censored person-time", fixed = TRUE)
+})
+
+test_that("IR-outcomeorganizer-03: Sample-size, missingness, and few-events warnings attribute cutoffs as general rules of thumb", {
+  d_n9 <- data.frame(vital = factor(c(rep("Dead", 5), rep("Alive", 4)), levels = c("Alive", "Dead")))
+  d_n15 <- data.frame(vital = factor(c(rep("Dead", 7), rep("Alive", 8)), levels = c("Alive", "Dead")))
+  d_miss <- data.frame(vital = factor(c(rep("Dead", 13), rep("Alive", 13), rep(NA, 4)), levels = c("Alive", "Dead")))
+  d_few <- data.frame(vital = factor(c(rep("Dead", 3), rep("Alive", 17)), levels = c("Alive", "Dead")))
+
+  r_n9   <- run_outcomeorganizer(data = d_n9, outcome = "vital", outcomeLevel = "Dead")
+  r_n15  <- run_outcomeorganizer(data = d_n15, outcome = "vital", outcomeLevel = "Dead")
+  r_miss <- run_outcomeorganizer(data = d_miss, outcome = "vital", outcomeLevel = "Dead")
+  r_few  <- run_outcomeorganizer(data = d_few, outcome = "vital", outcomeLevel = "Dead")
+
+  expect_match(.val_html(r_n9$strongWarnings), "general rule of thumb", fixed = TRUE)
+  expect_match(.val_html(r_n15$warnings), "general rule of thumb", fixed = TRUE)
+  expect_match(.val_html(r_miss$warnings), "general rule of thumb", fixed = TRUE)
+  expect_match(.val_html(r_few$warnings), "general rule of thumb", fixed = TRUE)
+})
+
+test_that("IR-outcomeorganizer-04: .describeEventIndicator() distinguishes 1-KM risk overstatement from KM survival overstatement", {
+  def <- .defineEventIndicator(
+    outcome = outcomeorganizer_compete$outcome_status,
+    analysistype = "cause",
+    multievent = TRUE,
+    dod = "Dead_Disease", dooc = "Dead_Other",
+    awd = "Alive_Disease", awod = "Alive_NED"
+  )
+  desc <- .describeEventIndicator(def)
+  expect_match(desc, "1 - KM overstates the absolute risk (cumulative incidence) of the event", fixed = TRUE)
+  expect_match(desc, "KM overstates the probability of surviving free of both the target event and competing death", fixed = TRUE)
+})

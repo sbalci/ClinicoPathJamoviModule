@@ -14988,17 +14988,21 @@ agreementClass <- if (requireNamespace("jmvcore")) {
 
                         # Keys and labels were scaffolded in .init() (private$.fixedRowTables());
                         # the n_cat row exists only when the metric is not ICC.
-                        table$setRow(rowKey = "metric", values = list(value = metric_label))
-                        table$setRow(rowKey = "n_required", values = list(value = as.character(n_required)))
-                        table$setRow(rowKey = "n_raters", values = list(value = as.character(n_raters)))
+                        # library-audit 2026-10-23 meddecide [LOW] DONE: raw numbers into a number column, so
+                        #   the user's number format applies; the metric's name goes in its parameter cell
+                        #   ("" is the empty cell; NULL would render as the missing-value dot).
+                        table$setRow(rowKey = "metric", values = list(
+                            parameter = .fmt(.("Agreement metric: {metric}"), metric = metric_label), value = ""))
+                        table$setRow(rowKey = "n_required", values = list(value = n_required))
+                        table$setRow(rowKey = "n_raters", values = list(value = n_raters))
                         if (metric != "icc") {
-                            table$setRow(rowKey = "n_cat", values = list(value = as.character(n_cat)))
+                            table$setRow(rowKey = "n_cat", values = list(value = n_cat))
                         }
-                        table$setRow(rowKey = "kappa_null", values = list(value = base::format(k0, digits = 3)))
-                        table$setRow(rowKey = "kappa_alt", values = list(value = base::format(k1, digits = 3)))
-                        table$setRow(rowKey = "alpha", values = list(value = base::format(alpha, digits = 3)))
-                        table$setRow(rowKey = "power", values = list(value = base::format(power, digits = 3)))
-                        table$setRow(rowKey = "total_reads", values = list(value = as.character(n_required * n_raters)))
+                        table$setRow(rowKey = "kappa_null", values = list(value = k0))
+                        table$setRow(rowKey = "kappa_alt", values = list(value = k1))
+                        table$setRow(rowKey = "alpha", values = list(value = alpha))
+                        table$setRow(rowKey = "power", values = list(value = power))
+                        table$setRow(rowKey = "total_reads", values = list(value = n_required * n_raters))
 
                         # Two complete sentences, not one template fed from bare English
                         # literals through %s. The old form put "Walter, Eliasziw & Donner
