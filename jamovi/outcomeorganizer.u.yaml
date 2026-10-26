@@ -4,24 +4,72 @@ jus: '3.0'
 stage: 0
 compilerMode: tame
 children:
+  - type: VariableSupplier
+    persistentItems: false
+    stretchFactor: 1
+    children:
+      - type: TargetLayoutBox
+        label: Outcome Variable
+        children:
+          - type: VariablesListBox
+            name: outcome
+            maxItemCount: 1
+            isTarget: true
+          - type: LevelSelector
+            name: outcomeLevel
+            enable: (outcome)
+      - type: TargetLayoutBox
+        label: Recurrence/Progression Variable
+        children:
+          - type: VariablesListBox
+            name: recurrence
+            maxItemCount: 1
+            isTarget: true
+          - type: LevelSelector
+            name: recurrenceLevel
+            enable: (recurrence)
+      - type: TargetLayoutBox
+        label: Patient ID
+        children:
+          - type: VariablesListBox
+            name: patientID
+            maxItemCount: 1
+            isTarget: true
+      - type: TargetLayoutBox
+        label: Follow-up Time
+        children:
+          - type: VariablesListBox
+            name: followupTime
+            maxItemCount: 1
+            isTarget: true
+      - type: TargetLayoutBox
+        label: Interval Start Variable
+        children:
+          - type: VariablesListBox
+            name: intervalStart
+            maxItemCount: 1
+            isTarget: true
+            enable: (intervalCensoring)
+      - type: TargetLayoutBox
+        label: Interval End Variable
+        children:
+          - type: VariablesListBox
+            name: intervalEnd
+            maxItemCount: 1
+            isTarget: true
+            enable: (intervalCensoring)
+      - type: TargetLayoutBox
+        label: Administrative Censoring Date
+        children:
+          - type: VariablesListBox
+            name: adminDate
+            maxItemCount: 1
+            isTarget: true
+            enable: (adminCensoring)
   - type: CollapseBox
     label: Basic Outcome Settings
     collapsed: false
     children:
-      - type: VariableSupplier
-        persistentItems: false
-        stretchFactor: 1
-        children:
-          - type: TargetLayoutBox
-            label: Outcome Variable
-            children:
-              - type: VariablesListBox
-                name: outcome
-                maxItemCount: 1
-                isTarget: true
-              - type: LevelSelector
-                name: outcomeLevel
-                enable: (outcome)
       - type: LayoutBox
         margin: large
         children:
@@ -48,48 +96,10 @@ children:
                     name: awd
                   - type: LevelSelector
                     name: awod
-
-  - type: CollapseBox
-    label: Recurrence/Progression
-    collapsed: true
-    children:
-      - type: VariableSupplier
-        persistentItems: false
-        stretchFactor: 1
-        children:
-          - type: TargetLayoutBox
-            label: Recurrence/Progression Variable
-            children:
-              - type: VariablesListBox
-                name: recurrence
-                maxItemCount: 1
-                isTarget: true
-              - type: LevelSelector
-                name: recurrenceLevel
-                enable: (recurrence)
-
   - type: CollapseBox
     label: Advanced Options
     collapsed: true
     children:
-      - type: VariableSupplier
-        persistentItems: false
-        stretchFactor: 1
-        children:
-          - type: TargetLayoutBox
-            label: Patient ID
-            children:
-              - type: VariablesListBox
-                name: patientID
-                maxItemCount: 1
-                isTarget: true
-          - type: TargetLayoutBox
-            label: Follow-up Time
-            children:
-              - type: VariablesListBox
-                name: followupTime
-                maxItemCount: 1
-                isTarget: true
       - type: LayoutBox
         margin: large
         children:
@@ -107,7 +117,6 @@ children:
                 name: eventPriority
                 format: number
                 enable: (useHierarchy && patientID && multievent)
-
   - type: CollapseBox
     label: Censoring Options
     collapsed: true
@@ -118,44 +127,9 @@ children:
           - type: CheckBox
             name: intervalCensoring
             label: Interval censoring
-            children:
-              - type: VariableSupplier
-                persistentItems: false
-                stretchFactor: 1
-                children:
-                  - type: TargetLayoutBox
-                    label: Interval Start Variable
-                    children:
-                      - type: VariablesListBox
-                        name: intervalStart
-                        maxItemCount: 1
-                        isTarget: true
-                  - type: TargetLayoutBox
-                    label: Interval End Variable
-                    children:
-                      - type: VariablesListBox
-                        name: intervalEnd
-                        maxItemCount: 1
-                        isTarget: true
-      - type: LayoutBox
-        margin: large
-        children:
           - type: CheckBox
             name: adminCensoring
             label: Administrative censoring
-            children:
-              - type: VariableSupplier
-                persistentItems: false
-                stretchFactor: 1
-                children:
-                  - type: TargetLayoutBox
-                    label: Administrative Censoring Date
-                    children:
-                      - type: VariablesListBox
-                        name: adminDate
-                        maxItemCount: 1
-                        isTarget: true
-
   - type: CollapseBox
     label: Display Options
     collapsed: false

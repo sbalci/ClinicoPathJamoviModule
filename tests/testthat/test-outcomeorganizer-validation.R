@@ -1083,3 +1083,24 @@ test_that("IR-outcomeorganizer-04: .describeEventIndicator() distinguishes 1-KM 
   expect_match(desc, "1 - KM overstates the absolute risk (cumulative incidence) of the event", fixed = TRUE)
   expect_match(desc, "KM overstates the probability of surviving free of both the target event and competing death", fixed = TRUE)
 })
+
+test_that("Release-gate UI and comment hygiene: single top-level VariableSupplier first and no Notice-serialization myth", {
+  skip_if_not_installed("yaml")
+  u_yaml <- yaml::read_yaml(file.path(.val_root, "jamovi/outcomeorganizer.u.yaml"))
+  top_types <- vapply(u_yaml$children, function(x) x$type, character(1))
+  expect_identical(top_types[1], "VariableSupplier")
+  expect_true(all(top_types[-1] == "CollapseBox"))
+
+  count_buried_suppliers <- function(node, in_collapse = FALSE) {
+    if (!is.list(node)) return(0L)
+    is_sup <- identical(node$type, "VariableSupplier") && in_collapse
+    next_collapse <- in_collapse || identical(node$type, "CollapseBox")
+    kids <- node$children %||% list()
+    as.integer(is_sup) + sum(vapply(kids, count_buried_suppliers, integer(1), in_collapse = next_collapse))
+  }
+  expect_identical(sum(vapply(u_yaml$children, count_buried_suppliers, integer(1))), 0L)
+
+  b_lines <- readLines(file.path(.val_root, "R/outcomeorganizer.b.R"), warn = FALSE)
+  comment_lines <- grep("^\\s*#", b_lines, value = TRUE)
+  expect_false(any(grepl("protobuf serialization error", comment_lines, fixed = TRUE)))
+})

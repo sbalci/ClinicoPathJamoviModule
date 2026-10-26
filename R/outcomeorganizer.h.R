@@ -281,8 +281,6 @@ outcomeorganizerResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
                 refs=list(
                     "ClinicoPathJamoviModule",
                     "survival",
-                    "survminer",
-                    "finalfit",
                     "cmprsk",
                     "mstate",
                     "survivaltutorial",

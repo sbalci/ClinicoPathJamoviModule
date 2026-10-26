@@ -33,8 +33,7 @@ outcomeorganizerClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
         # Notice management helpers ----
         # Notices render to dedicated Html outputs (errors / strongWarnings /
-        # warnings / infoMessages) to avoid the protobuf serialization error
-        # caused by jmvcore::Notice objects passed to self$results$insert().
+        # warnings / infoMessages) for multi-line rich HTML formatting.
         .addNotice = function(type, message, name = NULL) {
             # jmvcore::NoticeType constants: ERROR=0, STRONG_WARNING=1, WARNING=2, INFO=3
             type_str <- switch(
