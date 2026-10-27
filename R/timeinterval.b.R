@@ -72,7 +72,7 @@
 #' @importFrom R6 R6Class
 #'
 
-timeintervalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
+timeintervalClass <- if (requireNamespace("jmvcore")) R6::R6Class(
     "timeintervalClass",
     inherit = timeintervalBase,
     private = list(
@@ -349,8 +349,10 @@ timeintervalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # anything, and the reference group must actually establish the order.
             if (sum(ref) < 8 || sum(amb) < 4) return(invisible(NULL))
 
-            a_iv <- iv_chosen[amb]; r_iv <- iv_chosen[ref]
-            a_iv <- a_iv[is.finite(a_iv)]; r_iv <- r_iv[is.finite(r_iv)]
+            a_iv <- iv_chosen[amb]
+            r_iv <- iv_chosen[ref]
+            a_iv <- a_iv[is.finite(a_iv)]
+            r_iv <- r_iv[is.finite(r_iv)]
             if (length(a_iv) < 4 || length(r_iv) < 8) return(invisible(NULL))
 
             p <- jmvcore::tryNaN(
@@ -360,7 +362,8 @@ timeintervalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # Effect size as well as significance: in a large cohort a trivial
             # difference can clear any p threshold, and a trivial difference is not
             # a mis-typed date.
-            m_a <- stats::median(a_iv); m_r <- stats::median(r_iv)
+            m_a <- stats::median(a_iv)
+            m_r <- stats::median(r_iv)
             if (!is.finite(m_a) || !is.finite(m_r) || m_r <= 0) return(invisible(NULL))
             ratio <- m_a / m_r
             if (ratio > 0.67 && ratio < 1.5) return(invisible(NULL))
@@ -398,9 +401,18 @@ timeintervalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 jmvcore::reject(.("No valid dates found for format detection in either column"))
             }
             
-            sample_size <-  min(50, max(length(sample_start), length(sample_end)))
-            sample_start <- utils::head(sample_start, sample_size)
-            sample_end <- utils::head(sample_end, sample_size)
+            # Sample up to 500 non-missing values per column, prioritizing strings
+            # that contain a 13..31 day token so order-disambiguating dates beyond
+            # row 50 are never dropped behind a prefix of day <= 12 dates.
+            take_sample <- function(v, cap = 500L) {
+                if (length(v) <= cap) return(v)
+                has_high_day <- grepl("(^|[^0-9])(1[3-9]|2[0-9]|3[01])([^0-9]|$)",
+                                      as.character(v))
+                idx <- c(which(has_high_day), which(!has_high_day))
+                v[sort(utils::head(idx, cap))]
+            }
+            sample_start <- take_sample(sample_start, 500L)
+            sample_end <- take_sample(sample_end, 500L)
             
             # Test common formats
             formats_to_try <- c("ymd", "dmy", "mdy", "ydm", "myd", "dym", "ymdhms")
@@ -700,7 +712,7 @@ timeintervalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             if (n <= 1) return(list(lower = NA, upper = NA, raw_lower = NA, truncated = FALSE))
             alpha <- 1 - (conf_level / 100)
             se <- sd / sqrt(n)
-            margin <- stats::qt(1 - alpha/2, n - 1) * se
+            margin <- stats::qt(1 - alpha / 2, n - 1) * se
             raw_lower <- mean_val - margin
             truncated <- is.finite(raw_lower) && raw_lower < 0
             list(
@@ -1099,7 +1111,7 @@ timeintervalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # it. Cheap to do by accident in the variable supplier, and silent until
             # now.
             if (identical(self$options$dx_date, self$options$fu_date)) {
-                add_message('strong_warning', .fmt(
+                add_message("strong_warning", .fmt(
                     .("The same variable ({variable}) is selected as both the start and the end date, so every interval is exactly zero and the total person-time is zero. Select the follow-up or event date as the End Date Variable."),
                     variable = self$options$dx_date))
             }
@@ -1132,7 +1144,7 @@ timeintervalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     time_format = self$options$time_format,
                     output_unit = self$options$output_unit,
                     time_basis = self$options$time_basis,
-                    landmark_time = if(self$options$use_landmark) self$options$landmark_time else NULL,
+                    landmark_time = if (self$options$use_landmark) self$options$landmark_time else NULL,
                     timezone_setting = self$options$timezone
                 )
             }, error = function(e) {
@@ -1145,7 +1157,7 @@ timeintervalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 # render_messages() sorts by severity, so the error still shows first.
                 if (identical(self$options$time_format, "auto") &&
                     !is.null(private$.formatDetectionNote))
-                    add_message('warning', private$.formatDetectionNote)
+                    add_message("warning", private$.formatDetectionNote)
                 add_message("error", as.character(e$message))
                 render_messages()
             })
@@ -1159,7 +1171,7 @@ timeintervalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # format instead of relying on a silent dmy/mdy guess.
             if (identical(self$options$time_format, "auto") &&
                 !is.null(private$.formatDetectionNote)) {
-                add_message('warning', private$.formatDetectionNote)
+                add_message("warning", private$.formatDetectionNote)
             }
 
             # Rows that look like they were typed in the other day/month order.
@@ -1169,7 +1181,7 @@ timeintervalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # actionable and "check rows 16, 17, 18" is.
             mox <- private$.mixedOrderNote
             if (!is.null(mox)) {
-                add_message('strong_warning', .fmt(
+                add_message("strong_warning", .fmt(
                     .("Some rows may have been entered with the day and month the other way round from the rest of this column. {count} of {total} rows read as a valid date under both \"{format}\" and \"{swapped}\"; the other {others} can only be read as \"{format}\", which is how the format was chosen. Those two groups should have the same follow-up on average, because the day of the month has nothing to do with how long a patient is followed - but here the ambiguous rows run at a median of {medianamb} days against {medianref} days for the rest (rank-sum p = {p}), which is what a mis-typed day/month order looks like. Check rows {rows} first: the largest of them spans {examplechosen} days as read and {exampleswapped} days with the day and month swapped. Dates typed in two different orders in one column parse without error and stay positive, so nothing else on this page can see them, and the total person-time is wrong by however much those rows are wrong."),
                     count = mox$n, total = mox$total, format = mox$fmt, swapped = mox$swap,
                     others = mox$total - mox$n,
@@ -1186,7 +1198,7 @@ timeintervalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # symptoms (future dates, negative intervals) ever showed, none of
             # which named the cause.
             if (private$.twoDigitYearCount > 0) {
-                add_message('warning', .fmt(
+                add_message("warning", .fmt(
                     .("{count} date value(s) were written with a two-digit year. These are read as 2000-2068 for 00-68 and as 1969-1999 for 69-99, so a date such as 22/09/68 becomes 2068 and a 1950s-1960s date is pushed a century forward. If any interval is a century off, rewrite the column with four-digit years."),
                     count = private$.twoDigitYearCount))
             }
@@ -1197,7 +1209,7 @@ timeintervalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # the setting would then be live.
             if (identical(self$options$timezone, "utc") &&
                 !identical(calculated_times$detected_format, "ymdhms")) {
-                add_message('info', .fmt(
+                add_message("info", .fmt(
                     .("The UTC timezone setting applies only to the \"YYYY-MM-DD HH:MM:SS\" format, the only one carrying a time of day. These dates were read as \"{format}\", so they are calendar days and the timezone has no effect on the intervals."),
                     format = calculated_times$detected_format))
             }
@@ -1354,7 +1366,9 @@ timeintervalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 lm_fu_phrase  <- .("mean post-landmark follow-up")
                 lm_pt_phrase  <- .("The total post-landmark person-time")
             } else {
-                lm_val <- NA; lm_amount <- ""; lm_adj <- ""
+                lm_val <- NA
+                lm_amount <- ""
+                lm_adj <- ""
                 lm_hdr_suffix <- ""
                 lm_pt_label   <- .("Total person-time")
                 lm_mean_label <- .("Mean time")
@@ -1399,13 +1413,13 @@ timeintervalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 if (neg_systematic)
                     neg_msg <- paste(neg_msg,
                         .("At this share the fault is systematic rather than sporadic: the rows that were kept came from the same two columns and the same parsing, so they cannot be assumed correct merely because their interval came out positive - check the date columns and the Date Format setting before using any number on this page."))
-                add_message(if (neg_systematic) 'strong_warning' else 'warning', neg_msg)
+                add_message(if (neg_systematic) "strong_warning" else "warning", neg_msg)
             }
             if (self$options$remove_extreme && !is.null(private$.extremeSkipReason)) {
                 filter_lines <- c(filter_lines, private$.extremeSkipReason)
                 # A filter the user switched on and that cannot act deserves a
                 # banner, not only one line of small print in the summary panel.
-                add_message('warning', private$.extremeSkipReason)
+                add_message("warning", private$.extremeSkipReason)
             } else if (self$options$remove_extreme && filter_info$removed_extreme == 0 &&
                        !is.na(filter_info$extreme_threshold)) {
                 # "0 removed" is only reassuring if the threshold is stated with it.
@@ -1430,7 +1444,7 @@ timeintervalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 # the denominator of every incidence rate computed downstream. The
                 # summary already lists the filter, but a denominator that moved
                 # deserves a message of its own rather than one line of small print.
-                add_message('warning', .fmt(
+                add_message("warning", .fmt(
                     .("Extreme-value removal dropped {count} of the longest interval(s) (above {threshold} {unit}) from the analysis. These rows are excluded from the mean, the median and the total person-time, so the person-time denominator here is smaller than the follow-up actually observed. Long follow-up is not automatically an error: check the removed rows before using this person-time for an incidence rate."),
                     count = filter_info$removed_extreme, threshold = threshold_txt,
                     unit = self$options$output_unit))
@@ -1481,7 +1495,7 @@ timeintervalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     # here would contradict the glossary in one results pane.
                     # Conditional, not assertive, about selection: this analysis has no
                     # event indicator, so it cannot tell early death from recent accrual.
-                    add_message('warning', .fmt(
+                    add_message("warning", .fmt(
                         .("The {landmark} landmark is later than the median observed interval in these data ({median} {unit}), so more than half the cohort could not reach it and {excluded} of {total} observations were excluded. What remains is a subgroup defined by having been followed to the landmark, and the total person-time above is the denominator for that subgroup only: a rate computed from it answers \"among those still under observation at {amount}, how often did events occur\", not the same question for the cohort you enrolled. This analysis has no event indicator, so it cannot tell you whether the excluded participants had short follow-up because they died early or simply because they were enrolled recently - check that before interpreting the selection. Report the landmark, the number excluded and the reason alongside any rate taken from this analysis."),
                         landmark = lm_adj,
                         median = base::formatC(lm_median, format = "f", digits = 1),
@@ -1495,8 +1509,8 @@ timeintervalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 # all -- no exclusion, no re-basing. Silent before; a user who went
                 # to the trouble of enabling landmark analysis should be told it did
                 # not run rather than left to infer it from unchanged numbers.
-                add_message('warning', .(
-                    'Landmark analysis is switched on but the landmark time is 0, so nothing was excluded and no interval was shortened - these results are the same as with landmark analysis off. Set a landmark greater than zero, in the same unit as the results, or untick landmark analysis.'))
+                add_message("warning", .(
+                    "Landmark analysis is switched on but the landmark time is 0, so nothing was excluded and no interval was shortened - these results are the same as with landmark analysis off. Set a landmark greater than zero, in the same unit as the results, or untick landmark analysis."))
             }
             if (lm_on && isTRUE((if (!is.null(landmark_info$below_excluded)) landmark_info$below_excluded else landmark_info$excluded_count) == 0)) {
                 # The landmark excluded no valid intervals yet still subtracted
@@ -1512,7 +1526,7 @@ timeintervalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                              else calculated_times$quality$median_interval
                 if (!is.null(lm_median) && is.finite(lm_median) && lm_median > 0 &&
                     landmark_info$landmark_time < 0.05 * lm_median) {
-                    add_message('warning', .fmt(
+                    add_message("warning", .fmt(
                         .("The {landmark} landmark excluded no participants, because it is only {share}% of the median observed interval in these data ({median} {unit}). It still subtracted {amount} from every interval, so every duration and the total person-time below are that much smaller than the follow-up observed. Check that the landmark is expressed in the same unit as the results ({unit}): entering a value meant as months while the output unit is days is the usual cause."),
                         landmark = lm_adj,
                         share = base::formatC(100 * landmark_info$landmark_time / lm_median,
@@ -1559,10 +1573,14 @@ timeintervalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             }
 
             if (!is.null(time_values) && length(valid_time_values) > 0) {
+                q_25_75 <- unname(stats::quantile(valid_time_values, probs = c(0.25, 0.75), na.rm = TRUE))
                 summary_stats <- list(
                     n = length(valid_time_values),
                     mean = mean(valid_time_values, na.rm = TRUE),
                     median = stats::median(valid_time_values, na.rm = TRUE),
+                    q1 = q_25_75[1L],
+                    q3 = q_25_75[2L],
+                    iqr = q_25_75[2L] - q_25_75[1L],
                     sd = stats::sd(valid_time_values, na.rm = TRUE),
                     min = min(valid_time_values, na.rm = TRUE),
                     max = max(valid_time_values, na.rm = TRUE),
@@ -1696,7 +1714,7 @@ timeintervalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
                                     {lm_mean_label}: {round(summary_stats$mean, 2)}{ci_text}<br>
 
-                                    Median time: {round(summary_stats$median, 2)}<br>
+                                    Median time: {round(summary_stats$median, 2)} (IQR: {round(summary_stats$q1, 2)} to {round(summary_stats$q3, 2)})<br>
 
                                     Standard deviation: {round(summary_stats$sd, 2)}<br>
 
@@ -1735,13 +1753,13 @@ timeintervalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 # through with no warning at all, beside a summary reporting
                 # "Standard deviation: NA".
                 if (summary_stats$n == 1) {
-                    add_message('strong_warning', .("Only one interval could be calculated. No spread can be estimated from a single observation, so the standard deviation and the confidence interval are reported as NA, and the mean, median and range are all that one value. This is not a basis for any statistical statement."))
+                    add_message("strong_warning", .("Only one interval could be calculated. No spread can be estimated from a single observation, so the standard deviation and the confidence interval are reported as NA, and the mean, median and range are all that one value. This is not a basis for any statistical statement."))
                 } else if (summary_stats$n < 10) {
-                    add_message('strong_warning', .fmt(
+                    add_message("strong_warning", .fmt(
                         .("Critically small sample (n={n}). Statistical summaries are unreliable with fewer than 10 observations. Results should be considered exploratory only. Minimum n=20 recommended for basic descriptive analysis."),
                         n = summary_stats$n))
                 } else if (summary_stats$n < 20) {
-                    add_message('warning', .fmt(
+                    add_message("warning", .fmt(
                         .("Small sample size (n={n}). Confidence intervals may be very wide and unreliable with fewer than 20 observations. Consider collecting more data or interpreting results cautiously."),
                         n = summary_stats$n))
                 }
@@ -1766,7 +1784,7 @@ timeintervalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                                calculated_times$quality$max_interval else summary_stats$max
                 max_years <- raw_max * years_per_unit
                 if (!is.na(max_years) && is.finite(max_years) && max_years > 50) {
-                    add_message('warning', .fmt(
+                    add_message("warning", .fmt(
                         .("Longest interval in the data is {years} years ({value} {unit}, before any landmark or filter). Intervals beyond 50 years exceed the follow-up of essentially every clinical cohort, and usually mean the dates were parsed with the wrong format rather than observed. Check the Date Format setting and the raw date columns before reporting this person-time. If the intervals are genuinely this long (a lifetime cohort, or an age computed from date of birth), this message can be ignored."),
                         years = base::formatC(max_years, format = "f", digits = 1),
                         value = base::formatC(raw_max, format = "f", digits = 2),
@@ -1779,14 +1797,14 @@ timeintervalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 # nothing but a green "analysis completed" banner.
                 zshare <- calculated_times$quality$zero_share
                 if (!is.null(zshare) && !is.na(zshare) && zshare >= 0.2) {
-                    add_message('warning', .fmt(
+                    add_message("warning", .fmt(
                         .("{pct}% of intervals are zero-length (start and end date on the same day). These contribute nothing to total person-time, so the denominator here is smaller than the number of participants suggests. Check whether unfilled follow-up dates were defaulted to the start date."),
                         pct = base::formatC(100 * zshare, format = "f", digits = 0)))
                 }
 
                 # Add completion info message
                 if (lm_on) {
-                    add_message('info', .fmt(
+                    add_message("info", .fmt(
                         .("Analysis completed using {n} observations that reached the {landmark} landmark. All reported times are measured FROM the landmark, not from the start date ({amount} was subtracted from every interval): mean post-landmark follow-up {mean} {unit}, total post-landmark person-time {total} person-{unit}."),
                         n = summary_stats$n, landmark = lm_adj, amount = lm_amount,
                         mean = base::formatC(summary_stats$mean, format = "f", digits = 1),
@@ -1794,7 +1812,7 @@ timeintervalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         total = base::formatC(summary_stats$total_person_time,
                                               format = "f", digits = 1)))
                 } else {
-                    add_message('info', .fmt(
+                    add_message("info", .fmt(
                         .("Analysis completed using {n} observations with mean follow-up {mean} {unit} (total person-time: {total} person-{unit})."),
                         n = summary_stats$n,
                         mean = base::formatC(summary_stats$mean, format = "f", digits = 1),
@@ -1824,7 +1842,7 @@ timeintervalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         "<li>Lower the landmark time, or switch it off, and re-read the interval range in the summary</li>",
                         "<li>Check that the landmark is expressed in the same unit as the results ({lm_unit})</li>",
                         "</ul>")
-                    add_message('error', .fmt(
+                    add_message("error", .fmt(
                         .("Landmark analysis excluded every participant: none of the {n} observations reached the {amount} landmark. Lower the landmark time or switch landmark analysis off."),
                         n = landmark_info$original_n, amount = lm_amount))
                 } else if (filters_emptied) {
@@ -1835,7 +1853,7 @@ timeintervalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         "<li>Switch off the quality filters under Data Quality &amp; Statistics and inspect the raw intervals first</li>",
                         "<li>If every interval was negative, the start and end date columns are probably swapped</li>",
                         "</ul>")
-                    add_message('error', .fmt(
+                    add_message("error", .fmt(
                         .("All observations were removed by the data quality filters ({n} rows). Switch the filters off to inspect the raw intervals; if every interval was negative, the start and end date columns are probably swapped."),
                         n = removed_n))
                 } else {
@@ -1848,7 +1866,7 @@ timeintervalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         "<li>End dates occur after start dates</li>",
                         "<li>Data contains non-missing values</li>",
                         "</ul>")
-                    add_message('error', .("No valid time intervals could be calculated. Check that the date format setting matches the data and that both date columns contain readable dates."))
+                    add_message("error", .("No valid time intervals could be calculated. Check that the date format setting matches the data and that both date columns contain readable dates."))
                 }
 
                 error_summary <- paste0(
@@ -2008,7 +2026,7 @@ timeintervalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 if (quality$missing_values > 0) {
                     pct <- round(100 * quality$missing_values / quality$total_observations, 1)
                     if (pct > 10) {
-                        add_message('warning', .fmt(
+                        add_message("warning", .fmt(
                             .("{count} observations ({pct}%) have missing time intervals. Investigate missing date values as this may affect study conclusions."),
                             count = quality$missing_values,
                             pct = base::formatC(pct, format = "f", digits = 1)))
@@ -2017,7 +2035,7 @@ timeintervalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
                 # Future dates STRONG_WARNING
                 if (quality$future_dates > 0) {
-                    add_message('strong_warning', .fmt(
+                    add_message("strong_warning", .fmt(
                         .("{count} date values are in the future. Review date columns for data entry errors or incorrect date formats."),
                         count = quality$future_dates))
                 }

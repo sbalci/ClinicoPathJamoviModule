@@ -331,3 +331,30 @@ test_that("VAL-timeinterval-08: R6 private$.formatDetectionNote resets across re
   expect_match(ana$results$messages$content, "five-digit numbers", fixed = TRUE)
   expect_false(grepl("Auto-detection is ambiguous", ana$results$messages$content, fixed = TRUE))
 })
+
+test_that("LIM-timeinterval-01: summary reports interquartile range (IQR: Q1 to Q3) alongside median", {
+  local_load_timeinterval()
+  df <- data.frame(
+    s = rep("2020-01-01", 5),
+    e = c("2020-01-01", "2020-01-08", "2020-01-15", "2020-01-22", "2020-01-29"),
+    stringsAsFactors = FALSE
+  )
+  res <- timeinterval(data = df, dx_date = "s", fu_date = "e",
+                      time_format = "ymd", output_unit = "days")
+  expect_match(res$summary$content, "Median time: 14 (IQR: 7 to 21)", fixed = TRUE)
+})
+
+test_that("LIM-timeinterval-04: auto date-format detection finds disambiguating day > 12 beyond row 50 and row 500", {
+  local_load_timeinterval()
+  # Rows 1..550 have day <= 12 ("01/05/2020"); row 551 has "05/25/2020" (unambiguous mdy)
+  df_mdy <- data.frame(
+    s = c(rep("01/05/2020", 550), "01/15/2020"),
+    e = c(rep("02/06/2020", 550), "05/25/2020"),
+    stringsAsFactors = FALSE
+  )
+  res <- timeinterval(data = df_mdy, dx_date = "s", fu_date = "e",
+                      time_format = "auto", output_unit = "days")
+  expect_match(res$summary$content, "Date format used: mdy (auto-detected)", fixed = TRUE)
+  expect_false(grepl("Auto-detection is ambiguous", res$messages$content, fixed = TRUE))
+  expect_equal(tail(ti_vals(res), 1L), 131)
+})

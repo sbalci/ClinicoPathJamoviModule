@@ -10,7 +10,25 @@
 # "ClinicoPathJamoviModule" makes testthat skip the whole file silently.
 
 library(testthat)
-library(ClinicoPath)
+if (!requireNamespace("ClinicoPath", quietly = TRUE)) {
+  if (!exists("timeinterval", mode = "function")) {
+    suppressPackageStartupMessages({
+      library(jmvcore)
+      library(R6)
+      library(lubridate)
+      library(glue)
+      library(htmltools)
+    })
+    if (!exists(".", mode = "function")) . <- function(x) x
+    for (f in c("utils.R", "timeinterval.h.R", "timeinterval.b.R")) {
+      p <- file.path("..", "..", "R", f)
+      if (!file.exists(p)) p <- file.path("R", f)
+      if (file.exists(p)) source(p)
+    }
+  }
+} else {
+  library(ClinicoPath)
+}
 
 # ClinicoPath does a blanket import(jmvcore) and jmvcore exports its own format(),
 # which does NOT accept a strptime template -- so every date built here uses

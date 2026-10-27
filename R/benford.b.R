@@ -38,6 +38,24 @@ benfordClass <- if (requireNamespace('jmvcore')) R6::R6Class(
     inherit = benfordBase,
     private = list(
 
+        # Saved options can carry unexpected types or undeclared names. Keep
+        # regenerated R syntax literal even before option validation has run.
+        .sourcifyOption = function(option) {
+            if (!option$name %in% names(formals(benford)))
+                return("")
+            if (identical(option$name, "data"))
+                return(super$.sourcifyOption(option))
+            value <- option$value
+            if (is.list(value) || length(value) > 1L)
+                return("")
+            if (is.character(value)) {
+                if (identical(value, option$default))
+                    return("")
+                return(paste0(option$name, " = ", encodeString(value, quote = '"')))
+            }
+            super$.sourcifyOption(option)
+        },
+
         # Notice collection helpers. A single Preformatted (plain-text) output
         # item: avoids BOTH the jmvcore::Notice serialization error from
         # self$results$insert(999, Notice) AND any HTML in notices (project
