@@ -358,3 +358,90 @@ test_that("LIM-timeinterval-04: auto date-format detection finds disambiguating 
   expect_false(grepl("Auto-detection is ambiguous", res$messages$content, fixed = TRUE))
   expect_equal(tail(ti_vals(res), 1L), 131)
 })
+
+test_that("SEC-timeinterval-01: backend option backstops reject out-of-enum and out-of-range options under run(noThrow = TRUE)", {
+  local_load_timeinterval()
+  df_zero <- data.frame(
+    dx = c("2020-01-01", "2020-02-01", "2020-03-01"),
+    fu = c("2020-01-01", "2020-02-01", "2020-03-01"),
+    stringsAsFactors = FALSE
+  )
+
+  opts <- timeintervalOptions$new(dx_date = "dx", fu_date = "fu", include_quality_metrics = TRUE)
+  an <- timeintervalClass$new(options = opts, data = df_zero)
+  o_mult <- an$options$option("extreme_multiplier")
+  o_mult$.__enclos_env__$private$.value <- "<img src=x onerror=alert(1)>"
+  an$init(noThrow = TRUE)
+  an$run(noThrow = TRUE)
+  expect_false(grepl("<img", an$results$caveatsPanel$content, fixed = TRUE))
+  expect_match(an$results$messages$content, "Extreme threshold multiplier must be between 1.5 and 5", fixed = TRUE)
+
+  opts_u <- timeintervalOptions$new(dx_date = "dx", fu_date = "fu")
+  an_u <- timeintervalClass$new(options = opts_u, data = df_zero)
+  o_unit <- an_u$options$option("output_unit")
+  o_unit$.__enclos_env__$private$.value <- "hours"
+  an_u$init(noThrow = TRUE)
+  an_u$run(noThrow = TRUE)
+  expect_match(an_u$results$messages$content, "Unsupported output unit", fixed = TRUE)
+  expect_false(grepl("person-hours", an_u$results$summary$content, fixed = TRUE))
+})
+
+test_that("SEC-timeinterval-02: .sourcifyOption drops an injected Option named 'data' while keeping incData data = data", {
+  local_load_timeinterval()
+  df <- data.frame(dx = "2020-01-01", fu = "2020-06-01", stringsAsFactors = FALSE)
+  opts <- timeintervalOptions$new(dx_date = "dx", fu_date = "fu")
+  an <- timeintervalClass$new(options = opts, data = df)
+  an$options$.addOption(jmvcore:::Option$new("data", 'df", landmark_time = {stop("PWNED")}, output_unit = "days'))
+  src <- an$asSource()
+  mc <- match.call(timeinterval, parse(text = src)[[1]])
+  expect_identical(names(as.list(mc))[-1], c("data", "dx_date", "fu_date"))
+})
+
+test_that("FIX-timeinterval-01: non-finite landmark_time (Inf, NA, NaN) is cleanly rejected instead of crashing", {
+  local_load_timeinterval()
+  df <- data.frame(
+    dx = c("2020-01-01", "2020-02-01", "2020-03-01"),
+    fu = c("2020-06-01", "2020-08-01", "2020-12-01"),
+    stringsAsFactors = FALSE
+  )
+
+  res_inf <- timeinterval(
+    data = df, dx_date = "dx", fu_date = "fu",
+    use_landmark = TRUE, landmark_time = Inf
+  )
+  expect_match(res_inf$messages$content, "Landmark time must be a finite non-negative number", fixed = TRUE)
+
+  opts <- timeintervalOptions$new(dx_date = "dx", fu_date = "fu", use_landmark = TRUE)
+  an <- timeintervalClass$new(options = opts, data = df)
+  o_lm <- an$options$option("landmark_time")
+  o_lm$.__enclos_env__$private$.value <- NA_real_
+  an$init(noThrow = TRUE)
+  expect_no_error(an$run(noThrow = TRUE))
+  expect_match(an$results$messages$content, "Landmark time must be a finite non-negative number", fixed = TRUE)
+})
+
+test_that("FIX-timeinterval-02: landmark excluding 100% of observations does not also emit contradictory surviving-subgroup warning", {
+  local_load_timeinterval()
+  df <- data.frame(
+    dx = c("2020-01-01", "2020-02-01", "2020-03-01"),
+    fu = c("2020-06-01", "2020-08-01", "2020-12-01"),
+    stringsAsFactors = FALSE
+  )
+  res <- timeinterval(
+    data = df, dx_date = "dx", fu_date = "fu",
+    use_landmark = TRUE, landmark_time = 24, output_unit = "months"
+  )
+  expect_match(res$messages$content, "Landmark analysis excluded every participant", fixed = TRUE)
+  expect_false(grepl("What remains is a subgroup defined by having been followed to the landmark", res$messages$content, fixed = TRUE))
+})
+
+test_that("FIX-timeinterval-03: .checkDateSerial inspects up to 500 non-missing rows matching .detectDateFormat", {
+  local_load_timeinterval()
+  df <- data.frame(
+    dx = c(rep("2020-01-01", 15), rep("43831", 285)),
+    fu = c(rep("2020-06-01", 15), rep("44000", 285)),
+    stringsAsFactors = FALSE
+  )
+  res <- timeinterval(data = df, dx_date = "dx", fu_date = "fu")
+  expect_match(res$messages$content, "holds five-digit numbers such as 43831", fixed = TRUE)
+})

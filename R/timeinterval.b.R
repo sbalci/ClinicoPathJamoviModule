@@ -80,7 +80,9 @@ timeintervalClass <- if (requireNamespace("jmvcore")) R6::R6Class(
         # regenerated syntax literal; never turn their text into R expressions.
         .sourcifyOption = function(option) {
             if (!option$name %in% names(formals(timeinterval))) return("")
-            if (identical(option$name, "data")) return(super$.sourcifyOption(option))
+            if (identical(option$name, "data")) {
+                return(if (inherits(option, "Option")) "" else super$.sourcifyOption(option))
+            }
             value <- option$value
             if (is.list(value)) return("")
             if (is.character(value) && (length(value) != 1L || anyNA(value))) return("")
@@ -186,7 +188,7 @@ timeintervalClass <- if (requireNamespace("jmvcore")) R6::R6Class(
         # and YMMDD is a lubridate leniency nobody exports, while serials are what
         # every spreadsheet produces.
         .checkDateSerial = function(date_vector, column_name) {
-            v <- utils::head(date_vector[!is.na(date_vector)], 50)  # as .detectDateFormat()
+            v <- utils::head(date_vector[!is.na(date_vector)], 500L)  # as .detectDateFormat()
             if (length(v) == 0)
                 return(invisible(NULL))
 
@@ -392,15 +394,15 @@ timeintervalClass <- if (requireNamespace("jmvcore")) R6::R6Class(
             if (!is.null(specified_format) && specified_format != "auto") {
                 return(specified_format)
             }
-            
+
             # Remove missing values for format detection
             sample_start <- start_vector[!is.na(start_vector)]
             sample_end <- end_vector[!is.na(end_vector)]
-            
+
             if (length(sample_start) == 0 && length(sample_end) == 0) {
                 jmvcore::reject(.("No valid dates found for format detection in either column"))
             }
-            
+
             # Sample up to 500 non-missing values per column, prioritizing strings
             # that contain a 13..31 day token so order-disambiguating dates beyond
             # row 50 are never dropped behind a prefix of day <= 12 dates.
@@ -413,10 +415,10 @@ timeintervalClass <- if (requireNamespace("jmvcore")) R6::R6Class(
             }
             sample_start <- take_sample(sample_start, 500L)
             sample_end <- take_sample(sample_end, 500L)
-            
+
             # Test common formats
             formats_to_try <- c("ymd", "dmy", "mdy", "ydm", "myd", "dym", "ymdhms")
-            
+
             best_format <- "ymd"
             best_score <- -1
             format_scores <- stats::setNames(rep(-1, length(formats_to_try)), formats_to_try)
@@ -431,14 +433,14 @@ timeintervalClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                     "dmy" = lubridate::dmy,
                     "dym" = lubridate::dym
                 )
-                
+
                 tryCatch({
                     parsed_start <- if (length(sample_start) > 0) parser(sample_start, quiet = TRUE) else NULL
                     parsed_end <- if (length(sample_end) > 0) parser(sample_end, quiet = TRUE) else NULL
-                    
+
                     success_start <- if (length(parsed_start)) sum(!is.na(parsed_start)) / length(parsed_start) else 0
                     success_end <- if (length(parsed_end)) sum(!is.na(parsed_end)) / length(parsed_end) else 0
-                    
+
                     # Require a format that works for both columns; take the weaker score
                     success_rate <- min(success_start, success_end)
                     format_scores[fmt] <- success_rate
@@ -508,10 +510,10 @@ timeintervalClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                     start = start_name, end = end_name
                 ))
             }
-            
+
             return(best_format)
         },
-        
+
         .parseDate = function(date_vector, format, tz = "") {
             # Enhanced date parsing with better error handling
             # @param date_vector Character or numeric vector to parse
@@ -544,17 +546,17 @@ timeintervalClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                     format = format, message = conditionMessage(e)))
             })
         },
-        
+
         .validateParsedDates = function(parsed_dates, original_vector, column_name, format_label) {
             total_non_missing <- sum(!is.na(original_vector))
             successful <- sum(!is.na(parsed_dates))
-            
+
             if (total_non_missing == 0) {
                 jmvcore::reject(.fmt(
                     .("Column '{column}' contains only missing values; cannot calculate time intervals."),
                     column = column_name))
             }
-            
+
             if (successful == 0) {
                 sample_values <- paste(utils::head(unique(original_vector), 3), collapse = ", ")
                 jmvcore::reject(.fmt(
@@ -562,7 +564,7 @@ timeintervalClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                     column = column_name, format = format_label, examples = sample_values
                 ))
             }
-            
+
             success_rate <- successful / total_non_missing
             if (success_rate < 0.8) {
                 jmvcore::reject(.fmt(
@@ -571,27 +573,27 @@ timeintervalClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                 ))
             }
         },
-        
+
         .calculateTimeIntervals = function(start_dates, end_dates, output_unit) {
             # Enhanced interval calculation with validation
-            
+
             # Check for valid date objects
             if (!inherits(start_dates, "Date") && !inherits(start_dates, "POSIXct")) {
                 jmvcore::reject(.("Start dates are not valid date objects"))
             }
-            
+
             if (!inherits(end_dates, "Date") && !inherits(end_dates, "POSIXct")) {
                 jmvcore::reject(.("End dates are not valid date objects"))
             }
-            
+
             # Calculate intervals
             intervals <- lubridate::interval(start_dates, end_dates)
-            
+
             # Convert to specified time unit
             # For statistical accuracy in survival analysis, we use fixed duration lengths
             # for months (30.4375 days) and years (365.25 days) rather than calendar units.
             # This ensures that 'time' represents a consistent quantity of risk exposure.
-            
+
             if (output_unit %in% c("months", "years")) {
                 # Convert to duration first (seconds) then to unit
                 # This uses standard length: Month = 30.4375 days, Year = 365.25 days
@@ -600,7 +602,7 @@ timeintervalClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                 # Days and weeks are standard
                 calculated_time <- lubridate::time_length(intervals, output_unit)
             }
-            
+
             return(calculated_time)
         },
 
@@ -645,11 +647,10 @@ timeintervalClass <- if (requireNamespace("jmvcore")) R6::R6Class(
 
             jmvcore::reject(.("Unsupported output unit for calendar-based calculation"))
         },
-        
+
         .applyLandmarkAnalysis = function(calculated_time, data, landmark_time, output_unit) {
             # Enhanced landmark analysis with comprehensive reporting
-            
-            if (is.null(landmark_time) || landmark_time == 0) {
+            if (is.null(landmark_time)) {
                 return(list(
                     time = calculated_time,
                     data = data,
@@ -657,11 +658,21 @@ timeintervalClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                     landmark_time = 0
                 ))
             }
-            
-            if (!is.numeric(landmark_time) || landmark_time < 0) {
-                jmvcore::reject(.("Landmark time must be a non-negative number"))
+
+            if (!is.numeric(landmark_time) || length(landmark_time) != 1L ||
+                !is.finite(landmark_time) || landmark_time < 0) {
+                jmvcore::reject(.("Landmark time must be a finite non-negative number"))
             }
-            
+
+            if (landmark_time == 0) {
+                return(list(
+                    time = calculated_time,
+                    data = data,
+                    excluded_count = 0,
+                    landmark_time = 0
+                ))
+            }
+
             # Identify cases before landmark time
             # Handle NAs by treating them as excluded from valid set (FALSE)
             valid_cases <- calculated_time >= landmark_time
@@ -701,7 +712,7 @@ timeintervalClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                 final_n = length(final_time)
             ))
         },
-        
+
         .calculateCI = function(mean_val, sd, n, conf_level) {
             # Normal-theory (t) interval for the ARITHMETIC mean interval. A mean
             # duration cannot be negative, so the interval is intersected with the
@@ -769,23 +780,23 @@ timeintervalClass <- if (requireNamespace("jmvcore")) R6::R6Class(
 
             # Generate quality warnings
             warnings <- character()
-            
+
             if (non_missing == 0) {
                 warnings <- c(warnings, .("No valid time intervals after parsing start/end dates."))
             }
-            
+
             if (quality_metrics$negative_intervals > 0) {
                 warnings <- c(warnings, .fmt(.("{n} negative time intervals detected (end date before start date)"), n = quality_metrics$negative_intervals))
             }
-            
+
             if (quality_metrics$missing_values > 0) {
                 warnings <- c(warnings, .fmt(.("{n} missing time intervals due to missing dates"), n = quality_metrics$missing_values))
             }
-            
+
             if (quality_metrics$future_dates > 0) {
                 warnings <- c(warnings, paste(quality_metrics$future_dates, "dates in the future detected"))
             }
-            
+
             if (quality_metrics$extreme_values > 0) {
                 warnings <- c(warnings, paste(quality_metrics$extreme_values, "potentially extreme time intervals detected"))
             }
@@ -806,12 +817,12 @@ timeintervalClass <- if (requireNamespace("jmvcore")) R6::R6Class(
             }
 
             quality_metrics$warnings <- warnings
-            quality_metrics$overall_quality <- ifelse(length(warnings) == 0, "Good", 
+            quality_metrics$overall_quality <- ifelse(length(warnings) == 0, "Good",
                                                     ifelse(length(warnings) <= 2, "Fair", "Poor"))
-            
+
             return(quality_metrics)
         },
-        
+
         # Main enhanced calculation function
         .calculate_survival_time = function(data,
                                             dx_date = NULL,
@@ -987,7 +998,7 @@ timeintervalClass <- if (requireNamespace("jmvcore")) R6::R6Class(
             quality_assessment <- private$.assessDataQuality(
                 calculated_time_raw, start_dates_raw, end_dates_raw,
                 extreme_multiplier = self$options$extreme_multiplier)
-            
+
             # Apply landmark analysis if specified
             landmark_result <- private$.applyLandmarkAnalysis(calculated_time, data, landmark_time, output_unit)
 
@@ -1119,6 +1130,47 @@ timeintervalClass <- if (requireNamespace("jmvcore")) R6::R6Class(
             # (The timezone notice is raised AFTER parsing, once the format actually
             # used is known -- under "auto" the detector may well pick ymdhms, and
             # claiming the setting is inert would then be false.)
+
+            # Backend option backstops (defense-in-depth for run(noThrow = TRUE))
+            if (!is.character(self$options$output_unit) ||
+                length(self$options$output_unit) != 1L ||
+                !self$options$output_unit %in% c("days", "weeks", "months", "years")) {
+                add_message("error", .("Unsupported output unit."))
+                render_messages()
+                return()
+            }
+            if (!is.character(self$options$time_basis) ||
+                length(self$options$time_basis) != 1L ||
+                !self$options$time_basis %in% c("standardized", "calendar")) {
+                add_message("error", .("Unsupported time basis."))
+                render_messages()
+                return()
+            }
+            if (!is.character(self$options$timezone) ||
+                length(self$options$timezone) != 1L ||
+                !self$options$timezone %in% c("system", "utc")) {
+                add_message("error", .("Unsupported timezone setting."))
+                render_messages()
+                return()
+            }
+            if (!is.numeric(self$options$extreme_multiplier) ||
+                length(self$options$extreme_multiplier) != 1L ||
+                is.na(self$options$extreme_multiplier) ||
+                self$options$extreme_multiplier < 1.5 ||
+                self$options$extreme_multiplier > 5) {
+                add_message("error", .("Extreme threshold multiplier must be between 1.5 and 5."))
+                render_messages()
+                return()
+            }
+            if (!is.numeric(self$options$confidence_level) ||
+                length(self$options$confidence_level) != 1L ||
+                is.na(self$options$confidence_level) ||
+                self$options$confidence_level < 90 ||
+                self$options$confidence_level > 99) {
+                add_message("error", .("Confidence level must be between 90 and 99."))
+                render_messages()
+                return()
+            }
 
             # Validate input data structure
             validation <- private$.validateInputData(
@@ -1274,7 +1326,7 @@ timeintervalClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                 participants in a study. Unlike simple participant counts, person-time captures both the number
                 of subjects and their observation duration. This is essential for calculating accurate incidence
                 rates and properly accounting for varying follow-up periods.</p>
-                
+
                 <p><b>Key Concepts:</b></p>
                 <ul>
                     <li><b>Total Person-Time:</b> Sum of all individual follow-up periods</li>
@@ -1282,7 +1334,7 @@ timeintervalClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                     <li><b>Time Units:</b> Typically expressed as person-{self$options$output_unit}</li>
                     <li><b>Censoring:</b> Person-time counts observed follow-up whether or not the event occurred. This analysis has no event indicator, so it cannot separate an event date from a censoring date - supply the event status to a survival analysis for that</li>
                 </ul>
-                
+
                 <p><b>Applications:</b></p>
                 <ul>
                     <li>Calculate event rates in epidemiological studies</li>
@@ -1334,7 +1386,7 @@ timeintervalClass <- if (requireNamespace("jmvcore")) R6::R6Class(
             } else {
                 time_values <- calculated_times  # fallback if it's already a vector
             }
-            
+
             filter_info <- if (is.list(calculated_times) && "filter" %in% names(calculated_times)) {
                 calculated_times$filter
             } else {
@@ -1487,7 +1539,8 @@ timeintervalClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                 lm_median <- if (!is.null(landmark_info$input_median))
                                  landmark_info$input_median
                              else calculated_times$quality$median_interval
-                if (lm_below > 0 && !is.null(lm_median) && is.finite(lm_median) && lm_median > 0 &&
+                if (isTRUE(landmark_info$final_n > 0) && lm_below > 0 &&
+                    !is.null(lm_median) && is.finite(lm_median) && lm_median > 0 &&
                     landmark_info$landmark_time > lm_median) {
                     # NOTE: deliberately does NOT invoke guarantee-time (immortal-time)
                     # bias. Landmarking is the REMEDY for that bias, not a cause of it,
@@ -1536,7 +1589,7 @@ timeintervalClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                 }
             }
             filter_text <- if (length(filter_lines) > 0) paste(filter_lines, collapse = "; ") else "None"
-            
+
             # Generate summary statistics
             valid_time_values <- if (!is.null(time_values)) time_values[!is.na(time_values)] else numeric(0)
 
