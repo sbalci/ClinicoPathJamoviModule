@@ -74,5 +74,6 @@ refs:
     - ClinicoPathJamoviModule
     - lubridate
     - glue
-    - tools
+    - htmltools
+    - Dafni2011
 ...

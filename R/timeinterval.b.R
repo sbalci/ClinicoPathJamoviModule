@@ -12,7 +12,7 @@
 #' @param output_unit Output time unit: "days", "weeks", "months", or "years"
 #' @param time_basis "standardized" (30.4375-day months, 365.25-day years) or "calendar"
 #'   (actual month lengths). Standardized is the default and suits person-time denominators.
-#' @param use_landmark Enable landmark analysis (conditional survival from time point)
+#' @param use_landmark Enable landmark analysis (follow-up conditional on reaching the landmark time point)
 #' @param landmark_time Landmark time point in output units
 #' @param remove_negative Remove negative intervals (end before start)
 #' @param remove_extreme Remove extreme outliers (above extreme_multiplier x the 99th
@@ -35,7 +35,7 @@
 #' \itemize{
 #'   \item Multiple date format parsing with automatic detection
 #'   \item Flexible output units (days, weeks, months, years)
-#'   \item Landmark analysis for conditional survival
+#'   \item Landmark analysis for follow-up conditional on reaching a specified time point
 #'   \item Person-time calculations for epidemiological studies
 #'   \item Data quality assessment and validation
 #'   \item Statistical summaries with confidence intervals
@@ -608,19 +608,24 @@ timeintervalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             if (output_unit == "days") return(days)
             if (output_unit == "weeks") return(days / 7)
 
-            # Calendar months/years: count whole months, then proportion of remaining month
+            # Calendar months/years: count whole months, then proportion of the
+            # span to the next monthly anniversary. Dividing by the actual day span
+            # between consecutive rollback anniversaries (rather than days_in_month
+            # of the rollback start date) keeps calendar months continuous and
+            # strictly monotonic across 28/29/30/31-day month-end boundaries.
             whole_months <- intervals %/% lubridate::period(month = 1)
-            # Remaining interval after removing whole months.
-            # Use add_with_rollback so end-of-month start dates
-            # (e.g. Jan 31 + 1 month) roll back to the last valid day
-            # (Feb 28/29) instead of becoming NA and being dropped.
             remainder_start <- lubridate::add_with_rollback(start_dates, lubridate::period(month = whole_months))
             remainder_int <- lubridate::interval(remainder_start, end_dates)
             remainder_days <- lubridate::time_length(remainder_int, "days")
 
-            # Avoid division by zero when remainder_start is NA
-            days_in_month_start <- ifelse(is.na(remainder_start), NA_real_, lubridate::days_in_month(remainder_start))
-            fraction_months <- remainder_days / days_in_month_start
+            step_dir <- ifelse(is.na(days) | days >= 0, 1L, -1L)
+            next_anniv <- lubridate::add_with_rollback(
+                start_dates,
+                lubridate::period(month = whole_months + step_dir)
+            )
+            span_days <- abs(lubridate::time_length(lubridate::interval(remainder_start, next_anniv), "days"))
+            span_days <- ifelse(is.na(span_days) | span_days == 0, NA_real_, span_days)
+            fraction_months <- remainder_days / span_days
             total_months <- whole_months + fraction_months
 
             if (output_unit == "months") return(total_months)
@@ -657,6 +662,11 @@ timeintervalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             below_excluded <- sum(!is.na(calculated_time) & calculated_time < landmark_time)
 
             # Filter and adjust times
+            input_median <- if (any(!is.na(calculated_time))) {
+                stats::median(calculated_time, na.rm = TRUE)
+            } else {
+                NA_real_
+            }
             adjusted_time <- calculated_time - landmark_time
             # drop = FALSE: `self$data` holds only the columns this analysis asked
             # for, so it has ONE column whenever the same variable is chosen as
@@ -673,6 +683,7 @@ timeintervalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 excluded_count = excluded_count,
                 na_excluded = na_excluded,
                 below_excluded = below_excluded,
+                input_median = input_median,
                 landmark_time = landmark_time,
                 original_n = length(calculated_time),
                 final_n = length(final_time)
@@ -724,7 +735,8 @@ timeintervalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 extreme_values = if (is.finite(extreme_threshold)) sum(calculated_time > extreme_threshold, na.rm = TRUE) else 0,
                 missing_start_dates = sum(is.na(start_dates)),
                 missing_end_dates = sum(is.na(end_dates)),
-                future_dates = sum(start_dates > Sys.Date(), na.rm = TRUE) + sum(end_dates > Sys.Date(), na.rm = TRUE),
+                future_dates = sum(lubridate::as_date(start_dates) > Sys.Date(), na.rm = TRUE) +
+                               sum(lubridate::as_date(end_dates) > Sys.Date(), na.rm = TRUE),
                 # Longest interval BEFORE any landmark or filter. The implausible-
                 # duration backstop in .run() must test this, not the post-landmark
                 # max: subtracting a landmark shortens every interval, which would
@@ -902,9 +914,13 @@ timeintervalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 filter_applied <- TRUE
             }
 
+            n_calculable <- sum(!is.na(calculated_time_raw))
+            n_extreme_pool <- n_calculable
+
             if (self$options$remove_extreme) {
+                extreme_candidates <- calculated_time_raw[valid_idx]
                 suppressWarnings({
-                    q99 <- stats::quantile(calculated_time_raw, 0.99, na.rm = TRUE, names = FALSE)
+                    q99 <- stats::quantile(extreme_candidates, 0.99, na.rm = TRUE, names = FALSE)
                 })
                 # The rule is "more than `multiplier` times the 99th percentile",
                 # which only orders correctly for a POSITIVE q99. At q99 == 0 the
@@ -914,10 +930,10 @@ timeintervalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 # negative q99 multiplying moves the threshold the wrong way and
                 # flags the entire column. Neither is a meaningful outlier rule, so
                 # skip the filter and say why rather than dropping real rows.
-                n_intervals <- sum(!is.na(calculated_time_raw))
+                n_extreme_pool <- sum(!is.na(extreme_candidates))
                 if (!is.na(q99) && is.finite(q99) && q99 > 0) {
                     extreme_threshold <- q99 * self$options$extreme_multiplier
-                    removed_extreme <- sum(calculated_time_raw > extreme_threshold, na.rm = TRUE)
+                    removed_extreme <- sum(extreme_candidates > extreme_threshold, na.rm = TRUE)
                     valid_idx <- valid_idx & (calculated_time_raw <= extreme_threshold | is.na(calculated_time_raw))
                     filter_applied <- TRUE
                     # With fewer than 101 intervals, type-7 quantile() interpolates
@@ -928,11 +944,11 @@ timeintervalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     # (n <= 51 at the default 2x). The rule itself is deliberately
                     # unchanged; what changed is that it now SAYS so instead of
                     # reporting "0 removed" as if the data had been screened.
-                    if (n_intervals < 101 &&
-                        self$options$extreme_multiplier * (101 - n_intervals) >= 100) {
+                    if (removed_extreme == 0 && n_extreme_pool < 101 &&
+                        self$options$extreme_multiplier * (101 - n_extreme_pool) >= 100) {
                         private$.extremeSkipReason <- .fmt(
                             .("Extreme-value filtering cannot act on these data: with {n} intervals (fewer than 101) the 99th percentile is interpolated between the two longest intervals, so at a multiplier of {mult} no interval can exceed the '{mult} x 99th percentile' threshold of {threshold} {unit}, and none was removed. Review the longest intervals directly."),
-                            n = n_intervals, mult = self$options$extreme_multiplier,
+                            n = n_extreme_pool, mult = self$options$extreme_multiplier,
                             threshold = signif(extreme_threshold, 4), unit = output_unit)
                     }
                 } else if (!is.na(q99) && is.finite(q99)) {
@@ -973,7 +989,8 @@ timeintervalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     removed_negative = removed_negative,
                     removed_extreme = removed_extreme,
                     extreme_threshold = extreme_threshold,
-                    n_intervals = sum(!is.na(calculated_time_raw))
+                    n_intervals = n_extreme_pool,
+                    n_calculable = n_calculable
                 )
             ))
         },
@@ -981,6 +998,7 @@ timeintervalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         # Run analysis ----
         .run = function() {
             # Per-run state reset so a note from a previous run cannot persist.
+            private$.formatDetectionNote <- NULL
             private$.extremeSkipReason <- NULL
             private$.mixedOrderNote <- NULL
             private$.ambiguousExposure <- NULL
@@ -1029,7 +1047,7 @@ timeintervalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     "strong_warning" = .("Strong Warning"),
                     "warning" = .("Warning"),
                     "info" = .("Info"),
-                    tools::toTitleCase(gsub("_", " ", type)))
+                    .("Notice"))
                 msg_env$messages <- c(msg_env$messages, list(list(
                     rank = rank,
                     html = sprintf(
@@ -1356,9 +1374,12 @@ timeintervalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 # with it ON the same row cannot be silent. Escalates at 10%, where
                 # the diagnosis changes from sporadic entry error to a systematic
                 # fault that also puts the RETAINED rows in doubt.
-                # nrow(self$data) is the right denominator: removed_negative was
-                # counted on that same raw vector, before any other filter.
-                neg_total <- nrow(self$data)
+                # filter_info$n_calculable (rows with both dates parsed) is the
+                # right denominator: removed_negative was counted on that same
+                # calculable vector, so uncalculable NA rows cannot dilute the
+                # >=10% systematic-fault threshold.
+                neg_total <- if (!is.null(filter_info$n_calculable) && filter_info$n_calculable > 0)
+                                 filter_info$n_calculable else nrow(self$data)
                 neg_pct   <- 100 * filter_info$removed_negative / neg_total
                 neg_systematic <- isTRUE(neg_pct >= 10)
                 # Naming the format actually used turns "check the Date Format
@@ -1449,8 +1470,10 @@ timeintervalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 # the two coincide only without censoring, and this analysis has
                 # no event indicator at all, so the reverse-Kaplan-Meier
                 # estimator used elsewhere in the module cannot apply here.
-                lm_median <- calculated_times$quality$median_interval
-                if (!is.null(lm_median) && is.finite(lm_median) && lm_median > 0 &&
+                lm_median <- if (!is.null(landmark_info$input_median))
+                                 landmark_info$input_median
+                             else calculated_times$quality$median_interval
+                if (lm_below > 0 && !is.null(lm_median) && is.finite(lm_median) && lm_median > 0 &&
                     landmark_info$landmark_time > lm_median) {
                     # NOTE: deliberately does NOT invoke guarantee-time (immortal-time)
                     # bias. Landmarking is the REMEDY for that bias, not a cause of it,
@@ -1474,15 +1497,19 @@ timeintervalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 # not run rather than left to infer it from unchanged numbers.
                 add_message('warning', .(
                     'Landmark analysis is switched on but the landmark time is 0, so nothing was excluded and no interval was shortened - these results are the same as with landmark analysis off. Set a landmark greater than zero, in the same unit as the results, or untick landmark analysis.'))
-            } else if (lm_on && isTRUE(landmark_info$excluded_count == 0)) {
-                # The landmark excluded nobody yet still subtracted itself from every
-                # interval. Legitimate in a cohort with uniformly long follow-up, but
-                # it is also the exact signature of a unit mix-up: landmark_time is
-                # expressed in output_unit and defaults to 6, so a user who means
-                # "6 months" while the results are in days silently shortens every
-                # interval by 6 days and changes nothing else. That produces a wrong
-                # number that looks entirely reasonable, which is worse than an error.
-                lm_median <- calculated_times$quality$median_interval
+            }
+            if (lm_on && isTRUE((if (!is.null(landmark_info$below_excluded)) landmark_info$below_excluded else landmark_info$excluded_count) == 0)) {
+                # The landmark excluded no valid intervals yet still subtracted
+                # itself from every interval. Legitimate in a cohort with
+                # uniformly long follow-up, but it is also the exact signature
+                # of a unit mix-up: landmark_time is expressed in output_unit
+                # and defaults to 6, so a user who means "6 months" while the
+                # results are in days silently shortens every interval by 6 days
+                # and changes nothing else. That produces a wrong number that
+                # looks entirely reasonable, which is worse than an error.
+                lm_median <- if (!is.null(landmark_info$input_median))
+                                 landmark_info$input_median
+                             else calculated_times$quality$median_interval
                 if (!is.null(lm_median) && is.finite(lm_median) && lm_median > 0 &&
                     landmark_info$landmark_time < 0.05 * lm_median) {
                     add_message('warning', .fmt(
@@ -1615,9 +1642,10 @@ timeintervalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 # not carry an unqualified instruction to use it. paste0, not glue:
                 # this is interpolated into a glue block and must stay brace-free.
                 pt_zero <- isTRUE(summary_stats$total_person_time <= 0)
+                neg_denom <- if (!is.null(filter_info$n_calculable) && filter_info$n_calculable > 0)
+                                 filter_info$n_calculable else max(nrow(self$data), 1)
                 pt_suspect <- isTRUE(self$options$remove_negative) &&
-                              isTRUE(filter_info$removed_negative /
-                                     max(nrow(self$data), 1) >= 0.10)
+                              isTRUE(filter_info$removed_negative / neg_denom >= 0.10)
                 denominator_clause <- if (pt_zero) {
                     "is zero, so no incidence rate can be computed from it. Every interval is zero-length or missing; check the date columns before going further."
                 } else if (pt_suspect) {
@@ -1841,9 +1869,11 @@ timeintervalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # already surfaced as banners: rows that look mis-typed in the other
             # day/month order, and a systematic (>=10%) negative-interval fault that
             # was filtered away rather than corrected at source.
+            neg_denom <- if (!is.null(filter_info$n_calculable) && filter_info$n_calculable > 0)
+                             filter_info$n_calculable else max(nrow(self$data), 1)
             manuscript_unsafe <- !is.null(private$.mixedOrderNote) ||
                 (isTRUE(self$options$remove_negative) &&
-                 isTRUE(filter_info$removed_negative / max(nrow(self$data), 1) >= 0.10))
+                 isTRUE(filter_info$removed_negative / neg_denom >= 0.10))
 
             if (self$options$show_summary && manuscript_unsafe) {
                 self$results$nlSummary$setContent(paste0(
@@ -1912,7 +1942,7 @@ timeintervalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     <div style='background-color: rgba(33, 149, 188, 0.1); padding: 20px; border-left: 5px solid #0066cc; margin: 15px 0; color: inherit;'>
                         <h3 style='margin-top: 0; color: inherit;'> Clinical Summary</h3>
                         <p style='font-size: 1.1em; line-height: 1.6;'>
-                        <strong>Time interval analysis</strong> was performed on <strong>{n_obs} {if (n_obs == 1) 'participant' else 'participants'}</strong>{trimws(landmark_text)}.{lm_clause}
+                        <strong>Time interval analysis</strong> was performed on <strong>{n_obs} {if (n_obs == 1) 'participant' else 'participants'}</strong>{landmark_text}.{lm_clause}
                         The {lm_fu_phrase} was <strong>{mean_time} {unit}</strong> (median: {median_time} {unit}),
                         contributing a total of <strong>{total_pt} {if (lm_on) 'post-landmark ' else ''}person-{unit}</strong> of observation.{quality_text}
                         </p>

@@ -203,7 +203,6 @@ test_that("timeinterval handles boundary and degenerate inputs without silent fa
 })
 
 test_that("VAL-timeinterval-01: calendar-aware month calculation is monotonic across month-end rollback", {
-  skip("VAL-timeinterval-01 open defect: .calculateCalendarIntervals divides remainder_days by days_in_month(remainder_start) instead of days to next anniversary, causing 2021-01-31 -> 2021-03-30 (2.071m) to exceed 2021-01-31 -> 2021-03-31 (2.000m). Remove this skip when fixed.")
   local_load_timeinterval()
   df <- data.frame(
     s = rep("2021-01-31", 4),
@@ -218,7 +217,6 @@ test_that("VAL-timeinterval-01: calendar-aware month calculation is monotonic ac
 })
 
 test_that("VAL-timeinterval-02: remove_extreme operates on post-negative-filter intervals without contradictory warnings", {
-  skip("VAL-timeinterval-02 open defect: remove_extreme computes q99 and n_intervals on pre-filter raw vector including negative values, dropping the sole positive interval while simultaneously warning that 'none was removed' and 'dropped 1'. Remove this skip when fixed.")
   local_load_timeinterval()
   df <- data.frame(
     s = c(rep("2020-11-01", 50), "2020-01-01"),
@@ -234,7 +232,6 @@ test_that("VAL-timeinterval-02: remove_extreme operates on post-negative-filter 
 })
 
 test_that("VAL-timeinterval-03: landmark plausibility and unit-mixup warnings use post-filter non-NA intervals", {
-  skip("VAL-timeinterval-03 open defect: landmark unit-mixup check is silenced by a single NA row (excluded_count == 0 includes na_excluded), and late-landmark check uses pre-filter median_interval instead of post-filter median. Remove this skip when fixed.")
   local_load_timeinterval()
 
   # (1) Unit-mixup warning must fire even when 1 NA row is present
@@ -261,7 +258,6 @@ test_that("VAL-timeinterval-03: landmark plausibility and unit-mixup warnings us
 })
 
 test_that("VAL-timeinterval-04: ymdhms timestamps on today's date are not falsely flagged as future dates", {
-  skip("VAL-timeinterval-04 open defect: .assessDataQuality compares POSIXct > Sys.Date() (which coerces Sys.Date() to 00:00:00 UTC on today's date), flagging today's timestamps as future dates. Remove this skip when fixed.")
   local_load_timeinterval()
   today_str <- format(Sys.Date(), "%Y-%m-%d")
   df <- data.frame(
@@ -277,7 +273,6 @@ test_that("VAL-timeinterval-04: ymdhms timestamps on today's date are not falsel
 })
 
 test_that("VAL-timeinterval-05: negative-interval share threshold (10%) is invariant to appending all-NA rows", {
-  skip("VAL-timeinterval-05 open defect: neg_total uses nrow(self$data) instead of non-missing interval count, so appending 1 all-NA row dilutes 1/10 (10%) to 1/11 (9.1%) and releases withheld nlSummary. Remove this skip when fixed.")
   local_load_timeinterval()
   df <- data.frame(
     s = c("2020-12-01", rep("2020-01-01", 9), NA_character_),
@@ -291,7 +286,6 @@ test_that("VAL-timeinterval-05: negative-interval share threshold (10%) is invar
 })
 
 test_that("VAL-timeinterval-06: nlSummary preserves word spacing before 'after excluding' under landmark analysis", {
-  skip("VAL-timeinterval-06 open defect: trimws(landmark_text) at R/timeinterval.b.R:1915 strips the leading space, producing 'participantsafter excluding'. Remove this skip when fixed.")
   local_load_timeinterval()
   df <- data.frame(
     s = rep("2020-01-01", 5),
@@ -306,10 +300,34 @@ test_that("VAL-timeinterval-06: nlSummary preserves word spacing before 'after e
 })
 
 test_that("VAL-timeinterval-07: timeinterval.r.yaml cites valid CRAN URLs and landmark methodology reference", {
-  skip("VAL-timeinterval-07 open defect: timeinterval.r.yaml cites base package 'tools' with unresolvable CRAN URL (https://CRAN.R-project.org/package=tools), omits htmltools, and cites 0 methodological references (e.g., Dafni2011). Remove this skip when fixed.")
   r_yaml <- yaml::read_yaml(testthat::test_path("../../jamovi/timeinterval.r.yaml"))
   refs <- unlist(r_yaml$refs, use.names = FALSE)
   expect_false("tools" %in% refs)
   expect_true("htmltools" %in% refs)
   expect_true("Dafni2011" %in% refs)
+})
+
+test_that("VAL-timeinterval-08: R6 private$.formatDetectionNote resets across reruns on the same instance", {
+  local_load_timeinterval()
+  df_lifecycle <- data.frame(
+    amb_s = rep("01/05/20", 10),
+    amb_e = rep("02/06/20", 10),
+    ser_s = as.character(44001:44010),
+    ser_e = as.character(44101:44110),
+    stringsAsFactors = FALSE
+  )
+  ana <- timeintervalClass$new(
+    options = timeintervalOptions$new(dx_date = "amb_s", fu_date = "amb_e", time_format = "auto"),
+    data = df_lifecycle
+  )
+  ana$run()
+  expect_match(ana$results$messages$content, "Auto-detection is ambiguous", fixed = TRUE)
+
+  ana$.__enclos_env__$private$.options <- timeintervalOptions$new(
+    dx_date = "ser_s", fu_date = "ser_e", time_format = "auto"
+  )
+  ana$.__enclos_env__$private$.data <- df_lifecycle
+  ana$.__enclos_env__$private$.run()
+  expect_match(ana$results$messages$content, "five-digit numbers", fixed = TRUE)
+  expect_false(grepl("Auto-detection is ambiguous", ana$results$messages$content, fixed = TRUE))
 })

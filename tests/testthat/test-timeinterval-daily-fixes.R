@@ -1,7 +1,42 @@
 library(testthat)
 
+.ti_ensure_loaded <- function() {
+  if (!exists("timeintervalClass", mode = "environment") &&
+      !exists("timeintervalClass")) {
+    for (prefix in c("../../", "../", "")) {
+      if (file.exists(paste0(prefix, "R/timeinterval.b.R"))) {
+        suppressPackageStartupMessages({
+          library(jmvcore)
+          library(R6)
+          library(lubridate)
+          library(glue)
+          library(htmltools)
+        })
+        assign(".", function(x) x, envir = .GlobalEnv)
+        source(paste0(prefix, "R/utils.R"), local = FALSE)
+        source(paste0(prefix, "R/timeinterval.h.R"), local = FALSE)
+        source(paste0(prefix, "R/timeinterval.b.R"), local = FALSE)
+        break
+      }
+    }
+  }
+}
+
+.ti_fn <- function() {
+  .ti_ensure_loaded()
+  if (requireNamespace("ClinicoPath", quietly = TRUE)) ClinicoPath::timeinterval else timeinterval
+}
+.ti_opts <- function() {
+  .ti_ensure_loaded()
+  if (requireNamespace("ClinicoPath", quietly = TRUE)) ClinicoPath:::timeintervalOptions else timeintervalOptions
+}
+.ti_cls <- function() {
+  .ti_ensure_loaded()
+  if (requireNamespace("ClinicoPath", quietly = TRUE)) ClinicoPath:::timeintervalClass else timeintervalClass
+}
+
 ti_daily_call <- function(d, ...) {
-  do.call(ClinicoPath::timeinterval, c(list(data = d, dx_date = 's', fu_date = 'e',
+  do.call(.ti_fn(), c(list(data = d, dx_date = 's', fu_date = 'e',
     time_format = 'dmy', output_unit = 'days'), list(...)))
 }
 
@@ -38,13 +73,16 @@ test_that('TI-D02 landmark recovery advice distinguishes summaries and retained 
 
 test_that('TI-D03 regenerated R syntax preserves strings and rejects undeclared arguments', {
   d <- data.frame(s = '2020-01-01', e = '2020-02-01')
-  o <- ClinicoPath:::timeintervalOptions$new(dx_date = 's', fu_date = 'e')
-  a <- ClinicoPath:::timeintervalClass$new(options = o, data = d)
+  o <- .ti_opts()$new(dx_date = 's', fu_date = 'e')
+  a <- .ti_cls()$new(options = o, data = d)
   a$init()
   normal <- parse(text = a$asSource())[[1]]
   expect_identical(normal$data, quote(data))
   # Replaying benign generated syntax must still use the dataset object.
-  env <- new.env(); env$data <- d
+  env <- new.env(parent = globalenv()); env$data <- d
+  if (!requireNamespace("ClinicoPath", quietly = TRUE)) {
+    normal[[1]] <- quote(timeinterval)
+  }
   replay <- eval(normal, envir = env)
   expect_s3_class(replay, 'timeintervalResults')
   payload <- '95", output_unit = {stop("SYNTAX_CANARY"); "days"}, timezone = "utc'
@@ -53,10 +91,10 @@ test_that('TI-D03 regenerated R syntax preserves strings and rejects undeclared 
   expect_identical(expr$confidence_level, payload)
   expect_false('output_unit' %in% names(as.list(expr)))
   # Inspection and argument binding only. Never evaluate the hostile expression.
-  expect_silent(match.call(ClinicoPath::timeinterval, expr))
+  expect_silent(match.call(.ti_fn(), expr))
   op$value <- 95
   source_option <- a$.__enclos_env__$private$.sourcifyOption
-  opt_names <- setdiff(names(formals(ClinicoPath::timeinterval)), 'data')
+  opt_names <- setdiff(names(formals(.ti_fn())), 'data')
   for (nm in opt_names) {
     for (value in c(payload, 'trailing\\', 'line\nbreak')) {
       op <- a$options$option(nm)
