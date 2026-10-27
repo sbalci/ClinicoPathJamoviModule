@@ -132,7 +132,8 @@ oddsratioResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "logistf",
                     "epiR",
                     "rms",
-                    "survivaltutorial",
+                    "MASS",
+                    "pROC",
                     "graphics",
                     "knitr"))
             self$add(jmvcore::Html$new(
@@ -299,7 +300,9 @@ oddsratioBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   outcome level is required; until it is specified the analysis asks for it
 #'   and computes nothing. It is never taken from the order of the levels.
 #' @param diagnosticPredictor Specify the predictor to drive likelihood
-#'   ratios; must be binary. Defaults to the first explanatory variable.
+#'   ratios; must be binary. Defaults to the first explanatory variable when
+#'   predictorLevel is supplied in R; in the jamovi GUI, populate this box to
+#'   enable the Predictor Positive Level selector.
 #' @param predictorLevel Which level of the diagnostic predictor is the
 #'   positive test result. The diagnostic metrics (sensitivity, specificity,
 #'   likelihood ratios) need it; it is never taken from the level names or their

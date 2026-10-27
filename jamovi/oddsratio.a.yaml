@@ -90,10 +90,11 @@ options:
       description:
           main: >
               Choose which binary predictor to use for the separate, unadjusted sensitivity,
-              specificity, and likelihood-ratio calculations. If left empty, the first
-              explanatory variable is used when it is binary.
+              specificity, and likelihood-ratio calculations. In the jamovi interface, select
+              this variable here so the 'Predictor Positive Level' selector below can list its
+              levels; in R, if left empty, the first explanatory variable is used when it is binary.
           R: >
-              Specify the predictor to drive likelihood ratios; must be binary. Defaults to the first explanatory variable.
+              Specify the predictor to drive likelihood ratios; must be binary. Defaults to the first explanatory variable when predictorLevel is supplied in R; in the jamovi GUI, populate this box to enable the Predictor Positive Level selector.
 
     - name: predictorLevel
       title: Predictor Positive Level

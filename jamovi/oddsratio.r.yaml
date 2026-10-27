@@ -147,7 +147,8 @@ refs:
     - logistf
     - epiR
     - rms
-    - survivaltutorial
+    - MASS
+    - pROC
     - graphics
     - knitr
 ...
