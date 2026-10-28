@@ -1,6 +1,6 @@
 # LASSO Cox: encoding and reproducibility
 
-These changes apply to analysis version 0.0.6, on the `SurvivalT` development route.
+These changes apply to analysis version 0.0.6, under the `Survival` menu group (`menuSubgroup: Penalized Cox Regression`).
 
 ## Input requirements
 

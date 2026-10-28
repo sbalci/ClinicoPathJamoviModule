@@ -393,6 +393,16 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 status[outcome_num == censor_level_num] <- 0
             }
 
+            # Sanitize factor predictors with explicit NA levels (e.g., from addNA())
+            # so complete.cases() and contrast construction treat NA levels as missing.
+            for (var_name in names(predictors)) {
+                x <- predictors[[var_name]]
+                if (is.factor(x) && (anyNA(levels(x)) || any(is.na(as.character(x)) & !is.na(x)))) {
+                    keep_lev <- levels(x)[!is.na(levels(x))]
+                    predictors[[var_name]] <- factor(as.character(x), levels = keep_lev, ordered = is.ordered(x))
+                }
+            }
+
             # Remove constant explanatory variables instead of failing hard
             constant_vars <- sapply(predictors, function(x) {
                 length(unique(x[!is.na(x)])) <= 1
@@ -466,18 +476,27 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             contrasts_list <- list()
             encoding <- NULL
             removed_design_columns <- character()
+            cc_constant_factors <- character()
             # Only model.matrix() is guarded: a tryCatch around this whole block re-wrapped
             # the jmvcore::reject() messages below as "Error creating design matrix: ...".
                 for (var_name in factor_predictors) {
                     x <- predictors_cc[[var_name]]
                     lev <- if (is.factor(x)) levels(droplevels(x)) else sort(unique(x))
                     if (length(lev) < 2) {
-                        jmvcore::reject(.fmt(.("Factor variable '{var}' has insufficient variation in complete cases."),
-                            var = var_name))
+                        cc_constant_factors <- c(cc_constant_factors, var_name)
+                        next
                     }
                     factor_levels[[var_name]] <- lev
                     predictors_cc[[var_name]] <- factor(as.character(x), levels = lev)
                     contrasts_list[[var_name]] <- stats::contr.treatment(lev, base = 1)
+                }
+                if (length(cc_constant_factors) > 0) {
+                    predictors_cc <- predictors_cc[, setdiff(names(predictors_cc), cc_constant_factors), drop = FALSE]
+                    factor_predictors <- setdiff(factor_predictors, cc_constant_factors)
+                    ordered_predictors <- setdiff(ordered_predictors, cc_constant_factors)
+                    if (ncol(predictors_cc) == 0) {
+                        jmvcore::reject(.("No valid explanatory variables remain after removing constant predictors."))
+                    }
                 }
 
                 design <- tryCatch(
@@ -509,10 +528,10 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                     jmvcore::reject(.("Predictor variance cannot be represented numerically. Rescale extreme numeric values before fitting."))
                 }
                 valid_cols <- column_variance > 0
-                removed_design_columns <- colnames(X)[!valid_cols]
-                if (any(!valid_cols)) warning(.fmt(
+                removed_design_columns <- c(cc_constant_factors, colnames(X)[!valid_cols])
+                if (length(removed_design_columns) > 0) warning(.fmt(
                     .("Removed design columns constant in complete cases: {vars}."),
-                    vars = paste(colnames(X)[!valid_cols], collapse = ", ")))
+                    vars = paste(removed_design_columns, collapse = ", ")))
                 X <- X[, valid_cols, drop = FALSE]
                 encoding <- encoding[valid_cols, , drop = FALSE]
                 if (ncol(X) < 2) {
@@ -628,7 +647,12 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             }
 
             med <- stats::median(risk_scores, na.rm = TRUE)
-            groups <- ifelse(risk_scores <= med, .("Low Risk"), .("High Risk"))
+            low_idx <- if (any(risk_scores > med, na.rm = TRUE)) {
+                risk_scores <= med
+            } else {
+                risk_scores < med
+            }
+            groups <- ifelse(low_idx, .("Low Risk"), .("High Risk"))
             groups <- factor(groups, levels = c(.("Low Risk"), .("High Risk")))
             if (length(unique(groups)) < 2) {
                 return(NULL)
@@ -904,12 +928,15 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 paste0("  columns <- ", literal(results$data$variable_names)),
                 "  stopifnot(all(c(variables, time_name, outcome_name) %in% names(data)))",
                 "  predictors <- data[, variables, drop = FALSE]",
-                "  time <- as.numeric(data[[time_name]])",
+                "  predictors[] <- lapply(predictors, function(x) if (is.factor(x) && anyNA(levels(x))) factor(as.character(x), levels = levels(x)[!is.na(levels(x))], ordered = is.ordered(x)) else x)",
+                "  time_col <- data[[time_name]]",
+                "  time <- if (!is.null(attr(time_col, 'values'))) attr(time_col, 'values')[as.integer(time_col)] else if (is.factor(time_col)) as.numeric(as.character(time_col)) else as.numeric(time_col)",
                 "  outcome <- as.character(data[[outcome_name]])",
                 "  stopifnot(all(is.na(outcome) | outcome %in% c(event_level, censor_level)))",
                 "  status <- ifelse(is.na(outcome), NA_integer_, as.integer(outcome == event_level))",
                 "  complete <- complete.cases(time, status, predictors)",
                 "  predictors <- predictors[complete, , drop = FALSE]",
+                "  predictors <- predictors[, vapply(predictors, function(x) length(unique(x)) > 1L, logical(1)), drop = FALSE]",
                 "  time <- time[complete]",
                 "  status <- status[complete]",
                 "  stopifnot(all(is.finite(time)), all(time > 0))",
@@ -922,7 +949,10 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 "  }",
                 "  X <- stats::model.matrix(~ ., data = predictors,",
                 "    contrasts.arg = if (length(contrasts_list)) contrasts_list else NULL)[, -1, drop = FALSE]",
-                "  colnames(X) <- make.unique(gsub('`', '', colnames(X), fixed = TRUE), sep = '_')",
+                "  nm <- gsub('(?<!\\\\\\\\)`', '', colnames(X), perl = TRUE)",
+                "  nm <- gsub('\\\\`', '`', nm, fixed = TRUE)",
+                "  if (anyDuplicated(nm)) nm <- make.unique(nm, sep = '_')",
+                "  colnames(X) <- nm",
                 "  stopifnot(all(columns %in% colnames(X)))",
                 "  X <- X[, columns, drop = FALSE]",
                 "  stopifnot(all(is.finite(X)))",
@@ -1002,7 +1032,7 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                     variable = var_name,
                     coefficient = coef_val,
                     hazardRatio = hr_val,
-                    importance = round(importance, 4)
+                    importance = importance
                 ))
             }
 
@@ -1520,7 +1550,7 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                     value = sprintf("p=%d, n=%d (ratio=%.2f)", p, n, p / n),
                     detail = .("High-dimensional setting where an unpenalized full Cox model is unlikely to be stable. Penalization is appropriate, but rigorous internal validation remains necessary.")
                 )
-            } else if (p <= 5 && epv >= 30) {
+            } else if (p <= 5 && epv >= 20) {
                 checks$regularization <- list(
                     color = "green", label = .("Regularization Need"),
                     value = sprintf("p=%d, EPV=%.0f", p, epv),
@@ -1581,7 +1611,7 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                         color = "yellow", label = .("Pairwise Correlations"),
                         value = .("Not computed"),
                         detail = .("Pairwise correlation diagnostics are limited to 500 encoded columns to bound memory and computation. The fitted model still uses every retained column."))
-                } else if (ncol(data$X) >= 2) {
+                } else if (ncol(data$X) >= 2 && length(unique(col_origin)) >= 2) {
                     cor_matrix <- cor(data$X, use = "pairwise.complete.obs")
                     diag(cor_matrix) <- 0
                     # Within-factor dummy correlations describe the coding constraint,
@@ -1590,18 +1620,20 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                     cor_matrix[!is.na(origin_equal) & origin_equal] <- 0
                     max_cor <- max(abs(cor_matrix), na.rm = TRUE)
 
-                    # Find top correlated pairs
+                    # Find top correlated pairs (between distinct predictors with |r| > 0.5)
                     top_pairs <- character(0)
                     if (max_cor > 0.5) {
-                        idx <- which(upper.tri(cor_matrix), arr.ind = TRUE)
-                        pair_abs <- abs(cor_matrix[idx])
-                        ranked <- order(pair_abs, decreasing = TRUE)
-                        for (k in utils::head(ranked[is.finite(pair_abs[ranked])], 3L)) {
-                            top_pairs <- c(top_pairs,
-                                sprintf("%s & %s (r=%.2f)",
-                                        col_names[idx[k, 1]],
-                                        col_names[idx[k, 2]],
-                                        cor_matrix[idx[k, 1], idx[k, 2]]))
+                        idx <- which(upper.tri(cor_matrix) & (is.na(origin_equal) | !origin_equal) & abs(cor_matrix) > 0.5, arr.ind = TRUE)
+                        if (nrow(idx) > 0) {
+                            pair_abs <- abs(cor_matrix[idx])
+                            ranked <- order(pair_abs, decreasing = TRUE)
+                            for (k in utils::head(ranked[is.finite(pair_abs[ranked])], 3L)) {
+                                top_pairs <- c(top_pairs,
+                                    sprintf("%s & %s (r=%.2f)",
+                                            col_names[idx[k, 1]],
+                                            col_names[idx[k, 2]],
+                                            cor_matrix[idx[k, 1], idx[k, 2]]))
+                            }
                         }
                     }
                     pair_text <- if (length(top_pairs) > 0) {

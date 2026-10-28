@@ -1,10 +1,7 @@
 # Testing Lasso-Cox Regression Function
 
-> **Not yet released.** The `lassocox` analysis is on a development menu route, so it does
-> not appear in the jamovi menus of ClinicoPath or of any of its submodules. It is
-> documented here ahead of a future release, and its options, defaults and output may
-> still change. The R function is exported, so the examples below run from an R
-> console; what is not yet available is the jamovi analysis itself.
+> **Menu location:** `Survival` -> `Penalized Cox Regression` (`lassocox`).
+> Note that `lassocox_lung_cancer`, `lassocox_small_cohort`, and `lassocox_genomic` are bundled input-validation stress fixtures (containing rounded zero follow-up times and/or fewer than 3 censored observations to test input rejection); to test model fitting on their predictors, replace the endpoint in memory as shown in `tests/testthat/test-lassocox-integration.R`.
 
 
 All test datasets are in `data-raw/` (CSV) or `data/` (RDA). Synthetic data can be generated via `data-raw/create_lassocox_test_data.R`. Real data: `inst/extdata/histopathology.rds`. Additional datasets: `lassocox_genomic` (n=80, 50 gene features), `lassocox_multicollinear` (n=180, 12 correlated predictors).

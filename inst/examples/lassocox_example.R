@@ -47,7 +47,7 @@ result_breast <- lassocox(
 
 data(lassocox_lung_cancer, package = "ClinicoPath")
 
-result_lung <- lassocox(
+result_lung <- try(lassocox(
   data = lassocox_lung_cancer,
   elapsedtime = "follow_up_months",
   outcome = "progression",
@@ -61,7 +61,7 @@ result_lung <- lassocox(
   lambda = "lambda.min",
   nfolds = 10,
   standardize = TRUE
-)
+), silent = TRUE)
 
 # Expected result: a message asking the analyst to check the time origin and
 # measurement resolution. Correct the source data using subject-matter knowledge
@@ -110,7 +110,7 @@ result_cvd <- lassocox(
 
 data(lassocox_small_cohort, package = "ClinicoPath")
 
-result_small <- lassocox(
+result_small <- try(lassocox(
   data = lassocox_small_cohort,
   elapsedtime = "time_months",
   outcome = "event_occurred",
@@ -123,7 +123,7 @@ result_small <- lassocox(
   suitabilityCheck = TRUE,
   showExplanations = TRUE,
   showMethodologyNotes = TRUE
-)
+), silent = TRUE)
 
 # Expected result: a strictly-positive-time validation message. After a
 # defensible correction to the source data, a small development sample still

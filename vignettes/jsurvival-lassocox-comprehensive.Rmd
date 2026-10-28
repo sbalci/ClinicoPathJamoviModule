@@ -22,11 +22,10 @@ knitr::opts_chunk$set(
 devtools::load_all(".")
 ```
 
-> **Not yet released.** The `lassocox` analysis is on a development menu route, so it does
-> not appear in the jamovi menus of ClinicoPath or of any of its submodules. It is
-> documented here ahead of a future release, and its options, defaults and output may
-> still change. The R function is exported, so the examples below run from an R
-> console; what is not yet available is the jamovi analysis itself.
+> **Scope note:** The `lassocox` analysis is available under the `Survival` menu
+> group (`Penalized Cox Regression`) for exploratory survival-model development.
+> It is not a validated clinical prediction tool; internal resampling of the full
+> modeling pipeline and external validation remain required before clinical use.
 
 
 > **Note:** The examples use the exported R wrapper. Both `outcomeLevel` and
@@ -108,9 +107,9 @@ use the **Penalized Cox Regression** module.
 | Synthetic "collinear" | 100 | 45 | 4 (2 correlated) | Multicollinearity detection |
 | Synthetic "categorical" | 100 | 40 | 3 factors | All categorical predictors |
 | `histopathology` | 250 | ~100 | 8 mixed | Real clinical pathology data |
-| `lassocox_genomic` | 80 | - | 50 gene features | High-dimensional genomic scenario |
-| `lassocox_multicollinear` | 180 | - | 12 correlated | Multicollinearity stress test |
-| `lassocox_breast_cancer` | 250 | - | 20 clinical | Breast cancer clinicopathological |
+| `lassocox_genomic` | 80 | 78 (2 censored; stress fixture) | 50 gene features | High-dimensional genomic stress fixture (requires >= 3 censored rows or simulated endpoint to fit) |
+| `lassocox_multicollinear` | 180 | 125 | 12 correlated | Multicollinearity stress test |
+| `lassocox_breast_cancer` | 250 | 53 | 20 clinical | Breast cancer clinicopathological |
 
 ---
 

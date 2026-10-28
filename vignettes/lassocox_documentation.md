@@ -7,5 +7,4 @@ R code, audit repairs, and validation limitations for analysis version 0.0.6.
 This page remains as a compatibility link. Its duplicate implementation description
 was retired because it described obsolete preprocessing and output behavior.
 
-`lassocox` remains on the `SurvivalT` development route and is not a released
-clinical prediction tool. The exported R interface is documented in `?lassocox`.
+`lassocox` is placed under the `Survival` menu group (`menuSubgroup: Penalized Cox Regression`) for exploratory survival-model development and is not a validated clinical prediction tool. The exported R interface is documented in `?lassocox`.
