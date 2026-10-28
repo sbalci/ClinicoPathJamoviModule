@@ -21,17 +21,21 @@
 #' complete cases for the selected outcome and explanatory variables only.
 #'
 #' @section International Usage:
-#' For international users, the function includes an outcomeLevel parameter to
-#' explicitly specify which outcome level represents the positive case. This is
-#' important for correct interpretation of likelihood ratios and diagnostic metrics.
+#' For international users, the function includes \code{outcomeLevel} and
+#' \code{outcomeNegativeLevel} parameters to explicitly specify which outcome
+#' levels represent the positive (event) and negative (reference/non-event)
+#' cases. Any other outcome levels are excluded with a warning. This is essential
+#' for unambiguous interpretation of odds ratios, likelihood ratios, and
+#' diagnostic metrics.
 #'
 #' @section Nomogram Features:
 #' When showNomogram is enabled, the function generates:
 #' \itemize{
 #'   \item Prediction nomogram based on the fitted logistic model
 #'   \item Diagnostic metrics (sensitivity, specificity, likelihood ratios) for the
-#'     chosen \code{predictorLevel}; with \code{predictorLevel = NULL} they wait for
-#'     that choice and the model and nomogram still run
+#'     chosen \code{predictorLevel} and \code{predictorNegativeLevel}; with either
+#'     set to \code{NULL} they wait for those choices while the model and nomogram
+#'     still run
 #'   \item Contingency table analysis
 #'   \item User guidance for interpretation
 #' }
@@ -44,16 +48,21 @@
 #'   explanatory = c("age", "gender", "smoking"),
 #'   outcome = "mortality",
 #'   outcomeLevel = "Yes",
-#'   predictorLevel = NULL
+#'   outcomeNegativeLevel = "No",
+#'   predictorLevel = NULL,
+#'   predictorNegativeLevel = NULL
 #' )
 #'
-#' # With nomogram and specified outcome level
+#' # With nomogram and specified outcome and predictor levels
 #' result <- oddsratio(
 #'   data = clinical_data,
 #'   explanatory = c("age", "treatment"),
 #'   outcome = "recurrence",
 #'   outcomeLevel = "Yes",
-#'   predictorLevel = NULL,
+#'   outcomeNegativeLevel = "No",
+#'   diagnosticPredictor = "treatment",
+#'   predictorLevel = "Treated",
+#'   predictorNegativeLevel = "Control",
 #'   showNomogram = TRUE
 #' )
 #' }
@@ -75,6 +84,49 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
     private = list(
 
         .nom_object = NULL,
+
+        # Syntax-mode code generation (Category G1 hardening) ----
+        # Serialize an arbitrary R value (scalar, vector, named/unnamed list)
+        # into a single valid R literal that cannot break out of quotes or
+        # inject extra arguments into the generated ClinicoPath::oddsratio(...) call.
+        .R_literal = function(x) {
+            if (is.null(x)) return("NULL")
+            if (is.list(x)) {
+                if (length(x) == 0L) return("list()")
+                nms <- names(x)
+                elems <- vapply(seq_along(x), function(i) {
+                    val_src <- private$.R_literal(x[[i]])
+                    if (!is.null(nms) && nzchar(nms[i])) {
+                        paste0(paste(deparse(nms[i]), collapse = ""), " = ", val_src)
+                    } else {
+                        val_src
+                    }
+                }, character(1))
+                return(paste0("list(", paste(elems, collapse = ", "), ")"))
+            }
+            paste(
+                deparse(x, backtick = TRUE,
+                        control = c("keepNA", "keepInteger", "niceNames")),
+                collapse = ""
+            )
+        },
+
+        .sourcifyOption = function(option) {
+            if (identical(option$name, "data")) return("data = data")
+            declared <- c(
+                "explanatory", "outcome", "outcomeLevel", "outcomeNegativeLevel",
+                "overall", "rowpercent", "colpercent", "pers", "pcat",
+                "showNomogram", "usePenalized", "likelihoodRatios",
+                "diagnosticPredictor", "predictorLevel", "predictorNegativeLevel",
+                "showExplanations"
+            )
+            name <- option$name
+            if (is.null(name) || !(name %in% declared)) return("")
+            value <- option$value
+            if (is.null(value) || identical(value, option$default)) return("")
+            if (name == "explanatory" && length(value) == 0L) return("")
+            paste0(name, " = ", private$.R_literal(value))
+        },
 
         # Notice management helpers ----
         # Notices are rendered to dedicated Html outputs (errors / strongWarnings /
@@ -403,9 +455,10 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         # Handles data preprocessing, model fitting, and result generation
         .run = function() {
 
-            # Reset notices at start of each run
+            # Reset notices and cached state at start of each run
             private$.resetNotices()
             private$.nom_object <- NULL
+            self$results$plot_nomogram$setState(NULL)
 
 
 
@@ -1401,8 +1454,8 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         "</span><br><br>",
 
                         "<b> ", .("How to Use:"), "</b><br>",
-                        "1. ", .("Check that the positive outcome level is correct for your study"), "<br>",
-                        "2. ", .("If incorrect, use the 'Positive Outcome Level' dropdown to specify the correct level"), "<br>",
+                        "1. ", .("Check that the positive and negative outcome and predictor levels are correct for your study"), "<br>",
+                        "2. ", .("If incorrect, use the 'Positive Level', 'Negative Level', 'Predictor Positive Level', and 'Predictor Negative Level' dropdowns to specify the correct levels"), "<br>",
                         "3. ", .("These unadjusted diagnostic metrics depend on these interpretations being correct"), "<br>",
                         "4. ", .("Different languages/coding may require manual specification"),
                         "</small>",
@@ -1456,7 +1509,20 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
                         if (!is.null(nom_results$fit)) {
                             private$.createNomogram(nom_results$fit, nom_results$dd, all_labels)
+                            if (!is.null(private$.nom_object)) {
+                                # Persist only serializable ingredients needed to rebuild
+                                # the nomogram after save/reload.
+                                self$results$plot_nomogram$setState(list(
+                                    data = mydata,
+                                    dependent = dependent_variable_name_from_label,
+                                    explanatory = explanatory_variable_names,
+                                    labels = all_labels
+                                ))
+                            } else {
+                                self$results$plot_nomogram$setState(NULL)
+                            }
                         } else {
+                            self$results$plot_nomogram$setState(NULL)
                             # Notices are single-line, so the multi-line
                             # troubleshooting detail returned by
                             # .prepareRmsNomogram() goes to the nomogram Html
@@ -1478,15 +1544,6 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                                 "</div>"
                             ))
                         }
-
-                        # Persist only serializable ingredients needed to rebuild
-                        # the nomogram after save/reload.
-                        self$results$plot_nomogram$setState(list(
-                            data = mydata,
-                            dependent = dependent_variable_name_from_label,
-                            explanatory = explanatory_variable_names,
-                            labels = all_labels
-                        ))
                     }
                 }
                 # Educational Explanations ----
@@ -1656,12 +1713,30 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             
             # Use user-specified positive and negative outcome levels
             positive_outcome_level <- user_positive_outcome
-            negative_outcome_level <- if (!is.null(user_negative_outcome) && user_negative_outcome %in% outcome_levels) {
-                user_negative_outcome
+            if (!is.null(user_negative_outcome)) {
+                if (!(user_negative_outcome %in% outcome_levels)) {
+                    return(list(
+                        error = TRUE,
+                        message = .fmt(
+                            .("The selected negative outcome level '{level}' is not present among paired complete observations. Available levels: {levels}."),
+                            level = user_negative_outcome,
+                            levels = paste(outcome_levels, collapse = ", "))
+                    ))
+                }
+                if (identical(as.character(user_negative_outcome), as.character(positive_outcome_level))) {
+                    return(list(
+                        error = TRUE,
+                        message = .fmt(
+                            .("Outcome positive and negative levels must be different (both set to '{level}')."),
+                            level = positive_outcome_level)
+                    ))
+                }
+                negative_outcome_level <- user_negative_outcome
             } else {
-                setdiff(outcome_levels, positive_outcome_level)[1]
+                negative_outcome_level <- setdiff(outcome_levels, positive_outcome_level)[1]
             }
             positive_outcome_idx <- which(outcome_levels == positive_outcome_level)
+            negative_outcome_idx <- which(outcome_levels == negative_outcome_level)
             outcome_determination_method <- .("User-specified")
             
             # Positive predictor level: always the user's choice. .run() leaves
@@ -1679,13 +1754,33 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             }
 
             positive_predictor_level <- user_positive_predictor
-            negative_predictor_level <- if (!is.null(user_negative_predictor) && user_negative_predictor %in% predictor_levels) {
-                user_negative_predictor
+            if (!is.null(user_negative_predictor)) {
+                if (!(user_negative_predictor %in% predictor_levels)) {
+                    return(list(
+                        error = TRUE,
+                        message = .fmt(
+                            .("The selected negative predictor level '{level}' is not present among paired complete observations. Available levels: {levels}."),
+                            level = user_negative_predictor,
+                            levels = paste(predictor_levels, collapse = ", ")
+                        )
+                    ))
+                }
+                if (identical(as.character(user_negative_predictor), as.character(positive_predictor_level))) {
+                    return(list(
+                        error = TRUE,
+                        message = .fmt(
+                            .("Predictor positive and negative levels must be different (both set to '{level}')."),
+                            level = positive_predictor_level
+                        )
+                    ))
+                }
+                negative_predictor_level <- user_negative_predictor
             } else {
-                setdiff(predictor_levels, positive_predictor_level)[1]
+                negative_predictor_level <- setdiff(predictor_levels, positive_predictor_level)[1]
             }
             predictor_determination_method <- .("User-specified")
             positive_predictor_idx <- which(predictor_levels == positive_predictor_level)
+            negative_predictor_idx <- which(predictor_levels == negative_predictor_level)
 
             predictor_level_warning <- paste0(
                 "<div style='background-color: rgba(33, 163, 188, 0.21); border-left: 4px solid #0c5460; padding: 15px; margin: 10px 0; border-radius: 4px; color: inherit;'>",
@@ -1697,11 +1792,11 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 "</div>"
             )
 
-            # Calculate 2x2 table components
+            # Calculate 2x2 table components explicitly by positive/negative index
             tp <- cont_table[positive_predictor_idx, positive_outcome_idx]
-            fp <- cont_table[positive_predictor_idx, -positive_outcome_idx]
-            fn <- cont_table[-positive_predictor_idx, positive_outcome_idx]
-            tn <- cont_table[-positive_predictor_idx, -positive_outcome_idx]
+            fp <- cont_table[positive_predictor_idx, negative_outcome_idx]
+            fn <- cont_table[negative_predictor_idx, positive_outcome_idx]
+            tn <- cont_table[negative_predictor_idx, negative_outcome_idx]
             
             # Check statistical assumptions and provide recommendations
             assumption_check <- private$.checkStatisticalAssumptions(cont_table)
@@ -1802,8 +1897,8 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # run -- depends only on row/column totals, the minimum expected
             # count and any(== 0), all of which are permutation-invariant.
             display_table <- cont_table[
-                c(positive_predictor_idx, setdiff(seq_len(2), positive_predictor_idx)),
-                c(positive_outcome_idx, setdiff(seq_len(2), positive_outcome_idx)),
+                c(positive_predictor_idx, negative_predictor_idx),
+                c(positive_outcome_idx, negative_outcome_idx),
                 drop = FALSE]
             names(dimnames(display_table)) <- names(dimnames(cont_table))
 
@@ -2301,13 +2396,13 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
                 <p><strong>Requirements:</strong></p>
                 <ul>
-                    <li> Must be <strong>binary</strong> (exactly 2 levels): Yes/No, Present/Absent, Positive/Negative</li>
+                    <li> Compares two explicitly selected levels (<strong>Predictor Positive Level</strong> vs <strong>Predictor Negative Level</strong>): e.g., Yes/No, Present/Absent, Positive/Negative</li>
                     <li> Examples: Sex (Male/Female), LVI (Absent/Present), Treatment (Control/Treated)</li>
                     <li> Cannot use continuous variables: Age, Tumor Size (infinite possible values)</li>
-                    <li> Cannot use multi-category: Grade 1/2/3, Stage I/II/III/IV</li>
+                    <li> Multi-category variables (e.g., Grade 1/2/3): Only observations with the selected positive and negative levels are included in the 2\u00d72 diagnostic table; unselected levels are excluded with a warning</li>
                 </ul>
 
-                <p><strong>Why Binary Only?</strong></p>
+                <p><strong>Why Two Selected Levels?</strong></p>
                 <p>Diagnostic test performance metrics (sensitivity, specificity, likelihood ratios) are calculated from a 2\u00d72 contingency table:</p>
 
                 <table style="border-collapse: collapse; margin: 10px 0; font-size: 0.9em;">
@@ -2326,7 +2421,7 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
                 <p><strong>Selection Guidelines:</strong></p>
                 <ul>
-                    <li><strong>Not specified:</strong> Uses the first explanatory variable automatically (in the jamovi GUI, select the variable in the Diagnostic Predictor box to enable the Predictor Positive Level dropdown)</li>
+                    <li><strong>Not specified:</strong> Uses the first explanatory variable automatically (in the jamovi GUI, select the variable in the Diagnostic Predictor box to enable the Predictor Positive Level and Predictor Negative Level dropdowns)</li>
                     <li><strong>In your regression model:</strong> Diagnostic metrics are still unadjusted and use only its paired 2\u00d72 table</li>
                     <li><strong>Not in your model:</strong> Evaluates it independently using paired complete outcome/test observations</li>
                 </ul>

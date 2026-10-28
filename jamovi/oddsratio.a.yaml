@@ -19,16 +19,21 @@ description:
     #             explanatory = c("New Test", "Rater 1"),
     #             outcome = "Golden Standart",
     #             outcomeLevel = "1",
-    #             predictorLevel = NULL
+    #             outcomeNegativeLevel = "0",
+    #             predictorLevel = NULL,
+    #             predictorNegativeLevel = NULL
     #         )
             
-    #         # Advanced usage (nomogram, multiple predictors) - shown for reference:
+    #         # Advanced usage (nomogram, diagnostic metrics, multiple predictors):
     #         # oddsratio(
     #         #     data = histopathology,
     #         #     explanatory = c("New Test", "Rater 1", "Rater 2"),
     #         #     outcome = "Golden Standart",
     #         #     outcomeLevel = "1",
-    #         #     predictorLevel = NULL,
+    #         #     outcomeNegativeLevel = "0",
+    #         #     diagnosticPredictor = "New Test",
+    #         #     predictorLevel = "1",
+    #         #     predictorNegativeLevel = "0",
     #         #     showNomogram = TRUE,
     #         #     showExplanations = TRUE
     #         # )

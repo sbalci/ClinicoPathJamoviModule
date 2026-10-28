@@ -15,12 +15,12 @@ continuous explanatory variables and includes diagnostic metrics for binary pred
 \details{
 The function performs the following analyses:
 \itemize{
-\item Logistic regression using finalfit package
-\item Odds ratio calculation with 95\% confidence intervals
-\item Forest plot generation for visualization
-\item Optional nomogram creation for clinical prediction
-\item Likelihood ratio calculations for diagnostic metrics
-\item Sensitivity and specificity analysis for binary predictors
+  \item Logistic regression using finalfit package
+  \item Odds ratio calculation with 95% confidence intervals
+  \item Forest plot generation for visualization
+  \item Optional nomogram creation for clinical prediction
+  \item Likelihood ratio calculations for diagnostic metrics
+  \item Sensitivity and specificity analysis for binary predictors
 }
 
 The function automatically cleans variable names using janitor::clean_names()
@@ -29,21 +29,25 @@ complete cases for the selected outcome and explanatory variables only.
 }
 \section{International Usage}{
 
-For international users, the function includes an outcomeLevel parameter to
-explicitly specify which outcome level represents the positive case. This is
-important for correct interpretation of likelihood ratios and diagnostic metrics.
+For international users, the function includes \code{outcomeLevel} and
+\code{outcomeNegativeLevel} parameters to explicitly specify which outcome
+levels represent the positive (event) and negative (reference/non-event)
+cases. Any other outcome levels are excluded with a warning. This is essential
+for unambiguous interpretation of odds ratios, likelihood ratios, and
+diagnostic metrics.
 }
 
 \section{Nomogram Features}{
 
 When showNomogram is enabled, the function generates:
 \itemize{
-\item Prediction nomogram based on the fitted logistic model
-\item Diagnostic metrics (sensitivity, specificity, likelihood ratios) for the
-chosen \code{predictorLevel}; with \code{predictorLevel = NULL} they wait for
-that choice and the model and nomogram still run
-\item Contingency table analysis
-\item User guidance for interpretation
+  \item Prediction nomogram based on the fitted logistic model
+  \item Diagnostic metrics (sensitivity, specificity, likelihood ratios) for the
+    chosen \code{predictorLevel} and \code{predictorNegativeLevel}; with either
+    set to \code{NULL} they wait for those choices while the model and nomogram
+    still run
+  \item Contingency table analysis
+  \item User guidance for interpretation
 }
 }
 
@@ -55,16 +59,21 @@ result <- oddsratio(
   explanatory = c("age", "gender", "smoking"),
   outcome = "mortality",
   outcomeLevel = "Yes",
-  predictorLevel = NULL
+  outcomeNegativeLevel = "No",
+  predictorLevel = NULL,
+  predictorNegativeLevel = NULL
 )
 
-# With nomogram and specified outcome level
+# With nomogram and specified outcome and predictor levels
 result <- oddsratio(
   data = clinical_data,
   explanatory = c("age", "treatment"),
   outcome = "recurrence",
   outcomeLevel = "Yes",
-  predictorLevel = NULL,
+  outcomeNegativeLevel = "No",
+  diagnosticPredictor = "treatment",
+  predictorLevel = "Treated",
+  predictorNegativeLevel = "Control",
   showNomogram = TRUE
 )
 }
@@ -81,7 +90,7 @@ regression results tables and plots when modelling. R package version 0.9.7.
 ClinicoPath Development Team
 }
 \section{Super classes}{
-\code{\link[jmvcore:Analysis]{jmvcore::Analysis}} -> \code{oddsratioBase} -> \code{oddsratioClass}
+\code{\link[jmvcore:Analysis]{jmvcore::Analysis}} -> \code{R_GlobalEnv::oddsratioBase} -> \code{oddsratioClass}
 }
 \section{Methods}{
 \subsection{Public methods}{
@@ -119,7 +128,7 @@ ClinicoPath Development Team
   <li><span class="pkg-link" data-pkg="jmvcore" data-topic="Analysis" data-id="setError"><a href='../../jmvcore/html/Analysis.html#method-Analysis-setError'><code>jmvcore::Analysis$setError()</code></a></span></li>
   <li><span class="pkg-link" data-pkg="jmvcore" data-topic="Analysis" data-id="setStatus"><a href='../../jmvcore/html/Analysis.html#method-Analysis-setStatus'><code>jmvcore::Analysis$setStatus()</code></a></span></li>
   <li><span class="pkg-link" data-pkg="jmvcore" data-topic="Analysis" data-id="translate"><a href='../../jmvcore/html/Analysis.html#method-Analysis-translate'><code>jmvcore::Analysis$translate()</code></a></span></li>
-  <li><code>oddsratioBase$initialize()</code></li>
+  <li><code>R_GlobalEnv::oddsratioBase$initialize()</code></li>
 </ul>
 </details>}}
 \if{html}{\out{<hr>}}
