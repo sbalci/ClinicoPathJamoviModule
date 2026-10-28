@@ -5,6 +5,24 @@
 
 library(testthat)
 
+if (!exists("oddsratio", mode = "function") || !exists("oddsratioClass")) {
+  for (d in c("R", "../R", "../../R")) {
+    if (file.exists(file.path(d, "oddsratio.h.R")) && file.exists(file.path(d, "oddsratio.b.R"))) {
+      for (u in c("utils.R", "utils-formula.R")) {
+        if (file.exists(file.path(d, u))) {
+          source(file.path(d, u), local = globalenv())
+        }
+      }
+      if (!exists(".", mode = "function")) {
+        assign(".", function(x, ...) x, envir = globalenv())
+      }
+      source(file.path(d, "oddsratio.h.R"), local = globalenv())
+      source(file.path(d, "oddsratio.b.R"), local = globalenv())
+      break
+    }
+  }
+}
+
 strip_html_val <- function(x) {
   if (is.null(x) || length(x) == 0) return("")
   txt <- gsub("<[^>]+>", " ", paste(x, collapse = " "))

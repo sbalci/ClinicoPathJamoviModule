@@ -78,9 +78,8 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
         # Notice management helpers ----
         # Notices are rendered to dedicated Html outputs (errors / strongWarnings /
-        # warnings / infoMessages) to avoid the protobuf serialization error caused
-        # by jmvcore::Notice objects passed to self$results$insert(). The legacy
-        # function signature is retained so callers don't need to change.
+        # warnings / infoMessages) declared in oddsratio.r.yaml. The helper
+        # signature is retained so callers do not need to change.
         .addNotice = function(type, message, name = NULL) {
             # jmvcore::NoticeType constants: ERROR=0, STRONG_WARNING=1, WARNING=2, INFO=3
             type_str <- switch(
@@ -1009,7 +1008,7 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 )
 
                 # The penalized forest plot is verified here, in .run(), not in
-                # .plot(): the results tree is serialized after .run(), and
+                # .plot(): the results tree is committed after .run(), and
                 # renderers re-run on every resize and on .omv reopen while
                 # .resetNotices() fires only in .run() -- so a notice written from
                 # a renderer is both unreliably propagated and duplicated once per
@@ -1954,7 +1953,7 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         # Fall through only if the penalized fit failed. The
                         # warning about the resulting mismatch is emitted from
                         # .run(): notices must never be written from a renderer
-                        # (results are serialized after .run(), and renderers
+                        # (results are committed after .run(), and renderers
                         # re-run on resize/reopen without .resetNotices()).
                     }
 
@@ -2198,7 +2197,7 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 <p><strong>Selection Guidelines:</strong></p>
                 <ul>
                     <li><strong>Not specified:</strong> Uses the first explanatory variable automatically (in the jamovi GUI, select the variable in the Diagnostic Predictor box to enable the Predictor Positive Level dropdown)</li>
-                    <li><strong>In your regression model:</strong> Diagnostic metrics are still unadjusted and use only its paired 2\u{00D7}2 table</li>
+                    <li><strong>In your regression model:</strong> Diagnostic metrics are still unadjusted and use only its paired 2\u00d72 table</li>
                     <li><strong>Not in your model:</strong> Evaluates it independently using paired complete outcome/test observations</li>
                 </ul>
 
