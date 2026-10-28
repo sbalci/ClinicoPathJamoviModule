@@ -515,7 +515,7 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 original_names <- names(mydata)
 
                 # Clean variable names
-                mydata <- mydata %>% janitor::clean_names()
+                mydata <- janitor::clean_names(mydata)
 
                 # Now apply the labels to the cleaned names.
                 # Since the variable names have been cleaned, you must match the labels to the cleaned names.
