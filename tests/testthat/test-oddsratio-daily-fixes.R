@@ -9,7 +9,8 @@ or_daily_data <- function() {
 or_daily_text <- function(x) gsub('[[:space:]]+', ' ', gsub('<[^>]*>', ' ', paste(x, collapse=' ')))
 or_daily_run <- function(d, firth=FALSE, explanatory='test', nom=FALSE, diag=NULL) {
   do.call(ClinicoPath::oddsratio, list(data=d, explanatory=explanatory, outcome='out',
-    outcomeLevel='Yes', predictorLevel='Present', diagnosticPredictor=diag,
+    outcomeLevel='Yes', outcomeNegativeLevel='No', predictorLevel='Present',
+    predictorNegativeLevel='Absent', diagnosticPredictor=diag,
     showNomogram=nom, usePenalized=firth, showExplanations=TRUE))
 }
 

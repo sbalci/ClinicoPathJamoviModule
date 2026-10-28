@@ -9,8 +9,10 @@ oddsratioOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             explanatory = NULL,
             outcome = NULL,
             outcomeLevel = NULL,
+            outcomeNegativeLevel = NULL,
             diagnosticPredictor = NULL,
             predictorLevel = NULL,
+            predictorNegativeLevel = NULL,
             usePenalized = FALSE,
             showNomogram = FALSE,
             showExplanations = FALSE, ...) {
@@ -45,6 +47,11 @@ oddsratioOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 outcomeLevel,
                 variable="(outcome)",
                 allowNone=TRUE)
+            private$..outcomeNegativeLevel <- jmvcore::OptionLevel$new(
+                "outcomeNegativeLevel",
+                outcomeNegativeLevel,
+                variable="(outcome)",
+                allowNone=TRUE)
             private$..diagnosticPredictor <- jmvcore::OptionVariable$new(
                 "diagnosticPredictor",
                 diagnosticPredictor,
@@ -56,6 +63,11 @@ oddsratioOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             private$..predictorLevel <- jmvcore::OptionLevel$new(
                 "predictorLevel",
                 predictorLevel,
+                variable="(diagnosticPredictor)",
+                allowNone=TRUE)
+            private$..predictorNegativeLevel <- jmvcore::OptionLevel$new(
+                "predictorNegativeLevel",
+                predictorNegativeLevel,
                 variable="(diagnosticPredictor)",
                 allowNone=TRUE)
             private$..usePenalized <- jmvcore::OptionBool$new(
@@ -74,8 +86,10 @@ oddsratioOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..explanatory)
             self$.addOption(private$..outcome)
             self$.addOption(private$..outcomeLevel)
+            self$.addOption(private$..outcomeNegativeLevel)
             self$.addOption(private$..diagnosticPredictor)
             self$.addOption(private$..predictorLevel)
+            self$.addOption(private$..predictorNegativeLevel)
             self$.addOption(private$..usePenalized)
             self$.addOption(private$..showNomogram)
             self$.addOption(private$..showExplanations)
@@ -84,8 +98,10 @@ oddsratioOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         explanatory = function() private$..explanatory$value,
         outcome = function() private$..outcome$value,
         outcomeLevel = function() private$..outcomeLevel$value,
+        outcomeNegativeLevel = function() private$..outcomeNegativeLevel$value,
         diagnosticPredictor = function() private$..diagnosticPredictor$value,
         predictorLevel = function() private$..predictorLevel$value,
+        predictorNegativeLevel = function() private$..predictorNegativeLevel$value,
         usePenalized = function() private$..usePenalized$value,
         showNomogram = function() private$..showNomogram$value,
         showExplanations = function() private$..showExplanations$value),
@@ -93,8 +109,10 @@ oddsratioOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..explanatory = NA,
         ..outcome = NA,
         ..outcomeLevel = NA,
+        ..outcomeNegativeLevel = NA,
         ..diagnosticPredictor = NA,
         ..predictorLevel = NA,
+        ..predictorNegativeLevel = NA,
         ..usePenalized = NA,
         ..showNomogram = NA,
         ..showExplanations = NA)
@@ -140,11 +158,12 @@ oddsratioResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 options=options,
                 name="todo",
                 title="To Do",
-                visible="(length(explanatory) == 0 || length(outcome) == 0 || length(outcomeLevel) == 0)",
+                visible="(length(explanatory) == 0 || length(outcome) == 0 || length(outcomeLevel) == 0 || length(outcomeNegativeLevel) == 0)",
                 clearWith=list(
                     "explanatory",
                     "outcome",
-                    "outcomeLevel")))
+                    "outcomeLevel",
+                    "outcomeNegativeLevel")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="errors",
@@ -169,21 +188,23 @@ oddsratioResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 options=options,
                 name="text",
                 title="Odds Ratio Table",
-                visible="(length(explanatory) > 0 && length(outcome) > 0 && length(outcomeLevel) > 0)",
+                visible="(length(explanatory) > 0 && length(outcome) > 0 && length(outcomeLevel) > 0 && length(outcomeNegativeLevel) > 0)",
                 clearWith=list(
                     "explanatory",
                     "outcome",
                     "outcomeLevel",
+                    "outcomeNegativeLevel",
                     "usePenalized")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="text2",
                 title="Model Performance Metrics",
-                visible="(length(explanatory) > 0 && length(outcome) > 0 && length(outcomeLevel) > 0)",
+                visible="(length(explanatory) > 0 && length(outcome) > 0 && length(outcomeLevel) > 0 && length(outcomeNegativeLevel) > 0)",
                 clearWith=list(
                     "explanatory",
                     "outcome",
                     "outcomeLevel",
+                    "outcomeNegativeLevel",
                     "usePenalized")))
             self$add(jmvcore::Image$new(
                 options=options,
@@ -193,11 +214,12 @@ oddsratioResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 height=450,
                 renderFun=".plot",
                 requiresData=TRUE,
-                visible="(length(explanatory) > 0 && length(outcome) > 0 && length(outcomeLevel) > 0)",
+                visible="(length(explanatory) > 0 && length(outcome) > 0 && length(outcomeLevel) > 0 && length(outcomeNegativeLevel) > 0)",
                 clearWith=list(
                     "explanatory",
                     "outcome",
                     "outcomeLevel",
+                    "outcomeNegativeLevel",
                     "usePenalized")))
             self$add(jmvcore::Html$new(
                 options=options,
@@ -235,6 +257,7 @@ oddsratioResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "explanatory",
                     "outcome",
                     "outcomeLevel",
+                    "outcomeNegativeLevel",
                     "usePenalized")))
             self$add(jmvcore::Html$new(
                 options=options,
@@ -245,8 +268,10 @@ oddsratioResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "explanatory",
                     "outcome",
                     "outcomeLevel",
+                    "outcomeNegativeLevel",
                     "diagnosticPredictor",
-                    "predictorLevel")))
+                    "predictorLevel",
+                    "predictorNegativeLevel")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="nomogram",
@@ -256,6 +281,7 @@ oddsratioResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "explanatory",
                     "outcome",
                     "outcomeLevel",
+                    "outcomeNegativeLevel",
                     "usePenalized")))
             self$add(jmvcore::Html$new(
                 options=options,
@@ -296,20 +322,37 @@ oddsratioBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param explanatory The explanatory variables to be used in the analysis.
 #' @param outcome The outcome variable to be used in the analysis.
 #' @param outcomeLevel Specify which outcome level is modeled as the event in
-#'   logistic regression and used as positive for diagnostic metrics. A positive
-#'   outcome level is required; until it is specified the analysis asks for it
-#'   and computes nothing. It is never taken from the order of the levels.
+#'   logistic regression and used as positive for diagnostic metrics. Both
+#'   outcomeLevel and outcomeNegativeLevel are required; until both are
+#'   specified the analysis asks for them and computes nothing. They are never
+#'   taken from the order of the levels, and any other levels are excluded.
+#' @param outcomeNegativeLevel Specify which outcome level is modeled as the
+#'   non-event (reference, 0) in logistic regression and used as negative for
+#'   diagnostic metrics. Both outcomeLevel and outcomeNegativeLevel are
+#'   required; until both are specified the analysis asks for them and computes
+#'   nothing. Any rows with other outcome levels are excluded with a warning.
 #' @param diagnosticPredictor Specify the predictor to drive likelihood
-#'   ratios; must be binary. Defaults to the first explanatory variable when
-#'   predictorLevel is supplied in R; in the jamovi GUI, populate this box to
-#'   enable the Predictor Positive Level selector.
+#'   ratios. Defaults to the first explanatory variable when predictorLevel and
+#'   predictorNegativeLevel are supplied in R; in the jamovi GUI, populate this
+#'   box to enable the Predictor Positive Level selector (and Predictor Negative
+#'   Level selector).
 #' @param predictorLevel Which level of the diagnostic predictor is the
-#'   positive test result. The diagnostic metrics (sensitivity, specificity,
-#'   likelihood ratios) need it; it is never taken from the level names or their
-#'   order. Because a Level option cannot declare a default, this is a required
-#'   argument of the R function: predictorLevel = NULL leaves the diagnostic
-#'   metrics waiting for the choice while the logistic model, odds ratios,
-#'   forest plot and nomogram still run.
+#'   positive test result. Both predictorLevel and predictorNegativeLevel are
+#'   required for diagnostic metrics (sensitivity, specificity, likelihood
+#'   ratios) and are never taken from the level names or their order. Because a
+#'   Level option cannot declare a default, this is a required argument of the R
+#'   function: predictorLevel = NULL leaves the diagnostic metrics waiting for
+#'   the choice while the logistic model, odds ratios, forest plot and nomogram
+#'   still run.
+#' @param predictorNegativeLevel Which level of the diagnostic predictor is
+#'   the negative test result. Both predictorLevel and predictorNegativeLevel
+#'   are required for diagnostic metrics (sensitivity, specificity, likelihood
+#'   ratios) and are never taken from the level names or their order; any other
+#'   predictor levels are excluded from the 2x2 table with a warning. Because a
+#'   Level option cannot declare a default, this is a required argument of the R
+#'   function: predictorNegativeLevel = NULL leaves the diagnostic metrics
+#'   waiting for the choice while the logistic model, odds ratios, forest plot
+#'   and nomogram still run.
 #' @param usePenalized Use Firth penalized likelihood logistic regression.
 #'   This is recommended when there is separation (zero cells), small sample
 #'   sizes, or low events-per-variable.
@@ -346,8 +389,10 @@ oddsratio <- function(
     explanatory = NULL,
     outcome = NULL,
     outcomeLevel,
+    outcomeNegativeLevel,
     diagnosticPredictor = NULL,
     predictorLevel,
+    predictorNegativeLevel,
     usePenalized = FALSE,
     showNomogram = FALSE,
     showExplanations = FALSE) {
@@ -372,8 +417,10 @@ oddsratio <- function(
         explanatory = explanatory,
         outcome = outcome,
         outcomeLevel = outcomeLevel,
+        outcomeNegativeLevel = outcomeNegativeLevel,
         diagnosticPredictor = diagnosticPredictor,
         predictorLevel = predictorLevel,
+        predictorNegativeLevel = predictorNegativeLevel,
         usePenalized = usePenalized,
         showNomogram = showNomogram,
         showExplanations = showExplanations)

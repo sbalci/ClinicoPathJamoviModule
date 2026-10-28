@@ -102,7 +102,9 @@ test_that("C1: forest plot renders when variable names contain spaces", {
         explanatory = "Rater 1",
         outcome = "Golden Standart",
         outcomeLevel = "1",
-        predictorLevel = NULL))
+        outcomeNegativeLevel = "0",
+        predictorLevel = NULL,
+        predictorNegativeLevel = NULL))
 
     # Before the fix this dies inside finalfit::or_plot() with
     #   <text>:1:8: unexpected symbol / 1: Golden Standart
@@ -115,7 +117,9 @@ test_that("C1: forest plot renders with a spaced outcome and a clean predictor",
         explanatory = "LVI",
         outcome = "Golden Standart",
         outcomeLevel = "1",
-        predictorLevel = NULL))
+        outcomeNegativeLevel = "0",
+        predictorLevel = NULL,
+        predictorNegativeLevel = NULL))
 
     expect_no_error(render_plot(res))
 })
@@ -135,10 +139,12 @@ test_that("H2: penalized AIC is on the same scale as the maximum-likelihood AIC"
     names(d)[names(d) == "Golden Standart"] <- "gs"
 
     ml <- quietly(oddsratio(data = d, explanatory = c("LVI", "PNI"), outcome = "gs",
-                            outcomeLevel = "1", predictorLevel = NULL,
+                            outcomeLevel = "1", outcomeNegativeLevel = "0",
+                            predictorLevel = NULL, predictorNegativeLevel = NULL,
                             usePenalized = FALSE))
     fi <- quietly(oddsratio(data = d, explanatory = c("LVI", "PNI"), outcome = "gs",
-                            outcomeLevel = "1", predictorLevel = NULL,
+                            outcomeLevel = "1", outcomeNegativeLevel = "0",
+                            predictorLevel = NULL, predictorNegativeLevel = NULL,
                             usePenalized = TRUE))
 
     ml_aic <- aic_values(ml)
@@ -161,7 +167,8 @@ test_that("H3: Firth odds-ratio table shows no internal column names or empty co
     names(d)[names(d) == "Golden Standart"] <- "gs"
 
     res <- quietly(oddsratio(data = d, explanatory = c("LVI", "PNI"), outcome = "gs",
-                             outcomeLevel = "1", predictorLevel = NULL,
+                             outcomeLevel = "1", outcomeNegativeLevel = "0",
+                             predictorLevel = NULL, predictorNegativeLevel = NULL,
                              usePenalized = TRUE))
     html <- paste(as.character(res$text$content), collapse = "")
 
@@ -192,8 +199,10 @@ test_that("M4: small-cell recommendation renders as a single structured bullet",
         explanatory = "pred",
         outcome = "out",
         outcomeLevel = "Yes",
+        outcomeNegativeLevel = "No",
         diagnosticPredictor = "pred",
         predictorLevel = "Pos",
+        predictorNegativeLevel = "Neg",
         showNomogram = TRUE))
 
     html <- paste(as.character(res$diagnosticMetrics$content), collapse = "")
@@ -229,7 +238,9 @@ test_that("M5: re-rendering the forest plot does not duplicate notices", {
         explanatory = "Rater 1",
         outcome = "Golden Standart",
         outcomeLevel = "1",
+        outcomeNegativeLevel = "0",
         predictorLevel = NULL,
+        predictorNegativeLevel = NULL,
         usePenalized = TRUE))
 
     try(render_plot(res), silent = TRUE)
@@ -278,8 +289,10 @@ test_that("M9: rendered Html declares no hard-coded foreground colour", {
     names(d)[names(d) == "New Test"] <- "newtest"
 
     res <- quietly(oddsratio(data = d, explanatory = "newtest", outcome = "gs",
-                             outcomeLevel = "1", diagnosticPredictor = "newtest",
-                             predictorLevel = "1", showNomogram = TRUE,
+                             outcomeLevel = "1", outcomeNegativeLevel = "0",
+                             diagnosticPredictor = "newtest",
+                             predictorLevel = "1", predictorNegativeLevel = "0",
+                             showNomogram = TRUE,
                              showExplanations = TRUE))
 
     html <- all_html(res)
@@ -302,17 +315,23 @@ test_that("E: no unsubstituted {placeholder} leaks into any Html output", {
 
     configs <- list(
         quietly(oddsratio(data = d, explanatory = "LVI", outcome = "gs",
-                          outcomeLevel = "1", predictorLevel = NULL)),
+                          outcomeLevel = "1", outcomeNegativeLevel = "0",
+                          predictorLevel = NULL, predictorNegativeLevel = NULL)),
         quietly(oddsratio(data = d, explanatory = c("LVI", "Age"), outcome = "gs",
-                          outcomeLevel = "0", predictorLevel = NULL,
+                          outcomeLevel = "0", outcomeNegativeLevel = "1",
+                          predictorLevel = NULL, predictorNegativeLevel = NULL,
                           usePenalized = TRUE)),
         quietly(oddsratio(data = d, explanatory = "newtest", outcome = "gs",
-                          outcomeLevel = "1", diagnosticPredictor = "newtest",
-                          predictorLevel = "1", showNomogram = TRUE,
+                          outcomeLevel = "1", outcomeNegativeLevel = "0",
+                          diagnosticPredictor = "newtest",
+                          predictorLevel = "1", predictorNegativeLevel = "0",
+                          showNomogram = TRUE,
                           showExplanations = TRUE)),
         quietly(oddsratio(data = small_2x2, explanatory = "pred", outcome = "out",
-                          outcomeLevel = "Yes", diagnosticPredictor = "pred",
-                          predictorLevel = "Pos", showNomogram = TRUE))
+                          outcomeLevel = "Yes", outcomeNegativeLevel = "No",
+                          diagnosticPredictor = "pred",
+                          predictorLevel = "Pos", predictorNegativeLevel = "Neg",
+                          showNomogram = TRUE))
     )
 
     for (res in configs) {
@@ -329,9 +348,11 @@ test_that("E: no unsubstituted {placeholder} leaks into any Html output", {
 
 test_that("GUARD: swapping the positive outcome level inverts the odds ratio", {
     or_of <- function(level) {
+        neg_lvl <- if (identical(level, "1")) "0" else "1"
         res <- quietly(oddsratio(data = histopathology, explanatory = "LVI",
                                  outcome = "Golden Standart",
-                                 outcomeLevel = level, predictorLevel = NULL))
+                                 outcomeLevel = level, outcomeNegativeLevel = neg_lvl,
+                                 predictorLevel = NULL, predictorNegativeLevel = NULL))
         txt <- strip_html(res$text$content)
         cell <- regmatches(txt, regexpr("[0-9]+\\.[0-9]+ \\([0-9.]+-[0-9.]+, p=[0-9.]+\\)",
                                         txt))
@@ -353,8 +374,10 @@ test_that("GUARD: diagnostic metrics match epiR::epi.tests()", {
         explanatory = "New Test",
         outcome = "Golden Standart",
         outcomeLevel = "1",
+        outcomeNegativeLevel = "0",
         diagnosticPredictor = "New Test",
         predictorLevel = "1",
+        predictorNegativeLevel = "0",
         showNomogram = TRUE))
 
     txt <- strip_html(res$diagnosticMetrics$content)
@@ -417,7 +440,8 @@ test_that("N1: usePenalized changes the estimator, not the model specification",
     # coding the analyst actually chose.
     or_rows <- function(pen) or_table_rows(quietly(oddsratio(
         data = histopathology, explanatory = "Grade", outcome = "Mortality5yr",
-        outcomeLevel = "Dead", predictorLevel = NULL, usePenalized = pen)))
+        outcomeLevel = "Dead", outcomeNegativeLevel = "Alive",
+        predictorLevel = NULL, predictorNegativeLevel = NULL, usePenalized = pen)))
 
     expect_identical(or_rows(TRUE), or_rows(FALSE),
         info = paste("Firth rows:", paste(or_rows(TRUE), collapse = " / "),
@@ -432,7 +456,8 @@ test_that("N1-control: a many-valued numeric already agreed across estimators", 
     # band rather than to some general Firth-vs-ML formatting difference.
     or_rows <- function(pen) or_table_rows(quietly(oddsratio(
         data = histopathology, explanatory = "Age", outcome = "Mortality5yr",
-        outcomeLevel = "Dead", predictorLevel = NULL, usePenalized = pen)))
+        outcomeLevel = "Dead", outcomeNegativeLevel = "Alive",
+        predictorLevel = NULL, predictorNegativeLevel = NULL, usePenalized = pen)))
 
     expect_identical(or_rows(TRUE), or_rows(FALSE))
 })
@@ -445,7 +470,8 @@ test_that("N1-b: a genuine factor is unaffected by the cont_cut fix", {
 
     rows <- or_table_rows(quietly(oddsratio(
         data = d, explanatory = "GradeF", outcome = "Mortality5yr",
-        outcomeLevel = "Dead", predictorLevel = NULL)))
+        outcomeLevel = "Dead", outcomeNegativeLevel = "Alive",
+        predictorLevel = NULL, predictorNegativeLevel = NULL)))
 
     expect_equal(length(rows), 3L)
     expect_true(any(grepl("GradeF", rows, fixed = TRUE)))
@@ -460,7 +486,8 @@ test_that("N1-c: the forest plot estimates match the table for a low-cardinality
     # ratio. Assert the join now produces exactly one fully-estimated row.
     res <- quietly(oddsratio(
         data = histopathology, explanatory = "Grade", outcome = "Mortality5yr",
-        outcomeLevel = "Dead", predictorLevel = NULL))
+        outcomeLevel = "Dead", outcomeNegativeLevel = "Alive",
+        predictorLevel = NULL, predictorNegativeLevel = NULL))
 
     st <- res$plot$state
     expect_false(is.null(st))
@@ -487,7 +514,8 @@ test_that("N2: the odds-ratio table header names the outcome as the user selecte
     # janitor-cleaned name. The header read "Dependent: disease_status".
     res <- quietly(oddsratio(
         data = histopathology, explanatory = "LVI", outcome = "Disease Status",
-        outcomeLevel = "Ill", predictorLevel = NULL))
+        outcomeLevel = "Ill", outcomeNegativeLevel = "Healthy",
+        predictorLevel = NULL, predictorNegativeLevel = NULL))
 
     hdr <- or_table_header(res)
     expect_gte(length(hdr), 1L)
@@ -503,7 +531,9 @@ test_that("N2-b: no janitor-cleaned name reaches the rendered table, on either p
         res <- quietly(oddsratio(
             data = histopathology, explanatory = c("New Test", "LVI"),
             outcome = "Disease Status", outcomeLevel = "Ill",
-            predictorLevel = NULL, usePenalized = pen))
+            outcomeNegativeLevel = "Healthy",
+            predictorLevel = NULL, predictorNegativeLevel = NULL,
+            usePenalized = pen))
 
         html <- paste(as.character(res$text$content), collapse = "")
         for (leak in c("disease_status", "new_test"))
@@ -521,7 +551,9 @@ test_that("N3: the diagnostic 2x2 is laid out positive-first", {
     res <- quietly(oddsratio(
         data = histopathology, explanatory = c("LVI", "Age"),
         outcome = "Mortality5yr", outcomeLevel = "Dead",
+        outcomeNegativeLevel = "Alive",
         diagnosticPredictor = "LVI", predictorLevel = "Present",
+        predictorNegativeLevel = "Absent",
         showNomogram = TRUE))
 
     html <- paste(as.character(res$diagnosticMetrics$content), collapse = "")
@@ -552,7 +584,9 @@ test_that("N4: the diagnostic panel states its own denominator", {
     res <- quietly(oddsratio(
         data = histopathology, explanatory = c("LVI", "Age"),
         outcome = "Mortality5yr", outcomeLevel = "Dead",
+        outcomeNegativeLevel = "Alive",
         diagnosticPredictor = "LVI", predictorLevel = "Present",
+        predictorNegativeLevel = "Absent",
         showNomogram = TRUE))
 
     txt <- strip_html(res$diagnosticMetrics$content)
@@ -569,7 +603,8 @@ test_that("N5: a low-cardinality numeric predictor declares how it was coded", {
     # linear trend would trade a hidden choice for an undeclared one.
     res <- quietly(oddsratio(
         data = histopathology, explanatory = "Grade", outcome = "Mortality5yr",
-        outcomeLevel = "Dead", predictorLevel = NULL))
+        outcomeLevel = "Dead", outcomeNegativeLevel = "Alive",
+        predictorLevel = NULL, predictorNegativeLevel = NULL))
 
     expect_match(strip_html(res$infoMessages$content),
                  "Entered as continuous: Grade")
@@ -577,7 +612,8 @@ test_that("N5: a low-cardinality numeric predictor declares how it was coded", {
     # ... and must NOT fire for a variable it does not apply to.
     res2 <- quietly(oddsratio(
         data = histopathology, explanatory = "Age", outcome = "Mortality5yr",
-        outcomeLevel = "Dead", predictorLevel = NULL))
+        outcomeLevel = "Dead", outcomeNegativeLevel = "Alive",
+        predictorLevel = NULL, predictorNegativeLevel = NULL))
 
     expect_false(grepl("Entered as continuous",
                        strip_html(res2$infoMessages$content), fixed = TRUE))
@@ -593,7 +629,8 @@ test_that("N6: the analysis emits no message() chatter into Analysis Notes", {
         suppressWarnings(oddsratio(
             data = histopathology, explanatory = c("LVI", "Age"),
             outcome = "Mortality5yr", outcomeLevel = "Dead",
-            predictorLevel = NULL)),
+            outcomeNegativeLevel = "Alive",
+            predictorLevel = NULL, predictorNegativeLevel = NULL)),
         message = function(m) {
             msgs <<- c(msgs, conditionMessage(m))
             invokeRestart("muffleMessage")
@@ -611,7 +648,9 @@ test_that("N7: a binary 0/1 numeric keeps its per-level counts", {
     # These are the analysis's own documented example variables.
     rows <- or_table_rows(quietly(oddsratio(
         data = histopathology, explanatory = c("New Test", "Rater 1"),
-        outcome = "Golden Standart", outcomeLevel = "1", predictorLevel = NULL)))
+        outcome = "Golden Standart", outcomeLevel = "1",
+        outcomeNegativeLevel = "0",
+        predictorLevel = NULL, predictorNegativeLevel = NULL)))
 
     expect_false(any(grepl("Mean (SD)", rows, fixed = TRUE)))
     expect_equal(length(rows), 4L)          # two levels for each of two predictors
@@ -626,7 +665,9 @@ test_that("N7-b: coercing the binary leaves every estimate untouched", {
         html <- paste(as.character(quietly(oddsratio(
             data = histopathology, explanatory = c("New Test", "Rater 1"),
             outcome = "Golden Standart", outcomeLevel = "1",
-            predictorLevel = NULL, usePenalized = pen))$text$content), collapse = "")
+            outcomeNegativeLevel = "0",
+            predictorLevel = NULL, predictorNegativeLevel = NULL,
+            usePenalized = pen))$text$content), collapse = "")
         regmatches(html, gregexpr("[0-9]+\\.[0-9]{2} \\([0-9.]+-[0-9.]+", html))[[1]]
     }
     expect_true(any(grepl("^7\\.6[0-9] \\(4\\.3", ors(FALSE))))   # ML   7.66 (4.36-
@@ -644,7 +685,8 @@ test_that("N8: the continuous-coding notice tracks the coding, not finalfit's ol
     # SYMBOL's own name -- so `explanatory = ex` asks for a column called "ex".
     note <- function(ex) strip_html(quietly(do.call(oddsratio, list(
         data = d, explanatory = ex, outcome = "Mortality5yr",
-        outcomeLevel = "Dead", predictorLevel = NULL)))$infoMessages$content)
+        outcomeLevel = "Dead", outcomeNegativeLevel = "Alive",
+        predictorLevel = NULL, predictorNegativeLevel = NULL)))$infoMessages$content)
 
     # Every numeric is fitted linearly now, so a Gleason grade group needs the
     # same disclosure a 1-4 stage does. Inheriting `< 5` named one and not the
@@ -660,7 +702,8 @@ test_that("N8: the continuous-coding notice tracks the coding, not finalfit's ol
         strip_html(quietly(oddsratio(
             data = histopathology, explanatory = "New Test",
             outcome = "Golden Standart", outcomeLevel = "1",
-            predictorLevel = NULL))$infoMessages$content), fixed = TRUE))
+            outcomeNegativeLevel = "0",
+            predictorLevel = NULL, predictorNegativeLevel = NULL))$infoMessages$content), fixed = TRUE))
 })
 
 test_that("N9: a sparse level in a numeric trend is warned about", {
@@ -674,7 +717,8 @@ test_that("N9: a sparse level in a numeric trend is warned about", {
                     SparseGrade = c(rep(1, 120), rep(2, 77), rep(3, 3)))
 
     res <- quietly(oddsratio(data = d, explanatory = "SparseGrade", outcome = "y",
-                             outcomeLevel = "Yes", predictorLevel = NULL))
+                             outcomeLevel = "Yes", outcomeNegativeLevel = "No",
+                             predictorLevel = NULL, predictorNegativeLevel = NULL))
 
     expect_match(strip_html(res$warnings$content),
                  "entered as continuous and has 1 value\\(s\\) carried by fewer than 5")
@@ -685,7 +729,9 @@ test_that("N10: the plot state carries no dead payload", {
     # (~5.8 KB), read into a local in .plot() and never used.
     res <- quietly(oddsratio(
         data = histopathology, explanatory = c("LVI", "Age"),
-        outcome = "Mortality5yr", outcomeLevel = "Dead", predictorLevel = NULL))
+        outcome = "Mortality5yr", outcomeLevel = "Dead",
+        outcomeNegativeLevel = "Alive",
+        predictorLevel = NULL, predictorNegativeLevel = NULL))
 
     expect_false("filteredTable" %in% names(res$plot$state))
     expect_setequal(names(res$plot$state),
@@ -708,7 +754,9 @@ test_that("N11: the nomogram's axes carry the user's variable names, live and af
     for (ex in list(c("LVI", "PNI"), c("New Test", "Rater 1"))) {
         res <- quietly(do.call(oddsratio, list(
             data = histopathology, explanatory = ex, outcome = "Disease Status",
-            outcomeLevel = "Ill", predictorLevel = NULL, showNomogram = TRUE)))
+            outcomeLevel = "Ill", outcomeNegativeLevel = "Healthy",
+            predictorLevel = NULL, predictorNegativeLevel = NULL,
+            showNomogram = TRUE)))
 
         # The analysis object is not returned by the wrapper, so assert on the
         # rendered plot instead: it must draw on both paths.

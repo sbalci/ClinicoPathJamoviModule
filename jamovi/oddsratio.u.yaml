@@ -26,6 +26,10 @@ children:
             name: outcomeLevel
             label: Positive Level
             enable: (outcome)
+          - type: LevelSelector
+            name: outcomeNegativeLevel
+            label: Negative Level
+            enable: (outcome)
   - type: LayoutBox
     margin: large
     children:
@@ -57,4 +61,8 @@ children:
               - type: LevelSelector
                 name: predictorLevel
                 label: Predictor Positive Level
+                enable: (diagnosticPredictor)
+              - type: LevelSelector
+                name: predictorNegativeLevel
+                label: Predictor Negative Level
                 enable: (diagnosticPredictor)

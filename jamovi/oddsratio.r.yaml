@@ -8,11 +8,12 @@ items:
     - name:  todo
       title: To Do
       type:  Html
-      visible: (length(explanatory) == 0 || length(outcome) == 0 || length(outcomeLevel) == 0)
+      visible: (length(explanatory) == 0 || length(outcome) == 0 || length(outcomeLevel) == 0 || length(outcomeNegativeLevel) == 0)
       clearWith:
           - explanatory
           - outcome
           - outcomeLevel
+          - outcomeNegativeLevel
 
     - name:  errors
       title: Critical Errors
@@ -38,21 +39,23 @@ items:
     - name:  text
       title: Odds Ratio Table
       type:  Html
-      visible: (length(explanatory) > 0 && length(outcome) > 0 && length(outcomeLevel) > 0)
+      visible: (length(explanatory) > 0 && length(outcome) > 0 && length(outcomeLevel) > 0 && length(outcomeNegativeLevel) > 0)
       clearWith:
           - explanatory
           - outcome
           - outcomeLevel
+          - outcomeNegativeLevel
           - usePenalized
 
     - name:  text2
       title: Model Performance Metrics
       type:  Html
-      visible: (length(explanatory) > 0 && length(outcome) > 0 && length(outcomeLevel) > 0)
+      visible: (length(explanatory) > 0 && length(outcome) > 0 && length(outcomeLevel) > 0 && length(outcomeNegativeLevel) > 0)
       clearWith:
           - explanatory
           - outcome
           - outcomeLevel
+          - outcomeNegativeLevel
           - usePenalized
 
 
@@ -64,11 +67,12 @@ items:
       height: 450
       renderFun: .plot
       requiresData: true
-      visible: (length(explanatory) > 0 && length(outcome) > 0 && length(outcomeLevel) > 0)
+      visible: (length(explanatory) > 0 && length(outcome) > 0 && length(outcomeLevel) > 0 && length(outcomeNegativeLevel) > 0)
       clearWith:
           - explanatory
           - outcome
           - outcomeLevel
+          - outcomeNegativeLevel
           - usePenalized
 
     # Odds Ratio Explanations (right after odds ratio analysis)
@@ -108,6 +112,7 @@ items:
           - explanatory
           - outcome
           - outcomeLevel
+          - outcomeNegativeLevel
           - usePenalized
 
     - name: diagnosticMetrics
@@ -118,8 +123,10 @@ items:
           - explanatory
           - outcome
           - outcomeLevel
+          - outcomeNegativeLevel
           - diagnosticPredictor
           - predictorLevel
+          - predictorNegativeLevel
 
     - name: nomogram
       title: "Prediction Nomogram Details"
@@ -129,6 +136,7 @@ items:
           - explanatory
           - outcome
           - outcomeLevel
+          - outcomeNegativeLevel
           - usePenalized
 
     # Nomogram Explanations (right after nomogram analysis)

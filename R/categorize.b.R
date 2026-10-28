@@ -64,6 +64,19 @@ categorizeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             min(digits, 12L)
         },
 
+        # Keep familiar fixed decimals unless they collapse distinct endpoints.
+        # Significant-digit notation preserves small-scale ranges and plot labels.
+        .formatBreaks = function(breaks) {
+            labels <- sprintf(paste0("%.", private$.autoDigits(breaks), "f"), breaks)
+            if (anyDuplicated(labels) > 0) {
+                for (digits in 15:17) {
+                    labels <- trimws(formatC(breaks, format = "g", digits = digits))
+                    if (!anyDuplicated(labels)) break
+                }
+            }
+            labels
+        },
+
         # Validate breaks for strict monotonicity and uniqueness
         # Single reading of the manual break-point string, shared by the
         # analysis and the generated R snippet.
@@ -254,8 +267,7 @@ categorizeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     # right=FALSE (right_closed=FALSE): [a, b) except last is [a, b] when include_lowest=TRUE
                     # Precision comes from the break spacing, never a fixed
                     # single decimal - see private$.autoDigits().
-                    fmt <- paste0("%s%.", private$.autoDigits(breaks),
-                                  "f, %.", private$.autoDigits(breaks), "f%s")
+                    break_labels <- private$.formatBreaks(breaks)
                     sapply(1:n_categories, function(i) {
                         if (right_closed) {
                             left_bracket <- "("
@@ -266,7 +278,8 @@ categorizeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                             right_bracket <- ")"
                             if (i == n_categories && include_lowest) right_bracket <- "]"
                         }
-                        sprintf(fmt, left_bracket, breaks[i], breaks[i + 1], right_bracket)
+                        paste0(left_bracket, break_labels[i], ", ",
+                               break_labels[i + 1], right_bracket)
                     })
                 },
                 "semantic" = {
@@ -457,7 +470,15 @@ categorizeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             # Notices accumulate across run cycles unless the pane is reset
             # first; do it before anything can return early.
-            self$results$notices$setContent("")
+            self$results$notices$setContent("<div></div>")
+            # clearWith handles restored GUI results; direct reruns and normal
+            # validation returns also need to invalidate the previous result.
+            .deleteTableRows(self$results$freqTable)
+            .deleteTableRows(self$results$breakpointsTable)
+            self$results$breakpointsTable$setNote("seed", NULL)
+            self$results$summaryText$setContent("<div></div>")
+            self$results$rcode$setContent("<div></div>")
+            self$results$plot$setState(NULL)
 
             # Input Validation ----
             if (is.null(self$options$var) || length(self$options$var) == 0) {
@@ -489,7 +510,7 @@ categorizeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 self$results$todo$setContent(todo)
                 return()
             } else {
-                self$results$todo$setContent("")
+                self$results$todo$setContent("<div></div>")
             }
 
             # Get data ----
@@ -981,9 +1002,9 @@ categorizeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     # Same precision as the auto category labels - a fixed
                     # 2 decimals contradicted them on both sub-unit and
                     # large-magnitude scales.
-                    range_fmt <- paste0("%s%.", private$.autoDigits(breaks),
-                                        "f, %.", private$.autoDigits(breaks), "f%s")
-                    range_str <- sprintf(range_fmt, left_bracket, breaks[cat_idx], breaks[cat_idx + 1], right_bracket)
+                    break_labels <- private$.formatBreaks(breaks)
+                    range_str <- paste0(left_bracket, break_labels[cat_idx], ", ",
+                                        break_labels[cat_idx + 1], right_bracket)
                 } else {
                     range_str <- as.character(cat_name)
                 }
@@ -1227,7 +1248,7 @@ categorizeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             break_labels <- data.frame(
                 x = breaks,
                 y = max(ggplot2::ggplot_build(plot)$data[[1]]$density, na.rm = TRUE) * 1.05,
-                label = sprintf(paste0("%.", private$.autoDigits(breaks), "f"), breaks)
+                label = private$.formatBreaks(breaks)
             )
 
             plot <- plot +

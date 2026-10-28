@@ -84,7 +84,8 @@ test_that("A-01..A-12: 2x2 closed-form ML and Firth odds ratio, profile-likeliho
 
   res_ml <- oddsratio(
     data = d_2x2, explanatory = "exposure", outcome = "outcome",
-    outcomeLevel = "Event", predictorLevel = "Pos"
+    outcomeLevel = "Event", outcomeNegativeLevel = "NoEvent",
+    predictorLevel = "Pos", predictorNegativeLevel = "Neg"
   )
   tbl_ml <- parse_html_table_val(res_ml$text$content)
   c_ml <- parse_or_cell_val(tbl_ml[2, "OR (univariable)"])
@@ -97,7 +98,8 @@ test_that("A-01..A-12: 2x2 closed-form ML and Firth odds ratio, profile-likeliho
 
   res_firth <- oddsratio(
     data = d_2x2, explanatory = "exposure", outcome = "outcome",
-    outcomeLevel = "Event", predictorLevel = "Pos", usePenalized = TRUE
+    outcomeLevel = "Event", outcomeNegativeLevel = "NoEvent",
+    predictorLevel = "Pos", predictorNegativeLevel = "Neg", usePenalized = TRUE
   )
   tbl_firth <- parse_html_table_val(res_firth$text$content)
   c_firth_uni <- parse_or_cell_val(tbl_firth[2, "OR (univariable, Firth)"])
@@ -114,7 +116,7 @@ test_that("A-01..A-12: 2x2 closed-form ML and Firth odds ratio, profile-likeliho
                      levels = c("NoEvent", "Event")),
     exposure = factor(c(rep("Pos", 46), rep("Neg", 54)), levels = c("Neg", "Pos"))
   )
-  res_mod_ml <- oddsratio(d_mod, "exposure", "outcome", outcomeLevel = "Event", predictorLevel = "Pos")
+  res_mod_ml <- oddsratio(d_mod, "exposure", "outcome", outcomeLevel = "Event", outcomeNegativeLevel = "NoEvent", predictorLevel = "Pos", predictorNegativeLevel = "Neg")
   c_mod_ml <- parse_or_cell_val(parse_html_table_val(res_mod_ml$text$content)[2, "OR (univariable)"])
   wald_z <- log((28 * 32) / (18 * 22)) / sqrt(1 / 28 + 1 / 18 + 1 / 22 + 1 / 32)
   expect_equal(c_mod_ml$or, round((28 * 32) / (18 * 22), 2), tolerance = 1e-12)
@@ -128,7 +130,7 @@ test_that("A-13..A-21: 2x2 diagnostic Sensitivity, Specificity, LR+, LR-, Cloppe
                      levels = c("NoEvent", "Event")),
     exposure = factor(c(rep("Pos", 48), rep("Neg", 72)), levels = c("Neg", "Pos"))
   )
-  res <- oddsratio(d_2x2, "exposure", "outcome", outcomeLevel = "Event", predictorLevel = "Pos", showNomogram = TRUE)
+  res <- oddsratio(d_2x2, "exposure", "outcome", outcomeLevel = "Event", outcomeNegativeLevel = "NoEvent", predictorLevel = "Pos", predictorNegativeLevel = "Neg", showNomogram = TRUE)
   diag_txt <- strip_html_val(res$diagnosticMetrics$content)
 
   expect_match(diag_txt, "Sensitivity: 60.0% (95% CI 46.5-72.4%)", fixed = TRUE)
@@ -141,7 +143,8 @@ test_that("A-13..A-21: 2x2 diagnostic Sensitivity, Specificity, LR+, LR-, Cloppe
   ana <- oddsratioClass$new(
     options = oddsratioOptions$new(
       explanatory = "exposure", outcome = "outcome",
-      outcomeLevel = "Event", predictorLevel = "Pos"
+      outcomeLevel = "Event", outcomeNegativeLevel = "NoEvent",
+      predictorLevel = "Pos", predictorNegativeLevel = "Neg"
     ),
     data = d_2x2
   )
@@ -169,7 +172,8 @@ test_that("B-01..B-30: Multivariable ML, Firth, Model Metrics, and Nomogram matc
   d_mv$status <- factor(ifelse(rbinom(n, 1, plogis(eta)) == 1, "Dead", "Alive"), levels = c("Alive", "Dead"))
 
   res_ml <- oddsratio(d_mv, c("lvi", "grade", "age"), "status",
-                      outcomeLevel = "Dead", predictorLevel = "Present", showNomogram = TRUE)
+                      outcomeLevel = "Dead", outcomeNegativeLevel = "Alive",
+                      predictorLevel = "Present", predictorNegativeLevel = "Absent", showNomogram = TRUE)
   tbl_ml <- parse_html_table_val(res_ml$text$content)
   glm_fit <- stats::glm(status ~ lvi + grade + age, data = d_mv, family = stats::binomial())
   glm_ci <- suppressMessages(stats::confint(glm_fit))
@@ -184,7 +188,8 @@ test_that("B-01..B-30: Multivariable ML, Firth, Model Metrics, and Nomogram matc
 
   # Firth multivariable parity
   res_firth <- oddsratio(d_mv, c("lvi", "grade", "age"), "status",
-                         outcomeLevel = "Dead", predictorLevel = "Present", usePenalized = TRUE)
+                         outcomeLevel = "Dead", outcomeNegativeLevel = "Alive",
+                         predictorLevel = "Present", predictorNegativeLevel = "Absent", usePenalized = TRUE)
   tbl_firth <- parse_html_table_val(res_firth$text$content)
   lf <- logistf::logistf(status ~ lvi + grade + age, data = d_mv, pl = TRUE)
   idx_g3 <- match("gradeG3", lf$terms)
@@ -204,18 +209,18 @@ test_that("C-01..C-10: Metamorphic invariants (permutation, outcome/predictor in
                      levels = c("NoEvent", "Event")),
     exposure = factor(c(rep("Pos", 48), rep("Neg", 72)), levels = c("Neg", "Pos"))
   )
-  res_base <- oddsratio(d_2x2, "exposure", "outcome", outcomeLevel = "Event", predictorLevel = "Pos")
+  res_base <- oddsratio(d_2x2, "exposure", "outcome", outcomeLevel = "Event", outcomeNegativeLevel = "NoEvent", predictorLevel = "Pos", predictorNegativeLevel = "Neg")
   set.seed(20260101)
-  res_perm <- oddsratio(d_2x2[sample(nrow(d_2x2)), ], "exposure", "outcome", outcomeLevel = "Event", predictorLevel = "Pos")
+  res_perm <- oddsratio(d_2x2[sample(nrow(d_2x2)), ], "exposure", "outcome", outcomeLevel = "Event", outcomeNegativeLevel = "NoEvent", predictorLevel = "Pos", predictorNegativeLevel = "Neg")
   expect_identical(res_base$text$content, res_perm$text$content)
 
   # Outcome inversion: OR = 6.00 -> 1/6 = 0.17
-  res_inv_out <- oddsratio(d_2x2, "exposure", "outcome", outcomeLevel = "NoEvent", predictorLevel = "Pos")
+  res_inv_out <- oddsratio(d_2x2, "exposure", "outcome", outcomeLevel = "NoEvent", outcomeNegativeLevel = "Event", predictorLevel = "Pos", predictorNegativeLevel = "Neg")
   c_inv <- parse_or_cell_val(parse_html_table_val(res_inv_out$text$content)[2, "OR (univariable)"])
   expect_equal(c_inv$or, round(1 / 6, 2), tolerance = 1e-12)
 
   # Predictor inversion: Se -> 1-Se (40.0%), Sp -> 1-Sp (20.0%), LR+ -> 0.50, LR- -> 3.00
-  res_inv_pred <- oddsratio(d_2x2, "exposure", "outcome", outcomeLevel = "Event", predictorLevel = "Neg", showNomogram = TRUE)
+  res_inv_pred <- oddsratio(d_2x2, "exposure", "outcome", outcomeLevel = "Event", outcomeNegativeLevel = "NoEvent", predictorLevel = "Neg", predictorNegativeLevel = "Pos", showNomogram = TRUE)
   t2_inv_p <- strip_html_val(res_inv_pred$diagnosticMetrics$content)
   expect_match(t2_inv_p, "Sensitivity: 40.0%", fixed = TRUE)
   expect_match(t2_inv_p, "Specificity: 20.0%", fixed = TRUE)
@@ -228,8 +233,8 @@ test_that("C-01..C-10: Metamorphic invariants (permutation, outcome/predictor in
   exp_chr[c(1, 50)] <- NA_character_
   d_na$exp_addna <- addNA(factor(exp_chr, levels = c("Neg", "Pos")))
   d_na$exp_plain <- factor(exp_chr, levels = c("Neg", "Pos"))
-  r_addna <- oddsratio(d_na, "exp_addna", "outcome", outcomeLevel = "Event", predictorLevel = "Pos")
-  r_plain <- oddsratio(d_na, "exp_plain", "outcome", outcomeLevel = "Event", predictorLevel = "Pos")
+  r_addna <- oddsratio(d_na, "exp_addna", "outcome", outcomeLevel = "Event", outcomeNegativeLevel = "NoEvent", predictorLevel = "Pos", predictorNegativeLevel = "Neg")
+  r_plain <- oddsratio(d_na, "exp_plain", "outcome", outcomeLevel = "Event", outcomeNegativeLevel = "NoEvent", predictorLevel = "Pos", predictorNegativeLevel = "Neg")
   expect_identical(parse_html_table_val(r_addna$text$content)[, -1],
                    parse_html_table_val(r_plain$text$content)[, -1])
 })
@@ -241,7 +246,7 @@ test_that("D-01..D-08, E-01..E-07, H-01..H-06, I-01..I-02: Boundary guards, opti
                      levels = c("NoEvent", "Event")),
     exposure = factor(c(rep("Pos", 48), rep("Neg", 72)), levels = c("Neg", "Pos"))
   )
-  expect_error(oddsratio(d_2x2[0, ], "exposure", "outcome", outcomeLevel = "Event", predictorLevel = "Pos"),
+  expect_error(oddsratio(d_2x2[0, ], "exposure", "outcome", outcomeLevel = "Event", outcomeNegativeLevel = "NoEvent", predictorLevel = "Pos", predictorNegativeLevel = "Neg"),
                "No data available for analysis")
 
   # Perfect 2-zero-cell separation (TP=25, FP=0, FN=0, TN=25): ML marks not estimable, Firth yields 2601.00
@@ -249,10 +254,10 @@ test_that("D-01..D-08, E-01..E-07, H-01..H-06, I-01..I-02: Boundary guards, opti
     outcome = factor(c(rep("NoEvent", 25), rep("Event", 25)), levels = c("NoEvent", "Event")),
     exposure = factor(c(rep("Neg", 25), rep("Pos", 25)), levels = c("Neg", "Pos"))
   )
-  r_sep_ml <- suppressWarnings(oddsratio(d_sep, "exposure", "outcome", outcomeLevel = "Event", predictorLevel = "Pos"))
+  r_sep_ml <- suppressWarnings(oddsratio(d_sep, "exposure", "outcome", outcomeLevel = "Event", outcomeNegativeLevel = "NoEvent", predictorLevel = "Pos", predictorNegativeLevel = "Neg"))
   expect_match(parse_html_table_val(r_sep_ml$text$content)[2, "OR (univariable)"], "not estimable", fixed = TRUE)
 
-  r_sep_firth <- suppressWarnings(oddsratio(d_sep, "exposure", "outcome", outcomeLevel = "Event", predictorLevel = "Pos", usePenalized = TRUE))
+  r_sep_firth <- suppressWarnings(oddsratio(d_sep, "exposure", "outcome", outcomeLevel = "Event", outcomeNegativeLevel = "NoEvent", predictorLevel = "Pos", predictorNegativeLevel = "Neg", usePenalized = TRUE))
   c_sep_f <- parse_or_cell_val(parse_html_table_val(r_sep_firth$text$content)[2, "OR (multivariable, Firth)"])
   expect_equal(c_sep_f$or, 2601.00, tolerance = 1e-12)
 })
@@ -267,7 +272,7 @@ test_that("VAL-oddsratio-01 (Claims D-09, D-10, D-11): Quasi-complete 1-zero-cel
     outcome = factor(c(rep("NoEvent", 15), rep("Event", 15), rep("NoEvent", 30)), levels = c("NoEvent", "Event")),
     exposure = factor(c(rep("Neg", 30), rep("Pos", 30)), levels = c("Neg", "Pos"))
   )
-  res_qsep <- suppressWarnings(oddsratio(d_qsep, "exposure", "outcome", outcomeLevel = "Event", predictorLevel = "Pos"))
+  res_qsep <- suppressWarnings(oddsratio(d_qsep, "exposure", "outcome", outcomeLevel = "Event", outcomeNegativeLevel = "NoEvent", predictorLevel = "Pos", predictorNegativeLevel = "Neg"))
   tbl_qsep <- parse_html_table_val(res_qsep$text$content)
   expect_match(tbl_qsep[2, "OR (univariable)"], "not estimable", fixed = TRUE)
 
@@ -276,7 +281,7 @@ test_that("VAL-oddsratio-01 (Claims D-09, D-10, D-11): Quasi-complete 1-zero-cel
     outcome = factor(c(rep("NoEvent", 25), rep("Event", 25)), levels = c("NoEvent", "Event")),
     x = c(26:50, 1:25)
   )
-  res_csep <- suppressWarnings(oddsratio(d_csep, "x", "outcome", outcomeLevel = "Event", predictorLevel = NULL))
+  res_csep <- suppressWarnings(oddsratio(d_csep, "x", "outcome", outcomeLevel = "Event", outcomeNegativeLevel = "NoEvent", predictorLevel = NULL, predictorNegativeLevel = NULL))
   tbl_csep <- parse_html_table_val(res_csep$text$content)
   expect_match(tbl_csep[1, "OR (univariable)"], "not estimable", fixed = TRUE)
 
@@ -287,7 +292,7 @@ test_that("VAL-oddsratio-01 (Claims D-09, D-10, D-11): Quasi-complete 1-zero-cel
                        rep("NoEvent", 30)), levels = c("NoEvent", "Event")),
     grade = factor(c(rep("G1", 30), rep("G2", 30), rep("G3", 30)), levels = c("G1", "G2", "G3"))
   )
-  res_3sep <- suppressWarnings(oddsratio(d_3sep, "grade", "outcome", outcomeLevel = "Event", predictorLevel = NULL))
+  res_3sep <- suppressWarnings(oddsratio(d_3sep, "grade", "outcome", outcomeLevel = "Event", outcomeNegativeLevel = "NoEvent", predictorLevel = NULL, predictorNegativeLevel = NULL))
   tbl_3sep <- parse_html_table_val(res_3sep$text$content)
   expect_match(tbl_3sep[3, "OR (univariable)"], "not estimable", fixed = TRUE)
 })
@@ -304,7 +309,8 @@ test_that("VAL-oddsratio-02 (Claim I-03): Firth forest plot (.firthOrPlot) plots
   ana_sp <- oddsratioClass$new(
     options = oddsratioOptions$new(
       explanatory = c("New Test", "Age (years)"), outcome = "Outcome",
-      outcomeLevel = "Dead", predictorLevel = "Pos", usePenalized = TRUE
+      outcomeLevel = "Dead", outcomeNegativeLevel = "Alive",
+      predictorLevel = "Pos", predictorNegativeLevel = "Neg", usePenalized = TRUE
     ),
     data = d_sp
   )
@@ -331,7 +337,8 @@ test_that("VAL-oddsratio-03 (Claim D-12): .restoreOriginalNamesInTable preserves
     check.names = FALSE
   )
   res_pref <- oddsratio(d_pref, c("T", "tumor size (mm)", "score*"), "outcome",
-                        outcomeLevel = "Dead", predictorLevel = "High")
+                        outcomeLevel = "Dead", outcomeNegativeLevel = "Alive",
+                        predictorLevel = "High", predictorNegativeLevel = "Low")
   tbl_pref <- parse_html_table_val(res_pref$text$content)
   expect_equal(tbl_pref[3, 1], "tumor size (mm)")
   expect_equal(tbl_pref[4, 1], "score*")
@@ -343,7 +350,7 @@ test_that("VAL-oddsratio-04 (Claim G-02): Model Performance Metrics (text2) repo
                      levels = c("NoEvent", "Event")),
     exposure = factor(c(rep(NA, 20), rep("Pos", 28), rep("Neg", 72)), levels = c("Neg", "Pos"))
   )
-  res_miss <- oddsratio(d_miss, "exposure", "outcome", outcomeLevel = "Event", predictorLevel = "Pos")
+  res_miss <- oddsratio(d_miss, "exposure", "outcome", outcomeLevel = "Event", outcomeNegativeLevel = "NoEvent", predictorLevel = "Pos", predictorNegativeLevel = "Neg")
   t2_miss <- strip_html_val(res_miss$text2$content)
   expect_match(t2_miss, "Number in dataframe = 120, Number in model = 100, Missing = 20", fixed = TRUE)
 })
@@ -354,7 +361,7 @@ test_that("VAL-oddsratio-05 (Claims G-03, G-04): Hosmer-Lemeshow metric does not
                      levels = c("NoEvent", "Event")),
     exposure = factor(c(rep("Neg", 64), rep("Pos", 64)), levels = c("Neg", "Pos"))
   )
-  res_bal32 <- oddsratio(d_bal32, "exposure", "outcome", outcomeLevel = "Event", predictorLevel = "Pos")
+  res_bal32 <- oddsratio(d_bal32, "exposure", "outcome", outcomeLevel = "Event", outcomeNegativeLevel = "NoEvent", predictorLevel = "Pos", predictorNegativeLevel = "Neg")
   expect_true(nzchar(res_bal32$text$content))
   expect_false(grepl("H&L = Chi-sq(8)", strip_html_val(res_bal32$text2$content), fixed = TRUE))
 })
@@ -369,7 +376,8 @@ test_that("IR-oddsratio-01b/c, IR-oddsratio-04, IR-oddsratio-08 (Claims D-13, D-
   ana_sep_mv <- oddsratioClass$new(
     options = oddsratioOptions$new(
       explanatory = c("exposure", "age"), outcome = "outcome",
-      outcomeLevel = "Event", predictorLevel = "Pos", showNomogram = TRUE
+      outcomeLevel = "Event", outcomeNegativeLevel = "NoEvent",
+      predictorLevel = "Pos", predictorNegativeLevel = "Neg", showNomogram = TRUE
     ),
     data = d_sep_mv
   )
@@ -385,7 +393,7 @@ test_that("IR-oddsratio-01b/c, IR-oddsratio-04, IR-oddsratio-08 (Claims D-13, D-
     exposure = factor(c(rep("Neg", 30), rep("Pos", 30)), levels = c("Neg", "Pos")),
     age = rnorm(60, 60, 10)
   )
-  res_qsep_mv <- suppressWarnings(oddsratio(d_qsep_mv, c("exposure", "age"), "outcome", outcomeLevel = "Event", predictorLevel = "Pos"))
+  res_qsep_mv <- suppressWarnings(oddsratio(d_qsep_mv, c("exposure", "age"), "outcome", outcomeLevel = "Event", outcomeNegativeLevel = "NoEvent", predictorLevel = "Pos", predictorNegativeLevel = "Neg"))
   tbl_qsep_mv <- parse_html_table_val(res_qsep_mv$text$content)
   expect_match(tbl_qsep_mv[2, "OR (multivariable)"], "not estimable", fixed = TRUE)
 
@@ -394,7 +402,7 @@ test_that("IR-oddsratio-01b/c, IR-oddsratio-04, IR-oddsratio-08 (Claims D-13, D-
     outcome = factor(c(rep("Event", 3), rep("NoEvent", 2), rep("Event", 2), rep("NoEvent", 23)), levels = c("NoEvent", "Event")),
     exposure = factor(c(rep("Pos", 5), rep("Neg", 25)), levels = c("Neg", "Pos"))
   )
-  res_small_exp <- oddsratio(d_small_exp, "exposure", "outcome", outcomeLevel = "Event", predictorLevel = "Pos", showNomogram = TRUE)
+  res_small_exp <- oddsratio(d_small_exp, "exposure", "outcome", outcomeLevel = "Event", outcomeNegativeLevel = "NoEvent", predictorLevel = "Pos", predictorNegativeLevel = "Neg", showNomogram = TRUE)
   diag_small_txt <- strip_html_val(res_small_exp$diagnosticMetrics$content)
   expect_false(grepl("Chi-square assumptions may be violated", diag_small_txt, fixed = TRUE))
 })

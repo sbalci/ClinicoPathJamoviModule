@@ -53,7 +53,8 @@ test_that("multivariable odds ratios, CIs and p-values match stats::glm", {
     df <- or_df()
     res <- quietly(oddsratio(data = df, explanatory = c("grade", "stage"),
                              outcome = "dead", outcomeLevel = "Dead",
-                             predictorLevel = NULL))
+                             outcomeNegativeLevel = "Alive",
+                             predictorLevel = NULL, predictorNegativeLevel = NULL))
 
     ref <- stats::glm(dead ~ grade + stage, data = df, family = stats::binomial)
     est <- exp(stats::coef(ref))
@@ -79,9 +80,11 @@ test_that("choosing the other outcome level inverts the odds ratios", {
     # down while still looking entirely plausible.
     df <- or_df()
     a <- quietly(oddsratio(data = df, explanatory = "grade", outcome = "dead",
-                           outcomeLevel = "Dead", predictorLevel = NULL))
+                           outcomeLevel = "Dead", outcomeNegativeLevel = "Alive",
+                           predictorLevel = NULL, predictorNegativeLevel = NULL))
     b <- quietly(oddsratio(data = df, explanatory = "grade", outcome = "dead",
-                           outcomeLevel = "Alive", predictorLevel = NULL))
+                           outcomeLevel = "Alive", outcomeNegativeLevel = "Dead",
+                           predictorLevel = NULL, predictorNegativeLevel = NULL))
 
     or_a <- or_nums(or_cells(a)[1])[1]
     or_b <- or_nums(or_cells(b)[1])[1]
@@ -96,7 +99,9 @@ test_that("Firth penalized odds ratios match logistf", {
     df <- or_df()
     res <- quietly(oddsratio(data = df, explanatory = c("grade", "stage"),
                              outcome = "dead", outcomeLevel = "Dead",
-                             predictorLevel = NULL, usePenalized = TRUE))
+                             outcomeNegativeLevel = "Alive",
+                             predictorLevel = NULL, predictorNegativeLevel = NULL,
+                             usePenalized = TRUE))
 
     # The penalized table mirrors the maximum-likelihood table's structure: a
     # reference row per factor (rendered "-", so not an OR cell) plus BOTH a
@@ -136,8 +141,10 @@ test_that("diagnostic metrics and their CIs match epiR::epi.tests", {
     skip_if_not_installed("epiR")
     df <- or_df()
     res <- quietly(oddsratio(data = df, explanatory = "grade", outcome = "dead",
-                             outcomeLevel = "Dead", diagnosticPredictor = "grade",
-                             predictorLevel = "High", showNomogram = TRUE))
+                             outcomeLevel = "Dead", outcomeNegativeLevel = "Alive",
+                             diagnosticPredictor = "grade",
+                             predictorLevel = "High", predictorNegativeLevel = "Low",
+                             showNomogram = TRUE))
 
     tb <- table(factor(df$grade, levels = c("High", "Low")),
                 factor(df$dead,  levels = c("Dead", "Alive")))
@@ -166,7 +173,8 @@ test_that("a separated fit reports 'not estimable' instead of an astronomical OR
     sep <- data.frame(x = factor(rep(c("A", "B"), each = 30)),
                       y = factor(c(rep("No", 30), rep("Yes", 30)), levels = c("No", "Yes")))
     res <- quietly(oddsratio(data = sep, explanatory = "x", outcome = "y",
-                             outcomeLevel = "Yes", predictorLevel = NULL))
+                             outcomeLevel = "Yes", outcomeNegativeLevel = "No",
+                             predictorLevel = NULL, predictorNegativeLevel = NULL))
 
     txt <- or_text(res)
     expect_match(txt, "not estimable")
@@ -184,7 +192,8 @@ test_that("near-separation is caught too", {
                        y = factor(c(rep("No", 29), "Yes", rep("Yes", 30)),
                                   levels = c("No", "Yes")))
     res <- quietly(oddsratio(data = near, explanatory = "x", outcome = "y",
-                             outcomeLevel = "Yes", predictorLevel = NULL))
+                             outcomeLevel = "Yes", outcomeNegativeLevel = "No",
+                             predictorLevel = NULL, predictorNegativeLevel = NULL))
     expect_match(or_text(res), "not estimable")
 })
 
@@ -194,7 +203,8 @@ test_that("an ordinary analysis is untouched by the non-estimable guard", {
     df <- or_df()
     res <- quietly(oddsratio(data = df, explanatory = c("grade", "stage"),
                              outcome = "dead", outcomeLevel = "Dead",
-                             predictorLevel = NULL))
+                             outcomeNegativeLevel = "Alive",
+                             predictorLevel = NULL, predictorNegativeLevel = NULL))
     expect_false(grepl("not estimable", or_text(res)))
     expect_false(nzchar(trimws(gsub("<[^>]*>", "",
         paste(as.character(res$strongWarnings$content), collapse = "")))))
@@ -207,7 +217,8 @@ test_that("a large but genuinely estimable Firth odds ratio is preserved", {
     sep <- data.frame(x = factor(rep(c("A", "B"), each = 30)),
                       y = factor(c(rep("No", 30), rep("Yes", 30)), levels = c("No", "Yes")))
     res <- quietly(oddsratio(data = sep, explanatory = "x", outcome = "y",
-                             outcomeLevel = "Yes", predictorLevel = NULL,
+                             outcomeLevel = "Yes", outcomeNegativeLevel = "No",
+                             predictorLevel = NULL, predictorNegativeLevel = NULL,
                              usePenalized = TRUE))
     txt <- or_text(res)
     expect_false(grepl("not estimable", txt))
@@ -222,8 +233,10 @@ test_that("a degenerate 2x2 yields metrics without CIs rather than an error", {
                     o = factor(c(rep("D", 20), rep("H", 20)), levels = c("H", "D")))
     expect_no_error({
         res <- quietly(oddsratio(data = z, explanatory = "p", outcome = "o",
-                                 outcomeLevel = "D", diagnosticPredictor = "p",
-                                 predictorLevel = "Pos", showNomogram = TRUE))
+                                 outcomeLevel = "D", outcomeNegativeLevel = "H",
+                                 diagnosticPredictor = "p",
+                                 predictorLevel = "Pos", predictorNegativeLevel = "Neg",
+                                 showNomogram = TRUE))
     })
     txt <- diag_text(res)
     # A perfect test: LR+ diverges (not a number), LR- is exactly 0.

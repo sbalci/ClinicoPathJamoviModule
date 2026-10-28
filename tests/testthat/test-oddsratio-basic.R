@@ -15,7 +15,9 @@ test_that("oddsratio runs with minimal arguments", {
     explanatory = "stage",
     outcome = "outcome",
     outcomeLevel = "Dead",
-    predictorLevel = NULL
+    outcomeNegativeLevel = "Alive",
+    predictorLevel = NULL,
+    predictorNegativeLevel = NULL
   )
   expect_s3_class(result, "oddsratioResults")
 })
@@ -26,7 +28,9 @@ test_that("oddsratio handles multiple predictors", {
     explanatory = c("stage", "treatment", "biomarker_status"),
     outcome = "outcome",
     outcomeLevel = "Dead",
-    predictorLevel = NULL
+    outcomeNegativeLevel = "Alive",
+    predictorLevel = NULL,
+    predictorNegativeLevel = NULL
   )
   expect_no_error(result)
 })
@@ -37,7 +41,9 @@ test_that("oddsratio handles continuous predictors", {
     explanatory = c("age", "tumor_size"),
     outcome = "outcome",
     outcomeLevel = NULL,
-    predictorLevel = NULL
+    outcomeNegativeLevel = NULL,
+    predictorLevel = NULL,
+    predictorNegativeLevel = NULL
   )
   expect_no_error(result)
 })
@@ -48,15 +54,17 @@ test_that("oddsratio handles mixed predictors", {
     explanatory = c("age", "stage", "tumor_size"),
     outcome = "outcome",
     outcomeLevel = NULL,
-    predictorLevel = NULL
+    outcomeNegativeLevel = NULL,
+    predictorLevel = NULL,
+    predictorNegativeLevel = NULL
   )
   expect_no_error(result)
 })
 
 test_that("oddsratio sets todo notice on missing required arguments", {
-  res1 <- oddsratio(data = oddsratio_test, outcome = "outcome", outcomeLevel = NULL, predictorLevel = NULL)
+  res1 <- oddsratio(data = oddsratio_test, outcome = "outcome", outcomeLevel = NULL, outcomeNegativeLevel = NULL, predictorLevel = NULL, predictorNegativeLevel = NULL)
   expect_true(nchar(res1$todo$content) > 0)
-  res2 <- oddsratio(data = oddsratio_test, explanatory = "stage", outcomeLevel = NULL, predictorLevel = NULL)
+  res2 <- oddsratio(data = oddsratio_test, explanatory = "stage", outcomeLevel = NULL, outcomeNegativeLevel = NULL, predictorLevel = NULL, predictorNegativeLevel = NULL)
   expect_true(nchar(res2$todo$content) > 0)
 })
 
@@ -67,7 +75,9 @@ test_that("oddsratio handles nomogram option", {
     outcome = "disease_status",
     showNomogram = TRUE,
     outcomeLevel = NULL,
-    predictorLevel = NULL
+    outcomeNegativeLevel = NULL,
+    predictorLevel = NULL,
+    predictorNegativeLevel = NULL
   )
   expect_no_error(result)
 })
@@ -79,7 +89,9 @@ test_that("oddsratio handles explanations option", {
     outcome = "outcome",
     showExplanations = TRUE,
     outcomeLevel = NULL,
-    predictorLevel = NULL
+    outcomeNegativeLevel = NULL,
+    predictorLevel = NULL,
+    predictorNegativeLevel = NULL
   )
   expect_no_error(result)
 })

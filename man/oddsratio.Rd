@@ -9,8 +9,10 @@ oddsratio(
   explanatory = NULL,
   outcome = NULL,
   outcomeLevel,
+  outcomeNegativeLevel,
   diagnosticPredictor = NULL,
   predictorLevel,
+  predictorNegativeLevel,
   usePenalized = FALSE,
   showNomogram = FALSE,
   showExplanations = FALSE
@@ -24,22 +26,41 @@ oddsratio(
 \item{outcome}{The outcome variable to be used in the analysis.}
 
 \item{outcomeLevel}{Specify which outcome level is modeled as the event in
-logistic regression and used as positive for diagnostic metrics. A positive
-outcome level is required; until it is specified the analysis asks for it
-and computes nothing. It is never taken from the order of the levels.}
+logistic regression and used as positive for diagnostic metrics. Both
+outcomeLevel and outcomeNegativeLevel are required; until both are
+specified the analysis asks for them and computes nothing. They are never
+taken from the order of the levels, and any other levels are excluded.}
+
+\item{outcomeNegativeLevel}{Specify which outcome level is modeled as the
+non-event (reference, 0) in logistic regression and used as negative for
+diagnostic metrics. Both outcomeLevel and outcomeNegativeLevel are
+required; until both are specified the analysis asks for them and computes
+nothing. Any rows with other outcome levels are excluded with a warning.}
 
 \item{diagnosticPredictor}{Specify the predictor to drive likelihood
-ratios; must be binary. Defaults to the first explanatory variable when
-predictorLevel is supplied in R; in the jamovi GUI, populate this box to
-enable the Predictor Positive Level selector.}
+ratios. Defaults to the first explanatory variable when predictorLevel and
+predictorNegativeLevel are supplied in R; in the jamovi GUI, populate this
+box to enable the Predictor Positive Level selector (and Predictor Negative
+Level selector).}
 
 \item{predictorLevel}{Which level of the diagnostic predictor is the
-positive test result. The diagnostic metrics (sensitivity, specificity,
-likelihood ratios) need it; it is never taken from the level names or their
-order. Because a Level option cannot declare a default, this is a required
-argument of the R function: predictorLevel = NULL leaves the diagnostic
-metrics waiting for the choice while the logistic model, odds ratios,
-forest plot and nomogram still run.}
+positive test result. Both predictorLevel and predictorNegativeLevel are
+required for diagnostic metrics (sensitivity, specificity, likelihood
+ratios) and are never taken from the level names or their order. Because a
+Level option cannot declare a default, this is a required argument of the R
+function: predictorLevel = NULL leaves the diagnostic metrics waiting for
+the choice while the logistic model, odds ratios, forest plot and nomogram
+still run.}
+
+\item{predictorNegativeLevel}{Which level of the diagnostic predictor is
+the negative test result. Both predictorLevel and predictorNegativeLevel
+are required for diagnostic metrics (sensitivity, specificity, likelihood
+ratios) and are never taken from the level names or their order; any other
+predictor levels are excluded from the 2x2 table with a warning. Because a
+Level option cannot declare a default, this is a required argument of the R
+function: predictorNegativeLevel = NULL leaves the diagnostic metrics
+waiting for the choice while the logistic model, odds ratios, forest plot
+and nomogram still run.}
 
 \item{usePenalized}{Use Firth penalized likelihood logistic regression.
 This is recommended when there is separation (zero cells), small sample

@@ -35,7 +35,9 @@ test_that("Outcome releveling: Dead as positive (standard coding)", {
     explanatory = "treatment",
     outcome = "outcome",
     outcomeLevel = "Dead",
-    predictorLevel = NULL
+    outcomeNegativeLevel = "Alive",
+    predictorLevel = NULL,
+    predictorNegativeLevel = NULL
   )
 
   # The odds ratio for Drug vs Control should be > 1 (Drug has higher mortality)
@@ -81,7 +83,9 @@ test_that("Outcome releveling: Dead as positive (reversed coding)", {
     explanatory = "treatment",
     outcome = "outcome",
     outcomeLevel = "Dead",
-    predictorLevel = NULL
+    outcomeNegativeLevel = "Alive",
+    predictorLevel = NULL,
+    predictorNegativeLevel = NULL
   )
 
   expect_s3_class(result, "oddsratioResults")
@@ -124,7 +128,9 @@ test_that("Outcome releveling: Alive as positive (inverted interpretation)", {
     explanatory = "treatment",
     outcome = "outcome",
     outcomeLevel = "Alive",  # Modeling survival instead of death
-    predictorLevel = NULL
+    outcomeNegativeLevel = "Dead",
+    predictorLevel = NULL,
+    predictorNegativeLevel = NULL
   )
 
   expect_s3_class(result, "oddsratioResults")
@@ -169,7 +175,9 @@ test_that("Outcome releveling: Event vs No Event (standard epidemiology)", {
     explanatory = "exposure",
     outcome = "disease",
     outcomeLevel = "Event",
-    predictorLevel = NULL
+    outcomeNegativeLevel = "No Event",
+    predictorLevel = NULL,
+    predictorNegativeLevel = NULL
   )
 
   expect_s3_class(result, "oddsratioResults")
@@ -351,7 +359,9 @@ test_that("Edge case: Single binary predictor", {
     explanatory = "treatment",
     outcome = "outcome",
     outcomeLevel = "Dead",
-    predictorLevel = NULL
+    outcomeNegativeLevel = "Alive",
+    predictorLevel = NULL,
+    predictorNegativeLevel = NULL
   )
 
   expect_s3_class(result, "oddsratioResults")
@@ -383,7 +393,9 @@ test_that("Edge case: Multiple predictors", {
     explanatory = c("treatment", "smoking"),
     outcome = "outcome",
     outcomeLevel = "Dead",
-    predictorLevel = NULL
+    outcomeNegativeLevel = "Alive",
+    predictorLevel = NULL,
+    predictorNegativeLevel = NULL
   )
 
   expect_s3_class(result, "oddsratioResults")
@@ -403,7 +415,9 @@ test_that("Edge case: Continuous predictor (should work with logistic regression
     explanatory = "age",
     outcome = "outcome",
     outcomeLevel = "Event",
-    predictorLevel = NULL
+    outcomeNegativeLevel = "No Event",
+    predictorLevel = NULL,
+    predictorNegativeLevel = NULL
   )
 
   expect_s3_class(result, "oddsratioResults")

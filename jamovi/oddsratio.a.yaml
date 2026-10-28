@@ -74,12 +74,27 @@ options:
       description:
           main: >
               Specify which outcome level represents the positive case (e.g., "Dead", "Event", "Yes").
-              This is important for correct calculation of likelihood ratios and diagnostic metrics.
+              Both Positive and Negative outcome levels must be selected; any other outcome levels are excluded.
           R: >
             Specify which outcome level is modeled as the event in logistic regression and
-            used as positive for diagnostic metrics. A positive outcome level is required;
-            until it is specified the analysis asks for it and computes nothing. It is never
-            taken from the order of the levels.
+            used as positive for diagnostic metrics. Both outcomeLevel and outcomeNegativeLevel
+            are required; until both are specified the analysis asks for them and computes nothing.
+            They are never taken from the order of the levels, and any other levels are excluded.
+
+    - name: outcomeNegativeLevel
+      title: Negative Level
+      type: Level
+      variable: (outcome)
+      allowNone: true
+      description:
+          main: >
+              Specify which outcome level represents the negative/reference case (e.g., "Alive", "No Event", "No").
+              Both Positive and Negative outcome levels must be selected; any other outcome levels are excluded.
+          R: >
+            Specify which outcome level is modeled as the non-event (reference, 0) in logistic
+            regression and used as negative for diagnostic metrics. Both outcomeLevel and
+            outcomeNegativeLevel are required; until both are specified the analysis asks for
+            them and computes nothing. Any rows with other outcome levels are excluded with a warning.
 
     - name: diagnosticPredictor
       title: Diagnostic Predictor (for LRs)
@@ -89,12 +104,12 @@ options:
       default: null
       description:
           main: >
-              Choose which binary predictor to use for the separate, unadjusted sensitivity,
+              Choose which categorical predictor to use for the separate, unadjusted sensitivity,
               specificity, and likelihood-ratio calculations. In the jamovi interface, select
-              this variable here so the 'Predictor Positive Level' selector below can list its
-              levels; in R, if left empty, the first explanatory variable is used when it is binary.
+              this variable here so the 'Predictor Positive Level' and 'Predictor Negative Level'
+              selectors below can list its levels; in R, if left empty, the first explanatory variable is used.
           R: >
-              Specify the predictor to drive likelihood ratios; must be binary. Defaults to the first explanatory variable when predictorLevel is supplied in R; in the jamovi GUI, populate this box to enable the Predictor Positive Level selector.
+              Specify the predictor to drive likelihood ratios. Defaults to the first explanatory variable when predictorLevel and predictorNegativeLevel are supplied in R; in the jamovi GUI, populate this box to enable the Predictor Positive Level selector (and Predictor Negative Level selector).
 
     - name: predictorLevel
       title: Predictor Positive Level
@@ -104,18 +119,42 @@ options:
       description:
           main: >
               Choose which level of the diagnostic predictor is the positive test result
-              (e.g., "Present", "Test+", "Yes"). The diagnostic metrics (sensitivity,
-              specificity, likelihood ratios) need this choice; it is never taken from the
-              level names or their order. While it is empty the diagnostic metrics wait for
-              it and list the observed levels, and the logistic model, odds ratios, forest
-              plot and nomogram still run.
+              (e.g., "Present", "Test+", "Yes"). Both Predictor Positive Level and Predictor
+              Negative Level must be selected for diagnostic metrics; they are never taken from
+              the level names or their order, and any other levels are excluded. While either is
+              empty the diagnostic metrics wait for them and list the observed levels, and the
+              logistic model, odds ratios, forest plot and nomogram still run.
           R: >
-              Which level of the diagnostic predictor is the positive test result. The
-              diagnostic metrics (sensitivity, specificity, likelihood ratios) need it; it is
-              never taken from the level names or their order. Because a Level option cannot
-              declare a default, this is a required argument of the R function:
-              predictorLevel = NULL leaves the diagnostic metrics waiting for the choice
-              while the logistic model, odds ratios, forest plot and nomogram still run.
+              Which level of the diagnostic predictor is the positive test result. Both
+              predictorLevel and predictorNegativeLevel are required for diagnostic metrics
+              (sensitivity, specificity, likelihood ratios) and are never taken from the level
+              names or their order. Because a Level option cannot declare a default, this is a
+              required argument of the R function: predictorLevel = NULL leaves the diagnostic
+              metrics waiting for the choice while the logistic model, odds ratios, forest plot
+              and nomogram still run.
+
+    - name: predictorNegativeLevel
+      title: Predictor Negative Level
+      type: Level
+      variable: (diagnosticPredictor)
+      allowNone: true
+      description:
+          main: >
+              Choose which level of the diagnostic predictor is the negative test result
+              (e.g., "Absent", "Test-", "No"). Both Predictor Positive Level and Predictor
+              Negative Level must be selected for diagnostic metrics; they are never taken from
+              the level names or their order, and any other levels are excluded. While either is
+              empty the diagnostic metrics wait for them and list the observed levels, and the
+              logistic model, odds ratios, forest plot and nomogram still run.
+          R: >
+              Which level of the diagnostic predictor is the negative test result. Both
+              predictorLevel and predictorNegativeLevel are required for diagnostic metrics
+              (sensitivity, specificity, likelihood ratios) and are never taken from the level
+              names or their order; any other predictor levels are excluded from the 2x2 table
+              with a warning. Because a Level option cannot declare a default, this is a required
+              argument of the R function: predictorNegativeLevel = NULL leaves the diagnostic
+              metrics waiting for the choice while the logistic model, odds ratios, forest plot
+              and nomogram still run.
 
     - name: usePenalized
       title: Firth penalized logistic regression

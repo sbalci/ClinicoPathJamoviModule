@@ -71,7 +71,7 @@ test_that("Basic functionality tests", {
   basic_data <- oddsratio_test_data$basic_clinical
   
   expect_silent(
-    result <- ClinicoPath::oddsratio(outcomeLevel = NULL, predictorLevel = NULL, 
+    result <- ClinicoPath::oddsratio(outcomeLevel = NULL, outcomeNegativeLevel = NULL, predictorLevel = NULL, predictorNegativeLevel = NULL, 
       data = basic_data,
       explanatory = c("age", "gender", "smoking"),
       outcome = "mortality"
@@ -98,7 +98,7 @@ test_that("Input validation tests", {
   
   # Test 1: Missing data parameter
   expect_error(
-    ClinicoPath::oddsratio(outcomeLevel = NULL, predictorLevel = NULL, 
+    ClinicoPath::oddsratio(outcomeLevel = NULL, outcomeNegativeLevel = NULL, predictorLevel = NULL, predictorNegativeLevel = NULL, 
       explanatory = "age",
       outcome = "mortality"
     ),
@@ -106,14 +106,14 @@ test_that("Input validation tests", {
   )
   
   # Test 2: Missing outcome parameter
-  res_no_outcome <- ClinicoPath::oddsratio(outcomeLevel = NULL, predictorLevel = NULL, 
+  res_no_outcome <- ClinicoPath::oddsratio(outcomeLevel = NULL, outcomeNegativeLevel = NULL, predictorLevel = NULL, predictorNegativeLevel = NULL, 
     data = basic_data,
     explanatory = "age"
   )
   expect_true(nchar(res_no_outcome$todo$content) > 0)
   
   # Test 3: Missing explanatory parameter
-  res_no_expl <- ClinicoPath::oddsratio(outcomeLevel = NULL, predictorLevel = NULL, 
+  res_no_expl <- ClinicoPath::oddsratio(outcomeLevel = NULL, outcomeNegativeLevel = NULL, predictorLevel = NULL, predictorNegativeLevel = NULL, 
     data = basic_data,
     outcome = "mortality"
   )
@@ -121,7 +121,7 @@ test_that("Input validation tests", {
   
   # Test 4: Invalid variable names
   expect_error(
-    ClinicoPath::oddsratio(outcomeLevel = NULL, predictorLevel = NULL, 
+    ClinicoPath::oddsratio(outcomeLevel = NULL, outcomeNegativeLevel = NULL, predictorLevel = NULL, predictorNegativeLevel = NULL, 
       data = basic_data,
       explanatory = "nonexistent_variable",
       outcome = "mortality"
@@ -129,7 +129,7 @@ test_that("Input validation tests", {
   )
   
   # Test 5: Try with a valid variable but different configuration (should handle gracefully)
-  result_valid <- ClinicoPath::oddsratio(outcomeLevel = NULL, predictorLevel = NULL, 
+  result_valid <- ClinicoPath::oddsratio(outcomeLevel = NULL, outcomeNegativeLevel = NULL, predictorLevel = NULL, predictorNegativeLevel = NULL, 
     data = basic_data,
     explanatory = "age",
     outcome = "gender" 
@@ -143,7 +143,7 @@ test_that("Mathematical accuracy tests", {
   effect_data <- oddsratio_test_data$effect_size
   
   # Test 1: No effect predictor (OR should be close to 1.0)
-  result_no_effect <- ClinicoPath::oddsratio(outcomeLevel = NULL, predictorLevel = NULL, 
+  result_no_effect <- ClinicoPath::oddsratio(outcomeLevel = NULL, outcomeNegativeLevel = NULL, predictorLevel = NULL, predictorNegativeLevel = NULL, 
     data = effect_data,
     explanatory = "no_effect",
     outcome = "no_effect_outcome"
@@ -152,7 +152,7 @@ test_that("Mathematical accuracy tests", {
   expect_silent(result_no_effect$text$content)
   
   # Test 2: Large effect predictor (OR should be substantial)
-  result_large_effect <- ClinicoPath::oddsratio(outcomeLevel = NULL, predictorLevel = NULL, 
+  result_large_effect <- ClinicoPath::oddsratio(outcomeLevel = NULL, outcomeNegativeLevel = NULL, predictorLevel = NULL, predictorNegativeLevel = NULL, 
     data = effect_data,
     explanatory = "large_effect",
     outcome = "large_effect_outcome"
@@ -161,7 +161,7 @@ test_that("Mathematical accuracy tests", {
   expect_silent(result_large_effect$text$content)
   
   # Test 3: Continuous predictor
-  result_continuous <- ClinicoPath::oddsratio(outcomeLevel = NULL, predictorLevel = NULL, 
+  result_continuous <- ClinicoPath::oddsratio(outcomeLevel = NULL, outcomeNegativeLevel = NULL, predictorLevel = NULL, predictorNegativeLevel = NULL, 
     data = effect_data,
     explanatory = "continuous_predictor",
     outcome = "large_effect_outcome"
@@ -170,7 +170,7 @@ test_that("Mathematical accuracy tests", {
   expect_silent(result_continuous$text$content)
   
   # Test 4: Multiple explanatory variables
-  result_multiple <- ClinicoPath::oddsratio(outcomeLevel = NULL, predictorLevel = NULL, 
+  result_multiple <- ClinicoPath::oddsratio(outcomeLevel = NULL, outcomeNegativeLevel = NULL, predictorLevel = NULL, predictorNegativeLevel = NULL, 
     data = effect_data,
     explanatory = c("small_effect", "medium_effect"),
     outcome = "large_effect_outcome"
@@ -184,7 +184,7 @@ test_that("Edge case handling tests", {
   edge_data <- oddsratio_test_data$edge_cases
   
   # Test 1: Perfect predictor (should handle gracefully)
-  result_perfect <- ClinicoPath::oddsratio(outcomeLevel = NULL, predictorLevel = NULL, 
+  result_perfect <- ClinicoPath::oddsratio(outcomeLevel = NULL, outcomeNegativeLevel = NULL, predictorLevel = NULL, predictorNegativeLevel = NULL, 
     data = edge_data,
     explanatory = "perfect_predictor",
     outcome = "outcome"
@@ -193,7 +193,7 @@ test_that("Edge case handling tests", {
   expect_silent(result_perfect$text$content)
   
   # Test 2: Rare event predictor
-  result_rare <- ClinicoPath::oddsratio(outcomeLevel = NULL, predictorLevel = NULL, 
+  result_rare <- ClinicoPath::oddsratio(outcomeLevel = NULL, outcomeNegativeLevel = NULL, predictorLevel = NULL, predictorNegativeLevel = NULL, 
     data = edge_data,
     explanatory = "rare_mutation",
     outcome = "outcome"
@@ -202,7 +202,7 @@ test_that("Edge case handling tests", {
   expect_silent(result_rare$text$content)
   
   # Test 3: Highly unbalanced predictor
-  result_unbalanced <- ClinicoPath::oddsratio(outcomeLevel = NULL, predictorLevel = NULL, 
+  result_unbalanced <- ClinicoPath::oddsratio(outcomeLevel = NULL, outcomeNegativeLevel = NULL, predictorLevel = NULL, predictorNegativeLevel = NULL, 
     data = edge_data,
     explanatory = "rare_histology",
     outcome = "outcome"
@@ -211,7 +211,7 @@ test_that("Edge case handling tests", {
   expect_silent(result_unbalanced$text$content)
   
   # Test 4: Data with missing values
-  result_missing <- ClinicoPath::oddsratio(outcomeLevel = NULL, predictorLevel = NULL, 
+  result_missing <- ClinicoPath::oddsratio(outcomeLevel = NULL, outcomeNegativeLevel = NULL, predictorLevel = NULL, predictorNegativeLevel = NULL, 
     data = edge_data,
     explanatory = "biomarker_level",
     outcome = "outcome"
@@ -225,7 +225,7 @@ test_that("Nomogram feature tests", {
   basic_data <- oddsratio_test_data$basic_clinical
   
   # Test 1: Nomogram disabled (default)
-  result_no_nomogram <- ClinicoPath::oddsratio(outcomeLevel = NULL, predictorLevel = NULL, 
+  result_no_nomogram <- ClinicoPath::oddsratio(outcomeLevel = NULL, outcomeNegativeLevel = NULL, predictorLevel = NULL, predictorNegativeLevel = NULL, 
     data = basic_data,
     explanatory = "smoking",
     outcome = "mortality",
@@ -235,7 +235,7 @@ test_that("Nomogram feature tests", {
   expect_silent(result_no_nomogram$text$content)
   
   # Test 2: Nomogram enabled
-  result_with_nomogram <- ClinicoPath::oddsratio(outcomeLevel = NULL, predictorLevel = NULL, 
+  result_with_nomogram <- ClinicoPath::oddsratio(outcomeLevel = NULL, outcomeNegativeLevel = NULL, predictorLevel = NULL, predictorNegativeLevel = NULL, 
     data = basic_data,
     explanatory = "smoking",
     outcome = "mortality",
@@ -246,7 +246,7 @@ test_that("Nomogram feature tests", {
   expect_silent(result_with_nomogram$text2$content)
   
   # Test 3: Nomogram with multiple predictors
-  result_nomogram_multi <- ClinicoPath::oddsratio(outcomeLevel = NULL, predictorLevel = NULL, 
+  result_nomogram_multi <- ClinicoPath::oddsratio(outcomeLevel = NULL, outcomeNegativeLevel = NULL, predictorLevel = NULL, predictorNegativeLevel = NULL, 
     data = basic_data,
     explanatory = c("age", "smoking"),
     outcome = "mortality",
@@ -264,7 +264,7 @@ test_that("Real-world clinical scenarios", {
   # Test 1: Cardiovascular study
   cardio_data <- oddsratio_test_data$cardiovascular
   
-  result_cardio <- ClinicoPath::oddsratio(outcomeLevel = NULL, predictorLevel = NULL, 
+  result_cardio <- ClinicoPath::oddsratio(outcomeLevel = NULL, outcomeNegativeLevel = NULL, predictorLevel = NULL, predictorNegativeLevel = NULL, 
     data = cardio_data,
     explanatory = c("age", "sex", "hypertension", "diabetes"),
     outcome = "cv_event"
@@ -276,7 +276,7 @@ test_that("Real-world clinical scenarios", {
   # Test 2: Oncology study
   oncology_data <- oddsratio_test_data$oncology
   
-  result_oncology <- ClinicoPath::oddsratio(outcomeLevel = NULL, predictorLevel = NULL, 
+  result_oncology <- ClinicoPath::oddsratio(outcomeLevel = NULL, outcomeNegativeLevel = NULL, predictorLevel = NULL, predictorNegativeLevel = NULL, 
     data = oncology_data,
     explanatory = c("age", "gender", "tumor_grade", "her2_status"),
     outcome = "recurrence"
@@ -286,7 +286,7 @@ test_that("Real-world clinical scenarios", {
   expect_silent(result_oncology$plot)
   
   # Test 3: Mixed variable types
-  result_mixed <- ClinicoPath::oddsratio(outcomeLevel = NULL, predictorLevel = NULL, 
+  result_mixed <- ClinicoPath::oddsratio(outcomeLevel = NULL, outcomeNegativeLevel = NULL, predictorLevel = NULL, predictorNegativeLevel = NULL, 
     data = oncology_data,
     explanatory = c("age", "tumor_stage", "chemotherapy", "radiation"),
     outcome = "recurrence"
@@ -305,7 +305,7 @@ test_that("Variable name handling tests", {
   names(test_data)[names(test_data) == "systolic_bp"] <- "Systolic BP"
   names(test_data)[names(test_data) == "tumor_size"] <- "Tumor Size (cm)"
   
-  result_spaces <- ClinicoPath::oddsratio(outcomeLevel = NULL, predictorLevel = NULL, 
+  result_spaces <- ClinicoPath::oddsratio(outcomeLevel = NULL, outcomeNegativeLevel = NULL, predictorLevel = NULL, predictorNegativeLevel = NULL, 
     data = test_data,
     explanatory = c("age", "Systolic BP", "Tumor Size (cm)"),
     outcome = "mortality"
@@ -324,7 +324,7 @@ test_that("Performance tests", {
   # Measure execution time
   start_time <- Sys.time()
   
-  result_large <- ClinicoPath::oddsratio(outcomeLevel = NULL, predictorLevel = NULL, 
+  result_large <- ClinicoPath::oddsratio(outcomeLevel = NULL, outcomeNegativeLevel = NULL, predictorLevel = NULL, predictorNegativeLevel = NULL, 
     data = large_data,
     explanatory = c("age", "gender", "smoking", "comorbidity"),
     outcome = "mortality"
@@ -347,7 +347,7 @@ test_that("Error handling and recovery tests", {
   # Test 1: Empty data
   empty_data <- basic_data[0, ]
   
-  result_empty <- ClinicoPath::oddsratio(outcomeLevel = NULL, predictorLevel = NULL, 
+  result_empty <- ClinicoPath::oddsratio(outcomeLevel = NULL, outcomeNegativeLevel = NULL, predictorLevel = NULL, predictorNegativeLevel = NULL, 
     data = empty_data,
     explanatory = "age",
     outcome = "mortality"
@@ -358,7 +358,7 @@ test_that("Error handling and recovery tests", {
   missing_outcome_data <- basic_data
   missing_outcome_data$mortality <- NA
   
-  result_missing <- ClinicoPath::oddsratio(outcomeLevel = NULL, predictorLevel = NULL, 
+  result_missing <- ClinicoPath::oddsratio(outcomeLevel = NULL, outcomeNegativeLevel = NULL, predictorLevel = NULL, predictorNegativeLevel = NULL, 
     data = missing_outcome_data,
     explanatory = "age",
     outcome = "mortality"
@@ -369,7 +369,7 @@ test_that("Error handling and recovery tests", {
   single_level_data <- basic_data
   single_level_data$mortality <- factor(rep("Alive", nrow(single_level_data)))
   
-  result_single <- ClinicoPath::oddsratio(outcomeLevel = NULL, predictorLevel = NULL, 
+  result_single <- ClinicoPath::oddsratio(outcomeLevel = NULL, outcomeNegativeLevel = NULL, predictorLevel = NULL, predictorNegativeLevel = NULL, 
     data = single_level_data,
     explanatory = "age",
     outcome = "mortality"
@@ -381,7 +381,7 @@ test_that("Output format and content tests", {
   
   basic_data <- oddsratio_test_data$basic_clinical
   
-  result <- ClinicoPath::oddsratio(outcomeLevel = NULL, predictorLevel = NULL, 
+  result <- ClinicoPath::oddsratio(outcomeLevel = NULL, outcomeNegativeLevel = NULL, predictorLevel = NULL, predictorNegativeLevel = NULL, 
     data = basic_data,
     explanatory = c("age", "gender"),
     outcome = "mortality"
@@ -421,7 +421,7 @@ test_that("Integration with finalfit package", {
   )
   
   # Test that our function produces similar results
-  result <- ClinicoPath::oddsratio(outcomeLevel = NULL, predictorLevel = NULL, 
+  result <- ClinicoPath::oddsratio(outcomeLevel = NULL, outcomeNegativeLevel = NULL, predictorLevel = NULL, predictorNegativeLevel = NULL, 
     data = basic_data,
     explanatory = c("age", "gender", "smoking"),
     outcome = "mortality"
@@ -437,7 +437,7 @@ test_that("Likelihood ratio calculation tests", {
   edge_data <- oddsratio_test_data$edge_cases
   
   # Create oddsratio class instance to test private methods
-  result <- ClinicoPath::oddsratio(outcomeLevel = NULL, predictorLevel = NULL, 
+  result <- ClinicoPath::oddsratio(outcomeLevel = NULL, outcomeNegativeLevel = NULL, predictorLevel = NULL, predictorNegativeLevel = NULL, 
     data = edge_data,
     explanatory = "perfect_predictor",
     outcome = "outcome",
@@ -471,7 +471,7 @@ test_that("Manual calculation validation", {
   # Manual calculation: OR = (20*90)/(80*10) = 1800/800 = 2.25
   expected_or <- 2.25
   
-  result <- ClinicoPath::oddsratio(outcomeLevel = NULL, predictorLevel = NULL, 
+  result <- ClinicoPath::oddsratio(outcomeLevel = NULL, outcomeNegativeLevel = NULL, predictorLevel = NULL, predictorNegativeLevel = NULL, 
     data = simple_data,
     explanatory = "exposure",
     outcome = "outcome"
