@@ -79,24 +79,24 @@ likelihood ratios, and prediction nomograms.}
 \value{
 A results object containing:
 \tabular{llllll}{
-  \code{results$todo} \tab \tab \tab \tab \tab a html \cr
-  \code{results$errors} \tab \tab \tab \tab \tab a html \cr
-  \code{results$strongWarnings} \tab \tab \tab \tab \tab a html \cr
-  \code{results$warnings} \tab \tab \tab \tab \tab a html \cr
-  \code{results$infoMessages} \tab \tab \tab \tab \tab a html \cr
-  \code{results$text} \tab \tab \tab \tab \tab a html \cr
-  \code{results$text2} \tab \tab \tab \tab \tab a html \cr
-  \code{results$plot} \tab \tab \tab \tab \tab an image \cr
-  \code{results$oddsRatioExplanation} \tab \tab \tab \tab \tab a html \cr
-  \code{results$riskMeasuresExplanation} \tab \tab \tab \tab \tab a html \cr
-  \code{results$diagnosticTestExplanation} \tab \tab \tab \tab \tab a html \cr
-  \code{results$plot_nomogram} \tab \tab \tab \tab \tab an image \cr
-  \code{results$diagnosticMetrics} \tab \tab \tab \tab \tab a html \cr
-  \code{results$nomogram} \tab \tab \tab \tab \tab a html \cr
-  \code{results$nomogramAnalysisExplanation} \tab \tab \tab \tab \tab a html \cr
+\code{results$todo} \tab \tab \tab \tab \tab a html \cr
+\code{results$errors} \tab \tab \tab \tab \tab a html \cr
+\code{results$strongWarnings} \tab \tab \tab \tab \tab a html \cr
+\code{results$warnings} \tab \tab \tab \tab \tab a html \cr
+\code{results$infoMessages} \tab \tab \tab \tab \tab a html \cr
+\code{results$text} \tab \tab \tab \tab \tab a html \cr
+\code{results$text2} \tab \tab \tab \tab \tab a html \cr
+\code{results$plot} \tab \tab \tab \tab \tab an image \cr
+\code{results$oddsRatioExplanation} \tab \tab \tab \tab \tab a html \cr
+\code{results$riskMeasuresExplanation} \tab \tab \tab \tab \tab a html \cr
+\code{results$diagnosticTestExplanation} \tab \tab \tab \tab \tab a html \cr
+\code{results$plot_nomogram} \tab \tab \tab \tab \tab an image \cr
+\code{results$diagnosticMetrics} \tab \tab \tab \tab \tab a html \cr
+\code{results$nomogram} \tab \tab \tab \tab \tab a html \cr
+\code{results$nomogramAnalysisExplanation} \tab \tab \tab \tab \tab a html \cr
 }
 }
 \description{
-Logistic regression odds-ratio table, forest plot, prediction nomogram, and 
+Logistic regression odds-ratio table, forest plot, prediction nomogram, and
 optional binary diagnostic metrics.
 }

@@ -206,7 +206,8 @@ timeintervalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                     "ClinicoPathJamoviModule",
                     "lubridate",
                     "glue",
-                    "tools"))
+                    "htmltools",
+                    "Dafni2011"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="messages"))

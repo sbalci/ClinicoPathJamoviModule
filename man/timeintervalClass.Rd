@@ -18,7 +18,7 @@ This function provides comprehensive time interval calculation capabilities incl
 \itemize{
 \item Multiple date format parsing with automatic detection
 \item Flexible output units (days, weeks, months, years)
-\item Landmark analysis for conditional survival
+\item Landmark analysis for follow-up conditional on reaching a specified time point
 \item Person-time calculations for epidemiological studies
 \item Data quality assessment and validation
 \item Statistical summaries with confidence intervals

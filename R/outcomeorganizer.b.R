@@ -7,6 +7,8 @@ outcomeorganizerClass <- if (requireNamespace('jmvcore')) R6::R6Class(
     "outcomeorganizerClass",
     inherit = outcomeorganizerBase,
     public = list(
+        #' @description Initialize the analysis, guarding against an empty variable selection.
+        #' @param noThrow Whether initialization errors are stored in the results.
         init = function(noThrow = FALSE) {
             # Guard against jmvcore::select(private$.data, character(0)) crashing
             # with "invalid 'row.names' length" when 0 Variable options are set.

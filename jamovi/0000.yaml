@@ -60,7 +60,7 @@ analyses:
   - title: Benford Analysis
     name: benford
     ns: ClinicoPath
-    menuGroup: Exploration
+    menuGroup: ExplorationT
     menuSubgroup: ClinicoPath Data Quality
     menuTitle: Benford Analysis
     ribbon: analyses
@@ -124,7 +124,7 @@ analyses:
   - title: Categorize Continuous Variables
     name: categorize
     ns: ClinicoPath
-    menuGroup: Exploration
+    menuGroup: ExplorationT
     menuSubgroup: ClinicoPath Data Preparation
     menuTitle: Categorize Continuous Variables
     menuSubtitle: Bin numeric variables into categories
@@ -849,7 +849,7 @@ analyses:
   - title: Single Variable Quality Check
     name: checkdata
     ns: ClinicoPath
-    menuGroup: Exploration
+    menuGroup: ExplorationT
     menuTitle: Single Variable Quality Check
     menuSubgroup: ClinicoPath Data Quality
     ribbon: analyses
