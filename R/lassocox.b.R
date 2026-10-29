@@ -75,6 +75,32 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
     inherit = lassocoxBase,
     private = list(
 
+        .sourcifyOption = function(option) {
+            if (identical(option$name, "data"))
+                return("data = data")
+            declared <- setdiff(names(lassocoxOptions$active), c("data", "version"))
+            if (is.null(option$name) || !(option$name %in% declared))
+                return("")
+            value <- option$value
+            if (is.null(value) || is.list(value) || is.environment(value))
+                return("")
+            if (!identical(option$name, "explanatory") && length(value) != 1L)
+                return("")
+            if (is.character(value)) {
+                if (length(value) == 0L || anyNA(value) || (length(value) == 1L && !nzchar(value)))
+                    return("")
+                if (identical(value, option$default))
+                    return("")
+                rhs <- if (length(value) == 1L) {
+                    encodeString(value, quote = '"')
+                } else {
+                    paste0("c(", paste(encodeString(value, quote = '"'), collapse = ", "), ")")
+                }
+                return(paste0(option$name, " = ", rhs))
+            }
+            super$.sourcifyOption(option)
+        },
+
         .inputsReady = function() {
             !is.null(self$options$elapsedtime) && !is.null(self$options$outcome) &&
                 length(self$options$explanatory) > 0
@@ -98,10 +124,7 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
         .init = function() {
             private$.clearAnalysisOutputs()
-            for (name in c("lassoExplanation", "methodologyNotes", "clinicalGuidance",
-                "regularizationPathExplanation", "crossValidationExplanation", "riskScoreExplanation")) {
-                self$results[[name]]$setContent("")
-            }
+            private$.initializeExplanations()
             if (private$.dependencyError()) return()
             if (!private$.inputsReady()) {
                 self$results$todo$setContent(paste0(
@@ -112,19 +135,22 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             } else {
                 private$.initFixedTables()
             }
-            private$.initializeExplanations()
+        },
+
+        .modelSummaryLabels = function() {
+            c(.("Encoded Predictor Columns"), .("Selected Predictor Columns"),
+              .("Column Selection Proportion"), .("Optimal Lambda"), .("Penalty Selected By"),
+              .("Stratified CV Folds Used"), .("Sample Size"), .("Number of Events"),
+              .("Censoring Rate"), .("Event Level Used"), .("Rows Excluded (Missing Data)"),
+              .("Original Candidate Predictors"), .("Selected Original Predictors"),
+              .("Censored Level Used"))
         },
 
         .initFixedTables = function() {
-            labels <- c(.("Encoded Predictor Columns"), .("Selected Predictor Columns"),
-                .("Column Selection Proportion"), .("Optimal Lambda"), .("Penalty Selected By"),
-                .("Stratified CV Folds Used"), .("Sample Size"), .("Number of Events"),
-                .("Censoring Rate"), .("Event Level Used"), .("Rows Excluded (Missing Data)"),
-                .("Original Candidate Predictors"), .("Selected Original Predictors"),
-                .("Censored Level Used"))
+            labels <- private$.modelSummaryLabels()
             for (i in seq_along(labels)) self$results$modelSummary$addRow(rowKey = i,
                 values = list(statistic = labels[i], value = NA_character_))
-            self$results$performance$addRow(rowKey = 1,
+            self$results$performance$addRow(rowKey = 1L,
                 values = list(metric = .("Apparent C-index"), value = NA_character_,
                     interpretation = .("Development data only; optimism not corrected")))
             if (self$options$showModelComparison) {
@@ -136,6 +162,7 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
         .run = function() {
             private$.clearAnalysisOutputs(keep_rows = TRUE, clear_todo = FALSE)
+            private$.initializeExplanations()
             if (private$.dependencyError()) return()
             # Early exits for missing data or variables
             if (is.null(self$data) || nrow(self$data) == 0) {
@@ -261,6 +288,18 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             time_var <- self$options$elapsedtime
             outcome_var <- self$options$outcome
             explanatory_vars <- self$options$explanatory
+
+            if (length(time_var) != 1L || !is.character(time_var) ||
+                length(outcome_var) != 1L || !is.character(outcome_var) ||
+                !is.character(explanatory_vars)) {
+                jmvcore::reject(.("Invalid variable selection."))
+            }
+            missing_cols <- setdiff(c(time_var, outcome_var, explanatory_vars), names(data))
+            if (length(missing_cols) > 0L) {
+                jmvcore::reject(.fmt(
+                    .("Selected variables are not present in the dataset: {vars}."),
+                    vars = paste(missing_cols, collapse = ", ")))
+            }
 
             if (identical(time_var, outcome_var)) {
                 jmvcore::reject(.("Time and outcome must be different variables."))
@@ -696,7 +735,10 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             }
 
             # Set up cross-validation parameters
-            nfolds_requested <- as.integer(self$options$nfolds)
+            nfolds_requested <- suppressWarnings(as.integer(self$options$nfolds))
+            if (length(nfolds_requested) != 1L || is.na(nfolds_requested)) {
+                jmvcore::reject(.("Number of CV folds must be an integer of at least 3."))
+            }
             nfolds <- min(nfolds_requested, data$n_events, data$n_censored)
             if (nfolds < 3) {
                 jmvcore::reject(.fmt(
@@ -762,12 +804,11 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             # Respect the selected rule exactly. In particular, an empty model at
             # lambda.1se is a valid cross-validation result and must not be replaced
             # data-dependently by lambda.min merely to force predictors into the table.
-            lambda_optimal <- switch(self$options$lambda,
+            lambda_rule_used <- if (identical(self$options$lambda, "lambda.min")) "lambda.min" else "lambda.1se"
+            lambda_optimal <- switch(lambda_rule_used,
                 "lambda.min" = cv_fit$lambda.min,
-                "lambda.1se" = cv_fit$lambda.1se,
-                cv_fit$lambda.1se  # Default fallback
+                "lambda.1se" = cv_fit$lambda.1se
             )
-            lambda_rule_used <- self$options$lambda
             if (length(lambda_optimal) != 1 || !is.finite(lambda_optimal) || lambda_optimal <= 0) {
                 jmvcore::reject(.("The selected cross-validation rule did not produce a valid positive lambda."))
             }
@@ -864,6 +905,7 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         },
 
         .populateModelSummary = function(results) {
+            labels <- private$.modelSummaryLabels()
             values <- list(ncol(results$data$X), length(results$selected_vars),
                 paste0(round(100 * length(results$selected_vars) / ncol(results$data$X), 1), "%"),
                 base::format(results$lambda_optimal, scientific = TRUE, digits = 3),
@@ -874,8 +916,8 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 length(results$data$candidate_variables),
                 length(unique(results$data$encoding$variable[results$selected_vars])),
                 results$data$censor_level_used)
-            for (i in seq_along(values)) self$results$modelSummary$setRow(rowKey = i,
-                values = list(value = as.character(values[[i]])))
+            for (i in seq_along(values)) .fillRow(self$results$modelSummary, rowKey = i,
+                values = list(statistic = labels[i], value = as.character(values[[i]])))
             # the cross-validation folds, and so lambda and the selection, come from this seed
             self$results$modelSummary$setNote("seed",
                 .fmt(.("Random seed: {seed}"), seed = results$seed_used), init = FALSE)
@@ -1078,8 +1120,10 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
         .populatePerformance = function(results) {
             value <- results$performance_metrics$cindex
-            self$results$performance$setRow(rowKey = 1, values = list(
-                value = if (is.finite(value)) as.character(round(value, 3)) else .("Not available")))
+            .fillRow(self$results$performance, rowKey = 1L, values = list(
+                metric = .("Apparent C-index"),
+                value = if (is.finite(value)) as.character(round(value, 3)) else .("Not available"),
+                interpretation = .("Development data only; optimism not corrected")))
             self$results$performance$setNote("apparent",
                 .("This C-index is apparent (training) performance from the same patients used for preprocessing, penalty selection, and model fitting. Its uncertainty does not include the modeling process. Use bootstrap optimism correction or nested cross-validation that repeats all preprocessing and tuning, followed by external validation before clinical use."), init = FALSE)
         },
@@ -1134,6 +1178,8 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         },
 
         .pathPlot = function(image, ggtheme, theme, ...) {
+            if (!self$options$path_plot) return(FALSE)
+
             state <- image$state
             if (is.null(state)) return(FALSE)
             tick_idx <- unique(round(seq(1, length(state$lambda), length.out = 6)))
@@ -1415,6 +1461,10 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         },
 
         .initializeExplanations = function() {
+            for (name in c("lassoExplanation", "methodologyNotes", "clinicalGuidance",
+                "regularizationPathExplanation", "crossValidationExplanation", "riskScoreExplanation")) {
+                self$results[[name]]$setContent("")
+            }
             if (self$options$showExplanations) {
                 private$.populateLassoExplanation()
                 private$.populateCrossValidationExplanation()
@@ -1960,7 +2010,7 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 failures <<- c(failures, .fmt(.("Post-LASSO Cox refit: {message}"), message = conditionMessage(e)))
             })
 
-            table$setRow(rowNo = 1, values = list(
+            .fillRow(table, rowKey = 1L, values = list(
                 model_type = .("Unpenalized refit after LASSO selection"),
                 n_variables = length(results$selected_vars),
                 cindex = selected_refit_cindex,
@@ -1984,7 +2034,7 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 failures <<- c(failures, .fmt(.("Standard Cox on all variables: {message}"), message = conditionMessage(e)))
             })
 
-            table$setRow(rowNo = 2, values = list(
+            .fillRow(table, rowKey = 2L, values = list(
                 model_type = .("Standard Cox (all variables)"),
                 n_variables = ncol(results$data$X),
                 cindex = std_cindex,
@@ -2050,7 +2100,8 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 "<h4 style='margin-top: 0;'>", .("Results Summary"), "</h4>",
                 "<p>", .fmt(
                     .("LASSO Cox regression was performed on {nObs} observations ({nEvents} events) with {nTotal} encoded predictor columns using {lambdaMethod} for lambda selection."),
-                    nObs = n_obs, nEvents = n_events, nTotal = n_total, lambdaMethod = lambda_method), " ",
+                    nObs = n_obs, nEvents = n_events, nTotal = n_total,
+                    lambdaMethod = htmltools::htmlEscape(lambda_method)), " ",
                 .fmt(
                     .("The model selected {nSelected} of {nTotal} encoded columns: {varList}."),
                     nSelected = n_selected, nTotal = n_total, varList = var_list), "</p>",

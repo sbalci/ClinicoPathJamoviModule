@@ -535,3 +535,95 @@ test_that("IR-lassocox-05: suitability checks and factor level drop warning beha
   ))
   expect_match(res_drop$todo$content, "lost level\\(s\\) \\(G1\\)")
 })
+
+# ==============================================================================
+# 6. Security Audit Regression Tests (SEC-lassocox-01..02)
+# ==============================================================================
+test_that("SEC-lassocox-01: .sourcifyOption escapes quote-breaking strings, non-syntactic column names, and drops undeclared/list options in asSource()", {
+  df <- data.frame(t = 1:20, s = rep(0:1, 10), x1 = rnorm(20), x2 = rnorm(20))
+  declared <- setdiff(names(lassocoxOptions$active), c("data", "version", "riskScore"))
+
+  for (opt_name in declared) {
+    for (payload in c(
+      "val\", nfolds = {stop(\"X\"); 10}, censorLevel = \"0",
+      "val\\",
+      "val\n, nfolds = {stop(\"X\"); 10}"
+    )) {
+      opts <- lassocoxOptions$new()
+      an <- lassocoxClass$new(options = opts, data = df)
+      o <- an$options$option(opt_name)
+      o$value <- payload
+      ex <- parse(text = an$asSource())[[1]]
+      expect_identical(ex[[opt_name]], payload)
+      expect_true(all(names(ex)[-1] %in% c("data", opt_name)))
+    }
+    opts <- lassocoxOptions$new()
+    an <- lassocoxClass$new(options = opts, data = df)
+    o <- an$options$option(opt_name)
+    o$value <- list(a = quote(stop("X")))
+    ex_list <- parse(text = an$asSource())[[1]]
+    expect_false(opt_name %in% names(ex_list))
+  }
+
+  opts <- lassocoxOptions$new(
+    elapsedtime = "Follow-up (months)",
+    outcome = "Event \"status\"",
+    outcomeLevel = "1\", nfolds = {stop(\"X\"); 10}, censorLevel = \"0",
+    censorLevel = "0\\",
+    explanatory = c("x1`) + {stop(\"V\")} + vars(`x2", "Stage \"IV\"")
+  )
+  an <- lassocoxClass$new(options = opts, data = df)
+  an$options$.addOption(jmvcore:::Option$new("outcomeLevel = \"1\", nfolds = {stop(\"U\"); 10}, censorLevel", "0"))
+  ex_multi <- parse(text = an$asSource())[[1]]
+  expect_identical(eval(ex_multi$explanatory, baseenv()), c("x1`) + {stop(\"V\")} + vars(`x2", "Stage \"IV\""))
+  expect_false("nfolds" %in% names(ex_multi))
+})
+
+test_that("SEC-lassocox-02: .run() backstops reject missing columns and invalid nfolds, and normalize/escape lambda rule", {
+  df <- lassocox_breast_cancer[1:60, ]
+  opts <- lassocoxOptions$new(
+    elapsedtime = "survival_months", outcome = "death",
+    outcomeLevel = "Dead", censorLevel = "Alive",
+    explanatory = c("age", "nonexistent_col")
+  )
+  an <- lassocoxClass$new(options = opts, data = df)
+  expect_error(an$.__enclos_env__$private$.cleanData(), "not present in the dataset: nonexistent_col")
+
+  opts_lambda <- lassocoxOptions$new(
+    elapsedtime = "survival_months", outcome = "death",
+    outcomeLevel = "Dead", censorLevel = "Alive",
+    explanatory = c("age", "tumor_size_cm", "grade"),
+    showSummary = TRUE
+  )
+  an_lambda <- lassocoxClass$new(options = opts_lambda, data = df)
+  o_lam <- an_lambda$options$option("lambda")
+  o_lam$value <- "<script>alert(1)</script>"
+  an_lambda$.__enclos_env__$private$.init()
+  suppressWarnings(an_lambda$.__enclos_env__$private$.run())
+  expect_false(grepl("<script>", an_lambda$results$summaryText$content, fixed = TRUE))
+  expect_match(an_lambda$results$summaryText$content, "lambda\\.1se")
+})
+
+test_that("FIX-lassocox-01: .fillRow populates fixed tables when .run() executes without prior .initFixedTables() or after toggling showModelComparison/showExplanations", {
+  df <- lassocox_breast_cancer[1:60, ]
+  opts <- lassocoxOptions$new(
+    elapsedtime = "survival_months", outcome = "death",
+    outcomeLevel = "Dead", censorLevel = "Alive",
+    explanatory = c("age", "tumor_size_cm", "grade"),
+    showModelComparison = FALSE,
+    showExplanations = FALSE,
+    path_plot = FALSE
+  )
+  an <- lassocoxClass$new(options = opts, data = df)
+  # Toggle options to TRUE and run without calling .init() again
+  o_mc <- an$options$option("showModelComparison")
+  o_mc$value <- TRUE
+  o_ex <- an$options$option("showExplanations")
+  o_ex$value <- TRUE
+  expect_no_error(suppressWarnings(an$.__enclos_env__$private$.run()))
+  expect_equal(nrow(an$results$modelSummary$asDF), 14L)
+  expect_equal(nrow(an$results$performance$asDF), 1L)
+  expect_equal(nrow(an$results$modelComparison$asDF), 2L)
+  expect_true(nzchar(an$results$lassoExplanation$content))
+  expect_false(an$.__enclos_env__$private$.pathPlot(list(state = list(lambda = 1:2)), NULL, NULL))
+})
