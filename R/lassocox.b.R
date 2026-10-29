@@ -1543,7 +1543,7 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 init = FALSE)
         },
 
-        # ── Data Suitability Assessment ─────────────────────────────
+        # -- Data Suitability Assessment -----------------------------
         .assessSuitability = function(results) {
             data <- results$data
             checks <- list()
@@ -2020,7 +2020,6 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 .("The selected rule retained no predictor columns; this valid empty model was preserved.")
             else ""
 
-            lambda_val <- results$lambda_optimal
             metrics <- results$performance_metrics
 
             # Build selected variable list
