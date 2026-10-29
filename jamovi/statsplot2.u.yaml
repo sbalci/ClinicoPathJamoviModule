@@ -30,7 +30,7 @@ children:
             maxItemCount: 1
             isTarget: true
       - type: TargetLayoutBox
-        label: Subject ID (Repeated Continuous Outcomes)
+        label: Subject ID (Repeated Measures)
         children:
           - type: VariablesListBox
             name: subjectID

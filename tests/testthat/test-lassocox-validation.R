@@ -165,7 +165,10 @@ test_that("C01-C22: modelSummary, coefficients, performance, variableImportance,
     b_ncv <- as.numeric(coef(fit_ncv, lambda = cv_fit$lambda.min))
     names(b_ncv) <- colnames(X)
     coef_df <- res$coefficients$asDF
-    expect_lt(max(abs(coef_df$coefficient - b_ncv[coef_df$variable])), 1e-3)
+    # Row labels read "x2: High (vs Low)"; the encoding table carries the design-column names.
+    enc_df <- as.data.frame(res$encoding)
+    sel_cols <- enc_df$column[enc_df$selected == "Yes"]
+    expect_lt(max(abs(coef_df$coefficient - b_ncv[sel_cols])), 1e-3)
   }
 
   # Compare Apparent C-index against pure base-R pairwise concordance
@@ -235,7 +238,7 @@ test_that("C23: Exported R code executes in clean environment and reproduces fit
     data = lassocox_breast_cancer, elapsedtime = "survival_months", outcome = "death",
     outcomeLevel = "Dead", censorLevel = "Alive", explanatory = bc_vars,
     lambda = "lambda.min", nfolds = 5, standardize = TRUE, random_seed = 123456,
-    showRCode = TRUE
+    showRCode = TRUE, showEncoding = TRUE
   )
   html_rc <- res$rCode$content
   code_rc <- gsub("<[^>]+>", "", html_rc)
@@ -247,7 +250,8 @@ test_that("C23: Exported R code executes in clean environment and reproduces fit
   coef_df <- res$coefficients$asDF
   b_rc <- as.numeric(env_rc$lassocox_fit$coefficients)
   names(b_rc) <- rownames(env_rc$lassocox_fit$coefficients)
-  expect_equal(coef_df$coefficient, unname(b_rc[coef_df$variable]), tolerance = 1e-12)
+  enc_df <- as.data.frame(res$encoding)  # factor rows are labelled; map by design column
+  expect_equal(coef_df$coefficient, unname(b_rc[enc_df$column[enc_df$selected == "Yes"]]), tolerance = 1e-12)
 })
 
 # ==============================================================================

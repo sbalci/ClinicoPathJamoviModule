@@ -414,35 +414,44 @@ outcomeorganizerClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             # Create a new outcome variable based on the analysis type
             if (!multievent) {
-                # Delegated to the shared coder in utils-eventindicator.R so the five
-                # analyses that build an event indicator agree on validation.
-                res <- .defineEventIndicator(
-                    outcome      = input_mydata[[outcome_var]],
-                    outcomeLevel = outcomeLevel,
-                    multievent   = FALSE,
-                    outcome_name = self$options$outcome
-                )
+                # TTP takes its event indicator from the recurrence variable alone and
+                # overwrites myoutcome below, so the outcome's Event Level is never read.
+                # Coding the outcome anyway rejected a factor outcome with no Event Level
+                # ("Event Level is not selected") for a selection TTP does not use, and
+                # left a Censored/Event/Competing hand-off outcome's .causeFactor set, so
+                # the 0/1 TTP status was exported under competing-risk labels.
+                ttp_from_recurrence <- analysistype == 'ttp' && !is.null(recurrence_var)
+                if (!ttp_from_recurrence) {
+                    # Delegated to the shared coder in utils-eventindicator.R so the five
+                    # analyses that build an event indicator agree on validation.
+                    res <- .defineEventIndicator(
+                        outcome      = input_mydata[[outcome_var]],
+                        outcomeLevel = outcomeLevel,
+                        multievent   = FALSE,
+                        outcome_name = self$options$outcome
+                    )
 
-                if (!is.null(res$error))
-                    jmvcore::reject(res$error)
+                    if (!is.null(res$error))
+                        jmvcore::reject(res$error)
 
-                private$.eventRecode <- res
-                mydata[["myoutcome"]] <- res$status
-                # Ask the returned VECTOR, not the options branch. .defineEventIndicator()'s
-                # hand-off path fires on a Censored/Event/Competing factor regardless of
-                # `multievent`, so this branch can return 0/1/2 with a non-NULL status_factor.
-                # Leaving .causeFactor NULL made the export at ~line 1271 write the raw
-                # numeric, which jamovi returns as a nominal factor with levels "0"/"1"/"2";
-                # round-tripping that with outcomeLevel = "1" turned every competing event
-                # into a CENSORED observation. NULL for any ordinary binary outcome, so this
-                # is a no-op everywhere else.
-                private$.causeFactor <- res$status_factor
+                    private$.eventRecode <- res
+                    mydata[["myoutcome"]] <- res$status
+                    # Ask the returned VECTOR, not the options branch. .defineEventIndicator()'s
+                    # hand-off path fires on a Censored/Event/Competing factor regardless of
+                    # `multievent`, so this branch can return 0/1/2 with a non-NULL status_factor.
+                    # Leaving .causeFactor NULL made the export at ~line 1271 write the raw
+                    # numeric, which jamovi returns as a nominal factor with levels "0"/"1"/"2";
+                    # round-tripping that with outcomeLevel = "1" turned every competing event
+                    # into a CENSORED observation. NULL for any ordinary binary outcome, so this
+                    # is a no-op everywhere else.
+                    private$.causeFactor <- res$status_factor
 
-                diagnostics$binary_check <- sprintf(
-                    .("Event level '%s' -> 1 (%d rows); %s -> 0 (%d rows); %d row(s) missing."),
-                    res$event_label, res$n_event,
-                    if (length(res$censored_labels)) paste(sprintf("'%s'", res$censored_labels), collapse = ", ") else .("no other level"),
-                    res$n_censored, res$n_missing)
+                    diagnostics$binary_check <- sprintf(
+                        .("Event level '%s' -> 1 (%d rows); %s -> 0 (%d rows); %d row(s) missing."),
+                        res$event_label, res$n_event,
+                        if (length(res$censored_labels)) paste(sprintf("'%s'", res$censored_labels), collapse = ", ") else .("no other level"),
+                        res$n_censored, res$n_missing)
+                }
 
                 # Special handling for RFS/PFS/DFS if selected
                 if (analysistype %in% c('rfs', 'pfs', 'dfs') && !is.null(recurrence_var)) {
@@ -547,6 +556,8 @@ outcomeorganizerClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         private$.eventRecode$n_event    <- sum(composite == 1, na.rm = TRUE)
                         private$.eventRecode$n_censored <- sum(composite == 0, na.rm = TRUE)
                         private$.eventRecode$n_missing  <- sum(is.na(composite))
+                        # The outcome level alone, for the Summary's "coded as 1" lines.
+                        private$.eventRecode$outcome_event_label <- private$.eventRecode$event_label
                         private$.eventRecode$event_label <- paste0(
                             private$.eventRecode$event_label, " or recurrence/progression")
                     }
@@ -598,14 +609,24 @@ outcomeorganizerClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                                 n_ttp))
                     }
 
-                    # TTP replaces the outcome-derived indicator entirely.
-                    if (!is.null(private$.eventRecode)) {
-                        private$.eventRecode$estimand    <- .("time to progression (deaths censored)")
-                        private$.eventRecode$event_label <- .("progression")
-                        private$.eventRecode$n_event     <- n_ttp
-                        private$.eventRecode$n_censored  <- sum(ttp == 0, na.rm = TRUE)
-                        private$.eventRecode$n_missing   <- sum(is.na(ttp))
-                    }
+                    # TTP replaces the outcome-derived indicator entirely (the outcome
+                    # coder is skipped above), so the recode is described from the
+                    # recurrence variable: its event level -> 1, its other levels -> 0.
+                    rec_observed <- unique(as.character(recurrence_outcome[!is.na(recurrence_outcome)]))
+                    private$.eventRecode <- list(
+                        status           = ttp,
+                        status_factor    = NULL,
+                        n_event          = n_ttp,
+                        n_censored       = sum(ttp == 0, na.rm = TRUE),
+                        n_competing      = 0L,
+                        n_missing        = sum(is.na(ttp)),
+                        event_label      = as.character(recurrence_level),
+                        censored_labels  = setdiff(rec_observed, as.character(recurrence_level)),
+                        competing_labels = character(0),
+                        n_levels         = length(rec_observed),
+                        has_competing    = FALSE,
+                        estimand         = .("time to progression (deaths censored)"),
+                        error            = NULL)
                 }
 
                 # The event hierarchy is implemented only in the multi-event
@@ -1310,10 +1331,10 @@ outcomeorganizerClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         # in the same units was refused with a message telling the user to do what they
         # had already done. Classify the column instead, and return the kind alongside
         # the values so the caller can refuse a comparison across two different kinds.
-        # An unset Level option is NULL; naming it "(not set)" beats printing an
+        # An unset Level option is NULL; naming it "not set" beats printing an
         # empty pair of quotes in a message whose whole job is to say which
         # selection is wrong.
-        .lvlOrUnset = function(x) if (is.null(x) || !length(x) || !nzchar(x)) "(not set)" else as.character(x),
+        .lvlOrUnset = function(x) if (is.null(x) || !length(x) || !nzchar(x)) .("not set") else as.character(x),
 
         .timeScale = function(x) {
             if (inherits(x, "Date"))
@@ -1594,11 +1615,9 @@ outcomeorganizerClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             n_ev_rec <- sum(mydata[["myoutcome"]] == 1, na.rm = TRUE)
             if (!identical(self$options$analysistype, "multistate") &&
                 n_nonmissing_rec > 0 && n_ev_rec > 0 && n_ev_rec < 5) {
-                rare_lvl <- if (!self$options$multievent &&
-                                !is.null(self$options$outcomeLevel) &&
-                                nzchar(as.character(self$options$outcomeLevel))) {
-                    as.character(self$options$outcomeLevel)
-                } else if (!is.null(private$.eventRecode) &&
+                # The recode's own event label, not the outcomeLevel option: TTP and
+                # RFS/PFS/DFS count recurrence/progression, which outcomeLevel does not name.
+                rare_lvl <- if (!is.null(private$.eventRecode) &&
                            !is.null(private$.eventRecode$event_label) &&
                            nzchar(as.character(private$.eventRecode$event_label))) {
                     as.character(private$.eventRecode$event_label)
@@ -1627,18 +1646,25 @@ outcomeorganizerClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # column's factor levels) before HTML interpolation in the glue::glue blocks
             # below. glue does NOT HTML-escape interpolations.
             #
-            # Coerce NULL/empty Level options to "" first: htmlEscape(NULL) returns
-            # character(0), and a length-0 interpolation collapses the whole glue::glue
-            # block to character(0), so self$results$summary$setContent() would receive
-            # an empty vector (blank summary) for valid already-0/1 numeric outcomes
-            # where no event level need be chosen.
-            .lvl <- function(x) if (is.null(x) || length(x) == 0) "" else as.character(x)
-            esc_dod <- htmltools::htmlEscape(.lvl(self$options$dod))
-            esc_dooc <- htmltools::htmlEscape(.lvl(self$options$dooc))
-            esc_awd <- htmltools::htmlEscape(.lvl(self$options$awd))
-            esc_awod <- htmltools::htmlEscape(.lvl(self$options$awod))
-            esc_outcomeLevel <- htmltools::htmlEscape(.lvl(self$options$outcomeLevel))
-            esc_recurrenceLevel <- htmltools::htmlEscape(.lvl(self$options$recurrenceLevel))
+            # An unset Level option prints as "not set" via .lvlOrUnset(), never as an
+            # empty "()": htmlEscape(NULL) is character(0), which would also collapse a
+            # whole glue::glue block to character(0) (a blank summary).
+            esc_dod <- htmltools::htmlEscape(private$.lvlOrUnset(self$options$dod))
+            esc_dooc <- htmltools::htmlEscape(private$.lvlOrUnset(self$options$dooc))
+            esc_awd <- htmltools::htmlEscape(private$.lvlOrUnset(self$options$awd))
+            esc_awod <- htmltools::htmlEscape(private$.lvlOrUnset(self$options$awod))
+
+            # Single-event mode: name what the recode actually put in code 1 and code
+            # 0, from the recode itself (the same source as the Outcome Recode panel),
+            # not from what the analysis type implies. With outcomeLevel = "DOD" on a
+            # four-level outcome, DOOC deaths are coded 0; "Alive (other levels)" called
+            # them alive.
+            .quoteLevels <- function(x) if (length(x)) paste(sprintf("'%s'", htmltools::htmlEscape(as.character(x))), collapse = ", ") else .("none")
+            rc <- private$.eventRecode
+            esc_event <- .quoteLevels(if (!is.null(rc$outcome_event_label)) rc$outcome_event_label else rc$event_label)
+            esc_censored <- .quoteLevels(rc$censored_labels)
+            esc_competing <- .quoteLevels(rc$competing_labels)
+            esc_recurrence <- .quoteLevels(self$options$recurrenceLevel)
 
             # THE SUMMARY MUST FOLLOW THE CODING TOO.
             # `codes_present` reached the output table, the plot and the copy-ready
@@ -1713,62 +1739,42 @@ outcomeorganizerClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 }
             } else {
                 if (handoff_coded) {
-                    summary_text <- glue::glue(
-                        "
-                        <br><b>Competing-Risks Coding Detected</b><br>
-                        The outcome supplied is already a multi-state coding, so it was recoded to:<br>
-                        - Censored: coded as 0<br>
-                        - Event of interest ({esc_outcomeLevel}): coded as 1<br>
-                        - Competing event: coded as 2<br>
-                        <br>
-                        <i>This is NOT a two-level survival indicator. Kaplan-Meier and Cox treat any non-zero status as the same event, so use a competing-risks method (cumulative incidence, Fine-Gray) instead.</i>
-                        "
-                    )
+                    summary_text <- paste0(
+                        "<br><b>", .("Competing-Risks Coding Detected"), "</b><br>",
+                        .("The outcome supplied is already a multi-state coding, so it was recoded to:"), "<br>",
+                        "- ", .fmt(.("Censored ({levels}): coded as 0"), levels = esc_censored), "<br>",
+                        "- ", .fmt(.("Event of interest ({levels}): coded as 1"), levels = esc_event), "<br>",
+                        "- ", .fmt(.("Competing event ({levels}): coded as 2"), levels = esc_competing), "<br><br>",
+                        "<i>", .("This is NOT a two-level survival indicator. Kaplan-Meier and Cox treat any non-zero status as the same event, so use a competing-risks method (cumulative incidence, Fine-Gray) instead."), "</i>")
                 } else if (analysistype == 'os') {
-                    summary_text <- glue::glue(
-                        "
-                        <br><b>Overall Survival (OS) Analysis</b><br>
-                        Recoded outcome:<br>
-                        - Death ({esc_outcomeLevel}): coded as 1<br>
-                        - Alive (other levels): coded as 0<br>
-                        <br>
-                        <i>This is standard coding for overall survival using Cox regression or Kaplan-Meier analysis.</i>
-                        "
-                    )
+                    summary_text <- paste0(
+                        "<br><b>", .("Overall Survival (OS) Analysis"), "</b><br>",
+                        .("Recoded outcome:"), "<br>",
+                        "- ", .fmt(.("Event ({levels}): coded as 1"), levels = esc_event), "<br>",
+                        "- ", .fmt(.("Censored ({levels}): coded as 0"), levels = esc_censored), "<br><br>",
+                        "<i>", .fmt(.("Only {levels} is coded 1; every other level is coded 0 and treated as censored, including any other category of death (for example death from other causes). For overall survival, which counts death from any cause, enable Multiple Event Levels and assign each death category."), levels = esc_event), "</i>")
                 } else if (analysistype %in% c('rfs', 'pfs', 'dfs') && !is.null(self$options$recurrence)) {
-                    summary_text <- glue::glue(
-                        "
-                        <br><b>{toupper(analysistype)} Analysis</b><br>
-                        Recoded outcome:<br>
-                        - Death ({esc_outcomeLevel}): coded as 1<br>
-                        - Recurrence/Progression ({esc_recurrenceLevel}): coded as 1<br>
-                        - Event-free (other): coded as 0<br>
-                        <br>
-                        <i>This coding treats both disease events and death as events for {toupper(analysistype)} analysis.</i>
-                        "
-                    )
+                    summary_text <- paste0(
+                        "<br><b>", .fmt(.("{analysis} Analysis"), analysis = toupper(analysistype)), "</b><br>",
+                        .("Recoded outcome:"), "<br>",
+                        "- ", .fmt(.("Recurrence/Progression ({levels}): coded as 1"), levels = esc_recurrence), "<br>",
+                        "- ", .fmt(.("Outcome level {levels}: coded as 1"), levels = esc_event), "<br>",
+                        "- ", .fmt(.("Outcome level(s) {levels} without recurrence/progression: coded as 0"), levels = esc_censored), "<br><br>",
+                        "<i>", .fmt(.("Recurrence/progression and the selected outcome level both count as events for {analysis} analysis; any other outcome level, including other categories of death, is coded 0 unless recurrence/progression occurred."), analysis = toupper(analysistype)), "</i>")
                 } else if (analysistype == 'ttp' && !is.null(self$options$recurrence)) {
-                    summary_text <- glue::glue(
-                        "
-                        <br><b>Time to Progression (TTP) Analysis</b><br>
-                        Recoded outcome:<br>
-                        - Progression ({esc_recurrenceLevel}): coded as 1<br>
-                        - No progression (including deaths): coded as 0<br>
-                        <br>
-                        <i>This coding only treats disease progression as events; deaths without progression are censored.</i>
-                        "
-                    )
+                    summary_text <- paste0(
+                        "<br><b>", .("Time to Progression (TTP) Analysis"), "</b><br>",
+                        .("Recoded outcome:"), "<br>",
+                        "- ", .fmt(.("Progression ({levels}): coded as 1"), levels = esc_event), "<br>",
+                        "- ", .fmt(.("No progression ({levels}), including deaths: coded as 0"), levels = esc_censored), "<br><br>",
+                        "<i>", .("This coding only treats disease progression as events; deaths without progression are censored. The outcome variable and its Event Level are not used."), "</i>")
                 } else {
-                    summary_text <- glue::glue(
-                        "
-                        <br><b>Binary Outcome Coding</b><br>
-                        Recoded outcome:<br>
-                        - Event ({esc_outcomeLevel}): coded as 1<br>
-                        - Non-event (other levels): coded as 0<br>
-                        <br>
-                        <i>This is standard coding for Cox regression and Kaplan-Meier analysis.</i>
-                        "
-                    )
+                    summary_text <- paste0(
+                        "<br><b>", .("Binary Outcome Coding"), "</b><br>",
+                        .("Recoded outcome:"), "<br>",
+                        "- ", .fmt(.("Event ({levels}): coded as 1"), levels = esc_event), "<br>",
+                        "- ", .fmt(.("Censored ({levels}): coded as 0"), levels = esc_censored), "<br><br>",
+                        "<i>", .("This is standard coding for Cox regression and Kaplan-Meier analysis."), "</i>")
                 }
             }
 
@@ -2033,30 +2039,54 @@ outcomeorganizerClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                                    !is.null(self$options$recurrence)
                 multi_coded <- any(!codes_present %in% c("0", "1"))
 
-                event_desc <- if (analysistype == "multistate")
-                        .("transition to the disease state (1); this is a multistate coding with four states, not a single event indicator - the per-state breakdown below is the meaningful summary")
-                    else if (analysistype %in% c("rfs", "pfs", "dfs") && !composite_built)
-                        .("death (no recurrence variable was supplied, so the composite endpoint was not built and this is a death-only indicator)")
-                    else if (analysistype == "ttp" && !composite_built)
-                        .("death (no recurrence variable was supplied, so progression could not be identified and this is a death-only indicator)")
-                    else if (analysistype == "os" && multi_coded)
-                        .("the event of interest (coded 1); this outcome also carries competing states, listed below")
-                    else if (analysistype == "os") .("death from any cause")
-                    else if (analysistype == "cause") .("death from the disease of interest")
-                    else if (analysistype == "compete") .("disease-specific death (competing events coded as 2)")
-                    else if (analysistype %in% c("rfs", "pfs", "dfs")) .("recurrence/progression or death")
-                    else if (analysistype == "ttp") .("disease progression only")
-                    else .("the selected event type")
+                if (!self$options$multievent) {
+                    # Single-event mode codes ONE chosen level as 1 and every other level
+                    # as 0, whatever the analysis type, so the text names those levels
+                    # (from the recode, like the Summary) instead of asserting "death from
+                    # any cause" / "alive" -- an other-cause death is coded 0 here.
+                    if (analysistype == "ttp" && composite_built) {
+                        event_desc <- .fmt(.("disease progression only (recurrence/progression level {levels})"), levels = esc_event)
+                        censor_desc <- .fmt(.("all other patients (recurrence/progression level(s) {levels}), including those who died without progression"), levels = esc_censored)
+                    } else if (composite_built) {
+                        event_desc <- .fmt(.("recurrence/progression (level {rec}) or outcome level {levels}"), rec = esc_recurrence, levels = esc_event)
+                        censor_desc <- .fmt(.("patients with outcome level(s) {levels} and no recurrence/progression"), levels = esc_censored)
+                    } else if (multi_coded) {
+                        event_desc <- .fmt(.("the event of interest ({levels}); this outcome also carries competing states, listed below"), levels = esc_event)
+                        censor_desc <- .fmt(.("censored records ({levels})"), levels = esc_censored)
+                    } else {
+                        event_desc <- if (analysistype %in% c("rfs", "pfs", "dfs"))
+                                .fmt(.("outcome level {levels} only (no recurrence variable was supplied, so the composite endpoint was not built)"), levels = esc_event)
+                            else if (analysistype == "ttp")
+                                .fmt(.("outcome level {levels} only (no recurrence variable was supplied, so progression could not be identified)"), levels = esc_event)
+                            else .fmt(.("outcome level {levels}"), levels = esc_event)
+                        censor_desc <- .fmt(.("outcome level(s) {levels}, treated as censored"), levels = esc_censored)
+                    }
+                } else {
+                    event_desc <- if (analysistype == "multistate")
+                            .("transition to the disease state (1); this is a multistate coding with four states, not a single event indicator - the per-state breakdown below is the meaningful summary")
+                        else if (analysistype %in% c("rfs", "pfs", "dfs") && !composite_built)
+                            .("death (no recurrence variable was supplied, so the composite endpoint was not built and this is a death-only indicator)")
+                        else if (analysistype == "ttp" && !composite_built)
+                            .("death (no recurrence variable was supplied, so progression could not be identified and this is a death-only indicator)")
+                        else if (analysistype == "os" && multi_coded)
+                            .("the event of interest (coded 1); this outcome also carries competing states, listed below")
+                        else if (analysistype == "os") .("death from any cause")
+                        else if (analysistype == "cause") .("death from the disease of interest")
+                        else if (analysistype == "compete") .("disease-specific death (competing events coded as 2)")
+                        else if (analysistype %in% c("rfs", "pfs", "dfs")) .("recurrence/progression or death")
+                        else if (analysistype == "ttp") .("disease progression only")
+                        else .("the selected event type")
 
-                censor_desc <- if (analysistype == "ttp" && composite_built)
-                        .("patients who died without progression or remain event-free")
-                    else if (analysistype == "cause")
-                        .("patients who were alive at last contact or died of another cause (both censored for this endpoint)")
-                    else if (analysistype == "compete")
-                        .("patients alive at last contact; deaths from other causes are coded 2 as competing events, not censored")
-                    else if (analysistype == "multistate")
-                        .("patients in the baseline state (0), alive without disease")
-                    else .("patients who remain alive or event-free")
+                    censor_desc <- if (analysistype == "ttp" && composite_built)
+                            .("patients who died without progression or remain event-free")
+                        else if (analysistype == "cause")
+                            .("patients who were alive at last contact or died of another cause (both censored for this endpoint)")
+                        else if (analysistype == "compete")
+                            .("patients alive at last contact; deaths from other causes are coded 2 as competing events, not censored")
+                        else if (analysistype == "multistate")
+                            .("patients in the baseline state (0), alive without disease")
+                        else .("patients who remain alive or event-free")
+                }
 
                 n_events <- sum(mydata$myoutcome == 1, na.rm = TRUE)
                 n_censored <- sum(mydata$myoutcome == 0, na.rm = TRUE)
@@ -2133,6 +2163,9 @@ outcomeorganizerClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 plot_df$Label <- vapply(plot_df$Outcome, function(val) {
                     private$.getOutcomeLabel(val, plotData$analysis_type, plotData$multi_event, plotData$codes_present)
                 }, character(1))
+                # Bars in code order (0, 1, 2, 3), not alphabetical by label.
+                plot_df <- plot_df[order(suppressWarnings(as.numeric(plot_df$Outcome))), , drop = FALSE]
+                plot_df$Label <- factor(plot_df$Label, levels = unique(plot_df$Label))
 
                 # Color-blind safe palette
                 cb_palette <- c("#0072B2", "#E69F00", "#009E73", "#F0E442", "#CC79A7", "#56B4E9")

@@ -116,7 +116,7 @@ test_that("a chosen predictor positive and negative level pair gives the epiR::e
                                   sp[1] * 100, sp[2] * 100, sp[3] * 100))
         expect_match(txt, sprintf("Positive LR: %.2f \\(95%% CI %.2f-%.2f\\)", lp[1], lp[2], lp[3]))
         expect_match(txt, sprintf("Negative LR: %.2f \\(95%% CI %.2f-%.2f\\)", ln[1], ln[2], ln[3]))
-        expect_match(txt, sprintf("used as the positive/exposure category as specified"), fixed = TRUE)
+        expect_match(txt, "is treated as a positive test result as specified", fixed = TRUE)
         expect_false(grepl("waiting", txt, fixed = TRUE))
     }
 })

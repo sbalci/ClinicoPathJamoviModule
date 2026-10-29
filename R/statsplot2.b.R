@@ -77,6 +77,7 @@ statsplot2Class <- if (requireNamespace('jmvcore'))
                 text <- gsub("<", "&lt;", text, fixed = TRUE)
                 text <- gsub(">", "&gt;", text, fixed = TRUE)
                 text <- gsub("\"", "&quot;", text, fixed = TRUE)
+                text <- gsub("'", "&#39;", text, fixed = TRUE)
                 return(text)
             },
             
@@ -235,10 +236,10 @@ statsplot2Class <- if (requireNamespace('jmvcore'))
                 dep_type <- .infer_type(mydep, self$options$dep)
                 group_type <- .infer_type(mygroup, self$options$group)
                 
-                # Get other options
-                direction <- self$options$direction
-                distribution <- self$options$distribution
-                alluvsty <- self$options$alluvsty
+                # Get other options (with allowlist backstops against out-of-band mutation)
+                direction <- if (isTRUE(self$options$direction %in% c("independent", "repeated"))) self$options$direction else "independent"
+                distribution <- if (isTRUE(self$options$distribution %in% c("p", "np", "r", "bf"))) self$options$distribution else "p"
+                alluvsty <- if (isTRUE(self$options$alluvsty %in% c("t1", "t2"))) self$options$alluvsty else "t1"
                 
                 # Create analysis type identifier
                 plot_type <- paste(direction, group_type, dep_type, sep = "_")
@@ -331,7 +332,7 @@ statsplot2Class <- if (requireNamespace('jmvcore'))
                     ),
                     # Default case
                     glue::glue(
-                        "<p><strong>Basic ggplot2 visualization</strong> will be used for <code>{dep_var_safe}</code> vs <code>{group_var_safe}</code> with {analysis_info$direction} design.</p>",
+                        "<p><strong>Basic ggplot2 visualization</strong> will be used for <code>{dep_var_safe}</code> vs <code>{group_var_safe}</code> with {private$.safeHtmlOutput(analysis_info$direction)} design.</p>",
                         "<p style='color: inherit;'><em>Specialized statistical plots are not available for this combination.</em></p>"
                     )
                 )
@@ -747,7 +748,7 @@ statsplot2Class <- if (requireNamespace('jmvcore'))
                     return(box("<p>This figure is descriptive; no statistical test applies to this combination of variables.</p>"))
                 }
                 if (length(stats) == 0) {
-                    return(box(sprintf("<p>The %s test could not be computed for this comparison; the figure is shown without a test result (see the warning above).</p>", approach)))
+                    return(box(sprintf("<p>The %s test could not be computed for this comparison; the figure is shown without a test result (see the warning above).</p>", private$.safeHtmlOutput(approach))))
                 }
                 n_unit <- if (identical(analysis_info$plot_type, "repeated_factor_continuous")) " subjects" else ""
                 sentences_html <- paste(vapply(stats, function(st) {
@@ -1123,6 +1124,11 @@ statsplot2Class <- if (requireNamespace('jmvcore'))
                 data <- prepared_data$data
                 x_var <- prepared_data$group
                 y_var <- prepared_data$dep
+                if (is.null(data) || nrow(data) < 2 ||
+                    is.null(x_var) || is.null(y_var) ||
+                    !(x_var %in% names(data)) || !(y_var %in% names(data))) {
+                    return(NULL)
+                }
                 
                 # Determine the most appropriate basic plot
                 if (analysis_info$dep_type == "continuous" && analysis_info$group_type == "continuous") {
@@ -1307,6 +1313,16 @@ statsplot2Class <- if (requireNamespace('jmvcore'))
                             if (anyDuplicated(mydata_cc[c(subject_id, analysis_info$group_var)]) > 0) {
                                 jmvcore::reject("Repeated categorical analysis in long format requires at most one observation per subject and timepoint.")
                             }
+                            if (!is.null(analysis_info$grvar) && analysis_info$grvar %in% names(mydata_cc)) {
+                                n_panels_cat <- tapply(
+                                    as.character(mydata_cc[[analysis_info$grvar]]),
+                                    mydata_cc[[subject_id]],
+                                    function(x) length(unique(x))
+                                )
+                                if (any(n_panels_cat > 1)) {
+                                    jmvcore::reject("Each subject must belong to one split panel.")
+                                }
+                            }
                             if (length(cond_levels) >= 2L) {
                                 d_by_tp <- lapply(cond_levels, function(tl) {
                                     mydata_cc[mydata_cc[[analysis_info$group_var]] == tl, , drop = FALSE]
@@ -1369,8 +1385,10 @@ statsplot2Class <- if (requireNamespace('jmvcore'))
                 original_nrow <- nrow(mydata)
                 # Threshold and retained size are user-configurable; the defaults
                 # (10,000 / 5,000) reproduce the previous hard-coded behaviour.
-                thr <- self$options$sampleThreshold
-                keep <- self$options$sampleSize
+                raw_thr <- suppressWarnings(as.integer(self$options$sampleThreshold))
+                thr <- if (length(raw_thr) == 1L && !is.na(raw_thr)) max(1000L, min(1000000L, raw_thr)) else 10000L
+                raw_keep <- suppressWarnings(as.integer(self$options$sampleSize))
+                keep <- if (length(raw_keep) == 1L && !is.na(raw_keep)) max(100L, min(1000000L, raw_keep)) else 5000L
 
                 if (self$options$sampleLarge && original_nrow > thr) {
                     # User-configurable seed for reproducible sampling (default 42).
@@ -1981,6 +1999,28 @@ statsplot2Class <- if (requireNamespace('jmvcore'))
                 } else {
                     return()
                 }
+            },
+
+            .sourcifyOption = function(option) {
+                defaults <- list(
+                    dep = NULL, group = NULL, grvar = NULL, subjectID = NULL,
+                    direction = "independent", distribution = "p",
+                    forceContinuous = FALSE, alluvsty = "t1",
+                    showSummary = FALSE, showExplanations = FALSE,
+                    excl = FALSE, sampleLarge = FALSE,
+                    sampleThreshold = 10000, sampleSize = 5000,
+                    seed = 42, originaltheme = FALSE
+                )
+                nm <- option$name
+                if (is.null(nm) || !(nm %in% names(defaults))) return('')
+                val <- option$value
+                if (is.null(val) || !is.atomic(val)) return('')
+                def <- defaults[[nm]]
+                if (identical(val, def) ||
+                    (is.numeric(val) && is.numeric(def) && length(val) == 1L && !is.na(val) && val == def)) {
+                    return('')
+                }
+                paste0(nm, ' = ', paste(deparse(val, backtick = TRUE, control = 'keepNA'), collapse = ''))
             }
 
         ), # End of private list
@@ -1998,21 +2038,6 @@ statsplot2Class <- if (requireNamespace('jmvcore'))
                 pkg_name <- utils::packageName()
                 if (is.null(pkg_name)) pkg_name <- "ClinicoPath"  # fallback
 
-                # Get arguments using base helper (if available)
-                args <- ''
-                if (!is.null(private$.asArgs)) {
-                    args <- private$.asArgs(incData = FALSE)
-                }
-                if (args != '')
-                    args <- paste0(',\n    ', args)
-
-                src <- paste0(pkg_name, '::statsplot2(\n    data = data', args, ')')
-                if (isTRUE(tryCatch({ base::parse(text = src); TRUE }, error = function(e) FALSE))) {
-                    return(src)
-                }
-
-                # Fallback when column names contain spaces, parentheses or non-ASCII
-                # characters that private$.asArgs() emitted unquoted
                 defaults <- list(
                     dep = NULL, group = NULL, grvar = NULL, subjectID = NULL,
                     direction = "independent", distribution = "p",
@@ -2025,8 +2050,11 @@ statsplot2Class <- if (requireNamespace('jmvcore'))
                 kv <- character(0)
                 for (nm in names(defaults)) {
                     val <- self$options[[nm]]
-                    if (!identical(val, defaults[[nm]]) && !is.null(val)) {
-                        kv <- c(kv, paste0(nm, " = ", paste(deparse(val), collapse = "")))
+                    def <- defaults[[nm]]
+                    is_def <- identical(val, def) ||
+                        (is.numeric(val) && is.numeric(def) && length(val) == 1L && !is.na(val) && val == def)
+                    if (!is_def && !is.null(val) && is.atomic(val)) {
+                        kv <- c(kv, paste0(nm, " = ", paste(deparse(val, backtick = TRUE, control = "keepNA"), collapse = "")))
                     }
                 }
                 args_safe <- if (length(kv) > 0) paste0(",\n    ", paste(kv, collapse = ",\n    ")) else ""

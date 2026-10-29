@@ -15,6 +15,7 @@ items:
           - subjectID
           - distribution
           - forceContinuous
+          - alluvsty
           - excl
           - grvar
           - sampleLarge
@@ -34,6 +35,7 @@ items:
           - distribution
           - forceContinuous
           - alluvsty
+          - showSummary
           - excl
           - grvar
           - sampleLarge
@@ -51,11 +53,13 @@ items:
           - subjectID
           - distribution
           - forceContinuous
+          - alluvsty
           - excl
           - grvar
           - sampleLarge
           - sampleThreshold
           - sampleSize
+          - seed
 
 
     - name:  ExplanationMessage
@@ -69,6 +73,8 @@ items:
           - subjectID
           - distribution
           - forceContinuous
+          - alluvsty
+          - showExplanations
           - excl
           - grvar
           - sampleLarge

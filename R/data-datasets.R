@@ -8057,6 +8057,13 @@
 #'
 #' Example dataset for the \code{lassocox} analysis.
 #'
+#' @details Edge-case (stress) fixture: it cannot be fitted by \code{lassocox} as
+#' shipped. \code{vital_status} has 78 \code{Dead} and only 2 \code{Alive} rows, and
+#' the stratified cross-validation needs at least 3 events and 3 censored
+#' observations, so the analysis stops with that message. There is no subset that
+#' works with this endpoint. Use it to see the high-dimensional (53 candidate
+#' columns, 80 rows) input checks, or supply your own censoring.
+#'
 #' @format A data frame (data.frame) with 80 rows and 56 variables:
 #' \describe{
 #'   \item{\code{sample_id}}{character; 80 distinct values}
@@ -8126,6 +8133,14 @@
 #'
 #' Example dataset for the \code{lassocox} analysis.
 #'
+#' @details Edge-case (stress) fixture: it cannot be fitted by \code{lassocox} as
+#' shipped. 13 rows have \code{follow_up_months} equal to 0, and the analysis
+#' requires strictly positive follow-up times, so it stops with that message.
+#' Removing those rows does not help: \code{progression} has only 2 \code{No}
+#' (censored) rows in the whole dataset, below the 3 censored observations that
+#' stratified cross-validation needs. There is no subset that works with this
+#' endpoint.
+#'
 #' @format A data frame (data.frame) with 200 rows and 15 variables:
 #' \describe{
 #'   \item{\code{patient_id}}{character; 200 distinct values}
@@ -8181,6 +8196,14 @@
 #' Example data for lassocox (small cohort)
 #'
 #' Example dataset for the \code{lassocox} analysis.
+#'
+#' @details Edge-case (stress) fixture. 5 rows have \code{time_months} equal to 0,
+#' and \code{lassocox} requires strictly positive follow-up times, so the dataset
+#' as shipped stops with that message. Only 3 of 75 rows are censored
+#' (\code{event_occurred} = \code{No}). Excluding the zero-time rows (70 rows, 67
+#' events, 3 censored) meets the computational minimum and fits, but with so few
+#' censored rows the cross-validation is very unstable; with \code{random_seed = 42}
+#' and all seven predictors it retains no predictor (a valid empty model).
 #'
 #' @format A data frame (data.frame) with 75 rows and 10 variables:
 #' \describe{

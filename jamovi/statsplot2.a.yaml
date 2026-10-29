@@ -73,15 +73,16 @@ options:
 
 
     - name: subjectID
-      title: Subject ID (Repeated Continuous Outcomes)
+      title: Subject ID (Repeated Measures)
       type: Variable
       default: NULL
       description:
-          ui: Subject identifier for long-format repeated continuous outcomes (one row per subject and condition). Not needed for wide-format alluvial data.
+          ui: Subject identifier for long-format repeated measures (continuous within-subjects outcomes or multi-wave categorical transitions). Leave empty for wide-format alluvial data.
           R: >-
-            Subject identifier for long-format repeated continuous outcomes. Each
-            subject must have one row per condition; incomplete subjects are excluded.
-            Sampling retains whole subjects. Not used for wide-format alluvial data.
+            Subject identifier for long-format repeated measures (required for repeated
+            continuous outcomes; optional for long-format repeated categorical data, which
+            is automatically reshaped across all timepoints into wide format for alluvial
+            diagrams). Leave NULL when categorical repeated data is already in wide format.
 
     - name: direction
       title: Study Design

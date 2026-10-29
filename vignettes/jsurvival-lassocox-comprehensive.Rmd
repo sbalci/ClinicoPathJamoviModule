@@ -106,10 +106,17 @@ use the **Penalized Cox Regression** module.
 | Synthetic "small" | 60 | 25 | 5 numeric | Limited development-sample scenario |
 | Synthetic "collinear" | 100 | 45 | 4 (2 correlated) | Multicollinearity detection |
 | Synthetic "categorical" | 100 | 40 | 3 factors | All categorical predictors |
-| `histopathology` | 250 | ~100 | 8 mixed | Real clinical pathology data |
-| `lassocox_genomic` | 80 | 78 (2 censored; stress fixture) | 50 gene features | High-dimensional genomic stress fixture (requires >= 3 censored rows or simulated endpoint to fit) |
-| `lassocox_multicollinear` | 180 | 125 | 12 correlated | Multicollinearity stress test |
-| `lassocox_breast_cancer` | 250 | 53 | 20 clinical | Breast cancer clinicopathological |
+| `histopathology` | 250 | 169 (`Outcome` = 1; 1 missing) | mixed clinicopathological columns | Simulated pathology data |
+| `lassocox_genomic` | 80 | 78 (2 censored) | 53 (50 genes + age, sex, tumor stage) | High-dimensional stress fixture; cannot be fitted as shipped (cross-validation needs at least 3 censored rows) |
+| `lassocox_multicollinear` | 180 | 107 | 12 (correlated inflammatory and nutritional markers) | Multicollinearity scenario |
+| `lassocox_breast_cancer` | 250 | 87 | 19 clinicopathological | Breast cancer clinicopathological (used in Section 9) |
+
+Event counts are over all rows; rows with a missing predictor are dropped before
+fitting (for example, 242 complete cases with 83 events when all 19
+`lassocox_breast_cancer` predictors are selected). `lassocox_lung_cancer` and
+`lassocox_small_cohort` are also bundled as edge-case fixtures: both contain zero
+follow-up times, which this analysis rejects, and `lassocox_lung_cancer` has only 2
+censored rows. See their help pages for details.
 
 ---
 
@@ -444,7 +451,7 @@ where only LASSO-selected variables have non-zero coefficients.
 
 | Column | Meaning |
 |--------|---------|
-| Variable | Predictor name |
+| Variable | Predictor name; a factor indicator is labelled `variable: level (vs reference)` |
 | Penalized Coefficient | Original-scale coefficient from the penalized fit; positive and negative values indicate higher and lower fitted hazard |
 | Penalized Hazard Ratio | exp(coefficient), interpreted for the encoded column and its units |
 | Scale-Adjusted Magnitude | Absolute coefficient multiplied by the encoded column's complete-case SD; descriptive only |

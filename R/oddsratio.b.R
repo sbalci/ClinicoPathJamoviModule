@@ -951,25 +951,37 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         # only deprecation-flavoured WARNINGS, so the substantive
                         # "glm.fit: fitted probabilities numerically 0 or 1 occurred"
                         # separation warning still reaches the user.
+                        # Profile-likelihood CIs (= confint(glm)); when profiling
+                        # fails (typically separation) fall back to Wald CIs and
+                        # record that, so the table note can say which was used.
+                        # keep_fit_id = TRUE gives each row its model term, which
+                        # lets the forest plot drop exactly the rows the table
+                        # marks "not estimable"; the column is removed below.
+                        ci_type <- "profile"
                         df_out <- tryCatch(
                             .quietly(finalfit::finalfit(
                                 .data = mydata,
                                 dependent = formulaDependent,
                                 explanatory = formulaExplanatory,
                                 metrics = FALSE,
-                                cont_cut = 0
+                                cont_cut = 0,
+                                keep_fit_id = TRUE
                             )),
                             error = function(e_prof) {
+                                ci_type <<- "default"
                                 .quietly(finalfit::finalfit(
                                     .data = mydata,
                                     dependent = formulaDependent,
                                     explanatory = formulaExplanatory,
                                     metrics = FALSE,
                                     cont_cut = 0,
-                                    confint_type = "default"
+                                    confint_type = "default",
+                                    keep_fit_id = TRUE
                                 ))
                             }
                         )
+                        fit_ids <- as.character(df_out$fit_id)
+                        df_out <- df_out[, setdiff(names(df_out), c("fit_id", "index")), drop = FALSE]
 
                         glm_fit <- .quietly(finalfit::glmmulti(
                             .data = mydata,
@@ -981,30 +993,21 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                             round(as.numeric(.quietly(pROC::roc(glm_fit$y, glm_fit$fitted)$auc[1])), 3),
                             error = function(e) NA_real_
                         )
-                        yhat <- glm_fit$fitted
-                        qq <- unique(stats::quantile(yhat, probs = seq(0, 1, 0.1), na.rm = TRUE))
-                        hl_txt <- if (length(unique(yhat)) >= 3L && length(qq) >= 4L) {
-                            tryCatch(
-                                finalfit:::metrics_hoslem(glm_fit$y, yhat),
-                                error = function(e) "not applicable (insufficient distinct risk groups)"
-                            )
-                        } else {
-                            "not applicable (saturated / <3 risk groups)"
-                        }
+                        hl_txt <- private$.hosmerLemeshow(glm_fit$y, glm_fit$fitted)
                         metrics_out <- as.data.frame(
                             paste0(
                                 "Number in dataframe = ", n_dataframe,
                                 ", Number in model = ", nrow(mydata),
                                 ", Missing = ", n_dataframe - nrow(mydata),
                                 ", AIC = ", aic_val,
-                                ", C-statistic = ", auc_val,
+                                ", C-statistic (in-sample) = ", auc_val,
                                 ", H&L = ", hl_txt
                             ),
                             stringsAsFactors = FALSE
                         )
                         names(metrics_out) <- NULL
                         class(metrics_out) <- c("data.frame.ff", class(metrics_out))
-                        list(df_out, metrics_out)
+                        list(df_out, metrics_out, fit_ids, ci_type)
                     },
                         error = function(e) {
                             message <- .fmt(
@@ -1055,10 +1058,35 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     private$.addNotice(
                         jmvcore::NoticeType$STRONG_WARNING,
                         .fmt(
-                            .("The odds ratio could not be estimated for: {variables}. The confidence interval is unbounded, which means the data separate the outcome perfectly (or nearly so) for that variable and the maximum-likelihood estimate does not exist. The cell is shown as 'not estimable' rather than as the arbitrary large number the fitting algorithm stopped at. Enable Firth penalized logistic regression to obtain a finite estimate, or combine sparse categories. Note that the forest plot below is drawn by finalfit from the same unpenalized fit and will still show the unbounded estimate."),
+                            .("The odds ratio could not be estimated for: {variables}. The confidence interval is unbounded, which means the data separate the outcome perfectly (or nearly so) for that variable and the maximum-likelihood estimate does not exist. The cell is shown as 'not estimable' rather than as the arbitrary large number the fitting algorithm stopped at. Enable Firth penalized logistic regression to obtain a finite estimate, or combine sparse categories. Terms whose multivariable odds ratio is not estimable are omitted from the forest plot."),
                             variables = paste(nonest$flagged, collapse = ", ")
                         )
                     )
+                }
+
+                # Rows of the multivariable column marked "not estimable" are
+                # dropped from the forest plot (finalfit::or_plot refits the
+                # same unpenalized model and would draw an OR of ~1e30 on an
+                # axis to 1e+118, flattening every estimable row).
+                mv_rows <- unlist(nonest$rows[names(nonest$rows) == "OR (multivariable)"])
+                excluded_fit_ids <- if (length(tOdds) >= 3L) tOdds[[3]][mv_rows] else character(0)
+                excluded_labels <- character(0)
+                if (length(mv_rows) > 0) {
+                    lvl <- as.character(tOdds[[1]][[2]])[mv_rows]
+                    excluded_labels <- ifelse(
+                        is.na(lvl) | !nzchar(lvl) | lvl %in% c("Mean (SD)", "Median (IQR)"),
+                        nonest$var_col[mv_rows],
+                        paste0(nonest$var_col[mv_rows], " (", lvl, ")"))
+                }
+
+                # Name the interval and p-value methods actually used in this run.
+                ci_type <- if (length(tOdds) >= 4L) tOdds[[4]] else NULL
+                ci_note <- if (is.null(ci_type)) {
+                    .("Confidence intervals: profile penalized likelihood. P-values: penalized likelihood-ratio test.")
+                } else if (identical(ci_type, "default")) {
+                    .("Confidence intervals: Wald (profile-likelihood intervals could not be computed for this model). P-values: Wald test.")
+                } else {
+                    .("Confidence intervals: profile likelihood. P-values: Wald test.")
                 }
 
 
@@ -1077,7 +1105,8 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                              row.names = FALSE,
                              align = c("l", "l", "r", "r", "r", "r"),
                              format = "html")
-                self$results$text$setContent(results1)
+                self$results$text$setContent(paste0(
+                    results1, "<p><small>", htmltools::htmlEscape(ci_note), "</small></p>"))
 
 
 
@@ -1093,7 +1122,10 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     "formulaExplanatory" = formulaExplanatory,
                     "originalNames" = all_labels,
                     "originalOutcomeName" = self$options$outcome,
-                    "originalExplanatoryNames" = self$options$explanatory
+                    "originalExplanatoryNames" = self$options$explanatory,
+                    "excludedFitIds" = excluded_fit_ids,
+                    "excludedLabels" = excluded_labels,
+                    "confintType" = ci_type
                 )
 
                 # The penalized forest plot is verified here, in .run(), not in
@@ -1200,7 +1232,11 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     }
 
                     if (diagnostics_ok) {
-                        pred_is_continuous <- is.numeric(diagnostic_source[[diagnostic_predictor]])
+                        # A numeric with two distinct values (0/1 marker) is a
+                        # binary test, not a continuous one; factor() below
+                        # turns it into a two-level 2x2 margin.
+                        pred_is_continuous <- is.numeric(diagnostic_source[[diagnostic_predictor]]) &&
+                            length(unique(stats::na.omit(diagnostic_source[[diagnostic_predictor]]))) > 2L
                         diagnostic_data <- diagnostic_source[, c(
                             dependent_variable_name_from_label,
                             diagnostic_predictor
@@ -1787,7 +1823,7 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 "<div style='background-color: rgba(33, 163, 188, 0.21); border-left: 4px solid #0c5460; padding: 15px; margin: 10px 0; border-radius: 4px; color: inherit;'>",
                 "<b>", .("Predictor Level Modeling:"), "</b><br>",
                 .fmt(
-                    .("The level '{level}' is used as the positive/exposure category as specified (negative/reference category: '{neg}')."),
+                    .("The level '{level}' is treated as a positive test result as specified (negative test result: '{neg}')."),
                     level = htmltools::htmlEscape(positive_predictor_level),
                     neg = htmltools::htmlEscape(negative_predictor_level)),
                 "</div>"
@@ -1925,6 +1961,28 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             ))
         },
 
+        # Hosmer-Lemeshow goodness of fit on deciles of fitted risk, with
+        # df = (groups actually formed) - 2. With few distinct fitted values the
+        # decile breaks collapse (unique()), so fewer than 10 groups form;
+        # finalfit:::metrics_hoslem kept df = 8 regardless, which reported
+        # "Chi-sq(8) 0.32 (p=1.000)" where the correct test is df = 1, p = 0.57
+        # (ResourceSelection::hoslem.test agrees). Empty intervals are dropped.
+        .hosmerLemeshow = function(y, yhat) {
+            na_txt <- "not applicable (saturated / <3 risk groups)"
+            qq <- unique(stats::quantile(yhat, probs = seq(0, 1, 0.1), na.rm = TRUE))
+            if (length(unique(yhat)) < 3L || length(qq) < 4L) return(na_txt)
+            grp <- cut(yhat, breaks = qq, include.lowest = TRUE)
+            n_g <- tabulate(grp, nbins = nlevels(grp))
+            obs <- tapply(y, grp, sum)[n_g > 0]
+            expd <- tapply(yhat, grp, sum)[n_g > 0]
+            n_g <- n_g[n_g > 0]
+            hl_df <- length(n_g) - 2L
+            chisq <- sum((obs - expd)^2 / expd + (obs - expd)^2 / (n_g - expd))
+            if (hl_df < 1L || !is.finite(chisq)) return(na_txt)
+            p <- stats::pchisq(chisq, hl_df, lower.tail = FALSE)
+            sprintf("Chi-sq(%d) %.2f (%s)", hl_df, chisq, .pValueText(p))
+        },
+
         # Odds ratios from a non-converged fit are numerical noise, not estimates.
         #
         # Under (quasi-)separation glm's IRLS stops wherever the iteration limit
@@ -1941,7 +1999,7 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         # separated table gives 3721.00 (181.52-1160619.10) -- so this rule leaves
         # them untouched and cannot fire on an ordinary analysis.
         .markNonEstimableOR = function(tbl) {
-            empty <- list(table = tbl, flagged = character(0))
+            empty <- list(table = tbl, flagged = character(0), rows = list(), var_col = character(0))
             if (is.null(tbl) || !is.data.frame(tbl) || nrow(tbl) == 0) return(empty)
 
             or_cols <- which(grepl("^OR", names(tbl)))
@@ -1955,6 +2013,7 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 if (is.na(var_col[k]) && k > 1) var_col[k] <- var_col[k - 1]
 
             flagged <- character(0)
+            rows <- list()
             for (j in or_cols) {
                 cells <- as.character(tbl[[j]])
                 for (i in seq_along(cells)) {
@@ -1971,11 +2030,14 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         !is.na(hi) && is.finite(hi) &&
                         or_val < 1e12 && hi < 1e12) next
                     cells[i] <- "not estimable"
+                    rows[[names(tbl)[j]]] <- c(rows[[names(tbl)[j]]], i)
                     if (!is.na(var_col[i])) flagged <- unique(c(flagged, var_col[i]))
                 }
                 tbl[[j]] <- cells
             }
-            list(table = tbl, flagged = flagged)
+            # rows: flagged row indices per OR column; var_col: forward-filled
+            # variable name per row (used to caption the forest plot).
+            list(table = tbl, flagged = flagged, rows = rows, var_col = var_col)
         },
 
         # Prepares data and fits logistic regression model for nomogram creation
@@ -2218,12 +2280,36 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                             cont_cut = 0, total_col = TRUE, fit_id = TRUE),
                         error = function(e) NULL)
 
+                    # Drop the rows the table marks "not estimable" (.run()
+                    # stores their model terms). or_plot left-joins the fit onto
+                    # this factorlist, so a missing row is simply not drawn while
+                    # the model still adjusts for it. A factor left with only its
+                    # reference row is dropped too.
+                    plot_opts <- list(
+                        ggplot2::xlab("OR, 95% CI"),
+                        ggplot2::theme(axis.title = ggplot2::element_text(size = 12)))
+                    excluded <- plotList$excludedFitIds
+                    if (length(excluded) > 0 && !is.null(or_factorlist)) {
+                        lab <- as.character(or_factorlist$label)
+                        block <- cumsum(!is.na(lab) & nzchar(lab))
+                        keep <- !(as.character(or_factorlist$fit_id) %in% excluded)
+                        kept_n <- tapply(keep, block, sum)[as.character(block)]
+                        orig_n <- tabulate(block)[block]
+                        keep <- keep & !(kept_n == 1 & orig_n > 1)
+                        or_factorlist <- or_factorlist[keep, , drop = FALSE]
+                        plot_opts <- c(plot_opts, list(ggplot2::labs(caption = paste(strwrap(.fmt(
+                            .("Not shown (odds ratio not estimable): {terms}"),
+                            terms = paste(plotList$excludedLabels, collapse = ", ")), 45),
+                            collapse = "\n"))))
+                    }
+
                     plot <- tryCatch(
                         finalfit::or_plot(
                             .data = mydata,
                             dependent = formulaDependent,
                             explanatory = formulaExplanatory,
                             factorlist = or_factorlist,
+                            confint_type = plotList$confintType,
                             remove_ref = FALSE,
                             table_text_size = 4,
                             title_text_size = 14,
@@ -2232,12 +2318,7 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                             dependent_label = plotList$originalOutcomeName,
                             prefix = "",
                             suffix = ": OR (95% CI, p-value)",
-                            plot_opts = list(
-                                ggplot2::xlab("OR, 95% CI"),
-                                ggplot2::theme(
-                                    axis.title = ggplot2::element_text(size = 12)
-                                )
-                            )
+                            plot_opts = plot_opts
                         ),
                         error = function(e) NULL
                     )
@@ -2398,7 +2479,7 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 <p><strong>Requirements:</strong></p>
                 <ul>
                     <li> Compares two explicitly selected levels (<strong>Predictor Positive Level</strong> vs <strong>Predictor Negative Level</strong>): e.g., Yes/No, Present/Absent, Positive/Negative</li>
-                    <li> Examples: Sex (Male/Female), LVI (Absent/Present), Treatment (Control/Treated)</li>
+                    <li> Examples: LVI (Absent/Present), an immunostain (Negative/Positive), a frozen-section call (Benign/Malignant)</li>
                     <li> Cannot use continuous variables: Age, Tumor Size (infinite possible values)</li>
                     <li> Multi-category variables (e.g., Grade 1/2/3): Only observations with the selected positive and negative levels are included in the 2\u00d72 diagnostic table; unselected levels are excluded with a warning</li>
                 </ul>
@@ -2574,7 +2655,7 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 # Check for zero cells
                 if (any(cont_table == 0)) {
                     warnings <- append(warnings, 
-                        .("Zero cells detected in contingency table. This may affect odds ratio calculation.")
+                        .("Zero cells detected in the 2x2 table. Sensitivity or specificity may be exactly 0 or 1, a likelihood ratio may be undefined, and confidence intervals are less reliable.")
                     )
                 }
             }

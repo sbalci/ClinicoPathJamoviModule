@@ -391,6 +391,32 @@ datetimeconverterClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             !any(grepl("[0-9]{4}", v))
         },
 
+        # Values with text after the date: lubridate reads a PREFIX, so
+        # "2024-01-15abc" and "2024-01-15 extra" parse as 2024-01-15 at 100% and
+        # the rest vanishes without a trace. A parsed value is counted when its
+        # trailing non-digit run contains a letter, is not an AM/PM or zone marker,
+        # and removing it leaves the same reading -- so a month NAME that ends a
+        # value ("2024-15-March" under ydm) is never counted. Same rule,
+        # duplicated, as timeinterval's .countTrailingText().
+        # @param reparse function(x) re-parsing x with the settings used for `parsed`.
+        # @return list(n, example): count and the first offending raw value.
+        .countTrailingText = function(raw, parsed, reparse) {
+            ok <- !is.na(parsed) & !is.na(raw)
+            none <- list(n = 0L, example = NULL)
+            if (!any(ok)) return(none)
+            txt <- trimws(as.character(raw[ok]))
+            tail <- regmatches(txt, regexpr("[^0-9]*$", txt))
+            cand <- grepl("[A-Za-z]", tail) &
+                !grepl("^[[:space:].,]*([AaPp]\\.?[Mm]\\.?|[Zz]|UTC|GMT)[[:space:].]*$", tail)
+            if (!any(cand)) return(none)
+            head_txt <- substr(txt[cand], 1L, nchar(txt[cand]) - nchar(tail[cand]))
+            again <- suppressWarnings(reparse(head_txt))
+            stamp <- function(x) base::format(x, "%Y-%m-%d %H:%M:%S")
+            same <- !is.na(again) & stamp(again) == stamp(parsed[ok][cand])
+            if (!any(same)) return(none)
+            list(n = sum(same), example = txt[cand][same][1])
+        },
+
         .getParser = function(format) {
             # Return appropriate lubridate parser for format
             parser <- switch(format,
@@ -704,12 +730,20 @@ datetimeconverterClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 if (length(non_missing) > 0 &&
                     (max(non_missing) < 1e8 || min(non_missing) > 4e9)) {
                     .edge_u <- if (max(non_missing) < 1e8) max(non_missing) else min(non_missing)
+                    # Epoch MILLISECONDS (what JavaScript, many EHR APIs and device
+                    # logs export) are 1000x too large and land in year ~56000; the
+                    # advice used to point at Excel and never at milliseconds. Same
+                    # band as unix_ms_like below, so Auto-detect really does read them.
+                    .ms_like <- all(non_missing >= 1e12 & non_missing <= 4e12)
                     private$.addNotice(
                         type = "WARNING",
                         title = .("Numeric Column May Not Be Unix Timestamps"),
                         class = "date-suspect",
                         content = .fmt(
-                            .("This column was converted as Unix epoch seconds, but its {which} value ({value}) converts to {date}. \u2022 Epoch seconds for a realistic clinical date are roughly 1e8 to 4e9 (1973 to 2096). \u2022 If these are Excel serial numbers, choose an Excel Serial format instead; if they are measurements, select a real date column."),
+                            if (.ms_like)
+                                .("This column was converted as Unix epoch seconds, but its {which} value ({value}) converts to {date}. \u2022 Epoch seconds for a realistic clinical date are roughly 1e8 to 4e9 (1973 to 2096). \u2022 These values look like Unix epoch MILLISECONDS (1000 times larger than seconds). Select Auto-detect, which recognises and converts epoch milliseconds.")
+                            else
+                                .("This column was converted as Unix epoch seconds, but its {which} value ({value}) converts to {date}. \u2022 Epoch seconds for a realistic clinical date are roughly 1e8 to 4e9 (1973 to 2096). \u2022 If these are Excel serial numbers, choose an Excel Serial format instead; if they are measurements, select a real date column."),
                             which = if (max(non_missing) < 1e8) "largest" else "smallest",
                             value = base::format(.edge_u, trim = TRUE, scientific = FALSE),
                             date = base::format(as.POSIXct(.edge_u, origin = '1970-01-01', tz = 'UTC'), '%Y-%m-%d')))
@@ -2004,6 +2038,40 @@ datetimeconverterClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                                                origin = "1970-01-01", tz = tz_to_use)
                 } else {
                     parsed_dates <- private$.parseDatetime(parsing_vector, detected_format, tz = tz_to_use)
+
+                    .parser <- private$.getParser(detected_format)
+                    .trail <- private$.countTrailingText(
+                        parsing_vector, parsed_dates,
+                        function(x) suppressWarnings(.parser(x, tz = tz_to_use)))
+                    if (.trail$n > 0)
+                        private$.addNotice(
+                            type = "WARNING",
+                            title = .("Text After The Date Was Ignored"),
+                            class = "date-suspect",
+                            content = .fmt(
+                                .("{count} value(s) have text after the date, for example \"{example}\". \u2022 Only the date at the start of each value was read and the rest was ignored. \u2022 Check that the ignored text does not change the date (a second date, a time, or a note such as 'approx.'), and clean the column so it holds dates only."),
+                                count = .trail$n, example = .trail$example))
+
+                    # DAYLIGHT-SAVING GAP. A clock time inside the spring-forward gap
+                    # (America/New_York 2024-03-10 02:30) does not exist in that zone,
+                    # so lubridate returns NA, and the row was reported only as a
+                    # generic parse failure. Such a value DOES parse in UTC, which has
+                    # no gaps, so the difference is exactly the nonexistent times.
+                    if (!identical(tz_to_use, "UTC")) {
+                        .gap <- !is.na(parsing_vector) & is.na(parsed_dates)
+                        if (any(.gap))
+                            .gap[.gap] <- !is.na(suppressWarnings(
+                                .parser(parsing_vector[.gap], tz = "UTC")))
+                        if (any(.gap))
+                            private$.addNotice(
+                                type = "WARNING",
+                                title = .("Times In A Daylight-Saving Gap"),
+                                content = .fmt(
+                                    .("{count} value(s) could not be converted because that clock time does not exist in the {tz} timezone: it falls in the hour skipped when daylight-saving time starts (first: {example}). \u2022 These rows are left empty. \u2022 If the times were recorded in UTC or another fixed offset, set Timezone to UTC; otherwise correct the times at source."),
+                                    count = sum(.gap),
+                                    tz = tz_info$summary,
+                                    example = as.character(parsing_vector[which(.gap)[1]])))
+                    }
 
                     # TWO-DIGIT YEARS AND THE CENTURY PIVOT.
                     # lubridate pivots 00-68 to 20xx and 69-99 to 19xx, with no way to

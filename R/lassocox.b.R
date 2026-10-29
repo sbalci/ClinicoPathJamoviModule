@@ -1069,6 +1069,19 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 htmltools::htmlEscape(code), "</code></pre>"))
         },
 
+        # Row label for design columns: "<variable>: <level> (vs <reference>)" for a factor
+        # indicator, the variable name for a numeric column. Display only; every lookup
+        # (importance, coefficients, plots, R code) stays keyed by the design-column name.
+        .columnLabels = function(data, idx) {
+            enc <- data$encoding
+            if (is.null(enc)) return(data$variable_names[idx])
+            vapply(idx, function(i) {
+                if (enc$coding[i] == "numeric") return(enc$variable[i])
+                .fmt(.("{variable}: {level} (vs {reference})"),
+                    variable = enc$variable[i], level = enc$level[i], reference = enc$reference[i])
+            }, character(1))
+        },
+
         .populateCoefficients = function(results) {
             table <- self$results$coefficients
             
@@ -1088,6 +1101,7 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             }
 
             # Add coefficient rows for selected variables
+            row_labels <- private$.columnLabels(results$data, results$selected_vars)
             for (i in seq_along(results$selected_vars)) {
                 var_idx <- results$selected_vars[i]
                 var_name <- results$data$variable_names[var_idx]
@@ -1095,10 +1109,8 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 hr_val <- exp(coef_val)
                 importance <- results$var_importance[var_name]
 
-                # TODO (UX): a factor indicator shows its design-column name ("Tumour gradeGrade 3");
-                # label it from the encoding (variable, level, reference) as "Tumour grade: Grade 3 vs Grade 1".
                 table$addRow(rowKey = i, values = list(
-                    variable = var_name,
+                    variable = row_labels[i],
                     coefficient = coef_val,
                     hazardRatio = hr_val,
                     importance = importance
@@ -1566,10 +1578,10 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                                       na.last = TRUE)
             importance_ranks <- integer(length(results$selected_vars))
             importance_ranks[importance_order] <- seq_along(importance_order)
+            row_labels <- private$.columnLabels(results$data, results$selected_vars)
 
             for (i in seq_along(results$selected_vars)) {
                 var_idx <- results$selected_vars[i]
-                var_name <- results$data$variable_names[var_idx]
                 importance <- selected_importance[i]
 
                 # Selection frequency: fraction of lambda path where variable is non-zero
@@ -1580,7 +1592,7 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 }
 
                 table$addRow(rowKey = i, values = list(
-                    variable = var_name,
+                    variable = row_labels[i],
                     importance_score = importance,
                     selection_frequency = freq,
                     stability_rank = importance_ranks[i]
@@ -1625,6 +1637,8 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             }
 
             # - Check 2: Regularization Need --
+            # Every branch is green: "standard Cox may suffice" is advice, not a data problem
+            # (recoloured from yellow 2026-10-29), so the verdict needs no special case for it.
             if (p >= n / 3) {
                 checks$regularization <- list(
                     color = "green", label = .("Regularization Need"),
@@ -1836,14 +1850,14 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                     if (global_p >= 0.05) {
                         checks$ph_assumption <- list(
                             color = "green", label = .("Proportional Hazards"),
-                            value = sprintf(.("Selected-refit test p = %.3f"), global_p),
+                            value = .fmt(.("Selected-refit test {p}"), p = .pValueText(global_p)),
                             detail = .("No evidence of non-proportional hazards in an exploratory unpenalized refit of the selected encoded columns. Limited power and post-selection use mean that this does not prove the assumption.")
                         )
                     } else {
                         checks$ph_assumption <- list(
                             color = if (global_p < 0.01) "red" else "yellow",
                             label = .("Proportional Hazards"),
-                            value = sprintf(.("Selected-refit test p = %.3f"), global_p),
+                            value = .fmt(.("Selected-refit test {p}"), p = .pValueText(global_p)),
                             detail = .("The exploratory selected-variable refit shows evidence of non-proportional hazards. The Cox effect estimates and selection may be misspecified; investigate time-varying effects or a prespecified alternative model.")
                         )
                     }
@@ -1862,15 +1876,8 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 overall <- "red"
                 overall_text <- .("Some issues require attention before relying on these results.")
             } else if (any(colors == "yellow")) {
-                # Special case: if only yellow is regularization-not-needed and rest green
-                yellow_checks <- names(checks)[colors == "yellow"]
-                if (length(yellow_checks) == 1 && yellow_checks == "regularization") {
-                    overall <- "green"
-                    overall_text <- .("No major concern was identified by these limited checks; standard Cox may also be appropriate.")
-                } else {
-                    overall <- "yellow"
-                    overall_text <- .("Data is usable but review the flagged items.")
-                }
+                overall <- "yellow"
+                overall_text <- .("Data is usable but review the flagged items.")
             } else {
                 overall <- "green"
                 overall_text <- .("No concern was identified by these limited checks; formal sample-size planning and validation are still required.")
@@ -1929,9 +1936,6 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 )
                 if (!is.null(checks$epv) && checks$epv$color == "red") {
                     html <- paste0(html, "<li>", .("Reduce candidate parameters using subject-matter knowledge or collect more outcome information; penalization alone cannot repair very limited information."), "</li>")
-                }
-                if (!is.null(checks$regularization) && checks$regularization$color == "yellow") {
-                    html <- paste0(html, "<li>", .("Use <strong>Multivariable Survival</strong> in ClinicoPath for standard Cox regression with fewer predictors."), "</li>")
                 }
                 if (!is.null(checks$collinearity) && checks$collinearity$color %in% c("yellow", "red")) {
                     html <- paste0(html, "<li>", .("Consider an analysis that supports grouped or elastic-net penalties when correlated predictors should be retained together; ordinary LASSO may select only one member of a correlated set."), "</li>")
@@ -2074,8 +2078,8 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
             # Build selected variable list
             if (n_selected > 0) {
-                var_names <- results$data$variable_names[results$selected_vars]
-                var_list <- paste(htmltools::htmlEscape(var_names), collapse = ", ")
+                var_names <- private$.columnLabels(results$data, results$selected_vars)
+                var_list <- paste(htmltools::htmlEscape(var_names), collapse = "; ")
             } else {
                 var_list <- .("none")
             }

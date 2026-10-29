@@ -1547,7 +1547,11 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
 
 
                 ## Run RMST analysis before cutoff (if enabled) ----
-                if (self$options$rmst_analysis) {
+                # Whole-cohort RMST only when the cut-off block below will not run: there the
+                # cut-off pass clears and rewrites the table, so a first pass only produced a
+                # second, contradictory "Unsupported RMST horizon" message with another limit.
+                if (self$options$rmst_analysis &&
+                    !(self$options$findcut && !private$.lowEventCount)) {
                     private$.calculateRMST(results)
                 }
 
@@ -1647,6 +1651,8 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                         .("Optimal cut-off unavailable"),
                         .("An optimal cut-off could not be estimated from these data. The continuous Cox model remains the primary analysis; check predictor variability, event count, and minimum group size.")
                     )
+                    # No cut-off groups: report the whole-cohort RMST instead.
+                    if (self$options$rmst_analysis) private$.calculateRMST(results)
                     private$.addExplanations()
                     return()
                 }
@@ -3714,7 +3720,10 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                         }
 
                     }, error = function(e) {
-                        # Log-rank test failed - silently continue
+                        # Say so where the result would have been, rather than omit it.
+                        self$results$multipleCutTable$setNote("logrank", sprintf(
+                            .("The overall log-rank test across the cut-off groups could not be computed: %s"),
+                            htmltools::htmlEscape(conditionMessage(e))))
                     })
                 }
 
@@ -3755,41 +3764,34 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                     stats <- multicut_results$group_stats[[group_name]]
                     if (!is.null(stats) && !is.null(stats$surv_fit)) {
                         for (time_point in time_points) {
-                            tryCatch({
+                            row_key <- paste(group_name, time_point, sep = "_")
+                            blank <- list(risk_group = stats$group, time_point = time_point, n_risk = NA_real_,
+                                          survival_prob = NA_real_, surv_lower = NA_real_, surv_upper = NA_real_)
+                            note <- .("Not estimable at this time point.")
+                            row <- tryCatch({
                                 # Extract survival probability at specific time point
                                 surv_summary <- summary(stats$surv_fit, times = time_point)
 
                                 if (length(surv_summary$surv) > 0) {
                                     # Don't multiply by 100 - the YAML format: pc does this automatically
-                                    surv_prob <- surv_summary$surv[1]  # Keep as proportion (0-1)
-                                    lower_ci <- surv_summary$lower[1]
-                                    upper_ci <- surv_summary$upper[1]
-                                    n_at_risk <- surv_summary$n.risk[1]
-
-                                    survtable$addRow(rowKey = paste(group_name, time_point, sep = "_"),
-                                                   values = list(
+                                    list(
                                         risk_group = stats$group,
                                         time_point = time_point,
-                                        n_risk = n_at_risk,  # Match YAML column name
-                                        survival_prob = round(surv_prob, 3),  # Keep as proportion
-                                        surv_lower = round(lower_ci, 3),  # Match YAML column name
-                                        surv_upper = round(upper_ci, 3)   # Match YAML column name
-                                    ))
+                                        n_risk = surv_summary$n.risk[1],
+                                        survival_prob = round(surv_summary$surv[1], 3),  # Keep as proportion
+                                        surv_lower = round(surv_summary$lower[1], 3),
+                                        surv_upper = round(surv_summary$upper[1], 3))
                                 } else {
-                                    # No survival data available at this time point
-                                    survtable$addRow(rowKey = paste(group_name, time_point, sep = "_"),
-                                                   values = list(
-                                        risk_group = stats$group,
-                                        time_point = time_point,
-                                        n_risk = 0,  # Match YAML column name
-                                        survival_prob = NA,
-                                        surv_lower = NA,  # Match YAML column name
-                                        surv_upper = NA   # Match YAML column name
-                                    ))
+                                    note <- .("Beyond the observed follow-up of this group.")
+                                    utils::modifyList(blank, list(n_risk = 0))
                                 }
                             }, error = function(e) {
-                                # Survival calculation failed - silently continue
+                                # Was skipped silently, so the time point just vanished from the table.
+                                note <<- sprintf(.("Could not be computed: %s"), htmltools::htmlEscape(conditionMessage(e)))
+                                blank
                             })
+                            survtable$addRow(rowKey = row_key, values = row)
+                            .footnoteMissingCells(survtable, row_key, row, note)
                         }
                     }
                 }
@@ -5143,19 +5145,32 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                     suppressWarnings(as.numeric(unlist(strsplit(cutp_string, "[,[:space:]]+"))))
                 }, error = function(e) NA_real_)
 
+                # This parser runs for several tables; show each warning once.
+                warn_once <- function(title, message) {
+                    if (!isTRUE(grepl(htmltools::htmlEscape(title), self$results$warnings$content, fixed = TRUE)))
+                        private$.addHtmlMessage("warning", title, message)
+                }
+
                 # Remove invalid values
-                time_points <- time_points[!is.na(time_points) & time_points > 0]
+                valid <- !is.na(time_points) & time_points > 0
+                n_dropped <- sum(!valid)
+                time_points <- time_points[valid]
 
                 if (length(time_points) == 0) {
                     # Silently substituting defaults let the table label itself with
                     # times the user never asked for.
-                    private$.addHtmlMessage(
-                        "warning",
+                    warn_once(
                         .("Survival time points not understood"),
                         sprintf(.("'%s' could not be read as a list of time points. Default points (%s) are shown instead. Enter positive numbers separated by commas."),
                                 cutp_string, paste(default_points, collapse = ", ")))
                     return(default_points)
                 }
+                # A negative, zero or non-numeric entry used to vanish without a word.
+                if (n_dropped > 0)
+                    warn_once(
+                        .("Some survival time points were ignored"),
+                        sprintf(.("%d of the entries in '%s' were not positive numbers and were ignored. Survival is shown at: %s."),
+                                n_dropped, cutp_string, paste(sort(unique(time_points)), collapse = ", ")))
 
                 # Sort and return unique values
                 return(sort(unique(time_points)))

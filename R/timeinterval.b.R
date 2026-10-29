@@ -131,6 +131,36 @@ timeintervalClass <- if (requireNamespace("jmvcore")) R6::R6Class(
             sum(!mapply(grepl, yr, txt, MoreArgs = list(fixed = TRUE)))
         },
 
+        # Count and first example of values with text after the date (both columns).
+        .trailingTextCount = 0L,
+        .trailingTextExample = NULL,
+
+        # Values with text after the date: lubridate reads a PREFIX, so
+        # "2020-03-01abc" and "2020-03-01 extra" parse as 2020-03-01 and the rest
+        # vanishes without a trace. A parsed value is counted when its trailing
+        # non-digit run contains a letter, is not an AM/PM or zone marker, and
+        # removing it leaves the same reading -- so a month NAME that ends a value
+        # ("2020-15-March" under ydm) is never counted. Same rule, duplicated, as
+        # datetimeconverter's .countTrailingText().
+        # @param reparse function(x) re-parsing x with the settings used for `parsed`.
+        # @return list(n, example): count and the first offending raw value.
+        .countTrailingText = function(raw, parsed, reparse) {
+            ok <- !is.na(parsed) & !is.na(raw)
+            none <- list(n = 0L, example = NULL)
+            if (!any(ok)) return(none)
+            txt <- trimws(as.character(raw[ok]))
+            tail <- regmatches(txt, regexpr("[^0-9]*$", txt))
+            cand <- grepl("[A-Za-z]", tail) &
+                !grepl("^[[:space:].,]*([AaPp]\\.?[Mm]\\.?|[Zz]|UTC|GMT)[[:space:].]*$", tail)
+            if (!any(cand)) return(none)
+            head_txt <- substr(txt[cand], 1L, nchar(txt[cand]) - nchar(tail[cand]))
+            again <- suppressWarnings(reparse(head_txt))
+            stamp <- function(x) base::format(x, "%Y-%m-%d %H:%M:%S")
+            same <- !is.na(again) & stamp(again) == stamp(parsed[ok][cand])
+            if (!any(same)) return(none)
+            list(n = sum(same), example = txt[cand][same][1])
+        },
+
         .validateInputData = function(data, dx_date, fu_date) {
             # Input validation - returns status instead of throwing errors.
             #
@@ -458,47 +488,50 @@ timeintervalClass <- if (requireNamespace("jmvcore")) R6::R6Class(
             tied_formats <- names(format_scores)[
                 format_scores >= (best_score - 1e-9) & format_scores >= 0.5]
 
-            # TIE-BREAK ON YEAR SPAN, not on the order of formats_to_try.
+            # TIE-BREAK BY DEMOTING IMPLAUSIBLY WIDE READINGS -- the same rule as
+            # datetimeconverter's .detectDatetimeFormat(), duplicated here (it is
+            # a few lines) rather than moved to a shared helper.
             #
-            # The old rule was "first candidate in formats_to_try order wins", and
-            # ymd is first, so ymd won every tie. For any DD/MM/YY column with
+            # The original rule was "first candidate in formats_to_try order wins",
+            # and ymd is first, so ymd won every tie. For any DD/MM/YY column with
             # years <= 2031 that is ALWAYS wrong and ALWAYS a tie: ymd reads the
             # DAY as the year, so "22/09/18" becomes 2022-09-18 instead of
-            # 2018-09-22. Measured on a 30-row cohort, ymd parsed 30/30 -- tying
-            # dmy at 1.00 -- and produced a 7.7x wrong mean follow-up.
+            # 2018-09-22. Reading a day-of-month as a two-digit year scatters the
+            # years across 1..31, while a real cohort spans a few years, so any
+            # tied reading whose years span more than 20 is DEMOTED, and
+            # formats_to_try order decides among the survivors.
             #
-            # The discriminator is that a clinical cohort spans a few years, not
-            # thirty. Reading the day-of-month as a year scatters the years across
-            # 1..31, so the wrong format's parsed years span ~25-30 years while the
-            # right one spans the cohort's true accrual window. Measured on the same
-            # data: ymd span 25 years, dmy span 0. Genuine ISO text never reaches
-            # this branch (dmy cannot parse "2020-03-05" at all), and a true
-            # dmy/mdy ambiguity has an identical year component in both readings,
-            # so the span is equal and the original order still decides -- that
-            # case is handled downstream by .checkMixedDateOrder() instead.
+            # It is deliberately demote-only. The previous rule here PROMOTED the
+            # narrowest span, which is really "the field that varies least is the
+            # year" -- wrong whenever the day-of-month is more clustered than the
+            # cohort's years. Month-start columns written yy-mm-dd are exactly that
+            # shape: start "16-01-01", "17-03-01", ... is correct as ymd, but dmy
+            # pins every row to 2001 (span 0), won the tie, and reported a mean of
+            # 4.0 months where the truth was about 20. A degenerate zero span must
+            # not win, so the narrowest reading is never preferred for being narrow.
+            #
+            # Genuine ISO text never reaches this branch (dmy cannot parse
+            # "2020-03-05" at all), and a true dmy/mdy ambiguity has the same year
+            # component under both readings, so neither is demoted and the original
+            # order decides -- .checkMixedDateOrder() and the note below cover it.
             if (length(tied_formats) > 1) {
                 year_span <- vapply(tied_formats, function(fmt) {
                     p <- private$.tryParse(c(sample_start, sample_end), fmt)
                     y <- lubridate::year(p[!is.na(p)])
-                    if (length(y) == 0) NA_real_ else as.numeric(diff(range(y)))
+                    if (length(y) == 0) Inf else as.numeric(diff(range(y)))
                 }, numeric(1))
-                if (any(is.finite(year_span))) {
-                    # Strictly smaller only, so an exact tie keeps the previous
-                    # (formats_to_try order) winner and nothing silently reshuffles.
-                    narrowest <- tied_formats[which.min(year_span)]
-                    if (is.finite(year_span[[narrowest]]) &&
-                        (!is.finite(year_span[[best_format]]) ||
-                         year_span[[narrowest]] < year_span[[best_format]])) {
-                        best_format <- narrowest
-                    }
-                }
+                plausible <- tied_formats[is.finite(year_span) & year_span <= 20]
+                if (length(plausible) > 0) tied_formats <- plausible
+                # tied_formats keeps formats_to_try order, so [1] is the first
+                # plausible candidate.
+                best_format <- tied_formats[1]
             }
 
-            # Flag the ambiguity regardless of how it was resolved: the user should
-            # still verify the choice rather than trust a heuristic silently.
+            # Flag any ambiguity that survives the demotion: the user must verify
+            # the choice rather than trust the formats_to_try order silently.
             if (best_score >= 0.5 && length(tied_formats) > 1) {
                 private$.formatDetectionNote <- .fmt(
-                    .("Auto-detection is ambiguous: {formats} all parse these dates equally well ({pct}% success). The '{format}' format was used, because it places these dates in the narrowest range of years - please verify it matches your data or select the format manually."),
+                    .("Auto-detection is ambiguous: {formats} all parse these dates equally well ({pct}% success) and place them in a plausible range of years. The '{format}' format was used - please verify it matches your data or select the format manually."),
                     formats = paste(tied_formats, collapse = ", "),
                     pct = base::formatC(100 * best_score, format = "f", digits = 0),
                     format = best_format)
@@ -867,6 +900,12 @@ timeintervalClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                 private$.countTwoDigitYears(data[[dx_date]], start_dates) +
                 private$.countTwoDigitYears(data[[fu_date]], end_dates)
 
+            reparse <- function(x) private$.parseDate(x, detected_format, tz = tz)
+            trail_s <- private$.countTrailingText(data[[dx_date]], start_dates, reparse)
+            trail_e <- private$.countTrailingText(data[[fu_date]], end_dates, reparse)
+            private$.trailingTextCount <- trail_s$n + trail_e$n
+            private$.trailingTextExample <- c(trail_s$example, trail_e$example)[1]
+
             # Rows entered in the opposite day/month order parse cleanly and stay
             # positive, so nothing downstream can catch them. Check here, on the
             # raw strings, while both readings are still recoverable.
@@ -917,7 +956,15 @@ timeintervalClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                 # whose day-of-month is 12 or less -- so naming that cause matters
                 # more than the count. Each .() is one whole sentence; the newlines
                 # that lay the message out are joined outside the translated units.
-                jmvcore::reject(paste(
+                #
+                # Two-digit years are named only when the column actually has them:
+                # "22/09/65" is read as 2065, so a 1960s start date lands after its
+                # end date and EVERY such row is negative -- none of the three general
+                # causes describes that.
+                two_digit_cause <- if (private$.twoDigitYearCount > 0)
+                    .fmt(.("{count} date value(s) here were written with a two-digit year, which is read as 2000-2068 for 00-68: a 1965 date written as 65 becomes 2065 and falls after its end date. If the Examples below show a start date in the future, rewrite the column with four-digit years."),
+                         count = private$.twoDigitYearCount)
+                jmvcore::reject(paste(c(
                     .fmt(.("Negative time intervals detected (end date before start date) in {count} of {total} rows ({pct}%)."),
                          count = length(negative_idx),
                          total = length(calculated_time_raw),
@@ -925,10 +972,11 @@ timeintervalClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                     .("These rows cannot be analyzed: a negative interval subtracts from total person-time and would corrupt any incidence rate computed from that denominator."),
                     .("Usual causes are that the start and end date columns are swapped, or that the date format was mis-detected - a wrong day/month order flips only the rows whose day-of-month is 12 or less, which is why a few rows can be negative while the rest look correct."),
                     .("A third cause makes every row negative by less than a day: a start column carrying a time of day against an end column recorded at midnight, which is what many laboratory systems export - check the Examples below for a time component on one side only."),
+                    two_digit_cause,
                     .("Correct the dates at source, or tick 'Remove negative intervals' under Data Quality & Statistics to drop these rows from every statistic including person-time."),
                     .("Examples:"),
-                    paste(examples, collapse = "\n"),
-                    sep = "\n"))
+                    paste(examples, collapse = "\n")),
+                    collapse = "\n"))
             }
 
             if (self$options$remove_negative) {
@@ -1026,6 +1074,8 @@ timeintervalClass <- if (requireNamespace("jmvcore")) R6::R6Class(
             private$.mixedOrderNote <- NULL
             private$.ambiguousExposure <- NULL
             private$.twoDigitYearCount <- 0L
+            private$.trailingTextCount <- 0L
+            private$.trailingTextExample <- NULL
 
             # None of the Html items declare clearWith, and .run() has several early
             # returns, so anything written on a previous run survives into this one:
@@ -1186,6 +1236,29 @@ timeintervalClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                 return()
             }
 
+            # Caveats about how the dates were READ. Raised on the rejected path as
+            # well as the success path: both counts are recorded straight after
+            # parsing, before any rejection, and a two-digit year is very often the
+            # very thing that made the run fail ("22/09/65" -> 2065 -> every
+            # interval negative), so discarding it there hid the cause.
+            add_parse_caveats <- function() {
+                # Two-digit years are pivoted silently by lubridate; a 1960s date of
+                # birth written "22/09/68" lands in 2068 and only the downstream
+                # symptoms (future dates, negative intervals) ever showed, none of
+                # which named the cause.
+                if (private$.twoDigitYearCount > 0) {
+                    add_message("warning", .fmt(
+                        .("{count} date value(s) were written with a two-digit year. These are read as 2000-2068 for 00-68 and as 1969-1999 for 69-99, so a date such as 22/09/68 becomes 2068 and a 1950s-1960s date is pushed a century forward. If any interval is a century off, rewrite the column with four-digit years."),
+                        count = private$.twoDigitYearCount))
+                }
+                if (private$.trailingTextCount > 0) {
+                    add_message("warning", .fmt(
+                        .("{count} date value(s) have text after the date, for example \"{example}\". Only the date at the start of each value was read and the rest was ignored. Check that the ignored text does not change the date (a second date, a time, or a note such as 'approx.'), and clean the column so it holds dates only."),
+                        count = private$.trailingTextCount,
+                        example = private$.trailingTextExample))
+                }
+            }
+
             # Try to calculate time intervals with error handling
             calculated_times <- NULL
             tryCatch({
@@ -1210,6 +1283,7 @@ timeintervalClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                 if (identical(self$options$time_format, "auto") &&
                     !is.null(private$.formatDetectionNote))
                     add_message("warning", private$.formatDetectionNote)
+                add_parse_caveats()
                 add_message("error", as.character(e$message))
                 render_messages()
             })
@@ -1245,15 +1319,7 @@ timeintervalClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                     exampleswapped = base::formatC(mox$example_swapped, format = "f", digits = 0)))
             }
 
-            # Two-digit years are pivoted silently by lubridate; a 1960s date of
-            # birth written "22/09/68" lands in 2068 and only the downstream
-            # symptoms (future dates, negative intervals) ever showed, none of
-            # which named the cause.
-            if (private$.twoDigitYearCount > 0) {
-                add_message("warning", .fmt(
-                    .("{count} date value(s) were written with a two-digit year. These are read as 2000-2068 for 00-68 and as 1969-1999 for 69-99, so a date such as 22/09/68 becomes 2068 and a 1950s-1960s date is pushed a century forward. If any interval is a century off, rewrite the column with four-digit years."),
-                    count = private$.twoDigitYearCount))
-            }
+            add_parse_caveats()
 
             # Timezone reaches only a parser with a time component; every date-only
             # format yields a Date, which carries no zone. Tested against the format
@@ -2004,10 +2070,21 @@ timeintervalClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                 lm_clause <- if (lm_on)
                     glue::glue(" Follow-up time was measured from the {lm_adj} landmark rather than from the start date.")
                 else ""
+                # The sentence must say what was measured and what a unit is. The
+                # mean/median here are of the OBSERVED time between the two dates,
+                # over every row -- not a reverse Kaplan-Meier median follow-up, which
+                # is what "median follow-up" usually means in a survival paper. And a
+                # "month" is the standardized 30.4375 days (or a calendar month), which
+                # the summary panel stated and the pasted sentence did not.
+                unit_def <- if (!unit %in% c("months", "years")) ""
+                    else if (identical(self$options$time_basis, "calendar"))
+                        glue::glue("; calendar {unit}")
+                    else if (unit == "months") "; 1 month = 30.4375 days"
+                    else "; 1 year = 365.25 days"
                 copy_sentence <- if (lm_on)
-                    glue::glue("\"A landmark analysis was performed at {lm_amount}: {n_obs} {if (n_obs == 1) 'participant' else 'participants'} with at least {lm_amount} of follow-up {if (n_obs == 1) 'was' else 'were'} included, and follow-up time was measured from the landmark rather than from the start date. Post-landmark follow-up was a mean of {mean_time} {unit} (median {median_time} {unit}), contributing {total_pt} post-landmark person-{unit} of observation time.\"")
+                    glue::glue("\"A landmark analysis was performed at {lm_amount}: {n_obs} {if (n_obs == 1) 'participant' else 'participants'} with at least {lm_amount} of follow-up {if (n_obs == 1) 'was' else 'were'} included, and follow-up time was measured from the landmark rather than from the start date. Observed post-landmark follow-up had a mean of {mean_time} {unit} (median {median_time} {unit}{unit_def}), contributing {total_pt} post-landmark person-{unit} of observation time.\"")
                 else
-                    glue::glue("\"Follow-up data {if (n_obs == 1) 'was' else 'were'} available for {n_obs} {if (n_obs == 1) 'participant' else 'participants'} (mean {mean_time} {unit}, median {median_time} {unit}), contributing {total_pt} person-{unit} of observation time.\"")
+                    glue::glue("\"Follow-up data {if (n_obs == 1) 'was' else 'were'} available for {n_obs} {if (n_obs == 1) 'participant' else 'participants'}; the observed time from the start date to the end date had a mean of {mean_time} {unit} (median {median_time} {unit}{unit_def}), contributing {total_pt} person-{unit} of observation time.\"")
 
                 summary_html <- glue::glue("
                     <div style='background-color: rgba(33, 149, 188, 0.1); padding: 20px; border-left: 5px solid #0066cc; margin: 15px 0; color: inherit;'>
@@ -2021,7 +2098,8 @@ timeintervalClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                         <div style='background-color: rgba(33, 137, 255, 0.07); padding: 15px; margin-top: 15px; border-radius: 5px; color: inherit;'>
                             <p style='font-size: 0.95em; color: inherit; margin: 0;'>
                             <strong> Copy-Ready Sentence:</strong><br>
-                            <em style='color: inherit;'>{copy_sentence}</em>
+                            <em style='color: inherit;'>{copy_sentence}</em><br>
+                            <span style='font-size: 0.9em;'>These are observed intervals between the two dates for every participant, censored or not. They are not the reverse Kaplan-Meier median follow-up; report that from a survival analysis if your journal asks for median follow-up.</span>
                             </p>
                         </div>
                     </div>

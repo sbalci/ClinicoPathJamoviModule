@@ -315,3 +315,41 @@ test_that("many groups are warned about, not blocked", {
   expect_match(n, "300 pairwise tests", fixed = TRUE)   # 25 * 24 / 2
   expect_match(n, "Analysis completed successfully", fixed = TRUE)
 })
+
+test_that("asSource and .sourcifyOption prevent syntax-pane R code injection and ignore undeclared options", {
+  d <- data.frame(y = rnorm(20), g = factor(rep(c("A", "B"), 10)))
+
+  # 1. Unquoted OptionVariable expression breakout attempt
+  opts1 <- statsplot2Options$new(
+    dep = "y, group = {stop(\"PWN_VAR\"); g}",
+    group = "g"
+  )
+  a1 <- statsplot2Class$new(options = opts1, data = d)
+  src1 <- a1$asSource()
+  parsed1 <- base::parse(text = src1)[[1]]
+  # Every argument after `data = data` must be an atomic literal (character/numeric/logical), never a call
+  arg_vals1 <- as.list(parsed1)[-c(1, 2)] # drop `ClinicoPath::statsplot2` and `data = data`
+  for (arg in arg_vals1) {
+    expect_true(is.atomic(arg))
+  }
+  expect_equal(parsed1$dep, "y, group = {stop(\"PWN_VAR\"); g}")
+  expect_equal(parsed1$group, "g")
+
+  # 2. Undeclared option injected via .addOption is ignored by both asSource() and .asArgs()
+  opts2 <- statsplot2Options$new(dep = "y", group = "g")
+  o_extra <- jmvcore::OptionString$new("extra", "a\", b = {stop(\"INJECTED_EXTRA\"); 1}, c = \"d")
+  opts2$.addOption(o_extra)
+  a2 <- statsplot2Class$new(options = opts2, data = d)
+  src2 <- a2$asSource()
+  parsed2 <- base::parse(text = src2)[[1]]
+  expect_false("extra" %in% names(as.list(parsed2)))
+  expect_false(grepl("INJECTED_EXTRA", a2$.__enclos_env__$private$.asArgs(incData = FALSE), fixed = TRUE))
+
+  # 3. .safeHtmlOutput escapes all 5 HTML special characters including single quote
+  esc_fn <- a2$.__enclos_env__$private$.safeHtmlOutput
+  expect_equal(
+    esc_fn("<script>alert(\"x\" & 'y')</script>"),
+    "&lt;script&gt;alert(&quot;x&quot; &amp; &#39;y&#39;)&lt;/script&gt;"
+  )
+})
+
