@@ -75,6 +75,7 @@
 #' @seealso \code{\link[finalfit]{finalfit}}, \code{\link[rms]{rms}}
 #'
 #' @importFrom R6 R6Class
+#' @importFrom pROC roc
 #'
 #' @return An \code{R6} class generator object for the \code{oddsratioClass} backend; used internally by the jamovi analysis wrapper and not called directly.
 

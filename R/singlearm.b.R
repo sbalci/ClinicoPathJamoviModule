@@ -3,6 +3,7 @@
 #' @importFrom ggplot2 ggplot aes geom_text geom_line geom_point labs theme_void theme element_blank scale_x_continuous scale_y_continuous annotate
 #' @importFrom gridExtra grid.arrange
 #' @importFrom survminer ggsurvplot ggcompetingrisks
+#' @importFrom ggpubr ggarrange
 #'
 #' @description
 #' This function prepares and cleans data for single-arm survival analysis by
@@ -2161,8 +2162,13 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         for (nm in missing_columns) data_frame[[nm]] <- NA_real_
         data_frame <- data_frame[, median_columns, drop = FALSE]
 
+        na_note <- if (private$.isCompetingRisk())
+          .("Not computed for the cumulative-incidence median; see the table note.")
+        else
+          .("Not reached or not estimable within the observed follow-up.")
         for (i in seq_along(data_frame[, 1, drop = TRUE])) {
           medianTable$addRow(rowKey = i, values = c(data_frame[i,]))
+          .footnoteMissingCells(medianTable, i, c(data_frame[i,]), na_note)
         }
 
 
@@ -2590,6 +2596,8 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
           # the table and Table$setRow would drop it silently.
           for (i in seq_along(km_fit_df[, 1, drop = TRUE])) {
             survTable$addRow(rowKey = i, values = c(km_fit_df[i, names(km_fit_df) != "std.err"]))
+            .footnoteMissingCells(survTable, i, c(km_fit_df[i, names(km_fit_df) != "std.err"]),
+                                  .("Not estimable at this time point; see the table note."))
           }
           
           cohort_n <- nrow(mydata)
@@ -2717,6 +2725,8 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         data_frame <- km_fit_df[, names(km_fit_df) != "std.err", drop = FALSE]
         for (i in seq_along(data_frame[, 1, drop = TRUE])) {
           survTable$addRow(rowKey = i, values = c(data_frame[i,]))
+          .footnoteMissingCells(survTable, i, c(data_frame[i,]),
+                                .("Not estimable at this time point; see the table note."))
         }
 
 
@@ -2746,7 +2756,7 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
           dplyr::mutate(
             description =
               glue::glue(
-                "At {time} {self$options$timetypeoutput}, {tolower(estimand_meta$probability)} was {scales::percent(surv)}{ci}. \n At this time point {n.risk} of the {cohort_n} subjects were still at risk. \n {n.event} event(s) occurred between {prev_time} and {time} {self$options$timetypeoutput}; {events_cum} event(s) had been observed by {time} {self$options$timetypeoutput}. The observed event count is not 1 minus the Kaplan-Meier estimate because censoring is accounted for in the estimate."
+                "{estimand_meta$probability} at {time} {self$options$timetypeoutput} was {scales::percent(surv)}{ci}. \n At this time point {n.risk} of the {cohort_n} subjects were still at risk. \n {n.event} event(s) occurred between {prev_time} and {time} {self$options$timetypeoutput}; {events_cum} event(s) had been observed by {time} {self$options$timetypeoutput}. The observed event count is not 1 minus the Kaplan-Meier estimate because censoring is accounted for in the estimate."
               )
           ) %>%
           dplyr::select(description) %>%
@@ -4356,11 +4366,17 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
           median_table_row <- 1  # First row
           estimand_meta <- private$.estimandMeta()
 
-          n_total <- self$results$medianTable$getCell(rowNo = median_table_row, "records")$value
-          n_events <- self$results$medianTable$getCell(rowNo = median_table_row, "events")$value
-          median_survival <- self$results$medianTable$getCell(rowNo = median_table_row, "median")$value
-          ci_lower <- self$results$medianTable$getCell(rowNo = median_table_row, "x0_95lcl")$value
-          ci_upper <- self$results$medianTable$getCell(rowNo = median_table_row, "x0_95ucl")$value
+          # A not-reached / not-computed value is written as "" (.footnoteMissingCells);
+          # read it back as NA, which is what the checks below test for.
+          cell <- function(col) {
+            v <- self$results$medianTable$getCell(rowNo = median_table_row, col)$value
+            if (identical(v, "")) NA_real_ else v
+          }
+          n_total <- cell("records")
+          n_events <- cell("events")
+          median_survival <- cell("median")
+          ci_lower <- cell("x0_95lcl")
+          ci_upper <- cell("x0_95ucl")
           
           # Get event rate
           event_rate <- round((n_events / n_total) * 100, 1)

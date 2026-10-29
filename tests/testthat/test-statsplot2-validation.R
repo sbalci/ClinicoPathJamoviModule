@@ -166,7 +166,6 @@ test_that("C07: Integer-coded variables (<=15 vs >15 levels) and forceContinuous
 })
 
 test_that("C07 (VAL-statsplot2-02): Reclassified integer categories in easyalluvial (alluvsty='t2') keep category labels", {
-  skip("VAL-statsplot2-02 open defect: .prepareDataForPlot leaves reclassified integer columns numeric, so easyalluvial::alluvial_wide bins them into HH/MH/M/ML/LL quantiles. Remove this skip when fixed.")
   set.seed(902)
   d_num_alluv <- data.frame(t0 = rep(1:3, each = 10), t1 = sample(1:3, 30, replace = TRUE))
   r_t2 <- sp2_run(d_num_alluv, dep = "t1", group = "t0", direction = "repeated", alluvsty = "t2")
@@ -197,7 +196,6 @@ test_that("C08: Welch two-sample t-test and Hedges' g match closed-form oracle",
 })
 
 test_that("C08 (VAL-statsplot2-01): Result sentence prints single df without partial-match duplication", {
-  skip("VAL-statsplot2-01 open defect: sd$df partially matches sd$df.error on base data.frame in .sentence(), duplicating df as '(df = 9.49, 9.49)'. Remove this skip when fixed.")
   r <- sp2_run(d_tiny_2g, dep = "y", group = "g", distribution = "p", showSummary = TRUE)
   sent <- sp2_strip_html(r$summary)
   expect_match(sent, "(df = 9.49)", fixed = TRUE)
@@ -240,7 +238,6 @@ test_that("C11: Bayesian JZS two-sample BF10 matches 1D numerical quadrature (Ro
 })
 
 test_that("C11 (VAL-statsplot2-03): Bayesian t-test Result sentence does not mislabel raw mean difference as 'Bayesian t-test ='", {
-  skip("VAL-statsplot2-03 open defect: .sentence() uses sd$effectsize ('Bayesian t-test') as the label for posterior difference in means. Remove this skip when fixed.")
   r <- sp2_run(d_tiny_2g, dep = "y", group = "g", distribution = "bf", showSummary = TRUE, seed = 42)
   expect_false(grepl("Bayesian t-test = ", sp2_strip_html(r$summary), fixed = TRUE))
 })
@@ -419,7 +416,6 @@ test_that("C28-C29: Contingency table Pearson Chi-square, bias-corrected Cramer'
 })
 
 test_that("C29 (VAL-statsplot2-06): Categorical comparison with distribution='bf' does not claim statistical approach is 'not applicable'", {
-  skip("VAL-statsplot2-06 open defect: notices and ExplanationMessage claim statistical approach does not apply to categorical comparisons even when distribution='bf' runs Bayesian contingency table analysis. Remove this skip when fixed.")
   r_bf <- sp2_run(d_tiny_ff, dep = "resp", group = "arm", distribution = "bf", showExplanations = TRUE)
   expect_false(grepl("not applicable", r_bf$notices, fixed = TRUE))
   expect_false(grepl("Statistical approach option does not apply to categorical comparisons", r_bf$explain, fixed = TRUE))
@@ -440,7 +436,6 @@ test_that("C30: Split-by (grvar) panel statistics match subset analyses exactly"
 })
 
 test_that("C30 (VAL-statsplot2-04): Thin first split level (<2 obs) in manual .plotGrouped does not crash patchwork::wrap_plots", {
-  skip("VAL-statsplot2-04 open defect: plot_list[[i]] <- subplot leaves plot_list[[1]] == NULL when first split level has <2 rows, crashing patchwork::wrap_plots(). Remove this skip when fixed.")
   set.seed(809)
   d_thin <- data.frame(
     c1   = factor(c("Pos", sample(c("Pos", "Neg"), 40, replace = TRUE))),
@@ -466,20 +461,17 @@ test_that("C31-C32: Missing-value exclusion and large-dataset random subsampling
 })
 
 test_that("C31 (VAL-statsplot2-09a): excl=TRUE still reports how many rows were dropped for missing values", {
-  skip("VAL-statsplot2-09a open defect: When excl=TRUE, prepared_data$data is pre-filtered by jmvcore::naOmit, so n_dropped_na evaluates to 0 and the missing-value count disappears. Remove this skip when fixed.")
   r_t <- sp2_run(d_tiny_2g, dep = "y", group = "g", excl = TRUE)
   expect_match(r_t$notices, "1 row(s) carried a missing value", fixed = TRUE)
 })
 
 test_that("C33 (VAL-statsplot2-09b): statsSeedMatters is TRUE for within-subjects k>=3 nonparametric and Bayesian modes", {
-  skip("VAL-statsplot2-09b open defect: statsSeedMatters returns FALSE for within-subjects k>=3 under 'nonparametric' (Kendall's W bootstrap CI) and 'bayes' (anovaBF MCMC). Remove this skip when fixed.")
   seed_fn <- get("statsSeedMatters", inherits = TRUE)
   expect_true(seed_fn("nonparametric", "within", 3L))
   expect_true(seed_fn("bayes", "within", 3L))
 })
 
 test_that("C34-C35 (VAL-statsplot2-05, VAL-statsplot2-07): Non-finite values and unused factor levels handled cleanly", {
-  skip("VAL-statsplot2-05 & VAL-statsplot2-07 open defects: Inf in <=15-unique numeric column crashes .infer_type(), and unused factor levels trigger Ratio: Inf:1 / Minimum group size: 0. Remove this skip when fixed.")
   d_inf_small <- data.frame(y = c(1, 2, 3, 1, 2, 3, Inf, 1, 2, 3), g = factor(rep(c("A", "B"), 5)))
   expect_no_error(sp2_run(d_inf_small, dep = "y", group = "g"))
 
@@ -492,13 +484,11 @@ test_that("C34-C35 (VAL-statsplot2-05, VAL-statsplot2-07): Non-finite values and
 })
 
 test_that("C36 (VAL-statsplot2-08): Clinical interpretation does not state 'Wider violins indicate more variability'", {
-  skip("VAL-statsplot2-08 open defect: R/statsplot2.b.R:393 states 'Wider violins indicate more variability', inverting kernel density width vs spread. Remove this skip when fixed.")
   r <- sp2_run(d_tiny_2g, dep = "y", group = "g", showExplanations = TRUE)
   expect_false(grepl("Wider violins indicate more variability", sp2_strip_html(r$explain), fixed = TRUE))
 })
 
 test_that("C37 (VAL-statsplot2-09c): asSource() produces parseable R code when variable names contain spaces or non-ASCII characters", {
-  skip("VAL-statsplot2-09c open defect: asSource() delegates to .asArgs() which emits unquoted non-syntactic column names that fail parse(). Remove this skip when fixed.")
   opts_cls <- get("statsplot2Options", inherits = TRUE)
   anl_cls  <- get("statsplot2Class", inherits = TRUE)
   d_sp <- data.frame(`Tümör Boyutu (mm)` = d_tiny_2g$y[1:12], `Tedavi Grubu` = d_tiny_2g$g[1:12], check.names = FALSE)
@@ -507,9 +497,113 @@ test_that("C37 (VAL-statsplot2-09c): asSource() produces parseable R code when v
 })
 
 test_that("C15 (VAL-statsplot2-10): 3-group Bayesian ANOVA succeeds when grouping column is named 'g' and .extractStats does not warn on single-panel NULL subtitle_data", {
-  skip("VAL-statsplot2-10 open defect: .plotBetweenStats passes user column name 'g' directly to ggbetweenstats(type='bayes'), colliding with BayesFactor 'g_g' in performance::r2_bayes and causing .extractStats() to index $subtitle_data on pairwise_comparisons_data tibble. Remove this skip when fixed.")
   d_3g_g <- data.frame(y = d_tiny_3g$y, g = d_tiny_3g$grp)
   r_g <- sp2_run(d_3g_g, dep = "y", group = "g", distribution = "bf", seed = 42)
   expect_false(is.null(r_g$sd))
 })
+
+# ==============================================================================
+# IR-statsplot2-01..07: Independent Reviewer Regression Tests
+# ==============================================================================
+
+test_that("IR-statsplot2-01: Split-by (grvar) when all panels have < 2 complete observations blocks cleanly without pooling", {
+  d_all_thin <- data.frame(
+    y = c(10, 20, 30),
+    g = factor(c("A", "B", "A")),
+    s = factor(c("S1", "S2", "S3"))
+  )
+  r_thin <- sp2_run(d_all_thin, dep = "y", group = "g", grvar = "s")
+  expect_match(r_thin$notices, "No viable split panels", fixed = TRUE)
+  expect_null(r_thin$sd)
+})
+
+test_that("IR-statsplot2-02: Zero within-group variance in one group is detected and does not produce NaN summary prose", {
+  d_zvar <- data.frame(
+    y = c(rep(10.1, 6), 12.1, 14.2, 15.3, 18.4, 20.5, 22.6),
+    g = factor(rep(c("Constant", "Variable"), each = 6))
+  )
+  r_zvar <- sp2_run(d_zvar, dep = "y", group = "g", distribution = "p", showSummary = TRUE)
+  expect_match(r_zvar$notices, "Zero Within-Group Variance", fixed = TRUE)
+  expect_false(grepl("NaN", r_zvar$summary, fixed = TRUE))
+})
+
+test_that("IR-statsplot2-03: Identical variable roles (dep == group or grvar in dep/group) are rejected", {
+  expect_error(
+    sp2_run(d_tiny_2g, dep = "y", group = "y"),
+    "Outcome \\(dep\\) and grouping/predictor \\(group\\) must be different variables"
+  )
+  expect_error(
+    sp2_run(d_tiny_2g, dep = "y", group = "g", grvar = "g"),
+    "Split variable \\(grvar\\) must differ"
+  )
+})
+
+test_that("IR-statsplot2-04: Long-format repeated categorical data with subjectID is reshaped to wide format per subject", {
+  d_long_cat <- data.frame(
+    id   = factor(rep(paste0("P", 1:10), each = 2)),
+    time = factor(rep(c("Pre", "Post"), times = 10), levels = c("Pre", "Post")),
+    resp = factor(c(
+      "NR", "R",  "NR", "R",  "NR", "NR", "R",  "R",  "NR", "R",
+      "R",  "R",  "NR", "NR", "NR", "R",  "R",  "NR", "R",  "R"
+    ))
+  )
+  r_lc <- sp2_run(
+    d_long_cat,
+    dep = "resp",
+    group = "time",
+    direction = "repeated",
+    subjectID = "id",
+    showSummary = TRUE
+  )
+  expect_match(r_lc$notices, "Long-format repeated categorical data reshaped", fixed = TRUE)
+  expect_match(r_lc$notices, "Reshaped 10 complete subjects into wide format", fixed = TRUE)
+})
+
+test_that("IR-statsplot2-05: Repeated continuous sample-size assumption checks count unique complete subjects, not raw rows", {
+  d_rep2 <- data.frame(
+    id   = factor(rep(c("S1", "S2"), each = 20)),
+    cond = factor(rep(paste0("T", 1:20), times = 2)),
+    val  = rnorm(40, 50, 10)
+  )
+  expect_error(
+    sp2_run(d_rep2, dep = "val", group = "cond", direction = "repeated", subjectID = "id"),
+    "at least three complete subjects"
+  )
+
+  d_rep5 <- data.frame(
+    id   = factor(rep(paste0("S", 1:5), each = 6)),
+    cond = factor(rep(paste0("T", 1:6), times = 5)),
+    val  = seq(10.1, 39.1, length.out = 30) + rep(1:5, each = 6)
+  )
+  r_rep5 <- sp2_run(d_rep5, dep = "val", group = "cond", direction = "repeated", subjectID = "id")
+  expect_match(r_rep5$notices, "n=5", fixed = TRUE)
+})
+
+test_that("IR-statsplot2-06: Blocking error clears stale summary and explanation HTML content", {
+  opts_cls <- get("statsplot2Options", inherits = TRUE)
+  anl_cls  <- get("statsplot2Class", inherits = TRUE)
+  d_const <- data.frame(y = rep(5, 12), g = factor(rep(c("A", "B"), each = 6)))
+  a <- anl_cls$new(
+    options = opts_cls$new(dep = "y", group = "g", showSummary = TRUE, showExplanations = TRUE),
+    data = d_const
+  )
+  a$results$summary$setContent("<p>STALE SUMMARY</p>")
+  a$results$ExplanationMessage$setContent("<p>STALE EXPLANATION</p>")
+  a$run()
+  expect_false(grepl("STALE SUMMARY", sp2_strip_html(a$results$summary$content), fixed = TRUE))
+  expect_false(grepl("STALE EXPLANATION", sp2_strip_html(a$results$ExplanationMessage$content), fixed = TRUE))
+})
+
+test_that("IR-statsplot2-07: Character column with > 20 unique values triggers the same high-cardinality guard as factor", {
+  d_char_id <- data.frame(
+    id_chr = sprintf("PT_%03d", 1:30),
+    y      = seq(1, 30),
+    stringsAsFactors = FALSE
+  )
+  expect_error(
+    sp2_run(d_char_id, dep = "y", group = "id_chr"),
+    "looks like an identifier"
+  )
+})
+
 

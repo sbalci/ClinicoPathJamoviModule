@@ -131459,7 +131459,7 @@ msgstr ""
 
 #: R/survivalcont.b.R
 msgid "only %d non-missing value(s) of '%s' are available; at least 10 are required"
-msgstr "'%s' için yalnızca %d eksik olmayan değer mevcut; en az 10 gereklidir"
+msgstr "'%2$s' için yalnızca %1$d eksik olmayan değer mevcut; en az 10 gereklidir"
 
 #: R/outcomeorganizer.b.R
 msgid ""

@@ -459,10 +459,6 @@ items:
           title: "Score"
           type: number
           format: zto
-        - name: schoenfeld
-          title: "Schoenfeld (not case-aligned)"
-          type: number
-          format: zto
       clearWith:
         - residual_diagnostics
         - contexpl
@@ -1003,7 +999,7 @@ items:
     - name: survivalPlotsExplanation
       title: Understanding Survival Curves and Plots
       type: Html
-      visible: (((sc && (findcut || multiple_cutoffs)) || (findcut && (ce || ch || kmunicate))) && showExplanations)
+      visible: (showExplanations && ((sc && (findcut || multiple_cutoffs)) || (findcut && (ce || ch || kmunicate))))
       clearWith:
           - sc
           - ce

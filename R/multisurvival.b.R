@@ -2757,6 +2757,8 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
         tryCatch({
           tbl <- self$results$survMetricsTable
           .deleteTableRows(tbl)
+          # These rows are written with "" (a numeric NA would show as "NaN").
+          tbl$setNote("no_ci", .("Confidence intervals are computed for the concordance index only; the Brier score, time-dependent AUC and integrated Brier score are reported without intervals."))
           rk <- 0L
           max_time <- max(mydata$mytime, na.rm = TRUE)
 
@@ -2768,8 +2770,8 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
           tbl$addRow(rowKey = rk, values = list(
             metric   = .("Concordance index (Harrell's C)"),
             value    = c_index,
-            ci_lower = if (is.na(c_se)) NA_real_ else max(0, c_index - 1.96 * c_se),
-            ci_upper = if (is.na(c_se)) NA_real_ else min(1, c_index + 1.96 * c_se),
+            ci_lower = if (is.na(c_se)) "" else max(0, c_index - 1.96 * c_se),
+            ci_upper = if (is.na(c_se)) "" else min(1, c_index + 1.96 * c_se),
             # No verdict word: the glossary states there is no universal C-index
             # cut-off, and a fixed label contradicted it within the same report.
             interpretation = .("Rank discrimination; 0.5 = chance, 1.0 = perfect ordering, no universal cut-off")
@@ -2897,7 +2899,7 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
                 rk <- rk + 1L
                 tbl$addRow(rowKey = rk, values = list(
                   metric   = .fmt(.("Brier score (t = {t} {unit})"), t = t, unit = self$options$timetypeoutput),
-                  value    = bval, ci_lower = NA_real_, ci_upper = NA_real_,
+                  value    = bval, ci_lower = "", ci_upper = "",
                   # Judged against the Kaplan-Meier reference at the same
                   # timepoint (IPA = 1 - Brier_model / Brier_null), not against a
                   # universal cut-off. IPA <= 0 means the model predicts no better
@@ -2917,7 +2919,7 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
                 rk <- rk + 1L
                 tbl$addRow(rowKey = rk, values = list(
                   metric   = .fmt(.("Time-dependent AUC (t = {t} {unit})"), t = t, unit = self$options$timetypeoutput),
-                  value    = aval, ci_lower = NA_real_, ci_upper = NA_real_,
+                  value    = aval, ci_lower = "", ci_upper = "",
                   interpretation = .("Rank discrimination at this horizon; 0.5 = chance, 1.0 = perfect ordering")
                 ))
               }
@@ -2930,7 +2932,7 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
                 rk <- rk + 1L
                 tbl$addRow(rowKey = rk, values = list(
                   metric   = .fmt(.("Integrated Brier Score (0 to {t} {unit})"), t = max(tps), unit = self$options$timetypeoutput),
-                  value    = ibs, ci_lower = NA_real_, ci_upper = NA_real_,
+                  value    = ibs, ci_lower = "", ci_upper = "",
                   interpretation = {
                     rref <- utils::tail(br_ref$IBS[!is.na(br_ref$IBS)], 1)
                     if (length(rref) == 1 && rref > 0) {
@@ -6551,19 +6553,18 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
                 cox_summary <- summary(cox_model)
                 cox_results <- cox_summary$coefficients
                 if (!is.null(cox_results) && is.matrix(cox_results) && nrow(cox_results) > 0) {
-                  display <- c(
-                    stats::setNames(self$options$explanatory, cleaneddata$myexplanatory_labelled),
-                    stats::setNames(self$options$contexpl, cleaneddata$mycontexpl_labelled)
-                  )
+                  # Combine first: setNames(NULL, ...) errors when no continuous variable is chosen.
+                  display <- stats::setNames(
+                    c(self$options$explanatory, self$options$contexpl),
+                    c(cleaneddata$myexplanatory_labelled, cleaneddata$mycontexpl_labelled))
+                  # .coefTerms() returns one list (kind/var/level/ref) per coefficient, not a
+                  # data frame: nrow() on it was NULL, the `if` errored inside the silent
+                  # tryCatch, and the summary printed raw names such as "gradeG3".
                   term_info <- tryCatch(private$.coefTerms(cox_model, display), error = function(e) NULL)
-                  if (!is.null(term_info) && nrow(term_info) == nrow(cox_results)) {
-                    pretty_names <- ifelse(
-                      nzchar(term_info$level),
-                      paste0(term_info$var, ": ", term_info$level,
-                             ifelse(nzchar(term_info$ref), paste0(" (vs ", term_info$ref, ")"), "")),
-                      term_info$var
-                    )
-                    rownames(cox_results) <- pretty_names
+                  if (length(term_info) == nrow(cox_results)) {
+                    rownames(cox_results) <- vapply(term_info, function(tt)
+                      if (identical(tt$kind, "level")) sprintf("%s: %s (vs %s)", tt$var, tt$level, tt$ref)
+                      else tt$var, character(1))
                   }
                 }
               }

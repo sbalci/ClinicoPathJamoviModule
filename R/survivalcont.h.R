@@ -1024,11 +1024,6 @@ survivalcontResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                         `name`="score", 
                         `title`="Score", 
                         `type`="number", 
-                        `format`="zto"),
-                    list(
-                        `name`="schoenfeld", 
-                        `title`="Schoenfeld (not case-aligned)", 
-                        `type`="number", 
                         `format`="zto")),
                 clearWith=list(
                     "residual_diagnostics",
@@ -1557,7 +1552,7 @@ survivalcontResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                 options=options,
                 name="survivalPlotsExplanation",
                 title="Understanding Survival Curves and Plots",
-                visible="(((sc && (findcut || multiple_cutoffs)) || (findcut && (ce || ch || kmunicate))) && showExplanations)",
+                visible="(showExplanations && ((sc && (findcut || multiple_cutoffs)) || (findcut && (ce || ch || kmunicate))))",
                 clearWith=list(
                     "sc",
                     "ce",

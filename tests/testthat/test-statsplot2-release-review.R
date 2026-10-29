@@ -260,12 +260,13 @@ test_that("a test that fails inside ggstatsplot is reported, not hidden", {
   # ggstatsplot swallows the error and draws the figure with no subtitle.
   skip_if_not("showSummary" %in% names(formals(statsplot2)), "option not compiled yet")
   set.seed(35)
-  d <- data.frame(y = rnorm(90), g = factor(sample(c("A", "B", "C"), 90, TRUE)))
-  fails <- inherits(try(statsExpressions::oneway_anova(d, g, y, type = "bayes"), silent = TRUE), "try-error")
-  skip_if_not(fails, "Bayesian one-way test succeeds in this environment; nothing to surface")
-  res <- statsplot2(data = d, dep = "y", group = "g", distribution = "bf", showSummary = TRUE)
+  d <- data.frame(
+    y = c(rep(10.5, 30), rnorm(60)),
+    g = factor(rep(c("A", "B", "C"), each = 30))
+  )
+  res <- statsplot2(data = d, dep = "y", group = "g", distribution = "p", showSummary = TRUE)
   expect_match(sp_notices(res), "Statistics could not be computed", fixed = TRUE)
-  expect_match(sp_html(res$summary$content), "Bayesian test could not be computed", fixed = TRUE)
+  expect_match(sp_html(res$summary$content), "parametric test could not be computed", fixed = TRUE)
 })
 
 test_that("the Bayesian sentence and interpretation state the prior", {

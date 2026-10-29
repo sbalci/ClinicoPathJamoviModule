@@ -3005,7 +3005,7 @@ pathagreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 options=options,
                 name="kappaBalancedTable",
                 title="Exploratory Kappa-Balanced Score",
-                visible="((readerWorkflow:binary || readerWorkflow:ordinal_cutoff || readerWorkflow:numeric_cutoff) && showKappaBalanced)",
+                visible="(showKappaBalanced && (readerWorkflow:binary || readerWorkflow:ordinal_cutoff || readerWorkflow:numeric_cutoff))",
                 rows=0,
                 clearWith=list(
                     "referenceType",
@@ -3132,7 +3132,7 @@ pathagreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 options=options,
                 name="readerRCode",
                 title="Reproducible Reader R Code",
-                visible="((readerWorkflow:binary || readerWorkflow:ordinal_cutoff || readerWorkflow:numeric_cutoff) && readerCode)",
+                visible="(readerCode && (readerWorkflow:binary || readerWorkflow:ordinal_cutoff || readerWorkflow:numeric_cutoff))",
                 clearWith=list(
                     "referenceType",
                     "referenceDescription",

@@ -412,7 +412,13 @@ test_that("VAL-survivalcont-05: multipleMedianTable$asDF$median_survival remains
   d$status[d$marker < 45] <- 0L
   res <- .sc_val_run(d, multiple_cutoffs = TRUE, cutoff_method = "quantile", num_cutoffs = "two")
   expect_true(is.numeric(res$multipleMedianTable$asDF$median_survival))
-  expect_true("nr" %in% names(res$multipleMedianTable$notes))
+  # "Not reached" is explained per cell (blank + footnote); the table-wide "nr" note fired
+  # only when the median itself was missing.
+  mt <- res$multipleMedianTable
+  nr_rows <- which(is.na(mt$asDF$median_survival))
+  expect_gt(length(nr_rows), 0)
+  for (i in nr_rows)
+    expect_length(mt$getCell(rowNo = i, col = "median_survival")$footnotes, 1)
 })
 
 test_that("VAL-survivalcont-06: residualsTable preserves original dataset observation IDs when uselandmark=TRUE and findcut=TRUE", {

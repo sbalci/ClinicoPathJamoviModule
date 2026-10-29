@@ -1119,7 +1119,7 @@ nonparametricResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 title="Effect Size Visualization with Confidence Intervals",
                 width=800,
                 height=500,
-                visible="((show_effect_plots || descriptive_plots) && effect_size)",
+                visible="(effect_size && (show_effect_plots || descriptive_plots))",
                 requiresData=TRUE,
                 renderFun=".effectsizeplot",
                 clearWith=list(
@@ -1135,7 +1135,7 @@ nonparametricResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 title="Q-Q Plots for Normality Assessment",
                 width=800,
                 height=600,
-                visible="((show_qqplots || normality_tests) && descriptive_plots)",
+                visible="(descriptive_plots && (show_qqplots || normality_tests))",
                 requiresData=TRUE,
                 renderFun=".qqplot",
                 clearWith=list(
@@ -1173,7 +1173,7 @@ nonparametricResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 options=options,
                 name="assumptionExplanation",
                 title="Understanding Test Assumptions and Robustness",
-                visible="((assumption_checks || test_assumptions) && show_explanations)",
+                visible="(show_explanations && (assumption_checks || test_assumptions))",
                 clearWith=list(
                     "assumption_checks",
                     "test_assumptions",

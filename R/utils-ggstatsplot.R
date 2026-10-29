@@ -85,9 +85,10 @@ withBaseFormulaChar <- function(expr) {
 #'
 #' Measured on statsExpressions 2.1.1 by computing each test under two seeds:
 #' parametric results never change; robust ones do (bootstrap intervals), except for
-#' correlations and contingency tables; Bayesian ones do for one- and two-sample tests,
-#' correlations and contingency tables (posterior draws); nonparametric ones only for
-#' three or more independent groups (the bootstrap interval of epsilon-squared).
+#' correlations and contingency tables; Bayesian ones do for one-, two- and multi-sample
+#' tests, correlations and contingency tables (posterior / MCMC draws); nonparametric
+#' ones do for three or more groups in between-subjects (bootstrap interval of
+#' epsilon-squared) and within-subjects (bootstrap interval of Kendall's W).
 #'
 #' @param type `typestatistics`: "parametric", "nonparametric", "robust" or "bayes".
 #' @param design "between", "within", "one_sample", "correlation" or "contingency".
@@ -97,8 +98,8 @@ withBaseFormulaChar <- function(expr) {
 #' @keywords internal
 statsSeedMatters <- function(type, design, k = 2L) {
     switch(design,
-        between     = type == "robust" || (type == "bayes" && k == 2) || (type == "nonparametric" && k >= 3),
-        within      = type == "robust" || (type == "bayes" && k == 2),
+        between     = type == "robust" || type == "bayes" || (type == "nonparametric" && k >= 3),
+        within      = type == "robust" || type == "bayes" || (type == "nonparametric" && k >= 3),
         one_sample  = type %in% c("robust", "bayes"),
         correlation = type == "bayes",
         contingency = type == "bayes",

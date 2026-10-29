@@ -225,15 +225,17 @@ def check_tame():
 
 
 def check_visible_bang():
+    # jmvcore Options$eval evaluates only `^\([\$A-Za-z].*\)$`; anything else - `(!x)`, `((a || b) && c)`,
+    # `( x)` - is returned as a non-empty string, i.e. TRUE, so the item is always visible.
     hits = []
     for p in glob.glob('jamovi/*.r.yaml'):
         for i, l in enumerate(open(p, encoding='utf-8'), 1):
-            if re.match(r'^\s*visible:\s*\(\s*!', l):
+            if re.match(r'^\s*visible:\s*\((?![$A-Za-z])', l):
                 hits.append('%s:%d' % (os.path.basename(p), i))
     if hits:
-        WARN.append('%d `visible: (!x)` expressions - jmvcore cannot route these, so the item is '
-                    'ALWAYS VISIBLE: %s' % (len(hits), ', '.join(cap(hits, 8))))
-    print('  visible: (!x) silent-always-visible: %d' % len(hits))
+        WARN.append('%d `visible:` expressions not starting `(name` or `($` - jmvcore cannot route '
+                    'these, so the item is ALWAYS VISIBLE: %s' % (len(hits), ', '.join(cap(hits, 8))))
+    print('  visible: (!x) / ((x)) silent-always-visible: %d' % len(hits))
 
 
 def check_entities():

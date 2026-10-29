@@ -481,7 +481,7 @@ items:
     - name: ageInteractionTable
       title: 'Age x Group Interaction Test'
       type: Table
-      visible: (age_interaction)
+      visible: (age_adjustment && length(age_variable) > 0 && age_interaction)
       rows: 0
       columns:
         - name: term
@@ -574,7 +574,7 @@ items:
     - name: ageTimeScaleTable
       title: 'Cox Model with Age as Time Scale'
       type: Table
-      visible: (age_time_scale)
+      visible: (age_adjustment && length(age_variable) > 0 && age_time_scale)
       rows: 0
       columns:
         - name: variable
@@ -623,7 +623,7 @@ items:
     - name: ageTimeScaleInterpretation
       title: 'Age Time Scale Interpretation'
       type: Html
-      visible: (age_time_scale)
+      visible: (age_adjustment && length(age_variable) > 0 && age_time_scale)
       clearWith:
           - age_time_scale
           - age_variable
@@ -649,7 +649,7 @@ items:
     - name: ageStandardizationTable
       title: 'Age-Standardized Mortality'
       type: Table
-      visible: (age_standardization)
+      visible: (age_adjustment && length(age_variable) > 0 && age_standardization)
       rows: 0
       columns:
         - name: group
@@ -704,7 +704,7 @@ items:
     - name: ageStandardizationInterpretation
       title: 'Age Standardization Interpretation'
       type: Html
-      visible: (age_standardization)
+      visible: (age_adjustment && length(age_variable) > 0 && age_standardization)
       clearWith:
           - age_standardization
           - age_standardization_method
@@ -735,7 +735,7 @@ items:
       width: 700
       height: 500
       renderFun: .plotAgeStratifiedKM
-      visible: (age_stratified_km)
+      visible: (age_adjustment && length(age_variable) > 0 && age_stratified_km)
       clearWith:
           - age_stratified_km
           - age_variable
@@ -767,7 +767,7 @@ items:
       width: 700
       height: 500
       renderFun: .plotAdjustedCurves
-      visible: (adjusted_curves)
+      visible: (age_adjustment && length(age_variable) > 0 && adjusted_curves)
       clearWith:
           - adjusted_curves
           - age_adjustment
@@ -930,7 +930,9 @@ items:
       title: '`1, 3, 5 year Survival - ${explanatory}`'
       # title: '1, 3, 5 year Survival'
       type:  Table
-      visible: (length(outcome) > 0 && length(explanatory) > 0 && (length(elapsedtime) > 0 || (tint && length(dxdate) > 0 && length(fudate) > 0)))
+      # Hidden in competing-risks mode: Kaplan-Meier survival is not the estimand there; the
+      # time-point estimates are in cifTable.
+      visible: (length(outcome) > 0 && length(explanatory) > 0 && (length(elapsedtime) > 0 || (tint && length(dxdate) > 0 && length(fudate) > 0)) && !(multievent && analysistype:compete))
       rows: 0
       columns:
         - name: strata

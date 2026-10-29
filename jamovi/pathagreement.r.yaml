@@ -1552,7 +1552,7 @@ items:
     - name: kappaBalancedTable
       title: Exploratory Kappa-Balanced Score
       type: Table
-      visible: ((readerWorkflow:binary || readerWorkflow:ordinal_cutoff || readerWorkflow:numeric_cutoff) && showKappaBalanced)
+      visible: (showKappaBalanced && (readerWorkflow:binary || readerWorkflow:ordinal_cutoff || readerWorkflow:numeric_cutoff))
       rows: 0
       clearWith: *id001
       columns:
@@ -1593,7 +1593,7 @@ items:
     - name: readerRCode
       title: Reproducible Reader R Code
       type: Preformatted
-      visible: ((readerWorkflow:binary || readerWorkflow:ordinal_cutoff || readerWorkflow:numeric_cutoff) && readerCode)
+      visible: (readerCode && (readerWorkflow:binary || readerWorkflow:ordinal_cutoff || readerWorkflow:numeric_cutoff))
       clearWith: *id001
 
     - name: readerAvailability

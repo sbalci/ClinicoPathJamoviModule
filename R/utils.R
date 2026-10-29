@@ -225,6 +225,44 @@ NULL
     invisible(table)
 }
 
+#' Blank the missing cells of a filled row and footnote them.
+#'
+#' A numeric `NA` reaches jamovi as a double and is shown as "NaN"; `""` is the only blank cell
+#' (`$asDF` still reads it back as `NA` in a number column). Footnotes with the same text share one
+#' letter. Call after `addRow()`/`setRow()`, which clear the row's footnotes.
+#'
+#' @param table a `jmvcore::Table`.
+#' @param rowKey the row key.
+#' @param values the named list of cell values the row was filled with.
+#' @param note the footnote explaining why the value is missing.
+#' @return `table`, invisibly.
+#' @noRd
+.footnoteMissingCells <- function(table, rowKey, values, note) {
+    for (col in names(values)) {
+        v <- values[[col]]
+        if (length(v) == 1L && !is.character(v) && is.na(v)) {
+            table$setCell(rowKey = rowKey, col = col, value = "")
+            table$addFootnote(rowKey = rowKey, col = col, note = note)
+        }
+    }
+    invisible(table)
+}
+
+# "p < 0.001" or "p = 0.042". The comparison sign travels with the value, so a template can never
+# read "p = < 0.001" (format.pval(eps =) returns "<0.001").
+.pValueText <- function(p, digits = 3) {
+    if (length(p) != 1L || !is.finite(p)) return("p not available")
+    if (p < 10^-digits) sprintf("p < %s", format(10^-digits, scientific = FALSE))
+    else sprintf("p = %.*f", digits, p)
+}
+
+# finalfit's metrics line prints a p that rounds to zero as "p = 0.000" and glues
+# "R-squared = 0.126( Max possible = 0.999)".
+.tidyFinalfitMetrics <- function(x) {
+    x <- gsub("p = 0\\.000(?![0-9])", "p < 0.001", x, perl = TRUE)
+    gsub("( Max possible", " (max possible", x, fixed = TRUE)
+}
+
 # Which outcome level is the positive class, and why (enhancedROC, psychopdaROC). Never taken
 # from level order: only a NUMERIC 0/1 outcome defaults (1 = positive), as .defineEventIndicator()
 # does. Pure - the analyses translate `status`. A blank "" is missing, like an explicit NA level

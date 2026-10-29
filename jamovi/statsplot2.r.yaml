@@ -105,10 +105,14 @@ items:
 refs:
     - ClinicoPathJamoviModule
     - ggstatsplot
+    - statsExpressions
+    - effectsize
+    - WRS2
+    - BayesFactor
+    - afex
     - ggalluvial
     - easyalluvial
     - patchwork
     - cowplot
-    - jmv
     - performance
 ...

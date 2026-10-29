@@ -1686,22 +1686,28 @@ survivalClass <- if (requireNamespace('jmvcore'))
                         x0_95ucl = if ("x0_95ucl" %in% names(data_frame)) data_frame$x0_95ucl[i] else NA
                     )
                     medianTable$addRow(rowKey = i, values = row_values)
+                    .footnoteMissingCells(medianTable, i, row_values,
+                        if (private$.isCompetingRisk())
+                            .("Not computed for the cumulative-incidence median; see the table note.")
+                        else .("Not reached or not estimable within the observed follow-up."))
                 }
 
                 # Add note for competing risk median CI limitation
                 if (private$.isCompetingRisk()) {
                     medianTable$setNote("crci",
                         .("Confidence intervals for competing risk median times are not available (CIF quantile CIs require specialized methods such as bootstrap)."))
+                    medianTable$setNote("cr_timepoints", if (!isTRUE(self$options$cif_all_causes))
+                        .("Time-point estimates in competing-risks mode are cumulative incidences; turn on 'All event types at selected times' to show them."))
                     # Gray's test is the between-group comparison in this mode
                     # (Cox / log-rank / pairwise are refused); cuminc() already
                     # computed it, so show it rather than leave no inference at all.
                     gray <- cuminc_fit$Tests
                     if (is.matrix(gray) && "1" %in% rownames(gray)) {
                         medianTable$setNote("gray",
-                            .fmt(.("Gray's test for equality of cumulative incidence of the event of interest across groups: chi-square = {stat}, df = {df}, p = {p}."),
+                            .fmt(.("Gray's test for equality of cumulative incidence of the event of interest across groups: chi-square = {stat}, df = {df}, {p}."),
                                  stat = sprintf("%.2f", gray["1", "stat"]),
                                  df = as.integer(gray["1", "df"]),
-                                 p = format.pval(gray["1", "pv"], digits = 3, eps = 0.001)))
+                                 p = .pValueText(gray["1", "pv"])))
                     }
                 }
 
@@ -1959,8 +1965,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
                                 lower <- sprintf("%.2f", cis[i, 3])
                                 upper <- sprintf("%.2f", cis[i, 4])
                                 pval <- coefs[i, 5]
-                                pval_str <- if (pval < 0.001) "<0.001" else sprintf("%.3f", pval)
-                                formatted_hr <- sprintf("%s (%s-%s, p=%s)", hr, lower, upper, pval_str)
+                                formatted_hr <- sprintf("%s (%s-%s, %s)", hr, lower, upper, .pValueText(pval))
                                 level_name <- .stripPrefix(term_name, var)
                                 # Overwrite univariable HR column.
                                 #
@@ -2007,11 +2012,10 @@ survivalClass <- if (requireNamespace('jmvcore'))
                                     round(s_multi$rsq[2], 3))
                         } else ""
                         lrt_p <- s_multi$logtest["pvalue"]
-                        lrt_p_str <- if (!is.na(lrt_p) && lrt_p < 0.001) "<0.001" else sprintf("%.3f", round(lrt_p, 3))
-                        lrt_str <- sprintf("Likelihood ratio test = %s (df = %d, p = %s)",
+                        lrt_str <- sprintf("Likelihood ratio test = %s (df = %d, %s)",
                                            round(s_multi$logtest["test"], 2),
                                            as.integer(round(s_multi$logtest["df"])),
-                                           lrt_p_str)
+                                           .pValueText(unname(lrt_p)))
                         strat_metrics <- sprintf(
                             "Number in dataframe = %d, Number in model = %d, Missing = %d, Number of events = %d, %s, %s, %s",
                             nrow(mydata),
@@ -2066,7 +2070,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
                                 <br>
                                 <b>Model Metrics:</b>
                                   ",
-                                        unlist(tCox[[2]]),
+                                        .tidyFinalfitMetrics(unlist(tCox[[2]])),
                                         "
                                 <br>
                                 ")
@@ -3854,63 +3858,40 @@ survivalClass <- if (requireNamespace('jmvcore'))
                 original_names_mapping <- labelled_data$original_names_mapping
                 title2 <- .survivalDisplayName(myfactor, original_names_mapping)
 
-                # Create log-log plot
-                tryCatch({
-                    plot7 <- plotData %>%
-                        finalfit::surv_plot(
-                            .data = .,
-                            dependent = private$.buildSurvFormula(mytime, myoutcome, ns_prefix = FALSE),
-                            explanatory = myfactor,
-                            xlab = paste0('log(Time) (', self$options$timetypeoutput, ')'),
-                            ylab = 'log(-log(Survival))',
-                            title = .fmt(
-                                .("Log-log plot for {group}"),
-                                group = title2
-                            ),
-                            subtitle = .("Assessment of Proportional Hazards Assumption"),
-                            fun = function(x) log(-log(x)),
-                            legend = 'right'
-                        ) +
-                        ggplot2::scale_x_log10()
+                # log(-log S(t)) against log(t) from the Kaplan-Meier fit at its own event times.
+                # The estimate is a step function, so it is drawn with geom_step. (This used to try
+                # finalfit::surv_plot() + scale_x_log10() first; that always errored, and users only
+                # ever saw a fallback that sampled the curve on a 100-point grid.)
+                km_summary <- summary(km_fit, censored = FALSE)
+                plot_data <- data.frame(
+                    time = km_summary$time,
+                    surv = km_summary$surv,
+                    strata = if (is.null(km_summary$strata)) "Overall"
+                             else sub("^[^=]*=", "", as.character(km_summary$strata))
+                )
+                # log(-log S) is undefined at S = 1 and S = 0, log(t) at t = 0.
+                plot_data <- plot_data[plot_data$time > 0 & plot_data$surv > 0 & plot_data$surv < 1, ]
+                if (nrow(plot_data) == 0)
+                    return(FALSE)
+                plot_data$log_time <- log(plot_data$time)
+                plot_data$log_log_surv <- log(-log(plot_data$surv))
 
-                    print(plot7)
-                    TRUE
-                    
-                }, error = function(e) {
-                    # Fallback simple log-log plot
-                    survival_times <- seq(min(plotData[[mytime]], na.rm = TRUE), 
-                                        max(plotData[[mytime]], na.rm = TRUE), 
-                                        length.out = 100)
-                    
-                    km_summary <- summary(km_fit, times = survival_times, extend = TRUE)
-                    
-                    plot_data <- data.frame(
-                        time = km_summary$time,
-                        surv = km_summary$surv,
-                        strata = km_summary$strata
-                    )
-                    
-                    # Remove invalid values
-                    plot_data <- plot_data[plot_data$surv > 0 & plot_data$surv < 1, ]
-                    plot_data$log_time <- log(plot_data$time)
-                    plot_data$log_log_surv <- log(-log(plot_data$surv))
-                    
-                    plot7 <- ggplot2::ggplot(plot_data, ggplot2::aes(x = log_time, y = log_log_surv, color = strata)) +
-                        ggplot2::geom_line(size = 1) +
-                        ggplot2::labs(
-                            x = paste0('log(Time) (', self$options$timetypeoutput, ')'),
-                            y = 'log(-log(Survival))',
-                            title = .fmt(
-                                .("Log-log plot for {group}"),
-                                group = title2
-                            ),
-                            subtitle = .("Parallel lines suggest proportional hazards")
-                        ) +
-                        ggtheme
-                    
-                    print(plot7)
-                    TRUE
-                })
+                plot7 <- ggplot2::ggplot(plot_data, ggplot2::aes(x = log_time, y = log_log_surv, colour = strata)) +
+                    ggplot2::geom_step(linewidth = 1) +
+                    ggplot2::labs(
+                        x = paste0('log(Time) (', self$options$timetypeoutput, ')'),
+                        y = 'log(-log(Survival))',
+                        colour = title2,
+                        title = .fmt(
+                            .("Log-log plot for {group}"),
+                            group = title2
+                        ),
+                        subtitle = .("Parallel lines suggest proportional hazards")
+                    ) +
+                    ggtheme
+
+                print(plot7)
+                TRUE
             }
 
 
@@ -5762,8 +5743,9 @@ survivalClass <- if (requireNamespace('jmvcore'))
                 .deleteTableRows(smy)
                 for (i in seq_len(nrow(res))) {
                     est <- res[i, "est"]; se <- res[i, "se"]
+                    # "" not NA_real_: a numeric NA shows as "NaN" in jamovi.
                     pv  <- if (i %in% covrows && is.finite(se) && se > 0)
-                               2 * stats::pnorm(-abs(est / se)) else NA_real_
+                               2 * stats::pnorm(-abs(est / se)) else ""
                     prm <- rownames(res)[i]
                     if (useCov && startsWith(prm, ".grp"))
                         prm <- paste0(results$myexplanatory_labelled, ": ", substring(prm, 5))
@@ -5772,6 +5754,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
                         ci_lower = res[i, "L95%"], ci_upper = res[i, "U95%"], pvalue = pv
                     ))
                 }
+                smy$setNote("pvalue", .("A p-value is given for covariate effects only; testing a distribution parameter (shape, scale, rate) against zero has no clinical meaning."))
                 smy$setNote("modelfit", .fmt(.("{dist} model - AIC {aic}, BIC {bic}, log-likelihood {loglik}{cov}"), 
                         dist = private$.distLabel(dist),
                         aic = round(AIC(fit), 1),
@@ -5788,7 +5771,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
                         # Every row is written, so a fit that fails now cannot keep
                         # the numbers of an earlier run; it stays a blank row.
                         cmp$setRow(rowKey = dd, values = if (is.null(f))
-                            list(aic = NA, bic = NA, loglik = NA, df = NA)
+                            list(aic = "", bic = "", loglik = "", df = "")
                         else list(
                             aic = AIC(f), bic = BIC(f),
                             loglik = as.numeric(stats::logLik(f)), df = f$npars

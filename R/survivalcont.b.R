@@ -1982,20 +1982,18 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                     .("HR = 1.05 means each one-unit increase multiplies the hazard by 1.05; it is not a cumulative risk ratio and does not by itself establish causality.")
                 )
 
+                # Html content: markdown (**...**) would print literally.
                 tCoxtext2 <- glue::glue(.(
-                    '{tooltip}
-                    **Model Metrics:**
-                    {metrics}'),
+                    '{tooltip}<p><b>Model Metrics:</b> {metrics}</p>'),
                     tooltip = cox_tooltip,
-                    metrics = htmltools::htmlEscape(paste(as.character(unlist(tCox[[2]])), collapse = " ")))
+                    metrics = htmltools::htmlEscape(.tidyFinalfitMetrics(
+                        paste(as.character(unlist(tCox[[2]])), collapse = " "))))
 
                 if (self$options$uselandmark) {
                     landmark <- jmvcore::toNumeric(self$options$landmark)
 
                     tCoxtext2 <- glue::glue(.(
-                        '{previous_text}
-
-                        **Landmark Analysis:** Analysis is conditional on remaining under observation and event-free through {time} {units}. This can address guarantee-time bias when the landmark is prespecified, but it changes the target population and does not remove ordinary confounding or lead-time bias.'),
+                        '{previous_text}<p><b>Landmark Analysis:</b> Analysis is conditional on remaining under observation and event-free through {time} {units}. This can address guarantee-time bias when the landmark is prespecified, but it changes the target population and does not remove ordinary confounding or lead-time bias.</p>'),
                         previous_text = tCoxtext2,
                         time = landmark,
                         units = htmltools::htmlEscape(as.character(self$options$timetypeoutput)))
@@ -2285,6 +2283,8 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                 data_frame <- results2table
                 for (i in seq_along(data_frame[, 1, drop = TRUE])) {
                     medianTable$addRow(rowKey = i, values = c(data_frame[i,]))
+                    .footnoteMissingCells(medianTable, i, c(data_frame[i,]),
+                        .("Not reached or not estimable within the observed follow-up."))
                 }
 
 
@@ -3141,6 +3141,19 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                     min_group_pct <- private$.minGroupPct(warn = TRUE)
                     min_n <- ceiling(length(cont_var) * min_group_pct / 100)
                     n_requested <- length(cutoff_values)
+                    # Quantile cut-offs: recompute with fewer quantiles rather than
+                    # deleting cut-points. Deleting merges neighbours unevenly - 4 cuts
+                    # at a 25% minimum ended as one 80/20 split, though tertiles
+                    # (~33% each) satisfy it.
+                    if (identical(actual_method, "quantile")) {
+                        group_sizes <- function(cuts) as.integer(table(cut(
+                            mydata[[mycontexpl]], breaks = c(-Inf, cuts, Inf))))
+                        while (length(cutoff_values) > 1 &&
+                               min(group_sizes(cutoff_values)) < min_n) {
+                            cutoff_values <- sort(unique(private$.quantileCutoffs(
+                                cont_var, length(cutoff_values) - 1)))
+                        }
+                    }
                     repeat {
                         sizes <- as.integer(table(cut(
                             mydata[[mycontexpl]],
@@ -3685,8 +3698,8 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
 
                         # Set the log-rank test results as text
                         logrank_text <- paste0("Overall Log-rank Test: \u03c7\u00b2 = ", round(overall_chisq, 3),
-                                             " (df = ", length(logrank_test$n) - 1, "), p = ",
-                                             ifelse(overall_pval < 0.001, "< 0.001", round(overall_pval, 3)))
+                                             " (df = ", length(logrank_test$n) - 1, "), ",
+                                             .pValueText(overall_pval))
 
                         interpretation <- .("The log-rank p above is unadjusted. When survival outcomes guided the cut-point search, this comparison is optimistic and exploratory. No selection-adjusted p-value is reported; a single-split maximally selected-rank adjustment does not cover a multiple-cutoff procedure. Validate data-derived cut-points independently before clinical use.")
 
@@ -3710,26 +3723,21 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                 .deleteTableRows(median_table)  # Clear existing rows
                 private$.landmarkNote(median_table, list(landmark_offset = multicut_results$landmark_offset))
 
-                any_nr <- FALSE
                 for (group_name in names(multicut_results$group_stats)) {
                     stats <- multicut_results$group_stats[[group_name]]
                     if (!is.null(stats)) {
-                        if (is.na(stats$median_surv)) any_nr <- TRUE
-                        median_table$addRow(rowKey = group_name, values = list(
+                        row <- list(
                             risk_group = stats$group,
                             n_patients = stats$n,
                             events = stats$events,
-                            median_survival = if (is.na(stats$median_surv)) NA_real_ else round(stats$median_surv, 1),
-                            median_lower = if (is.na(stats$median_lower)) NA_real_ else round(stats$median_lower, 1),
-                            median_upper = if (is.na(stats$median_upper)) NA_real_ else round(stats$median_upper, 1)
-                        ))
+                            median_survival = round(stats$median_surv, 1),
+                            median_lower = round(stats$median_lower, 1),
+                            median_upper = round(stats$median_upper, 1)
+                        )
+                        median_table$addRow(rowKey = group_name, values = row)
+                        .footnoteMissingCells(median_table, group_name, row,
+                            .("Not reached: the Kaplan-Meier curve (or its confidence limit) did not cross 50% in this group during observed follow-up."))
                     }
-                }
-                if (any_nr) {
-                    median_table$setNote(
-                        "nr",
-                        .("Blank/NaN median or confidence limit indicates that the Kaplan-Meier curve did not reach 50% in that group during observed follow-up.")
-                    )
                 }
 
                 # Populate survival estimates table
@@ -4231,8 +4239,7 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                             observation = observation_id,
                             martingale = round(martingale_resid[i], 4),
                             deviance = round(deviance_resid[i], 4),
-                            score = if (is.matrix(score_resid)) round(score_resid[i, 1], 4) else round(score_resid[i], 4),
-                            schoenfeld = NA_real_
+                            score = if (is.matrix(score_resid)) round(score_resid[i, 1], 4) else round(score_resid[i], 4)
                         ))
                     }
                     residuals_table$setNote(

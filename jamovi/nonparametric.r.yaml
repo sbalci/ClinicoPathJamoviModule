@@ -453,7 +453,7 @@ items:
       type: Image
       width: 800
       height: 500
-      visible: ((show_effect_plots || descriptive_plots) && effect_size)
+      visible: (effect_size && (show_effect_plots || descriptive_plots))
       requiresData: true
       renderFun: .effectsizeplot
       clearWith:
@@ -469,7 +469,7 @@ items:
       type: Image
       width: 800
       height: 600
-      visible: ((show_qqplots || normality_tests) && descriptive_plots)
+      visible: (descriptive_plots && (show_qqplots || normality_tests))
       requiresData: true
       renderFun: .qqplot
       clearWith:
@@ -508,7 +508,7 @@ items:
     - name: assumptionExplanation
       title: Understanding Test Assumptions and Robustness
       type: Html
-      visible: ((assumption_checks || test_assumptions) && show_explanations)
+      visible: (show_explanations && (assumption_checks || test_assumptions))
       clearWith:
           - assumption_checks
           - test_assumptions

@@ -1311,7 +1311,7 @@ survivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 options=options,
                 name="ageInteractionTable",
                 title="Age x Group Interaction Test",
-                visible="(age_interaction)",
+                visible="(age_adjustment && length(age_variable) > 0 && age_interaction)",
                 rows=0,
                 columns=list(
                     list(
@@ -1409,7 +1409,7 @@ survivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 options=options,
                 name="ageTimeScaleTable",
                 title="Cox Model with Age as Time Scale",
-                visible="(age_time_scale)",
+                visible="(age_adjustment && length(age_variable) > 0 && age_time_scale)",
                 rows=0,
                 columns=list(
                     list(
@@ -1464,7 +1464,7 @@ survivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 options=options,
                 name="ageTimeScaleInterpretation",
                 title="Age Time Scale Interpretation",
-                visible="(age_time_scale)",
+                visible="(age_adjustment && length(age_variable) > 0 && age_time_scale)",
                 clearWith=list(
                     "age_time_scale",
                     "age_variable",
@@ -1489,7 +1489,7 @@ survivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 options=options,
                 name="ageStandardizationTable",
                 title="Age-Standardized Mortality",
-                visible="(age_standardization)",
+                visible="(age_adjustment && length(age_variable) > 0 && age_standardization)",
                 rows=0,
                 columns=list(
                     list(
@@ -1551,7 +1551,7 @@ survivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 options=options,
                 name="ageStandardizationInterpretation",
                 title="Age Standardization Interpretation",
-                visible="(age_standardization)",
+                visible="(age_adjustment && length(age_variable) > 0 && age_standardization)",
                 clearWith=list(
                     "age_standardization",
                     "age_standardization_method",
@@ -1581,7 +1581,7 @@ survivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 width=700,
                 height=500,
                 renderFun=".plotAgeStratifiedKM",
-                visible="(age_stratified_km)",
+                visible="(age_adjustment && length(age_variable) > 0 && age_stratified_km)",
                 clearWith=list(
                     "age_stratified_km",
                     "age_variable",
@@ -1612,7 +1612,7 @@ survivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 width=700,
                 height=500,
                 renderFun=".plotAdjustedCurves",
-                visible="(adjusted_curves)",
+                visible="(age_adjustment && length(age_variable) > 0 && adjusted_curves)",
                 clearWith=list(
                     "adjusted_curves",
                     "age_adjustment",
@@ -1760,7 +1760,7 @@ survivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 options=options,
                 name="survTable",
                 title="`1, 3, 5 year Survival - ${explanatory}`",
-                visible="(length(outcome) > 0 && length(explanatory) > 0 && (length(elapsedtime) > 0 || (tint && length(dxdate) > 0 && length(fudate) > 0)))",
+                visible="(length(outcome) > 0 && length(explanatory) > 0 && (length(elapsedtime) > 0 || (tint && length(dxdate) > 0 && length(fudate) > 0)) && !(multievent && analysistype:compete))",
                 rows=0,
                 columns=list(
                     list(

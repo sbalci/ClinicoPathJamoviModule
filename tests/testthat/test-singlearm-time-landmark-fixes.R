@@ -59,8 +59,9 @@ test_that("Kaplan-Meier boundary intervals are not displayed as exact certainty"
 
     for (i in seq_len(res$survTable$rowCount)) {
         expect_equal(res$survTable$getCell(rowNo = i, "surv")$value, 1)
-        expect_true(is.na(res$survTable$getCell(rowNo = i, "lower")$value))
-        expect_true(is.na(res$survTable$getCell(rowNo = i, "upper")$value))
+        # Blank ("") with a footnote: a numeric NA would show as "NaN" in jamovi.
+        expect_identical(res$survTable$getCell(rowNo = i, "lower")$value, "")
+        expect_identical(res$survTable$getCell(rowNo = i, "upper")$value, "")
     }
 })
 

@@ -181,11 +181,15 @@ statsplot2Results <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 refs=list(
                     "ClinicoPathJamoviModule",
                     "ggstatsplot",
+                    "statsExpressions",
+                    "effectsize",
+                    "WRS2",
+                    "BayesFactor",
+                    "afex",
                     "ggalluvial",
                     "easyalluvial",
                     "patchwork",
                     "cowplot",
-                    "jmv",
                     "performance"))
             self$add(jmvcore::Preformatted$new(
                 options=options,

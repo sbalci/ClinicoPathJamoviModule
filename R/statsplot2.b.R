@@ -21,10 +21,10 @@ statsplot2Class <- if (requireNamespace('jmvcore'))
                 grouped_manual = list(width = 1200, height_per_row = 450, max_height = 1400)
             ),
 
-            # Notice collection helpers. A single Preformatted (plain-text) output item:
-            # avoids BOTH the jmvcore::Notice serialization error from
-            # self$results$insert(999, Notice) AND any HTML in notices (project convention:
-            # notice content must be plain text). ====
+            # Notice collection helpers. Uses a single Preformatted (plain-text) output item
+            # (jmvcore::Notice itself serializes fine; the historical crash was caused by
+            # out-of-bounds Group$insert(999, ...), corrected 2026-09). Plain text also
+            # avoids any HTML in notices per project convention. ====
             .noticeList = list(),
 
             .addNotice = function(type, title, content) {
@@ -200,24 +200,25 @@ statsplot2Class <- if (requireNamespace('jmvcore'))
 
                     if (inherits(v, "factor") || inherits(v, "ordered")) return("factor")
 
-                    # Handle character variables (common in clinical data)
-                    if (is.character(v)) {
+                    # Handle character and logical variables (common in clinical data;
+                    # high-cardinality / identifier checks run uniformly in .run())
+                    if (is.character(v) || is.logical(v)) {
                         unique_vals <- length(unique(v[!is.na(v)]))
-                        # Character columns with \u226420 unique values treated as categorical
-                        if (unique_vals > 0 && unique_vals <= 20) return("factor")
+                        if (unique_vals > 0) return("factor")
                         return("unknown")
                     }
 
                     # Handle numeric variables
                     if (inherits(v, contin)) {
                         if (isTRUE(self$options$forceContinuous)) return("continuous")
-                        unique_vals <- length(unique(v[!is.na(v)]))
+                        v_fin <- v[is.finite(v)]
+                        unique_vals <- length(unique(v_fin))
                         # Up to 15 distinct whole numbers (scores, counts, grades) are read
                         # as categorical. That changes the plot AND the test, and a jamovi
                         # user has no way to add decimals, so every reclassification is
                         # reported and the option above is the escape hatch.
                         if (unique_vals > 0 && unique_vals <= 15 &&
-                            all(abs(v[!is.na(v)] - round(v[!is.na(v)])) < .Machine$double.eps^0.5)) {
+                            all(abs(v_fin - round(v_fin)) < .Machine$double.eps^0.5)) {
                             private$.addNotice('WARNING', 'Numeric variable analysed as categorical', glue::glue(
                                 "'{label}' has {unique_vals} distinct whole-number values and is analysed as categorical, ",
                                 "which changes the plot type and the test. ",
@@ -341,11 +342,23 @@ statsplot2Class <- if (requireNamespace('jmvcore'))
                 notes_html <- ""
 
                 # Note about statistical approach
-                if (analysis_info$dep_type == "factor" && analysis_info$group_type == "factor") {
+                if (identical(analysis_info$plot_type, "repeated_factor_factor")) {
                     notes_html <- paste0(notes_html,
                         "<p style='background-color: rgba(33, 152, 239, 0.13); padding: 8px; border-radius: 4px; font-size: 0.9em; color: inherit;'>",
-                        "<strong>Note:</strong> Statistical approach option does not apply to categorical comparisons.</p>"
+                        "<strong>Note:</strong> Statistical approach option does not apply to descriptive alluvial diagrams.</p>"
                     )
+                } else if (identical(analysis_info$plot_type, "independent_factor_factor")) {
+                    if (identical(analysis_info$distribution, "bf")) {
+                        notes_html <- paste0(notes_html,
+                            "<p style='background-color: rgba(33, 152, 239, 0.13); padding: 8px; border-radius: 4px; font-size: 0.9em; color: inherit;'>",
+                            "<strong>Note:</strong> Bayesian statistical approach computes a Gunel-Dickey contingency-table Bayes factor and posterior Cramer's V.</p>"
+                        )
+                    } else {
+                        notes_html <- paste0(notes_html,
+                            "<p style='background-color: rgba(33, 152, 239, 0.13); padding: 8px; border-radius: 4px; font-size: 0.9em; color: inherit;'>",
+                            "<strong>Note:</strong> Frequentist and robust approaches use Pearson's Chi-square test and bias-corrected Cramer's V for categorical comparisons (select Bayesian for a contingency-table Bayes factor).</p>"
+                        )
+                    }
                 }
 
                 # Note about alluvial style
@@ -390,8 +403,8 @@ statsplot2Class <- if (requireNamespace('jmvcore'))
                         "<p>This <strong>violin plot</strong> compares the distribution of <code>{dep_var_safe}</code> between different <code>{group_var_safe}</code> groups.</p>",
                         "<ul style='margin: 10px 0; padding-left: 20px;'>",
                         "<li><strong>Medians:</strong> Center lines show typical values in each group</li>",
-                        "<li><strong>Spread:</strong> Wider violins indicate more variability</li>",
-                        "<li><strong>Distribution shape:</strong> Violin width reveals data density at different values</li>",
+                        "<li><strong>Spread:</strong> Taller violins and wider interquartile boxes indicate greater variability</li>",
+                        "<li><strong>Distribution shape:</strong> Violin width reveals data density (concentration of observations) at different values</li>",
                         "<li><strong>Statistical testing:</strong> Included when applicable to assess group differences</li>",
                         "</ul>"
                     ),
@@ -409,7 +422,7 @@ statsplot2Class <- if (requireNamespace('jmvcore'))
                         "<ul style='margin: 10px 0; padding-left: 20px;'>",
                         "<li><strong>Bar height:</strong> Represents count or proportion in each category</li>",
                         "<li><strong>Height differences:</strong> Indicate varying proportions between groups</li>",
-                        "<li><strong>Chi-square test:</strong> Tests for independence between variables</li>",
+                        "<li><strong>Statistical test:</strong> Chi-square test (or Bayesian contingency-table test when Bayesian approach is selected) evaluates independence between variables</li>",
                         "<li><strong>Patterns:</strong> Look for systematic differences across groups</li>",
                         "</ul>"
                     ),
@@ -451,7 +464,8 @@ statsplot2Class <- if (requireNamespace('jmvcore'))
                 html <- paste0(html, interpretation)
 
                 # Add assumption notes based on statistical approach
-                if (analysis_info$dep_type == "continuous" || analysis_info$group_type == "continuous") {
+                if (analysis_info$dep_type == "continuous" || analysis_info$group_type == "continuous" ||
+                    (identical(analysis_info$plot_type, "independent_factor_factor") && identical(analysis_info$distribution, "bf"))) {
                     assumption_html <- "<div style='background-color: rgba(255, 255, 255, 0.06); padding: 10px; margin-top: 10px; border-radius: 4px; border: 1px solid #ddd; color: inherit;'>"
                     assumption_html <- paste0(assumption_html, "<h5 style='margin-top: 0; color: inherit;'>Statistical Approach</h5>")
 
@@ -478,14 +492,16 @@ statsplot2Class <- if (requireNamespace('jmvcore'))
                         )
                     } else if (analysis_info$distribution == "bf") {
                         assumption_html <- paste0(assumption_html,
-                            "<p style='margin: 5px 0;'><strong>Bayesian:</strong> Provides evidence for or against the null hypothesis.</p>",
+                            "<p style='margin: 5px 0;'><strong>Bayesian:</strong> Quantifies relative evidence for the alternative vs. null hypothesis (Jeffreys, 1961; Lee &amp; Wagenmakers, 2013).</p>",
                             "<ul style='margin: 5px 0; padding-left: 20px; font-size: 0.9em;'>",
-                            "<li>BF > 3: Moderate evidence</li>",
-                            "<li>BF > 10: Strong evidence</li>",
-                            "<li>BF > 30: Very strong evidence</li>",
+                            "<li>BF10 &gt; 3: Moderate evidence for the alternative</li>",
+                            "<li>BF10 &gt; 10: Strong evidence for the alternative</li>",
+                            "<li>BF10 &gt; 30: Very strong evidence for the alternative</li>",
+                            "<li>1/3 \u2264 BF10 \u2264 3: Inconclusive / anecdotal evidence</li>",
+                            "<li>BF10 &lt; 1/3: Moderate or stronger evidence for the null hypothesis</li>",
                             "</ul>",
                             "<p style='margin: 5px 0;'>Bayes factors depend on the prior. The ggstatsplot default prior is used ",
-                            "(Cauchy, scale 0.707, for mean comparisons); the result sentence states the prior actually applied.</p>",
+                            "(Cauchy, scale 0.707, for mean comparisons; Gunel-Dickey a = 1 for contingency tables); the result sentence states the prior actually applied.</p>",
                             "<p style='font-size: 0.85em; color: inherit;'>",
                             "<strong>When to use:</strong> Want to quantify evidence, need to support null hypothesis</p>"
                         )
@@ -501,13 +517,22 @@ statsplot2Class <- if (requireNamespace('jmvcore'))
             },
             
             # Check statistical assumptions and provide warnings
-            .checkAssumptions = function(analysis_info, data) {
+            .checkAssumptions = function(analysis_info, data, subject_id = NULL) {
 
                 dep_data <- data[[analysis_info$dep_var]]
                 group_data <- data[[analysis_info$group_var]]
 
-                # Sample size checks
-                total_n <- sum(!is.na(dep_data) & !is.na(group_data))
+                valid_dep <- !is.na(dep_data) & (!is.numeric(dep_data) | is.finite(dep_data))
+                valid_grp <- !is.na(group_data) & (!is.numeric(group_data) | is.finite(group_data))
+                complete_mask <- valid_dep & valid_grp
+
+                # Sample size checks (use independent subject count for repeated continuous designs)
+                total_n <- if (identical(analysis_info$plot_type, "repeated_factor_continuous") &&
+                               !is.null(subject_id) && subject_id %in% names(data)) {
+                    length(unique(data[[subject_id]][complete_mask & !is.na(data[[subject_id]])]))
+                } else {
+                    sum(complete_mask)
+                }
                 if (total_n < 10) {
                     private$.addNotice('STRONG_WARNING', 'Very Small Sample', glue::glue(
                         "Only {total_n} complete observations.\n",
@@ -524,13 +549,27 @@ statsplot2Class <- if (requireNamespace('jmvcore'))
                     ))
                 }
 
+                # Identify continuous and categorical variables symmetrically (handles
+                # independent_continuous_factor where dep and group roles are reversed)
+                has_continuous <- analysis_info$dep_type == "continuous" ||
+                    identical(analysis_info$plot_type, "independent_continuous_factor")
+                cont_var <- if (analysis_info$dep_type == "continuous") analysis_info$dep_var else analysis_info$group_var
+                cont_data <- if (analysis_info$dep_type == "continuous") dep_data[complete_mask] else group_data[complete_mask]
+                cat_data <- if (analysis_info$group_type == "factor") {
+                    group_data[complete_mask]
+                } else if (identical(analysis_info$plot_type, "independent_continuous_factor")) {
+                    dep_data[complete_mask]
+                } else {
+                    NULL
+                }
+
                 # Parametric assumption checks
-                if (analysis_info$distribution == "p" && analysis_info$dep_type == "continuous") {
+                if (analysis_info$distribution == "p" && has_continuous && length(cont_data) > 0) {
                     # Check for extreme outliers (beyond 3.5 IQR) WITHIN each group: a
                     # real group difference widens the pooled IQR and hides them.
-                    grp <- if (analysis_info$group_type == "factor") group_data else rep(1L, length(dep_data))
-                    extreme_outliers <- sum(unlist(tapply(dep_data, grp, function(v) {
-                        v <- v[!is.na(v)]
+                    grp <- if (!is.null(cat_data)) droplevels(as.factor(cat_data)) else rep(1L, length(cont_data))
+                    extreme_outliers <- sum(unlist(tapply(cont_data, grp, function(v) {
+                        v <- v[is.finite(v)]
                         if (length(v) < 5) return(0L)
                         q <- stats::quantile(v, c(0.25, 0.75))
                         iqr <- q[[2]] - q[[1]]
@@ -538,7 +577,7 @@ statsplot2Class <- if (requireNamespace('jmvcore'))
                     })), na.rm = TRUE)
                     if (extreme_outliers > 0) {
                         private$.addNotice('STRONG_WARNING', 'Extreme Outliers Detected', glue::glue(
-                            "Extreme outliers detected in {analysis_info$dep_var}.\n",
+                            "Extreme outliers detected in {cont_var}.\n",
                             " - Found: {extreme_outliers} extreme outlier(s) (>3.5 IQR within its group)\n",
                             " - Consider robust statistical approach (distribution='r')\n",
                             " - Outliers may unduly influence parametric results"
@@ -556,30 +595,69 @@ statsplot2Class <- if (requireNamespace('jmvcore'))
                     }
                 }
 
-                # Group size balance check for between-subjects designs
-                if (analysis_info$direction == "independent" && analysis_info$group_type == "factor") {
-                    group_sizes <- table(group_data)
-                    min_group <- min(group_sizes)
-                    max_group <- max(group_sizes)
-                    if (max_group / min_group > 4) {
-                        private$.addNotice('WARNING', 'Unbalanced Group Sizes', glue::glue(
-                            "Unbalanced group sizes detected.\n",
-                            " - Smallest group: {min_group}\n",
-                            " - Largest group: {max_group}\n",
-                            " - Ratio: {round(max_group/min_group, 1)}:1\n",
-                            " - Results may be less reliable with imbalanced designs"
-                        ))
+                # Zero within-group variance check for continuous-by-group comparisons
+                if (has_continuous && !is.null(cat_data) && is.numeric(cont_data) && length(cont_data) >= 2) {
+                    grp_fac <- droplevels(as.factor(cat_data))
+                    if (nlevels(grp_fac) >= 2) {
+                        grp_vars <- tapply(cont_data, grp_fac, function(v) {
+                            v <- v[is.finite(v)]
+                            if (length(v) >= 2) stats::var(v) else NA_real_
+                        })
+                        zero_var_grps <- names(grp_vars)[!is.na(grp_vars) & grp_vars == 0]
+                        if (length(zero_var_grps) > 0) {
+                            private$.addNotice('STRONG_WARNING', 'Zero Within-Group Variance', glue::glue(
+                                "Group(s) {paste(sQuote(zero_var_grps, FALSE), collapse = ', ')} have zero variance in '{cont_var}' (all observations are identical).\n",
+                                " - Heteroscedastic parametric tests (Welch's t-test / Welch's ANOVA) and trimmed-means tests divide by within-group variance and may be undefined\n",
+                                " - Consider using the Nonparametric approach (distribution='np')"
+                            ))
+                        }
                     }
+                }
 
-                    # Very small group sizes
-                    if (min_group < 5) {
-                        private$.addNotice('STRONG_WARNING', 'Very Small Group Sizes', glue::glue(
-                            "Very small group size(s) detected.\n",
-                            " - Minimum group size: {min_group}\n",
-                            " - Consider combining groups if scientifically appropriate\n",
-                            " - Consider exact statistical methods for small samples\n",
-                            " - Statistical power may be severely limited"
-                        ))
+                # Group size balance check for between-subjects designs (both orientations)
+                if (analysis_info$direction == "independent" && !is.null(cat_data) && length(cat_data) > 0) {
+                    group_sizes <- table(droplevels(as.factor(cat_data)))
+                    if (length(group_sizes) >= 2) {
+                        min_group <- min(group_sizes)
+                        max_group <- max(group_sizes)
+                        if (min_group > 0 && max_group / min_group > 4) {
+                            private$.addNotice('WARNING', 'Unbalanced Group Sizes', glue::glue(
+                                "Unbalanced group sizes detected.\n",
+                                " - Smallest group: {min_group}\n",
+                                " - Largest group: {max_group}\n",
+                                " - Ratio: {round(max_group/min_group, 1)}:1\n",
+                                " - Results may be less reliable with imbalanced designs"
+                            ))
+                        }
+
+                        # Very small group sizes
+                        if (min_group < 5) {
+                            private$.addNotice('STRONG_WARNING', 'Very Small Group Sizes', glue::glue(
+                                "Very small group size(s) detected.\n",
+                                " - Minimum group size: {min_group}\n",
+                                " - Consider combining groups if scientifically appropriate\n",
+                                " - Consider exact statistical methods for small samples\n",
+                                " - Statistical power may be severely limited"
+                            ))
+                        }
+                    }
+                }
+
+                # Expected cell count check for frequentist contingency tables
+                if (identical(analysis_info$plot_type, "independent_factor_factor") &&
+                    !identical(analysis_info$distribution, "bf") && total_n >= 2) {
+                    tbl <- table(droplevels(as.factor(dep_data[complete_mask])),
+                                 droplevels(as.factor(group_data[complete_mask])))
+                    if (nrow(tbl) >= 2 && ncol(tbl) >= 2) {
+                        exp_cells <- tryCatch(suppressWarnings(stats::chisq.test(tbl)$expected),
+                                              error = function(e) NULL)
+                        if (!is.null(exp_cells) && any(exp_cells < 5)) {
+                            private$.addNotice('WARNING', 'Small Expected Cell Counts', glue::glue(
+                                "One or more contingency table cells have expected counts < 5 (minimum expected = {round(min(exp_cells), 1)}).\n",
+                                " - Asymptotic Pearson Chi-square p-values may be inaccurate in sparse tables\n",
+                                " - Consider Fisher's exact test or Bayesian contingency analysis (distribution='bf')"
+                            ))
+                        }
                     }
                 }
 
@@ -587,16 +665,27 @@ statsplot2Class <- if (requireNamespace('jmvcore'))
             },
 
             # Per-panel one-row statistics from a ggstatsplot figure (or a
-            # patchwork of them). Empty when the figure carries no test.
+            # patchwork of them). Empty when the figure carries no test or when
+            # the test statistic / Bayes factor is non-finite (NaN / NA).
             .extractStats = function(plot) {
                 if (is.null(plot)) return(list())
                 st <- tryCatch(suppressWarnings(ggstatsplot::extract_stats(plot)), error = function(e) NULL)
                 if (is.null(st)) return(list())
-                if (!is.null(st$subtitle_data)) return(list(list(label = NULL, sd = as.data.frame(st$subtitle_data))))
+                has_valid_stat <- function(df) {
+                    if (is.null(df) || nrow(df) == 0) return(FALSE)
+                    has_stat <- !is.null(df[["statistic"]]) && length(df[["statistic"]]) > 0 && is.finite(df[["statistic"]][1])
+                    has_bf   <- !is.null(df[["bf10"]])      && length(df[["bf10"]]) > 0      && is.finite(df[["bf10"]][1])
+                    has_stat || has_bf
+                }
+                if ("subtitle_data" %in% names(st)) {
+                    sd_single <- st[["subtitle_data"]]
+                    if (!has_valid_stat(sd_single)) return(list())
+                    return(list(list(label = NULL, sd = as.data.frame(sd_single))))
+                }
                 out <- list()
                 for (i in seq_along(st)) {
-                    sd <- if (is.list(st[[i]])) st[[i]]$subtitle_data else NULL
-                    if (is.null(sd) || nrow(sd) == 0) next
+                    sd <- if (is.list(st[[i]])) st[[i]][["subtitle_data"]] else NULL
+                    if (!has_valid_stat(sd)) next
                     title <- tryCatch(plot[[i]]$labels$title, error = function(e) NULL)
                     out[[length(out) + 1]] <- list(label = if (is.null(title)) NULL else as.character(title), sd = as.data.frame(sd))
                 }
@@ -604,7 +693,7 @@ statsplot2Class <- if (requireNamespace('jmvcore'))
             },
 
             # One copy-ready sentence from a one-row statsExpressions result.
-            .sentence = function(sd, dep, group, label = NULL) {
+            .sentence = function(sd, dep, group, label = NULL, n_unit = "") {
                 esc <- private$.safeHtmlOutput
                 fmt <- function(x) {
                     if (is.null(x) || length(x) == 0 || is.na(x[1])) return("NA")
@@ -616,35 +705,39 @@ statsplot2Class <- if (requireNamespace('jmvcore'))
                     if (is.null(p) || is.na(p[1])) return("p not available")
                     if (p[1] < 0.001) "p < 0.001" else paste0("p = ", formatC(p[1], format = "f", digits = 3))
                 }
-                n <- if (!is.null(sd$n.obs)) sd$n.obs[1] else NA
+                n <- if (!is.null(sd[["n.obs"]])) sd[["n.obs"]][1] else NA
                 effect <- ""
-                if (!is.null(sd$estimate) && !is.na(sd$estimate[1])) {
+                if (!is.null(sd[["estimate"]]) && !is.na(sd[["estimate"]][1])) {
                     ci <- ""
-                    if (!is.null(sd$conf.low) && !is.na(sd$conf.low[1])) {
-                        level <- if (!is.null(sd$conf.level)) round(100 * sd$conf.level[1]) else 95
+                    if (!is.null(sd[["conf.low"]]) && !is.na(sd[["conf.low"]][1])) {
+                        level <- if (!is.null(sd[["conf.level"]])) round(100 * sd[["conf.level"]][1]) else 95
                         ci <- sprintf(" (%d%% %s %s to %s)", as.integer(level),
-                                      if (!is.null(sd$bf10)) "credible interval" else "CI",
-                                      fmt(sd$conf.low), fmt(sd$conf.high))
+                                      if (!is.null(sd[["bf10"]])) "credible interval" else "CI",
+                                      fmt(sd[["conf.low"]]), fmt(sd[["conf.high"]]))
                     }
-                    es_name <- if (!is.null(sd$effectsize)) esc(sd$effectsize[1]) else "effect size"
-                    effect <- sprintf("; %s = %s%s", es_name, fmt(sd$estimate), ci)
+                    raw_es <- if (!is.null(sd[["effectsize"]])) as.character(sd[["effectsize"]][1]) else "effect size"
+                    if (grepl("^Bayesian t-test$", raw_es, ignore.case = TRUE)) {
+                        raw_es <- "posterior difference"
+                    }
+                    es_name <- esc(raw_es)
+                    effect <- sprintf("; %s = %s%s", es_name, fmt(sd[["estimate"]]), ci)
                 }
-                core <- if (!is.null(sd$bf10)) {
-                    prior <- if (!is.null(sd$prior.distribution))
-                        sprintf(" (prior: %s, scale %s)", esc(sd$prior.distribution[1]), fmt(sd$prior.scale)) else ""
-                    sprintf("BF10 = %s%s", fmt(sd$bf10), prior)
+                core <- if (!is.null(sd[["bf10"]])) {
+                    prior <- if (!is.null(sd[["prior.distribution"]]))
+                        sprintf(" (prior: %s, scale %s)", esc(sd[["prior.distribution"]][1]), fmt(sd[["prior.scale"]])) else ""
+                    sprintf("BF10 = %s%s", fmt(sd[["bf10"]]), prior)
                 } else {
-                    df <- c(if (!is.null(sd$df)) sd$df[1], if (!is.null(sd$df.error)) sd$df.error[1])
+                    df <- c(if (!is.null(sd[["df"]])) sd[["df"]][1], if (!is.null(sd[["df.error"]])) sd[["df.error"]][1])
                     df <- df[!is.na(df)]
-                    sprintf("test statistic = %s%s, %s", fmt(sd$statistic),
+                    sprintf("test statistic = %s%s, %s", fmt(sd[["statistic"]]),
                             if (length(df)) paste0(" (df = ", paste(vapply(df, fmt, ""), collapse = ", "), ")") else "",
-                            p_text(sd$p.value))
+                            p_text(sd[["p.value"]]))
                 }
                 where <- if (is.null(label)) "" else sprintf(", %s", esc(label))
-                sprintf("%s by %s%s: %s; %s%s; n = %s.", esc(dep), esc(group), where, esc(sd$method[1]), core, effect, n)
+                sprintf("%s by %s%s: %s; %s%s; n = %s%s.", esc(dep), esc(group), where, esc(sd[["method"]][1]), core, effect, n, n_unit)
             },
 
-            .buildSummary = function(stats, has_test, approach, analysis_info) {
+            .buildSummary = function(stats, has_test, approach, analysis_info, omitted_panels = character(0)) {
                 box <- function(body) {
                     paste0(
                         "<div style='padding: 12px; border-left: 4px solid #1976d2; background-color: rgba(33, 152, 239, 0.08); color: inherit;'>",
@@ -656,15 +749,23 @@ statsplot2Class <- if (requireNamespace('jmvcore'))
                 if (length(stats) == 0) {
                     return(box(sprintf("<p>The %s test could not be computed for this comparison; the figure is shown without a test result (see the warning above).</p>", approach)))
                 }
-                box(paste(vapply(stats, function(st) {
-                    paste0("<p>", private$.sentence(st$sd, analysis_info$dep_var, analysis_info$group_var, st$label), "</p>")
-                }, ""), collapse = ""))
+                n_unit <- if (identical(analysis_info$plot_type, "repeated_factor_continuous")) " subjects" else ""
+                sentences_html <- paste(vapply(stats, function(st) {
+                    paste0("<p>", private$.sentence(st$sd, analysis_info$dep_var, analysis_info$group_var, st$label, n_unit = n_unit), "</p>")
+                }, ""), collapse = "")
+                omitted_html <- if (length(omitted_panels) > 0) {
+                    sprintf("<p><em>Note: Statistics could not be computed for split panel(s) %s (fewer than 2 groups or zero variation within the panel).</em></p>",
+                            paste(sQuote(vapply(omitted_panels, private$.safeHtmlOutput, ""), FALSE), collapse = ", "))
+                } else ""
+                box(paste0(sentences_html, omitted_html))
             },
 
             .run = function() {
 
                 private$.noticeList <- list()
                 private$.renderNotices()
+                self$results$summary$setContent("")
+                self$results$ExplanationMessage$setContent("")
 
                 analysis_info <- NULL
 
@@ -722,12 +823,12 @@ statsplot2Class <- if (requireNamespace('jmvcore'))
                     return()
                 }
 
-                # Check assumptions (adds STRONG_WARNING / WARNING notices to the
-                # plain-text notices output item via private$.addNotice)
-                private$.checkAssumptions(analysis_info, self$data)
-
                 # Prepare data for plotting and counts
                 prepared_data <- private$.prepareDataForPlot(analysis_info)
+
+                # Check assumptions (adds STRONG_WARNING / WARNING notices to the
+                # plain-text notices output item via private$.addNotice)
+                private$.checkAssumptions(analysis_info, prepared_data$data, prepared_data$subject_id)
 
                 # Explanation and interpretation are opt-in (jamovi convention:
                 # educational panels render only when the user enables them).
@@ -764,7 +865,10 @@ statsplot2Class <- if (requireNamespace('jmvcore'))
                     n_used <- if (length(.an_vars))
                         sum(stats::complete.cases(prepared_data$data[, .an_vars, drop = FALSE]))
                     else nrow(prepared_data$data)
-                    n_dropped_na <- nrow(prepared_data$data) - n_used
+                    n_dropped_na <- if (isTRUE(prepared_data$sampled) || isTRUE(prepared_data$reshaped_wide))
+                        (nrow(prepared_data$data) - n_used) + (if (!is.null(prepared_data$dropped)) prepared_data$dropped else 0L)
+                    else
+                        max(0L, n_total - n_used)
 
                     # Random subsampling changes the statistics, not just the
                     # picture. "Observations used: 5,000 of 30,000" reads like
@@ -780,14 +884,20 @@ statsplot2Class <- if (requireNamespace('jmvcore'))
                     # A comparison needs at least two groups. With one, every
                     # "difference" is vacuous, yet the run reported success.
                     blocking <- FALSE
+                    .dv <- analysis_info$dep_var
                     .gv <- analysis_info$group_var
+                    .dg_vars <- intersect(c(.dv, .gv), names(prepared_data$data))
+                    .cc_dg <- if (length(.dg_vars))
+                        stats::complete.cases(prepared_data$data[, .dg_vars, drop = FALSE])
+                    else rep(TRUE, nrow(prepared_data$data))
+
                     if (!is.null(.gv) && .gv %in% names(prepared_data$data)) {
-                        .n_grp <- length(unique(stats::na.omit(prepared_data$data[[.gv]])))
+                        .n_grp <- length(unique(prepared_data$data[[.gv]][.cc_dg]))
                         if (.n_grp < 2) {
                             blocking <- TRUE
                             private$.addNotice('ERROR', 'Only one group to compare',
                                 glue::glue(
-                                    "'{.gv}' has a single level, so there is nothing to compare against. ",
+                                    "'{.gv}' has a single level with complete observations, so there is nothing to compare against. ",
                                     "Any test or effect size shown describes one group on its own. ",
                                     "Choose a grouping variable with at least two levels."))
                         }
@@ -797,16 +907,23 @@ statsplot2Class <- if (requireNamespace('jmvcore'))
                     # identifier, not a grouping. ggstatsplot would still run its
                     # k(k-1)/2 pairwise tests (25 s for 200 levels here) and then die
                     # with "not enough observations", so stop before drawing.
-                    if (!is.null(.gv) && analysis_info$group_type == "factor" && .gv %in% names(prepared_data$data)) {
-                        .lv <- length(unique(stats::na.omit(prepared_data$data[[.gv]])))
-                        .nn <- sum(!is.na(prepared_data$data[[.gv]]))
+                    .cat_var <- if (analysis_info$group_type == "factor") {
+                        .gv
+                    } else if (identical(analysis_info$plot_type, "independent_continuous_factor")) {
+                        .dv
+                    } else {
+                        NULL
+                    }
+                    if (!is.null(.cat_var) && .cat_var %in% names(prepared_data$data)) {
+                        .lv <- length(unique(stats::na.omit(prepared_data$data[[.cat_var]])))
+                        .nn <- sum(!is.na(prepared_data$data[[.cat_var]]))
                         if (.lv > 20 && .lv > .nn / 2) {
                             jmvcore::reject(glue::glue(
-                                "'{.gv}' has {.lv} levels for {.nn} observations - about one level per row - ",
+                                "'{.cat_var}' has {.lv} levels for {.nn} observations - about one level per row - ",
                                 "so it looks like an identifier, not a grouping variable. Choose a variable with a few groups."))
                         } else if (.lv > 20) {
                             private$.addNotice('STRONG_WARNING', 'Many groups', glue::glue(
-                                "'{.gv}' has {.lv} levels. The comparison runs {.lv * (.lv - 1) / 2} pairwise tests, ",
+                                "'{.cat_var}' has {.lv} levels. The comparison runs {.lv * (.lv - 1) / 2} pairwise tests, ",
                                 "which is slow and crowds the figure; consider collapsing levels."))
                         }
                     }
@@ -815,9 +932,8 @@ statsplot2Class <- if (requireNamespace('jmvcore'))
                     # constant numeric outcome (one unique value) is read as a
                     # factor and the whole analysis silently switches from a
                     # continuous comparison to a categorical one.
-                    .dv <- analysis_info$dep_var
                     if (!is.null(.dv) && .dv %in% names(prepared_data$data)) {
-                        .vals <- stats::na.omit(prepared_data$data[[.dv]])
+                        .vals <- prepared_data$data[[.dv]][.cc_dg]
                         if (length(.vals) > 0 && length(unique(.vals)) < 2) {
                             blocking <- TRUE
                             private$.addNotice('ERROR', 'Outcome has no variation',
@@ -834,15 +950,29 @@ statsplot2Class <- if (requireNamespace('jmvcore'))
                     # vanish from the panel grid without a word (the render path
                     # cannot post notices).
                     .sv <- analysis_info$grvar
+                    .viable_panels <- character(0)
+                    .degenerate_panels <- character(0)
                     if (!is.null(.sv) && .sv %in% names(prepared_data$data)) {
-                        .cc <- stats::complete.cases(prepared_data$data[, c(.dv, .gv), drop = FALSE])
                         .present <- unique(stats::na.omit(as.character(prepared_data$data[[.sv]])))
-                        .per_level <- table(factor(as.character(prepared_data$data[[.sv]])[.cc], levels = .present))
+                        .per_level <- table(factor(as.character(prepared_data$data[[.sv]])[.cc_dg], levels = .present))
                         .thin <- names(.per_level)[.per_level < 2]
-                        if (length(.thin) > 0) {
+                        .viable_panels <- setdiff(.present, .thin)
+                        if (length(.viable_panels) == 0) {
+                            blocking <- TRUE
+                            private$.addNotice('ERROR', 'No viable split panels', glue::glue(
+                                "Every level of '{.sv}' has fewer than 2 complete observations, so a split analysis cannot be computed. ",
+                                "Choose a categorical split variable with at least 2 observations per level, or clear 'Split By'."))
+                        } else if (length(.thin) > 0) {
                             private$.addNotice('STRONG_WARNING', 'Split panel(s) omitted', glue::glue(
                                 "Level(s) {paste(sQuote(.thin, FALSE), collapse = ', ')} of '{.sv}' have fewer than 2 complete observations, ",
                                 "so no panel is drawn for them. The remaining panels are shown."))
+                        }
+                        for (.vp in .viable_panels) {
+                            .vp_mask <- .cc_dg & (as.character(prepared_data$data[[.sv]]) == .vp)
+                            if (length(unique(prepared_data$data[[.gv]][.vp_mask])) < 2 ||
+                                length(unique(prepared_data$data[[.dv]][.vp_mask])) < 2) {
+                                .degenerate_panels <- c(.degenerate_panels, .vp)
+                            }
                         }
                     }
 
@@ -882,26 +1012,45 @@ statsplot2Class <- if (requireNamespace('jmvcore'))
                         private$.addNotice('STRONG_WARNING', 'Statistics could not be computed', glue::glue(
                             "The {approach} test failed for this comparison, so the figure is shown without a test result. ",
                             "Choose another statistical approach or check the data."))
+                    } else if (has_test && !is.null(.sv) && !blocking &&
+                               (length(stats) < length(.viable_panels) || length(.degenerate_panels) > 0)) {
+                        .omitted_lbl <- if (length(.degenerate_panels) > 0)
+                            paste(sQuote(.degenerate_panels, FALSE), collapse = ", ")
+                        else
+                            "one or more split panels"
+                        private$.addNotice('STRONG_WARNING', 'Split panel statistics incomplete', glue::glue(
+                            "Statistics could not be computed for level(s) {.omitted_lbl} of '{.sv}': ",
+                            "the {approach} test requires at least 2 groups and non-zero variation within each panel, so those panel(s) are omitted from the result sentence."))
                     }
                     if (self$options$showSummary) {
                         self$results$summary$setContent(
-                            private$.buildSummary(stats, has_test, approach, analysis_info))
+                            private$.buildSummary(stats, has_test, approach, analysis_info, omitted_panels = .degenerate_panels))
                     }
 
                     # The alluvial diagrams DRAW missing values as an 'NA' stratum;
                     # every other plot type drops them.
-                    na_fate <- if (identical(analysis_info$plot_type, "repeated_factor_factor"))
+                    na_fate <- if (identical(analysis_info$plot_type, "repeated_factor_factor") && !isTRUE(self$options$excl))
                         "appear as an 'NA' stratum in the diagram (enable 'Exclude missing values' to drop them)"
                     else "are omitted from the statistics"
-                    # Categorical comparisons always use the chi-square / flow display;
-                    # echoing the approach option there implied it had been applied.
-                    approach_label <- if (analysis_info$dep_type == "factor" && analysis_info$group_type == "factor")
-                        "not applicable (categorical comparison)" else analysis_info$distribution
+                    approach_label <- if (identical(analysis_info$plot_type, "repeated_factor_factor")) {
+                        "not applicable (categorical comparison)"
+                    } else if (analysis_info$dep_type == "factor" && analysis_info$group_type == "factor") {
+                        if (identical(analysis_info$distribution, "bf")) "bf (Bayesian contingency table)"
+                        else "not applicable (Pearson Chi-square)"
+                    } else {
+                        analysis_info$distribution
+                    }
+                    subj_note <- if ((identical(analysis_info$plot_type, "repeated_factor_continuous") ||
+                                      isTRUE(prepared_data$reshaped_wide)) &&
+                                     !is.null(prepared_data$subject_id) &&
+                                     prepared_data$subject_id %in% names(prepared_data$data))
+                        sprintf(" (%d subjects)", length(unique(prepared_data$data[[prepared_data$subject_id]])))
+                    else ""
 
                     private$.addNotice('INFO', 'Analysis Summary', glue::glue(
                         "{if (blocking) 'Analysis ran, but see the error(s) above before using these results.' else 'Analysis completed successfully.'}\n",
                         " - Plot type: {analysis_info$plot_type}\n",
-                        " - Observations used: {base::format(n_used, big.mark = ',')} of {base::format(n_total, big.mark = ',')}",
+                        " - Observations used: {base::format(n_used, big.mark = ',')} of {base::format(n_total, big.mark = ',')}{subj_note}",
                         "{if (isTRUE(prepared_data$sampled)) ' (RANDOM SUBSAMPLE - see warning above)' else ''}\n",
                         "{if (n_dropped_na > 0) paste0(' - ', base::format(n_dropped_na, big.mark = \',\'), ' row(s) carried a missing value in the analysed variables and ', na_fate, '.\\n') else ''}",
                         " - Statistical approach: {approach_label}\n",
@@ -997,13 +1146,62 @@ statsplot2Class <- if (requireNamespace('jmvcore'))
             
             # Prepare data for plotting (handle NA exclusion, term composition)
             .prepareDataForPlot = function(analysis_info) {
+                if (identical(analysis_info$dep_var, analysis_info$group_var)) {
+                    jmvcore::reject(
+                        "Outcome (dep) and grouping/predictor (group) must be different variables."
+                    )
+                }
+                if (!is.null(analysis_info$grvar) &&
+                    analysis_info$grvar %in% c(analysis_info$dep_var, analysis_info$group_var)) {
+                    jmvcore::reject(
+                        "Split variable (grvar) must differ from the outcome (dep) and grouping/predictor (group) variables."
+                    )
+                }
+
                 # Get base data
                 repeated_continuous <- identical(analysis_info$plot_type, "repeated_factor_continuous")
-                subject_id <- if (repeated_continuous) self$options$subjectID else NULL
-                if (repeated_continuous && (is.null(subject_id) || !nzchar(subject_id)))
+                repeated_factor <- identical(analysis_info$plot_type, "repeated_factor_factor")
+                raw_subject_id <- self$options$subjectID
+                has_subject_id <- !is.null(raw_subject_id) && nzchar(raw_subject_id)
+                subject_id <- if (repeated_continuous || (repeated_factor && has_subject_id)) raw_subject_id else NULL
+                if (repeated_continuous && !has_subject_id)
                     jmvcore::reject("Select a Subject ID for repeated continuous outcomes, or use Repeated Measurements (jjwithinstats) for wide-format data.")
                 selected <- unique(c(analysis_info$dep_var, analysis_info$group_var, analysis_info$grvar, subject_id))
                 mydata <- self$data[, selected, drop = FALSE]
+
+                # Exclude non-finite numeric values (Inf / -Inf / NaN) in dep or group
+                for (.vname in intersect(c(analysis_info$dep_var, analysis_info$group_var), names(mydata))) {
+                    if (is.numeric(mydata[[.vname]])) {
+                        .bad_inf <- !is.na(mydata[[.vname]]) & !is.finite(mydata[[.vname]])
+                        if (any(.bad_inf)) {
+                            mydata[[.vname]][.bad_inf] <- NA_real_
+                            private$.addNotice('WARNING', 'Non-finite values excluded', glue::glue(
+                                "'{.vname}' contains {sum(.bad_inf)} non-finite value(s) (Inf/-Inf/NaN), which were treated as missing."
+                            ))
+                        }
+                    }
+                }
+
+                # Coerce variables classified as categorical (including integer-coded
+                # numerics with <= 15 unique values) to factor so downstream plotting
+                # functions (e.g. easyalluvial) treat them as discrete categories.
+                if (identical(analysis_info$dep_type, "factor") &&
+                    !is.null(analysis_info$dep_var) &&
+                    analysis_info$dep_var %in% names(mydata) &&
+                    !is.factor(mydata[[analysis_info$dep_var]])) {
+                    mydata[[analysis_info$dep_var]] <- as.factor(mydata[[analysis_info$dep_var]])
+                }
+                if (identical(analysis_info$group_type, "factor") &&
+                    !is.null(analysis_info$group_var) &&
+                    analysis_info$group_var %in% names(mydata) &&
+                    !is.factor(mydata[[analysis_info$group_var]])) {
+                    mydata[[analysis_info$group_var]] <- as.factor(mydata[[analysis_info$group_var]])
+                }
+                if (!is.null(analysis_info$grvar) &&
+                    analysis_info$grvar %in% names(mydata) &&
+                    !is.factor(mydata[[analysis_info$grvar]])) {
+                    mydata[[analysis_info$grvar]] <- as.factor(mydata[[analysis_info$grvar]])
+                }
                 
                 # Handle NA exclusion if requested
                 if (self$options$excl) {
@@ -1036,6 +1234,58 @@ statsplot2Class <- if (requireNamespace('jmvcore'))
                     if (length(conditions) < 2 || length(complete_ids) < 3)
                         jmvcore::reject("Repeated analysis requires at least three complete subjects and two conditions.")
                     after_n <- nrow(mydata)
+                }
+
+                reshaped_wide <- FALSE
+                if (repeated_factor) {
+                    if (!is.null(subject_id) && subject_id %in% names(mydata)) {
+                        if (subject_id %in% c(analysis_info$dep_var, analysis_info$group_var, analysis_info$grvar)) {
+                            jmvcore::reject("Subject ID must differ from the outcome, condition and split variables.")
+                        }
+                        if (any(duplicated(mydata[[subject_id]]))) {
+                            mydata_cc <- mydata[stats::complete.cases(mydata), , drop = FALSE]
+                            cond_levels <- levels(droplevels(as.factor(mydata_cc[[analysis_info$group_var]])))
+                            if (anyDuplicated(mydata_cc[c(subject_id, analysis_info$group_var)]) > 0) {
+                                jmvcore::reject("Repeated categorical analysis in long format requires at most one observation per subject and timepoint.")
+                            }
+                            if (length(cond_levels) == 2L) {
+                                d1 <- mydata_cc[mydata_cc[[analysis_info$group_var]] == cond_levels[1], , drop = FALSE]
+                                d2 <- mydata_cc[mydata_cc[[analysis_info$group_var]] == cond_levels[2], , drop = FALSE]
+                                common_ids <- intersect(as.character(d1[[subject_id]]), as.character(d2[[subject_id]]))
+                                if (length(common_ids) < 2L) {
+                                    jmvcore::reject("Repeated categorical analysis requires at least two complete subjects observed at both timepoints.")
+                                }
+                                idx1 <- match(common_ids, as.character(d1[[subject_id]]))
+                                idx2 <- match(common_ids, as.character(d2[[subject_id]]))
+                                dep_lvls <- levels(droplevels(as.factor(mydata_cc[[analysis_info$dep_var]])))
+                                wide_df <- data.frame(
+                                    row.names = seq_along(common_ids),
+                                    stringsAsFactors = FALSE
+                                )
+                                wide_df[[analysis_info$group_var]] <- factor(as.character(d1[[analysis_info$dep_var]][idx1]), levels = dep_lvls)
+                                wide_df[[analysis_info$dep_var]] <- factor(as.character(d2[[analysis_info$dep_var]][idx2]), levels = dep_lvls)
+                                if (!is.null(analysis_info$grvar) && analysis_info$grvar %in% names(d1)) {
+                                    wide_df[[analysis_info$grvar]] <- droplevels(as.factor(d1[[analysis_info$grvar]][idx1]))
+                                }
+                                total_subj <- length(unique(as.character(mydata[[subject_id]])))
+                                mydata <- wide_df
+                                before_n <- total_subj
+                                after_n <- nrow(mydata)
+                                reshaped_wide <- TRUE
+                                private$.addNotice(
+                                    "WARNING",
+                                    "Long-format repeated categorical data reshaped",
+                                    glue::glue(
+                                        "Detected repeated Subject ID records across '{cond_levels[1]}' and '{cond_levels[2]}'. Reshaped {after_n} complete subjects into wide format (Timepoint 1 = '{cond_levels[1]}', Timepoint 2 = '{cond_levels[2]}') for the alluvial transition diagram."
+                                    )
+                                )
+                            } else {
+                                jmvcore::reject(glue::glue(
+                                    "Long-format repeated categorical data with Subject ID currently supports 2 timepoints in '{analysis_info$group_var}' (found {length(cond_levels)}). For wide-format alluvial diagrams, place Timepoint 1 in X-axis and Timepoint 2 in Y-axis with one row per subject."
+                                ))
+                            }
+                        }
+                    }
                 }
 
                 # Handle large dataset sampling if requested
@@ -1085,7 +1335,8 @@ statsplot2Class <- if (requireNamespace('jmvcore'))
                     distribution = analysis_info$distribution,
                     alluvsty = analysis_info$alluvsty,
                     dropped = before_n - after_n,
-                    sampled = sampled_flag
+                    sampled = sampled_flag,
+                    reshaped_wide = reshaped_wide
                 )
             },
             
@@ -1098,7 +1349,9 @@ statsplot2Class <- if (requireNamespace('jmvcore'))
                     if (!is.null(result)) {
                         return(result)
                     }
-                    # If grouped plot fails, continue to fallback
+                    # If grouped plot fails across all panels, use faceted fallback rather than unsplit plot
+                    message("Using faceted fallback ggplot2 visualization for grouped plot")
+                    return(private$.plotFallback(prepared_data, analysis_info))
                 }
                 
                 # Try specialized plot functions first
@@ -1139,15 +1392,25 @@ statsplot2Class <- if (requireNamespace('jmvcore'))
                 # Checkpoint before expensive plot generation
                 private$.checkpoint()
 
+                # Avoid BayesFactor::anovaBF 'g_g' parameter collision in performance::r2_bayes
+                # when the user's grouping column is named 'g'
+                plot_data <- prepared_data$data
+                x_col <- prepared_data$group
+                if (identical(x_col, "g") && !(".grp_" %in% names(plot_data))) {
+                    plot_data[[".grp_"]] <- plot_data[["g"]]
+                    x_col <- ".grp_"
+                }
+
                 # formula.tools (pulled in by logistf) overrides as.character.formula,
                 # which breaks stats::oneway.test. ggstatsplot swallows that and returns
                 # a plot with no subtitle at all, so a three-or-more-group comparison
                 # rendered a figure with no statistics on it and no warning.
                 plot <- withBaseFormulaChar(ggstatsplot::ggbetweenstats(
-                    data = prepared_data$data,
-                    x = !!rlang::sym(prepared_data$group),
+                    data = plot_data,
+                    x = !!rlang::sym(x_col),
                     y = !!rlang::sym(prepared_data$dep),
-                    type = prepared_data$distribution
+                    type = prepared_data$distribution,
+                    xlab = prepared_data$group
                 ))
                 return(plot)
             },
@@ -1205,14 +1468,21 @@ statsplot2Class <- if (requireNamespace('jmvcore'))
 
                 x_var <- prepared_data$group  # continuous variable
                 y_var <- prepared_data$dep    # factor variable
+                plot_data <- prepared_data$data
+                cat_col <- y_var
+                if (identical(cat_col, "g") && !(".grp_" %in% names(plot_data))) {
+                    plot_data[[".grp_"]] <- plot_data[["g"]]
+                    cat_col <- ".grp_"
+                }
 
                 # Compare observations between categories, preserving the estimand
                 # when the two selected variables are exchanged.
                 plot <- withBaseFormulaChar(ggstatsplot::ggbetweenstats(
-                    data = prepared_data$data,
-                    x = !!rlang::sym(y_var),
+                    data = plot_data,
+                    x = !!rlang::sym(cat_col),
                     y = !!rlang::sym(x_var),
-                    type = prepared_data$distribution
+                    type = prepared_data$distribution,
+                    xlab = y_var
                 )) + ggplot2::coord_flip()
                 return(plot)
             },
@@ -1227,12 +1497,20 @@ statsplot2Class <- if (requireNamespace('jmvcore'))
                 # Checkpoint before expensive plot generation
                 private$.checkpoint()
 
+                plot_data <- prepared_data$data
+                x_col <- prepared_data$group
+                if (identical(x_col, "g") && !(".grp_" %in% names(plot_data))) {
+                    plot_data[[".grp_"]] <- plot_data[["g"]]
+                    x_col <- ".grp_"
+                }
+
                 plot <- ggstatsplot::ggwithinstats(
-                    data = prepared_data$data,
-                    x = !!rlang::sym(prepared_data$group),
+                    data = plot_data,
+                    x = !!rlang::sym(x_col),
                     y = !!rlang::sym(prepared_data$dep),
                     type = prepared_data$distribution,
-                    subject.id = !!rlang::sym(prepared_data$subject_id)
+                    subject.id = !!rlang::sym(prepared_data$subject_id),
+                    xlab = prepared_data$group
                 )
                 return(plot)
             },
@@ -1321,6 +1599,24 @@ statsplot2Class <- if (requireNamespace('jmvcore'))
             .plotGrouped = function(analysis_info, prepared_data) {
                 # Check if native grouped function exists for this plot type
                 grouped_func_available <- FALSE
+
+                # Pre-filter out thin split levels (< 2 complete observations in dep/group),
+                # which are already reported by .run() via 'Split panel(s) omitted'
+                grvar_col_all <- prepared_data$data[[prepared_data$grvar]]
+                dg_vars <- intersect(c(prepared_data$dep, prepared_data$group), names(prepared_data$data))
+                cc_dg <- if (length(dg_vars))
+                    stats::complete.cases(prepared_data$data[, dg_vars, drop = FALSE])
+                else rep(TRUE, nrow(prepared_data$data))
+                present_levels <- unique(stats::na.omit(as.character(grvar_col_all)))
+                per_level_n <- table(factor(as.character(grvar_col_all)[cc_dg], levels = present_levels))
+                viable_levels <- names(per_level_n)[per_level_n >= 2]
+                if (length(viable_levels) == 0) {
+                    return(NULL)
+                }
+                grouped_data <- prepared_data$data[
+                    !is.na(grvar_col_all) & (as.character(grvar_col_all) %in% viable_levels), , drop = FALSE
+                ]
+                grouped_data <- droplevels(grouped_data)
                 
                 # Handle specific grouped plot types with native support
                 if (analysis_info$plot_type == "independent_factor_continuous") {
@@ -1328,12 +1624,19 @@ statsplot2Class <- if (requireNamespace('jmvcore'))
                     # the tryCatch return value so a failure falls through to the manual
                     # multi-panel fallback instead of propagating uncaught through .generatePlot.
                     grouped_func_available <- tryCatch({
+                        grp_plot_data <- grouped_data
+                        x_col <- prepared_data$group
+                        if (identical(x_col, "g") && !(".grp_" %in% names(grp_plot_data))) {
+                            grp_plot_data[[".grp_"]] <- grp_plot_data[["g"]]
+                            x_col <- ".grp_"
+                        }
                         plot <- withBaseFormulaChar(ggstatsplot::grouped_ggbetweenstats(
-                            data = prepared_data$data,
-                            x = !!rlang::sym(prepared_data$group),
+                            data = grp_plot_data,
+                            x = !!rlang::sym(x_col),
                             y = !!rlang::sym(prepared_data$dep),
                             grouping.var = !!rlang::sym(prepared_data$grvar),
-                            type = prepared_data$distribution
+                            type = prepared_data$distribution,
+                            xlab = prepared_data$group
                         ))
                         TRUE
                     }, error = function(e) {
@@ -1347,7 +1650,7 @@ statsplot2Class <- if (requireNamespace('jmvcore'))
                     # local scope with no <<-, discarding the reset).
                     grouped_func_available <- tryCatch({
                         plot <- ggstatsplot::grouped_ggscatterstats(
-                            data = prepared_data$data,
+                            data = grouped_data,
                             x = !!rlang::sym(prepared_data$group),
                             y = !!rlang::sym(prepared_data$dep),
                             grouping.var = !!rlang::sym(prepared_data$grvar),
@@ -1362,8 +1665,8 @@ statsplot2Class <- if (requireNamespace('jmvcore'))
                 
                 # If no native grouped function, create multiple plots
                 if (!grouped_func_available) {
-                    # Get unique levels of grouping variable with enhanced validation
-                    grvar_col <- prepared_data$data[[prepared_data$grvar]]
+                    # Get unique viable levels of grouping variable
+                    grvar_col <- grouped_data[[prepared_data$grvar]]
                     # NA is not a level: `NA == level` selects phantom all-NA rows into
                     # every panel and drew an 'NA' stratum in split alluvial diagrams.
                     grvar_levels <- unique(stats::na.omit(grvar_col))
@@ -1379,8 +1682,12 @@ statsplot2Class <- if (requireNamespace('jmvcore'))
                         
                         # Filter data for this level
                         level_data <- prepared_data
-                        level_data$data <- prepared_data$data[which(grvar_col == level), , drop = FALSE]
+                        level_data$data <- grouped_data[which(grvar_col == level), , drop = FALSE]
                         level_data$grvar <- NULL  # Remove grvar to avoid recursion
+
+                        # Skip thin panels (< 2 complete observations) without posting
+                        # a global ERROR notice
+                        if (nrow(level_data$data) < 2) next
                         
                         # Generate plot for this subset with error handling
                         subplot <- tryCatch({
@@ -1399,14 +1706,16 @@ statsplot2Class <- if (requireNamespace('jmvcore'))
                             private$.plotFallback(level_data, analysis_info)
                         })
                         
-                        # Add title to identify the group
+                        # Add title to identify the group (append compactly so plot_list has no NULL gaps)
                         if (!is.null(subplot)) {
                             subplot <- subplot + 
                                 ggplot2::ggtitle(paste(prepared_data$grvar, "=", level))
-                            plot_list[[i]] <- subplot
+                            plot_list[[length(plot_list) + 1L]] <- subplot
                         }
                     }
                     
+                    plot_list <- Filter(Negate(is.null), plot_list)
+
                     # Combine plots using patchwork if available, otherwise return first plot
                     if (length(plot_list) > 0) {
                         if (requireNamespace("patchwork", quietly = TRUE)) {
@@ -1556,6 +1865,10 @@ statsplot2Class <- if (requireNamespace('jmvcore'))
                 if (is.null(dep))
                     return('')
 
+                # Get package name dynamically
+                pkg_name <- utils::packageName()
+                if (is.null(pkg_name)) pkg_name <- "ClinicoPath"  # fallback
+
                 # Get arguments using base helper (if available)
                 args <- ''
                 if (!is.null(private$.asArgs)) {
@@ -1564,12 +1877,31 @@ statsplot2Class <- if (requireNamespace('jmvcore'))
                 if (args != '')
                     args <- paste0(',\n    ', args)
 
-                # Get package name dynamically
-                pkg_name <- utils::packageName()
-                if (is.null(pkg_name)) pkg_name <- "ClinicoPath"  # fallback
+                src <- paste0(pkg_name, '::statsplot2(\n    data = data', args, ')')
+                if (isTRUE(tryCatch({ base::parse(text = src); TRUE }, error = function(e) FALSE))) {
+                    return(src)
+                }
 
-                # Build complete function call
-                paste0(pkg_name, '::statsplot2(\n    data = data', args, ')')
+                # Fallback when column names contain spaces, parentheses or non-ASCII
+                # characters that private$.asArgs() emitted unquoted
+                defaults <- list(
+                    dep = NULL, group = NULL, grvar = NULL, subjectID = NULL,
+                    direction = "independent", distribution = "p",
+                    forceContinuous = FALSE, alluvsty = "t1",
+                    showSummary = FALSE, showExplanations = FALSE,
+                    excl = FALSE, sampleLarge = FALSE,
+                    sampleThreshold = 10000, sampleSize = 5000,
+                    seed = 42, originaltheme = FALSE
+                )
+                kv <- character(0)
+                for (nm in names(defaults)) {
+                    val <- self$options[[nm]]
+                    if (!identical(val, defaults[[nm]]) && !is.null(val)) {
+                        kv <- c(kv, paste0(nm, " = ", paste(deparse(val), collapse = "")))
+                    }
+                }
+                args_safe <- if (length(kv) > 0) paste0(",\n    ", paste(kv, collapse = ",\n    ")) else ""
+                paste0(pkg_name, "::statsplot2(\n    data = data", args_safe, ")")
             }
         ) # End of public list
     )

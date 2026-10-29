@@ -154,3 +154,27 @@ options:
     assert 'equalis' in fails and 'optimis' not in fails, fails        # "optimism" is not British
 
 print('round-8 checks: ok')
+
+# visible: jmvcore evaluates only `^\([$A-Za-z]`; `((`, `(!` and `( x` are always visible.
+with tempfile.TemporaryDirectory() as m:
+    write(m, 'jamovi/v.r.yaml', '''items:
+  - name: a
+    visible: ((x || y) && z)
+  - name: b
+    visible: (!x)
+  - name: c
+    visible: ( x)
+  - name: d
+    visible: (z && (x || y))
+  - name: e
+    visible: ($x)
+''')
+    sys.argv = ['release_gate.py', '--root', m]
+    spec = importlib.util.spec_from_file_location('release_gate', GATE)
+    rg = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(rg)
+    rg.check_visible_bang()
+    warns = '\n'.join(rg.WARN)
+    assert 'v.r.yaml:3' in warns and 'v.r.yaml:5' in warns and 'v.r.yaml:7' in warns, warns
+    assert 'v.r.yaml:9' not in warns and 'v.r.yaml:11' not in warns, warns
+print('visible-expression check: ok')

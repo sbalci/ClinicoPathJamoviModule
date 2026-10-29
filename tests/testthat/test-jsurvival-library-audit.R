@@ -243,20 +243,24 @@ test_that("oddsratio validation rejects cleanly on both audited error paths", {
     outcome = factor(character(), levels = c("no", "yes")),
     predictor = numeric()
   )
+  # Both outcome levels are required (outcomeNegativeLevel, added 2026-10-28); with
+  # the negative level unset the analysis shows guidance instead of reaching validation.
   expect_error(
     oddsratio(
       data = empty_data,
       explanatory = "predictor",
       outcome = "outcome",
       outcomeLevel = "yes",
-      predictorLevel = NULL
+      outcomeNegativeLevel = "no",
+      predictorLevel = NULL,
+      predictorNegativeLevel = NULL
     ),
     "No data available for analysis",
     fixed = TRUE
   )
 
   invalid_data <- data.frame(
-    outcome = factor(rep("yes", 20)),
+    outcome = factor(rep("yes", 20), levels = c("no", "yes")),
     predictor = seq_len(20)
   )
   expect_error(
@@ -265,9 +269,11 @@ test_that("oddsratio validation rejects cleanly on both audited error paths", {
       explanatory = "predictor",
       outcome = "outcome",
       outcomeLevel = "yes",
-      predictorLevel = NULL
+      outcomeNegativeLevel = "no",
+      predictorLevel = NULL,
+      predictorNegativeLevel = NULL
     ),
-    "regression. Ensure the outcome variable",
+    "Outcome variable must have at least 2 different values for logistic regression",
     fixed = TRUE
   )
 })
