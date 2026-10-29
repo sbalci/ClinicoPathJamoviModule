@@ -606,4 +606,72 @@ test_that("IR-statsplot2-07: Character column with > 20 unique values triggers t
   )
 })
 
+test_that("LIM-statsplot2-01: 3+ timepoint long-format repeated categorical data with subjectID reshapes across all timepoints for t1 and t2 alluvial diagrams", {
+  d_long_3tp <- data.frame(
+    id   = factor(rep(paste0("P", 1:8), each = 3)),
+    time = factor(
+      rep(c("Baseline", "Week4", "Week12"), times = 8),
+      levels = c("Baseline", "Week4", "Week12")
+    ),
+    resp = factor(c(
+      "PD", "SD", "PR",
+      "PD", "PD", "SD",
+      "SD", "PR", "CR",
+      "SD", "SD", "PR",
+      "PR", "PR", "CR",
+      "PD", "SD", "SD",
+      "SD", "PR", "PR",
+      "CR", "CR", "CR"
+    ), levels = c("PD", "SD", "PR", "CR"))
+  )
+
+  r_t1 <- sp2_run(
+    d_long_3tp,
+    dep = "resp",
+    group = "time",
+    direction = "repeated",
+    subjectID = "id",
+    alluvsty = "t1"
+  )
+  expect_match(r_t1$notices, "across 3 timepoints ('Baseline' -> 'Week4' -> 'Week12')", fixed = TRUE)
+  expect_match(r_t1$notices, "Reshaped 8 complete subjects into wide format across all 3 timepoints", fixed = TRUE)
+  expect_s3_class(r_t1$plot, "ggplot")
+
+  r_t2 <- sp2_run(
+    d_long_3tp,
+    dep = "resp",
+    group = "time",
+    direction = "repeated",
+    subjectID = "id",
+    alluvsty = "t2"
+  )
+  expect_match(r_t2$notices, "across 3 timepoints ('Baseline' -> 'Week4' -> 'Week12')", fixed = TRUE)
+  expect_s3_class(r_t2$plot, "ggplot")
+})
+
+test_that("LIM-statsplot2-02: Split-by (grvar) reports Holm-Bonferroni and BH-FDR multiplicity-adjusted p-values across panels", {
+  skip_if_not(exists("statsplot2_test"), "statsplot2_test dataset not loaded")
+  r_sp <- sp2_run(
+    statsplot2_test,
+    dep = "tumor_reduction",
+    group = "treatment",
+    grvar = "sex",
+    distribution = "p",
+    showSummary = TRUE
+  )
+  raw_p <- vapply(r_sp$stats, function(st) as.numeric(st$sd[["p.value"]][1]), numeric(1))
+  p_holm <- stats::p.adjust(raw_p, method = "holm")
+  p_bh   <- stats::p.adjust(raw_p, method = "BH")
+  fmt_p  <- function(p) if (p < 0.001) "< 0.001" else paste0("= ", formatC(p, format = "f", digits = 3))
+
+  expect_match(r_sp$summary, "Multiple-testing adjustment across 2 split panels (Holm-Bonferroni / BH-FDR)", fixed = TRUE)
+  expect_match(r_sp$notices, "Multi-panel multiplicity adjustment", fixed = TRUE)
+  for (j in seq_along(r_sp$stats)) {
+    expected_Frag <- sprintf("%s (p_Holm %s, p_FDR %s)", r_sp$stats[[j]]$label, fmt_p(p_holm[j]), fmt_p(p_bh[j]))
+    expect_match(r_sp$summary, expected_Frag, fixed = TRUE)
+    expect_match(r_sp$notices, expected_Frag, fixed = TRUE)
+  }
+})
+
+
 

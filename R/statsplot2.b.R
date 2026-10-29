@@ -753,11 +753,40 @@ statsplot2Class <- if (requireNamespace('jmvcore'))
                 sentences_html <- paste(vapply(stats, function(st) {
                     paste0("<p>", private$.sentence(st$sd, analysis_info$dep_var, analysis_info$group_var, st$label, n_unit = n_unit), "</p>")
                 }, ""), collapse = "")
+                mult_html <- ""
+                if (length(stats) >= 2L) {
+                    raw_p <- vapply(stats, function(st) {
+                        if (!is.null(st$sd[["bf10"]]) && any(is.finite(suppressWarnings(as.numeric(st$sd[["bf10"]]))))) {
+                            return(NA_real_)
+                        }
+                        pv <- suppressWarnings(as.numeric(st$sd[["p.value"]][1]))
+                        if (length(pv) == 1L && is.finite(pv)) pv else NA_real_
+                    }, numeric(1))
+                    valid_idx <- which(is.finite(raw_p))
+                    if (length(valid_idx) >= 2L) {
+                        p_holm <- stats::p.adjust(raw_p[valid_idx], method = "holm")
+                        p_bh   <- stats::p.adjust(raw_p[valid_idx], method = "BH")
+                        fmt_p  <- function(p) if (p < 0.001) "< 0.001" else paste0("= ", formatC(p, format = "f", digits = 3))
+                        parts  <- vapply(seq_along(valid_idx), function(j) {
+                            idx <- valid_idx[j]
+                            lbl <- if (!is.null(stats[[idx]]$label) && nzchar(stats[[idx]]$label))
+                                private$.safeHtmlOutput(stats[[idx]]$label)
+                            else
+                                paste0("Panel ", idx)
+                            sprintf("%s (p_Holm %s, p_FDR %s)", lbl, fmt_p(p_holm[j]), fmt_p(p_bh[j]))
+                        }, character(1))
+                        mult_html <- sprintf(
+                            "<p><em>Multiple-testing adjustment across %d split panels (Holm-Bonferroni / BH-FDR): %s.</em></p>",
+                            length(valid_idx),
+                            paste(parts, collapse = "; ")
+                        )
+                    }
+                }
                 omitted_html <- if (length(omitted_panels) > 0) {
                     sprintf("<p><em>Note: Statistics could not be computed for split panel(s) %s (fewer than 2 groups or zero variation within the panel).</em></p>",
                             paste(sQuote(vapply(omitted_panels, private$.safeHtmlOutput, ""), FALSE), collapse = ", "))
                 } else ""
-                box(paste0(sentences_html, omitted_html))
+                box(paste0(sentences_html, mult_html, omitted_html))
             },
 
             .run = function() {
@@ -1026,6 +1055,34 @@ statsplot2Class <- if (requireNamespace('jmvcore'))
                         self$results$summary$setContent(
                             private$.buildSummary(stats, has_test, approach, analysis_info, omitted_panels = .degenerate_panels))
                     }
+                    if (has_test && length(stats) >= 2L && !blocking) {
+                        .raw_p <- vapply(stats, function(st) {
+                            if (!is.null(st$sd[["bf10"]]) && any(is.finite(suppressWarnings(as.numeric(st$sd[["bf10"]]))))) {
+                                return(NA_real_)
+                            }
+                            pv <- suppressWarnings(as.numeric(st$sd[["p.value"]][1]))
+                            if (length(pv) == 1L && is.finite(pv)) pv else NA_real_
+                        }, numeric(1))
+                        .valid_idx <- which(is.finite(.raw_p))
+                        if (length(.valid_idx) >= 2L) {
+                            .p_holm <- stats::p.adjust(.raw_p[.valid_idx], method = "holm")
+                            .p_bh   <- stats::p.adjust(.raw_p[.valid_idx], method = "BH")
+                            .fmt_p  <- function(p) if (p < 0.001) "< 0.001" else paste0("= ", formatC(p, format = "f", digits = 3))
+                            .parts  <- vapply(seq_along(.valid_idx), function(j) {
+                                idx <- .valid_idx[j]
+                                lbl <- if (!is.null(stats[[idx]]$label) && nzchar(stats[[idx]]$label)) stats[[idx]]$label else paste0("Panel ", idx)
+                                sprintf("%s (p_Holm %s, p_FDR %s)", lbl, .fmt_p(.p_holm[j]), .fmt_p(.p_bh[j]))
+                            }, character(1))
+                            .adj_summary <- paste(.parts, collapse = "; ")
+                            private$.addNotice(
+                                'INFO',
+                                'Multi-panel multiplicity adjustment',
+                                glue::glue(
+                                    "Across {length(.valid_idx)} split panels, Holm-Bonferroni and Benjamini-Hochberg FDR adjusted p-values are: {.adj_summary}."
+                                )
+                            )
+                        }
+                    }
 
                     # The alluvial diagrams DRAW missing values as an 'NA' stratum;
                     # every other plot type drops them.
@@ -1237,6 +1294,8 @@ statsplot2Class <- if (requireNamespace('jmvcore'))
                 }
 
                 reshaped_wide <- FALSE
+                tp_cols <- NULL
+                tp_labels <- NULL
                 if (repeated_factor) {
                     if (!is.null(subject_id) && subject_id %in% names(mydata)) {
                         if (subject_id %in% c(analysis_info$dep_var, analysis_info$group_var, analysis_info$grvar)) {
@@ -1248,40 +1307,58 @@ statsplot2Class <- if (requireNamespace('jmvcore'))
                             if (anyDuplicated(mydata_cc[c(subject_id, analysis_info$group_var)]) > 0) {
                                 jmvcore::reject("Repeated categorical analysis in long format requires at most one observation per subject and timepoint.")
                             }
-                            if (length(cond_levels) == 2L) {
-                                d1 <- mydata_cc[mydata_cc[[analysis_info$group_var]] == cond_levels[1], , drop = FALSE]
-                                d2 <- mydata_cc[mydata_cc[[analysis_info$group_var]] == cond_levels[2], , drop = FALSE]
-                                common_ids <- intersect(as.character(d1[[subject_id]]), as.character(d2[[subject_id]]))
+                            if (length(cond_levels) >= 2L) {
+                                d_by_tp <- lapply(cond_levels, function(tl) {
+                                    mydata_cc[mydata_cc[[analysis_info$group_var]] == tl, , drop = FALSE]
+                                })
+                                common_ids <- Reduce(intersect, lapply(d_by_tp, function(dt) as.character(dt[[subject_id]])))
                                 if (length(common_ids) < 2L) {
-                                    jmvcore::reject("Repeated categorical analysis requires at least two complete subjects observed at both timepoints.")
+                                    jmvcore::reject("Repeated categorical analysis requires at least two complete subjects observed across all timepoints.")
                                 }
-                                idx1 <- match(common_ids, as.character(d1[[subject_id]]))
-                                idx2 <- match(common_ids, as.character(d2[[subject_id]]))
                                 dep_lvls <- levels(droplevels(as.factor(mydata_cc[[analysis_info$dep_var]])))
                                 wide_df <- data.frame(
                                     row.names = seq_along(common_ids),
                                     stringsAsFactors = FALSE
                                 )
-                                wide_df[[analysis_info$group_var]] <- factor(as.character(d1[[analysis_info$dep_var]][idx1]), levels = dep_lvls)
-                                wide_df[[analysis_info$dep_var]] <- factor(as.character(d2[[analysis_info$dep_var]][idx2]), levels = dep_lvls)
-                                if (!is.null(analysis_info$grvar) && analysis_info$grvar %in% names(d1)) {
-                                    wide_df[[analysis_info$grvar]] <- droplevels(as.factor(d1[[analysis_info$grvar]][idx1]))
+                                idx_first <- match(common_ids, as.character(d_by_tp[[1]][[subject_id]]))
+                                idx_last  <- match(common_ids, as.character(d_by_tp[[length(cond_levels)]][[subject_id]]))
+                                wide_df[[analysis_info$group_var]] <- factor(as.character(d_by_tp[[1]][[analysis_info$dep_var]][idx_first]), levels = dep_lvls)
+                                wide_df[[analysis_info$dep_var]]   <- factor(as.character(d_by_tp[[length(cond_levels)]][[analysis_info$dep_var]][idx_last]), levels = dep_lvls)
+                                if (!is.null(analysis_info$grvar) && analysis_info$grvar %in% names(d_by_tp[[1]])) {
+                                    wide_df[[analysis_info$grvar]] <- droplevels(as.factor(d_by_tp[[1]][[analysis_info$grvar]][idx_first]))
+                                }
+                                tp_cols <- paste0(".tp_", seq_along(cond_levels))
+                                tp_labels <- cond_levels
+                                for (ti in seq_along(cond_levels)) {
+                                    idx_t <- match(common_ids, as.character(d_by_tp[[ti]][[subject_id]]))
+                                    wide_df[[tp_cols[ti]]] <- factor(as.character(d_by_tp[[ti]][[analysis_info$dep_var]][idx_t]), levels = dep_lvls)
                                 }
                                 total_subj <- length(unique(as.character(mydata[[subject_id]])))
                                 mydata <- wide_df
                                 before_n <- total_subj
                                 after_n <- nrow(mydata)
                                 reshaped_wide <- TRUE
-                                private$.addNotice(
-                                    "WARNING",
-                                    "Long-format repeated categorical data reshaped",
-                                    glue::glue(
-                                        "Detected repeated Subject ID records across '{cond_levels[1]}' and '{cond_levels[2]}'. Reshaped {after_n} complete subjects into wide format (Timepoint 1 = '{cond_levels[1]}', Timepoint 2 = '{cond_levels[2]}') for the alluvial transition diagram."
+                                if (length(cond_levels) == 2L) {
+                                    private$.addNotice(
+                                        "WARNING",
+                                        "Long-format repeated categorical data reshaped",
+                                        glue::glue(
+                                            "Detected repeated Subject ID records across '{cond_levels[1]}' and '{cond_levels[2]}'. Reshaped {after_n} complete subjects into wide format (Timepoint 1 = '{cond_levels[1]}', Timepoint 2 = '{cond_levels[2]}') for the alluvial transition diagram."
+                                        )
                                     )
-                                )
+                                } else {
+                                    .tp_list <- paste(sQuote(cond_levels, FALSE), collapse = " -> ")
+                                    private$.addNotice(
+                                        "WARNING",
+                                        "Long-format repeated categorical data reshaped",
+                                        glue::glue(
+                                            "Detected repeated Subject ID records across {length(cond_levels)} timepoints ({.tp_list}). Reshaped {after_n} complete subjects into wide format across all {length(cond_levels)} timepoints for the alluvial transition diagram."
+                                        )
+                                    )
+                                }
                             } else {
                                 jmvcore::reject(glue::glue(
-                                    "Long-format repeated categorical data with Subject ID currently supports 2 timepoints in '{analysis_info$group_var}' (found {length(cond_levels)}). For wide-format alluvial diagrams, place Timepoint 1 in X-axis and Timepoint 2 in Y-axis with one row per subject."
+                                    "Repeated categorical analysis requires at least 2 timepoints in '{analysis_info$group_var}' (found {length(cond_levels)})."
                                 ))
                             }
                         }
@@ -1336,7 +1413,9 @@ statsplot2Class <- if (requireNamespace('jmvcore'))
                     alluvsty = analysis_info$alluvsty,
                     dropped = before_n - after_n,
                     sampled = sampled_flag,
-                    reshaped_wide = reshaped_wide
+                    reshaped_wide = reshaped_wide,
+                    tp_cols = tp_cols,
+                    tp_labels = tp_labels
                 )
             },
             
@@ -1542,31 +1621,68 @@ statsplot2Class <- if (requireNamespace('jmvcore'))
                     jmvcore::reject("Package 'dplyr' is required for data manipulation but is not installed. Install with: install.packages('dplyr')")
                 }
                 
-                # Create plot data
+                # Checkpoint before expensive data aggregation
+                private$.checkpoint(flush = FALSE)
+
+                if (!is.null(prepared_data$tp_cols) &&
+                    length(prepared_data$tp_cols) >= 3L &&
+                    all(prepared_data$tp_cols %in% names(prepared_data$data))) {
+                    n_subj <- nrow(prepared_data$data)
+                    n_tp   <- length(prepared_data$tp_cols)
+                    tp_lbl <- prepared_data$tp_labels
+                    init_cat <- prepared_data$data[[prepared_data$tp_cols[1]]]
+                    lodes_list <- lapply(seq_len(n_tp), function(ti) {
+                        data.frame(
+                            subject          = factor(seq_len(n_subj)),
+                            timepoint        = factor(rep(tp_lbl[ti], n_subj), levels = tp_lbl),
+                            category         = prepared_data$data[[prepared_data$tp_cols[ti]]],
+                            initial_category = init_cat,
+                            stringsAsFactors = FALSE
+                        )
+                    })
+                    lodes_df <- do.call(rbind, lodes_list)
+                    plot <- ggplot2::ggplot(
+                        data = lodes_df,
+                        ggplot2::aes(
+                            x        = .data$timepoint,
+                            stratum  = .data$category,
+                            alluvium = .data$subject,
+                            fill     = .data$initial_category,
+                            colour   = .data$initial_category
+                        )
+                    ) +
+                        ggalluvial::geom_flow(stat = "alluvium", lode.guidance = "frontback", alpha = 0.7) +
+                        ggalluvial::geom_stratum() +
+                        ggplot2::geom_label(
+                            stat = ggalluvial::StatStratum,
+                            ggplot2::aes(label = ggplot2::after_stat(stratum))
+                        ) +
+                        ggplot2::xlab(prepared_data$group) +
+                        ggplot2::ylab(prepared_data$dep) +
+                        ggplot2::theme_minimal()
+                    return(plot)
+                }
+
+                # Create plot data (2-axis wide alluvial)
                 plotData <- data.frame(
                     gr = prepared_data$data[[prepared_data$group]],
                     dp = prepared_data$data[[prepared_data$dep]]
                 )
                 
-                # Checkpoint before expensive data aggregation
-                private$.checkpoint(flush = FALSE)
-                
                 # Tally the combinations
-                mydata_changes <- plotData %>%
-                    dplyr::group_by(gr, dp) %>%
-                    dplyr::tally()
+                mydata_changes <- dplyr::count(plotData, .data$gr, .data$dp, name = "n")
                 
                 # Create alluvial plot
                 plot <- ggplot2::ggplot(
                     data = mydata_changes,
-                    ggplot2::aes(axis1 = gr, axis2 = dp, y = n)
+                    ggplot2::aes(axis1 = .data$gr, axis2 = .data$dp, y = .data$n)
                 ) +
                     ggplot2::scale_x_discrete(
                         limits = c(prepared_data$group, prepared_data$dep),
                         expand = c(.1, .05)
                     ) +
                     ggplot2::xlab(prepared_data$group) +
-                    ggalluvial::geom_alluvium(ggplot2::aes(fill = gr, colour = gr)) +
+                    ggalluvial::geom_alluvium(ggplot2::aes(fill = .data$gr, colour = .data$gr)) +
                     ggalluvial::geom_stratum() +
                     ggplot2::geom_label(stat = ggalluvial::StatStratum,
                         ggplot2::aes(label = ggplot2::after_stat(stratum))) +
@@ -1582,6 +1698,19 @@ statsplot2Class <- if (requireNamespace('jmvcore'))
                     jmvcore::reject("Package 'easyalluvial' is required for simplified alluvial plots but is not installed. Install with: install.packages('easyalluvial')")
                 }
                 
+                if (!is.null(prepared_data$tp_cols) &&
+                    length(prepared_data$tp_cols) >= 3L &&
+                    all(prepared_data$tp_cols %in% names(prepared_data$data))) {
+                    alluvial_data <- prepared_data$data[, prepared_data$tp_cols, drop = FALSE]
+                    names(alluvial_data) <- make.unique(as.character(prepared_data$tp_labels))
+                    plot <- .quietly(easyalluvial::alluvial_wide(
+                        data = alluvial_data,
+                        max_variables = length(prepared_data$tp_cols),
+                        fill_by = 'first_variable'
+                    ))
+                    return(plot)
+                }
+
                 # Subset to the user-selected group/dep columns (group first, matching the
                 # ggalluvial axis1=group, axis2=dep layout) so the diagram reflects the chosen
                 # variables instead of every column in the data frame.

@@ -55,14 +55,10 @@ Automatic Plot Selection
 \if{html}{\out{<a id="method-statsplot2Class-asSource"></a>}}
 \if{latex}{\out{\hypertarget{method-statsplot2Class-asSource}{}}}
 \subsection{\code{statsplot2Class$asSource()}}{
-  Generate R source code for Statistical Plot analysis
   \subsection{Usage}{
     \if{html}{\out{<div class="r">}}
     \preformatted{statsplot2Class$asSource()}
     \if{html}{\out{</div>}}
-  }
-  \subsection{Returns}{
-    Character string with R syntax for reproducible analysis
   }
 }
 

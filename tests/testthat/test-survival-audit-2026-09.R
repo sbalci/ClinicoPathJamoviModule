@@ -39,6 +39,9 @@ library(testthat)
     setContent = function(x) { rec$content[[nm]] <- paste(x, collapse = " "); invisible(NULL) },
     setNote    = function(key, note) { rec$notes[[key]] <- note; invisible(NULL) },
     addRow     = function(rowKey, values) { rec$rows[[length(rec$rows) + 1L]] <- values; invisible(NULL) },
+    # .footnoteMissingCells() blanks a missing cell and footnotes it.
+    setCell     = function(...) invisible(NULL),
+    addFootnote = function(...) invisible(NULL),
     setState   = function(x) { rec$state <- x; invisible(NULL) },
     getColumn  = function(name) list(setTitle = function(x) invisible(NULL))
   )
@@ -154,7 +157,7 @@ test_that("competing-risk mode surfaces Gray's test as a median-table note", {
   r <- .median_run(e, d, competing = TRUE)
 
   expect_match(r$notes$gray, "Gray's test")
-  expect_match(r$notes$gray, "chi-square = [0-9.]+, df = 1, p = ")
+  expect_match(r$notes$gray, "chi-square = [0-9.]+, df = 1, p [=<] [0-9]")
   expect_match(r$notes$crci, "Confidence intervals")
   expect_length(r$rows, 2)
 })

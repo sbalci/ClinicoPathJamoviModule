@@ -54,8 +54,8 @@ TEST: false
 jjstatsplot: false
 jsurvival: true
 ClinicoPathDescriptives: false
-OncoPath: true
-meddecide: true
+OncoPath: false
+meddecide: false
 ClinicoPath: false
 
 # ========================================

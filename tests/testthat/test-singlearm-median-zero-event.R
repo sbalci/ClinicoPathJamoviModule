@@ -42,12 +42,20 @@ library(testthat)
     addRow     = function(rowKey, values) {
       rec$rows[[length(rec$rows) + 1L]] <- values; invisible(NULL)
     },
+    # .footnoteMissingCells() blanks a missing cell and footnotes it.
+    setCell     = function(...) invisible(NULL),
+    addFootnote = function(...) invisible(NULL),
     getColumn  = function(name) list(setTitle = function(x) invisible(NULL))
   )
   add <- function(kind) function(m) rec$msgs <- c(rec$msgs, paste0(kind, ": ", m))
 
   stub <- new.env(parent = globalenv())
   bind <- function(f) { environment(f) <- stub; f }
+  # singlearm.b.R is sourced on its own; give it the R/utils.R helpers it calls
+  # (.fmt, .footnoteMissingCells, ...), which otherwise resolve only under load_all().
+  u <- new.env(parent = globalenv())
+  suppressWarnings(suppressMessages(sys.source(.msrc("utils.R"), envir = u)))
+  for (nm in ls(u, all.names = TRUE)) assign(nm, get(nm, envir = u), envir = stub)
   stub$. <- function(x, ...) x                     # translation shim
   stub$`%>%` <- magrittr::`%>%`
   stub$self <- list(
