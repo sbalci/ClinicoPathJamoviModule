@@ -768,8 +768,14 @@ checkdataClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
         # Initialize function for setup tasks
         .init = function() {
-            # Set initial visibility states
-            # This runs once when the analysis is created
+            # Rebuild fixed scaffolds for the current selection on every init.
+            for (name in c("missingVals", "outlierMethodSummary", "distribution")) {
+                table <- self$results[[name]]
+                .deleteTableRows(table)
+                for (key in names(table$notes)) table$setNote(key, NULL)
+            }
+            self$results$outliers$setTitle(.("Outlier Detection (Consensus: >=2 methods)"))
+            self$results$outlierMethodSummary$setTitle(.("Outlier Detection Method Summary (Heuristic)"))
 
             # Fixed row structure is built here rather than in .run() so the
             # tables do not appear empty and then visibly restructure on every
@@ -1217,6 +1223,18 @@ checkdataClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         },
 
         .run = function() {
+            # Dynamic rows and rendered content can survive option restoration.
+            for (name in c("outliers", "duplicates", "patterns")) {
+                table <- self$results[[name]]
+                .deleteTableRows(table)
+                for (key in names(table$notes)) table$setNote(key, NULL)
+            }
+            for (name in c("todo", "notices", "noOutliers", "naturalSummary",
+                           "aboutAnalysis", "caveatsAssumptions"))
+                self$results[[name]]$setContent("<div></div>")
+            self$results$qualityText$setContent("")
+            self$results$outlierMethodSummary$setVisible(FALSE)
+
             private$.outlier_transform <- "none"
             private$.outliers_assessed <- FALSE
             private$.outliers_informative_only <- FALSE
@@ -1258,6 +1276,11 @@ checkdataClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             # Enhanced input validation with user guidance
             if (is.null(self$options$var)) {
+                for (name in c("missingVals", "outlierMethodSummary", "distribution")) {
+                    table <- self$results[[name]]
+                    .deleteTableRows(table)
+                    for (key in names(table$notes)) table$setNote(key, NULL)
+                }
                 todo_content <- paste0(
                     "<h3>", .("ClinicoPath Data Quality Assessment"), "</h3>",
                     "<p>", .("<strong>Purpose:</strong> Comprehensive evaluation of data completeness, accuracy, and patterns for clinical research."), "</p>",
@@ -1301,6 +1324,12 @@ checkdataClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # Get variable data with enhanced validation
             variable <- self$data[[self$options$var]]
             var_name <- self$options$var
+
+            # An actual NA factor level is missing even though is.na() on its
+            # integer code is FALSE. Replacement preserves order and attributes;
+            # a literal "NA" label remains an ordinary observed category.
+            if (is.factor(variable) && anyNA(levels(variable)))
+                levels(variable) <- levels(variable)
 
             # Comprehensive data validation. An empty dataset - no rows, or a row
             # filter that excludes every case - arrives here as a zero-length

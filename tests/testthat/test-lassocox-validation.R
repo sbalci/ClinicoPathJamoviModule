@@ -394,3 +394,144 @@ test_that("VAL-lassocox-06: Shipped examples script executes cleanly and vignett
     expect_false(grepl("SurvivalT", doc_txt, fixed = TRUE))
   }
 })
+
+# ==============================================================================
+# 5. Independent Review Regression Tests (IR-lassocox-01..05)
+# ==============================================================================
+
+test_that("IR-lassocox-01: excluded rows with NA survival time do not alter complete-case sample size", {
+  set.seed(123)
+  df1 <- data.frame(
+    time = c(rexp(59, 0.1) + 0.5, NA_real_),
+    status = c(rbinom(59, 1, 0.7), 1L),
+    x1 = rnorm(60),
+    x2 = rnorm(60),
+    const_pred = c(rep(NA_real_, 10), rep(1, 50))
+  )
+  df2 <- df1
+  df2$const_pred[60] <- 2
+  r1 <- suppressWarnings(run_lassocox(
+    data = df1, elapsedtime = "time", outcome = "status",
+    outcomeLevel = "1", censorLevel = "0",
+    explanatory = c("x1", "x2", "const_pred"), random_seed = 42
+  ))
+  r2 <- suppressWarnings(run_lassocox(
+    data = df2, elapsedtime = "time", outcome = "status",
+    outcomeLevel = "1", censorLevel = "0",
+    explanatory = c("x1", "x2", "const_pred"), random_seed = 42
+  ))
+  expect_equal(r1$modelSummary$asDF$value, r2$modelSummary$asDF$value)
+  expect_equal(r1$coefficients$asDF, r2$coefficients$asDF)
+})
+
+test_that("IR-lassocox-02: showRCode script executes cleanly on logical outcome column (both 1/0 and TRUE/FALSE levels)", {
+  set.seed(42)
+  x1 <- rnorm(50)
+  x2 <- rnorm(50)
+  data_lgl <- data.frame(
+    time = rexp(50, 0.1 * exp(1.2 * x1)) + 0.5,
+    status = sample(c(TRUE, FALSE), 50, replace = TRUE),
+    x1 = x1,
+    x2 = x2
+  )
+  for (lvls in list(c("1", "0"), c("TRUE", "FALSE"))) {
+    res <- run_lassocox(
+      data = data_lgl, elapsedtime = "time", outcome = "status",
+      outcomeLevel = lvls[1], censorLevel = lvls[2],
+      explanatory = c("x1", "x2"), lambda = "lambda.min",
+      random_seed = 42, showRCode = TRUE
+    )
+    code <- gsub("^.*<pre[^>]*><code>|</code></pre>.*$", "", res$rCode$content)
+    code <- gsub("&lt;", "<", gsub("&gt;", ">", gsub("&quot;", "\"", gsub("&#39;", "'", code))))
+    code <- gsub("&amp;", "&", code)
+    env <- new.env(parent = globalenv())
+    env$data <- data_lgl
+    expect_no_error(eval(parse(text = code), envir = env))
+    coef_df <- res$coefficients$asDF
+    b_rc <- as.numeric(env$lassocox_fit$coefficients)
+    names(b_rc) <- rownames(env$lassocox_fit$coefficients)
+    expect_equal(coef_df$coefficient, unname(b_rc[coef_df$variable]), tolerance = 1e-12)
+  }
+})
+
+test_that("IR-lassocox-03: lassocox coefficients are invariant to additive location shifts of continuous predictors", {
+  set.seed(20261028)
+  n <- 80L
+  df0 <- data.frame(
+    time = rexp(n, 0.1) + 0.5,
+    status = rbinom(n, 1, 0.7),
+    x1 = rnorm(n, mean = 50, sd = 12),
+    x2 = rnorm(n, mean = 0, sd = 2.5),
+    x3 = rnorm(n, mean = 10, sd = 4)
+  )
+  df0$time <- rexp(n, rate = 0.08 * exp(0.06 * (df0$x1 - 50) - 0.35 * df0$x2)) + 0.2
+  df_shift <- df0
+  df_shift$x1 <- df0$x1 + 500
+  df_shift$x2 <- df0$x2 - 123.45
+
+  r0 <- run_lassocox(df0, elapsedtime = "time", outcome = "status",
+                     outcomeLevel = "1", censorLevel = "0",
+                     explanatory = c("x1", "x2", "x3"),
+                     lambda = "lambda.min", random_seed = 12345)
+  r1 <- run_lassocox(df_shift, elapsedtime = "time", outcome = "status",
+                     outcomeLevel = "1", censorLevel = "0",
+                     explanatory = c("x1", "x2", "x3"),
+                     lambda = "lambda.min", random_seed = 12345)
+  expect_equal(r0$coefficients$asDF$coefficient, r1$coefficients$asDF$coefficient, tolerance = 1e-12)
+})
+
+test_that("IR-lassocox-04: path_plot top-30 filter includes selected large-scale predictors", {
+  set.seed(42)
+  X <- matrix(rnorm(100 * 35), 100, 35)
+  colnames(X) <- c("x_large_unit", paste0("noise_", 1:34))
+  X[, 1] <- X[, 1] * 10000
+  df <- data.frame(
+    time = rexp(100, 0.05 * exp(1.5 * X[, 1] / 10000)) + 0.1,
+    status = rbinom(100, 1, 0.85),
+    X
+  )
+  res <- run_lassocox(
+    data = df, elapsedtime = "time", outcome = "status",
+    outcomeLevel = "1", censorLevel = "0",
+    explanatory = colnames(X), lambda = "lambda.1se",
+    random_seed = 42, cv_plot = FALSE, coef_plot = FALSE,
+    survival_plot = FALSE, path_plot = TRUE
+  )
+  expect_true(all(res$coefficients$asDF$variable %in% unique(res$path_plot$state$paths$column)))
+})
+
+test_that("IR-lassocox-05: suitability checks and factor level drop warning behave consistently", {
+  set.seed(303)
+  X <- matrix(rnorm(250 * 6), nrow = 250, ncol = 6)
+  colnames(X) <- paste0("p", 1:6)
+  df <- data.frame(
+    time = rexp(250, 0.1) + 0.5,
+    status = c(rep(0L, 30), rep(1L, 220)),
+    grade3 = factor(rep(c("G1", "G2", "G3"), length.out = 250)),
+    X
+  )
+  res_fac <- suppressWarnings(run_lassocox(
+    data = df, elapsedtime = "time", outcome = "status",
+    outcomeLevel = "1", censorLevel = "0",
+    explanatory = "grade3", random_seed = 42
+  ))
+  expect_false(grepl("Only one predictor column", res_fac$suitabilityReport$content, fixed = TRUE))
+
+  res_p6 <- run_lassocox(
+    data = df, elapsedtime = "time", outcome = "status",
+    outcomeLevel = "1", censorLevel = "0",
+    explanatory = paste0("p", 1:6), random_seed = 42
+  )
+  expect_false(grepl("Use <strong>Multivariable Survival</strong> in ClinicoPath for standard Cox regression with fewer predictors",
+                     res_p6$suitabilityReport$content, fixed = TRUE))
+
+  df_drop <- df[1:60, ]
+  df_drop$grade <- factor(c(rep("G1", 5), rep("G2", 28), rep("G3", 27)), levels = c("G1", "G2", "G3"))
+  df_drop$p1[1:5] <- NA_real_
+  res_drop <- suppressWarnings(run_lassocox(
+    data = df_drop, elapsedtime = "time", outcome = "status",
+    outcomeLevel = "1", censorLevel = "0",
+    explanatory = c("grade", "p1", "p2"), random_seed = 42
+  ))
+  expect_match(res_drop$todo$content, "lost level\\(s\\) \\(G1\\)")
+})

@@ -9,7 +9,7 @@ children:
     stretchFactor: 1
     children:
       - type: TargetLayoutBox
-        label: Follow-up time
+        label: Follow-up Time
         children:
           - type: VariablesListBox
             name: elapsedtime
@@ -29,7 +29,7 @@ children:
             name: censorLevel
             enable: (outcome)
       - type: TargetLayoutBox
-        label: Candidate predictors
+        label: Candidate Predictors
         children:
           - type: VariablesListBox
             name: explanatory

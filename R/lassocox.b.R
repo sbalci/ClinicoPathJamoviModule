@@ -300,8 +300,11 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             event_level_used <- NULL
             censor_level_used <- NULL
 
-            if (is.factor(outcome_raw) || is.character(outcome_raw)) {
-                outcome_chr <- as.character(outcome_raw)
+            is_lgl_tf <- is.logical(outcome_raw) &&
+                !is.null(self$options$outcomeLevel) &&
+                toupper(as.character(self$options$outcomeLevel)) %in% c("TRUE", "FALSE")
+            if (is.factor(outcome_raw) || is.character(outcome_raw) || is_lgl_tf) {
+                outcome_chr <- if (is_lgl_tf) toupper(as.character(outcome_raw)) else as.character(outcome_raw)
                 observed_levels <- sort(unique(outcome_chr[!is.na(outcome_chr)]))
                 if (length(observed_levels) != 2) {
                     jmvcore::reject(.fmt(.('Outcome variable must have exactly 2 observed values. Found {n} level(s): {levels}. For competing events, construct an explicit binary cause-specific status in which the event of interest is 1 and every non-event observation is 0; do not omit other event types.'),
@@ -315,7 +318,7 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                     jmvcore::reject(.fmt(.("Choose the Event Level: the outcome value that means the event happened. Values found: {levels}. The analysis does not pick one from the level order, because the order does not say which value is the event."),
                         levels = paste(observed_levels, collapse = ", ")))
                 }
-                event_level_used <- as.character(outcome_level_opt)
+                event_level_used <- if (is_lgl_tf) toupper(as.character(outcome_level_opt)) else as.character(outcome_level_opt)
                 if (!(event_level_used %in% observed_levels)) {
                     jmvcore::reject(.fmt(.("Selected event level ('{level}') is not present in observed outcome data."),
                         level = event_level_used))
@@ -331,7 +334,7 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                     }
                     censor_level_used <- remaining[1]
                 } else {
-                    censor_level_used <- as.character(censor_level_opt)
+                    censor_level_used <- if (is_lgl_tf) toupper(as.character(censor_level_opt)) else as.character(censor_level_opt)
                     if (!(censor_level_used %in% observed_levels)) {
                         jmvcore::reject(.fmt(.("Selected censored level ('{level}') is not present in observed outcome data."),
                             level = censor_level_used))
@@ -403,9 +406,14 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 }
             }
 
-            # Remove constant explanatory variables instead of failing hard
+            # Remove constant explanatory variables instead of failing hard.
+            # Evaluate constancy only on rows with valid time and outcome status so
+            # predictor values on already-excluded incomplete-outcome rows cannot alter
+            # complete-case listwise deletion.
+            valid_outcome <- !is.na(time) & !is.na(status)
             constant_vars <- sapply(predictors, function(x) {
-                length(unique(x[!is.na(x)])) <= 1
+                vals <- x[valid_outcome & !is.na(x)]
+                length(unique(vals)) <= 1
             })
             constant_var_names <- names(predictors)[constant_vars]
             if (any(constant_vars)) {
@@ -481,10 +489,21 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             # the jmvcore::reject() messages below as "Error creating design matrix: ...".
                 for (var_name in factor_predictors) {
                     x <- predictors_cc[[var_name]]
+                    orig_x <- predictors[[var_name]][valid_outcome]
+                    orig_lev <- if (is.factor(orig_x)) levels(droplevels(orig_x)) else sort(unique(orig_x[!is.na(orig_x)]))
                     lev <- if (is.factor(x)) levels(droplevels(x)) else sort(unique(x))
                     if (length(lev) < 2) {
                         cc_constant_factors <- c(cc_constant_factors, var_name)
                         next
+                    }
+                    dropped_lev <- setdiff(orig_lev, lev)
+                    if (length(dropped_lev) > 0) {
+                        warning(.fmt(
+                            .("Factor '{var}' lost level(s) ({dropped}) after complete-case filtering; reference level is '{ref}'."),
+                            var = var_name,
+                            dropped = paste(dropped_lev, collapse = ", "),
+                            ref = lev[1]
+                        ))
                     }
                     factor_levels[[var_name]] <- lev
                     predictors_cc[[var_name]] <- factor(as.character(x), levels = lev)
@@ -711,8 +730,14 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 }
             }, add = TRUE)
             set.seed(seed_value)
+            # Center design columns before calling glmnet::coxnet so coordinate descent
+            # is invariant to additive location shifts on continuous predictors.
+            # Because the Cox partial likelihood has no intercept, subtracting column
+            # means cancels out of every fold's partial likelihood and leaves per-fold
+            # SDs and original-unit slope coefficients unchanged.
+            x_fit <- sweep(data$X, 2, colMeans(data$X), "-")
             cv_args <- list(
-                x = data$X,
+                x = x_fit,
                 y = y,
                 family = "cox", cox.ties = "breslow",
                 alpha = 1,  # Lasso (L1) penalty
@@ -931,7 +956,8 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 "  predictors[] <- lapply(predictors, function(x) if (is.factor(x) && anyNA(levels(x))) factor(as.character(x), levels = levels(x)[!is.na(levels(x))], ordered = is.ordered(x)) else x)",
                 "  time_col <- data[[time_name]]",
                 "  time <- if (!is.null(attr(time_col, 'values'))) attr(time_col, 'values')[as.integer(time_col)] else if (is.factor(time_col)) as.numeric(as.character(time_col)) else as.numeric(time_col)",
-                "  outcome <- as.character(data[[outcome_name]])",
+                "  outcome_col <- data[[outcome_name]]",
+                "  outcome <- if (is.logical(outcome_col) && all(c(event_level, censor_level) %in% c('0', '1'))) as.character(as.integer(outcome_col)) else if (is.logical(outcome_col)) toupper(as.character(outcome_col)) else as.character(outcome_col)",
                 "  stopifnot(all(is.na(outcome) | outcome %in% c(event_level, censor_level)))",
                 "  status <- ifelse(is.na(outcome), NA_integer_, as.integer(outcome == event_level))",
                 "  complete <- complete.cases(time, status, predictors)",
@@ -973,7 +999,8 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 "  foldid[cens_idx] <- sample(rep(seq_len(nfolds), length.out = length(cens_idx)))",
                 paste0("  set.seed(", results$seed_used, ")"),
                 "  y <- survival::Surv(time, status)",
-                "  cv_fit <- glmnet::cv.glmnet(X, y, family = 'cox', cox.ties = 'breslow',",
+                "  X_fit <- sweep(X, 2, colMeans(X), '-')",
+                "  cv_fit <- glmnet::cv.glmnet(X_fit, y, family = 'cox', cox.ties = 'breslow',",
                 paste0("    alpha = 1, standardize = ", literal(isTRUE(self$options$standardize)),
                     ", foldid = foldid, parallel = FALSE)"),
                 paste0("  lambda_selected <- cv_fit[[", literal(results$lambda_rule_used), "]]"),
@@ -1294,7 +1321,11 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             # to avoid protobuf serialization errors with function references
             if (self$options$path_plot) {
                 beta <- results$cv_fit$glmnet.fit$beta
-                path_order <- order(Matrix::rowSums(abs(beta)), decreasing = TRUE)
+                col_sd <- apply(results$data$X, 2, stats::sd)
+                col_sd[!is.finite(col_sd) | col_sd <= 0] <- 1
+                std_path_sum <- as.numeric(Matrix::rowSums(abs(beta))) * col_sd
+                is_sel <- seq_len(nrow(beta)) %in% results$selected_vars
+                path_order <- order(is_sel, std_path_sum, decreasing = TRUE)
                 shown <- head(path_order, 30L)
                 path_beta <- as.matrix(beta[shown, , drop = FALSE])
                 path_beta[, results$cv_fit$glmnet.fit$df == 0] <- 0
@@ -1558,9 +1589,9 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 )
             } else if (p <= 10 && epv >= 20) {
                 checks$regularization <- list(
-                    color = "yellow", label = .("Regularization Need"),
+                    color = "green", label = .("Regularization Need"),
                     value = sprintf("p=%d, EPV=%.0f", p, epv),
-                    detail = .("Moderate dimensionality. Consider standard Cox regression (Multivariable Survival in ClinicoPath) as an alternative.")
+                    detail = .("Moderate dimensionality with ample events. LASSO is valid, and standard Cox regression (Multivariable Survival in ClinicoPath) may also be considered.")
                 )
             } else {
                 checks$regularization <- list(
@@ -1667,6 +1698,12 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                             detail = paste0(.("Near-perfect collinearity detected. Remove redundant variables before analysis."), pair_text)
                         )
                     }
+                } else if (ncol(data$X) >= 2) {
+                    checks$collinearity <- list(
+                        color = "green", label = .("Multicollinearity"),
+                        value = .("N/A (single factor)"),
+                        detail = .("Only one categorical predictor supplied (represented by multiple mutually exclusive indicator columns); between-predictor collinearity is not applicable.")
+                    )
                 } else {
                     checks$collinearity <- list(
                         color = "green", label = .("Multicollinearity"),
