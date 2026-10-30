@@ -5,6 +5,23 @@
 #   3. TTP demanded the outcome's Event Level, which it never reads.
 #   4. The distribution plot ordered its bars alphabetically, not by code.
 
+# Resolves the analysis from whatever namespace the tests run in (the umbrella
+# under load_all(), jsurvival under test_file(package = "jsurvival")), unlike
+# helper-outcomeorganizer.R, which looks only for ClinicoPath and skips otherwise.
+.oo_obj <- function(data, ...) {
+    Opt <- get0("outcomeorganizerOptions", inherits = TRUE)
+    Cls <- get0("outcomeorganizerClass", inherits = TRUE)
+    if (is.null(Opt) || is.null(Cls))
+        testthat::skip("outcomeorganizer classes are not reachable from the test environment")
+    args <- list(...)
+    for (lv in c("outcomeLevel", "recurrenceLevel", "dod", "dooc", "awd", "awod"))
+        if (!lv %in% names(args)) args[lv] <- list(NULL)
+    a <- Cls$new(options = do.call(Opt$new, args), data = data)
+    a$init()
+    suppressWarnings(try(a$run(), silent = TRUE))
+    a
+}
+
 .oo_text <- function(x) {
     h <- paste(as.character(x), collapse = " ")
     h <- gsub("<[^>]+>", " ", h)
@@ -23,7 +40,7 @@
 }
 
 testthat::test_that("single-event OS names the levels in code 1 and code 0 (other-cause deaths are coded 0)", {
-    a <- run_outcomeorganizer_obj(.oo_four(), outcome = "o4", outcomeLevel = "DOD",
+    a <- .oo_obj(.oo_four(), outcome = "o4", outcomeLevel = "DOD",
                                   analysistype = "os", showNaturalSummary = TRUE)
     s <- .oo_text(a$results$summary$content)
     testthat::expect_true(nzchar(s))
@@ -39,7 +56,7 @@ testthat::test_that("single-event OS names the levels in code 1 and code 0 (othe
 })
 
 testthat::test_that("RFS text does not call code 1 'death' or code 0 'event-free' beyond the chosen levels", {
-    a <- run_outcomeorganizer_obj(.oo_four(), outcome = "o4", outcomeLevel = "DOD",
+    a <- .oo_obj(.oo_four(), outcome = "o4", outcomeLevel = "DOD",
                                   recurrence = "rec", recurrenceLevel = "Yes",
                                   analysistype = "rfs", showNaturalSummary = TRUE)
     s <- .oo_text(a$results$summary$content)
@@ -52,7 +69,7 @@ testthat::test_that("RFS text does not call code 1 'death' or code 0 'event-free
 
 testthat::test_that("no empty brackets when a level is not set", {
     # numeric 0/1 outcome, no Event Level needed
-    a <- run_outcomeorganizer_obj(.oo_four(), outcome = "n01", analysistype = "os")
+    a <- .oo_obj(.oo_four(), outcome = "n01", analysistype = "os")
     s <- .oo_text(a$results$summary$content)
     testthat::expect_true(nzchar(s))
     testthat::expect_false(grepl("()", s, fixed = TRUE))
@@ -62,7 +79,7 @@ testthat::test_that("no empty brackets when a level is not set", {
     d <- .oo_four()
     d <- d[d$o4 != "AWD", ]
     d$o4 <- droplevels(d$o4)
-    b <- run_outcomeorganizer_obj(d, outcome = "o4", multievent = TRUE, analysistype = "os",
+    b <- .oo_obj(d, outcome = "o4", multievent = TRUE, analysistype = "os",
                                   dod = "DOD", dooc = "DOOC", awod = "AWOD")
     s2 <- .oo_text(b$results$summary$content)
     testthat::expect_true(nzchar(s2))
@@ -72,7 +89,7 @@ testthat::test_that("no empty brackets when a level is not set", {
 
 testthat::test_that("TTP runs without the outcome Event Level and codes from the recurrence variable", {
     d <- .oo_four()
-    a <- run_outcomeorganizer_obj(d, outcome = "vit", recurrence = "rec",
+    a <- .oo_obj(d, outcome = "vit", recurrence = "rec",
                                   recurrenceLevel = "Yes", analysistype = "ttp")
     rc <- a$.__enclos_env__$private$.eventRecode
     testthat::expect_false(is.null(rc))
@@ -84,21 +101,21 @@ testthat::test_that("TTP runs without the outcome Event Level and codes from the
     testthat::expect_match(s, "No progression ('No'), including deaths: coded as 0", fixed = TRUE)
 
     # Same status as when an (unused) outcome Event Level is supplied.
-    b <- run_outcomeorganizer_obj(d, outcome = "vit", outcomeLevel = "Dead", recurrence = "rec",
+    b <- .oo_obj(d, outcome = "vit", outcomeLevel = "Dead", recurrence = "rec",
                                   recurrenceLevel = "Yes", analysistype = "ttp")
     testthat::expect_equal(b$.__enclos_env__$private$.eventRecode$status, rc$status)
 
     # A Censored/Event/Competing outcome must not leave competing-risk export labels on a TTP status.
     d$cr <- factor(sample(c("Censored", "Event", "Competing"), nrow(d), TRUE),
                    levels = c("Censored", "Event", "Competing"))
-    h <- run_outcomeorganizer_obj(d, outcome = "cr", recurrence = "rec",
+    h <- .oo_obj(d, outcome = "cr", recurrence = "rec",
                                   recurrenceLevel = "Yes", analysistype = "ttp")
     testthat::expect_false(is.null(h$.__enclos_env__$private$.eventRecode))
     testthat::expect_null(h$.__enclos_env__$private$.causeFactor)
 })
 
 testthat::test_that("distribution plot bars follow code order, not alphabetical labels", {
-    a <- run_outcomeorganizer_obj(.oo_four(), outcome = "o4", multievent = TRUE,
+    a <- .oo_obj(.oo_four(), outcome = "o4", multievent = TRUE,
                                   analysistype = "multistate", visualization = TRUE,
                                   dod = "DOD", dooc = "DOOC", awd = "AWD", awod = "AWOD")
     img <- a$results$outcomeViz

@@ -476,8 +476,8 @@ test_that("a two-digit-year column is no longer read as ymd", {
     # Was: the detector broke ties by candidate order and `ymd` was first, so any
     # DD/MM/YY column with years <= 2031 was read as yy-mm-dd -- the DAY became the
     # year. Measured before the fix on this exact fixture: mean 3775 days against a
-    # true 493. Ties are now broken by which reading spans the narrowest range of
-    # years, because a cohort spans a few years and a day-of-month spans thirty.
+    # true 493. Tied readings whose years span more than 20 are now demoted,
+    # because a cohort spans a few years and a day-of-month spans thirty.
     set.seed(3)
     s <- as.Date("2018-01-05") + sample(0:300, 30, TRUE)
     e <- s + sample(300:700, 30, TRUE)

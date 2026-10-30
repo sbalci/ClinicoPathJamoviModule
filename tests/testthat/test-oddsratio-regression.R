@@ -737,7 +737,10 @@ test_that("N10: the plot state carries no dead payload", {
     expect_setequal(names(res$plot$state),
                     c("plotData", "formulaDependent", "formulaExplanatory",
                       "originalNames", "originalOutcomeName",
-                      "originalExplanatoryNames"))
+                      "originalExplanatoryNames",
+                      # read by .plot(): rows to omit (not estimable) and
+                      # the CI method the table used
+                      "excludedFitIds", "excludedLabels", "confintType"))
 })
 
 test_that("N11: the nomogram's axes carry the user's variable names, live and after reload", {

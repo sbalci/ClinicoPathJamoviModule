@@ -4010,13 +4010,12 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                         "support",
                         .("RMST time horizon must be a non-negative finite number (use 0 for the default 75th percentile horizon).")
                     )
-                    if (is.null(cutoffdata)) {
-                        private$.addHtmlMessage(
-                            "error",
-                            .("Invalid RMST horizon"),
-                            .("RMST time horizon must be a non-negative finite number (use 0 for the default 75th percentile horizon).")
-                        )
-                    }
+                    # One RMST pass per run now (see .run()), so report on whichever pass runs.
+                    private$.addHtmlMessage(
+                        "error",
+                        .("Invalid RMST horizon"),
+                        .("RMST time horizon must be a non-negative finite number (use 0 for the default 75th percentile horizon).")
+                    )
                     return()
                 }
                 if (!is.null(raw_tau) && raw_tau > 0) {

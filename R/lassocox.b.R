@@ -1850,14 +1850,14 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                     if (global_p >= 0.05) {
                         checks$ph_assumption <- list(
                             color = "green", label = .("Proportional Hazards"),
-                            value = .fmt(.("Selected-refit test {p}"), p = .pValueText(global_p)),
+                            value = .fmt(.("Selected-refit test {p}"), p = htmltools::htmlEscape(.pValueText(global_p))),
                             detail = .("No evidence of non-proportional hazards in an exploratory unpenalized refit of the selected encoded columns. Limited power and post-selection use mean that this does not prove the assumption.")
                         )
                     } else {
                         checks$ph_assumption <- list(
                             color = if (global_p < 0.01) "red" else "yellow",
                             label = .("Proportional Hazards"),
-                            value = .fmt(.("Selected-refit test {p}"), p = .pValueText(global_p)),
+                            value = .fmt(.("Selected-refit test {p}"), p = htmltools::htmlEscape(.pValueText(global_p))),
                             detail = .("The exploratory selected-variable refit shows evidence of non-proportional hazards. The Cox effect estimates and selection may be misspecified; investigate time-varying effects or a prespecified alternative model.")
                         )
                     }

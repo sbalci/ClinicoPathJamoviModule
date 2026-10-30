@@ -23,10 +23,10 @@ test_that("PH check prints a small p as 'p < 0.001', never 'p = 0.000'", {
     sim <- data.frame(time = pmin(t1, cen), st = factor(ifelse(t1 <= cen, "D", "A")), x1 = x1, x2 = x2, x3 = x3)
     a <- lassocox_rf_run(sim, elapsedtime = "time", outcome = "st", outcomeLevel = "D", censorLevel = "A",
         explanatory = c("x1", "x2", "x3"), lambda = "lambda.min", random_seed = 42)
-    txt <- lassocox_rf_text(a$results$suitabilityReport$content)
-    expect_true(nzchar(txt))
-    expect_match(txt, "Selected-refit test p < 0.001", fixed = TRUE)
-    expect_false(grepl("p = 0.000", txt, fixed = TRUE))
+    html <- a$results$suitabilityReport$content
+    expect_true(nzchar(html))
+    expect_match(html, "Selected-refit test p &lt; 0.001", fixed = TRUE)  # escaped inside the HTML cell
+    expect_false(grepl("p = 0.000", html, fixed = TRUE))
 })
 
 test_that("factor indicators are labelled 'variable: level (vs reference)'; numbers keyed by design column", {
@@ -67,17 +67,19 @@ test_that("factor indicators are labelled 'variable: level (vs reference)'; numb
 
 test_that("'standard Cox may suffice' is advice, not a yellow verdict", {
     # p = 8, EPV >= 20, uncorrelated, PH holds: the configuration that used to be the
-    # only route into the regularization-yellow special case.
+    # only route into the regularization-yellow special case. That branch was already
+    # unreachable when it was deleted, so this guards against its return; it cannot
+    # fail on the build before the deletion.
     set.seed(11); n <- 420
     X <- matrix(rnorm(n * 8), n, 8, dimnames = list(NULL, paste0("v", 1:8)))
     d <- as.data.frame(X)
-    tt <- rexp(n, 0.1 * exp(0.4 * d$v1)); cc <- rexp(n, 0.1)
+    tt <- rexp(n, 0.1 * exp(0.8 * d$v1)); cc <- rexp(n, 0.1)
     d$time <- pmin(tt, cc) + 0.01; d$status <- factor(ifelse(tt <= cc, "Dead", "Alive"))
     a <- lassocox_rf_run(d, elapsedtime = "time", outcome = "status", outcomeLevel = "Dead",
-        censorLevel = "Alive", explanatory = paste0("v", 1:8), random_seed = 42)
+        censorLevel = "Alive", explanatory = paste0("v", 1:8), lambda = "lambda.min", random_seed = 42)
     html <- a$results$suitabilityReport$content
     expect_true(nzchar(html))
     expect_false(grepl("standard Cox may also be appropriate", html, fixed = TRUE))
     expect_false(grepl("Use <strong>Multivariable Survival</strong> in ClinicoPath for standard Cox regression with fewer predictors", html, fixed = TRUE))
-    expect_match(lassocox_rf_text(html), "Regularization Need", fixed = TRUE)
+    expect_match(lassocox_rf_text(html), "Overall: No concern was identified by these limited checks", fixed = TRUE)
 })
