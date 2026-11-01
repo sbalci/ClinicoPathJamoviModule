@@ -148,9 +148,16 @@ test_that("C01-C22: modelSummary, coefficients, performance, variableImportance,
   foldid[ev] <- sample(rep(1:5, length.out = length(ev)))
   foldid[ce] <- sample(rep(1:5, length.out = length(ce)))
   cv_fit <- glmnet::cv.glmnet(X, y, family = "cox", cox.ties = "breslow", alpha = 1, foldid = foldid, standardize = TRUE)
-  beta <- as.numeric(coef(cv_fit, s = "lambda.min"))
-  names(beta) <- colnames(X)
-  sel <- which(abs(beta) > 1e-8)
+  reference_beta <- as.numeric(coef(cv_fit, s = "lambda.min"))
+  names(reference_beta) <- colnames(X)
+  # Test the module's returned estimates against the independent likelihood, not
+  # just a separately fitted glmnet reference. Restore zero entries omitted by the table.
+  beta <- setNames(numeric(ncol(X)), colnames(X))
+  coef_df <- res$coefficients$asDF
+  beta[coef_df$variable] <- coef_df$coefficient
+  expect_equal(beta, reference_beta, tolerance = 1e-12)
+  sel <- which(beta != 0)
+  expect_true(length(sel) > 0)
 
   # KKT stationarity check against pure base-R Breslow gradient
   xm <- colMeans(X)
@@ -158,6 +165,7 @@ test_that("C01-C22: modelSummary, coefficients, performance, variableImportance,
   b_res <- breslow_loglik_grad_hess(beta, X, time, status)
   scaled_grad <- (b_res$grad / n) / wj
   expect_lt(max(abs(scaled_grad[sel] - cv_fit$lambda.min * sign(beta[sel]))), 1e-4)
+  expect_true(all(abs(scaled_grad[-sel]) <= cv_fit$lambda.min + 1e-4))
 
   # Compare against independent ncvreg::ncvsurv when installed
   if (requireNamespace("ncvreg", quietly = TRUE)) {
@@ -393,4 +401,99 @@ test_that("VAL-lassocox-06: Shipped examples script executes cleanly and vignett
     doc_txt <- paste(readLines(doc_file, warn = FALSE), collapse = "\n")
     expect_false(grepl("SurvivalT", doc_txt, fixed = TRUE))
   }
+})
+
+# Focused follow-up: inspect the real backend inputs and outputs, not a retyped fit.
+validation_backend <- function(d, ...) {
+  args <- modifyList(list(elapsedtime = "time", outcome = "status",
+    outcomeLevel = "Dead", censorLevel = "Alive", explanatory = c("x", "grade"),
+    nfolds = 5, random_seed = 101, lambda = "lambda.min",
+    cv_plot = FALSE, coef_plot = FALSE, survival_plot = FALSE), list(...))
+  lassocoxClass$new(options = do.call(lassocoxOptions$new, args), data = d)
+}
+validation_data <- function() {
+  withr::local_seed(20261101)
+  n <- 90L
+  x <- rnorm(n)
+  data.frame(time = rexp(n, exp(.8 * x)) + .01,
+    status = factor(rep(c("Dead", "Dead", "Alive"), 30), levels = c("Alive", "Dead")),
+    x = x, grade = ordered(rep(c("G1", "G2", "G3"), 30)))
+}
+
+test_that("FOLLOWUP: explicit NA factors exclude exact rows and preserve treatment coding", {
+  d <- validation_data()
+  d$grade[1] <- NA
+  d$grade <- addNA(d$grade)
+  d$x[2] <- NA
+  d$time[3] <- NA
+  d$status[4] <- NA
+  a <- validation_backend(d)
+  clean <- suppressWarnings(a$.__enclos_env__$private$.cleanData())
+  rows <- 5:90
+  expect_identical(clean$complete_cases, rows)
+  expect_equal(clean$excluded_rows, 4)
+  expect_equal(clean$n_events, sum(as.character(d$status[rows]) == "Dead"))
+  expect_equal(clean$status, as.numeric(as.character(d$status[rows]) == "Dead"))
+  expected <- cbind(d$x[rows], as.numeric(as.character(d$grade[rows]) == "G2"),
+    as.numeric(as.character(d$grade[rows]) == "G3"))
+  expect_equal(unname(clean$X), expected)
+  expect_equal(clean$encoding$reference, c("", "G1", "G1"))
+  expect_equal(clean$encoding$level, c("", "G2", "G3"))
+  expect_equal(clean$encoding$coding, c("numeric", "ordered_treatment", "ordered_treatment"))
+  # Reordering outcome levels must not invert the explicitly selected event.
+  d$status <- factor(as.character(d$status), levels = c("Dead", "Alive"))
+  other <- validation_backend(d)
+  recoded <- suppressWarnings(other$.__enclos_env__$private$.cleanData())
+  expect_identical(recoded$status, clean$status)
+  expect_equal(recoded$X, clean$X)
+  d$status <- ifelse(is.na(d$status), NA_real_, ifelse(d$status == "Dead", 1, 2))
+  numeric_a <- validation_backend(d, outcomeLevel = "1", censorLevel = "2")
+  numeric_clean <- suppressWarnings(numeric_a$.__enclos_env__$private$.cleanData())
+  expect_identical(numeric_clean$status, clean$status)
+})
+
+test_that("FOLLOWUP: seeded backend folds reproduce, stratify, and restore RNG state", {
+  d <- validation_data()
+  a <- validation_backend(d)
+  pr <- a$.__enclos_env__$private
+  clean <- suppressWarnings(pr$.cleanData())
+  withr::local_seed(2026)
+  before <- .Random.seed
+  fit <- suppressWarnings(pr$.fitModel(clean))
+  expect_identical(.Random.seed, before)
+  again <- suppressWarnings(pr$.fitModel(clean))
+  expect_identical(again$foldid, fit$foldid)
+  expect_identical(again$lambda_optimal, fit$lambda_optimal)
+  expect_equal(again$coef_matrix, fit$coef_matrix, tolerance = 0)
+  counts <- table(fit$foldid, clean$status)
+  expect_true(all(counts > 0))
+  expect_true(all(apply(counts, 2, function(x) diff(range(x))) <= 1))
+  changed <- validation_backend(d, random_seed = 102)
+  changed_fit <- suppressWarnings(changed$.__enclos_env__$private$.fitModel(clean))
+  expect_false(identical(changed_fit$foldid, fit$foldid))
+  # The analysis must not leave a new global RNG state when none existed.
+  rm(".Random.seed", envir = .GlobalEnv)
+  invisible(suppressWarnings(pr$.fitModel(clean)))
+  expect_false(exists(".Random.seed", envir = .GlobalEnv, inherits = FALSE))
+})
+
+test_that("FOLLOWUP: performance matches hand-counted comparable pairs and risk orientation", {
+  pr <- validation_backend(validation_data())$.__enclos_env__$private
+  cases <- list(
+    list(t = c(1,2,3), s = c(1,1,0), r = c(3,2,1), c = 1),
+    list(t = c(1,2,3), s = c(1,1,0), r = c(1,2,3), c = 0),
+    list(t = c(1,2,3), s = c(1,1,0), r = c(2,2,1), c = 5/6),
+    list(t = c(1,1,2), s = c(1,1,0), r = c(3,1,2), c = 1/2),
+    # A subject censored at an event time remains in that event's risk set.
+    list(t = c(1,1,2), s = c(1,0,0), r = c(3,1,2), c = 1),
+    list(t = c(1,2,3), s = c(1,1,0), r = c(0,0,0), c = 1/2))
+  for (case in cases) {
+    y <- survival::Surv(case$t, case$s)
+    metric <- pr$.calculatePerformanceMetrics(y, case$r, NULL)
+    expect_equal(metric$cindex, case$c, tolerance = 1e-12)
+    reverse <- pr$.calculatePerformanceMetrics(y, -case$r, NULL)
+    expect_equal(metric$cindex + reverse$cindex, 1, tolerance = 1e-12)
+  }
+  no_pairs <- pr$.calculatePerformanceMetrics(survival::Surv(c(1,1), c(1,1)), c(2,1), NULL)
+  expect_true(is.na(no_pairs$cindex))
 })
