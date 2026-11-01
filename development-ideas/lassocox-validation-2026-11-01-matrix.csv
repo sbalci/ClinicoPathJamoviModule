@@ -1,0 +1,13 @@
+"file","test","nb","failed","skipped","error","warning","passed"
+"test-lassocox-validation.R","C01-C22: modelSummary, coefficients, performance, variableImportance, modelComparison, encoding, and reproducibility match independent oracles",16,0,FALSE,FALSE,0,16
+"test-lassocox-validation.R","C13 & C15: Time rescaling invariance and predictor scaling equivariance under standardize=TRUE",3,0,FALSE,FALSE,0,3
+"test-lassocox-validation.R","C23: Exported R code executes in clean environment and reproduces fit on standard names",1,0,FALSE,FALSE,0,1
+"test-lassocox-validation.R","VAL-lassocox-01: suitabilityReport Multicollinearity Check 5 must not list masked within-factor dummy pairs with fabricated r=0.00 or report Max |r|=0.00 for a single factor",2,0,FALSE,FALSE,0,2
+"test-lassocox-validation.R","VAL-lassocox-02: .buildRCode matches .stripBackticks() on backticked predictor names and handles jamovi values-attributed time columns",3,0,FALSE,FALSE,0,3
+"test-lassocox-validation.R","VAL-lassocox-03: .makeBinaryRiskGroups splits two distinct risk score values even when median equals maximum risk score",3,0,FALSE,FALSE,0,3
+"test-lassocox-validation.R","VAL-lassocox-04: .cleanData handles factors with explicit NA level (addNA) and factors becoming constant in complete cases",3,0,FALSE,FALSE,0,3
+"test-lassocox-validation.R","VAL-lassocox-05: Regularization Need status is monotone in EPV and coefficients$importance matches variableImportance$importance_score precision",3,0,FALSE,FALSE,0,3
+"test-lassocox-validation.R","VAL-lassocox-06: Shipped examples script executes cleanly and vignette/doc metadata align with jamovi/lassocox.a.yaml",8,0,FALSE,FALSE,0,8
+"test-lassocox-validation.R","FOLLOWUP: explicit NA factors exclude exact rows and preserve treatment coding",11,0,FALSE,FALSE,0,11
+"test-lassocox-validation.R","FOLLOWUP: seeded backend folds reproduce, stratify, and restore RNG state",8,0,FALSE,FALSE,0,8
+"test-lassocox-validation.R","FOLLOWUP: performance matches hand-counted comparable pairs and risk orientation",13,0,FALSE,FALSE,0,13
