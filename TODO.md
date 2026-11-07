@@ -1,3 +1,35 @@
+# meddecide 1.1.3 pre-release review — fixes applied, follow-ups (2026-11-07; uncommitted)
+
+Scope: delta 403e034..45e7bc8 (~4,100 changed lines in 15 analyses), 4 oracle reviewers + 1 docs reviewer.
+No S1. Fixed: S2 decision narrative vs Youden notice (`.youdenRunCI`, band "indistinct"); S2 agreement
+positive-category matching under the default path; S3 wording in decision (LR reason, NPV "100.0%"),
+decisioncalculator, sequentialtests, agreement (Wilson n, PSA verdict, Gwet SE 0), psychopdaROC (DeLong note
+for AUC < 0.5, matrix note erased by .clearTables, Inf matrix, empty subgroup scaffold), decisioncurve
+(pointwise band), lassologistic (collinearity), decisioncompare (box names, empty class). Regression file:
+`tests/testthat/test-meddecide-release-review-2026-11-07.R` (each block fails on HEAD). Turkish for 22 new
+msgids appended to the umbrella tr.po (catalog lags; do not i18nUpdate the umbrella).
+
+- [ ] User decision: AGPL `pander` ships transitively via `epiR` (decision, decisioncalculator,
+      decisioncompare call only `epiR::epi.tests`). Ask the jamovi team, or replace epi.tests with
+      `binom.test` (identical Clopper-Pearson) + the existing log-LR helpers and drop epiR.
+- [ ] agreement S4: "Hierarchical kappa" without a cluster variable raises five identical WARNINGs
+      (`.hierarchicalBlankNote`), incl. tables not requested; one notice would do.
+- [ ] agreement S4 (UNVERIFIED in GUI): sample-size table integer rows print 74.00 / 2.00; metric row puts ""
+      into a number column.
+- [ ] psychopdaROC S4: `metric`/`break_ties` stay enabled for oc_youden_kernel/normal (no effect on the cut);
+      `missed_target_` note key uses make.names (A B vs A.B collide).
+- [ ] enhancedROC S4: min Se/Sp enabled when Youden optimization is off (WARNING already discloses);
+      normalized pAUC blank below the diagonal with only an R warning; "Unit of observation" default shown
+      without "(default setting)"; preset labels in notices differ from the option titles.
+- [ ] decisioncompare S4: originalCrossTab drops missing test results silently (useNA or footnote);
+      diffTable rows for a non-computable pair are empty with no text; cTable columns "Gold Positive/Negative"
+      do not name the levels.
+- [ ] decisioncurve S4: benefit range touching the analysed window edge is not flagged; "analysed"/"analyzed"
+      mixed in notices.  lassologistic S4: "Events per variable" label when non-events are the smaller class.
+- [ ] Turkish coverage: 6,382 of ~7,900 msgids translated (81%); English fallback for the rest.
+- [ ] R wrapper: `agreement(data = df, vars = v)` with `v` a character vector in a variable fails with
+      "invalid 'row.names' length" (generic wrapper NSE; literal c(...) works). Not traced.
+
 # meddecide 1.1.1 independent review — fixes applied, follow-ups (2026-10-21; uncommitted)
 
 Done: S1 psychopdaROC NRI/IDI; S2 zero-cell rule (shared `R/utils-diagnostic-ratios.R`, 4 analyses),
