@@ -249,7 +249,7 @@ test_that("excludeIndeterminate stops when no negative level is named", {
         test2 = "t2", test2Positive = "Pos", test2Negative = "Neg",
         test3 = NULL, test3Positive = NULL, test3Negative = NULL,
         excludeIndeterminate = TRUE))
-    expect_match(res$notices$content, "Reference negative level", fixed = TRUE)
+    expect_match(res$notices$content, "Reference negative", fixed = TRUE)
     # library-audit 2026-10-23 meddecide [MEDIUM] DONE: rows come from .init(); nothing is computed
     expect_true(all(is.na(res$comparisonTable$asDF$Sens)))
 })

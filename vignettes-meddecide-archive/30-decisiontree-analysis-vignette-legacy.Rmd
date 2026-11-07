@@ -1,0 +1,623 @@
+---
+title: "Decision Tree Graph Analysis: Comprehensive Guide and Testing"
+author: "ClinicoPath Package"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.width = 8,
+  fig.height = 6,
+  warning = FALSE,
+  message = FALSE,
+    echo = TRUE,
+  eval = FALSE
+)
+
+
+library(dplyr)
+library(ggplot2)
+library(knitr)
+```
+
+# Introduction to Decision Tree Graph Analysis
+
+This vignette provides a comprehensive guide to using the Decision Tree Graph module in the ClinicoPath package. The module creates professional decision tree visualizations for cost-effectiveness analysis with typical decision nodes (squares), chance nodes (circles), and terminal nodes (triangles).
+
+## Key Features
+
+- **Multiple Tree Types**: Simple decision trees, Markov models, and cost-effectiveness trees
+- **Node Visualization**: Customizable shapes and colors for different node types
+- **Economic Analysis**: Expected value calculations, ICERs, and net benefit analysis
+- **Sensitivity Analysis**: One-way sensitivity analysis with tornado diagrams
+- **Flexible Layouts**: Horizontal, vertical, and radial tree orientations
+
+# Test Datasets
+
+We'll use several comprehensive test datasets to demonstrate all features:
+
+```{r load-data}
+# Load test datasets
+data("basic_decision_data")      # Basic treatment comparison
+data("markov_decision_data")     # Markov model data  
+data("pharma_decision_data")     # Drug comparison study
+data("screening_decision_data")  # Screening program analysis
+data("minimal_test_data")        # Simple functionality test
+data("edge_case_data")          # Edge cases and error testing
+
+# Display dataset summaries
+cat("Basic Decision Data:", nrow(basic_decision_data), "rows,", ncol(basic_decision_data), "columns\n")
+cat("Markov Decision Data:", nrow(markov_decision_data), "rows,", ncol(markov_decision_data), "columns\n")
+cat("Pharma Decision Data:", nrow(pharma_decision_data), "rows,", ncol(pharma_decision_data), "columns\n")
+cat("Screening Decision Data:", nrow(screening_decision_data), "rows,", ncol(screening_decision_data), "columns\n")
+```
+
+# Basic Usage Examples
+
+## Example 1: Simple Treatment Comparison
+
+Let's start with a basic treatment comparison using the minimal test dataset:
+
+```{r basic-example}
+# Examine the minimal test data structure
+head(minimal_test_data)
+
+# This dataset contains:
+# - treatment: Decision variable (A vs B)
+# - prob1, prob2: Probability variables
+# - cost1, cost2: Cost variables  
+# - utility1, utility2: Utility variables
+# - outcome: Outcome variable
+```
+
+### Creating a Basic Decision Tree
+
+```{r basic-tree, eval=FALSE}
+# In jamovi, you would:
+# 1. Load the minimal_test_data
+# 2. Go to meddecide > Decision > Decision Tree Graph
+# 3. Set variables:
+#    - Decisions: treatment
+#    - Probabilities: prob1, prob2
+#    - Costs: cost1, cost2
+#    - Utilities: utility1, utility2
+#    - Outcomes: outcome
+# 4. Choose layout: horizontal
+# 5. Enable: Show Probabilities, Show Costs, Show Utilities
+```
+
+## Example 2: Pharmaceutical Cost-Effectiveness Analysis
+
+Using the comprehensive pharmaceutical dataset:
+
+```{r pharma-example}
+# Examine pharmaceutical data structure
+head(pharma_decision_data)
+
+# Key variables:
+# - drug_regimen: Main decision variable (4 treatment options)
+# - dosing_strategy: Secondary decision variable
+# - prob_response, prob_severe_ae: Probability variables
+# - cost_drug_per_cycle, cost_administration: Cost variables
+# - utility_response, utility_stable: Utility variables
+```
+
+### Advanced Configuration
+
+```{r pharma-config, eval=FALSE}
+# Advanced jamovi configuration:
+# 1. Decisions: drug_regimen, dosing_strategy
+# 2. Probabilities: prob_response, prob_severe_ae, prob_discontinuation
+# 3. Costs: cost_drug_per_cycle, cost_administration, cost_monitoring
+# 4. Utilities: utility_response, utility_stable, utility_progression
+# 5. Tree Type: Cost-Effectiveness Tree
+# 6. Layout: Horizontal
+# 7. Color Scheme: Medical Theme
+# 8. Enable Expected Values calculation
+# 9. Set discount rate: 3%
+# 10. Time horizon: 5 years
+```
+
+# Testing All Module Arguments
+
+## Tree Type Options
+
+### Simple Decision Tree
+- Best for basic treatment comparisons
+- Minimal probability calculations
+- Focus on direct outcomes
+
+### Markov Model Tree  
+- For multi-state disease progression
+- Time-dependent transitions
+- Suitable for chronic diseases
+
+### Cost-Effectiveness Tree
+- Comprehensive economic evaluation
+- ICER calculations
+- Net benefit analysis
+
+```{r tree-types, eval=FALSE}
+# Test each tree type with markov_decision_data:
+
+# 1. Simple Decision Tree
+# - Focus on treatment_strategy decisions
+# - Use basic probabilities
+
+# 2. Markov Model Tree  
+# - Include transition probabilities
+# - Multi-cycle analysis
+# - State-specific costs and utilities
+
+# 3. Cost-Effectiveness Tree
+# - Full economic evaluation
+# - All cost components
+# - Utility measurements
+```
+
+## Layout Options Testing
+
+```{r layouts, eval=FALSE}
+# Test all layout orientations:
+
+# 1. Horizontal Layout (default)
+# - Tree flows left to right
+# - Decision node on left, outcomes on right
+# - Best for simple trees
+
+# 2. Vertical Layout
+# - Tree flows top to bottom  
+# - Good for presentation slides
+# - Compact for wide trees
+
+# 3. Radial Layout  
+# - Tree radiates from center
+# - Artistic presentation
+# - Good for complex trees with many branches
+```
+
+## Display Options Testing
+
+### Node Shape Configuration
+
+```{r node-shapes, eval=FALSE}
+# Test node shape options:
+
+# 1. Show Node Shapes = TRUE (default)
+# - Squares for decision nodes
+# - Circles for chance nodes  
+# - Triangles for terminal nodes
+# - Clear visual distinction
+
+# 2. Show Node Shapes = FALSE
+# - All nodes as circles
+# - Color coding only
+# - Simpler appearance
+```
+
+### Label Display Options
+
+```{r labels, eval=FALSE}
+# Test label configurations:
+
+# 1. Show Probabilities = TRUE
+# - Display "p=0.75" on branches
+# - Help interpret chance outcomes
+# - Essential for probability assessment
+
+# 2. Show Costs = TRUE  
+# - Display "Cost: $15,000" on terminal nodes
+# - Critical for cost-effectiveness
+# - Currency formatting
+
+# 3. Show Utilities = TRUE
+# - Display "Utility: 0.85" on terminal nodes  
+# - Quality of life measures
+# - QALY calculations
+
+# 4. Show Node Labels = TRUE
+# - Descriptive text on nodes
+# - Treatment names, outcome descriptions
+# - Improve interpretation
+
+# 5. Show Branch Labels = TRUE
+# - Text on connecting lines
+# - Probability values, condition names
+# - Decision pathway clarity
+```
+
+## Color Scheme Testing
+
+```{r color-schemes, eval=FALSE}
+# Test all color schemes:
+
+# 1. Default Theme
+# - Green decisions, blue chance, orange terminals
+# - Standard clinical colors
+# - Good general purpose
+
+# 2. Colorblind Friendly  
+# - Carefully selected colors
+# - Accessible to colorblind users
+# - High contrast options
+
+# 3. Medical Theme
+# - Professional medical colors
+# - Suitable for clinical presentations
+# - Conservative appearance
+
+# 4. Economic Theme
+# - Colors representing cost/benefit
+# - Green for savings, red for costs
+# - Financial analysis focus
+```
+
+# Analysis Options Testing
+
+## Expected Value Calculations
+
+```{r expected-values, eval=FALSE}
+# Test expected value features:
+
+# 1. Calculate Expected Values = TRUE
+# - Automatic cost and utility calculations
+# - Probability-weighted outcomes
+# - Decision tree rollback analysis
+
+# Configuration with screening_decision_data:
+# - Multiple screening strategies
+# - Cost per test, diagnostic workup
+# - Utilities for different health states
+# - Life years gained calculations
+```
+
+## Sensitivity Analysis
+
+```{r sensitivity-analysis, eval=FALSE}
+# Test sensitivity analysis options:
+
+# 1. Sensitivity Analysis = TRUE
+# - One-way sensitivity analysis
+# - Parameter variation testing
+# - Robust decision making
+
+# 2. Tornado Diagram = TRUE  
+# - Visual sensitivity results
+# - Parameters ranked by impact
+# - Range of outcomes displayed
+
+# Using pharma_decision_data for sensitivity:
+# - Vary drug efficacy (prob_response)
+# - Vary cost parameters
+# - Vary utility values
+# - Assess decision robustness
+```
+
+## Economic Parameters
+
+```{r economic-params, eval=FALSE}
+# Test economic parameter settings:
+
+# 1. Discount Rate testing:
+# - 0% (no discounting)
+# - 3% (standard health economics)
+# - 5% (conservative approach)
+# - 7% (high discount rate)
+
+# 2. Time Horizon testing:
+# - 1 year (short-term analysis)
+# - 5 years (medium-term)
+# - 10 years (long-term)
+# - Lifetime (maximum horizon)
+
+# Impact on net present value calculations
+# Future cost and benefit discounting
+```
+
+# Output Tables Testing
+
+## Summary Table Features
+
+```{r summary-table, eval=FALSE}
+# Test summary table with basic_decision_data:
+
+# Summary Table includes:
+# - Strategy names
+# - Expected costs (discounted)
+# - Expected utilities (QALYs)
+# - Incremental Cost-Effectiveness Ratios (ICERs)
+# - Net benefit at willingness-to-pay thresholds
+
+# Currency formatting for costs
+# Decimal precision for utilities  
+# ICER calculation accuracy
+```
+
+## Node Details Table
+
+```{r node-table, eval=FALSE}
+# Test node details table:
+
+# Node Table includes:
+# - Node ID (unique identifier)
+# - Node Type (decision/chance/terminal)
+# - Node Label (descriptive text)
+# - Probability values
+# - Cost values  
+# - Utility values
+
+# Useful for:
+# - Debugging tree structure
+# - Verifying calculations
+# - Detailed documentation
+```
+
+## Sensitivity Analysis Table
+
+```{r sensitivity-table, eval=FALSE}
+# Test sensitivity analysis table:
+
+# Sensitivity Table includes:
+# - Parameter names
+# - Base case values
+# - Low/high range values
+# - Low/high results
+# - Range of impact
+
+# Parameter ranking by importance
+# Threshold analysis capability
+# Scenario analysis support
+```
+
+# Edge Cases and Error Handling
+
+## Missing Data Testing
+
+```{r missing-data}
+# Test with edge_case_data containing missing values
+head(edge_case_data)
+
+# Edge cases include:
+# - Missing treatment assignments
+# - Zero probabilities  
+# - Negative costs
+# - Utilities outside 0-1 range
+# - Single category variables
+```
+
+```{r edge-cases, eval=FALSE}
+# Test error handling:
+
+# 1. Missing Required Variables
+# - No decision variables specified
+# - No cost or utility data
+# - Expected: Informative error message
+
+# 2. Invalid Probability Values
+# - Probabilities < 0 or > 1
+# - Expected: Data validation warning
+
+# 3. Negative Costs
+# - Cost values < 0
+# - Expected: Warning or automatic correction
+
+# 4. Invalid Utility Values  
+# - Utilities < 0 or > 1
+# - Expected: Range validation
+
+# 5. Insufficient Data
+# - Fewer than 2 decision options
+# - Expected: Minimum data requirement message
+```
+
+# Performance Testing
+
+## Large Dataset Handling
+
+```{r performance-test, eval=FALSE}
+# Test with large datasets:
+
+# 1. Markov data (200 scenarios)
+# - Complex multi-state model
+# - Many transition probabilities
+# - State-specific costs/utilities
+
+# 2. Screening data (120 scenarios)  
+# - Multiple screening strategies
+# - Population-specific parameters
+# - Test performance characteristics
+
+# Performance metrics:
+# - Tree generation time
+# - Plot rendering speed
+# - Memory usage
+# - Table population speed
+```
+
+## Complex Tree Structures
+
+```{r complex-trees, eval=FALSE}
+# Test complex tree configurations:
+
+# 1. Multiple Decision Variables
+# - Primary and secondary decisions
+# - Nested decision structures  
+# - Interaction effects
+
+# 2. Many Outcome Branches
+# - Multiple chance nodes
+# - Numerous terminal outcomes
+# - Complex probability trees
+
+# 3. Deep Tree Hierarchies
+# - Multi-level decisions
+# - Sequential choices
+# - Time-dependent paths
+```
+
+# Comparison with Other Methods
+
+## Validation Against Manual Calculations
+
+```{r validation, eval=FALSE}
+# Validate expected value calculations:
+
+# Manual calculation example with minimal_test_data:
+# Treatment A:
+# - Expected Cost = (prob1 * cost1) + (prob2 * cost2)  
+# - Expected Utility = (prob1 * utility1) + (prob2 * utility2)
+
+# Treatment B:
+# - Similar calculations
+# - Compare with module output
+
+# ICER calculation:
+# - (Cost_B - Cost_A) / (Utility_B - Utility_A)
+# - Verify against summary table
+```
+
+## Sensitivity Analysis Validation
+
+```{r sensitivity-validation, eval=FALSE}
+# Validate sensitivity analysis:
+
+# 1. One-way sensitivity
+# - Manually vary single parameters
+# - Compare impact on outcomes
+# - Verify tornado diagram rankings
+
+# 2. Two-way sensitivity  
+# - Vary two parameters simultaneously
+# - Create sensitivity matrices
+# - Identify interaction effects
+
+# 3. Probabilistic sensitivity
+# - Monte Carlo simulation
+# - Parameter uncertainty modeling
+# - Confidence interval generation
+```
+
+# Best Practices and Recommendations
+
+## Data Preparation
+
+1. **Variable Naming**: Use descriptive names for clarity
+2. **Data Validation**: Check ranges and missing values
+3. **Probability Constraints**: Ensure probabilities sum to 1
+4. **Cost Standardization**: Use consistent currency and time periods
+5. **Utility Scales**: Maintain 0-1 range for utilities
+
+## Analysis Configuration
+
+1. **Tree Type Selection**: Match complexity to analysis needs
+2. **Layout Choice**: Consider audience and presentation format
+3. **Display Options**: Balance detail with clarity
+4. **Economic Parameters**: Use standard discount rates
+5. **Sensitivity Analysis**: Include key uncertain parameters
+
+## Interpretation Guidelines
+
+1. **Expected Values**: Focus on central estimates
+2. **ICERs**: Consider cost-effectiveness thresholds
+3. **Sensitivity Results**: Assess decision robustness
+4. **Uncertainty**: Acknowledge parameter limitations
+5. **Clinical Relevance**: Ensure practical applicability
+
+# Troubleshooting Common Issues
+
+## Data Issues
+
+```{r troubleshooting, eval=FALSE}
+# Common problems and solutions:
+
+# 1. "No data provided for analysis"
+# Solution: Check data loading and variable selection
+
+# 2. "Missing required variables"  
+# Solution: Specify at least one decision, cost, or utility variable
+
+# 3. Probabilities don't sum to 1
+# Solution: Normalize probability variables
+
+# 4. Negative costs or utilities
+# Solution: Check data entry and transformations
+
+# 5. Tree too complex to display
+# Solution: Simplify structure or use subsets
+```
+
+## Visualization Issues
+
+```{r viz-troubleshooting, eval=FALSE}
+# Visualization problems:
+
+# 1. Overlapping node labels
+# Solution: Reduce label length or change layout
+
+# 2. Tree too wide/tall
+# Solution: Adjust layout orientation
+
+# 3. Colors not distinguishable  
+# Solution: Change color scheme
+
+# 4. Missing plot elements
+# Solution: Check display option settings
+
+# 5. Poor plot quality
+# Solution: Adjust figure dimensions
+```
+
+# Advanced Applications
+
+## Multi-Criteria Decision Analysis
+
+```{r mcda, eval=FALSE}
+# Incorporate multiple decision criteria:
+
+# 1. Cost-effectiveness
+# 2. Safety profiles  
+# 3. Patient preferences
+# 4. Implementation feasibility
+# 5. Equity considerations
+
+# Weight different criteria
+# Composite scoring systems
+# Stakeholder involvement
+```
+
+## Budget Impact Analysis
+
+```{r budget-impact, eval=FALSE}
+# Extend to budget impact:
+
+# 1. Population-level costs
+# 2. Implementation timelines
+# 3. Resource requirements
+# 4. Capacity constraints
+# 5. Affordability thresholds
+
+# Multi-year projections
+# Scenario modeling
+# Policy implications
+```
+
+# Conclusion
+
+The Decision Tree Graph module provides a comprehensive toolkit for cost-effectiveness analysis in healthcare. Key strengths include:
+
+1. **Flexibility**: Multiple tree types and configurations
+2. **Visual Appeal**: Professional publication-ready graphics  
+3. **Economic Rigor**: Standard health economics calculations
+4. **User-Friendly**: Intuitive jamovi interface
+5. **Comprehensive Output**: Tables, plots, and sensitivity analysis
+
+This vignette has demonstrated extensive testing across various scenarios, data types, and configuration options. The module handles both simple and complex decision problems while maintaining computational efficiency and visual clarity.
+
+For additional support and examples, consult the ClinicoPath documentation and consider the specific requirements of your decision analysis context.
+
+---
+
+**Note**: This vignette demonstrates the capabilities and testing approaches for the Decision Tree Graph module. Actual analysis results will depend on your specific data and research questions. Always validate calculations and interpretations within your clinical and economic context.

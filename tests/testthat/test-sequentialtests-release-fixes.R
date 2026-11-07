@@ -18,9 +18,12 @@ test_that("SEQ-21-F1: formulas panel conditions on disease status and names inde
 test_that("SEQ-21-F4: a preset that replaces values typed in an R call says so", {
     n <- ClinicoPath::sequentialtests(preset = "covid_screening_confirmation",
                                       test1_sens = 0.5, strategy = "parallel")$notices$content
-    expect_match(n, "Teaching Example Replaced Entered Values", fixed = TRUE)
+    expect_match(n, "Teaching Example Replaced Values Given in the Call", fixed = TRUE)
     expect_match(n, "Test 1 sensitivity: 0.5 -> 0.75", fixed = TRUE)
     expect_match(n, "Testing strategy: parallel -> serial_positive", fixed = TRUE)
+    # 2026-11-07: a value left at its option default was not given, so it is not listed
+    # (test1_spec etc. defaulted and used to be reported as "entered").
+    expect_false(grepl("Test 1 specificity", n, fixed = TRUE))
     # values that agree with the preset (as the GUI's JavaScript writes them) are not listed
     agree <- ClinicoPath::sequentialtests(preset = "covid_screening_confirmation",
                                           test1_sens = 0.75, test1_spec = 0.95,

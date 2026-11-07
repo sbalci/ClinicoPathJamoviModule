@@ -143,7 +143,7 @@ test_that("IR2-04: variables chosen before their levels give a quiet INFO, not a
     expect_null(r$error)
     notices <- rf_text(r$res$notices$content)
     expect_match(notices, "Levels Not Yet Selected", fixed = TRUE)
-    expect_match(notices, "Reference positive level, Reference negative level, Test 1 positive level", fixed = TRUE)
+    expect_match(notices, "Reference positive, Reference negative, Test 1 positive level", fixed = TRUE)
     expect_false(grepl("Validation failed|Missing Positive Levels", notices))
     # library-audit 2026-10-23 meddecide [MEDIUM] DONE: rows come from .init(); nothing is computed
     expect_true(all(is.na(r$res$comparisonTable$asDF$Sens)))

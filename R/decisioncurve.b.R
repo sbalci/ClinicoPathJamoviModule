@@ -318,8 +318,12 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
         # Where the Range of Benefit's uncertainty can be read (DC-21-01). The range itself is a
         # point-estimate statement; the bootstrap bands are drawn only on the decision curve plot.
         .rangeUncertaintyPointer = function() {
-            if (private$.ciDrawn())
-                .("Check whether the model's bootstrap interval on the decision curve plot stays above both reference lines over this range.")
+            # The reference lines are estimated from the same data, so a band clearing a line is
+            # not a test of the difference; and pointwise intervals overstate joint confidence.
+            if (private$.ciDrawn() && identical(private$.ciBand(), "simultaneous"))
+                .("The simultaneous bootstrap band on the decision curve plot shows the uncertainty of the model's net benefit over this range. The reference lines are estimated from the same data, so a band that clears them is not a test of the difference from treat all or treat none.")
+            else if (private$.ciDrawn())
+                .("The pointwise bootstrap intervals on the decision curve plot hold at each threshold separately and overstate confidence when read across this range; choose the simultaneous band under Interval type to judge the range as a whole. The reference lines are estimated from the same data, so an interval that clears them is not a test of the difference from treat all or treat none.")
             else
                 .("Turn on Bootstrap confidence intervals (with the Decision curve plot) to see the uncertainty of the net benefit over this range.")
         },

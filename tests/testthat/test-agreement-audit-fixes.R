@@ -79,6 +79,10 @@ test_that("agreement guides use translation while preserving markup", {
 
 test_that("agreement guide headings use the packaged Turkish catalog", {
   ns <- environment(agreement)
+  # jmvcore reads the catalog with base::system.file(), i.e. from the INSTALLED
+  # package; under load_all() with nothing installed it falls back to English.
+  skip_if(base::system.file("i18n", "tr.json", package = environmentName(ns)) == "",
+          "Turkish catalog not reachable by jmvcore (package not installed)")
   opts <- ns$agreementOptions$new()
   opts$.__enclos_env__$private$.lang <- "tr"
   a <- ns$agreementClass$new(data = data.frame(), options = opts)

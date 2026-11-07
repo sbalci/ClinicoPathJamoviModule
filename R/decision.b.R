@@ -32,6 +32,9 @@ decisionClass <- if (requireNamespace("jmvcore"))
             # Sign of the observed Youden's index; set in .run() before any narrative is
             # built and read by every .lrBand() call (NULL outside a run = no guard).
             .youdenDirection = NULL,
+            # Agresti-Caffo interval of Youden's index; set in .run() next to .youdenDirection
+            # so the narrative bands agree with .validateDiscrimination() (NULL = no CI known).
+            .youdenRunCI = NULL,
             # Constants for maintainability
             NOMOGRAM_LABEL_SIZE = 14/5,
 
@@ -70,6 +73,7 @@ decisionClass <- if (requireNamespace("jmvcore"))
                 private$.n_complete_cases <- NA_integer_
                 private$.n_level_excluded <- 0L
                 private$.youdenDirection <- NULL
+                private$.youdenRunCI <- NULL
             },
 
             # A Level option left empty. allowNone gives NULL; "" and NA are treated the same.
@@ -105,6 +109,12 @@ decisionClass <- if (requireNamespace("jmvcore"))
                 x <- 100 * p
                 if (length(x) == 1 && is.finite(x) && x != 0 && abs(x) < 1)
                     paste0(trimws(formatC(x, digits = 2, format = "fg", decimal.mark = ".")), "%")
+                # Mirror of the rule above: within 0.05 points of 100, one decimal prints
+                # "100.0%" (NPV 99.975% at prior 0.001), so keep two significant figures of 100 - x.
+                else if (length(x) == 1 && is.finite(x) && x > 99.95 && x < 100) {
+                    d <- ceiling(-log10(100 - x)) + 1L
+                    if (d > 4L) ">99.999%" else sprintf("%.*f%%", d, x)
+                }
                 else sprintf("%.1f%%", x)
             },
 
@@ -361,12 +371,18 @@ decisionClass <- if (requireNamespace("jmvcore"))
             # 0.5 none, below 0.7 poor, 0.7 acceptable, 0.8 excellent, 0.9 outstanding.
             # The summary word used to be "moderate" whenever sens OR spec reached 0.70,
             # which called a worse-than-chance test (sens .75, spec .20) "moderate".
-            .discriminationBand = function(sens, spec) {
+            # youden_ci: when given, a "worse" or "poor" estimate whose 95% interval includes 0
+            # is "indistinct" - the STRONG_WARNING tells users to report it as no evidence of
+            # discrimination, so the narrative panels must not call it poor or worse than chance.
+            .discriminationBand = function(sens, spec, youden_ci = private$.youdenRunCI) {
                 if (length(sens) != 1 || length(spec) != 1 || is.na(sens) || is.na(spec)) return("na")
                 tol <- 1e-8
                 # Banded as printed (three decimals, as in the Clinical Interpretation
                 # panel and the notices), so a printed 0.400 is never called poor.
                 j <- as.numeric(sprintf("%.3f", sens + spec - 1))
+                poor_or_worse <- j < -tol || (j > tol && (1 + j) / 2 < 0.7 - tol)
+                if (poor_or_worse && !is.null(youden_ci) &&
+                    youden_ci[["lower"]] <= 0 && youden_ci[["upper"]] >= 0) return("indistinct")
                 if (j < -tol) return("worse")
                 if (abs(j) <= tol) return("none")
                 auc <- (1 + j) / 2
@@ -1064,7 +1080,8 @@ decisionClass <- if (requireNamespace("jmvcore"))
                     acceptable = .("Acceptable discrimination (equivalent AUC 0.70 to below 0.80; Youden's index 0.40 to below 0.60)"),
                     poor = .("Poor discrimination (equivalent AUC above 0.50 and below 0.70; Youden's index above 0 and below 0.40)"),
                     none = .("No discrimination (Youden's index 0, equivalent AUC 0.50)"),
-                    worse = .("Worse than chance (Youden's index below 0): check the level chosen as test-positive"))
+                    worse = .("Worse than chance (Youden's index below 0): check the level chosen as test-positive"),
+                    indistinct = .("No evidence of discrimination in this sample (the 95% confidence interval for Youden's index includes 0)"))
 
                 return(list(
                     lr_pos_interp = lr_pos_interp,
@@ -1130,6 +1147,8 @@ decisionClass <- if (requireNamespace("jmvcore"))
                     # one Turkish word cannot serve both (the Turkish "zero" leaked into its sentence).
                     none = .("chance-level"),
                     worse = .("worse-than-chance"),
+                    # Fills "the test shows {quality} discrimination": the 95% CI of Youden's index includes 0.
+                    indistinct = .("no statistically detectable"),
                     na = .("undetermined"))
 
                 # Describe the discrimination profile (no use recommendation is made)
@@ -1245,7 +1264,7 @@ decisionClass <- if (requireNamespace("jmvcore"))
                     prev = private$.fmtPct(if (is.finite(prevalence)) prevalence else NA_real_),
                     ppv = private$.fmtPct(ppv),
                     ppvci = pct_ci(ppv_ci),
-                    npv = sprintf("%.1f%%", npv * 100),
+                    npv = private$.fmtPct(npv),
                     npvci = pct_ci(npv_ci),
                     # .fmtLR, as in the Clinical Summary: at one decimal LR+ 1.96
                     # printed "2.0" beside the band for LR+ below 2.
@@ -1478,7 +1497,7 @@ decisionClass <- if (requireNamespace("jmvcore"))
                 auc <- (sens + spec) / 2
                 # Same classifier as the Clinical Summary word and the Clinical
                 # Interpretation panel, so the three can never disagree about one test.
-                band <- private$.discriminationBand(sens, spec)
+                band <- private$.discriminationBand(sens, spec, youden_ci = NULL)
 
                 # Severity follows the Agresti-Caffo 95% interval (.youdenCI), not the sign of
                 # the point estimate. A coin-flip test at Youden -0.005 (n = 201, interval
@@ -1553,7 +1572,7 @@ decisionClass <- if (requireNamespace("jmvcore"))
                 # used > 10 / > 5 / > 2 where the other two panels used >= 10 / >= 5 / >= 2,
                 # so LR+ = 10 was "Moderate" here and "strong" in the report.
                 benchmarks$lr_pos_interpretation <- switch(private$.lrBand(lr_pos, "pos", private$.youdenDirection),
-                    na = .("Cannot be calculated: LR+ is sensitivity / (1 - specificity), and one of those is not estimable here"),
+                    na = .("Not estimable: sensitivity or specificity could not be computed, or the false-positive count is zero and no continuity-corrected value would be valid"),
                     unstable = .("Unreliable: rests on a zero count, and the continuity correction points the other way from the observed data"),
                     large = .("Strong evidence for disease"),
                     moderate = .("Moderate evidence for disease"),
@@ -1563,7 +1582,7 @@ decisionClass <- if (requireNamespace("jmvcore"))
                     against = .("Points AGAINST disease when positive: the test-positive level may be inverted"))
 
                 benchmarks$lr_neg_interpretation <- switch(private$.lrBand(lr_neg, "neg", private$.youdenDirection),
-                    na = .("Cannot be calculated: LR- is (1 - sensitivity) / specificity, and one of those is not estimable here"),
+                    na = .("Not estimable: sensitivity or specificity could not be computed, or the true-negative count is zero and no continuity-corrected value would be valid"),
                     unstable = .("Unreliable: rests on a zero count, and the continuity correction points the other way from the observed data"),
                     large = .("Strong evidence against disease"),
                     moderate = .("Moderate evidence against disease"),
@@ -2294,6 +2313,7 @@ decisionClass <- if (requireNamespace("jmvcore"))
                 # direction every likelihood-ratio sentence must agree with (.lrBand).
                 youden_direction <- sign(TP * TN - FP * FN)
                 private$.youdenDirection <- youden_direction
+                private$.youdenRunCI <- private$.youdenCI(TP, TP + FN, FP, FP + TN)
 
                 # .validateLikelihoodRatios() used to run here. It replaced a
                 # non-finite LR with a fabricated finite one (sens / max(1 - spec, 0.001),

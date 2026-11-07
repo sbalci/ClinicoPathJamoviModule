@@ -1,0 +1,342 @@
+---
+title: "Decision Tree vs Markov Chain Analysis: Complete Guide"
+author: "ClinicoPath Development Team"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.width = 7,
+  fig.height = 5,
+    echo = TRUE,
+  eval = FALSE
+)
+```
+
+# Overview
+
+This guide explains when and how to use **Decision Trees** vs **Markov Chain Models** for medical decision analysis and cost-effectiveness research. Both methods are implemented in the ClinicoPath jamovi module.
+
+# Decision Tree Analysis
+
+## What is a Decision Tree?
+
+A decision tree is a graphical representation of a decision problem that maps out:
+
+- **Decision nodes** (squares): Choice points where decisions are made
+- **Chance nodes** (circles): Probabilistic events beyond our control  
+- **Terminal nodes** (triangles): Final outcomes with associated costs and utilities
+
+## Example: Acute Appendicitis Treatment
+
+**Clinical Question:** Should a patient with suspected appendicitis receive immediate surgery or conservative treatment?
+
+### Decision Tree Structure
+
+```
+DECISION NODE (□): Treatment Choice
+├── Surgery (immediate)
+│   ├── CHANCE NODE (○): Surgery Outcome  
+│   │   ├── Success (96%) → TERMINAL (△): Cost $12,000, Utility 0.95
+│   │   └── Complications (4%) → TERMINAL (△): Cost $20,000, Utility 0.85
+│   
+└── Conservative Treatment
+    ├── CHANCE NODE (○): Conservative Outcome
+    │   ├── Success (70%) → TERMINAL (△): Cost $3,000, Utility 0.90  
+    │   └── Failure (30%) → Emergency Surgery → TERMINAL (△): Cost $18,000, Utility 0.75
+```
+
+### Results Interpretation
+
+| Strategy | Expected Cost | Expected Utility | Cost per QALY |
+|----------|---------------|------------------|---------------|
+| Surgery | $12,315 | 0.989 QALYs | $12,457 |
+| Conservative | $7,454 | 0.895 QALYs | $8,330 |
+
+**ICER (Incremental Cost-Effectiveness Ratio):**
+
+- Incremental Cost: $4,861
+- Incremental Utility: 0.094 QALYs  
+- **ICER: $51,744 per QALY**
+
+### Clinical Interpretation
+
+- Surgery costs $4,861 more but provides 0.094 additional QALYs
+- At $51,744/QALY, surgery is marginally cost-effective (threshold typically $50,000-$100,000/QALY)
+- **Recommendation:** Consider patient-specific factors (age, comorbidities, preferences)
+
+# Markov Chain Analysis
+
+## What is a Markov Chain Model?
+
+A Markov model tracks a population through different **health states** over time, where:
+
+- Patients can transition between states each cycle (e.g., annually)
+- Transition probabilities depend only on current state (not history)  
+- Each state has associated costs and quality of life values
+
+## Example: Chronic Heart Disease Management
+
+**Clinical Question:** What is the long-term cost-effectiveness of different heart disease management strategies over 20 years?
+
+### Markov States
+
+1. **Asymptomatic** Heart Disease
+2. **Symptomatic** Heart Disease
+3. **Heart Failure** 
+4. **Death** (absorbing state)
+
+### Transition Matrix (Standard Care)
+
+```
+From/To          Asymptomatic  Symptomatic  Heart Failure  Death
+Asymptomatic         88.4%        10.0%         0.0%       1.5%
+Symptomatic           0.0%        77.2%        19.8%       3.0%
+Heart Failure         0.0%         0.0%        84.5%      15.5%
+Death                 0.0%         0.0%         0.0%     100.0%
+```
+
+### Population Progression Over Time
+
+| Year | Asymptomatic | Symptomatic | Heart Failure | Death |
+|------|-------------|-------------|---------------|-------|
+| 0 | 100.0% | 0.0% | 0.0% | 0.0% |
+| 5 | 54.0% | 23.8% | 11.5% | 10.6% |
+| 10 | 29.2% | 19.4% | 21.3% | 30.1% |
+| 15 | 15.8% | 12.3% | 20.7% | 51.2% |
+| 20 | 8.5% | 7.1% | 15.9% | 68.4% |
+
+### Cost-Effectiveness Results (20 years)
+
+- **Total Lifetime Cost:** $120,561
+- **Total Lifetime QALYs:** 8.39
+- **Cost per QALY:** $14,370
+
+### Clinical Interpretation
+
+- Standard care provides good value at $14,370/QALY (well below cost-effectiveness threshold)
+- 68% of patients die within 20 years, highlighting disease severity
+- Peak heart failure prevalence occurs around year 15 (20.7%)
+- Early intervention may be valuable given rapid disease progression
+
+# When to Use Each Method
+
+## Decision Tree Applications
+
+**Best for:**
+
+- ✅ **Acute conditions** (appendicitis, trauma, infections)
+- ✅ **One-time decisions** (surgery vs. medication)
+- ✅ **Short-term outcomes** (days to months)
+- ✅ **Simple comparisons** (2-3 treatment options)
+- ✅ **Emergency decisions** with immediate consequences
+
+**Examples:**
+
+- Should this patient get emergency surgery?
+- Which diagnostic test should be ordered?
+- Should we vaccinate this population?
+- Is screening cost-effective for this age group?
+
+## Markov Chain Applications
+
+**Best for:**
+
+- ✅ **Chronic diseases** (diabetes, heart disease, cancer)
+- ✅ **Long-term analysis** (years to lifetime)  
+- ✅ **Disease progression** modeling
+- ✅ **Complex interventions** with ongoing effects
+- ✅ **Policy decisions** affecting populations
+
+**Examples:**
+
+- What's the lifetime value of diabetes management?
+- How cost-effective are cancer screening programs?
+- Should we implement population-wide interventions?
+- What's the optimal timing for treatment intensification?
+
+# Practical Implementation Guide
+
+## Using Decision Trees in jamovi
+
+### Data Setup
+
+Variables needed:
+
+- Decision variables (treatment options)
+- Probability variables (success rates, complication rates)
+- Cost variables (treatment costs, complication costs)
+- Utility variables (quality of life outcomes)
+
+### Analysis Steps
+
+1. Select "Decision Tree" type
+2. Assign variables to appropriate roles
+3. Configure display options (show probabilities, costs, utilities)
+4. Run analysis and interpret expected values
+
+### Key Outputs
+
+- **Tree visualization** showing decision structure
+- **Expected values table** with costs and utilities
+- **ICER calculations** for cost-effectiveness
+- **Sensitivity analysis** (optional)
+
+## Using Markov Chains in jamovi
+
+### Data Setup
+
+Variables needed:
+
+- Health state variables (disease stages)
+- Transition probability variables (between states)
+- State-specific costs (annual costs per state)
+- State-specific utilities (quality of life per state)
+- Time parameters (cycle length, time horizon)
+
+### Analysis Steps
+
+1. Select "Markov Model" type
+2. Define health states and transition probabilities
+3. Set time horizon and cycle length
+4. Configure discounting (typically 3-5% annually)
+5. Run cohort simulation
+
+### Key Outputs
+
+- **Transition matrix** showing movement between states
+- **Cohort trace** showing population over time
+- **Cost-effectiveness** results with lifetime totals
+- **State transition plots** visualizing progression
+
+# Key Concepts and Interpretation
+
+## Cost-Effectiveness Metrics
+
+**ICER (Incremental Cost-Effectiveness Ratio):**
+
+```
+ICER = (Cost_A - Cost_B) / (Effect_A - Effect_B)
+```
+
+- **< $50,000/QALY:** Generally cost-effective
+- **$50,000-$100,000/QALY:** Moderately cost-effective  
+- **> $100,000/QALY:** Not cost-effective (U.S. standards)
+
+**Net Benefit:**
+
+```
+Net Benefit = (Utility × WTP_Threshold) - Cost
+```
+
+- Positive values indicate cost-effectiveness
+- Easier to compare multiple strategies
+
+## Quality Measures
+
+**QALYs (Quality-Adjusted Life Years):**
+
+- Combines quantity and quality of life
+- 1.0 = perfect health for one year
+- 0.0 = death or health state equivalent to death
+- Allows comparison across different conditions
+
+**Utilities:**
+
+- 1.0 = Perfect health
+- 0.8-0.9 = Mild symptoms/limitations  
+- 0.6-0.8 = Moderate impairment
+- 0.4-0.6 = Severe limitations
+- < 0.4 = Very poor quality of life
+
+## Time Considerations
+
+**Discounting:**
+
+- Future costs and benefits are worth less than present ones
+- Standard rates: 3-5% annually
+- Applied to both costs and utilities
+- More important for long-term Markov models
+
+**Time Horizon:**
+
+- Decision trees: Usually < 1 year
+- Markov models: Often lifetime or 10-50 years
+- Should capture all relevant long-term effects
+
+# Advanced Applications
+
+## Combined Approaches
+
+Some complex problems benefit from both methods:
+
+1. **Initial Decision Tree:** Choose immediate treatment
+2. **Subsequent Markov Model:** Model long-term consequences
+
+**Example: Cancer Treatment**
+
+- Decision tree: Surgery vs. chemotherapy vs. radiation
+- Markov model: Long-term survival and quality of life
+
+## Sensitivity Analysis
+
+**One-way sensitivity analysis:**
+
+- Vary one parameter at a time
+- Show impact on cost-effectiveness
+- Identify key drivers of results
+
+**Probabilistic sensitivity analysis:**
+
+- Vary all parameters simultaneously
+- Account for uncertainty in all inputs
+- Provide confidence intervals for results
+
+## Advanced Markov Features
+
+**State rewards:**
+
+- Costs/utilities accumulated while in states
+- vs. transition rewards (one-time costs/utilities)
+
+**Tunnel states:**
+
+- Temporary states with time-dependent properties
+- Useful for modeling treatment effects
+
+**Multiple cohorts:**
+
+- Compare different starting populations
+- Analyze subgroup differences
+
+# Conclusion
+
+## Key Takeaways
+
+1. **Decision trees** excel for acute, one-time decisions with short-term outcomes
+2. **Markov chains** are essential for chronic disease management and long-term policy analysis
+3. Both methods provide **rigorous economic evaluation** for healthcare decisions
+4. **Cost-effectiveness thresholds** help interpret results in policy context
+5. **Sensitivity analysis** is crucial for understanding result robustness
+
+## Next Steps
+
+- Practice with provided example datasets
+- Apply methods to your specific research questions
+- Consider combining approaches for complex problems
+- Validate results with clinical experts
+- Present findings using both quantitative results and visual representations
+
+## Resources
+
+- ClinicoPath jamovi module documentation
+- Example datasets: `appendicitis_decision_tree.csv`, `heart_disease_markov.csv`
+- Comprehensive test data in the `data/` directory
+- Detailed vignettes with step-by-step examples
+
+---
+
+*This guide provides a foundation for understanding and implementing decision tree and Markov chain analyses in clinical research and health economics. Both methods are powerful tools for evidence-based decision making in healthcare.*

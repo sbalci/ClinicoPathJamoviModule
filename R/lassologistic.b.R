@@ -800,12 +800,17 @@ lassologisticClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                     } else if (max_cor < 0.9) {
                         checks$collinearity <- list(
                             status = "yellow", label = .("Collinearity"),
-                            detail = sprintf(.("Max |r| = %.2f (0.7-0.9: moderate, LASSO will handle)"), max_cor)
+                            detail = sprintf(.("Max |r| = %.2f (0.7-0.9: moderate; which of the correlated predictors is selected may vary)"), max_cor)
                         )
                     } else {
                         checks$collinearity <- list(
                             status = "red", label = .("Collinearity"),
-                            detail = sprintf(.("Max |r| = %.2f (>=0.9: high, consider elastic net)"), max_cor)
+                            # Collinearity destabilises WHICH correlated predictor is kept, not the
+                            # predictions; the remedy depends on the penalty actually fitted.
+                            detail = if (identical(self$options$penalty, "lasso"))
+                                sprintf(.("Max |r| = %.2f (>=0.9: high; LASSO keeps one of the correlated predictors more or less arbitrarily, so the selected set is unstable; elastic net or ridge keeps them together)"), max_cor)
+                            else
+                                sprintf(.("Max |r| = %.2f (>=0.9: high; the coefficients of the correlated predictors are not separately interpretable)"), max_cor)
                         )
                     }
                 }
@@ -833,16 +838,18 @@ lassologisticClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
 
                 # Surface critical suitability issues as Notices
                 if (n_red > 0) {
-                    red_items <- paste(sapply(
-                        checks[sapply(checks, function(x) x$status == "red")],
-                        function(x) x$label
-                    ), collapse = "; ")
+                    red_keys <- names(checks)[sapply(checks, function(x) x$status == "red")]
+                    red_items <- paste(sapply(checks[red_keys], function(x) x$label), collapse = "; ")
+                    # "Collect more data" is a sample-size remedy; collinearity alone does not make
+                    # the predictions unreliable, so it gets its own sentence (see the table row).
                     private$.addNotice(
                         "STRONG_WARNING", .("Data Suitability"),
-                        sprintf(
-                            .("Data suitability: %1$d major concern(s) detected (%2$s). Results may be unreliable; consider reducing predictors or collecting more data."),
-                            n_red, red_items
-                        )
+                        if (identical(red_keys, "collinearity"))
+                            sprintf(.("Data suitability: high collinearity detected (%s). The predictions are not affected as such, but the choice and coefficients of correlated predictors are unstable; see the Data Suitability table."),
+                                red_items)
+                        else
+                            sprintf(.("Data suitability: %1$d major concern(s) detected (%2$s). Results may be unreliable; consider reducing predictors or collecting more data."),
+                                n_red, red_items)
                     )
                 } else if (n_yellow > 0) {
                     private$.addNotice(

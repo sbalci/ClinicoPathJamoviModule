@@ -2,7 +2,7 @@
   positive <- options$positiveClass
   negative <- options$validationNegative
   if (is.null(positive) || !nzchar(positive) || is.null(negative) || !nzchar(negative) || positive == negative) {
-    stop("Select a positive reference level and enter a distinct negative reference level.")
+    stop("Select a positive reference level and choose a distinct negative reference level.")
   }
   if (options$direction == "auto") stop("Frozen-model evaluation requires an explicit score direction.")
   if (options$cohortRole == "frozen" &&

@@ -1050,8 +1050,8 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
                 # error: name the empty boxes and stop quietly (IR2-decisioncompare-04). The
                 # caller returns before any result is filled, so no level is ever inferred.
                 level_boxes <- list(
-                    list(var = self$options$gold, level = self$options$goldPositive, box = jmvcore::.("Reference positive level")),
-                    list(var = self$options$gold, level = private$.opt("goldNegative"), box = jmvcore::.("Reference negative level")),
+                    list(var = self$options$gold, level = self$options$goldPositive, box = jmvcore::.("Reference positive")),
+                    list(var = self$options$gold, level = private$.opt("goldNegative"), box = jmvcore::.("Reference negative")),
                     list(var = self$options$test1, level = self$options$test1Positive, box = jmvcore::.("Test 1 positive level")),
                     list(var = self$options$test1, level = private$.opt("test1Negative"), box = jmvcore::.("Test 1 negative level")),
                     list(var = self$options$test2, level = self$options$test2Positive, box = jmvcore::.("Test 2 positive level")),
@@ -1539,7 +1539,9 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
                 # 9 patients. Disclose the two class denominators.
                 n_gold_pos <- TP + FN
                 n_gold_neg <- TN + FP
-                if (min(n_gold_pos, n_gold_neg) < 30) {
+                # An empty class has no estimate to put an interval on (it is blank and noted
+                # elsewhere), so the "read the interval" advice is for small, non-empty classes.
+                if (min(n_gold_pos, n_gold_neg) < 30 && min(n_gold_pos, n_gold_neg) > 0) {
                     # The 95% CI option is disabled while a population prevalence is supplied, so
                     # the advice must say how to reach it.
                     private$.addNotice(

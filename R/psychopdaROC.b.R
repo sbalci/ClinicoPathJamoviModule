@@ -1657,7 +1657,11 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
           # arithmetic on its [1] aborted the whole analysis. Rows 1_pos/1_neg come from
           # .init(); a tie adds its own pair.
           cuts <- unlist(results$optimal_cutpoint)
+          # Set here, not in .init(): .clearTables() empties every note at the start of .run().
+          sensSpecTable$setNote("cells", .("Rows are the decision at the cutpoint and columns the criterion: the Positive row holds true and false positives, the Negative row false and true negatives."))
           for (k in seq_along(cuts)) {
+            # No usable cut-point (Results shows none): no matrix at an infinite threshold.
+            if (!is.finite(cuts[k])) next
             i <- ruleIdx(cuts[k])
             if (!length(i)) next
             cells <- list(
@@ -3540,6 +3544,11 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
             alt_direction
           )
           aucSummaryTable$setNote("auc_below_chance", poor_disc_note)
+          # The paired DeLong difference is taken in the selected direction too: a marker read
+          # backwards (AUC 0.13 for one with clinical AUC 0.87) makes the other look far better.
+          self$results$delongComparisonTable$setNote("auc_below_chance", sprintf(
+            .("Every marker is compared in the selected Classification Direction. %s has an AUC below 0.5 in that direction, so a difference involving it reflects reading that marker backwards, not which marker discriminates better."),
+            .rocLabel(paste(poor_disc_vars, collapse = ", "))), init = FALSE)
           private$.setNotice("belowChance",
             .("At least one AUC is below 0.5. Check Positive Class and Classification Direction against the clinical meaning of the marker."),
             jmvcore::NoticeType$WARNING)
@@ -5254,12 +5263,17 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
         for (var in self$options$dependentVars) {
           table <- self$results$sensSpecTable$get(key = var)
           if (is.null(table)) next
+          # With a subgroup, .run() adds one matrix per "var ::: level"; this per-variable
+          # item from `items: (dependentVars)` would stay an empty table, so it is not shown.
+          if (!is.null(self$options$subGroup)) {
+            table$setVisible(FALSE)
+            next
+          }
           .deleteTableRows(table)
           table$getColumn("pos")$setTitle(lab(.("Positive (%s)"), pos, .("Positive")))
           table$getColumn("neg")$setTitle(lab(.("Negative (%s)"), neg, .("Negative")))
           table$addRow(rowKey = "1_pos", values = list(decision = lab(.("Positive (%s)"), pos, .("Positive"))))
           table$addRow(rowKey = "1_neg", values = list(decision = lab(.("Negative (%s)"), neg, .("Negative"))))
-          table$setNote("cells", .("Rows are the decision at the cutpoint and columns the criterion: the Positive row holds true and false positives, the Negative row false and true negatives."))
         }
       },
 

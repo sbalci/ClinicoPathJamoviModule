@@ -1,0 +1,111 @@
+---
+title: "Multi-class Diagnostic Performance Evaluation"
+subtitle: "Comprehensive evaluation of multi-class classification models"
+author: "meddecide"
+date: "`r Sys.Date()`"
+output: html_document
+vignette: >
+  %\VignetteIndexEntry{Multi-class Diagnostic Performance Evaluation}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+## Overview
+
+The Multi-class Diagnostic Performance Evaluation function provides comprehensive assessment of multi-class classification models, addressing the need for thorough evaluation metrics identified in machine learning and diagnostic research.
+
+This function was developed in response to analysis of thyroid cytology classification research, where comprehensive multi-class diagnostic evaluation is essential for medical AI applications.
+
+## Key Features
+
+### Per-Class Metrics
+- Sensitivity (Recall) for each class
+- Specificity for each class  
+- Positive Predictive Value (PPV)
+- Negative Predictive Value (NPV)
+- F1 Score
+- Youden Index
+- Area Under the Curve (AUC) via one-vs-rest approach
+
+### Overall Performance
+- Overall accuracy with confidence intervals
+- Cohen's Kappa for chance-corrected agreement
+- Weighted averages of sensitivity, specificity, and F1 scores
+
+### Model Comparison
+- Side-by-side metric comparison
+- Statistical significance tests:
+  - DeLong test for ROC curve comparison (binary)
+  - McNemar test for paired model comparison
+- Effect size calculations
+- Clinical interpretation of differences
+
+### Visualizations
+- Multi-class ROC curves (one-vs-rest)
+- Confusion matrix heatmap
+- Performance metrics comparison chart
+- Model comparison visualization
+
+## Example Applications
+
+### Medical AI Validation
+Evaluating multi-class medical image classification models:
+- Thyroid cytology classification (PTC, MTC, Benign, FN)
+- Pathology diagnosis categories
+- Radiological findings classification
+
+### Machine Learning Model Assessment
+Comparing different classification approaches:
+- Deep learning vs traditional methods
+- Feature engineering impact assessment
+- Algorithm performance comparison
+
+## Statistical Methods
+
+The function implements established diagnostic evaluation methods:
+
+1. **One-vs-Rest ROC Analysis**: Each class treated as positive against all others
+2. **Confusion Matrix Analysis**: Complete classification accuracy breakdown
+3. **Diagnostic Metrics**: Standard 2×2 table metrics extended to multi-class
+4. **Statistical Comparisons**: Appropriate tests for paired model evaluation
+
+## Data Requirements
+
+- **Predicted Classes**: Categorical variable with model predictions
+- **Actual Classes**: Categorical variable with true labels
+- **Optional Second Model**: For model comparison analysis
+
+## Interpretation Guidelines
+
+### AUC Values
+- 0.9-1.0: Excellent discrimination
+- 0.8-0.9: Good discrimination  
+- 0.7-0.8: Fair discrimination
+- 0.6-0.7: Poor discrimination
+- 0.5-0.6: Fail (no discriminative ability)
+
+### Kappa Values
+- 0.81-1.00: Almost perfect agreement
+- 0.61-0.80: Substantial agreement
+- 0.41-0.60: Moderate agreement
+- 0.21-0.40: Fair agreement
+- 0.00-0.20: Slight agreement
+
+### Model Comparison
+- **Statistical Significance**: p < 0.05 indicates significant difference
+- **Clinical Significance**: Consider magnitude and clinical relevance
+- **Effect Size**: Practical importance of observed differences
+
+## References
+
+This implementation follows guidelines from:
+- DeLong, E.R., DeLong, D.M., Clarke-Pearson, D.L. (1988). Comparing the areas under two or more correlated receiver operating characteristic curves
+- McNemar, Q. (1947). Note on the sampling error of the difference between correlated proportions
+- Youden, W.J. (1950). Index for rating diagnostic tests
+- Cohen, J. (1960). A coefficient of agreement for nominal scales
+
+## Related Functions
+
+- **Enhanced ROC Analysis**: For detailed ROC curve analysis with DeLong tests
+- **Decision Analysis**: For clinical decision-making applications  
+- **Cross-table Analysis**: For basic 2×2 table diagnostics

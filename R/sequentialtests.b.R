@@ -120,6 +120,9 @@ sequentialtestsClass <- if (requireNamespace('jmvcore'))
                         for (key in names(override_labels)) {
                             entered <- self$options$get(key)
                             used <- preset_values[[key]]
+                            # A value left at its default was not entered (R calls fill every
+                            # argument), so it is replaced silently, as the GUI does.
+                            if (isTRUE(all.equal(entered, self$options$option(key)$default))) next
                             if (!isTRUE(all.equal(entered, used)))
                                 overridden <- c(overridden, sprintf("%s: %s -> %s",
                                     override_labels[[key]], format(entered), format(used)))
@@ -127,9 +130,9 @@ sequentialtestsClass <- if (requireNamespace('jmvcore'))
                         if (length(overridden) > 0) {
                             private$.addNotice(
                                 'WARNING',
-                                .('Teaching Example Replaced Entered Values'),
+                                .('Teaching Example Replaced Values Given in the Call'),
                                 private$.formatTranslated(
-                                    .('The teaching example replaced these entered values (entered -> used): {values}. Set the teaching example to "Custom Values" to analyse your own values.'),
+                                    .('The teaching example replaced these values given in the call (given -> used): {values}. Set the teaching example to "Custom values" to analyze your own values.'),
                                     list(values = paste(overridden, collapse = "; "))
                                 )
                             )

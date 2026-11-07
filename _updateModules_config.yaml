@@ -48,7 +48,7 @@
 
 
 new_version: "1.1.3"
-new_date: "2026-10-30"
+new_date: "2026-11-07"
 quick: false
 TEST: false
 jjstatsplot: false
@@ -76,7 +76,7 @@ modes:
   # The small verified tests below are selected by analysis and namespace-translated.
   copy_test_files: false
   verified_test_files:
-    decision: ["test-decision-release-inputs.R", "test-decision-release-metrics.R", "test-decision-audit-fixes.R", "test-decision-reference-pages.R", "test-decision-release-fixes.R"]
+    decision: ["test-decision-release-inputs.R", "test-decision-release-metrics.R", "test-decision-audit-fixes.R", "test-decision-reference-pages.R", "test-decision-release-fixes.R", "test-meddecide-release-review-2026-11-07.R"]
     decisioncalculator: ["test-decisioncalculator-release-inputs.R", "test-decisioncalculator-correction-explanation.R", "test-decisioncalculator-release-fixes.R"]
     decisioncombine: ["test-decisioncombine-release-inputs.R", "test-decisioncombine-correction-explanation.R", "test-decisioncombine-release-fixes.R"]
     enhancedROC: ["test-enhancedROC-release-inputs.R", "test-enhancedROC-release-parity.R", "test-enhancedROC-release-fixes.R", "test-enhancedROC-release-fixes-2026-10-21.R"]

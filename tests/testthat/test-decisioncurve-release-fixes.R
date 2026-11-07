@@ -33,8 +33,11 @@ test_that("DC-21-01 a null predictor's range is stated as apparent, with no unce
   # with the bands drawn, the pointer reads them instead
   res_ci <- rf_run(d, showBenefitRange = TRUE, showTable = FALSE, confidenceIntervals = TRUE,
                    bootReps = 100)
-  expect_match(rf_notes(res_ci$benefitRangeTable), "bootstrap interval on the decision curve plot",
+  # 2026-11-07: the default pointwise intervals are named as such, and a band clearing a
+  # reference line is not presented as a test of the difference.
+  expect_match(rf_notes(res_ci$benefitRangeTable), "pointwise bootstrap intervals on the decision curve plot",
                fixed = TRUE)
+  expect_match(rf_notes(res_ci$benefitRangeTable), "not a test of the difference", fixed = TRUE)
 })
 
 test_that("DC-21-02 an exact 1:3 split also discloses case-control sampling; 1:1 still does", {

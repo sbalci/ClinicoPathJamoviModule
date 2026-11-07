@@ -221070,3 +221070,91 @@ msgstr "Adım adım yönergelerle rehber kipini açar: - Değişken ve seçenek 
 #: jamovi/waterfall.a.yaml
 msgid "Optional per-patient RECIST category (CR/PR/SD/PD, or NE for not evaluable). It overrides the computed category, and counts a patient with no measured value (e.g. PD before the first scan). Affects coloring and metrics. Per-visit values are reduced to the best one up to the first PD."
 msgstr "İsteğe bağlı hasta başına RECIST kategorisi (CR/PR/SD/PD veya değerlendirilemez için NE). Hesaplanan kategorinin yerine geçer ve ölçülmüş değeri olmayan bir hastayı da sayar (örneğin ilk taramadan önce PD). Renklendirmeyi ve ölçütleri etkiler. Ziyaret bazlı değerler, ilk PD'ye kadarki en iyi değere indirgenir."
+
+#: meddecide release review 2026-11-07
+msgid "A likelihood ratio whose denominator cell is empty uses the Haldane-Anscombe 0.5 correction, while the predictive values in the results tables use the observed counts. Multiplying the pre-test odds by these likelihood ratios therefore need not reproduce the predictive values exactly."
+msgstr "Payda hücresi boş olan bir olabilirlik oranı 0.5 Haldane-Anscombe düzeltmesini kullanırken sonuç tablolarındaki öngörü değerleri gözlenen sayıları kullanır. Bu nedenle test öncesi odds'u bu olabilirlik oranlarıyla çarpmak öngörü değerlerini tam olarak vermeyebilir."
+
+#: meddecide release review 2026-11-07
+msgid "Data suitability: high collinearity detected (%s). The predictions are not affected as such, but the choice and coefficients of correlated predictors are unstable; see the Data Suitability table."
+msgstr "Veri uygunluğu: yüksek çoklu doğrusallık saptandı (%s). Tahminler bundan doğrudan etkilenmez, ancak ilişkili yordayıcıların seçimi ve katsayıları kararsızdır; Veri Uygunluğu tablosuna bakın."
+
+#: meddecide release review 2026-11-07
+msgid "Every case received the same ratings, so the standard error is 0 and no confidence interval or p-value can be estimated from this sample."
+msgstr "Her olgu aynı değerlendirmeleri aldı; bu nedenle standart hata 0'dır ve bu örneklemden güven aralığı ya da p değeri tahmin edilemez."
+
+#: meddecide release review 2026-11-07
+msgid "Every marker is compared in the selected Classification Direction. %s has an AUC below 0.5 in that direction, so a difference involving it reflects reading that marker backwards, not which marker discriminates better."
+msgstr "Her belirteç seçilen Sınıflandırma Yönünde karşılaştırılır. %s bu yönde 0.5'in altında bir AUC'ye sahiptir; bu nedenle onu içeren bir fark, hangi belirtecin daha iyi ayırt ettiğini değil, o belirtecin ters yönde okunduğunu yansıtır."
+
+#: meddecide release review 2026-11-07
+msgid "Max |r| = %.2f (>=0.9: high; LASSO keeps one of the correlated predictors more or less arbitrarily, so the selected set is unstable; elastic net or ridge keeps them together)"
+msgstr "Maks |r| = %.2f (>=0.9: yüksek; LASSO ilişkili yordayıcılardan birini aşağı yukarı keyfi olarak tutar, bu nedenle seçilen küme kararsızdır; elastic net veya ridge onları birlikte tutar)"
+
+#: meddecide release review 2026-11-07
+msgid "Max |r| = %.2f (>=0.9: high; the coefficients of the correlated predictors are not separately interpretable)"
+msgstr "Maks |r| = %.2f (>=0.9: yüksek; ilişkili yordayıcıların katsayıları ayrı ayrı yorumlanamaz)"
+
+#: meddecide release review 2026-11-07
+msgid "Max |r| = %.2f (0.7-0.9: moderate; which of the correlated predictors is selected may vary)"
+msgstr "Maks |r| = %.2f (0.7-0.9: orta; ilişkili yordayıcılardan hangisinin seçildiği değişebilir)"
+
+#: meddecide release review 2026-11-07
+msgid "No evidence of discrimination in this sample (the 95% confidence interval for Youden's index includes 0)"
+msgstr "Bu örneklemde ayırt etme gücüne ilişkin kanıt yok (Youden indeksinin %95 güven aralığı 0'ı içeriyor)"
+
+#: meddecide release review 2026-11-07
+msgid "no statistically detectable"
+msgstr "istatistiksel olarak saptanamayan"
+
+#: meddecide release review 2026-11-07
+msgid "Not estimable: sensitivity or specificity could not be computed, or the false-positive count is zero and no continuity-corrected value would be valid"
+msgstr "Tahmin edilemez: duyarlılık ya da özgüllük hesaplanamadı veya yanlış pozitif sayısı sıfırdır ve süreklilik düzeltmeli hiçbir değer geçerli olmaz"
+
+#: meddecide release review 2026-11-07
+msgid "Not estimable: sensitivity or specificity could not be computed, or the true-negative count is zero and no continuity-corrected value would be valid"
+msgstr "Tahmin edilemez: duyarlılık ya da özgüllük hesaplanamadı veya gerçek negatif sayısı sıfırdır ve süreklilik düzeltmeli hiçbir değer geçerli olmaz"
+
+#: meddecide release review 2026-11-07
+msgid "Prediction: %s"
+msgstr "Tahmin: %s"
+
+#: meddecide release review 2026-11-07
+msgid "Select a positive reference level and choose a distinct negative reference level."
+msgstr "Bir pozitif referans düzeyi seçin ve ondan farklı bir negatif referans düzeyi seçin."
+
+#: meddecide release review 2026-11-07
+msgid "Teaching Example Replaced Values Given in the Call"
+msgstr "Eğitim Örneği Çağrıda Verilen Değerlerin Yerini Aldı"
+
+#: meddecide release review 2026-11-07
+msgid "The %.0f%% interval is an <i>approximation</i>: a Wilson interval applied to specific agreement, which is not a binomial proportion, on n = 2a + b + c, the number of times either rater assigned the category (a case both raters placed in it counts twice, so the interval is narrower than one based on cases). Actual coverage is not guaranteed, and the interval is least trustworthy for rare categories and for values near 0 or 1. de Vet and colleagues (2013) recommend a bootstrap interval instead; treat these limits as indicative."
+msgstr "%%%.0f aralık bir <i>yaklaşımdır</i>: binom oranı olmayan özgül uyuma, n = 2a + b + c üzerinden, yani değerlendiricilerden herhangi birinin kategoriyi atadığı kez sayısı üzerinden uygulanmış bir Wilson aralığıdır (iki değerlendiricinin de o kategoriye koyduğu bir olgu iki kez sayılır, bu nedenle aralık olgulara dayalı bir aralıktan daha dardır). Gerçek kapsama garanti edilmez ve aralık, nadir kategorilerde ve 0 ya da 1'e yakın değerlerde en az güvenilirdir. de Vet ve meslektaşları (2013) bunun yerine bir bootstrap aralığı önerir; bu sınırları gösterge niteliğinde kabul edin."
+
+#: meddecide release review 2026-11-07
+msgid "The pointwise bootstrap intervals on the decision curve plot hold at each threshold separately and overstate confidence when read across this range; choose the simultaneous band under Interval type to judge the range as a whole. The reference lines are estimated from the same data, so an interval that clears them is not a test of the difference from treat all or treat none."
+msgstr "Karar eğrisi grafiğindeki noktasal bootstrap aralıkları her eşik için ayrı ayrı geçerlidir ve bu aralık boyunca birlikte okunduğunda güveni olduğundan yüksek gösterir; aralığı bir bütün olarak değerlendirmek için Aralık türü altında eşzamanlı bandı seçin. Referans çizgileri aynı verilerden tahmin edilir; bu nedenle onların üzerinde kalan bir aralık, herkesi tedavi etme veya hiç kimseyi tedavi etmemeden farkın bir testi değildir."
+
+#: meddecide release review 2026-11-07
+msgid "The simultaneous bootstrap band on the decision curve plot shows the uncertainty of the model's net benefit over this range. The reference lines are estimated from the same data, so a band that clears them is not a test of the difference from treat all or treat none."
+msgstr "Karar eğrisi grafiğindeki eşzamanlı bootstrap bandı, modelin net yararının bu aralık boyunca belirsizliğini gösterir. Referans çizgileri aynı verilerden tahmin edilir; bu nedenle onların üzerinde kalan bir bant, herkesi tedavi etme veya hiç kimseyi tedavi etmemeden farkın bir testi değildir."
+
+#: meddecide release review 2026-11-07
+msgid "The teaching example replaced these values given in the call (given -> used): {values}. Set the teaching example to \"Custom values\" to analyze your own values."
+msgstr "Eğitim örneği çağrıda verilen şu değerlerin yerini aldı (verilen -> kullanılan): {values}. Kendi değerlerinizi analiz etmek için eğitim örneğini \"Özel değerler\" olarak ayarlayın."
+
+#: meddecide jamovi/0000.yaml 2026-11-07
+msgid "Histopathology Diagnostic and Agreement Examples"
+msgstr "Histopatoloji Tanı ve Uyum Örnekleri"
+
+#: meddecide jamovi/0000.yaml 2026-11-07
+msgid "Medical Decision, Diagnostic Accuracy and Agreement Analysis"
+msgstr "Tıbbi Karar, Tanısal Doğruluk ve Uyum Analizi"
+
+#: meddecide jamovi/0000.yaml 2026-11-07
+msgid "Pathology dataset with saved Interrater Reliability, Medical Decision, Medical Decision Calculator, Co-Testing and Sequential Testing analyses."
+msgstr "Kaydedilmiş Değerlendiriciler Arası Güvenilirlik, Tıbbi Karar, Tıbbi Karar Hesaplayıcı, Birlikte Test (Co-Testing) ve Sıralı Test analizlerini içeren patoloji veri seti."
+
+#: meddecide jamovi/0000.yaml 2026-11-07
+msgid "Medical decision analysis for clinicians and pathologists. Diagnostic test accuracy: sensitivity, specificity, predictive values at a chosen prevalence and likelihood ratios with exact intervals and an explicit zero-cell rule, Fagan nomograms, comparison and combination of tests, co-testing and sequential testing, and analysis without a gold standard (latent class models). ROC analysis: optimal cut-points, partial AUC, DeLong comparisons, NRI and IDI, calibration and frozen-model validation. Decision curve analysis and LASSO logistic prediction models. Interrater reliability: Cohen's, Fleiss' and weighted kappa, Krippendorff's alpha, Gwet's AC1/AC2, ICC, specific agreement and related measures. Sample-size and power calculators for kappa studies are in the Power menu. Results support research and teaching; they do not replace clinical judgement. Report problems at <https://github.com/sbalci/ClinicoPathJamoviModule/issues/>."
+msgstr "Klinisyenler ve patologlar için tıbbi karar analizi. Tanısal test doğruluğu: duyarlılık, özgüllük, seçilen bir prevalansta öngörü değerleri ve kesin aralıklar ile açık bir sıfır hücre kuralına sahip olabilirlik oranları, Fagan nomogramları, testlerin karşılaştırılması ve birleştirilmesi, birlikte test ve sıralı test ile altın standart olmadan analiz (gizil sınıf modelleri). ROC analizi: optimal kesim noktaları, kısmi AUC, DeLong karşılaştırmaları, NRI ve IDI, kalibrasyon ve dondurulmuş model doğrulaması. Karar eğrisi analizi ve LASSO lojistik tahmin modelleri. Değerlendiriciler arası güvenilirlik: Cohen, Fleiss ve ağırlıklı kappa, Krippendorff alfa, Gwet AC1/AC2, ICC, özgül uyum ve ilişkili ölçüler. Kappa çalışmaları için örneklem büyüklüğü ve güç hesaplayıcıları Power menüsündedir. Sonuçlar araştırma ve eğitimi destekler; klinik yargının yerini tutmaz. Sorunları <https://github.com/sbalci/ClinicoPathJamoviModule/issues/> adresinden bildirin."

@@ -4715,14 +4715,15 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                         # Determine which categories to analyze
                         collapse_negative <- FALSE
                         negative_label <- ""
-                        if (all_categories) {
-                            categories_to_analyze <- all_levels
-                        } else if (nzchar(trimws(positive_category))) {
-                            # Typed, because a LevelSelector draws on one variable and these categories come
-                            # from every rater (see the option in agreement.a.yaml): a stray space or other
-                            # capitalisation still names the category; an exact match wins.
-                            typed <- trimws(positive_category)
-                            hit <- if (typed %in% all_levels) typed else all_levels[tolower(all_levels) == tolower(typed)]
+                        # Typed, because a LevelSelector draws on one variable and these categories come
+                        # from every rater (see the option in agreement.a.yaml): a stray space or other
+                        # capitalisation still names the category; an exact match wins. Matched here,
+                        # before the branch: under "All-category estimates" (the default) the raw text
+                        # used to reach the "(Positive)" label, so "pos" left both rows "(Negative)".
+                        positive_category <- trimws(positive_category)
+                        if (nzchar(positive_category)) {
+                            hit <- if (positive_category %in% all_levels) positive_category
+                                   else all_levels[tolower(all_levels) == tolower(positive_category)]
                             if (length(hit) == 1L) positive_category <- hit
                             if (!(positive_category %in% all_levels)) {
                                 private$.subAnalysisFailed(self$results$specificAgreementGroup$specificAgreementTable,
@@ -4730,6 +4731,10 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                                 )
                                 return()
                             }
+                        }
+                        if (all_categories) {
+                            categories_to_analyze <- all_levels
+                        } else if (nzchar(positive_category)) {
                             # NSA has to be reachable in the mode that advertises it.
                             #
                             # This used to be categories_to_analyze <- positive_category
@@ -4862,7 +4867,8 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                                     # Add note for binary PSA/NSA interpretation
                                     if (nzchar(positive_category) && category == positive_category) {
                                         type_label <- sprintf(.("%s (Positive)"), category)
-                                        if (specific_agreement < 0.80) {
+                                        # Below the "Good" band only: at 0.75-0.80 it read "Good agreement ... Critical".
+                                        if (specific_agreement < 0.75) {
                                             interp <- paste(interp, .("- Critical: Low PSA indicates inconsistent positive diagnosis"))
                                         }
                                     } else if (binary_split) {
@@ -4919,7 +4925,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                         if (include_ci && self$options$specificCIMethod == "legacy") {
                             self$results$specificAgreementGroup$specificAgreementTable$setNote(
                                 "ci_approx",
-                                sprintf(.("The %.0f%% interval is an <i>approximation</i>: a Wilson interval applied to specific agreement, which is not a binomial proportion, on the count of cases rated into the category by at least one rater. Actual coverage is not guaranteed, and the interval is least trustworthy for rare categories and for values near 0 or 1. de Vet and colleagues (2013) recommend a bootstrap interval instead; treat these limits as indicative."),
+                                sprintf(.("The %.0f%% interval is an <i>approximation</i>: a Wilson interval applied to specific agreement, which is not a binomial proportion, on n = 2a + b + c, the number of times either rater assigned the category (a case both raters placed in it counts twice, so the interval is narrower than one based on cases). Actual coverage is not guaranteed, and the interval is least trustworthy for rare categories and for values near 0 or 1. de Vet and colleagues (2013) recommend a bootstrap interval instead; treat these limits as indicative."),
                                     100 * self$options$confLevel)
                             )
                         }
@@ -11473,6 +11479,15 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                         ci_lower <- ci_parts[1]
                         ci_upper <- ci_parts[2]
 
+                        # Unanimous ratings give SE 0, so irrCAC's interval collapses to [1, 1] and
+                        # t is infinite. That is no evidence of precision: leave them blank and say so.
+                        se0_note <- NULL
+                        if (is.finite(se) && se == 0) {
+                            se <- NA_real_; ci_lower <- NA_real_; ci_upper <- NA_real_; p_value <- NA_real_
+                            se0_note <- .("Every case received the same ratings, so the standard error is 0 and no confidence interval or p-value can be estimated from this sample.")
+                        }
+                        self$results$gwetGroup$gwetTable$setNote("se0", se0_note)
+
                         # Populate table
                         self$results$gwetGroup$gwetTable$setRow(rowNo = 1, values = list(
                             method = method_name,
@@ -14444,7 +14459,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                         }
                         table$setRow(rowKey = "n_info", values = list(
                             value = length(ref_cols),
-                            comparison = sprintf(.("Prediction: rater %d"), as.integer(pred_col)),
+                            comparison = sprintf(.("Prediction: %s"), private$.noteSafe(colnames(ratings)[pred_col])),
                             # One table, two denominators: the concordance figures use
                             # every valid case, the strict figures only those with a
                             # resolved consensus. A bare "N cases evaluated" hid the split

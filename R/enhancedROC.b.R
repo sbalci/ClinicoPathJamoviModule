@@ -1454,8 +1454,8 @@ enhancedROCClass <- R6::R6Class(
                 return(.fmt(.("Unmapped reference levels; explicitly recode before evaluation: {levels}"),
                             levels = substring(message, nchar(prefix) + 1L)))
             known <- list(
-                "Select a positive reference level and enter a distinct negative reference level." =
-                    .("Select a positive reference level and enter a distinct negative reference level."),
+                "Select a positive reference level and choose a distinct negative reference level." =
+                    .("Select a positive reference level and choose a distinct negative reference level."),
                 "Frozen-model evaluation requires an explicit score direction." =
                     .("Frozen-model evaluation requires an explicit score direction."),
                 "Frozen evaluation requires a model version and an independently selected threshold. Use Development / exploratory for data-selected thresholds." =

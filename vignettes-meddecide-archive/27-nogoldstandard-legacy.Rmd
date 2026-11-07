@@ -1,0 +1,242 @@
+---
+title: "Analyzing Diagnostic Tests without a Gold Standard"
+author: "ClinicoPath Development Team"
+date: "`r Sys.Date()`"
+output:
+  html_document:
+    toc: true
+    toc_depth: 3
+    toc_float: true
+    theme: united
+vignette: >
+  %\VignetteIndexEntry{Analyzing Diagnostic Tests without a Gold Standard}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  echo = TRUE,
+  message = FALSE,
+  warning = FALSE,
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+# Introduction
+
+Evaluating a diagnostic test usually needs a reference ("gold") standard that tells us who truly has the
+disease. Often no such reference exists, or it is too invasive, costly or unethical to apply to everyone.
+The `nogoldstandard` analysis estimates how several imperfect tests behave from the patterns of agreement
+and disagreement among them, without a reference test.
+
+This vignette shows how to:
+
+1. fit a two-class latent class model and read its class proportion and response probabilities,
+2. obtain bootstrap confidence intervals,
+3. compare the latent-model results with simple reference rules,
+4. check, and understand the limits of checking, the conditional-independence assumption.
+
+Every code chunk below is executed when the vignette is built.
+
+# Methods Overview
+
+The analysis offers five methods.
+
+1. **Latent class analysis** (`latent_class`, the default): a two-class model in which the tests are
+   assumed to err independently within each class (conditional independence). Fitted by maximum likelihood.
+2. **Penalized EM** (`bayesian`): the same two-class model, fitted with fixed priors. Prevalence uses a
+   uniform Beta(1, 1) prior; sensitivity and specificity each use a Beta(2, 1) prior, which adds one pseudo
+   true-positive and one pseudo true-negative result to every test and pulls both estimates upward. The
+   result is a penalized-likelihood (MAP) point estimate, not a posterior sample, and the priors cannot be
+   changed.
+3. **Composite reference** (`composite`): a patient is reference-positive when more than half of the tests
+   are positive (a tie counts as negative). Each evaluated test votes on the reference it is then compared
+   with (incorporation bias), so its agreement can be distorted in either direction.
+4. **All tests positive** (`all_positive`): reference-positive only when every test is positive.
+5. **Any test positive** (`any_positive`): reference-positive when at least one test is positive.
+
+The three rule methods report agreement of each test with a rule built from the same tests. That is not
+diagnostic accuracy.
+
+The latent methods need at least three tests; the analysis refuses two.
+
+# Example Data
+
+Four imperfect tests on 200 patients. In this simulation the true status is known, so we can compare the
+estimates with the truth; in practice it is not.
+
+```{r data}
+library(meddecide)
+
+set.seed(123)
+n <- 200
+true_status <- rbinom(n, 1, 0.3)  # 30% prevalence
+
+simulate_test <- function(sens, spec) {
+  ifelse(true_status == 1, rbinom(n, 1, sens), rbinom(n, 1, 1 - spec))
+}
+to_factor <- function(x) factor(ifelse(x == 1, "pos", "neg"), levels = c("neg", "pos"))
+
+data <- data.frame(
+  caseID = 1:n,
+  test1 = to_factor(simulate_test(0.90, 0.90)),
+  test2 = to_factor(simulate_test(0.75, 0.95)),
+  test3 = to_factor(simulate_test(0.85, 0.85)),
+  test4 = to_factor(simulate_test(0.70, 0.95))
+)
+head(data)
+```
+
+# Running the Analysis
+
+In R every test slot and every positive-level argument must be supplied. Unused slots are passed as
+`NULL` (a positive level is a required argument of the R function even when its test is not used).
+
+```{r lca}
+result <- nogoldstandard(
+  data = data,
+  test1 = "test1", test1Positive = "pos",
+  test2 = "test2", test2Positive = "pos",
+  test3 = "test3", test3Positive = "pos",
+  test4 = "test4", test4Positive = "pos",
+  test5 = NULL, test5Positive = NULL,
+  method = "latent_class"
+)
+
+result$prevalence$asDF
+result$test_metrics$asDF[, c("test", "sensitivity", "specificity", "ppv", "npv")]
+```
+
+Results tables are read with `$asDF`, which is a field, not a function: write `result$prevalence$asDF`,
+not `result$prevalence$asDF()`.
+
+The output contains:
+
+1. the fitted proportion of the high-positive latent class,
+2. for each test, the probability of a positive result in the high-positive class and of a negative result
+   in the other class, with predictive values,
+3. model-fit statistics and a conditional-independence check (bivariate residuals),
+4. the test agreement table and plot.
+
+# Bootstrap Confidence Intervals
+
+With `bootstrap = TRUE` the analysis resamples patients with replacement, refits the selected method on
+each resample, and reports percentile intervals. The point estimates do not change; only intervals are
+added. `seed` makes the intervals reproducible. `nboot` must be at least 100; use 1000 or more for
+reported results (100 keeps this vignette fast).
+
+```{r bootstrap}
+result_ci <- nogoldstandard(
+  data = data,
+  test1 = "test1", test1Positive = "pos",
+  test2 = "test2", test2Positive = "pos",
+  test3 = "test3", test3Positive = "pos",
+  test4 = "test4", test4Positive = "pos",
+  test5 = NULL, test5Positive = NULL,
+  method = "latent_class",
+  bootstrap = TRUE, nboot = 100, alpha = 0.05, seed = 42
+)
+result_ci$prevalence$asDF
+```
+
+Percentile intervals can be too narrow with weak identification, estimates at 0% or 100%, or small
+samples; nominal coverage is not guaranteed. Rows are resampled as independent patients, so the
+intervals do not account for clustering (several specimens from one patient).
+
+# Comparing Methods
+
+```{r compare}
+methods <- c("latent_class", "bayesian", "composite", "all_positive", "any_positive")
+results <- lapply(methods, function(m) {
+  nogoldstandard(
+    data = data,
+    test1 = "test1", test1Positive = "pos",
+    test2 = "test2", test2Positive = "pos",
+    test3 = "test3", test3Positive = "pos",
+    test4 = "test4", test4Positive = "pos",
+    test5 = NULL, test5Positive = NULL,
+    method = m
+  )
+})
+names(results) <- methods
+
+sapply(results, function(x) x$prevalence$asDF$estimate[1])
+```
+
+The methods estimate different quantities:
+
+- **Latent class analysis** and **penalized EM** estimate the proportion of the high-positive latent class.
+  Penalized EM is pulled toward higher sensitivity and specificity by its fixed priors; with a large
+  sample the two agree closely.
+- **All tests positive** gives the smallest rule-positive proportion and **any test positive** the
+  largest, by construction.
+- **Composite** is a majority vote that includes the evaluated test.
+
+# Interpreting Results
+
+## Class proportion, not automatically prevalence
+
+Latent classes are unlabeled. The analysis names the class whose tests are, on average, more often
+positive the "high-positive" class. Calling it the diseased class, its proportion the prevalence, and the
+response probabilities sensitivity and specificity requires the substantive assumption that positive
+results are more common in diseased patients for most tests. If a positive level is selected the wrong
+way round, a test can come out below chance (sensitivity plus specificity below 1), and the analysis warns
+about it.
+
+For the rule methods the "prevalence" is the proportion meeting the rule, and sensitivity and
+specificity are agreement with that rule.
+
+## Conditional independence
+
+The latent model assumes the tests err independently within each class. Two tests that share a mechanism
+(the same target, the same reader, the same specimen) violate this and can make both look more accurate
+than they are.
+
+- **Four or five tests**: the bivariate-residual table compares each observed pairwise table with the one
+  the fitted model implies. A residual above 3.84 is descriptive evidence against conditional
+  independence, and the analysis then raises a warning. The flagged pair is not necessarily the dependent
+  pair: the latent classes can absorb dependence between two tests so that the misfit appears elsewhere.
+  Penalized EM shows the same table, computed from the unpenalized fit of the same model.
+- **Three tests**: the two-class model has 7 parameters for 7 free cell frequencies, so it usually
+  reproduces the observed table exactly. Dependence cannot be detected from the data, the residuals read
+  "Not assessable", and the analysis warns that conditional independence cannot be checked. A fourth test
+  that errs independently is needed to detect dependence.
+
+The analysis does not fit dependence models (direct test-to-test associations, more than two classes, or
+random-effects latent class models).
+
+## Missing data
+
+The analysis is complete-case: a patient with a missing result on any selected test is excluded from every
+estimate, and the number of analysed cases out of the total is reported. If results are not missing completely at random, the
+estimates can be biased.
+
+# Recommendations for Practice
+
+1. Use latent class analysis as the primary method, with at least four tests when you can, and read its
+   conditional-independence check before interpreting the response probabilities as accuracy.
+2. Treat penalized EM as a stabilized version of the same model for small samples, not as a way to supply
+   prior knowledge; its priors are fixed.
+3. Report the rule methods as agreement, not as accuracy.
+4. Report bootstrap intervals (1000 or more resamples) with the seed.
+5. Validate against external data, follow-up, or a reference test on a subset of patients where possible.
+
+# References
+
+1. Hui SL, Walter SD. Estimating the error rates of diagnostic tests. Biometrics. 1980;36(1):167-171.
+
+2. Joseph L, Gyorkos TW, Coupal L. Bayesian estimation of disease prevalence and the parameters of diagnostic tests in the absence of a gold standard. Am J Epidemiol. 1995;141(3):263-272.
+
+3. Albert PS, Dodd LE. A cautionary note on the robustness of latent class models for estimating diagnostic error without a gold standard. Biometrics. 2004;60(2):427-435.
+
+4. Collins J, Huynh M. Estimation of diagnostic test accuracy without full verification: a review of latent class methods. Stat Med. 2014;33(24):4141-4169.
+
+5. Dendukuri N, Joseph L. Bayesian approaches to modeling the conditional dependence between multiple diagnostic tests. Biometrics. 2001;57(1):158-167.
+
+# Session Information
+
+```{r}
+sessionInfo()
+```

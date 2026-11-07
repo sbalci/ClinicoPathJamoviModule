@@ -692,6 +692,10 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) {
                 # F1 Score (harmonic mean of sensitivity and PPV)
                 if (is.finite(Sens) && is.finite(PPV) && (Sens + PPV) > 0) {
                     F1Score <- 2 * (Sens * PPV) / (Sens + PPV)
+                } else if (is.finite(Sens) && Sens == 0) {
+                    # No true positive: 2TP / (2TP + FP + FN) = 0 exactly (FN > 0 since Sens is
+                    # defined), although the harmonic-mean form is 0/0 or has an undefined PPV.
+                    F1Score <- 0
                 } else {
                     F1Score <- NA_real_
                 }
@@ -958,6 +962,9 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) {
                                 # and NNDx when only the Youden upper limit is above 0).
                                 v <- c(df$est[i], df$lower[i], df$upper[i])
                                 v[!is.finite(v)] <- NA_real_
+                                # A 0/0 proportion (PPV with TP = FP = 0) comes back with the
+                                # interval 0 to 1, which bounds nothing: blank it with the estimate.
+                                if (is.nan(df$est[i])) v[2:3] <- NA_real_
                                 table$setRow(rowKey = stats[i],
                                     values = list(est = v[1], lower = v[2],
                                                   upper = v[3]))
@@ -1616,7 +1623,7 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) {
                     # NPV are not, so "PPV 100.0%" sat beside "multiplies pre-test odds by
                     # 11.00" with nothing to reconcile them.
                     if (isTRUE(lr_corrected)) paste0("<p style='margin: 10px 0; font-size: 13px;'>",
-                        .("A likelihood ratio whose denominator cell is empty uses the Haldane-Anscombe 0.5 correction, while the predictive values above use the observed counts. Multiplying the pre-test odds by these likelihood ratios therefore need not reproduce the predictive values exactly."),
+                        .("A likelihood ratio whose denominator cell is empty uses the Haldane-Anscombe 0.5 correction, while the predictive values in the results tables use the observed counts. Multiplying the pre-test odds by these likelihood ratios therefore need not reproduce the predictive values exactly."),
                         "</p>") else "",
                     "<div style='background-color: rgba(155, 155, 155, 0.06); border: 1px solid #ccc; padding: 12px; margin: 15px 0; color: inherit;'>",
                     "<p style='margin: 0; font-weight: bold;'>", .("Interpretation caveat"),
