@@ -54,11 +54,13 @@ test_that("lassocox reports inadequate censoring and fits an independent-censori
   predictors <- c("age", "gender", "smoking_status", "histology", "stage", "tumor_size_cm",
     "ecog_performance_status", "hemoglobin_g_dl", "wbc_count_k_ul", "platelet_count_k_ul",
     "creatinine_mg_dl", "treatment_type")
-  expect_error(lassocox_integration_run(d, "follow_up_months", "progression", "Yes", predictors), "zero values")
-  positive <- d
-  positive$follow_up_months <- seq_len(nrow(d))
-  expect_error(lassocox_integration_run(positive, "follow_up_months", "progression", "Yes", predictors), "at least 3 events and 3 censored")
-  # Preserve the bundled stress fixture; simulate a usable endpoint in memory only.
+  # The bundled data (regenerated 2026-11-07 with realistic censoring) fits as shipped.
+  lassocox_integration_valid(lassocox_integration_run(d, "follow_up_months", "progression", "Yes", predictors))
+  zero <- d; zero$follow_up_months[1] <- 0
+  expect_error(lassocox_integration_run(zero, "follow_up_months", "progression", "Yes", predictors), "zero values")
+  few <- d; few$progression <- factor(c("No", "No", rep("Yes", nrow(d) - 2)))
+  expect_error(lassocox_integration_run(few, "follow_up_months", "progression", "Yes", predictors), "at least 3 events and 3 censored")
+  # An independent-censoring endpoint, simulated in memory.
   withr::local_seed(455)
   event <- rexp(nrow(d), exp(.03 * (d$age - mean(d$age))))
   censor <- rexp(nrow(d), .5)
@@ -82,8 +84,10 @@ test_that("lassocox integrates cardiovascular predictors and missingness reporti
 
 test_that("lassocox integrates a small cohort with reproducible reduced folds", {
   d <- lassocox_integration_data("lassocox_small_cohort")
-  # Rounded zero times in the bundled stress fixture must be rejected.
-  expect_error(lassocox_integration_run(d, "time_months", "event_occurred", "Yes",
+  lassocox_integration_valid(lassocox_integration_run(d, "time_months", "event_occurred", "Yes",
+    c("age", "biomarker_a")))
+  zero <- d; zero$time_months[1] <- 0
+  expect_error(lassocox_integration_run(zero, "time_months", "event_occurred", "Yes",
     c("age", "biomarker_a")), "zero values")
   withr::local_seed(612)
   d$time_months <- rexp(nrow(d))  # independent synthetic times, in memory only
@@ -97,7 +101,7 @@ test_that("lassocox integrates a small cohort with reproducible reduced folds", 
 test_that("lassocox integrates a dynamically specified genomic predictor vector", {
   d <- lassocox_integration_data("lassocox_genomic")
   predictors <- c("age", "sex", "tumor_stage", grep("^gene_", names(d), value = TRUE))
-  expect_error(lassocox_integration_run(d, "os_months", "vital_status", "Dead", predictors), "at least 3 events and 3 censored")
+  lassocox_integration_valid(lassocox_integration_run(d, "os_months", "vital_status", "Dead", predictors, nfolds = 5))
   withr::local_seed(714)
   event <- rexp(nrow(d), exp(.8 * as.numeric(scale(d[[predictors[4]]]))))
   censor <- rexp(nrow(d), .3)

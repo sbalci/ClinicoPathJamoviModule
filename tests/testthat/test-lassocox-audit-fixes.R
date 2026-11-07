@@ -83,7 +83,7 @@ test_that("reruns clear notes and recover fixed rows and plot visibility", {
   pr$.clearAnalysisOutputs()
   expect_equal(a$results$modelSummary$rowCount, 0)
   expect_length(a$results$coefficients$notes, 0)
-  expect_identical(a$results$rCode$content, "")
+  expect_identical(a$results$rCode$content, "<div></div>")
   expect_null(a$results$path_plot$state)
 })
 

@@ -100,16 +100,21 @@ test_that("timeinterval format with different units", {
   formats <- c("ymd", "dmy", "mdy")
   units <- c("days", "weeks", "months", "years")
   
+  # timeinterval_test holds ISO dates, so only ymd can read it. dmy/mdy used to
+  # "pass" because the parse failure was an Html banner; it is now a reject().
   for (fmt in formats) {
     for (unit in units) {
-      result <- timeinterval(
+      call <- quote(timeinterval(
         data = timeinterval_test,
         dx_date = "diagnosis_date",
         fu_date = "followup_date",
         time_format = fmt,
         output_unit = unit
-      )
-      expect_no_error(result)
+      ))
+      if (fmt == "ymd")
+        expect_s3_class(eval(call), "timeintervalResults")
+      else
+        expect_error(eval(call), "Date parsing failed", fixed = TRUE)
     }
   }
 })

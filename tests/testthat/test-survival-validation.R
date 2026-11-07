@@ -9,7 +9,7 @@
     }))
     e <- new.env(parent = globalenv())
     e[[".packageName"]] <- "ClinicoPath"
-    for (f in c("utils.R", "utils-formula.R", "utils-eventindicator.R",
+    for (f in c("utils.R", "utils-formula.R", "utils-eventindicator.R", "utils-survivaldata.R",
                 "utils-observed-cif.R", "survival-competingrisks.R",
                 "survival.h.R", "survival.b.R")) {
       sys.source(file.path(root, "R", f), envir = e)
@@ -50,7 +50,11 @@ test_that("survival copy-ready median sentences retain estimable confidence limi
   expect_true(all(is.finite(r$medianTable$asDF$x0_95lcl)))
   expect_true(all(is.finite(r$medianTable$asDF$x0_95ucl)))
   expect_false(grepl("NA to NA", r$copyReadySentencesExplanation$content, fixed = TRUE))
-  expect_match(r$copyReadySentencesExplanation$content,"95% CI: 11.92 to 28.2 months",fixed=TRUE)
+  # Limits are the log-log (Kalbfleisch-Prentice) band, as in Single Arm Survival.
+  tab <- summary(survival::survfit(survival::Surv(time, status) ~ grp, data = .sv_validation_data(),
+                                   conf.type = "log-log"))$table
+  ci <- sprintf("95%% CI: %.1f to %.1f months", tab[, "0.95LCL"], tab[, "0.95UCL"])
+  for (x in ci) expect_match(r$copyReadySentencesExplanation$content, x, fixed = TRUE)
 })
 
 test_that("survival copy-ready text contains its estimated Cox hazard ratio", {
@@ -120,7 +124,9 @@ test_that("survival preserves literal NA labels, order and caller data", {
   actual <- .sv_validation_run(d)
   expect_equal(sum(actual$medianTable$asDF$records),117)
   expect_setequal(as.character(actual$medianTable$asDF$factor),c("B","A","NA"))
-  expect_true(is.ordered(actual$plot$state$cleanData$grp))
+  # Ordered becomes plain, or contr.poly gives unlabelled .L/.Q model rows; the order stays.
+  expect_false(is.ordered(actual$plot$state$cleanData$grp))
+  expect_equal(levels(actual$plot$state$cleanData$grp), c("B", "NA", "A"))
   expect_identical(d,original)
 })
 
@@ -164,13 +170,15 @@ test_that("survival Cox sentences identify aliased references and ordered contra
   d <- .sv_validation_data()
   d$grp<-factor(d$grp,levels=c("Unused","B","A"))
   actual <- .sv_validation_run(d,showSummaries=TRUE)
-  expect_match(actual$copyReadySentencesExplanation$content,"(model contrast)",fixed=TRUE)
+  expect_match(actual$copyReadySentencesExplanation$content,"A vs B",fixed=TRUE)
+  expect_false(grepl("(model contrast)",actual$copyReadySentencesExplanation$content,fixed=TRUE))
   expect_false(grepl("vs Unused",actual$copyReadySentencesExplanation$content,fixed=TRUE))
   d <- .sv_validation_data()
   d$grp<-ordered(rep(c("Low","Middle","High"),40),levels=c("Low","Middle","High"))
   actual <- .sv_validation_run(d,showSummaries=TRUE)
-  expect_match(actual$copyReadySentencesExplanation$content,"(model contrast)",fixed=TRUE)
-  expect_false(grepl("vs Low",actual$copyReadySentencesExplanation$content,fixed=TRUE))
+  expect_match(actual$copyReadySentencesExplanation$content,"Middle vs Low",fixed=TRUE)
+  expect_match(actual$copyReadySentencesExplanation$content,"High vs Low",fixed=TRUE)
+  expect_false(grepl("(model contrast)",actual$copyReadySentencesExplanation$content,fixed=TRUE))
 })
 
 test_that("survival residual diagnostics work independently of ph_cox and respect stratified_cox (IR-01, IR-05)", {

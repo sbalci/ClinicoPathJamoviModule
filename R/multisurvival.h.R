@@ -1084,20 +1084,17 @@ multisurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                     list(
                         `name`="rate", 
                         `title`="Incidence Rate", 
-                        `type`="number", 
-                        `format`="zto"),
+                        `type`="number"),
                     list(
                         `name`="rate_ci_lower", 
                         `title`="Lower", 
                         `superTitle`="95% CI", 
-                        `type`="number", 
-                        `format`="zto"),
+                        `type`="number"),
                     list(
                         `name`="rate_ci_upper", 
                         `title`="Upper", 
                         `superTitle`="95% CI", 
-                        `type`="number", 
-                        `format`="zto")),
+                        `type`="number")),
                 clearWith=list(
                     "outcome",
                     "outcomeLevel",
@@ -2445,7 +2442,8 @@ multisurvivalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' Multivariable Survival Analysis
 #'
 #' Performs multivariable survival analysis using Cox proportional hazards 
-#' regression. In multivariable survival analysis, person-time follow-up is 
+#' regression. With competing events it fits a Fine-Gray subdistribution 
+#' hazard model. In multivariable survival analysis, person-time follow-up is 
 #' crucial for properly adjusting for covariates while accounting for varying 
 #' observation periods. The Cox proportional hazards model incorporates 
 #' person-time by modeling the hazard function, which represents the 
@@ -2466,13 +2464,15 @@ multisurvivalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   and \code{fudate}. If false, \code{elapsedtime} should be provided as a
 #'   pre-calculated numeric variable.
 #' @param dxdate Date of diagnosis. Required if \code{tint} = true. Accepts:
-#'   (1) Date/datetime text, (2) Numeric Unix epoch seconds (from DateTime
-#'   Converter's corrected_datetime_numeric output), (3) Numeric datetime values
-#'   from R. Time intervals calculated as difference from follow-up date.
+#'   (1) Date/datetime text, or (2) Numeric Unix epoch seconds (from DateTime
+#'   Converter's corrected_datetime_numeric output). Other numeric dates (day
+#'   counts, Excel serials, YYYYMMDD, years) are refused. Time intervals
+#'   calculated as difference from follow-up date.
 #' @param fudate Follow-up date or date of last observation. Required if
-#'   \code{tint} = true. Accepts: (1) Date/datetime text, (2) Numeric Unix epoch
-#'   seconds (from DateTime Converter's corrected_datetime_numeric output), (3)
-#'   Numeric datetime values from R. Must be in same format as diagnosis date.
+#'   \code{tint} = true. Accepts: (1) Date/datetime text, or (2) Numeric Unix
+#'   epoch seconds (from DateTime Converter's corrected_datetime_numeric
+#'   output). Other numeric dates (day counts, Excel serials, YYYYMMDD, years)
+#'   are refused. Must be in same format as diagnosis date.
 #' @param timetypedata Specifies the format of the date variables in the input
 #'   data. This is critical if \code{tint = true}, as \code{dxdate} and
 #'   \code{fudate} will be parsed according to this format to calculate survival
@@ -2483,8 +2483,9 @@ multisurvivalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param uselandmark If true, applies a landmark analysis starting at a
 #'   specified time point.
 #' @param landmark The time point (in the units defined by
-#'   \code{timetypeoutput}) at which to start landmark analyses. Only used if
-#'   \code{uselandmark} = true.
+#'   \code{timetypeoutput}) at which to start landmark analyses. Patients whose
+#'   time is at or before it are excluded, and the rest are timed from it. Only
+#'   used if \code{uselandmark} = true.
 #' @param outcome The outcome (event status) variable. A numeric 0/1 column is
 #'   read as 0 = censored and 1 = event. For any other coding, such as numeric
 #'   1/2 or a factor (Alive/Dead), \code{outcomeLevel} must name the event

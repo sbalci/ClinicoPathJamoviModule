@@ -835,7 +835,7 @@ singlearmResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                         `type`="integer"),
                     list(
                         `name`="n.event", 
-                        `title`="Events Since Prior Row", 
+                        `title`="Events since previous time", 
                         `type`="integer"),
                     list(
                         `name`="surv", 
@@ -955,20 +955,17 @@ singlearmResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     list(
                         `name`="rate", 
                         `title`="Crude Event Rate", 
-                        `type`="number", 
-                        `format`="zto"),
+                        `type`="number"),
                     list(
                         `name`="rate_ci_lower", 
                         `title`="Lower", 
                         `superTitle`="95% CI", 
-                        `type`="number", 
-                        `format`="zto"),
+                        `type`="number"),
                     list(
                         `name`="rate_ci_upper", 
                         `title`="Upper", 
                         `superTitle`="95% CI", 
-                        `type`="number", 
-                        `format`="zto")),
+                        `type`="number")),
                 clearWith=list(
                     "outcome",
                     "outcomeLevel",
@@ -1284,20 +1281,17 @@ singlearmResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     list(
                         `name`="hazard", 
                         `title`="Hazard Rate", 
-                        `type`="number", 
-                        `format`="zto"),
+                        `type`="number"),
                     list(
                         `name`="hazard_lower", 
                         `title`="Lower", 
                         `superTitle`="95% CI", 
-                        `type`="number", 
-                        `format`="zto"),
+                        `type`="number"),
                     list(
                         `name`="hazard_upper", 
                         `title`="Upper", 
                         `superTitle`="95% CI", 
-                        `type`="number", 
-                        `format`="zto")),
+                        `type`="number")),
                 clearWith=list(
                     "outcome",
                     "outcomeLevel",
@@ -1509,6 +1503,7 @@ singlearmResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 title="Add Redefined Outcome to Data",
                 varTitle="Redefined Outcome Single Arm",
                 varDescription="`Redefined Outcome - from ${ outcome } for analysis ${ analysistype } in Single Arm Analysis`",
+                measureType="nominal",
                 clearWith=list(
                     "outcome",
                     "analysistype",
@@ -1563,19 +1558,15 @@ singlearmBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   diagnosis date and follow-up date and want to calculate the time elapsed
 #'   between them.
 #' @param dxdate The date of diagnosis or study entry. Accepts: (1)
-#'   Date/datetime text (e.g., "2024-01-15"), (2) Numeric values. Each bare
-#'   numeric date column is classified by its overall magnitude: values below
-#'   100000 indicate DAYS since 1970-01-01 (the R Date encoding), whereas values
-#'   at or above 100000 indicate Unix epoch SECONDS (the DateTime Converter's
-#'   corrected_datetime_numeric output). Columns with inconsistent scales or
-#'   values on both sides of this boundary are rejected. Time intervals are
-#'   calculated as the difference from the follow-up date.
+#'   Date/datetime text (e.g., "2024-01-15"), (2) Numeric values, which must be
+#'   Unix epoch SECONDS since 1970 (the DateTime Converter's
+#'   corrected_datetime_numeric output). Day counts, Excel serials, YYYYMMDD
+#'   numbers and years are refused, because a bare number has no unit. Time
+#'   intervals are calculated as the difference from the follow-up date.
 #' @param fudate The date of last follow-up or event. Accepts: (1)
-#'   Date/datetime text (e.g., "2024-01-15"), (2) Numeric values, classified by
-#'   column magnitude exactly as for the diagnosis date (below 100000 = days
-#'   since 1970-01-01; at or above 100000 = Unix epoch seconds). Mixed values
-#'   within a column and inconsistent numeric encodings between columns are
-#'   rejected. Must be in the same format as the diagnosis date.
+#'   Date/datetime text (e.g., "2024-01-15"), (2) Numeric values, which must be
+#'   Unix epoch SECONDS since 1970, as for the diagnosis date. Must be in the
+#'   same format as the diagnosis date.
 #' @param outcome The outcome or event of interest for each patient. Should be
 #'   a factor or numeric variable indicating whether the patient experienced the
 #'   event (e.g., death) or censoring (e.g., end of follow-up).
@@ -1645,7 +1636,9 @@ singlearmBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   estimated by Kaplan-Meier. This is a probability on a 0-1 scale, not a
 #'   running count of events: a raw count ignores censoring and is not
 #'   comparable between cohorts of different size or follow-up. Read it as "the
-#'   estimated proportion of the cohort that had had the event by time t".
+#'   estimated proportion of the cohort that had had the event by time t",
+#'   except under Cause Specific survival, where other-cause deaths are censored
+#'   and 1 - S(t) overstates that proportion.
 #' @param ch Plot cumulative hazard over time. This is an accumulated
 #'   rate-scale quantity, not an event probability, and it is not bounded by 1.
 #'   Use cumulative event probability for the Kaplan-Meier estimate 1 - S(t).

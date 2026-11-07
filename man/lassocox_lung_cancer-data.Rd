@@ -8,7 +8,7 @@
 A data frame (data.frame) with 200 rows and 15 variables:
 \describe{
   \item{\code{patient_id}}{character; 200 distinct values}
-  \item{\code{follow_up_months}}{numeric, 0 to 3.3}
+  \item{\code{follow_up_months}}{numeric, 0.1 to 48}
   \item{\code{progression}}{factor with 2 levels: No, Yes}
   \item{\code{age}}{numeric, 35 to 85}
   \item{\code{gender}}{factor with 2 levels: Female, Male}
@@ -32,5 +32,11 @@ lassocox_lung_cancer
 }
 \description{
 Example dataset for the \code{lassocox} analysis.
+}
+\details{
+Clinical example with mixed variable types: 121 progressions and 79
+censored rows among 200 patients. Regenerated on 2026-11-07 with a baseline hazard;
+the earlier version had zero follow-up times and only 2 censored rows and could not
+be fitted.
 }
 \keyword{datasets}

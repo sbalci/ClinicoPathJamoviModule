@@ -202,6 +202,7 @@ statsplot2Results <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "subjectID",
                     "distribution",
                     "forceContinuous",
+                    "alluvsty",
                     "excl",
                     "grvar",
                     "sampleLarge",
@@ -221,6 +222,7 @@ statsplot2Results <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "distribution",
                     "forceContinuous",
                     "alluvsty",
+                    "showSummary",
                     "excl",
                     "grvar",
                     "sampleLarge",
@@ -238,11 +240,13 @@ statsplot2Results <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "subjectID",
                     "distribution",
                     "forceContinuous",
+                    "alluvsty",
                     "excl",
                     "grvar",
                     "sampleLarge",
                     "sampleThreshold",
-                    "sampleSize")))
+                    "sampleSize",
+                    "seed")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="ExplanationMessage",
@@ -255,6 +259,8 @@ statsplot2Results <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "subjectID",
                     "distribution",
                     "forceContinuous",
+                    "alluvsty",
+                    "showExplanations",
                     "excl",
                     "grvar",
                     "sampleLarge",
@@ -347,10 +353,11 @@ statsplot2Base <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   continuous or categorical.
 #' @param grvar Optional grouping variable for creating grouped plots across
 #'   multiple panels.
-#' @param subjectID Subject identifier for long-format repeated continuous
-#'   outcomes. Each subject must have one row per condition; incomplete subjects
-#'   are excluded. Sampling retains whole subjects. Not used for wide-format
-#'   alluvial data.
+#' @param subjectID Subject identifier for long-format repeated measures
+#'   (required for repeated continuous outcomes; optional for long-format
+#'   repeated categorical data, which is automatically reshaped across all
+#'   timepoints into wide format for alluvial diagrams). Leave NULL when
+#'   categorical repeated data is already in wide format.
 #' @param direction Measurement design type. "independent" for
 #'   between-subjects comparisons,  "repeated" for within-subjects/repeated
 #'   measures comparisons.

@@ -283,10 +283,11 @@ jjbarstatsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "ClinicoPathJamoviModule",
                     "ggstatsplot",
                     "statsExpressions",
+                    "effectsize",
+                    "BayesFactor",
                     "Fagerland2013",
                     "ggpubr",
-                    "digest",
-                    "ggthemes"),
+                    "digest"),
                 clearWith=list(
                     "dep",
                     "group",
@@ -323,7 +324,8 @@ jjbarstatsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "ratio",
                     "clinicalpreset",
                     "typestatistics",
-                    "seed")))
+                    "seed",
+                    "addGGPubrBalloon")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="about",
@@ -378,7 +380,15 @@ jjbarstatsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 height=500,
                 renderFun=".plotBalloon",
                 requiresData=TRUE,
-                visible="(addGGPubrBalloon)"))}))
+                visible="(addGGPubrBalloon)",
+                clearWith=list(
+                    "dep",
+                    "group",
+                    "grvar",
+                    "counts",
+                    "paired",
+                    "addGGPubrBalloon",
+                    "ggpubrBalloonPalette")))}))
 
 jjbarstatsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "jjbarstatsBase",

@@ -176,9 +176,9 @@ test_that("person-time rates and exact Poisson CIs match poisson.test", {
     ref <- stats::poisson.test(ev, pt)
     expect_equal(as.numeric(overall$events), ev)
     expect_equal(as.numeric(overall$person_time), round(pt, 2), tolerance = 1e-8)
-    expect_equal(as.numeric(overall$rate), round(ev / pt * 100, 2), tolerance = 1e-8)
-    expect_equal(as.numeric(overall$rate_ci_lower), round(ref$conf.int[1] * 100, 2), tolerance = 1e-8)
-    expect_equal(as.numeric(overall$rate_ci_upper), round(ref$conf.int[2] * 100, 2), tolerance = 1e-8)
+    expect_equal(as.numeric(overall$rate), ev / pt * 100, tolerance = 1e-8)
+    expect_equal(as.numeric(overall$rate_ci_lower), ref$conf.int[1] * 100, tolerance = 1e-8)
+    expect_equal(as.numeric(overall$rate_ci_upper), ref$conf.int[2] * 100, tolerance = 1e-8)
 })
 
 test_that("optimism-corrected C-index equals apparent minus mean bootstrap optimism", {

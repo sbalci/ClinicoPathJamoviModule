@@ -37,10 +37,12 @@ formats. Can handle character strings, numeric values, or factors with
 datetime representations.}
 
 \item{datetime_format}{DateTime format specification. 'Auto-detect'
-attempts to identify the format automatically and warns when day-first and
-month-first parsing both succeed but disagree; manual selection ensures
-accurate parsing for specific datetime formats. Excel serial numbers use
-the 1899-12-30 origin, which is exact for dates from 1900-03-01 onward
+identifies the format from the shape of the text and warns when day-first
+and month-first parsing both succeed but disagree; year-month dates have no
+day, so they are set to the 1st of the month with a warning. Manual
+selection ensures accurate parsing for specific datetime formats; a value
+that cannot have the selected format is left empty. Excel serial numbers
+use the 1899-12-30 origin, which is exact for dates from 1900-03-01 onward
 (Excel's 1900 system wrongly counts a 29 February 1900). A serial number
 does not record which epoch produced it, so auto-detection assumes the 1900
 system (the default in Windows Excel and in Mac Excel 2011 and later) and

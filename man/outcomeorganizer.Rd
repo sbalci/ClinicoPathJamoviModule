@@ -58,14 +58,18 @@ applying event hierarchies.}
 \item{followupTime}{Optional follow-up time. Supplying it lets
 administrative censoring actually truncate follow-up and reset event
 status, and lets the event hierarchy keep the earliest priority event per
-patient instead of writing a later one back onto earlier records. Leave
-empty to keep the previous behavior.}
+patient instead of writing a later one back onto earlier records. For RFS,
+PFS, DFS and TTP with a cut-off it must be the time to that endpoint's
+event, not last contact: there is no recurrence date here, so a recurrence
+before the cut-off is erased when last contact falls after it. Leave empty
+to keep the previous behavior.}
 
 \item{analysistype}{The type of survival analysis to prepare the outcome
 for.}
 
 \item{multievent}{If true, allows for multiple event types (e.g., death
-from disease vs death from other causes).}
+from disease vs death from other causes). For RFS, PFS and DFS every death
+category then counts as an event; DFS also counts Alive with Disease.}
 
 \item{dod}{The level representing death from the disease of interest.}
 

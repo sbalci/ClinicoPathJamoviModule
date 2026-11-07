@@ -594,7 +594,7 @@ test_that("D6: Multi-event partition & RFS+multievent guards reject invalid conf
   expect_error(
     run_outcomeorganizer(data = d_a3, outcome = "status4", multievent = TRUE, analysistype = "rfs",
                          dod = "DOD", dooc = "DOOC", awd = "AWD", awod = "AWOD"),
-    "not available with Multiple Event Levels enabled"
+    "is built from a Recurrence/Progression variable"
   )
 })
 

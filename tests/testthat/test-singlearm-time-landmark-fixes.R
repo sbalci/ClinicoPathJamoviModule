@@ -201,9 +201,9 @@ test_that("fractional landmarks are accepted on a continuous time scale", {
 })
 
 
-test_that("numeric R Date columns are read as days, not Unix epoch seconds", {
-    # Was: every numeric date column went to as.POSIXct(origin = "1970-01-01"),
-    # which counts SECONDS. A 366-day interval came out as 0.000139 months.
+test_that("numeric day-count columns are refused, not read as seconds or as days", {
+    # A 366-day interval read as seconds came out as 0.000139 months. Reading it as
+    # days was the next attempt, and that guess is what let 20190115 through.
     dx <- as.numeric(as.Date("2020-01-01"))
     fu <- as.numeric(as.Date("2021-01-01"))
     d <- data.frame(dxd = rep(dx, 6), fud = rep(fu, 6),
@@ -213,8 +213,8 @@ test_that("numeric R Date columns are read as days, not Unix epoch seconds", {
     res <- run_singlearm(data = d, tint = TRUE, dxdate = "dxd", fudate = "fud",
                          outcome = "status", outcomeLevel = "Dead")
 
-    # 366 days is a little over 12 months, not 0.000139 of one.
-    expect_equal(res$medianTable$getCell(rowNo = 1, "median")$value, 12, tolerance = 0.05)
+    expect_match(res$errors$content, "cannot be read as dates", fixed = TRUE)
+    expect_equal(res$medianTable$rowCount, 0)
 })
 
 

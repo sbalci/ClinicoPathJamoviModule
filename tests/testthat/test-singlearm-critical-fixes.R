@@ -120,7 +120,7 @@ test_that("person-time rate and Garwood limits use target events over exposure",
       lower = table_number(result$personTimeTable, 1, "rate_ci_lower"),
       upper = table_number(result$personTimeTable, 1, "rate_ci_upper")
     ),
-    round(expected, 2)
+    expected
   )
 })
 

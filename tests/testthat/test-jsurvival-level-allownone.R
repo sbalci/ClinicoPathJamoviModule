@@ -70,8 +70,9 @@ or_df <- function(n = 240, seed = 11) {
 
 test_that("oddsratio waits for the positive outcome level", {
   res <- suppressWarnings(oddsratio(data = or_df(), explanatory = "grade", outcome = "dead",
-                                    outcomeLevel = NULL, predictorLevel = NULL))
-  expect_match(as.character(res$todo$content), "Positive Outcome Level Required", fixed = TRUE)
+                                    outcomeLevel = NULL, outcomeNegativeLevel = NULL, predictorLevel = NULL,
+                                    predictorNegativeLevel = NULL))
+  expect_match(as.character(res$todo$content), "Positive and Negative Outcome Levels Required", fixed = TRUE)
 })
 
 # An empty predictor level used to be guessed (keyword match, else the second
@@ -79,8 +80,8 @@ test_that("oddsratio waits for the positive outcome level", {
 # inferred now: the diagnostic metrics wait for the choice and list the levels.
 test_that("an empty predictor level leaves the diagnostic metrics waiting, never guessed", {
   res <- suppressWarnings(oddsratio(data = or_df(), explanatory = "grade", outcome = "dead",
-                                    outcomeLevel = "Dead", diagnosticPredictor = "grade",
-                                    predictorLevel = NULL, showNomogram = TRUE))
+                                    outcomeLevel = "Dead", outcomeNegativeLevel = "Alive", diagnosticPredictor = "grade",
+                                    predictorLevel = NULL, predictorNegativeLevel = NULL, showNomogram = TRUE))
   text <- html_text(res)
   expect_match(text, "Diagnostic metrics are waiting for the Predictor Positive Level", fixed = TRUE)
   expect_match(text, "High (n = ", fixed = TRUE)

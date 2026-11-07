@@ -408,6 +408,12 @@ crosstableClass <- if (requireNamespace('jmvcore'))
             # Prepare data by cleaning names and setting original labels with robust handling.
             .labelData = function() {
                 mydata <- self$data
+                # A genuine NA factor level has a nonmissing integer code. Normalize it
+                # before missing-data checks and engines; retain literal "NA" and metadata.
+                for (name in names(mydata)) {
+                    if (is.factor(mydata[[name]]) && anyNA(levels(mydata[[name]])))
+                        levels(mydata[[name]]) <- levels(mydata[[name]])
+                }
                 original_names <- names(mydata)
 
                 # Clean variable names using janitor
@@ -554,9 +560,9 @@ crosstableClass <- if (requireNamespace('jmvcore'))
 
                         "<p><strong>Interpretation Guidelines:</strong></p>",
                         "<ul>",
-                        "<li><strong>Q < 0.05:</strong> Strong evidence - expect 5% of discoveries at this threshold to be false positives</li>",
-                        "<li><strong>Q < 0.10:</strong> Moderate evidence - 10% FDR, often acceptable in exploratory research</li>",
-                        "<li><strong>Q < 0.20:</strong> Suggestive evidence - warrants further investigation in hypothesis-generating studies</li>",
+                        "<li><strong>Q < 0.05:</strong> Strong evidence - under the method's assumptions, the expected false-discovery proportion is at most 5% over repeated samples</li>",
+                        "<li><strong>Q < 0.10:</strong> Moderate evidence - target FDR at most 10% over repeated samples, an exploratory convention</li>",
+                        "<li><strong>Q < 0.20:</strong> Suggestive evidence - target FDR at most 20% over repeated samples; warrants further investigation in hypothesis-generating studies</li>",
                         "</ul>",
 
                         "<p><strong>When to use FDR control:</strong></p>",
@@ -566,7 +572,7 @@ crosstableClass <- if (requireNamespace('jmvcore'))
                         "<li> Hypothesis-generating research where you can tolerate some false positives</li>",
                         "</ul>",
 
-                        "<p><em> FDR methods are less conservative than FWER - you'll discover more effects but accept a small proportion of false positives.</em></p>",
+                        "<p><em> FDR and FWER control different error criteria. Neither guarantees a particular false-positive proportion in this table; BY can be more conservative than Bonferroni or Holm.</em></p>",
                         "</div>"
                     )
                 }
@@ -582,8 +588,9 @@ crosstableClass <- if (requireNamespace('jmvcore'))
                 # .populateSMD() fills the computed cells with setRow().
                 # Row keys are the ORIGINAL variable names, which is what
                 # .crosstableDisplayName() resolves the cleaned names back to.
+                tab <- self$results$smdTable
+                tab$deleteRows()
                 if (isTRUE(self$options$showSMD)) {
-                    tab <- self$results$smdTable
                     for (v in self$options$vars) {
                         key <- unname(as.character(v))
                         tab$addRow(rowKey = key, values = list(variable = key))
@@ -591,15 +598,49 @@ crosstableClass <- if (requireNamespace('jmvcore'))
                 }
             },
 
+            .clearComputedResults = function(clear_method_note = TRUE) {
+                for (name in c("tablestyle1", "tablestyle2", "tablestyle3", "tablestyle4",
+                               "summary", "qvalueExplanation", "testInformation"))
+                    self$results$get(name)$setContent(" ")
+                if (clear_method_note)
+                    self$results$todo2$setContent(" ")
+                self$results$qvalueExplanation$setVisible(FALSE)
+                self$results$testInformation$setVisible(FALSE)
+                tab <- self$results$smdTable
+                for (key in self$options$vars) {
+                    if (isTRUE(self$options$showSMD))
+                        tab$setRow(rowKey = unname(as.character(key)), values = list(
+                            vtype = NULL, smd = NULL, absSMD = NULL, balance = NULL))
+                }
+                tab$setNote("smd", NULL)
+            },
+
+            # Restored options can bypass their UI types before syntax is serialized.
+            .sourcifyOption = function(option) {
+                if (!option$name %in% names(formals(crosstable))) return("")
+                value <- option$value
+                if (is.list(value)) return("")
+                if (is.character(value)) {
+                    if (identical(value, option$default)) return("")
+                    return(paste0(option$name, " = ",
+                                  paste(deparse(value), collapse = " ")))
+                }
+                super$.sourcifyOption(option)
+            },
+
             # .run ----
             .run = function() {
                 # Reset notices so the same message is not appended once per run cycle
                 private$.noticeList <- list()
                 private$.renderNotices()
+                self$results$dataQualityNotice$setContent(" ")
+                self$results$dataQualityNotice$setVisible(FALSE)
 
                 sty <- self$options$sty
                 # If required options are missing, show a welcome message with instructions.
-                if (is.null(self$options$vars) || is.null(self$options$group)) {
+                if (length(self$options$vars) == 0 || length(self$options$group) == 0) {
+                    private$.clearComputedResults()
+                    self$results$subtitle$setContent("")
                     # Initial state - no error, just show welcome message
                     self$results$errorNotice$setVisible(FALSE)
 
@@ -674,6 +715,7 @@ crosstableClass <- if (requireNamespace('jmvcore'))
 
                 # Check if data has complete rows.
                 if (nrow(self$data) == 0) {
+                    private$.clearComputedResults()
                     # Use HTML error notice instead of dynamic Notice to avoid serialization errors
                     error_html <- .crosstableNoticeHTML(
                         .('Dataset contains no complete rows. Please check your data and filters.'),
@@ -800,6 +842,7 @@ crosstableClass <- if (requireNamespace('jmvcore'))
                 if (length(dropped_vars) > 0) {
                     myvars <- setdiff(myvars, dropped_vars)
                     if (length(myvars) == 0) {
+                        private$.clearComputedResults()
                         private$.addNotice(
                             "ERROR",
                             .("Nothing left to tabulate"),
@@ -847,6 +890,7 @@ crosstableClass <- if (requireNamespace('jmvcore'))
                 # sees a complete-looking table containing no comparison.
                 group_sizes <- validation_results$group_sizes
                 if (length(group_sizes) < 2) {
+                    private$.clearComputedResults()
                     group_label <- .crosstableDisplayName(mygroup, original_names_mapping)
                     present <- if (length(group_sizes) == 1)
                         sprintf(
@@ -951,6 +995,7 @@ crosstableClass <- if (requireNamespace('jmvcore'))
                 # Generate table based on selected style. Each engine lives in its
                 # own method and returns the rendered HTML plus the per-variable
                 # p-values it displayed, or NULL after reporting its error.
+                private$.clearComputedResults(clear_method_note = FALSE)
                 built <- switch(sty,
                     arsenal   = private$.tableArsenal(mydata, formula, original_names_mapping),
                     finalfit  = private$.tableFinalfit(mydata, myvars, mygroup),
@@ -1377,8 +1422,8 @@ crosstableClass <- if (requireNamespace('jmvcore'))
 
                             "<p><strong>How to interpret:</strong></p>",
                             "<ul>",
-                            "<li><strong>Q-value = 0.05:</strong> Among all variables with q \u{2264} 0.05, expect ~5% to be false positives</li>",
-                            "<li><strong>Q-value = 0.10:</strong> Expect ~10% false positives (acceptable in exploratory research)</li>",
+                            "<li><strong>Q-value = 0.05:</strong> At a 0.05 threshold, the expected false-discovery proportion is at most 5% over repeated samples under the method's assumptions</li>",
+                            "<li><strong>Q-value = 0.10:</strong> Target FDR at most 10% over repeated samples (an exploratory convention)</li>",
                             q_vs_fwer_bullet,
                             "</ul>",
 
@@ -1392,8 +1437,8 @@ crosstableClass <- if (requireNamespace('jmvcore'))
 
                             "<p><strong>Important considerations:</strong></p>",
                             "<ul>",
-                            "<li> FDR methods assume independence or positive dependence between tests</li>",
-                            "<li> Less conservative than Bonferroni/Holm - you'll find more discoveries but accept some false positives</li>",
+                            "<li> BH requires independence or suitable positive dependence; BY controls FDR under arbitrary dependence between tests</li>",
+                            "<li> FDR and FWER are different error criteria; BY can be more conservative than Bonferroni/Holm</li>",
                             "<li> Should not replace careful hypothesis planning and validation</li>",
                             "</ul>",
 
@@ -1761,7 +1806,8 @@ crosstableClass <- if (requireNamespace('jmvcore'))
                 vars <- self$options$vars
                 group <- self$options$group
 
-                if (is.null(vars) || length(vars) == 0 || is.null(group))
+                if (!is.character(vars) || length(vars) == 0 || anyNA(vars) ||
+                    !is.character(group) || length(group) != 1 || is.na(group))
                     return('')
 
                 # `deparse()` produces correctly quoted R literals - handles spaces,

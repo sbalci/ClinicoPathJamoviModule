@@ -21,7 +21,7 @@ library(testthat)
 
 .load_survival <- function() {
   e <- new.env(parent = globalenv())
-  for (f in c("utils.R", "utils-formula.R", "utils-eventindicator.R", "utils-followup.R", "survival-competingrisks.R", "multisurvival-formula.R", "survival.b.R"))
+  for (f in c("utils.R", "utils-formula.R", "utils-eventindicator.R", "utils-survivaldata.R", "utils-followup.R", "survival-competingrisks.R", "multisurvival-formula.R", "survival.b.R"))
     suppressWarnings(suppressMessages(sys.source(.ssrc(f), envir = e)))
   e
 }
@@ -61,6 +61,8 @@ library(testthat)
     .buildSurvFormula    = bind(pm$.buildSurvFormula),
     .competingRiskCumInc = bind(pm$.competingRiskCumInc),
     .calculateResiduals  = bind(pm$.calculateResiduals),
+    .originalRowIndex    = bind(pm$.originalRowIndex),
+    .landmarkSuffix      = function() "",
     .medianSurv          = bind(pm$.medianSurv),
     .populateExplanations = bind(pm$.populateExplanations),
     .plot9               = bind(pm$.plot9),
@@ -78,6 +80,7 @@ library(testthat)
     mytime = round(rexp(n, 1 / 20), 1) + 0.5,
     myoutcome = rbinom(n, 1, 0.6),
     myfactor = factor(sample(levels, n, replace = TRUE)),
+    source_row_index = seq_len(n),
     stringsAsFactors = FALSE
   )
 }
@@ -209,10 +212,18 @@ test_that("every model formula goes through the allow-listed parser", {
 test_that("calibration uses the last baseline-hazard jump at or before the time point", {
   src <- readLines(.ssrc("survival.b.R"))
   expect_false(any(grepl("which.min(abs(basehaz_df$time - cal_time))", src, fixed = TRUE)))
-  expect_true(any(grepl("bh_idx <- which(basehaz_df$time <= cal_time)", src, fixed = TRUE)))
-  expect_true(any(grepl("if (length(bh_idx) == 0) 0 else basehaz_df$hazard[max(bh_idx)]", src, fixed = TRUE)))
+  expect_true(any(grepl("stats::predict(cox_model, newdata = at_cal_time, type = \"survival\")", src, fixed = TRUE)))
 
-  # The semantics the line encodes, on a hand-built step function.
+  # predict() must give the step function's value, not the nearest jump's.
+  d <- data.frame(t = c(2, 5, 9, 12), s = c(1, 1, 1, 0), x = c(0, 1, 0, 1))
+  fit <- survival::coxph(survival::Surv(t, s) ~ x, d)
+  bh <- survival::basehaz(fit, centered = TRUE)
+  at_t <- function(cal) { nd <- d; nd$t <- cal; unname(stats::predict(fit, newdata = nd, type = "survival")) }
+  H <- function(cal) { i <- which(bh$time <= cal); if (length(i) == 0) 0 else bh$hazard[max(i)] }
+  for (cal in c(1, 5, 8.9, 9))
+    expect_equal(at_t(cal), exp(-H(cal) * exp(unname(stats::predict(fit, type = "lp")))))
+
+  # The semantics, on a hand-built step function.
   basehaz_df <- data.frame(time = c(2, 5, 9), hazard = c(0.1, 0.3, 0.7))
   at <- function(cal_time) { i <- which(basehaz_df$time <= cal_time); if (length(i) == 0) 0 else basehaz_df$hazard[max(i)] }
   expect_equal(at(1), 0)      # before first event: H0 = 0, not the 0.1 of the nearest jump

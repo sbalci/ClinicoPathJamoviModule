@@ -3422,6 +3422,19 @@ test files identical before and after. A NULL cell shows as "." in jamovi, not b
 selection on zero rows, notice placement, swimmerplot's zero-row message): see
 `quality-reports/ONCOPATH_RELEASE_PROFILE_2026-10-18-night.md`.
 
+## OncoPath 1.1.3 pre-submission review (2026-11-07)
+
+Record: `../OncoPath/docs/audit/presubmission-20261107/README.md`. 3 HIGH + 5 MEDIUM fixed in the four
+umbrella `.b.R` files; new tests `test-<analysis>-presubmission-20261107.R`; OncoPath regenerated.
+
+- [x] Fixes + regression tests (red on old sibling, green on fixed); Turkish (88 msgids) in `jamovi/i18n/tr.po`
+- [x] Vignettes (36 mismatches), README, NEWS 1.1.3, 0000.yaml spelling; gate 0 blocking; smoke PASS; engine 0 problems
+- [ ] User: open the five example `.omv` files in jamovi with 1.1.3, let them re-run, save (results are from 1.1.2)
+- [ ] Deferred: diagnosticmeta numeric-covariate intercept at 0 (centre + say so?) - changes displayed numbers
+- [ ] Deferred: swimmerplot "data cutoff" option for ongoing lines with a blank end time (new option)
+- [ ] Deferred: ihcheterogeneity explicit "Measurement scale: continuous / ordinal" option (value-count heuristic
+      cannot separate Allred from coarsely recorded percentages)
+
 ## OncoPath module-audit findings — fixed (2026-10-19)
 
 Source: `../OncoPath/docs/audit/MODULE_AUDIT_REPORT_20261019-1535.md` (4 MEDIUM, 30 LOW). Record:

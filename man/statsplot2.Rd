@@ -36,10 +36,11 @@ continuous or categorical.}
 \item{grvar}{Optional grouping variable for creating grouped plots across
 multiple panels.}
 
-\item{subjectID}{Subject identifier for long-format repeated continuous
-outcomes. Each subject must have one row per condition; incomplete subjects
-are excluded. Sampling retains whole subjects. Not used for wide-format
-alluvial data.}
+\item{subjectID}{Subject identifier for long-format repeated measures
+(required for repeated continuous outcomes; optional for long-format
+repeated categorical data, which is automatically reshaped across all
+timepoints into wide format for alluvial diagrams). Leave NULL when
+categorical repeated data is already in wide format.}
 
 \item{direction}{Measurement design type. "independent" for
 between-subjects comparisons,  "repeated" for within-subjects/repeated

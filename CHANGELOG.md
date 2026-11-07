@@ -5,6 +5,98 @@ prevents them. Newest first. Release notes for users live in `NEWS.md`.
 
 ---
 
+## 2026-11-07 — OncoPath 1.1.3 pre-submission review: rows are not values, and an artefact fix applied to one design only
+
+### Three HIGH defects survived five audit rounds; each needed an ordinary coding the bundled examples lack
+
+- **Failure mode:** (1) swimmerplot counted patients with more than one response ROW as having a derived,
+  unconfirmed best response, so a patient-level BOR repeated on every row produced a false "not a RECIST
+  BOR" warning and manuscript sentence. (2) waterfall's "no negative changes" scale guard was gated on
+  `is.null(timeVar)`, so percent-of-baseline values (100 = no change) in long data with no time-0 row made
+  every patient PD in silence. (3) ihcheterogeneity applied the Krouwer three-slope rule to region-vs-
+  reference rows but bypassed it for region pairs (`isTRUE(r$pair) ||`), so unequal precision between two
+  regions read as proportional bias in 35-70% of unbiased studies.
+- **Detection signal:** one reviewer per analysis told to probe option x coding combinations against
+  independent oracles (repeated BOR per row; percent-of-baseline coding; no reference with unequal SDs),
+  every MEDIUM+ with an executed repro; fixes verified red on the old sibling, green on the fixed copy.
+- **Prevention rule:** a per-patient count of "several values" must count distinct normalised values,
+  not rows. A guard that protects against a data-scale mix-up must not be switched off by an unrelated
+  option. When an artefact correction is added for one design, grep for every other branch that computes
+  the same statistic (`pair`, `no reference`, `by group`) and apply it there in the same change.
+
+## 2026-11-07 — jsurvival 1.1.3 maintainer decisions: an unusable example documented instead of fixed
+
+### Three shipped LASSO Cox datasets could not be fitted, and the docs said so instead of fixing them
+
+- **Failure mode:** `create_lassocox_test_data.R` drew survival times with `rate = exp(risk * k)` and no
+  baseline hazard, a rate near 1 per month. Almost everyone died before censoring (2 or 3 censored rows),
+  some times rounded to 0, and the effects were damped by 0.35-0.4 until nothing was selectable. The
+  dataset help pages were later rewritten to call them "edge-case (stress) fixtures" that cannot be
+  fitted, which made a generator bug look intentional. `lassocox_small_cohort`, titled "High
+  Censoring", had 72 events in 75 rows.
+- **Detection signal:** running the analysis on its own example data during the release review, and
+  printing events, censored count and median follow-up for every example dataset.
+- **Prevention rule:** an example dataset is part of the release: run its analysis on it and check the
+  result is a sensible demonstration (some censoring, some selection) before shipping. Simulate times as
+  `rexp(n, rate = baseline * exp(lp))`, and when an example turns out unusable, fix the generator rather
+  than documenting the defect.
+
+## 2026-10-30 — jsurvival 1.1.3 independent review: defects live where code is copied, and a test harness can pass by not running
+
+### Copied blocks diverged; shared helpers did not
+
+- **Failure mode:** four hand-copied `.definemytime()`, landmark and saved-column blocks drifted apart.
+  The same cohort gave different patients at a landmark, a numeric day count read as seconds in two
+  analyses with no message, and a sentinel date refused by one analysis and analyzed by three. Fixes
+  from earlier passes had landed in `singlearm` or `survivalcont` only.
+- **Detection signal:** one seeded cohort pushed through all nine analyses and compared cell by cell
+  (`development-scripts/audit_jsurvival_crossanalysis_2026-10-30.R`). Each analysis passed on its own.
+  Nothing failed where a helper was already shared.
+- **Prevention rule:** a fix found in one analysis of a family is a question about all of them. Move
+  the logic into `R/utils-*.R` (`.applyLandmark`, `.classifyNumericDates`, `.checkDatePlausibility`,
+  `.dropEmptyLevels`) and audit with a cross-analysis fixture, not per analysis.
+
+### Every estimator matched its oracle and the output was still wrong
+
+- **Failure mode:** an emptied reference level gave a reversed hazard ratio printed against a group with
+  no patients, and "adjusted" curves used `method = "average"`, which keeps each group's covariate mix.
+  Oracle tests passed, because the estimator was right for the comparison it actually made.
+- **Detection signal:** comparing the printed label and sentence with an independent `coxph` on the
+  comparison the label claims, and reading the plotted frame instead of the plot's title.
+- **Prevention rule:** an oracle checks the label as well as the number: fit what the row says it is.
+
+### A scratch test harness produced quiet false passes
+
+- **Failure mode:** the first scratch test runner copied `helper-*.R` without renaming `ClinicoPath` and
+  could not load umbrella-only datasets, so whole blocks errored or skipped. Fixers saw few failures on
+  files that had hardly run. Symlink races also left stray `R/R` and `jamovi/jamovi` links in the umbrella.
+- **Detection signal:** 186 errored blocks in the `survival` files once the totals were read per file
+  rather than summed, and two unexpected entries in `git status`.
+- **Prevention rule:** a run counts only with a per-file total of blocks, expectations, failures,
+  errors and skips, and a file with no total line was killed, not passed. Never symlink into a
+  directory that may already hold the link target.
+
+## 2026-10-30 — library audit 2026-09-15 jsurvival, closing a PARTIAL: a detector blind to the value side, and a deferral nobody could see
+
+### The nomogram saved every patient's model data into the `.omv`
+
+- **Failure mode:** `oddsratio` `plot_nomogram` stored `list(data = mydata, dependent, explanatory,
+  labels)` so its renderer could refit `rms::lrm` after a reload: 246 rows, about 11.7 KB at n = 250,
+  growing with n. The September response marked the finding PARTIAL and deferred this site on the
+  belief that the fix needed about 160 lines of `.run()` moved into a helper. It did not: the plot
+  draws the `rms::nomogram` object, which is axis scales only (about 4 KB, no rows, no function or
+  environment), so storing that object is the drawing data.
+- **Detection signal:** the library reviewer (`2026-09-15 jsurvival` [LOW]). `check_state_payload`
+  read the site as clean because it matched heavy names (`mydata`, `fit`, `model` …) only as keys;
+  `data = mydata` hid the dataset behind an innocent key. The deferral had no breadcrumb in the
+  code, so the reviewer could not have known it was a known, deliberate gap.
+- **Prevention rule:** a heavy object is flagged on either side of `=`; a library object may be
+  state only after measuring it at two sample sizes, searching it for functions and environments,
+  and plotting it after a serialise round trip. A PARTIAL's deferred half gets a DEFERRED breadcrumb
+  at the site. Enforced by `tools/release_gate.py` `check_state_payload` (`_HEAVY_VALUE`, self-test in
+  `tools/test_release_gate.py`) and `test-jsurvival-library-audit.R` "jsurvival image states hold
+  drawing data, not patient rows"; guide §17, plots guide "Recommended State Structure".
+
 ## 2026-10-26 — library audit round 8, implement pass (meddecide): three traps in our own remediation
 
 ### Every Turkish fix of the round lived only in the sibling, which the next regeneration overwrites

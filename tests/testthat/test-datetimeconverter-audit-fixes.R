@@ -326,7 +326,9 @@ test_that("a clean run clears the notices pane instead of keeping the last one",
         an$.__enclos_env__$private$.noticeList <- list()
         an$.__enclos_env__$private$.renderNotices()
     })
-    expect_equal(nchar(an$results$notices$content), 0L)
+    # "<div></div>", not "": the jamovi client skips an empty Html update, so ""
+    # left the previous notices on screen (2026-10-30). Cleared = no notice text.
+    expect_identical(an$results$notices$content, "<div></div>")
 })
 
 test_that("every format token the module can carry has a human label", {

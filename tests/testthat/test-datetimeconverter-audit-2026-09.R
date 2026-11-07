@@ -42,6 +42,8 @@ library(testthat)
     s
   }
   stub$`%||%` <- function(a, b) if (is.null(a)) b else a
+  suppressWarnings(suppressMessages(
+    sys.source(file.path(dirname(.dtc_src()), "utils-dateshape.R"), envir = stub)))
   opts <- utils::modifyList(list(datetime_var = "v", datetime_format = "auto",
                                  timezone = "system"), options)
   stub$self <- list(options = opts, data = data)
@@ -53,6 +55,8 @@ library(testthat)
     },
     .resolveTimezone      = bind(pm$.resolveTimezone),
     .getParser            = bind(pm$.getParser),
+    .numericAsDigitStrings = bind(pm$.numericAsDigitStrings),
+    .flagImplausibleYears = bind(pm$.flagImplausibleYears),
     .processNumericVector = bind(pm$.processNumericVector),
     .prepareDatetimeInput = bind(pm$.prepareDatetimeInput),
     .parseDatetime        = bind(pm$.parseDatetime),
@@ -104,10 +108,11 @@ test_that("the preview shows the full clock on a midnight row", {
 test_that("a numeric column read as an Excel serial is not 'stored as datetime values'", {
   # Prerequisite the gate depends on: the numeric branch returns already_parsed
   # with a serial hint when a text format is selected, so an ungated
-  # `format_hint != datetime_format` fires for it.
-  s <- .dtc_stub(data = data.frame(v = c(44197, 44562, 45000)),
+  # `format_hint != datetime_format` fires for it. Fractional serials: whole
+  # numbers under a text format are read as digit strings since 2026-10-30.
+  s <- .dtc_stub(data = data.frame(v = c(44197.5, 44562.25, 45000.75)),
                  options = list(datetime_format = "ymd"))
-  prep <- quietly(s$p$.prepareDatetimeInput(c(44197, 44562, 45000)))
+  prep <- quietly(s$p$.prepareDatetimeInput(c(44197.5, 44562.25, 45000.75)))
   expect_true(prep$already_parsed)
   expect_equal(prep$format_hint, "excel_serial")
 
@@ -133,7 +138,7 @@ test_that("a compact yyyymmdd integer column parsed by ymd raises no numeric-col
 })
 
 test_that("the numeric-column warning still fires when the text parser fails or a serial reading took over", {
-  v <- c(44197, 44562, 45000, 45100)
+  v <- c(44197.5, 44562.25, 45000.75, 45100.5)   # fractional: still the serial path
   s <- .dtc_stub(data = data.frame(v = v), options = list(datetime_format = "ymd"))
   # serial reading overrode the selection (format_hint set, parse rate 100%)
   prep <- quietly(s$p$.prepareDatetimeInput(v))

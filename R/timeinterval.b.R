@@ -11,7 +11,8 @@
 #' @param time_format Date format: "auto", "ymd", "dmy", "mdy", "ydm", "myd", "dym", or "ymdhms"
 #' @param output_unit Output time unit: "days", "weeks", "months", or "years"
 #' @param time_basis "standardized" (30.4375-day months, 365.25-day years) or "calendar"
-#'   (actual month lengths). Standardized is the default and suits person-time denominators.
+#'   (actual month lengths). Calendar is the default and matches the survival analyses;
+#'   standardized gives a constant unit for person-time denominators.
 #' @param use_landmark Enable landmark analysis (follow-up conditional on reaching the landmark time point)
 #' @param landmark_time Landmark time point in output units
 #' @param remove_negative Remove negative intervals (end before start)
@@ -23,8 +24,7 @@
 #' @param confidence_level Confidence level for mean intervals (90-99%)
 #' @param show_summary Emit a plain-language, copy-ready clinical summary
 #' @param show_glossary Show definitions of person-time, incidence rate, landmark analysis
-#' @param timezone "system" or "utc"; affects only the "ymdhms" format, the sole format
-#'   carrying a time of day
+#' @param timezone "system" or "utc"; affects only dates carrying a time of day
 #'
 #' @return A `timeintervalResults` object: a jamovi results group holding the summary,
 #'   person-time, quality-assessment and glossary panels plus the optional calculated-time
@@ -118,6 +118,16 @@ timeintervalClass <- if (requireNamespace("jmvcore")) R6::R6Class(
         # not carry the four-digit year lubridate assigned them -- i.e. two-digit
         # years, which lubridate pivots at 68 (00-68 -> 2000-2068, 69-99 -> 1969-1999).
         .twoDigitYearCount = 0L,
+
+        # Values read with no day (the 1st was assumed), values whose text cannot have
+        # the format, and clock times that do not exist in this zone: each is a row
+        # that is imprecise or empty for a reason the missing count cannot give.
+        .partialDateCount = 0L,
+        .partialDateExample = NULL,
+        .misfitCount = 0L,
+        .misfitExample = NULL,
+        .dstGapCount = 0L,
+        .dstGapExample = NULL,
 
         # A parsed value was written with a two-digit year when its own text does
         # not contain the four-digit year it was read as. Tested on the text rather
@@ -279,22 +289,13 @@ timeintervalClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                 sep = "\n"))
         },
 
-        # One place that maps a format name to its lubridate parser, so the
-        # detector, the tie-break and the mixed-order check cannot drift apart.
+        # One place that reads a column under a format, so the detector, the tie-break
+        # and the mixed-order check cannot drift apart.
         .tryParse = function(x, fmt) {
-            parser <- switch(fmt,
-                "ymdhms" = lubridate::ymd_hms,
-                "ymd" = lubridate::ymd,
-                "ydm" = lubridate::ydm,
-                "mdy" = lubridate::mdy,
-                "myd" = lubridate::myd,
-                "dmy" = lubridate::dmy,
-                "dym" = lubridate::dym,
-                NULL)
-            if (is.null(parser) || length(x) == 0)
+            if (is.null(.dateParser(fmt)) || length(x) == 0)
                 return(rep(as.POSIXct(NA), max(length(x), 0)))
-            suppressWarnings(tryCatch(parser(x, quiet = TRUE),
-                                      error = function(e) rep(as.POSIXct(NA), length(x))))
+            tryCatch(.parseDateText(x, fmt),
+                     error = function(e) rep(as.POSIXct(NA), length(x)))
         },
 
         # Detect rows entered in the OPPOSITE day/month order from the rest of the
@@ -338,7 +339,8 @@ timeintervalClass <- if (requireNamespace("jmvcore")) R6::R6Class(
             private$.ambiguousExposure <- NULL
             # Only day/month orders can be confused this way. ymd/ydm text is
             # unambiguous, and packed numeric dates have no separator to swap.
-            swap <- switch(fmt, dmy = "mdy", mdy = "dmy", NULL)
+            swap <- switch(fmt, dmy = "mdy", mdy = "dmy", dmy_hms = "mdy_hms", mdy_hms = "dmy_hms",
+                           dmy_hm = "mdy_hm", mdy_hm = "dmy_hm", NULL)
             if (is.null(swap)) return(invisible(NULL))
             if (!is.character(start_raw)) start_raw <- as.character(start_raw)
             if (!is.character(end_raw))   end_raw   <- as.character(end_raw)
@@ -433,99 +435,13 @@ timeintervalClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                 jmvcore::reject(.("No valid dates found for format detection in either column"))
             }
 
-            # Sample up to 500 non-missing values per column, prioritizing strings
-            # that contain a 13..31 day token so order-disambiguating dates beyond
-            # row 50 are never dropped behind a prefix of day <= 12 dates.
-            take_sample <- function(v, cap = 500L) {
-                if (length(v) <= cap) return(v)
-                has_high_day <- grepl("(^|[^0-9])(1[3-9]|2[0-9]|3[01])([^0-9]|$)",
-                                      as.character(v))
-                idx <- c(which(has_high_day), which(!has_high_day))
-                v[sort(utils::head(idx, cap))]
-            }
-            sample_start <- take_sample(sample_start, 500L)
-            sample_end <- take_sample(sample_end, 500L)
-
-            # Test common formats
-            formats_to_try <- c("ymd", "dmy", "mdy", "ydm", "myd", "dym", "ymdhms")
-
-            best_format <- "ymd"
-            best_score <- -1
-            format_scores <- stats::setNames(rep(-1, length(formats_to_try)), formats_to_try)
-
-            for (fmt in formats_to_try) {
-                parser <- switch(fmt,
-                    "ymdhms" = lubridate::ymd_hms,
-                    "ymd" = lubridate::ymd,
-                    "ydm" = lubridate::ydm,
-                    "mdy" = lubridate::mdy,
-                    "myd" = lubridate::myd,
-                    "dmy" = lubridate::dmy,
-                    "dym" = lubridate::dym
-                )
-
-                tryCatch({
-                    parsed_start <- if (length(sample_start) > 0) parser(sample_start, quiet = TRUE) else NULL
-                    parsed_end <- if (length(sample_end) > 0) parser(sample_end, quiet = TRUE) else NULL
-
-                    success_start <- if (length(parsed_start)) sum(!is.na(parsed_start)) / length(parsed_start) else 0
-                    success_end <- if (length(parsed_end)) sum(!is.na(parsed_end)) / length(parsed_end) else 0
-
-                    # Require a format that works for both columns; take the weaker score
-                    success_rate <- min(success_start, success_end)
-                    format_scores[fmt] <- success_rate
-
-                    if (success_rate > best_score) {
-                        best_score <- success_rate
-                        best_format <- fmt
-                    }
-                }, error = function(e) {
-                    # Continue to next format
-                })
-            }
-
-            # Two or more formats can parse the data equally well.
-            tied_formats <- names(format_scores)[
-                format_scores >= (best_score - 1e-9) & format_scores >= 0.5]
-
-            # TIE-BREAK BY DEMOTING IMPLAUSIBLY WIDE READINGS -- the same rule as
-            # datetimeconverter's .detectDatetimeFormat(), duplicated here (it is
-            # a few lines) rather than moved to a shared helper.
-            #
-            # The original rule was "first candidate in formats_to_try order wins",
-            # and ymd is first, so ymd won every tie. For any DD/MM/YY column with
-            # years <= 2031 that is ALWAYS wrong and ALWAYS a tie: ymd reads the
-            # DAY as the year, so "22/09/18" becomes 2022-09-18 instead of
-            # 2018-09-22. Reading a day-of-month as a two-digit year scatters the
-            # years across 1..31, while a real cohort spans a few years, so any
-            # tied reading whose years span more than 20 is DEMOTED, and
-            # formats_to_try order decides among the survivors.
-            #
-            # It is deliberately demote-only. The previous rule here PROMOTED the
-            # narrowest span, which is really "the field that varies least is the
-            # year" -- wrong whenever the day-of-month is more clustered than the
-            # cohort's years. Month-start columns written yy-mm-dd are exactly that
-            # shape: start "16-01-01", "17-03-01", ... is correct as ymd, but dmy
-            # pins every row to 2001 (span 0), won the tie, and reported a mean of
-            # 4.0 months where the truth was about 20. A degenerate zero span must
-            # not win, so the narrowest reading is never preferred for being narrow.
-            #
-            # Genuine ISO text never reaches this branch (dmy cannot parse
-            # "2020-03-05" at all), and a true dmy/mdy ambiguity has the same year
-            # component under both readings, so neither is demoted and the original
-            # order decides -- .checkMixedDateOrder() and the note below cover it.
-            if (length(tied_formats) > 1) {
-                year_span <- vapply(tied_formats, function(fmt) {
-                    p <- private$.tryParse(c(sample_start, sample_end), fmt)
-                    y <- lubridate::year(p[!is.na(p)])
-                    if (length(y) == 0) Inf else as.numeric(diff(range(y)))
-                }, numeric(1))
-                plausible <- tied_formats[is.finite(year_span) & year_span <= 20]
-                if (length(plausible) > 0) tied_formats <- plausible
-                # tied_formats keeps formats_to_try order, so [1] is the first
-                # plausible candidate.
-                best_format <- tied_formats[1]
-            }
+            # The candidates, the shape guard and the year-span tie-break are shared with
+            # datetimeconverter (R/utils-dateshape.R), so both decide the same way on one
+            # column. .checkMixedDateOrder() and the note below cover a true dmy/mdy tie.
+            ranking <- .rankDateFormats(list(.dateSample(sample_start), .dateSample(sample_end)))
+            best_format <- ranking$format
+            best_score <- max(ranking$scores)
+            tied_formats <- ranking$tied
 
             # Flag any ambiguity that survives the demotion: the user must verify
             # the choice rather than trust the formats_to_try order silently.
@@ -553,26 +469,13 @@ timeintervalClass <- if (requireNamespace("jmvcore")) R6::R6Class(
             # @param format Format string (e.g., "ymd", "dmy")
             # @param tz Timezone (default: "" for system timezone)
             # @return POSIXct or Date datetime vector
-            date_parser <- switch(format,
-                "ymdhms" = lubridate::ymd_hms,
-                "ymd" = lubridate::ymd,
-                "ydm" = lubridate::ydm,
-                "mdy" = lubridate::mdy,
-                "myd" = lubridate::myd,
-                "dmy" = lubridate::dmy,
-                "dym" = lubridate::dym,
+            if (is.null(.dateParser(format)))
                 jmvcore::reject(.fmt(
                     .("Unsupported date format: {format}"), format = format))
-            )
 
             tryCatch({
-                # Pass timezone to parser for formats with time component
-                if (format == "ymdhms") {
-                    parsed_dates <- date_parser(date_vector, quiet = TRUE, tz = tz)
-                } else {
-                    parsed_dates <- date_parser(date_vector, quiet = TRUE)
-                }
-                return(parsed_dates)
+                # Timezone reaches only a format with a time component
+                return(.parseDateText(date_vector, format, tz = tz))
             }, error = function(e) {
                 jmvcore::reject(.fmt(
                     .("Error parsing dates with format {format}: {message}"),
@@ -827,11 +730,11 @@ timeintervalClass <- if (requireNamespace("jmvcore")) R6::R6Class(
             }
 
             if (quality_metrics$future_dates > 0) {
-                warnings <- c(warnings, paste(quality_metrics$future_dates, "dates in the future detected"))
+                warnings <- c(warnings, .fmt(.("{n} dates in the future detected"), n = quality_metrics$future_dates))
             }
 
             if (quality_metrics$extreme_values > 0) {
-                warnings <- c(warnings, paste(quality_metrics$extreme_values, "potentially extreme time intervals detected"))
+                warnings <- c(warnings, .fmt(.("{n} potentially extreme time intervals detected"), n = quality_metrics$extreme_values))
             }
 
             # A cohort where a large share of patients start and end on the same day
@@ -842,16 +745,52 @@ timeintervalClass <- if (requireNamespace("jmvcore")) R6::R6Class(
             if (non_missing > 0) {
                 zero_pct <- 100 * quality_metrics$zero_intervals / non_missing
                 if (zero_pct >= 20) {
-                    warnings <- c(warnings, paste0(
-                        quality_metrics$zero_intervals, " zero-length intervals (",
-                        round(zero_pct, 1), "% of valid intervals) - start and end date are the same day, ",
-                        "which contributes no person-time"))
+                    warnings <- c(warnings, .fmt(
+                        .("{n} zero-length intervals ({pct}% of valid intervals) - start and end date are the same day, which contributes no person-time"),
+                        n = quality_metrics$zero_intervals, pct = round(zero_pct, 1)))
                 }
             }
 
+            # Defects found while the dates were READ. Each is raised as its own
+            # banner in .run(), but the grade used to count only the warnings above,
+            # so "Overall Quality: Good" could sit under a strong warning that the
+            # total person-time is wrong. All are recorded before this method
+            # is called (.calculate_survival_time()).
+            mox <- private$.mixedOrderNote
+            if (!is.null(mox)) {
+                warnings <- c(warnings, .fmt(
+                    .("{count} rows may have the day and month entered the other way round from the rest of the column, so the total person-time may be wrong (see the strong warning above)"),
+                    count = mox$n))
+            }
+            if (private$.twoDigitYearCount > 0) {
+                warnings <- c(warnings, .fmt(
+                    .("{count} date value(s) written with a two-digit year"),
+                    count = private$.twoDigitYearCount))
+            }
+            if (private$.trailingTextCount > 0) {
+                warnings <- c(warnings, .fmt(
+                    .("{count} date value(s) with text after the date that was ignored"),
+                    count = private$.trailingTextCount))
+            }
+            if (private$.partialDateCount > 0) {
+                warnings <- c(warnings, .fmt(
+                    .("{count} date value(s) with no day recorded"),
+                    count = private$.partialDateCount))
+            }
+            if (!is.null(private$.formatDetectionNote)) {
+                warnings <- c(warnings, .("The date format could not be settled from these dates, so the order of their day, month and year is unproven"))
+            }
+            if (!is.null(private$.extremeSkipReason)) {
+                warnings <- c(warnings, .("Extreme-value filtering could not act on these data"))
+            }
+
             quality_metrics$warnings <- warnings
-            quality_metrics$overall_quality <- ifelse(length(warnings) == 0, "Good",
-                                                    ifelse(length(warnings) <= 2, "Fair", "Poor"))
+            # A mixed day/month order is evidence that the headline number itself is
+            # wrong, so it caps the grade at Poor whatever else is clean.
+            quality_metrics$overall_quality <-
+                if (!is.null(mox) || length(warnings) > 2) .("Poor")
+                else if (length(warnings) == 0) .("Good")
+                else .("Fair")
 
             return(quality_metrics)
         },
@@ -862,7 +801,7 @@ timeintervalClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                                             fu_date = NULL,
                                             time_format = "ymd",
                                             output_unit = "months",
-                                            time_basis = "standardized",
+                                            time_basis = "calendar",
                                             landmark_time = NULL,
                                             timezone_setting = "system") {
 
@@ -875,6 +814,18 @@ timeintervalClass <- if (requireNamespace("jmvcore")) R6::R6Class(
             # (mis)format too, not just auto-detect.
             private$.checkDateSerial(data[[dx_date]], dx_date)
             private$.checkDateSerial(data[[fu_date]], fu_date)
+
+            # Packed dates lose their zeros as numbers, and as text saved from numbers.
+            # The parser pads a number to an even width and no further, so YYMMDD 000105,
+            # stored as 105, would come back empty.
+            for (col in c(dx_date, fu_date)) {
+                digits <- if (is.numeric(data[[col]]))
+                    ifelse(is.na(data[[col]]), NA_character_,
+                           base::format(data[[col]], trim = TRUE, scientific = FALSE))
+                else as.character(data[[col]])
+                padded <- .restoreLeadingZeros(digits)
+                if (!identical(padded, digits)) data[[col]] <- padded
+            }
 
             # Detect date format if needed
             detected_format <- private$.detectDateFormat(
@@ -891,6 +842,22 @@ timeintervalClass <- if (requireNamespace("jmvcore")) R6::R6Class(
             # Parse dates with enhanced error handling
             start_dates <- private$.parseDate(data[[dx_date]], detected_format, tz = tz)
             end_dates <- private$.parseDate(data[[fu_date]], detected_format, tz = tz)
+
+            # Recorded before the checks below can reject, so a failure can name them.
+            raw_dates <- c(as.character(data[[dx_date]]), as.character(data[[fu_date]]))
+            if (detected_format %in% c("ym", "my")) {
+                private$.partialDateCount <- sum(!is.na(c(start_dates, end_dates)))
+                private$.partialDateExample <- raw_dates[!is.na(raw_dates)][1]
+            }
+            misfits <- .dateMisfits(raw_dates, detected_format)
+            private$.misfitCount <- length(misfits)
+            private$.misfitExample <- raw_dates[misfits[1]]
+            if (.dateHasTime(detected_format) && !identical(tz, "UTC")) {
+                gap <- which(is.na(c(as.character(start_dates), as.character(end_dates))) & !is.na(raw_dates))
+                gap <- gap[!is.na(.parseDateText(raw_dates[gap], detected_format))]
+                private$.dstGapCount <- length(gap)
+                private$.dstGapExample <- raw_dates[gap[1]]
+            }
 
             # Validate parse success for both columns
             private$.validateParsedDates(start_dates, data[[dx_date]], dx_date, detected_format)
@@ -944,8 +911,11 @@ timeintervalClass <- if (requireNamespace("jmvcore")) R6::R6Class(
             negative_idx <- which(!is.na(calculated_time_raw) & calculated_time_raw < 0)
             if (length(negative_idx) > 0 && !self$options$remove_negative) {
                 example_rows <- utils::head(negative_idx, 3)
+                # rownames(), not the position: with a jamovi filter active,
+                # self$data drops the filtered rows and keeps the spreadsheet row
+                # numbers as rownames, so a position sends the user to the wrong row.
                 examples <- paste0(
-                    "Row ", example_rows, ": Start=", base::format(start_dates_raw[example_rows]),
+                    .("Row"), " ", rownames(data)[example_rows], ": Start=", base::format(start_dates_raw[example_rows]),
                     ", End=", base::format(end_dates_raw[example_rows])
                 )
                 # The old message named a checkbox that does not exist ("Remove
@@ -1076,17 +1046,29 @@ timeintervalClass <- if (requireNamespace("jmvcore")) R6::R6Class(
             private$.twoDigitYearCount <- 0L
             private$.trailingTextCount <- 0L
             private$.trailingTextExample <- NULL
+            private$.partialDateCount <- 0L
+            private$.partialDateExample <- NULL
+            private$.misfitCount <- 0L
+            private$.misfitExample <- NULL
+            private$.dstGapCount <- 0L
+            private$.dstGapExample <- NULL
 
-            # None of the Html items declare clearWith, and .run() has several early
-            # returns, so anything written on a previous run survives into this one:
-            # deselect a date variable after a successful run and the old summary,
-            # quality panel and message banner stay on screen next to "Getting
-            # Started". Blank every panel up front; each is rewritten below when the
-            # run actually produces it.
-            for (item in c("messages", "todo", "aboutPanel", "personTimeInfo",
-                           "qualityAssessment", "caveatsPanel", "summary",
-                           "nlSummary", "glossaryPanel"))
-                self$results[[item]]$setContent("")
+            # None of the Html items declare clearWith, so anything written on a
+            # previous run survives into this one: deselect a date variable after a
+            # successful run and the old summary, quality panel and message banner
+            # stay on screen next to "Getting Started". The panels are blanked on
+            # the two paths that end normally -- the getting-started return and a
+            # successful calculation -- and NOT before a validation reject(), where
+            # the previous, greyed results under the error are jamovi's own
+            # presentation of a failed run (review guide section 5, round 8).
+            # "<div></div>", never "": the jamovi client skips an empty Html update,
+            # so "" left the previous run's text on screen.
+            blank_panels <- function()
+                for (item in c("messages", "aboutPanel", "personTimeInfo",
+                               "qualityAssessment", "caveatsPanel", "summary",
+                               "nlSummary", "glossaryPanel"))
+                    self$results[[item]]$setContent("<div></div>")
+            self$results$todo$setContent("<div></div>")
 
             # Initialize messages list (backed by an environment so the nested
             # add_message() helper can append without `<<-`).
@@ -1137,7 +1119,7 @@ timeintervalClass <- if (requireNamespace("jmvcore")) R6::R6Class(
             # messages of equal severity keep the order they were raised in.
             render_messages <- function() {
                 if (length(msg_env$messages) == 0) {
-                    self$results$messages$setContent("")
+                    self$results$messages$setContent("<div></div>")
                     return(invisible(NULL))
                 }
                 ranks <- vapply(msg_env$messages, function(m) m$rank, integer(1))
@@ -1159,6 +1141,7 @@ timeintervalClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                     then choose a date format (or leave it on Auto-detect) and an output
                     time unit (days, weeks, months, or years)."
 
+                blank_panels()
                 html <- self$results$todo
                 html$setContent(todo)
                 return()
@@ -1178,48 +1161,39 @@ timeintervalClass <- if (requireNamespace("jmvcore")) R6::R6Class(
             }
 
             # (The timezone notice is raised AFTER parsing, once the format actually
-            # used is known -- under "auto" the detector may well pick ymdhms, and
-            # claiming the setting is inert would then be false.)
+            # used is known -- under "auto" the detector may well pick a time format,
+            # and claiming the setting is inert would then be false.)
 
-            # Backend option backstops (defense-in-depth for run(noThrow = TRUE))
+            # Backend option backstops (defense-in-depth for run(noThrow = TRUE)).
+            # reject(), not an Html error and return(): these are fatal.
             if (!is.character(self$options$output_unit) ||
                 length(self$options$output_unit) != 1L ||
                 !self$options$output_unit %in% c("days", "weeks", "months", "years")) {
-                add_message("error", .("Unsupported output unit."))
-                render_messages()
-                return()
+                jmvcore::reject(.("Unsupported output unit."))
             }
             if (!is.character(self$options$time_basis) ||
                 length(self$options$time_basis) != 1L ||
                 !self$options$time_basis %in% c("standardized", "calendar")) {
-                add_message("error", .("Unsupported time basis."))
-                render_messages()
-                return()
+                jmvcore::reject(.("Unsupported time basis."))
             }
             if (!is.character(self$options$timezone) ||
                 length(self$options$timezone) != 1L ||
                 !self$options$timezone %in% c("system", "utc")) {
-                add_message("error", .("Unsupported timezone setting."))
-                render_messages()
-                return()
+                jmvcore::reject(.("Unsupported timezone setting."))
             }
             if (!is.numeric(self$options$extreme_multiplier) ||
                 length(self$options$extreme_multiplier) != 1L ||
                 is.na(self$options$extreme_multiplier) ||
                 self$options$extreme_multiplier < 1.5 ||
                 self$options$extreme_multiplier > 5) {
-                add_message("error", .("Extreme threshold multiplier must be between 1.5 and 5."))
-                render_messages()
-                return()
+                jmvcore::reject(.("Extreme threshold multiplier must be between 1.5 and 5."))
             }
             if (!is.numeric(self$options$confidence_level) ||
                 length(self$options$confidence_level) != 1L ||
                 is.na(self$options$confidence_level) ||
                 self$options$confidence_level < 90 ||
                 self$options$confidence_level > 99) {
-                add_message("error", .("Confidence level must be between 90 and 99."))
-                render_messages()
-                return()
+                jmvcore::reject(.("Confidence level must be between 90 and 99."))
             }
 
             # Validate input data structure
@@ -1229,40 +1203,65 @@ timeintervalClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                 self$options$fu_date
             )
 
-            if (!validation$valid) {
-                # Add validation error message
-                add_message("error", validation$error)
-                render_messages()
-                return()
-            }
+            # A fatal input defect is a reject(), so jamovi shows its own error
+            # state instead of a hand-built red banner on a complete-looking pane.
+            if (!validation$valid)
+                jmvcore::reject(validation$error)
 
             # Caveats about how the dates were READ. Raised on the rejected path as
             # well as the success path: both counts are recorded straight after
             # parsing, before any rejection, and a two-digit year is very often the
             # very thing that made the run fail ("22/09/65" -> 2065 -> every
             # interval negative), so discarding it there hid the cause.
-            add_parse_caveats <- function() {
+            parse_caveats <- function() {
+                caveats <- character()
                 # Two-digit years are pivoted silently by lubridate; a 1960s date of
                 # birth written "22/09/68" lands in 2068 and only the downstream
                 # symptoms (future dates, negative intervals) ever showed, none of
                 # which named the cause.
                 if (private$.twoDigitYearCount > 0) {
-                    add_message("warning", .fmt(
+                    caveats <- c(caveats, .fmt(
                         .("{count} date value(s) were written with a two-digit year. These are read as 2000-2068 for 00-68 and as 1969-1999 for 69-99, so a date such as 22/09/68 becomes 2068 and a 1950s-1960s date is pushed a century forward. If any interval is a century off, rewrite the column with four-digit years."),
                         count = private$.twoDigitYearCount))
                 }
                 if (private$.trailingTextCount > 0) {
-                    add_message("warning", .fmt(
+                    caveats <- c(caveats, .fmt(
                         .("{count} date value(s) have text after the date, for example \"{example}\". Only the date at the start of each value was read and the rest was ignored. Check that the ignored text does not change the date (a second date, a time, or a note such as 'approx.'), and clean the column so it holds dates only."),
                         count = private$.trailingTextCount,
                         example = private$.trailingTextExample))
                 }
+                if (private$.partialDateCount > 0) {
+                    caveats <- c(caveats, .fmt(
+                        .("{count} date value(s) give a month and a year but no day, for example \"{example}\". Each was set to the 1st of its month, so the day is not data and an interval between two such dates is ambiguous by up to a month either way."),
+                        count = private$.partialDateCount,
+                        example = private$.partialDateExample))
+                }
+                if (private$.misfitCount > 0) {
+                    caveats <- c(caveats, .fmt(
+                        .("{count} date value(s) were left empty because their text cannot have the date format used, for example \"{example}\". Reading them would mean splitting digits in the wrong place or inventing a day that was never recorded."),
+                        count = private$.misfitCount,
+                        example = private$.misfitExample))
+                }
+                if (private$.dstGapCount > 0) {
+                    caveats <- c(caveats, .fmt(
+                        .("{count} date value(s) were left empty because that clock time does not exist on this computer's timezone: it falls in the hour skipped when daylight-saving time starts (first: {example}). If the times were recorded in UTC or another fixed offset, set Timezone to UTC; otherwise correct the times at source."),
+                        count = private$.dstGapCount,
+                        example = private$.dstGapExample))
+                }
+                caveats
             }
 
-            # Try to calculate time intervals with error handling
-            calculated_times <- NULL
-            tryCatch({
-                calculated_times <- private$.calculate_survival_time(
+            # No catch-all tryCatch here. Every failure inside is a validation
+            # reject() (serial guard, format detection, parse rate, landmark,
+            # negative intervals) and must reach jamovi's error state; the
+            # third-party parsers are already wrapped individually in .tryParse()
+            # and .parseDate(). The handler below only ADDS the diagnostics that
+            # were computed before the failure -- the format-ambiguity note
+            # ("ymd and dmy both fit; I used ymd") and the two-digit-year /
+            # trailing-text caveats, often the very cause of the rejection -- to
+            # the message, and re-raises the same condition object.
+            calculated_times <- tryCatch(
+                private$.calculate_survival_time(
                     data = self$data,
                     dx_date = self$options$dx_date,
                     fu_date = self$options$fu_date,
@@ -1271,27 +1270,21 @@ timeintervalClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                     time_basis = self$options$time_basis,
                     landmark_time = if (self$options$use_landmark) self$options$landmark_time else NULL,
                     timezone_setting = self$options$timezone
-                )
-            }, error = function(e) {
-                # Raise the ambiguity note HERE too, not only on the success path
-                # below: .detectDateFormat() runs BEFORE any rejection, so on a
-                # failed run the single most diagnostic sentence we have ("ymd and
-                # dmy both fit these dates equally well; I used ymd") was computed
-                # and then thrown away by the early return under this handler --
-                # exactly when the user is trying to work out what went wrong.
-                # render_messages() sorts by severity, so the error still shows first.
-                if (identical(self$options$time_format, "auto") &&
-                    !is.null(private$.formatDetectionNote))
-                    add_message("warning", private$.formatDetectionNote)
-                add_parse_caveats()
-                add_message("error", as.character(e$message))
-                render_messages()
-            })
+                ),
+                error = function(e) {
+                    extra <- c(
+                        if (identical(self$options$time_format, "auto"))
+                            private$.formatDetectionNote,
+                        parse_caveats())
+                    if (length(extra) > 0)
+                        e$message <- paste(c(conditionMessage(e), extra), collapse = "\n")
+                    stop(e)
+                })
 
-            # If calculation failed, stop here
-            if (is.null(calculated_times)) {
-                return()
-            }
+            # Every panel is rewritten (or hidden by its visible:) from here on;
+            # blank them so a panel this run does not produce cannot keep the
+            # previous run's text.
+            blank_panels()
 
             # Surface ambiguous auto-detection so users can verify the chosen
             # format instead of relying on a silent dmy/mdy guess.
@@ -1314,21 +1307,23 @@ timeintervalClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                     medianamb = base::formatC(mox$median_amb, format = "f", digits = 0),
                     medianref = base::formatC(mox$median_ref, format = "f", digits = 0),
                     p = base::formatC(mox$p, format = "g", digits = 4),
-                    rows = paste(mox$rows, collapse = ", "),
+                    # spreadsheet row numbers (rownames), not positions in self$data
+                    rows = paste(rownames(self$data)[mox$rows], collapse = ", "),
                     examplechosen = base::formatC(mox$example_chosen, format = "f", digits = 0),
                     exampleswapped = base::formatC(mox$example_swapped, format = "f", digits = 0)))
             }
 
-            add_parse_caveats()
+            for (caveat in parse_caveats())
+                add_message("warning", caveat)
 
             # Timezone reaches only a parser with a time component; every date-only
             # format yields a Date, which carries no zone. Tested against the format
-            # ACTUALLY used, because under "auto" the detector may pick ymdhms and
+            # ACTUALLY used, because under "auto" the detector may pick a time format and
             # the setting would then be live.
             if (identical(self$options$timezone, "utc") &&
-                !identical(calculated_times$detected_format, "ymdhms")) {
+                !.dateHasTime(calculated_times$detected_format)) {
                 add_message("info", .fmt(
-                    .("The UTC timezone setting applies only to the \"YYYY-MM-DD HH:MM:SS\" format, the only one carrying a time of day. These dates were read as \"{format}\", so they are calendar days and the timezone has no effect on the intervals."),
+                    .("The UTC timezone setting applies only to values carrying a time of day. These dates were read as \"{format}\", so they are calendar days and the timezone has no effect on the intervals."),
                     format = calculated_times$detected_format))
             }
 
@@ -1359,32 +1354,33 @@ timeintervalClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                 if (!is.null(time_values_for_output) && length(time_values_for_output) > 0) {
                     self$results$calculated_time$setRowNums(rownames(filtered_data))
                     self$results$calculated_time$setValues(time_values_for_output)
-                    # Put the unit in the appended column's name. The static
-                    # varTitle in the .r.yaml cannot say whether the column holds
-                    # days, months or years -- and an unlabelled time column landing
-                    # in a survival dataset is exactly how unit mix-ups happen.
-                    # varTitle interpolation is not an option here: jmvcore::format() writes the column title that
-                    # asProtoBuf() sends, and .run() is after the varTitle was applied.
-                    # The landmark belongs in the column NAME, not only in the
-                    # Caveats panel. With a landmark active every written value is
-                    # the landmark shorter than the interval the name otherwise
-                    # promises, on a silently reduced cohort -- and this column is
-                    # advertised for downstream survival analysis, where feeding a
-                    # rebased time variable alongside an unrebased event indicator
-                    # is a real and invisible error. The Caveats panel does explain
-                    # it, but it is gated on include_quality_metrics, which is off
-                    # by default, so by default nothing on screen said so.
-                    lm_written <- if (!is.null(calculated_times$landmark))
-                                      calculated_times$landmark$landmark_time else 0
-                    self$results$calculated_time$setTitle(
-                        if (isTRUE(lm_written > 0))
-                            .fmt(.("Calculated Time ({unit}, from {landmark} {unit} landmark)"),
-                                 unit = self$options$output_unit,
-                                 landmark = base::format(round(lm_written, 4)))
-                        else
-                            .fmt(.("Calculated Time ({unit})"), unit = self$options$output_unit))
                 }
             }
+
+            # Put the unit in the appended column's name. The static varTitle in the
+            # .r.yaml cannot say whether the column holds days, months or years -- and an
+            # unlabelled time column landing in a survival dataset is exactly how unit
+            # mix-ups happen. varTitle interpolation is not an option here: jmvcore::format()
+            # writes the column title that asProtoBuf() sends, and .run() is after the
+            # varTitle was applied.
+            # The landmark belongs in the column NAME, not only in the Caveats panel. With
+            # a landmark active every written value is the landmark shorter than the
+            # interval the name otherwise promises, on a silently reduced cohort -- and
+            # this column is advertised for downstream survival analysis, where feeding a
+            # rebased time variable alongside an unrebased event indicator is a real and
+            # invisible error. The Caveats panel does explain it, but it is gated on
+            # include_quality_metrics, which is off by default.
+            # Outside the isNotFilled() gate: a rerun that keeps the column still sends a
+            # title, the yaml default unless this runs, and jamovi renames the column to it.
+            lm_written <- if (!is.null(calculated_times$landmark))
+                              calculated_times$landmark$landmark_time else 0
+            self$results$calculated_time$setTitle(
+                if (isTRUE(lm_written > 0))
+                    .fmt(.("Calculated Time ({unit}, from {landmark} {unit} landmark)"),
+                         unit = self$options$output_unit,
+                         landmark = base::format(round(lm_written, 4)))
+                else
+                    .fmt(.("Calculated Time ({unit})"), unit = self$options$output_unit))
 
             # Generate person-time information
             person_time_info <- glue::glue("
@@ -2004,11 +2000,12 @@ timeintervalClass <- if (requireNamespace("jmvcore")) R6::R6Class(
             # analysis has just warned may be wrong, because it travels beyond the
             # results window where the warning cannot follow it. Two triggers, both
             # already surfaced as banners: rows that look mis-typed in the other
-            # day/month order, and a systematic (>=10%) negative-interval fault that
+            # day/month order or an order the dates could not settle, and a systematic (>=10%) negative-interval fault that
             # was filtered away rather than corrected at source.
             neg_denom <- if (!is.null(filter_info$n_calculable) && filter_info$n_calculable > 0)
                              filter_info$n_calculable else max(nrow(self$data), 1)
             manuscript_unsafe <- !is.null(private$.mixedOrderNote) ||
+                !is.null(private$.formatDetectionNote) ||
                 (isTRUE(self$options$remove_negative) &&
                  isTRUE(filter_info$removed_negative / neg_denom >= 0.10))
 
@@ -2042,13 +2039,13 @@ timeintervalClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                         # a bare "<" breaks the XML-based Word/PDF export; the
                         # messages banner is htmlEscaped, where "&lt;" would appear
                         # literally). One plain-English phrase is right everywhere.
-                        excl_parts <- c(excl_parts, sprintf("%d with follow-up shorter than %s",
-                                        below_n, lm_amount))
+                        excl_parts <- c(excl_parts, .fmt(.("{n} with follow-up shorter than {amount}"),
+                                        n = below_n, amount = lm_amount))
                     if (na_n > 0)
-                        excl_parts <- c(excl_parts, sprintf("%d with missing follow-up", na_n))
+                        excl_parts <- c(excl_parts, .fmt(.("{n} with missing follow-up"), n = na_n))
                     if (length(excl_parts) > 0)
-                        sprintf(" after excluding %s (landmark analysis)",
-                                paste(excl_parts, collapse = " and "))
+                        paste0(" ", .fmt(.("after excluding {parts} (landmark analysis)"),
+                                         parts = paste(excl_parts, collapse = paste0(" ", .("and"), " "))))
                     else
                         ""
                 } else {
@@ -2059,7 +2056,7 @@ timeintervalClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                 # landmark_text above as "N with missing follow-up"; repeating them
                 # here would state one exclusion twice in a single sentence.
                 quality_text <- if (!lm_on && summary_stats$missing > 0) {
-                    sprintf(" Note: %d missing values were detected.", summary_stats$missing)
+                    paste0(" ", .fmt(.("Note: {n} missing values were detected."), n = summary_stats$missing))
                 } else {
                     ""
                 }
@@ -2283,7 +2280,7 @@ timeintervalClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                 # the basis this run actually used, and the extreme-value bullet has
                 # to quote the user's multiplier rather than a hardcoded 2x.
                 basis_caveat <- if (identical(self$options$time_basis, "calendar"))
-                    "This run used the <strong>calendar-aware</strong> basis, so months and years follow actual month lengths (28-31 days). Switch to the standardized basis (1 month = 30.4375 days, 1 year = 365.25 days) if you need a constant unit of risk exposure for person-time denominators."
+                    "This run used the <strong>calendar-aware</strong> basis, so months and years follow actual month lengths (28-31 days), as in the survival analyses of this module. Switch to the standardized basis (1 month = 30.4375 days, 1 year = 365.25 days) if you need a constant unit of risk exposure for person-time denominators."
                 else
                     "To ensure statistical consistency for survival analysis, this run used <strong>standardized durations</strong> (1 month = 30.4375 days, 1 year = 365.25 days) rather than calendar units. This prevents bias from varying month lengths (28-31 days)."
                 caveats_html <- glue::glue("

@@ -21,10 +21,10 @@ test_that("R46: a partly RECIST coding withholds ORR/DCR and names the labels", 
     expect_true(is.na(sp_rate(r, "Objective Response Rate")))
     expect_true(is.na(sp_rate(r, "Disease Control Rate")))
     nt <- sp_txt(r$notices$content)
-    expect_match(nt, "not RECIST categories (CR, PR, SD, PD or NE): 'Response'", fixed = TRUE)
+    expect_match(nt, "values other than CR, PR, SD, PD or NE: 'Response'", fixed = TRUE)
     cr <- sp_txt(r$copyReadyReport$content)
     expect_false(grepl("(ORR) of", cr, fixed = TRUE))
-    expect_match(cr, "Not every response value was a RECIST category", fixed = TRUE)
+    expect_match(cr, "Not every response value was one of CR, PR, SD, PD or NE", fixed = TRUE)
 })
 
 test_that("R46: a non-RECIST row hidden behind a recognised best response still withholds", {
@@ -64,7 +64,7 @@ test_that("R44: a best response derived from several rows is disclosed as unconf
             responseVar = "resp", showCopyReady = TRUE)
     nt <- sp_txt(r$notices$content)
     expect_match(nt, "Unconfirmed best response", fixed = TRUE)
-    expect_match(nt, "2 of 4 patients have more than one response row", fixed = TRUE)
+    expect_match(nt, "2 of 4 patients have more than one different response", fixed = TRUE)
     notes <- vapply(r$advancedMetrics$notes, function(n) n$note, "")
     expect_true(any(grepl("not a RECIST 1.1 best overall response", notes, fixed = TRUE)))
     expect_match(sp_txt(r$copyReadyReport$content), "responses were not confirmed", fixed = TRUE)

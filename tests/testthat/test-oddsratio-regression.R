@@ -740,7 +740,7 @@ test_that("N10: the plot state carries no dead payload", {
                       "originalExplanatoryNames",
                       # read by .plot(): rows to omit (not estimable) and
                       # the CI method the table used
-                      "excludedFitIds", "excludedLabels", "confintType"))
+                      "excludedFitIds", "excludedLabels", "extremeLabels", "confintType"))
 })
 
 test_that("N11: the nomogram's axes carry the user's variable names, live and after reload", {

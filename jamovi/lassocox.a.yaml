@@ -152,6 +152,8 @@ options:
           standard deviations. Displayed coefficients are back-transformed by glmnet to
           the original design-column scale. Factor indicators are still penalized and
           selected separately rather than as a grouped factor.
+          When this is off, selection depends on the units of each predictor; changing a
+          unit can change which predictors are selected.
 
     - name: suitabilityCheck
       title: Data suitability assessment
@@ -198,7 +200,8 @@ options:
         R: >
           Plot coefficients across the fitted log-lambda path with both CV choices
           and counts of nonzero columns. For readability, at most 30 paths are
-          displayed, ranked by their summed absolute coefficients across the path.
+          displayed: selected columns first, then by summed absolute coefficient times
+          column SD across the path.
 
     - name: showEncoding
       title: Predictor encoding

@@ -178,10 +178,11 @@ survivalcontOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                 "uselandmark",
                 uselandmark,
                 default=FALSE)
-            private$..landmark <- jmvcore::OptionInteger$new(
+            private$..landmark <- jmvcore::OptionNumber$new(
                 "landmark",
                 landmark,
-                default=3)
+                default=3,
+                min=0)
             private$..sc <- jmvcore::OptionBool$new(
                 "sc",
                 sc,
@@ -814,8 +815,7 @@ survivalcontResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                     list(
                         `name`="rate", 
                         `title`="Incidence Rate", 
-                        `type`="number", 
-                        `format`="zto"),
+                        `type`="number"),
                     list(
                         `name`="rate_ci_lower", 
                         `title`="Lower", 
@@ -1114,7 +1114,12 @@ survivalcontResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                     list(
                         `name`="statistic", 
                         `title`="Statistic", 
-                        `type`="number")),
+                        `type`="number"),
+                    list(
+                        `name`="padjusted", 
+                        `title`="Adjusted p", 
+                        `type`="number", 
+                        `format`="zto,pvalue")),
                 visible="(findcut)",
                 clearWith=list(
                     "sc",
@@ -1381,7 +1386,7 @@ survivalcontResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                         `type`="integer"),
                     list(
                         `name`="n.event", 
-                        `title`="Number of Events", 
+                        `title`="Events since previous time", 
                         `type`="integer"),
                     list(
                         `name`="surv", 
@@ -2066,7 +2071,11 @@ survivalcontBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 
 #' Survival Analysis for Continuous Explanatory Variable
 #'
-#' 
+#' Survival analysis for one continuous explanatory variable: Cox regression 
+#' on the continuous scale, and optional data-derived cut-offs with 
+#' Kaplan-Meier groups. A cut-off chosen from the same data overstates the 
+#' effect and needs independent validation. These methods describe 
+#' associations and do not establish causality.
 #' @param data The data as a data frame.
 #' @param elapsedtime The time-to-event or follow-up duration for each
 #'   patient. Should be numeric and continuous, measured in consistent units
@@ -2111,11 +2120,19 @@ survivalcontBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   days, or 1, 3, and 5 for years). Enter any other comma- or space-separated
 #'   positive values to request custom points in the selected output time scale.
 #' @param timetypedata select the time type in data
-#' @param timetypeoutput select the time type in output
+#' @param timetypeoutput The time unit used throughout the analysis. When
+#'   survival time is calculated from dates, dates are CONVERTED to this unit.
+#'   When a pre-calculated elapsed-time variable is supplied, no conversion is
+#'   possible (the column carries no unit), so this option DECLARES the unit
+#'   that variable is already recorded in. Either way it determines how
+#'   cutpoints and plausibility checks are interpreted, and how axes are
+#'   labeled, so selecting the wrong unit for pre-calculated time changes the
+#'   reported results, not just the labels.
 #' @param uselandmark Enable this option to perform landmark survival analysis
 #'   at a specified time point.
 #' @param landmark Specify the landmark time at which to evaluate survival
-#'   probabilities in landmark analysis. This option is only available if you
+#'   probabilities in landmark analysis. Patients with an event or censoring at
+#'   or before this time are excluded. This option is only available if you
 #'   enable the "Use Landmark Time" option.
 #' @param sc Create Kaplan-Meier curves after the continuous explanatory
 #'   variable has been divided by a selected single or multiple cut-off method.

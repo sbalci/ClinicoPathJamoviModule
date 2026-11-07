@@ -1,6 +1,6 @@
 # Regression tests for R/singlearm.b.R:
 #
-#   1. .definemytime()            - numeric-date epoch scale (days vs seconds)
+#   1. .definemytime()            - numeric dates: epoch seconds only
 #   2. .baselineHazardAnalysis()  - avoid an arbitrary minimum-event verdict
 #   3. .competingRiskPlotRefusal()- advice must match why competing risks are on
 #   4. .survTable()               - competing-risk titles and explanation panel
@@ -53,6 +53,8 @@ bind_method <- function(name, options, private_extra = list(), results = NULL) {
         .checkpoint  = function(...) invisible(NULL),
         .displayMessages = function() invisible(NULL),
         .isCompetingRisk = function(...) FALSE,
+        .landmarkSuffix = function() "",
+        .landmarkNote = function(...) invisible(NULL),
         # The REAL estimand label map, rebound into the stub environment: with
         # no declared estimand it returns the endpoint-neutral fallback. Copying
         # those strings into a hand-written stub instead would make the wording
@@ -71,12 +73,10 @@ bind_method <- function(name, options, private_extra = list(), results = NULL) {
 
 
 # ---------------------------------------------------------------------------
-# 1. Numeric date columns: classify each column and reject ambiguity
+# 1. Numeric date columns: epoch seconds only, everything else refused
 # ---------------------------------------------------------------------------
-# The per-column all(x < 1e5) heuristic let a single sentinel or typo flip one
-# column to Unix seconds while the other stayed on days-since-epoch: diagnosis
-# read as 1970, follow-up as 2018, i.e. ~48-year survival times with no error
-# and no notice.
+# A days-or-seconds guess read 20190115 as seconds, and one sentinel could flip a
+# column's scale. A bare number has no unit, so nothing is reinterpreted now.
 
 run_definemytime <- function(dx, fu, unit = "years") {
     n <- length(dx)
@@ -94,7 +94,7 @@ run_definemytime <- function(dx, fu, unit = "years") {
     list(df = b$f(), log = b$log)
 }
 
-test_that("a single out-of-range value does not flip the epoch scale", {
+test_that("a sentinel in a day-count column is refused with the column", {
     skip_if_not_installed("lubridate")
 
     dx <- c(17000, 17010, 17020, 17030, 17040, 17050)   # days since 1970
@@ -103,23 +103,24 @@ test_that("a single out-of-range value does not flip the epoch scale", {
 
     out <- run_definemytime(dx, fu)
     expect_null(out$df)
-    expect_true(any(grepl("both sides of the date-encoding boundary",
-                          out$log$errors, fixed = TRUE)))
+    expect_true(any(grepl("cannot be read as dates", out$log$errors, fixed = TRUE)))
 })
 
 test_that("an implausible individual follow-up is flagged, not printed", {
     skip_if_not_installed("lubridate")
 
-    dx <- seq(1.5e9, 1.5e9 + 5e6, length.out = 6)
+    # Both dates of the long row are plausible on their own (1905 and 2060), so
+    # only the interval check can catch it.
+    dx <- seq(-2.05e9, -2.05e9 + 5e6, length.out = 6)
     fu <- dx + 365 * 86400
-    fu[3] <- dx[3] + 200 * 365.25 * 86400
+    fu[3] <- dx[3] + 155 * 365.25 * 86400
 
     out <- run_definemytime(dx, fu)
     expect_null(out$df)
     expect_true(any(grepl("exceed 150 years", out$log$errors, fixed = TRUE)))
 })
 
-test_that("different numeric encodings across date columns are rejected", {
+test_that("one refused column stops the analysis even when the other is valid", {
     skip_if_not_installed("lubridate")
 
     dx <- seq(17000, 17050, by = 10)
@@ -127,19 +128,19 @@ test_that("different numeric encodings across date columns are rejected", {
     out <- run_definemytime(dx, fu)
 
     expect_null(out$df)
-    expect_true(any(grepl("different numeric encodings",
-                          out$log$errors, fixed = TRUE)))
+    expect_length(out$log$errors, 1)
+    expect_true(any(grepl("cannot be read as dates", out$log$errors, fixed = TRUE)))
 })
 
-test_that("ordinary numeric-day dates are unchanged (no new false alarm)", {
+test_that("numeric day counts are refused, not read as days", {
     skip_if_not_installed("lubridate")
 
     dx <- seq(17000, 17050, by = 10)
     out <- run_definemytime(dx, dx + 365)
 
-    expect_equal(stats::median(out$df$mytime), 1, tolerance = 0.01)
-    expect_length(out$log$warnings, 0)
-    expect_true(any(grepl("DAYS", out$log$infos)))
+    expect_null(out$df)
+    expect_true(any(grepl("Numeric date columns must hold seconds since 1970",
+                          out$log$errors, fixed = TRUE)))
 })
 
 test_that("genuine Unix-second dates are still read as seconds", {
@@ -150,7 +151,7 @@ test_that("genuine Unix-second dates are still read as seconds", {
 
     expect_equal(stats::median(out$df$mytime), 1, tolerance = 0.01)
     expect_length(out$log$warnings, 0)
-    expect_true(any(grepl("SECONDS", out$log$infos)))
+    expect_length(out$log$errors, 0)
 })
 
 test_that("the declared-unit check still fires on pre-calculated time", {

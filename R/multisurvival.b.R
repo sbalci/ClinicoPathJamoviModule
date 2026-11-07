@@ -186,7 +186,7 @@
 
 # Helper function for generating clinical interpretation summaries
 .generateClinicalSummary <- function(results, analysis_type = "cox", n_vars = 0, n_events = 0,
-                                     term_map = NULL, self = NULL) {
+                                     term_map = NULL, self = NULL, not_ranked = integer(0)) {
   # jmvcore's `.()` looks up `self` in the calling frame; the analysis passes
   # its own so the summary is translated. Direct (test) calls leave it NULL and
   # get the untranslated text through this stub.
@@ -197,6 +197,8 @@
   # three-level factor with two significant contrasts announced "2 out of 1
   # factors showed statistically significant associations" -- more significant
   # factors than factors examined.
+  # `not_ranked`: coefficient rows that cannot be the "strongest predictor" because
+  # they belong to an interaction, so their hazard ratio is not one number.
 
   # Extract key statistics based on analysis type
   if (analysis_type %in% c("cox", "finegray") && !is.null(results)) {
@@ -256,7 +258,7 @@
           # Find strongest effect (furthest from HR = 1)
           if ("HR (95% CI, p-value)" %in% names(results)) {
             hr_column <- results[["HR (95% CI, p-value)"]]
-            for (i in sig_indices) {
+            for (i in setdiff(sig_indices, not_ranked)) {
               hr_text <- hr_column[i]
               hr_match <- regmatches(hr_text, regexpr("[0-9]+\\.?[0-9]*", hr_text))
               if (length(hr_match) > 0) {
@@ -269,7 +271,7 @@
               }
             }
           } else if ("exp(coef)" %in% names(results)) {
-            for (i in sig_indices) {
+            for (i in setdiff(sig_indices, not_ranked)) {
               hr_val <- suppressWarnings(as.numeric(results[["exp(coef)"]][i]))
               if (!is.na(hr_val) && is.finite(hr_val) && hr_val > 0 &&
                   abs(log(hr_val)) > abs(log(strongest_hr))) {
@@ -309,6 +311,8 @@
           .("Strongest predictor: {variable} was associated with {effect} ({measure} = {hr})."),
           variable = htmltools::htmlEscape(as.character(strongest_var)), effect = strongest_effect, measure = effect_name, hr = round(strongest_hr, 2))
       }
+      if (length(not_ranked) > 0)
+        summary_parts$not_ranked <- .("Variables in an interaction are not ranked here: their hazard ratios and p-values apply only at the values stated under the table.")
     } else {
       summary_parts$findings <- paste0(
         if (one_factor)
@@ -440,6 +444,7 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
       # Number of rows dropped by the landmark filter, so the landmark
       # disclosure can state how many patients were excluded.
       .landmarkExcluded = NULL,
+      .landmarkMissing = NULL,
       .coxCache = NULL,
       .coxComputed = FALSE,
 
@@ -507,12 +512,43 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
       .landmarkDisclosure = function(landmark) {
           n_excluded <- private$.landmarkExcluded
           excl <- if (is.null(n_excluded) || is.na(n_excluded) || n_excluded <= 0) ""
-              else paste0(" ", .fmt(.("Patients whose follow-up ended before the landmark were excluded (n = {n} removed)."), n = n_excluded))
+              else paste0(" ", .fmt(.("Patients whose follow-up ended at or before the landmark were excluded (n = {n} removed)."), n = n_excluded))
+          n_missing <- private$.landmarkMissing
+          if (!is.null(n_missing) && !is.na(n_missing) && n_missing > 0)
+              excl <- paste0(excl, " ", .fmt(.("Patients with no follow-up time could not be assessed at the landmark and were also excluded (n = {n})."), n = n_missing))
           paste0(
               "<br><b>", .fmt(.("Landmark analysis at {time} {unit}."), time = format(landmark), unit = self$options$timetypeoutput), "</b>",
               excl, " ",
               .("All times reported here are measured FROM the landmark, not from study entry, and all estimates are conditional on being event-free at the landmark. They are not comparable with unlandmarked survival times.")
           )
+      },
+
+      # The landmark in force, or NULL. A landmark at 0 keeps the clock where it was.
+      .landmarkOffset = function() {
+          if (!isTRUE(self$options$uselandmark)) return(NULL)
+          offset <- jmvcore::toNumeric(self$options$landmark)
+          if (length(offset) != 1L || !is.finite(offset) || offset <= 0) return(NULL)
+          offset
+      },
+
+      # Same sentence as survivalcont: every time-based table says what its clock is.
+      .landmarkNote = function(tbl) {
+          offset <- private$.landmarkOffset()
+          if (is.null(offset)) return(invisible(NULL))
+          tbl$setNote("landmark", .fmt(.("Times are measured from the landmark at {offset} {unit}, not from diagnosis; add {offset} to express a time as time from diagnosis."), offset = round(offset, 2), unit = self$options$timetypeoutput))
+          invisible(NULL)
+      },
+
+      # The output unit for a sentence or a table cell that names a time.
+      .timeUnitLabel = function() {
+          unit <- self$options$timetypeoutput
+          if (is.null(private$.landmarkOffset())) unit
+          else .fmt(.("{unit} from the landmark"), unit = unit)
+      },
+
+      .timeAxisLabel = function() {
+          base <- paste0("Time (", self$options$timetypeoutput, ")")
+          if (is.null(private$.landmarkOffset())) base else paste0(base, " from landmark")
       },
 
       # Reset the per-run compute caches so a re-run recomputes cleaned data and
@@ -521,6 +557,7 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
           private$.dataCache <- NULL
           private$.dataComputed <- FALSE
           private$.landmarkExcluded <- NULL
+          private$.landmarkMissing <- NULL
           private$.coxCache <- NULL
           private$.coxComputed <- FALSE
           private$.nom_object <- NULL
@@ -537,6 +574,39 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
               self$results[[nm]]$setVisible(FALSE)
           }
           self$results$eventRecodeInfo$setContent("<div></div>")
+      },
+
+      # An early return leaves the previous model's text on screen: jamovi restores an
+      # Html item's content even when clearWith matched, and its view ignores `stale`
+      # and skips an empty string, so the old sentences would sit beside empty tables.
+      # The walk covers a panel added later. Kept: the notices and the welcome text,
+      # and the static explanations .init() fills once the inputs are complete.
+      .blankHtmlPanels = function() {
+          keep <- c("todo", "errors", "strongWarnings", "warnings", "infoMessages")
+          if (private$.validateSurvivalInputs()$valid)
+              keep <- c(keep, "glossaryPanel", "assumptionsPanel", "multivariableCoxExplanation",
+                        "adjustedSurvivalExplanation", "riskScoreExplanation", "nomogramExplanation",
+                        "personTimeExplanation", "stratifiedAnalysisExplanation",
+                        "survivalPlotsExplanation")
+          for (item in self$results$items)
+              if (inherits(item, "Html") && !(item$name %in% keep))
+                  item$setContent("<div></div>")
+          invisible(NULL)
+      },
+
+      # A sentence for every coefficient that holds an interacting variable at a fixed
+      # value: which value, and whether that value is one any patient has. `cond` is
+      # .coefConditions(). NULL when no term is conditioned.
+      .conditioningNote = function(cond) {
+          if (length(cond$terms) == 0) return(NULL)
+          note <- .fmt(.("These rows are not overall effects, because the variables are in an interaction. {terms}. At other values the hazard ratio differs and can change direction."),
+                       terms = paste(sprintf("%s: at %s", names(cond$terms), cond$terms), collapse = "; "))
+          for (i in seq_len(nrow(cond$outside)))
+              note <- paste(note, .fmt(.("{var} = 0 is outside the observed range ({low} to {high}), so that row describes no actual patient. To read the effect at a clinical value, subtract that value from {var} in the data and refit."),
+                                       var = cond$outside$var[i],
+                                       low = base::format(cond$outside$low[i], trim = TRUE),
+                                       high = base::format(cond$outside$high[i], trim = TRUE)))
+          note
       },
 
       # Populate the interaction (effect-modification) test table and the
@@ -573,16 +643,22 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
         if (!is.null(itab) && nrow(itab) > 0) {
           itbl <- self$results$interactionTest
           for (i in seq_len(nrow(itab))) {
-            itbl$addRow(rowKey = i, values = list(
+            vals <- list(
               term     = itab$term[i],
               hr       = itab$hr[i],
               ci_lower = itab$ci_lower[i],
               ci_upper = itab$ci_upper[i],
               p        = itab$p[i]
-            ))
+            )
+            itbl$addRow(rowKey = i, values = vals)
+            .footnoteMissingCells(itbl, i, vals,
+              .("Not estimable: this interaction coefficient is aliased (a combination of levels with no observations, or redundant with other terms)."))
           }
           itbl$setNote("emkey",
             .("Each row tests whether the focal effect differs across the moderator (effect modification). A significant p indicates the effect is modified."))
+          cond_note <- private$.conditioningNote(
+            .coefConditions(cox_model, data, private$.displayNames(private$.cleandata())))
+          if (!is.null(cond_note)) itbl$setNote("conditioning", cond_note)
 
           # A term spanning several coefficients needs a JOINT test.
           #
@@ -596,9 +672,9 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
           if (!is.null(jt) && nrow(jt) > 0) {
             itbl$setNote("joint", .fmt(
               .("Joint test of effect modification (all coefficients of the term at once), which is the test to read when a term spans more than one coefficient: {tests}. Individual rows are single-coefficient tests and can look more extreme than the joint test."),
-              tests = paste(sprintf("%s: chi-square = %.2f, df = %d, p = %s",
+              tests = paste(sprintf("%s: chi-square = %.2f, df = %d, %s",
                                     jt$term, jt$chisq, jt$df,
-                                    format.pval(jt$p, digits = 3, eps = 0.001)),
+                                    vapply(jt$p, .pValueText, character(1))),
                             collapse = "; ")))
           }
         }
@@ -616,6 +692,7 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
         skipped_highorder <- FALSE
         any_swapped <- FALSE
         nonconverged <- character(0)
+        held_fixed <- character(0)
         for (term in real_interactions) {
           info <- .interactionModeratorInfo(term, data)
           if (!isTRUE(info$twoway)) {
@@ -634,10 +711,20 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
             error = function(e) NULL
           )
           if (is.null(sub)) next
+          # A second interaction on the focal variable: the row holds that variable
+          # at its reference or 0, so the row label has to say so.
+          held <- .conditionLabels(
+            setdiff(.termPartners(cox_model, .escapeVariableNames(info$focal)), info$moderator),
+            cox_model, data, private$.displayNames(private$.cleandata()))
+          held <- paste(held, collapse = ", ")
+          if (nzchar(held)) {
+            sub$moderator_level <- paste0(sub$moderator_level, " (at ", held, ")")
+            held_fixed <- c(held_fixed, held)
+          }
           for (i in seq_len(nrow(sub))) {
             rowKey <- rowKey + 1
             conv <- is.null(sub$converged) || isTRUE(sub$converged[i])
-            sg$addRow(rowKey = rowKey, values = list(
+            vals <- list(
               interaction     = sub$interaction[i],
               moderator_level = if (conv) sub$moderator_level[i] else paste0(sub$moderator_level[i], " *"),
               focal_effect    = sub$focal_effect[i],
@@ -645,7 +732,9 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
               ci_lower        = sub$ci_lower[i],
               ci_upper        = sub$ci_upper[i],
               p               = sub$p[i]
-            ))
+            )
+            sg$addRow(rowKey = rowKey, values = vals)
+            .footnoteMissingCells(sg, rowKey, vals, .("Not estimable in this subgroup."))
             if (!conv)
               nonconverged <- c(nonconverged, paste0(sub$interaction[i], " [", sub$moderator_level[i], "]"))
           }
@@ -672,6 +761,9 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
         }
 
         notes <- character(0)
+        if (length(held_fixed) > 0)
+          notes <- c(notes, .fmt(.("The focal variable is in a second interaction, so a row labelled at a value applies only at that value ({values}). At other values of that variable the hazard ratio differs."),
+                                 values = paste(unique(held_fixed), collapse = "; ")))
         if (length(nonconverged) > 0)
           notes <- c(notes, .fmt(.("* Model did not converge for: {fits} (likely small-sample separation); interpret these HRs with extreme caution."),
                                  fits = paste(unique(nonconverged), collapse = "; ")))
@@ -1056,7 +1148,9 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
         # Otherwise mytime/myoutcome collide in the joins, row_names becomes an
         # accidental patient-ID predictor, and fgid is overwritten by finegray.
         reserved <- c("row_names", "mytime", "myoutcome", "fgid",
-                      "fgstart", "fgstop", "fgstatus", "fgwt")
+                      "fgstart", "fgstop", "fgstatus", "fgwt",
+                      "if", "else", "repeat", "while", "function", "for", "in",
+                      "next", "break", "true", "false", "null", "inf", "nan", "na")
         names(mydata_cleaned) <- make.unique(
           c(reserved, names(mydata_cleaned)), sep = "_"
         )[-seq_along(reserved)]
@@ -1286,6 +1380,12 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
             return(data.frame(row_names = character(0), mytime = numeric(0)))
           }
 
+          private$.addHtmlMessage(
+            "info",
+            .("Time unit"),
+            sprintf(.('Pre-calculated elapsed time is used exactly as supplied; no unit conversion is performed. The analysis assumes "%s" is the unit "%s" is already recorded in, and scales cutpoints, thresholds and axis labels accordingly. If that is not the unit of your data, change "Time Type in Output".'),
+                    self$options$timetypeoutput, self$options$elapsedtime))
+
           mydata[["mytime"]] <-
             jmvcore::toNumeric(mydata[[mytime_labelled]])
 
@@ -1316,7 +1416,16 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
           is_numeric_fu <- is.numeric(mydata[[fudate]])
 
           if (is_numeric_dx && is_numeric_fu) {
-              # Handle numeric Unix epoch input (from DateTime Converter)
+              # Epoch seconds from DateTime Converter, and nothing else: a day count
+              # read as seconds gives times 86400 too small and a normal-looking table.
+              for (i in 1:2) {
+                  shape <- .classifyNumericDates(mydata[[c(dxdate, fudate)[i]]])
+                  if (!shape$accepted && !identical(shape$code, "empty"))
+                      jmvcore::reject(.fmt(
+                          .("{var} contains numbers that cannot be read as dates (for example {example}). Numeric date columns must hold seconds since 1970. Convert the column with Date-Time Converter, or store the dates as text such as 2021-03-15."),
+                          var = c(self$options$dxdate, self$options$fudate)[i],
+                          example = base::format(shape$example, scientific = FALSE, trim = TRUE)))
+              }
               mydata[["start"]] <- as.POSIXct(mydata[[dxdate]], origin="1970-01-01", tz="UTC")
               mydata[["end"]] <- as.POSIXct(mydata[[fudate]], origin="1970-01-01", tz="UTC")
           } else if (!is_numeric_dx && !is_numeric_fu) {
@@ -1353,6 +1462,25 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
               .("Time difference cannot be calculated. Make sure that time type in variables are correct. Currently it is: {format}"),
               format = self$options$timetypedata
             ))
+          }
+
+          fail_dx <- .countDateParseFailures(mydata[[dxdate]], mydata[["start"]])
+          fail_fu <- .countDateParseFailures(mydata[[fudate]], mydata[["end"]])
+          if (fail_dx$n_failed + fail_fu$n_failed > 0)
+            private$.addHtmlMessage(
+              "warning",
+              .("Dates could not be read"),
+              .fmt(.("{nfailed} of {ninputs} dates could not be read, so those patients were excluded. Check the date format."),
+                   nfailed = fail_dx$n_failed + fail_fu$n_failed,
+                   ninputs = fail_dx$n_inputs + fail_fu$n_inputs))
+
+          for (i in 1:2) {
+            implausible <- .checkDatePlausibility(mydata[[c("start", "end")[i]]])
+            if (implausible$n_implausible > 0)
+              jmvcore::reject(.fmt(
+                .("{n} dates in {var} fall outside a plausible range (for example {example}). Replace placeholder dates before analyzing; a follow-up date such as 2199-01-01 is not a censoring date."),
+                n = implausible$n_implausible, var = c(self$options$dxdate, self$options$fudate)[i],
+                example = implausible$examples[1]))
           }
 
           timetypeoutput <-
@@ -1541,18 +1669,20 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
 
         if (self$options$uselandmark) {
           landmark <- jmvcore::toNumeric(self$options$landmark)
-          is_pre_landmark <- !is.na(cleanData_pre$mytime) & cleanData_pre$mytime < landmark
+          after_landmark <- .applyLandmark(cleanData$mytime, landmark)
+          if (!after_landmark$valid)
+            jmvcore::reject(.("Landmark time must be a finite, non-negative value."))
+          is_pre_landmark <- !is.na(cleanData_pre$mytime) & cleanData_pre$mytime <= landmark
 
-          # dplyr::filter also drops rows whose mytime is NA (NA >= landmark is
-          # NA), and .definemytime() yields NA for a blank time cell or a date
-          # lubridate could not parse. Those rows are not pre-landmark
-          # follow-up, so they are taken out of the count before it is reported.
-          n_missing_time <- sum(is.na(cleanData$mytime))
-          n_before_landmark <- nrow(cleanData) - n_missing_time
-          cleanData <- cleanData %>%
-            dplyr::filter(mytime >= landmark) %>%
-            dplyr::mutate(mytime = mytime - landmark)
-          private$.landmarkExcluded <- n_before_landmark - nrow(cleanData)
+          # A blank time cell or an unreadable date is not pre-landmark follow-up,
+          # so it is counted apart from the patients the landmark excluded.
+          n_missing_time <- after_landmark$n_missing
+          # dplyr::filter(), not `[`: it keeps the variable labels. !! because a
+          # user column may be called anything, and a data mask would find it first.
+          cleanData$mytime <- after_landmark$time
+          cleanData <- dplyr::filter(cleanData, !!after_landmark$keep)
+          private$.landmarkExcluded <- after_landmark$n_excluded
+          private$.landmarkMissing <- n_missing_time
         }
 
         ## Names cleanData ----
@@ -1618,6 +1748,33 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
         }
         cleanData <- clean_model
 
+        # An Ordinal column would get contr.poly (.L/.Q rows finalfit cannot match to
+        # levels), and a level left empty by the exclusions above would make coxph
+        # compare two other levels under the reference's name, with no warning.
+        factor_vars <- unique(c(myexplanatory_labelled, adjexplanatory_labelled, mystratvar_labelled))
+        cleanData <- .unorderFactors(cleanData, factor_vars)
+        level_check <- .dropEmptyLevels(cleanData, factor_vars)
+        cleanData <- level_check$data
+        all_labels <- labelled::var_label(mydata_labelled)
+        for (v in setdiff(names(level_check$dropped)[lengths(level_check$dropped) > 0],
+                          level_check$too_few)) {
+          label <- if (is.null(all_labels[[v]])) v else all_labels[[v]]
+          lost <- paste(level_check$dropped[[v]], collapse = ", ")
+          if (level_check$reference_changed[[v]])
+            private$.addHtmlMessage(
+              "warning",
+              .("Reference level changed"),
+              .fmt(.("{var}: no analyzed patient has {levels}, so that level was dropped. Hazard ratios are compared with {reference}, not with {old}."),
+                   var = label, levels = lost, reference = level_check$new_reference[[v]],
+                   old = level_check$old_reference[[v]]))
+          else
+            private$.addHtmlMessage(
+              "info",
+              .("Empty level dropped"),
+              .fmt(.("{var}: no analyzed patient has {levels}, so that level was dropped."),
+                   var = label, levels = lost))
+        }
+
         in_final_model <- cleanData_pre$row_names %in% cleanData$row_names
         dropped_cov_time_mask <- has_outcome_pre & !is_pre_landmark & !in_final_model
         n_missing_cov_time <- as.integer(sum(dropped_cov_time_mask))
@@ -1629,8 +1786,10 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
 
         if (self$options$tint &&
             self$results$calculatedtime$isNotFilled()) {
-          self$results$calculatedtime$setRowNums(cleanData$row_names)
-          self$results$calculatedtime$setValues(cleanData$mytime)
+          # Every row's unshifted time: the saved column is the interval the dates
+          # describe, whatever landmark or covariates this model uses.
+          self$results$calculatedtime$setRowNums(time$row_names)
+          self$results$calculatedtime$setValues(time$mytime)
         }
 
 
@@ -1639,8 +1798,8 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
 
         if (self$options$multievent &&
             self$results$outcomeredefined$isNotFilled()) {
-          self$results$outcomeredefined$setRowNums(cleanData$row_names)
-          self$results$outcomeredefined$setValues(cleanData$myoutcome)
+          self$results$outcomeredefined$setRowNums(outcome$row_names)
+          self$results$outcomeredefined$setValues(outcome$myoutcome)
         }
 
 
@@ -1761,7 +1920,7 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
 
         # A one-valued explanatory variable used to reach coxph()/finalfit and fail
         # there as "contrasts can be applied only to factors with 2 or more levels".
-        for (v in cleaneddata$name3expl) {
+        for (v in unique(c(cleaneddata$name3expl, cleaneddata$mystratvar_labelled))) {
           x <- cleaneddata$cleanData[[v]]
           if (!is.null(x) && length(unique(stats::na.omit(x))) < 2) {
             label <- labelled::var_label(x)
@@ -1770,7 +1929,7 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
                 .("The explanatory variable '{var}' has only one value in the analyzed rows, so no effect can be estimated for it. Remove it, or check the data filter and missing values."),
                 var = if (is.null(label)) v else label),
               if (isTRUE(self$options$uselandmark))
-                .("Landmark analysis is on: rows with follow-up shorter than the landmark time were excluded before this check.")
+                .("Landmark analysis is on: rows with follow-up ending at or before the landmark time were excluded before this check.")
               else "")))
           }
         }
@@ -1951,12 +2110,14 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
         private$.blankCIndexValidationRows()
         # Modular execution using helper functions
         if (!private$.validateAndPrepare()) {
+          private$.blankHtmlPanels()
           return()
         }
 
         # Execute main analysis
         analysis_results <- private$.executeAnalysis()
         if (is.null(analysis_results)) {
+          private$.blankHtmlPanels()
           return()
         }
 
@@ -2001,15 +2162,13 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
           # "how long was this cohort actually watched". median(mytime) is the
           # median time to event-or-censoring, which in a high-event cohort is
           # close to the median SURVIVAL and understates the observation window.
-          # In competing-risk mode "not the event of interest" includes the
-          # competing event, which is a terminal outcome and not a censoring:
-          # it has to be censored in the reverse-KM fit, not counted as its
-          # event, or the reported follow-up is understated. The estimator
-          # itself is shared -- .medianFollowUp() in R/utils-followup.R.
-          cens <- if (is.factor(mydata$myoutcome) && "Censored" %in% levels(mydata$myoutcome))
-            as.integer(!is.na(mydata$myoutcome) & mydata$myoutcome == "Censored")
-          else
-            as.integer(!is.na(event_indicator) & event_indicator == 0)
+          # Only a patient known alive at last contact is censored for follow-up. An
+          # other-cause death is status 0 under Cause Specific and a competing event
+          # under Fine-Gray; counting either as still observed understates follow-up.
+          # `alive` runs along the source rows, so it is matched on row_names. The
+          # estimator itself is shared -- .medianFollowUp() in R/utils-followup.R.
+          cens <- as.integer(private$.eventRecode$alive[
+            match(mydata$row_names, cleaneddata$mydata_labelled$row_names)])
           mfu <- .medianFollowUp(mydata$mytime, cens)
           median_followup <- mfu$value
           followup_is_reverse_km <- isTRUE(mfu$reverse)
@@ -2288,6 +2447,9 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
             # modelling formula below, which is rebuilt from the original.
             fg_data <- survival::finegray(update(coxformula, . ~ . + fgid),
                                           data = mydata, etype = "Event", id = fgid)
+            # finegray() uses strata() for the censoring weights and then drops the
+            # column, which the stratified fit below needs.
+            for (v in mystratvar) fg_data[[v]] <- mydata[[v]][fg_data$fgid]
 
             # Update formula to use Fine-Gray variables
             fg_formula <- update(coxformula, survival::Surv(fgstart, fgstop, fgstatus) ~ .)
@@ -2504,6 +2666,9 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
         self$results$personTimeTable$setNote(
           "ci",
           .("Exact (Garwood) Poisson 95% CI. Rows with 0 events give a one-sided 97.5% upper bound; intervals with very little accrued person-time yield correspondingly wide bounds."))
+        self$results$personTimeTable$setNote(
+          "rate", .fmt(.("Rates are per {m} person-{unit}."), m = rate_multiplier, unit = time_unit))
+        private$.landmarkNote(self$results$personTimeTable)
 
         # Clear before repopulating.
         #
@@ -2525,9 +2690,9 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
           interval=paste0("Overall (0-max)"),
           events=total_events,
           person_time=round(total_time, 2),
-          rate=round(overall_rate, 2),
-          rate_ci_lower=round(ci_lower, 2),
-          rate_ci_upper=round(ci_upper, 2)
+          rate=overall_rate,
+          rate_ci_lower=ci_lower,
+          rate_ci_upper=ci_upper
         ))
 
         # FIX: Add group-stratified person-time analysis
@@ -2579,9 +2744,9 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
                       interval=paste0(group_label, ": ", as.character(group)),
                       events=group_events_count,
                       person_time=round(group_time, 2),
-                      rate=round(group_rate, 2),
-                      rate_ci_lower=round(group_ci_lower, 2),
-                      rate_ci_upper=round(group_ci_upper, 2)
+                      rate=group_rate,
+                      rate_ci_lower=group_ci_lower,
+                      rate_ci_upper=group_ci_upper
                     ))
 
                     rowKey_counter <- rowKey_counter + 1
@@ -2688,13 +2853,16 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
                 interval=paste0(.fmtTimeLabel(start_time), "-", .fmtTimeLabel(end_time)),
                 events=events_in_interval,
                 person_time=round(person_time_in_interval, 2),
-                rate=round(interval_rate, 2),
-                rate_ci_lower=round(interval_ci_lower, 2),
-                rate_ci_upper=round(interval_ci_upper, 2)
+                rate=interval_rate,
+                rate_ci_lower=interval_ci_lower,
+                rate_ci_upper=interval_ci_upper
               ))
             }
           }
         }
+
+        # signif, not round: a rate per 1 person-day is 0.0008, which round(, 2) calls 0.
+        rate_text <- function(x) base::format(signif(x, 3), scientific = FALSE, trim = TRUE)
 
         # Create summary text with interpretation
         summary_html <- paste0(
@@ -2702,9 +2870,12 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
           "<p>", .fmt(.("Total follow-up time: <b>{time} person-{unit}</b>"), time = round(total_time, 2), unit = time_unit), "</p>",
           "<p>", .fmt(.("Number of events: <b>{events}</b>"), events = total_events), "</p>",
           "<p>", .fmt(.("Overall incidence rate: <b>{rate}</b> per {multiplier} person-{unit} (95% CI {lower} to {upper})"),
-                      rate = round(overall_rate, 2), multiplier = rate_multiplier, unit = time_unit,
-                      lower = round(ci_lower, 2), upper = round(ci_upper, 2)), "</p>",
-          "<p>", .("This represents the rate at which events occurred in your study population. The incidence rate is calculated as the number of events divided by the total person-time at risk."), "</p>")
+                      rate = rate_text(overall_rate), multiplier = rate_multiplier, unit = time_unit,
+                      lower = rate_text(ci_lower), upper = rate_text(ci_upper)), "</p>",
+          "<p>", .("This represents the rate at which events occurred in your study population. The incidence rate is calculated as the number of events divided by the total person-time at risk."), "</p>",
+          if (!is.null(private$.landmarkOffset()))
+            paste0("<p>", .fmt(.("Person-time is counted from the landmark at {offset} {unit}."),
+                               offset = round(private$.landmarkOffset(), 2), unit = time_unit), "</p>"))
 
         self$results$personTimeSummary$setContent(summary_html)
       }
@@ -2759,6 +2930,7 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
           .deleteTableRows(tbl)
           # These rows are written with "" (a numeric NA would show as "NaN").
           tbl$setNote("no_ci", .("Confidence intervals are computed for the concordance index only; the Brier score, time-dependent AUC and integrated Brier score are reported without intervals."))
+          private$.landmarkNote(tbl)
           rk <- 0L
           max_time <- max(mydata$mytime, na.rm = TRUE)
 
@@ -2898,7 +3070,7 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
               if (length(bval) == 1 && !is.na(bval)) {
                 rk <- rk + 1L
                 tbl$addRow(rowKey = rk, values = list(
-                  metric   = .fmt(.("Brier score (t = {t} {unit})"), t = t, unit = self$options$timetypeoutput),
+                  metric   = .fmt(.("Brier score (t = {t} {unit})"), t = t, unit = private$.timeUnitLabel()),
                   value    = bval, ci_lower = "", ci_upper = "",
                   # Judged against the Kaplan-Meier reference at the same
                   # timepoint (IPA = 1 - Brier_model / Brier_null), not against a
@@ -2918,7 +3090,7 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
               if (length(aval) == 1 && !is.na(aval)) {
                 rk <- rk + 1L
                 tbl$addRow(rowKey = rk, values = list(
-                  metric   = .fmt(.("Time-dependent AUC (t = {t} {unit})"), t = t, unit = self$options$timetypeoutput),
+                  metric   = .fmt(.("Time-dependent AUC (t = {t} {unit})"), t = t, unit = private$.timeUnitLabel()),
                   value    = aval, ci_lower = "", ci_upper = "",
                   interpretation = .("Rank discrimination at this horizon; 0.5 = chance, 1.0 = perfect ordering")
                 ))
@@ -2931,7 +3103,7 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
               if (length(ibs) == 1) {
                 rk <- rk + 1L
                 tbl$addRow(rowKey = rk, values = list(
-                  metric   = .fmt(.("Integrated Brier Score (0 to {t} {unit})"), t = max(tps), unit = self$options$timetypeoutput),
+                  metric   = .fmt(.("Integrated Brier Score (0 to {t} {unit})"), t = max(tps), unit = private$.timeUnitLabel()),
                   value    = ibs, ci_lower = "", ci_upper = "",
                   interpretation = {
                     rref <- utils::tail(br_ref$IBS[!is.na(br_ref$IBS)], 1)
@@ -3026,7 +3198,7 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
                                       colour = "#B22222", alpha = 0.8)
         p <- g + ggplot2::labs(
             title = .("Brier Score Over Time"),
-            x = .fmt(.("Time ({unit})"), unit = self$options$timetypeoutput),
+            x = private$.timeAxisLabel(),
             y = .("Brier score (IPCW)"),
             caption = .("Lower is better. Solid = model; dashed = Kaplan-Meier (no covariates). Apparent, in-sample estimates.")
           ) +
@@ -3155,7 +3327,7 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
             pval    <- if (df_diff > 0) stats::pchisq(lrt, df_diff, lower.tail = FALSE) else NA_real_
 
             rk <- rk + 1L
-            tbl$addRow(rowKey = rk, values = list(
+            vals <- list(
               term   = term,
               df     = df_diff,
               aic    = stats::AIC(fit_red),
@@ -3164,7 +3336,10 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
               interpretation = if (isTRUE(pval < 0.05)) .("Significant contribution to fit")
                                else if (is.na(pval)) .("Not estimable (term is aliased)")
                                else .("No detected improvement in fit (p >= 0.05)")
-            ))
+            )
+            tbl$addRow(rowKey = rk, values = vals)
+            .footnoteMissingCells(tbl, rk, vals,
+              .("Not estimable: dropping this term removes no estimable coefficient (it is aliased)."))
           }
 
           # The explanatory paragraph below appears only with Show Summaries on;
@@ -3410,7 +3585,7 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
           nom_args <- list(
             f,
             fun = risk_funs,
-            funlabel = paste("Predicted", pred_times, self$options$timetypeoutput, "risk"),
+            funlabel = paste("Predicted", pred_times, private$.timeUnitLabel(), "risk"),
             fun.at = risk_ats
           )
           if (length(interact_list) > 0) {
@@ -3766,8 +3941,12 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
         ))
         tbl$setRow(rowKey = "optimism", values = list(
           value = res$optimism,
-          detail = .fmt(.("Mean over {b} resamples"), b = res$n_boot)
+          detail = .fmt(.("Mean over {b} of {total} resamples"), b = res$n_boot, total = res$B)
         ))
+        if (res$n_excluded > 0)
+          tbl$setNote("excluded", .fmt(
+            .("{k} of {total} bootstrap resamples were excluded because the Cox refit failed or gave a non-estimable coefficient or concordance (for example, a factor level absent from the resample). Resamples whose refit only warned (such as monotone likelihood) are included."),
+            k = res$n_excluded, total = res$B))
         tbl$setRow(rowKey = "corrected", values = list(
           value = res$corrected,
           detail = .("Bias-corrected estimate")
@@ -4374,7 +4553,7 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
             .data = .,
             dependent = paste0('survival::Surv(', .escapeVariableNames("mytime"), ', ', .escapeVariableNames("myoutcome"), ')'),
             explanatory = thefactor,
-            xlab = paste0('Time (', self$options$timetypeoutput, ')'),
+            xlab = private$.timeAxisLabel(),
             pval = self$options$pplot,
             pval.method	= self$options$pplot,
             legend = 'none',
@@ -4788,7 +4967,7 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
             ggplot2::geom_step(linewidth = 0.8, na.rm = TRUE) +
             ggplot2::scale_y_continuous(limits = c(0, 1)) +
             ggplot2::labs(
-              x = paste0("Time (", self$options$timetypeoutput, ")"),
+              x = private$.timeAxisLabel(),
               y = .("Cumulative incidence"),
               colour = .("Risk group"),
               title = .("Cumulative Incidence by Risk Group"),
@@ -4824,7 +5003,7 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
           risk.table.y.text = FALSE,
           ncensor.plot = TRUE,
           ncensor.plot.height = 0.25,
-          xlab = paste0("Time (", self$options$timetypeoutput, ")"),
+          xlab = private$.timeAxisLabel(),
           ylab = .("Survival probability"),
 
           pval = self$options$pplot,
@@ -5074,7 +5253,11 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
                     lower = as_matrix(sf$lower, length(sf$time)),
                     upper = as_matrix(sf$upper, length(sf$time))))
       }
+      # Stop at the shortest stratum. Past a stratum's last follow-up summary() carries
+      # its last value flat, so the average would keep a stale survival in it.
+      last_seen <- tapply(sf$time, rep(seq_along(sf$strata), sf$strata), max)
       grid <- sort(unique(sf$time))
+      grid <- grid[grid <= min(last_seen)]
       sm <- summary(sf, times = grid, extend = TRUE)
       list(time  = grid,
            surv  = as_matrix(sm$surv,  length(grid)),
@@ -5111,6 +5294,21 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
       idx <- which(g$time <= t)
       if (length(idx) == 0 || t > max(g$time, na.rm = TRUE)) return(NULL)
       g[max(idx), , drop = FALSE]
+    }
+
+      ,
+    # A stratified standardized curve stops at the shortest stratum it averages over
+    # (.survfitCurveMatrix), which can be well before the end of follow-up. Say so,
+    # or the rows it drops and a median "not reached" look like a property of the data.
+    .adjustedCurveEndNote = function(tbl, curves, mydata) {
+      if (!isTRUE(self$options$use_stratify) || identical(self$options$ac_method, "conditional"))
+        return(invisible(NULL))
+      curve_end <- min(tapply(curves$time, curves$group, max))
+      if (curve_end < max(mydata[["mytime"]], na.rm = TRUE))
+        tbl$setNote("stratum_end", .fmt(
+          .("Standardized curves end at {end} {unit}, the shortest follow-up among the strata they average over; a stratum has no estimate after its own follow-up ends."),
+          end = round(curve_end, 2), unit = private$.timeUnitLabel()))
+      invisible(NULL)
     }
 
       ,
@@ -5303,7 +5501,7 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
             paste0(" ", .fmt(.("(95% CI {lower} to {upper})"), lower = row$lower, upper = row$upper)) else ""
           paste0(
             .fmt(.("For {level} at {time} {unit}, {estimate} is {value}{ci}."),
-                 level = htmltools::htmlEscape(row$strata), time = row$time, unit = self$options$timetypeoutput,
+                 level = htmltools::htmlEscape(row$strata), time = row$time, unit = private$.timeUnitLabel(),
                  estimate = estimate_label, value = row$surv, ci = ci), " ",
             .fmt(.("In the observed group, {atrisk} patients were still at risk at that time and {events} events had occurred by that time."),
                  atrisk = row$atrisk, events = row$events)
@@ -5322,6 +5520,8 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
       self$results$adjustedSurvTable$setNote(
         "counts",
         .("Observed at risk and observed events are counts in the data, not properties of the adjusted curve."))
+      private$.landmarkNote(self$results$adjustedSurvTable)
+      private$.adjustedCurveEndNote(self$results$adjustedSurvTable, curves, mydata)
 
       return(all_results)
     }
@@ -5425,7 +5625,7 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
             ggplot2::geom_step(linewidth = 0.8, na.rm = TRUE) +
             ggplot2::scale_y_continuous(limits = c(0, 1)) +
             ggplot2::labs(
-              x = paste0("Time (", self$options$timetypeoutput, ")"),
+              x = private$.timeAxisLabel(),
               y = .("Cumulative incidence"),
               colour = self$options$adjexplanatory,
               title = private$.wrapPlotText(
@@ -5470,7 +5670,7 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
           ggplot2::geom_step(linewidth = 0.8, na.rm = TRUE) +
           ggplot2::scale_y_continuous(limits = c(0, 1)) +
           ggplot2::labs(
-            x = paste0("Time (", self$options$timetypeoutput, ")"),
+            x = private$.timeAxisLabel(),
             y = .("Adjusted survival"),
             colour = self$options$adjexplanatory,
             fill = self$options$adjexplanatory,
@@ -5638,7 +5838,7 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
                             variable = htmltools::htmlEscape(adj_var), level = htmltools::htmlEscape(r$factor), quantity = quantity,
                             median = if (is.finite(r$median)) round(r$median, 1)
                                      else .("not reached"),
-                            ci = ci, unit = self$options$timetypeoutput)
+                            ci = ci, unit = private$.timeUnitLabel())
         if (is.na(r$median)) {
           description <- paste0(description, "\n", .("Note:"), " ",
             if (is_cr)
@@ -5664,9 +5864,43 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
       medianTable$setNote(
         "counts",
         .("Records and observed events are counts in the data, not properties of the adjusted curve."))
+      if (identical(method, "conditional"))
+        medianTable$setNote(
+          "ci_method",
+          .("Confidence intervals use the log transformation (conf.type='log'); the median CI is the Brookmeyer-Crowley inversion of that pointwise band."))
+      private$.landmarkNote(medianTable)
+      private$.adjustedCurveEndNote(medianTable, curves, mydata)
       invisible(NULL)
     }
 
+
+      ,
+    # Cleaned column name -> the name the clinician gave the column.
+    .displayNames = function(cleaneddata) {
+      tryCatch({
+        lb <- labelled::var_label(cleaneddata$mydata_labelled)
+        lb <- lb[!vapply(lb, is.null, logical(1))]
+        stats::setNames(as.character(unlist(lb)), names(lb))
+      }, error = function(e) NULL)
+    }
+
+      ,
+    # .conditioningNote() under the main table, which is a kable and has no setNote().
+    .mainTableNote = function(cox_model, cleaneddata) {
+      note <- private$.conditioningNote(.coefConditions(
+        cox_model, cleaneddata$cleanData, private$.displayNames(cleaneddata)))
+      if (is.null(note)) return("")
+      paste0("<p>", htmltools::htmlEscape(note), "</p>")
+    }
+
+      ,
+    # Rows of the finalfit table that are not a variable's single hazard ratio: the
+    # variables an interaction conditions, and the interaction rows themselves.
+    .interactionRowLabels = function(cox_model, cleaneddata) {
+      cond <- .coefConditions(cox_model, cleaneddata$cleanData,
+                              private$.displayNames(cleaneddata))
+      c(names(cond$terms), cond$interaction_labels)
+    }
 
       ,
     # Recover variable / level / reference for each coefficient of a coxph.
@@ -5723,14 +5957,17 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
           # with a 2-level one contributes two coefficients that share the same
           # term, so a term-only label prints the same string twice with
           # different hazard ratios beside it. Coefficient names are
-          # paste0(term, level) joined by ":", and colons are not permitted in
-          # factor levels, so the split is unambiguous; fall back to the bare
-          # terms if the pieces do not line up.
-          comps  <- strsplit(tm, ":", fixed = TRUE)[[1]]
-          pieces <- strsplit(nms[i], ":", fixed = TRUE)[[1]]
-          lab <- if (length(pieces) == length(comps)) {
+          # paste0(term, level) joined by ":", and a level can itself contain a
+          # colon, so the name is matched against every combination of levels
+          # instead of being split; fall back to the bare terms on no match.
+          comps <- strsplit(tm, ":", fixed = TRUE)[[1]]
+          combos <- expand.grid(
+            lapply(comps, function(cmp) { lv <- xl[[bare(cmp)]]; if (is.null(lv)) "" else lv }),
+            stringsAsFactors = FALSE)
+          hit <- match(nms[i], do.call(paste, c(unname(Map(paste0, comps, combos)), sep = ":")))
+          lab <- if (!is.na(hit)) {
             vapply(seq_along(comps), function(k) {
-              lv <- substring(pieces[k], nchar(comps[k]) + 1L)
+              lv <- combos[hit, k]
               if (nzchar(lv)) sprintf("%s: %s", shown(comps[k]), lv) else shown(comps[k])
             }, character(1))
           } else {
@@ -5840,12 +6077,10 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
       # coefficient string. mydata_labelled carries janitor's cleaned name ->
       # the clinician's original column name for EVERY column, so strata and
       # interaction components are covered too.
-      display <- tryCatch({
-        lb <- labelled::var_label(results$mydata_labelled)
-        lb <- lb[!vapply(lb, is.null, logical(1))]
-        stats::setNames(as.character(unlist(lb)), names(lb))
-      }, error = function(e) NULL)
+      display <- private$.displayNames(results)
       terms <- private$.coefTerms(cox_model, display)
+      # What each coefficient is conditional on, when it belongs to an interaction.
+      cond <- .coefConditions(cox_model, mydata, display)
 
       # Create Cox table
       coxTable <- self$results$adjustedCoxTable
@@ -5856,20 +6091,22 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
           .("Effects are Fine-Gray subdistribution hazard ratios for the event of interest; they are not cause-specific hazard ratios or cumulative-risk ratios.")
         else
           .("Effects are Cox proportional-hazards ratios."))
+      cond_note <- private$.conditioningNote(cond)
+      if (!is.null(cond_note)) coxTable$setNote("conditioning", cond_note)
 
       for (i in seq_len(nrow(coef_matrix))) {
         tt <- terms[[i]]
         coxTable$addRow(
           rowKey = i,
           values = list(
-            Variable = switch(
+            Variable = paste0(switch(
               tt$kind,
               level       = sprintf("%s: %s (vs %s)", tt$var, tt$level, tt$ref),
               continuous  = sprintf("%s (per 1-unit increase)", tt$var),
               contrast    = sprintf("%s (%s contrast)", tt$var, tt$suffix),
               interaction = sprintf("%s (interaction)", tt$var),
               tt$var
-            ),
+            ), if (nzchar(cond$coef[i])) paste0(", at ", cond$coef[i])),
             HR = sprintf("%.2f (%.2f-%.2f)",
                          coef_matrix[i,1], coef_matrix[i,2], coef_matrix[i,3]),
             Pvalue = coef_matrix[i,4]
@@ -5887,6 +6124,23 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
       coxSummary <- vapply(seq_len(nrow(coef_matrix)), function(i) {
         tt <- terms[[i]]
         v  <- .esc(tt$var)
+        at <- .esc(cond$coef[i])
+        # An interaction partner cannot be "held constant" away: the HR depends on
+        # its value, so the sentence states the value this HR belongs to.
+        if (nzchar(at)) return(switch(
+          tt$kind,
+          level = .fmt(
+            .("For {variable} = {level} compared with {variable} = {reference}, the adjusted {effect} is {estimate} at {conditions}, with the other covariates in the model held constant. This is not an overall effect, because {variable} is in an interaction."),
+            variable = v, level = .esc(tt$level), reference = .esc(tt$ref), effect = effect_name, estimate = .ci(i), conditions = at),
+          continuous = .fmt(
+            .("For {variable}, the adjusted {effect} is {estimate} per 1-unit increase in {variable} at {conditions}, with the other covariates in the model held constant. This is not an overall effect, because {variable} is in an interaction."),
+            variable = v, effect = effect_name, estimate = .ci(i), conditions = at),
+          interaction = .fmt(
+            .("For the interaction {variable}, the adjusted {effect} is {estimate} at {conditions}. This is a ratio of hazard ratios (how one variable's effect differs across the other), not the effect for any single group."),
+            variable = v, effect = effect_name, estimate = .ci(i), conditions = at),
+          .fmt(.("For {variable}, the adjusted {effect} is {estimate} at {conditions}."),
+               variable = v, effect = effect_name, estimate = .ci(i), conditions = at)
+        ))
         switch(
           tt$kind,
           level = .fmt(
@@ -5983,11 +6237,7 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
     z <- stats::qnorm(0.975)
 
     cleaneddata <- private$.cleandata()
-    display <- tryCatch({
-      lb <- labelled::var_label(cleaneddata$mydata_labelled)
-      lb <- lb[!vapply(lb, is.null, logical(1))]
-      stats::setNames(as.character(unlist(lb)), names(lb))
-    }, error = function(e) NULL)
+    display <- private$.displayNames(cleaneddata)
     term_info <- private$.coefTerms(fg_model, display)
     term_labels <- vapply(term_info, function(tt) switch(
       tt$kind,
@@ -6007,8 +6257,9 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
       stringsAsFactors = FALSE
     )
     names(fg_table) <- c(.("Variable"), .("sHR (95% CI)"), .("p-value"))
-    self$results$text$setContent(knitr::kable(
-      fg_table, row.names = FALSE, format = "html", escape = TRUE))
+    self$results$text$setContent(paste0(
+      knitr::kable(fg_table, row.names = FALSE, format = "html", escape = TRUE),
+      private$.mainTableNote(fg_model, cleaneddata)))
     self$results$text2$setContent(paste0(
       "<p><b>", .("Fine-Gray subdistribution hazards model."), "</b> ",
       .("Confidence intervals and p-values use the subject-clustered robust variance."), " ",
@@ -6179,10 +6430,10 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
                        text_html, fixed = TRUE)
 
     # Set the content for the HR table
-    self$results$text$setContent(text_html)
+    self$results$text$setContent(paste0(text_html, private$.mainTableNote(private$.cox_model(), cleaneddata)))
 
     # Extract and format model metrics from finalfit
-    metrics_text <- unlist(tCox[[2]])
+    metrics_text <- .tidyFinalfitMetrics(unlist(tCox[[2]]))
 
     # finalfit runs on cleanData after naOmit(), so its own header always reads
     # "Number in dataframe = <N_complete>, Number in model = <N_complete>, Missing = 0".
@@ -6245,7 +6496,8 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
         # counted significant coefficient ROWS but printed the total as a count
         # of VARIABLES, so a model with 3 significant variables across 5 level
         # rows was announced as "5 out of 8 factors".
-        .sig <- private$.summariseCoxSignificance(cox_table)
+        .sig <- private$.summariseCoxSignificance(
+          cox_table, private$.interactionRowLabels(private$.cox_model(), cleaneddata))
         sig_count       <- .sig$n_sig_vars
         sig_rows        <- .sig$n_sig_rows
         strongest_var   <- .sig$strongest_label
@@ -6288,6 +6540,9 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
                    variable = htmltools::htmlEscape(strongest_var), effect = strongest_effect, hr = round(strongest_hr, 2))
             )
           }
+          if (.sig$n_not_ranked > 0)
+            summary_parts$not_ranked <- paste0(
+              "<br><br>", .("Variables in an interaction are not ranked here: their hazard ratios and p-values apply only at the values stated under the table."))
 
           summary_parts$interpretation <- paste0(
             "<br><br><b>", .("Clinical interpretation:"), "</b> ",
@@ -6343,8 +6598,8 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
         # first read a column named "p" that a finalfit table does not have (the
         # p-value is embedded in the HR string); the second counted coefficient
         # ROWS but printed them against a count of VARIABLES. Both now call this.
-        .summariseCoxSignificance = function(cox_table) {
-            out <- list(n_sig_vars = 0, n_total_vars = 0, n_sig_rows = 0,
+        .summariseCoxSignificance = function(cox_table, not_ranked = character(0)) {
+            out <- list(n_sig_vars = 0, n_total_vars = 0, n_sig_rows = 0, n_not_ranked = 0,
                         strongest_label = NULL, strongest_hr = NA_real_,
                         strongest_effect = "")
             if (is.null(cox_table) || !is.data.frame(cox_table) || nrow(cox_table) == 0)
@@ -6386,6 +6641,12 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
 
                 out$n_sig_rows <- out$n_sig_rows + 1
                 if (!is.na(var_col[i])) sig_vars <- c(sig_vars, var_col[i])
+
+                # A variable in an interaction has no single hazard ratio to rank.
+                if (var_col[i] %in% not_ranked) {
+                    out$n_not_ranked <- out$n_not_ranked + 1
+                    next
+                }
 
                 if (hr_val > 0 && abs(log(hr_val)) > best) {
                     best <- abs(log(hr_val))
@@ -6483,7 +6744,7 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
 
                 nom_times <- private$.nom_times
                 horizon_txt <- if (length(nom_times))
-                    paste(paste(nom_times, self$options$timetypeoutput), collapse = ", ")
+                    paste(paste(nom_times, private$.timeUnitLabel()), collapse = ", ")
                 else .("the requested timepoints")
 
                 avail_html <- if (nomogram_ok)
@@ -6547,6 +6808,7 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
 
             # Try to get Cox regression results for summary
             cox_results <- NULL
+            not_ranked <- integer(0)
             tryCatch({
               cox_model <- private$.cox_model()
               if (!is.null(cox_model)) {
@@ -6565,6 +6827,8 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
                     rownames(cox_results) <- vapply(term_info, function(tt)
                       if (identical(tt$kind, "level")) sprintf("%s: %s (vs %s)", tt$var, tt$level, tt$ref)
                       else tt$var, character(1))
+                    is_interaction <- vapply(term_info, function(tt) identical(tt$kind, "interaction"), logical(1))
+                    not_ranked <- which(is_interaction | nzchar(.coefConditions(cox_model, mydata, display)$coef))
                   }
                 }
               }
@@ -6589,7 +6853,8 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
               n_vars = n_vars,
               n_events = n_events,
               term_map = .tmap,
-              self = self
+              self = self,
+              not_ranked = not_ranked
             )
 
             # Format for display

@@ -41,8 +41,14 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
             LOW_LEVEL_FRACTION = 0.10,
             LOW_LEVEL_SHARE = 0.50,
             # An ordinal score (HER2 0-3+): every measurement whole-numbered with at
-            # most this many distinct values.
-            ORDINAL_MAX_VALUES = 5
+            # most this many distinct values ...
+            ORDINAL_MAX_VALUES = 5,
+            # ... or a bounded score such as Allred (0, 2-8): at most this many
+            # whole-number values, all between 0 and ORDINAL_BOUNDED_MAX. Allred
+            # scores with ER-negative cases were graded INADEQUATE by the CV of
+            # their codes beside a weighted kappa of 0.98.
+            ORDINAL_BOUNDED_MAX_VALUES = 9,
+            ORDINAL_BOUNDED_MAX = 12
         ),
 
         # Per-run caches, reset at the top of .run().
@@ -81,9 +87,10 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
         #
         # `level` (optional, same length as x; NA where unknown) is the level a
         # difference may change with (proportional bias): see .levelFit().
-        # `bounds = TRUE` (reference design) also fits the slope on y (the
-        # reference) and on x (the region), which .analyzeSamplingBias requires to
-        # agree with the slope on `level` before a difference changes with the level.
+        # `bounds = TRUE` also fits the slope on y (the reference, or the second
+        # region of a pair) and on x (the region), which .analyzeSamplingBias
+        # requires to agree with the slope on `level` before a difference changes
+        # with the level.
         .biasRow = function(x, y, level = NULL, z = y, bounds = FALSE) {
             d <- x - y
             n <- length(d)
@@ -150,11 +157,14 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
         # variances still give a slope of (sx^2 - sy^2) / (2 var(L)) that cannot be
         # told from a real one (Dunn 2004): with a precise reference (SD 1 vs 5) an
         # unbiased core "changed with the level" in 64% of studies at n = 300
-        # (release review 2026-10-19, Krouwer 2008). With a reference the slope must
-        # therefore agree in direction on the reference, the region and their mean
-        # (.analyzeSamplingBias): error alone tilts the slope on the reference down
-        # and on the region up, so all three agree only when the scales differ. A
-        # slope only ever stops a difference from being ruled out.
+        # (release review 2026-10-19, Krouwer 2008). The slope must therefore agree
+        # in direction on both measurements and on their mean (.analyzeSamplingBias):
+        # error alone tilts the slope on the second measurement down and on the
+        # first up, so all three agree only when the scales differ. That holds for a
+        # pair of regions as for a region and the reference: a precise and a noisy
+        # region "changed with the level" in 70% of studies at n = 300 when only the
+        # pair-mean slope was read (review 2026-11-07). A slope only ever stops a
+        # difference from being ruled out.
         # Standard errors are HC3 (heteroscedasticity-consistent, MacKinnon & White
         # 1985): IHC error grows with the level, and plain OLS errors flagged a slope
         # in 33-48% of simulated studies with none (review 2026-09-19).
@@ -352,7 +362,7 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
             if (has_reference)
                 .("Slope of the difference on the mean of the two measurements (the region and the reference), with heteroscedasticity-robust (HC3) standard errors; p is unadjusted. Measurement error alone tilts a slope on the reference value downwards and a slope on the region value upwards, so a difference is treated as changing with the level only when its slope differs from zero (p below 0.05 divided by the number of comparisons) in the same direction on all three: the reference value, the region value and their mean (Krouwer 2008). Such a difference is judged at the 5th and 95th percentiles of the mean, against the margin at the comparison mean taken as fixed; it can stop a difference from being ruled out but never shows it to be material (Bland & Altman 1995, 1999).")
             else
-                .("Slope of the difference on the mean of the two regions compared, with heteroscedasticity-robust (HC3) standard errors; p is unadjusted. Unequal measurement error between regions can produce a slope, so here a slope can stop a difference from being ruled out but never shows it to be material. When p is below 0.05 divided by the number of comparisons, the difference is also judged at the 5th and 95th percentiles of that level (Bland & Altman 1999).")
+                .("Slope of the difference on the mean of the two regions compared, with heteroscedasticity-robust (HC3) standard errors; p is unadjusted. Measurement error alone tilts a slope on the second region of a pair downwards and a slope on the first region upwards, so a difference is treated as changing with the level only when its slope differs from zero (p below 0.05 divided by the number of comparisons) in the same direction on all three: each of the two regions and their mean (Krouwer 2008). Such a difference is judged at the 5th and 95th percentiles of the mean, against the margin at the comparison mean taken as fixed; it can stop a difference from being ruled out but never shows it to be material (Bland & Altman 1999).")
         },
 
         .materialWhereSentence = function(info) {
@@ -877,14 +887,19 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
             # An ordinal score (HER2 0-3+) read as a ratio scale gave a CV of 93% and
             # "INADEQUATE SAMPLING" where the weighted kappa was 0.88 (release review
             # IH-3). Every measurement must look ordinal; the verdict is then withheld.
-            max_values <- private$.CLINICAL_CONSTANTS$ORDINAL_MAX_VALUES
+            # A percentage recorded in coarse steps (Ki67 0/5/10/15/20) looks the
+            # same, so the texts say "ordinal score or coarsely binned values".
+            cc <- private$.CLINICAL_CONSTANTS
             private$.ordinal <- all(vapply(c(if (has_reference) list(whole_section), as.list(biopsy_data)), function(v) {
                 v <- v[!is.na(v)]
-                length(v) > 0 && all(v == round(v)) && length(unique(v)) <= max_values
+                n_values <- length(unique(v))
+                length(v) > 0 && all(v == round(v)) &&
+                    (n_values <= cc$ORDINAL_MAX_VALUES ||
+                     (n_values <= cc$ORDINAL_BOUNDED_MAX_VALUES && min(v) >= 0 && max(v) <= cc$ORDINAL_BOUNDED_MAX))
             }, logical(1)))
             if (private$.ordinal)
-                private$.addNotice("STRONG_WARNING", .("Ordinal score"),
-                    .("Every measurement takes 5 or fewer whole-number values, as an ordinal score does (for example HER2 0 to 3+). The CV, the percentage differences and their grades assume a continuous scale and are not meaningful here, so no sampling verdict is given. Assess agreement of an ordinal score with weighted kappa or the proportion of cases in the same category."))
+                private$.addNotice("STRONG_WARNING", .("Ordinal score or binned values"),
+                    .("Every measurement takes only a few whole-number values (at most 5, or at most 9 between 0 and 12), so the measurements look like an ordinal score (for example HER2 0 to 3+ or an Allred score) or coarsely binned values. The CV, the percentage differences and their grades assume a finely measured continuous scale and are not meaningful here, so no sampling verdict is given. Assess agreement of an ordinal score with weighted kappa or the proportion of cases in the same category; record binned values more finely."))
 
             # Data-quality checks go to the notices panel with every other warning
             # (they used to sit in a separate box at the top of the interpretation).
@@ -1040,6 +1055,7 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
             # no minimum, a region measured in 2 cases gave r = +/-1 exactly, and
             # that value entered the headline mean correlation.
             inter_corr <- numeric(0)
+            inter_n <- integer(0)
             if (n_biopsies >= 2) {
                 for (a in 1:(n_biopsies - 1)) for (b in (a + 1):n_biopsies) {
                     ok <- !is.na(X[, a]) & !is.na(X[, b])
@@ -1054,10 +1070,19 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
                         }
                         next
                     }
-                    inter_corr[sprintf("%s / %s", region_names[a], region_names[b])] <- stats::cor(X[ok, a], X[ok, b], method = "spearman")
+                    pair_name <- sprintf("%s / %s", region_names[a], region_names[b])
+                    inter_corr[pair_name] <- stats::cor(X[ok, a], X[ok, b], method = "spearman")
+                    inter_n[pair_name] <- sum(ok)
                 }
             }
             mean_inter_biopsy <- if (length(inter_corr) > 0) mean(inter_corr) else NA_real_
+            # Without a reference the pairs are graded as the regions are with one:
+            # each pair gets its CI, and a pair SHOWN below the threshold sets the
+            # verdict. Without CIs every pair under the threshold was said to be "not
+            # shown to be below it", also when its whole CI lay below.
+            pair_ci <- lapply(names(inter_corr), function(nm) private$.spearmanCI(inter_corr[[nm]], inter_n[[nm]]))
+            names(pair_ci) <- names(inter_corr)
+            mean_inter_ci <- if (length(inter_corr) > 0) private$.spearmanCI(mean_inter_biopsy, min(inter_n)) else c(NA_real_, NA_real_)
 
             ref_corr <- stats::setNames(rep(NA_real_, n_biopsies), region_names)
             ref_n <- stats::setNames(integer(n_biopsies), region_names)
@@ -1088,7 +1113,9 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
             # to be below the threshold (upper 95% limit below it). The lowest point
             # estimate of k equally good regions falls as k grows, so grading the
             # minimum penalised studies for sampling more cores.
-            shown_below <- region_names[valid & vapply(ref_ci, function(ci) !is.na(ci[2]) && ci[2] < correlation_threshold, logical(1))]
+            is_shown <- function(ci) !is.na(ci[2]) && ci[2] < correlation_threshold
+            shown_below <- if (has_reference) region_names[valid & vapply(ref_ci, is_shown, logical(1))]
+                           else names(pair_ci)[vapply(pair_ci, is_shown, logical(1))]
             # Below the threshold as a point estimate (regions, or pairs of regions
             # without a reference): "met" needs none, as "ruled out" needs the
             # whole CI inside the margin. Only the verdict "met" claims
@@ -1207,11 +1234,28 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
             # Row 3: mean inter-regional correlation, graded against the SAME
             # user threshold as row 1 (fixed 0.80/0.60 used to keep the
             # correlation_threshold option out of the inter-regional table).
+            # Without a reference this is the graded correlation, so it carries a CI
+            # and each pair gets its own row, as each region does with a reference.
             if (!is.na(mean_inter_biopsy)) {
+                ci3 <- if (has_reference) c(NA_real_, NA_real_) else mean_inter_ci
                 repro_table$addRow(rowKey = 3, values = private$.tableValues(list(
                     metric = .("Mean Inter-Regional Correlation"),
-                    value = mean_inter_biopsy, ci_lower = NA_real_, ci_upper = NA_real_,
+                    value = mean_inter_biopsy, ci_lower = ci3[1], ci_upper = ci3[2],
                     interpretation = private$.corrGrade(mean_inter_biopsy, correlation_threshold))))
+                if (!has_reference && length(inter_corr) > 1) {
+                    for (i in seq_along(inter_corr)) {
+                        nm <- names(inter_corr)[i]
+                        repro_table$addRow(rowKey = 300 + i, values = private$.tableValues(list(
+                            metric = sprintf(.("Spearman correlation: %s"), private$.cellSafe(nm)),
+                            value = inter_corr[[i]], ci_lower = pair_ci[[nm]][1], ci_upper = pair_ci[[nm]][2],
+                            interpretation = private$.corrGrade(inter_corr[[i]], correlation_threshold))))
+                    }
+                }
+                if (!has_reference)
+                    repro_table$setNote("corr_ci", if (length(inter_corr) > 1)
+                        .("Correlation CIs use the Fisher z transformation with the Spearman variance of Bonett & Wright (2000); the CI of the mean correlation uses the smallest number of pairs and is conservative. Coverage falls below 95% when r is above about 0.97.")
+                      else
+                        .("Correlation CIs use the Fisher z transformation with the Spearman variance of Bonett & Wright (2000). Coverage falls below 95% when r is above about 0.97."))
             }
 
             # Rows 4/5: mean and median per-case CV (shared helper, so the table
@@ -1221,11 +1265,11 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
             within_cv <- private$.rmsCV(cv_values)
             median_cv <- if (any(!is.na(cv_values))) stats::median(cv_values, na.rm = TRUE) else NA_real_
             cv_grade <- function(x) if (is.na(x)) .("Not estimable") else
-                if (private$.ordinal) .("Not graded: ordinal score") else
+                if (private$.ordinal) .("Not graded: ordinal or binned values") else
                 if (x <= cv_threshold / 2) .("Low variability") else
                 if (x <= cv_threshold) .("Moderate variability") else .("High variability")
             repro_table$addRow(rowKey = 4, values = private$.tableValues(list(
-                metric = if (has_reference) .("Within-case CV (%) - region vs reference")
+                metric = if (has_reference) .("Within-case CV (%) - reference and regions")
                          else .("Within-case CV (%) - between regions"),
                 value = within_cv, ci_lower = NA_real_, ci_upper = NA_real_,
                 interpretation = cv_grade(within_cv))))
@@ -1280,6 +1324,9 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
                  point_below = point_below,
                  unassessed = unassessed,
                  mean_inter_biopsy = mean_inter_biopsy,
+                 mean_inter_ci = mean_inter_ci,
+                 pair_corr = inter_corr,
+                 pair_ci = pair_ci,
                  within_cv = within_cv, median_cv = median_cv,
                  case_cv = as.numeric(cv_values))
         },
@@ -1309,7 +1356,7 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
             rows <- list()
             skipped <- character(0)
             add <- function(x, y, name, pooled, comparator, level = NULL, z = y, pair = FALSE) {
-                r <- private$.biasRow(x, y, level, z, bounds = !pair)
+                r <- private$.biasRow(x, y, level, z, bounds = TRUE)
                 r$name <- name
                 r$pooled <- pooled
                 r$comparator <- comparator
@@ -1326,8 +1373,8 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
             # grew. The mean of the OTHER regions was tried and dropped (release
             # review 2026-09-19): a site effect the regions share made unbiased
             # regions MATERIAL. Unequal errors still give a slope on the pair mean,
-            # so with a reference it must agree with the slopes on the reference and
-            # on the region (bounds = TRUE), and it only stops a difference from
+            # so it must agree with the slopes on each of the two measurements
+            # (bounds = TRUE, in both designs), and it only stops a difference from
             # being ruled out.
             if (has_reference) {
                 for (j in seq_len(k)) {
@@ -1382,8 +1429,8 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
             # A constant reference is one fixed number, not a reference.
             #
             # A difference that changes with the level (slope shown at p < 0.05 / m,
-            # HC3; with a reference in the same direction on the reference, the
-            # region and their mean) is also judged at the 5th and 95th percentiles
+            # HC3, in the same direction on each of the two measurements and on
+            # their mean) is also judged at the 5th and 95th percentiles
             # of the level (the mean of the two measurements): ruled out only if both
             # 90% CIs lie inside the margin (intersection-union). It is never made
             # MATERIAL by the slope, which with one reading per method cannot be
@@ -1414,21 +1461,38 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
                 rows[[i]]$equivalent <- !isTRUE(r$constant) && !any(is.na(ci90)) && all(abs(ci90) <= margin)
                 margin_abs <- margin / 100 * abs(r$ref_mean)
                 rows[[i]]$margin_abs <- margin_abs
-                # Error alone tilts the slope on the reference down (-s_ref^2 /
-                # var(ref)) and on the region up (+s_region^2 / var(region)): a
-                # difference changes with the level only when both agree with the
-                # pair-mean slope shown in the table. A measurement with fewer than 5
+                # Error alone tilts the slope on the reference (or the second
+                # region) down (-s_y^2 / var(y)) and on the region up (+s_x^2 /
+                # var(x)): a difference changes with the level only when both agree
+                # with the pair-mean slope shown in the table. A measurement with fewer than 5
                 # values has no slope of its own and cannot contradict (a region
                 # stuck at one value against a varying reference plainly changes
                 # with the level).
                 same_way <- function(f, few) if (is.null(f)) few else f$p < slope_gate && sign(f$slope) == sign(r$prop$slope)
                 rows[[i]]$prop_shown <- !is.null(r$prop) && !is.na(r$rel) && r$prop$p < slope_gate &&
-                    (isTRUE(r$pair) || (same_way(r$prop_ref, r$few_y) && same_way(r$prop_reg, r$few_x)))
+                    same_way(r$prop_ref, r$few_y) && same_way(r$prop_reg, r$few_x)
                 if (rows[[i]]$prop_shown) {
                     e90 <- private$.endCI(r$prop, 0.90)
                     rows[[i]]$end_ci90 <- e90
                     rows[[i]]$equivalent <- rows[[i]]$equivalent && all(abs(e90) <= margin_abs)
                 }
+            }
+
+            # A margin finer than the steps the scores are recorded in (5% of a Ki67
+            # mean of 3.4% is +/-0.17 points, against whole-percent scores): every
+            # comparison stays inconclusive, and "more cases" is the only advice.
+            # Said once, with the resolution, for the comparisons not ruled out.
+            fine <- Filter(function(r) {
+                if (isTRUE(r$equivalent) || is.na(r$rel) || !is.finite(r$margin_abs)) return(FALSE)
+                steps <- abs(r$d)[abs(r$d) > sqrt(.Machine$double.eps) * max(1, abs(r$ref_mean))]
+                length(steps) > 0 && r$margin_abs < min(steps)
+            }, rows)
+            if (length(fine) > 0 && !reference_constant && !isTRUE(private$.ordinal)) {
+                f <- fine[[1]]
+                steps <- abs(f$d)[abs(f$d) > sqrt(.Machine$double.eps) * max(1, abs(f$ref_mean))]
+                private$.addNotice("INFO", .("Margin finer than the recorded values"), sprintf(
+                    .("A margin of %s%% of the comparison mean is ±%s in the measurement's own units, smaller than the smallest non-zero difference recorded between paired measurements (%s). Ruling out a difference that small needs many cases and may be finer than matters clinically; check that the systematic difference margin suits this marker and its level."),
+                    margin, signif(f$margin_abs, 2), signif(min(steps), 3)))
             }
 
             for (i in seq_along(rows)) {
@@ -2027,13 +2091,16 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
                 n_biopsies = ncol(biopsy_data),
                 n_complete = sum(stats::complete.cases(all_measures)),
                 overall_corr = if (has_reference) rs$mean_ref_corr else rs$mean_inter_biopsy,
-                overall_ci = if (has_reference) rs$mean_ref_ci else c(NA_real_, NA_real_),
-                # The correlation the verdict grades: the mean, unless a region is
-                # SHOWN to fall below the threshold - then the lowest such region.
-                verdict_corr = if (has_reference && length(shown_below) > 0) min(rs$ref_corr[shown_below])
+                overall_ci = if (has_reference) rs$mean_ref_ci else rs$mean_inter_ci,
+                # The correlation the verdict grades: the mean, unless a region (or,
+                # without a reference, a pair of regions) is SHOWN to fall below the
+                # threshold - then the lowest such one.
+                verdict_corr = if (length(shown_below) > 0) min((if (has_reference) rs$ref_corr else rs$pair_corr)[shown_below])
                                else if (has_reference) rs$mean_ref_corr else rs$mean_inter_biopsy,
                 ref_corr = rs$ref_corr,
                 ref_ci = rs$ref_ci,
+                pair_corr = rs$pair_corr,
+                pair_ci = rs$pair_ci,
                 shown_below = shown_below,
                 point_below = if (is.null(rs$point_below)) character(0) else setdiff(rs$point_below, shown_below),
                 min_ref_name = rs$min_ref_name,
@@ -2233,12 +2300,16 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
                 ci <- metrics$overall_ci
                 if (meets && length(ci) == 2 && !is.na(ci[1]) && ci[1] < correlation_threshold)
                     text <- paste(text, sprintf(.("Its 95%% CI extends down to %s, below the threshold."), f3(ci[1])))
+                if (!metrics$has_reference && length(metrics$shown_below) > 0)
+                    text <- paste(text, htmltools::htmlEscape(sprintf(.("Pairs of regions shown to be below the threshold on their own (upper 95%% limit below it): %s."),
+                        paste(vapply(metrics$shown_below, function(nm) sprintf(.("'%s' (r = %s, 95%% CI %s to %s)"), nm, f3(metrics$pair_corr[[nm]]),
+                                                                              f3(metrics$pair_ci[[nm]][1]), f3(metrics$pair_ci[[nm]][2])), ""), collapse = ", "))))
                 if (!is.null(unassessed_text)) text <- paste(text, htmltools::htmlEscape(unassessed_text))
                 li(.("Representativeness:"), text)
             }
 
             variability_item <- if (!is.na(metrics$within_cv) && isTRUE(metrics$ordinal)) {
-                li(.("Sampling Variability:"), sprintf(.("Within-case CV = %s%% (not graded: ordinal score)"), sprintf("%.1f", metrics$within_cv)))
+                li(.("Sampling Variability:"), sprintf(.("Within-case CV = %s%% (not graded: ordinal or binned values)"), sprintf("%.1f", metrics$within_cv)))
             } else if (!is.na(metrics$within_cv)) {
                 # Same (thr/2, thr) bands as the reproducibility table.
                 # No "the median is within your threshold" rider: the median per-case
@@ -2296,7 +2367,7 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
                     "</p>"),
                 ordinal = paste0(
                     "<p><strong>", .("Not graded:"), "</strong> ",
-                    .("The measurements are an ordinal score (5 or fewer whole-number values), so no sampling verdict is given: the CV and the percentage-difference margin assume a continuous scale. Assess agreement of an ordinal score with weighted kappa or the proportion of cases in the same category."),
+                    .("The measurements look like an ordinal score or coarsely binned values (only a few whole-number values), so no sampling verdict is given: the CV and the percentage-difference margin assume a finely measured continuous scale. Assess agreement of an ordinal score with weighted kappa or the proportion of cases in the same category."),
                     "</p>"),
                 insufficient = paste0(
                     "<p><strong>", .("Insufficient data:"), "</strong> ",
@@ -2369,7 +2440,7 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
             # the per-case CV the verdict grades (graded against the same threshold,
             # it told a study that met the CV threshold to take more regions).
             sampling_item <- if (verdict == "ordinal") {
-                .("No regions-per-case advice is given for an ordinal score, because it rests on the CV.")
+                .("No regions-per-case advice is given for an ordinal score or binned values, because it rests on the CV.")
             } else if (verdict == "bias") {
                 .("A systematic difference is present, and averaging more regions removes neither an offset nor a difference that changes with the level. Address the systematic difference first.")
             } else if (verdict == "insufficient" || is.null(single) || is.na(single)) {
@@ -2476,7 +2547,7 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
                 else if (has_reference)
                     .("Whether a difference changed with the level (proportional bias) was assessed by regressing it on the reference value, on the region value and on the mean of the two, with heteroscedasticity-robust standard errors (Bland & Altman 1995, 1999); because measurement error alone tilts the first slope downwards and the second upwards, a difference was considered to change with the level only when all three slopes differed from zero in the same direction (p below 0.05 divided by the number of comparisons) (Krouwer 2008). Such a difference was judged at the 5th and 95th percentiles of the mean of the two measurements and was considered ruled out only if it lay within the margin at both.")
                 else
-                    .("Whether a difference changed with the level (proportional bias) was assessed by regressing it on the mean of the two regions compared, with heteroscedasticity-robust standard errors (Bland & Altman 1999); where the slope differed from zero (p below 0.05 divided by the number of comparisons), the difference was also judged at the 5th and 95th percentiles of that level, and a difference that changed with the level was not considered ruled out."),
+                    .("Whether a difference changed with the level (proportional bias) was assessed by regressing it on each of the two regions compared and on their mean, with heteroscedasticity-robust standard errors (Bland & Altman 1999); because measurement error alone tilts the slope on one region downwards and on the other upwards, a difference was considered to change with the level only when all three slopes differed from zero in the same direction (p below 0.05 divided by the number of comparisons) (Krouwer 2008). Such a difference was judged at the 5th and 95th percentiles of the mean of the two regions and was considered ruled out only if it lay within the margin at both."),
                 if (has_reference && length(ref_corr) > 0)
                     .("Confidence intervals for Spearman correlations used the Fisher z transformation with the variance of Bonett and Wright (2000)."),
                 .("Sampling variability was quantified as the within-case coefficient of variation (CV), the root mean square of the per-case CVs; cases whose mean was near zero were left out."),
@@ -2515,11 +2586,17 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
                             f3(r), correlation_threshold)
                 }
             } else {
-                sprintf(if (metrics$overall_corr >= correlation_threshold)
-                            .("The mean Spearman correlation between regional measurements was %s, which meets the %s threshold set for this analysis.")
-                        else
-                            .("The mean Spearman correlation between regional measurements was %s, below the %s threshold set for this analysis."),
-                        f3(metrics$overall_corr), correlation_threshold)
+                shown <- if (is.null(metrics$shown_below)) character(0) else metrics$shown_below
+                paste(c(
+                    sprintf(if (metrics$overall_corr >= correlation_threshold)
+                                .("The mean Spearman correlation between regional measurements was %s, which meets the %s threshold set for this analysis.")
+                            else
+                                .("The mean Spearman correlation between regional measurements was %s, below the %s threshold set for this analysis."),
+                            f3(metrics$overall_corr), correlation_threshold),
+                    if (length(shown) > 0)
+                        sprintf(.("The correlation of the region pair(s) %s was shown to be below the threshold (upper 95%% confidence limit below it)."),
+                                paste(sprintf("'%s'", shown), collapse = ", "))),
+                    collapse = " ")
             }
 
             dropped <- if (is.null(metrics$icc_dropped)) character(0) else metrics$icc_dropped
@@ -2541,7 +2618,7 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
                     .("The ICC was computed on the %d cases with every measurement."), as.integer(metrics$icc_n)))
 
             variability_sentence <- if (!is.null(metrics$within_cv) && !is.na(metrics$within_cv) && isTRUE(metrics$ordinal)) {
-                sprintf(.("The within-case CV was %s%%; it was not graded, because the measurements were an ordinal score."), sprintf("%.1f", metrics$within_cv))
+                sprintf(.("The within-case CV was %s%%; it was not graded, because the measurements looked like an ordinal score or coarsely binned values."), sprintf("%.1f", metrics$within_cv))
             } else if (!is.null(metrics$within_cv) && !is.na(metrics$within_cv)) {
                 sprintf(
                     if (metrics$within_cv <= cv_threshold / 2)
@@ -2579,7 +2656,7 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
                 moderate = sprintf(.("The sampling approach met the correlation and CV criteria only after relaxing them to correlation \u2265 %s and CV \u2264 %s%%."),
                                    signif(correlation_threshold - 0.2, 6), signif(cv_threshold * 1.5, 6)),
                 inadequate = .("The sampling approach did not meet the predefined quality criteria."),
-                ordinal = .("No sampling verdict was given, because the measurements were an ordinal score and the CV and percentage-difference criteria assume a continuous scale."),
+                ordinal = .("No sampling verdict was given, because the measurements looked like an ordinal score or coarsely binned values and the CV and percentage-difference criteria assume a finely measured continuous scale."),
                 .("Data were insufficient to evaluate overall sampling quality against predefined criteria."))
 
             clinical_sentence <- if (verdict == "bias" && !has_reference) {
@@ -2596,7 +2673,7 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
                     if (info$opposite) .("The regions are offset in opposite directions, so each needs its own calibration.")),
                     collapse = " ")
             } else if (verdict == "ordinal") {
-                .("In this dataset the measurements were an ordinal score, so their agreement should be judged with weighted kappa or category agreement rather than with the CV.")
+                .("In this dataset the measurements looked like an ordinal score or coarsely binned values, so their agreement should be judged with weighted kappa or category agreement rather than with the CV.")
             } else if (verdict == "met_uncertain") {
                 .("In this dataset the regional measurements met the correlation and variability thresholds on average, but agreement was not confirmed.")
             } else if (!is.null(metrics$within_cv) && !is.na(metrics$within_cv)) {
@@ -2757,7 +2834,7 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
                 "<li>Schuirmann DJ. J Pharmacokinet Biopharm 1987;15(6):657-680.</li>",
                 if (any(vapply(metrics$bias_rows, function(r) !is.null(r$prop), logical(1))))
                     "<li>MacKinnon JG, White H. J Econometrics 1985;29(3):305-325.</li>",
-                if (metrics$has_reference && any(vapply(metrics$bias_rows, function(r) !is.null(r$prop), logical(1))))
+                if (any(vapply(metrics$bias_rows, function(r) !is.null(r$prop), logical(1))))
                     "<li>Krouwer JS. Stat Med 2008;27(5):778-780.</li>",
                 if (isTRUE(private$.ss_done)) "<li>Bonett DG. Stat Med 2002;21(9):1331-1335.</li>"
             )
@@ -2787,7 +2864,7 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
                     entry(.("ICC(3,1), consistency:"), .("The same ratio with systematic offsets removed; it is shown beside the absolute-agreement form so an offset can be seen.")))),
                 block(.("Variability"), "#48bb78", c(
                     entry(.("CV (coefficient of variation):"), .("SD divided by the mean, times 100, for one case's measurements. This analysis grades it against the CV threshold you set: low at or below half the threshold, moderate within it, high above it. The within-case CV combines the cases as a root mean square. It is unstable when the mean is near zero, so such cases are left out.")),
-                    entry(.("Proportional bias:"), .("A difference between two measurements that changes with the level of the marker - for example a biopsy that reads higher than the whole section in low cases and lower in high cases. A measurement's own error tilts a slope fitted against it, so with a reference this analysis requires the slopes against the reference, against the region and against their mean to agree in direction, and shows the slope against the mean; without a reference it uses the mean of the two regions. An average difference can hide it, and a fixed correction cannot remove it.")),
+                    entry(.("Proportional bias:"), .("A difference between two measurements that changes with the level of the marker - for example a biopsy that reads higher than the whole section in low cases and lower in high cases. A measurement's own error tilts a slope fitted against it, so this analysis requires the slopes against each of the two measurements compared (a region and the reference, or two regions) and against their mean to agree in direction, and shows the slope against the mean. An average difference can hide it, and a fixed correction cannot remove it.")),
                     entry(.("Limits of agreement:"), .("Mean difference plus or minus 1.96 SD of the differences: the range expected to hold 95% of individual differences between the two measurements compared (a region and the reference, or two regions).")),
                     entry(.("Variance components:"), .("The total variance split into between-case, between-method and residual (within-case) parts.")))),
                 block(.("Verdicts"), "#6b7280", c(
@@ -2822,7 +2899,7 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
                 met_uncertain = paste(.("Overall: the regional measurements met your correlation and variability thresholds on average, but agreement was not confirmed."), private$.assessmentPointer()),
                 moderate = .("Overall: the regional measurements met your thresholds only after relaxing them, so a single region may not represent the case well."),
                 inadequate = .("Overall: the regional measurements did not meet your agreement thresholds."),
-                ordinal = .("Overall: no verdict, because the measurements are an ordinal score and the thresholds of this analysis assume a continuous scale."),
+                ordinal = .("Overall: no verdict, because the measurements look like an ordinal score or coarsely binned values and the thresholds of this analysis assume a finely measured continuous scale."),
                 bias = if (!metrics$has_reference && !is.null(info$culprit))
                         sprintf(.("Overall: region '%s' differs systematically from the other regions, so the regions cannot be used interchangeably."), info$culprit)
                     else if (!metrics$has_reference)
@@ -2859,7 +2936,7 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
 
             variability_sentence <- if (!is.na(within_cv) && isTRUE(metrics$ordinal)) {
                 paste0("<li><strong>", .("Variability:"), "</strong> ",
-                       sprintf(.("CV = %.1f%%, not graded because the measurements are an ordinal score."), within_cv), "</li>")
+                       sprintf(.("CV = %.1f%%, not graded because the measurements look like an ordinal score or coarsely binned values."), within_cv), "</li>")
             } else if (!is.na(within_cv)) {
                 template <- if (within_cv <= cv_thr / 2) {
                     .("Low (CV = %.1f%%, graded against your %s%% threshold) - measurements of the same case were consistent.")
@@ -2875,7 +2952,12 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
             }
 
             shown <- if (is.null(metrics$shown_below)) character(0) else metrics$shown_below
-            correlation_sentence <- if (length(shown) > 0) {
+            correlation_sentence <- if (length(shown) > 0 && !isTRUE(metrics$has_reference)) {
+                weakest <- shown[which.min(metrics$pair_corr[shown])]
+                paste0("<li><strong>", .("Correlation:"), "</strong> ", htmltools::htmlEscape(sprintf(
+                    .("The weakest pair of regions, '%s', correlated %.2f, shown to be below your %.2f threshold; the average was %.2f."),
+                    weakest, metrics$pair_corr[[weakest]], cor_thr, metrics$overall_corr)), "</li>")
+            } else if (length(shown) > 0) {
                 # The statistic the verdict grades, not only the mean.
                 weakest <- shown[which.min(metrics$ref_corr[shown])]
                 paste0("<li><strong>", .("Correlation:"), "</strong> ", htmltools::htmlEscape(sprintf(

@@ -24,7 +24,7 @@ test_that("a yy-mm-dd month-start column is not read day-first", {
         e = c("17-05-01", "18-06-01", "19-07-01", "21-03-01", "22-09-01", "16-08-01"),
         stringsAsFactors = FALSE)
     truth <- as.numeric(as.Date(paste0("20", d$e)) - as.Date(paste0("20", d$s))) / 30.4375
-    r <- ti_run(d, dx_date = "s", fu_date = "e", output_unit = "months")
+    r <- ti_run(d, dx_date = "s", fu_date = "e", output_unit = "months", time_basis = "standardized")
     sm <- strip_html(r$summary$content)
     expect_match(sm, "Date format used: ymd", fixed = TRUE)
     expect_match(sm, sprintf("Mean time: %s", round(mean(truth), 2)), fixed = TRUE)
@@ -39,14 +39,17 @@ test_that("a two-digit-year rejection keeps its two-digit-year warning and names
     # causes, none of them two-digit years, and the two-digit warning was discarded.
     d <- data.frame(s = c("22/09/65", "01/01/66", "15/06/64"),
                     e = c("22/09/20", "01/01/21", "15/06/22"), stringsAsFactors = FALSE)
-    msg <- strip_html(ti_run(d, dx_date = "s", fu_date = "e", output_unit = "years")$messages$content)
+    # A reject() since 2026-10-30: the caveats travel inside the error message.
+    ti_err <- function(df, ...)
+        tryCatch({ ti_run(df, ...); "" }, error = function(e) conditionMessage(e))
+    msg <- ti_err(d, dx_date = "s", fu_date = "e", output_unit = "years")
     expect_match(msg, "Negative time intervals detected", fixed = TRUE)
     expect_match(msg, "6 date value(s) here were written with a two-digit year", fixed = TRUE)
     expect_match(msg, "6 date value(s) were written with a two-digit year. These are read", fixed = TRUE)
 
     # four-digit years: the two-digit sentence must not appear
     d4 <- data.frame(s = c("2020-05-01", "2020-06-01"), e = c("2020-04-01", "2020-07-01"))
-    msg4 <- strip_html(ti_run(d4, dx_date = "s", fu_date = "e")$messages$content)
+    msg4 <- ti_err(d4, dx_date = "s", fu_date = "e")
     expect_match(msg4, "Negative time intervals detected", fixed = TRUE)
     expect_false(grepl("two-digit year", msg4, fixed = TRUE))
 })
@@ -75,13 +78,13 @@ test_that("the copy-ready sentence says the interval is observed and defines the
     d <- data.frame(s = c("2020-01-15", "2020-02-29", "2021-03-31", "2022-06-10", "2023-01-01"),
                     e = c("2021-01-15", "2021-02-28", "2021-04-30", "2022-06-10", "2024-01-01"))
     nl <- strip_html(ti_run(d, dx_date = "s", fu_date = "e", output_unit = "months",
-                            show_summary = TRUE)$nlSummary$content)
+                            time_basis = "standardized", show_summary = TRUE)$nlSummary$content)
     expect_match(nl, "the observed time from the start date to the end date had a mean of", fixed = TRUE)
     expect_match(nl, "1 month = 30.4375 days", fixed = TRUE)
     expect_match(nl, "not the reverse Kaplan-Meier median follow-up", fixed = TRUE)
 
     nly <- strip_html(ti_run(d, dx_date = "s", fu_date = "e", output_unit = "years",
-                             show_summary = TRUE)$nlSummary$content)
+                             time_basis = "standardized", show_summary = TRUE)$nlSummary$content)
     expect_match(nly, "1 year = 365.25 days", fixed = TRUE)
     nlc <- strip_html(ti_run(d, dx_date = "s", fu_date = "e", output_unit = "months",
                              time_basis = "calendar", show_summary = TRUE)$nlSummary$content)

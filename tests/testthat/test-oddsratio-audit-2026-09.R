@@ -62,7 +62,7 @@ test_that("S1: no bare stats::as.formula() remains in oddsratio.b.R", {
   src <- readLines(.osrc("oddsratio.b.R"), warn = FALSE)
   expect_false(any(grepl("as.formula(", src, fixed = TRUE)))
   # every logistf / lrm fit is fed a guarded formula
-  expect_equal(sum(grepl(".asSurvivalFormula(", src, fixed = TRUE)), 4L)
+  expect_equal(sum(grepl(".asSurvivalFormula(", src, fixed = TRUE)), 5L)
 })
 
 test_that("N1: binary-numeric coercion precedes the separation check in .run()", {

@@ -442,7 +442,7 @@ options:
       required: false
       description:
           R: >
-            Optional variable to sort patient timelines. When one is selected it overrides the Sort order setting; leave it empty to sort by duration, patient ID or response.
+            Optional variable to sort patient timelines, smallest value (or first level) at the top; each patient takes their first non-missing value. When one is selected it overrides the Sort order setting; leave it empty to sort by duration, patient ID or response.
       default: NULL
       
     - name: sortOrder

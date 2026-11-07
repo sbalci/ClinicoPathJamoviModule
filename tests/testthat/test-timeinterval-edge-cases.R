@@ -15,20 +15,21 @@ test_that("timeinterval handles missing values", {
   res <- timeinterval(
     data = timeinterval_quality,
     dx_date = "start_date",
-    fu_date = "end_date"
+    fu_date = "end_date",
+    remove_negative = TRUE  # the fixture carries deliberate negatives (a reject otherwise)
   )
   expect_s3_class(res, "timeintervalResults")
 })
 
 # ═══ NEGATIVE INTERVALS ═══
 test_that("timeinterval detects negative intervals", {
-  result <- timeinterval(
+  # A reject() since 2026-10-30 (was an Html banner on a complete-looking result).
+  expect_error(timeinterval(
     data = timeinterval_negative,
     dx_date = "start_date",
     fu_date = "end_date",
     include_quality_metrics = TRUE
-  )
-  expect_s3_class(result, "timeintervalResults")
+  ), "Negative time intervals detected", fixed = TRUE)
 })
 
 test_that("timeinterval removes negative intervals when requested", {
@@ -79,7 +80,8 @@ test_that("timeinterval handles large datasets", {
   result <- timeinterval(
     data = timeinterval_large,
     dx_date = "dx_date",
-    fu_date = "fu_date"
+    fu_date = "fu_date",
+    remove_negative = TRUE  # the fixture carries deliberate negatives (a reject otherwise)
   )
   expect_s3_class(result, "timeintervalResults")
 })
@@ -92,7 +94,8 @@ test_that("timeinterval handles variables with spaces", {
   result <- timeinterval(
     data = data_spaces,
     dx_date = "start date",
-    fu_date = "end_date"
+    fu_date = "end_date",
+    remove_negative = TRUE
   )
   expect_s3_class(result, "timeintervalResults")
 })
@@ -103,14 +106,16 @@ test_that("timeinterval handles boundary confidence levels", {
     data = timeinterval_quality,
     dx_date = "start_date",
     fu_date = "end_date",
-    confidence_level = 90
+    confidence_level = 90,
+    remove_negative = TRUE
   )
   
   result_99 <- timeinterval(
     data = timeinterval_quality,
     dx_date = "start_date",
     fu_date = "end_date",
-    confidence_level = 99
+    confidence_level = 99,
+    remove_negative = TRUE
   )
   
   expect_s3_class(result_90, "timeintervalResults")
@@ -123,7 +128,8 @@ test_that("timeinterval handles zero landmark time", {
     dx_date = "start_date",
     fu_date = "end_date",
     use_landmark = TRUE,
-    landmark_time = 0
+    landmark_time = 0,
+    remove_negative = TRUE
   )
   expect_s3_class(result, "timeintervalResults")
 })

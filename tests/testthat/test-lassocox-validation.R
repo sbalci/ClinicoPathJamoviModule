@@ -388,8 +388,8 @@ test_that("VAL-lassocox-06: Shipped examples script executes cleanly and vignett
   expect_equal(env_ex$result_breast$modelSummary$rowCount, 14L)
   expect_equal(env_ex$result_cvd$modelSummary$rowCount, 14L)
   expect_equal(env_ex$result_importance$modelSummary$rowCount, 14L)
-  expect_s3_class(env_ex$result_lung, "try-error")
-  expect_s3_class(env_ex$result_small, "try-error")
+  expect_equal(env_ex$result_lung$modelSummary$rowCount, 14L)
+  expect_equal(env_ex$result_small$modelSummary$rowCount, 14L)
 
   doc_paths <- c("../../vignettes/lassocox-documentation.md", "vignettes/lassocox-documentation.md")
   doc_file <- doc_paths[file.exists(doc_paths)][1]
@@ -559,7 +559,10 @@ test_that("SEC-lassocox-01: .sourcifyOption escapes quote-breaking strings, non-
       o$value <- payload
       ex <- parse(text = an$asSource())[[1]]
       expect_identical(ex[[opt_name]], payload)
-      expect_true(all(names(ex)[-1] %in% c("data", opt_name)))
+      # Unset Level options (no wrapper default) are emitted as NULL so the call runs.
+      extra <- setdiff(names(ex)[-1], c("data", opt_name))
+      expect_true(all(extra %in% c("outcomeLevel", "censorLevel")))
+      for (nm in extra) expect_null(ex[[nm]])
     }
     opts <- lassocoxOptions$new()
     an <- lassocoxClass$new(options = opts, data = df)

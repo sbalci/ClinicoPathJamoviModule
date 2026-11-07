@@ -113,6 +113,29 @@ diagnosticmetaClass <- R6::R6Class(
             c(max(0, center - margin), min(1, center + margin))
         },
 
+        # Percentage text for sentences. One decimal unless that rounding
+        # would carry the value across 0, 100 or a band edge (70/80/90/99):
+        # 99.979 printed as "100.0%" claimed a perfect test beside a table
+        # showing 99.979, and 89.96 printed as "90.0%" sat in the band below.
+        .fmtPct = function(x) {
+            if (!is.finite(x)) return(sprintf("%.1f", x))
+            edges <- c(0, 70, 80, 90, 99, 100)
+            d <- 1L
+            # A value within floating-point noise of an edge (89.9999999999
+            # from a fit of exactly 90%) is on it, not across it.
+            crosses <- function(d) any((round(x, d) >= edges) != (x >= edges) &
+                                       abs(x - edges) > 1e-8)
+            while (d < 4L && crosses(d)) d <- d + 1L
+            sprintf("%.*f", d, x)
+        },
+
+        # Ratio text for sentences: two decimals, or two significant digits
+        # below 0.01, where "%.2f" printed a likelihood ratio as "0.00".
+        .fmtRatio = function(x) {
+            if (!is.finite(x) || abs(x) >= 0.01) return(sprintf("%.2f", x))
+            base::format(signif(x, 2), scientific = FALSE)
+        },
+
         # ---- Notices --------------------------------------------------------
         # User-facing warnings and information banners. These previously went
         # through .appendInstructionMessage(), which appended them below ~95
@@ -977,10 +1000,16 @@ diagnosticmetaClass <- R6::R6Class(
             level_txt <- format(100 * conf_level)
             private$.zero_margin <- list(fp = margin_share("fp") >= 0.75,
                                          fn = margin_share("fn") >= 0.75)
+            # "No upper limit" for LR+ (no lower limit for LR-) is true only
+            # when the raw total of that error is 0: one false positive in the
+            # remaining quarter of studies bounds the common-value FPR above 0.
             if (private$.zero_margin$fp) {
                 fp_tot <- sum(raw_counts$fp); nd_tot <- sum(raw_counts$fp + raw_counts$tn)
                 private$.addNotice("STRONG_WARNING", .("Specificity set by the continuity correction"), sprintf(
-                    .("%d of %d studies have no false positives. Each of them enters the model only after a continuity correction, so the pooled specificity, its confidence interval, its between-study variance, LR+ and the diagnostic odds ratio are set largely by the size of that correction rather than by the data: a smaller correction gives a higher specificity and a much larger LR+. The interval is not a data-derived precision. If all studies shared one specificity, the raw counts (%s false positives among %s non-diseased participants) would give an exact %s%% confidence interval starting at %.2f%%, and LR+ would have no upper limit the data can set. Report the raw counts and that bound alongside the pooled value, and do not read the LR+ grading as established."),
+                    if (fp_tot == 0)
+                        .("%d of %d studies have no false positives. Each of them enters the model only after a continuity correction, so the pooled specificity, its confidence interval, its between-study variance, LR+ and the diagnostic odds ratio are set largely by the size of that correction rather than by the data: a smaller correction gives a higher specificity and a much larger LR+. The interval is not a data-derived precision. If all studies shared one specificity, the raw counts (%s false positives among %s non-diseased participants) would give an exact %s%% confidence interval starting at %.2f%%, and LR+ would have no upper limit the data can set. Report the raw counts and that bound alongside the pooled value, and do not read the LR+ grading as established.")
+                    else
+                        .("%d of %d studies have no false positives. Each of them enters the model only after a continuity correction, so the pooled specificity, its confidence interval, its between-study variance, LR+ and the diagnostic odds ratio are set largely by the size of that correction rather than by the data: a smaller correction gives a higher specificity and a much larger LR+. The interval is not a data-derived precision. If all studies shared one specificity, the raw counts (%s false positives among %s non-diseased participants) would give an exact %s%% confidence interval starting at %.2f%%. Report the raw counts and that bound alongside the pooled value, and do not read the LR+ grading as established."),
                     sum(raw_counts$fp == 0), nrow(raw_counts), format(fp_tot), format(nd_tot),
                     level_txt, exact_lower(fp_tot, nd_tot)))
                 self$results$bivariateresults$setNote("zero_margin_fp",
@@ -989,7 +1018,10 @@ diagnosticmetaClass <- R6::R6Class(
             if (private$.zero_margin$fn) {
                 fn_tot <- sum(raw_counts$fn); d_tot <- sum(raw_counts$fn + raw_counts$tp)
                 private$.addNotice("STRONG_WARNING", .("Sensitivity set by the continuity correction"), sprintf(
-                    .("%d of %d studies have no false negatives. Each of them enters the model only after a continuity correction, so the pooled sensitivity, its confidence interval, its between-study variance, LR- and the diagnostic odds ratio are set largely by the size of that correction rather than by the data: a smaller correction gives a higher sensitivity and a much smaller LR-. The interval is not a data-derived precision. If all studies shared one sensitivity, the raw counts (%s false negatives among %s diseased participants) would give an exact %s%% confidence interval starting at %.2f%%, and LR- would have no lower limit above zero the data can set. Report the raw counts and that bound alongside the pooled value, and do not read the LR- grading as established."),
+                    if (fn_tot == 0)
+                        .("%d of %d studies have no false negatives. Each of them enters the model only after a continuity correction, so the pooled sensitivity, its confidence interval, its between-study variance, LR- and the diagnostic odds ratio are set largely by the size of that correction rather than by the data: a smaller correction gives a higher sensitivity and a much smaller LR-. The interval is not a data-derived precision. If all studies shared one sensitivity, the raw counts (%s false negatives among %s diseased participants) would give an exact %s%% confidence interval starting at %.2f%%, and LR- would have no lower limit above zero the data can set. Report the raw counts and that bound alongside the pooled value, and do not read the LR- grading as established.")
+                    else
+                        .("%d of %d studies have no false negatives. Each of them enters the model only after a continuity correction, so the pooled sensitivity, its confidence interval, its between-study variance, LR- and the diagnostic odds ratio are set largely by the size of that correction rather than by the data: a smaller correction gives a higher sensitivity and a much smaller LR-. The interval is not a data-derived precision. If all studies shared one sensitivity, the raw counts (%s false negatives among %s diseased participants) would give an exact %s%% confidence interval starting at %.2f%%. Report the raw counts and that bound alongside the pooled value, and do not read the LR- grading as established."),
                     sum(raw_counts$fn == 0), nrow(raw_counts), format(fn_tot), format(d_tot),
                     level_txt, exact_lower(fn_tot, d_tot)))
                 self$results$bivariateresults$setNote("zero_margin_fn",
@@ -1215,7 +1247,6 @@ diagnosticmetaClass <- R6::R6Class(
             }
             private$.pooled_specificity <- pooled_spec
 
-            # SERIALIZATION FIX: Use table note instead of inserting Notice
             # The closing sentence is set later, once it is known whether a
             # prediction interval exists: under the fixed-effect method it does
             # not, and this note used to send the reader to it anyway.
@@ -1989,7 +2020,6 @@ diagnosticmetaClass <- R6::R6Class(
                     n_before_covariate - nrow(analysis_data), n_before_covariate, n_before_covariate))
 
             if (nrow(analysis_data) < 3) {
-                # SERIALIZATION FIX: Use table note instead of inserting Notice
                 self$results$metaregression$setNote("insufficient_data",
                     .("Meta-regression not run: fewer than three studies remain after removing missing covariate values."))
                 return()
@@ -2270,7 +2300,10 @@ diagnosticmetaClass <- R6::R6Class(
                             length(beta_names) >= j &&
                             !is.na(beta_names[j]) &&
                             nzchar(beta_names[j])) {
-                            paste0(covariate_var, " ", substring(beta_names[j], nchar("covariate") + 1L))
+                            suffix <- substring(beta_names[j], nchar("covariate") + 1L)
+                            # A polynomial contrast suffix (".L", ".Q") joins the
+                            # name directly; a level name is set off by a space.
+                            paste0(covariate_var, if (startsWith(suffix, ".")) "" else " ", suffix)
                         } else {
                             safe_covariate_label
                         }
@@ -2327,8 +2360,14 @@ diagnosticmetaClass <- R6::R6Class(
                             .("%s: each coefficient contrasts that level of %s against the reference level '%s'; the intercept is the logit at that reference level."),
                             measure, covariate_note, .rocLabel(lv[zero], note = TRUE)))
                     }
+                    # The design columns are named after the internal column
+                    # ("covariate.L"); show the user's variable, and print a
+                    # rounding residue such as -9e-17 as the 0 it is.
+                    coding[abs(coding) < 1e-10] <- 0
+                    col_names <- paste0(covariate_var,
+                        substring(colnames(coding), nchar("covariate") + 1L))
                     columns <- vapply(seq_len(ncol(coding)), function(j) {
-                        paste0(.rocLabel(colnames(coding)[j], note = TRUE), ": ",
+                        paste0(.rocLabel(col_names[j], note = TRUE), ": ",
                             paste(paste0(.rocLabel(lv, note = TRUE), "=", format(signif(coding[, j], 6),
                                                        trim = TRUE)), collapse = ", "))
                     }, character(1))
@@ -3519,14 +3558,18 @@ diagnosticmetaClass <- R6::R6Class(
             if (has_estimates) {
                 table$setNote("explanation", sprintf(
                     .("Sensitivity and specificity are test characteristics; predictive values depend on disease prevalence. Values calculated from pooled sensitivity (%s%%) and specificity (%s%%)."),
-                    sprintf("%.1f", sens * 100),
-                    sprintf("%.1f", spec * 100)
+                    private$.fmtPct(sens * 100),
+                    private$.fmtPct(spec * 100)
                 ))
             } else {
                 table$setNote("explanation",
                     .("Pooled sensitivity and specificity estimates are unavailable; predictive values cannot be computed.")
                 )
             }
+            # The table uses the pooled point only. When studies disagree
+            # widely, a laboratory's own predictive values can be far from it.
+            table$setNote("heterogeneity", if (has_estimates && isTRUE(private$.heterogeneity_substantial))
+                .("Between-study heterogeneity is substantial, so the predictive values in any one setting can differ markedly from these; the prediction interval in the bivariate table shows the range of sensitivity and specificity a new setting may have."))
         },
 
         # Enhanced data validation with user-friendly warnings
@@ -3540,9 +3583,15 @@ diagnosticmetaClass <- R6::R6Class(
                 return()
             }
 
-            # Calculate confidence intervals (these should be set by bivariate analysis)
-            sens_pct <- round(private$.pooled_sensitivity * 100, 1)
-            spec_pct <- round(private$.pooled_specificity * 100, 1)
+            # Unrounded percentages. Every sentence formats, bands and counts from
+            # these: rounding first to one decimal printed 99.979% as "100.0%",
+            # "1000 out of 1,000" and "missing only 0" beside a table showing
+            # 99.979 and data with false negatives, and moved 89.96% into the
+            # excellent band.
+            sens_pct <- private$.pooled_sensitivity * 100
+            spec_pct <- private$.pooled_specificity * 100
+            sens_txt <- private$.fmtPct(sens_pct)
+            spec_txt <- private$.fmtPct(spec_pct)
 
             # Calculate positive and negative likelihood ratios
             lr_pos <- NA_real_
@@ -3574,12 +3623,12 @@ diagnosticmetaClass <- R6::R6Class(
 
             nlr_text <- if (is.finite(lr_neg)) {
                 if (is.finite(inv_lr_neg)) {
-                    paste0("<p>", sprintf(.("<strong>Negative Likelihood Ratio:</strong> %.2f - A negative test is %.1fx more likely in healthy than disease"),
-                            lr_neg, inv_lr_neg), "</p>")
+                    paste0("<p>", sprintf(.("<strong>Negative Likelihood Ratio:</strong> %s - A negative test is %.1fx more likely in healthy than disease"),
+                            private$.fmtRatio(lr_neg), inv_lr_neg), "</p>")
                 } else {
                     paste0("<p>", sprintf(
-                        .("<strong>Negative Likelihood Ratio:</strong> %.2f - Interpretation unstable (sensitivity \u2248 100%%)."),
-                        lr_neg
+                        .("<strong>Negative Likelihood Ratio:</strong> %s - Interpretation unstable (sensitivity \u2248 100%%)."),
+                        private$.fmtRatio(lr_neg)
                     ), "</p>")
                 }
             } else {
@@ -3592,12 +3641,12 @@ diagnosticmetaClass <- R6::R6Class(
             # notices panel. Carry the uncertainty with the estimate.
             ci_fragment <- function(ci) {
                 if (length(ci) == 2 && all(is.finite(ci)))
-                    sprintf(" (%.1f%%-%.1f%%)", ci[1], ci[2]) else ""
+                    sprintf(" (%s%%-%s%%)", private$.fmtPct(ci[1]), private$.fmtPct(ci[2])) else ""
             }
             copy_text <- sprintf(
-                .("Meta-analysis of %d diagnostic accuracy studies shows pooled sensitivity of %.1f%%%s and specificity of %.1f%%%s, at the %d%% confidence level."),
-                private$.n_studies, sens_pct, ci_fragment(private$.pooled_sens_ci),
-                spec_pct, ci_fragment(private$.pooled_spec_ci),
+                .("Meta-analysis of %d diagnostic accuracy studies shows pooled sensitivity of %s%%%s and specificity of %s%%%s, at the %d%% confidence level."),
+                private$.n_studies, sens_txt, ci_fragment(private$.pooled_sens_ci),
+                spec_txt, ci_fragment(private$.pooled_spec_ci),
                 self$options$confidence_level %||% 95
             )
             # Guard BOTH margins: sprintf() with a zero-length argument returns
@@ -3606,9 +3655,9 @@ diagnosticmetaClass <- R6::R6Class(
             if (length(private$.pooled_sens_pi) == 2 && all(is.finite(private$.pooled_sens_pi)) &&
                 length(private$.pooled_spec_pi) == 2 && all(is.finite(private$.pooled_spec_pi))) {
                 copy_text <- sprintf(
-                    .("%s A new study is predicted to fall between %.1f%% and %.1f%% for sensitivity and between %.1f%% and %.1f%% for specificity."),
-                    copy_text, private$.pooled_sens_pi[1], private$.pooled_sens_pi[2],
-                    private$.pooled_spec_pi[1], private$.pooled_spec_pi[2])
+                    .("%s A new study is predicted to fall between %s%% and %s%% for sensitivity and between %s%% and %s%% for specificity."),
+                    copy_text, private$.fmtPct(private$.pooled_sens_pi[1]), private$.fmtPct(private$.pooled_sens_pi[2]),
+                    private$.fmtPct(private$.pooled_spec_pi[1]), private$.fmtPct(private$.pooled_spec_pi[2]))
             }
 
             if (isTRUE(private$.repeated_ids))
@@ -3619,12 +3668,13 @@ diagnosticmetaClass <- R6::R6Class(
             lr_ci <- private$.pooled_lr_ci
             lr_fragment <- function(ci) {
                 if (length(ci) == 2 && all(is.finite(ci)))
-                    sprintf(" (%.2f-%.2f)", ci[1], ci[2]) else ""
+                    sprintf(" (%s-%s)", private$.fmtRatio(ci[1]), private$.fmtRatio(ci[2])) else ""
             }
             if (is.finite(lr_pos) && is.finite(lr_neg)) {
                 copy_text <- sprintf(
-                    .("%s Positive LR %.2f%s and negative LR %.2f%s."),
-                    copy_text, lr_pos, lr_fragment(lr_ci$plr), lr_neg, lr_fragment(lr_ci$nlr)
+                    .("%s Positive LR %s%s and negative LR %s%s."),
+                    copy_text, private$.fmtRatio(lr_pos), lr_fragment(lr_ci$plr),
+                    private$.fmtRatio(lr_neg), lr_fragment(lr_ci$nlr)
                 )
             }
 
@@ -3659,6 +3709,9 @@ diagnosticmetaClass <- R6::R6Class(
             # complement to "0"), which the table's 99.5% contradicts; count per
             # 1,000 there instead (2026-10-19 review, DM-4).
             per_1000 <- function(pct) pct > 99 || pct < 1
+            # Above 99.95% even a count per 1,000 rounds the complement to 0;
+            # say "fewer than 1 in 1,000" instead of a count that claims none.
+            under_1_in_1000 <- function(pct) pct > 99 && round(10 * (100 - pct)) < 1
 
             # Every sentence goes through .() whole; the HTML scaffold carries
             # only %s slots. copy_text sits inside a single-quoted attribute, so
@@ -3699,14 +3752,18 @@ diagnosticmetaClass <- R6::R6Class(
             .("Meta-Analysis Summary"),
             sprintf(.("<strong>Analysis Type:</strong> Diagnostic test accuracy meta-analysis of %d studies"), private$.n_studies),
             .("Pooled Test Performance"),
-            if (per_1000(sens_pct))
-                sprintf(.("<strong>Sensitivity:</strong> %.1f%% - The test correctly identifies %.0f out of 1,000 patients with disease"), sens_pct, 10 * sens_pct)
+            if (under_1_in_1000(sens_pct))
+                sprintf(.("<strong>Sensitivity:</strong> %s%% - The test misses fewer than 1 in 1,000 patients with disease"), sens_txt)
+            else if (per_1000(sens_pct))
+                sprintf(.("<strong>Sensitivity:</strong> %s%% - The test correctly identifies %.0f out of 1,000 patients with disease"), sens_txt, 10 * sens_pct)
             else
-                sprintf(.("<strong>Sensitivity:</strong> %.1f%% - The test correctly identifies %.0f out of 100 patients with disease"), sens_pct, sens_pct),
-            if (per_1000(spec_pct))
-                sprintf(.("<strong>Specificity:</strong> %.1f%% - The test correctly identifies %.0f out of 1,000 healthy individuals"), spec_pct, 10 * spec_pct)
+                sprintf(.("<strong>Sensitivity:</strong> %s%% - The test correctly identifies %.0f out of 100 patients with disease"), sens_txt, sens_pct),
+            if (under_1_in_1000(spec_pct))
+                sprintf(.("<strong>Specificity:</strong> %s%% - Fewer than 1 in 1,000 healthy individuals test positive"), spec_txt)
+            else if (per_1000(spec_pct))
+                sprintf(.("<strong>Specificity:</strong> %s%% - The test correctly identifies %.0f out of 1,000 healthy individuals"), spec_txt, 10 * spec_pct)
             else
-                sprintf(.("<strong>Specificity:</strong> %.1f%% - The test correctly identifies %.0f out of 100 healthy individuals"), spec_pct, spec_pct),
+                sprintf(.("<strong>Specificity:</strong> %s%% - The test correctly identifies %.0f out of 100 healthy individuals"), spec_txt, spec_pct),
             correction_disclosure,
             .("Clinical Decision Metrics"),
             plr_text,
@@ -3837,11 +3894,13 @@ diagnosticmetaClass <- R6::R6Class(
                 band_key(min(ci)) != band_key(max(ci))
             }
             sens_uncertain <- ci_spans_bands(sens_ci)
+            sens_txt <- private$.fmtPct(sens)
+            spec_txt <- private$.fmtPct(spec)
             spec_uncertain <- ci_spans_bands(spec_ci)
 
             ci_txt <- function(ci) {
                 if (is.null(ci) || length(ci) < 2 || any(!is.finite(ci))) return("")
-                sprintf(" (%.1f%%-%.1f%%)", min(ci), max(ci))
+                sprintf(" (%s%%-%s%%)", private$.fmtPct(min(ci)), private$.fmtPct(max(ci)))
             }
 
             # library-audit 2026-09-16 OncoPath [LOW] DONE: every band is its own whole .() sentence and the
@@ -3861,16 +3920,16 @@ diagnosticmetaClass <- R6::R6Class(
             lr_spans <- function(ci, band) length(ci) == 2 && all(is.finite(ci)) &&
                 band(min(ci)) != band(max(ci))
             lr_note <- function(ci) sprintf(
-                .("<strong>Note:</strong> its confidence interval (%.2f-%.2f) spans more than one evidence category, so this grading is not firmly established by the pooled data."),
-                min(ci), max(ci))
+                .("<strong>Note:</strong> its confidence interval (%s-%s) spans more than one evidence category, so this grading is not firmly established by the pooled data."),
+                private$.fmtRatio(min(ci)), private$.fmtRatio(max(ci)))
 
             # Sentences are collected and joined at the end; no .() string carries the separator.
             parts <- sprintf(switch(band_key(sens),
-                excellent = .("<strong>Your pooled sensitivity of %.1f%%%s</strong> falls in the <em>excellent</em> band on the conventional 90/80/70 scale."),
-                good      = .("<strong>Your pooled sensitivity of %.1f%%%s</strong> falls in the <em>good</em> band on the conventional 90/80/70 scale."),
-                moderate  = .("<strong>Your pooled sensitivity of %.1f%%%s</strong> falls in the <em>moderate</em> band on the conventional 90/80/70 scale."),
-                limited   = .("<strong>Your pooled sensitivity of %.1f%%%s</strong> falls in the <em>limited</em> band on the conventional 90/80/70 scale.")),
-                sens, ci_txt(sens_ci))
+                excellent = .("<strong>Your pooled sensitivity of %s%%%s</strong> falls in the <em>excellent</em> band on the conventional 90/80/70 scale."),
+                good      = .("<strong>Your pooled sensitivity of %s%%%s</strong> falls in the <em>good</em> band on the conventional 90/80/70 scale."),
+                moderate  = .("<strong>Your pooled sensitivity of %s%%%s</strong> falls in the <em>moderate</em> band on the conventional 90/80/70 scale."),
+                limited   = .("<strong>Your pooled sensitivity of %s%%%s</strong> falls in the <em>limited</em> band on the conventional 90/80/70 scale.")),
+                sens_txt, ci_txt(sens_ci))
             if (sens_uncertain) {
                 parts <- c(parts, .("<strong>Note:</strong> the confidence interval spans more than one performance category, so this classification is not firmly established by the pooled data."))
             }
@@ -3887,56 +3946,62 @@ diagnosticmetaClass <- R6::R6Class(
                         sprintf(.("On the pooled estimate this test would detect about %.0f of 100 patients with disease, but the interval%s admits materially worse performance."),
                                 sens, ci_txt(sens_ci))
                     } else {
-                        if (sens > 99)
-                            sprintf(.("With %.1f%% sensitivity, this test will detect %.0f out of 1,000 patients with disease, missing only %.0f."),
-                                    sens, 10 * sens, 10 * (100 - sens))
+                        if (sens > 99 && round(10 * (100 - sens)) < 1)
+                            sprintf(.("With %s%% sensitivity, this test will miss fewer than 1 in 1,000 patients with disease."),
+                                    sens_txt)
+                        else if (sens > 99)
+                            sprintf(.("With %s%% sensitivity, this test will detect %.0f out of 1,000 patients with disease, missing only %.0f."),
+                                    sens_txt, 10 * sens, 10 * (100 - sens))
                         else
-                            sprintf(.("With %.1f%% sensitivity, this test will detect %.0f out of 100 patients with disease, missing only %.0f."),
-                                    sens, sens, 100 - sens)
+                            sprintf(.("With %s%% sensitivity, this test will detect %.0f out of 100 patients with disease, missing only %.0f."),
+                                    sens_txt, sens, 100 - sens)
                     },
                     switch(nlr_key,
-                        strong = sprintf(.("Rule-out power is governed by the negative likelihood ratio rather than by sensitivity alone; here LR- = %.2f, which lowers the post-test odds substantially (the SnNout pattern)."), lr_neg),
+                        strong = sprintf(.("Rule-out power is governed by the negative likelihood ratio rather than by sensitivity alone; here LR- = %s, which lowers the post-test odds substantially (the SnNout pattern)."), private$.fmtRatio(lr_neg)),
                         moderate = sprintf(.("Rule-out power is governed by the negative likelihood ratio rather than by sensitivity alone; here LR- = %.2f, which provides moderate evidence against disease after a negative result."), lr_neg),
                         weak = sprintf(.("Rule-out power is governed by the negative likelihood ratio rather than by sensitivity alone; here LR- = %.2f, which provides weak evidence against disease after a negative result."), lr_neg),
                         minimal = sprintf(.("Rule-out power is governed by the negative likelihood ratio rather than by sensitivity alone; here LR- = %.2f, which provides minimal evidence against disease after a negative result."), lr_neg),
                         not_estimable = .("Rule-out power is governed by the negative likelihood ratio rather than by sensitivity alone, and LR- is not estimable here."),
-                        correction = sprintf(.("Rule-out power is governed by the negative likelihood ratio rather than by sensitivity alone; here LR- = %.2f, but with no false negatives in most studies this value and its interval are set by the continuity correction rather than by the data, so it is not graded."), lr_neg)
+                        correction = sprintf(.("Rule-out power is governed by the negative likelihood ratio rather than by sensitivity alone; here LR- = %s, but with no false negatives in most studies this value and its interval are set by the continuity correction rather than by the data, so it is not graded."), private$.fmtRatio(lr_neg))
                     ),
                     if (nlr_key != "correction" && lr_spans(lr_ci$nlr, nlr_band)) lr_note(lr_ci$nlr)
                 )
             } else if (sens >= 80) {
                 parts <- c(parts,
-                    sprintf(.("With %.1f%% sensitivity, approximately %.0f out of 100 diseased patients will be correctly identified."),
-                            sens, sens),
+                    sprintf(.("With %s%% sensitivity, approximately %.0f out of 100 diseased patients will be correctly identified."),
+                            sens_txt, sens),
                     .("<strong>Interpretation:</strong> a negative result reduces, but does not remove, the possibility of disease at this sensitivity.")
                 )
             } else {
                 parts <- c(parts,
-                    sprintf(.("With %.1f%% sensitivity, up to %.0f out of 100 diseased patients may be missed."),
-                            sens, 100 - sens),
+                    sprintf(.("With %s%% sensitivity, up to %.0f out of 100 diseased patients may be missed."),
+                            sens_txt, 100 - sens),
                     .("<strong>Interpretation:</strong> at this sensitivity a substantial proportion of diseased patients are expected to test negative.")
                 )
             }
 
             # Add specificity interpretation
             parts <- c(parts, sprintf(switch(band_key(spec),
-                excellent = .("<br><br><strong>Your pooled specificity of %.1f%%%s</strong> falls in the <em>excellent</em> band on the conventional 90/80/70 scale."),
-                good      = .("<br><br><strong>Your pooled specificity of %.1f%%%s</strong> falls in the <em>good</em> band on the conventional 90/80/70 scale."),
-                moderate  = .("<br><br><strong>Your pooled specificity of %.1f%%%s</strong> falls in the <em>moderate</em> band on the conventional 90/80/70 scale."),
-                limited   = .("<br><br><strong>Your pooled specificity of %.1f%%%s</strong> falls in the <em>limited</em> band on the conventional 90/80/70 scale.")),
-                spec, ci_txt(spec_ci)))
+                excellent = .("<br><br><strong>Your pooled specificity of %s%%%s</strong> falls in the <em>excellent</em> band on the conventional 90/80/70 scale."),
+                good      = .("<br><br><strong>Your pooled specificity of %s%%%s</strong> falls in the <em>good</em> band on the conventional 90/80/70 scale."),
+                moderate  = .("<br><br><strong>Your pooled specificity of %s%%%s</strong> falls in the <em>moderate</em> band on the conventional 90/80/70 scale."),
+                limited   = .("<br><br><strong>Your pooled specificity of %s%%%s</strong> falls in the <em>limited</em> band on the conventional 90/80/70 scale.")),
+                spec_txt, ci_txt(spec_ci)))
             if (spec_uncertain) {
                 parts <- c(parts, .("<strong>Note:</strong> the confidence interval spans more than one performance category, so this classification is not firmly established by the pooled data."))
             }
 
             if (spec >= 90) {
                 parts <- c(parts,
-                    if (spec > 99)
-                        sprintf(.("With %.1f%% specificity, only %.0f out of 1,000 healthy individuals will test positive (false alarms)."),
-                                spec, 10 * (100 - spec))
+                    if (spec > 99 && round(10 * (100 - spec)) < 1)
+                        sprintf(.("With %s%% specificity, fewer than 1 in 1,000 healthy individuals will test positive (false alarms)."),
+                                spec_txt)
+                    else if (spec > 99)
+                        sprintf(.("With %s%% specificity, only %.0f out of 1,000 healthy individuals will test positive (false alarms)."),
+                                spec_txt, 10 * (100 - spec))
                     else
-                        sprintf(.("With %.1f%% specificity, only %.0f out of 100 healthy individuals will test positive (false alarms)."),
-                                spec, 100 - spec),
+                        sprintf(.("With %s%% specificity, only %.0f out of 100 healthy individuals will test positive (false alarms)."),
+                                spec_txt, 100 - spec),
                     switch(plr_key,
                         strong = sprintf(.("Rule-in power is governed by the positive likelihood ratio rather than by specificity alone; here LR+ = %.2f, which raises the post-test odds substantially (the SpPin pattern)."), lr_pos),
                         moderate = sprintf(.("Rule-in power is governed by the positive likelihood ratio rather than by specificity alone; here LR+ = %.2f, which provides moderate evidence for disease after a positive result."), lr_pos),
@@ -3949,14 +4014,14 @@ diagnosticmetaClass <- R6::R6Class(
                 )
             } else if (spec >= 80) {
                 parts <- c(parts,
-                    sprintf(.("With %.1f%% specificity, approximately %.0f out of 100 healthy individuals will be correctly classified."),
-                            spec, spec),
+                    sprintf(.("With %s%% specificity, approximately %.0f out of 100 healthy individuals will be correctly classified."),
+                            spec_txt, spec),
                     .("<strong>Interpretation:</strong> at this specificity an appreciable share of positive results are expected to be false positives.")
                 )
             } else {
                 parts <- c(parts,
-                    sprintf(.("With %.1f%% specificity, up to %.0f out of 100 healthy individuals may test positive."),
-                            spec, 100 - spec),
+                    sprintf(.("With %s%% specificity, up to %.0f out of 100 healthy individuals may test positive."),
+                            spec_txt, 100 - spec),
                     .("<strong>Interpretation:</strong> at this specificity a large share of positive results are expected to be false positives.")
                 )
             }
@@ -3986,11 +4051,11 @@ diagnosticmetaClass <- R6::R6Class(
             if (!nlr_key %in% c("not_estimable", "correction")) {
                 parts <- c(parts,
                     sprintf(switch(nlr_key,
-                        strong   = .("<strong>Your negative LR of %.2f</strong> provides <em>strong</em> evidence AGAINST disease when test is negative."),
+                        strong   = .("<strong>Your negative LR of %s</strong> provides <em>strong</em> evidence AGAINST disease when test is negative."),
                         moderate = .("<strong>Your negative LR of %.2f</strong> provides <em>moderate</em> evidence AGAINST disease when test is negative."),
                         weak     = .("<strong>Your negative LR of %.2f</strong> provides <em>weak</em> evidence AGAINST disease when test is negative."),
                         minimal  = .("<strong>Your negative LR of %.2f</strong> provides <em>minimal</em> evidence AGAINST disease when test is negative.")),
-                        lr_neg),
+                        if (identical(nlr_key, "strong")) private$.fmtRatio(lr_neg) else lr_neg),
                     if (lr_spans(lr_ci$nlr, nlr_band)) lr_note(lr_ci$nlr),
                     if (lr_neg < 0.1) {
                         sprintf(.("A negative result substantially decreases disease probability (divides pre-test odds by %.1fx)."),
@@ -4011,23 +4076,23 @@ diagnosticmetaClass <- R6::R6Class(
             # when the prediction interval is wide.
             if (sens >= 90 && spec >= 90) {
                 parts <- c(parts,
-                    sprintf(.("<br><br><strong>Overall Summary:</strong> pooled sensitivity (%.1f%%) and pooled specificity (%.1f%%) both fall in the <em>excellent</em> band."),
-                            sens, spec)
+                    sprintf(.("<br><br><strong>Overall Summary:</strong> pooled sensitivity (%s%%) and pooled specificity (%s%%) both fall in the <em>excellent</em> band."),
+                            sens_txt, spec_txt)
                 )
             } else if (sens >= 80 && spec >= 80) {
                 parts <- c(parts,
-                    sprintf(.("<br><br><strong>Overall Summary:</strong> pooled sensitivity (%.1f%%) and pooled specificity (%.1f%%) both fall in the <em>good</em> band or above."),
-                            sens, spec)
+                    sprintf(.("<br><br><strong>Overall Summary:</strong> pooled sensitivity (%s%%) and pooled specificity (%s%%) both fall in the <em>good</em> band or above."),
+                            sens_txt, spec_txt)
                 )
             } else if (sens >= 90 || spec >= 90) {
                 parts <- c(parts,
-                    sprintf(.("<br><br><strong>Overall Summary:</strong> performance is <em>asymmetric</em> - pooled sensitivity (%.1f%%) and pooled specificity (%.1f%%) fall in different performance bands."),
-                            sens, spec)
+                    sprintf(.("<br><br><strong>Overall Summary:</strong> performance is <em>asymmetric</em> - pooled sensitivity (%s%%) and pooled specificity (%s%%) fall in different performance bands."),
+                            sens_txt, spec_txt)
                 )
             } else {
                 parts <- c(parts,
-                    sprintf(.("<br><br><strong>Overall Summary:</strong> pooled sensitivity (%.1f%%) and pooled specificity (%.1f%%) do not both reach the <em>good</em> band."),
-                            sens, spec)
+                    sprintf(.("<br><br><strong>Overall Summary:</strong> pooled sensitivity (%s%%) and pooled specificity (%s%%) do not both reach the <em>good</em> band."),
+                            sens_txt, spec_txt)
                 )
             }
 
@@ -4299,7 +4364,7 @@ diagnosticmetaClass <- R6::R6Class(
                 "</li>\n                        <li>",
                 .("<strong>Confidence region (dashed):</strong> how precisely the POOLED point is estimated. It shrinks as more studies are added."),
                 "</li>\n                        <li>",
-                .("<strong>Prediction region (dotted):</strong> where the accuracy of a FUTURE study in a new setting is expected to fall. It includes between-study heterogeneity and does NOT shrink with more studies."),
+                .("<strong>Prediction region (dotted):</strong> where the accuracy of a FUTURE study in a new setting is expected to fall. It includes between-study heterogeneity, so more studies narrow it only down to the spread between studies, never to a single point."),
                 "</li>\n                    </ul>\n                </div>\n\n                <div style='background-color: rgba(33, 99, 235, 0.08); padding: 15px; border-radius: 5px; margin: 10px 0; color: inherit;'>\n                    <h5>",
                 .("Model Choice: Random vs Fixed Effects"),
                 "</h5>\n                    <p>",

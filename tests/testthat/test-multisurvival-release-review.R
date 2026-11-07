@@ -20,7 +20,7 @@ if (is.null(.msrr_ns)) {
     .msrr_ns <- new.env(parent = globalenv())
     .msrr_ns$. <- function(x, ...) x
     for (.f in c("00jmv.R", "utils.R", "utils-Notices.R", "utils-formula.R",
-                 "utils-eventindicator.R", "utils-followup.R", "survival-competingrisks.R",
+                 "utils-eventindicator.R", "utils-followup.R", "utils-survivaldata.R", "survival-competingrisks.R",
                  "multisurvival-formula.R", "multisurvival-interactions.R",
                  "multisurvival-nomogram.R", "multisurvival.h.R", "multisurvival.b.R")) {
       .fp <- file.path(.r_dir, .f)
@@ -228,14 +228,14 @@ test_that("invalid person-time cutpoints are ignored without negative exposure",
   exposure <- sum(data$time)
   expect_equal(overall$events, events)
   expect_equal(overall$person_time, round(exposure, 2))
-  expect_equal(overall$rate, round(events / exposure * 100, 2))
+  expect_equal(overall$rate, events / exposure * 100)
   expect_equal(
     overall$rate_ci_lower,
-    round((stats::qchisq(0.025, 2 * events) / 2) / exposure * 100, 2)
+    (stats::qchisq(0.025, 2 * events) / 2) / exposure * 100
   )
   expect_equal(
     overall$rate_ci_upper,
-    round((stats::qchisq(0.975, 2 * (events + 1)) / 2) / exposure * 100, 2)
+    (stats::qchisq(0.975, 2 * (events + 1)) / 2) / exposure * 100
   )
 
   interval_rows <- table[grepl("^[0-9.]+-[0-9.]+$", table$interval), , drop = FALSE]

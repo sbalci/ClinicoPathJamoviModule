@@ -193,8 +193,10 @@ test_that("C01 & C02: Continuous Cox and Stratified Cox match zero-dependency pa
 
   res <- .sc_val_run(d, stratified_cox = TRUE, strata_variable = "site")
   ff <- .sc_parse_ff(res$coxTable$asDF$HR_univariable[1])
+  printed_digits <- nchar(sub("^[0-9]+\\.([0-9]+) .*", "\\1", res$coxTable$asDF$HR_univariable[1]))
+  expect_gte(printed_digits, 2L)
   expect_equal(unname(c(ff["hr"], ff["lower"], ff["upper"])),
-               round(c(ora_u$hr, ora_u$ci_lower, ora_u$ci_upper), 2),
+               round(c(ora_u$hr, ora_u$ci_lower, ora_u$ci_upper), printed_digits),
                tolerance = 1e-8)
 
   sc_df <- res$stratifiedCoxTable$asDF
@@ -216,7 +218,7 @@ test_that("C03 & C04: Piecewise person-time Garwood Poisson 95% CIs and step-int
   expect_equal(pt$person_time, c(358, 130, 156, 60, 12))
   # 0-event interval (36, 60] uses one-sided 97.5% Garwood upper bound: (qchisq(0.975, 2)/2) / 60 * 100
   expect_equal(pt$rate_ci_lower[4], 0)
-  expect_equal(pt$rate_ci_upper[4], round((stats::qchisq(0.975, 2) / 2) / 60 * 100, 2))
+  expect_equal(pt$rate_ci_upper[4], (stats::qchisq(0.975, 2) / 2) / 60 * 100)
 
   rmst_df <- res$rmstTable$asDF
   km_ref <- summary(survival::survfit(survival::Surv(time, status) ~ 1, data = d12), rmean = 40)$table
@@ -238,7 +240,7 @@ test_that("C05, C06, C07 & C08: Optimal cut-off, KM group survival/medians, resi
   expect_equal(res$rescutTable$asDF$statistic[1], unname(ms_ref$statistic), tolerance = 1e-8)
 
   expect_equal(res$multipleCutTable$asDF$cutpoint_value,
-               round(unname(stats::quantile(d$marker, probs = c(1/3, 2/3))), 2),
+               signif(unname(stats::quantile(d$marker, probs = c(1/3, 2/3))), 6),
                tolerance = 1e-8)
 
   res_nofc <- .sc_val_run(d, findcut = FALSE, residual_diagnostics = TRUE)

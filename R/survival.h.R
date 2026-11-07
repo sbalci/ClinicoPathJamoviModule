@@ -216,9 +216,10 @@ survivalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 "uselandmark",
                 uselandmark,
                 default=FALSE)
-            private$..landmark <- jmvcore::OptionInteger$new(
+            private$..landmark <- jmvcore::OptionNumber$new(
                 "landmark",
                 landmark,
+                min=0,
                 default=3)
             private$..pw <- jmvcore::OptionBool$new(
                 "pw",
@@ -1255,7 +1256,22 @@ survivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "age_adjustment",
                     "age_variable",
                     "explanatory",
-                    "outcome")))
+                    "outcome",
+                    "uselandmark",
+                    "landmark",
+                    "elapsedtime",
+                    "tint",
+                    "dxdate",
+                    "fudate",
+                    "timetypedata",
+                    "timetypeoutput",
+                    "outcomeLevel",
+                    "multievent",
+                    "analysistype",
+                    "dod",
+                    "dooc",
+                    "awd",
+                    "awod")))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="ageAdjustedCoxTable",
@@ -1645,7 +1661,16 @@ survivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "explanatory",
                     "outcome",
                     "elapsedtime",
-                    "age_adjustment")))
+                    "age_adjustment",
+                    "multievent",
+                    "analysistype",
+                    "outcomeLevel",
+                    "tint",
+                    "timetypedata",
+                    "dxdate",
+                    "fudate",
+                    "uselandmark",
+                    "landmark")))
             self$add(jmvcore::Preformatted$new(
                 options=options,
                 name="cox_ph",
@@ -1735,7 +1760,7 @@ survivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$add(jmvcore::Preformatted$new(
                 options=options,
                 name="survTableSummary",
-                title="`1, 3, 5-yr Survival Summary and Table  - ${explanatory}`",
+                title="`Survival at Selected Time Points, Summary - ${explanatory}`",
                 visible="(showSummaries && length(outcome) > 0 && length(explanatory) > 0 && (length(elapsedtime) > 0 || (tint && length(dxdate) > 0 && length(fudate) > 0)))",
                 clearWith=list(
                     "explanatory",
@@ -1759,7 +1784,7 @@ survivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$add(jmvcore::Table$new(
                 options=options,
                 name="survTable",
-                title="`1, 3, 5 year Survival - ${explanatory}`",
+                title="`Survival at Selected Time Points - ${explanatory}`",
                 visible="(length(outcome) > 0 && length(explanatory) > 0 && (length(elapsedtime) > 0 || (tint && length(dxdate) > 0 && length(fudate) > 0)) && !(multievent && analysistype:compete))",
                 rows=0,
                 columns=list(
@@ -1769,15 +1794,15 @@ survivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                         `type`="text"),
                     list(
                         `name`="time", 
-                        `title`="time", 
-                        `type`="integer"),
+                        `title`="Time", 
+                        `type`="text"),
                     list(
                         `name`="n.risk", 
                         `title`="Number at Risk", 
                         `type`="integer"),
                     list(
                         `name`="n.event", 
-                        `title`="Number of Events", 
+                        `title`="Events since previous time", 
                         `type`="integer"),
                     list(
                         `name`="surv", 
@@ -1856,8 +1881,7 @@ survivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     list(
                         `name`="rate", 
                         `title`="Incidence Rate", 
-                        `type`="number", 
-                        `format`="zto"),
+                        `type`="number"),
                     list(
                         `name`="rate_ci_lower", 
                         `title`="Lower", 
@@ -2041,7 +2065,7 @@ survivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 columns=list(
                     list(
                         `name`="observation", 
-                        `title`="Observation", 
+                        `title`="Data row", 
                         `type`="integer"),
                     list(
                         `name`="lp", 
@@ -2317,6 +2341,8 @@ survivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 requiresData=TRUE,
                 clearWith=list(
                     "ce",
+                    "pplot",
+                    "medianline",
                     "endplot",
                     "byplot",
                     "ybegin_plot",
@@ -2352,6 +2378,8 @@ survivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 requiresData=TRUE,
                 clearWith=list(
                     "ch",
+                    "pplot",
+                    "medianline",
                     "endplot",
                     "byplot",
                     "ybegin_plot",
@@ -2509,6 +2537,7 @@ survivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 title="Add Redefined Outcome to Data",
                 varTitle="`Redefined Outcome - from ${ outcome } for { analysistype } survival analysis`",
                 varDescription="Redefined Outcome from Outcome based on Analysis Type in Survival Analysis",
+                measureType="nominal",
                 clearWith=list(
                     "outcome",
                     "analysistype",
@@ -2519,7 +2548,15 @@ survivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "dooc",
                     "awd",
                     "awod",
-                    "outcomeredefined")))
+                    "outcomeredefined",
+                    "uselandmark",
+                    "landmark",
+                    "elapsedtime",
+                    "tint",
+                    "dxdate",
+                    "fudate",
+                    "timetypedata",
+                    "timetypeoutput")))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="calibrationTable",
@@ -3206,8 +3243,9 @@ survivalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   analysis. Enter a  comma-separated list of time points to create intervals.
 #'   For example,  "12, 36, 60" will create intervals 0-12, 12-36, 36-60, and
 #'   60+.
-#' @param rate_multiplier Specify the multiplier for incidence rates (e.g.,
-#'   100 for rates per 100 person-years, 1000 for rates per 1000 person-years).
+#' @param rate_multiplier Specify the multiplier for incidence rates. Rates
+#'   are per this many person-units of the selected time type, for example per
+#'   100 person-months when time is in months.
 #' @param rmst_analysis Calculate Restricted Mean Survival Time, which
 #'   represents the average survival time up to a specified time horizon. Useful
 #'   when median survival cannot be estimated or for comparing survival over a
@@ -3239,9 +3277,10 @@ survivalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   groups. For example, 50, 65, 75 creates groups 50 or younger, over 50 to
 #'   65, over 65 to 75, and over 75. Each upper cutpoint is included in the
 #'   preceding group.
-#' @param age_time_scale Use biological age as the time axis instead of
+#' @param age_time_scale Use chronological age as the time axis instead of
 #'   follow-up time. The Cox model becomes Surv(age_at_entry, age_at_event,
-#'   event). Most rigorous for cancer epidemiology where age drives risk.
+#'   event). Suited to cohorts followed for disease onset; for patients timed
+#'   from diagnosis it is a sensitivity analysis.
 #' @param age_standardization Compute age-standardized mortality using direct
 #'   or indirect standardization. Reports Standardized Mortality Ratio comparing
 #'   observed vs expected deaths by age group.
@@ -3251,12 +3290,12 @@ survivalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param age_stratified_km Show Kaplan-Meier survival curves stratified by
 #'   age groups. Displays separate curves for each age group within the
 #'   explanatory variable.
-#' @param adjusted_curves Show Kaplan-Meier-style survival curves adjusted for
-#'   age using the Cox model. Displays what the survival curves would look like
-#'   after removing the effect of age differences between groups.
-#' @param remark_checklist Display a REMARK (REporting recommendations for
-#'   tumor MARKer prognostic studies) checklist showing which reporting items
-#'   are addressed by the current analysis configuration.
+#' @param adjusted_curves Show survival curves standardized for age with the
+#'   Cox model (direct standardization). Every patient is assigned to each group
+#'   in turn, so all groups share the age distribution of the whole cohort.
+#' @param remark_checklist Display the 20-item REMARK (REporting
+#'   recommendations for tumor MARKer prognostic studies) checklist, marking the
+#'   items reported in this output and those to report in the manuscript.
 #' @param residual_diagnostics Calculate and display Cox model residuals for
 #'   diagnostic purposes, including Martingale, deviance, score, and Schoenfeld
 #'   residuals.
@@ -3312,7 +3351,7 @@ survivalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param rcs_variable Select a continuous predictor variable to assess for
 #'   non-linear effects. The variable will be modeled with restricted cubic
 #'   splines and compared to a linear model. Common candidates include age,
-#'   tumor size, biomarker levels, and follow-up duration.
+#'   tumor size and biomarker levels.
 #' @param rcs_knots Number of knots for restricted cubic splines. 3 knots = 2
 #'   df (simplest), 4 knots = 3 df (recommended default), 5 knots = 4 df (more
 #'   flexible). Uses natural splines with interior knots at equally spaced

@@ -190,7 +190,10 @@ create_lung_cancer_clinical <- function() {
                 0.2 * (as.numeric(gender) == 1) +
                -0.1 * (hemoglobin - 12.5) / 2.1
 
-  survival_times <- rexp(n, rate = exp(risk_score * 0.4))
+  # Baseline hazard 0.01/month: without it the rate was about 1/month and almost
+  # every patient died before censoring, which LASSO Cox rightly refuses. The risk
+  # score is used at full strength; the old 0.4 damping left nothing to select.
+  survival_times <- rexp(n, rate = 0.01 * exp(risk_score))
 
   admin_censor <- 48
   loss_followup <- rexp(n, rate = 0.02)
@@ -337,7 +340,9 @@ create_small_cohort_study <- function() {
                 0.2 * (as.numeric(treatment_group) - 1) +
                 0.1 * (severity_score - 50) / 15
 
-  survival_times <- rexp(n, rate = exp(risk_score * 0.3))
+  # Baseline hazard 0.02/month gives the high censoring this cohort is meant to
+  # show; without it 72 of 75 patients had an event.
+  survival_times <- rexp(n, rate = 0.02 * exp(risk_score * 0.3))
 
   admin_censor <- 24
   early_dropout <- rexp(n, rate = 0.05)
@@ -392,7 +397,8 @@ create_genomic_highdim <- function() {
 
   # Survival driven by genomic risk + clinical factors
   combined_risk <- linear_pred + 0.3 * (as.numeric(tumor_stage) - 1) + 0.1 * (age - 60) / 10
-  survival_times <- rexp(n, rate = exp(combined_risk * 0.35))
+  # Baseline hazard 0.05/month and undamped effects, as for the lung cancer data.
+  survival_times <- rexp(n, rate = 0.05 * exp(combined_risk))
 
   admin_censor <- 36
   loss_followup <- rexp(n, rate = 0.025)

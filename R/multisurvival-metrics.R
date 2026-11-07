@@ -42,7 +42,7 @@
 # `seed`      : RNG seed; the global RNG state is saved and restored so the
 #               analysis remains reproducible without disturbing other draws.
 #
-# Returns a list(apparent, optimism, corrected, B, n_boot) or NULL when the
+# Returns a list(apparent, optimism, corrected, B, n_boot, n_excluded) or NULL when the
 # correction cannot be computed reliably (too few valid resamples, degenerate
 # model, missing package state).
 .multisurvivalOptimismCIndex <- function(cox_model, data, status,
@@ -78,8 +78,15 @@
     # (esp. for strata() models) otherwise re-evaluates fit_b's stored call
     # `data = boot`, but `boot` is local to this function and invisible there,
     # yielding "object 'boot' not found". Storing the model frame avoids that.
-    fit_b <- tryCatch(survival::coxph(form, data = boot, model = TRUE),
-                      error = function(e) NULL, warning = function(w) NULL)
+    # A refit that WARNS (typically "Loglik converged before variable ...",
+    # i.e. monotone likelihood) is kept: those are the most overfitted
+    # resamples, and dropping them biased the mean optimism down and the
+    # corrected C up, most at low EPV. Only errors and non-finite or aliased
+    # coefficients exclude a resample; the count is returned as n_excluded.
+    fit_b <- tryCatch(
+      withCallingHandlers(survival::coxph(form, data = boot, model = TRUE),
+                          warning = function(w) invokeRestart("muffleWarning")),
+      error = function(e) NULL)
     if (is.null(fit_b) || is.null(stats::coef(fit_b)) ||
         any(!is.finite(stats::coef(fit_b))))
       next
@@ -111,5 +118,5 @@
   corrected <- max(0, min(1, corrected))
 
   list(apparent = apparent, optimism = opt, corrected = corrected,
-       B = B, n_boot = length(valid))
+       B = B, n_boot = length(valid), n_excluded = B - length(valid))
 }

@@ -95,7 +95,8 @@ test_that("every text says the three slopes must agree (IH-1)", {
     expect_match(notes, "in the same direction on all three: the reference value, the region value and their mean", fixed = TRUE)
     expect_match(txt(res$report_sentences$content), "regressing it on the reference value, on the region value and on the mean of the two", fixed = TRUE)
     expect_match(txt(res$assumptions$content), "Krouwer JS. Stat Med 2008", fixed = TRUE)
-    expect_match(txt(res$glossary$content), "against the reference, against the region and against their mean", fixed = TRUE)
+    # Reworded 2026-11-07 when the rule was extended to pairs of regions (IHC-1).
+    expect_match(txt(res$glossary$content), "against each of the two measurements compared (a region and the reference, or two regions) and against their mean", fixed = TRUE)
 })
 
 ih2_data <- function() {
@@ -144,7 +145,8 @@ test_that("an ordinal HER2 score is not graded by its CV (IH-3)", {
     expect_match(txt(res$report_sentences$content), "No sampling verdict was given", fixed = TRUE)
     expect_match(txt(res$summary$content), "Overall: no verdict", fixed = TRUE)
     rt <- res$reproducibilitytable$asDF
-    expect_equal(rt$interpretation[grepl("^Within-case CV", rt$metric)], "Not graded: ordinal score")
+    # Reworded 2026-11-07: binned percentages look the same (IHC-2/IHC-4).
+    expect_equal(rt$interpretation[grepl("^Within-case CV", rt$metric)], "Not graded: ordinal or binned values")
     # the mean of ordinal cores has many values, but gets no slope
     b <- res$samplingbiastable$asDF
     expect_true(all(is.na(b$slope) | is.nan(b$slope)))

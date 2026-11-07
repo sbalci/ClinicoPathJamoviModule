@@ -32,6 +32,10 @@ ti_run <- function(df, ...) {
     quietly(a$run())
     list(a = a, o = o, r = a$results)
 }
+# The message of the reject() a run raises ("" when it runs). Since 2026-10-30
+# validation failures reach jamovi's error state instead of an Html banner.
+ti_err <- function(df, ...)
+    tryCatch({ ti_run(df, ...); "" }, error = function(e) conditionMessage(e))
 # Simulate the user ticking the Output control. jamovi sends this list shape;
 # OptionOutput's getter normalises it back to a scalar logical.
 tick_output <- function(o, name = "calculated_time") {
@@ -103,7 +107,8 @@ test_that("row numbers stay aligned with values when a filter drops rows", {
     df <- data.frame(s = fmt(s, "%Y-%m-%d"), e = fmt(e, "%Y-%m-%d"),
                      stringsAsFactors = FALSE)
     o <- tick_output(timeintervalOptions$new(dx_date = "s", fu_date = "e",
-                                             time_format = "ymd", remove_negative = TRUE))
+                                             time_format = "ymd", remove_negative = TRUE,
+                                             time_basis = "standardized"))
     a <- timeintervalClass$new(options = o, data = df); quietly(a$run())
     p <- a$results$calculated_time$.__enclos_env__$private
 
@@ -328,8 +333,7 @@ test_that("day-count serials are rejected as serials whatever the column type", 
     for (as_type in list(identity, as.character, factor)) {
         df <- data.frame(s = as_type(sv), e = as_type(ev))
         for (f in c("auto", "mdy", "ymd")) {
-            h <- ti_run(df, dx_date = "s", fu_date = "e", time_format = f)
-            txt <- strip_html(h$r$messages$content)
+            txt <- ti_err(df, dx_date = "s", fu_date = "e", time_format = f)
             expect_match(txt, "holds five-digit numbers")
             expect_false(grepl("Could not detect a common date format", txt))
             expect_false(grepl("Date parsing failed", txt))
@@ -342,8 +346,8 @@ test_that("the serial message does not present one epoch's date as the reading",
     # 1970-01-01 -- all three land in the same five-digit band, so quoting one
     # reading unqualified can be wrong by decades.
     sv <- xl_serial("2016-01-01", 30)
-    h <- ti_run(data.frame(s = sv, e = sv + 365), dx_date = "s", fu_date = "e")
-    expect_match(strip_html(h$r$messages$content), "SAS and Stata count from 1960-01-01")
+    expect_match(ti_err(data.frame(s = sv, e = sv + 365), dx_date = "s", fu_date = "e"),
+                 "SAS and Stata count from 1960-01-01")
 })
 
 test_that("a stray numeric code in a text date column does not condemn the column", {
@@ -466,10 +470,10 @@ test_that("the format-ambiguity note survives a rejected run", {
         start = rep(c("10/06/2020", "11/07/2020", "12/08/2020"), each = 4),
         end   = rep(c("05/03/2020", "04/02/2020", "03/01/2020"), each = 4),
         stringsAsFactors = FALSE)
-    h <- ti_run(df, dx_date = "start", fu_date = "end", output_unit = "days")
-    txt <- strip_html(h$r$messages$content)
+    # The note now travels inside the reject() message (jamovi's error state).
+    txt <- ti_err(df, dx_date = "start", fu_date = "end", output_unit = "days")
     expect_match(txt, "Auto-detection is ambiguous")
-    expect_match(txt, "Error:")          # the rejection itself is still shown
+    expect_match(txt, "Negative time intervals detected")   # the rejection itself
 })
 
 test_that("a two-digit-year column is no longer read as ymd", {

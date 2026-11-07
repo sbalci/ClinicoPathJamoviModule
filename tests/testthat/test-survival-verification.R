@@ -31,7 +31,7 @@ test_that("median survival matches survival::survfit", {
     )
 
     ref <- summary(survival::survfit(
-        survival::Surv(time, status) ~ grp, data = df))$table
+        survival::Surv(time, status) ~ grp, data = df, conf.type = "log-log"))$table
     got <- res$medianTable$asDF
 
     expect_equal(nrow(got), nrow(ref))
@@ -50,7 +50,7 @@ test_that("survival probabilities at cutpoints match summary.survfit", {
         explanatory = "grp", cutp = "12, 36, 60"
     )
 
-    ref <- summary(survival::survfit(survival::Surv(time, status) ~ grp, data = df),
+    ref <- summary(survival::survfit(survival::Surv(time, status) ~ grp, data = df, conf.type = "log-log"),
                    times = c(12, 36, 60), extend = TRUE)
     got <- res$survTable$asDF
 
@@ -117,11 +117,11 @@ test_that("person-time incidence rate and exact Poisson CI match poisson.test", 
     ref <- stats::poisson.test(ev, pt)
 
     expect_equal(as.numeric(overall$events), ev)
-    expect_equal(as.numeric(overall$rate), round(ev / pt * 100, 2), tolerance = 1e-8)
+    expect_equal(as.numeric(overall$rate), ev / pt * 100, tolerance = 1e-8)
     expect_equal(as.numeric(overall$rate_ci_lower),
-                 round(ref$conf.int[1] * 100, 2), tolerance = 1e-8)
+                 ref$conf.int[1] * 100, tolerance = 1e-8)
     expect_equal(as.numeric(overall$rate_ci_upper),
-                 round(ref$conf.int[2] * 100, 2), tolerance = 1e-8)
+                 ref$conf.int[2] * 100, tolerance = 1e-8)
 })
 
 test_that("pairwise log-rank p-values match survminer::pairwise_survdiff", {
@@ -154,6 +154,8 @@ test_that("survTable never reports survival beyond a group's observed follow-up"
     # follow-up used to be reported as a survival probability -- with a
     # confidence interval -- computed from zero patients at risk.
     df <- make_verification_df()
+    # Censored tails: a curve that ends on an event has reached 0, and 0 is kept.
+    for (g in levels(df$grp)) df$status[df$grp == g & df$time == max(df$time[df$grp == g])] <- 0
     max_time <- max(df$time)
 
     res <- run_survival(

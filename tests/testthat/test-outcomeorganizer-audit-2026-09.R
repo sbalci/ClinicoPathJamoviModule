@@ -81,12 +81,11 @@ test_that("addOutcome is populated by isNotFilled() gating, without the option s
 })
 
 # ----------------------------------------------------- duplicate warning --
-test_that("rfs without a recurrence variable warns exactly once", {
+test_that("rfs without a recurrence variable is refused, not warned", {
   df <- data.frame(status = factor(rep(c("Dead", "Alive"), 15), levels = c("Alive", "Dead")))
   a <- oo_run(df, outcome = "status", outcomeLevel = "Dead", analysistype = "rfs")
-  w <- warn_html(a)
-  expect_equal(lengths(regmatches(w, gregexpr("recurrence/progression variable", w, fixed = TRUE))), 1L)
-  expect_false(grepl("Currently only outcome is specified", w, fixed = TRUE))
+  expect_false(a$results$addOutcome$isFilled())
+  expect_false(grepl("Currently only outcome is specified", warn_html(a), fixed = TRUE))
 })
 
 # ------------------------------------------------------- n<10 severity --

@@ -54,13 +54,12 @@ clean_df <- function(n = 40) {
 # whose true follow-up is 12 months. Only pushback was a future-dates warning.
 test_that("spreadsheet day-count serials are rejected under every format setting", {
     df <- data.frame(start = xl("2016-01-01", 60), end = xl("2016-01-01", 60) + 366)
+    # A reject() reaching jamovi's error state, so no summary (and no fabricated
+    # person-time) can be produced at all (2026-10-30: was an Html banner).
     for (fmt in c("auto", "ymd", "mdy")) {
-        res <- timeinterval(data = df, dx_date = "start", fu_date = "end",
-                            time_format = fmt, output_unit = "months")
-        expect_true(grepl("cannot be read as dates unambiguously", res$messages$content, fixed = TRUE),
-                    info = paste("format:", fmt))
-        # the fabricated person-time must never be produced
-        expect_false(grepl("person-months", res$summary$content, fixed = TRUE),
+        expect_error(timeinterval(data = df, dx_date = "start", fu_date = "end",
+                                  time_format = fmt, output_unit = "months"),
+                     "cannot be read as dates unambiguously", fixed = TRUE,
                      info = paste("format:", fmt))
     }
 })
@@ -118,20 +117,18 @@ test_that("a stray numeric cell in a text date column does not abort the analysi
 test_that("day-count serials in the 2009-2012 band are caught", {
     xl9 <- xl("2009-10-15", 30)
     d <- data.frame(start = xl9, end = xl9 + 730)
-    res <- timeinterval(data = d, dx_date = "start", fu_date = "end",
-                        time_format = "auto", output_unit = "months")
-    expect_true(grepl("cannot be read as dates unambiguously",
-                      res$messages$content, fixed = TRUE))
+    expect_error(timeinterval(data = d, dx_date = "start", fu_date = "end",
+                              time_format = "auto", output_unit = "months"),
+                 "cannot be read as dates unambiguously", fixed = TRUE)
 })
 
 # R's own numeric Date origin (1970-01-01) lands in the same 5-digit band.
 test_that("R numeric Date values are caught", {
     v <- as.numeric(as.Date("2005-01-01")) + 0:29
     d <- data.frame(start = v, end = v + 366)
-    res <- timeinterval(data = d, dx_date = "start", fu_date = "end",
-                        time_format = "auto", output_unit = "months")
-    expect_true(grepl("cannot be read as dates unambiguously",
-                      res$messages$content, fixed = TRUE))
+    expect_error(timeinterval(data = d, dx_date = "start", fu_date = "end",
+                              time_format = "auto", output_unit = "months"),
+                 "cannot be read as dates unambiguously", fixed = TRUE)
 })
 
 # Backstop for a misparse the serial guard cannot see.

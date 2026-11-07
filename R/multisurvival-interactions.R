@@ -74,12 +74,84 @@
        categorical_moderator = is_cat(moderator), swapped = swapped)
 }
 
-# One row per interaction coefficient (name contains ":"): HR, CI, p.
+# Interaction terms of a fitted model, by the formula's own term order. A ":" in a
+# coefficient name proves nothing: a factor level can contain one.
+.interactionTermNames <- function(cox_model) {
+  tt <- stats::terms(cox_model)
+  intersect(attr(tt, "term.labels")[attr(tt, "order") > 1L], names(cox_model$assign))
+}
+
+# Variables that interact with `term`: the rest of every fitted term containing it.
+# `term` is a label of cox_model$assign. Returned without backticks.
+.termPartners <- function(cox_model, term) {
+  fac <- attr(stats::terms(cox_model), "factors")
+  if (length(fac) == 0 || !term %in% colnames(fac)) return(character(0))
+  vars_in <- function(tm) rownames(fac)[fac[, tm] > 0]
+  own <- vars_in(term)
+  others <- unlist(lapply(intersect(colnames(fac), names(cox_model$assign)), function(tm) {
+    v <- vars_in(tm)
+    if (all(own %in% v)) setdiff(v, own)
+  }))
+  unique(gsub("^`|`$", "", others))
+}
+
+# "age = 0", "grade = G1": the value at which a coefficient holds each partner. A
+# factor sits at its reference level and a numeric at 0, whatever its range.
+.conditionLabels <- function(partners, cox_model, data, display = NULL) {
+  shown <- function(v) if (v %in% names(display)) unname(display[[v]]) else v
+  vapply(partners, function(v) {
+    lv <- cox_model$xlevels[[v]]
+    if (is.null(lv) && (is.factor(data[[v]]) || is.character(data[[v]])))
+      lv <- levels(factor(data[[v]]))
+    paste(shown(v), "=", if (is.null(lv)) "0" else lv[1])
+  }, character(1), USE.NAMES = FALSE)
+}
+
+# What each coefficient of an interaction model is conditional on.
+#   coef      along coef(): "age = 0, site = X", or "" for a coefficient with no partner
+#   terms     named by shown term: the same text for each conditioned term
+#   outside   data.frame(var, low, high): numeric partners whose 0 no patient has
+#   interaction_labels  interaction coefficient names, as finalfit labels them ("armB:age")
+.coefConditions <- function(cox_model, data, display = NULL) {
+  shown <- function(tm) {
+    parts <- strsplit(tm, ":", fixed = TRUE)[[1]]
+    parts <- gsub("^`|`$", "", parts)
+    known <- parts %in% names(display)
+    if (any(known)) parts[known] <- unname(display[parts[known]])
+    paste(parts, collapse = ":")
+  }
+  asg <- cox_model$assign
+  coef_at <- rep("", length(stats::coef(cox_model)))
+  terms_at <- character(0)
+  partners_all <- character(0)
+  for (tm in names(asg)) {
+    partners <- .termPartners(cox_model, tm)
+    if (length(partners) == 0) next
+    at <- paste(.conditionLabels(partners, cox_model, data, display), collapse = ", ")
+    coef_at[asg[[tm]]] <- at
+    terms_at[shown(tm)] <- at
+    partners_all <- union(partners_all, partners)
+  }
+  numeric_partners <- partners_all[vapply(partners_all, function(v) is.numeric(data[[v]]), logical(1))]
+  outside <- data.frame(var = character(0), low = numeric(0), high = numeric(0),
+                        stringsAsFactors = FALSE)
+  for (v in numeric_partners) {
+    rng <- range(data[[v]], na.rm = TRUE)
+    if (rng[1] > 0 || rng[2] < 0)
+      outside[nrow(outside) + 1L, ] <- list(
+        if (v %in% names(display)) unname(display[[v]]) else v, rng[1], rng[2])
+  }
+  interaction_rows <- unlist(asg[.interactionTermNames(cox_model)], use.names = FALSE)
+  list(coef = coef_at, terms = terms_at, outside = outside,
+       interaction_labels = gsub("`", "", names(stats::coef(cox_model))[interaction_rows], fixed = TRUE))
+}
+
+# One row per interaction coefficient: HR, CI, p.
 .interactionTestTable <- function(cox_model, conf_level = 0.95) {
   sm <- summary(cox_model)$coefficients
   if (is.null(sm) || nrow(sm) == 0) return(NULL)
   cn <- rownames(sm)
-  int_idx <- which(grepl(":", cn))
+  int_idx <- sort(unlist(cox_model$assign[.interactionTermNames(cox_model)], use.names = FALSE))
   if (length(int_idx) == 0) return(NULL)
   cis <- suppressWarnings(stats::confint(cox_model, level = conf_level))
   if (is.null(dim(cis))) cis <- matrix(cis, ncol = 2,
@@ -126,17 +198,20 @@
   V <- try(stats::vcov(cox_model), silent = TRUE)
   if (inherits(V, "try-error") || is.null(V) || is.null(b)) return(NULL)
 
-  int_terms <- names(asg)[grepl(":", names(asg), fixed = TRUE)]
+  int_terms <- .interactionTermNames(cox_model)
   rows <- list()
   for (tm in int_terms) {
     idx <- asg[[tm]]
+    if (any(idx > length(b))) next
+    # An empty cross-cell aliases one coefficient; the rest still have a joint test,
+    # on fewer df.
+    idx <- idx[!is.na(b[idx])]
     # A single-coefficient term adds nothing beyond its own row.
     if (length(idx) < 2) next
-    if (any(idx > length(b)) || anyNA(b[idx])) next
 
     Vs <- V[idx, idx, drop = FALSE]
     chi <- try(as.numeric(t(b[idx]) %*% solve(Vs) %*% b[idx]), silent = TRUE)
-    # A singular sub-covariance means the term is aliased (empty cross-cell);
+    # A singular sub-covariance means the remaining coefficients are still aliased;
     # report nothing rather than a fabricated chi-square.
     if (inherits(chi, "try-error") || !is.finite(chi) || chi < 0) next
 
@@ -196,6 +271,7 @@
     # Capture warnings via an environment flag instead of `<<-`.
     warn_env <- new.env(parent = emptyenv())
     warn_env$warned <- FALSE
+    at_level <- !is.na(modvec) & modvec == b
     fit <- tryCatch(
       withCallingHandlers(
         survival::coxph(cox_formula, data = d2),
@@ -209,7 +285,16 @@
     for (i in seq_along(focal_coef_names)) {
       nm <- focal_coef_names[i]
       if (!nm %in% rownames(sm)) next
-      est <- sm[nm, "coef"]; se <- sm[nm, "se(coef)"]
+      # This level needs the focal contrast among its own patients. Without it the
+      # model aliases another coefficient, and `nm` then carries a different level's
+      # effect: a real-looking number with no NA anywhere to give it away.
+      estimable <- if (focal_is_cat) {
+        all(flev[c(1L, i + 1L)] %in% as.character(fvec[at_level]))
+      } else {
+        length(unique(stats::na.omit(fvec[at_level]))) > 1L
+      }
+      est <- if (estimable) sm[nm, "coef"] else NA_real_
+      se <- sm[nm, "se(coef)"]
       rows[[length(rows) + 1]] <- data.frame(
         interaction     = paste0(focal, " * ", moderator),
         moderator_level = b,
@@ -217,8 +302,8 @@
         hr              = exp(est),
         ci_lower        = exp(est - z * se),
         ci_upper        = exp(est + z * se),
-        p               = sm[nm, "Pr(>|z|)"],
-        converged       = !warned,
+        p               = if (estimable) sm[nm, "Pr(>|z|)"] else NA_real_,
+        converged       = !warned || !estimable,
         stringsAsFactors = FALSE
       )
     }

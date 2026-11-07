@@ -62,6 +62,7 @@ library(testthat)
     stub <- new.env(parent = globalenv())
     stub$. <- function(x, ...) x
     stub$.fmt <- .ti_fmt()
+    suppressWarnings(suppressMessages(sys.source(.tisrc("utils-dateshape.R"), envir = stub)))
     stub$self <- list(
         options = options,
         data    = options$data,

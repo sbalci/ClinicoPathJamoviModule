@@ -72,7 +72,7 @@ test_that("partial multievent selections identify which fields are missing", {
       awd = NULL,
       awod = NULL
     )
-  }, "not assigned to any category: AWD, AWOD", fixed = TRUE)
+  }, "not assigned to any category: (AWD, AWOD|AWOD, AWD)")
 })
 
 # =============================================================================

@@ -251,12 +251,17 @@ options:
             response and duration of response. A patient with no measured value but a
             supplied category (e.g. PD for clinical progression or death before the
             first scan) is counted with that category. NE, "not evaluable" and UNK are
-            read as Unknown (not evaluable). One value per patient: the first
-            non-missing value is used and conflicting values are reported.
+            read as Unknown (not evaluable), and the full names (e.g. "Partial response")
+            are accepted. Give one value per patient. When a patient's values differ
+            across rows they are read as per-visit responses: the category is the best
+            one in time order (row order without a time variable) up to and including
+            the first PD (CR, then PR, then SD, then PD; NE visits do not count), and a
+            notice names those patients.
           jamovi: >
             Optional per-patient RECIST category (CR/PR/SD/PD, or NE for not
             evaluable). It overrides the computed category, and counts a patient with
             no measured value (e.g. PD before the first scan). Affects coloring and metrics.
+            Per-visit values are reduced to the best one up to the first PD.
 
     - name: showCategoryLabels
       title: Response category above each bar
@@ -548,7 +553,6 @@ options:
             Enable guided mode with step-by-step instructions:
             - Walks through variable selection and options
             - Provides contextual help and best practice recommendations
-            - Includes misuse detection and warnings
             Recommended for new users or complex analyses
 
     - name: showClinicalSummary
@@ -593,7 +597,7 @@ options:
             - Median time to first response (RECIST PR or better)
             - Kaplan-Meier median duration of response (censoring-aware)
             - Number of responders and events
-            Requires a time variable and raw (per-visit) input.
+            Requires a time variable (raw measurements or per-visit percentage changes).
 
     - name: addResponseCategory
       title: Response category column
@@ -611,7 +615,7 @@ options:
       description:
           R: >
             Random seed for the reproducible bootstrap confidence interval of the
-            median response (used when 'Show Confidence Interval' is enabled).
+            median response (used when 'Bootstrap CI of the median' is enabled).
             Change it to draw a different bootstrap sample; the default (123)
             reproduces the previous fixed behavior.
 

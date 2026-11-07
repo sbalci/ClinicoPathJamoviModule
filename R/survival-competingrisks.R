@@ -15,9 +15,8 @@
     if (is.null(self)) {
         paste0(feature, " is not available for competing-risks analysis. It assumes a ",
                "single event type, and the competing-risk outcome is coded 0/1/2. Use the ",
-               "cumulative incidence output instead, or set survival type to Overall or ",
-               "Cause Specific.")
+               "cumulative incidence output instead, or supply an outcome with one event type.")
     } else {
-        .fmt(.("{feature} is not available for competing-risks analysis. It assumes a single event type, and the competing-risk outcome is coded 0/1/2. Use the cumulative incidence output instead, or set survival type to Overall or Cause Specific."), feature = feature)
+        .fmt(.("{feature} is not available for competing-risks analysis. It assumes a single event type, and the competing-risk outcome is coded 0/1/2. Use the cumulative incidence output instead, or supply an outcome with one event type."), feature = feature)
     }
 }

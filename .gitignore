@@ -124,3 +124,5 @@ promotion/
 
 # testthat writes this only when tests fail (library-audit 2026-10-23 OncoPath)
 tests/testthat/testthat-problems.rds
+.claude/settings.local.json
+

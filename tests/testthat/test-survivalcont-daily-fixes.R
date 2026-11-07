@@ -66,7 +66,7 @@ test_that('SC-D03 tree no-split fallback is disclosed with the actual method', {
   d <- data.frame(time = rep(1, 120), status = rep(1, 120), marker = seq_len(120))
   got <- sc_daily_call(d, multiple_cutoffs = TRUE, cutoff_method = 'tree')
   expect_equal(got$multipleCutTable$asDF$cutpoint_value,
-               round(unname(quantile(d$marker, c(1/3, 2/3))), 2))
+               signif(unname(quantile(d$marker, c(1/3, 2/3))), 6))
   expect_match(got$warnings$content, 'Quantile cut-points are shown instead', fixed = TRUE)
   expect_identical(got$plotMultipleCutoffs$state$method, 'quantile (tree fallback)')
   expect_identical(got$plotMultipleSurvival$state$method, 'quantile (tree fallback)')
@@ -81,7 +81,7 @@ test_that('SC-D03 quantile supplementation of an insufficient tree is disclosed'
   got <- sc_daily_call(d, multiple_cutoffs = TRUE, cutoff_method = 'tree',
                       num_cutoffs = 'three')
   expected <- sort(c(tree$splits[1, 'index'], quantile(d$marker, c(1/3, 2/3))))
-  expect_equal(got$multipleCutTable$asDF$cutpoint_value, round(unname(expected), 2))
+  expect_equal(got$multipleCutTable$asDF$cutpoint_value, signif(unname(expected), 6))
   expect_match(got$warnings$content, 'Quantile cut-points supplement the tree splits', fixed = TRUE)
   expect_identical(got$plotMultipleCutoffs$state$method, 'tree + quantile')
 })

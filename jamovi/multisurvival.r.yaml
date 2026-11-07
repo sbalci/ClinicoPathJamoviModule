@@ -447,20 +447,18 @@ items:
           title: "Person-Time"
           type: number
           format: zto
+        # No zto: it fixes 3 decimals, so a rate per 1 person-day would print as 0.001 or 0.000.
         - name: rate
           title: "Incidence Rate"
           type: number
-          format: zto
         - name: rate_ci_lower
           title: "Lower"
           superTitle: '95% CI'
           type: number
-          format: zto
         - name: rate_ci_upper
           title: "Upper"
           superTitle: '95% CI'
           type: number
-          format: zto
       clearWith:
         - outcome
         - outcomeLevel

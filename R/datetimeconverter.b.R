@@ -91,7 +91,9 @@ datetimeconverterClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 # Clear, don't bare-return: the analysis object persists across run
                 # cycles, so a clean run used to leave the PREVIOUS run's notices on
                 # screen verbatim.
-                self$results$notices$setContent("")
+                # "<div></div>", not "": the jamovi client skips an empty Html
+                # update, so "" left the previous run's notices on screen.
+                self$results$notices$setContent("<div></div>")
                 return()
             }
 
@@ -163,86 +165,14 @@ datetimeconverterClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 return(list(format = "unsure", warnings = 'Auto-detection unavailable: all values missing.'))
             }
 
-            if (length(sample_dates) > 200L) {
-                sample_dates <- sample_dates[round(seq(1, length(sample_dates), length.out = 200L))]
-            }
-            formats_to_try <- c(
-                "ymd_hms", "dmy_hms", "mdy_hms",
-                "ymd_hm", "dmy_hm", "mdy_hm",
-                "ymd", "dmy", "mdy",
-                "ydm", "myd", "dym"
-            )
-
-            eval_results <- setNames(vector("list", length(formats_to_try)), formats_to_try)
-            for (fmt in formats_to_try)
-                eval_results[[fmt]] <- private$.evaluateFormat(sample_dates, fmt)
-
-            # Find top two formats by success rate
-            success_vec <- vapply(eval_results, function(x) x$success_rate, numeric(1))
-            top_order <- names(sort(success_vec, decreasing = TRUE))
-
-            # TIE-BREAK BY REJECTING IMPLAUSIBLY WIDE READINGS.
-            #
-            # sort() is stable, so the old rule was "first candidate in
-            # formats_to_try order wins" -- and ymd is listed before dmy. Any
-            # DD/MM/YY column with years <= 2031 is ALWAYS a tie (ymd, dmy, mdy and
-            # myd all parse 100%), so ymd ALWAYS won and read the DAY as the year:
-            # "05/03/21" became 2005-03-21 instead of 2021-03-05, ~16 years out.
-            # Measured 200/200 wrong at every n from 5 to 100.
-            #
-            # The discriminator is that reading a day-of-month as a two-digit year
-            # scatters the parsed years across 1..31, while a real cohort spans a
-            # few years. So we DEMOTE any tied reading whose years span more than
-            # 20, and keep formats_to_try order among the survivors.
-            #
-            # It is deliberately demote-only. The tempting rule -- "promote the
-            # narrowest" -- is really "the field that varies least is the year",
-            # which is wrong whenever the day-of-month is MORE clustered than the
-            # cohort's year span. Month-start, quarterly, annual and anniversary
-            # columns written yy-mm-dd are exactly that shape: "16-01-01" parses
-            # correctly as ymd today, and promote-the-narrowest turns it into
-            # 2001-01-16 because dmy pins every row to year 2001 (span 0). That
-            # regression is 100% deterministic, so only the >20-year demotion is
-            # applied. It also keeps ydm/myd/dym from winning on a degenerate
-            # zero span.
-            #
-            # Genuine ISO text never reaches this branch (dmy cannot parse
-            # "2020-03-05" at all), and a true DD/MM vs MM/DD ambiguity has the same
-            # year component under both readings, so neither is demoted, the
-            # original order still decides, and .warnAmbiguousFormat() below still
-            # flags it. .evaluateFormat() already returned $parsed, so this costs no
-            # extra parsing.
-            #
-            # Known remaining gap: a DD/MM/YY column whose day-of-month is itself
-            # clustered (e.g. always the 1st) still has no wide reading to demote
-            # and is still detected as ymd.
-            tied <- top_order[success_vec[top_order] >= (max(success_vec) - 1e-9)]
-            if (length(tied) > 1) {
-                # NO STRING-SHAPE RULE CAN SETTLE THIS.
-                # A rule demoting year-first readings of "2 digits, / or ., ..." was
-                # tried here to rescue month-coarsened registry columns (day always the
-                # 1st), where the year-span test below has no wide reading to demote and
-                # "01/05/19" was read as 2001-05-19 instead of 2019-05-01. It worked for
-                # that shape and BROKE the mirror shape: yy/mm/dd and yy.mm.dd are the
-                # SAME six-digit string, so the rule read every one of them day-first
-                # instead - 0/40 correct, up to 18.9 years out. Measured over a
-                # 144-family grid it was net negative (109 vs 111 exactly-correct
-                # families), because it traded one silent error for another.
-                #
-                # "01/05/19" simply is ambiguous. Both readings are flagged by
-                # .warnAmbiguousFormat() below, which is the honest outcome: tell the
-                # user rather than guess. Only the year-span test remains, which is
-                # principled - it demotes a reading that scatters the cohort over more
-                # than 20 years, which is what reading a day-of-month as a year does.
-                year_span <- vapply(tied, function(fmt) {
-                    p <- eval_results[[fmt]]$parsed
-                    y <- lubridate::year(p[!is.na(p)])
-                    if (length(y) == 0) Inf else as.numeric(diff(range(y)))
-                }, numeric(1))
-                plausible <- tied[is.finite(year_span) & year_span <= 20]
-                if (length(plausible) > 0) tied <- plausible
-                top_order <- c(tied, setdiff(top_order, tied))
-            }
+            # The candidates, the shape guard and the year-span tie-break are shared with
+            # timeinterval (R/utils-dateshape.R), so both decide the same way on one column.
+            sample_dates <- .dateSample(sample_dates)
+            ranking <- .rankDateFormats(list(sample_dates))
+            success_vec <- ranking$scores
+            top_order <- ranking$order
+            eval_results <- lapply(ranking$parsed, function(p) list(
+                success_rate = mean(!is.na(p[[1]])), parsed = p[[1]], input = sample_dates))
 
             top_fmt <- top_order[1]
             second_fmt <- top_order[2]
@@ -274,9 +204,8 @@ datetimeconverterClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         },
 
         .evaluateFormat = function(sample_dates, fmt) {
-            parser <- private$.getParser(fmt)
             tryCatch({
-                parsed_dates <- suppressWarnings(parser(sample_dates))
+                parsed_dates <- .parseDateText(sample_dates, fmt)
                 list(
                     success_rate = sum(!is.na(parsed_dates)) / length(sample_dates),
                     parsed = parsed_dates,
@@ -370,6 +299,8 @@ datetimeconverterClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 ydm = "YYYY-DD-MM",
                 myd = "MM-YYYY-DD",
                 dym = "DD-YYYY-MM",
+                ym = "YYYY-MM",
+                my = "MM-YYYY",
                 excel_serial = "Excel serial",
                 excel_serial_1904 = "Excel serial (1904 system)",
                 unix_epoch = "Unix epoch",
@@ -381,14 +312,18 @@ datetimeconverterClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         # Get lubridate parser function for format
         # @param format Character string specifying datetime format
         # @return Lubridate parser function (e.g., lubridate::ymd, lubridate::dmy_hms)
-        # TRUE when the column's year token cannot be four digits, i.e. every value
-        # is free of a 4-digit run. That is the only situation in which the century
-        # pivot can be wrong, so every two-digit-year behaviour is gated on it.
+        # TRUE when the column's year token cannot be four digits, i.e. no value holds
+        # a 4-digit token or a digit run long enough to pack one (DDMMYYYY). A six-digit
+        # DDMMYY is two-digit however many digits sit in a row. That is the only
+        # situation in which the century pivot can be wrong, so every two-digit-year
+        # behaviour is gated on it.
+        .fourDigitYearPattern = "(?<![0-9])[0-9]{4}(?![0-9])|[0-9]{7,}",
+
         .hasTwoDigitYear = function(x) {
             v <- as.character(x)
             v <- v[!is.na(v) & nzchar(trimws(v))]
             if (length(v) == 0) return(FALSE)
-            !any(grepl("[0-9]{4}", v))
+            !any(grepl(private$.fourDigitYearPattern, v, perl = TRUE))
         },
 
         # Values with text after the date: lubridate reads a PREFIX, so
@@ -418,28 +353,7 @@ datetimeconverterClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         },
 
         .getParser = function(format) {
-            # Return appropriate lubridate parser for format
-            parser <- switch(format,
-                "ymd_hms" = lubridate::ymd_hms,
-                "dmy_hms" = lubridate::dmy_hms,
-                "mdy_hms" = lubridate::mdy_hms,
-                "ymd_hm" = lubridate::ymd_hm,
-                "dmy_hm" = lubridate::dmy_hm,
-                "mdy_hm" = lubridate::mdy_hm,
-                "dmyhms" = lubridate::dmy_hms,
-                "mdyhms" = lubridate::mdy_hms,
-                "ymdhms" = lubridate::ymd_hms,
-                "dmyhm" = lubridate::dmy_hm,
-                "mdyhm" = lubridate::mdy_hm,
-                "ymdhm" = lubridate::ymd_hm,
-                "ymd" = lubridate::ymd,
-                "dmy" = lubridate::dmy,
-                "mdy" = lubridate::mdy,
-                "ydm" = lubridate::ydm,
-                "myd" = lubridate::myd,
-                "dym" = lubridate::dym,
-                NULL
-            )
+            parser <- .dateParser(format)
             if (is.null(parser))
                 stop("Unsupported datetime format: ", format)
             return(parser)
@@ -525,6 +439,26 @@ datetimeconverterClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 numeric_override <- self$options$datetime_format
                 numeric_force <- if (!is.null(numeric_override) && numeric_override %in% c('excel_serial', 'excel_serial_1904', 'unix_epoch'))
                     numeric_override else NULL
+                # A TEXT format chosen for a numeric column is honoured: the numbers
+                # are packed calendar dates (DDMMYY, YYYYMMDD), not serials. The range
+                # heuristics below used to read every set inside [0, 600000] as Excel
+                # serials whatever was selected, and a DDMMYY column that had lost its
+                # leading zeros (050321 -> 50321) became 2037/2311/2752, graded
+                # "Excellent".
+                if (is.null(numeric_force) && !is.null(numeric_override) &&
+                    !identical(numeric_override, 'auto')) {
+                    digits <- private$.numericAsDigitStrings(vector, numeric_override)
+                    if (!is.null(digits))
+                        return(list(
+                            original_display = digits$strings,
+                            parsing_vector = digits$strings,
+                            quality_vector = digits$strings,
+                            parsed_dates = NULL,
+                            already_parsed = FALSE,
+                            format_hint = NULL,
+                            notes = c(notes, digits$notes)
+                        ))
+                }
                 return(private$.processNumericVector(
                     numeric_vector = vector,
                     notes = notes,
@@ -582,7 +516,10 @@ datetimeconverterClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             }
 
             numeric_ratio <- if (sum(non_blank) == 0) 0 else sum(!is.na(numeric_guess[non_blank])) / sum(non_blank)
-            if (identical(manual_format, "auto") && numeric_ratio >= 0.8) {
+            # Six or eight digit TEXT is a packed date, written with its zeros (061218).
+            # No serial is that long: Excel serial 100000 is the year 2173.
+            packed_text <- all(grepl("^([0-9]{6}|[0-9]{8})$", char_vals[non_blank]))
+            if (identical(manual_format, "auto") && numeric_ratio >= 0.8 && !packed_text) {
                 notes <- c(notes, 'Detected numeric serial values stored as text; automatically converted before parsing.')
                 return(private$.processNumericVector(
                     numeric_vector = numeric_guess,
@@ -601,6 +538,38 @@ datetimeconverterClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 format_hint = NULL,
                 notes = notes
             ))
+        },
+
+        # Whole non-negative numbers -> their digit strings, for a manually chosen
+        # text format. A lost leading zero (DDMMYY 050321 stored as 50321) is put
+        # back only when padding to 6 or 8 digits makes EVERY value parse under the
+        # selected format. NULL -- fractions, negatives, or digits that mostly do
+        # not parse (10-digit Unix seconds under ymdhms) -- keeps the numeric
+        # serial path, where the misuse notice says a text format met a numeric
+        # column and the implausible-year check now applies.
+        .numericAsDigitStrings = function(x, fmt) {
+            ok <- !is.na(x) & is.finite(x)
+            if (!any(ok) || any(x[ok] < 0) || any(x[ok] != floor(x[ok])))
+                return(NULL)
+            parse_rate <- function(v) {
+                p <- tryCatch(.parseDateText(v, fmt), error = function(e) NULL)
+                if (length(p) != length(v)) 0 else mean(!is.na(p))
+            }
+            strings <- rep(NA_character_, length(x))
+            strings[ok] <- base::format(x[ok], trim = TRUE, scientific = FALSE)
+            notes <- .("A text date format is selected, so the numeric values were read as digit strings (for example 150321 as 15-03-21), not as Excel or Unix serial numbers.")
+            padded <- .restoreLeadingZeros(strings, serial_share = 1)
+            if (!identical(padded, strings) && parse_rate(padded[ok]) == 1) {
+                short <- which(padded != strings)
+                notes <- c(notes, .fmt(
+                    .("Restored a lost leading zero on {count} value(s) (for example {before} as {after}): that is the only reading under which every value is a valid date in the selected format."),
+                    count = length(short), before = strings[short[1]], after = padded[short[1]]))
+                strings <- padded
+            }
+            # ponytail: same 80% bar as the compact-date test it replaces.
+            if (parse_rate(strings[ok]) < 0.8)
+                return(NULL)
+            list(strings = strings, notes = notes)
         },
 
         .processNumericVector = function(numeric_vector, notes, quality_vector, original_display = NULL, force_format = NULL) {
@@ -778,7 +747,16 @@ datetimeconverterClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             compact_10digit_dt <- manual_fmt %in% c("ymdhm", "dmyhm", "mdyhm", "ymdhms", "dmyhms", "mdyhms") &&
                 all(non_missing >= 1e9 & non_missing <= 9999999999 & non_missing == floor(non_missing)) &&
                 private$.evaluateFormat(.sample_non_missing, manual_fmt)$success_rate >= 0.8
-            excel_like <- all(non_missing >= 0 & non_missing <= 600000) && !compact_6digit
+            # Under Auto, six-digit numbers that read as dates are packed dates, not serials:
+            # Excel serial 100000 is the year 2173, and DDMMYY 061218 used to become 2067 or
+            # 2475. A stray one in a serial column is an outlier, hence the same 20% as the
+            # serial test in .restoreLeadingZeros(); six digits that do not read as dates
+            # (platelet counts) stay here for the "may not be dates" warning.
+            packed_6digit <- identical(manual_fmt, "auto") && mean(non_missing >= 100000) >= 0.2 &&
+                max(.rankDateFormats(list(.dateSample(.restoreLeadingZeros(
+                    trimws(original_display[!is.na(numeric_vector)])))))$scores) >= 0.8
+            excel_like <- all(non_missing >= 0 & non_missing <= 600000) &&
+                !compact_6digit && !packed_6digit
             unix_like <- all(non_missing >= 1e8 & non_missing <= 4e9) && !compact_10digit_dt
             unix_ms_like <- all(non_missing >= 1e12 & non_missing <= 4e12)
 
@@ -900,6 +878,14 @@ datetimeconverterClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             char_vals <- trimws(char_vals)
             char_vals[char_vals == ''] <- NA_character_
             notes <- c(notes, 'Treated numeric values as formatted strings for parsing.')
+            padded <- .restoreLeadingZeros(char_vals)
+            if (!identical(padded, char_vals)) {
+                short <- which(padded != char_vals)
+                notes <- c(notes, .fmt(
+                    .("Restored a lost leading zero on {count} value(s) (for example {before} as {after}), since these are packed dates and some values already have the full width."),
+                    count = length(short), before = char_vals[short[1]], after = padded[short[1]]))
+                char_vals <- padded
+            }
             return(list(
                 original_display = char_vals,
                 parsing_vector = char_vals,
@@ -959,35 +945,19 @@ datetimeconverterClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         .parseDatetime = function(datetime_vector, format, tz = "") {
             # Parse datetime using detected or selected format
 
-            parser <- private$.getParser(format)
+            private$.getParser(format)
 
             tryCatch({
-                # Apply timezone if parser supports it
-                parsed_dates <- suppressWarnings(parser(datetime_vector, tz = tz))
-                # Plausibility check: flag years out of range
-                # base::format, NOT the bare `format` -- see the note in
-                # .prepareDatetimeInput(). Unqualified, `format(parsed_dates, "%Y")`
-                # returned the whole datetime string, as.integer() then produced the
-                # epoch seconds (1710498030 for 2024-03-15), and the upper bound
-                # as.integer(format(Sys.Date()+365, "%Y")) came out as 21033 -- so
-                # every ordinary date compared "> 21033" and this warning fired on
-                # 100%-successful conversions of perfectly valid 2022-2024 dates.
-                # A warning that cries wolf on every run is worse than no warning:
-                # it teaches the user to ignore the one signal that a wrong format
-                # has silently mis-parsed their dates.
-                yrs <- suppressWarnings(as.integer(base::format(parsed_dates, "%Y")))
-                .bad <- !is.na(yrs) & (yrs < 1900 | yrs > as.integer(base::format(Sys.Date() + 365, "%Y")))
-                if (any(.bad)) {
-                    private$.addNotice(
-                        type = "WARNING",
-                        title = .("Implausible Dates Detected"),
-                        class = "date-suspect",
-                        content = .fmt(
-                            .("{count} of {total} parsed date(s) fall outside the plausible range (<1900 or >1 year in the future); the first is {example}. Review preview to confirm correct parsing."),
-                            count = sum(.bad), total = sum(!is.na(yrs)),
-                            example = base::format(parsed_dates[which(.bad)[1]], "%Y-%m-%d"))
-                    )
-                }
+                # A date with no time is a calendar day, and it must survive a zone with
+                # no midnight on that day: a clock moved at 00:00 (Istanbul 1964-05-15,
+                # Havana, Sao Paulo) gave NA, and a notice about a clock time the value
+                # does not contain. roll_dst moves it to the first instant of that day.
+                parsed_dates <- if (.dateHasTime(format))
+                    .parseDateText(datetime_vector, format, tz = tz)
+                else lubridate::force_tz(
+                    as.POSIXct(.parseDateText(datetime_vector, format), tz = "UTC"),
+                    tzone = tz, roll_dst = "post")
+                private$.flagImplausibleYears(parsed_dates)
                 return(parsed_dates)
             }, error = function(e) {
                 private$.addNotice(
@@ -1000,6 +970,40 @@ datetimeconverterClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 # Return NA vector to allow analysis to continue
                 return(rep(as.POSIXct(NA), length(datetime_vector)))
             })
+        },
+
+        # Years outside [1900, next year] -> a date-suspect WARNING (which also
+        # withholds the quality grade). `numeric = TRUE` is the serial path:
+        # .processNumericVector() converts without .parseDatetime(), so a column of
+        # packed dates read as Excel serials (50321 -> 2037) was never checked.
+        .flagImplausibleYears = function(parsed_dates, numeric = FALSE) {
+            # base::format, NOT the bare `format` -- see the note in
+            # .prepareDatetimeInput(). Unqualified, `format(parsed_dates, "%Y")`
+            # returned the whole datetime string, as.integer() then produced the
+            # epoch seconds (1710498030 for 2024-03-15), and the upper bound
+            # as.integer(format(Sys.Date()+365, "%Y")) came out as 21033 -- so
+            # every ordinary date compared "> 21033" and this warning fired on
+            # 100%-successful conversions of perfectly valid 2022-2024 dates.
+            # A warning that cries wolf on every run is worse than no warning:
+            # it teaches the user to ignore the one signal that a wrong format
+            # has silently mis-parsed their dates.
+            yrs <- suppressWarnings(as.integer(base::format(parsed_dates, "%Y")))
+            .bad <- !is.na(yrs) & (yrs < 1900 | yrs > as.integer(base::format(Sys.Date() + 365, "%Y")))
+            if (!any(.bad))
+                return(invisible(NULL))
+            private$.addNotice(
+                type = "WARNING",
+                title = .("Implausible Dates Detected"),
+                class = "date-suspect",
+                content = .fmt(
+                    if (numeric)
+                        .("{count} of {total} date(s) converted from numeric serial values fall outside the plausible range (<1900 or >1 year in the future); the first is {example}. \u2022 If this column holds packed calendar dates such as DDMMYY or YYYYMMDD, select the matching text format instead, so the digits are read as day, month and year.")
+                    else
+                        .("{count} of {total} parsed date(s) fall outside the plausible range (<1900 or >1 year in the future); the first is {example}. Review preview to confirm correct parsing."),
+                    count = sum(.bad), total = sum(!is.na(yrs)),
+                    example = base::format(parsed_dates[which(.bad)[1]], "%Y-%m-%d"))
+            )
+            invisible(NULL)
         },
 
         .resolveTimezone = function() {
@@ -1857,13 +1861,12 @@ datetimeconverterClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # no two-digit years at all. Reset every field that survives a run here.
             private$.twoDigitYearSource <- FALSE
             private$.pivotSuspected <- FALSE
-            self$results$welcome$setContent("")
-            self$results$formatInfo$setContent("")
-            self$results$qualityMetrics$setContent("")
-            self$results$previewTable$setContent("")
-            self$results$componentPreview$setContent("")
-            self$results$qualityAssessment$setContent("")
-            self$results$nlSummary$setContent("")
+            # "<div></div>", not "": these blanks are the FINAL content on the
+            # welcome and early-error returns, and the jamovi client skips an empty
+            # Html update, so "" left the previous variable's panels on screen.
+            for (item in c("welcome", "formatInfo", "qualityMetrics", "previewTable",
+                           "componentPreview", "qualityAssessment", "nlSummary"))
+                self$results[[item]]$setContent("<div></div>")
 
             # Show welcome message if no variable selected
             if (is.null(self$options$datetime_var) || self$options$datetime_var == "") {
@@ -1903,6 +1906,8 @@ datetimeconverterClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 </div>"
 
                 self$results$welcome$setContent(welcome_msg)
+                # Clears the previous variable's notices (the list was reset above).
+                private$.renderNotices()
                 return()
             }
 
@@ -1939,7 +1944,7 @@ datetimeconverterClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 private$.addNotice(
                     type = "ERROR",
                     title = .("Empty Dataset"),
-                    content = 'Dataset contains no rows. \u2022 Please ensure your dataset has at least one observation. \u2022 Check for data loading or filtering issues.'
+                    content = .("Dataset contains no rows. \u2022 Please ensure your dataset has at least one observation. \u2022 Check for data loading or filtering issues.")
                 )
                 private$.renderNotices()
                 return()
@@ -1990,6 +1995,15 @@ datetimeconverterClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 } else {
                     "preparsed"
                 }
+                # Serial conversions never pass through .parseDatetime(), so they
+                # had no implausible-year check: integer DDMMYY read as Excel
+                # serials gave 2037-2752 and the grade said "Excellent". Skipped
+                # when a magnitude guard has already questioned the column.
+                if (isTRUE(prepared$format_hint %in% c("excel_serial", "excel_serial_1904",
+                                                       "unix_epoch", "unix_epoch_ms")) &&
+                    !any(vapply(private$.noticeList,
+                                function(n) identical(n$class, "date-suspect"), logical(1))))
+                    private$.flagImplausibleYears(parsed_dates, numeric = TRUE)
                 # Only for TRUE POSIXct/Date input. The numeric force_format branches also
                 # return already_parsed = TRUE, and for those the selection was honoured,
                 # not ignored -- the note contradicted the "Forced ... interpretation"
@@ -2052,6 +2066,30 @@ datetimeconverterClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                                 .("{count} value(s) have text after the date, for example \"{example}\". \u2022 Only the date at the start of each value was read and the rest was ignored. \u2022 Check that the ignored text does not change the date (a second date, a time, or a note such as 'approx.'), and clean the column so it holds dates only."),
                                 count = .trail$n, example = .trail$example))
 
+                    # Values the format's parser reads only by splitting digits in the
+                    # wrong place, or by inventing a day. They are empty, and say why:
+                    # with Auto they are the odd rows out, with an explicit format very
+                    # possibly the whole column.
+                    .misfit <- .dateMisfits(parsing_vector, detected_format)
+                    if (length(.misfit) > 0)
+                        private$.addNotice(
+                            type = "WARNING",
+                            title = .("Values That Cannot Have This Format"),
+                            class = "date-suspect",
+                            content = .fmt(
+                                .("{count} value(s) were left empty because their text cannot have the format {fmt}, for example \"{example}\". \u2022 Reading them would mean splitting digits in the wrong place or inventing a day that was never recorded. \u2022 Choose the format that matches the text, or select Auto-detect."),
+                                count = length(.misfit),
+                                fmt = private$.formatLabel(detected_format),
+                                example = as.character(parsing_vector[.misfit[1]])))
+                    if (detected_format %in% c("ym", "my"))
+                        private$.addNotice(
+                            type = "WARNING",
+                            title = .("Partial Dates: No Day Recorded"),
+                            class = "date-suspect",
+                            content = .fmt(
+                                .("These values give a month and a year but no day, for example \"{example}\". \u2022 Each was set to the 1st of its month, so the day in the converted column is not data. \u2022 Anything computed from these dates is accurate to about a month at best."),
+                                example = as.character(parsing_vector[!is.na(parsing_vector)][1])))
+
                     # DAYLIGHT-SAVING GAP. A clock time inside the spring-forward gap
                     # (America/New_York 2024-03-10 02:30) does not exist in that zone,
                     # so lubridate returns NA, and the row was reported only as a
@@ -2060,8 +2098,8 @@ datetimeconverterClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     if (!identical(tz_to_use, "UTC")) {
                         .gap <- !is.na(parsing_vector) & is.na(parsed_dates)
                         if (any(.gap))
-                            .gap[.gap] <- !is.na(suppressWarnings(
-                                .parser(parsing_vector[.gap], tz = "UTC")))
+                            .gap[.gap] <- !is.na(
+                                .parseDateText(parsing_vector[.gap], detected_format, tz = "UTC"))
                         if (any(.gap))
                             private$.addNotice(
                                 type = "WARNING",
@@ -2092,7 +2130,7 @@ datetimeconverterClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         # no-op. Silence there is the worst outcome: they believe the
                         # correction was applied.
                         .four <- as.character(parsing_vector)
-                        .four <- .four[!is.na(.four) & grepl("[0-9]{4}", .four)]
+                        .four <- .four[!is.na(.four) & grepl(private$.fourDigitYearPattern, .four, perl = TRUE)]
                         private$.addNotice(
                             type = "WARNING",
                             title = .("Two-digit-year Correction Not Applied"),
@@ -2105,7 +2143,11 @@ datetimeconverterClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         private$.twoDigitYearSource) {
                         .future <- !is.na(parsed_dates) & parsed_dates > Sys.time()
                         if (any(.future)) {
-                            parsed_dates[.future] <- parsed_dates[.future] - lubridate::years(100)
+                            # On the clock, in UTC: a 19xx date can land on a day with no
+                            # midnight in this zone, which emptied it with no notice at all.
+                            parsed_dates[.future] <- lubridate::force_tz(
+                                lubridate::force_tz(parsed_dates[.future], "UTC") - lubridate::years(100),
+                                tzone = tz_to_use, roll_dst = "post")
                             preprocessing_notes <- c(preprocessing_notes, .fmt(
                                 .("Two-digit years: {count} date(s) would have fallen in the future and were moved back one century."),
                                 count = sum(.future)))
@@ -2196,6 +2238,8 @@ datetimeconverterClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 "ymd" = "YYYY-MM-DD",
                 "dmy" = "DD-MM-YYYY",
                 "mdy" = "MM-DD-YYYY",
+                "ym" = "YYYY-MM (day set to the 1st)",
+                "my" = "MM-YYYY (day set to the 1st)",
                 "excel_serial" = "Excel Serial (days since 1899-12-30)",
                 "excel_serial_1904" = "Excel Serial, legacy Mac (days since 1904-01-01)",
                 "unix_epoch" = "Unix Epoch Seconds (since 1970-01-01)",
@@ -2207,7 +2251,10 @@ datetimeconverterClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 detected_format
             )
 
-            format_context <- if (prepared$already_parsed) {
+            # format_hint, not already_parsed: every Excel/Unix serial conversion
+            # also returns already_parsed = TRUE, and "already stored as datetime
+            # values" was then printed beside "Forced Excel serial interpretation".
+            format_context <- if (isTRUE(prepared$format_hint %in% c("posixct", "date"))) {
                 "<p><em>Input was already stored as datetime values; original encoding was preserved.</em></p>"
             } else if (self$options$datetime_format == "auto") {
                 "<p><em>Format was automatically detected. If results look incorrect, try manually specifying the format.</em></p>"

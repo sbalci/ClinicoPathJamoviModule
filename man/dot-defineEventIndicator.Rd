@@ -33,11 +33,19 @@ Causes, Alive with Disease, Alive without Disease.}
 }
 \value{
 A list with \code{status} (0/1 or 0/1/2, \code{NA} preserved), \code{status_factor}
-(Censored/Event/Competing, only when competing), the counts \code{n_event},
-\code{n_censored}, \code{n_competing}, \code{n_missing}, the labels \code{event_label} and
+(Censored/Event/Competing, only when competing), \code{alive} (see below), the
+counts \code{n_event}, \code{n_censored}, \code{n_competing}, \code{n_missing}, \code{n_awd} (Alive
+with Disease rows, \code{NA} outside multievent), the labels \code{event_label} and
 \code{censored_labels}, \code{competing_labels}, \code{n_levels}, \code{has_competing},
 \code{estimand}, and \code{error}
 (\code{NULL}, or a ready-to-display message the caller should reject with).
+
+\code{alive} is the censoring indicator for \code{\link[=.medianFollowUp]{.medianFollowUp()}}: TRUE where the
+subject was alive at last contact, \code{NA} where the outcome is missing. It
+differs from \code{status == 0} in one case: Cause Specific codes Dead of Other
+Causes as 0 for the event, but that patient was not still under observation.
+A single-level recode cannot tell a death from any other level, so there
+every status 0 counts as alive and \code{.describeEventIndicator()} says so.
 }
 \description{
 Single source of truth for turning a user's outcome variable into the 0/1

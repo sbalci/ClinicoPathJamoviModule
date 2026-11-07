@@ -35,11 +35,19 @@
 #'   Causes, Alive with Disease, Alive without Disease.
 #' @param outcome_name Display name of the outcome variable, used in messages.
 #' @return A list with `status` (0/1 or 0/1/2, `NA` preserved), `status_factor`
-#'   (Censored/Event/Competing, only when competing), the counts `n_event`,
-#'   `n_censored`, `n_competing`, `n_missing`, the labels `event_label` and
+#'   (Censored/Event/Competing, only when competing), `alive` (see below), the
+#'   counts `n_event`, `n_censored`, `n_competing`, `n_missing`, `n_awd` (Alive
+#'   with Disease rows, `NA` outside multievent), the labels `event_label` and
 #'   `censored_labels`, `competing_labels`, `n_levels`, `has_competing`,
 #'   `estimand`, and `error`
 #'   (`NULL`, or a ready-to-display message the caller should reject with).
+#'
+#'   `alive` is the censoring indicator for [.medianFollowUp()]: TRUE where the
+#'   subject was alive at last contact, `NA` where the outcome is missing. It
+#'   differs from `status == 0` in one case: Cause Specific codes Dead of Other
+#'   Causes as 0 for the event, but that patient was not still under observation.
+#'   A single-level recode cannot tell a death from any other level, so there
+#'   every status 0 counts as alive and `.describeEventIndicator()` says so.
 #' @keywords internal
 .defineEventIndicator <- function(outcome,
                                   outcomeLevel = NULL,
@@ -52,14 +60,17 @@
 
     ok <- function(status, event_label, censored_labels, estimand,
                    n_levels, status_factor = NULL,
-                   competing_labels = character(0), competing_mode = NULL) {
+                   competing_labels = character(0), competing_mode = NULL,
+                   alive = status == 0L, n_awd = NA_integer_) {
         list(
             status          = status,
             status_factor   = status_factor,
+            alive           = alive,
             n_event         = sum(status == 1, na.rm = TRUE),
             n_censored      = sum(status == 0, na.rm = TRUE),
             n_competing     = sum(status == 2, na.rm = TRUE),
             n_missing       = sum(is.na(status)),
+            n_awd           = n_awd,
             event_label     = event_label,
             censored_labels = censored_labels,
             competing_labels = competing_labels,
@@ -155,6 +166,9 @@
             status[!is.na(outcome) & as.character(outcome) == as.character(buckets[[b]])] <-
                 as.integer(codes[[b]])
 
+        alive <- status == 0L
+        alive[as.character(outcome) %in% as.character(dooc)] <- FALSE
+
         estimand <- switch(analysistype,
             overall = "overall survival",
             cause   = "cause-specific survival",
@@ -178,7 +192,9 @@
                   n_levels        = length(observed),
                   status_factor   = status_factor,
                   competing_labels = as.character(comp_labels),
-                  competing_mode  = identical(analysistype, "compete")))
+                  competing_mode  = identical(analysistype, "compete"),
+                  alive           = alive,
+                  n_awd           = sum(as.character(outcome) %in% as.character(awd))))
     }
 
     # ---- labelled cause factor handed over from outcomeorganizer ----------
@@ -417,6 +433,11 @@
                 "surviving free of both the target event and competing death. Use Multiple ",
                 "Event Levels with survival type Competing Risk to estimate cumulative incidence."
             ) else "This assumption cannot be verified from the displayed summaries.",
+            if (length(res$censored_labels) >= 2L &&
+                !res$estimand %in% c("overall survival", "cause-specific survival",
+                                     "disease-free survival", "competing risks")) paste0(
+                " Median follow-up also counts these levels as alive at last contact, ",
+                "which understates it if any of them is a death."),
             "</p>")
     }
 
@@ -455,8 +476,14 @@
     # follow-up date normally means, and what the UI suggests) the recurrence is
     # recorded later than it happened and DFS is biased upward. This is a silent
     # bias, not a detectable error -- there is no signature in the data to test.
+    #
+    # Only the multi-event coding has an "Alive with Disease" category. A caller
+    # that builds DFS some other way (outcomeorganizer's single-event composite:
+    # outcome level OR a recurrence variable) flags it with composite_endpoint,
+    # and carries its own time-to-first-event warning.
     dfs <- ""
-    if (identical(res$estimand, "disease-free survival")) {
+    if (identical(res$estimand, "disease-free survival") &&
+        !isTRUE(res$composite_endpoint)) {
         dfs <- paste0(
             "<p style='margin-top:8px;padding:8px;border-left:4px solid #d68910;",
             "background-color: rgba(246, 163, 33, 0.11); color: inherit'><b>Disease-free survival requires a time to the ",
@@ -466,7 +493,11 @@
             "instead the time from diagnosis to the LAST FOLLOW-UP, every recurrence is ",
             "dated later than it occurred and disease-free survival is over-estimated. ",
             "For subjects with disease, supply the date of recurrence as the follow-up date ",
-            "(or an elapsed time measured to recurrence).</p>")
+            "(or an elapsed time measured to recurrence).</p>",
+            if (isTRUE(res$n_awd == 0L)) paste0(
+                "<p style='margin-top:8px'><b>No Alive with Disease rows.</b> No recurrence ",
+                "is counted, so every event here is a death and these results equal overall ",
+                "survival, whatever the title says.</p>"))
     }
 
     paste0(

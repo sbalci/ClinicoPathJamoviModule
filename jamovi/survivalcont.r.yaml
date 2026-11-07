@@ -247,7 +247,6 @@ items:
         - name: rate
           title: "Incidence Rate"
           type: number
-          format: zto
         - name: rate_ci_lower
           title: "Lower"
           superTitle: '95% CI'
@@ -552,6 +551,10 @@ items:
         - name: statistic
           title: 'Statistic'
           type: number
+        - name: padjusted
+          title: 'Adjusted p'
+          type: number
+          format: zto,pvalue
       visible: (findcut)
       clearWith:
           - sc
@@ -830,7 +833,7 @@ items:
           title: "Number at Risk"
           type: integer
         - name: n.event
-          title: "Number of Events"
+          title: "Events since previous time"
           type: integer
         - name: surv
           title: "Survival"

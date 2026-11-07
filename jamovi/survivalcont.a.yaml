@@ -7,6 +7,13 @@ menuSubtitle: 'Cut-off & Univariate Survival Analysis'
 version: '1.1.3'
 jas: '1.2'
 
+description:
+    main: >-
+        Survival analysis for one continuous explanatory variable: Cox regression on the
+        continuous scale, and optional data-derived cut-offs with Kaplan-Meier groups. A
+        cut-off chosen from the same data overstates the effect and needs independent
+        validation. These methods describe associations and do not establish causality.
+
 options:
 
     - name: data
@@ -187,7 +194,7 @@ options:
 
 
     - name: timetypeoutput
-      title: Output time unit
+      title: Time Type in Output
       type: List
       options:
         - title: days
@@ -199,8 +206,14 @@ options:
         - title: years
           name: years
       default: months
-      description:
-          R: select the time type in output
+      description: >-
+        The time unit used throughout the analysis. When survival time is calculated
+        from dates, dates are CONVERTED to this unit. When a pre-calculated elapsed-time
+        variable is supplied, no conversion is possible (the column carries no unit), so
+        this option DECLARES the unit that variable is already recorded in. Either way it
+        determines how cutpoints and plausibility checks are interpreted, and how axes are
+        labeled, so selecting the wrong unit for pre-calculated time changes the reported
+        results, not just the labels.
 
     - name: uselandmark
       title: Use landmark time
@@ -211,11 +224,13 @@ options:
 
     - name: landmark
       title: Landmark time
-      type: Integer
+      type: Number
       default: 3
+      min: 0
       description: >-
         Specify the landmark time at which to evaluate survival probabilities in landmark
-        analysis. This option is only available if you enable the "Use Landmark Time" option.
+        analysis. Patients with an event or censoring at or before this time are excluded.
+        This option is only available if you enable the "Use Landmark Time" option.
 
 
 

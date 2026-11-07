@@ -8057,17 +8057,15 @@
 #'
 #' Example dataset for the \code{lassocox} analysis.
 #'
-#' @details Edge-case (stress) fixture: it cannot be fitted by \code{lassocox} as
-#' shipped. \code{vital_status} has 78 \code{Dead} and only 2 \code{Alive} rows, and
-#' the stratified cross-validation needs at least 3 events and 3 censored
-#' observations, so the analysis stops with that message. There is no subset that
-#' works with this endpoint. Use it to see the high-dimensional (53 candidate
-#' columns, 80 rows) input checks, or supply your own censoring.
+#' @details High-dimensional example: 53 candidate columns (50 genes) for 80
+#' patients, 45 \code{Dead} and 35 \code{Alive}. Six genes carry a true effect. Regenerated
+#' on 2026-11-07 with a baseline hazard; the earlier version had only 2 censored rows
+#' and could not be fitted.
 #'
 #' @format A data frame (data.frame) with 80 rows and 56 variables:
 #' \describe{
 #'   \item{\code{sample_id}}{character; 80 distinct values}
-#'   \item{\code{os_months}}{numeric, 0.01 to 6.86}
+#'   \item{\code{os_months}}{numeric, 0.01 to 36}
 #'   \item{\code{vital_status}}{factor with 2 levels: Alive, Dead}
 #'   \item{\code{age}}{numeric, 33 to 79}
 #'   \item{\code{sex}}{factor with 2 levels: Female, Male}
@@ -8133,18 +8131,15 @@
 #'
 #' Example dataset for the \code{lassocox} analysis.
 #'
-#' @details Edge-case (stress) fixture: it cannot be fitted by \code{lassocox} as
-#' shipped. 13 rows have \code{follow_up_months} equal to 0, and the analysis
-#' requires strictly positive follow-up times, so it stops with that message.
-#' Removing those rows does not help: \code{progression} has only 2 \code{No}
-#' (censored) rows in the whole dataset, below the 3 censored observations that
-#' stratified cross-validation needs. There is no subset that works with this
-#' endpoint.
+#' @details Clinical example with mixed variable types: 133 progressions and 67
+#' censored rows among 200 patients. Regenerated on 2026-11-07 with a baseline hazard;
+#' the earlier version had zero follow-up times and only 2 censored rows and could not
+#' be fitted.
 #'
 #' @format A data frame (data.frame) with 200 rows and 15 variables:
 #' \describe{
 #'   \item{\code{patient_id}}{character; 200 distinct values}
-#'   \item{\code{follow_up_months}}{numeric, 0 to 3.3}
+#'   \item{\code{follow_up_months}}{numeric, 0.1 to 48}
 #'   \item{\code{progression}}{factor with 2 levels: No, Yes}
 #'   \item{\code{age}}{numeric, 35 to 85}
 #'   \item{\code{gender}}{factor with 2 levels: Female, Male}
@@ -8197,18 +8192,15 @@
 #'
 #' Example dataset for the \code{lassocox} analysis.
 #'
-#' @details Edge-case (stress) fixture. 5 rows have \code{time_months} equal to 0,
-#' and \code{lassocox} requires strictly positive follow-up times, so the dataset
-#' as shipped stops with that message. Only 3 of 75 rows are censored
-#' (\code{event_occurred} = \code{No}). Excluding the zero-time rows (70 rows, 67
-#' events, 3 censored) meets the computational minimum and fits, but with so few
-#' censored rows the cross-validation is very unstable; with \code{random_seed = 42}
-#' and all seven predictors it retains no predictor (a valid empty model).
+#' @details Small, heavily censored cohort: 16 events among 75 patients (59
+#' censored), for seven predictors. It shows how few events limit selection.
+#' Regenerated on 2026-11-07 with a baseline hazard; the earlier version had 72 events
+#' in 75 rows and zero follow-up times, the opposite of what it was meant to show.
 #'
 #' @format A data frame (data.frame) with 75 rows and 10 variables:
 #' \describe{
 #'   \item{\code{id}}{character; 75 distinct values}
-#'   \item{\code{time_months}}{numeric, 0 to 3.6}
+#'   \item{\code{time_months}}{numeric, 0.2 to 24}
 #'   \item{\code{event_occurred}}{factor with 2 levels: No, Yes}
 #'   \item{\code{age}}{numeric, 25 to 87}
 #'   \item{\code{gender}}{factor with 2 levels: F, M}

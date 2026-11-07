@@ -40,14 +40,24 @@ test_that("timeinterval landmark analysis workflow", {
 
 # ═══ DIFFERENT TIME SCALES ═══
 test_that("timeinterval short-term study workflow", {
-  result <- timeinterval(
+  # 13 of the 30 rows end before they start. That used to "pass" as an Html
+  # banner; it is now a reject(), and the filter is the way through.
+  expect_error(timeinterval(
     data = timeinterval_shortterm,
     dx_date = "admission_date",
     fu_date = "discharge_date",
     output_unit = "days",
     time_basis = "calendar"
+  ), "Negative time intervals detected", fixed = TRUE)
+  result <- timeinterval(
+    data = timeinterval_shortterm,
+    dx_date = "admission_date",
+    fu_date = "discharge_date",
+    output_unit = "days",
+    time_basis = "calendar",
+    remove_negative = TRUE
   )
-  expect_no_error(result)
+  expect_s3_class(result, "timeintervalResults")
 })
 
 test_that("timeinterval long-term study workflow", {

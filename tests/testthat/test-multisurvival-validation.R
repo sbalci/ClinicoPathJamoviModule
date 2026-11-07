@@ -60,7 +60,7 @@ test_that(".multisurvivalOptimismCIndex returns a well-formed, bounded result", 
     fx$fit, fx$data, fx$status, B = 80, seed = 7)
 
   expect_type(res, "list")
-  expect_named(res, c("apparent", "optimism", "corrected", "B", "n_boot"))
+  expect_named(res, c("apparent", "optimism", "corrected", "B", "n_boot", "n_excluded"))
   # Apparent C-index equals survival::concordance on the fitted model.
   expect_equal(res$apparent,
                survival::concordance(fx$fit)$concordance,
@@ -211,6 +211,7 @@ test_that("Fine-Gray (finegray + weighted coxph) matches cmprsk::crr (mgus2)", {
       "utils-formula.R",
       "utils-eventindicator.R",
       "utils-followup.R",
+      "utils-survivaldata.R",
       "survival-competingrisks.R",
       "multisurvival-formula.R",
       "multisurvival-interactions.R",
@@ -337,9 +338,9 @@ test_that("VAL-A2: Person-time table matches closed-form Garwood (1936) exact Po
   # Overall: 8 events, 300 person-months
   expect_equal(pt$events[1], 8)
   expect_equal(pt$person_time[1], 300)
-  expect_equal(pt$rate[1], round(8 / 300 * 100, 2))
-  expect_equal(pt$rate_ci_lower[1], round((0.5 * stats::qchisq(0.025, 16) / 300) * 100, 2))
-  expect_equal(pt$rate_ci_upper[1], round((0.5 * stats::qchisq(0.975, 18) / 300) * 100, 2))
+  expect_equal(pt$rate[1], 8 / 300 * 100)
+  expect_equal(pt$rate_ci_lower[1], (0.5 * stats::qchisq(0.025, 16) / 300) * 100)
+  expect_equal(pt$rate_ci_upper[1], (0.5 * stats::qchisq(0.975, 18) / 300) * 100)
 
   # Subgroup conservation: Group A (120) + Group B (180) = 300
   grp <- pt[grepl("^arm:", pt$interval), ]
@@ -382,7 +383,8 @@ test_that("VAL-A3 & E2: All 7 date formats and landmark filtering compute exact 
     expect_equal(.out_vals(r_fmt$calculatedtime), seq(30, 360, by = 30), tolerance = 1e-8)
   }
 
-  # Landmark at 90 days drops first 2 rows (30, 60) and shifts remaining 10 rows by -90
+  # Landmark at 90 days excludes 30, 60 and 90 (T > L). The saved column is not the
+  # analysis time: it keeps every row's unshifted interval.
   d_lm <- data.frame(
     dx = fmt_map$ymd$dx, fu = fmt_map$ymd$fu,
     status = rep(c(1L, 1L, 0L), 4), arm = factor(rep(c("A", "B"), 6))
@@ -394,9 +396,9 @@ test_that("VAL-A3 & E2: All 7 date formats and landmark filtering compute exact 
     outcome = "status", outcomeLevel = "1", explanatory = "arm",
     calculatedtime = TRUE
   )
-  expect_equal(.out_vals(r_lm$calculatedtime), seq(90, 360, by = 30) - 90, tolerance = 1e-8)
+  expect_equal(.out_vals(r_lm$calculatedtime), seq(30, 360, by = 30), tolerance = 1e-8)
   expect_match(.strip_html(r_lm$text2$content),
-               "Patients whose follow-up ended before the landmark were excluded \\(n = 2 removed\\)")
+               "Patients whose follow-up ended at or before the landmark were excluded \\(n = 3 removed\\)")
 })
 
 test_that("VAL-B1: Reference parity for survMetricsTable, cox_phTable, modelContributionTable, and adjustedSurvTable", {

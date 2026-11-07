@@ -178,3 +178,19 @@ with tempfile.TemporaryDirectory() as m:
     assert 'v.r.yaml:3' in warns and 'v.r.yaml:5' in warns and 'v.r.yaml:7' in warns, warns
     assert 'v.r.yaml:9' not in warns and 'v.r.yaml:11' not in warns, warns
 print('visible-expression check: ok')
+
+# setState payload: a heavy object as the VALUE of an innocent key (library-audit 2026-09-15
+# jsurvival [LOW], oddsratio plot_nomogram `list(data = mydata, ...)`) was invisible to the key-side pattern.
+os.chdir(os.path.dirname(os.path.dirname(GATE)))   # the earlier blocks left a deleted temp dir as cwd
+sys.argv = ['release_gate.py']
+spec = importlib.util.spec_from_file_location('release_gate', GATE)
+rg = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(rg)
+heavy = lambda payload: sorted({m.group(1) for m in rg._HEAVY.finditer(payload)} |
+                               {m.group(1) for m in rg._HEAVY_VALUE.finditer(payload)})
+assert heavy('list(data = mydata, dependent = dv)') == ['mydata'], heavy('list(data = mydata, dependent = dv)')
+assert heavy('list(fit = cox_fit)') == ['cox_fit', 'fit'] or 'fit' in heavy('list(fit = cox_fit)')
+assert heavy('list(nom = private$.nom_object)') == [], heavy('list(nom = private$.nom_object)')
+assert heavy('list(data = plotData, fitted = fitted_vals)') == [], heavy('list(data = plotData, fitted = fitted_vals)')
+assert heavy('list(n = nrow(mydata), ok = x == model)') == [], heavy('list(n = nrow(mydata), ok = x == model)')
+print('setState value-side payload check: ok')

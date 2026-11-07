@@ -111,7 +111,8 @@ Rscript --vanilla tools/submodule_smoke.R ../<Module>   # installed namespace of
 #    clearWith, renderFun, entities, versions, NEWS.md heading,
 #    catalog scope, " [..]" and \u{} inside .(), translated sprintf
 #    specifiers, notice title colours, sentinel $insert() index,
-#    description block scalars, bug-report URL, dataset descriptions  [CRITICAL..LOW]
+#    description block scalars, bug-report URL, dataset descriptions,
+#    heavy setState payloads (key or value side, section 17)          [CRITICAL..LOW]
 python3 tools/release_gate.py      # FAIL lines block; read every WARN for shipped analyses
 python3 tools/release_gate.py --root ../<Module>   # the same checks on the tree the reviewer reads
 
@@ -1573,7 +1574,10 @@ self$results$plot3$setState(list(
   don't stash the dataset in state.
 - Still convert to a base `data.frame` before `setState()` (protobuf).
 
-Detect: `grep -nE 'setState\(.*(model|fit|clean(ed)?[Dd]ata)' R/<fn>.b.R`
+Detect: `python3 tools/release_gate.py` → `check_state_payload`. It flags a heavy name used as a
+key (`list(cox_model = ...)`), as the whole payload (`setState(zph)`) or, since 2026-10-30, as the
+value of an innocent key (`list(data = mydata)`); a measured exception carries
+`# state-payload: <why>` on or just above the call.
 
 
 **Round 8 (2026-10-23 meddecide [LOW]): rows the plot really draws.** A dot plot of one point per
@@ -1596,6 +1600,21 @@ no side effects. It keeps one value and one class flag per patient (about 3 KB p
 compressed) with the threshold, direction and labels stored once. **Read at render time only when the
 rows can be rebuilt without the analysis's own side effects; otherwise keep the marks, drop the repeated
 columns, and measure.** Both renderers still draw a state saved in the old shape.
+
+**Closing the 2026-09-15 jsurvival PARTIAL (2026-10-30): the drawn object can be the drawing data.**
+`oddsratio` `plot_nomogram` stored `list(data = mydata, dependent, explanatory, labels)` so the
+renderer could refit `rms::lrm` after a reload: 246 patient rows, about 11.7 KB at n = 250, growing
+with n. Two things had kept it open. First, `check_state_payload` matched heavy names only as keys,
+so `data = mydata` read as clean; the check now also matches the value side. Second, the response
+assumed the fix needed the model-preparation code moved into a helper so the renderer could read
+`self$data`. It did not: what the plot draws is the `rms::nomogram` object, which is axis scales
+only (about 4 KB, longest vector 15 elements whatever n is, no function or environment), so the
+state is now `list(nom = <that object>)`. The fit is heavy; the object the library draws from the
+fit can be light. Before storing a library object, measure `length(serialize(x, NULL))` at two
+sample sizes, search it for functions and environments, and plot it after a serialise round trip.
+The PARTIAL's deferred half had no breadcrumb in the code, so the reviewer could not have seen it
+(conventions: a PARTIAL needs a DEFERRED breadcrumb at the site). Test:
+`test-jsurvival-library-audit.R` "jsurvival image states hold drawing data, not patient rows".
 
 ---
 

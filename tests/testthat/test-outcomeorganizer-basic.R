@@ -96,13 +96,27 @@ test_that("outcomeorganizer handles multistate models", {
 })
 
 test_that("outcomeorganizer handles disease-free survival (DFS)", {
+  # outcomeorganizer_dfs has no recurrence column: DFS comes from vital status alone, under
+  # Multiple Event Levels. One Event Level cannot carry it, so that is refused.
   result <- run_outcomeorganizer(
     data = outcomeorganizer_dfs,
     outcome = "status",
-    outcomeLevel = "Dead",
-    analysistype = "dfs"
+    analysistype = "dfs",
+    multievent = TRUE,
+    dod = "Dead",
+    awd = "Disease",
+    awod = "NED"
   )
   expect_s3_class(result, "outcomeorganizerResults")
+  expect_error(
+    run_outcomeorganizer(
+      data = outcomeorganizer_dfs,
+      outcome = "status",
+      outcomeLevel = "Dead",
+      analysistype = "dfs"
+    ),
+    "is built from a Recurrence/Progression variable"
+  )
 })
 
 test_that("outcomeorganizer output table and diagnostics work", {

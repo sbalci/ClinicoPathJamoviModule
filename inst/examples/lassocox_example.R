@@ -39,15 +39,14 @@ result_breast <- lassocox(
 
 
 # ===============================================================
-# Example 2: Lung Cancer -- Input Validation
+# Example 2: Lung Cancer -- Mixed Variable Types
 # ===============================================================
-# This stress fixture contains follow-up values rounded to zero and only two
-# censored observations. The analysis should return an actionable validation
-# message instead of silently changing times or fitting an unstable model.
+# 200 patients, 133 progressions, with numeric and multi-level categorical
+# predictors. Factors are expanded into indicator columns before the penalty.
 
 data(lassocox_lung_cancer, package = "ClinicoPath")
 
-result_lung <- try(lassocox(
+result_lung <- lassocox(
   data = lassocox_lung_cancer,
   elapsedtime = "follow_up_months",
   outcome = "progression",
@@ -61,11 +60,9 @@ result_lung <- try(lassocox(
   lambda = "lambda.min",
   nfolds = 10,
   standardize = TRUE
-), silent = TRUE)
+)
 
-# Expected result: a message asking the analyst to check the time origin and
-# measurement resolution. Correct the source data using subject-matter knowledge
-# before fitting; do not add an arbitrary constant automatically.
+# Selected columns depend on the fold split; report the seed with the result.
 
 
 # ===============================================================
@@ -103,14 +100,14 @@ result_cvd <- lassocox(
 
 
 # ===============================================================
-# Example 4: Small Cohort -- Input Validation
+# Example 4: Small Cohort -- Few Events
 # ===============================================================
-# This stress fixture also contains follow-up values rounded to zero. It
-# demonstrates the same strictly-positive-time validation in a small cohort.
+# 75 patients with only 16 events for seven predictors. With so few events
+# the penalty usually retains nothing, which is a valid answer, not a failure.
 
 data(lassocox_small_cohort, package = "ClinicoPath")
 
-result_small <- try(lassocox(
+result_small <- lassocox(
   data = lassocox_small_cohort,
   elapsedtime = "time_months",
   outcome = "event_occurred",
@@ -123,11 +120,10 @@ result_small <- try(lassocox(
   suitabilityCheck = TRUE,
   showExplanations = TRUE,
   showMethodologyNotes = TRUE
-), silent = TRUE)
+)
 
-# Expected result: a strictly-positive-time validation message. After a
-# defensible correction to the source data, a small development sample still
-# requires cautious interpretation and validation of the full modeling process.
+# An empty model here means the data cannot support selection. A small
+# development sample needs validation of the whole modeling process.
 
 
 # ===============================================================

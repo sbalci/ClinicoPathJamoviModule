@@ -8,7 +8,7 @@
 A data frame (data.frame) with 75 rows and 10 variables:
 \describe{
   \item{\code{id}}{character; 75 distinct values}
-  \item{\code{time_months}}{numeric, 0 to 3.6}
+  \item{\code{time_months}}{numeric, 0.2 to 24}
   \item{\code{event_occurred}}{factor with 2 levels: No, Yes}
   \item{\code{age}}{numeric, 25 to 87}
   \item{\code{gender}}{factor with 2 levels: F, M}
@@ -27,5 +27,11 @@ lassocox_small_cohort
 }
 \description{
 Example dataset for the \code{lassocox} analysis.
+}
+\details{
+Small, heavily censored cohort: 16 events among 75 patients (59
+censored), for seven predictors. It shows how few events limit selection.
+Regenerated on 2026-11-07 with a baseline hazard; the earlier version had 72 events
+in 75 rows and zero follow-up times, the opposite of what it was meant to show.
 }
 \keyword{datasets}

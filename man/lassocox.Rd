@@ -81,7 +81,8 @@ during each model fit. Cross-validation training fits therefore do not
 reuse full-cohort means and standard deviations. Displayed coefficients are
 back-transformed by glmnet to the original design-column scale. Factor
 indicators are still penalized and selected separately rather than as a
-grouped factor.}
+grouped factor. When this is off, selection depends on the units of each
+predictor; changing a unit can change which predictors are selected.}
 
 \item{suitabilityCheck}{Display an advisory assessment of outcome
 information, model dimension, missingness, collinearity, and an exploratory
@@ -100,8 +101,8 @@ reported.}
 
 \item{path_plot}{Plot coefficients across the fitted log-lambda path with
 both CV choices and counts of nonzero columns. For readability, at most 30
-paths are displayed, ranked by their summed absolute coefficients across
-the path.}
+paths are displayed: selected columns first, then by summed absolute
+coefficient times column SD across the path.}
 
 \item{showEncoding}{Display the original predictor, design column, coding,
 reference level, and selection status.}

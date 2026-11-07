@@ -394,8 +394,10 @@ test_that("IR-datetimeconverter-05 (S3): Re-running on an all-NA column clears s
   expect_true(nzchar(html_text(ana_r$results$previewTable)))
   opts_r$.__enclos_env__$private$..datetime_var$.__enclos_env__$private$.value <- "all_na_dt"
   ana_r$.__enclos_env__$private$.run()
-  expect_false(nzchar(html_text(ana_r$results$previewTable)))
-  expect_false(nzchar(html_text(ana_r$results$qualityMetrics)))
+  # Cleared with "<div></div>", not "": the jamovi client skips an empty Html
+  # update, so "" left the stale HTML on screen (2026-10-30).
+  expect_identical(html_text(ana_r$results$previewTable), "<div></div>")
+  expect_identical(html_text(ana_r$results$qualityMetrics), "<div></div>")
 })
 
 test_that("IR-datetimeconverter-06 (S4): monthname and dayname extraction pass explicit C locale", {

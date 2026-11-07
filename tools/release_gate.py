@@ -859,6 +859,9 @@ _HEAVY_NAME = (r'fit|model|models|zph|roc|survfit|coxph|cph|glmnet|rf|object|'
 _HEAVY = re.compile(r'(?<![\w.])(%s)\s*=(?!=)' % _HEAVY_NAME)
 # `setState(zph)` / `setState(cox_fit)` - the whole payload IS the object, no key at all
 _HEAVY_BARE = re.compile(r'^\s*(%s)\s*$' % _HEAVY_NAME)
+# `list(data = mydata, ...)` - a heavy object as the VALUE of an innocent key; the key-side pattern
+# missed this (library-audit 2026-09-15 jsurvival [LOW], oddsratio plot_nomogram)
+_HEAVY_VALUE = re.compile(r'(?<![=!<>])=\s*(%s)\s*(?=[,)]|$)' % _HEAVY_NAME)
 
 
 def check_state_payload():
@@ -889,7 +892,8 @@ def check_state_payload():
             if re.search(r'#\s*state-payload:', src[start: j]):
                 waived.append(os.path.basename(p))
                 continue
-            names = sorted({h.group(1) for h in _HEAVY.finditer(payload)})
+            names = sorted({h.group(1) for h in _HEAVY.finditer(payload)} |
+                           {h.group(1) for h in _HEAVY_VALUE.finditer(payload)})
             bare = _HEAVY_BARE.match(payload)
             if bare:
                 names = sorted(set(names) | {bare.group(1)})

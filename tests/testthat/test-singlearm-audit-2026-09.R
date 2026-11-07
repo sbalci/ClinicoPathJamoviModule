@@ -55,7 +55,8 @@ library(testthat)
                ".getCachedSurvfit", ".safeExecute", ".estimandMeta",
                ".yearInUnits", ".getDefaultCutpoints", ".resolveCutpoints",
                ".supportedCutpoints", ".parseNumericList", ".ciText",
-               ".survTable", ".medianSurv", ".competingRiskCumInc"))
+               ".survTable", ".medianSurv", ".competingRiskCumInc",
+               ".landmarkSuffix", ".landmarkNote"))
     priv[[nm]] <- bind(pm[[nm]])
   stub$private <- priv
   stub

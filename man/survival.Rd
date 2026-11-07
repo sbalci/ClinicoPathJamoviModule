@@ -209,8 +209,9 @@ analysis. Enter a  comma-separated list of time points to create intervals.
 For example,  "12, 36, 60" will create intervals 0-12, 12-36, 36-60, and
 60+.}
 
-\item{rate_multiplier}{Specify the multiplier for incidence rates (e.g.,
-100 for rates per 100 person-years, 1000 for rates per 1000 person-years).}
+\item{rate_multiplier}{Specify the multiplier for incidence rates. Rates
+are per this many person-units of the selected time type, for example per
+100 person-months when time is in months.}
 
 \item{rmst_analysis}{Calculate Restricted Mean Survival Time, which
 represents the average survival time up to a specified time horizon. Useful
@@ -252,9 +253,10 @@ groups. For example, 50, 65, 75 creates groups 50 or younger, over 50 to
 65, over 65 to 75, and over 75. Each upper cutpoint is included in the
 preceding group.}
 
-\item{age_time_scale}{Use biological age as the time axis instead of
+\item{age_time_scale}{Use chronological age as the time axis instead of
 follow-up time. The Cox model becomes Surv(age_at_entry, age_at_event,
-event). Most rigorous for cancer epidemiology where age drives risk.}
+event). Suited to cohorts followed for disease onset; for patients timed
+from diagnosis it is a sensitivity analysis.}
 
 \item{age_standardization}{Compute age-standardized mortality using direct
 or indirect standardization. Reports Standardized Mortality Ratio comparing
@@ -268,13 +270,13 @@ standard population.}
 age groups. Displays separate curves for each age group within the
 explanatory variable.}
 
-\item{adjusted_curves}{Show Kaplan-Meier-style survival curves adjusted for
-age using the Cox model. Displays what the survival curves would look like
-after removing the effect of age differences between groups.}
+\item{adjusted_curves}{Show survival curves standardized for age with the
+Cox model (direct standardization). Every patient is assigned to each group
+in turn, so all groups share the age distribution of the whole cohort.}
 
-\item{remark_checklist}{Display a REMARK (REporting recommendations for
-tumor MARKer prognostic studies) checklist showing which reporting items
-are addressed by the current analysis configuration.}
+\item{remark_checklist}{Display the 20-item REMARK (REporting
+recommendations for tumor MARKer prognostic studies) checklist, marking the
+items reported in this output and those to report in the manuscript.}
 
 \item{residual_diagnostics}{Calculate and display Cox model residuals for
 diagnostic purposes, including Martingale, deviance, score, and Schoenfeld
@@ -346,7 +348,7 @@ tumor size where the relationship with outcome may not be linear.}
 \item{rcs_variable}{Select a continuous predictor variable to assess for
 non-linear effects. The variable will be modeled with restricted cubic
 splines and compared to a linear model. Common candidates include age,
-tumor size, biomarker levels, and follow-up duration.}
+tumor size and biomarker levels.}
 
 \item{rcs_knots}{Number of knots for restricted cubic splines. 3 knots = 2
 df (simplest), 4 knots = 3 df (recommended default), 5 knots = 4 df (more

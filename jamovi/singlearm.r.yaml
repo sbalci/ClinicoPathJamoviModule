@@ -388,7 +388,7 @@ items:
           title: "Number at Risk"
           type: integer
         - name: n.event
-          title: "Events Since Prior Row"
+          title: "Events since previous time"
           type: integer
         - name: surv
           title: "Probability Estimate"
@@ -508,17 +508,14 @@ items:
         - name: rate
           title: "Crude Event Rate"
           type: number
-          format: zto
         - name: rate_ci_lower
           title: "Lower"
           superTitle: '95% CI'
           type: number
-          format: zto
         - name: rate_ci_upper
           title: "Upper"
           superTitle: '95% CI'
           type: number
-          format: zto
       clearWith:
         - outcome
         - outcomeLevel
@@ -857,17 +854,14 @@ items:
         - name: hazard
           title: "Hazard Rate"
           type: number
-          format: zto
         - name: hazard_lower
           title: "Lower"
           superTitle: '95% CI'
           type: number
-          format: zto
         - name: hazard_upper
           title: "Upper"
           superTitle: '95% CI'
           type: number
-          format: zto
       clearWith:
         - outcome
         - outcomeLevel
@@ -1080,6 +1074,7 @@ items:
       type: Output
       varTitle: 'Redefined Outcome Single Arm'
       varDescription: '`Redefined Outcome - from ${ outcome } for analysis ${ analysistype } in Single Arm Analysis`'
+      measureType: nominal
       clearWith:
           - outcome
           - analysistype

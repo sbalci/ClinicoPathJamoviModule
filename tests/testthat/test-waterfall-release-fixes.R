@@ -533,7 +533,7 @@ test_that("R2-notices: processing errors appear once; plot-only notices follow t
 
 test_that("R2-scale: raw sizes with a 0 mm value are still recognised; progression-heavy data are not 'x100'", {
   sizes <- data.frame(pid = paste0("P", 1:8), size = c(45, 0, 30, 60, 25, 52, 18, 40))
-  expect_match(wf_notices(wf_run(sizes, patientID = "pid", responseVar = "size")), "No negative changes")
+  expect_match(wf_notices(wf_run(sizes, patientID = "pid", responseVar = "size")), "No value below zero")
   prog <- data.frame(pid = paste0("P", 1:8), chg = c(110, 150, 240, 130, 180, 95, 200, 160))
   expect_false(grepl("multiplied by 100", wf_notices(wf_run(prog, patientID = "pid", responseVar = "chg"))))
 })

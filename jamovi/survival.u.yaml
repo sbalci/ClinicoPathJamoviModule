@@ -103,7 +103,7 @@ children:
                         label: Input time type
                       - type: ComboBox
                         name: timetypeoutput
-                        label: Output time type
+                        label: Time Type in Output
       - type: Label
         label: Landmark Analysis
         fitToGrid: true

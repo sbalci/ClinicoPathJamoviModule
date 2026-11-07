@@ -297,12 +297,11 @@ test_that("C22, C24, C28-C29: Boundary rejections, McNemar discordant guards, Cr
 })
 
 # ==============================================================================
-# 2. OPEN DEFECT REGRESSION TESTS (Guarded with skip() per Phase 6)
+# ==============================================================================
+# 2. DEFECT REGRESSION TESTS (VAL-jjbarstats-01 through VAL-jjbarstats-07)
 # ==============================================================================
 
 test_that("VAL-jjbarstats-01 (C10): Paired McNemar test and Cohen's g are invariant to opposite factor level ordering of dep and group", {
-  skip("VAL-jjbarstats-01 open defect: paired 2x2 table(dep, group) does not align factor levels, swapping concordant and discordant pairs. Remove this skip when fixed.")
-
   # Same 60 paired subjects as d_a4 (20 Pos->Pos, 12 Pos->Neg, 4 Neg->Pos, 24 Neg->Neg),
   # but post has factor levels in reversed order c("Neg", "Pos").
   d_rev <- data.frame(
@@ -323,8 +322,6 @@ test_that("VAL-jjbarstats-01 (C10): Paired McNemar test and Cohen's g are invari
 })
 
 test_that("VAL-jjbarstats-02 (C20): Unused factor levels are dropped in .prepareData() and post-NA empty/single-level variables are rejected", {
-  skip("VAL-jjbarstats-02 open defect: .prepareData() omits droplevels() and .validateVariables() runs before complete.cases(). Remove this skip when fixed.")
-
   d_unused <- data.frame(
     dep = factor(c(rep("Pos", 16), rep("Neg", 4), rep("Pos", 6), rep("Neg", 14)), levels = c("Pos", "Neg")),
     grp = factor(c(rep("Drug", 20), rep("Ctrl", 20)), levels = c("Drug", "Ctrl", "GhostArm"))
@@ -343,8 +340,6 @@ test_that("VAL-jjbarstats-02 (C20): Unused factor levels are dropped in .prepare
 })
 
 test_that("VAL-jjbarstats-03 (C23): Assumptions panel matches resultssubtitle=FALSE and typestatistics='bayes' on sparse 2x2 tables", {
-  skip("VAL-jjbarstats-03 open defect: .checkStatisticalAssumptions() ignores resultssubtitle=FALSE and typestatistics='bayes' on sparse 2x2 tables. Remove this skip when fixed.")
-
   d_sp <- data.frame(
     resp = factor(rep(c("Yes", "No", "Yes", "No"), times = c(2, 10, 8, 6)), levels = c("No", "Yes")),
     arm  = factor(rep(c("A", "B"), times = c(12, 14)), levels = c("A", "B"))
@@ -358,8 +353,6 @@ test_that("VAL-jjbarstats-03 (C23): Assumptions panel matches resultssubtitle=FA
 })
 
 test_that("VAL-jjbarstats-04 (C25): Diagnostic preset extreme prevalence check honours weighted counts", {
-  skip("VAL-jjbarstats-04 open defect: diagnostic preset prevalence check uses unweighted table(prepared_data[[dep[1]]]). Remove this skip when fixed.")
-
   d_pw2 <- data.frame(
     dis   = factor(c("Pos", "Pos", "Neg", "Neg"), levels = c("Pos", "Neg")),
     tst   = factor(c("T+", "T-", "T+", "T-"), levels = c("T+", "T-")),
@@ -371,8 +364,6 @@ test_that("VAL-jjbarstats-04 (C25): Diagnostic preset extreme prevalence check h
 })
 
 test_that("VAL-jjbarstats-05 (C07, C21): Zero-cell Fisher subtitle omits OR=0 symmetrically with OR=Inf, and addNA() levels are excluded as missing", {
-  skip("VAL-jjbarstats-05 open defect: .exactSubtitle() treats OR=0 as finite (printing OR=0.00) and .prepareData() keeps addNA() levels. Remove this skip when fixed.")
-
   d_z1 <- data.frame(
     dep = factor(c(rep("Neg", 10), rep("Pos", 5), rep("Neg", 5)), levels = c("Pos", "Neg")),
     grp = factor(c(rep("A", 10), rep("B", 10)), levels = c("A", "B"))
@@ -391,8 +382,6 @@ test_that("VAL-jjbarstats-05 (C07, C21): Zero-cell Fisher subtitle omits OR=0 sy
 })
 
 test_that("VAL-jjbarstats-06 (C19, C27, C30): Seed caption, Bayesian proportiontest disclosure, balloon multi-dep notice, weighted todo N, and r.yaml refs", {
-  skip("VAL-jjbarstats-06 open defect: seed caption shown on deterministic plots, bayes proportiontest claimed, balloon notice in render callback, weighted todo N uses nrow, and r.yaml omits effectsize/BayesFactor. Remove this skip when fixed.")
-
   d_a1 <- data.frame(
     dep = factor(c(rep("Pos", 16), rep("Neg", 4), rep("Pos", 6), rep("Neg", 14)), levels = c("Pos", "Neg")),
     grp = factor(c(rep("Drug", 20), rep("Ctrl", 20)), levels = c("Drug", "Ctrl"))
@@ -401,7 +390,81 @@ test_that("VAL-jjbarstats-06 (C19, C27, C30): Seed caption, Bayesian proportiont
                          proportiontest = TRUE, render_plot = FALSE)
   expect_false(grepl("p-values above the bars", res_bp$summary, fixed = TRUE))
 
-  res_nosub <- run_jbs_test(d_a1, dep = "dep", group = "grp", resultssubtitle = FALSE, bfmessage = TRUE)
-  cap_nosub <- paste(deparse(res_nosub$plot_obj$labels$caption), collapse = " ")
-  expect_false(grepl("Random seed", cap_nosub, fixed = TRUE))
+  # Paired frequentist test with bfmessage=TRUE does not compute a BF caption, so no seed caption
+  res_paired_bf <- run_jbs_test(d_a1, dep = "dep", group = "grp", paired = TRUE,
+                                resultssubtitle = TRUE, bfmessage = TRUE)
+  cap_paired_bf <- paste(deparse(res_paired_bf$plot_obj$labels$caption), collapse = " ")
+  expect_false(grepl("Random seed", cap_paired_bf, fixed = TRUE))
+
+  # Sparse 2x2 table with resultssubtitle=TRUE swaps in Fisher exact subtitle (suppressing BF caption)
+  d_sp2 <- data.frame(
+    dep = factor(c(rep("Pos", 2), rep("Neg", 10), rep("Pos", 8), rep("Neg", 6)), levels = c("Pos", "Neg")),
+    grp = factor(c(rep("Drug", 12), rep("Ctrl", 14)), levels = c("Drug", "Ctrl"))
+  )
+  res_sp_bf <- run_jbs_test(d_sp2, dep = "dep", group = "grp", resultssubtitle = TRUE, bfmessage = TRUE)
+  cap_sp_bf <- paste(deparse(res_sp_bf$plot_obj$labels$caption), collapse = " ")
+  expect_false(grepl("Random seed", cap_sp_bf, fixed = TRUE))
 })
+
+test_that("VAL-jjbarstats-07: Split-by (grvar) subgroup sparse cells and paired subgroup limitations are flagged in notices and assumptions", {
+  # Pooled table has expected counts >= 5, but Site2 has expected counts < 5
+  d_sub <- data.frame(
+    dep  = factor(c(rep("Pos", 15), rep("Neg", 15), rep("Pos", 15), rep("Neg", 15),
+                    rep("Pos", 1),  rep("Neg", 4),  rep("Pos", 4),  rep("Neg", 1)),
+                  levels = c("Pos", "Neg")),
+    grp  = factor(c(rep("A", 30), rep("B", 30), rep("A", 5), rep("B", 5)),
+                  levels = c("A", "B")),
+    site = factor(c(rep("Site1", 60), rep("Site2", 10)), levels = c("Site1", "Site2"))
+  )
+  res_sub <- run_jbs_test(d_sub, dep = "dep", group = "grp", grvar = "site", render_plot = FALSE)
+  expect_match(res_sub$notices, "Subgroup Low Expected Counts", fixed = TRUE)
+  expect_match(res_sub$notices, "Site2", fixed = TRUE)
+  expect_match(res_sub$assump, "Subgroup Chi-square Assumption Violated", fixed = TRUE)
+
+  # Balloon plot supports grvar facetting and paired level alignment
+  opts_b <- jjbarstatsOptions$new(
+    dep = "dep", group = "grp", grvar = "site", addGGPubrBalloon = TRUE
+  )
+  a_b <- jjbarstatsClass$new(options = opts_b, data = d_sub)
+  quiet_jbs(a_b$run())
+  tf_b <- tempfile(fileext = ".svg")
+  svglite::svglite(tf_b, width = 8, height = 5)
+  ok_b <- quiet_jbs(a_b$.__enclos_env__$private$.plotBalloon(a_b$results$balloonPlot))
+  grDevices::dev.off()
+  expect_true(isTRUE(ok_b))
+  svg_b <- paste(readLines(tf_b, warn = FALSE), collapse = "\n")
+  unlink(tf_b)
+  expect_match(svg_b, "Site1", fixed = TRUE)
+  expect_match(svg_b, "Site2", fixed = TRUE)
+})
+
+# =============================================================================
+# 16. SEC-jjbarstats-01 & SEC-jjbarstats-02 defense-in-depth regressions
+# =============================================================================
+test_that("SEC-jjbarstats-01: asSource() safely escapes OptionString (ratio) with quotes and backslashes", {
+  df <- data.frame(
+    d = factor(c("A", "B", "A", "B")),
+    g = factor(c("X", "X", "Y", "Y"))
+  )
+  payload <- "0.5', system('id'), '0.5\\\"\\\\"
+  opts <- jjbarstatsOptions$new(dep = "d", group = "g", ratio = payload)
+  a <- jjbarstatsClass$new(options = opts, data = df)
+  src <- a$asSource()
+  parsed <- base::parse(text = src)
+  expect_length(parsed, 1L)
+  call_obj <- parsed[[1]]
+  expect_equal(as.character(call_obj$ratio), payload)
+})
+
+test_that("SEC-jjbarstats-02: counts summing above 1e7 are rejected before uncount expansion", {
+  df_huge <- data.frame(
+    d = factor(c("A", "B")),
+    g = factor(c("X", "Y")),
+    w = c(6e6, 6e6)
+  )
+  expect_error(
+    quiet_jbs(jjbarstats(data = df_huge, dep = "d", group = "g", counts = "w")),
+    "exceeds the maximum supported"
+  )
+})
+

@@ -17,7 +17,7 @@
     e$Surv <- survival::Surv
     e$`%>%` <- magrittr::`%>%`
     for (f in c("utils.R", "utils-formula.R", "utils-followup.R", "utils-eventindicator.R",
-                "utils-observed-cif.R", "survival-competingrisks.R"))
+                "utils-survivaldata.R", "utils-observed-cif.R", "survival-competingrisks.R"))
       sys.source(file.path(root, "R", f), e)
   }
   if (length(wrappers)) {

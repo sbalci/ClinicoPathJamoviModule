@@ -8,7 +8,7 @@
 A data frame (data.frame) with 80 rows and 56 variables:
 \describe{
   \item{\code{sample_id}}{character; 80 distinct values}
-  \item{\code{os_months}}{numeric, 0.01 to 6.86}
+  \item{\code{os_months}}{numeric, 0.01 to 36}
   \item{\code{vital_status}}{factor with 2 levels: Alive, Dead}
   \item{\code{age}}{numeric, 33 to 79}
   \item{\code{sex}}{factor with 2 levels: Female, Male}
@@ -73,5 +73,11 @@ lassocox_genomic
 }
 \description{
 Example dataset for the \code{lassocox} analysis.
+}
+\details{
+High-dimensional example: 53 candidate columns (50 genes) for 80
+patients, 48 \code{Dead} and 32 \code{Alive}. Six genes carry a true effect. Regenerated
+on 2026-11-07 with a baseline hazard; the earlier version had only 2 censored rows
+and could not be fitted.
 }
 \keyword{datasets}

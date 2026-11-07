@@ -119,8 +119,8 @@ test_that("exported upstream code reproduces mixed-factor fitting and missing ro
     pr$.clearAnalysisOutputs()
     expect_null(a$results$path_plot$state)
     expect_equal(a$results$encoding$rowCount, 0L)
-    expect_equal(a$results$rCode$content, "")
-    expect_equal(a$results$summaryText$content, "")
+    expect_equal(a$results$rCode$content, "<div></div>")
+    expect_equal(a$results$summaryText$content, "<div></div>")
     expect_false(pr$.pathPlot(a$results$path_plot, ggplot2::theme_minimal(), NULL))
   }
 })

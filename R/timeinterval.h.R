@@ -10,7 +10,7 @@ timeintervalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
             fu_date = NULL,
             time_format = "auto",
             output_unit = "months",
-            time_basis = "standardized",
+            time_basis = "calendar",
             use_landmark = FALSE,
             landmark_time = 6,
             remove_negative = FALSE,
@@ -76,7 +76,7 @@ timeintervalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                 options=list(
                     "standardized",
                     "calendar"),
-                default="standardized")
+                default="calendar")
             private$..use_landmark <- jmvcore::OptionBool$new(
                 "use_landmark",
                 use_landmark,
@@ -309,18 +309,23 @@ timeintervalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   date, study exit). Must be in the same format as the start date variable.
 #'   Spreadsheet day-count serial numbers are rejected for the same reason as
 #'   the start date column.
-#' @param time_format Date format specification. 'Auto-detect' attempts to
-#'   identify the format automatically. Manual selection ensures accurate
-#'   parsing for specific date formats. Two-digit years are read as 2000-2068
-#'   for 00-68 and as 1969-1999 for 69-99; a message reports how many values
-#'   were parsed that way.
+#' @param time_format Date format specification. 'Auto-detect' identifies the
+#'   format from the shape of the text, including day-first and month-first
+#'   dates with a time of day, and year-month dates, which have no day and are
+#'   set to the 1st of the month with a warning. Manual selection ensures
+#'   accurate parsing for specific date formats; a value that cannot have the
+#'   selected format is left empty. Two-digit years are read as 2000-2068 for
+#'   00-68 and as 1969-1999 for 69-99; a message reports how many values were
+#'   parsed that way.
 #' @param output_unit Unit for calculated time intervals. Affects person-time
 #'   calculations and  statistical summaries. Choose based on study duration and
 #'   event frequency.
-#' @param time_basis Controls how months/years are computed. Standardized uses
-#'   fixed lengths (30.4375 days per month, 365.25 days per year) suited for
-#'   person-time denominators. Calendar-aware respects actual month lengths (28
-#'   - 31 days) when converting intervals to months/years.
+#' @param time_basis Controls how months/years are computed. Calendar-aware
+#'   (the default) respects actual month lengths (28 - 31 days), as the survival
+#'   analyses in this module do when they compute time from dates, so the same
+#'   dates give the same months. Standardized uses fixed lengths (30.4375 days
+#'   per month, 365.25 days per year), a constant unit for person-time
+#'   denominators.
 #' @param use_landmark Enables conditional analysis from a specific time
 #'   point. Useful for  studying outcomes conditional on having been followed to
 #'   a landmark time (for example, only participants with at least 6 months of
@@ -359,13 +364,13 @@ timeintervalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   incidence rate, landmark analysis, etc.) to help interpret results.
 #' @param timezone Timezone for datetime parsing. 'System Default' uses your
 #'   computer's timezone. 'UTC' interprets datetimes as Coordinated Universal
-#'   Time. This applies only to the 'YYYY-MM-DD HH:MM:SS' format, the only one
-#'   that carries a time of day; date-only formats produce calendar dates that
-#'   have no timezone, so the setting has no effect on them. Note that it
-#'   changes the reported DURATIONS as well as the parsing: a zone with daylight
-#'   saving gains or loses an hour at each transition, so an interval spanning
-#'   one comes out an hour short under 'System Default' and exact under 'UTC'.
-#'   Choose UTC if you need durations unaffected by daylight saving.
+#'   Time. This applies only to values carrying a time of day; date-only formats
+#'   produce calendar dates that have no timezone, so the setting has no effect
+#'   on them. Note that it changes the reported DURATIONS as well as the
+#'   parsing: a zone with daylight saving gains or loses an hour at each
+#'   transition, so an interval spanning one comes out an hour short under
+#'   'System Default' and exact under 'UTC'. Choose UTC if you need durations
+#'   unaffected by daylight saving.
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$messages} \tab \tab \tab \tab \tab a html \cr
@@ -387,7 +392,7 @@ timeinterval <- function(
     fu_date = NULL,
     time_format = "auto",
     output_unit = "months",
-    time_basis = "standardized",
+    time_basis = "calendar",
     use_landmark = FALSE,
     landmark_time = 6,
     remove_negative = FALSE,

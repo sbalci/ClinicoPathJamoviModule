@@ -316,17 +316,48 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
           # recorded on a follow-up row (e.g. a new lesion at week 12) was ignored.
           field <- private$.resolvePatientField(source_df, src_pid_name, categoryVar, timeVar,
                                                 normalize = private$.normaliseCategory)
-          if (length(field$conflicts) > 0) {
-            private$.addNotice(
-              type = "WARNING",
-              title = .("Conflicting category overrides"),
-              content = sprintf(
-                .("%d patient(s) have more than one response category override across their rows: %s. The first recorded value is used. Enter one category per patient."),
-                length(field$conflicts), paste(utils::head(field$conflicts, 10), collapse = ", "))
-            )
-          }
           idx <- match(wdf[[pidCol]], field$ids)
           user_cat <- private$.normaliseCategory(as.character(field$value)[idx])
+
+          # Values that differ within a patient are per-visit (timepoint)
+          # responses, as in long trial data. Taking the earliest one made a
+          # patient with SD, PR, PR an SD. Derive the best response from them
+          # instead: in time order up to and including the first PD, the best of
+          # CR > PR > SD > PD; NE / Unknown visits do not count.
+          ids_all <- source_df[[src_pid_name]]
+          cat_all <- private$.normaliseCategory(source_df[[categoryVar]])
+          keep <- !is.na(ids_all) & !is.na(cat_all) & cat_all != ""
+          has_time <- !is.null(timeVar) && timeVar %in% names(source_df)
+          o <- if (has_time) order(jmvcore::toNumeric(source_df[[timeVar]]), na.last = TRUE)
+               else seq_along(ids_all)
+          o <- o[keep[o]]
+          u <- unique(ids_all[o])
+          seqs <- split(cat_all[o], factor(match(ids_all[o], u), levels = seq_along(u)))
+          multi <- vapply(seqs, function(s) length(unique(s)) > 1, logical(1))
+          if (any(multi)) {
+            ranks <- c("CR", "PR", "SD", "PD")
+            derive <- function(s) {
+              s <- s[s %in% ranks]
+              if (length(s) == 0) return(NA_character_)
+              pd <- match("PD", s)
+              if (!is.na(pd)) s <- s[seq_len(pd)]
+              ranks[ranks %in% s][1]
+            }
+            derived <- vapply(seqs[multi], derive, character(1))
+            j <- match(wdf[[pidCol]], u[multi])
+            use <- !is.na(j) & !is.na(derived[j])
+            user_cat[use] <- derived[j[use]]
+            private$.addNotice(
+              type = "WARNING",
+              title = .("Several response categories per patient"),
+              content = sprintf(
+                if (has_time)
+                  .("%d patient(s) have more than one supplied response category across their rows: %s. They were read as per-visit responses: each patient's category is the best one in time order up to and including the first PD (CR, then PR, then SD, then PD); NE or Unknown visits do not count, and responses are not confirmed. If the values are not per-visit responses, enter one category per patient.")
+                else
+                  .("%d patient(s) have more than one supplied response category across their rows: %s. They were read as per-visit responses in row order (no time variable is selected): each patient's category is the best one up to and including the first PD (CR, then PR, then SD, then PD); NE or Unknown visits do not count, and responses are not confirmed. Select the time variable, or enter one category per patient."),
+                sum(multi), paste(utils::head(.patientIDLabels(u[multi]), 10), collapse = ", "))
+            )
+          }
 
           # recist_category is a factor with levels CR/PR/SD/PD/Unknown. Assigning
           # a label outside that set silently produced NA (with an "invalid factor
@@ -345,7 +376,7 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
               type = "WARNING",
               title = .("Response category override ignored"),
               content = sprintf(
-                .("The response category override contained %d unrecognised label(s): %s. Only CR, PR, SD, PD and Unknown are accepted. Those patients keep their computed category; no patient was dropped."),
+                .("The response category override contained %d unrecognized label(s): %s. Only CR, PR, SD, PD (or their full names, such as Partial response) and NE or Unknown are accepted. Those patients keep their computed category; no patient was dropped."),
                 length(rejected), paste(rejected, collapse = ", "))
             )
           }
@@ -353,6 +384,17 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
           if (any(ok)) {
             # Match back to the canonical capitalisation of the factor levels.
             wdf$recist_category[ok] <- valid[match(user_cat[ok], recognised)]
+          }
+          # A supplied NE makes the patient not evaluable; name them, so the
+          # "reasons in the notices" of the copy-ready text holds.
+          ne <- ok & user_cat == "UNKNOWN"
+          if (any(ne)) {
+            private$.addNotice(
+              type = "INFO",
+              title = .("Not evaluable by supplied category"),
+              content = sprintf(
+                .("%d patient(s) have a supplied category of NE or Unknown and are reported as not evaluable: %s."),
+                sum(ne), paste(utils::head(.patientIDLabels(wdf[[pidCol]][ne]), 10), collapse = ", ")))
           }
           # Which patients' categories were supplied; counted (evaluable ones
           # only) after the invalid-raw reset in .accountForUnevaluablePatients.
@@ -790,20 +832,27 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
           }
 
           raw_like <- FALSE
+          zero_baseline <- FALSE
           if (!is.null(timeVar) && timeVar %in% names(df)) {
             tv <- jmvcore::toNumeric(df[[timeVar]])
             at0 <- !is.na(tv) & tv == 0 & !is.na(v)
             # A percent change at the time = 0 baseline is 0 by definition.
             raw_like <- sum(at0) >= 2 && mean(v[at0] != 0) >= 0.5
+            # Explicit 0% baseline rows show the column IS percent change, so
+            # values that are all >= 0 are genuine growth, not a scale mix-up.
+            zero_baseline <- any(at0 & v == 0)
           }
           if (raw_like) {
             # Fatal: every category and rate computed from raw sizes read as
             # percentages is wrong (an example saved this way showed ORR 0%).
             private$.rejectRun(.("The data input type is Percentage changes, but the time = 0 values are not 0%: these look like raw tumor measurements. Set Data Input Type to Raw measurements so percent changes are computed from the baseline."))
-          } else if (is.null(timeVar) && all(x >= 0) && any(x > 0)) {
+          } else if (!zero_baseline && all(x >= 0) && any(x > 0)) {
+            # Also with a time variable: long data with no time = 0 row escaped the
+            # raw_like test above, and "percent of baseline" values (100 = no
+            # change) made every patient PD with nothing said.
             # (>= 0: raw sizes include 0 mm for a complete response)
-            private$.addNotice("WARNING", .("No negative changes"),
-              .("Every response value is positive, so no patient shrank at all. If these are raw tumor sizes rather than percent changes, set Data Input Type to Raw measurements and add a time variable."))
+            private$.addNotice("STRONG_WARNING", .("No value below zero"),
+              .("Every response value is 0 or above. Read as percent changes, no tumor shrank, so no patient can be a complete or partial response. If 100 means no change (tumor size as a percent of baseline), subtract 100 from every value. If these are raw tumor sizes, set Data input type to Raw measurements with a time variable whose baseline is 0. If they are genuine percent changes, the categories stand."))
           }
           invisible(NULL)
         },
@@ -846,6 +895,11 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         .normaliseCategory = function(x) {
           u <- toupper(trimws(as.character(x)))
           u[!is.na(u) & u %in% c("NE", "N/E", "NOT EVALUABLE", "NOT EVALUATED", "UNK", "UNKNOWN")] <- "UNKNOWN"
+          # The full names, as Swimmer Plot reads them.
+          u[!is.na(u) & u %in% c("COMPLETE RESPONSE", "COMPLETE REMISSION")] <- "CR"
+          u[!is.na(u) & u %in% c("PARTIAL RESPONSE", "PARTIAL REMISSION")] <- "PR"
+          u[!is.na(u) & u %in% c("STABLE DISEASE")] <- "SD"
+          u[!is.na(u) & u %in% c("PROGRESSIVE DISEASE")] <- "PD"
           u
         },
 
@@ -979,7 +1033,8 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
           if (missing_responses > 0) {
             validation_messages <- c(validation_messages, paste0(
               "<br>",
-              sprintf(.("Warning: %d missing response values found. These will be excluded from analysis."),
+              # A supplied response category still counts a patient with no value.
+              sprintf(.("Warning: %d missing response values found. Those rows take no part in best response; a patient with no value at all is excluded unless a response category is supplied for them."),
                       missing_responses)
             ))
           }
@@ -1096,15 +1151,18 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             dplyr::select(!!patientID, !!responseVar)
 
           if (nrow(large_growth) > 0) {
-          # Escape printed data-frame rows before HTML interpolation
+          # "patient (value%)" pairs, escaped before HTML interpolation; a
+          # printed data frame put row numbers and column headers in the notice.
           safe_large_growth <- paste(
-              htmltools::htmlEscape(capture.output(print(large_growth))),
-              collapse = "<br>"
+              htmltools::htmlEscape(sprintf("%s (%s%%)",
+                  .patientIDLabels(large_growth[[patientID]]),
+                  format(large_growth[[responseVar]], trim = TRUE))),
+              collapse = ", "
           )
           validation_messages <- c(validation_messages, paste0(
               "<br>", .("Unusually Large Growth Values Detected:"),
               "<br>", .("The following measurements show >200% growth:"),
-              safe_large_growth,
+              " ", safe_large_growth,
               "<br><br>", .("While such large increases are possible, please verify:"),
               "<br>- ", .("Measurement accuracy"),
               "<br>- ", .("Calculation methods"),
@@ -1127,7 +1185,10 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
         # Add checks for unrealistic values if response data is available
         if (responseVar %in% names(df)) {
-          response_values <- df[[responseVar]][!is.na(df[[responseVar]])]
+          # toNumeric(): a jamovi Nominal-Integer column is a factor with values,
+          # and `<` on a factor is NA, so the negative-size check never ran.
+          rv_all <- jmvcore::toNumeric(df[[responseVar]])
+          response_values <- rv_all[!is.na(rv_all)]
           if (length(response_values) > 0) {
             if (inputType == "percentage") {
               # For percentage data, check for extreme values
@@ -2544,7 +2605,9 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         # renderer used to say so only via message(), which jamovi never shows.
         if (isTRUE(self$options$showCI) && isTRUE(self$options$showWaterfallPlot) &&
             !is.null(processed_data$waterfall)) {
-          n_ci <- sum(!is.na(processed_data$waterfall$response))
+          # Bars drawn = measured AND evaluable (a supplied NE has no bar).
+          n_ci <- sum(!is.na(processed_data$waterfall$response) &
+                        as.character(processed_data$waterfall$recist_category) != "Unknown")
           if (n_ci < 10) {
             # Same quantity the renderer tests (evaluable patients), so the notice
             # cannot promise an interval the plot then leaves out.
@@ -2769,11 +2832,15 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         # before the x positions are assigned and say so in the caption.
         # A patient with a supplied category but no measured change is evaluable
         # (in the rates) and still has no bar: captioned separately.
+        # A patient made not evaluable by a supplied NE keeps a measured value;
+        # it is dropped too, so it is neither a bar nor part of the median.
         na_resp <- is.na(df$response)
         cat_chr <- if ("recist_category" %in% names(df)) as.character(df$recist_category) else rep(NA_character_, nrow(df))
-        n_not_shown <- sum(na_resp & (is.na(cat_chr) | cat_chr == "Unknown"))
-        n_supplied_nobar <- sum(na_resp) - n_not_shown
-        df <- df[!na_resp, , drop = FALSE]
+        unk <- !is.na(cat_chr) & cat_chr == "Unknown"
+        drop_bar <- na_resp | unk
+        n_not_shown <- sum(unk | (na_resp & is.na(cat_chr)))
+        n_supplied_nobar <- sum(drop_bar) - n_not_shown
+        df <- df[!drop_bar, , drop = FALSE]
         if (nrow(df) == 0) return(FALSE)
 
         # Define colorblind-safe color schemes

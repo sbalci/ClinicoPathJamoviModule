@@ -27,7 +27,8 @@
       env$Surv <- survival::Surv
       env$`%>%` <- magrittr::`%>%`
       for (f in c("00jmv.R", "utils.R", "utils-Notices.R", "utils-formula.R",
-                  "utils-eventindicator.R", "utils-followup.R", "survival-competingrisks.R",
+                  "utils-eventindicator.R", "utils-followup.R", "utils-survivaldata.R",
+                  "survival-competingrisks.R",
                   "multisurvival-formula.R", "multisurvival-interactions.R",
                   "multisurvival-metrics.R", "multisurvival-nomogram.R",
                   "multisurvival.h.R", "multisurvival.b.R")) {

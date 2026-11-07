@@ -43,6 +43,7 @@ items:
         - clinicalpreset
         - typestatistics
         - seed
+        - addGGPubrBalloon
 
     - name: about
       title: About This Analysis
@@ -98,14 +99,23 @@ items:
       renderFun: .plotBalloon
       requiresData: true
       visible: (addGGPubrBalloon)
+      clearWith:
+        - dep
+        - group
+        - grvar
+        - counts
+        - paired
+        - addGGPubrBalloon
+        - ggpubrBalloonPalette
 
 
 refs:
     - ClinicoPathJamoviModule
     - ggstatsplot
     - statsExpressions
+    - effectsize
+    - BayesFactor
     - Fagerland2013
     - ggpubr
     - digest
-    - ggthemes
 ...

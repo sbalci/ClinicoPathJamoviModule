@@ -140,7 +140,7 @@ analyses:
   - title: Cross Tables
     name: crosstable
     ns: ClinicoPath
-    menuGroup: Exploration
+    menuGroup: ExplorationT
     menuSubgroup: ClinicoPath Comparisons
     menuTitle: Cross Tables
     description: Function for making Cross Tables with multiple table styles.
@@ -935,7 +935,7 @@ analyses:
   - title: Chi-Square Post-Hoc Tests
     name: chisqposttest
     ns: ClinicoPath
-    menuGroup: Exploration
+    menuGroup: ExplorationT
     menuTitle: Chi-Square Post-Hoc Tests
     menuSubgroup: ClinicoPath Comparisons
     description: >
@@ -1074,6 +1074,12 @@ analyses:
     menuSubtitle: Cut-off & Univariate Survival Analysis
     ribbon: analyses
     category: analyses
+    description: >-
+      Survival analysis for one continuous explanatory variable: Cox regression
+      on the continuous scale, and optional data-derived cut-offs with
+      Kaplan-Meier groups. A cut-off chosen from the same data overstates the
+      effect and needs independent validation. These methods describe
+      associations and do not establish causality.
   - title: Multivariable Survival Analysis
     name: multisurvival
     ns: ClinicoPath
@@ -1083,7 +1089,8 @@ analyses:
     menuSubtitle: Multivariable Cox-regression, Adjusted Survival
     description: >-
       Performs multivariable survival analysis using Cox proportional hazards
-      regression. In multivariable survival analysis, person-time follow-up is
+      regression. With competing events it fits a Fine-Gray subdistribution
+      hazard model. In multivariable survival analysis, person-time follow-up is
       crucial for properly adjusting for covariates while accounting for varying
       observation periods. The Cox proportional hazards model incorporates
       person-time by modeling the hazard function, which represents the
@@ -1802,7 +1809,7 @@ analyses:
   - title: Bar Charts
     name: jjbarstats
     ns: ClinicoPath
-    menuGroup: JJStatsPlot
+    menuGroup: JJStatsPlotT
     menuSubgroup: Categorical vs Categorical
     menuTitle: Bar Charts
     description: >

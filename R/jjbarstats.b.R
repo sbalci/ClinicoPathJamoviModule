@@ -9,7 +9,7 @@
 #'
 #' @return An \code{R6} class generator object for the \code{jjbarstatsClass} backend; used internally by the jamovi analysis wrapper and not called directly.
 
-jjbarstatsClass <- if (requireNamespace('jmvcore'))
+jjbarstatsClass <- if (requireNamespace("jmvcore"))
     R6::R6Class(
         "jjbarstatsClass",
         inherit = jjbarstatsBase,
@@ -23,10 +23,9 @@ jjbarstatsClass <- if (requireNamespace('jmvcore'))
             .data_hash = NULL,
             .validation_passed = FALSE,
 
-            # Notice collection helpers. A single Preformatted (plain-text) output item:
-            # avoids BOTH the jmvcore::Notice serialization error from
-            # self$results$insert(999, Notice) AND any HTML in notices (project convention:
-            # notice content must be plain text). ====
+            # Notice collection helpers. A single Preformatted (plain-text) output item
+            # keeps all notices in plain text (project convention) and avoids fragile
+            # positional Group$insert() index arithmetic. ====
             .noticeList = list(),
 
             .addNotice = function(type, title, content) {
@@ -130,7 +129,7 @@ jjbarstatsClass <- if (requireNamespace('jmvcore'))
                 
                 missing_vars <- all_vars[!all_vars %in% names(self$data)]
                 if (length(missing_vars) > 0) {
-                    jmvcore::reject(.('Variables not found in data: {vars}'),
+                    jmvcore::reject(.("Variables not found in data: {vars}"),
                                     vars = paste(missing_vars, collapse = ", "))
                 }
                 
@@ -178,22 +177,31 @@ jjbarstatsClass <- if (requireNamespace('jmvcore'))
                         jmvcore::reject(.("Counts variable '{var}' sums to zero - there are no observations to analyze."),
                                         var = counts_var)
                     }
+                    if (sum(count_values) > 1e7) {
+                        jmvcore::reject(
+                            "Total frequency count exceeds the maximum supported for plot expansion (10,000,000). Verify that the counts variable contains frequency weights."
+                        )
+                    }
                 }
                 
                 # Enhanced validation for statistical tests
-                private$.validateStatisticalRequirements(dep_vars, group_var)
+                private$.validateStatisticalRequirements(dep_vars, group_var, self$data, drop_unused = FALSE)
                 
                 return(TRUE)
             },
 
-            .validateStatisticalRequirements = function(dep_vars, group_var) {
+            .validateStatisticalRequirements = function(dep_vars, group_var, data = self$data, drop_unused = TRUE) {
                 # WEIGHTED GROUP SIZES: Use weighted counts, not row counts
-                if (!is.null(group_var) && group_var %in% names(self$data)) {
+                if (!is.null(group_var) && group_var %in% names(data)) {
                     # Checkpoint before table calculation
                     private$.checkpoint(flush = FALSE)
 
                     # Get weighted group sizes
-                    group_sizes <- private$.getWeightedGroupCounts(self$data, group_var)
+                    group_sizes <- if (drop_unused) {
+                        private$.getWeightedGroupCounts(data, group_var)
+                    } else {
+                        table(data[[group_var]], useNA = "no")
+                    }
 
                     # NOTE: User-facing data-quality warnings (small groups, zero cells,
                     # low expected counts) are emitted via private$.emitDataQualityNotices()
@@ -206,12 +214,15 @@ jjbarstatsClass <- if (requireNamespace('jmvcore'))
 
                 # Check dependent variables have sufficient variation
                 for (dep_var in dep_vars) {
-                    if (!is.null(dep_var) && dep_var %in% names(self$data)) {
+                    if (!is.null(dep_var) && dep_var %in% names(data)) {
                         # Checkpoint before each table calculation in loop
                         private$.checkpoint(flush = FALSE)
 
-                        # Non-missing levels; the same count for weighted and unweighted data
-                        dep_levels_count <- length(table(self$data[[dep_var]], useNA = "no"))
+                        dep_levels_count <- if (drop_unused) {
+                            length(private$.getWeightedGroupCounts(data, dep_var))
+                        } else {
+                            length(table(data[[dep_var]], useNA = "no"))
+                        }
 
                         if (dep_levels_count < 2) {
                             jmvcore::reject(.("Variable '{var}' has insufficient variation (only {n} level). Need at least 2 categories."),
@@ -347,7 +358,8 @@ jjbarstatsClass <- if (requireNamespace('jmvcore'))
                     "<p><strong>Variables Analyzed:</strong> ", dep_vars, " by ", htmltools::htmlEscape(self$options$group), "</p>",
                     "<p><strong>Sample Size:</strong> ", n_total, " observations across ", n_groups, " groups</p>",
                     "<p><strong>Statistical Method:</strong> ", test_method, "</p>",
-                    if (isTRUE(private$.option("proportiontest")))
+                    if (isTRUE(private$.option("proportiontest")) &&
+                        !identical(private$.option("typestatistics"), "bayes"))
                         "<p><strong>Proportion Tests:</strong> one goodness-of-fit test per group; the p-values above the bars are not adjusted for multiple testing</p>"
                     else "",
                     if (!is.null(self$options$grvar)) paste0(
@@ -375,10 +387,11 @@ jjbarstatsClass <- if (requireNamespace('jmvcore'))
                 if (is.null(raw) || !nzchar(trimws(raw)))
                     return(none)
 
-                warn <- function(msg)
+                warn <- function(msg) {
                     list(ratio = NULL,
-                         notice = list('WARNING', 'Expected proportions ignored',
+                         notice = list("WARNING", "Expected proportions ignored",
                                        paste0(msg, " Equal proportions were used instead.")))
+                }
 
                 vals <- suppressWarnings(as.numeric(trimws(strsplit(raw, ",")[[1]])))
 
@@ -400,7 +413,7 @@ jjbarstatsClass <- if (requireNamespace('jmvcore'))
                 if (abs(sum(vals) - 1) > 0.001) {
                     norm <- vals / sum(vals)
                     return(list(ratio = norm,
-                                notice = list('INFO', 'Expected proportions rescaled',
+                                notice = list("INFO", "Expected proportions rescaled",
                                     sprintf("'%s' sums to %.3f, so it was rescaled to sum to 1: %s.",
                                             raw, sum(vals), paste(round(norm, 3), collapse = ", ")))))
                 }
@@ -452,7 +465,7 @@ jjbarstatsClass <- if (requireNamespace('jmvcore'))
                     # A zero cell sends the odds ratio to 0 or Inf; omit it rather
                     # than print an uninterpretable bound.
                     or <- unname(ft$estimate)
-                    has_or <- is.finite(or) && all(is.finite(ft$conf.int))
+                    has_or <- is.finite(or) && or > 0 && all(is.finite(ft$conf.int))
 
                     txt <- if (has_or)
                         sprintf('list(italic("p")["Fisher"] == "%s", widehat(italic("OR")) == "%s", CI["%g%%"] ~ "[" * "%s", "%s" * "]", italic("n")["obs"] == "%d")',
@@ -528,8 +541,11 @@ jjbarstatsClass <- if (requireNamespace('jmvcore'))
                 # Check group sizes for chi-square validity across every dependent variable.
                 # Not for paired data: McNemar uses only the discordant pairs, has no
                 # expected-count rule, and Fisher's exact test assumes independent samples.
+                # Not for Bayesian analysis: the Dirichlet-multinomial Bayes factor does not
+                # rely on asymptotic chi-square expected-count approximations.
                 if (self$options$group %in% names(analysis_data) &&
-                    !isTRUE(private$.option("paired"))) {
+                    !isTRUE(private$.option("paired")) &&
+                    !identical(private$.option("typestatistics"), "bayes")) {
                     for (dep_var_check in self$options$dep) {
                         if (!(dep_var_check %in% names(analysis_data)))
                             next
@@ -564,18 +580,17 @@ jjbarstatsClass <- if (requireNamespace('jmvcore'))
                                     # subtitle was replaced with the exact test,
                                     # telling the reader to disregard it would
                                     # recreate the contradiction being fixed.
-                                    if (!is.null(private$.exactSubtitle(analysis_data, dep_var_check)))
+                                    if (isTRUE(private$.option("resultssubtitle")) &&
+                                        !is.null(private$.exactSubtitle(analysis_data, dep_var_check)))
                                         paste0(
                                             " <strong>Exact test used:</strong> ",
                                             "a chi-squared is unreliable at these expected counts, ",
                                             "so the chart subtitle reports Fisher's exact test instead.")
                                     else paste0(
-                                        " <strong>Use the exact test, not the plot subtitle:</strong> ",
-                                        "the chart reports an uncorrected Pearson chi-squared, which is ",
-                                        "unreliable at these expected counts, and the plotting package ",
-                                        "offers no exact-test option for this chart. ",
+                                        " <strong>Use Fisher's exact test:</strong> ",
+                                        "an uncorrected Pearson chi-squared is unreliable at these expected counts. ",
                                         if (is.finite(fisher_p))
-                                            sprintf("Fisher's exact test on this table gives <strong>%s</strong>; quote that value.",
+                                            sprintf("Fisher's exact test on this table gives <strong>%s</strong>; quote that value (or enable 'Statistical results in subtitle' to display it on the chart).",
                                                     private$.fmtP(fisher_p))
                                         else
                                             "Fisher's exact test could not be computed for this table.")))
@@ -584,6 +599,22 @@ jjbarstatsClass <- if (requireNamespace('jmvcore'))
                                 recommendations <- c(recommendations,
                                     " <strong>Recommendation:</strong> Consider combining categories or using non-parametric methods. Fisher's exact test is only available for 2\u00d72 tables."
                                 )
+                            }
+                        }
+
+                        # Check split-by (grvar) strata for sparse expected counts
+                        if (!is.null(self$options$grvar) && self$options$grvar %in% names(analysis_data)) {
+                            strata <- split(analysis_data, analysis_data[[self$options$grvar]], drop = TRUE)
+                            sparse_strata <- names(Filter(function(st_df) {
+                                isTRUE(private$.computeFisherDecision(st_df, dep_var_check)$assumption_violated)
+                            }, strata))
+                            if (length(sparse_strata) > 0) {
+                                warnings <- c(warnings, sprintf(
+                                    " <strong>Subgroup Chi-square Assumption Violated (%s by %s):</strong> Subgroup(s) %s have expected cell counts < 5; split-by panels report uncorrected Pearson chi-squared p-values.",
+                                    htmltools::htmlEscape(dep_var_check),
+                                    htmltools::htmlEscape(self$options$grvar),
+                                    htmltools::htmlEscape(paste(sparse_strata, collapse = ", "))
+                                ))
                             }
                         }
                     }
@@ -605,10 +636,14 @@ jjbarstatsClass <- if (requireNamespace('jmvcore'))
                     "<p><strong>General Assumptions:</strong></p>",
                     "<ul>",
                     "<li>Variables are categorical or ordinal</li>",
-                    # Paired observations are dependent by design, and McNemar has no
-                    # expected-count rule.
-                    if (isTRUE(private$.option("paired"))) "<li>Paired observations (matched subjects); the pairs are independent of one another</li>"
-                    else "<li>Observations are independent</li><li>Expected cell counts \u2265 5 for chi-square validity</li>",
+                    # Paired observations are dependent by design, and McNemar and Bayes
+                    # have no chi-squared expected-count rule.
+                    if (identical(private$.option("typestatistics"), "bayes"))
+                        "<li>Observations follow a multinomial/Dirichlet contingency table sampling model</li>"
+                    else if (isTRUE(private$.option("paired")))
+                        "<li>Paired observations (matched subjects); the pairs are independent of one another</li>"
+                    else
+                        "<li>Observations are independent</li><li>Expected cell counts \u2265 5 for chi-square validity</li>",
                     "</ul>",
 
                     if (length(warnings) > 0) paste0(
@@ -641,10 +676,13 @@ jjbarstatsClass <- if (requireNamespace('jmvcore'))
                 dfstar <- dfstar[!is.na(dfstar)]
                 v_line <- if (length(dfstar) == 0 || all(dfstar == 1))
                     "<li><strong>Cram\u00e9r's V (bias-corrected):</strong> 0.1 (small), 0.3 (medium), 0.5 (large)</li>"
-                else paste0(vapply(sort(unique(dfstar)), function(k) sprintf(
-                    "<li><strong>Cram\u00e9r's V (bias-corrected), %s:</strong> %.2f (small), %.2f (medium), %.2f (large); Cohen's cut-offs divided by the square root of min(rows, columns) - 1 = %d</li>",
-                    htmltools::htmlEscape(paste(names(dfstar)[dfstar == k], collapse = ", ")),
-                    0.1 / sqrt(k), 0.3 / sqrt(k), 0.5 / sqrt(k), as.integer(k)), character(1)), collapse = "")
+                else paste0(vapply(sort(unique(dfstar)), function(k) {
+                    sprintf(
+                        "<li><strong>Cram\u00e9r's V (bias-corrected), %s:</strong> %.2f (small), %.2f (medium), %.2f (large); Cohen's cut-offs divided by the square root of min(rows, columns) - 1 = %d</li>",
+                        htmltools::htmlEscape(paste(names(dfstar)[dfstar == k], collapse = ", ")),
+                        0.1 / sqrt(k), 0.3 / sqrt(k), 0.5 / sqrt(k), as.integer(k)
+                    )
+                }, character(1)), collapse = "")
 
                 # There is no results table in jjbarstats.r.yaml: Cramer's V and its
                 # confidence interval exist only inside the ggstatsplot subtitle, and
@@ -734,7 +772,8 @@ jjbarstatsClass <- if (requireNamespace('jmvcore'))
                     " and ", htmltools::htmlEscape(self$options$group), " using ",
                     private$.methodDescription(analysis_data), ". ",
                     
-                    if (isTRUE(private$.option("proportiontest")))
+                    if (isTRUE(private$.option("proportiontest")) &&
+                        !identical(private$.option("typestatistics"), "bayes"))
                         "Proportion tests were carried out within each group; their p-values are not adjusted for multiple testing. "
                     else "",
                     
@@ -772,8 +811,29 @@ jjbarstatsClass <- if (requireNamespace('jmvcore'))
                 }
             },
 
+            # Align factor levels of dep and group for paired 2x2 McNemar analysis when
+            # both variables share the same two category labels.
+            .alignPairedLevels = function(data, dep_var, group_var) {
+                if (is.null(dep_var) || is.null(group_var) ||
+                    !(dep_var %in% names(data)) || !(group_var %in% names(data))) {
+                    return(data)
+                }
+                x <- data[[dep_var]]
+                y <- data[[group_var]]
+                lvls_x <- if (is.factor(x)) levels(droplevels(x)) else sort(unique(as.character(stats::na.omit(x))))
+                lvls_y <- if (is.factor(y)) levels(droplevels(y)) else sort(unique(as.character(stats::na.omit(y))))
+                if (length(lvls_x) == 2L && length(lvls_y) == 2L && setequal(lvls_x, lvls_y)) {
+                    data[[dep_var]] <- factor(as.character(x), levels = lvls_x)
+                    data[[group_var]] <- factor(as.character(y), levels = lvls_x)
+                }
+                data
+            },
+
             # Helper function to create weighted contingency table
             .getWeightedTable = function(data, var1, var2) {
+                if (isTRUE(private$.option("paired"))) {
+                    data <- private$.alignPairedLevels(data, var1, var2)
+                }
                 if (!is.null(self$options$counts) && self$options$counts %in% names(data)) {
                     # Weighted contingency table using xtabs
                     formula_str <- paste0(jmvcore::composeTerm(self$options$counts),
@@ -796,10 +856,11 @@ jjbarstatsClass <- if (requireNamespace('jmvcore'))
                                          by = list(group = data[[group_var]]),
                                          FUN = sum, na.rm = TRUE)
                     group_counts <- setNames(agg_data$x, agg_data$group)
-                    return(group_counts)
+                    return(group_counts[group_counts > 0])
                 } else {
-                    # Unweighted: simple table
-                    return(table(data[[group_var]], useNA = "no"))
+                    # Unweighted: simple table of observed (non-empty) categories
+                    tb <- table(droplevels(as.factor(data[[group_var]])), useNA = "no")
+                    return(tb[tb > 0])
                 }
             },
 
@@ -819,7 +880,7 @@ jjbarstatsClass <- if (requireNamespace('jmvcore'))
                     # Not for paired data: an empty discordant cell is a result, and a
                     # paired 2x2 cannot be collapsed.
                     if (!isTRUE(private$.option("paired")) && any(cross_table == 0)) {
-                        private$.addNotice('WARNING', 'Zero-Count Cells', sprintf(
+                        private$.addNotice("WARNING", "Zero-Count Cells", sprintf(
                             "Variable '%s' vs '%s': some cells have zero counts. Consider collapsing categories.",
                             dep_var, group_var
                         ))
@@ -830,31 +891,45 @@ jjbarstatsClass <- if (requireNamespace('jmvcore'))
                         identical(private$.option("typestatistics"), "bayes"))
                         next
                     fc <- private$.computeFisherDecision(data, dep_var)
-                    if (!isTRUE(fc$assumption_violated))
-                        next
-                    if (isTRUE(fc$is_2x2)) {
-                        # One notice for a sparse 2x2, in step with the figure: the main
-                        # chart's subtitle is swapped to Fisher's exact test when a subtitle
-                        # is requested; split-by panels are a patchwork and keep the chi-squared.
-                        fisher_p <- tryCatch(stats::fisher.test(cross_table)$p.value,
-                                             error = function(e) NA_real_)
-                        swapped <- isTRUE(private$.option("resultssubtitle")) &&
-                            !is.null(private$.exactSubtitle(data, dep_var))
-                        private$.addNotice('STRONG_WARNING', 'Chi-squared assumption violated', paste0(
-                            fc$fisher_reason, " ",
-                            if (swapped)
-                                "The chart subtitle therefore reports Fisher's exact test instead of the chi-squared."
-                            else if (is.finite(fisher_p))
-                                sprintf("Fisher's exact test on this table gives %s; quote that value, not a chi-squared.",
-                                        private$.fmtP(fisher_p, html = FALSE))
-                            else
-                                "Fisher's exact test could not be computed for this table.",
-                            if (swapped && !is.null(self$options$grvar))
-                                " The split-by panels keep the uncorrected chi-squared." else ""))
-                    } else {
-                        private$.addNotice('WARNING', 'Low Expected Counts', sprintf(
-                            "Variable '%s' vs '%s': %d of %d cells (%.1f%%) have expected counts below 5, so the chi-squared p-value is unreliable. Consider collapsing categories.",
-                            dep_var, group_var, fc$low_count_cells, fc$total_cells, fc$pct_low))
+                    if (isTRUE(fc$assumption_violated)) {
+                        if (isTRUE(fc$is_2x2)) {
+                            # One notice for a sparse 2x2, in step with the figure: the main
+                            # chart's subtitle is swapped to Fisher's exact test when a subtitle
+                            # is requested; split-by panels are a patchwork and keep the chi-squared.
+                            fisher_p <- tryCatch(stats::fisher.test(cross_table)$p.value,
+                                                 error = function(e) NA_real_)
+                            swapped <- isTRUE(private$.option("resultssubtitle")) &&
+                                !is.null(private$.exactSubtitle(data, dep_var))
+                            private$.addNotice("STRONG_WARNING", "Chi-squared assumption violated", paste0(
+                                fc$fisher_reason, " ",
+                                if (swapped)
+                                    "The chart subtitle therefore reports Fisher's exact test instead of the chi-squared."
+                                else if (is.finite(fisher_p))
+                                    sprintf("Fisher's exact test on this table gives %s; quote that value, not a chi-squared.",
+                                            private$.fmtP(fisher_p, html = FALSE))
+                                else
+                                    "Fisher's exact test could not be computed for this table.",
+                                if (swapped && !is.null(self$options$grvar))
+                                    " The split-by panels keep the uncorrected chi-squared." else ""))
+                        } else {
+                            private$.addNotice("WARNING", "Low Expected Counts", sprintf(
+                                "Variable '%s' vs '%s': %d of %d cells (%.1f%%) have expected counts below 5, so the chi-squared p-value is unreliable. Consider collapsing categories.",
+                                dep_var, group_var, fc$low_count_cells, fc$total_cells, fc$pct_low))
+                        }
+                    }
+
+                    # Also check split-by (grvar) subgroups for low expected counts
+                    if (!is.null(self$options$grvar) && self$options$grvar %in% names(data)) {
+                        strata <- split(data, data[[self$options$grvar]], drop = TRUE)
+                        sparse_strata <- names(Filter(function(st_df) {
+                            isTRUE(private$.computeFisherDecision(st_df, dep_var)$assumption_violated)
+                        }, strata))
+                        if (length(sparse_strata) > 0) {
+                            private$.addNotice("WARNING", "Subgroup Low Expected Counts", sprintf(
+                                "Variable '%s' vs '%s' stratified by '%s': subgroup(s) %s have expected cell counts below 5. Split-by panels report uncorrected Pearson chi-squared p-values that are unreliable in sparse strata.",
+                                dep_var, group_var, self$options$grvar, paste(sparse_strata, collapse = ", ")
+                            ))
+                        }
                     }
                 }
                 invisible(NULL)
@@ -871,16 +946,21 @@ jjbarstatsClass <- if (requireNamespace('jmvcore'))
                         next
                     paired_valid <- private$.validatePairedData(data, dep_var)
                     if (!paired_valid$valid) {
-                        private$.addNotice('ERROR', 'Invalid Paired Data', paired_valid$message)
                         jmvcore::reject(paired_valid$message)
                     } else if (identical(private$.option("typestatistics"), "bayes")) {
                         # statsExpressions ignores `paired` for type = "bayes", so there is
                         # no McNemar test here to describe.
-                        private$.addNotice('WARNING', 'Pairing not used by the Bayesian analysis', sprintf(
+                        private$.addNotice("WARNING", "Pairing not used by the Bayesian analysis", sprintf(
                             "The Bayesian contingency analysis has no paired version: for '%s' the chart shows a Bayes factor for independence of the two variables, not a test of change between the paired measurements. Choose the frequentist type of statistic for McNemar's test.",
                             dep_var))
                     } else {
-                        private$.addNotice('STRONG_WARNING', 'Paired Data Assumption', paired_valid$message)
+                        private$.addNotice("STRONG_WARNING", "Paired Data Assumption", paired_valid$message)
+                        if (isTRUE(paired_valid$mismatched_categories)) {
+                            private$.addNotice("WARNING", "Mismatched Paired Categories", sprintf(
+                                "Variables '%s' and '%s' have different categories (levels do not match). Ensure row and column levels represent the same binary classification across the two paired conditions.",
+                                dep_var, self$options$group
+                            ))
+                        }
                         # How much information the discordant pairs carry, not a validity
                         # cut-off: Fagerland et al. (2013) recommend the asymptotic test
                         # ggbarstats shows and advise against the exact binomial in any
@@ -888,13 +968,28 @@ jjbarstatsClass <- if (requireNamespace('jmvcore'))
                         # smallest p is P(chi2(1) > m): m <= 3 cannot reach 0.05.
                         m <- paired_valid$discordant
                         if (stats::pchisq(m, df = 1, lower.tail = FALSE) >= 0.05)
-                            private$.addNotice('WARNING', 'Too few discordant pairs to reach p < 0.05', sprintf(
+                            private$.addNotice("WARNING", "Too few discordant pairs to reach p < 0.05", sprintf(
                                 "Only %d discordant %s (%d vs %d) for '%s': McNemar's test cannot reach p < 0.05 whatever their split, so its non-significant result says nothing about whether the proportions changed.",
                                 m, if (m == 1) "pair" else "pairs", paired_valid$b, paired_valid$c, dep_var))
                         else if (m < 10)
-                            private$.addNotice('INFO', 'Few discordant pairs', sprintf(
+                            private$.addNotice("INFO", "Few discordant pairs", sprintf(
                                 "Only %d discordant pairs (%d vs %d) for '%s', so McNemar's test has little power here; a non-significant result does not show that the proportions are the same.",
                                 m, paired_valid$b, paired_valid$c, dep_var))
+
+                        # Check split-by (grvar) strata for paired validity / discordant counts
+                        if (!is.null(self$options$grvar) && self$options$grvar %in% names(data)) {
+                            strata <- split(data, data[[self$options$grvar]], drop = TRUE)
+                            problem_strata <- names(Filter(function(st_df) {
+                                st_v <- private$.validatePairedData(st_df, dep_var)
+                                !isTRUE(st_v$valid) || st_v$discordant < 10
+                            }, strata))
+                            if (length(problem_strata) > 0) {
+                                private$.addNotice("WARNING", "Subgroup Paired Data Limitation", sprintf(
+                                    "Variable '%s' vs '%s' stratified by '%s': subgroup(s) %s have fewer than 10 pairs, zero discordant pairs, or fewer than 10 discordant pairs, limiting McNemar test validity or power in those split-by panels.",
+                                    dep_var, self$options$group, self$options$grvar, paste(problem_strata, collapse = ", ")
+                                ))
+                            }
+                        }
                     }
                 }
                 invisible(NULL)
@@ -903,17 +998,50 @@ jjbarstatsClass <- if (requireNamespace('jmvcore'))
             .prepareData = function() {
                 mydata <- self$data
 
-                # ggstatsplot drops rows with a missing value in any analysed variable
+                # ggstatsplot drops rows with a missing value in any analyzed variable
                 # itself; doing it here keeps every reported count equal to what is
                 # tested. The number of dropped rows is reported as a notice from .run().
                 private$.checkpoint(flush = FALSE)
-                relevant_vars <- c(self$options$dep, self$options$group,
-                                   self$options$grvar, self$options$counts)
-                mydata <- mydata[complete.cases(mydata[relevant_vars]), ]
+                relevant_vars <- unique(c(self$options$dep, self$options$group,
+                                          self$options$grvar, self$options$counts))
+                relevant_vars <- relevant_vars[!vapply(relevant_vars, is.null, logical(1))]
+                relevant_vars <- relevant_vars[relevant_vars %in% names(mydata)]
+
+                cat_vars <- setdiff(relevant_vars, self$options$counts)
+                for (v in cat_vars) {
+                    if (is.factor(mydata[[v]]) && any(is.na(levels(mydata[[v]])))) {
+                        lvls <- levels(mydata[[v]])
+                        mydata[[v]] <- factor(as.character(mydata[[v]]),
+                                              levels = lvls[!is.na(lvls)],
+                                              ordered = is.ordered(mydata[[v]]))
+                    }
+                }
+
+                mydata <- mydata[complete.cases(mydata[relevant_vars]), , drop = FALSE]
 
                 if (nrow(mydata) == 0) {
-                    jmvcore::reject(.('No complete data rows available: every row has a missing value in at least one selected variable.'))
+                    jmvcore::reject(.("No complete data rows available: every row has a missing value in at least one selected variable."))
                 }
+
+                if (!is.null(self$options$counts) && self$options$counts %in% names(mydata)) {
+                    if (sum(mydata[[self$options$counts]], na.rm = TRUE) <= 0) {
+                        jmvcore::reject(.("Counts variable '{var}' sums to zero - there are no observations to analyze."),
+                                        var = self$options$counts)
+                    }
+                }
+
+                for (v in cat_vars) {
+                    if (!is.null(self$options$counts) && self$options$counts %in% names(mydata)) {
+                        wt_sums <- tapply(mydata[[self$options$counts]], mydata[[v]], sum, na.rm = TRUE)
+                        pos_lvls <- names(wt_sums[!is.na(wt_sums) & wt_sums > 0])
+                        mydata <- mydata[as.character(mydata[[v]]) %in% pos_lvls, , drop = FALSE]
+                    }
+                    if (is.factor(mydata[[v]])) {
+                        mydata[[v]] <- droplevels(mydata[[v]])
+                    }
+                }
+
+                private$.validateStatisticalRequirements(self$options$dep, self$options$group, mydata)
 
                 return(mydata)
             },
@@ -931,7 +1059,7 @@ jjbarstatsClass <- if (requireNamespace('jmvcore'))
                     ))
                 }
 
-                # Check if it's a 2\u00d72 table
+                # Check if it's a 2\u00d72 table (with aligned levels when categories match)
                 cross_table <- private$.getWeightedTable(data, dep_var, self$options$group)
 
                 if (!all(dim(cross_table) == c(2, 2))) {
@@ -967,12 +1095,15 @@ jjbarstatsClass <- if (requireNamespace('jmvcore'))
                     ))
                 }
 
+                mismatched <- !setequal(rownames(cross_table), colnames(cross_table))
+
                 # WARNING: We cannot validate actual pairing structure without a subject ID
                 # This is a limitation - user must ensure data is properly paired
                 return(list(
                     valid = TRUE,
                     discordant = discordant,
                     b = cross_table[1, 2], c = cross_table[2, 1],
+                    mismatched_categories = mismatched,
                     message = "Data structure compatible with McNemar test. Ensure observations are actually paired (e.g., before/after, matched cases/controls). If data is independent, disable paired option."
                 ))
             },
@@ -981,6 +1112,10 @@ jjbarstatsClass <- if (requireNamespace('jmvcore'))
                 # Progress indicator
                 if (!is.null(progress_label)) {
                     private$.checkpoint()
+                }
+
+                if (isTRUE(private$.option("paired"))) {
+                    data <- private$.alignPairedLevels(data, dep_var, self$options$group)
                 }
 
                 # Data-quality notices (sparse 2x2, low expected counts, zero cells) are
@@ -1139,6 +1274,10 @@ jjbarstatsClass <- if (requireNamespace('jmvcore'))
                     )
 
                     self$results$todo$setContent(todo)
+                    self$results$summary$setContent("")
+                    self$results$assumptions$setContent("")
+                    self$results$interpretation$setContent("")
+                    self$results$report$setContent("")
                     return()
 
                 } else {
@@ -1146,7 +1285,7 @@ jjbarstatsClass <- if (requireNamespace('jmvcore'))
                     tryCatch({
                         # Basic data check
                         if (nrow(self$data) == 0) {
-                            jmvcore::reject(.('Dataset is empty. Please ensure your data contains observations.'))
+                            jmvcore::reject(.("Dataset is empty. Please ensure your data contains observations."))
                         }
                         
                         # Checkpoint before data validation and preparation
@@ -1157,6 +1296,7 @@ jjbarstatsClass <- if (requireNamespace('jmvcore'))
                         prep_time <- round(difftime(Sys.time(), start_time, units = "secs"), 2)
                         
                         n_dropped <- nrow(self$data) - nrow(prepared_data)
+                        n_effective <- private$.getEffectiveSampleSize(prepared_data)
 
                         # Checkpoint before performance calculations
                         private$.checkpoint(flush = FALSE)
@@ -1185,7 +1325,7 @@ jjbarstatsClass <- if (requireNamespace('jmvcore'))
 
                         todo <- glue::glue(
                             "<br>Bar chart analysis comparing {htmltools::htmlEscape(paste(self$options$dep, collapse=', '))} by {htmltools::htmlEscape(self$options$group)}{if(!is.null(self$options$grvar)) paste0(', grouped by ', htmltools::htmlEscape(self$options$grvar)) else ''}.<br>
-                            <br>Data prepared: {nrow(prepared_data)} observations{if (n_dropped > 0) paste0(' (', n_dropped, ' rows with missing values excluded)') else ''}.<br>
+                            <br>Data prepared: {n_effective} observations{if (n_dropped > 0) paste0(' (', n_dropped, ' rows with missing values excluded)') else ''}.<br>
                             {analysis_info}
                             {perf_warning}
                             {if(prep_time > 0.1) paste0('<br>Preparation time: ', prep_time, ' seconds.<br>') else ''}
@@ -1203,8 +1343,8 @@ jjbarstatsClass <- if (requireNamespace('jmvcore'))
                         # Rows lost to missing values were only ever message()d, which
                         # jamovi does not show; say it where the reader is.
                         if (n_dropped > 0)
-                            private$.addNotice('INFO', 'Rows with missing values excluded', sprintf(
-                                "%d of %d rows had a missing value in a selected variable and were excluded; %d rows were analysed.",
+                            private$.addNotice("INFO", "Rows with missing values excluded", sprintf(
+                                "%d of %d rows had a missing value in a selected variable and were excluded; %d rows were analyzed.",
                                 n_dropped, nrow(self$data), nrow(prepared_data)))
 
                         # Multiplicity. ggbarstats' per-group proportion tests are never
@@ -1212,14 +1352,20 @@ jjbarstatsClass <- if (requireNamespace('jmvcore'))
                         # whose `...` ignores it), and several outcomes are several tests.
                         n_grp <- length(private$.getWeightedGroupCounts(prepared_data, self$options$group))
                         n_dep <- length(self$options$dep)
-                        if (isTRUE(private$.option("proportiontest")) && n_grp * n_dep > 1)
-                            private$.addNotice('INFO', 'Proportion tests are unadjusted', sprintf(
+                        if (isTRUE(private$.option("proportiontest")) &&
+                            !identical(private$.option("typestatistics"), "bayes") &&
+                            n_grp * n_dep > 1)
+                            private$.addNotice("INFO", "Proportion tests are unadjusted", sprintf(
                                 "The p-values above the bars come from %d separate goodness-of-fit tests (one per group%s) with no correction for multiple testing; adjust them before reporting.",
                                 n_grp * n_dep, if (n_dep > 1) " and outcome" else ""))
                         if (n_dep > 1)
-                            private$.addNotice('INFO', 'Several outcomes tested', sprintf(
+                            private$.addNotice("INFO", "Several outcomes tested", sprintf(
                                 "%d outcome variables were each tested against '%s'; the %d test results are not adjusted for multiple testing.",
                                 n_dep, self$options$group, n_dep))
+                        if (isTRUE(self$options$addGGPubrBalloon) && n_dep > 1)
+                            private$.addNotice("INFO", "Balloon Plot Single Variable", sprintf(
+                                "Balloon plot created for first variable only (%s). Multiple dependent variables not supported for balloon plots.",
+                                self$options$dep[1]))
 
                         # Say so when the typed proportions were rescaled or dropped.
                         # Deduplicated: the same entry is checked once per dependent
@@ -1240,32 +1386,42 @@ jjbarstatsClass <- if (requireNamespace('jmvcore'))
                         # blank. showexplanations acts as a master switch enabling all panels.
                         if (isTRUE(self$options$showexplanations) || isTRUE(self$options$showSummary))
                             private$.generateSummary(prepared_data)
+                        else
+                            self$results$summary$setContent("")
                         if (isTRUE(self$options$showexplanations) || isTRUE(self$options$showAssumptions))
                             private$.checkStatisticalAssumptions(prepared_data)
+                        else
+                            self$results$assumptions$setContent("")
                         if (isTRUE(self$options$showexplanations) || isTRUE(self$options$showInterpretation))
                             private$.generateInterpretationGuide(prepared_data)
+                        else
+                            self$results$interpretation$setContent("")
                         if (isTRUE(self$options$showexplanations))
                             private$.generateCopyReadyReport(prepared_data)
+                        else
+                            self$results$report$setContent("")
 
                         # ENHANCEMENT 3: Clinical prevalence warning for diagnostic preset
                         if (self$options$clinicalpreset == "diagnostic" &&
                             !is.null(self$options$dep) &&
                             length(self$options$dep) > 0) {
 
-                            # Check first dependent variable for 2-level disease status
+                            # Check dependent variable(s) for 2-level disease status using weighted counts
                             tryCatch({
-                                dep_table <- table(prepared_data[[self$options$dep[1]]])
+                                for (dv in self$options$dep) {
+                                    dep_table <- private$.getWeightedGroupCounts(prepared_data, dv)
 
-                                if (length(dep_table) == 2) {
-                                    # Calculate prevalence (proportion of less common outcome)
-                                    prevalence <- min(dep_table) / sum(dep_table)
+                                    if (length(dep_table) == 2 && sum(dep_table) > 0) {
+                                        # Calculate prevalence (proportion of less common outcome)
+                                        prevalence <- min(dep_table) / sum(dep_table)
 
-                                    # Warn about extreme prevalence (< 5% or > 95%)
-                                    if (prevalence < 0.05 || prevalence > 0.95) {
-                                        private$.addNotice('STRONG_WARNING', 'Extreme Disease Prevalence', sprintf(
-                                            "Extreme disease prevalence detected (%.1f%%). Positive/negative predictive values are highly prevalence-dependent and may not generalize to populations with different baseline risk. Consider reporting likelihood ratios or conducting sensitivity analysis across prevalence ranges.",
-                                            prevalence * 100
-                                        ))
+                                        # Warn about extreme prevalence (< 5% or > 95%)
+                                        if (prevalence < 0.05 || prevalence > 0.95) {
+                                            private$.addNotice("STRONG_WARNING", "Extreme Disease Prevalence", sprintf(
+                                                "Extreme disease prevalence detected (%.1f%%). Positive/negative predictive values are highly prevalence-dependent and may not generalize to populations with different baseline risk. Consider reporting likelihood ratios or conducting sensitivity analysis across prevalence ranges.",
+                                                prevalence * 100
+                                            ))
+                                        }
                                     }
                                 }
                             }, error = function(e) {
@@ -1275,37 +1431,33 @@ jjbarstatsClass <- if (requireNamespace('jmvcore'))
                         }
 
                     }, error = function(e) {
-                        # Reset cache on error
+                        # Reset cache on error and let jmvcore::reject() / jamovi present the error once
                         private$.cached_data <- NULL
                         private$.validation_passed <- FALSE
-                        
-                        # Enhanced error reporting with more context
-                        error_context <- ""
-                        if (grepl("continuous", e$message, ignore.case = TRUE)) {
-                            error_context <- "<br> <b>Tip:</b> Use Data > Transform to create categorical groups from continuous variables.<br>"
-                        } else if (grepl("minimum|group size", e$message, ignore.case = TRUE)) {
-                            error_context <- "<br> <b>Tip:</b> Consider combining small categories or collecting more data.<br>"
-                        } else if (grepl("variation|level", e$message, ignore.case = TRUE)) {
-                            error_context <- "<br> <b>Tip:</b> Ensure your variables have multiple categories for comparison.<br>"
-                        }
-                        
-                        error_msg <- glue::glue(
-                            "<br> <b>Error in Bar Chart Analysis:</b><br>
-                            <br>{htmltools::htmlEscape(e$message)}<br>
-                            {error_context}
-                            <br><b>General Troubleshooting:</b><br>
-                            \u2022 Ensure dependent and grouping variables are categorical<br>
-                            \u2022 Check that selected variables exist in your dataset<br>
-                            \u2022 Verify sufficient sample sizes in each group (\u22655 recommended)<br>
-                            \u2022 Confirm variables have adequate variation (\u22652 categories)<br><hr>"
-                        )
-                        self$results$todo$setContent(error_msg)
                         stop(e)
                     })
                     
                     # Add checkpoint for user feedback
                     private$.checkpoint()
                 }
+            }
+
+            ,
+            .seedUsedOnPlot = function(data, grouped = FALSE) {
+                type <- private$.option("typestatistics")
+                if (statsSeedMatters(type, "contingency"))
+                    return(TRUE)
+                if (!captionSeedMatters(type, "contingency", 2L, self$options$bfmessage))
+                    return(FALSE)
+                if (isTRUE(private$.option("paired")))
+                    return(FALSE)
+                if (!grouped && isTRUE(private$.option("resultssubtitle"))) {
+                    any_bf <- any(vapply(self$options$dep, function(dv) {
+                        is.null(private$.exactSubtitle(data, dv))
+                    }, logical(1)))
+                    return(any_bf)
+                }
+                TRUE
             }
 
             ,
@@ -1316,7 +1468,7 @@ jjbarstatsClass <- if (requireNamespace('jmvcore'))
 
                 # Validation ----
                 if (is.null(self$options$dep) || is.null(self$options$group))
-                    return()
+                    return(FALSE)
 
                 # Checkpoint before data retrieval
                 private$.checkpoint(flush = FALSE)
@@ -1347,8 +1499,7 @@ jjbarstatsClass <- if (requireNamespace('jmvcore'))
                     )
                 }
 
-                if (statsSeedMatters(private$.option("typestatistics"), "contingency") ||
-                    captionSeedMatters(private$.option("typestatistics"), "contingency", 2L, self$options$bfmessage))
+                if (private$.seedUsedOnPlot(mydata, grouped = FALSE))
                     plot <- addSeedCaption(plot, self, self$options$seed)
 
                 # Print Plot ----
@@ -1366,7 +1517,7 @@ jjbarstatsClass <- if (requireNamespace('jmvcore'))
 
                 # Validation ----
                 if (is.null(self$options$dep) || is.null(self$options$group) || is.null(self$options$grvar))
-                    return()
+                    return(FALSE)
 
                 # Checkpoint before data retrieval
                 private$.checkpoint(flush = FALSE)
@@ -1397,8 +1548,7 @@ jjbarstatsClass <- if (requireNamespace('jmvcore'))
                     )
                 }
 
-                if (statsSeedMatters(private$.option("typestatistics"), "contingency") ||
-                    captionSeedMatters(private$.option("typestatistics"), "contingency", 2L, self$options$bfmessage))
+                if (private$.seedUsedOnPlot(mydata, grouped = TRUE))
                     plot2 <- addSeedCaption(plot2, self, self$options$seed)
 
                 # Print Plot ----
@@ -1409,10 +1559,10 @@ jjbarstatsClass <- if (requireNamespace('jmvcore'))
             ,
             .plotBalloon = function(image, ...) {
                 if (!self$options$addGGPubrBalloon)
-                    return()
+                    return(FALSE)
 
                 if (is.null(self$options$dep) || is.null(self$options$group))
-                    return()
+                    return(FALSE)
 
                 # Use validated/cached data so the balloon plot respects the same
                 # excl / NA-handling and validation applied to the main plots.
@@ -1424,43 +1574,61 @@ jjbarstatsClass <- if (requireNamespace('jmvcore'))
                 dep <- self$options$dep
                 group <- self$options$group
 
-                # BUG FIX: Handle multiple dependent variables
-                # Balloon plot only works with single dependent variable
+                # Balloon plot only works with a single dependent variable; the
+                # accompanying INFO notice is emitted in .run().
                 if (length(dep) > 1) {
-                    # Use only the first dependent variable and notify user
-                    dep_first <- dep[1]
-
-                    private$.addNotice('INFO', 'Balloon Plot Single Variable', sprintf(
-                        "Balloon plot created for first variable only (%s). Multiple dependent variables not supported for balloon plots.",
-                        dep_first
-                    ))
-
-                    dep <- dep_first
+                    dep <- dep[1]
                 }
 
-                # Create contingency table
-                if (!is.null(self$options$counts) && self$options$counts %in% names(mydata)) {
-                    formula_str <- paste0(jmvcore::composeTerm(self$options$counts),
-                                          " ~ ", jmvcore::composeTerm(dep),
-                                          " + ", jmvcore::composeTerm(group))
-                    cont_table <- xtabs(jmvcore::asFormula(formula_str), data = mydata)
+                if (isTRUE(private$.option("paired"))) {
+                    mydata <- private$.alignPairedLevels(mydata, dep, group)
+                }
+
+                grvar <- self$options$grvar
+                has_grvar <- !is.null(grvar) && grvar %in% names(mydata)
+
+                # Create contingency table (stratified by grvar when provided)
+                if (has_grvar) {
+                    if (!is.null(self$options$counts) && self$options$counts %in% names(mydata)) {
+                        formula_str <- paste0(jmvcore::composeTerm(self$options$counts),
+                                              " ~ ", jmvcore::composeTerm(dep),
+                                              " + ", jmvcore::composeTerm(group),
+                                              " + ", jmvcore::composeTerm(grvar))
+                        cont_table <- xtabs(jmvcore::asFormula(formula_str), data = mydata)
+                    } else {
+                        cont_table <- table(mydata[[dep]], mydata[[group]], mydata[[grvar]])
+                    }
+                    cont_df <- as.data.frame(cont_table)
+                    names(cont_df) <- c("Row", "Column", "Subgroup", "Freq")
+                    plot <- ggpubr::ggballoonplot(
+                        cont_df,
+                        x = "Column",
+                        y = "Row",
+                        size = "Freq",
+                        fill = "Freq",
+                        facet.by = "Subgroup",
+                        ggtheme = ggpubr::theme_pubr()
+                    )
                 } else {
-                    cont_table <- table(mydata[[dep]], mydata[[group]])
+                    if (!is.null(self$options$counts) && self$options$counts %in% names(mydata)) {
+                        formula_str <- paste0(jmvcore::composeTerm(self$options$counts),
+                                              " ~ ", jmvcore::composeTerm(dep),
+                                              " + ", jmvcore::composeTerm(group))
+                        cont_table <- xtabs(jmvcore::asFormula(formula_str), data = mydata)
+                    } else {
+                        cont_table <- table(mydata[[dep]], mydata[[group]])
+                    }
+                    cont_df <- as.data.frame(cont_table)
+                    names(cont_df) <- c("Row", "Column", "Freq")
+                    plot <- ggpubr::ggballoonplot(
+                        cont_df,
+                        x = "Column",
+                        y = "Row",
+                        size = "Freq",
+                        fill = "Freq",
+                        ggtheme = ggpubr::theme_pubr()
+                    )
                 }
-
-                # Convert to data frame for ggballoonplot
-                cont_df <- as.data.frame(cont_table)
-                names(cont_df) <- c("Row", "Column", "Freq")
-
-                # Create balloon plot
-                plot <- ggpubr::ggballoonplot(
-                    cont_df,
-                    x = "Column",
-                    y = "Row",
-                    size = "Freq",
-                    fill = "Freq",
-                    ggtheme = ggpubr::theme_pubr()
-                )
 
                 # Add gradient color based on palette
                 if (self$options$ggpubrBalloonPalette == "jco") {
@@ -1485,7 +1653,7 @@ jjbarstatsClass <- if (requireNamespace('jmvcore'))
                 group <- self$options$group
 
                 if (is.null(dep) || is.null(group))
-                    return('')
+                    return("")
 
                 # Build the argument list in option-declaration order.
                 #
@@ -1503,16 +1671,21 @@ jjbarstatsClass <- if (requireNamespace('jmvcore'))
                 # sourcify so formatting stays consistent with jamovi.
                 args <- character(0)
                 for (option in private$.options$options) {
-                    if (option$name == 'data')
+                    if (option$name == "data")
                         next
-                    if (inherits(option, 'OptionVariable') || inherits(option, 'OptionVariables')) {
+                    if (inherits(option, "OptionVariable") || inherits(option, "OptionVariables")) {
                         val <- option$value
                         if (!is.null(val) && length(val) > 0)
-                            args <- c(args, paste0(option$name, ' = ',
-                                                   paste0(deparse(val), collapse = '')))
+                            args <- c(args, paste0(option$name, " = ",
+                                                   paste0(deparse(val), collapse = "")))
+                    } else if (inherits(option, "OptionString")) {
+                        val <- option$value
+                        if (!is.null(val) && nzchar(val) && !identical(val, option$default))
+                            args <- c(args, paste0(option$name, " = ",
+                                                   paste0(deparse(val), collapse = "")))
                     } else {
                         as <- private$.sourcifyOption(option)
-                        if (!identical(as, ''))
+                        if (!identical(as, ""))
                             args <- c(args, as)
                     }
                 }
@@ -1522,8 +1695,8 @@ jjbarstatsClass <- if (requireNamespace('jmvcore'))
                 if (is.null(pkg_name)) pkg_name <- "ClinicoPath"  # fallback
 
                 # Build complete function call
-                paste0(pkg_name, '::jjbarstats(\n    data = data,\n    ',
-                       paste(args, collapse = ',\n    '), ')')
+                paste0(pkg_name, "::jjbarstats(\n    data = data,\n    ",
+                       paste(args, collapse = ",\n    "), ")")
             }
         ) # End of public list
     )

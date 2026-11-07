@@ -45,7 +45,7 @@ test_that("Cox, cut-point, median, S(t), person-time, RMST and stratified Cox ma
 
   ## Median survival and survival probabilities by cut-off group --------------
   cat_df <- survminer::surv_categorize(cut_ref)
-  fit_g <- survival::survfit(survival::Surv(time, status) ~ marker, data = cat_df)
+  fit_g <- survival::survfit(survival::Surv(time, status) ~ marker, data = cat_df, conf.type = "log-log")
   tbl_ref <- summary(fit_g)$table
   med_tbl <- res$medianTable$asDF
   expect_equal(nrow(med_tbl), nrow(tbl_ref))
@@ -66,11 +66,11 @@ test_that("Cox, cut-point, median, S(t), person-time, RMST and stratified Cox ma
   tot_e <- sum(df$status)
   expect_equal(pt$person_time[1], round(tot_t, 2))
   expect_equal(pt$events[1], tot_e)
-  expect_equal(pt$rate[1], round(tot_e / tot_t * 100, 2))
+  expect_equal(pt$rate[1], tot_e / tot_t * 100)
   expect_equal(pt$rate_ci_lower[1],
-               round(stats::qchisq(0.025, 2 * tot_e) / 2 / tot_t * 100, 2))
+               stats::qchisq(0.025, 2 * tot_e) / 2 / tot_t * 100)
   expect_equal(pt$rate_ci_upper[1],
-               round(stats::qchisq(0.975, 2 * (tot_e + 1)) / 2 / tot_t * 100, 2))
+               stats::qchisq(0.975, 2 * (tot_e + 1)) / 2 / tot_t * 100)
 
   ## RMST vs survfit(rmean = tau) ---------------------------------------------
   rm_tbl <- res$rmstTable$asDF
@@ -558,12 +558,13 @@ test_that("Regression: unusable date and stratification inputs are diagnosed, no
   # Numeric day-count dates are 86400x smaller than the epoch seconds the code
   # assumes; they used to yield an empty analysis with no explanation.
   daycounts <- data.frame(base, dxd = as.numeric(dx), fud = as.numeric(dx + 400))
-  res <- run_survivalcont(
-    data = daycounts, elapsedtime = NULL, outcome = "status", contexpl = "marker",
-    tint = TRUE, dxdate = "dxd", fudate = "fud"
+  expect_error(
+    run_survivalcont(
+      data = daycounts, elapsedtime = NULL, outcome = "status", contexpl = "marker",
+      tint = TRUE, dxdate = "dxd", fudate = "fud"
+    ),
+    "cannot be read as dates", fixed = TRUE
   )
-  expect_match(strip_survivalcont_html(res$errors$content),
-               "not epoch seconds", fixed = TRUE)
 
   # A near-continuous stratification variable gave one stratum per patient and
   # was tabulated as a valid HR 1.00 (0, Inf), p = 1.00.
@@ -722,9 +723,11 @@ test_that("Regression: a date-format mismatch is named rather than blamed on mis
     tint = TRUE, dxdate = "dxd", fudate = "fud", timetypedata = "mdy"
   )
   combined <- paste(strip_survivalcont_html(res$errors$content),
-                    strip_survivalcont_html(res$strongWarnings$content))
-  expect_match(combined, "did not match the selected input time type", fixed = TRUE)
-  expect_match(combined, "format mismatch rather than missing data", fixed = TRUE)
+                    strip_survivalcont_html(res$warnings$content))
+  expect_match(combined, "dates could not be read, so those patients were excluded", fixed = TRUE)
+  expect_match(combined, "day and month swapped", fixed = TRUE)
+  # No 20% cut-off: the analysis runs on the dates that were read, as Survival Analysis does.
+  expect_false(grepl("Date format does not match the data", combined, fixed = TRUE))
 })
 
 test_that("Regression: person-time intervals accept whitespace separators", {

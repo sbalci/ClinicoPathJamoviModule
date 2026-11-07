@@ -516,3 +516,33 @@ test_that("fixed-row jsurvival tables are scaffolded before .run()", {
   }
   audit_skip_unloaded(wanted)
 })
+
+# library-audit 2026-09-15 jsurvival [LOW] DONE: image state holds what is drawn, never patient rows
+# or a model fit; the nomogram stores its rms::nomogram object (guide §17)
+test_that("jsurvival image states hold drawing data, not patient rows", {
+  wanted <- "oddsratio"
+  if ("oddsratio" %in% audit_loaded(wanted)) {
+    set.seed(3)
+    n <- 200
+    d <- data.frame(grp = factor(sample(c("A", "B"), n, TRUE)), age = round(stats::rnorm(n, 60, 10)))
+    risk <- stats::plogis(-1 + 0.8 * (d$grp == "B") + 0.02 * (d$age - 60))
+    d$y <- factor(ifelse(stats::runif(n) < risk, "Dead", "Alive"))
+    a <- get("oddsratioClass")$new(
+      options = get("oddsratioOptions")$new(explanatory = c("grp", "age"), outcome = "y",
+                                            outcomeLevel = "Dead", outcomeNegativeLevel = "Alive",
+                                            showNomogram = TRUE),
+      data = d)
+    suppressWarnings(suppressMessages({ a$init(); a$run() }))
+    st <- a$results$plot_nomogram$state
+    expect_identical(names(st), "nom")
+    expect_s3_class(st$nom, "nomogram")
+    has_rows <- function(x) is.data.frame(x) || (is.list(x) && any(vapply(x, has_rows, logical(1))))
+    expect_false(has_rows(st))
+    # what a reopened .omv has: no private cache, only the saved state
+    a$.__enclos_env__$private$.nom_object <- NULL
+    f <- tempfile(fileext = ".png")
+    a$results$plot_nomogram$saveAs(f)
+    expect_gt(file.size(f), 5000)
+  }
+  audit_skip_unloaded(wanted)
+})

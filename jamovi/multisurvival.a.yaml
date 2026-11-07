@@ -10,6 +10,7 @@ jas: '1.2'
 description:
     main: >-
         Performs multivariable survival analysis using Cox proportional hazards regression.
+        With competing events it fits a Fine-Gray subdistribution hazard model.
         In multivariable survival analysis, person-time follow-up is crucial for properly adjusting
         for covariates while accounting for varying observation periods. The Cox proportional hazards
         model incorporates person-time by modeling the hazard function, which represents the instantaneous
@@ -153,9 +154,10 @@ options:
       permitted: [ numeric, factor ]
       description:
         R: >
-          Date of diagnosis. Required if `tint` = true. Accepts: (1) Date/datetime text,
-          (2) Numeric Unix epoch seconds (from DateTime Converter's corrected_datetime_numeric output),
-          (3) Numeric datetime values from R. Time intervals calculated as difference from follow-up date.
+          Date of diagnosis. Required if `tint` = true. Accepts: (1) Date/datetime text, or
+          (2) Numeric Unix epoch seconds (from DateTime Converter's corrected_datetime_numeric output).
+          Other numeric dates (day counts, Excel serials, YYYYMMDD, years) are refused.
+          Time intervals calculated as difference from follow-up date.
 
     - name: fudate
       title: 'Follow-up Date'
@@ -166,9 +168,9 @@ options:
       description:
         R: >
           Follow-up date or date of last observation. Required if `tint` = true. Accepts:
-          (1) Date/datetime text, (2) Numeric Unix epoch seconds (from DateTime Converter's
-          corrected_datetime_numeric output), (3) Numeric datetime values from R. Must be in
-          same format as diagnosis date.
+          (1) Date/datetime text, or (2) Numeric Unix epoch seconds (from DateTime Converter's
+          corrected_datetime_numeric output). Other numeric dates (day counts, Excel serials,
+          YYYYMMDD, years) are refused. Must be in same format as diagnosis date.
 
 
 
@@ -233,6 +235,7 @@ options:
       description:
         R: >
           The time point (in the units defined by `timetypeoutput`) at which to start landmark analyses.
+          Patients whose time is at or before it are excluded, and the rest are timed from it.
           Only used if `uselandmark` = true.
 
 
@@ -242,7 +245,8 @@ options:
       description:
         R: >
           If true, adds a calculated survival time variable to the dataset, based on `dxdate` and `fudate`
-          if `tint` = true, or confirms `elapsedtime` if already provided.
+          if `tint` = true, or confirms `elapsedtime` if already provided. It holds the time from diagnosis
+          for every row, not shifted by a landmark.
 
 
 

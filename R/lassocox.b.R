@@ -82,6 +82,12 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             if (is.null(option$name) || !(option$name %in% declared))
                 return("")
             value <- option$value
+            unset <- is.null(value) || length(value) == 0L ||
+                (is.character(value) && length(value) == 1L && (is.na(value) || !nzchar(value)))
+            # A Level option (outcomeLevel, censorLevel) has no default, so the wrapper
+            # requires it: an unset one must still appear, as NULL, or the copied call fails.
+            if (unset && identical(formals(lassocox)[[option$name]], quote(expr = )))
+                return(paste0(option$name, " = NULL"))
             if (is.null(value) || is.list(value) || is.environment(value))
                 return("")
             if (!identical(option$name, "explanatory") && length(value) != 1L)
@@ -176,7 +182,9 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 return()
             }
 
-            self$results$todo$setContent("")
+            # "<div></div>", not "": the jamovi client skips an empty Html update, so a
+            # clean run would leave the previous run's notes (or the welcome box) on screen.
+            self$results$todo$setContent("<div></div>")
             if (!private$.hasPackage("survminer") && self$options$survival_plot) {
                 self$results$todo$setContent(paste0("<div class='alert alert-info'><p>",
                     .("survminer is unavailable. Survival curves use the base-R fallback without a risk table."),
@@ -267,9 +275,9 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 } else .deleteTableRows(table)
             }
             for (name in c("summaryText", "suitabilityReport", "rCode")) {
-                self$results[[name]]$setContent("")
+                self$results[[name]]$setContent("<div></div>")  # final on early-return paths
             }
-            if (clear_todo) self$results$todo$setContent("")
+            if (clear_todo) self$results$todo$setContent("<div></div>")
             for (name in c("cv_plot", "coef_plot", "path_plot", "survival_plot")) {
                 self$results[[name]]$setState(NULL)
             }
@@ -787,14 +795,40 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 parallel = FALSE  # Avoid parallel processing issues
             )
             cv_args$foldid <- foldid
-            # Outside any tryCatch: .checkpoint() signals its restart as an error.
-            private$.checkpoint()
+            cv_args$keep <- TRUE  # fit.preval, read by the check below
             # Only the glmnet call is guarded, so the reject() below reaches the user
             # verbatim rather than re-wrapped as "Error in cross-validation: ...".
-            cv_fit <- tryCatch(
-                .quietly(do.call(glmnet::cv.glmnet, cv_args)),
+            run_cv <- function(args) tryCatch(
+                .quietly(do.call(glmnet::cv.glmnet, args)),
                 error = function(e) jmvcore::reject(.fmt(.('Error in cross-validation: {msg}'),
                     msg = conditionMessage(e))))
+            # Outside any tryCatch: .checkpoint() signals its restart as an error.
+            private$.checkpoint()
+            cv_fit <- run_cv(cv_args)
+
+            # glmnet 5.0 evaluates the Cox likelihood with exp(eta) capped at eta = 30 but
+            # eta itself uncapped, so past 30 the deviance is wrong and can go negative,
+            # and the solver follows the wrong gradient. With few events per column the
+            # fold fits reach 30 inside the default path, held-out rows first. Stop before
+            # the first lambda that reaches it; x_fit is centered, so these etas are already
+            # on the capped scale. Repeat because a supplied lambda makes every fold fit that
+            # exact grid, where the first pass interpolated each fold's own grid. glmnet 4.x
+            # has no such cap and needs no stop.
+            lambda_searched <- length(cv_fit$lambda)
+            while (utils::packageVersion("glmnet") >= "5.0") {
+                eta_max <- pmax(apply(cv_fit$fit.preval, 2, max, na.rm = TRUE),
+                    apply(as.matrix(x_fit %*% cv_fit$glmnet.fit$beta), 2, max))
+                stop_at <- which(eta_max > 30)[1]
+                if (is.na(stop_at)) break
+                # lambda[1] is the exact edge of the empty model; refitted as given, rounding
+                # can admit a column with a zero-sized coefficient, so step just above it.
+                kept <- cv_fit$lambda[seq_len(stop_at - 1L)]
+                cv_args$lambda <- c(1.001 * kept[1], kept[-1])
+                private$.checkpoint()
+                cv_fit <- run_cv(cv_args)
+            }
+            if (length(cv_fit$lambda) < lambda_searched)
+                private$.warnInstability(private$.lambdaStopNote(cv_fit, lambda_searched))
 
             # Check if cross-validation succeeded
             if (is.null(cv_fit$lambda.min) || is.na(cv_fit$lambda.min)) {
@@ -875,6 +909,7 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 selected_vars = selected_vars,
                 lambda_optimal = lambda_optimal,
                 lambda_rule_used = lambda_rule_used,
+                lambda_searched = lambda_searched,
                 nfolds_used = nfolds,
                 foldid = foldid,
                 seed_used = seed_value,
@@ -885,6 +920,14 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             ))
         },
         
+        .lambdaStopNote = function(cv_fit, searched) {
+            note <- .fmt(.("The penalty search stopped after {kept} of {searched} lambda values. Smaller penalties gave a patient a linear predictor above 30 (relative hazard above 1e13), where glmnet cannot compute the cross-validation curve correctly, so they were not used."),
+                kept = length(cv_fit$lambda), searched = searched)
+            if (cv_fit$lambda.min == min(cv_fit$lambda))
+                note <- paste(note, .("Deviance was still falling at the last lambda used, so lambda.min is only the smallest penalty that could be evaluated, and the data may separate the outcome almost perfectly."))
+            note
+        },
+
         # Calculate comprehensive performance metrics
         .calculatePerformanceMetrics = function(y, risk_scores, data) {
             metrics <- list()
@@ -921,6 +964,9 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             # the cross-validation folds, and so lambda and the selection, come from this seed
             self$results$modelSummary$setNote("seed",
                 .fmt(.("Random seed: {seed}"), seed = results$seed_used), init = FALSE)
+            if (length(results$cv_fit$lambda) < results$lambda_searched)
+                self$results$modelSummary$setNote("lambdaStop",
+                    private$.lambdaStopNote(results$cv_fit, results$lambda_searched), init = FALSE)
         },
 
         .populateReproducibility = function(results) {
@@ -945,6 +991,7 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                     base::format(results$cv_fit$lambda.min, digits = 17),
                     base::format(results$cv_fit$lambda.1se, digits = 17),
                     results$lambda_rule_used,
+                    paste(length(results$cv_fit$lambda), results$lambda_searched, sep = " / "),
                     as.character(results$seed_used),
                     "Breslow",
                     if (self$options$standardize) .("Yes") else .("No"),
@@ -956,7 +1003,7 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                     as.character(utils::packageVersion("glmnet")),
                     as.character(utils::packageVersion("survival"))),
                     c(.("Selected lambda"), "lambda.min", "lambda.1se", .("Lambda rule"),
-                      .("Random seed"), .("Tie handling"), .("Internal standardization"),
+                      .("Lambda values used / searched"), .("Random seed"), .("Tie handling"), .("Internal standardization"),
                       .("Removed constant predictors"), .("Removed constant design columns"), .("R version"),
                       .("glmnet version"), .("survival version")))
                 for (k in seq_len(results$nfolds_used)) {
@@ -1042,9 +1089,19 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 paste0("  set.seed(", results$seed_used, ")"),
                 "  y <- survival::Surv(time, status)",
                 "  X_fit <- sweep(X, 2, colMeans(X), '-')",
-                "  cv_fit <- glmnet::cv.glmnet(X_fit, y, family = 'cox', cox.ties = 'breslow',",
+                "  run_cv <- function(...) glmnet::cv.glmnet(X_fit, y, family = 'cox', cox.ties = 'breslow',",
                 paste0("    alpha = 1, standardize = ", literal(isTRUE(self$options$standardize)),
-                    ", foldid = foldid, parallel = FALSE)"),
+                    ", foldid = foldid, parallel = FALSE, keep = TRUE, ...)"),
+                "  cv_fit <- run_cv()",
+                "  # Stop before any eta above 30: glmnet 5.0 caps exp(eta) there and the deviance is wrong.",
+                "  while (utils::packageVersion('glmnet') >= '5.0') {",
+                "    eta_max <- pmax(apply(cv_fit$fit.preval, 2, max, na.rm = TRUE),",
+                "      apply(as.matrix(X_fit %*% cv_fit$glmnet.fit$beta), 2, max))",
+                "    stop_at <- which(eta_max > 30)[1]",
+                "    if (is.na(stop_at)) break",
+                "    kept <- cv_fit$lambda[seq_len(stop_at - 1L)]",
+                "    cv_fit <- run_cv(lambda = c(1.001 * kept[1], kept[-1]))",
+                "  }",
                 paste0("  lambda_selected <- cv_fit[[", literal(results$lambda_rule_used), "]]"),
                 "  beta <- as.matrix(stats::coef(cv_fit, s = lambda_selected))",
                 "  if (cv_fit$glmnet.fit$df[match(lambda_selected, cv_fit$glmnet.fit$lambda)] == 0)",
@@ -1087,7 +1144,13 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             
             # Clear existing rows
             .deleteTableRows(table)
-            
+
+            table$setNote("split",
+                .("The selected columns depend on the cross-validation split, so a different seed or row order can select a different set."), init = FALSE)
+            if (!isTRUE(self$options$standardize))
+                table$setNote("units",
+                    .("Selection depends on the units of each predictor; changing a unit can change which predictors are selected."), init = FALSE)
+
             if (length(results$selected_vars) == 0) {
                 table$addRow(rowKey = 1, values = list(
                     variable = .("No variables selected"),
@@ -1210,7 +1273,7 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                     color = NULL,
                     subtitle = .("Dashed blue: lambda.min; dotted orange: lambda.1se"),
                     caption = paste(strwrap(.fmt(
-                        .("Showing {shown} of {total} paths on the original scale, ranked by summed absolute coefficients (not clinical importance). Long legend labels are abbreviated."),
+                        .("Showing {shown} of {total} paths on the original scale: selected columns first, then by summed absolute coefficient times column SD (not clinical importance). Long legend labels are abbreviated."),
                         shown = state$shown, total = state$total), width = 90), collapse = "\n")) +
                 ggplot2::scale_color_discrete(labels = function(x) {
                     if (any(nchar(x) > 18)) abbreviate(x, minlength = 12, strict = TRUE) else x
@@ -1536,7 +1599,7 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                     .("The coefficient summary is a horizontal bar plot: the horizontal axis shows penalized coefficients and the vertical axis shows selected encoded columns."),
                     .("Bar colors indicate higher or lower fitted hazard. Ordering uses |coefficient| times the column standard deviation; raw bar lengths use original units."),
                     .("The separate coefficient-path plot shows coefficients against log lambda, with full-model nonzero counts on its upper axis."),
-                    .("At most 30 paths are shown, ranked by summed absolute coefficients across the path. All retained columns remain in fitting; trace rank is not clinical importance."),
+                    .("At most 30 paths are shown: selected columns first, then by summed absolute coefficient times column SD across the path. All retained columns remain in fitting; trace rank is not clinical importance."),
                     .("The path legend uses a compact layout and abbreviates long names. Predictor encoding lists the complete design-column names."))))
         },
 
@@ -2096,8 +2159,11 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             scale_note <- if (self$options$standardize) {
                 .("Internal standardization was used for penalized fitting; glmnet back-transforms displayed coefficients to the original design-column scale.")
             } else {
-                .("Coefficients are on the original variable scale.")
+                paste(.("Coefficients are on the original variable scale."),
+                    .("Selection depends on the units of each predictor; changing a unit can change which predictors are selected."))
             }
+            lambda_stop_note <- if (length(results$cv_fit$lambda) < results$lambda_searched)
+                paste0(" ", private$.lambdaStopNote(results$cv_fit, results$lambda_searched)) else ""
 
             summary_text <- paste0(
                 "<div style='background-color: rgba(33, 137, 255, 0.07); border: 1px solid #b8d4f0; border-radius: 6px; padding: 14px; margin-bottom: 12px; color: inherit;'>",
@@ -2108,7 +2174,9 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                     lambdaMethod = htmltools::htmlEscape(lambda_method)), " ",
                 .fmt(
                     .("The model selected {nSelected} of {nTotal} encoded columns: {varList}."),
-                    nSelected = n_selected, nTotal = n_total, varList = var_list), "</p>",
+                    nSelected = n_selected, nTotal = n_total, varList = var_list), " ",
+                .("The selected columns depend on the cross-validation split, so a different seed or row order can select a different set."),
+                lambda_stop_note, "</p>",
                 "<p>", .fmt(
                     .("The apparent development-sample C-index was {cindex}."),
                     cindex = cindex_text), " ",

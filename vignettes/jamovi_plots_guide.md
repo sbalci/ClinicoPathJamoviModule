@@ -496,6 +496,13 @@ plotState <- list(
 )
 ```
 
+A library object the renderer draws can itself be the state when it is small and holds no rows —
+for example an `rms::nomogram` (axis scales, about 4 KB whatever n is), unlike the `lrm` fit it
+was built from. Check before storing one: `length(serialize(x, NULL))` at two sample sizes (it
+must not grow with n), no function or environment inside, and the plot drawn after
+`unserialize(serialize(x, NULL))` matches. `oddsratio` `plot_nomogram` is the reference
+(review guide section 17).
+
 ### State Management Patterns
 
 #### Conditional State Setting

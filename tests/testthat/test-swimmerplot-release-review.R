@@ -385,7 +385,7 @@ test_that("copy-ready manuscript text never fabricates ORR for non-RECIST codes"
     # Every patient responded; nothing maps to CR/PR/SD/PD. The metrics table
     # refuses to claim 0% - the manuscript text must refuse too.
     bad <- txt(mk(rep("Responder", 6)))
-    expect_match(bad, "Not every response value was a RECIST category")
+    expect_match(bad, "Not every response value was one of CR, PR, SD, PD or NE")
     expect_false(grepl("objective response rate \\(ORR\\) of 0\\.0%", bad))
 })
 

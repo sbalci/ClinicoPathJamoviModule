@@ -6,7 +6,7 @@
 .mss_env$`%>%` <- magrittr::`%>%`
 for (.mss_file in c(
   "00jmv.R", "utils.R", "utils-formula.R", "utils-eventindicator.R",
-  "utils-followup.R", "multisurvival-formula.R", "multisurvival-interactions.R",
+  "utils-followup.R", "utils-survivaldata.R", "multisurvival-formula.R", "multisurvival-interactions.R",
   "multisurvival-metrics.R", "multisurvival.h.R", "multisurvival.b.R"
 )) sys.source(file.path(.mss_root, "R", .mss_file), .mss_env)
 

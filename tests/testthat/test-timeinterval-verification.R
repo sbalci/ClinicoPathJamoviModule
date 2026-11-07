@@ -124,17 +124,17 @@ test_that("the mean confidence interval matches stats::t.test", {
 test_that("negative intervals are refused by default with an actionable message", {
     df <- data.frame(s = c("2020-01-01", "2020-06-01"),
                      e = c("2019-12-01", "2020-08-01"), stringsAsFactors = FALSE)
-    r <- ti_run(df, dx_date = "s", fu_date = "e", time_format = "ymd",
-                output_unit = "months", remove_negative = FALSE)
-    msg <- strip_html(r$r$messages$content)
+    # A reject() since 2026-10-30, so the message is the error, and no partial
+    # summary can be emitted alongside the refusal.
+    msg <- tryCatch({ ti_run(df, dx_date = "s", fu_date = "e", time_format = "ymd",
+                             output_unit = "months", remove_negative = FALSE); "" },
+                    error = function(e) conditionMessage(e))
     expect_match(msg, "Negative time intervals detected")
     # the message must name the checkbox that actually exists in the UI --
     # it used to say "Remove Negative Intervals", which is not a real label
     expect_match(msg, "Remove negative intervals")   # must quote the control label the GUI shows
     expect_match(msg, "1 of 2 rows")                      # count AND denominator
     expect_match(msg, "2020-01-01")                       # names the offending row
-    # and no partial summary is emitted alongside the refusal
-    expect_false(nzchar(trimws(strip_html(r$r$summary$content))))
 
     # with the option on, the negative row is dropped and the rest is analysed
     r2 <- ti_run(df, dx_date = "s", fu_date = "e", time_format = "ymd",
@@ -146,7 +146,7 @@ test_that("summary statistics match base R on the computed intervals", {
     df <- data.frame(s = rep("2020-01-01", 4),
                      e = c("2020-07-01", "2021-01-01", "2021-07-01", "2022-01-01"),
                      stringsAsFactors = FALSE)
-    r <- ti_run(df, dx_date = "s", fu_date = "e", time_format = "ymd", output_unit = "months")
+    r <- ti_run(df, dx_date = "s", fu_date = "e", time_format = "ymd", output_unit = "months", time_basis = "standardized")
     ref <- as.numeric(difftime(lubridate::ymd(df$e), lubridate::ymd(df$s), units = "days")) / MONTH_DAYS
 
     txt <- strip_html(r$r$summary$content)

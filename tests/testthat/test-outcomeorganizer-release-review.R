@@ -14,11 +14,12 @@ testthat::test_that("the Summary is defined on every analysis path", {
     # the whole analysis, for the default analysis type.
     d1 <- data.frame(
         st = factor(c("Alive", "Dead", "Dead", "Alive", "Dead")),
+        rec = factor(c("Yes", "No", "Yes", "No", "No")),
         stringsAsFactors = FALSE)
     for (ty in c("os", "cause", "rfs", "pfs", "dfs", "ttp")) {
         a <- run_outcomeorganizer_obj(
             d1, outcome = "st", outcomeLevel = "Dead", analysistype = ty,
-            outputTable = TRUE)
+            recurrence = "rec", recurrenceLevel = "Yes", outputTable = TRUE)
         testthat::expect_true(
             nzchar(a$results$summary$content),
             info = paste("empty Summary for analysistype =", ty))
@@ -226,14 +227,15 @@ testthat::test_that("severity names are normalised so strong warnings stay stron
 })
 
 testthat::test_that("the glossary's RFS definition matches what RFS computes", {
-    # The glossary said "death from disease"; RFS runs only on a single event level,
-    # where the cause of death is not available, so it counts death from any cause.
+    # The glossary claimed "any cause" unconditionally. The deaths counted follow the
+    # selection, so it must say so and must not promise more than one Event Level does.
     a <- run_outcomeorganizer_obj(
         data.frame(st = factor(c("Alive", "Dead"))),
         outcome = "st", outcomeLevel = "Dead", showGlossary = TRUE)
     g <- a$results$glossary$content
 
-    testthat::expect_match(g, "any</b> cause")
+    testthat::expect_match(g, "with one Event Level only that level counts as death", fixed = TRUE)
+    testthat::expect_false(grepl("counts death from", g, fixed = TRUE))
     testthat::expect_false(grepl("recurrence or death from disease", g))
 
     # and the behaviour the glossary now describes
@@ -250,7 +252,7 @@ testthat::test_that("the glossary's RFS definition matches what RFS computes", {
     testthat::expect_equal(mk("ttp"), c(1, 0, 1, 0, 0))   # progression only
 })
 
-testthat::test_that("RFS/PFS/DFS with Multiple Event Levels is refused, not silently ignored", {
+testthat::test_that("RFS/PFS/DFS with Multiple Event Levels count every death category", {
     d <- data.frame(
         st  = factor(c("AWOD", "DOD", "DOD", "AWD", "DOOC")),
         rec = factor(c("Yes", "No", "Yes", "No", "No")), stringsAsFactors = FALSE)
@@ -261,12 +263,11 @@ testthat::test_that("RFS/PFS/DFS with Multiple Event Levels is refused, not sile
             dod = "DOD", dooc = "DOOC", awd = "AWD", awod = "AWOD"))
         a <- .oo_fn("outcomeorganizerClass")$new(options = o, data = d)
         f <- tempfile(); sink(f)
-        # reject() throws; assert the condition, not a notice that never appears
-        err <- tryCatch({ a$.__enclos_env__$private$.organizeOutcomes(); NULL },
-                        error = function(e) conditionMessage(e))
+        coded <- a$.__enclos_env__$private$.organizeOutcomes()$df_outcome$myoutcome
         sink()
-        testthat::expect_match(err %||% "", "not available with Multiple Event Levels",
-                               info = ty)
+        # With a recurrence variable, recurrence decides for every endpoint, DFS included:
+        # AWD with no recurrence is event-free (and flagged for checking under DFS).
+        testthat::expect_equal(coded, c(1, 1, 1, 0, 1), info = ty)
     }
 })
 

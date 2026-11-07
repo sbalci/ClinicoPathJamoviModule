@@ -26,7 +26,7 @@ test_that("the sparse-2x2 panel reports the real Fisher p-value", {
     oracle <- stats::fisher.test(table(d$resp, d$arm))$p.value
     expect_equal(round(oracle, 4), 0.0511, tolerance = 1e-4)   # pins the fixture
 
-    t <- jbs_assump(jjbarstats(data = d, dep = "resp", group = "arm"))
+    t <- jbs_assump(jjbarstats(data = d, dep = "resp", group = "arm", resultssubtitle = TRUE))
     expect_match(t, "Chi-square Assumption Violated")
     expect_match(t, "1 of 4 cells")
     # For a 2x2 the exact test now REPLACES the chart subtitle, so the panel
@@ -36,7 +36,7 @@ test_that("the sparse-2x2 panel reports the real Fisher p-value", {
 })
 
 test_that("the panel no longer claims an exact test was substituted", {
-    t <- jbs_assump(jjbarstats(data = jbs_2x2(), dep = "resp", group = "arm"))
+    t <- jbs_assump(jjbarstats(data = jbs_2x2(), dep = "resp", group = "arm", resultssubtitle = TRUE))
     expect_false(grepl("Automatically switched", t, fixed = TRUE))
     expect_false(grepl("Auto-Selected", t, fixed = TRUE))
     expect_false(grepl("Using Fisher's Exact Test", t, fixed = TRUE))
@@ -133,7 +133,7 @@ test_that("an adequately powered table keeps the chi-squared subtitle", {
 test_that("the assumptions panel agrees with whatever the chart shows", {
     # Once the subtitle can be swapped, telling the reader to disregard it would
     # recreate the very contradiction this fix removes.
-    swapped <- jbs_assump(jjbarstats(data = jbs_2x2(), dep = "resp", group = "arm"))
+    swapped <- jbs_assump(jjbarstats(data = jbs_2x2(), dep = "resp", group = "arm", resultssubtitle = TRUE))
     expect_match(swapped, "Exact test used")
     expect_match(swapped, "subtitle reports Fisher's exact test")
     expect_false(grepl("not the plot subtitle", swapped, fixed = TRUE))

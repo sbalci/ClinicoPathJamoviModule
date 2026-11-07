@@ -167,10 +167,10 @@ test_that("jjbarstats handles edge cases and errors appropriately", {
                           group = "also_nonexistent"),
                "not present in the dataset")
 
-  # Single row: too little data to compare, but a rejection in the panel rather
-  # than a crash
-  expect_no_error(jjbarstats(data = medical_study_data[1, ], dep = "response",
-                             group = "treatment_group"))
+  # Single row: only 1 observed category after droplevels(), so rejected cleanly
+  expect_error(jjbarstats(data = medical_study_data[1, ], dep = "response",
+                          group = "treatment_group"),
+               "at least 2 categories")
 
   # Missing variable
   expect_error(jjbarstats(data = medical_study_data, dep = "nonexistent_variable",

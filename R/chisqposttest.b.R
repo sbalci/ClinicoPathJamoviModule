@@ -1350,7 +1350,7 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     htmltools::h4(.("Multiple Testing Correction"), style = "color: inherit; margin-top: 0;"),
                     htmltools::p(htmltools::strong(.("Why correction is needed:"))),
                     htmltools::p(sprintf(
-                        .("When several tests are performed, the chance of at least one false positive grows. With %d comparisons at \u{3B1} = %g, that chance would be about %.0f%% if no correction were applied."),
+                        .("When several tests are performed, the chance of at least one false positive grows. With %d comparisons at \u{3B1} = %g, that chance would be about %.0f%% if the tests were independent and no correction were applied."),
                         num_comparisons, alpha, 100 * (1 - (1 - alpha)^num_comparisons))),
                     htmltools::div(
                         style = "background-color: rgba(230, 33, 99, 0.12); padding: 10px; border-radius: 3px; color: inherit;",
@@ -1404,7 +1404,10 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     style = "font-style: italic; background-color: rgba(138, 155, 172, 0.06); padding: 10px; border-radius: 4px; border: 1px dashed #dee2e6; color: inherit;",
                     htmltools::strong(.("Example Interpretation:")), htmltools::br(),
                     sprintf(.("If the cell 'Grade 3 \u{D7} Positive' has a residual of +3.2 (with cutoff \u{B1}%.2f):"), cutoff), htmltools::br(),
-                    .("It indicates that Grade 3 cases are significantly over-represented among the Positive group compared to what would be expected by chance.")
+                    if (3.2 > cutoff)
+                        .("The positive residual exceeds the selected cutoff, so this cell is flagged as over-represented relative to independence.")
+                    else
+                        .("The positive residual does not exceed the selected cutoff, so this cell is not flagged as over-represented relative to independence.")
                 )
             )
             return(as.character(guidance))
@@ -1577,6 +1580,12 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # the raw-rows and frequency-count analyses of the same data agree.
             analysis_vars <- intersect(c(rows, cols, counts), names(data))
             n_before <- nrow(data)
+            # A genuine NA factor level has a nonmissing integer code. Normalize it
+            # locally before listwise deletion; keep the literal label "NA" intact.
+            for (name in analysis_vars) {
+                if (is.factor(data[[name]]) && anyNA(levels(data[[name]])))
+                    levels(data[[name]]) <- levels(data[[name]])
+            }
             if (length(analysis_vars) > 0)
                 data <- jmvcore::naOmit(jmvcore::select(data, analysis_vars))
             n_dropped <- n_before - nrow(data)
@@ -1918,9 +1927,9 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 # Use HTML message only (no Notice object to avoid serialization errors)
                 message_text <- sprintf(
                     if (identical(chiSqTest$omnibus_method, "chisq"))
-                        .("The overall chi-square test is not significant (p = %s \u{2265} %g). Post-hoc pairwise comparisons are only valid when the overall test is significant: running them after a non-significant omnibus test inflates the Type I error rate and constitutes data dredging.")
+                        .("The overall chi-square test is not significant (p = %s \u{2265} %g). This analysis's policy is to run pairwise comparisons only after a significant overall test. A non-significant overall result does not establish that all groups are equivalent or rule out prespecified contrasts with an appropriate multiple-testing correction.")
                     else
-                        .("The overall Fisher's exact test is not significant (p = %s \u2265 %g). Post-hoc pairwise comparisons are only valid when the overall test is significant: running them after a non-significant omnibus test inflates the Type I error rate and constitutes data dredging."),
+                        .("The overall Fisher's exact test is not significant (p = %s \u2265 %g). This analysis's policy is to run pairwise comparisons only after a significant overall test. A non-significant overall result does not establish that all groups are equivalent or rule out prespecified contrasts with an appropriate multiple-testing correction."),
                     format.pval(chiSqTest$omnibus_p, digits = 3), self$options$sig)
                 self$results$multipleTestingInfo$setContent(
                     paste0("<div style='padding: 15px; background-color: rgba(255, 202, 33, 0.23); border: 1px solid #ffc107; color: inherit;'>",
@@ -2237,6 +2246,30 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             }
         },
         
+        # Clear computed output after a normal validation return, or before filling
+        # optional panels for a new valid run. Keep the fixed omnibus row scaffold.
+        .clearComputedResults = function(clear_main = TRUE) {
+            for (name in c("posthocTable", "exportTable")) {
+                .deleteTableRows(self$results[[name]])
+                self$results[[name]]$setNote("seed", NULL)
+            }
+            self$results$posthocTable$setNote("phici", NULL)
+            panels <- c("assumptionsCheck", "clinicalSummary", "educationalOverview",
+                        "residualsGuidance", "residualsAnalysis", "multipleTestingInfo",
+                        "detailedComparisons", "reportSentences", "glossaryPanel")
+            if (is.null(self$options$counts))
+                panels <- c(panels, "weightedDataInfo")
+            if (clear_main) {
+                self$results$chisqTable$setRow(rowNo = 1, values = list(
+                    stat = "", value = NA_real_, df = NA_integer_, p = NA_real_))
+                self$results$chisqTable$setNote("seed", NULL)
+                self$results$chisqTable$setNote("continuity", NULL)
+                panels <- c(panels, "contingencyTable")
+            }
+            for (name in panels)
+                self$results[[name]]$setContent("<div></div>")
+        },
+
         # Main analysis method - Core implementation
         .run = function() {
             # Reset the notice buffer: without this the same notice is appended once
@@ -2258,11 +2291,17 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             }
 
             # Initial setup and validation
-            if (!private$.handleInitialSetup()) return()
+            if (!private$.handleInitialSetup()) {
+                private$.clearComputedResults()
+                return()
+            }
 
             # Prepare and validate data
             data_info <- private$.prepareAndValidateData()
-            if (is.null(data_info)) return()  # Error notice already inserted
+            if (is.null(data_info)) {
+                private$.clearComputedResults()
+                return()  # Error notice already inserted
+            }
 
             data <- data_info$data
             rows <- data_info$rows
@@ -2271,7 +2310,10 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             # Create contingency table
             contTable <- private$.buildContingencyTable(data, rows, cols, counts, show_warnings = TRUE)
-            if (is.null(contTable)) return()  # Error notice already inserted
+            if (is.null(contTable)) {
+                private$.clearComputedResults()
+                return()  # Error notice already inserted
+            }
             
             # The "Exclude missing values" checkbox is inert: listwise deletion is
             # unconditional (see .buildContingencyTable). Only say so when the user
@@ -2284,6 +2326,7 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             # Perform main chi-square test
             chiSqTest <- private$.performChiSquareTest(contTable, rows, cols)
+            private$.clearComputedResults(clear_main = FALSE)
             # With a forced Fisher omnibus the chi-square approximation warnings below
             # would call the p-value in the table unreliable and tell the user to select
             # the test that is already in use.

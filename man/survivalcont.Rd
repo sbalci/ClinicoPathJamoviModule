@@ -115,13 +115,21 @@ positive values to request custom points in the selected output time scale.}
 
 \item{timetypedata}{select the time type in data}
 
-\item{timetypeoutput}{select the time type in output}
+\item{timetypeoutput}{The time unit used throughout the analysis. When
+survival time is calculated from dates, dates are CONVERTED to this unit.
+When a pre-calculated elapsed-time variable is supplied, no conversion is
+possible (the column carries no unit), so this option DECLARES the unit
+that variable is already recorded in. Either way it determines how
+cutpoints and plausibility checks are interpreted, and how axes are
+labeled, so selecting the wrong unit for pre-calculated time changes the
+reported results, not just the labels.}
 
 \item{uselandmark}{Enable this option to perform landmark survival analysis
 at a specified time point.}
 
 \item{landmark}{Specify the landmark time at which to evaluate survival
-probabilities in landmark analysis. This option is only available if you
+probabilities in landmark analysis. Patients with an event or censoring at
+or before this time are excluded. This option is only available if you
 enable the "Use Landmark Time" option.}
 
 \item{sc}{Create Kaplan-Meier curves after the continuous explanatory
@@ -310,5 +318,9 @@ Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.f
 \code{as.data.frame(results$coxTable)}
 }
 \description{
-Survival Analysis for Continuous Explanatory Variable
+Survival analysis for one continuous explanatory variable: Cox regression
+on the continuous scale, and optional data-derived cut-offs with
+Kaplan-Meier groups. A cut-off chosen from the same data overstates the
+effect and needs independent validation. These methods describe
+associations and do not establish causality.
 }

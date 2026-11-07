@@ -166,12 +166,12 @@ test_that("user-facing messages go through .() and still render in English", {
     chunk <- paste(src[i:min(i + 5, length(src))], collapse = "\n")
     !grepl("\\.\\(\\s*['\"]", substr(chunk, 1, 220))
   }, calls)
-  # exactly three pass-throughs remain, and each is translated at its source
+  # exactly four pass-throughs remain, and each is translated at its source
   # rather than at the call: user_msg (a .() switch in .safeExecute), the
-  # role_errors vector (.() at assignment), and res$error from the shared
+  # role_errors vector (.() at assignment), .recodeCaveats(), and res$error from the shared
   # .defineEventIndicator() in utils-eventindicator.R -- the only genuinely
   # untranslated one, tracked for a module-wide pass.
-  expect_equal(length(unwrapped), 3L)
+  expect_equal(length(unwrapped), 4L)
 
   # no paste0-glued fragments left inside a notice call
   glued <- Filter(function(i) grepl("paste0\\($", trimws(src[i])), calls)

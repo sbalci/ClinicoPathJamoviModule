@@ -431,6 +431,21 @@ items:
           - age_variable
           - explanatory
           - outcome
+          - uselandmark
+          - landmark
+          - elapsedtime
+          - tint
+          - dxdate
+          - fudate
+          - timetypedata
+          - timetypeoutput
+          - outcomeLevel
+          - multievent
+          - analysistype
+          - dod
+          - dooc
+          - awd
+          - awod
 
     - name: ageAdjustedCoxTable
       title: 'Age-Adjusted Cox Regression'
@@ -802,6 +817,15 @@ items:
           - outcome
           - elapsedtime
           - age_adjustment
+          - multievent
+          - analysistype
+          - outcomeLevel
+          - tint
+          - timetypedata
+          - dxdate
+          - fudate
+          - uselandmark
+          - landmark
 
 
 
@@ -894,8 +918,7 @@ items:
 
 
     - name:  survTableSummary
-      # title: '1, 3, 5-yr Survival Summary and Table'
-      title: '`1, 3, 5-yr Survival Summary and Table  - ${explanatory}`'
+      title: '`Survival at Selected Time Points, Summary - ${explanatory}`'
       type:  Preformatted
       visible: (showSummaries && length(outcome) > 0 && length(explanatory) > 0 && (length(elapsedtime) > 0 || (tint && length(dxdate) > 0 && length(fudate) > 0)))
       clearWith:
@@ -927,8 +950,7 @@ items:
 
 
     - name:  survTable
-      title: '`1, 3, 5 year Survival - ${explanatory}`'
-      # title: '1, 3, 5 year Survival'
+      title: '`Survival at Selected Time Points - ${explanatory}`'
       type:  Table
       # Hidden in competing-risks mode: Kaplan-Meier survival is not the estimand there; the
       # time-point estimates are in cifTable.
@@ -939,13 +961,13 @@ items:
           title: "Levels"
           type: text
         - name: 'time'
-          title: "time"
-          type: integer
+          title: "Time"
+          type: text
         - name: n.risk
           title: "Number at Risk"
           type: integer
         - name: n.event
-          title: "Number of Events"
+          title: "Events since previous time"
           type: integer
         - name: surv
           title: "Survival"
@@ -1033,7 +1055,6 @@ items:
         - name: rate
           title: "Incidence Rate"
           type: number
-          format: zto
         - name: rate_ci_lower
           title: "Lower"
           superTitle: '95% CI'
@@ -1226,7 +1247,7 @@ items:
       rows: 0
       columns:
         - name: observation
-          title: "Observation"
+          title: "Data row"
           type: integer
         - name: lp
           title: "Linear predictor"
@@ -1501,6 +1522,8 @@ items:
       requiresData: true
       clearWith:
           - ce
+          - pplot
+          - medianline
           - endplot
           - byplot
           - ybegin_plot
@@ -1538,6 +1561,8 @@ items:
       requiresData: true
       clearWith:
           - ch
+          - pplot
+          - medianline
           - endplot
           - byplot
           - ybegin_plot
@@ -1710,6 +1735,7 @@ items:
       type: Output
       varTitle: '`Redefined Outcome - from ${ outcome } for { analysistype } survival analysis`'
       varDescription: Redefined Outcome from Outcome based on Analysis Type in Survival Analysis
+      measureType: nominal
       clearWith:
           - outcome
           - analysistype
@@ -1721,6 +1747,14 @@ items:
           - awd
           - awod
           - outcomeredefined
+          - uselandmark
+          - landmark
+          - elapsedtime
+          - tint
+          - dxdate
+          - fudate
+          - timetypedata
+          - timetypeoutput
 
     # Calibration Curves Results
     - name: calibrationTable

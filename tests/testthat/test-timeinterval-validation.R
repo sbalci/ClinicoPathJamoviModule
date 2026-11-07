@@ -20,6 +20,14 @@ local_load_timeinterval <- function() {
   invisible(TRUE)
 }
 
+# The message a run(noThrow = TRUE) recorded as the analysis error. Since
+# 2026-10-30 validation failures are reject()s (jamovi's error state), not an
+# Html banner in `messages`.
+ti_error_text <- function(an) {
+  e <- an$results$.__enclos_env__$private$.error
+  if (is.null(e)) "" else e
+}
+
 ti_vals <- function(res) {
   v <- res$calculated_time$.__enclos_env__$private$.values
   if (is.null(v)) return(NULL)
@@ -120,14 +128,14 @@ test_that("timeinterval matches independent reference calculations on bundled da
 
   exp_days <- as.numeric(as.Date(timeinterval_ymd$end_date) - as.Date(timeinterval_ymd$start_date))
   res_ymd <- timeinterval(data = timeinterval_ymd, dx_date = "start_date", fu_date = "end_date",
-                          time_format = "ymd", output_unit = "months")
+                          time_format = "ymd", output_unit = "months", time_basis = "standardized")
   expect_equal(ti_vals(res_ymd), exp_days / 30.4375, tolerance = 1e-8)
 
   exp_lm_raw <- as.numeric(as.Date(timeinterval_landmark$last_contact) - as.Date(timeinterval_landmark$enrollment_date)) / 30.4375
   keep <- !is.na(exp_lm_raw) & (exp_lm_raw >= 6)
   res_lm <- timeinterval(data = timeinterval_landmark, dx_date = "enrollment_date", fu_date = "last_contact",
                          time_format = "ymd", output_unit = "months",
-                         use_landmark = TRUE, landmark_time = 6)
+                         use_landmark = TRUE, landmark_time = 6, time_basis = "standardized")
   expect_equal(ti_vals(res_lm), exp_lm_raw[keep] - 6, tolerance = 1e-8)
   expect_equal(ti_rownums(res_lm), which(keep))
 })
@@ -149,8 +157,8 @@ test_that("timeinterval satisfies metamorphic invariance laws (permutation, unit
 
   # Unit scaling identity
   rw <- timeinterval(data = df, dx_date = "s", fu_date = "e", time_format = "ymd", output_unit = "weeks")
-  rm <- timeinterval(data = df, dx_date = "s", fu_date = "e", time_format = "ymd", output_unit = "months")
-  ry <- timeinterval(data = df, dx_date = "s", fu_date = "e", time_format = "ymd", output_unit = "years")
+  rm <- timeinterval(data = df, dx_date = "s", fu_date = "e", time_format = "ymd", output_unit = "months", time_basis = "standardized")
+  ry <- timeinterval(data = df, dx_date = "s", fu_date = "e", time_format = "ymd", output_unit = "years", time_basis = "standardized")
   expect_equal(ti_vals(rw) * 7, ti_vals(r0), tolerance = 1e-12)
   expect_equal(ti_vals(rm) * 30.4375, ti_vals(r0), tolerance = 1e-12)
   expect_equal(ti_vals(ry) * 365.25, ti_vals(r0), tolerance = 1e-12)
@@ -170,15 +178,13 @@ test_that("timeinterval handles boundary and degenerate inputs without silent fa
   local_load_timeinterval()
 
   # Empty and all-NA datasets
-  r_empty <- timeinterval(data = data.frame(s = character(0), e = character(0)),
-                          dx_date = "s", fu_date = "e", time_format = "ymd")
-  expect_match(r_empty$messages$content, "Data frame is empty", fixed = TRUE)
-  expect_null(ti_vals(r_empty))
+  expect_error(timeinterval(data = data.frame(s = character(0), e = character(0)),
+                            dx_date = "s", fu_date = "e", time_format = "ymd"),
+               "Data frame is empty", fixed = TRUE)
 
-  r_na <- timeinterval(data = data.frame(s = rep(NA_character_, 3), e = rep("2020-01-01", 3)),
-                       dx_date = "s", fu_date = "e", time_format = "ymd")
-  expect_match(r_na$messages$content, "contains only missing", fixed = TRUE)
-  expect_null(ti_vals(r_na))
+  expect_error(timeinterval(data = data.frame(s = rep(NA_character_, 3), e = rep("2020-01-01", 3)),
+                            dx_date = "s", fu_date = "e", time_format = "ymd"),
+               "contains only missing", fixed = TRUE)
 
   # Single row (n = 1) and constant intervals (SD = 0)
   r_n1 <- timeinterval(data = data.frame(s = "2020-01-01", e = "2020-01-11"),
@@ -192,10 +198,9 @@ test_that("timeinterval handles boundary and degenerate inputs without silent fa
   expect_match(r_sd0$summary$content, "confidence interval has zero width", fixed = TRUE)
 
   # 5-digit spreadsheet serials rejected; 8-digit packed dates parsed
-  r_serial <- timeinterval(data = data.frame(s = c("43831", "43862"), e = c("43900", "43950")),
-                           dx_date = "s", fu_date = "e", time_format = "ymd")
-  expect_match(r_serial$messages$content, "five-digit numbers", fixed = TRUE)
-  expect_null(ti_vals(r_serial))
+  expect_error(timeinterval(data = data.frame(s = c("43831", "43862"), e = c("43900", "43950")),
+                            dx_date = "s", fu_date = "e", time_format = "ymd"),
+               "five-digit numbers", fixed = TRUE)
 
   r_compact <- timeinterval(data = data.frame(s = c("20200101", "20200201"), e = c("20200601", "20200701")),
                             dx_date = "s", fu_date = "e", time_format = "ymd", output_unit = "days")
@@ -327,9 +332,11 @@ test_that("VAL-timeinterval-08: R6 private$.formatDetectionNote resets across re
     dx_date = "ser_s", fu_date = "ser_e", time_format = "auto"
   )
   ana$.__enclos_env__$private$.data <- df_lifecycle
-  ana$.__enclos_env__$private$.run()
-  expect_match(ana$results$messages$content, "five-digit numbers", fixed = TRUE)
-  expect_false(grepl("Auto-detection is ambiguous", ana$results$messages$content, fixed = TRUE))
+  msg <- tryCatch({ ana$.__enclos_env__$private$.run(); "" },
+                  error = function(e) conditionMessage(e))
+  expect_match(msg, "five-digit numbers", fixed = TRUE)
+  # the previous run's ambiguity note must not ride along on this rejection
+  expect_false(grepl("Auto-detection is ambiguous", msg, fixed = TRUE))
 })
 
 test_that("LIM-timeinterval-01: summary reports interquartile range (IQR: Q1 to Q3) alongside median", {
@@ -374,7 +381,8 @@ test_that("SEC-timeinterval-01: backend option backstops reject out-of-enum and 
   an$init(noThrow = TRUE)
   an$run(noThrow = TRUE)
   expect_false(grepl("<img", an$results$caveatsPanel$content, fixed = TRUE))
-  expect_match(an$results$messages$content, "Extreme threshold multiplier must be between 1.5 and 5", fixed = TRUE)
+  expect_identical(an$status, "error")
+  expect_match(ti_error_text(an), "Extreme threshold multiplier must be between 1.5 and 5", fixed = TRUE)
 
   opts_u <- timeintervalOptions$new(dx_date = "dx", fu_date = "fu")
   an_u <- timeintervalClass$new(options = opts_u, data = df_zero)
@@ -382,7 +390,7 @@ test_that("SEC-timeinterval-01: backend option backstops reject out-of-enum and 
   o_unit$.__enclos_env__$private$.value <- "hours"
   an_u$init(noThrow = TRUE)
   an_u$run(noThrow = TRUE)
-  expect_match(an_u$results$messages$content, "Unsupported output unit", fixed = TRUE)
+  expect_match(ti_error_text(an_u), "Unsupported output unit", fixed = TRUE)
   expect_false(grepl("person-hours", an_u$results$summary$content, fixed = TRUE))
 })
 
@@ -405,11 +413,10 @@ test_that("FIX-timeinterval-01: non-finite landmark_time (Inf, NA, NaN) is clean
     stringsAsFactors = FALSE
   )
 
-  res_inf <- timeinterval(
+  expect_error(timeinterval(
     data = df, dx_date = "dx", fu_date = "fu",
     use_landmark = TRUE, landmark_time = Inf
-  )
-  expect_match(res_inf$messages$content, "Landmark time must be a finite non-negative number", fixed = TRUE)
+  ), "Landmark time must be a finite non-negative number", fixed = TRUE)
 
   opts <- timeintervalOptions$new(dx_date = "dx", fu_date = "fu", use_landmark = TRUE)
   an <- timeintervalClass$new(options = opts, data = df)
@@ -417,7 +424,7 @@ test_that("FIX-timeinterval-01: non-finite landmark_time (Inf, NA, NaN) is clean
   o_lm$.__enclos_env__$private$.value <- NA_real_
   an$init(noThrow = TRUE)
   expect_no_error(an$run(noThrow = TRUE))
-  expect_match(an$results$messages$content, "Landmark time must be a finite non-negative number", fixed = TRUE)
+  expect_match(ti_error_text(an), "Landmark time must be a finite non-negative number", fixed = TRUE)
 })
 
 test_that("FIX-timeinterval-02: landmark excluding 100% of observations does not also emit contradictory surviving-subgroup warning", {
@@ -442,6 +449,6 @@ test_that("FIX-timeinterval-03: .checkDateSerial inspects up to 500 non-missing 
     fu = c(rep("2020-06-01", 15), rep("44000", 285)),
     stringsAsFactors = FALSE
   )
-  res <- timeinterval(data = df, dx_date = "dx", fu_date = "fu")
-  expect_match(res$messages$content, "holds five-digit numbers such as 43831", fixed = TRUE)
+  expect_error(timeinterval(data = df, dx_date = "dx", fu_date = "fu"),
+               "holds five-digit numbers such as 43831", fixed = TRUE)
 })

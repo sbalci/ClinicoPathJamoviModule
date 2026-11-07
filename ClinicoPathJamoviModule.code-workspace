@@ -29,6 +29,9 @@
 		},
 		{
 			"path": "../ClinicoPathPj"
+		},
+		{
+			"path": "../ClinicoPathShiny"
 		}
 	],
 	"settings": {}

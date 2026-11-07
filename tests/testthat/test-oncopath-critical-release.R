@@ -48,15 +48,20 @@ test_that("ordered and custom contrasts retain their model and report actual cod
     }
 })
 
-test_that("swimmer rejects conflicting patient groups regardless of order and size", {
+test_that("swimmer refuses the comparison for conflicting patient groups regardless of order and size", {
     for (count in c(8L, 600L)) {
         d <- data.frame(id = rep(seq_len(count), each = 2), start = rep(c(0, 2), count),
                         end = rep(c(1, 3), count), group = rep(c("A", "B"), count),
                         resp = rep(c("PR", "PD"), count))
         for (idx in list(seq_len(nrow(d)), rev(seq_len(nrow(d))))) {
-            expect_error(swimmerplot(d[idx, ], patientID = "id", startTime = "start",
-                                    endTime = "end", groupVar = "group", responseVar = "resp"),
-                         "conflicting non-missing group values")
+            # The group feeds only the comparison, so only the comparison is
+            # skipped; the plot, follow-up and response rates used to be lost
+            # with the whole run (2026-11-07 pre-submission review).
+            r <- swimmerplot(d[idx, ], patientID = "id", startTime = "start",
+                             endTime = "end", groupVar = "group", responseVar = "resp")
+            expect_match(r$notices$content, "conflicting non-missing group values", fixed = TRUE)
+            expect_equal(r$groupComparisonTest$rowCount, 0)
+            expect_equal(r$summary$asDF$value[1], count)
             # The group feeds only the response comparison; without one it is
             # ignored, not a reason to fail (2026-10-19, R61).
             expect_no_error(swimmerplot(d[idx, ], patientID = "id", startTime = "start",

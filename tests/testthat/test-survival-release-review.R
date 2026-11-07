@@ -117,7 +117,7 @@ test_that("age-based plots use the same landmarked time as the tables", {
   expect_lt(nrow(s_land$plot_data), nrow(s_plain$plot_data))
   expect_equal(max(s_land$plot_data$time),
                max(raw$elapsedtime) - 12, tolerance = 1e-8)
-  expect_equal(nrow(s_land$plot_data), sum(raw$elapsedtime >= 12))
+  expect_equal(nrow(s_land$plot_data), sum(raw$elapsedtime > 12))
 
   # and both plots share one frame, so they cannot disagree with each other
   expect_equal(land$adjustedCurvesPlot$state$plot_data, s_land$plot_data)

@@ -127,8 +127,8 @@ test_that("a valid rate multiplier still scales the incidence rate", {
                            outcome = "status", outcomeLevel = "Dead",
                            person_time = TRUE, rate_multiplier = 1000)
 
-    expect_equal(r100$personTimeTable$getCell(rowNo = 1, "rate")$value, 9.09)
-    expect_equal(r1000$personTimeTable$getCell(rowNo = 1, "rate")$value, 90.91)
+    expect_equal(r100$personTimeTable$getCell(rowNo = 1, "rate")$value, 100 / 11)
+    expect_equal(r1000$personTimeTable$getCell(rowNo = 1, "rate")$value, 1000 / 11)
 })
 
 test_that("a user variable named row_names is not overwritten by the join key", {
@@ -165,14 +165,17 @@ test_that("start and end dates must be different variables", {
     expect_equal(res$medianTable$rowCount, 0)
 })
 
-test_that("a time-zero event is not divided by later person-time", {
+test_that("a time-zero event is counted with no person-time, as in the other analyses", {
     d <- simple_data(c(0, 2, 4, 6), c(TRUE, FALSE, TRUE, FALSE))
     res <- run_singlearm(data = d, elapsedtime = "time", outcome = "status",
                          outcomeLevel = "Dead", person_time = TRUE)
 
-    expect_equal(res$personTimeTable$rowCount, 0)
-    expect_match(strip_html(res$warnings$content),
-                 "Person-time rates were not calculated.*time zero")
+    pt <- res$personTimeTable$asDF
+    expect_equal(as.numeric(pt$events[1]), 2)
+    expect_equal(as.numeric(pt$person_time[1]), 12)
+    expect_equal(as.numeric(pt$rate[1]), 2 / 12 * 100, tolerance = 1e-8)
+    notes <- paste(vapply(res$personTimeTable$notes, function(n) n$note, ""), collapse = " ")
+    expect_match(notes, "1 event(s) at time zero", fixed = TRUE)
     expect_equal(res$medianTable$rowCount, 1)
 })
 
@@ -384,7 +387,8 @@ test_that("no plot selected still means no plot explanation", {
                          sc = FALSE, ce = FALSE, ch = FALSE, kmunicate = FALSE,
                          showExplanations = TRUE)
 
-    expect_equal(paste(res$survivalPlotsExplanation$content, collapse = ""), "")
+    # Blank markup ("<div></div>"), not "": an empty Html update is skipped by the client.
+    expect_equal(gsub("<[^>]+>", "", paste(res$survivalPlotsExplanation$content, collapse = "")), "")
 })
 
 

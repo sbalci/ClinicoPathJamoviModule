@@ -76,6 +76,8 @@ library(testthat)
     # The declared endpoint. .medianSurv() names the estimand off this, via the
     # real .estimandMeta(), so the labels asserted below are the shipped ones.
     .eventRecode         = list(estimand = estimand),
+    .landmarkSuffix      = function() "",
+    .landmarkNote        = function(...) invisible(NULL),
     .estimandMeta        = bind(pm$.estimandMeta),
     .addInfo             = add("INFO"),
     .addWarning          = add("WARNING"),
@@ -167,7 +169,8 @@ test_that("L1/L2: a competing-risk cohort WITH events is unchanged by the zero-e
     ))
   stub$private <- list(
     .isCompetingRisk = function(...) competing,
-    .eventRecode     = list(estimand = estimand))
+    .eventRecode     = list(estimand = estimand),
+    .landmarkSuffix  = function() "")
   stub$private$.estimandMeta <- e$singlearmClass$private_methods$.estimandMeta
   environment(stub$private$.estimandMeta) <- stub
   environment(f) <- stub

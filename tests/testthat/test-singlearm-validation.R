@@ -278,13 +278,13 @@ test_that("VAL-A3, A4 & D5: Person-time exposure, Garwood 95% CIs, and piecewise
   gw_i3 <- .garwood_oracle(1,  15, 100)
 
   expect_equal(as.numeric(tb_pt[tb_pt$interval == "Overall (0-max)", c("events", "person_time", "rate", "rate_ci_lower", "rate_ci_upper")]),
-               c(6, 212, round(gw_ov$rate, 2), round(gw_ov$lo, 2), round(gw_ov$hi, 2)))
+               c(6, 212, gw_ov$rate, gw_ov$lo, gw_ov$hi))
   expect_equal(as.numeric(tb_pt[tb_pt$interval == "0-15", c("events", "person_time", "rate", "rate_ci_lower", "rate_ci_upper")]),
-               c(3, 132, round(gw_i1$rate, 2), round(gw_i1$lo, 2), round(gw_i1$hi, 2)))
+               c(3, 132, gw_i1$rate, gw_i1$lo, gw_i1$hi))
   expect_equal(as.numeric(tb_pt[tb_pt$interval == "15-30", c("events", "person_time", "rate", "rate_ci_lower", "rate_ci_upper")]),
-               c(2, 65, round(gw_i2$rate, 2), round(gw_i2$lo, 2), round(gw_i2$hi, 2)))
+               c(2, 65, gw_i2$rate, gw_i2$lo, gw_i2$hi))
   expect_equal(as.numeric(tb_pt[tb_pt$interval == "30+", c("events", "person_time", "rate", "rate_ci_lower", "rate_ci_upper")]),
-               c(1, 15, round(gw_i3$rate, 2), round(gw_i3$lo, 2), round(gw_i3$hi, 2)))
+               c(1, 15, gw_i3$rate, gw_i3$lo, gw_i3$hi))
 
   # Piecewise baseline hazard across 3 bins (30 events)
   d_a4 <- do.call(rbind, replicate(5, d_a3, simplify = FALSE))
@@ -296,7 +296,7 @@ test_that("VAL-A3, A4 & D5: Person-time exposure, Garwood 95% CIs, and piecewise
     pt_k <- sum(pmax(0, pmin(d_a4$time, b) - a))
     ev_k <- sum(d_a4$status == 1 & d_a4$time <= b & (if (k == 1L) d_a4$time >= a else d_a4$time > a))
     gw_k <- .garwood_oracle(ev_k, pt_k, mult = 1)
-    c(round(gw_k$rate, 4), round(gw_k$lo, 4), round(gw_k$hi, 4))
+    c(gw_k$rate, gw_k$lo, gw_k$hi)
   })
   expect_equal(c(tb_bh$hazard, tb_bh$hazard_lower, tb_bh$hazard_upper),
                c(sapply(exp_bh, `[`, 1), sapply(exp_bh, `[`, 2), sapply(exp_bh, `[`, 3)),

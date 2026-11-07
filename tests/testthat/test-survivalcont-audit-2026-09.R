@@ -29,7 +29,7 @@ library(testthat)
 
 .sc_env <- function() {
   e <- new.env(parent = globalenv())
-  for (f in c("utils-formula.R", "utils-eventindicator.R", "utils-followup.R", "survival-competingrisks.R", "multisurvival-formula.R"))
+  for (f in c("utils-formula.R", "utils-eventindicator.R", "utils-followup.R", "utils-survivaldata.R", "survival-competingrisks.R", "multisurvival-formula.R"))
     suppressWarnings(suppressMessages(sys.source(.sc_src(f), envir = e)))
   suppressWarnings(suppressMessages(sys.source(.sc_src("survivalcont.b.R"), envir = e)))
   e
@@ -59,7 +59,7 @@ library(testthat)
   priv$.multicutFailReason <- NULL
   for (nm in c(".getData", ".definemytime", ".definemyoutcome", ".definemyfactor",
                ".eventOfInterestIndicator", ".cleandata", ".multipleCutoffs",
-               ".escapeVariableNames", ".quantileCutoffs"))
+               ".escapeVariableNames", ".quantileCutoffs", ".oneYear"))
     assign(nm, bind(pm[[nm]]), envir = priv)
   stub$private <- priv
   list(private = priv, rec = rec)
@@ -168,18 +168,18 @@ test_that("C-LOW: .escapeVariableNames() delegates to jmvcore::composeTerm", {
 
 # STAT: no adjusted p-value is promised ---------------------------------------
 
-test_that("STAT: the cut-off narrative no longer promises a multiplicity-adjusted p-value", {
+test_that("STAT: the cut-off narrative names only the adjusted p the table prints", {
   src <- paste(readLines(.sc_src("survivalcont.b.R")), collapse = "\n")
   expect_false(grepl("Adjusts p-value for multiple testing", src, fixed = TRUE))
   expect_false(grepl("Multiple testing correction</td>", src, fixed = TRUE))
   expect_false(grepl(">Adjusted p-value</td>", src, fixed = TRUE))
-  expect_true(grepl("No multiplicity-adjusted p-value is computed or reported", src, fixed = TRUE))
-  expect_true(grepl("no multiplicity-adjusted p-value is reported for this cut-off", src, fixed = TRUE))
+  expect_true(grepl("The adjusted p in the cut-off table accounts for that search", src, fixed = TRUE))
+  expect_true(grepl("Adjusted p allows for that search", src, fixed = TRUE))
   # Tail probabilities: no 1 - pchisq() cancellation left.
   expect_false(grepl("1 - stats::pchisq", src, fixed = TRUE))
   expect_false(grepl("1 - pchisq", src, fixed = TRUE))
-  # On-plot log-rank p on the multi-cut-off KM plot carries its caveat.
-  expect_true(grepl("log-rank p is exploratory: groups were chosen from these data", src, fixed = TRUE))
+  # An outcome-guided multi-cut-off KM plot carries no p, and says why.
+  expect_true(grepl("no p-value: groups were chosen from these data", src, fixed = TRUE))
 })
 
 test_that("STAT: rescutTable cites maxstat, which the notice tells users to cite", {
