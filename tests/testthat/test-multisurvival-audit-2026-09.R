@@ -155,7 +155,8 @@ test_that("factor-level text is HTML-escaped at every Html sink flagged by the a
 
 test_that("stratified nomogram path no longer hides the summary it then writes to", {
   src <- .b_lines()
-  i <- grep("for (nm in c(\"nomogramHeading\", \"plot_nomogram\", \"nomogram_display\",", src, fixed = TRUE)
+  # Empty Preformatted heading elements (including nomogramHeading) were removed per check_empty_preformatted.
+  i <- grep("for (nm in c(\"plot_nomogram\", \"nomogram_display\",", src, fixed = TRUE)
   expect_length(i, 1L)
   expect_false(grepl("nomogramSummary", src[i + 1L], fixed = TRUE))
 })

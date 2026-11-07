@@ -291,8 +291,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
             # explanatory to a factor (finalfit's own < 5 rule); NULL otherwise.
             .explanatoryCoercedLevels = NULL,
 
-            # HTML notice helper (avoids the protobuf serialization error caused by
-            # passing jmvcore::Notice objects to self$results$insert / $add).
+            # HTML notice helper for the strongWarnings/warnings/infoMessages/errors panels.
             # See R/survivalcont.b.R:700-743 for the reference implementation.
             .addHtmlMessage = function(type, title, message) {
                 output_name <- switch(type,
@@ -1631,7 +1630,8 @@ survivalClass <- if (requireNamespace('jmvcore'))
                     ))
                 }, error = function(e) {
                     err_msg <- paste("Error calculating RMST:", htmltools::htmlEscape(e$message))
-                    self$results$rmstTable$setNote("error", err_msg)
+                    self$results$rmstTable$setNote("unavailable", err_msg)
+                    private$.addHtmlMessage("warning", .("RMST calculation unavailable"), err_msg)
                     return(list(
                         table = NULL,
                         tau = NULL,
@@ -3443,7 +3443,9 @@ survivalClass <- if (requireNamespace('jmvcore'))
                     }
 
                 }, error = function(e) {
-                    table$setNote("error", .fmt(.("Bootstrap validation failed: {message}"), message = htmltools::htmlEscape(e$message)))
+                    msg <- .fmt(.("Bootstrap validation failed: {message}"), message = htmltools::htmlEscape(e$message))
+                    table$setNote("unavailable", msg)
+                    private$.addHtmlMessage("warning", .("Bootstrap validation unavailable"), msg)
                 })
             }
 
@@ -5349,9 +5351,10 @@ survivalClass <- if (requireNamespace('jmvcore'))
                     basehaz_df <- survival::basehaz(cox_model, centered = TRUE)
                     if (nrow(basehaz_df) == 0 || max(basehaz_df$time) < cal_time) {
                         # cal_time beyond observed data
-                        self$results$calibrationTable$setNote("error",
-                            paste0("Calibration time point (", round(cal_time, 1),
-                                   ") exceeds maximum observed time. Choose a smaller value."))
+                        msg <- paste0("Calibration time point (", round(cal_time, 1),
+                                      ") exceeds maximum observed time. Choose a smaller value.")
+                        self$results$calibrationTable$setNote("unavailable", msg)
+                        private$.addHtmlMessage("warning", .("Calibration unavailable"), msg)
                         return()
                     }
                     # Each patient's model-predicted survival at the calibration time.
@@ -5369,8 +5372,9 @@ survivalClass <- if (requireNamespace('jmvcore'))
                     # Reduce groups if too few unique predicted values
                     effective_groups <- min(n_groups, n_unique_pred)
                     if (effective_groups < 2) {
-                        self$results$calibrationTable$setNote("error",
-                            "Cannot create risk groups - too little variation in predicted survival. Add continuous covariates for meaningful calibration.")
+                        msg <- "Cannot create risk groups - too little variation in predicted survival. Add continuous covariates for meaningful calibration."
+                        self$results$calibrationTable$setNote("unavailable", msg)
+                        private$.addHtmlMessage("warning", .("Calibration unavailable"), msg)
                         return()
                     }
                     if (n_unique_pred <= n_groups) {
@@ -5385,8 +5389,9 @@ survivalClass <- if (requireNamespace('jmvcore'))
                         # Handle duplicated breaks
                         breaks <- unique(breaks)
                         if (length(breaks) < 3) {
-                            self$results$calibrationTable$setNote("error",
-                                "Cannot create risk groups - too little variation in predicted survival. Add continuous covariates for meaningful calibration.")
+                            msg <- "Cannot create risk groups - too little variation in predicted survival. Add continuous covariates for meaningful calibration."
+                            self$results$calibrationTable$setNote("unavailable", msg)
+                            private$.addHtmlMessage("warning", .("Calibration unavailable"), msg)
                             return()
                         }
                         breaks[1] <- breaks[1] - 0.001
@@ -5575,8 +5580,9 @@ survivalClass <- if (requireNamespace('jmvcore'))
                     }
 
                 }, error = function(e) {
-                    self$results$calibrationTable$setNote("error",
-                        paste("Calibration error:", htmltools::htmlEscape(e$message)))
+                    msg <- paste("Calibration error:", htmltools::htmlEscape(e$message))
+                    self$results$calibrationTable$setNote("unavailable", msg)
+                    private$.addHtmlMessage("warning", .("Calibration unavailable"), msg)
                 })
             }
 
@@ -5625,15 +5631,17 @@ survivalClass <- if (requireNamespace('jmvcore'))
                     # The rcs_variable is not in cleanData (which only has time/outcome/explanatory)
                     # Pull it from the original data and add it to mydata
                     if (is.null(rcs_var) || !(rcs_var %in% names(self$data))) {
-                        self$results$rcsTestTable$setNote("error",
-                            "Selected variable not found in the data.")
+                        msg <- "Selected variable not found in the data."
+                        self$results$rcsTestTable$setNote("unavailable", msg)
+                        private$.addHtmlMessage("warning", .("RCS analysis unavailable"), msg)
                         return()
                     }
 
                     # The outcome time cannot predict itself.
                     if (identical(rcs_var, self$options$elapsedtime)) {
-                        self$results$rcsTestTable$setNote("error",
-                            .("The survival time cannot be used as a spline predictor: it is the outcome, so any association with it is built in."))
+                        msg <- .("The survival time cannot be used as a spline predictor: it is the outcome, so any association with it is built in.")
+                        self$results$rcsTestTable$setNote("unavailable", msg)
+                        private$.addHtmlMessage("warning", .("RCS analysis unavailable"), msg)
                         return()
                     }
 
@@ -5647,16 +5655,18 @@ survivalClass <- if (requireNamespace('jmvcore'))
 
                     rcs_values <- mydata[[rcs_var]]
                     if (all(is.na(rcs_values))) {
-                        self$results$rcsTestTable$setNote("error",
-                            "Selected variable contains no numeric values.")
+                        msg <- "Selected variable contains no numeric values."
+                        self$results$rcsTestTable$setNote("unavailable", msg)
+                        private$.addHtmlMessage("warning", .("RCS analysis unavailable"), msg)
                         return()
                     }
 
                     n_unique <- length(unique(na.omit(rcs_values)))
                     if (n_unique < n_knots + 2) {
-                        self$results$rcsTestTable$setNote("error",
-                            paste0("Too few unique values (", n_unique,
-                                   ") for ", n_knots, " knots. Need at least ", n_knots + 2, "."))
+                        msg <- paste0("Too few unique values (", n_unique,
+                                      ") for ", n_knots, " knots. Need at least ", n_knots + 2, ".")
+                        self$results$rcsTestTable$setNote("unavailable", msg)
+                        private$.addHtmlMessage("warning", .("RCS analysis unavailable"), msg)
                         return()
                     }
 
@@ -5801,8 +5811,9 @@ survivalClass <- if (requireNamespace('jmvcore'))
                     }
 
                 }, error = function(e) {
-                    self$results$rcsTestTable$setNote("error",
-                        paste("RCS analysis error:", htmltools::htmlEscape(e$message)))
+                    msg <- paste("RCS analysis error:", htmltools::htmlEscape(e$message))
+                    self$results$rcsTestTable$setNote("unavailable", msg)
+                    private$.addHtmlMessage("warning", .("RCS analysis unavailable"), msg)
                 })
             }
 
@@ -6160,14 +6171,16 @@ survivalClass <- if (requireNamespace('jmvcore'))
                 age_col_name <- age_result$age_col_name
 
                 if (is.null(age_col_name)) {
-                    self$results$ageAdjustedCoxTable$setNote("error",
-                        .("Age variable not found in data."))
+                    msg <- .("Age variable not found in data.")
+                    self$results$ageAdjustedCoxTable$setNote("unavailable", msg)
+                    private$.addHtmlMessage("warning", .("Age-adjusted analysis unavailable"), msg)
                     return()
                 }
 
                 if (nrow(mydata) < 10) {
-                    self$results$ageAdjustedCoxTable$setNote("error",
-                        .("Insufficient observations for age-adjusted analysis after removing missing values."))
+                    msg <- .("Insufficient observations for age-adjusted analysis after removing missing values.")
+                    self$results$ageAdjustedCoxTable$setNote("unavailable", msg)
+                    private$.addHtmlMessage("warning", .("Age-adjusted analysis unavailable"), msg)
                     return()
                 }
 
@@ -6384,11 +6397,12 @@ survivalClass <- if (requireNamespace('jmvcore'))
                         paste(interpretation_parts, collapse = "\n"))
 
                 }, error = function(e) {
-                    self$results$ageAdjustedCoxTable$setNote("error",
-                        .fmt(
-                            .("Age-adjusted Cox regression failed: {message}"),
-                            message = conditionMessage(e)
-                        ))
+                    msg <- .fmt(
+                        .("Age-adjusted Cox regression failed: {message}"),
+                        message = conditionMessage(e)
+                    )
+                    self$results$ageAdjustedCoxTable$setNote("unavailable", msg)
+                    private$.addHtmlMessage("warning", .("Age-adjusted analysis unavailable"), msg)
                 })
 
                 # ---- 2. Age Interaction Test ----
@@ -6449,11 +6463,12 @@ survivalClass <- if (requireNamespace('jmvcore'))
                         }
 
                     }, error = function(e) {
-                        self$results$ageInteractionTable$setNote("error",
-                            .fmt(
-                                .("Age interaction test failed: {message}"),
-                                message = conditionMessage(e)
-                            ))
+                        msg <- .fmt(
+                            .("Age interaction test failed: {message}"),
+                            message = conditionMessage(e)
+                        )
+                        self$results$ageInteractionTable$setNote("unavailable", msg)
+                        private$.addHtmlMessage("warning", .("Age interaction test unavailable"), msg)
                     })
                 }
 
@@ -6516,8 +6531,9 @@ survivalClass <- if (requireNamespace('jmvcore'))
                     age_col_name <- age_result$age_col_name
 
                     if (is.null(age_col_name)) {
-                        self$results$ageTimeScaleTable$setNote("error",
-                            .("Age variable not found in data."))
+                        msg <- .("Age variable not found in data.")
+                        self$results$ageTimeScaleTable$setNote("unavailable", msg)
+                        private$.addHtmlMessage("warning", .("Age-as-time-scale analysis unavailable"), msg)
                         return()
                     }
 
@@ -6565,8 +6581,9 @@ survivalClass <- if (requireNamespace('jmvcore'))
                         private$.timeZeroNote(!is.na(age_entry) & !is.na(age_exit) & age_exit <= age_entry,
                                               mydata[[myoutcome]]))
                     if (sum(valid) < 10) {
-                        self$results$ageTimeScaleTable$setNote("error",
-                            .("Insufficient valid observations for age-as-time-scale analysis. Check that age and follow-up time are in compatible units."))
+                        msg <- .("Insufficient valid observations for age-as-time-scale analysis. Check that age and follow-up time are in compatible units.")
+                        self$results$ageTimeScaleTable$setNote("unavailable", msg)
+                        private$.addHtmlMessage("warning", .("Age-as-time-scale analysis unavailable"), msg)
                         return()
                     }
 
@@ -6640,11 +6657,12 @@ survivalClass <- if (requireNamespace('jmvcore'))
                     self$results$ageTimeScaleInterpretation$setContent(interpretation)
 
                 }, error = function(e) {
-                    self$results$ageTimeScaleTable$setNote("error",
-                        .fmt(
-                            .("Age-as-time-scale analysis failed: {message}"),
-                            message = conditionMessage(e)
-                        ))
+                    msg <- .fmt(
+                        .("Age-as-time-scale analysis failed: {message}"),
+                        message = conditionMessage(e)
+                    )
+                    self$results$ageTimeScaleTable$setNote("unavailable", msg)
+                    private$.addHtmlMessage("warning", .("Age-as-time-scale analysis unavailable"), msg)
                 })
             }
 
@@ -6669,8 +6687,9 @@ survivalClass <- if (requireNamespace('jmvcore'))
                     age_col_name <- age_result$age_col_name
 
                     if (is.null(age_col_name)) {
-                        self$results$ageStandardizationTable$setNote("error",
-                            .("Age variable not found in data."))
+                        msg <- .("Age variable not found in data.")
+                        self$results$ageStandardizationTable$setNote("unavailable", msg)
+                        private$.addHtmlMessage("warning", .("Age standardization unavailable"), msg)
                         return()
                     }
 
@@ -6890,11 +6909,12 @@ survivalClass <- if (requireNamespace('jmvcore'))
                     self$results$ageStandardizationInterpretation$setContent(interpretation)
 
                 }, error = function(e) {
-                    self$results$ageStandardizationTable$setNote("error",
-                        .fmt(
-                            .("Age standardization failed: {message}"),
-                            message = conditionMessage(e)
-                        ))
+                    msg <- .fmt(
+                        .("Age standardization failed: {message}"),
+                        message = conditionMessage(e)
+                    )
+                    self$results$ageStandardizationTable$setNote("unavailable", msg)
+                    private$.addHtmlMessage("warning", .("Age standardization unavailable"), msg)
                 })
             }
 
@@ -7169,7 +7189,10 @@ survivalClass <- if (requireNamespace('jmvcore'))
                     if (has_calibration) .("Calibration here is apparent, on the data used to fit the model, and is not validation.")),
                     collapse = " ")
 
-                # Build HTML
+                self$results$remarkChecklist$setContent(private$.generateRemarkGuide(reported, notes))
+            },
+
+            .generateRemarkGuide = function(reported, notes) {
                 html_parts <- list("<h3>REMARK Reporting Checklist</h3>")
                 html_parts <- c(html_parts, "<p><small>Items from Altman DG et al. <i>BMC Med</i> 2012;10:51 (doi:10.1186/1741-7015-10-51), Table 1, explaining McShane LM et al. <i>JNCI</i> 2005;97(16):1180-1184</small></p>")
                 html_parts <- c(html_parts, "<table style='border-collapse: collapse; width: 100%; font-size: 0.9em;'>")
@@ -7194,7 +7217,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
                     "\u{270e} = Report in the manuscript",
                     "</small></p>")
 
-                self$results$remarkChecklist$setContent(paste(html_parts, collapse = "\n"))
+                paste(html_parts, collapse = "\n")
             }
 
         )

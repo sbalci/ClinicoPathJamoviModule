@@ -32,6 +32,7 @@ refs:
         volume: 332
         pages: "1080"
         doi: 10.1136/bmj.332.7549.1080
+        url: "https://doi.org/10.1136/bmj.332.7549.1080"
 
     AustinLeeFine2016:
         type: article
@@ -639,6 +640,7 @@ refs:
         issue: 2
         pages: 121-129
         doi: 10.1002/sim.4780010204
+        url: "https://doi.org/10.1002/sim.4780010204"
 
     Garcia2022:
         type: article
@@ -739,6 +741,7 @@ refs:
         issue: 3
         pages: 651-674
         doi: 10.1198/106186006X133933
+        url: "https://doi.org/10.1198/106186006X133933"
 
     HuiWalter1980:
         type: article
@@ -996,6 +999,7 @@ refs:
         issue: 2
         pages: 442-451
         doi: 10.1016/0005-2795(75)90109-9
+        url: "https://doi.org/10.1016/0005-2795(75)90109-9"
 
     McClish1989:
         type: article
@@ -1445,6 +1449,7 @@ refs:
         volume: 8
         pages: "25"
         doi: 10.1186/1471-2105-8-25
+        url: "https://doi.org/10.1186/1471-2105-8-25"
 
     Swamidass2010:
         type: article
@@ -2377,6 +2382,7 @@ refs:
         issue: 12
         pages: 1772-1779
         doi: 10.1200/JCO.1986.4.12.1772
+        url: "https://doi.org/10.1200/JCO.1986.4.12.1772"
 
     ggExtra:
         type: software
@@ -2595,6 +2601,7 @@ refs:
         title: "Visualizations with statistical details: The 'ggstatsplot' approach."
         publisher: PsyArxiv
         doi: "doi:10.31234/osf.io/p7mku"
+        url: "https://doi.org/10.31234/osf.io/p7mku"
 
     ggstream:
         type: software
@@ -2638,6 +2645,7 @@ refs:
         issue: 11
         pages: 1259-1276
         doi: 10.1002/sim.4780091106
+        url: "https://doi.org/10.1002/sim.4780091106"
 
     glmmTMB:
         type: software
@@ -2889,6 +2897,7 @@ refs:
         issue: 12
         pages: 1439-1445
         doi: 10.1002/sim.4780091207
+        url: "https://doi.org/10.1002/sim.4780091207"
 
     icenReg:
         type: software
@@ -3074,6 +3083,7 @@ refs:
         issue: 3
         pages: 659-663
         doi: 10.1093/biomet/70.3.659
+        url: "https://doi.org/10.1093/biomet/70.3.659"
 
     lavaan:
         type: software
@@ -3455,6 +3465,7 @@ refs:
         issue: 3
         pages: 549-556
         doi: 10.2307/2530245
+        url: "https://doi.org/10.2307/2530245"
 
     officer:
         type: software
@@ -3662,6 +3673,7 @@ refs:
         issue: 2
         pages: 191-199
         doi: 10.1093/biomet/64.2.191
+        url: "https://doi.org/10.1093/biomet/64.2.191"
 
     pocock2012winratio:
         type: article
@@ -3840,6 +3852,7 @@ refs:
         issue: 4
         pages: 387-391
         doi: 10.1038/sj.bjc.6602678
+        url: "https://doi.org/10.1038/sj.bjc.6602678"
 
     remotes:
         type: software
@@ -4483,6 +4496,7 @@ refs:
         year: 2026
         title: "tools: Tools for Package Development (Base R)"
         publisher: "[R base package]. R Foundation for Statistical Computing"
+        url: "https://CRAN.R-project.org/"
 
     torch:
         type: software

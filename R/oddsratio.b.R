@@ -1560,17 +1560,7 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         "<span style='opacity: 0.75; color: inherit;'>(", htmltools::htmlEscape(lr_results$predictor_determination_method), ")</span><br><br>",
 
                         "<b> ", .("Contingency Table:"), "</b><br>",
-                        "<table style='border-collapse: collapse; margin: 5px 0;'>",
-                        "<tr><th style='border: 1px solid #ddd; padding: 5px;'></th>",
-                        "<th style='border: 1px solid #ddd; padding: 5px;'>", htmltools::htmlEscape(outcome_levels[1]), " (+)</th>",
-                        "<th style='border: 1px solid #ddd; padding: 5px;'>", htmltools::htmlEscape(outcome_levels[2]), " (\u2212)</th></tr>",
-                        "<tr><td style='border: 1px solid #ddd; padding: 5px;'><b>", htmltools::htmlEscape(predictor_levels[1]), " (+)</b></td>",
-                        "<td style='border: 1px solid #ddd; padding: 5px;'>", cont_table[1,1], "</td>",
-                        "<td style='border: 1px solid #ddd; padding: 5px;'>", cont_table[1,2], "</td></tr>",
-                        "<tr><td style='border: 1px solid #ddd; padding: 5px;'><b>", htmltools::htmlEscape(predictor_levels[2]), " (\u2212)</b></td>",
-                        "<td style='border: 1px solid #ddd; padding: 5px;'>", cont_table[2,1], "</td>",
-                        "<td style='border: 1px solid #ddd; padding: 5px;'>", cont_table[2,2], "</td></tr>",
-                        "</table>",
+                        private$.formatContingencyGuide(outcome_levels, predictor_levels, cont_table),
                         .fmt(
                             .("TP: {tp}, FP: {fp}, FN: {fn}, TN: {tn}"),
                             tp = lr_results$tp, fp = lr_results$fp,
@@ -3167,6 +3157,22 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             return(list(summary_table, metrics, NULL, NULL, scale_notes = private$.perSdNotes(
                 coef_names, unname(stats::coef(fit)), unname(fit$ci.lower), unname(fit$ci.upper),
                 explanatory, .data, all_labels)))
+        },
+
+        .formatContingencyGuide = function(outcome_levels, predictor_levels, cont_table) {
+            paste0(
+                "<table style='border-collapse: collapse; margin: 5px 0;'>",
+                "<tr><th style='border: 1px solid #ddd; padding: 5px;'></th>",
+                "<th style='border: 1px solid #ddd; padding: 5px;'>", htmltools::htmlEscape(outcome_levels[1]), " (+)</th>",
+                "<th style='border: 1px solid #ddd; padding: 5px;'>", htmltools::htmlEscape(outcome_levels[2]), " (\u2212)</th></tr>",
+                "<tr><td style='border: 1px solid #ddd; padding: 5px;'><b>", htmltools::htmlEscape(predictor_levels[1]), " (+)</b></td>",
+                "<td style='border: 1px solid #ddd; padding: 5px;'>", cont_table[1,1], "</td>",
+                "<td style='border: 1px solid #ddd; padding: 5px;'>", cont_table[1,2], "</td></tr>",
+                "<tr><td style='border: 1px solid #ddd; padding: 5px;'><b>", htmltools::htmlEscape(predictor_levels[2]), " (\u2212)</b></td>",
+                "<td style='border: 1px solid #ddd; padding: 5px;'>", cont_table[2,1], "</td>",
+                "<td style='border: 1px solid #ddd; padding: 5px;'>", cont_table[2,2], "</td></tr>",
+                "</table>"
+            )
         }
 
         )

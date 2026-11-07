@@ -200,6 +200,7 @@ options:
 
 
 
+    # number-list: open-ended
     - name: cutp
       title: Cutpoints
       type: String
@@ -432,6 +433,7 @@ options:
         competing risks it is a crude cause-specific rate for the target event, not the
         cumulative incidence or absolute risk.
 
+    # number-list: open-ended
     - name: time_intervals
       title: "Time Interval Stratification"
       type: String

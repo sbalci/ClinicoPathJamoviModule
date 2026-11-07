@@ -87,11 +87,6 @@ items:
 
 
     # Static section divider (rendered via .r.yaml title; no setContent needed)
-    - name:  multivariableCoxHeading
-      title: Multivariable Survival Model
-      type:  Preformatted
-      
-
     - name:  text
       title: Multivariable Survival
       type:  Html
@@ -259,13 +254,8 @@ items:
           format: zto,pvalue
 
     # Multivariable Cox Summary (right after main analysis)
-    - name: multivariableCoxSummaryHeading
-      title: 'Natural Language Summary'
-      type: Preformatted
-      visible: (showSummaries)
-
     - name: multivariableCoxSummary
-      title: ''
+      title: 'Natural Language Summary'
       type: Html
       visible: (showSummaries)
       clearWith:
@@ -425,12 +415,6 @@ items:
     #   title: mydataview_personTimeAnalysis
     #   type:  Preformatted
 
-    - name:  personTimeHeading
-      title: Person-Time Analysis
-      type:  Preformatted
-      visible: (person_time)
-      
-
     - name: personTimeTable
       title: 'Person-Time Analysis'
       type: Table
@@ -496,13 +480,8 @@ items:
         - person_time
 
     # Person-Time Summary (right after person-time analysis)
-    - name: personTimeSummaryHeading
-      title: 'Person-Time Natural Language Summary'
-      type: Preformatted
-      visible: (person_time && showSummaries)
-
     - name: personTimeSummary
-      title: ''
+      title: 'Person-Time Natural Language Summary'
       type: Html
       visible: (person_time && showSummaries)
       clearWith:
@@ -541,11 +520,6 @@ items:
 
 
     # Survival Plots Section
-    - name: survivalPlotsHeading
-      title: 'Survival Plots'
-      type: Preformatted
-      visible: (hr || km || ac)
-
     - name: plot
       title: Hazards Regression Plot
       type: Image
@@ -874,18 +848,7 @@ items:
           - timetypedata
           - timetypeoutput
 
-    - name:  riskScoreHeading
-      title: Risk Score Analysis
-      type:  Preformatted
-      visible: (calculateRiskScore)
-      
-
     # Risk Score Summary (right after risk score analysis)
-    - name: riskScoreSummaryHeading
-      title: 'Risk Score Natural Language Summary'
-      type: Preformatted
-      visible: (calculateRiskScore && showSummaries)
-
     - name: riskScoreTable
       title: Risk Score Summary
       type: Table
@@ -1240,11 +1203,6 @@ items:
     #   title: mydataview_calculateAdjustedStats
     #   type:  Preformatted
 
-    - name:  adjustedSurvivalHeading
-      title: Adjusted Probability Analysis
-      type:  Preformatted
-      visible: (ac)
-
     # Placed BEFORE the curve on purpose. The four adjustment methods answer
     # genuinely different questions, and the estimand was previously stated only
     # in a footnote underneath the tables -- after the reader had already formed
@@ -1329,12 +1287,6 @@ items:
     #   title: mydataview_nomogram
     #   type:  Preformatted
 
-    - name:  nomogramHeading
-      title: Nomogram Analysis
-      type:  Preformatted
-      visible: (showNomogram)
-      
-
     - name: plot_nomogram
       title: Nomogram
       type: Image
@@ -1399,13 +1351,8 @@ items:
 
     # Nomogram Summary (right after nomogram analysis)
 
-    - name: nomogramSummaryHeading
-      title: 'Nomogram Natural Language Summary'
-      type: Preformatted
-      visible: (showNomogram && showSummaries)
-
     - name: nomogramSummary
-      title: ''
+      title: 'Nomogram Natural Language Summary'
       type: Html
       visible: (showNomogram && showSummaries)
       clearWith:
@@ -1906,11 +1853,6 @@ items:
           - contexpl
           - outcome
 
-    - name:  multivariableCoxHeading3
-      title: Multivariable Cox Explanations
-      type:  Preformatted
-      visible: (showExplanations)
-
     # Adjusted Survival Curves Explanation
     - name: adjustedSurvivalExplanation
       title: 'Understanding Adjusted Survival Curves'
@@ -1960,11 +1902,6 @@ items:
           - use_stratify
           - stratvar
           - outcome
-
-    - name:  survivalPlotsHeading3
-      title: Survival Plots Explanations
-      type:  Preformatted
-      visible: (showExplanations && (ac || hr || km))
 
     # Survival Plots Explanation
     - name: survivalPlotsExplanation

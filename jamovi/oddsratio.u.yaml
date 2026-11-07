@@ -30,6 +30,22 @@ children:
             name: outcomeNegativeLevel
             label: Negative Level
             enable: (outcome)
+      - type: TargetLayoutBox
+        label: Diagnostic Predictor (binary)
+        children:
+          - type: VariablesListBox
+            name: diagnosticPredictor
+            maxItemCount: 1
+            isTarget: true
+            enable: (showNomogram)
+          - type: LevelSelector
+            name: predictorLevel
+            label: Predictor Positive Level
+            enable: (showNomogram && diagnosticPredictor)
+          - type: LevelSelector
+            name: predictorNegativeLevel
+            label: Predictor Negative Level
+            enable: (showNomogram && diagnosticPredictor)
   - type: LayoutBox
     margin: large
     children:
@@ -46,23 +62,3 @@ children:
       - type: CheckBox
         name: showNomogram
         label: Prediction nomogram and diagnostic metrics
-      - type: VariableSupplier
-        name: diagnosticPredictorSupplier
-        persistentItems: true
-        stretchFactor: 1
-        children:
-          - type: TargetLayoutBox
-            label: Diagnostic Predictor (binary)
-            children:
-              - type: VariablesListBox
-                name: diagnosticPredictor
-                maxItemCount: 1
-                isTarget: true
-              - type: LevelSelector
-                name: predictorLevel
-                label: Predictor Positive Level
-                enable: (diagnosticPredictor)
-              - type: LevelSelector
-                name: predictorNegativeLevel
-                label: Predictor Negative Level
-                enable: (diagnosticPredictor)

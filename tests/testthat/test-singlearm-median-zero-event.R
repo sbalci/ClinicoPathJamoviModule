@@ -61,10 +61,8 @@ library(testthat)
   stub$self <- list(
     options = list(timetypeoutput = timetypeoutput, showExplanations = FALSE),
     results = list(
-      medianHeading             = item("medianHeading"),
       medianTable               = item("medianTable"),
       medianSummary             = item("medianSummary"),
-      medianHeading3            = item("medianHeading3"),
       medianSurvivalExplanation = item("medianSurvivalExplanation")
     )
   )
@@ -85,6 +83,7 @@ library(testthat)
     .safeExecute         = bind(pm$.safeExecute),
     .getCachedSurvfit    = bind(pm$.getCachedSurvfit),
     .competingRiskCumInc = bind(pm$.competingRiskCumInc),
+    .medianSurvivalExplanation = bind(pm$.medianSurvivalExplanation),
     .medianSurv          = bind(pm$.medianSurv)
   )
 
@@ -127,7 +126,6 @@ test_that("L2: the zero-event competing-risk narrative says why, and is not a su
 test_that("L1: the competing-risk median section is titled after the estimand", {
   r <- .median_run(c(rep(0L, 8), rep(1L, 6), rep(2L, 6)), competing = TRUE)
   expect_match(r$titles$medianTable, "Cumulative Incidence")
-  expect_match(r$titles$medianHeading, "Median Time to Event of Interest")
   expect_match(r$titles$medianSummary, "Median Time to Event of Interest")
   expect_false(grepl("Median Survival", r$titles$medianTable, fixed = TRUE))
   # ... and the empty CI cells are explained rather than left ambiguous.

@@ -17,7 +17,7 @@
 #' @noRd
 NULL
 
-# Helper function to create styled HTML notice (replaces jmvcore::Notice to avoid serialization errors)
+# Helper function to create styled HTML notice cards for the errors/warnings/info panels
 #
 # The tints are translucent rather than opaque pastel hex. An opaque light fill
 # is a bright island in jamovi's dark theme, and it forces every piece of text
@@ -166,7 +166,7 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
           outcome_complete = .("Outcome Variable Completeness (before exclusions)"))
       },
 
-      # Message Accumulation Methods (to avoid serialization errors from dynamic Notices) ----
+      # Message Accumulation Methods (for HTML notice panels) ----
       .addError = function(message) {
         private$.errorMessages <- c(private$.errorMessages, message)
       },
@@ -309,12 +309,10 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         # .r.yaml expression cannot see.
         hz <- isTRUE(self$options$baseline_hazard)
         hazard_visible <- list(
-          baselineHazardHeading     = hz,
           baselineHazardTable       = hz,
           baselineHazardPlot        = hz,
           smoothedHazardPlot        = isTRUE(self$options$hazard_smoothing),
           baselineHazardSummary     = hz && isTRUE(self$options$showSummaries),
-          baselineHazardHeading3    = hz && isTRUE(self$options$showExplanations),
           baselineHazardExplanation = hz && isTRUE(self$options$showExplanations))
         for (nm in names(hazard_visible))
           self$results[[nm]]$setVisible(!isTRUE(cr) && hazard_visible[[nm]])
@@ -2187,7 +2185,6 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         private$.landmarkNote(medianTable)
         if (private$.isCompetingRisk()) {
           cif_median_title <- .("Median Time to Event of Interest (Cumulative Incidence)")
-          self$results$medianHeading$setTitle(paste0(cif_median_title, lm_suffix))
           medianTable$setTitle(paste0(cif_median_title, lm_suffix))
           medianTable$getColumn("median")$setTitle(.("Median time to event"))
           medianTable$getColumn("rmean")$setTitle(.("Restricted mean survival time"))
@@ -2197,8 +2194,6 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
           # the same estimand confusion one level up.
           self$results$medianSummary$setTitle(
             .("Median Time to Event of Interest: Natural Language Summary"))
-          self$results$medianHeading3$setTitle(
-            .("Median Time to Event of Interest: Explanations"))
           self$results$medianSurvivalExplanation$setTitle(
             .("Understanding the Median Time to the Event of Interest"))
           private$.addInfo(.('Competing risk analysis: Median time represents cumulative incidence of event of interest, properly accounting for competing events.'))
@@ -2212,8 +2207,6 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             "cr_ci",
             .("No confidence interval is computed for the cumulative-incidence median. Restricted-mean survival columns are not applicable to this cumulative-incidence quantile and are left empty."))
         } else {
-          median_title <- .fmt(.("{median} Analysis"), median = estimand_meta$median)
-          self$results$medianHeading$setTitle(paste0(median_title, lm_suffix))
           medianTable$setTitle(paste0(.fmt(.("{median} Table"), median = estimand_meta$median), lm_suffix))
           medianTable$getColumn("median")$setTitle(estimand_meta$median)
           medianTable$getColumn("rmean")$setTitle(
@@ -2238,8 +2231,6 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                     self$options$timetypeoutput))
           self$results$medianSummary$setTitle(
             .fmt(.("{median}: Natural Language Summary"), median = estimand_meta$median))
-          self$results$medianHeading3$setTitle(
-            .fmt(.("{median}: Explanations"), median = estimand_meta$median))
           self$results$medianSurvivalExplanation$setTitle(
             .fmt(.("Understanding {median}"), median = estimand_meta$median))
         }
@@ -2412,7 +2403,15 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
               '<p><em>', .("Descriptive estimates from a single cohort with no comparison group."), '</em></p>',
               '</div>'))
         } else if (self$options$showExplanations) {
-            median_explanation_html <- '
+            self$results$medianSurvivalExplanation$setContent(private$.medianSurvivalExplanation())
+        }
+
+
+      }
+
+      ,
+      .medianSurvivalExplanation = function() {
+            '
             <div class="explanation-box" style="background-color: rgba(33, 152, 255, 0.07); padding: 15px; border-radius: 8px; margin: 10px 0; color: inherit;">
                 <h3 style="color: inherit; margin-top: 0;"> Understanding the Kaplan-Meier Median</h3>
                 
@@ -2491,13 +2490,6 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 </div>
             </div>
             '
-
-            
-            
-            self$results$medianSurvivalExplanation$setContent(median_explanation_html)
-        }
-
-
       }
 
 
@@ -2510,8 +2502,6 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
         mydata <- results$cleanData
         estimand_meta <- private$.estimandMeta()
-
-        # Reveal the section heading now that the survival-table analysis runs
 
         # Title the table after what it actually contains. The fixed schema said
         # "1, 3, 5 year Survival" whatever the cutpoints and whatever the time
@@ -2526,7 +2516,6 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
           self$results$survTable$getColumn("surv")$setTitle(.("Cumulative incidence"))
           self$results$survTableSummary$setTitle(
             .("Cumulative Incidence Natural Language Summary"))
-          self$results$survTableHeading3$setTitle(.("Cumulative Incidence Explanations"))
           self$results$survivalProbabilityExplanation$setTitle(
             .("Understanding Cumulative Incidence at Selected Time Points"))
         } else {
@@ -2537,14 +2526,11 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             estimand_meta$probability)
           self$results$survTableSummary$setTitle(
             .fmt(.("{probability}: Natural Language Summary"), probability = estimand_meta$probability))
-          self$results$survTableHeading3$setTitle(
-            .fmt(.("{probability}: Explanations"), probability = estimand_meta$probability))
           self$results$survivalProbabilityExplanation$setTitle(
             .fmt(.("Understanding {probability}"), probability = estimand_meta$probability))
         }
         lm_suffix <- private$.landmarkSuffix()
         surv_title <- paste0(surv_title, lm_suffix)
-        self$results$survTableHeading$setTitle(surv_title)
         self$results$survTable$setTitle(surv_title)
         private$.landmarkNote(self$results$survTable)
 
@@ -2865,7 +2851,15 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
         # Add explanatory output for survival probabilities
         if (self$options$showExplanations) {
-            survival_probability_explanation_html <- '
+            self$results$survivalProbabilityExplanation$setContent(private$.survivalProbabilityExplanation())
+        }
+
+
+      }
+
+      ,
+      .survivalProbabilityExplanation = function() {
+            '
             <div class="explanation-box" style="background-color: rgba(33, 152, 255, 0.07); padding: 15px; border-radius: 8px; margin: 10px 0; color: inherit;">
                 <h3 style="color: inherit; margin-top: 0;"> Understanding Kaplan-Meier Time-Specific Estimates</h3>
                 
@@ -2960,12 +2954,6 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 </div>
             </div>
             '
-            
-            
-            self$results$survivalProbabilityExplanation$setContent(survival_probability_explanation_html)
-        }
-
-
       }
 
       # Person-Time Analysis Function ----

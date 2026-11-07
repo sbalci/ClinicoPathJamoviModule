@@ -63,6 +63,7 @@ library(testthat)
     .detectMisuse         = bind(pm$.detectMisuse),
     .datetimeText         = bind(pm$.datetimeText),
     .safeCharacterConversion = bind(pm$.safeCharacterConversion),
+    .formatPreviewGuide   = bind(pm$.formatPreviewGuide),
     .generatePreviewTable = bind(pm$.generatePreviewTable)
   )
   list(p = stub$private, rec = rec)

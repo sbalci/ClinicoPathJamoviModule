@@ -63,6 +63,14 @@ bind_method <- function(name, options, private_extra = list(), results = NULL) {
             g <- gen$private_methods$.estimandMeta
             if (is.null(g)) NULL else `environment<-`(g, env)
         }),
+        .medianSurvivalExplanation = local({
+            g <- gen$private_methods$.medianSurvivalExplanation
+            if (is.null(g)) NULL else `environment<-`(g, env)
+        }),
+        .survivalProbabilityExplanation = local({
+            g <- gen$private_methods$.survivalProbabilityExplanation
+            if (is.null(g)) NULL else `environment<-`(g, env)
+        }),
         .safeExecute = function(expr, context = NULL) expr,
         .yearInUnits = function() switch(options$timetypeoutput,
             days = 365.25, weeks = 52.18, months = 12, years = 1, 12)
@@ -297,8 +305,6 @@ run_survtable <- function(competing) {
     setter <- function(key) function(x) rec$titles[[key]] <- x
     contenter <- function(key) function(x) rec$content[[key]] <- x
     res <- list(
-        survTableHeading = list(setVisible = function(...) invisible(NULL),
-                                setTitle = setter("heading")),
         survTable = list(
             setTitle  = setter("table"),
             getColumn = function(name) list(setTitle = setter(paste0("col.", name))),
@@ -306,10 +312,9 @@ run_survtable <- function(competing) {
             setNote   = function(key, note) rec$content[["note"]] <- note),
         survTableSummary = list(setTitle = setter("summary"),
                                 setContent = contenter("summary")),
-        # The explanation heading and panel are titled at run time too -- a panel
-        # headed "Understanding Survival Probabilities" over cumulative-incidence
+        # The explanation panel is titled at run time too -- a panel headed
+        # "Understanding Survival Probabilities" over cumulative-incidence
         # prose is the same estimand confusion one level up.
-        survTableHeading3 = list(setTitle = setter("explanationHeading")),
         survivalProbabilityExplanation = list(setTitle = setter("explanationTitle"),
                                               setContent = contenter("explanation")))
 
@@ -338,7 +343,6 @@ test_that("competing-risk table is titled cumulative incidence and explained", {
 
     # Cumulative incidence is not survival.
     expect_true(grepl("Cumulative Incidence", rec$titles$table, fixed = TRUE))
-    expect_true(grepl("Cumulative Incidence", rec$titles$heading, fixed = TRUE))
     expect_equal(rec$titles[["col.surv"]], "Cumulative incidence")
     # The cutpoints are user-set: the title must not claim 1, 3, 5 years.
     expect_false(grepl("1, 3, 5", rec$titles$table, fixed = TRUE))
@@ -348,7 +352,6 @@ test_that("competing-risk table is titled cumulative incidence and explained", {
     expect_true(nzchar(rec$content$explanation))
     expect_true(grepl("not 1 minus a Kaplan-Meier", rec$content$explanation, fixed = TRUE))
     expect_true(grepl("Cumulative Incidence", rec$titles$explanationTitle, fixed = TRUE))
-    expect_true(grepl("Cumulative Incidence", rec$titles$explanationHeading, fixed = TRUE))
 })
 
 test_that("the ordinary Kaplan-Meier table uses endpoint-neutral wording", {

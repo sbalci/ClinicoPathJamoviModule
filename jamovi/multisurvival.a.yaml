@@ -526,6 +526,7 @@ options:
 
 
 
+    # number-list: open-ended
     - name: cutp
       title: Cutpoints
       type: String
@@ -882,6 +883,7 @@ options:
         total follow-up time and incidence rates. These metrics help quantify the
         rate of events per unit of time in your study population.
 
+    # number-list: open-ended
     - name: time_intervals
       title: "Time Interval Stratification"
       type: String
@@ -916,6 +918,7 @@ options:
           Brier score and time-dependent AUC at the chosen timepoints, and the
           Integrated Brier Score. Computed with the riskRegression package.
 
+    # number-list: open-ended
     - name: survmetrics_timepoints
       title: "Timepoints for Brier / AUC"
       type: String

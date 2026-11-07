@@ -2191,87 +2191,7 @@ timeintervalClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                     "without error and stay positive no check on this page can detect it. ",
                     "This is a property of the data, not a fault found in it.</p>")
 
-                quality_html <- glue::glue(
-                    "<div style='background-color: rgba(138, 155, 172, 0.06); padding: 15px; border-left: 4px solid #007bff; margin: 15px 0; color: inherit;'>",
-                        "<h4 style='margin-top: 0; color: inherit;'> Data Quality Assessment</h4>",
-
-                        "<p><strong>Overall Quality:</strong> {quality$overall_quality}</p>",
-
-                        # The counts below are computed on the RAW input, before any
-                        # landmark or quality filter, so "Total Observations" here
-                        # will not match "Number of observations" in the summary
-                        # whenever a filter is active. Say so rather than leaving two
-                        # different Ns side by side unexplained.
-                        "<p style='font-size: 0.9em;'>Counts below describe the data as supplied, before any filter or landmark is applied, so the total may exceed the number of observations in the statistical summary.</p>",
-
-                        # Day/month ambiguity is an EXPOSURE, not a defect, so it is
-                        # stated here rather than raised as a banner: in a clean
-                        # dd/mm column a sixth of rows typically have day <= 12 in
-                        # both dates, and a banner that fires on most correct
-                        # datasets only teaches users to ignore banners. A row typed
-                        # in the other order whose day exceeds 12 cannot be parsed at
-                        # all and is already counted as missing above; this line
-                        # covers the remainder, which no test can distinguish from
-                        # chance and which is therefore disclosed instead.
-                        "{amb_exposure_html}",
-
-
-                        "<table style='width: 100%; border-collapse: collapse; margin-top: 10px;'>",
-                            "<tr style='background-color: rgba(33, 63, 94, 0.1); color: inherit;'>",
-                                "<th style='padding: 8px; text-align: left; border: 1px solid #dee2e6;'>Metric</th>",
-                                "<th style='padding: 8px; text-align: right; border: 1px solid #dee2e6;'>Count</th>",
-                                "<th style='padding: 8px; text-align: right; border: 1px solid #dee2e6;'>%</th>",
-                            "</tr>",
-                            "<tr>",
-                                "<td style='padding: 8px; border: 1px solid #dee2e6;'>Total Observations</td>",
-                                "<td style='padding: 8px; text-align: right; border: 1px solid #dee2e6;'>{quality$total_observations}</td>",
-                                "<td style='padding: 8px; text-align: right; border: 1px solid #dee2e6;'>100%</td>",
-                            "</tr>",
-                            "<tr style='background-color: rgba(255, 202, 33, 0.23); color: inherit;'>",
-                                "<td style='padding: 8px; border: 1px solid #dee2e6;'>Missing Values</td>",
-                                "<td style='padding: 8px; text-align: right; border: 1px solid #dee2e6;'>{quality$missing_values}</td>",
-                                "<td style='padding: 8px; text-align: right; border: 1px solid #dee2e6;'>{round(100*quality$missing_values/quality$total_observations, 1)}%</td>",
-                            "</tr>",
-                            # The two indented rows split the count above by column, which is
-                            # the next thing a pathologist needs to know: WHICH column to go
-                            # and fix. They count a parsed date that came out NA, so they also
-                            # expose values that were present but unreadable --
-                            # .validateParsedDates() tolerates up to 20% of those per column
-                            # and they are otherwise invisible everywhere in this analysis.
-                            # They can sum to more than "Missing Values": a row missing both
-                            # dates is counted once above and once in each row here.
-                            "<tr>",
-                                "<td style='padding: 8px 8px 8px 28px; border: 1px solid #dee2e6;'>Start dates missing or unreadable</td>",
-                                "<td style='padding: 8px; text-align: right; border: 1px solid #dee2e6;'>{quality$missing_start_dates}</td>",
-                                "<td style='padding: 8px; text-align: right; border: 1px solid #dee2e6;'>{round(100*quality$missing_start_dates/quality$total_observations, 1)}%</td>",
-                            "</tr>",
-                            "<tr>",
-                                "<td style='padding: 8px 8px 8px 28px; border: 1px solid #dee2e6;'>End dates missing or unreadable</td>",
-                                "<td style='padding: 8px; text-align: right; border: 1px solid #dee2e6;'>{quality$missing_end_dates}</td>",
-                                "<td style='padding: 8px; text-align: right; border: 1px solid #dee2e6;'>{round(100*quality$missing_end_dates/quality$total_observations, 1)}%</td>",
-                            "</tr>",
-                            "<tr style='background-color: rgba(216, 33, 50, 0.18); color: inherit;'>",
-                                "<td style='padding: 8px; border: 1px solid #dee2e6;'>Negative Intervals</td>",
-                                "<td style='padding: 8px; text-align: right; border: 1px solid #dee2e6;'>{quality$negative_intervals}</td>",
-                                "<td style='padding: 8px; text-align: right; border: 1px solid #dee2e6;'>{round(100*quality$negative_intervals/quality$total_observations, 1)}%</td>",
-                            "</tr>",
-                            "<tr>",
-                                "<td style='padding: 8px; border: 1px solid #dee2e6;'>Zero Intervals</td>",
-                                "<td style='padding: 8px; text-align: right; border: 1px solid #dee2e6;'>{quality$zero_intervals}</td>",
-                                "<td style='padding: 8px; text-align: right; border: 1px solid #dee2e6;'>{round(100*quality$zero_intervals/quality$total_observations, 1)}%</td>",
-                            "</tr>",
-                            "<tr style='background-color: rgba(255, 202, 33, 0.23); color: inherit;'>",
-                                "<td style='padding: 8px; border: 1px solid #dee2e6;'>Extreme Values</td>",
-                                "<td style='padding: 8px; text-align: right; border: 1px solid #dee2e6;'>{quality$extreme_values}</td>",
-                                "<td style='padding: 8px; text-align: right; border: 1px solid #dee2e6;'>{round(100*quality$extreme_values/quality$total_observations, 1)}%</td>",
-                            "</tr>",
-                        "</table>",
-
-                        "{if (length(filter_lines) > 0) paste0('<p><strong>Filters applied:</strong> ', filter_text, '</p>') else ''}",
-
-                        "{if(length(quality$warnings) > 0) paste0('<p style=\"margin-top: 15px;\"><strong> Warnings:</strong></p><ul>', paste0('<li>', quality$warnings, '</li>', collapse=''), '</ul>') else ''}",
-                    "</div>"
-                )
+                quality_html <- private$.formatQualityAssessmentGuide(quality, amb_exposure_html, filter_lines, filter_text)
 
                 self$results$qualityAssessment$setContent(quality_html)
 
@@ -2320,6 +2240,61 @@ timeintervalClass <- if (requireNamespace("jmvcore")) R6::R6Class(
             # unconditionally: with no messages it blanks the element, so a banner
             # from a previous run cannot survive into a clean one.
             render_messages()
+        },
+
+        .formatQualityAssessmentGuide = function(quality, amb_exposure_html, filter_lines, filter_text) {
+            glue::glue(
+                "<div style='background-color: rgba(138, 155, 172, 0.06); padding: 15px; border-left: 4px solid #007bff; margin: 15px 0; color: inherit;'>",
+                    "<h4 style='margin-top: 0; color: inherit;'> Data Quality Assessment</h4>",
+                    "<p><strong>Overall Quality:</strong> {quality$overall_quality}</p>",
+                    "<p style='font-size: 0.9em;'>Counts below describe the data as supplied, before any filter or landmark is applied, so the total may exceed the number of observations in the statistical summary.</p>",
+                    "{amb_exposure_html}",
+                    "<table style='width: 100%; border-collapse: collapse; margin-top: 10px;'>",
+                        "<tr style='background-color: rgba(33, 63, 94, 0.1); color: inherit;'>",
+                            "<th style='padding: 8px; text-align: left; border: 1px solid #dee2e6;'>Metric</th>",
+                            "<th style='padding: 8px; text-align: right; border: 1px solid #dee2e6;'>Count</th>",
+                            "<th style='padding: 8px; text-align: right; border: 1px solid #dee2e6;'>%</th>",
+                        "</tr>",
+                        "<tr>",
+                            "<td style='padding: 8px; border: 1px solid #dee2e6;'>Total Observations</td>",
+                            "<td style='padding: 8px; text-align: right; border: 1px solid #dee2e6;'>{quality$total_observations}</td>",
+                            "<td style='padding: 8px; text-align: right; border: 1px solid #dee2e6;'>100%</td>",
+                        "</tr>",
+                        "<tr style='background-color: rgba(255, 202, 33, 0.23); color: inherit;'>",
+                            "<td style='padding: 8px; border: 1px solid #dee2e6;'>Missing Values</td>",
+                            "<td style='padding: 8px; text-align: right; border: 1px solid #dee2e6;'>{quality$missing_values}</td>",
+                            "<td style='padding: 8px; text-align: right; border: 1px solid #dee2e6;'>{round(100*quality$missing_values/quality$total_observations, 1)}%</td>",
+                        "</tr>",
+                        "<tr>",
+                            "<td style='padding: 8px 8px 8px 28px; border: 1px solid #dee2e6;'>Start dates missing or unreadable</td>",
+                            "<td style='padding: 8px; text-align: right; border: 1px solid #dee2e6;'>{quality$missing_start_dates}</td>",
+                            "<td style='padding: 8px; text-align: right; border: 1px solid #dee2e6;'>{round(100*quality$missing_start_dates/quality$total_observations, 1)}%</td>",
+                        "</tr>",
+                        "<tr>",
+                            "<td style='padding: 8px 8px 8px 28px; border: 1px solid #dee2e6;'>End dates missing or unreadable</td>",
+                            "<td style='padding: 8px; text-align: right; border: 1px solid #dee2e6;'>{quality$missing_end_dates}</td>",
+                            "<td style='padding: 8px; text-align: right; border: 1px solid #dee2e6;'>{round(100*quality$missing_end_dates/quality$total_observations, 1)}%</td>",
+                        "</tr>",
+                        "<tr style='background-color: rgba(216, 33, 50, 0.18); color: inherit;'>",
+                            "<td style='padding: 8px; border: 1px solid #dee2e6;'>Negative Intervals</td>",
+                            "<td style='padding: 8px; text-align: right; border: 1px solid #dee2e6;'>{quality$negative_intervals}</td>",
+                            "<td style='padding: 8px; text-align: right; border: 1px solid #dee2e6;'>{round(100*quality$negative_intervals/quality$total_observations, 1)}%</td>",
+                        "</tr>",
+                        "<tr>",
+                            "<td style='padding: 8px; border: 1px solid #dee2e6;'>Zero Intervals</td>",
+                            "<td style='padding: 8px; text-align: right; border: 1px solid #dee2e6;'>{quality$zero_intervals}</td>",
+                            "<td style='padding: 8px; text-align: right; border: 1px solid #dee2e6;'>{round(100*quality$zero_intervals/quality$total_observations, 1)}%</td>",
+                        "</tr>",
+                        "<tr style='background-color: rgba(255, 202, 33, 0.23); color: inherit;'>",
+                            "<td style='padding: 8px; border: 1px solid #dee2e6;'>Extreme Values</td>",
+                            "<td style='padding: 8px; text-align: right; border: 1px solid #dee2e6;'>{quality$extreme_values}</td>",
+                            "<td style='padding: 8px; text-align: right; border: 1px solid #dee2e6;'>{round(100*quality$extreme_values/quality$total_observations, 1)}%</td>",
+                        "</tr>",
+                    "</table>",
+                    "{if (length(filter_lines) > 0) paste0('<p><strong>Filters applied:</strong> ', filter_text, '</p>') else ''}",
+                    "{if(length(quality$warnings) > 0) paste0('<p style=\"margin-top: 15px;\"><strong> Warnings:</strong></p><ul>', paste0('<li>', quality$warnings, '</li>', collapse=''), '</ul>') else ''}",
+                "</div>"
+            )
         }
     )
 )

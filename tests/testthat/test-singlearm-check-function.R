@@ -104,16 +104,16 @@ test_that("option-driven visibility is unchanged without the .init() block", {
   expect_false(vis(plots, "plot_cif"))
 })
 
-test_that("section headings are gated on the required inputs, not on .init()", {
+test_that("primary tables are gated on the required inputs, not on .init()", {
   full <- do.call(ClinicoPath::singlearm, singlearm_cf_args())
-  expect_true(isTRUE(full$medianHeading$visible))
-  expect_true(isTRUE(full$survTableHeading$visible))
+  expect_true(isTRUE(full$medianTable$visible))
+  expect_true(isTRUE(full$survTable$visible))
   expect_false(isTRUE(full$todo$visible))
 
-  # outcome chosen but no time source: welcome panel, no empty section titles
+  # outcome chosen but no time source: welcome panel, no empty tables
   partial <- do.call(ClinicoPath::singlearm, singlearm_cf_args(elapsedtime = NULL))
-  expect_false(isTRUE(partial$medianHeading$visible))
-  expect_false(isTRUE(partial$survTableHeading$visible))
+  expect_false(isTRUE(partial$medianTable$visible))
+  expect_false(isTRUE(partial$survTable$visible))
   expect_true(isTRUE(partial$todo$visible))
 })
 

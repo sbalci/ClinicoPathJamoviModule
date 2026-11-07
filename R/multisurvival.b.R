@@ -1506,9 +1506,7 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
         # This prevents wasted computation in downstream cleaning and model fitting
         if (any(mydata$mytime < 0, na.rm = TRUE)) {
           n_negative <- sum(mydata$mytime < 0, na.rm = TRUE)
-          # Notice Disabled per user request (serialization issues)
-          # notice <- jmvcore::Notice$new(...)
-          
+          # Accumulate structured HTML error message for the errors panel
           error_msg <- paste0(
               .fmt(.("Negative Survival Times Detected: {count} observation(s) have negative time values."), count = n_negative), "\n",
               .("This typically indicates:"), "\n",
@@ -3435,7 +3433,7 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
           # to read something that is not on the page is worse than silence.
           # nomogramSummary is left alone: .calculate_nomogram() writes the
           # "no nomogram for a stratified model" explanation into it next.
-          for (nm in c("nomogramHeading", "plot_nomogram", "nomogram_display",
+          for (nm in c("plot_nomogram", "nomogram_display",
                        "nomogramExplanation")) {
             it <- try(self$results[[nm]], silent = TRUE)
             if (!inherits(it, "try-error") && !is.null(it)) {
@@ -3828,31 +3826,7 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
         }
 
         # Add one points-to-risk table per risk axis (one per timepoint)
-        html_content <- paste0(html_content, '
-        </div>
-        <div class="outputs-section">
-            <h3>', .("Risk Prediction"), '</h3>
-            <div class="section-title">', .("Points to Risk Conversion"), '</div>')
-        for (axis_label in names(risk_tables)) {
-          html_content <- paste0(html_content, '
-            <table class="prediction-table">
-                <tr>
-                    <th>', .("Total Points"), '</th>
-                    <th>', htmltools::htmlEscape(axis_label), '</th>
-                </tr>')
-          for(line in risk_tables[[axis_label]]) {
-            values <- strsplit(trimws(line), "\\s+")[[1]]
-            if(length(values) == 2) {
-              html_content <- paste0(html_content, '
-                <tr>
-                    <td>', htmltools::htmlEscape(values[1]), '</td>
-                    <td>', htmltools::htmlEscape(values[2]), '</td>
-                </tr>')
-            }
-          }
-          html_content <- paste0(html_content, '
-            </table>')
-        }
+        html_content <- paste0(html_content, private$.nomogramPointsGuide(risk_tables))
         html_content <- paste0(html_content, '
         </div>
 
@@ -3868,6 +3842,36 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
     </div>')
 
         return(html_content)
+      }
+
+      ,
+      .nomogramPointsGuide = function(risk_tables) {
+        out <- paste0('
+        </div>
+        <div class="outputs-section">
+            <h3>', .("Risk Prediction"), '</h3>
+            <div class="section-title">', .("Points to Risk Conversion"), '</div>')
+        for (axis_label in names(risk_tables)) {
+          out <- paste0(out, '
+            <table class="prediction-table">
+                <tr>
+                    <th>', .("Total Points"), '</th>
+                    <th>', htmltools::htmlEscape(axis_label), '</th>
+                </tr>')
+          for(line in risk_tables[[axis_label]]) {
+            values <- strsplit(trimws(line), "\\s+")[[1]]
+            if(length(values) == 2) {
+              out <- paste0(out, '
+                <tr>
+                    <td>', htmltools::htmlEscape(values[1]), '</td>
+                    <td>', htmltools::htmlEscape(values[2]), '</td>
+                </tr>')
+            }
+          }
+          out <- paste0(out, '
+            </table>')
+        }
+        out
       }
 
       # library-audit 2026-09-16 meddecide [LOW] DONE (same class): cindexValidation has a fixed
@@ -6258,7 +6262,7 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
     )
     names(fg_table) <- c(.("Variable"), .("sHR (95% CI)"), .("p-value"))
     self$results$text$setContent(paste0(
-      knitr::kable(fg_table, row.names = FALSE, format = "html", escape = TRUE),
+      knitr::kable(fg_table, row.names = FALSE, align = c("l", "r", "r"), format = "html", escape = TRUE),
       private$.mainTableNote(fg_model, cleaneddata)))
     self$results$text2$setContent(paste0(
       "<p><b>", .("Fine-Gray subdistribution hazards model."), "</b> ",

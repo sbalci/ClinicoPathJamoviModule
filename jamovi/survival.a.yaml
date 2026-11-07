@@ -208,6 +208,7 @@ options:
 
 
 
+    # number-list: open-ended
     - name: cutp
       title: Cutpoints
       type: String
@@ -484,6 +485,7 @@ options:
         total follow-up time and incidence rates. These metrics help quantify the
         rate of events per unit of time in your study population.
 
+    # number-list: open-ended
     - name: time_intervals
       title: "Time Interval Stratification"
       type: String
@@ -574,6 +576,7 @@ options:
         Allows different baseline hazards for each age group without assuming a
         linear age effect.
 
+    # number-list: open-ended
     - name: age_group_cutpoints
       title: "Age Group Cutpoints"
       type: String

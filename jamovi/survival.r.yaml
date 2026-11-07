@@ -188,11 +188,6 @@ items:
     #   title: medianSummary2
     #   type:  Preformatted
 
-    - name:  medianSurvivalHeading
-      title: Median Survival Analysis
-      type:  Preformatted
-      visible: (length(outcome) > 0 && length(explanatory) > 0 && (length(elapsedtime) > 0 || (tint && length(dxdate) > 0 && length(fudate) > 0)))
-
     - name:  medianSummary
       # title: Median Survival Summary and Table
       title: '`Median Survival Summary and Table - ${explanatory}`'
@@ -279,11 +274,6 @@ items:
           # must invalidate these rows.
 
     # Median Survival Explanation
-    - name:  medianSurvivalHeading3
-      title: Median Survival Analysis Explanations
-      type:  Preformatted
-      visible: (showExplanations)
-
     - name: medianSurvivalExplanation
       title: Understanding Median Survival Analysis
       type: Html
@@ -297,13 +287,6 @@ items:
 
 
 
-
-
-    - name:  coxRegressionHeading
-      title: Cox Regression Analysis
-      type:  Preformatted
-      visible: (length(outcome) > 0 && length(explanatory) > 0 && (length(elapsedtime) > 0 || (tint && length(dxdate) > 0 && length(fudate) > 0)))
-      
 
 
     - name:  coxSummary
@@ -406,11 +389,6 @@ items:
           - strata_variable
 
 
-
-    - name:  coxRegressionHeading3
-      title: Cox Regression Analysis Explanations
-      type:  Preformatted
-      visible: (showExplanations)
 
     # Cox Regression Explanation
     - name: coxRegressionExplanation
@@ -911,12 +889,6 @@ items:
           - strata_variable
 
 
-    - name:  survivalTablesHeading
-      title: Survival Probability Tables
-      type:  Preformatted
-      visible: (length(outcome) > 0 && length(explanatory) > 0 && (length(elapsedtime) > 0 || (tint && length(dxdate) > 0 && length(fudate) > 0)))
-
-
     - name:  survTableSummary
       title: '`Survival at Selected Time Points, Summary - ${explanatory}`'
       type:  Preformatted
@@ -1012,11 +984,6 @@ items:
 
 
     # Survival Tables Explanation
-    - name:  survivalTablesHeading3
-      title: Survival Tables Explanations
-      type:  Preformatted
-      visible: (showExplanations)
-
     - name: survivalTablesExplanation
       title: Understanding Survival Probability Tables
       type: Html
@@ -1029,12 +996,6 @@ items:
 
 
 
-
-    - name:  personTimeHeading
-      title: Person-Time Analysis
-      type:  Preformatted
-      visible: (person_time)
-      
 
     - name: personTimeTable
       title: 'Person-Time Analysis'
@@ -1126,14 +1087,6 @@ items:
           - person_time
           - explanatory
           - outcome
-
-
-
-    - name:  rmstHeading
-      title: RMST Analysis
-      type:  Preformatted
-      visible: (rmst_analysis)
-      
 
 
 
@@ -1336,12 +1289,6 @@ items:
         - uselandmark
         - landmark
 
-
-
-    - name:  pairwiseComparisonHeading
-      title: Pairwise Comparison Analysis
-      type:  Preformatted
-      visible: (pw)
 
 
     - name:  pairwiseTable
@@ -1625,11 +1572,6 @@ items:
           - KMunicate
           - KMunicate2
 
-
-    - name:  survivalPlotsHeading3
-      title: Survival Plots Explanations
-      type:  Preformatted
-      visible: (showExplanations && (sc || ce || ch || kmunicate || loglog))
 
     # Survival Plots Explanation
     - name: survivalPlotsExplanation

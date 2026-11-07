@@ -1959,36 +1959,8 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             dot_colors <- list(green = "#28a745", yellow = "#ffc107",
                 red = "#dc3545", neutral = "#6c757d")
 
-            # Overall banner
-            html <- paste0(
-                "<div style='", bg_colors[[overall]], " padding: 12px; border-radius: 6px; margin-bottom: 12px;'>",
-                "<strong>", .("Overall:"), " ", overall_text, "</strong></div>"
-            )
-
-            # Check table
-            html <- paste0(html,
-                "<table style='width: 100%; border-collapse: collapse; font-size: 13px;'>",
-                "<thead><tr style='border-bottom: 2px solid #dee2e6;'>",
-                "<th style='padding: 6px; text-align: left;'>", .("Status"), "</th>",
-                "<th style='padding: 6px; text-align: left;'>", .("Check"), "</th>",
-                "<th style='padding: 6px; text-align: left;'>", .("Value"), "</th>",
-                "<th style='padding: 6px; text-align: left;'>", .("Detail"), "</th>",
-                "</tr></thead><tbody>"
-            )
-
-            for (chk in checks) {
-                dot <- paste0("<span style='color: ", dot_colors[[chk$color]], "; font-size: 18px;'>\u{25CF}</span>")
-                html <- paste0(html,
-                    "<tr style='border-bottom: 1px solid #dee2e6;'>",
-                    "<td style='padding: 6px;'>", dot, "</td>",
-                    "<td style='padding: 6px;'><strong>", chk$label, "</strong></td>",
-                    "<td style='padding: 6px;'>", chk$value, "</td>",
-                    "<td style='padding: 6px;'>", chk$detail, "</td>",
-                    "</tr>"
-                )
-            }
-
-            html <- paste0(html, "</tbody></table>")
+            # Overall banner + Check table
+            html <- private$.formatSuitabilityGuide(checks, bg_colors[[overall]], overall_text, dot_colors)
 
             # Recommendations (if any yellow/red)
             colors <- sapply(checks, function(x) x$color)
@@ -2022,6 +1994,32 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             )
 
             self$results$suitabilityReport$setContent(html)
+        },
+
+        .formatSuitabilityGuide = function(checks, overall_bg, overall_text, dot_colors) {
+            html <- paste0(
+                "<div style='", overall_bg, " padding: 12px; border-radius: 6px; margin-bottom: 12px;'>",
+                "<strong>", .("Overall:"), " ", overall_text, "</strong></div>",
+                "<table style='width: 100%; border-collapse: collapse; font-size: 13px;'>",
+                "<thead><tr style='border-bottom: 2px solid #dee2e6;'>",
+                "<th style='padding: 6px; text-align: left;'>", .("Status"), "</th>",
+                "<th style='padding: 6px; text-align: left;'>", .("Check"), "</th>",
+                "<th style='padding: 6px; text-align: left;'>", .("Value"), "</th>",
+                "<th style='padding: 6px; text-align: left;'>", .("Detail"), "</th>",
+                "</tr></thead><tbody>"
+            )
+            for (chk in checks) {
+                dot <- paste0("<span style='color: ", dot_colors[[chk$color]], "; font-size: 18px;'>\u{25CF}</span>")
+                html <- paste0(html,
+                    "<tr style='border-bottom: 1px solid #dee2e6;'>",
+                    "<td style='padding: 6px;'>", dot, "</td>",
+                    "<td style='padding: 6px;'><strong>", chk$label, "</strong></td>",
+                    "<td style='padding: 6px;'>", chk$value, "</td>",
+                    "<td style='padding: 6px;'>", chk$detail, "</td>",
+                    "</tr>"
+                )
+            }
+            paste0(html, "</tbody></table>")
         },
 
         .coxRefit = function(data, columns) {
@@ -2115,13 +2113,13 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 init = FALSE)
 
             if (length(failures) > 0) {
-                table$setNote(
-                    "failed",
-                    .fmt(
-                        .("Some rows could not be computed ({detail}). Empty cells mean the model could not be fitted, not that it performed poorly."),
-                        detail = paste(failures, collapse = "; ")
-                    ),
-                    init = FALSE)
+                note_msg <- .fmt(
+                    .("Some rows could not be computed ({detail}). Empty cells mean the model could not be fitted, not that it performed poorly."),
+                    detail = paste(failures, collapse = "; ")
+                )
+                note_key <- "failed"
+                table$setNote(note_key, note_msg, init = FALSE)
+                private$.addNotice("WARNING", .("Model Comparison Incomplete"), note_msg)
             }
         },
 

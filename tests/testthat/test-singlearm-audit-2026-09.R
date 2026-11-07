@@ -56,6 +56,7 @@ library(testthat)
                ".yearInUnits", ".getDefaultCutpoints", ".resolveCutpoints",
                ".supportedCutpoints", ".parseNumericList", ".ciText",
                ".survTable", ".medianSurv", ".competingRiskCumInc",
+               ".medianSurvivalExplanation", ".survivalProbabilityExplanation",
                ".landmarkSuffix", ".landmarkNote"))
     priv[[nm]] <- bind(pm[[nm]])
   stub$private <- priv
@@ -148,8 +149,7 @@ test_that("N2: fewer than 10 events is a quantified STRONG_WARNING; 10 or more i
   m <- .audit_methods()
   rec <- .recorder()
   results_stub <- list()
-  for (nm in c("survTable", "survTableSummary", "survTableHeading",
-               "survTableHeading3", "survivalProbabilityExplanation"))
+  for (nm in c("survTable", "survTableSummary", "survivalProbabilityExplanation"))
     results_stub[[nm]] <- .rec_item(rec, nm)
   stub <- .audit_stub(m,
     options = list(timetypeoutput = "months", showExplanations = FALSE, cutp = cutp),
@@ -199,7 +199,7 @@ test_that("S1: the median section requests the same log-log band", {
   m <- .audit_methods()
   rec <- .recorder()
   results_stub <- list()
-  for (nm in c("medianHeading", "medianTable", "medianSummary", "medianHeading3",
+  for (nm in c("medianTable", "medianSummary",
                "medianSurvivalExplanation"))
     results_stub[[nm]] <- .rec_item(rec, nm)
   stub <- .audit_stub(m,
@@ -229,8 +229,8 @@ test_that("S1: the median section requests the same log-log band", {
                         showSummaries = FALSE, showExplanations = FALSE) {
   m <- .audit_methods()
   rec <- .recorder()
-  nms <- c("baselineHazardHeading", "baselineHazardTable", "baselineHazardPlot",
-           "smoothedHazardPlot", "baselineHazardSummary", "baselineHazardHeading3",
+  nms <- c("baselineHazardTable", "baselineHazardPlot",
+           "smoothedHazardPlot", "baselineHazardSummary",
            "baselineHazardExplanation")
   results_stub <- list()
   for (nm in nms) results_stub[[nm]] <- .rec_item(rec, nm)
@@ -242,21 +242,19 @@ test_that("S1: the median section requests the same log-log band", {
   rec$visible
 }
 
-test_that("I1: competing risks hides the seven hazard elements", {
+test_that("I1: competing risks hides the five hazard elements", {
   v <- .hazard_vis(cr = TRUE, hazard_smoothing = TRUE, showSummaries = TRUE, showExplanations = TRUE)
-  expect_length(v, 7)
+  expect_length(v, 5)
   expect_true(all(!unlist(v)))
 })
 
 test_that("I1: switching back to ordinary survival re-shows them per the option bindings", {
   # BEFORE: nothing ever called setVisible(TRUE); the populated table stayed hidden.
   v <- .hazard_vis(cr = FALSE, hazard_smoothing = TRUE, showSummaries = TRUE, showExplanations = FALSE)
-  expect_true(v$baselineHazardHeading)
   expect_true(v$baselineHazardTable)
   expect_true(v$baselineHazardPlot)
   expect_true(v$smoothedHazardPlot)
   expect_true(v$baselineHazardSummary)
-  expect_false(v$baselineHazardHeading3)
   expect_false(v$baselineHazardExplanation)
 
   v2 <- .hazard_vis(cr = FALSE, baseline_hazard = FALSE, hazard_smoothing = TRUE)

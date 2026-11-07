@@ -1265,6 +1265,10 @@ datetimeconverterClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 return("<p>No data to preview.</p>")
             }
 
+            return(private$.formatPreviewGuide(original, parsed, n_show))
+        },
+
+        .formatPreviewGuide = function(original, parsed, n_show) {
             table_html <- paste0(
                 "<div style='background-color: rgba(138, 155, 172, 0.06); padding: 15px; border-radius: 8px; overflow-x: auto; color: inherit;'>",
                 "<p><strong>Showing first ", n_show, " of ", length(original), " observations</strong></p>",
@@ -1343,6 +1347,10 @@ datetimeconverterClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 return("<p>No data to preview.</p>")
             }
 
+            return(private$.formatComponentPreviewGuide(components, n_show))
+        },
+
+        .formatComponentPreviewGuide = function(components, n_show) {
             table_html <- paste0(
                 "<div style='background-color: rgba(138, 155, 172, 0.06); padding: 15px; border-radius: 8px; overflow-x: auto; color: inherit;'>",
                 "<p><strong>Showing first ", n_show, " of ", length(components[[1]]), " observations</strong></p>",
@@ -1487,7 +1495,15 @@ datetimeconverterClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 ""
             }
 
-            quality_html <- paste0(
+            quality_html <- private$.formatQualityAssessmentGuide(
+                quality, missing_bg, missing_pct, parsing_bg, parsed_pct, quality_summary, misuse_html
+            )
+
+            self$results$qualityAssessment$setContent(quality_html)
+        },
+
+        .formatQualityAssessmentGuide = function(quality, missing_bg, missing_pct, parsing_bg, parsed_pct, quality_summary, misuse_html) {
+            paste0(
                 "<div style='background-color: rgba(33, 137, 255, 0.07); padding: 15px; border-left: 4px solid #2196F3; color: inherit;'>\n",
                 "    <h4 style='margin-top: 0;'> Data Quality Assessment</h4>\n\n",
                 "    <table style='width: 100%; border-collapse: collapse; margin-top: 10px;'>\n",
@@ -1521,8 +1537,6 @@ datetimeconverterClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 "    ", misuse_html, "\n",
                 "</div>"
             )
-
-            self$results$qualityAssessment$setContent(quality_html)
         },
 
         .populateNaturalLanguageSummary = function(datetime_var, detected_format, quality, components, timezone_label = NULL) {
@@ -1905,11 +1919,14 @@ datetimeconverterClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 </p>
                 </div>"
 
+                self$results$welcome$setVisible(TRUE)
                 self$results$welcome$setContent(welcome_msg)
                 # Clears the previous variable's notices (the list was reset above).
                 private$.renderNotices()
                 return()
             }
+
+            self$results$welcome$setVisible(FALSE)
 
             # Get data
             data <- self$data
@@ -2307,39 +2324,7 @@ datetimeconverterClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 paste0(quality$success_rate, "%")
             }
 
-            quality_html <- paste0(
-                "<div style='background-color: rgba(33, 159, 33, 0.1); padding: 15px; border-radius: 8px; color: inherit;'>",
-                "<h4 style='margin-top: 0;'>Quality Assessment</h4>",
-                "<table style='width: 100%; border-collapse: collapse;'>",
-                "<tr><td style='padding: 6px; border: 1px solid #ddd;'><strong>Total Observations:</strong></td><td style='padding: 6px; border: 1px solid #ddd;'>", quality$total_observations, "</td></tr>",
-                "<tr><td style='padding: 6px; border: 1px solid #ddd;'><strong>Originally Missing:</strong></td><td style='padding: 6px; border: 1px solid #ddd;'>", quality$original_missing, "</td></tr>",
-                "<tr><td style='padding: 6px; border: 1px solid #ddd;'><strong>Successfully Parsed:</strong></td><td style='padding: 6px; border: 1px solid #ddd;'>", quality$successfully_parsed, " (", success_rate_display, ")</td></tr>",
-                "<tr><td style='padding: 6px; border: 1px solid #ddd;'><strong>Failed Parsing:</strong></td><td style='padding: 6px; border: 1px solid #ddd;'>", quality$failed_parsing, "</td></tr>"
-            )
-
-            if (!is.na(quality$min_datetime)) {
-                quality_html <- paste0(quality_html,
-                    "<tr><td style='padding: 6px; border: 1px solid #ddd;'><strong>Minimum DateTime:</strong></td><td style='padding: 6px; border: 1px solid #ddd;'>", private$.datetimeText(quality$min_datetime), "</td></tr>",
-                    "<tr><td style='padding: 6px; border: 1px solid #ddd;'><strong>Maximum DateTime:</strong></td><td style='padding: 6px; border: 1px solid #ddd;'>", private$.datetimeText(quality$max_datetime), "</td></tr>",
-                    "<tr><td style='padding: 6px; border: 1px solid #ddd;'><strong>Date Range:</strong></td><td style='padding: 6px; border: 1px solid #ddd;'>", quality$range_days, " days (", quality$range_years, " years)</td></tr>"
-                )
-            }
-
-            quality_html <- paste0(quality_html, "</table>")
-
-            # Add sample of failed values if any
-            if (length(quality$failed_samples) > 0) {
-                quality_html <- paste0(quality_html,
-                    "<h5 style='margin-top: 15px; font-weight: bold;'>Sample of Failed Values:</h5>",
-                    "<ul style='font-weight: bold;'>"
-                )
-                for (failed_val in quality$failed_samples) {
-                    quality_html <- paste0(quality_html, "<li>", htmltools::htmlEscape(failed_val), "</li>")
-                }
-                quality_html <- paste0(quality_html, "</ul>")
-            }
-
-            quality_html <- paste0(quality_html, "</div>")
+            quality_html <- private$.formatQualityMetricsGuide(quality, success_rate_display)
             self$results$qualityMetrics$setContent(quality_html)
 
             # Generate preview table
@@ -2505,6 +2490,42 @@ datetimeconverterClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             # Render all collected notices
             private$.renderNotices()
+        },
+
+        .formatQualityMetricsGuide = function(quality, success_rate_display) {
+            quality_html <- paste0(
+                "<div style='background-color: rgba(33, 159, 33, 0.1); padding: 15px; border-radius: 8px; color: inherit;'>",
+                "<h4 style='margin-top: 0;'>Quality Assessment</h4>",
+                "<table style='width: 100%; border-collapse: collapse;'>",
+                "<tr><td style='padding: 6px; border: 1px solid #ddd;'><strong>Total Observations:</strong></td><td style='padding: 6px; border: 1px solid #ddd;'>", quality$total_observations, "</td></tr>",
+                "<tr><td style='padding: 6px; border: 1px solid #ddd;'><strong>Originally Missing:</strong></td><td style='padding: 6px; border: 1px solid #ddd;'>", quality$original_missing, "</td></tr>",
+                "<tr><td style='padding: 6px; border: 1px solid #ddd;'><strong>Successfully Parsed:</strong></td><td style='padding: 6px; border: 1px solid #ddd;'>", quality$successfully_parsed, " (", success_rate_display, ")</td></tr>",
+                "<tr><td style='padding: 6px; border: 1px solid #ddd;'><strong>Failed Parsing:</strong></td><td style='padding: 6px; border: 1px solid #ddd;'>", quality$failed_parsing, "</td></tr>"
+            )
+
+            if (!is.na(quality$min_datetime)) {
+                quality_html <- paste0(quality_html,
+                    "<tr><td style='padding: 6px; border: 1px solid #ddd;'><strong>Minimum DateTime:</strong></td><td style='padding: 6px; border: 1px solid #ddd;'>", private$.datetimeText(quality$min_datetime), "</td></tr>",
+                    "<tr><td style='padding: 6px; border: 1px solid #ddd;'><strong>Maximum DateTime:</strong></td><td style='padding: 6px; border: 1px solid #ddd;'>", private$.datetimeText(quality$max_datetime), "</td></tr>",
+                    "<tr><td style='padding: 6px; border: 1px solid #ddd;'><strong>Date Range:</strong></td><td style='padding: 6px; border: 1px solid #ddd;'>", quality$range_days, " days (", quality$range_years, " years)</td></tr>"
+                )
+            }
+
+            quality_html <- paste0(quality_html, "</table>")
+
+            # Add sample of failed values if any
+            if (length(quality$failed_samples) > 0) {
+                quality_html <- paste0(quality_html,
+                    "<h5 style='margin-top: 15px; font-weight: bold;'>Sample of Failed Values:</h5>",
+                    "<ul style='font-weight: bold;'>"
+                )
+                for (failed_val in quality$failed_samples) {
+                    quality_html <- paste0(quality_html, "<li>", htmltools::htmlEscape(failed_val), "</li>")
+                }
+                quality_html <- paste0(quality_html, "</ul>")
+            }
+
+            paste0(quality_html, "</div>")
         }
     )
 )
