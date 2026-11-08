@@ -206347,3 +206347,54 @@ msgstr ""
 #: R/timeinterval.b.R
 msgid "Zero Intervals"
 msgstr ""
+
+#: R/survival.b.R
+msgid "Saved adjusted curves need recalculation. Re-run the analysis to use the current model."
+msgstr "Saved adjusted curves need recalculation. Re-run the analysis to use the current model."
+
+#: survival/options/adjusted_curves.description
+msgid "Show survival curves standardized for age with the Cox model (direct standardization). Every patient is assigned to each group in turn, so all groups share the age distribution of the model cohort. Uses the same fitted model as the age-adjusted table, retaining baseline and age-group stratification when requested. Stratified curves stop at the shortest observed stratum follow-up; standardized confidence bands are not provided."
+msgstr "Show survival curves standardized for age with the Cox model (direct standardization). Every patient is assigned to each group in turn, so all groups share the age distribution of the model cohort. Uses the same fitted model as the age-adjusted table, retaining baseline and age-group stratification when requested. Stratified curves stop at the shortest observed stratum follow-up; standardized confidence bands are not provided."
+
+#: R/multisurvival.b.R
+msgid "{variable} (per 1-unit increase)"
+msgstr "{variable} (per 1-unit increase)"
+
+#: R/multisurvival.b.R
+msgid "{variable} ({contrast} contrast)"
+msgstr "{variable} ({contrast} contrast)"
+
+#: R/multisurvival.b.R
+msgid "{variable} (ratio of hazard ratios)"
+msgstr "{variable} (ratio of hazard ratios)"
+
+#: R/multisurvival.b.R
+msgid "{effect}, at {conditions}"
+msgstr "{effect}, at {conditions}"
+
+#: R/multisurvival.b.R
+msgid "Interaction rows show ratios of hazard ratios, not subgroup hazard ratios. Main-effect rows are conditional on the values shown."
+msgstr "Interaction rows show ratios of hazard ratios, not subgroup hazard ratios. Main-effect rows are conditional on the values shown."
+
+#: R/multisurvival.b.R
+msgid "Ratio of hazard ratios"
+msgstr "Ratio of hazard ratios"
+
+#: R/multisurvival.b.R
+msgid "Hazard ratio"
+msgstr "Hazard ratio"
+
+#: R/multisurvival.b.R
+msgid "Cox model coefficients"
+msgstr "Cox model coefficients"
+
+#: R/multisurvival.b.R
+msgid "Exponentiated coefficient (95% CI, log scale)"
+msgstr "Exponentiated coefficient (95% CI, log scale)"
+
+#: R/multisurvival.b.R
+msgid "If true, generates a plot of fitted Cox coefficients. Interaction models use a coefficient forest in both styles: main effects include their conditioning values, and interaction coefficients are labelled as ratios of hazard ratios."
+msgstr "If true, generates a plot of fitted Cox coefficients. Interaction models use a coefficient forest in both styles: main effects include their conditioning values, and interaction coefficients are labelled as ratios of hazard ratios."
+
+msgid "Percentage of all observations"
+msgstr "Percentage of all observations"

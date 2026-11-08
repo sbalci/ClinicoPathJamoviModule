@@ -395,7 +395,7 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
 
         # A fatal input problem: jamovi's own error state, not an ERROR banner beside the tables
         # .init() has already laid out, which read as an empty but otherwise normal analysis
-        # (review guide §25). "{}" + msg: the text carries variable, model and level names, and
+        # (review guide section 25). "{}" + msg: the text carries variable, model and level names, and
         # reject() would otherwise read a brace in one as a placeholder.
         .fatal = function(title, content) {
             jmvcore::reject("{}", msg = paste0(title, ": ", content))
@@ -1392,7 +1392,7 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
 
             # No positive level chosen yet. allowNone stops jamovi pre-selecting the first level,
             # which is usually the non-event ("No", "0"), so this is the state every new analysis
-            # starts in: unconfigured, not an error (review guide §25). List the levels and stop.
+            # starts in: unconfigured, not an error (review guide section 25). List the levels and stop.
             if (private$.levelUnset(self$options$outcomePositive)) {
                 lv <- table(self$data[[self$options$outcome]])
                 private$.addNotice(
@@ -1501,7 +1501,7 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                 rule_positive <- self$options$decisionRulePositive
             } else if (isTRUE(self$options$clinicalDecisionRule)) {
                 # Ticked, but the variable or its positive level is still empty: a half-configured
-                # rule, not an error (review guide §25), so the models still run. Say so, or the
+                # rule, not an error (review guide section 25), so the models still run. Say so, or the
                 # green "Analysis Complete" reads as if the rule were in the comparison.
                 private$.addNotice(
                     type = "INFO",

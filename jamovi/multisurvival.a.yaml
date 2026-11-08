@@ -407,7 +407,9 @@ options:
       default: false
       description:
         R: >
-          If true, generates a plot of hazard ratios for each explanatory variable in the Cox model.
+          If true, generates a plot of fitted Cox coefficients. Interaction models use
+          a coefficient forest in both styles: main effects include their conditioning
+          values, and interaction coefficients are labelled as ratios of hazard ratios.
 
     - name: sty
       title: Plot Style

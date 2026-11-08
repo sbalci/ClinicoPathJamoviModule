@@ -31,7 +31,8 @@
         `publisher`="BMJ", 
         `volume`=332, 
         `pages`="1080", 
-        `doi`="10.1136/bmj.332.7549.1080"), 
+        `doi`="10.1136/bmj.332.7549.1080", 
+        `url`="https://doi.org/10.1136/bmj.332.7549.1080"), 
     `AustinLeeFine2016`=list(
         `type`="article", 
         `author`="Austin, P. C., Lee, D. S., & Fine, J. P.", 
@@ -97,6 +98,17 @@
         `title`="BayesFactor: Computation of Bayes Factors for Common Designs", 
         `publisher`="[R package]. Retrieved from https://CRAN.R-project.org/package=BayesFactor", 
         `url`="https://CRAN.R-project.org/package=BayesFactor"), 
+    `Bergsma2013`=list(
+        `type`="article", 
+        `author`="Bergsma, W.", 
+        `year`=2013, 
+        `title`="A bias-correction for Cram\u00E9r's V and Tschuprow's T", 
+        `publisher`="Journal of the Korean Statistical Society", 
+        `volume`=42, 
+        `issue`=3, 
+        `pages`="323-328", 
+        `doi`="10.1016/j.jkss.2012.10.002", 
+        `url`="https://doi.org/10.1016/j.jkss.2012.10.002"), 
     `BiocManager`=list(
         `type`="software", 
         `author`="Martin Morgan (ORCID: ), Marcel Ramos (ORCID: )", 
@@ -580,7 +592,8 @@
         `volume`=1, 
         `issue`=2, 
         `pages`="121-129", 
-        `doi`="10.1002/sim.4780010204"), 
+        `doi`="10.1002/sim.4780010204", 
+        `url`="https://doi.org/10.1002/sim.4780010204"), 
     `Garcia2022`=list(
         `type`="article", 
         `author`="Garcia, V., Elfer, K., Peeters, D. J. E., et al.", 
@@ -671,7 +684,8 @@
         `volume`=15, 
         `issue`=3, 
         `pages`="651-674", 
-        `doi`="10.1198/106186006X133933"), 
+        `doi`="10.1198/106186006X133933", 
+        `url`="https://doi.org/10.1198/106186006X133933"), 
     `HuiWalter1980`=list(
         `type`="article", 
         `author`="Hui, S. L., & Walter, S. D.", 
@@ -904,7 +918,8 @@
         `volume`=405, 
         `issue`=2, 
         `pages`="442-451", 
-        `doi`="10.1016/0005-2795(75)90109-9"), 
+        `doi`="10.1016/0005-2795(75)90109-9", 
+        `url`="https://doi.org/10.1016/0005-2795(75)90109-9"), 
     `McClish1989`=list(
         `type`="article", 
         `author`="McClish, D. K.", 
@@ -1310,7 +1325,8 @@
         `publisher`="BMC Bioinformatics", 
         `volume`=8, 
         `pages`="25", 
-        `doi`="10.1186/1471-2105-8-25"), 
+        `doi`="10.1186/1471-2105-8-25", 
+        `url`="https://doi.org/10.1186/1471-2105-8-25"), 
     `Swamidass2010`=list(
         `type`="article", 
         `author`="Swamidass, S. J., Azencott, C.-A., Daily, K., & Baldi, P.", 
@@ -2136,7 +2152,8 @@
         `volume`=4, 
         `issue`=12, 
         `pages`="1772-1779", 
-        `doi`="10.1200/JCO.1986.4.12.1772"), 
+        `doi`="10.1200/JCO.1986.4.12.1772", 
+        `url`="https://doi.org/10.1200/JCO.1986.4.12.1772"), 
     `ggExtra`=list(
         `type`="software", 
         `author`="Dean Attali , Christopher Baker", 
@@ -2327,7 +2344,8 @@
         `year`=2021, 
         `title`="Visualizations with statistical details: The 'ggstatsplot' approach.", 
         `publisher`="PsyArxiv", 
-        `doi`="doi:10.31234/osf.io/p7mku"), 
+        `doi`="doi:10.31234/osf.io/p7mku", 
+        `url`="https://doi.org/10.31234/osf.io/p7mku"), 
     `ggstream`=list(
         `type`="software", 
         `author`="David Sjoberg", 
@@ -2365,7 +2383,8 @@
         `volume`=9, 
         `issue`=11, 
         `pages`="1259-1276", 
-        `doi`="10.1002/sim.4780091106"), 
+        `doi`="10.1002/sim.4780091106", 
+        `url`="https://doi.org/10.1002/sim.4780091106"), 
     `glmmTMB`=list(
         `type`="software", 
         `author`="Mollie Brooks, Ben Bolker, Kasper Kristensen, Martin Maechler, Arni Magnusson, Hans Skaug, Anders Nielsen, Casper Berg, Koen van Bentham", 
@@ -2587,7 +2606,8 @@
         `volume`=9, 
         `issue`=12, 
         `pages`="1439-1445", 
-        `doi`="10.1002/sim.4780091207"), 
+        `doi`="10.1002/sim.4780091207", 
+        `url`="https://doi.org/10.1002/sim.4780091207"), 
     `icenReg`=list(
         `type`="software", 
         `author`="Clifford Anderson-Bergman", 
@@ -2751,7 +2771,8 @@
         `volume`=70, 
         `issue`=3, 
         `pages`="659-663", 
-        `doi`="10.1093/biomet/70.3.659"), 
+        `doi`="10.1093/biomet/70.3.659", 
+        `url`="https://doi.org/10.1093/biomet/70.3.659"), 
     `lavaan`=list(
         `type`="software", 
         `author`="Rosseel, Y., et al.", 
@@ -3090,7 +3111,8 @@
         `volume`=35, 
         `issue`=3, 
         `pages`="549-556", 
-        `doi`="10.2307/2530245"), 
+        `doi`="10.2307/2530245", 
+        `url`="https://doi.org/10.2307/2530245"), 
     `officer`=list(
         `type`="software", 
         `author`="David Gohel, Stefan Moog, Mark Heckmann", 
@@ -3273,7 +3295,8 @@
         `volume`=64, 
         `issue`=2, 
         `pages`="191-199", 
-        `doi`="10.1093/biomet/64.2.191"), 
+        `doi`="10.1093/biomet/64.2.191", 
+        `url`="https://doi.org/10.1093/biomet/64.2.191"), 
     `pocock2012winratio`=list(
         `type`="article", 
         `author`="Pocock, S. J., Ariti, C. A., Collier, T. J., & Wang, D.", 
@@ -3430,7 +3453,8 @@
         `volume`=93, 
         `issue`=4, 
         `pages`="387-391", 
-        `doi`="10.1038/sj.bjc.6602678"), 
+        `doi`="10.1038/sj.bjc.6602678", 
+        `url`="https://doi.org/10.1038/sj.bjc.6602678"), 
     `remotes`=list(
         `type`="software", 
         `author`="G\u00E1bor Cs\u00E1rdi, Jim Hester, Hadley Wickham, Winston Chang, Martin Morgan, Dan Tenenbaum", 
@@ -3999,7 +4023,8 @@
         `author`="R Core Team", 
         `year`=2026, 
         `title`="tools: Tools for Package Development (Base R)", 
-        `publisher`="[R base package]. R Foundation for Statistical Computing"), 
+        `publisher`="[R base package]. R Foundation for Statistical Computing", 
+        `url`="https://CRAN.R-project.org/"), 
     `torch`=list(
         `type`="software", 
         `author`="Tomasz Kalinowski, Daniel Falbel, Javier Luraschi", 

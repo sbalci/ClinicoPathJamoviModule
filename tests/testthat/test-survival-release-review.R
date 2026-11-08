@@ -119,8 +119,12 @@ test_that("age-based plots use the same landmarked time as the tables", {
                max(raw$elapsedtime) - 12, tolerance = 1e-8)
   expect_equal(nrow(s_land$plot_data), sum(raw$elapsedtime > 12))
 
-  # and both plots share one frame, so they cannot disagree with each other
-  expect_equal(land$adjustedCurvesPlot$state$plot_data, s_land$plot_data)
+  # The adjusted curve now stores aggregate coordinates from the table's fit.
+  # It must retain this cohort's landmark shift without serializing patient rows.
+  expect_null(land$adjustedCurvesPlot$state$plot_data)
+  expect_equal(max(land$adjustedCurvesPlot$state$curves$time), max(s_land$plot_data$time))
+  expect_match(land$adjustedCurvesPlot$state$subtitle,
+               paste("all", nrow(s_land$plot_data), "patients"), fixed = TRUE)
 })
 
 test_that("age-based plots still refuse under competing risks", {

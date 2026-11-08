@@ -946,9 +946,12 @@ waterfallBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   (ORR/DCR), time to response and duration of response. A patient with no
 #'   measured value but a supplied category (e.g. PD for clinical progression or
 #'   death before the first scan) is counted with that category. NE, "not
-#'   evaluable" and UNK are read as Unknown (not evaluable). One value per
-#'   patient: the first non-missing value is used and conflicting values are
-#'   reported.
+#'   evaluable" and UNK are read as Unknown (not evaluable), and the full names
+#'   (e.g. "Partial response") are accepted. Give one value per patient. When a
+#'   patient's values differ across rows they are read as per-visit responses:
+#'   the category is the best one in time order (row order without a time
+#'   variable) up to and including the first PD (CR, then PR, then SD, then PD;
+#'   NE visits do not count), and a notice names those patients.
 #' @param showCategoryLabels Print the response category (CR, PR, SD, PD)
 #'   above each waterfall bar, so the category can be read directly instead of
 #'   being mapped back from the bar color.
@@ -1011,7 +1014,7 @@ waterfallBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   Kaplan-Meier median (accounting for responders still in response at last
 #'   follow-up), which the naive median understates.
 #' @param seed Random seed for the reproducible bootstrap confidence interval
-#'   of the median response (used when 'Show Confidence Interval' is enabled).
+#'   of the median response (used when 'Bootstrap CI of the median' is enabled).
 #'   Change it to draw a different bootstrap sample; the default (123)
 #'   reproduces the previous fixed behavior.
 #' @return A results object containing:

@@ -105,6 +105,18 @@ refs:
         publisher: "[R package]. Retrieved from https://CRAN.R-project.org/package=BayesFactor"
         url: "https://CRAN.R-project.org/package=BayesFactor"
 
+    Bergsma2013:
+        type: article
+        author: "Bergsma, W."
+        year: 2013
+        title: "A bias-correction for Cramér's V and Tschuprow's T"
+        publisher: "Journal of the Korean Statistical Society"
+        volume: 42
+        issue: 3
+        pages: 323-328
+        doi: 10.1016/j.jkss.2012.10.002
+        url: "https://doi.org/10.1016/j.jkss.2012.10.002"
+
     BiocManager:
         type: software
         author: "Martin Morgan (ORCID: ), Marcel Ramos (ORCID: )"

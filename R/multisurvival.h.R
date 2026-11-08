@@ -2386,7 +2386,7 @@ multisurvivalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             super$initialize(
                 package = "ClinicoPath",
                 name = "multisurvival",
-                version = c(1,1,3),
+                version = c(1,1,4),
                 options = options,
                 results = multisurvivalResults$new(options=options),
                 data = data,
@@ -2478,8 +2478,10 @@ multisurvivalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   first variable is the focal effect and the second is the moderator.
 #' @param multievent If true, multiple event levels will be considered for
 #'   competing risks analysis. Requires specifying \code{dod}, \code{dooc}, etc.
-#' @param hr If true, generates a plot of hazard ratios for each explanatory
-#'   variable in the Cox model.
+#' @param hr If true, generates a plot of fitted Cox coefficients. Interaction
+#'   models use a coefficient forest in both styles: main effects include their
+#'   conditioning values, and interaction coefficients are labelled as ratios of
+#'   hazard ratios.
 #' @param sty The style of the hazard ratio (forest) plot. "finalfit" or
 #'   "survminer forestplot".
 #' @param ph_cox If true, tests the proportional hazards assumption for the

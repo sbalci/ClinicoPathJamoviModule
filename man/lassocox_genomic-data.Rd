@@ -76,7 +76,7 @@ Example dataset for the \code{lassocox} analysis.
 }
 \details{
 High-dimensional example: 53 candidate columns (50 genes) for 80
-patients, 48 \code{Dead} and 32 \code{Alive}. Six genes carry a true effect. Regenerated
+patients, 45 \code{Dead} and 35 \code{Alive}. Six genes carry a true effect. Regenerated
 on 2026-11-07 with a baseline hazard; the earlier version had only 2 censored rows
 and could not be fitted.
 }

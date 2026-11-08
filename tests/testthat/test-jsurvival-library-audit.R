@@ -684,3 +684,200 @@ test_that("reviewed survival orchestration methods remain readable phase entry p
   }
   audit_skip_unloaded(names(sites))
 })
+
+
+# R1: compare the rendered probabilities with an independent baseline-hazard oracle.
+.sac_ns <- function() {
+  for (p in c("jsurvival", "ClinicoPath"))
+    if (p %in% loadedNamespaces()) return(asNamespace(p))
+  stop("Load the analysis namespace before running this regression")
+}
+.sac_data <- function() {
+  set.seed(1893); n <- 360
+  site <- factor(sample(c("low", "high"), n, TRUE))
+  group <- factor(ifelse(runif(n) < ifelse(site == "high", .85, .15), "B", "A"))
+  age <- runif(n, 35, 85)
+  data.frame(time = rexp(n, .02 * ifelse(site == "high", 6, 1) * exp(.025 * (age - 60))),
+             event = rbinom(n, 1, .8), group = group, age = age, site = site)
+}
+.sac_run <- function(d, mode = "none", ...) {
+  opts <- list(elapsedtime = "time", outcome = "event", outcomeLevel = "1",
+    explanatory = "group", dod = NULL, dooc = NULL, awd = NULL, awod = NULL,
+    age_adjustment = TRUE, age_variable = "age", adjusted_curves = TRUE, cutp = "6,12")
+  if (mode %in% c("site", "cross"))
+    opts <- c(opts, list(stratified_cox = TRUE, strata_variable = "site"))
+  if (mode %in% c("age", "cross")) opts$age_stratified_cox <- TRUE
+  opts <- utils::modifyList(opts, list(...), keep.null = TRUE)
+  ns <- .sac_ns()
+  a <- get("survivalClass", ns)$new(options = do.call(get("survivalOptions", ns)$new, opts), data = d)
+  a$init(); suppressMessages(a$run())
+  a
+}
+.sac_plot <- function(a) {
+  grDevices::pdf(NULL); on.exit(grDevices::dev.off(), add = TRUE)
+  p <- a$.__enclos_env__$private
+  ok <- p$.plotAdjustedCurves(a$results$adjustedCurvesPlot, ggplot2::theme_minimal(), list(palette = "jmv"))
+  testthat::expect_true(isTRUE(ok))
+  ggplot2::last_plot()$data
+}
+.sac_oracle <- function(d, mode, times) {
+  age_strata <- mode %in% c("age", "cross")
+  site_strata <- mode %in% c("site", "cross")
+  d <- d[stats::complete.cases(d[, c("time", "event", "group", "age",
+    if (site_strata) "site")]), , drop = FALSE]
+  d$band <- cut(d$age, c(-Inf, 50, 65, 75, Inf), include.lowest = TRUE)
+  d$stratum <- if (age_strata && site_strata) interaction(d$site, d$band, drop = TRUE)
+    else if (age_strata) d$band else if (site_strata) d$site else factor("all")
+  rhs <- c("group", if (!age_strata) "age", if (age_strata || site_strata) "strata(stratum)")
+  f <- stats::as.formula(paste("survival::Surv(time,event) ~", paste(rhs, collapse = " + ")))
+  fit <- survival::coxph(f, d, model = TRUE)
+  bh <- survival::basehaz(fit, centered = FALSE)
+  rows <- lapply(levels(d$group), function(g) {
+    nd <- d; nd$group <- factor(g, levels = levels(d$group))
+    risk <- exp(stats::predict(fit, nd, type = "lp", reference = "zero"))
+    s <- vapply(times, function(t) {
+      h <- vapply(as.character(nd$stratum), function(k) {
+        use <- bh$time <= t
+        if ("strata" %in% names(bh)) use <- use & as.character(bh$strata) == k
+        if (any(use)) tail(bh$hazard[use], 1) else 0
+      }, 0)
+      mean(exp(-h * risk))
+    }, numeric(1))
+    data.frame(group = g, time = times, surv = s)
+  })
+  list(curves = do.call(rbind, rows), fit = fit, data = d)
+}
+.sac_at <- function(curves, groups, times) {
+  key <- if ("group" %in% names(curves)) "group" else "variable"
+  unlist(lapply(groups, function(g) vapply(times, function(t) {
+    rows <- curves[as.character(curves[[key]]) == g & curves$time <= t, , drop = FALSE]
+    if (nrow(rows)) tail(rows$surv, 1) else 1
+  }, 0)), use.names = FALSE)
+}
+
+testthat::test_that("adjusted curves honor baseline, age and crossed stratification", {
+  d <- .sac_data(); times <- c(1, 3, 6)
+  for (mode in c("none", "site", "age", "cross")) {
+    a <- .sac_run(d, mode); actual <- .sac_plot(a)
+    ref <- .sac_oracle(d, mode, times)
+    testthat::expect_equal(.sac_at(actual, levels(d$group), times), ref$curves$surv,
+                          tolerance = 1e-8, info = mode)
+    hr <- a$results$ageAdjustedCoxTable$asDF$hr_age_adjusted[1]
+    testthat::expect_equal(as.numeric(sub(" .*", "", hr)),
+      unname(exp(stats::coef(ref$fit)["groupB"])), tolerance = .0051, info = mode)
+  }
+})
+
+testthat::test_that("standardized curves stop at common stratum follow-up and retain source exclusions", {
+  d <- .sac_data(); d$time[d$site == "high"] <- pmin(d$time[d$site == "high"], 8)
+  d$event[d$site == "high" & d$time == 8] <- 0
+  d$age[c(2, 11)] <- NA; d$site[4] <- NA
+  rownames(d) <- as.character(seq_len(nrow(d)) * 3L)
+  a <- .sac_run(d, "site", uselandmark = TRUE, landmark = 1)
+  actual <- .sac_plot(a)
+  use <- d[d$time > 1, , drop = FALSE]; use$time <- use$time - 1
+  ref <- .sac_oracle(use, "site", c(1, 3, 6))
+  testthat::expect_equal(.sac_at(actual, levels(d$group), c(1, 3, 6)), ref$curves$surv,
+                        tolerance = 1e-8)
+  testthat::expect_lte(max(actual$time), min(tapply(ref$data$time, ref$data$site, max)))
+})
+
+testthat::test_that("adjusted curve state holds coordinates and renders after dataset-free restoration", {
+  a <- .sac_run(.sac_data(), "cross")
+  state <- a$results$adjustedCurvesPlot$state
+  testthat::expect_false("plot_data" %in% names(state))
+  restored <- .sac_run(.sac_data(), "cross")
+  restored$results$adjustedCurvesPlot$setState(unserialize(serialize(state, NULL)))
+  restored$.__enclos_env__$private$.data <- NULL
+  testthat::expect_equal(.sac_plot(restored), .sac_plot(a))
+})
+
+testthat::test_that("adjusted curves invalidate on every stratification control", {
+  ns <- .sac_ns(); result <- get("survivalResults", ns)$new(get("survivalOptions", ns)$new())
+  clear <- result$adjustedCurvesPlot$.__enclos_env__$private$.clearWith
+  testthat::expect_true(all(c("stratified_cox", "strata_variable", "age_stratified_cox",
+                             "age_group_cutpoints") %in% clear))
+})
+
+
+.fr_ns <- function() {
+  for(p in c('jsurvival','ClinicoPath')) if(p %in% loadedNamespaces()) return(asNamespace(p))
+  stop('Load the analysis namespace first')
+}
+.fr_data <- function() {
+  set.seed(2811);n<-350
+  d<-data.frame(arm=factor(sample(c('Control','Treated'),n,TRUE)),
+    age=runif(n,40,80),stage=factor(sample(c('I','II','III'),n,TRUE)),marker=rnorm(n))
+  d$time<-rexp(n,.02*exp(.3*(d$arm=='Treated')+.02*(d$age-60)+.15*d$marker))+.1
+  d$event<-rbinom(n,1,.8);d
+}
+.fr_run <- function(d,style,interactions=list(c('arm','age'))) {
+  ns<-.fr_ns();o<-get('multisurvivalOptions',ns)$new(elapsedtime='time',outcome='event',
+    outcomeLevel='1',explanatory=c('arm','stage'),contexpl=c('age','marker'),
+    dod=NULL,dooc=NULL,awd=NULL,awod=NULL,hr=TRUE,sty=style,interactions=interactions)
+  a<-get('multisurvivalClass',ns)$new(options=o,data=d);a$init();suppressWarnings(suppressMessages(a$run()));a
+}
+.fr_render <- function(a,style) {
+  grDevices::pdf(NULL);on.exit(grDevices::dev.off(),add=TRUE)
+  p<-a$.__enclos_env__$private;im<-a$results[[if(style=='t1')'plot' else 'plot3']]
+  ok<-suppressWarnings(suppressMessages(if(style=='t1')p$.plot(im,ggplot2::theme_minimal(),list(palette='jmv')) else p$.plot3(im,ggplot2::theme_minimal(),list(palette='jmv'))))
+  testthat::expect_true(isTRUE(ok));ggplot2::last_plot()
+}
+
+testthat::test_that('both interaction forest styles retain conditional rows and ratio-of-HR meaning',{
+  d<-.fr_data()
+  for(style in c('t1','t3')) {
+    a<-.fr_run(d,style);p<-.fr_render(a,style)
+    caption<-gsub('[[:space:]]+',' ',paste(p$labels$caption,collapse=' '))
+    testthat::expect_match(caption,'age = 0',fixed=TRUE,info=style)
+    testthat::expect_match(caption,'outside the observed range',fixed=TRUE,info=style)
+    testthat::expect_match(caption,'ratios of hazard ratios',fixed=TRUE,info=style)
+    wanted<-c('term','estimate','lower','upper','label','estimable')
+    has<-is.data.frame(p$data)&&all(wanted %in% names(p$data))
+    testthat::expect_true(has,info=paste(style,'each fitted coefficient must have its own labelled row'))
+    if(!has)next
+    fit<-survival::coxph(survival::Surv(time,event)~arm+stage+age+marker+arm:age,d)
+    cf<-stats::coef(fit);se<-sqrt(diag(stats::vcov(fit)));z<-stats::qnorm(.975)
+    testthat::expect_equal(p$data$term,names(cf),info=style)
+    testthat::expect_equal(p$data$estimate,unname(exp(cf)),tolerance=1e-10,info=style)
+    testthat::expect_equal(p$data$lower,unname(exp(cf-z*se)),tolerance=1e-10,info=style)
+    testthat::expect_equal(p$data$upper,unname(exp(cf+z*se)),tolerance=1e-10,info=style)
+    testthat::expect_match(p$data$label[match('armTreated',p$data$term)],'age = 0',fixed=TRUE)
+    testthat::expect_match(p$data$label[match('age',p$data$term)],'arm = Control',fixed=TRUE)
+    testthat::expect_match(p$data$label[match('armTreated:age',p$data$term)],'ratio of hazard ratios',fixed=TRUE)
+  }
+})
+
+testthat::test_that('multi-level and higher-order forest interactions retain all design-matrix rows',{
+  d<-.fr_data()
+  for(terms in list(list(c('stage','arm')),list(c('stage','arm','age')))) {
+    a<-.fr_run(d,'t1',terms);p<-.fr_render(a,'t1');fit<-a$.__enclos_env__$private$.cox_model()
+    has<-is.data.frame(p$data)&&all(c('term','label')%in%names(p$data))
+    testthat::expect_true(has)
+    if(has) {
+      testthat::expect_equal(p$data$term,names(stats::coef(fit)))
+      testthat::expect_equal(length(unique(p$data$label)),length(stats::coef(fit)))
+    }
+  }
+})
+
+testthat::test_that('non-interaction models keep their existing forest rendering',{
+  a<-.fr_run(.fr_data(),'t1',list());p<-.fr_render(a,'t1')
+  testthat::expect_null(p$labels$caption)
+})
+
+testthat::test_that('restored interaction forests reserve the complete caption layout', {
+  for (style in c('t1', 't3')) {
+    a <- .fr_run(.fr_data(), style)
+    im <- a$results[[if (style == 't1') 'plot' else 'plot3']]
+    testthat::expect_setequal(names(im$state), c('has_competing', 'forest_size'))
+    size <- im$state$forest_size
+    testthat::expect_length(size, 4L)
+    im$setSize2(600, 450)
+    # The native lifecycle calls postInit after loading the previous drawing state.
+    a$.__enclos_env__$private$.postInit()
+    ip <- im$.__enclos_env__$private
+    if (length(size) == 4L) for (i in seq_along(size))
+      testthat::expect_equal(ip[[c('.widthM', '.heightM', '.widthB', '.heightB')[i]]], size[i])
+  }
+})

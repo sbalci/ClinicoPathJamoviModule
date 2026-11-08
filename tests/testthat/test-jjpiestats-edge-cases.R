@@ -32,13 +32,15 @@ test_that("jjpiestats handles single category level", {
   single_level_data <- jjpiestats_small %>%
     filter(category == "Group A")
 
-  result <- jjpiestats(
-    data = single_level_data,
-    dep = "category"
+  # Should reject single observed level with clear variation message
+  expect_error(
+    jjpiestats(
+      data = single_level_data,
+      dep = "category"
+    ),
+    regexp = "insufficient variation|at least 2 categories",
+    ignore.case = TRUE
   )
-
-  # Should handle single level (or warn/error appropriately)
-  expect_s3_class(result, "jjpiestatsResults")
 })
 
 # ═══════════════════════════════════════════════════════════

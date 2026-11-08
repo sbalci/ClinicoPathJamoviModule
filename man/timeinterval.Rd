@@ -121,6 +121,7 @@ A results object containing:
 \code{results$todo} \tab \tab \tab \tab \tab a html \cr
 \code{results$aboutPanel} \tab \tab \tab \tab \tab a html \cr
 \code{results$personTimeInfo} \tab \tab \tab \tab \tab a html \cr
+\code{results$qualityCounts} \tab \tab \tab \tab \tab a table \cr
 \code{results$qualityAssessment} \tab \tab \tab \tab \tab a html \cr
 \code{results$caveatsPanel} \tab \tab \tab \tab \tab a html \cr
 \code{results$summary} \tab \tab \tab \tab \tab a html \cr
@@ -128,6 +129,12 @@ A results object containing:
 \code{results$glossaryPanel} \tab \tab \tab \tab \tab a html \cr
 \code{results$calculated_time} \tab \tab \tab \tab \tab an output \cr
 }
+
+Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
+
+\code{results$qualityCounts$asDF}
+
+\code{as.data.frame(results$qualityCounts)}
 }
 \description{
 Advanced time interval calculator designed for survival analysis,

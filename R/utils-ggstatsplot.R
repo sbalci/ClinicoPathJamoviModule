@@ -123,13 +123,16 @@ statsSeedMatters <- function(type, design, k = 2L) {
 #' @noRd
 #' @keywords internal
 captionSeedMatters <- function(type, design, k = 2L, bfmessage = FALSE) {
-    if (!isTRUE(bfmessage) || !identical(type, "parametric")) return(FALSE)
+    if (!isTRUE(bfmessage)) return(FALSE)
+    if (identical(design, "contingency")) {
+        return(!identical(type, "bayes"))
+    }
+    if (!identical(type, "parametric")) return(FALSE)
     switch(design,
         between     = k == 2,
         within      = TRUE,
         one_sample  = TRUE,
         correlation = TRUE,
-        contingency = TRUE,
         FALSE)
 }
 

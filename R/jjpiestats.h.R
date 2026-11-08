@@ -272,6 +272,7 @@ jjpiestatsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "ggstatsplot",
                     "statsExpressions",
                     "Fagerland2013",
+                    "Bergsma2013",
                     "digest",
                     "ggpubr",
                     "tools"),
@@ -325,12 +326,12 @@ jjpiestatsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 options=options,
                 name="assumptions",
                 title="Statistical Assumptions & Warnings",
-                visible="(showAssumptions || showexplanations)"))
+                visible="(showAssumptions || showexplanations || clinicalpreset != 'custom')"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="interpretation",
                 title="Results Interpretation",
-                visible="(showInterpretation || showexplanations)"))
+                visible="(showInterpretation || showexplanations || clinicalpreset != 'custom')"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="report",
@@ -348,7 +349,7 @@ jjpiestatsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 height=300,
                 renderFun=".plot4",
                 requiresData=TRUE,
-                visible="(length(dep) > 0 && length(group) > 0 && length(grvar) > 0)"))
+                visible="(length(dep) > 0 && length(grvar) > 0)"))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="plot2",

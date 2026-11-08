@@ -55,12 +55,12 @@ items:
     - name: assumptions
       title: Statistical Assumptions & Warnings
       type: Html
-      visible: (showAssumptions || showexplanations)
+      visible: (showAssumptions || showexplanations || clinicalpreset != 'custom')
 
     - name: interpretation
       title: Results Interpretation
       type: Html
-      visible: (showInterpretation || showexplanations)
+      visible: (showInterpretation || showexplanations || clinicalpreset != 'custom')
 
     - name: report
       title: Copy-Ready Report
@@ -78,7 +78,7 @@ items:
       height: 300
       renderFun: .plot4
       requiresData: true
-      visible: (length(dep) > 0 && length(group) > 0 && length(grvar) > 0)
+      visible: (length(dep) > 0 && length(grvar) > 0)
 
     - name: plot2
       title: '`${group} - {dep}`'
@@ -116,6 +116,7 @@ refs:
     - ggstatsplot
     - statsExpressions
     - Fagerland2013
+    - Bergsma2013
     - digest
     - ggpubr
     - tools

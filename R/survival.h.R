@@ -1226,6 +1226,10 @@ survivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 clearWith=list(
                     "age_adjustment",
                     "age_variable",
+                    "age_stratified_cox",
+                    "age_group_cutpoints",
+                    "stratified_cox",
+                    "strata_variable",
                     "explanatory",
                     "outcome",
                     "uselandmark",
@@ -1604,6 +1608,10 @@ survivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "adjusted_curves",
                     "age_adjustment",
                     "age_variable",
+                    "age_stratified_cox",
+                    "age_group_cutpoints",
+                    "stratified_cox",
+                    "strata_variable",
                     "explanatory",
                     "outcome",
                     "elapsedtime",
@@ -3103,7 +3111,7 @@ survivalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             super$initialize(
                 package = "ClinicoPath",
                 name = "survival",
-                version = c(1,1,3),
+                version = c(1,1,4),
                 options = options,
                 results = survivalResults$new(options=options),
                 data = data,
@@ -3255,7 +3263,11 @@ survivalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   explanatory variable.
 #' @param adjusted_curves Show survival curves standardized for age with the
 #'   Cox model (direct standardization). Every patient is assigned to each group
-#'   in turn, so all groups share the age distribution of the whole cohort.
+#'   in turn, so all groups share the age distribution of the model cohort. Uses
+#'   the same fitted model as the age-adjusted table, retaining baseline and
+#'   age-group stratification when requested. Stratified curves stop at the
+#'   shortest observed stratum follow-up; standardized confidence bands are not
+#'   provided.
 #' @param remark_checklist Display the 20-item REMARK (REporting
 #'   recommendations for tumor MARKer prognostic studies) checklist, marking the
 #'   items reported in this output and those to report in the manuscript.

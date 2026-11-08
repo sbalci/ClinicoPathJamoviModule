@@ -73,3 +73,30 @@ test_that("shared bootstrap fallback formula preserves quoted model matrices", {
     expect_equal(actual, expected, info = name)
   }
 })
+
+
+.dq_ns <- function() {
+  for (p in c('jsurvival', 'ClinicoPath')) if (p %in% loadedNamespaces()) return(asNamespace(p))
+  stop('Load the analysis namespace first')
+}
+testthat::test_that('native datetime percentages use all observations for every row', {
+  ns <- .dq_ns()
+  for (counts in list(c(4, 1, 2, 1), c(4, 4, 0, 0), c(5, 2, 0, 3))) {
+    o <- get('datetimeconverterOptions', ns)$new(datetime_var = 'date')
+    a <- get('datetimeconverterClass', ns)$new(options = o,
+      data = data.frame(date = c('2020-01-01', 'bad', NA_character_)))
+    a$init()
+    q <- stats::setNames(as.list(counts), c('total_observations', 'original_missing',
+      'successfully_parsed', 'failed_parsing'))
+    q$success_rate <- if (counts[1] > counts[2]) 100 * counts[3] / (counts[1] - counts[2]) else NA_real_
+    q$min_datetime <- as.POSIXct(NA); q$max_datetime <- as.POSIXct(NA)
+    q$failed_samples <- character()
+    a$.__enclos_env__$private$.formatQualityMetricsGuide(q, 'not used')
+    tab <- a$results$qualityCounts$asDF
+    testthat::expect_equal(as.numeric(tab[[2]]), counts)
+    pct <- as.numeric(tab[[3]])
+    testthat::expect_true(all(is.finite(pct)))
+    testthat::expect_equal(pct, 100 * counts / counts[1])
+    testthat::expect_equal(sum(pct[-1]), 100)
+  }
+})

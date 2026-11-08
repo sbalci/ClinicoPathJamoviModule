@@ -141,6 +141,7 @@ formal comparison here.}
 A results object containing:
 \tabular{llllll}{
 \code{results$todo} \tab \tab \tab \tab \tab a html \cr
+\code{results$suitabilityChecks} \tab \tab \tab \tab \tab a table \cr
 \code{results$suitabilityReport} \tab \tab \tab \tab \tab a html \cr
 \code{results$modelSummary} \tab \tab \tab \tab \tab a table \cr
 \code{results$coefficients} \tab \tab \tab \tab \tab a table \cr
@@ -166,9 +167,9 @@ A results object containing:
 
 Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
 
-\code{results$modelSummary$asDF}
+\code{results$suitabilityChecks$asDF}
 
-\code{as.data.frame(results$modelSummary)}
+\code{as.data.frame(results$suitabilityChecks)}
 }
 \description{
 Fits a cross-validated LASSO-penalized Cox model for exploratory model

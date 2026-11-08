@@ -34,7 +34,7 @@ lassocox_lung_cancer
 Example dataset for the \code{lassocox} analysis.
 }
 \details{
-Clinical example with mixed variable types: 121 progressions and 79
+Clinical example with mixed variable types: 133 progressions and 67
 censored rows among 200 patients. Regenerated on 2026-11-07 with a baseline hazard;
 the earlier version had zero follow-up times and only 2 censored rows and could not
 be fitted.

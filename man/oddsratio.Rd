@@ -84,6 +84,7 @@ A results object containing:
 \code{results$strongWarnings} \tab \tab \tab \tab \tab a html \cr
 \code{results$warnings} \tab \tab \tab \tab \tab a html \cr
 \code{results$infoMessages} \tab \tab \tab \tab \tab a html \cr
+\code{results$fittedTable} \tab \tab \tab \tab \tab a table \cr
 \code{results$text} \tab \tab \tab \tab \tab a html \cr
 \code{results$text2} \tab \tab \tab \tab \tab a html \cr
 \code{results$plot} \tab \tab \tab \tab \tab an image \cr
@@ -91,10 +92,17 @@ A results object containing:
 \code{results$riskMeasuresExplanation} \tab \tab \tab \tab \tab a html \cr
 \code{results$diagnosticTestExplanation} \tab \tab \tab \tab \tab a html \cr
 \code{results$plot_nomogram} \tab \tab \tab \tab \tab an image \cr
+\code{results$diagnosticContingency} \tab \tab \tab \tab \tab a table \cr
 \code{results$diagnosticMetrics} \tab \tab \tab \tab \tab a html \cr
 \code{results$nomogram} \tab \tab \tab \tab \tab a html \cr
 \code{results$nomogramAnalysisExplanation} \tab \tab \tab \tab \tab a html \cr
 }
+
+Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
+
+\code{results$fittedTable$asDF}
+
+\code{as.data.frame(results$fittedTable)}
 }
 \description{
 Logistic regression odds-ratio table, forest plot, prediction nomogram, and

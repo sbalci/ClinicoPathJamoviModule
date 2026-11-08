@@ -168,9 +168,10 @@ provide a calendar date (e.g., 2023-06-01) to draw a custom reference line.
 If left blank, the Custom Reference Time is used as an offset from the
 earliest start date.}
 
-\item{sortVariable}{Optional variable to sort patient timelines. When one
-is selected it overrides the Sort order setting; leave it empty to sort by
-duration, patient ID or response.}
+\item{sortVariable}{Optional variable to sort patient timelines, smallest
+value (or first level) at the top; each patient takes their first
+non-missing value. When one is selected it overrides the Sort order
+setting; leave it empty to sort by duration, patient ID or response.}
 
 \item{sortOrder}{How to order patients in the visualization, read from the
 top of the plot down. Ignored while a Sort by variable is selected.

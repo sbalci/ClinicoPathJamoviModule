@@ -2017,11 +2017,23 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
         # Image state is serialised into the .omv, so it carries only what a
         # renderer cannot rebuild -- never the cleaned dataset or the coxph fit
         # (2026-09-15 library audit). plot/plot3/plotKM declare requiresData and
-        # rebuild data and model from self$data; they keep only the competing-risk
-        # flag, which .isCompetingRisk(state) needs when jmvcore's .load() re-renders
-        # without .run(). plot_adj has no requiresData, so it stores its curve frame.
+        # rebuild data and model from self$data. They retain the competing-risk flag
+        # and aggregate caption-layout dimensions for redraws without .run().
+        # plot_adj has no requiresData, so it stores its curve frame.
         plot_flag <- list(has_competing = private$.isCompetingRisk(cleaneddata))
         if (self$options$hr) {
+          # Caption height stays fixed when the coefficient panel is resized.
+          if (length(.interactionTermNames(cox_model)) > 0) {
+            caption <- private$.interactionForestCaption(cox_model, cleaneddata)
+            fixed_height <- 90 + 14 * length(strwrap(caption, width = 95))
+            plot_flag$forest_size <- c(900, max(280, 48 * length(stats::coef(cox_model))),
+                                       0, fixed_height)
+            for (im in list(self$results$plot, self$results$plot3))
+              do.call(im$setSize2, as.list(plot_flag$forest_size))
+          } else {
+            self$results$plot$setSize2(600, 450)
+            self$results$plot3$setSize2(800, 600)
+          }
           self$results$plot$setState(plot_flag)
           self$results$plot3$setState(plot_flag)
         }
@@ -2111,6 +2123,17 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
         }
 
         private$.calculateRiskScore(cox_model, cleaneddata$cleanData)
+      },
+
+      # Image dimensions are not restored by jmvcore with the drawing state.
+      # Keep the aggregate layout metadata so redraw/export reserves the caption.
+      .postInit = function() {
+        for (im in list(self$results$plot, self$results$plot3)) {
+          size <- im$state$forest_size
+          if (is.numeric(size) && length(size) == 4L && all(is.finite(size)) &&
+              all(size >= 0) && all(size <= 20000) && all(size[1:2] > 0))
+            do.call(im$setSize2, as.list(size))
+        }
       },
 
       .run = function() {
@@ -4214,6 +4237,11 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
           return(TRUE)
         }
 
+        if (length(.interactionTermNames(cox_model)) > 0) {
+          print(private$.interactionForestPlot(cox_model, plotData, ggtheme, theme))
+          return(TRUE)
+        }
+
         # Build the descriptive column ourselves so that cont_cut = 0 applies.
         #
         # hr_plot() has no cont_cut argument and does NOT forward its `...` to
@@ -4361,6 +4389,11 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
           return(TRUE)
         }
         
+        if (length(.interactionTermNames(cox_model)) > 0) {
+          print(private$.interactionForestPlot(cox_model, plotData, ggtheme, theme))
+          return(TRUE)
+        }
+
         plot3 <- tryCatch({
           .quietly(survminer::ggforest(model = cox_model, data = mydata))
         }, error = function(e) {
@@ -5929,6 +5962,71 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
       c(names(cond$terms), cond$interaction_labels)
     }
 
+      ,
+    # R2 release repair: annotations and every design-matrix row travel inside
+    # the exported image, including conditional main effects and interaction ratios.
+    .interactionForestCaption = function(model, cleaneddata) {
+      cond <- .coefConditions(model, cleaneddata$cleanData,
+                              private$.displayNames(cleaneddata))
+      paste(private$.conditioningNote(cond),
+        .("Interaction rows show ratios of hazard ratios, not subgroup hazard ratios. Main-effect rows are conditional on the values shown."))
+    }
+      ,
+    .interactionForestPlot = function(model, cleaneddata, ggtheme, theme) {
+      sm <- summary(model)$coefficients
+      beta <- sm[, "coef"]
+      se <- sm[, if ("robust se" %in% colnames(sm)) "robust se" else "se(coef)"]
+      z <- stats::qnorm(.975)
+      display <- private$.displayNames(cleaneddata)
+      terms <- private$.coefTerms(model, display)
+      cond <- .coefConditions(model, cleaneddata$cleanData, display)
+      label <- vapply(seq_along(terms), function(i) {
+        tt <- terms[[i]]
+        text <- switch(tt$kind,
+          level = .fmt(.("{variable}: {level} (vs {reference})"),
+            variable = tt$var, level = tt$level, reference = tt$ref),
+          continuous = .fmt(.("{variable} (per 1-unit increase)"), variable = tt$var),
+          contrast = .fmt(.("{variable} ({contrast} contrast)"),
+            variable = tt$var, contrast = tt$suffix),
+          interaction = .fmt(.("{variable} (ratio of hazard ratios)"), variable = tt$var),
+          tt$var)
+        if (nzchar(cond$coef[i]))
+          text <- .fmt(.("{effect}, at {conditions}"), effect = text, conditions = cond$coef[i])
+        paste(strwrap(text, width = 60), collapse = "\n")
+      }, character(1))
+      df <- data.frame(term = rownames(sm), estimate = unname(exp(beta)),
+        lower = unname(exp(beta - z * se)), upper = unname(exp(beta + z * se)),
+        label = label, stringsAsFactors = FALSE)
+      df$estimable <- is.finite(df$estimate) & is.finite(df$lower) &
+        is.finite(df$upper) & df$lower > 0 & df$estimate > 0
+      df$row <- factor(df$term, levels = rev(df$term))
+      df$effect <- vapply(terms, function(tt) if (tt$kind == "interaction")
+        .("Ratio of hazard ratios") else .("Hazard ratio"), character(1))
+      values <- vapply(seq_len(nrow(df)), function(i) if (df$estimable[i])
+        sprintf("%.3g [%.3g, %.3g]", df$estimate[i], df$lower[i], df$upper[i])
+        else .("Not estimable"), character(1))
+      labels <- stats::setNames(paste(df$label, values, sep = "\n"), df$term)
+      p <- ggplot2::ggplot(df, ggplot2::aes(x = estimate, y = row, colour = effect)) +
+        ggplot2::geom_vline(xintercept = 1, linetype = "dashed", colour = "grey50") +
+        ggplot2::geom_segment(data = df[df$estimable, , drop = FALSE],
+          ggplot2::aes(x = lower, xend = upper, yend = row)) +
+        ggplot2::geom_point(data = df[df$estimable, , drop = FALSE], size = 2) +
+        ggplot2::geom_text(data = df[!df$estimable, , drop = FALSE],
+          ggplot2::aes(x = 1, label = .("Not estimable")), show.legend = FALSE) +
+        ggplot2::scale_x_log10() +
+        ggplot2::scale_y_discrete(labels = labels, drop = FALSE) +
+        ggtheme + ggplot2::labs(y = NULL, colour = NULL,
+          title = .("Cox model coefficients"),
+          x = .("Exponentiated coefficient (95% CI, log scale)"),
+          caption = paste(strwrap(private$.interactionForestCaption(model, cleaneddata),
+                                  width = 95), collapse = "\n")) +
+        ggplot2::theme(plot.caption = ggplot2::element_text(size = 8, hjust = 0),
+                       plot.caption.position = "plot", legend.position = "bottom")
+      if (!is.null(theme$palette))
+        p <- p + ggplot2::scale_colour_manual(values = jmvcore::colorPalette(
+          length(unique(df$effect)), theme$palette))
+      p
+    }
       ,
     # Recover variable / level / reference for each coefficient of a coxph.
     #

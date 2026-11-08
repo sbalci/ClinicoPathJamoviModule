@@ -633,7 +633,10 @@ options:
       description: >-
         Show survival curves standardized for age with the Cox model (direct
         standardization). Every patient is assigned to each group in turn, so
-        all groups share the age distribution of the whole cohort.
+        all groups share the age distribution of the model cohort. Uses the same
+        fitted model as the age-adjusted table, retaining baseline and age-group
+        stratification when requested. Stratified curves stop at the shortest
+        observed stratum follow-up; standardized confidence bands are not provided.
 
     - name: remark_checklist
       title: "REMARK reporting checklist"

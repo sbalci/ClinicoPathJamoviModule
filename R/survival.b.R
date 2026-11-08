@@ -1109,6 +1109,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
             # Main Run Function (Refactored) ----
             ,
         .prepareSurvivalRun = function() {
+                self$results$adjustedCurvesPlot$setState(NULL)
                 .populateSurvivalTable(self$results$remarkItems, data.frame())
 
                 # Reset cached data for this analysis cycle
@@ -6212,7 +6213,8 @@ survivalClass <- if (requireNamespace('jmvcore'))
                     has_competing = private$.isCompetingRisk()
                 )
                 self$results$ageStratifiedKMPlot$setState(state)
-                self$results$adjustedCurvesPlot$setState(state)
+                if (private$.isCompetingRisk())
+                    self$results$adjustedCurvesPlot$setState(list(has_competing = TRUE))
             }
             ,
             .ageAdjustedCox = function(results) {
@@ -6360,7 +6362,8 @@ survivalClass <- if (requireNamespace('jmvcore'))
                         }
                         formula_adj_str <- paste(surv_lhs, "~", rhs_adj)
                     }
-                    cox_adjusted <- survival::coxph(.asSurvivalFormula(formula_adj_str), data = mydata)
+                    cox_adjusted <- survival::coxph(.asSurvivalFormula(formula_adj_str),
+                        data = mydata, model = TRUE)
 
                     # Extract HRs for the group variable (not age)
                     unadj_summary <- summary(cox_unadj)
@@ -6460,6 +6463,12 @@ survivalClass <- if (requireNamespace('jmvcore'))
 
                     self$results$ageAdjustedInterpretation$setContent(
                         paste(interpretation_parts, collapse = "\n"))
+
+                    # R1 release repair: derive drawing coordinates from THIS fit,
+                    # including baseline/age strata, never a renderer-side refit.
+                    private$.setAdjustedCurveState(cox_adjusted, mydata,
+                        results$name3explanatory, age_col_name,
+                        existing_strata_var, use_age_strata)
 
                 }, error = function(e) {
                     msg <- .fmt(
@@ -7096,70 +7105,97 @@ survivalClass <- if (requireNamespace('jmvcore'))
             # ================================================================
             # Adjusted Survival Curves (Phase 1A)
             # ================================================================
-            # Shows curves standardized to the cohort's age distribution with
-            # the Cox model (survminer::ggadjustedcurves, method "conditional").
+            # Coordinates come from the exact model used by the age-adjusted table.
+            # Each patient's baseline stratum is retained under every group assignment.
             # ================================================================
             ,
-            .plotAdjustedCurves = function(image, ggtheme, theme, ...) {
-                if (!self$options$age_adjustment || !self$options$adjusted_curves) {
-                    return(FALSE)
-                }
-                # Belongs to an age-adjusted block that is refused under
-                # competing risks.
-                if (private$.isCompetingRisk(image$state))
-                    return(private$.competingRiskPlotRefusal(
-                        "Age-adjusted survival curves", ggtheme))
-
-                state <- image$state
-                if (is.null(state) || is.null(state$plot_data)) {
-                    return(FALSE)
-                }
-
+            .setAdjustedCurveState = function(fit, data, group_var, age_var,
+                                               strata_var, age_strata) {
+                if (!self$options$adjusted_curves) return(invisible(NULL))
                 tryCatch({
-                    # See .setAgePlotState(): shared cleaned frame, so these
-                    # curves cannot disagree with the tables beside them.
-                    plot_data <- state$plot_data
-                    myfactor <- state$group_label
-                    age_var <- state$age_label
-
-                    if (nrow(plot_data) < 10) return(FALSE)
-
-                    # Fit age-adjusted Cox model
-                    cox_fit <- survival::coxph(
-                        survival::Surv(time, event) ~ group + age,
-                        data = plot_data
-                    )
-
-                    # Direct standardization: every patient is assigned to each
-                    # group in turn and the predicted curves are averaged, so all
-                    # groups share one age distribution. method = "average" keeps
-                    # each group's own patients and therefore its own age mix: on
-                    # data with no group effect it drew 0.83 vs 0.18 where
-                    # standardized curves give 0.48 vs 0.52.
-                    p <- .quietly(survminer::ggadjustedcurves(
-                        cox_fit,
-                        data = plot_data,
-                        variable = "group",
-                        method = "conditional",
-                        ggtheme = ggtheme,
-                        legend.title = myfactor,
-                        title = .fmt(.("Survival Curves Standardized for {age}"), age = age_var)
-                    ))
-
-                    # Add subtitle with model info
-                    p <- p + ggplot2::labs(
-                        x = private$.timeAxisLabel(),
+                    if (any(!is.finite(stats::coef(fit))))
+                        stop(.('The model could not be evaluated under this adjustment method.'))
+                    groups <- levels(droplevels(as.factor(data[[group_var]])))
+                    curves <- lapply(groups, function(g) {
+                        nd <- data
+                        nd[[group_var]] <- factor(g, levels = groups)
+                        sf <- survival::survfit(fit, newdata = nd, se.fit = FALSE)
+                        grid <- sort(unique(c(0, sf$time)))
+                        if (!is.null(sf$strata)) {
+                            # Subject curves have different stratum-specific grids.
+                            # Align them before averaging; do not extrapolate a
+                            # stratum's terminal plateau past its observed follow-up.
+                            ends <- tapply(sf$time,
+                                rep(seq_along(sf$strata), sf$strata), max)
+                            grid <- grid[grid <= min(ends)]
+                        }
+                        sm <- summary(sf, times = grid, extend = TRUE)
+                        if (length(sm$surv) != length(grid) * nrow(nd))
+                            stop(.('The model could not be evaluated under this adjustment method.'))
+                        data.frame(time = grid, surv = rowMeans(matrix(sm$surv,
+                            nrow = length(grid))), group = g, stringsAsFactors = FALSE)
+                    })
+                    curves <- do.call(rbind, curves)
+                    age_label <- if (isTRUE(age_strata)) paste0("strata(", age_var,
+                        ": ", paste(levels(data$.age_band), collapse = ", "), ")") else age_var
+                    if (!is.null(strata_var))
+                        age_label <- paste0(age_label, " + strata(", strata_var, ")")
+                    caption <- .("Confidence intervals for standardized curves are not implemented here and are left blank. Appropriate uncertainty estimation, such as patient-level bootstrapping, is required.")
+                    if (isTRUE(age_strata) || !is.null(strata_var)) {
+                        caption <- paste(.fmt(
+                            .("Standardized curves end at {end} {unit}, the shortest follow-up among the strata they average over; a stratum has no estimate after its own follow-up ends."),
+                            end = round(max(curves$time), 2), unit = self$options$timetypeoutput),
+                            caption)
+                    }
+                    self$results$adjustedCurvesPlot$setState(list(
+                        curves = curves, group_label = self$options$explanatory,
+                        age_label = self$options$age_variable, has_competing = FALSE,
                         subtitle = .fmt(
                             .("Direct standardization: all {n} patients assigned to each group; Cox model {group} + {age}"),
-                            n = nrow(plot_data), group = myfactor, age = age_var)
-                    )
-
-                    .quietly(print(p))
-                    return(TRUE)
-
+                            n = nrow(data), group = self$options$explanatory, age = age_label),
+                        caption = caption, time_label = private$.timeAxisLabel()))
                 }, error = function(e) {
-                    return(FALSE)
+                    msg <- conditionMessage(e)
+                    self$results$adjustedCurvesPlot$setState(list(error = msg))
+                    private$.addHtmlMessage("warning", .("Adjusted curves unavailable"), msg)
                 })
+                invisible(NULL)
+            }
+            ,
+            .plotAdjustedCurves = function(image, ggtheme, theme, ...) {
+                if (!self$options$age_adjustment || !self$options$adjusted_curves)
+                    return(FALSE)
+                state <- image$state
+                if (private$.isCompetingRisk(state))
+                    return(private$.competingRiskPlotRefusal(
+                        "Age-adjusted survival curves", ggtheme))
+                if (is.null(state)) return(FALSE)
+                # Older saved states have patient rows but no baseline stratum.
+                # They cannot reconstruct a stratified model faithfully on redraw.
+                if (!is.null(state$plot_data)) {
+                    state <- list(error = .("Saved adjusted curves need recalculation. Re-run the analysis to use the current model."))
+                    image$setState(state)
+                }
+                if (!is.null(state$error)) {
+                    grid::grid.newpage()
+                    grid::grid.text(paste(strwrap(paste(
+                        .("Adjusted curves unavailable"), state$error), width = 85),
+                        collapse = "\n"), gp = grid::gpar(fontsize = 11))
+                    return(TRUE)
+                }
+                if (is.null(state$curves) || !nrow(state$curves)) return(FALSE)
+                p <- ggplot2::ggplot(state$curves,
+                    ggplot2::aes(x = time, y = surv, colour = group)) +
+                    ggplot2::geom_step() + ggtheme +
+                    ggplot2::scale_y_continuous(limits = c(0, 1)) +
+                    ggplot2::labs(x = state$time_label, y = .("Survival Probability"),
+                        colour = state$group_label,
+                        title = .fmt(.("Survival Curves Standardized for {age}"),
+                            age = state$age_label),
+                        subtitle = paste(strwrap(state$subtitle, width = 95), collapse = "\n"),
+                        caption = paste(strwrap(state$caption, width = 95), collapse = "\n"))
+                .quietly(print(p))
+                TRUE
             }
 
             # ================================================================

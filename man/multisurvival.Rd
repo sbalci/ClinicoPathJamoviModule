@@ -146,8 +146,10 @@ first variable is the focal effect and the second is the moderator.}
 \item{multievent}{If true, multiple event levels will be considered for
 competing risks analysis. Requires specifying \code{dod}, \code{dooc}, etc.}
 
-\item{hr}{If true, generates a plot of hazard ratios for each explanatory
-variable in the Cox model.}
+\item{hr}{If true, generates a plot of fitted Cox coefficients. Interaction
+models use a coefficient forest in both styles: main effects include their
+conditioning values, and interaction coefficients are labelled as ratios of
+hazard ratios.}
 
 \item{sty}{The style of the hazard ratio (forest) plot. "finalfit" or
 "survminer forestplot".}
@@ -292,24 +294,20 @@ A results object containing:
 \code{results$strongWarnings} \tab \tab \tab \tab \tab a html \cr
 \code{results$warnings} \tab \tab \tab \tab \tab a html \cr
 \code{results$infoMessages} \tab \tab \tab \tab \tab a html \cr
-\code{results$multivariableCoxHeading} \tab \tab \tab \tab \tab a preformatted \cr
+\code{results$fittedTable} \tab \tab \tab \tab \tab a table \cr
 \code{results$text} \tab \tab \tab \tab \tab a html \cr
 \code{results$text2} \tab \tab \tab \tab \tab a html \cr
 \code{results$interactionExplanation} \tab \tab \tab \tab \tab a html \cr
 \code{results$interactionTest} \tab \tab \tab \tab \tab a table \cr
 \code{results$subgroupHR} \tab \tab \tab \tab \tab a table \cr
-\code{results$multivariableCoxSummaryHeading} \tab \tab \tab \tab \tab a preformatted \cr
 \code{results$multivariableCoxSummary} \tab \tab \tab \tab \tab a html \cr
 \code{results$glossaryPanel} \tab \tab \tab \tab \tab a html \cr
 \code{results$assumptionsPanel} \tab \tab \tab \tab \tab a html \cr
 \code{results$survMetricsTable} \tab \tab \tab \tab \tab a table \cr
 \code{results$survMetricsSummary} \tab \tab \tab \tab \tab a html \cr
 \code{results$survMetricsPlot} \tab \tab \tab \tab \tab an image \cr
-\code{results$personTimeHeading} \tab \tab \tab \tab \tab a preformatted \cr
 \code{results$personTimeTable} \tab \tab \tab \tab \tab a table \cr
-\code{results$personTimeSummaryHeading} \tab \tab \tab \tab \tab a preformatted \cr
 \code{results$personTimeSummary} \tab \tab \tab \tab \tab a html \cr
-\code{results$survivalPlotsHeading} \tab \tab \tab \tab \tab a preformatted \cr
 \code{results$plot} \tab \tab \tab \tab \tab an image \cr
 \code{results$plot3} \tab \tab \tab \tab \tab an image \cr
 \code{results$cox_phTable} \tab \tab \tab \tab \tab a table \cr
@@ -317,8 +315,6 @@ A results object containing:
 \code{results$plot8} \tab \tab \tab \tab \tab an image \cr
 \code{results$plotKM} \tab \tab \tab \tab \tab an image \cr
 \code{results$risk_score_analysis2} \tab \tab \tab \tab \tab a html \cr
-\code{results$riskScoreHeading} \tab \tab \tab \tab \tab a preformatted \cr
-\code{results$riskScoreSummaryHeading} \tab \tab \tab \tab \tab a preformatted \cr
 \code{results$riskScoreTable} \tab \tab \tab \tab \tab a table \cr
 \code{results$riskScoreSummary} \tab \tab \tab \tab \tab a html \cr
 \code{results$riskScoreMetrics} \tab \tab \tab \tab \tab a html \cr
@@ -329,13 +325,10 @@ A results object containing:
 \code{results$outcomeredefined} \tab \tab \tab \tab \tab an output \cr
 \code{results$addRiskScore} \tab \tab \tab \tab \tab an output \cr
 \code{results$addRiskGroup} \tab \tab \tab \tab \tab an output \cr
-\code{results$adjustedSurvivalHeading} \tab \tab \tab \tab \tab a preformatted \cr
 \code{results$adjustedEstimandPanel} \tab \tab \tab \tab \tab a html \cr
 \code{results$plot_adj} \tab \tab \tab \tab \tab an image \cr
-\code{results$nomogramHeading} \tab \tab \tab \tab \tab a preformatted \cr
 \code{results$plot_nomogram} \tab \tab \tab \tab \tab an image \cr
 \code{results$nomogram_display} \tab \tab \tab \tab \tab a html \cr
-\code{results$nomogramSummaryHeading} \tab \tab \tab \tab \tab a preformatted \cr
 \code{results$nomogramSummary} \tab \tab \tab \tab \tab a html \cr
 \code{results$adjustedSurvTable} \tab \tab \tab \tab \tab a table \cr
 \code{results$adjustedSurvTableSummary} \tab \tab \tab \tab \tab a html \cr
@@ -348,21 +341,19 @@ A results object containing:
 \code{results$modelContributionTable} \tab \tab \tab \tab \tab a table \cr
 \code{results$modelContributionSummary} \tab \tab \tab \tab \tab a html \cr
 \code{results$multivariableCoxExplanation} \tab \tab \tab \tab \tab a html \cr
-\code{results$multivariableCoxHeading3} \tab \tab \tab \tab \tab a preformatted \cr
 \code{results$adjustedSurvivalExplanation} \tab \tab \tab \tab \tab a html \cr
 \code{results$riskScoreExplanation} \tab \tab \tab \tab \tab a html \cr
 \code{results$nomogramExplanation} \tab \tab \tab \tab \tab a html \cr
 \code{results$personTimeExplanation} \tab \tab \tab \tab \tab a html \cr
 \code{results$stratifiedAnalysisExplanation} \tab \tab \tab \tab \tab a html \cr
-\code{results$survivalPlotsHeading3} \tab \tab \tab \tab \tab a preformatted \cr
 \code{results$survivalPlotsExplanation} \tab \tab \tab \tab \tab a html \cr
 }
 
 Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
 
-\code{results$interactionTest$asDF}
+\code{results$fittedTable$asDF}
 
-\code{as.data.frame(results$interactionTest)}
+\code{as.data.frame(results$fittedTable)}
 }
 \description{
 Performs multivariable survival analysis using Cox proportional hazards

@@ -112,8 +112,11 @@ A results object containing:
 \code{results$notices} \tab \tab \tab \tab \tab a html \cr
 \code{results$welcome} \tab \tab \tab \tab \tab a html \cr
 \code{results$formatInfo} \tab \tab \tab \tab \tab a html \cr
+\code{results$qualityCounts} \tab \tab \tab \tab \tab a table \cr
 \code{results$qualityMetrics} \tab \tab \tab \tab \tab a html \cr
+\code{results$conversionRows} \tab \tab \tab \tab \tab a table \cr
 \code{results$previewTable} \tab \tab \tab \tab \tab a html \cr
+\code{results$componentRows} \tab \tab \tab \tab \tab a table \cr
 \code{results$componentPreview} \tab \tab \tab \tab \tab a html \cr
 \code{results$qualityAssessment} \tab \tab \tab \tab \tab a html \cr
 \code{results$nlSummary} \tab \tab \tab \tab \tab a html \cr
@@ -134,6 +137,12 @@ A results object containing:
 \code{results$quarter_out} \tab \tab \tab \tab \tab an output \cr
 \code{results$dayofyear_out} \tab \tab \tab \tab \tab an output \cr
 }
+
+Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
+
+\code{results$qualityCounts$asDF}
+
+\code{as.data.frame(results$qualityCounts)}
 }
 \description{
 Convert datetime variables to standardized format and extract datetime

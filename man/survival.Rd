@@ -272,7 +272,11 @@ explanatory variable.}
 
 \item{adjusted_curves}{Show survival curves standardized for age with the
 Cox model (direct standardization). Every patient is assigned to each group
-in turn, so all groups share the age distribution of the whole cohort.}
+in turn, so all groups share the age distribution of the model cohort. Uses
+the same fitted model as the age-adjusted table, retaining baseline and
+age-group stratification when requested. Stratified curves stop at the
+shortest observed stratum follow-up; standardized confidence bands are not
+provided.}
 
 \item{remark_checklist}{Display the 20-item REMARK (REporting
 recommendations for tumor MARKer prognostic studies) checklist, marking the
@@ -377,16 +381,12 @@ A results object containing:
 \code{results$strongWarnings} \tab \tab \tab \tab \tab a html \cr
 \code{results$warnings} \tab \tab \tab \tab \tab a html \cr
 \code{results$infoMessages} \tab \tab \tab \tab \tab a html \cr
-\code{results$medianSurvivalHeading} \tab \tab \tab \tab \tab a preformatted \cr
 \code{results$medianSummary} \tab \tab \tab \tab \tab a preformatted \cr
 \code{results$medianTable} \tab \tab \tab \tab \tab a table \cr
-\code{results$medianSurvivalHeading3} \tab \tab \tab \tab \tab a preformatted \cr
 \code{results$medianSurvivalExplanation} \tab \tab \tab \tab \tab a html \cr
-\code{results$coxRegressionHeading} \tab \tab \tab \tab \tab a preformatted \cr
 \code{results$coxSummary} \tab \tab \tab \tab \tab a preformatted \cr
 \code{results$coxTable} \tab \tab \tab \tab \tab a table \cr
 \code{results$tCoxtext2} \tab \tab \tab \tab \tab a html \cr
-\code{results$coxRegressionHeading3} \tab \tab \tab \tab \tab a preformatted \cr
 \code{results$coxRegressionExplanation} \tab \tab \tab \tab \tab a html \cr
 \code{results$ageAdjustedCoxHeading} \tab \tab \tab \tab \tab a preformatted \cr
 \code{results$ageAdjustedCoxTable} \tab \tab \tab \tab \tab a table \cr
@@ -399,20 +399,17 @@ A results object containing:
 \code{results$ageStandardizationInterpretation} \tab \tab \tab \tab \tab a html \cr
 \code{results$ageStratifiedKMPlot} \tab \tab \tab \tab \tab an image \cr
 \code{results$adjustedCurvesPlot} \tab \tab \tab \tab \tab an image \cr
+\code{results$remarkItems} \tab \tab \tab \tab \tab a table \cr
 \code{results$remarkChecklist} \tab \tab \tab \tab \tab a html \cr
 \code{results$cox_ph} \tab \tab \tab \tab \tab a preformatted \cr
 \code{results$phInterpretation} \tab \tab \tab \tab \tab a html \cr
 \code{results$plot8} \tab \tab \tab \tab \tab an image \cr
-\code{results$survivalTablesHeading} \tab \tab \tab \tab \tab a preformatted \cr
 \code{results$survTableSummary} \tab \tab \tab \tab \tab a preformatted \cr
 \code{results$survTable} \tab \tab \tab \tab \tab a table \cr
-\code{results$survivalTablesHeading3} \tab \tab \tab \tab \tab a preformatted \cr
 \code{results$survivalTablesExplanation} \tab \tab \tab \tab \tab a html \cr
-\code{results$personTimeHeading} \tab \tab \tab \tab \tab a preformatted \cr
 \code{results$personTimeTable} \tab \tab \tab \tab \tab a table \cr
 \code{results$personTimeSummary} \tab \tab \tab \tab \tab a html \cr
 \code{results$personTimeExplanation} \tab \tab \tab \tab \tab a html \cr
-\code{results$rmstHeading} \tab \tab \tab \tab \tab a preformatted \cr
 \code{results$rmstTable} \tab \tab \tab \tab \tab a table \cr
 \code{results$rmstSummary} \tab \tab \tab \tab \tab a preformatted \cr
 \code{results$rmstExplanation} \tab \tab \tab \tab \tab a html \cr
@@ -420,7 +417,6 @@ A results object containing:
 \code{results$residualsTable} \tab \tab \tab \tab \tab a table \cr
 \code{results$export_survival_data} \tab \tab \tab \tab \tab an output \cr
 \code{results$survivalExportSummary} \tab \tab \tab \tab \tab a html \cr
-\code{results$pairwiseComparisonHeading} \tab \tab \tab \tab \tab a preformatted \cr
 \code{results$pairwiseTable} \tab \tab \tab \tab \tab a table \cr
 \code{results$pairwiseSummary} \tab \tab \tab \tab \tab a preformatted \cr
 \code{results$weightedLogRankTable} \tab \tab \tab \tab \tab a table \cr
@@ -429,7 +425,6 @@ A results object containing:
 \code{results$plot2} \tab \tab \tab \tab \tab an image \cr
 \code{results$plot3} \tab \tab \tab \tab \tab an image \cr
 \code{results$plot6} \tab \tab \tab \tab \tab an image \cr
-\code{results$survivalPlotsHeading3} \tab \tab \tab \tab \tab a preformatted \cr
 \code{results$survivalPlotsExplanation} \tab \tab \tab \tab \tab a html \cr
 \code{results$plot7} \tab \tab \tab \tab \tab an image \cr
 \code{results$residualsPlot} \tab \tab \tab \tab \tab an image \cr

@@ -407,6 +407,10 @@ items:
       clearWith:
           - age_adjustment
           - age_variable
+          - age_stratified_cox
+          - age_group_cutpoints
+          - stratified_cox
+          - strata_variable
           - explanatory
           - outcome
           - uselandmark
@@ -765,6 +769,10 @@ items:
           - adjusted_curves
           - age_adjustment
           - age_variable
+          - age_stratified_cox
+          - age_group_cutpoints
+          - stratified_cox
+          - strata_variable
           - explanatory
           - outcome
           - elapsedtime

@@ -265,8 +265,9 @@ nominal categories with no inherent order.}
 
 \item{exct}{Report Conger's (1980) exact kappa instead of Fleiss' kappa for
 3 or more raters. Its chance-agreement term uses each rater's own category
-proportions, so the coefficient differs from Fleiss' kappa, and no z
-statistic or p-value is available for it. Not applicable with 2 raters.}
+proportions, so the coefficient differs from Fleiss' kappa. Inference uses
+Gwet's (2014) linearized variance across all observed ratings. Not
+applicable with 2 raters.}
 
 \item{showLevelInfo}{Display information about how categorical levels are
 currently ordered in your variables. Essential for weighted kappa analysis

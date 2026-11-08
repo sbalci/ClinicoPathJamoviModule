@@ -2441,8 +2441,11 @@ datetimeconverterClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 .("Successfully Parsed:"), .("Failed Parsing:")),
                 count = c(quality$total_observations, quality$original_missing,
                     quality$successfully_parsed, quality$failed_parsing),
-                percentage = c(NA_real_, NA_real_, quality$success_rate, NA_real_))
-            names(values) <- c(.("Metric"), .("Count"), .("Percentage"))
+                percentage = if (quality$total_observations > 0)
+                    100 * c(quality$total_observations, quality$original_missing,
+                        quality$successfully_parsed, quality$failed_parsing) /
+                        quality$total_observations else rep(NA_real_, 4L))
+            names(values) <- c(.("Metric"), .("Count"), .("Percentage of all observations"))
             .populateSurvivalTable(self$results$qualityCounts, values, c("", "dp:0", "dp:1"))
             quality_html <- "<div>"
             if (!is.na(quality$min_datetime)) {
