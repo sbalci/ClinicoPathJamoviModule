@@ -4,7 +4,7 @@
 
 - **Function**: `multisurvival`
 - **Title**: Multivariable Survival Analysis
-- **Module**: `SurvivalT`
+- **Module**: `Survival`
 - **Files**:
   - `jamovi/multisurvival.u.yaml` - User Interface Definition
   - `jamovi/multisurvival.a.yaml` - Options & Schema Definition
@@ -79,6 +79,7 @@
 | `survmetrics_show_plots` | `Bool` | `FALSE` | Brier score over time plot |
 | `showExplanations` | `Bool` | `FALSE` | Analysis explanations |
 | `showSummaries` | `Bool` | `TRUE` | Natural language summaries |
+| `cif_all_causes` | `Bool` | `FALSE` | Overlay competing event CIF |
 
 ## 3. Results Definition (`.r.yaml`)
 

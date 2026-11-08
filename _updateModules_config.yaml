@@ -76,6 +76,9 @@ modes:
   # The small verified tests below are selected by analysis and namespace-translated.
   copy_test_files: false
   verified_test_files:
+    datetimeconverter: ["test-jsurvival-audit-fixes-20261108.R"]
+    singlearm: ["helper-jsurvival-audit-failures.R", "test-singlearm-domain-validation.R", "test-singlearm-time-landmark-fixes.R", "test-competing-risk-handoff.R"]
+    multisurvival: ["test-multisurvival-stratify.R", "test-multisurvival-adjusted-cox-consistency.R"]
     decision: ["test-decision-release-inputs.R", "test-decision-release-metrics.R", "test-decision-audit-fixes.R", "test-decision-reference-pages.R", "test-decision-release-fixes.R", "test-meddecide-release-review-2026-11-07.R"]
     decisioncalculator: ["test-decisioncalculator-release-inputs.R", "test-decisioncalculator-correction-explanation.R", "test-decisioncalculator-release-fixes.R"]
     decisioncombine: ["test-decisioncombine-release-inputs.R", "test-decisioncombine-correction-explanation.R", "test-decisioncombine-release-fixes.R"]
@@ -182,13 +185,9 @@ modules:
       - "comprehensive_dca_data.rda"
       - "dca_test.rda"
       - "dca_test_data.rda"
-      # agreement is parked (menuGroup: meddecideT), so its example data do not ship yet. When it
-      # is promoted, uncomment: the Pathologist Grading Analysis example (6 pathologists x 150
-      # biopsies, ISUP grade groups, incomplete design, known truth; data-raw/generate_agreement_grading_data.R).
+      # Optional extra example datasets for agreement and lassologistic (currently kept in the
+      # umbrella package to minimize the meddecide data footprint):
       # - "agreement_grading.rda"
-      # lassologistic is parked (menuGroup: meddecideT), so its example data do not ship yet. When
-      # it is promoted, uncomment: PanNET G3 vs PanNEC (n = 120, IHC + morphology + clinical) and a
-      # small 40-row fixture; data-raw/create_lassologistic_test_data.R.
       # - "lassologistic_pannen.rda"
       # - "lassologistic_small.rda"
   jsurvival:
@@ -198,6 +197,8 @@ modules:
     # /check-module audit). maxstat is survminer's own Import, so surv_cutpoint()
     # still gets it transitively. Also dropped from R/zzz_imports.R + NAMESPACE.
     prune_imports:
+      # Computed grids now use native tables; knitr remains a documentation Suggests.
+      - "knitr"
       - "MASS"
       - "maxstat"
       - "pec"

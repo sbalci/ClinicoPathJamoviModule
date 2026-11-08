@@ -159,4 +159,39 @@ test_that("IHC-6: a margin finer than the recorded values is pointed out", {
     d2 <- data.frame(ws = t + rnorm(n, 0, 3), b1 = t + rnorm(n, 0, 8))
     r2 <- ihc(d2, wholesection = "ws", biopsy1 = "b1")
     expect_false(grepl("Margin finer", txt(r2$notices$content)))
+    # Material systematic bias on a coarse step must NOT be called "Margin finer than the recorded values"
+    d_mat <- data.frame(ws = seq(10, 80, length.out = 20),
+                        b1 = seq(10, 80, length.out = 20) + rep(c(10, 20), 10))
+    r_mat <- ihc(d_mat, wholesection = "ws", biopsy1 = "b1", bias_margin = 5)
+    expect_false(grepl("Margin finer than the recorded values", txt(r_mat$notices$content)))
+})
+
+test_that("IHC-2b: Allred scores leave proportional slopes blank and skip equivalence/CV grading across tables", {
+    d <- allred_data()
+    d$comp <- rep(c("CoreA", "CoreB"), length.out = nrow(d))
+    r <- ihc(d, wholesection = "ws", biopsy1 = "c1", biopsy2 = "c2", biopsy3 = "c3",
+             spatial_id = "comp", compareCompartments = TRUE, compartmentTests = TRUE)
+    sb <- r$samplingbiastable$asDF
+    expect_true(all(is.na(sb$slope)))
+    expect_false(any(grepl("ruled out|shown to exceed|inconclusive", sb$clinical_impact)))
+    sp <- r$spatialanalysistable$asDF
+    expect_true(all(sp$heterogeneity_level == "Not graded: ordinal or binned values"))
+    cc <- r$compartmentComparison$asDF
+    expect_true(all(cc$consensus_grading == "Not graded: ordinal or binned values"))
+})
+
+test_that("IHC-3b: inter-regional sparse pair (3 <= n < 5) downgrades verdict to uncertain and cites Bonett-Wright", {
+    set.seed(42); n <- 25; t <- runif(n, 15, 75)
+    d <- data.frame(
+        R1 = t + rnorm(n, 0, 1),
+        R2 = t + rnorm(n, 0, 1),
+        R3 = c(t[1:3] + rnorm(3, 0, 1), rep(NA_real_, n - 3))
+    )
+    r <- ihc(d, biopsy1 = "R1", biopsy2 = "R2", biopsy3 = "R3",
+             showInterpretation = TRUE, showReportSentences = TRUE, showAssumptions = TRUE)
+    interp <- txt(r$interpretation$content)
+    expect_match(interp, "Agreement thresholds met, not confirmed", fixed = TRUE)
+    expect_match(interp, "'R1 / R3'", fixed = TRUE)
+    expect_match(txt(r$report_sentences$content), "Bonett and Wright (2000)", fixed = TRUE)
+    expect_match(txt(r$assumptions$content), "Bonett DG, Wright TA. Psychometrika 2000", fixed = TRUE)
 })

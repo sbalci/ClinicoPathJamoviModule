@@ -28,6 +28,17 @@ items:
          - timezone
          - two_digit_year
 
+    - name: qualityCounts
+      title: Parsing Counts
+      type: Table
+      rows: 0
+      columns: []
+      clearWith:
+         - datetime_var
+         - datetime_format
+         - timezone
+         - two_digit_year
+
     - name: qualityMetrics
       title: 'Quality Assessment'
       type: Html
@@ -36,6 +47,18 @@ items:
          - datetime_format
          - timezone
          - two_digit_year
+
+    - name: conversionRows
+      title: Conversion Values
+      type: Table
+      rows: 0
+      columns: []
+      clearWith:
+         - datetime_var
+         - datetime_format
+         - timezone
+         - two_digit_year
+         - preview_rows
 
     - name: previewTable
       title: 'Conversion Preview'
@@ -51,6 +74,17 @@ items:
     # This panel's real dependency set is datetime_var, datetime_format, timezone,
     # preview_rows and all 22 extract_*/*_out toggles -- 26 of the 30 options -- so an
     # explicit list would be longer than the default and easy to leave incomplete again.
+    - name: componentRows
+      title: Extracted Component Values
+      type: Table
+      rows: 0
+      columns: []
+
+    # qualityAssessment and nlSummary carry no clearWith on purpose: jmvcore defaults to
+    # "*", which is already the widest (and therefore safest) setting. Both are derived
+    # from the parse plus most of the option set, so narrowing them would only risk
+    # reintroducing the staleness the lists above had.
+
     - name: componentPreview
       title: 'Extracted Components Preview'
       type: Html

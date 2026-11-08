@@ -127,3 +127,54 @@ test_that("predictive values carry a heterogeneity note only when heterogeneity 
   # a fit of exactly 90% is "90.0", not "90.0000"
   expect_match(b_notes, "specificity (90.0%)", fixed = TRUE)
 })
+
+test_that("IEEE-754 90.0% boundary is classified as excellent and LR note is not duplicated", {
+  # (1 - plogis(qlogis(0.10))) * 100 evaluates to 89.999999999999986 in IEEE-754
+  d <- data.frame(study = paste0("H", 1:8), tp = rep(c(80, 160), 4), fn = rep(c(20, 40), 4),
+                  fp = rep(c(10, 20), 4), tn = rep(c(90, 180), 4))
+  b <- ps_run(d, show_analysis_summary = TRUE)
+  interp <- ps_text(b$results$summary$content)
+  expect_match(interp, "Your pooled specificity of 90.0% (88.2%-91.6%) falls in the excellent band", fixed = TRUE)
+  expect_no_match(interp, "Your pooled specificity of 90.0% (88.2%-91.6%) falls in the good band", fixed = TRUE)
+  # When sens >= 90 or spec >= 90 already emits the LR note, the LR paragraph does not repeat it
+  d_high <- data.frame(study = paste0("K", 1:8), tp = rep(92, 8), fn = rep(8, 8),
+                       fp = rep(5, 8), tn = rep(95, 8))
+  b_high <- ps_run(d_high, show_analysis_summary = TRUE)
+  raw_html <- b_high$results$summary$content
+  n_occ <- length(gregexpr("even if sensitivity or specificity is high", raw_html, fixed = TRUE)[[1]])
+  expect_equal(n_occ, 1L)
+})
+
+test_that("fmtRatio preserves digits when 2-decimal rounding crosses an LR threshold", {
+  a <- ps_run(ps_twenty())
+  priv <- a$.__enclos_env__$private
+  expect_identical(priv$.fmtRatio(0.1973), "0.197")
+  expect_identical(priv$.fmtRatio(9.996), "9.996")
+  expect_identical(priv$.fmtRatio(1.996), "1.996")
+  expect_identical(priv$.fmtRatio(0.214), "0.21")
+})
+
+test_that("SROC curve is withheld when between-study variance collapses or FPR has zero range", {
+  # Identical proportions across studies -> zero heterogeneity -> degenerate vertical SROC
+  d_hom <- data.frame(study = paste0("H", 1:8), tp = rep(80, 8), fn = rep(20, 8),
+                      fp = rep(10, 8), tn = rep(90, 8))
+  a_hom <- ps_run(d_hom, sroc_plot = TRUE)
+  expect_null(a_hom$results$srocplot$state$sroc_curve)
+})
+
+test_that("meta-regression treats Inf covariate values as missing and matches factor contrast spacing", {
+  d <- ps_twenty()
+  d$cov_inf <- seq_len(nrow(d))
+  d$cov_inf[1] <- Inf
+  a_inf <- ps_run(d, meta_regression = TRUE, covariate = "cov_inf")
+  expect_false(a_inf$errored)
+  expect_gt(a_inf$results$metaregression$rowCount, 0)
+
+  d$grp <- factor(rep(c("Reference", "Assay B"), 10), levels = c("Reference", "Assay B"))
+  stats::contrasts(d$grp) <- stats::contr.sum(2)
+  a_fac <- ps_run(d, meta_regression = TRUE, covariate = "grp")
+  params <- a_fac$results$metaregression$asDF$parameter
+  scale_note <- paste(ps_notes(a_fac$results$metaregression), collapse = " ")
+  expect_true("grp 1" %in% params)
+  expect_match(scale_note, "grp 1: Reference=1, Assay B=-1", fixed = TRUE)
+})

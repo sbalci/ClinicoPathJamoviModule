@@ -18,6 +18,24 @@ items:
           - standardize
           - random_seed
 
+    - name: suitabilityChecks
+      title: Suitability Checks
+      type: Table
+      rows: 0
+      columns: []
+      visible: (suitabilityCheck)
+      clearWith:
+          - outcome
+          - outcomeLevel
+          - censorLevel
+          - elapsedtime
+          - explanatory
+          - suitabilityCheck
+          - lambda
+          - nfolds
+          - standardize
+          - random_seed
+
     - name: suitabilityReport
       title: Data Suitability Assessment
       type: Html

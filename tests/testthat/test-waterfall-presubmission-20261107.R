@@ -111,3 +111,76 @@ test_that("Docs: a.yaml descriptions match the behavior", {
     expect_false(grepl("misuse detection", opt("enableGuidedMode")$description$jamovi, fixed = TRUE))
     expect_match(opt("seed")$description$R, "Bootstrap CI of the median", fixed = TRUE)
 })
+
+test_that("W9: responseCategoryVar or groupVar named 'response' is not overwritten by calculated response", {
+    # Raw measurements where the category column is literally named 'response'
+    d <- data.frame(
+        id = c("P1", "P1", "P2", "P2", "P3", "P3", "P4"),
+        t  = c(0, 6, 0, 6, 0, 6, 0),
+        sz = c(100, 60, 100, 95, 100, 130, NA),
+        response = c(NA, NA, NA, NA, NA, NA, "PD")
+    )
+    r <- wp(d, patientID = "id", responseVar = "sz", timeVar = "t",
+            inputType = "raw", responseCategoryVar = "response")
+    expect_equal(unname(wp_cats(r, "id")[c("P1", "P2", "P3", "P4")]), c("PR", "SD", "PD", "PD"))
+
+    # Group column literally named 'response'
+    d_grp <- data.frame(
+        id = c("P1", "P1", "P2", "P2", "P3", "P3", "P4", "P4"),
+        t  = rep(c(0, 6), 4),
+        sz = c(100, 50, 100, 60, 100, 110, 100, 130),
+        response = rep(c("Arm A", "Arm A", "Arm B", "Arm B"), each = 2)
+    )
+    r_grp <- wp(d_grp, patientID = "id", responseVar = "sz", timeVar = "t",
+                inputType = "raw", groupVar = "response")
+    gc <- r_grp$groupComparisonTable$asDF
+    expect_equal(sort(as.character(gc$group)), c("Arm A", "Arm B"))
+})
+
+test_that("W10: per-visit responseCategoryVar is honored in first_pd bar selection and TTR/DoR", {
+    # P1 has per-visit PD at t=6 (e.g. new lesion while target is -5%) followed by -50% at t=12:
+    # post-PD shrinkage at t=12 must not become P1's waterfall bar height.
+    # P2 & P3 achieve PR at t=6 and progress via per-visit PD (new lesion) at t=12 while target is still -35%.
+    d <- data.frame(
+        id  = c(rep("P1", 3), rep("P2", 3), rep("P3", 3)),
+        t   = rep(c(0, 6, 12), 3),
+        sz  = c(100, 95, 50, 100, 60, 65, 100, 55, 60),
+        cat = c(NA, "PD", "PR", NA, "PR", "PD", NA, "PR", "PD")
+    )
+    r <- wp(d, patientID = "id", responseVar = "sz", timeVar = "t",
+            inputType = "raw", responseCategoryVar = "cat", showResponseDuration = TRUE)
+    wf <- r$waterfallplot$state$data$waterfall
+    expect_equal(wf$response[wf$id == "P1"], -5)
+    expect_equal(as.character(wf$recist_category[wf$id == "P1"]), "PD")
+    rdt <- r$responseDurationTable$asDF
+    expect_equal(rdt$value[rdt$metric == "Median time to first response (TTR)"], 6)
+    expect_equal(rdt$value[rdt$metric == "Median duration of response (Kaplan-Meier)"], 6)
+    expect_match(rdt$detail[rdt$metric == "Median duration of response (Kaplan-Meier)"],
+                 "2 progression events", fixed = TRUE)
+})
+
+test_that("W11: unrecognized labels mixed with valid per-visit categories warn and keep valid override", {
+    d <- data.frame(
+        id  = c("P1", "P1", "P1", "P2", "P2", "P3", "P3"),
+        t   = c(0, 6, 12, 0, 6, 0, 6),
+        pct = c(0, -10, -15, 0, -40, 0, 25),
+        cat = c("Baseline", "PR", "PR", NA, "PR", NA, "PD")
+    )
+    r <- wp(d, patientID = "id", responseVar = "pct", timeVar = "t", responseCategoryVar = "cat")
+    expect_equal(unname(wp_cats(r, "id")["P1"]), "PR")
+    expect_match(wp_notices(r), "unrecognized label(s): BASELINE", fixed = TRUE)
+})
+
+test_that("W12: pct = NA with cat = 'NE' is kept as Unknown without duplicate notices", {
+    d <- data.frame(
+        id  = paste0("P", 1:4),
+        pct = c(-50, -40, 10, NA),
+        cat = c(NA, NA, NA, "NE")
+    )
+    r <- wp(d, patientID = "id", responseVar = "pct", responseCategoryVar = "cat")
+    st <- r$summaryTable$asDF
+    expect_equal(st$n[grepl("Unknown", st$category)], 1)
+    n <- wp_notices(r)
+    expect_match(n, "reported as not evaluable: P4", fixed = TRUE)
+    expect_false(grepl("patients were excluded", n, fixed = TRUE))
+})

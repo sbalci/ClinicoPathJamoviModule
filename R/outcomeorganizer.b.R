@@ -179,6 +179,9 @@ outcomeorganizerClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             recurrence_var <- get_cleaned_var(self$options$recurrence)
             id_var <- get_cleaned_var(self$options$patientID)
             followup_var <- get_cleaned_var(self$options$followupTime)
+            interval_start_var <- get_cleaned_var(self$options$intervalStart)
+            interval_end_var <- get_cleaned_var(self$options$intervalEnd)
+            admin_date_var <- get_cleaned_var(self$options$adminDate)
 
             # Apply labels using correct mapping
             # We use the original names as labels for the cleaned variables
@@ -204,6 +207,10 @@ outcomeorganizerClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 "recurrence_var" = recurrence_var,
                 "id_var" = id_var,
                 "followup_var" = followup_var,
+                "interval_start_var" = interval_start_var,
+                "interval_end_var" = interval_end_var,
+                "admin_date_var" = admin_date_var,
+                "get_cleaned_var" = get_cleaned_var,
                 "original_outcome" = self$options$outcome
             ))
         },
@@ -669,7 +676,7 @@ outcomeorganizerClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 # say which of the other levels are deaths, so name them with counts.
                 if (!multievent && analysistype %in% c('os', 'rfs', 'pfs', 'dfs') &&
                     length(private$.eventRecode$censored_labels) >= 2L) {
-                    .coded0 <- which(mydata[["myoutcome"]] == 0)
+                    .coded0 <- which(res$status == 0)
                     private$.addHtmlMessage(
                         "strong_warning",
                         .("Only one outcome level counts as death"),
@@ -863,7 +870,8 @@ outcomeorganizerClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                             # The option is a free integer, so this is easy to hit:
                             # overall survival codes only 0/1, and a user who typed 2
                             # thinking of competing risks gets silence.
-                            present_codes <- sort(unique(stats::na.omit(mydata[["myoutcome"]])))
+                            .mo_vals <- mydata[["myoutcome"]]
+                            present_codes <- sort(unique(.mo_vals[!is.na(.mo_vals)]))
 
                             # THE SAME REFUSAL THE ADMIN-CENSORING PATH MAKES.
                             # The recode below writes literal 0 to every non-priority
@@ -912,6 +920,7 @@ outcomeorganizerClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                                         myoutcome = dplyr::case_when(
                                             !is.finite(.first_pri)                  ~ myoutcome,
                                             dplyr::row_number() == .pri_idx         ~ highest_priority,
+                                            is.na(myoutcome)                        ~ myoutcome,
                                             # `TRUE ~ 0` here overwrote EVERY other row,
                                             # earlier ones included -- so a competing
                                             # event (code 2) recorded BEFORE the priority
@@ -920,9 +929,11 @@ outcomeorganizerClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                                             # substantive statistical error, not a
                                             # bookkeeping one. It also made the notice
                                             # below ("their later rows were censored")
-                                            # false. Censor only tied or later rows once
-                                            # the first priority record is retained;
+                                            # false. Censor only tied or later rows (and
+                                            # any undated duplicate priority-event row)
+                                            # once the first priority record is retained;
                                             # leave strictly earlier records as coded.
+                                            myoutcome == highest_priority & is.na(.hier_t) ~ 0,
                                             !is.na(.hier_t) & .hier_t >= .first_pri ~ 0,
                                             TRUE                                    ~ myoutcome
                                         )
@@ -934,7 +945,7 @@ outcomeorganizerClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                                     dplyr::group_by(.data[[".hier_id"]]) %>%
                                     dplyr::mutate(
                                         myoutcome = if (any(myoutcome == highest_priority, na.rm = TRUE))
-                                            highest_priority
+                                            ifelse(is.na(myoutcome), myoutcome, highest_priority)
                                         else
                                             myoutcome
                                     ) %>%
@@ -1021,8 +1032,8 @@ outcomeorganizerClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             if (self$options$intervalCensoring && !is.null(self$options$intervalStart) && !is.null(self$options$intervalEnd)) {
                 # Get interval variables from cached labels
-                start_var <- names(all_labels_cache)[all_labels_cache == self$options$intervalStart]
-                end_var <- names(all_labels_cache)[all_labels_cache == self$options$intervalEnd]
+                start_var <- labelled_data$interval_start_var
+                end_var <- labelled_data$interval_end_var
 
                 if (length(start_var) > 0 && length(end_var) > 0) {
                     # Add interval variables to output for use with survival::Surv()
@@ -1106,10 +1117,7 @@ outcomeorganizerClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 admin_date_var_name <- self$options$adminDate
 
                 # Find the admin date variable in cached labels
-                admin_date_var <- NULL
-                if (!is.null(admin_date_var_name)) {
-                    admin_date_var <- names(all_labels_cache)[all_labels_cache == admin_date_var_name]
-                }
+                admin_date_var <- labelled_data$admin_date_var
 
                 if (length(admin_date_var) > 0) {
                     mydata[["admin_censor_date"]] <- input_mydata[[admin_date_var[1]]]
@@ -1605,7 +1613,7 @@ outcomeorganizerClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             super$.sourcifyOption(option)
         },
 
-        .run = function() {
+        .prepareOutcomeRun = function() {
             # Reset notices at start of each run
             private$.resetNotices()
 
@@ -1698,7 +1706,7 @@ outcomeorganizerClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 }
                 private$.clearPanels()
                 private$.insertNotices()
-                return()
+                jmvcore::reject(paste(unique(validation_results$errors), collapse = " "))
             }
 
             # Add validation strong warnings, then warnings
@@ -1733,6 +1741,10 @@ outcomeorganizerClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # below ~5 events. Checking the recoded `myoutcome` avoids false positives
             # when the censored group has < 5 rows on a numeric 0/1 outcome, and catches
             # < 5 events in multi-event modes as well.
+            private$.describeOutcomeCoding(mydata, results, df_outcome, diagnostics, applied)
+        },
+
+        .describeOutcomeCoding = function(mydata, results, df_outcome, diagnostics, applied) {
             n_nonmissing_rec <- sum(!is.na(mydata[["myoutcome"]]))
             n_ev_rec <- sum(mydata[["myoutcome"]] == 1, na.rm = TRUE)
             if (!identical(self$options$analysistype, "multistate") &&
@@ -1803,7 +1815,8 @@ outcomeorganizerClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # made every other path die with "object 'handoff_coded' not found"), and
             # `codes_present` is defined ~100 lines later, so borrowing that instead
             # parses cleanly and then fails at runtime the same way.
-            .codes_here <- unique(stats::na.omit(mydata[["myoutcome"]]))
+            .mo_here <- mydata[["myoutcome"]]
+            .codes_here <- unique(.mo_here[!is.na(.mo_here)])
             handoff_coded <- length(.codes_here) > 0 && any(!.codes_here %in% c(0, 1))
 
             if (self$options$multievent && !analysistype %in% c('rfs', 'pfs', 'dfs', 'ttp')) {
@@ -1910,6 +1923,10 @@ outcomeorganizerClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # patient ID / no duplicate IDs for hierarchy; interval/admin variables not
             # found), so gate the report text on the applied flags returned by
             # .organizeOutcomes() rather than on the checkbox alone.
+            private$.publishOutcomeTables(mydata, results, df_outcome, diagnostics, applied, analysistype, summary_text, rc, esc_event, esc_censored, esc_recurrence, esc_rec_others, handoff_coded)
+        },
+
+        .publishOutcomeTables = function(mydata, results, df_outcome, diagnostics, applied, analysistype, summary_text, rc, esc_event, esc_censored, esc_recurrence, esc_rec_others, handoff_coded) {
             if (isTRUE(applied$hierarchy)) {
                 summary_text <- paste(summary_text, paste0(
                     "<br><b>", .("Event Hierarchy Applied:"), "</b> ",
@@ -2050,9 +2067,27 @@ outcomeorganizerClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # clinical-safety hazard: the reader cannot otherwise see which
             # levels were collapsed into "censored", nor which estimand the
             # downstream probability-scale outputs correspond to.
-            if (!is.null(private$.eventRecode))
+            private$.publishOutcomeExports(mydata, results, df_outcome, applied, analysistype, rc, esc_event, esc_censored, esc_recurrence, esc_rec_others, codes_present)
+        },
+
+        .publishOutcomeExports = function(mydata, results, df_outcome, applied, analysistype, rc, esc_event, esc_censored, esc_recurrence, esc_rec_others, codes_present) {
+            if (!is.null(private$.eventRecode)) {
                 self$results$eventRecodeInfo$setContent(
                     .describeEventIndicator(private$.eventRecode, self$options$outcome))
+            } else if (identical(analysistype, "multistate")) {
+                ms_counts <- table(factor(mydata, levels = c(0, 1, 2, 3)), useNA = "no")
+                self$results$eventRecodeInfo$setContent(paste0(
+                    "<div style='padding:10px 12px;border-left:4px solid #2b6cb0;background-color:rgba(43,108,176,0.08);border-radius:4px;color:inherit;'>",
+                    "<b>", .("Multi-State Outcome Coding:"), "</b> ",
+                    htmltools::htmlEscape(self$options$outcome), "<br>",
+                    "<small>",
+                    "0 = ", htmltools::htmlEscape(as.character(self$options$awod %||% "Alive without Disease")), " (n = ", ms_counts[["0"]], "), ",
+                    "1 = ", htmltools::htmlEscape(as.character(self$options$awd %||% "Alive with Disease")), " (n = ", ms_counts[["1"]], "), ",
+                    "2 = ", htmltools::htmlEscape(as.character(self$options$dod %||% "Dead of Disease")), " (n = ", ms_counts[["2"]], "), ",
+                    "3 = ", htmltools::htmlEscape(as.character(self$options$dooc %||% "Dead of Other Causes")), " (n = ", ms_counts[["3"]], ")",
+                    "</small></div>"
+                ))
+            }
 
             # Add recoded outcome to data if requested.
             #
@@ -2068,9 +2103,13 @@ outcomeorganizerClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # an Output option is not an argument of the generated R wrapper, so it is
             # permanently FALSE from the R API and gating on it would make the column
             # unreachable headless. jamovi already gates delivery via Output$enabled.
+            .rn_out <- rownames(self$data)
+            if (length(.rn_out) != nrow(self$data) || anyNA(suppressWarnings(as.integer(.rn_out)))) {
+                .rn_out <- seq_len(nrow(self$data))
+            }
             if (!is.null(private$.adminTime) &&
                 self$results$addAdminTime$isNotFilled()) {
-                self$results$addAdminTime$setRowNums(rownames(self$data))
+                self$results$addAdminTime$setRowNums(.rn_out)
                 self$results$addAdminTime$setValues(as.numeric(private$.adminTime))
             }
 
@@ -2099,7 +2138,7 @@ outcomeorganizerClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                            ttp = .("time to progression"),
                            multistate = .("multistate"),
                            analysistype)))
-                self$results$addOutcome$setRowNums(rownames(self$data))
+                self$results$addOutcome$setRowNums(.rn_out)
                 # Rebuild the labels from the FINAL status vector.
                 #
                 # private$.causeFactor is a snapshot taken immediately after the
@@ -2258,6 +2297,10 @@ outcomeorganizerClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             }
 
             # Show glossary if requested
+            private$.finishOutcomeRun()
+        },
+
+        .finishOutcomeRun = function() {
             if (self$options$showGlossary) {
                 private$.showGlossary()
             }
@@ -2265,6 +2308,10 @@ outcomeorganizerClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # Add completion notice
             private$.addNotice(jmvcore::NoticeType$INFO,
                 .("Outcome recoding completed. Use Add Recoded Outcome to Data to write the status to a new column."))
+        },
+
+        .run = function() {
+            private$.prepareOutcomeRun()
         },
 
         # Plot function for outcome distribution visualization
@@ -2316,8 +2363,7 @@ outcomeorganizerClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 print(plot)
                 TRUE
             }, error = function(e) {
-                # Log error but don't crash the analysis
-                warning("Failed to render outcome visualization: ", e$message)
+                # Fail gracefully without crashing the analysis
                 FALSE
             })
         }

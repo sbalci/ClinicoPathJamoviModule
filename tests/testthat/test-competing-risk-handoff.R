@@ -178,11 +178,10 @@ test_that("survivalcont() refuses the hand-off instead of analysing it inverted"
     d <- handoff_grouped()
     d$biomarker <- seq(2, 10, length.out = nrow(d))
 
-    res <- quiet(do.call(get("survivalcont", envir = .cr_ns), list(
-        data = d, elapsedtime = "time", outcome = "out", contexpl = "biomarker",
-        outcomeLevel = "Event", dod = NULL, dooc = NULL, awd = NULL, awod = NULL,
-        multievent = FALSE, analysistype = "overall",
-        timetypeoutput = "months", cutp = "12, 36, 60", findcut = TRUE)))
+    res <- .audit_failed_result("survivalcont", data = d, elapsedtime = "time",
+        outcome = "out", contexpl = "biomarker", outcomeLevel = "Event",
+        multievent = FALSE, analysistype = "overall", timetypeoutput = "months",
+        cutp = "12, 36, 60", findcut = TRUE)
 
     # The gate used to sit at the very top of .run(), before .cleandata(), where
     # private$.eventRecode does not exist yet -- so it could only test the

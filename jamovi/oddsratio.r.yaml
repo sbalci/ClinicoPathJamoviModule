@@ -36,6 +36,19 @@ items:
       visible: false
 
     # === MAIN ODDS RATIO ANALYSIS ===
+    - name: fittedTable
+      title: Odds Ratios
+      type: Table
+      rows: 0
+      columns: []
+      visible: (length(explanatory) > 0 && length(outcome) > 0 && length(outcomeLevel) > 0 && length(outcomeNegativeLevel) > 0)
+      clearWith:
+          - explanatory
+          - outcome
+          - outcomeLevel
+          - outcomeNegativeLevel
+          - usePenalized
+
     - name:  text
       title: Odds Ratio Table
       type:  Html
@@ -114,6 +127,21 @@ items:
           - outcomeLevel
           - outcomeNegativeLevel
           - usePenalized
+
+    - name: diagnosticContingency
+      title: Diagnostic Contingency Table
+      type: Table
+      rows: 0
+      columns: []
+      visible: (showNomogram)
+      clearWith:
+          - explanatory
+          - outcome
+          - outcomeLevel
+          - outcomeNegativeLevel
+          - diagnosticPredictor
+          - predictorLevel
+          - predictorNegativeLevel
 
     - name: diagnosticMetrics
       title: Diagnostic Test Performance

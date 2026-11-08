@@ -12498,17 +12498,11 @@ agreementClass <- if (requireNamespace("jmvcore")) {
             # place. Table lists come from jamovi/agreement.r.yaml: the items guarded by
             # visible: (hierarchicalKappa ...) and visible: (mixedEffectsComparison).
             .hierarchicalBlankNote = function(note) {
-                for (nm in c("hierarchicalOverallTable", "clusterSpecificTable",
-                             "varianceDecompositionTable", "hierarchicalICCTable",
-                             "homogeneityTestTable")) {
-                    private$.subAnalysisFailed(private$.resultItem(nm), note)
-                }
+                private$.subAnalysisFailed(private$.resultItem("hierarchicalOverallTable"), note)
                 invisible(NULL)
             },
             .mixedEffectsBlankNote = function(note) {
-                for (nm in c("mixedEffectsTable", "mixedEffectsVarianceTable")) {
-                    private$.subAnalysisFailed(private$.resultItem(nm), note)
-                }
+                private$.subAnalysisFailed(private$.resultItem("mixedEffectsTable"), note)
                 invisible(NULL)
             },
             # Plain-language reading of one variance component's share of the total in

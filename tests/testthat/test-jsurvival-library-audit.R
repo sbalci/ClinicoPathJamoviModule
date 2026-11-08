@@ -546,3 +546,122 @@ test_that("jsurvival image states hold drawing data, not patient rows", {
   }
   audit_skip_unloaded(wanted)
 })
+
+# library-audit 2026-09-15 jsurvival [LOW] PARTIAL: lassocox .cleanData() delegates outcome coding
+# and design-matrix construction to .encodeOutcome() and .buildDesignMatrix(), and .assessSuitability()
+# delegates collinearity and PH checks to .assessCollinearity() and .assessPhAssumption()
+test_that("lassocox extracted outcome-coding, design-matrix, and suitability helpers match .cleanData()", {
+  wanted <- "lassocox"
+  skip_if_not_installed("glmnet")
+  if ("lassocox" %in% audit_loaded(wanted)) {
+    set.seed(42)
+    n <- 80
+    d <- data.frame(
+      time = round(stats::rexp(n, 0.05) + 0.5, 2),
+      event = factor(ifelse(stats::rbinom(n, 1, 0.6) == 1, "Event", "Censored")),
+      x1 = stats::rnorm(n),
+      x2 = stats::rnorm(n),
+      grp = factor(sample(c("Ref", "Alt"), n, replace = TRUE), levels = c("Ref", "Alt"))
+    )
+    a <- get("lassocoxClass")$new(
+      options = get("lassocoxOptions")$new(
+        elapsedtime = "time",
+        outcome = "event",
+        outcomeLevel = "Event",
+        censorLevel = "Censored",
+        explanatory = c("x1", "x2", "grp"),
+        suitabilityCheck = TRUE,
+        cv_plot = FALSE,
+        coef_plot = FALSE,
+        survival_plot = FALSE
+      ),
+      data = d
+    )
+    suppressWarnings(suppressMessages({ a$init(); a$run() }))
+    priv <- a$.__enclos_env__$private
+
+    cleaned <- suppressWarnings(priv$.cleanData())
+    enc <- priv$.encodeOutcome(d$event)
+    expect_identical(enc$status, cleaned$status)
+    expect_identical(enc$event_level_used, "Event")
+    expect_identical(enc$censor_level_used, "Censored")
+
+    dm <- suppressWarnings(priv$.buildDesignMatrix(
+      d[c("x1", "x2", "grp")],
+      !is.na(d$time) & !is.na(enc$status),
+      rep(TRUE, n),
+      sum(enc$status == 1)
+    ))
+    expect_identical(dm$X, cleaned$X)
+    expect_identical(dm$encoding, cleaned$encoding)
+
+    col_check <- priv$.assessCollinearity(cleaned)
+    expect_true(col_check$color %in% c("green", "yellow", "red"))
+    ph_check <- priv$.assessPhAssumption(cleaned, c(1L, 2L))
+    expect_true(ph_check$color %in% c("green", "yellow", "red"))
+  }
+  audit_skip_unloaded(wanted)
+})
+
+test_that("pre-release mathematical and clinical edge cases remain guarded", {
+  wanted <- c("outcomeorganizer", "datetimeconverter", "survival", "survivalcont")
+  loaded <- audit_loaded(wanted)
+  quiet <- function(expr) suppressWarnings(suppressMessages(expr))
+  run <- function(name, data, ...) {
+    a <- get(paste0(name, "Class"))$new(options = get(paste0(name, "Options"))$new(...), data = data)
+    quiet(a$init())
+    quiet(a$run())
+    a
+  }
+
+  if ("outcomeorganizer" %in% loaded) {
+    d_oo <- data.frame(
+      id = c("P1", "P1", "P1"),
+      time = c(5, 10, 15),
+      status = factor(c("Alive", "Dead", NA), levels = c("Alive", "Dead"))
+    )
+    oo <- run("outcomeorganizer", d_oo, outcome = "status", outcomeLevel = "Dead",
+              patientID = "id", followupTime = "time", useHierarchy = TRUE, eventPriority = 1)
+    oo_priv <- oo$.__enclos_env__$private
+    cleaned <- quiet(oo_priv$.organizeOutcomes(oo_priv$.getData()))
+    expect_identical(as.integer(cleaned$mydata$myoutcome), c(0L, 1L, NA_integer_))
+  }
+
+  if ("datetimeconverter" %in% loaded) {
+    d_dt <- data.frame(dt = as.Date(c("2023-06-15", "2023-12-01")))
+    dtc <- run("datetimeconverter", d_dt, datetime_var = "dt", timezone = "America/New_York",
+               extract_day = TRUE)
+    prep <- quiet(dtc$.__enclos_env__$private$.prepareDatetimeInput(d_dt$dt))
+    expect_identical(as.integer(lubridate::day(prep$parsed_dates)), c(15L, 1L))
+  }
+
+  if ("survival" %in% loaded) {
+    set.seed(11)
+    d_sv <- data.frame(
+      time = c(rep(10, 8), seq(12, 30, length.out = 22)),
+      status = c(rep(1, 15), rep(0, 15)),
+      grp = factor(rep(c("A", "B"), each = 15))
+    )
+    sv <- run("survival", d_sv, elapsedtime = "time", outcome = "status", outcomeLevel = "1",
+              explanatory = "grp", rmst_analysis = TRUE, rmst_tau = 5)
+    rmst_df <- sv$results$rmstTable$asDF
+    expect_equal(nrow(rmst_df), 2L)
+    expect_equal(as.numeric(rmst_df$rmst), c(5, 5))
+    expect_equal(as.numeric(rmst_df$se), c(0, 0))
+  }
+
+  if ("survivalcont" %in% loaded) {
+    set.seed(12)
+    d_sc <- data.frame(
+      time = seq(1, 40, length.out = 40),
+      status = c(rep(1, 12), rep(0, 28)),
+      marker = seq(10, 50, length.out = 40)
+    )
+    sc <- run("survivalcont", d_sc, elapsedtime = "time", outcome = "status", outcomeLevel = "1",
+              contexpl = "marker", findcut = TRUE, showSummaries = TRUE)
+    med_txt <- as.character(sc$results$medianSummary$content)
+    expect_false(grepl("NA \\[NA - NA", med_txt))
+  }
+
+  audit_skip_unloaded(wanted)
+})

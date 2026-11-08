@@ -785,6 +785,30 @@ items:
           - landmark
 
     # REMARK Reporting Checklist
+    - name: remarkItems
+      title: REMARK Reporting Items
+      type: Table
+      rows: 0
+      columns: []
+      visible: (remark_checklist)
+      clearWith:
+          - remark_checklist
+          - explanatory
+          - outcome
+          - elapsedtime
+          - age_adjustment
+          - multievent
+          - analysistype
+          - outcomeLevel
+          - tint
+          - timetypedata
+          - dxdate
+          - fudate
+          - uselandmark
+          - landmark
+
+
+
     - name: remarkChecklist
       title: 'REMARK Reporting Checklist'
       type: Html

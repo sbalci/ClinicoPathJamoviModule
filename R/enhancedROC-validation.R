@@ -76,7 +76,7 @@
     "Reference standard" = options$referenceDescription,
     "Positive / negative" = paste(positive, "/", negative),
     "Threshold source" = declared(options$thresholdSource, "thresholdSource"),
-    "Unit of observation" = options$analysisUnit,
+    "Unit of observation" = declared(options$analysisUnit, "analysisUnit"),
     "Prediction scale" = options$predictionScale,
     "Analyzed independent units" = as.character(length(unique(patient))),
     "Positive independent units" = as.character(length(unique(patient[y == 1]))),

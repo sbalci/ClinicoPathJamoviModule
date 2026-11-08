@@ -165,7 +165,10 @@
       .fmt(.("Outcome Factor Has Unsupported Levels: the outcome variable has non-numeric levels that cannot be interpreted as events: {levels}."),
                       # levels() is NULL for a character outcome, which printed "events: ."
                       levels = paste(if (is.factor(outcome_vec)) levels(outcome_vec)
-                                     else sort(unique(stats::na.omit(as.character(outcome_vec)))),
+                                     else {
+                                       .ov <- as.character(outcome_vec)
+                                       sort(unique(.ov[!is.na(.ov)]))
+                                     },
                                      collapse = ", ")),
       .("To fix: select the level that represents the event with the Event Level option, or recode the outcome as numeric (0 = censored, 1 = event) or logical (FALSE/TRUE). For competing risks, use a factor with the levels 'Censored', 'Event' and 'Competing'."),
       sep = "\n\n"))
@@ -398,6 +401,16 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
   R6::R6Class(
     "multisurvivalClass",
     inherit = multisurvivalBase,
+    public = list(
+        #' @description Initialize safely when the supplied data has no selected variables.
+        #' @param noThrow Whether initialization errors are stored in the results.
+        init = function(noThrow = FALSE) {
+            if (!is.null(private$.data) && length(self$options$varsRequired) == 0L) {
+                private$.data <- data.frame()
+            }
+            super$init(noThrow = noThrow)
+        }
+    ),
     private = list(
 
       .sourcifyOption = function(option) {
@@ -1920,7 +1933,7 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
         # there as "contrasts can be applied only to factors with 2 or more levels".
         for (v in unique(c(cleaneddata$name3expl, cleaneddata$mystratvar_labelled))) {
           x <- cleaneddata$cleanData[[v]]
-          if (!is.null(x) && length(unique(stats::na.omit(x))) < 2) {
+          if (!is.null(x) && length(unique(x[!is.na(x)])) < 2) {
             label <- labelled::var_label(x)
             jmvcore::reject(trimws(paste(
               .fmt(
@@ -2101,6 +2114,7 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
       },
 
       .run = function() {
+        .populateSurvivalTable(self$results$fittedTable, data.frame())
         private$.resetComputeCaches()
         private$.initializeMessageOutputs()
         # Before any early return: the scaffolded C-index rows can hold values
@@ -2893,6 +2907,11 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
         # models. Competing-risks / Fine-Gray fits use a different prediction
         # target, so skip with an explanatory note rather than report a wrong number.
         if (private$.isCompetingRisk()) {
+          .deleteTableRows(self$results$survMetricsTable)
+          self$results$survMetricsTable$setNote(
+            "compete",
+            .("Model performance metrics (Brier score, IBS, time-dependent AUC) are computed for standard survival models and are not shown for competing-risks / Fine-Gray analyses.")
+          )
           self$results$survMetricsSummary$setContent(
             paste0("<p>", .("Model performance metrics (Brier score, IBS, time-dependent AUC) are computed for standard survival models and are not shown for competing-risks / Fine-Gray analyses."), "</p>")
           )
@@ -3215,6 +3234,11 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
 
         # Single-term deletion is defined for standard Cox models.
         if (private$.isCompetingRisk()) {
+          .deleteTableRows(self$results$modelContributionTable)
+          self$results$modelContributionTable$setNote(
+            "compete",
+            .("Covariate contribution (single-term deletion) is shown for standard Cox models and is not available for competing-risks / Fine-Gray analyses.")
+          )
           self$results$modelContributionSummary$setContent(
             paste0("<p>", .("Covariate contribution (single-term deletion) is shown for standard Cox models and is not available for competing-risks / Fine-Gray analyses."), "</p>")
           )
@@ -3479,14 +3503,10 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
              fg_formula_obj <- base_formula
              fg_data <- survival::finegray(fg_formula_obj, data = mydata, etype = "Event")
              
-             # Define datadist for expanded data
-             # Note: datadist must use the data used in fit
-             dd_fg <- rms::datadist(fg_data)
-             # Pass the datadist object, not a string naming a function-local
-             # variable: rms cannot get("dd_fg") from here, which would make
-             # cph()/nomogram() fail silently inside .calculate_nomogram()'s
-             # tryCatch. The on.exit above restores the original datadist.
-             options(datadist = dd_fg)
+             # Keep the patient-level datadist (dd, set above from mydata[, var_names]):
+             # computing datadist on expanded fg_data pseudo-rows weights competing-event
+             # patients by how many later risk sets they appear in, biasing covariate
+             # medians, quantiles, and axis limits.
              
              # Update formula for Fine-Gray structure
              # Note: cph uses its own formula parsing, variables must be in data
@@ -3498,8 +3518,6 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
                           x = TRUE,
                           y = TRUE,
                           surv = TRUE))
-                          
-             # Restore datadist option later if needed
         } else {
              # Standard Cox
              # Create formula and fit model using consolidated function
@@ -3561,7 +3579,12 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
           if (!any(keep)) stop("no estimable baseline survival at the requested timepoints")
           pred_times <- pred_times[keep]; s0 <- s0[keep]
           mean_lp <- mean(f$linear.predictors)
-          lp_c <- f$linear.predictors - mean_lp
+          lp_patient <- if (is_finegray && "fgcount" %in% names(fg_data)) {
+            f$linear.predictors[!duplicated(fg_data$fgcount)]
+          } else {
+            f$linear.predictors
+          }
+          lp_c <- lp_patient - mean_lp
 
           # Label each risk axis only where the model can actually reach. A
           # fixed 0.1..0.9 grid left rms nothing to place when the predicted
@@ -4765,6 +4788,7 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
 
         ### Fill risk score table ----
         riskScoreTable <- self$results$riskScoreTable
+        .deleteTableRows(riskScoreTable)
 
         for (i in seq_len(nrow(risk_summary))) {
           riskScoreTable$addRow(
@@ -4942,7 +4966,8 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
                               st   = riskData$myoutcome,
                               group = riskData$risk_group)
           cr_df <- cr_df[!is.na(cr_df$time) & !is.na(cr_df$st) & !is.na(cr_df$group), , drop = FALSE]
-          cr_df$st <- droplevels(cr_df$st)
+          present_events <- intersect(c("Event", "Competing"), unique(as.character(cr_df$st)))
+          cr_df$st <- factor(cr_df$st, levels = c("Censored", present_events))
 
           aj <- try(survival::survfit(survival::Surv(time, st) ~ group, data = cr_df),
                     silent = TRUE)
@@ -5591,7 +5616,7 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
         if (is.null(plotData)) return(FALSE)
 
         if (identical(plotData$message, "no_variable")) {
-          text_warning <- "Please select a variable for adjusted curves."
+          text_warning <- .("Please select a variable for adjusted curves.")
           grid::grid.newpage()
           grid::grid.text(text_warning, 0.5, 0.5)
           return(TRUE)
@@ -5600,9 +5625,7 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
         if (identical(plotData$message, "not_in_model")) {
           grid::grid.newpage()
           grid::grid.text(
-            paste0("Adjusted curves require the selected variable to be part of ",
-                   "the fitted model. Add it under Explanatory Variables or ",
-                   "Stratification Variables."),
+            .("Adjusted curves require the selected variable to be part of the fitted model. Add it under Explanatory Variables or Stratification Variables."),
             0.5, 0.5)
           return(TRUE)
         }
@@ -6261,9 +6284,8 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
       stringsAsFactors = FALSE
     )
     names(fg_table) <- c(.("Variable"), .("sHR (95% CI)"), .("p-value"))
-    self$results$text$setContent(paste0(
-      knitr::kable(fg_table, row.names = FALSE, align = c("l", "r", "r"), format = "html", escape = TRUE),
-      private$.mainTableNote(fg_model, cleaneddata)))
+    .populateSurvivalTable(self$results$fittedTable, fg_table)
+    self$results$text$setContent(private$.mainTableNote(fg_model, cleaneddata))
     self$results$text2$setContent(paste0(
       "<p><b>", .("Fine-Gray subdistribution hazards model."), "</b> ",
       .("Confidence intervals and p-values use the subject-clustered robust variance."), " ",
@@ -6410,31 +6432,13 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
     if (is.list(tCox) && is.data.frame(tCox[[1]]))
       tCox[[1]][is.na(tCox[[1]])] <- "-"
 
-    # Convert finalfit table to HTML with nice formatting
-    # escape = TRUE: finalfit HR cells are plain text, so HTML-escaping keeps
-    # formatting intact while preventing user column labels (row names) that
-    # contain HTML from being injected as markup into this type:Html output.
-    text_html <- knitr::kable(
-      tCox[[1]],
-      row.names = FALSE,
-      align = c('l', 'l', 'r', 'l', 'l'),
-      format = "html",
-      escape = TRUE
-    )
-
-    # finalfit prints the internal column names in its header cell
-    # ("Dependent: Surv(mytime, myoutcome)"). Show the clinician's own variable
-    # names instead; the cell is already HTML-escaped, so escape the labels too.
     .time_lab <- if (isTRUE(self$options$tint)) .("Calculated time") else self$options$elapsedtime
     .outcome_lab <- if (isTRUE(self$options$multievent)) .("Redefined outcome") else self$options$outcome
     if (!is.null(.time_lab) && !is.null(.outcome_lab))
-      text_html <- sub("Surv(mytime, myoutcome)",
-                       sprintf("Surv(%s, %s)", htmltools::htmlEscape(.time_lab),
-                               htmltools::htmlEscape(.outcome_lab)),
-                       text_html, fixed = TRUE)
-
-    # Set the content for the HR table
-    self$results$text$setContent(paste0(text_html, private$.mainTableNote(private$.cox_model(), cleaneddata)))
+      names(tCox[[1]]) <- sub("Surv(mytime, myoutcome)",
+        sprintf("Surv(%s, %s)", .time_lab, .outcome_lab), names(tCox[[1]]), fixed = TRUE)
+    .populateSurvivalTable(self$results$fittedTable, tCox[[1]])
+    self$results$text$setContent(private$.mainTableNote(private$.cox_model(), cleaneddata))
 
     # Extract and format model metrics from finalfit
     metrics_text <- .tidyFinalfitMetrics(unlist(tCox[[2]]))
@@ -6629,7 +6633,7 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
             tested_vars <- unique(var_col[!is.na(var_col) & !is.na(hr_txt) &
                                           nzchar(trimws(hr_txt)) & trimws(hr_txt) != "-"])
             out$n_total_vars <- if (length(tested_vars) > 0) length(tested_vars)
-                                else length(unique(stats::na.omit(var_col)))
+                                else length(unique(var_col[!is.na(var_col)]))
             sig_vars <- character(0)
             best <- 0
 

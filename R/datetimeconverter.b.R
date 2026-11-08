@@ -24,6 +24,16 @@
 datetimeconverterClass <- if (requireNamespace('jmvcore')) R6::R6Class(
     "datetimeconverterClass",
     inherit = datetimeconverterBase,
+    public = list(
+        #' @description Initialize safely when the supplied data has no selected variables.
+        #' @param noThrow Whether initialization errors are stored in the results.
+        init = function(noThrow = FALSE) {
+            if (!is.null(private$.data) && length(self$options$varsRequired) == 0L) {
+                private$.data <- data.frame()
+            }
+            super$init(noThrow = noThrow)
+        }
+    ),
     private = list(
         .sourcifyOption = function(option) {
             .declared <- setdiff(
@@ -410,11 +420,14 @@ datetimeconverterClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             }
 
             if (inherits(vector, 'Date')) {
-                # as.POSIXct(<Date>) is UTC midnight whatever the Timezone option says;
-                # force_tz() keeps the 00:00 clock and moves the instant to midnight in
-                # the requested zone, which is what the same date as text would give.
-                parsed_dates <- lubridate::force_tz(as.POSIXct(vector),
-                                                    tzone = private$.resolveTimezone()$tz)
+                # as.POSIXct(<Date>, tz = "UTC") is UTC midnight; force_tz() with
+                # roll_dst = "post" keeps the 00:00 calendar date and moves the
+                # instant to midnight in the requested zone (matching .parseDatetime()
+                # and avoiding the -1 day shift of bare as.POSIXct(<Date>) in
+                # timezones west of UTC).
+                parsed_dates <- lubridate::force_tz(as.POSIXct(vector, tz = "UTC"),
+                                                    tzone = private$.resolveTimezone()$tz,
+                                                    roll_dst = "post")
                 original_display <- base::format(vector)
                 notes <- c(notes, 'Detected Date input; converted to POSIXct at midnight.')
                 format_hint <- 'date'
@@ -1269,63 +1282,15 @@ datetimeconverterClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         },
 
         .formatPreviewGuide = function(original, parsed, n_show) {
-            table_html <- paste0(
-                "<div style='background-color: rgba(138, 155, 172, 0.06); padding: 15px; border-radius: 8px; overflow-x: auto; color: inherit;'>",
-                "<p><strong>Showing first ", n_show, " of ", length(original), " observations</strong></p>",
-                "<table style='width: 100%; border-collapse: collapse; font-size: 12px;'>",
-                "<thead><tr style='background-color: rgba(108, 117, 125, 0.25); color: inherit;'>",
-                "<th style='padding: 6px; border: 1px solid #dee2e6;'>Row</th>",
-                "<th style='padding: 6px; border: 1px solid #dee2e6;'>Original Value</th>",
-                "<th style='padding: 6px; border: 1px solid #dee2e6;'>Converted DateTime</th>",
-                "<th style='padding: 6px; border: 1px solid #dee2e6;'>Status</th>",
-                "</tr></thead><tbody>"
-            )
-
-            for (i in seq_len(n_show)) {
-                row_bg <- if (i %% 2 == 0) "transparent" else "rgba(138, 155, 172, 0.07)"
-
-                original_val <- if (is.na(original[i])) {
-                    "<em>NA</em>"
-                } else {
-                    htmltools::htmlEscape(as.character(original[i]))
-                }
-
-                parsed_val <- if (is.na(parsed[i])) {
-                    "<em>NA</em>"
-                } else {
-                    # NOT as.character(): on R >= 4.3 it drops the clock for midnight
-                    # rows, so the column mixed "2024-01-15" and "2024-01-15 10:30:00".
-                    private$.datetimeText(parsed[i])
-                }
-
-            # Status: success if parsed is not NA (unless original was NA)
-            if (is.na(original[i])) {
-                status <- "<span style='opacity: 0.6;'>-</span>"
-            } else if (is.na(parsed[i])) {
-                # The glyph was empty: an earlier non-ASCII sweep stripped the tick and
-                # cross and left the coloured spans behind, so the Status column showed
-                # nothing at all for both success and failure. Words, not symbols -- they
-                # survive any encoding pass, screen-read correctly, and do not rely on
-                # colour alone (the failed row's tint is the only other signal).
-                status <- "<span style='font-weight: bold;'>Failed</span>"
-                row_bg <- "rgba(220, 53, 69, 0.14)"
-            } else {
-                status <- "<span style='font-weight: bold; opacity: 0.85;'>OK</span>"
-            }
-
-                table_html <- paste0(table_html,
-                    "<tr style='background-color: ", row_bg, "; color: inherit;'>",
-                    "<td style='padding: 6px; border: 1px solid #dee2e6;'>", i, "</td>",
-                    "<td style='padding: 6px; border: 1px solid #dee2e6;'>", original_val, "</td>",
-                    "<td style='padding: 6px; border: 1px solid #dee2e6;'>", parsed_val, "</td>",
-                    "<td style='padding: 6px; border: 1px solid #dee2e6; text-align: center;'>", status, "</td>",
-                    "</tr>"
-                )
-            }
-
-            table_html <- paste0(table_html, "</tbody></table></div>")
-
-            return(table_html)
+            index <- seq_len(n_show)
+            values <- data.frame(row = index, original = as.character(original[index]),
+                converted = private$.datetimeText(parsed[index]),
+                status = ifelse(is.na(original[index]), "-",
+                    ifelse(is.na(parsed[index]), .("Failed"), .("OK"))))
+            names(values) <- c(.("Row"), .("Original Value"), .("Converted DateTime"), .("Status"))
+            .populateSurvivalTable(self$results$conversionRows, values, rep("", 4))
+            paste0("<p>", .fmt(.("Showing first {n} of {total} observations"),
+                n = n_show, total = length(original)), "</p>")
         },
 
         # Generate HTML preview of extracted datetime components
@@ -1351,70 +1316,19 @@ datetimeconverterClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         },
 
         .formatComponentPreviewGuide = function(components, n_show) {
-            table_html <- paste0(
-                "<div style='background-color: rgba(138, 155, 172, 0.06); padding: 15px; border-radius: 8px; overflow-x: auto; color: inherit;'>",
-                "<p><strong>Showing first ", n_show, " of ", length(components[[1]]), " observations</strong></p>",
-                "<table style='width: 100%; border-collapse: collapse; font-size: 12px;'>",
-                "<thead><tr style='background-color: rgba(108, 117, 125, 0.25); color: inherit;'>",
-                "<th style='padding: 6px; border: 1px solid #dee2e6;'>Row</th>"
-            )
-
-            # Add column headers for each component
-            for (comp_name in names(components)) {
-                display_name <- switch(comp_name,
-                    "year" = "Year",
-                    "month" = "Month",
-                    "monthname" = "Month Name",
-                    "day" = "Day",
-                    "hour" = "Hour",
-                    "minute" = "Minute",
-                    "second" = "Second",
-                    "dayname" = "Day Name",
-                    "weeknum" = "Week #",
-                    "quarter" = "Quarter",
-                    "dayofyear" = "Day of Year",
-                    comp_name
-                )
-                table_html <- paste0(table_html,
-                    "<th style='padding: 6px; border: 1px solid #dee2e6;'>", display_name, "</th>"
-                )
-            }
-
-            table_html <- paste0(table_html, "</tr></thead><tbody>")
-
-            # Add data rows
-            for (i in seq_len(n_show)) {
-                row_bg <- if (i %% 2 == 0) "transparent" else "rgba(138, 155, 172, 0.07)"
-
-                table_html <- paste0(table_html,
-                    "<tr style='background-color: ", row_bg, "; color: inherit;'>",
-                    "<td style='padding: 6px; border: 1px solid #dee2e6;'>", i, "</td>"
-                )
-
-                for (comp_name in names(components)) {
-                    comp_val <- if (is.na(components[[comp_name]][i])) {
-                        "<em>NA</em>"
-                    } else {
-                        as.character(components[[comp_name]][i])
-                    }
-
-                    table_html <- paste0(table_html,
-                        "<td style='padding: 6px; border: 1px solid #dee2e6;'>", comp_val, "</td>"
-                    )
-                }
-
-                table_html <- paste0(table_html, "</tr>")
-            }
-
-            week_note <- if ("weeknum" %in% names(components)) {
-                "<p style='font-size: 11px; opacity: 0.78; margin: 8px 0 0 0;'><em>Note: Week # counts 7-day blocks from 1 January (lubridate::week), not ISO-8601 weeks.</em></p>"
-            } else {
-                ""
-            }
-
-            table_html <- paste0(table_html, "</tbody></table>", week_note, "</div>")
-
-            return(table_html)
+            values <- data.frame(row = seq_len(n_show), check.names = FALSE)
+            for (name in names(components)) values[[name]] <- components[[name]][seq_len(n_show)]
+            labels <- c(row = .("Row"), year = .("Year"), month = .("Month"),
+                monthname = .("Month Name"), day = .("Day"), hour = .("Hour"),
+                minute = .("Minute"), second = .("Second"), dayname = .("Day Name"),
+                weeknum = .("Week #"), quarter = .("Quarter"), dayofyear = .("Day of Year"))
+            names(values) <- unname(labels[names(values)])
+            .populateSurvivalTable(self$results$componentRows, values)
+            note <- if ("weeknum" %in% names(components))
+                .("Week # counts 7-day blocks from 1 January (lubridate::week), not ISO-8601 weeks.") else ""
+            self$results$componentRows$setNote("week", note)
+            paste0("<p>", .fmt(.("Showing first {n} of {total} observations"),
+                n = n_show, total = length(components[[1]])), "</p>")
         },
 
         # ===================================================================
@@ -1862,11 +1776,13 @@ datetimeconverterClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         # MAIN RUN METHOD
         # ===================================================================
 
-        .run = function() {
+        .prepareDatetimeRun = function() {
 
             # Notices accumulate on the instance, which persists across run cycles;
             # without this reset the same notice is re-rendered once per option change.
             private$.noticeList <- list()
+            for (name in c("conversionRows", "componentRows", "qualityCounts"))
+                .populateSurvivalTable(self$results[[name]], data.frame())
 
             # Same hazard, different field: .twoDigitYearSource is set only on the
             # text-parsing branch, so a later run on a POSIXct or Excel-serial column
@@ -1954,7 +1870,7 @@ datetimeconverterClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         name = datetime_var, available = available_preview)
                 )
                 private$.renderNotices()
-                return()
+                jmvcore::reject(tail(private$.noticeList, 1)[[1]]$content)
             }
 
             if (nrow(data) == 0) {
@@ -1964,7 +1880,7 @@ datetimeconverterClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     content = .("Dataset contains no rows. \u2022 Please ensure your dataset has at least one observation. \u2022 Check for data loading or filtering issues.")
                 )
                 private$.renderNotices()
-                return()
+                jmvcore::reject(tail(private$.noticeList, 1)[[1]]$content)
             }
 
             # Prepare datetime values for parsing
@@ -1978,9 +1894,10 @@ datetimeconverterClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         name = datetime_var)
                 )
                 private$.renderNotices()
-                return()
+                jmvcore::reject(tail(private$.noticeList, 1)[[1]]$content)
             }
 
+            private$.checkpoint()
             prepared <- private$.prepareDatetimeInput(datetime_vector)
             if (all(is.na(prepared$quality_vector))) {
                 private$.addNotice(
@@ -1991,9 +1908,13 @@ datetimeconverterClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         name = datetime_var)
                 )
                 private$.renderNotices()
-                return()
+                jmvcore::reject(tail(private$.noticeList, 1)[[1]]$content)
             }
 
+            private$.parseDatetimeRun(name, data, datetime_var, prepared)
+        },
+
+        .parseDatetimeRun = function(name, data, datetime_var, prepared) {
             original_display <- prepared$original_display
             parsing_vector <- prepared$parsing_vector
             quality_vector <- prepared$quality_vector
@@ -2017,10 +1938,15 @@ datetimeconverterClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 # serials gave 2037-2752 and the grade said "Excellent". Skipped
                 # when a magnitude guard has already questioned the column.
                 if (isTRUE(prepared$format_hint %in% c("excel_serial", "excel_serial_1904",
-                                                       "unix_epoch", "unix_epoch_ms")) &&
+                                                       "unix_epoch", "unix_epoch_ms",
+                                                       "posixct", "date")) &&
                     !any(vapply(private$.noticeList,
                                 function(n) identical(n$class, "date-suspect"), logical(1))))
-                    private$.flagImplausibleYears(parsed_dates, numeric = TRUE)
+                    private$.flagImplausibleYears(
+                        parsed_dates,
+                        numeric = prepared$format_hint %in% c("excel_serial", "excel_serial_1904",
+                                                              "unix_epoch", "unix_epoch_ms")
+                    )
                 # Only for TRUE POSIXct/Date input. The numeric force_format branches also
                 # return already_parsed = TRUE, and for those the selection was honoured,
                 # not ignored -- the note contradicted the "Forced ... interpretation"
@@ -2036,6 +1962,7 @@ datetimeconverterClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         fmt = private$.formatLabel(self$options$datetime_format)))
                 }
             } else {
+                private$.checkpoint()
                 if (self$options$datetime_format == "auto") {
                     detection <- private$.detectDatetimeFormat(parsing_vector)
                     detected_format <- detection$format
@@ -2185,6 +2112,10 @@ datetimeconverterClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             }
 
             # Assess quality
+            private$.assessDatetimeRun(name, data, datetime_var, prepared, original_display, quality_vector, preprocessing_notes, format_warnings, tz_info, parsed_dates, detected_format, detection)
+        },
+
+        .assessDatetimeRun = function(name, data, datetime_var, prepared, original_display, quality_vector, preprocessing_notes, format_warnings, tz_info, parsed_dates, detected_format, detection) {
             quality <- private$.assessQuality(quality_vector, parsed_dates)
 
             # Add quality threshold notices
@@ -2315,6 +2246,10 @@ datetimeconverterClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 notes_html,
                 "</div>"
             )
+            private$.publishDatetimeRun(name, data, datetime_var, original_display, parsed_dates, detected_format, quality, misuse_warnings, tz_summary, format_html)
+        },
+
+        .publishDatetimeRun = function(name, data, datetime_var, original_display, parsed_dates, detected_format, quality, misuse_warnings, tz_summary, format_html) {
             self$results$formatInfo$setContent(format_html)
 
             # Generate quality metrics
@@ -2336,6 +2271,7 @@ datetimeconverterClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             self$results$previewTable$setContent(preview_html)
 
             # Extract components (always extract to show preview)
+            private$.checkpoint()
             components <- private$.extractComponents(parsed_dates)
 
             # Generate component preview
@@ -2347,7 +2283,7 @@ datetimeconverterClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 self$results$componentPreview$setContent(component_preview_html)
             } else {
                 self$results$componentPreview$setContent(
-                    "<p><em>No components selected for extraction. Use the preview checkboxes or 'Add to Data' toggles in the left panel to extract datetime components.</em></p>"
+                    paste0("<p><em>", .("No components selected for extraction. Use the preview checkboxes or 'Add to Data' toggles in the left panel to extract datetime components."), "</em></p>")
                 )
             }
 
@@ -2443,6 +2379,10 @@ datetimeconverterClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 self$results$weeknum_out$setValues(as.numeric(components[["weeknum"]]))
             }
 
+            private$.finishDatetimeRun(name, datetime_var, parsed_dates, detected_format, quality, misuse_warnings, tz_summary, components, out_row_nums)
+        },
+
+        .finishDatetimeRun = function(name, datetime_var, parsed_dates, detected_format, quality, misuse_warnings, tz_summary, components, out_row_nums) {
             if (!is.null(components[["quarter"]]) && self$results$quarter_out$isNotFilled()) {
                 self$results$quarter_out$setRowNums(out_row_nums)
                 self$results$quarter_out$setValues(as.numeric(components[["quarter"]]))
@@ -2492,31 +2432,31 @@ datetimeconverterClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             private$.renderNotices()
         },
 
+        .run = function() {
+            private$.prepareDatetimeRun()
+        },
+
         .formatQualityMetricsGuide = function(quality, success_rate_display) {
-            quality_html <- paste0(
-                "<div style='background-color: rgba(33, 159, 33, 0.1); padding: 15px; border-radius: 8px; color: inherit;'>",
-                "<h4 style='margin-top: 0;'>Quality Assessment</h4>",
-                "<table style='width: 100%; border-collapse: collapse;'>",
-                "<tr><td style='padding: 6px; border: 1px solid #ddd;'><strong>Total Observations:</strong></td><td style='padding: 6px; border: 1px solid #ddd;'>", quality$total_observations, "</td></tr>",
-                "<tr><td style='padding: 6px; border: 1px solid #ddd;'><strong>Originally Missing:</strong></td><td style='padding: 6px; border: 1px solid #ddd;'>", quality$original_missing, "</td></tr>",
-                "<tr><td style='padding: 6px; border: 1px solid #ddd;'><strong>Successfully Parsed:</strong></td><td style='padding: 6px; border: 1px solid #ddd;'>", quality$successfully_parsed, " (", success_rate_display, ")</td></tr>",
-                "<tr><td style='padding: 6px; border: 1px solid #ddd;'><strong>Failed Parsing:</strong></td><td style='padding: 6px; border: 1px solid #ddd;'>", quality$failed_parsing, "</td></tr>"
-            )
-
+            values <- data.frame(metric = c(.("Total Observations:"), .("Originally Missing:"),
+                .("Successfully Parsed:"), .("Failed Parsing:")),
+                count = c(quality$total_observations, quality$original_missing,
+                    quality$successfully_parsed, quality$failed_parsing),
+                percentage = c(NA_real_, NA_real_, quality$success_rate, NA_real_))
+            names(values) <- c(.("Metric"), .("Count"), .("Percentage"))
+            .populateSurvivalTable(self$results$qualityCounts, values, c("", "dp:0", "dp:1"))
+            quality_html <- "<div>"
             if (!is.na(quality$min_datetime)) {
-                quality_html <- paste0(quality_html,
-                    "<tr><td style='padding: 6px; border: 1px solid #ddd;'><strong>Minimum DateTime:</strong></td><td style='padding: 6px; border: 1px solid #ddd;'>", private$.datetimeText(quality$min_datetime), "</td></tr>",
-                    "<tr><td style='padding: 6px; border: 1px solid #ddd;'><strong>Maximum DateTime:</strong></td><td style='padding: 6px; border: 1px solid #ddd;'>", private$.datetimeText(quality$max_datetime), "</td></tr>",
-                    "<tr><td style='padding: 6px; border: 1px solid #ddd;'><strong>Date Range:</strong></td><td style='padding: 6px; border: 1px solid #ddd;'>", quality$range_days, " days (", quality$range_years, " years)</td></tr>"
-                )
+                quality_html <- paste0(quality_html, "<p>", .("Minimum DateTime:"), " ",
+                    private$.datetimeText(quality$min_datetime), "<br>", .("Maximum DateTime:"), " ",
+                    private$.datetimeText(quality$max_datetime), "<br>", .("Date Range:"), " ",
+                    .fmt(.("{days} days ({years} years)"), days = quality$range_days,
+                        years = quality$range_years), "</p>")
             }
-
-            quality_html <- paste0(quality_html, "</table>")
 
             # Add sample of failed values if any
             if (length(quality$failed_samples) > 0) {
                 quality_html <- paste0(quality_html,
-                    "<h5 style='margin-top: 15px; font-weight: bold;'>Sample of Failed Values:</h5>",
+                    "<h5 style='margin-top: 15px; font-weight: bold;'>", .("Sample of Failed Values:"), "</h5>",
                     "<ul style='font-weight: bold;'>"
                 )
                 for (failed_val in quality$failed_samples) {

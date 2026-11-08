@@ -17,6 +17,7 @@ probabilities, person-time incidence rates and piecewise hazard rates.
 \section{Methods}{
 \subsection{Public methods}{
   \itemize{
+    \item \href{#method-singlearmClass-init}{\code{singlearmClass$init()}}
     \item \href{#method-singlearmClass-clone}{\code{singlearmClass$clone()}}
   }
 }
@@ -40,7 +41,6 @@ probabilities, person-time incidence rates and piecewise hazard rates.
   <li><span class="pkg-link" data-pkg="jmvcore" data-topic="Analysis" data-id="asProtoBuf"><a href='../../jmvcore/html/Analysis.html#method-Analysis-asProtoBuf'><code>jmvcore::Analysis$asProtoBuf()</code></a></span></li>
   <li><span class="pkg-link" data-pkg="jmvcore" data-topic="Analysis" data-id="asSource"><a href='../../jmvcore/html/Analysis.html#method-Analysis-asSource'><code>jmvcore::Analysis$asSource()</code></a></span></li>
   <li><span class="pkg-link" data-pkg="jmvcore" data-topic="Analysis" data-id="check"><a href='../../jmvcore/html/Analysis.html#method-Analysis-check'><code>jmvcore::Analysis$check()</code></a></span></li>
-  <li><span class="pkg-link" data-pkg="jmvcore" data-topic="Analysis" data-id="init"><a href='../../jmvcore/html/Analysis.html#method-Analysis-init'><code>jmvcore::Analysis$init()</code></a></span></li>
   <li><span class="pkg-link" data-pkg="jmvcore" data-topic="Analysis" data-id="optionsChangedHandler"><a href='../../jmvcore/html/Analysis.html#method-Analysis-optionsChangedHandler'><code>jmvcore::Analysis$optionsChangedHandler()</code></a></span></li>
   <li><span class="pkg-link" data-pkg="jmvcore" data-topic="Analysis" data-id="postInit"><a href='../../jmvcore/html/Analysis.html#method-Analysis-postInit'><code>jmvcore::Analysis$postInit()</code></a></span></li>
   <li><span class="pkg-link" data-pkg="jmvcore" data-topic="Analysis" data-id="print"><a href='../../jmvcore/html/Analysis.html#method-Analysis-print'><code>jmvcore::Analysis$print()</code></a></span></li>
@@ -53,6 +53,25 @@ probabilities, person-time incidence rates and piecewise hazard rates.
   <li><code>singlearmBase$initialize()</code></li>
 </ul>
 </details>}}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-singlearmClass-init"></a>}}
+\if{latex}{\out{\hypertarget{method-singlearmClass-init}{}}}
+\subsection{\code{singlearmClass$init()}}{
+  Initialize safely when the supplied data has no selected variables.
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{singlearmClass$init(noThrow = FALSE)}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{noThrow}}{Whether initialization errors are stored in the results.}
+    }
+    \if{html}{\out{</div>}}
+  }
+}
+
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-singlearmClass-clone"></a>}}
 \if{latex}{\out{\hypertarget{method-singlearmClass-clone}{}}}

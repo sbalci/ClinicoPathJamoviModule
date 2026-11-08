@@ -11,18 +11,28 @@ prevents them. Newest first. Release notes for users live in `NEWS.md`.
 
 - **Failure mode:** (1) swimmerplot counted patients with more than one response ROW as having a derived,
   unconfirmed best response, so a patient-level BOR repeated on every row produced a false "not a RECIST
-  BOR" warning and manuscript sentence. (2) waterfall's "no negative changes" scale guard was gated on
-  `is.null(timeVar)`, so percent-of-baseline values (100 = no change) in long data with no time-0 row made
-  every patient PD in silence. (3) ihcheterogeneity applied the Krouwer three-slope rule to region-vs-
-  reference rows but bypassed it for region pairs (`isTRUE(r$pair) ||`), so unequal precision between two
-  regions read as proportional bias in 35-70% of unbiased studies.
+  BOR" warning and manuscript sentence; excluded rows also needed row-index filtering so milestones,
+  events, and sort variables could not read excluded episodes. (2) waterfall's "no negative changes" scale
+  guard was gated on `is.null(timeVar)`, so percent-of-baseline values (100 = no change) in long data with
+  no time-0 row made every patient PD in silence; per-visit `responseCategoryVar` overrides also needed to
+  cap `first_pd` in `.processData()` and feed `TTR`/`DoR`, and reading `responseCategoryVar` or `groupVar`
+  from `processed_df` after writing `processed_df$response` silently overwrote columns named `"response"`.
+  (3) ihcheterogeneity applied the Krouwer three-slope rule to region-vs-reference rows but bypassed it
+  for region pairs (`isTRUE(r$pair) ||`), so unequal precision between two regions read as proportional
+  bias in 35-70% of unbiased studies; Allred scores (`0, 2-8`) also needed the ordinal guard across all
+  tables (`reproducibilitytable`, `samplingbiastable`, `spatialanalysistable`, `compartmentComparison`).
+  (4) diagnosticmeta rounded near-100% pooled accuracy (`99.979%`) to `"100.0%"` with `"missing only 0"`
+  and `"LR- = 0.00"`, and IEEE-754 boundary values (`89.999999999999986` for `90.0%`) fell into `"good"`
+  instead of `"excellent"`.
 - **Detection signal:** one reviewer per analysis told to probe option x coding combinations against
-  independent oracles (repeated BOR per row; percent-of-baseline coding; no reference with unequal SDs),
-  every MEDIUM+ with an executed repro; fixes verified red on the old sibling, green on the fixed copy.
+  independent oracles (repeated BOR per row; percent-of-baseline coding; no reference with unequal SDs;
+  near-100% and 90.0% boundary accuracy), every MEDIUM+ with an executed repro; fixes verified red on the
+  old sibling, green on the fixed copy.
 - **Prevention rule:** a per-patient count of "several values" must count distinct normalised values,
   not rows. A guard that protects against a data-scale mix-up must not be switched off by an unrelated
   option. When an artefact correction is added for one design, grep for every other branch that computes
-  the same statistic (`pair`, `no reference`, `by group`) and apply it there in the same change.
+  the same statistic (`pair`, `no reference`, `by group`) and apply it there in the same change. Never
+  read user-selected columns from a data frame after overwriting an internal column name like `response`.
 
 ## 2026-11-07 — jsurvival 1.1.3 maintainer decisions: an unusable example documented instead of fixed
 

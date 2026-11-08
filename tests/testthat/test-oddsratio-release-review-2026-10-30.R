@@ -12,13 +12,13 @@ rr_or <- function(d, expl, pos = "Y", neg = "N", dp = NULL, pl = NULL, nl = NULL
          predictorNegativeLevel = nl), list(...))))
 }
 
-# html kable -> character matrix; row 1 is the header.
+# Native finalfit result grid; first row retains the display headers.
 rr_table <- function(res) {
-  rows <- regmatches(res$text$content, gregexpr("<tr>.*?</tr>", res$text$content))[[1]]
-  do.call(rbind, lapply(rows, function(x) {
-    cl <- regmatches(x, gregexpr("<t[hd][^>]*>.*?</t[hd]>", x))[[1]]
-    gsub("&lt;", "<", trimws(gsub("<[^>]+>", "", cl)))
-  }))
+  tb <- res$fittedTable
+  headers <- vapply(tb$columns, function(x) x$title, character(1))
+  cells <- as.matrix(tb$asDF)
+  cells[is.na(cells)] <- ""
+  unname(rbind(headers, cells))
 }
 rr_txt <- function(x) gsub("\\s+", " ", gsub("<[^>]+>", " ", paste(x, collapse = " ")))
 rr_notices <- function(res, item = "strongWarnings") rr_txt(res[[item]]$content)

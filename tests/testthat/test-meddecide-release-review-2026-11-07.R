@@ -97,3 +97,115 @@ test_that("decisioncalculator: F1 is exactly 0 with no true positive; an undefin
   expect_equal(nrow(ppv), 1)
   expect_true(is.na(ppv$est) && is.na(ppv$lower) && is.na(ppv$upper))
 })
+
+test_that("enhancedROC: CI text keeps 3 decimals, McClish below-diagonal sets a kept table note without R warning, and Unit of observation marks default", {
+  withr::local_seed(42)
+  y <- factor(rep(c("neg", "pos"), each = 40), levels = c("neg", "pos"))
+  x <- c(stats::rnorm(40, 0, 1), stats::rnorm(40, 1.4, 1))
+  x_inv <- -x
+  d <- data.frame(y = y, x = x, x_inv = x_inv)
+
+  res <- expect_no_warning(enhancedROC(
+    data = d, outcome = "y", positiveClass = "pos", validationNegative = "neg",
+    predictors = c("x", "x_inv"), direction = "higher",
+    diagnosticMetrics = TRUE, partialAuc = TRUE,
+    partialAucFrom = 0.8, partialAucTo = 1.0,
+    showTableNotes = FALSE
+  ))
+
+  dp <- agreement_item(res, "diagnosticPerformance")$asDF
+  expect_true(all(grepl("^\\([0-9]\\.[0-9]{3}, [0-9]\\.[0-9]{3}\\)$", dp$sensitivity_ci)))
+  expect_true(all(grepl("^\\([0-9]\\.[0-9]{3}, [0-9]\\.[0-9]{3}\\)$", dp$specificity_ci)))
+
+  pauc_tbl <- agreement_item(res, "partialAucAnalysis")
+  expect_true("mcclish_below_diagonal" %in% names(pauc_tbl$notes))
+  expect_match(pauc_tbl$notes$mcclish_below_diagonal$note, "McClish correction", fixed = TRUE)
+
+  res_val <- enhancedROC(
+    data = d, outcome = "y", positiveClass = "pos", validationNegative = "neg",
+    predictors = "x", direction = "higher",
+    validationPanel = TRUE, cohortRole = "development"
+  )
+  vc <- agreement_item(res_val, "validationContext")$asDF
+  unit_row <- vc[vc$setting == "Unit of observation", , drop = FALSE]
+  expect_equal(unit_row$value, "slide (default setting)")
+})
+
+test_that("psychopdaROC: fixedSensSpecTable missed_target_ note keys do not collide for A B vs A.B", {
+  withr::local_seed(7)
+  d <- data.frame(
+    y = factor(rep(c("neg", "pos"), each = 10), levels = c("neg", "pos")),
+    `A B` = c(1:10, 4:13),
+    `A.B` = c(1:10, 5:14),
+    check.names = FALSE
+  )
+  res <- psychopdaROC(
+    data = d, dependentVars = c("A B", "A.B"),
+    classVar = "y", positiveClass = "pos", negativeClass = "neg",
+    fixedSensSpecAnalysis = TRUE, fixedAnalysisType = "sensitivity",
+    fixedSensitivityValue = 0.95, fixedInterpolation = "linear"
+  )
+  note_keys <- names(res$fixedSensSpecTable$notes)
+  expect_true("missed_target_A B" %in% note_keys)
+  expect_true("missed_target_A.B" %in% note_keys)
+})
+
+test_that("agreement: hierarchicalKappa and mixedEffectsComparison emit one sub-analysis notice each when required variable is missing", {
+  d <- data.frame(
+    R1 = c(1, 2, 3, 4, 5, 6),
+    R2 = c(1.1, 2.1, 2.9, 4.2, 5.0, 5.8)
+  )
+  a <- agreement_run(
+    d, vars = c("R1", "R2"),
+    hierarchicalKappa = TRUE, clusterSpecificKappa = TRUE,
+    varianceDecomposition = TRUE, iccHierarchical = TRUE,
+    testClusterHomogeneity = TRUE, mixedEffectsComparison = TRUE
+  )
+  notices <- Filter(function(it) inherits(it, "Notice") && isTRUE(it$visible), a$results$items)
+  notice_names <- unname(vapply(notices, function(it) it$name, character(1)))
+  expect_identical(
+    sort(notice_names[startsWith(notice_names, "agreement_")]),
+    c("agreement_hierarchicalOverallTable", "agreement_mixedEffectsTable")
+  )
+})
+
+test_that("decision: comparatorCases notes truncation when discordant cases exceed maxCasesShow", {
+  d <- rv_mk(10, 8, 7, 10)
+  r <- rv_dec(d, referenceType = "method", showMisclassified = TRUE, maxCasesShow = 10)
+  expect_equal(r$comparatorCases$rowCount, 10)
+  expect_true("truncated" %in% names(r$comparatorCases$notes))
+  expect_match(r$comparatorCases$notes$truncated$note, "Showing the first 10 of 15 discordant cases.", fixed = TRUE)
+})
+
+test_that("decisioncompare: originalCrossTab notes missing rows and cTable1-2 name the reference and test levels", {
+  d <- data.frame(
+    gold = factor(c(rep("pos", 15), rep("neg", 15)), levels = c("pos", "neg")),
+    t1   = factor(c(rep("pos", 12), rep("neg", 3), NA, rep("neg", 14)), levels = c("pos", "neg")),
+    t2   = factor(c(rep("pos", 10), rep("neg", 5), rep("pos", 2), rep("neg", 13)), levels = c("pos", "neg"))
+  )
+  r <- decisioncompare(
+    data = d, gold = "gold", goldPositive = "pos", goldNegative = "neg",
+    test1 = "t1", test1Positive = "pos", test1Negative = "neg",
+    test2 = "t2", test2Positive = "pos", test2Negative = "neg",
+    test3Positive = NULL, test3Negative = NULL, od = TRUE
+  )
+  expect_true("missing" %in% names(r$originalCrossTab$notes))
+  expect_match(r$originalCrossTab$notes$missing$note, "t1: 1 of 30 rows", fixed = TRUE)
+  expect_true("levels" %in% names(r$cTable1$notes))
+  expect_match(r$cTable1$notes$levels$note, 'Reference Positive is "pos"', fixed = TRUE)
+})
+
+test_that("decisioncurve: benefitRangeTable flags when the benefit range touches the analyzed window boundary", {
+  withr::local_seed(19)
+  y <- factor(rep(c("no", "yes"), each = 50), levels = c("no", "yes"))
+  p <- c(stats::runif(50, 0.02, 0.35), stats::runif(50, 0.65, 0.98))
+  d <- data.frame(y = y, p = p)
+  r <- decisioncurve(
+    data = d, outcome = "y", outcomePositive = "yes",
+    models = "p", decisionRulePositive = NULL, showBenefitRange = TRUE,
+    thresholdRange = "custom",
+    thresholdMin = 0.20, thresholdMax = 0.80, thresholdStep = 0.05
+  )
+  expect_true("window_edge" %in% names(r$benefitRangeTable$notes))
+  expect_match(r$benefitRangeTable$notes$window_edge$note, "reaches the boundary of the analysed threshold window", fixed = TRUE)
+})

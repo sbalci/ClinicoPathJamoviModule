@@ -279,8 +279,11 @@ datetimeconverterResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
         notices = function() private$.items[["notices"]],
         welcome = function() private$.items[["welcome"]],
         formatInfo = function() private$.items[["formatInfo"]],
+        qualityCounts = function() private$.items[["qualityCounts"]],
         qualityMetrics = function() private$.items[["qualityMetrics"]],
+        conversionRows = function() private$.items[["conversionRows"]],
         previewTable = function() private$.items[["previewTable"]],
+        componentRows = function() private$.items[["componentRows"]],
         componentPreview = function() private$.items[["componentPreview"]],
         qualityAssessment = function() private$.items[["qualityAssessment"]],
         nlSummary = function() private$.items[["nlSummary"]],
@@ -332,6 +335,17 @@ datetimeconverterResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
                     "datetime_format",
                     "timezone",
                     "two_digit_year")))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="qualityCounts",
+                title="Parsing Counts",
+                rows=0,
+                columns=list(),
+                clearWith=list(
+                    "datetime_var",
+                    "datetime_format",
+                    "timezone",
+                    "two_digit_year")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="qualityMetrics",
@@ -341,6 +355,18 @@ datetimeconverterResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
                     "datetime_format",
                     "timezone",
                     "two_digit_year")))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="conversionRows",
+                title="Conversion Values",
+                rows=0,
+                columns=list(),
+                clearWith=list(
+                    "datetime_var",
+                    "datetime_format",
+                    "timezone",
+                    "two_digit_year",
+                    "preview_rows")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="previewTable",
@@ -351,6 +377,12 @@ datetimeconverterResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
                     "timezone",
                     "two_digit_year",
                     "preview_rows")))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="componentRows",
+                title="Extracted Component Values",
+                rows=0,
+                columns=list()))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="componentPreview",
@@ -626,8 +658,11 @@ datetimeconverterBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
 #'   \code{results$notices} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$welcome} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$formatInfo} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$qualityCounts} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$qualityMetrics} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$conversionRows} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$previewTable} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$componentRows} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$componentPreview} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$qualityAssessment} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$nlSummary} \tab \tab \tab \tab \tab a html \cr
@@ -648,6 +683,12 @@ datetimeconverterBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
 #'   \code{results$quarter_out} \tab \tab \tab \tab \tab an output \cr
 #'   \code{results$dayofyear_out} \tab \tab \tab \tab \tab an output \cr
 #' }
+#'
+#' Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
+#'
+#' \code{results$qualityCounts$asDF}
+#'
+#' \code{as.data.frame(results$qualityCounts)}
 #'
 #' @export
 datetimeconverter <- function(

@@ -2498,6 +2498,7 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
             private$.syncRows(range_table, row_keys)
             has_gap <- character(0)
             none_beneficial <- character(0)
+            at_edge <- character(0)
 
             for (i in seq_along(model_names)) {
                 model_name <- model_names[i]
@@ -2511,8 +2512,16 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
 
                 if (is.na(info$range_start)) {
                     none_beneficial <- c(none_beneficial, model_name)
-                } else if (isFALSE(info$contiguous)) {
-                    has_gap <- c(has_gap, model_name)
+                } else {
+                    if (isFALSE(info$contiguous)) {
+                        has_gap <- c(has_gap, model_name)
+                    }
+                    grid_th <- model_results$thresholds
+                    if (length(grid_th) > 0 &&
+                        (abs(info$range_start - min(grid_th)) < 1e-9 ||
+                         abs(info$range_end - max(grid_th)) < 1e-9)) {
+                        at_edge <- c(at_edge, model_name)
+                    }
                 }
 
                 row_values <- list(
@@ -2556,6 +2565,18 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                         .("The start and end shown span a gap where the model is not superior - read the curve rather than the endpoints.")
                     )
                 )
+            } else {
+                range_table$setNote("gap", NULL)
+            }
+
+            if (length(at_edge) > 0) {
+                range_table$setNote(
+                    "window_edge",
+                    .fmt(.('{models} reaches the boundary of the analysed threshold window, so the full range of benefit may extend beyond the thresholds examined.'),
+                         models = .rocLabel(paste(at_edge, collapse = ", ")))
+                )
+            } else {
+                range_table$setNote("window_edge", NULL)
             }
         },
 

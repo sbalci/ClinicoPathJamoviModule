@@ -73,6 +73,16 @@
 lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
     "lassocoxClass",
     inherit = lassocoxBase,
+    public = list(
+        #' @description Initialize safely when the supplied data has no selected variables.
+        #' @param noThrow Whether initialization errors are stored in the results.
+        init = function(noThrow = FALSE) {
+            if (!is.null(private$.data) && length(self$options$varsRequired) == 0L) {
+                private$.data <- data.frame()
+            }
+            super$init(noThrow = noThrow)
+        }
+    ),
     private = list(
 
         .sourcifyOption = function(option) {
@@ -192,8 +202,9 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             }
 
             # Collect warnings during the pipeline so they appear in jamovi GUI
-            collected_warnings <- character(0)
-            stability_warnings <- character(0)
+            warn_env <- new.env(parent = emptyenv())
+            warn_env$collected <- character(0)
+            warn_env$stability <- character(0)
 
             # Warnings are collected into the results panel. Errors are deliberately
             # NOT caught: a catch-all here swallowed every jmvcore::reject() raised by
@@ -225,15 +236,15 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                     # Save plot data for rendering
                     private$.savePlotData(results)
 
-                    if (length(stability_warnings)) {
+                    if (length(warn_env$stability)) {
                         self$results$todo$setContent(paste0(self$results$todo$content,
                             "<div class='alert alert-danger'><h4>", .("Model stability warnings"),
-                            "</h4><ul>", paste0("<li>", htmltools::htmlEscape(stability_warnings),
+                            "</h4><ul>", paste0("<li>", htmltools::htmlEscape(warn_env$stability),
                                 "</li>", collapse = ""), "</ul></div>"))
                     }
                     # Display collected warnings in results panel
-                    if (length(collected_warnings) > 0) {
-                        warn_items <- paste0("<li>", htmltools::htmlEscape(collected_warnings), "</li>",
+                    if (length(warn_env$collected) > 0) {
+                        warn_items <- paste0("<li>", htmltools::htmlEscape(warn_env$collected), "</li>",
                                              collapse = "")
                         warn_html <- paste0(
                             "<div class='alert alert-warning'>",
@@ -248,8 +259,8 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 },
                 warning = function(w) {
                     if (inherits(w, "lassocox_instability")) {
-                        stability_warnings <<- c(stability_warnings, conditionMessage(w))
-                    } else collected_warnings <<- c(collected_warnings, conditionMessage(w))
+                        warn_env$stability <- c(warn_env$stability, conditionMessage(w))
+                    } else warn_env$collected <- c(warn_env$collected, conditionMessage(w))
                     invokeRestart("muffleWarning")
                 }
             )
@@ -265,7 +276,7 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 performance = "value",
                 modelComparison = c("n_variables", "cindex", "aic", "log_likelihood"))
             for (name in c(names(fixed_columns), "coefficients", "variableImportance",
-                "encoding", "reproducibility")) {
+                "encoding", "reproducibility", "suitabilityChecks")) {
                 table <- self$results[[name]]
                 for (key in names(table$notes)) table$setNote(key, NULL, init = FALSE)
                 if (keep_rows && name %in% names(fixed_columns)) {
@@ -291,6 +302,9 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         },
 
         # Comprehensive data cleaning and validation
+        # library-audit 2026-09-15 jsurvival [LOW] PARTIAL: extracted .encodeOutcome() and .buildDesignMatrix()
+        #   from .cleanData(), and .assessCollinearity() and .assessPhAssumption() from .assessSuitability();
+        #   older .run() bodies remain deferred background cleanup (guide §2)
         .cleanData = function() {
             data <- self$data
             time_var <- self$options$elapsedtime
@@ -341,6 +355,138 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                     vars = paste(empty_vars, collapse = ", ")))
             }
 
+            outcome_info <- private$.encodeOutcome(outcome_raw)
+            status <- outcome_info$status
+            event_level_used <- outcome_info$event_level_used
+            censor_level_used <- outcome_info$censor_level_used
+
+            # Sanitize factor predictors with explicit NA levels (e.g., from addNA())
+            # so complete.cases() and contrast construction treat NA levels as missing.
+            for (var_name in names(predictors)) {
+                x <- predictors[[var_name]]
+                if (is.factor(x) && (anyNA(levels(x)) || any(is.na(as.character(x)) & !is.na(x)))) {
+                    keep_lev <- levels(x)[!is.na(levels(x))]
+                    predictors[[var_name]] <- factor(as.character(x), levels = keep_lev, ordered = is.ordered(x))
+                }
+            }
+
+            # Remove constant explanatory variables instead of failing hard.
+            # Evaluate constancy only on rows with valid time and outcome status so
+            # predictor values on already-excluded incomplete-outcome rows cannot alter
+            # complete-case listwise deletion.
+            valid_outcome <- !is.na(time) & !is.na(status)
+            constant_vars <- sapply(predictors, function(x) {
+                vals <- x[valid_outcome & !is.na(x)]
+                length(unique(vals)) <= 1
+            })
+            constant_var_names <- names(predictors)[constant_vars]
+            if (any(constant_vars)) {
+                constant_var_names <- names(predictors)[constant_vars]
+                predictors <- predictors[, !constant_vars, drop = FALSE]
+                explanatory_vars <- names(predictors)
+                warning(.fmt(.('Removed constant explanatory variables: {vars}'),
+                    vars = paste(constant_var_names, collapse = ", ")))
+            }
+            if (ncol(predictors) == 0) {
+                jmvcore::reject(.("No valid explanatory variables remain after removing constant predictors."))
+            }
+            # Complete-case filtering across all analysis inputs
+            complete <- complete.cases(time, status, predictors)
+            n_complete <- sum(complete)
+            n_excluded <- length(complete) - n_complete
+
+            if (n_complete < 10) {
+                jmvcore::reject(.fmt(.('Too few complete cases for analysis ({n}). Need at least 10 complete observations.'),
+                    n = n_complete))
+            }
+            if (n_excluded > 0) {
+                warning(.fmt(.('Excluded {n} row(s) with missing values in time/outcome/predictors (complete-case analysis).'),
+                    n = n_excluded))
+            }
+
+            time_cc <- time[complete]
+            status_cc <- status[complete]
+
+            if (any(!is.finite(time_cc))) {
+                jmvcore::reject(.("Time variable contains non-finite values after filtering. Please correct the input."))
+            }
+            if (any(time_cc < 0, na.rm = TRUE)) {
+                jmvcore::reject(.("Time variable contains negative values. This Cox engine requires strictly positive follow-up times."))
+            }
+            if (any(time_cc == 0, na.rm = TRUE)) {
+                jmvcore::reject(.("Time variable contains zero values. This Cox engine requires strictly positive follow-up times. Check the time origin and measurement resolution; times have not been automatically adjusted."))
+            }
+
+            # Outcome must remain binary after complete-case filtering
+            if (!(length(unique(status_cc)) == 2 && all(unique(status_cc) %in% c(0, 1)))) {
+                jmvcore::reject(.("Outcome is not binary after complete-case filtering. Check event level and missing-data pattern."))
+            }
+
+            n_events <- sum(status_cc == 1)
+            n_censored <- sum(status_cc == 0)
+            if (n_events < 3 || n_censored < 3) {
+                jmvcore::reject(.fmt(
+                    .('Stratified cross-validation requires at least 3 events and 3 censored observations. Found {nEvents} events and {nCensored} censored observations. This is a computational minimum, not evidence that the sample is adequate for prediction modeling.'),
+                    nEvents = n_events, nCensored = n_censored))
+            }
+
+            if (n_events < 10 || n_censored < 10) {
+                private$.warnInstability(.fmt(
+                    .('Only {nEvents} events and {nCensored} censored observations are available. Cross-validation and selected coefficients may be highly unstable; no fixed event count guarantees reliable prediction modeling.'),
+                    nEvents = n_events, nCensored = n_censored))
+            }
+
+            design_info <- private$.buildDesignMatrix(predictors, valid_outcome, complete, n_events)
+            X <- design_info$X
+            encoding <- design_info$encoding
+            factor_levels <- design_info$factor_levels
+            factor_predictors <- design_info$factor_predictors
+            removed_design_columns <- design_info$removed_design_columns
+
+            # Keep the design matrix on its original scale. glmnet receives the
+            # standardize option below, so each cross-validation training fit performs
+            # its own internal scaling rather than using means/SDs calculated from the
+            # held-out rows. glmnet back-transforms returned coefficients to the original
+            # predictor scale; the values retained here are descriptive only.
+            if (self$options$standardize) {
+                scale_vals <- apply(X, 2, stats::sd)
+                scale_vals[is.na(scale_vals) | scale_vals == 0] <- 1
+                scaling_info <- list(
+                    center = colMeans(X),
+                    scale = scale_vals
+                )
+            } else {
+                scaling_info <- NULL
+            }
+
+            if (any(is.infinite(X))) {
+                jmvcore::reject(.("Design matrix contains infinite values. Check for extreme outliers."))
+            }
+
+            return(list(
+                time = time_cc,
+                status = status_cc,
+                X = X,
+                n = n_complete,
+                n_events = n_events,
+                n_censored = n_censored,
+                variable_names = colnames(X),
+                original_variable_names = explanatory_vars,
+                candidate_variables = candidate_variables,
+                removed_constants = constant_var_names,
+                removed_design_columns = removed_design_columns,
+                encoding = encoding,
+                factor_levels = factor_levels,
+                factor_predictors = factor_predictors,
+                scaling_info = scaling_info,
+                complete_cases = which(complete),
+                event_level_used = event_level_used,
+                censor_level_used = censor_level_used,
+                excluded_rows = n_excluded
+            ))
+        },
+
+        .encodeOutcome = function(outcome_raw) {
             # Determine event coding robustly for factor/character/numeric outcomes
             # Uses strict two-level encoding: event_level -> 1, censor_level -> 0,
             # anything else (including NA) -> NA (excluded by complete.cases)
@@ -443,82 +589,14 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 status[outcome_num == censor_level_num] <- 0
             }
 
-            # Sanitize factor predictors with explicit NA levels (e.g., from addNA())
-            # so complete.cases() and contrast construction treat NA levels as missing.
-            for (var_name in names(predictors)) {
-                x <- predictors[[var_name]]
-                if (is.factor(x) && (anyNA(levels(x)) || any(is.na(as.character(x)) & !is.na(x)))) {
-                    keep_lev <- levels(x)[!is.na(levels(x))]
-                    predictors[[var_name]] <- factor(as.character(x), levels = keep_lev, ordered = is.ordered(x))
-                }
-            }
+            list(
+                status = status,
+                event_level_used = event_level_used,
+                censor_level_used = censor_level_used
+            )
+        },
 
-            # Remove constant explanatory variables instead of failing hard.
-            # Evaluate constancy only on rows with valid time and outcome status so
-            # predictor values on already-excluded incomplete-outcome rows cannot alter
-            # complete-case listwise deletion.
-            valid_outcome <- !is.na(time) & !is.na(status)
-            constant_vars <- sapply(predictors, function(x) {
-                vals <- x[valid_outcome & !is.na(x)]
-                length(unique(vals)) <= 1
-            })
-            constant_var_names <- names(predictors)[constant_vars]
-            if (any(constant_vars)) {
-                constant_var_names <- names(predictors)[constant_vars]
-                predictors <- predictors[, !constant_vars, drop = FALSE]
-                explanatory_vars <- names(predictors)
-                warning(.fmt(.('Removed constant explanatory variables: {vars}'),
-                    vars = paste(constant_var_names, collapse = ", ")))
-            }
-            if (ncol(predictors) == 0) {
-                jmvcore::reject(.("No valid explanatory variables remain after removing constant predictors."))
-            }
-            # Complete-case filtering across all analysis inputs
-            complete <- complete.cases(time, status, predictors)
-            n_complete <- sum(complete)
-            n_excluded <- length(complete) - n_complete
-
-            if (n_complete < 10) {
-                jmvcore::reject(.fmt(.('Too few complete cases for analysis ({n}). Need at least 10 complete observations.'),
-                    n = n_complete))
-            }
-            if (n_excluded > 0) {
-                warning(.fmt(.('Excluded {n} row(s) with missing values in time/outcome/predictors (complete-case analysis).'),
-                    n = n_excluded))
-            }
-
-            time_cc <- time[complete]
-            status_cc <- status[complete]
-
-            if (any(!is.finite(time_cc))) {
-                jmvcore::reject(.("Time variable contains non-finite values after filtering. Please correct the input."))
-            }
-            if (any(time_cc < 0, na.rm = TRUE)) {
-                jmvcore::reject(.("Time variable contains negative values. This Cox engine requires strictly positive follow-up times."))
-            }
-            if (any(time_cc == 0, na.rm = TRUE)) {
-                jmvcore::reject(.("Time variable contains zero values. This Cox engine requires strictly positive follow-up times. Check the time origin and measurement resolution; times have not been automatically adjusted."))
-            }
-
-            # Outcome must remain binary after complete-case filtering
-            if (!(length(unique(status_cc)) == 2 && all(unique(status_cc) %in% c(0, 1)))) {
-                jmvcore::reject(.("Outcome is not binary after complete-case filtering. Check event level and missing-data pattern."))
-            }
-
-            n_events <- sum(status_cc == 1)
-            n_censored <- sum(status_cc == 0)
-            if (n_events < 3 || n_censored < 3) {
-                jmvcore::reject(.fmt(
-                    .('Stratified cross-validation requires at least 3 events and 3 censored observations. Found {nEvents} events and {nCensored} censored observations. This is a computational minimum, not evidence that the sample is adequate for prediction modeling.'),
-                    nEvents = n_events, nCensored = n_censored))
-            }
-
-            if (n_events < 10 || n_censored < 10) {
-                private$.warnInstability(.fmt(
-                    .('Only {nEvents} events and {nCensored} censored observations are available. Cross-validation and selected coefficients may be highly unstable; no fixed event count guarantees reliable prediction modeling.'),
-                    nEvents = n_events, nCensored = n_censored))
-            }
-
+        .buildDesignMatrix = function(predictors, valid_outcome, complete, n_events) {
             # Explicit treatment contrasts avoid dependence on global contrast options,
             # ordered-factor polynomial defaults, or custom factor contrast attributes.
             predictors_cc <- predictors[complete, , drop = FALSE]
@@ -534,75 +612,75 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             cc_constant_factors <- character()
             # Only model.matrix() is guarded: a tryCatch around this whole block re-wrapped
             # the jmvcore::reject() messages below as "Error creating design matrix: ...".
-                for (var_name in factor_predictors) {
-                    x <- predictors_cc[[var_name]]
-                    orig_x <- predictors[[var_name]][valid_outcome]
-                    orig_lev <- if (is.factor(orig_x)) levels(droplevels(orig_x)) else sort(unique(orig_x[!is.na(orig_x)]))
-                    lev <- if (is.factor(x)) levels(droplevels(x)) else sort(unique(x))
-                    if (length(lev) < 2) {
-                        cc_constant_factors <- c(cc_constant_factors, var_name)
-                        next
-                    }
-                    dropped_lev <- setdiff(orig_lev, lev)
-                    if (length(dropped_lev) > 0) {
-                        warning(.fmt(
-                            .("Factor '{var}' lost level(s) ({dropped}) after complete-case filtering; reference level is '{ref}'."),
-                            var = var_name,
-                            dropped = paste(dropped_lev, collapse = ", "),
-                            ref = lev[1]
-                        ))
-                    }
-                    factor_levels[[var_name]] <- lev
-                    predictors_cc[[var_name]] <- factor(as.character(x), levels = lev)
-                    contrasts_list[[var_name]] <- stats::contr.treatment(lev, base = 1)
+            for (var_name in factor_predictors) {
+                x <- predictors_cc[[var_name]]
+                orig_x <- predictors[[var_name]][valid_outcome]
+                orig_lev <- if (is.factor(orig_x)) levels(droplevels(orig_x)) else sort(unique(orig_x[!is.na(orig_x)]))
+                lev <- if (is.factor(x)) levels(droplevels(x)) else sort(unique(x))
+                if (length(lev) < 2) {
+                    cc_constant_factors <- c(cc_constant_factors, var_name)
+                    next
                 }
-                if (length(cc_constant_factors) > 0) {
-                    predictors_cc <- predictors_cc[, setdiff(names(predictors_cc), cc_constant_factors), drop = FALSE]
-                    factor_predictors <- setdiff(factor_predictors, cc_constant_factors)
-                    ordered_predictors <- setdiff(ordered_predictors, cc_constant_factors)
-                    if (ncol(predictors_cc) == 0) {
-                        jmvcore::reject(.("No valid explanatory variables remain after removing constant predictors."))
-                    }
+                dropped_lev <- setdiff(orig_lev, lev)
+                if (length(dropped_lev) > 0) {
+                    warning(.fmt(
+                        .("Factor '{var}' lost level(s) ({dropped}) after complete-case filtering; reference level is '{ref}'."),
+                        var = var_name,
+                        dropped = paste(dropped_lev, collapse = ", "),
+                        ref = lev[1]
+                    ))
                 }
+                factor_levels[[var_name]] <- lev
+                predictors_cc[[var_name]] <- factor(as.character(x), levels = lev)
+                contrasts_list[[var_name]] <- stats::contr.treatment(lev, base = 1)
+            }
+            if (length(cc_constant_factors) > 0) {
+                predictors_cc <- predictors_cc[, setdiff(names(predictors_cc), cc_constant_factors), drop = FALSE]
+                factor_predictors <- setdiff(factor_predictors, cc_constant_factors)
+                ordered_predictors <- setdiff(ordered_predictors, cc_constant_factors)
+                if (ncol(predictors_cc) == 0) {
+                    jmvcore::reject(.("No valid explanatory variables remain after removing constant predictors."))
+                }
+            }
 
-                design <- tryCatch(
-                    stats::model.matrix(~ ., data = predictors_cc,
-                        contrasts.arg = if (length(contrasts_list)) contrasts_list else NULL),
-                    error = function(e) jmvcore::reject(.fmt(
-                        .('Error creating design matrix: {msg}. Check factor coding and missing values.'),
-                        msg = sub("[.]$", "", conditionMessage(e)))))
-                assignments <- attr(design, "assign")[-1]
-                X <- .stripBackticks(design[, -1, drop = FALSE])
-                origins <- names(predictors_cc)[assignments]
-                encoding <- data.frame(
-                    column = colnames(X), variable = origins,
-                    coding = rep("numeric", ncol(X)),
-                    reference = rep("", ncol(X)), level = rep("", ncol(X)),
-                    stringsAsFactors = FALSE)
-                for (var_name in factor_predictors) {
-                    idx <- which(origins == var_name)
-                    encoding$coding[idx] <- if (var_name %in% ordered_predictors)
-                        "ordered_treatment" else "treatment"
-                    encoding$reference[idx] <- factor_levels[[var_name]][1]
-                    encoding$level[idx] <- factor_levels[[var_name]][-1]
-                }
-                if (any(!is.finite(X))) {
-                    jmvcore::reject(.("Encoded predictors contain non-finite values."))
-                }
-                column_variance <- apply(X, 2, stats::var)
-                if (any(!is.finite(column_variance))) {
-                    jmvcore::reject(.("Predictor variance cannot be represented numerically. Rescale extreme numeric values before fitting."))
-                }
-                valid_cols <- column_variance > 0
-                removed_design_columns <- c(cc_constant_factors, colnames(X)[!valid_cols])
-                if (length(removed_design_columns) > 0) warning(.fmt(
-                    .("Removed design columns constant in complete cases: {vars}."),
-                    vars = paste(removed_design_columns, collapse = ", ")))
-                X <- X[, valid_cols, drop = FALSE]
-                encoding <- encoding[valid_cols, , drop = FALSE]
-                if (ncol(X) < 2) {
-                    jmvcore::reject(.("At least two non-constant encoded predictor columns are required by this LASSO engine."))
-                }
+            design <- tryCatch(
+                stats::model.matrix(~ ., data = predictors_cc,
+                    contrasts.arg = if (length(contrasts_list)) contrasts_list else NULL),
+                error = function(e) jmvcore::reject(.fmt(
+                    .('Error creating design matrix: {msg}. Check factor coding and missing values.'),
+                    msg = sub("[.]$", "", conditionMessage(e)))))
+            assignments <- attr(design, "assign")[-1]
+            X <- .stripBackticks(design[, -1, drop = FALSE])
+            origins <- names(predictors_cc)[assignments]
+            encoding <- data.frame(
+                column = colnames(X), variable = origins,
+                coding = rep("numeric", ncol(X)),
+                reference = rep("", ncol(X)), level = rep("", ncol(X)),
+                stringsAsFactors = FALSE)
+            for (var_name in factor_predictors) {
+                idx <- which(origins == var_name)
+                encoding$coding[idx] <- if (var_name %in% ordered_predictors)
+                    "ordered_treatment" else "treatment"
+                encoding$reference[idx] <- factor_levels[[var_name]][1]
+                encoding$level[idx] <- factor_levels[[var_name]][-1]
+            }
+            if (any(!is.finite(X))) {
+                jmvcore::reject(.("Encoded predictors contain non-finite values."))
+            }
+            column_variance <- apply(X, 2, stats::var)
+            if (any(!is.finite(column_variance))) {
+                jmvcore::reject(.("Predictor variance cannot be represented numerically. Rescale extreme numeric values before fitting."))
+            }
+            valid_cols <- column_variance > 0
+            removed_design_columns <- c(cc_constant_factors, colnames(X)[!valid_cols])
+            if (length(removed_design_columns) > 0) warning(.fmt(
+                .("Removed design columns constant in complete cases: {vars}."),
+                vars = paste(removed_design_columns, collapse = ", ")))
+            X <- X[, valid_cols, drop = FALSE]
+            encoding <- encoding[valid_cols, , drop = FALSE]
+            if (ncol(X) < 2) {
+                jmvcore::reject(.("At least two non-constant encoded predictor columns are required by this LASSO engine."))
+            }
 
             if (length(factor_predictors) > 0) {
                 warning(.fmt(
@@ -621,47 +699,13 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                     nEvents = n_events, nColumns = ncol(X)))
             }
 
-            # Keep the design matrix on its original scale. glmnet receives the
-            # standardize option below, so each cross-validation training fit performs
-            # its own internal scaling rather than using means/SDs calculated from the
-            # held-out rows. glmnet back-transforms returned coefficients to the original
-            # predictor scale; the values retained here are descriptive only.
-            if (self$options$standardize) {
-                scale_vals <- apply(X, 2, stats::sd)
-                scale_vals[is.na(scale_vals) | scale_vals == 0] <- 1
-                scaling_info <- list(
-                    center = colMeans(X),
-                    scale = scale_vals
-                )
-            } else {
-                scaling_info <- NULL
-            }
-
-            if (any(is.infinite(X))) {
-                jmvcore::reject(.("Design matrix contains infinite values. Check for extreme outliers."))
-            }
-
-            return(list(
-                time = time_cc,
-                status = status_cc,
+            list(
                 X = X,
-                n = n_complete,
-                n_events = n_events,
-                n_censored = n_censored,
-                variable_names = colnames(X),
-                original_variable_names = explanatory_vars,
-                candidate_variables = candidate_variables,
-                removed_constants = constant_var_names,
-                removed_design_columns = removed_design_columns,
                 encoding = encoding,
                 factor_levels = factor_levels,
                 factor_predictors = factor_predictors,
-                scaling_info = scaling_info,
-                complete_cases = which(complete),
-                event_level_used = event_level_used,
-                censor_level_used = censor_level_used,
-                excluded_rows = n_excluded
-            ))
+                removed_design_columns = removed_design_columns
+            )
         },
 
         .makeStratifiedFoldId = function(status, nfolds, seed_value = NULL) {
@@ -935,14 +979,17 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             # C-index (concordance index)
             # Note: higher risk_scores = worse prognosis, so we need reverse=TRUE
             # because survival::concordance() by default treats higher values as better
-            tryCatch({
+            cindex_pair <- tryCatch({
                 cindex_result <- survival::concordance(y ~ risk_scores, reverse = TRUE)
-                metrics$cindex <- cindex_result$concordance
-                metrics$cindex_se <- sqrt(max(0, cindex_result$var))
+                list(
+                    cindex = cindex_result$concordance,
+                    cindex_se = sqrt(max(0, cindex_result$var))
+                )
             }, error = function(e) {
-                metrics$cindex <<- NA
-                metrics$cindex_se <<- NA
+                list(cindex = NA, cindex_se = NA)
             })
+            metrics$cindex <- cindex_pair$cindex
+            metrics$cindex_se <- cindex_pair$cindex_se
             
             return(metrics)
         },
@@ -1759,13 +1806,61 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             }
 
             # - Check 5: Multicollinearity --
+            checks$collinearity <- private$.assessCollinearity(data)
+
+            # - Check 6: Data Quality --
+            original_data <- self$data
+            n_total <- nrow(original_data)
+            n_missing <- n_total - n
+            pct_missing <- 100 * n_missing / n_total
+
+            n_constant <- length(data$removed_constants) + length(data$removed_design_columns)
+            issues <- character()
+            if (n_missing > 0) issues <- c(issues, .fmt(
+                .("Complete-case analysis excluded {n} rows ({pct}%). Even a small excluded fraction can bias results when missingness is informative."),
+                n = n_missing, pct = sprintf("%.1f", pct_missing)))
+            if (length(data$removed_constants)) issues <- c(issues, .fmt(
+                .("Removed constant candidate predictors: {vars}."),
+                vars = paste(data$removed_constants, collapse = ", ")))
+            if (length(data$removed_design_columns)) issues <- c(issues, .fmt(
+                .("Removed encoded columns constant in complete cases: {vars}."),
+                vars = paste(data$removed_design_columns, collapse = ", ")))
+            checks$data_quality <- list(
+                color = if (pct_missing > 20) "red" else if (length(issues)) "yellow" else "green",
+                label = .("Data Quality"),
+                value = if (length(issues)) .fmt(
+                    .("{n} rows excluded; {constants} constant predictors or columns removed"),
+                    n = n_missing, constants = n_constant) else .("No issues"),
+                detail = if (length(issues)) paste(issues, collapse = " ")
+                    else .("Complete data with no constant predictors."))
+
+            # - Check 7: Proportional Hazards Assumption (advisory) --
+            checks$ph_assumption <- private$.assessPhAssumption(data, results$selected_vars)
+
+            # - Overall Verdict --
+            colors <- sapply(checks, function(x) x$color)
+            if (any(colors == "red")) {
+                overall <- "red"
+                overall_text <- .("Some issues require attention before relying on these results.")
+            } else if (any(colors == "yellow")) {
+                overall <- "yellow"
+                overall_text <- .("Data is usable but review the flagged items.")
+            } else {
+                overall <- "green"
+                overall_text <- .("No concern was identified by these limited checks; formal sample-size planning and validation are still required.")
+            }
+
+            private$.generateSuitabilityHtml(checks, overall, overall_text)
+        },
+
+        .assessCollinearity = function(data) {
             tryCatch({
                 # Term assignments are captured before subsetting the model matrix.
                 col_names <- colnames(data$X)
                 col_origin <- data$encoding$variable
 
                 if (ncol(data$X) > 500) {
-                    checks$collinearity <- list(
+                    list(
                         color = "yellow", label = .("Pairwise Correlations"),
                         value = .("Not computed"),
                         detail = .("Pairwise correlation diagnostics are limited to 500 encoded columns to bound memory and computation. The fitted model still uses every retained column."))
@@ -1797,156 +1892,116 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                     pair_text <- if (length(top_pairs) > 0) {
                         paste0(" ", .fmt(
                             .("Top correlated encoded-column pairs: {pairs}."),
-                            pairs = htmltools::htmlEscape(paste(top_pairs, collapse = "; "))))
+                            pairs = paste(top_pairs, collapse = "; ")))
                     } else ""
 
                     if (max_cor < 0.7) {
-                        checks$collinearity <- list(
+                        list(
                             color = "green", label = .("Multicollinearity"),
                             value = sprintf("Max |r| = %.2f", max_cor),
                             detail = paste0(.("No pairwise correlation reaches the warning threshold; this does not rule out multivariable linear dependencies."), pair_text)
                         )
                     } else if (max_cor < 0.9) {
-                        checks$collinearity <- list(
+                        list(
                             color = "yellow", label = .("Multicollinearity"),
                             value = sprintf("Max |r| = %.2f", max_cor),
                             detail = paste0(.("Moderate collinearity. LASSO may select one of several correlated columns, and that choice can be unstable. Consider Elastic Net if retaining correlated predictors is important."), pair_text)
                         )
                     } else if (max_cor < 0.99) {
-                        checks$collinearity <- list(
+                        list(
                             color = "yellow", label = .("Multicollinearity"),
                             value = sprintf("Max |r| = %.2f", max_cor),
                             detail = paste0(.("High collinearity. Strongly recommend Elastic Net or Ridge regression."), pair_text)
                         )
                     } else {
-                        checks$collinearity <- list(
+                        list(
                             color = "red", label = .("Multicollinearity"),
                             value = sprintf("Max |r| = %.2f", max_cor),
                             detail = paste0(.("Near-perfect collinearity detected. Remove redundant variables before analysis."), pair_text)
                         )
                     }
                 } else if (ncol(data$X) >= 2) {
-                    checks$collinearity <- list(
+                    list(
                         color = "green", label = .("Multicollinearity"),
                         value = .("N/A (single factor)"),
                         detail = .("Only one categorical predictor supplied (represented by multiple mutually exclusive indicator columns); between-predictor collinearity is not applicable.")
                     )
                 } else {
-                    checks$collinearity <- list(
+                    list(
                         color = "green", label = .("Multicollinearity"),
                         value = .("N/A (single column)"),
                         detail = .("Only one predictor column; collinearity not applicable.")
                     )
                 }
             }, error = function(e) {
-                checks$collinearity <<- list(
+                list(
                     color = "yellow", label = .("Multicollinearity"),
                     value = .("Could not compute"),
                     detail = .("The correlation summary could not be computed. This is an unavailable diagnostic, not evidence that collinearity is absent.")
                 )
             })
+        },
 
-            # - Check 6: Data Quality --
-            original_data <- self$data
-            n_total <- nrow(original_data)
-            n_missing <- n_total - n
-            pct_missing <- 100 * n_missing / n_total
-
-            n_constant <- length(data$removed_constants) + length(data$removed_design_columns)
-            issues <- character()
-            if (n_missing > 0) issues <- c(issues, .fmt(
-                .("Complete-case analysis excluded {n} rows ({pct}%). Even a small excluded fraction can bias results when missingness is informative."),
-                n = n_missing, pct = sprintf("%.1f", pct_missing)))
-            if (length(data$removed_constants)) issues <- c(issues, .fmt(
-                .("Removed constant candidate predictors: {vars}."),
-                vars = paste(data$removed_constants, collapse = ", ")))
-            if (length(data$removed_design_columns)) issues <- c(issues, .fmt(
-                .("Removed encoded columns constant in complete cases: {vars}."),
-                vars = paste(data$removed_design_columns, collapse = ", ")))
-            checks$data_quality <- list(
-                color = if (pct_missing > 20) "red" else if (length(issues)) "yellow" else "green",
-                label = .("Data Quality"),
-                value = if (length(issues)) .fmt(
-                    .("{n} rows excluded; {constants} constant predictors or columns removed"),
-                    n = n_missing, constants = n_constant) else .("No issues"),
-                detail = if (length(issues)) htmltools::htmlEscape(paste(issues, collapse = " "))
-                    else .("Complete data with no constant predictors."))
-
-            # - Check 7: Proportional Hazards Assumption (advisory) --
+        .assessPhAssumption = function(data, selected_vars) {
             # cox.zph() does not accept a glmnet fit. Assess the same selected encoded
             # columns in an unpenalized Cox refit and label the result honestly: this is
             # an exploratory diagnostic, not valid post-selection inference on the
             # penalized estimator.
-            if (length(results$selected_vars) == 0) {
-                checks$ph_assumption <- list(
+            if (length(selected_vars) == 0) {
+                return(list(
                     color = "yellow", label = .("Proportional Hazards"),
                     value = .("Not assessable (empty model)"),
                     detail = .("The selected lambda retained no predictor columns, so there is no fitted predictor effect for a Schoenfeld-residual diagnostic.")
+                ))
+            }
+            tryCatch({
+                ph_fit <- private$.coxRefit(data, selected_vars)
+                ph_env <- new.env(parent = emptyenv())
+                ph_env$warnings <- character(0)
+                ph_test <- withCallingHandlers(
+                    survival::cox.zph(ph_fit),
+                    warning = function(w) {
+                        ph_env$warnings <- c(ph_env$warnings, conditionMessage(w))
+                        invokeRestart("muffleWarning")
+                    }
                 )
-            } else {
-                tryCatch({
-                    ph_fit <- private$.coxRefit(data, results$selected_vars)
-                    ph_warnings <- character(0)
-                    ph_test <- withCallingHandlers(
-                        survival::cox.zph(ph_fit),
-                        warning = function(w) {
-                            ph_warnings <<- c(ph_warnings, conditionMessage(w))
-                            invokeRestart("muffleWarning")
-                        }
+                if (length(ph_env$warnings) > 0) {
+                    stop(.fmt(
+                        .("The proportional-hazards diagnostic did not complete cleanly: {message}"),
+                        message = paste(unique(ph_env$warnings), collapse = "; ")
+                    ), call. = FALSE)
+                }
+                p_rows <- ph_test$table[, "p"]
+                global_p <- if ("GLOBAL" %in% names(p_rows)) {
+                    unname(p_rows["GLOBAL"])
+                } else {
+                    unname(p_rows[1])
+                }
+                if (length(global_p) != 1 || !is.finite(global_p)) {
+                    stop("non-finite Schoenfeld-residual test result")
+                }
+
+                if (global_p >= 0.05) {
+                    list(
+                        color = "green", label = .("Proportional Hazards"),
+                        value = .fmt(.("Selected-refit test {p}"), p = .pValueText(global_p)),
+                        detail = .("No evidence of non-proportional hazards in an exploratory unpenalized refit of the selected encoded columns. Limited power and post-selection use mean that this does not prove the assumption.")
                     )
-                    if (length(ph_warnings) > 0) {
-                        stop(.fmt(
-                            .("The proportional-hazards diagnostic did not complete cleanly: {message}"),
-                            message = paste(unique(ph_warnings), collapse = "; ")
-                        ), call. = FALSE)
-                    }
-                    p_rows <- ph_test$table[, "p"]
-                    global_p <- if ("GLOBAL" %in% names(p_rows)) {
-                        unname(p_rows["GLOBAL"])
-                    } else {
-                        unname(p_rows[1])
-                    }
-                    if (length(global_p) != 1 || !is.finite(global_p)) {
-                        stop("non-finite Schoenfeld-residual test result")
-                    }
-
-                    if (global_p >= 0.05) {
-                        checks$ph_assumption <- list(
-                            color = "green", label = .("Proportional Hazards"),
-                            value = .fmt(.("Selected-refit test {p}"), p = htmltools::htmlEscape(.pValueText(global_p))),
-                            detail = .("No evidence of non-proportional hazards in an exploratory unpenalized refit of the selected encoded columns. Limited power and post-selection use mean that this does not prove the assumption.")
-                        )
-                    } else {
-                        checks$ph_assumption <- list(
-                            color = if (global_p < 0.01) "red" else "yellow",
-                            label = .("Proportional Hazards"),
-                            value = .fmt(.("Selected-refit test {p}"), p = htmltools::htmlEscape(.pValueText(global_p))),
-                            detail = .("The exploratory selected-variable refit shows evidence of non-proportional hazards. The Cox effect estimates and selection may be misspecified; investigate time-varying effects or a prespecified alternative model.")
-                        )
-                    }
-                }, error = function(e) {
-                    checks$ph_assumption <<- list(
-                        color = "yellow", label = .("Proportional Hazards"),
-                        value = .("Could not assess"),
-                        detail = .("The selected-variable Schoenfeld-residual diagnostic could not be computed. This is an unavailable diagnostic, not evidence that proportional hazards holds.")
+                } else {
+                    list(
+                        color = if (global_p < 0.01) "red" else "yellow",
+                        label = .("Proportional Hazards"),
+                        value = .fmt(.("Selected-refit test {p}"), p = .pValueText(global_p)),
+                        detail = .("The exploratory selected-variable refit shows evidence of non-proportional hazards. The Cox effect estimates and selection may be misspecified; investigate time-varying effects or a prespecified alternative model.")
                     )
-                })
-            }
-
-            # - Overall Verdict --
-            colors <- sapply(checks, function(x) x$color)
-            if (any(colors == "red")) {
-                overall <- "red"
-                overall_text <- .("Some issues require attention before relying on these results.")
-            } else if (any(colors == "yellow")) {
-                overall <- "yellow"
-                overall_text <- .("Data is usable but review the flagged items.")
-            } else {
-                overall <- "green"
-                overall_text <- .("No concern was identified by these limited checks; formal sample-size planning and validation are still required.")
-            }
-
-            private$.generateSuitabilityHtml(checks, overall, overall_text)
+                }
+            }, error = function(e) {
+                list(
+                    color = "yellow", label = .("Proportional Hazards"),
+                    value = .("Could not assess"),
+                    detail = .("The selected-variable Schoenfeld-residual diagnostic could not be computed. This is an unavailable diagnostic, not evidence that proportional hazards holds.")
+                )
+            })
         },
 
         .generateSuitabilityHtml = function(checks, overall, overall_text) {
@@ -1997,29 +2052,17 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         },
 
         .formatSuitabilityGuide = function(checks, overall_bg, overall_text, dot_colors) {
-            html <- paste0(
-                "<div style='", overall_bg, " padding: 12px; border-radius: 6px; margin-bottom: 12px;'>",
-                "<strong>", .("Overall:"), " ", overall_text, "</strong></div>",
-                "<table style='width: 100%; border-collapse: collapse; font-size: 13px;'>",
-                "<thead><tr style='border-bottom: 2px solid #dee2e6;'>",
-                "<th style='padding: 6px; text-align: left;'>", .("Status"), "</th>",
-                "<th style='padding: 6px; text-align: left;'>", .("Check"), "</th>",
-                "<th style='padding: 6px; text-align: left;'>", .("Value"), "</th>",
-                "<th style='padding: 6px; text-align: left;'>", .("Detail"), "</th>",
-                "</tr></thead><tbody>"
-            )
-            for (chk in checks) {
-                dot <- paste0("<span style='color: ", dot_colors[[chk$color]], "; font-size: 18px;'>\u{25CF}</span>")
-                html <- paste0(html,
-                    "<tr style='border-bottom: 1px solid #dee2e6;'>",
-                    "<td style='padding: 6px;'>", dot, "</td>",
-                    "<td style='padding: 6px;'><strong>", chk$label, "</strong></td>",
-                    "<td style='padding: 6px;'>", chk$value, "</td>",
-                    "<td style='padding: 6px;'>", chk$detail, "</td>",
-                    "</tr>"
-                )
-            }
-            paste0(html, "</tbody></table>")
+            values <- data.frame(
+                status = vapply(checks, function(x) switch(x$color,
+                    green = .("No issue detected"), yellow = .("Caution"),
+                    red = .("Concern"), .("Not determined")), character(1)),
+                check = vapply(checks, function(x) x$label, character(1)),
+                value = vapply(checks, function(x) as.character(x$value), character(1)),
+                detail = vapply(checks, function(x) x$detail, character(1)))
+            names(values) <- c(.("Status"), .("Check"), .("Value"), .("Detail"))
+            .populateSurvivalTable(self$results$suitabilityChecks, values)
+            paste0("<div style='", overall_bg, " padding: 12px;'>",
+                "<strong>", .("Overall:"), " ", overall_text, "</strong></div>")
         },
 
         .coxRefit = function(data, columns) {
@@ -2027,19 +2070,20 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             names(refit_data) <- paste0(".v", seq_len(ncol(refit_data)))
             refit_data$.time <- data$time
             refit_data$.status <- data$status
-            refit_warnings <- character(0)
+            refit_env <- new.env(parent = emptyenv())
+            refit_env$warnings <- character(0)
             fit <- withCallingHandlers(
                 survival::coxph(survival::Surv(.time, .status) ~ .,
                     data = refit_data, ties = "breslow", x = TRUE),
                 warning = function(w) {
-                    refit_warnings <<- c(refit_warnings, conditionMessage(w))
+                    refit_env$warnings <- c(refit_env$warnings, conditionMessage(w))
                     invokeRestart("muffleWarning")
                 }
             )
-            if (length(refit_warnings) > 0) {
+            if (length(refit_env$warnings) > 0) {
                 stop(.fmt(
                     .("Cox refit did not converge cleanly: {message}"),
-                    message = paste(unique(refit_warnings), collapse = "; ")
+                    message = paste(unique(refit_env$warnings), collapse = "; ")
                 ), call. = FALSE)
             }
             coefficients <- stats::coef(fit)
@@ -2060,7 +2104,8 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             selected_refit_cindex <- NA
             selected_refit_aic <- NA
             selected_refit_loglik <- NA
-            failures <- character(0)
+            fail_env <- new.env(parent = emptyenv())
+            fail_env$failures <- character(0)
             tryCatch({
                 # Refit Cox model with only selected variables for AIC/loglik
                 if (length(results$selected_vars) > 0) {
@@ -2072,7 +2117,7 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                     selected_refit_loglik <- as.numeric(stats::logLik(selected_refit))
                 }
             }, error = function(e) {
-                failures <<- c(failures, .fmt(.("Post-LASSO Cox refit: {message}"), message = conditionMessage(e)))
+                fail_env$failures <- c(fail_env$failures, .fmt(.("Post-LASSO Cox refit: {message}"), message = conditionMessage(e)))
             })
 
             .fillRow(table, rowKey = 1L, values = list(
@@ -2096,7 +2141,7 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             }, error = function(e) {
                 # Standard Cox legitimately fails when p is large relative to n - say so
                 # rather than presenting an empty row as though it were a result.
-                failures <<- c(failures, .fmt(.("Standard Cox on all variables: {message}"), message = conditionMessage(e)))
+                fail_env$failures <- c(fail_env$failures, .fmt(.("Standard Cox on all variables: {message}"), message = conditionMessage(e)))
             })
 
             .fillRow(table, rowKey = 2L, values = list(
@@ -2112,14 +2157,14 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 .("Both rows are unpenalized Cox fits on the same development data. The first is fitted only after those columns were selected by LASSO; it is not the penalized model. C-index, log-likelihood, and AIC are apparent and selection-biased. In particular, the AIC values must not be used as a formal model-selection comparison because the candidate model was chosen from these same data."),
                 init = FALSE)
 
-            if (length(failures) > 0) {
+            if (length(fail_env$failures) > 0) {
                 note_msg <- .fmt(
                     .("Some rows could not be computed ({detail}). Empty cells mean the model could not be fitted, not that it performed poorly."),
-                    detail = paste(failures, collapse = "; ")
+                    detail = paste(fail_env$failures, collapse = "; ")
                 )
                 note_key <- "failed"
                 table$setNote(note_key, note_msg, init = FALSE)
-                private$.addNotice("WARNING", .("Model Comparison Incomplete"), note_msg)
+                warning(note_msg, call. = FALSE)
             }
         },
 

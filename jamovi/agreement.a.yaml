@@ -244,8 +244,9 @@ options:
           R: >
             Report Conger's (1980) exact kappa instead of Fleiss' kappa for 3 or more
             raters. Its chance-agreement term uses each rater's own category
-            proportions, so the coefficient differs from Fleiss' kappa, and no z
-            statistic or p-value is available for it. Not applicable with 2 raters.
+            proportions, so the coefficient differs from Fleiss' kappa. Inference uses
+            Gwet's (2014) linearized variance across all observed ratings. Not
+            applicable with 2 raters.
 
     - name: showLevelInfo
       title: "Level ordering information"

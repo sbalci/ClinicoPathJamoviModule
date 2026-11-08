@@ -83,7 +83,7 @@ test_that("a landmark past the longest follow-up reports a configuration error, 
     # "missing value where TRUE/FALSE needed".
     d <- simple_data(1:6, c(TRUE, FALSE, TRUE, FALSE, TRUE, FALSE))
 
-    res <- run_singlearm(data = d, elapsedtime = "time", outcome = "status",
+    res <- run_singlearm_failed(data = d, elapsedtime = "time", outcome = "status",
                          outcomeLevel = "Dead", uselandmark = TRUE, landmark = 100)
 
     msg <- strip_html(res$errors$content)
@@ -210,7 +210,7 @@ test_that("numeric day-count columns are refused, not read as seconds or as days
                     status = factor(c("Dead","Alive","Dead","Alive","Dead","Alive"),
                                     levels = c("Alive", "Dead")))
 
-    res <- run_singlearm(data = d, tint = TRUE, dxdate = "dxd", fudate = "fud",
+    res <- run_singlearm_failed(data = d, tint = TRUE, dxdate = "dxd", fudate = "fud",
                          outcome = "status", outcomeLevel = "Dead")
 
     expect_match(res$errors$content, "cannot be read as dates", fixed = TRUE)
@@ -257,7 +257,7 @@ test_that("an incomplete multievent mapping produces an actionable error, not a 
     d <- data.frame(time = 1:6,
                     st = factor(c("DOD","DOOC","AWOD","DOD","AWOD","DOOC")))
 
-    res <- run_singlearm(data = d, elapsedtime = "time", outcome = "st",
+    res <- run_singlearm_failed(data = d, elapsedtime = "time", outcome = "st",
                          outcomeLevel = "DOD", multievent = TRUE, dod = "DOD")
 
     expect_match(strip_html(res$errors$content), "not assigned to any category")

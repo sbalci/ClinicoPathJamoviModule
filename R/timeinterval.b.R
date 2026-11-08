@@ -75,6 +75,16 @@
 timeintervalClass <- if (requireNamespace("jmvcore")) R6::R6Class(
     "timeintervalClass",
     inherit = timeintervalBase,
+    public = list(
+        #' @description Initialize safely when the supplied data has no selected variables.
+        #' @param noThrow Whether initialization errors are stored in the results.
+        init = function(noThrow = FALSE) {
+            if (!is.null(private$.data) && length(self$options$varsRequired) == 0L) {
+                private$.data <- data.frame()
+            }
+            super$init(noThrow = noThrow)
+        }
+    ),
     private = list(
         # Saved options can contain unexpected names/types before validation. Keep
         # regenerated syntax literal; never turn their text into R expressions.
@@ -1037,7 +1047,8 @@ timeintervalClass <- if (requireNamespace("jmvcore")) R6::R6Class(
         },
 
         # Run analysis ----
-        .run = function() {
+        .prepareIntervalRun = function() {
+            .populateSurvivalTable(self$results$qualityCounts, data.frame())
             # Per-run state reset so a note from a previous run cannot persist.
             private$.formatDetectionNote <- NULL
             private$.extremeSkipReason <- NULL
@@ -1166,6 +1177,10 @@ timeintervalClass <- if (requireNamespace("jmvcore")) R6::R6Class(
 
             # Backend option backstops (defense-in-depth for run(noThrow = TRUE)).
             # reject(), not an Html error and return(): these are fatal.
+            private$.validateIntervalRun(blank_panels, add_message, color, rank, render_messages)
+        },
+
+        .validateIntervalRun = function(blank_panels, add_message, color, rank, render_messages) {
             if (!is.character(self$options$output_unit) ||
                 length(self$options$output_unit) != 1L ||
                 !self$options$output_unit %in% c("days", "weeks", "months", "years")) {
@@ -1197,6 +1212,7 @@ timeintervalClass <- if (requireNamespace("jmvcore")) R6::R6Class(
             }
 
             # Validate input data structure
+            private$.checkpoint()
             validation <- private$.validateInputData(
                 self$data,
                 self$options$dx_date,
@@ -1260,6 +1276,7 @@ timeintervalClass <- if (requireNamespace("jmvcore")) R6::R6Class(
             # ("ymd and dmy both fit; I used ymd") and the two-digit-year /
             # trailing-text caveats, often the very cause of the rejection -- to
             # the message, and re-raises the same condition object.
+            private$.checkpoint()
             calculated_times <- tryCatch(
                 private$.calculate_survival_time(
                     data = self$data,
@@ -1298,6 +1315,10 @@ timeintervalClass <- if (requireNamespace("jmvcore")) R6::R6Class(
             # and the user is the one who can check the named rows against the
             # source records. It names rows because "check your dates" is not
             # actionable and "check rows 16, 17, 18" is.
+            private$.describeIntervalParsing(add_message, color, rank, render_messages, parse_caveats, calculated_times)
+        },
+
+        .describeIntervalParsing = function(add_message, color, rank, render_messages, parse_caveats, calculated_times) {
             mox <- private$.mixedOrderNote
             if (!is.null(mox)) {
                 add_message("strong_warning", .fmt(
@@ -1440,6 +1461,10 @@ timeintervalClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                     </ol>
                 </div>
             "
+            private$.describeIntervalFilters(add_message, color, render_messages, calculated_times, about_html)
+        },
+
+        .describeIntervalFilters = function(add_message, color, render_messages, calculated_times, about_html) {
             self$results$aboutPanel$setContent(about_html)
 
             # Extract time values from the result list
@@ -1624,9 +1649,12 @@ timeintervalClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                 # all -- no exclusion, no re-basing. Silent before; a user who went
                 # to the trouble of enabling landmark analysis should be told it did
                 # not run rather than left to infer it from unchanged numbers.
-                add_message("warning", .(
-                    "Landmark analysis is switched on but the landmark time is 0, so nothing was excluded and no interval was shortened - these results are the same as with landmark analysis off. Set a landmark greater than zero, in the same unit as the results, or untick landmark analysis."))
+                add_message("warning", .("Landmark analysis is switched on but the landmark time is 0, so nothing was excluded and no interval was shortened - these results are the same as with landmark analysis off. Set a landmark greater than zero, in the same unit as the results, or untick landmark analysis."))
             }
+            private$.publishIntervalStatistics(add_message, color, render_messages, calculated_times, time_values, filter_info, landmark_info, lm_on, lm_unit, lm_amount, lm_adj, lm_hdr_suffix, lm_pt_label, lm_mean_label, lm_fu_phrase, lm_pt_phrase, filter_lines, lm_median)
+        },
+
+        .publishIntervalStatistics = function(add_message, color, render_messages, calculated_times, time_values, filter_info, landmark_info, lm_on, lm_unit, lm_amount, lm_adj, lm_hdr_suffix, lm_pt_label, lm_mean_label, lm_fu_phrase, lm_pt_phrase, filter_lines, lm_median) {
             if (lm_on && isTRUE((if (!is.null(landmark_info$below_excluded)) landmark_info$below_excluded else landmark_info$excluded_count) == 0)) {
                 # The landmark excluded no valid intervals yet still subtracted
                 # itself from every interval. Legitimate in a cohort with
@@ -1653,6 +1681,7 @@ timeintervalClass <- if (requireNamespace("jmvcore")) R6::R6Class(
             filter_text <- if (length(filter_lines) > 0) paste(filter_lines, collapse = "; ") else "None"
 
             # Generate summary statistics
+            private$.checkpoint()
             valid_time_values <- if (!is.null(time_values)) time_values[!is.na(time_values)] else numeric(0)
 
             # .applyLandmarkAnalysis() DROPS the rows whose interval is NA, so the
@@ -2002,6 +2031,10 @@ timeintervalClass <- if (requireNamespace("jmvcore")) R6::R6Class(
             # already surfaced as banners: rows that look mis-typed in the other
             # day/month order or an order the dates could not settle, and a systematic (>=10%) negative-interval fault that
             # was filtered away rather than corrected at source.
+            private$.publishIntervalQuality(add_message, color, render_messages, calculated_times, filter_info, lm_on, lm_amount, lm_adj, lm_fu_phrase, filter_lines, filter_text, valid_time_values, summary_stats, neg_denom)
+        },
+
+        .publishIntervalQuality = function(add_message, color, render_messages, calculated_times, filter_info, lm_on, lm_amount, lm_adj, lm_fu_phrase, filter_lines, filter_text, valid_time_values, summary_stats, neg_denom) {
             neg_denom <- if (!is.null(filter_info$n_calculable) && filter_info$n_calculable > 0)
                              filter_info$n_calculable else max(nrow(self$data), 1)
             manuscript_unsafe <- !is.null(private$.mixedOrderNote) ||
@@ -2143,6 +2176,10 @@ timeintervalClass <- if (requireNamespace("jmvcore")) R6::R6Class(
             }
 
             # Generate contextual warnings for data quality issues using static Notices
+            private$.finishIntervalRun(add_message, color, render_messages, calculated_times, filter_lines, filter_text, unit)
+        },
+
+        .finishIntervalRun = function(add_message, color, render_messages, calculated_times, filter_lines, filter_text, unit) {
             if (!is.null(calculated_times) && is.list(calculated_times) &&
                 !is.null(calculated_times$quality)) {
                 quality <- calculated_times$quality
@@ -2242,57 +2279,41 @@ timeintervalClass <- if (requireNamespace("jmvcore")) R6::R6Class(
             render_messages()
         },
 
+        .run = function() {
+            private$.prepareIntervalRun()
+        },
+
         .formatQualityAssessmentGuide = function(quality, amb_exposure_html, filter_lines, filter_text) {
+            hdr_title <- .("Data Quality Assessment")
+            lbl_overall <- .("Overall Quality:")
+            txt_counts_note <- .("Counts below describe the data as supplied, before any filter or landmark is applied, so the total may exceed the number of observations in the statistical summary.")
+            hdr_metric <- .("Metric")
+            hdr_count <- .("Count")
+            lbl_total <- .("Total Observations")
+            lbl_missing <- .("Missing Values")
+            lbl_missing_start <- .("Start dates missing or unreadable")
+            lbl_missing_end <- .("End dates missing or unreadable")
+            lbl_negative <- .("Negative Intervals")
+            lbl_zero <- .("Zero Intervals")
+            lbl_extreme <- .("Extreme Values")
+            lbl_filters <- .("Filters applied:")
+            lbl_warnings <- .("Warnings:")
+            counts <- c(quality$total_observations, quality$missing_values,
+                quality$missing_start_dates, quality$missing_end_dates,
+                quality$negative_intervals, quality$zero_intervals, quality$extreme_values)
+            values <- data.frame(metric = c(lbl_total, lbl_missing, lbl_missing_start,
+                lbl_missing_end, lbl_negative, lbl_zero, lbl_extreme), count = counts,
+                percentage = c(100, 100 * counts[-1] / quality$total_observations))
+            names(values) <- c(hdr_metric, hdr_count, .("Percentage"))
+            .populateSurvivalTable(self$results$qualityCounts, values, c("", "dp:0", "dp:1"))
             glue::glue(
                 "<div style='background-color: rgba(138, 155, 172, 0.06); padding: 15px; border-left: 4px solid #007bff; margin: 15px 0; color: inherit;'>",
-                    "<h4 style='margin-top: 0; color: inherit;'> Data Quality Assessment</h4>",
-                    "<p><strong>Overall Quality:</strong> {quality$overall_quality}</p>",
-                    "<p style='font-size: 0.9em;'>Counts below describe the data as supplied, before any filter or landmark is applied, so the total may exceed the number of observations in the statistical summary.</p>",
+                    "<h4 style='margin-top: 0; color: inherit;'> {hdr_title}</h4>",
+                    "<p><strong>{lbl_overall}</strong> {quality$overall_quality}</p>",
+                    "<p style='font-size: 0.9em;'>{txt_counts_note}</p>",
                     "{amb_exposure_html}",
-                    "<table style='width: 100%; border-collapse: collapse; margin-top: 10px;'>",
-                        "<tr style='background-color: rgba(33, 63, 94, 0.1); color: inherit;'>",
-                            "<th style='padding: 8px; text-align: left; border: 1px solid #dee2e6;'>Metric</th>",
-                            "<th style='padding: 8px; text-align: right; border: 1px solid #dee2e6;'>Count</th>",
-                            "<th style='padding: 8px; text-align: right; border: 1px solid #dee2e6;'>%</th>",
-                        "</tr>",
-                        "<tr>",
-                            "<td style='padding: 8px; border: 1px solid #dee2e6;'>Total Observations</td>",
-                            "<td style='padding: 8px; text-align: right; border: 1px solid #dee2e6;'>{quality$total_observations}</td>",
-                            "<td style='padding: 8px; text-align: right; border: 1px solid #dee2e6;'>100%</td>",
-                        "</tr>",
-                        "<tr style='background-color: rgba(255, 202, 33, 0.23); color: inherit;'>",
-                            "<td style='padding: 8px; border: 1px solid #dee2e6;'>Missing Values</td>",
-                            "<td style='padding: 8px; text-align: right; border: 1px solid #dee2e6;'>{quality$missing_values}</td>",
-                            "<td style='padding: 8px; text-align: right; border: 1px solid #dee2e6;'>{round(100*quality$missing_values/quality$total_observations, 1)}%</td>",
-                        "</tr>",
-                        "<tr>",
-                            "<td style='padding: 8px 8px 8px 28px; border: 1px solid #dee2e6;'>Start dates missing or unreadable</td>",
-                            "<td style='padding: 8px; text-align: right; border: 1px solid #dee2e6;'>{quality$missing_start_dates}</td>",
-                            "<td style='padding: 8px; text-align: right; border: 1px solid #dee2e6;'>{round(100*quality$missing_start_dates/quality$total_observations, 1)}%</td>",
-                        "</tr>",
-                        "<tr>",
-                            "<td style='padding: 8px 8px 8px 28px; border: 1px solid #dee2e6;'>End dates missing or unreadable</td>",
-                            "<td style='padding: 8px; text-align: right; border: 1px solid #dee2e6;'>{quality$missing_end_dates}</td>",
-                            "<td style='padding: 8px; text-align: right; border: 1px solid #dee2e6;'>{round(100*quality$missing_end_dates/quality$total_observations, 1)}%</td>",
-                        "</tr>",
-                        "<tr style='background-color: rgba(216, 33, 50, 0.18); color: inherit;'>",
-                            "<td style='padding: 8px; border: 1px solid #dee2e6;'>Negative Intervals</td>",
-                            "<td style='padding: 8px; text-align: right; border: 1px solid #dee2e6;'>{quality$negative_intervals}</td>",
-                            "<td style='padding: 8px; text-align: right; border: 1px solid #dee2e6;'>{round(100*quality$negative_intervals/quality$total_observations, 1)}%</td>",
-                        "</tr>",
-                        "<tr>",
-                            "<td style='padding: 8px; border: 1px solid #dee2e6;'>Zero Intervals</td>",
-                            "<td style='padding: 8px; text-align: right; border: 1px solid #dee2e6;'>{quality$zero_intervals}</td>",
-                            "<td style='padding: 8px; text-align: right; border: 1px solid #dee2e6;'>{round(100*quality$zero_intervals/quality$total_observations, 1)}%</td>",
-                        "</tr>",
-                        "<tr style='background-color: rgba(255, 202, 33, 0.23); color: inherit;'>",
-                            "<td style='padding: 8px; border: 1px solid #dee2e6;'>Extreme Values</td>",
-                            "<td style='padding: 8px; text-align: right; border: 1px solid #dee2e6;'>{quality$extreme_values}</td>",
-                            "<td style='padding: 8px; text-align: right; border: 1px solid #dee2e6;'>{round(100*quality$extreme_values/quality$total_observations, 1)}%</td>",
-                        "</tr>",
-                    "</table>",
-                    "{if (length(filter_lines) > 0) paste0('<p><strong>Filters applied:</strong> ', filter_text, '</p>') else ''}",
-                    "{if(length(quality$warnings) > 0) paste0('<p style=\"margin-top: 15px;\"><strong> Warnings:</strong></p><ul>', paste0('<li>', quality$warnings, '</li>', collapse=''), '</ul>') else ''}",
+                    "{if (length(filter_lines) > 0) paste0('<p><strong>', lbl_filters, '</strong> ', filter_text, '</p>') else ''}",
+                    "{if(length(quality$warnings) > 0) paste0('<p style=\"margin-top: 15px;\"><strong> ', lbl_warnings, '</strong></p><ul>', paste0('<li>', quality$warnings, '</li>', collapse=''), '</ul>') else ''}",
                 "</div>"
             )
         }

@@ -744,6 +744,7 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
                 # Preserve the fixed row scaffold, but blank values before validation can fail.
                 for (i in 1:3) {
                     ctable <- self$results[[paste0("cTable", i)]]
+                    ctable$setNote("levels", NULL)
                     for (key in c("Test Positive", "Test Negative", "Total"))
                         ctable$setRow(rowKey = key,
                             values = list(GP = "", GN = "", Total = ""))  # "" is blank; NA_real_ shows NaN
@@ -754,6 +755,7 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
                 }
                 .deleteTableRows(self$results$goldFrequency)
                 .deleteTableRows(self$results$originalCrossTab)
+                self$results$originalCrossTab$setNote("missing", NULL)
                 for (plot_name in c("plot1", "plotRadar", "plotHeatmap"))
                     self$results[[plot_name]]$setState(NULL)
                 for (html_name in c("summaryReport", "reportSentence", "explanationsContent",
@@ -1312,13 +1314,24 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
                     cross$addColumn(name = private$.odColumns[k],
                         title = .rocLabel(gold_levels[k], note = FALSE),
                         superTitle = .rocLabel(goldVariable, note = FALSE), type = "integer")
+                missing_parts <- character(0)
                 for (t in seq_along(test_vars)) {
-                    tab <- table(as.factor(mydata[[test_vars[t]]]), gold)
+                    tv <- as.factor(mydata[[test_vars[t]]])
+                    n_miss <- sum(is.na(tv) | is.na(gold))
+                    if (n_miss > 0L)
+                        missing_parts <- c(missing_parts, sprintf("%s: %d", .rocLabel(test_vars[t]), n_miss))
+                    tab <- table(tv, gold)
                     for (r in seq_len(nrow(tab)))
                         cross$addRow(rowKey = paste0(t, "_", r), values = c(
                             list(test = .rocLabel(test_vars[t], note = FALSE),
                                  level = .rocLabel(rownames(tab)[r], note = FALSE)),
                             stats::setNames(as.list(as.integer(tab[r, ])), private$.odColumns)))
+                }
+                if (length(missing_parts) > 0L) {
+                    cross$setNote("missing", .fmt(
+                        jmvcore::.("Rows with a missing test or reference result are omitted from each cross-tabulation ({counts} of {total} rows)."),
+                        counts = paste(missing_parts, collapse = "; "),
+                        total = nrow(mydata)))
                 }
             },
 
@@ -1560,7 +1573,11 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
                 metrics <- private$.calculateDiagnosticMetrics(TP, FP, FN, TN, testVariable)
 
                 # Populate contingency table
-                private$.populateContingencyTable(test_index, testVariable, TP, FP, FN, TN)
+                private$.populateContingencyTable(
+                    test_index, testVariable, TP, FP, FN, TN,
+                    testPLevel = testPLevel, testNLevel = testNLevel,
+                    goldVariable = goldVariable, goldPLevel = goldPLevel, goldNLevel = goldNLevel
+                )
 
                 # Calculate confidence intervals if requested
                 if (self$options$ci) {
@@ -1732,10 +1749,23 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
             },
 
             # Populate contingency table for a specific test
-            .populateContingencyTable = function(test_index, testVariable, TP, FP, FN, TN) {
+            .populateContingencyTable = function(test_index, testVariable, TP, FP, FN, TN,
+                                                 testPLevel = NULL, testNLevel = NULL,
+                                                 goldVariable = NULL, goldPLevel = NULL, goldNLevel = NULL) {
                 table_name <- paste0("cTable", test_index)
                 if (table_name %in% names(self$results)) {
                     cTable <- self$results[[table_name]]
+                    if (!is.null(goldPLevel) && !is.null(goldNLevel) &&
+                        !is.null(testPLevel) && !is.null(testNLevel)) {
+                        cTable$setNote("levels", .fmt(
+                            jmvcore::.('Reference Positive is "{gpos}" and Reference Negative is "{gneg}" ({gold}); Test Positive is "{tpos}" and Test Negative is "{tneg}" ({test}). Sensitivity is the proportion of "{gpos}" cases that the test calls "{tpos}".'),
+                            gpos = .rocLabel(goldPLevel),
+                            gneg = .rocLabel(goldNLevel),
+                            gold = .rocLabel(goldVariable),
+                            tpos = .rocLabel(testPLevel),
+                            tneg = .rocLabel(testNLevel),
+                            test = .rocLabel(testVariable)))
+                    }
 
                     cTable$setRow(
                         rowKey = "Test Positive",

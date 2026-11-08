@@ -25,11 +25,12 @@
 | `show_variability_plots` | UI Control `show_variability_plots` | `self$options$show_variability_plots` | Output item / Table |
 | `variance_components` | UI Control `variance_components` | `self$options$variance_components` | Output item / Table |
 | `sample_size_planning` | UI Control `sample_size_planning` | `self$options$sample_size_planning` | Output item / Table |
-| `generate_recommendations` | UI Control `generate_recommendations` | `self$options$generate_recommendations` | Output item / Table |
-| `showSummary` | UI Control `showSummary` | `self$options$showSummary` | Output item / Table |
-| `showGlossary` | UI Control `showGlossary` | `self$options$showGlossary` | Output item / Table |
-| `showReportSentences` | UI Control `showReportSentences` | `self$options$showReportSentences` | Output item / Table |
-| `showAssumptions` | UI Control `showAssumptions` | `self$options$showAssumptions` | Output item / Table |
+| `generate_recommendations` | UI Control `generate_recommendations` | `self$options$generate_recommendations` | Clinical recommendations in `interpretation` |
+| `showInterpretation` | UI Control `showInterpretation` | `self$options$showInterpretation` | `interpretation` (`Clinical Interpretation and Analysis Summary`) |
+| `showSummary` | UI Control `showSummary` | `self$options$showSummary` | `summary` (`Summary (Plain-Language)`) |
+| `showGlossary` | UI Control `showGlossary` | `self$options$showGlossary` | `glossary` (`Statistical Glossary`) |
+| `showReportSentences` | UI Control `showReportSentences` | `self$options$showReportSentences` | `report_sentences` (`Copy-Ready Report Sentences`) |
+| `showAssumptions` | UI Control `showAssumptions` | `self$options$showAssumptions` | `assumptions` (`Methodology & Assumptions`) |
 
 ## Verification Checklist
 

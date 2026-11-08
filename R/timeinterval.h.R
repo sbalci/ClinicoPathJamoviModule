@@ -189,6 +189,7 @@ timeintervalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
         todo = function() private$.items[["todo"]],
         aboutPanel = function() private$.items[["aboutPanel"]],
         personTimeInfo = function() private$.items[["personTimeInfo"]],
+        qualityCounts = function() private$.items[["qualityCounts"]],
         qualityAssessment = function() private$.items[["qualityAssessment"]],
         caveatsPanel = function() private$.items[["caveatsPanel"]],
         summary = function() private$.items[["summary"]],
@@ -223,6 +224,13 @@ timeintervalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                 options=options,
                 name="personTimeInfo",
                 title="Understanding Person-Time Analysis"))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="qualityCounts",
+                title="Data Quality Counts",
+                rows=0,
+                columns=list(),
+                visible="(include_quality_metrics)"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="qualityAssessment",
@@ -377,6 +385,7 @@ timeintervalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$aboutPanel} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$personTimeInfo} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$qualityCounts} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$qualityAssessment} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$caveatsPanel} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$summary} \tab \tab \tab \tab \tab a html \cr
@@ -384,6 +393,12 @@ timeintervalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   \code{results$glossaryPanel} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$calculated_time} \tab \tab \tab \tab \tab an output \cr
 #' }
+#'
+#' Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
+#'
+#' \code{results$qualityCounts$asDF}
+#'
+#' \code{as.data.frame(results$qualityCounts)}
 #'
 #' @export
 timeinterval <- function(

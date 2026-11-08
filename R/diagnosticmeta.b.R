@@ -129,11 +129,19 @@ diagnosticmetaClass <- R6::R6Class(
             sprintf("%.*f", d, x)
         },
 
-        # Ratio text for sentences: two decimals, or two significant digits
-        # below 0.01, where "%.2f" printed a likelihood ratio as "0.00".
+        # Ratio text for sentences: two decimals unless rounding would cross
+        # an LR evidence boundary (0.1/0.2/0.5/2/5/10), or two significant
+        # digits below 0.01, where "%.2f" printed a likelihood ratio as "0.00".
         .fmtRatio = function(x) {
-            if (!is.finite(x) || abs(x) >= 0.01) return(sprintf("%.2f", x))
-            base::format(signif(x, 2), scientific = FALSE)
+            if (!is.finite(x)) return(sprintf("%.2f", x))
+            if (abs(x) < 0.01) return(base::format(signif(x, 2), scientific = FALSE))
+            edges <- c(0.1, 0.2, 0.5, 2, 5, 10)
+            d <- 2L
+            crosses <- function(d) any(((round(x, d) >= edges) != (x >= edges) |
+                                        (round(x, d) > edges) != (x > edges)) &
+                                       abs(x - edges) > 1e-8)
+            while (d < 4L && crosses(d)) d <- d + 1L
+            sprintf("%.*f", d, x)
         },
 
         # ---- Notices --------------------------------------------------------
@@ -2013,7 +2021,8 @@ diagnosticmetaClass <- R6::R6Class(
             # while the pooled estimates above still used it, so the two tables
             # described different study sets with nothing saying so.
             n_before_covariate <- nrow(analysis_data)
-            analysis_data <- analysis_data[!is.na(analysis_data$covariate), , drop = FALSE]
+            cov_ok <- if (is.numeric(analysis_data$covariate)) is.finite(analysis_data$covariate) else !is.na(analysis_data$covariate)
+            analysis_data <- analysis_data[cov_ok, , drop = FALSE]
             if (nrow(analysis_data) < n_before_covariate)
                 self$results$metaregression$setNote("covariate_missing", sprintf(
                     .("%d of %d studies were excluded from the meta-regression because the covariate is missing; the pooled estimates above use all %d."),
@@ -2364,8 +2373,9 @@ diagnosticmetaClass <- R6::R6Class(
                     # ("covariate.L"); show the user's variable, and print a
                     # rounding residue such as -9e-17 as the 0 it is.
                     coding[abs(coding) < 1e-10] <- 0
-                    col_names <- paste0(covariate_var,
-                        substring(colnames(coding), nchar("covariate") + 1L))
+                    suffixes <- substring(colnames(coding), nchar("covariate") + 1L)
+                    col_names <- trimws(paste0(covariate_var,
+                        ifelse(startsWith(suffixes, "."), "", " "), suffixes))
                     columns <- vapply(seq_len(ncol(coding)), function(j) {
                         paste0(.rocLabel(col_names[j], note = TRUE), ": ",
                             paste(paste0(.rocLabel(lv, note = TRUE), "=", format(signif(coding[, j], 6),
@@ -2898,13 +2908,16 @@ diagnosticmetaClass <- R6::R6Class(
                 # on a grid inside that range so the line keeps its resolution.
                 obs_fpr <- meta_data$fp / (meta_data$fp + meta_data$tn)
                 obs_fpr <- obs_fpr[is.finite(obs_fpr)]
-                fpr_grid <- if (length(obs_fpr) > 1 && diff(range(obs_fpr)) > 0)
-                    seq(min(obs_fpr), max(obs_fpr), length.out = 99) else 1:99 / 100
-                crv <- as.data.frame(mada::sroc(biv_model, fpr = fpr_grid))
-                if (ncol(crv) >= 2) {
-                    names(crv)[1:2] <- c("fpr", "sens")
-                    crv <- crv[stats::complete.cases(crv[, c("fpr", "sens")]), c("fpr", "sens"), drop = FALSE]
-                    if (nrow(crv) > 1) sroc_curve <- crv
+                psi_ok <- is.matrix(biv_model$Psi) && all(dim(biv_model$Psi) >= 2) &&
+                    all(is.finite(diag(biv_model$Psi)[1:2])) && all(diag(biv_model$Psi)[1:2] > 1e-3)
+                if (psi_ok && length(obs_fpr) > 1 && diff(range(obs_fpr)) > 0) {
+                    fpr_grid <- seq(min(obs_fpr), max(obs_fpr), length.out = 99)
+                    crv <- as.data.frame(mada::sroc(biv_model, fpr = fpr_grid))
+                    if (ncol(crv) >= 2) {
+                        names(crv)[1:2] <- c("fpr", "sens")
+                        crv <- crv[stats::complete.cases(crv[, c("fpr", "sens")]), c("fpr", "sens"), drop = FALSE]
+                        if (nrow(crv) > 1) sroc_curve <- crv
+                    }
                 }
 
                 mu  <- as.numeric(stats::coef(biv_model))   # (tsens, tfpr), logit scale
@@ -3875,6 +3888,23 @@ diagnosticmetaClass <- R6::R6Class(
             # sensitivity of 90.4% with a 95% CI of 71-97% was reported as
             # "excellent ... will detect 90 out of 100 patients", which the
             # interval does not support.
+            # Snap values within IEEE-754 noise (1e-8) of a band edge so
+            # (1 - plogis(qlogis(0.10))) * 100 = 89.999999999999986, which
+            # .fmtPct prints as "90.0%", lands in the >= 90 band too.
+            snap_edge <- function(v) {
+                if (is.null(v)) return(NULL)
+                edges <- c(0, 70, 80, 90, 99, 100)
+                vapply(v, function(x) {
+                    if (!is.finite(x)) return(x)
+                    hit <- which(abs(x - edges) <= 1e-8)
+                    if (length(hit) > 0) edges[hit[1]] else x
+                }, numeric(1))
+            }
+            sens <- snap_edge(sens)
+            spec <- snap_edge(spec)
+            sens_ci <- snap_edge(sens_ci)
+            spec_ci <- snap_edge(spec_ci)
+
             band_key <- function(x) {
                 if (x >= 90) {
                     "excellent"
@@ -4035,7 +4065,7 @@ diagnosticmetaClass <- R6::R6Class(
                         weak     = .("<br><br><strong>Your positive LR of %.2f</strong> provides <em>weak</em> evidence FOR disease when test is positive."),
                         minimal  = .("<br><br><strong>Your positive LR of %.2f</strong> provides <em>minimal</em> evidence FOR disease when test is positive.")),
                         lr_pos),
-                    if (lr_spans(lr_ci$plr, plr_band)) lr_note(lr_ci$plr),
+                    if (!(spec >= 90) && lr_spans(lr_ci$plr, plr_band)) lr_note(lr_ci$plr),
                     if (lr_pos > 10) {
                         sprintf(.("A positive result increases disease probability substantially (multiplies pre-test odds by %.1fx)."),
                                 lr_pos)
@@ -4056,7 +4086,7 @@ diagnosticmetaClass <- R6::R6Class(
                         weak     = .("<strong>Your negative LR of %.2f</strong> provides <em>weak</em> evidence AGAINST disease when test is negative."),
                         minimal  = .("<strong>Your negative LR of %.2f</strong> provides <em>minimal</em> evidence AGAINST disease when test is negative.")),
                         if (identical(nlr_key, "strong")) private$.fmtRatio(lr_neg) else lr_neg),
-                    if (lr_spans(lr_ci$nlr, nlr_band)) lr_note(lr_ci$nlr),
+                    if (!(sens >= 90) && lr_spans(lr_ci$nlr, nlr_band)) lr_note(lr_ci$nlr),
                     if (lr_neg < 0.1) {
                         sprintf(.("A negative result substantially decreases disease probability (divides pre-test odds by %.1fx)."),
                                 1 / lr_neg)

@@ -203540,3 +203540,2810 @@ msgid ""
 "are interpreted, and how axes are labeled, so selecting the wrong unit for "
 "pre-calculated time changes the reported results, not just the labels."
 msgstr ""
+
+#: R/outcomeorganizer.b.R
+msgid "{analysis} Analysis"
+msgstr ""
+
+#: R/timeinterval.b.R
+msgid ""
+"{count} date value(s) give a month and a year but no day, for example "
+"\"{example}\". Each was set to the 1st of its month, so the day is not data "
+"and an interval between two such dates is ambiguous by up to a month either "
+"way."
+msgstr ""
+
+#: R/timeinterval.b.R
+msgid ""
+"{count} date value(s) have text after the date, for example \"{example}\". "
+"Only the date at the start of each value was read and the rest was ignored. "
+"Check that the ignored text does not change the date (a second date, a time, "
+"or a note such as 'approx.'), and clean the column so it holds dates only."
+msgstr ""
+
+#: R/timeinterval.b.R
+msgid ""
+"{count} date value(s) here were written with a two-digit year, which is read "
+"as 2000-2068 for 00-68: a 1965 date written as 65 becomes 2065 and falls "
+"after its end date. If the Examples below show a start date in the future, "
+"rewrite the column with four-digit years."
+msgstr ""
+
+#: R/timeinterval.b.R
+msgid ""
+"{count} date value(s) were left empty because that clock time does not exist "
+"on this computer's timezone: it falls in the hour skipped when "
+"daylight-saving time starts (first: {example}). If the times were recorded "
+"in UTC or another fixed offset, set Timezone to UTC; otherwise correct the "
+"times at source."
+msgstr ""
+
+#: R/timeinterval.b.R
+msgid ""
+"{count} date value(s) were left empty because their text cannot have the "
+"date format used, for example \"{example}\". Reading them would mean "
+"splitting digits in the wrong place or inventing a day that was never "
+"recorded."
+msgstr ""
+
+#: R/timeinterval.b.R
+msgid "{count} date value(s) with no day recorded"
+msgstr ""
+
+#: R/timeinterval.b.R
+msgid "{count} date value(s) with text after the date that was ignored"
+msgstr ""
+
+#: R/timeinterval.b.R
+msgid "{count} date value(s) written with a two-digit year"
+msgstr ""
+
+#: R/datetimeconverter.b.R
+msgid ""
+"{count} of {total} date(s) converted from numeric serial values fall outside "
+"the plausible range (<1900 or >1 year in the future); the first is "
+"{example}. • If this column holds packed calendar dates such as DDMMYY or "
+"YYYYMMDD, select the matching text format instead, so the digits are read as "
+"day, month and year."
+msgstr ""
+
+#: R/timeinterval.b.R
+msgid ""
+"{count} rows may have the day and month entered the other way round from the "
+"rest of the column, so the total person-time may be wrong (see the strong "
+"warning above)"
+msgstr ""
+
+#: R/datetimeconverter.b.R
+msgid ""
+"{count} value(s) could not be converted because that clock time does not "
+"exist in the {tz} timezone: it falls in the hour skipped when "
+"daylight-saving time starts (first: {example}). • These rows are left empty. "
+"• If the times were recorded in UTC or another fixed offset, set Timezone to "
+"UTC; otherwise correct the times at source."
+msgstr ""
+
+#: R/datetimeconverter.b.R
+msgid ""
+"{count} value(s) have text after the date, for example \"{example}\". • Only "
+"the date at the start of each value was read and the rest was ignored. • "
+"Check that the ignored text does not change the date (a second date, a time, "
+"or a note such as 'approx.'), and clean the column so it holds dates only."
+msgstr ""
+
+#: R/datetimeconverter.b.R
+msgid ""
+"{count} value(s) were left empty because their text cannot have the format "
+"{fmt}, for example \"{example}\". • Reading them would mean splitting digits "
+"in the wrong place or inventing a day that was never recorded. • Choose the "
+"format that matches the text, or select Auto-detect."
+msgstr ""
+
+#: R/datetimeconverter.b.R
+msgid "{days} days ({years} years)"
+msgstr ""
+
+#: R/survival-competingrisks.R
+msgid ""
+"{feature} is not available for competing-risks analysis. It assumes a single "
+"event type, and the competing-risk outcome is coded 0/1/2. Use the "
+"cumulative incidence output instead, or supply an outcome with one event "
+"type."
+msgstr ""
+
+#: R/multisurvival.b.R
+msgid ""
+"{k} of {total} bootstrap resamples were excluded because the Cox refit "
+"failed or gave a non-estimable coefficient or concordance (for example, a "
+"factor level absent from the resample). Resamples whose refit only warned "
+"(such as monotone likelihood) are included."
+msgstr ""
+
+#: R/singlearm.b.R
+msgid ""
+"{levels} were treated as censored. If any of these is a death or another "
+"terminal event, 1 minus Kaplan-Meier overstates absolute risk; use Multiple "
+"Event Levels with Competing Risk."
+msgstr ""
+
+#: R/multisurvival.b.R
+#: R/singlearm.b.R
+#: R/survival.b.R
+#: R/survivalcont.b.R
+msgid ""
+"{n} dates in {var} fall outside a plausible range (for example {example}). "
+"Replace placeholder dates before analyzing; a follow-up date such as "
+"2199-01-01 is not a censoring date."
+msgstr ""
+
+#: R/timeinterval.b.R
+msgid "{n} dates in the future detected"
+msgstr ""
+
+#: R/singlearm.b.R
+msgid ""
+"{n} death(s) from other causes were censored, so 1 minus Kaplan-Meier "
+"overstates the absolute risk of the event. Use Competing Risk for cumulative "
+"incidence."
+msgstr ""
+
+#: R/singlearm.b.R
+msgid ""
+"{n} event(s) at time zero are counted with no follow-up time, which raises "
+"the rate. The Kaplan-Meier or cumulative-incidence estimate shows them as a "
+"drop at the origin."
+msgstr ""
+
+#: R/survival.b.R
+msgid ""
+"{n} patients with survival time 0, including {events} with an event, were "
+"excluded from this model because it needs positive times."
+msgstr ""
+
+#: R/timeinterval.b.R
+msgid "{n} potentially extreme time intervals detected"
+msgstr ""
+
+#: R/outcomeorganizer.b.R
+msgid ""
+"{n} row(s) have no patient ID, so they were left out of the event hierarchy "
+"and kept as coded."
+msgstr ""
+
+#: R/outcomeorganizer.b.R
+msgid ""
+"{n} row(s) with a missing status and follow-up past the cut-off were coded "
+"0, as event-free at the cut-off."
+msgstr ""
+
+#: R/timeinterval.b.R
+msgid "{n} with follow-up shorter than {amount}"
+msgstr ""
+
+#: R/timeinterval.b.R
+msgid "{n} with missing follow-up"
+msgstr ""
+
+#: R/timeinterval.b.R
+msgid ""
+"{n} zero-length intervals ({pct}% of valid intervals) - start and end date "
+"are the same day, which contributes no person-time"
+msgstr ""
+
+#: R/survival.b.R
+#: R/survivalcont.b.R
+msgid ""
+"{nfailed} of {ninputs} dates could not be read, so those patients were "
+"excluded. Check the date format: when it does not match the data, the dates "
+"that were read may have day and month swapped."
+msgstr ""
+
+#: R/multisurvival.b.R
+#: R/singlearm.b.R
+msgid ""
+"{nfailed} of {ninputs} dates could not be read, so those patients were "
+"excluded. Check the date format."
+msgstr ""
+
+#: R/survivalcont.b.R
+msgid ""
+"{previous_text}<p><b>Landmark Analysis:</b> Analysis is conditional on "
+"remaining under observation and event-free through {time} {units}. This can "
+"address guarantee-time bias when the landmark is prespecified, but it "
+"changes the target population and does not remove ordinary confounding or "
+"lead-time bias.</p>"
+msgstr ""
+
+#: R/survivalcont.b.R
+msgid "{tooltip}<p><b>Model Metrics:</b> {metrics}</p>"
+msgstr ""
+
+#: R/outcomeorganizer.b.R
+msgid ""
+"{type} is built from a Recurrence/Progression variable, and none is "
+"selected. Without it the column would hold the outcome level alone under the "
+"{type} name. Select that variable and its Event Level, or choose Overall "
+"Survival."
+msgstr ""
+
+#: R/multisurvival.b.R
+msgid "{unit} from the landmark"
+msgstr ""
+
+#: R/multisurvival.b.R
+msgid ""
+"{var} = 0 is outside the observed range ({low} to {high}), so that row "
+"describes no actual patient. To read the effect at a clinical value, "
+"subtract that value from {var} in the data and refit."
+msgstr ""
+
+#: R/multisurvival.b.R
+#: R/singlearm.b.R
+#: R/survival.b.R
+#: R/survivalcont.b.R
+msgid ""
+"{var} contains numbers that cannot be read as dates (for example {example}). "
+"Numeric date columns must hold seconds since 1970. Convert the column with "
+"Date-Time Converter, or store the dates as text such as 2021-03-15."
+msgstr ""
+
+#: R/multisurvival.b.R
+msgid "{var}: no analyzed patient has {levels}, so that level was dropped."
+msgstr ""
+
+#: R/multisurvival.b.R
+msgid ""
+"{var}: no analyzed patient has {levels}, so that level was dropped. Hazard "
+"ratios are compared with {reference}, not with {old}."
+msgstr ""
+
+#: R/lassocox.b.R
+msgid "{variable}: {level} (vs {reference})"
+msgstr ""
+
+#: R/oddsratio.b.R
+msgid ""
+"{variable}: the odds ratio per one unit is unreadable at two decimals "
+"because of the measurement scale. The odds ratio per 1 SD ({unit} units) is "
+"{or} (95% CI {lower} to {upper}). To show this in the table, rescale the "
+"variable."
+msgstr ""
+
+#: R/survivalcont.b.R
+msgid ""
+"%d of %d analyzed record(s) had missing values in stratification variable "
+"'%s' and were excluded from the stratified Cox model (n=%d, events=%d "
+"analyzed)."
+msgstr ""
+
+#: R/survivalcont.b.R
+msgid "%d of %d record(s) were excluded because survival time was missing."
+msgstr ""
+
+#: R/survivalcont.b.R
+msgid ""
+"%d of the entries in '%s' were not positive numbers and were ignored. "
+"Survival is shown at: %s."
+msgstr ""
+
+#: R/outcomeorganizer.b.R
+msgid ""
+"%d patient(s) have more than one row. For each, the EARLIEST record carrying "
+"the priority outcome (%s) was kept as the event and their tied or later rows "
+"were censored, so the event is not moved earlier in time. However, this "
+"analysis does not collapse the dataset to one row per patient: passing "
+"multiple rows per patient into an unclustered survival analysis (Surv(time, "
+"status)) treats repeated rows as independent subjects and double-counts "
+"censored person-time. Reduce your data to one row per patient (or use a "
+"clustered/counting-process model) before running downstream survival "
+"analyses."
+msgstr ""
+
+#: survival/results/survTable.title
+msgid "`Survival at Selected Time Points - ${explanatory}`"
+msgstr ""
+
+#: survival/results/survTableSummary.title
+msgid "`Survival at Selected Time Points, Summary - ${explanatory}`"
+msgstr ""
+
+#: R/oddsratio.b.R
+msgid ""
+"<div style=\"margin-bottom: 20px; padding: 15px; background-color: rgba(216, "
+"33, 50, 0.18); border-left: 4px solid #dc3545; color: inherit;\"> <h4 "
+"style=\"margin-top: 0; color: inherit;\">Understanding Prediction and "
+"Diagnostic Outputs</h4> <p><strong>Prediction nomogram:</strong> The plotted "
+"nomogram assigns points to all explanatory variables in the "
+"maximum-likelihood logistic regression model and maps total points to "
+"predicted outcome probability. It is not a Fagan nomogram and does not "
+"display pre-test-to-post-test probability conversion.</p> <h5 style=\"color: "
+"inherit;\">Prediction Nomogram Components:</h5> <ul> "
+"<li><strong>Points:</strong> Contribution assigned to each predictor "
+"value</li> <li><strong>Total Points:</strong> Sum of predictor "
+"contributions</li> <li><strong>Predicted Probability:</strong> Model-based "
+"probability corresponding to total points</li> </ul> "
+"<p><strong>Important:</strong> The plot is a visual representation of the "
+"fitted model, not evidence of calibration, discrimination, transportability, "
+"or clinical utility. Internal and external validation are required before "
+"clinical use. It is not generated when Firth regression is selected because "
+"that would mix different estimation methods. Predicted probabilities need a "
+"cohort sample with the real event rate: in a case-control sample the odds "
+"ratios hold but the predicted probabilities do not.</p> <hr style=\"margin: "
+"15px 0; border: none; border-top: 1px solid #f5c6cb;\"> <h5 style=\"color: "
+"inherit; margin-top: 15px;\">What is a Diagnostic Predictor?</h5> "
+"<p><strong>The diagnostic predictor is the single binary variable you want "
+"to evaluate as a diagnostic test.</strong></p> <div "
+"style=\"background-color: rgba(255, 202, 33, 0.23); padding: 10px; "
+"border-radius: 5px; margin: 10px 0; color: inherit;\"> "
+"<strong>Example:</strong> If you select \"LVI\" (Lymphovascular Invasion: "
+"Absent/Present) as the diagnostic predictor, the diagnostic table answers: "
+"<em>\"How well does LVI alone distinguish the selected outcome "
+"states?\"</em> </div> <p><strong>Requirements:</strong></p> <ul> <li> "
+"Compares two explicitly selected levels (<strong>Predictor Positive "
+"Level</strong> vs <strong>Predictor Negative Level</strong>): e.g., Yes/No, "
+"Present/Absent, Positive/Negative</li> <li> Examples: LVI (Absent/Present), "
+"an immunostain (Negative/Positive), a frozen-section call "
+"(Benign/Malignant)</li> <li> Cannot use continuous variables: Age, Tumor "
+"Size (infinite possible values)</li> <li> Multi-category variables (e.g., "
+"Grade 1/2/3): Only observations with the selected positive and negative "
+"levels are included in the 2×2 diagnostic table; unselected levels are "
+"excluded with a warning</li> </ul> <p><strong>Why Two Selected "
+"Levels?</strong></p> <p>Diagnostic test performance metrics (sensitivity, "
+"specificity, likelihood ratios) are calculated from a 2×2 contingency "
+"table:</p> <table style=\"border-collapse: collapse; margin: 10px 0; "
+"font-size: 0.9em;\"> <tr><th style=\"border: 1px solid #ddd; padding: "
+"5px;\"></th> <th style=\"border: 1px solid #ddd; padding: 5px;\">Outcome "
+"+</th> <th style=\"border: 1px solid #ddd; padding: 5px;\">Outcome "
+"-</th></tr> <tr><td style=\"border: 1px solid #ddd; padding: 5px;\">Test "
+"+</td> <td style=\"border: 1px solid #ddd; padding: 5px;\">True "
+"Positive</td> <td style=\"border: 1px solid #ddd; padding: 5px;\">False "
+"Positive</td></tr> <tr><td style=\"border: 1px solid #ddd; padding: "
+"5px;\">Test -</td> <td style=\"border: 1px solid #ddd; padding: 5px;\">False "
+"Negative</td> <td style=\"border: 1px solid #ddd; padding: 5px;\">True "
+"Negative</td></tr> </table> <p><small><em>Sensitivity = TP/(TP+FN), "
+"Specificity = TN/(TN+FP), LR+ = Sensitivity/(1-Specificity)</em></small></p> "
+"<p><strong>Selection Guidelines:</strong></p> <ul> <li><strong>Not "
+"specified:</strong> Uses the first explanatory variable automatically (in "
+"the jamovi GUI, select the variable in the Diagnostic Predictor box to "
+"enable the Predictor Positive Level and Predictor Negative Level "
+"dropdowns)</li> <li><strong>In your regression model:</strong> Diagnostic "
+"metrics are still unadjusted and use only its paired 2×2 table</li> "
+"<li><strong>Not in your model:</strong> Evaluates it independently using "
+"paired complete outcome/test observations</li> </ul> <div "
+"style=\"background-color: rgba(33, 163, 188, 0.21); padding: 10px; "
+"border-radius: 5px; margin: 10px 0; color: inherit;\"> <strong> Clinical "
+"Tip:</strong> If your first variable is continuous (e.g., Age), you must "
+"manually select a binary diagnostic predictor to obtain sensitivity, "
+"specificity, and likelihood ratios. The prediction nomogram can still be "
+"generated from the regression variables. </div> </div>"
+msgstr ""
+
+#: R/survivalcont.b.R
+msgid ""
+"<h4>Person-Time Analysis Summary</h4>\n"
+"                    <p>Total follow-up time: <b>{total_time_val} "
+"{units}</b></p>\n"
+"                    <p>Number of events: <b>{events}</b></p>\n"
+"                    <p>Overall incidence rate: <b>{rate}</b> per "
+"{multiplier} {units} {ci_str}</p>\n"
+"                    <p>{scope}</p>\n"
+"                    <p>This represents the rate at which events occurred in "
+"your study population. The incidence rate is calculated as the number of "
+"events divided by the total person-time at risk, accounting for varying "
+"follow-up durations across patients.</p>"
+msgstr ""
+
+#: R/outcomeorganizer.b.R
+msgid ""
+"A Censored/Event/Competing column cannot be the outcome of {analysis}, which "
+"has no competing code. Select the original vital status column instead."
+msgstr ""
+
+#: R/survival.b.R
+msgid "a Kaplan-Meier plot"
+msgstr ""
+
+#: R/survival.b.R
+msgid ""
+"A p-value is given for covariate effects only; testing a distribution "
+"parameter (shape, scale, rate) against zero has no clinical meaning."
+msgstr ""
+
+#: R/singlearm.b.R
+msgid ""
+"A smoothed hazard was not estimated because automatic binning produced %d "
+"usable interval(s). At least three interval-rate estimates are needed for "
+"this exploratory smoother."
+msgstr ""
+
+#: R/datetimeconverter.b.R
+msgid ""
+"A text date format is selected, so the numeric values were read as digit "
+"strings (for example 150321 as 15-03-21), not as Excel or Unix serial "
+"numbers."
+msgstr ""
+
+#: R/survival.b.R
+msgid "Aalen-Johansen cumulative incidence and Gray's test"
+msgstr ""
+
+#: R/multisurvival.b.R
+msgid ""
+"Adjusted curves require the selected variable to be part of the fitted "
+"model. Add it under Explanatory Variables or Stratification Variables."
+msgstr ""
+
+#: R/outcomeorganizer.b.R
+msgid ""
+"Administrative censoring applied at the supplied cut-off: follow-up "
+"truncated for %d patient(s); %d event(s) with a recorded time after the "
+"cut-off were reset to censored. Use the truncated follow-up time this "
+"analysis writes back, not the original follow-up column."
+msgstr ""
+
+#: R/timeinterval.b.R
+msgid "after excluding {parts} (landmark analysis)"
+msgstr ""
+
+#: R/survival.b.R
+msgid "Age interaction test suppressed: fewer than 10 events."
+msgstr ""
+
+#: R/survival.b.R
+msgid "Age interaction test unavailable"
+msgstr ""
+
+#: R/survival.b.R
+msgid "Age standardization unavailable"
+msgstr ""
+
+#: R/survival.b.R
+msgid "Age-adjusted analysis unavailable"
+msgstr ""
+
+#: R/survival.b.R
+msgid "age-adjusted Cox regression"
+msgstr ""
+
+#: R/survival.b.R
+msgid "Age-adjusted Cox regression suppressed: fewer than 10 events."
+msgstr ""
+
+#: R/survival.b.R
+msgid "Age-as-time-scale analysis unavailable"
+msgstr ""
+
+#: R/survival.b.R
+msgid "Age-as-time-scale Cox regression suppressed: fewer than 10 events."
+msgstr ""
+
+#: R/outcomeorganizer.b.R
+msgid ""
+"all other patients (recurrence/progression level(s) {levels}), including "
+"those who died without progression"
+msgstr ""
+
+#: R/survival.b.R
+msgid ""
+"Among patients event-free at the landmark of {offset} {unit}, with time "
+"measured from the landmark."
+msgstr ""
+
+#: R/survival.b.R
+msgid ""
+"Among reported results, provide estimated effects with confidence intervals "
+"from an analysis in which the marker and standard prognostic variables are "
+"included, regardless of their statistical significance."
+msgstr ""
+
+#: R/outcomeorganizer.b.R
+msgid ""
+"An event hierarchy with priority code {code} was applied to repeated patient "
+"records."
+msgstr ""
+
+#: R/survival.b.R
+msgid "Analysis and presentation"
+msgstr ""
+
+#: R/survival.b.R
+msgid ""
+"Analyzed by level of {var}. Any cutpoint and how it was chosen belong in the "
+"manuscript."
+msgstr ""
+
+#: R/survival.b.R
+msgid "Assay methods"
+msgstr ""
+
+#: R/multisurvival.b.R
+msgid ""
+"Assign every observed outcome level under Multiple Event Levels to continue. "
+"Categories absent from the cohort may remain unselected."
+msgstr ""
+
+#: R/multisurvival.b.R
+msgid "Assign outcome levels"
+msgstr ""
+
+#: R/lassocox.b.R
+msgid ""
+"At most 30 paths are shown: selected columns first, then by summed absolute "
+"coefficient times column SD across the path. All retained columns remain in "
+"fitting; trace rank is not clinical importance."
+msgstr ""
+
+#: R/timeinterval.b.R
+msgid ""
+"Auto-detection is ambiguous: {formats} all parse these dates equally well "
+"({pct}% success) and place them in a plausible range of years. The "
+"'{format}' format was used - please verify it matches your data or select "
+"the format manually."
+msgstr ""
+
+#: R/singlearm.b.R
+msgid ""
+"Because the curve changes in steps, it need not equal exactly 50%; this is a "
+"cohort-level estimate, not a prediction that exactly half of individual "
+"patients survive beyond that time."
+msgstr ""
+
+#: R/survivalcont.b.R
+msgid "Beyond the observed follow-up of this group."
+msgstr ""
+
+#: R/outcomeorganizer.b.R
+msgid "Binary Outcome Coding"
+msgstr ""
+
+#: R/survival.b.R
+msgid "bootstrap internal validation"
+msgstr ""
+
+#: R/survival.b.R
+msgid "Bootstrap validation unavailable"
+msgstr ""
+
+#: R/survival.b.R
+msgid ""
+"Both models are stratified by {var}; the unadjusted column differs from the "
+"adjusted one only by age."
+msgstr ""
+
+#: R/survival.b.R
+msgid ""
+"Calibration here is apparent, on the data used to fit the model, and is not "
+"validation."
+msgstr ""
+
+#: R/survival.b.R
+msgid "Calibration unavailable"
+msgstr ""
+
+#: lassocox/ui[0][2].label
+msgid "Candidate Predictors"
+msgstr ""
+
+#: R/lassocox.b.R
+msgid "Caution"
+msgstr ""
+
+#: R/outcomeorganizer.b.R
+msgid "Censored ({levels}): coded as 0"
+msgstr ""
+
+#: R/outcomeorganizer.b.R
+msgid "censored records ({levels})"
+msgstr ""
+
+#: R/oddsratio.b.R
+msgid ""
+"Check that the positive and negative outcome and predictor levels are "
+"correct for your study"
+msgstr ""
+
+#: R/survivalcont.b.R
+msgid "Check the time unit"
+msgstr ""
+
+#: oddsratio/options/diagnosticPredictor.description.main
+msgid ""
+"Choose which categorical predictor to use for the separate, unadjusted "
+"sensitivity, specificity, and likelihood-ratio calculations. In the jamovi "
+"interface, select this variable here so the 'Predictor Positive Level' and "
+"'Predictor Negative Level' selectors below can list its levels; in R, if "
+"left empty, the first explanatory variable is used."
+msgstr ""
+
+#: oddsratio/options/predictorNegativeLevel.description.main
+msgid ""
+"Choose which level of the diagnostic predictor is the negative test result "
+"(e.g., \"Absent\", \"Test-\", \"No\"). Both Predictor Positive Level and "
+"Predictor Negative Level must be selected for diagnostic metrics; they are "
+"never taken from the level names or their order, and any other levels are "
+"excluded. While either is empty the diagnostic metrics wait for them and "
+"list the observed levels, and the logistic model, odds ratios, forest plot "
+"and nomogram still run."
+msgstr ""
+
+#: oddsratio/options/predictorLevel.description.main
+msgid ""
+"Choose which level of the diagnostic predictor is the positive test result "
+"(e.g., \"Present\", \"Test+\", \"Yes\"). Both Predictor Positive Level and "
+"Predictor Negative Level must be selected for diagnostic metrics; they are "
+"never taken from the level names or their order, and any other levels are "
+"excluded. While either is empty the diagnostic metrics wait for them and "
+"list the observed levels, and the logistic model, odds ratios, forest plot "
+"and nomogram still run."
+msgstr ""
+
+#: R/survival.b.R
+msgid ""
+"Clarify how marker values were handled in the analyses; if relevant, "
+"describe methods used for cutpoint determination."
+msgstr ""
+
+#: survival/options/age_group_cutpoints.description
+msgid ""
+"Comma-separated age cutpoints for creating age groups. For example, 50, 65, "
+"75 creates groups 50 or younger, over 50 to 65, over 65 to 75, and over 75. "
+"Each upper cutpoint is included in the preceding group."
+msgstr ""
+
+#: R/multisurvival.b.R
+msgid ""
+"Compare models on the same complete-case rows and choose the model "
+"assumptions to match the study question."
+msgstr ""
+
+#: R/multisurvival.b.R
+msgid "Comparison with separate subgroup fits."
+msgstr ""
+
+#: R/outcomeorganizer.b.R
+msgid "Competing event ({levels}): coded as 2"
+msgstr ""
+
+#: R/survival.b.R
+msgid ""
+"Competing-risk mode is selected, so this analysis reports cumulative "
+"incidence and Gray's test, and fits no Cox model. Two models answer two "
+"different questions. A cause-specific Cox model censors competing events and "
+"estimates the cause-specific hazard, the event rate among patients still "
+"free of every event. A Fine-Gray model estimates the subdistribution hazard, "
+"which relates a variable to the cumulative incidence of the event."
+msgstr ""
+
+#: R/outcomeorganizer.b.R
+msgid "Competing-Risks Coding Detected"
+msgstr ""
+
+#: R/survival.b.R
+msgid "Competing-risks mode reports cumulative incidence instead."
+msgstr ""
+
+#: R/survival.b.R
+msgid "Complete-case analysis: {n} of {total} rows were used."
+msgstr ""
+
+#: R/lassocox.b.R
+msgid "Concern"
+msgstr ""
+
+#: R/multisurvival.b.R
+msgid ""
+"Confidence intervals are computed for the concordance index only; the Brier "
+"score, time-dependent AUC and integrated Brier score are reported without "
+"intervals."
+msgstr ""
+
+#: R/multisurvival.b.R
+msgid ""
+"Confidence intervals for standardized curves are not implemented here and "
+"are left blank. Appropriate uncertainty estimation, such as patient-level "
+"bootstrapping, is required."
+msgstr ""
+
+#: R/survivalcont.b.R
+msgid ""
+"Confidence intervals use the complementary log-log transformation "
+"(conf.type='log-log'), as in Single Arm Survival, based on Greenwood's "
+"variance estimate; the median CI is the Brookmeyer-Crowley inversion of that "
+"pointwise band."
+msgstr ""
+
+#: R/survival.b.R
+msgid ""
+"Confidence intervals use the complementary log-log transformation with "
+"Greenwood's variance, as in Single Arm Survival."
+msgstr ""
+
+#: R/multisurvival.b.R
+msgid ""
+"Confidence intervals use the log transformation (conf.type='log'); the "
+"median CI is the Brookmeyer-Crowley inversion of that pointwise band."
+msgstr ""
+
+#: R/oddsratio.b.R
+msgid "Confidence intervals: profile likelihood. P-values: Wald test."
+msgstr ""
+
+#: R/oddsratio.b.R
+msgid ""
+"Confidence intervals: profile penalized likelihood. P-values: penalized "
+"likelihood-ratio test."
+msgstr ""
+
+#: R/oddsratio.b.R
+msgid ""
+"Confidence intervals: Wald (profile-likelihood intervals could not be "
+"computed for this model). P-values: Wald test."
+msgstr ""
+
+#: R/timeinterval.b.R
+msgid "Confidence level must be between 90 and 99."
+msgstr ""
+
+#: R/survivalcont.b.R
+msgid "Confidence limits could not be estimated for this survival estimate."
+msgstr ""
+
+#: datetimeconverter/results/conversionRows.title
+msgid "Conversion Values"
+msgstr ""
+
+#: R/datetimeconverter.b.R
+msgid "Converted DateTime"
+msgstr ""
+
+#: R/survivalcont.b.R
+msgid "Could not be computed: %s"
+msgstr ""
+
+#: R/timeinterval.b.R
+msgid ""
+"Counts below describe the data as supplied, before any filter or landmark is "
+"applied, so the total may exceed the number of observations in the "
+"statistical summary."
+msgstr ""
+
+#: R/survivalcont.b.R
+msgid "Cox model residual calculation failed: {msg}"
+msgstr ""
+
+#: R/survivalcont.b.R
+msgid ""
+"Cox regression analysis failed. This may be due to insufficient data, "
+"convergence issues, or inappropriate data structure. Please check your "
+"variables and try again."
+msgstr ""
+
+#: R/survival.b.R
+msgid ""
+"Cox regression estimated {direction} for {comparison}, with a hazard ratio "
+"of {hr} (95% CI: {lower} to {upper}, {p}), which was {significance}."
+msgstr ""
+
+#: R/survival.b.R
+msgid ""
+"Cox regression estimated a hazard ratio of {hr} for {comparison} (95% CI: "
+"{lower} to {upper}, {p}); the interval includes 1, so these data are "
+"compatible with both a lower and a higher hazard."
+msgstr ""
+
+#: R/survival.b.R
+msgid "cox.zph test of proportional hazards"
+msgstr ""
+
+#: R/oddsratio.b.R
+msgid ""
+"Critical validation errors detected: {errors}. Ensure distinct positive and "
+"negative outcome levels are selected, explanatory variables have sufficient "
+"variation, and consider removing rows with missing data."
+msgstr ""
+
+#: R/singlearm.b.R
+msgid "Crude Cause-Specific Person-Time Rate (rates per {m} person-{unit})"
+msgstr ""
+
+#: R/survival.b.R
+msgid "Cumulative incidence did not reach 50% within the observed follow-up."
+msgstr ""
+
+#: survivalcont/ui[1][2].label
+msgid "Cut-off Constraints"
+msgstr ""
+
+#: timeinterval/results/qualityCounts.title
+msgid "Data Quality Counts"
+msgstr ""
+
+#: survival/results/residualsTable.columns.title
+msgid "Data row"
+msgstr ""
+
+#: R/survivalcont.b.R
+msgid "Dataset contains no rows."
+msgstr ""
+
+#: R/datetimeconverter.b.R
+msgid ""
+"Dataset contains no rows. • Please ensure your dataset has at least one "
+"observation. • Check for data loading or filtering issues."
+msgstr ""
+
+#: R/datetimeconverter.b.R
+msgid "Date Range:"
+msgstr ""
+
+#: R/survival.b.R
+msgid ""
+"Describe the characteristics (for example, disease stage or co-morbidities) "
+"of the study patients, including their source and inclusion and exclusion "
+"criteria."
+msgstr ""
+
+#: R/survival.b.R
+msgid ""
+"Describe the flow of patients through the study, including the number of "
+"patients included in each stage of the analysis (a diagram may be helpful) "
+"and reasons for dropout. Specifically, both overall and for each subgroup "
+"extensively examined report the number of patients and the number of events."
+msgstr ""
+
+#: R/survival.b.R
+msgid ""
+"Describe treatments received and how chosen (for example, randomized or "
+"rule-based)."
+msgstr ""
+
+#: R/survival.b.R
+msgid ""
+"Describe type of biological material used (including control samples) and "
+"methods of preservation and storage."
+msgstr ""
+
+#: R/lassocox.b.R
+msgid ""
+"Deviance was still falling at the last lambda used, so lambda.min is only "
+"the smallest penalty that could be evaluated, and the data may separate the "
+"outcome almost perfectly."
+msgstr ""
+
+#: R/outcomeorganizer.b.R
+msgid "DFS built from vital status alone"
+msgstr ""
+
+#: oddsratio/results/diagnosticContingency.title
+msgid "Diagnostic Contingency Table"
+msgstr ""
+
+#: R/oddsratio.b.R
+msgid ""
+"Diagnostic metrics are waiting for the Predictor Positive Level and "
+"Predictor Negative Level. Choose which levels of '{variable}' represent the "
+"positive and negative test results. Observed levels: {levels}. The logistic "
+"model, odds ratios, forest plot and nomogram are not affected."
+msgstr ""
+
+#: R/oddsratio.b.R
+msgid ""
+"Diagnostic metrics for '{variable}' require both outcome levels to be "
+"present among the selected positive and negative predictor levels. The "
+"prediction nomogram is unaffected."
+msgstr ""
+
+#: R/oddsratio.b.R
+msgid ""
+"Diagnostic metrics for '{variable}' require paired complete observations "
+"with at least two observed categorical predictor levels and two observed "
+"outcome levels. The prediction nomogram is unaffected."
+msgstr ""
+
+#: R/oddsratio.b.R
+msgid ""
+"Diagnostic metrics were not calculated because a valid paired 2×2 table "
+"could not be formed."
+msgstr ""
+
+#: R/oddsratio.b.R
+msgid ""
+"Diagnostic predictor '{variable}' has {n} observed levels ({allLevels}). "
+"Excluded {nExcl} observation(s) with unselected predictor level(s) "
+"({excluded}) from the 2x2 diagnostic table so only '{pos}' (+) vs '{neg}' "
+"(-) are compared."
+msgstr ""
+
+#: R/survival.b.R
+msgid ""
+"Direct standardization is not estimable for {group}: no person-time in "
+"required age band(s) {bands}. Use groups with overlapping age support or "
+"combine age bands before comparing standardized rates."
+msgstr ""
+
+#: R/survival.b.R
+msgid ""
+"Direct standardization: all {n} patients assigned to each group; Cox model "
+"{group} + {age}"
+msgstr ""
+
+#: R/multisurvival.b.R
+msgid ""
+"Discrimination may be overstated and prediction error understated. These "
+"estimates are not bounds on performance in new patients; use internal "
+"validation and external validation in the intended population."
+msgstr ""
+
+#: R/survival.b.R
+msgid "Discuss implications for future research and clinical value."
+msgstr ""
+
+#: R/survival.b.R
+msgid "Discussion"
+msgstr ""
+
+#: R/outcomeorganizer.b.R
+msgid "disease progression only (recurrence/progression level {levels})"
+msgstr ""
+
+#: R/multisurvival.b.R
+msgid "Disease-free endpoint timing"
+msgstr ""
+
+#: R/singlearm.b.R
+msgid ""
+"Disease-free survival counts Alive with Disease as an event at the recorded "
+"time. That is correct only if the time runs to recurrence or progression, "
+"not to last follow-up."
+msgstr ""
+
+#: survival/options/remark_checklist.description
+msgid ""
+"Display the 20-item REMARK (REporting recommendations for tumor MARKer "
+"prognostic studies) checklist, marking the items reported in this output and "
+"those to report in the manuscript."
+msgstr ""
+
+#: R/multisurvival.b.R
+msgid ""
+"Each coefficient row tests an interaction contrast. For a term spanning "
+"several coefficients, read the joint test to assess overall effect "
+"modification. HR = 1 means no modification on that contrast."
+msgstr ""
+
+#: R/multisurvival.b.R
+msgid "Empty level dropped"
+msgstr ""
+
+#: R/timeinterval.b.R
+msgid "End dates missing or unreadable"
+msgstr ""
+
+#: R/outcomeorganizer.b.R
+msgid "Event ({levels}): coded as 1"
+msgstr ""
+
+#: R/outcomeorganizer.b.R
+msgid ""
+"Event hierarchy is only available for overall, cause-specific and "
+"competing-risk coding with Multiple Event Levels enabled. It was requested "
+"but has been ignored for this analysis, and the outcome is unchanged."
+msgstr ""
+
+#: R/outcomeorganizer.b.R
+msgid "Event of interest ({levels}): coded as 1"
+msgstr ""
+
+#: R/singlearm.b.R
+msgid "Events per person-%s"
+msgstr ""
+
+#: singlearm/results/survTable.columns.title
+#: survival/results/survTable.columns.title
+#: survivalcont/results/survTable.columns.title
+msgid "Events since previous time"
+msgstr ""
+
+#: datetimeconverter/results/componentRows.title
+msgid "Extracted Component Values"
+msgstr ""
+
+#: R/timeinterval.b.R
+msgid "Extreme threshold multiplier must be between 1.5 and 5."
+msgstr ""
+
+#: R/timeinterval.b.R
+msgid "Extreme Values"
+msgstr ""
+
+#: R/timeinterval.b.R
+msgid "Extreme-value filtering could not act on these data"
+msgstr ""
+
+#: R/lassocox.b.R
+msgid ""
+"Factor '{var}' lost level(s) ({dropped}) after complete-case filtering; "
+"reference level is '{ref}'."
+msgstr ""
+
+#: R/datetimeconverter.b.R
+msgid "Failed Parsing:"
+msgstr ""
+
+#: R/outcomeorganizer.b.R
+msgid ""
+"Few events: only {nEv} of {nTotal} non-missing outcomes ({pct}%) are "
+"'{level}'. As a general rule of thumb (< 5 events), Kaplan-Meier and Cox "
+"estimates are unstable with fewer than 5 events."
+msgstr ""
+
+#: R/timeinterval.b.R
+msgid "Filters applied:"
+msgstr ""
+
+#: R/oddsratio.b.R
+msgid "Fisher's exact test / Firth regression"
+msgstr ""
+
+#: R/survival.b.R
+msgid "Fleming-Harrington (rho = {rho})"
+msgstr ""
+
+#: multisurvival/ui[0][5].label
+#: singlearm/ui[0][3].label
+#: survival/ui[0][4].label
+msgid "Follow-Up Date"
+msgstr ""
+
+#: R/outcomeorganizer.b.R
+msgid ""
+"Follow-up was truncated for %d of %d patient(s) and %d of %d event(s) with a "
+"recorded time after the cut-off were reset to censored. Check that the "
+"cut-off is in the same units as the follow-up time before using these "
+"numbers, and pair the recoded outcome with the truncated follow-up column "
+"this analysis writes back, not with your original follow-up column."
+msgstr ""
+
+#: R/outcomeorganizer.b.R
+msgid ""
+"For {analysis}, Follow-up Time must be the time to that endpoint's event. "
+"This analysis has no recurrence date, so with a last-contact time a "
+"recurrence before the cut-off is erased when last contact falls after it."
+msgstr ""
+
+#: R/multisurvival.b.R
+msgid ""
+"For {variable} = {level} compared with {variable} = {reference}, the "
+"adjusted {effect} is {estimate} at {conditions}, with the other covariates "
+"in the model held constant. This is not an overall effect, because "
+"{variable} is in an interaction."
+msgstr ""
+
+#: R/multisurvival.b.R
+msgid "For {variable}, the adjusted {effect} is {estimate} at {conditions}."
+msgstr ""
+
+#: R/multisurvival.b.R
+msgid ""
+"For {variable}, the adjusted {effect} is {estimate} per 1-unit increase in "
+"{variable} at {conditions}, with the other covariates in the model held "
+"constant. This is not an overall effect, because {variable} is in an "
+"interaction."
+msgstr ""
+
+#: R/multisurvival.b.R
+msgid ""
+"For disease-free survival, follow-up must end at the first qualifying "
+"recurrence or death, or at censoring if neither occurred. Disease status at "
+"the last visit alone cannot establish the time of the first event."
+msgstr ""
+
+#: R/multisurvival.b.R
+msgid ""
+"For each two-way interaction with a categorical moderator, these are "
+"conditional effects implied by the single full interaction model. The "
+"moderator is releveled and the same model is refitted; its focal coefficient "
+"and covariance give the subgroup HR, CI and p-value."
+msgstr ""
+
+#: R/survival.b.R
+msgid ""
+"For key multivariable analyses, report estimated effects (for example, "
+"hazard ratio) with confidence intervals for the marker and, at least for the "
+"final model, all other variables in the model."
+msgstr ""
+
+#: R/survival.b.R
+msgid ""
+"For the {group} group the cumulative incidence of the event of interest did "
+"not reach 50% during the observed follow-up."
+msgstr ""
+
+#: R/survival.b.R
+msgid ""
+"For the {group} group the cumulative incidence of the event of interest "
+"reached 50% at {median} {unit}."
+msgstr ""
+
+#: R/multisurvival.b.R
+msgid ""
+"For the interaction {variable}, the adjusted {effect} is {estimate} at "
+"{conditions}. This is a ratio of hazard ratios (how one variable's effect "
+"differs across the other), not the effect for any single group."
+msgstr ""
+
+#: R/survival.b.R
+msgid ""
+"Give rationale for sample size; if the study was designed to detect a "
+"specified effect size, give the target power and effect size."
+msgstr ""
+
+#: R/survival.b.R
+msgid ""
+"Gray's test for equality of cumulative incidence of the event of interest "
+"across groups: chi-square = {stat}, df = {df}, {p}."
+msgstr ""
+
+#: R/survival.b.R
+msgid "hazard ratios"
+msgstr ""
+
+#: R/survival.b.R
+msgid "Hazard ratios are now relative to {level}."
+msgstr ""
+
+#: R/survival.b.R
+msgid ""
+"Hazard ratios with confidence intervals are shown here for the marker and "
+"age."
+msgstr ""
+
+#: R/survival.b.R
+msgid "Hazard ratios, survival probabilities and a Kaplan-Meier plot are shown here."
+msgstr ""
+
+#: package/datasets/histopathologyincludinganalysis.name
+msgid "histopathology including analysis"
+msgstr ""
+
+#: R/survival.b.R
+msgid ""
+"If done, report results of further investigations, such as checking "
+"assumptions, sensitivity analyses, and internal validation."
+msgstr ""
+
+#: singlearm/options/outcomeredefined.description
+msgid ""
+"If enabled, the recoded event indicator is added to your data as a new "
+"variable, so you can verify how the outcome levels were mapped: 0 = "
+"censored, 1 = event, or, for competing risks, a Censored/Event/Competing "
+"factor that the survival analyses read back as competing risks. It covers "
+"every row of the dataset; a row whose original outcome was missing or was "
+"mapped to no category stays empty."
+msgstr ""
+
+#: R/oddsratio.b.R
+msgid ""
+"If incorrect, use the 'Positive Level', 'Negative Level', 'Predictor "
+"Positive Level', and 'Predictor Negative Level' dropdowns to specify the "
+"correct levels"
+msgstr ""
+
+#: R/multisurvival.b.R
+msgid ""
+"If only one variable is categorical, that variable defines the subgroups. "
+"Continuous-by-continuous and higher-order interactions do not have discrete "
+"subgroup HRs here."
+msgstr ""
+
+#: survivalcont/options/calculatedcutoff.description
+msgid ""
+"If you enable this option, the calculated cut-off group will be added to "
+"your data as a new variable with two levels (\"low\" for values less than or "
+"equal to the cut-off and \"high\" for values strictly above the cut-off) "
+"based on the data-derived cut-off point found using the maximally selected "
+"rank statistic. This option is only available if you enable the \"Find "
+"Cut-off for Continuous Explanatory Variable\" option."
+msgstr ""
+
+#: R/survival.b.R
+msgid ""
+"In the {group} group the cumulative incidence of the event of interest did "
+"not reach 50% during the observed follow-up."
+msgstr ""
+
+#: R/survival.b.R
+msgid ""
+"In the {group} group the cumulative incidence of the event of interest "
+"reached 50% at {median} {unit}."
+msgstr ""
+
+#: R/survival.b.R
+msgid "In the {group} group, half of the patients had the event by {median} {unit}."
+msgstr ""
+
+#: R/multisurvival.b.R
+msgid ""
+"In the observed group, {atrisk} patients were still at risk at that time and "
+"{events} events had occurred by that time."
+msgstr ""
+
+#: R/oddsratio.b.R
+msgid "infinite (no false positives)"
+msgstr ""
+
+#: R/oddsratio.b.R
+msgid "infinite (no true negatives)"
+msgstr ""
+
+#: R/multisurvival.b.R
+msgid "Interactions in model: {terms}"
+msgstr ""
+
+#: R/survival.b.R
+msgid ""
+"Interpret the results in the context of the pre-specified hypotheses and "
+"other relevant studies; include a discussion of limitations of the study."
+msgstr ""
+
+#: R/survival.b.R
+msgid "Introduction"
+msgstr ""
+
+#: R/survivalcont.b.R
+msgid "Invalid minimum group size"
+msgstr ""
+
+#: R/survivalcont.b.R
+msgid "Invalid rate multiplier"
+msgstr ""
+
+#: R/survivalcont.b.R
+msgid "Invalid RMST horizon"
+msgstr ""
+
+#: R/lassocox.b.R
+msgid "Invalid variable selection."
+msgstr ""
+
+#: R/survival.b.R
+msgid ""
+"Joint likelihood-ratio test of all interaction terms: chi-square = {stat}, "
+"df = {df}, {p}."
+msgstr ""
+
+#: R/survival.b.R
+msgid "Kaplan-Meier estimation"
+msgstr ""
+
+#: R/lassocox.b.R
+msgid "Lambda values used / searched"
+msgstr ""
+
+#: R/survival.b.R
+msgid ""
+"Landmark analysis at {time} {unit}: {n} patients excluded (follow-up ended "
+"at or before the landmark) and {missing} with missing time. All estimates "
+"are conditional on being event-free at the landmark and are not comparable "
+"with unlandmarked survival times."
+msgstr ""
+
+#: R/singlearm.b.R
+msgid ""
+"Landmark analysis at %s %s: no subject was excluded, but every time is "
+"measured from the landmark and estimates are conditional on surviving to it."
+msgstr ""
+
+#: R/multisurvival.b.R
+msgid ""
+"Landmark analysis is on: rows with follow-up ending at or before the "
+"landmark time were excluded before this check."
+msgstr ""
+
+#: R/timeinterval.b.R
+msgid ""
+"Landmark analysis is switched on but the landmark time is 0, so nothing was "
+"excluded and no interval was shortened - these results are the same as with "
+"landmark analysis off. Set a landmark greater than zero, in the same unit as "
+"the results, or untick landmark analysis."
+msgstr ""
+
+#: R/survivalcont.b.R
+msgid ""
+"Landmark at %.2f %s: %d of %d patient(s) (%.1f%%) had an event or censoring "
+"at or before the landmark and were excluded; %d remain at risk. Reported "
+"times are measured FROM the landmark."
+msgstr ""
+
+#: R/timeinterval.b.R
+msgid "Landmark time must be a finite non-negative number"
+msgstr ""
+
+#: R/survival.b.R
+msgid "Landmark time must be zero or positive."
+msgstr ""
+
+#: R/outcomeorganizer.b.R
+msgid ""
+"Large amount of missing outcome data: {pct}% ({missing} out of {total} "
+"rows). Complete-case analysis drops missing rows (general rule of thumb > "
+"10% missing)."
+msgstr ""
+
+#: R/survival.b.R
+msgid ""
+"List all candidate variables initially examined or considered for inclusion "
+"in models."
+msgstr ""
+
+#: R/survival.b.R
+msgid "log-rank"
+msgstr ""
+
+#: R/oddsratio.b.R
+msgid ""
+"Logistic regression needs the same outcome window for every patient. For a "
+"status taken from censored or unequal follow-up, use the survival analyses "
+"instead."
+msgstr ""
+
+#: R/survival.b.R
+msgid ""
+"Main-effect rows are hazard ratios at age 0, because age is not centered, "
+"and are not meaningful on their own. Read the interaction rows and the joint "
+"test."
+msgstr ""
+
+#: R/datetimeconverter.b.R
+msgid "Maximum DateTime:"
+msgstr ""
+
+#: R/oddsratio.b.R
+msgid ""
+"Maximum-likelihood odds ratios could not be estimated due to separation for: "
+"{variables}. Enable Firth penalized regression or combine sparse categories "
+"before interpreting model-based predictions."
+msgstr ""
+
+#: R/multisurvival.b.R
+msgid "Mean over {b} of {total} resamples"
+msgstr ""
+
+#: R/survival.b.R
+msgid "Median survival for the {group} group was {median} {unit}."
+msgstr ""
+
+#: R/datetimeconverter.b.R
+msgid "Minimum DateTime:"
+msgstr ""
+
+#: R/survivalcont.b.R
+msgid "Minimum group size (%) must be between 5 and 30; defaulting to 10%."
+msgstr ""
+
+#: R/oddsratio.b.R
+msgid ""
+"Missing observations are removed only for variables used by each analysis "
+"path (complete cases across the selected outcome and explanatory variables "
+"for the regression table; paired complete outcome and diagnostic-predictor "
+"observations for diagnostic metrics). Variable names with spaces or special "
+"characters are handled automatically and restored in the output."
+msgstr ""
+
+#: R/survivalcont.b.R
+msgid "Missing stratification values excluded"
+msgstr ""
+
+#: R/oddsratio.b.R
+msgid "Missing: {n}"
+msgstr ""
+
+#: multisurvival/results/fittedTable.title
+msgid "Model Estimates"
+msgstr ""
+
+#: R/lassocox.b.R
+msgid ""
+"Moderate dimensionality with ample events. LASSO is valid, and standard Cox "
+"regression (Multivariable Survival in ClinicoPath) may also be considered."
+msgstr ""
+
+#: R/outcomeorganizer.b.R
+msgid "Multi-State Outcome Coding:"
+msgstr ""
+
+#: survivalcont/ui[1][1].label
+msgid "Multiple Cut-off Detection"
+msgstr ""
+
+#: R/survival.b.R
+msgid "Multivariable Survival fits such a model."
+msgstr ""
+
+#: R/survival.b.R
+msgid "N = {n} observations."
+msgstr ""
+
+#: R/lassocox.b.R
+msgid "N/A (single factor)"
+msgstr ""
+
+#: R/survival.b.R
+msgid ""
+"Needs a model holding the standard prognostic variables; Multivariable "
+"Survival fits one."
+msgstr ""
+
+#: R/timeinterval.b.R
+msgid "Negative Intervals"
+msgstr ""
+
+#: R/oddsratio.b.R
+msgid "Negative outcome level:"
+msgstr ""
+
+#: R/oddsratio.b.R
+msgid "Negative predictor level:"
+msgstr ""
+
+#: R/datetimeconverter.b.R
+msgid ""
+"No components selected for extraction. Use the preview checkboxes or 'Add to "
+"Data' toggles in the left panel to extract datetime components."
+msgstr ""
+
+#: R/survival.b.R
+msgid ""
+"No event of interest was observed, so its cumulative incidence is zero "
+"throughout follow-up and no time can be reported."
+msgstr ""
+
+#: R/lassocox.b.R
+msgid "No issue detected"
+msgstr ""
+
+#: R/singlearm.b.R
+msgid ""
+"No patient is mapped to Alive with Disease, so no recurrence is counted: "
+"every event is a death and this disease-free analysis equals overall "
+"survival."
+msgstr ""
+
+#: R/survival.b.R
+msgid ""
+"No patients remain in level(s) {levels} of {var} after exclusions, so they "
+"were dropped."
+msgstr ""
+
+#: R/outcomeorganizer.b.R
+msgid "No progression ({levels}), including deaths: coded as 0"
+msgstr ""
+
+#: R/survival.b.R
+msgid "No such investigation was completed in this run."
+msgstr ""
+
+#: R/singlearm.b.R
+#: R/survival.b.R
+msgid "Not computed for the cumulative-incidence median; see the table note."
+msgstr ""
+
+#: R/survival.b.R
+msgid "Not defined: the survival estimate has reached 0%."
+msgstr ""
+
+#: R/lassocox.b.R
+msgid "Not determined"
+msgstr ""
+
+#: R/singlearm.b.R
+msgid "Not estimable at this time point; see the table note."
+msgstr ""
+
+#: R/survivalcont.b.R
+msgid "Not estimable at this time point."
+msgstr ""
+
+#: R/multisurvival.b.R
+msgid "Not estimable in this subgroup."
+msgstr ""
+
+#: R/multisurvival.b.R
+msgid ""
+"Not estimable: dropping this term removes no estimable coefficient (it is "
+"aliased)."
+msgstr ""
+
+#: R/oddsratio.b.R
+msgid "Not estimable: the data separate the outcome, so no finite odds ratio exists."
+msgstr ""
+
+#: R/multisurvival.b.R
+msgid ""
+"Not estimable: this interaction coefficient is aliased (a combination of "
+"levels with no observations, or redundant with other terms)."
+msgstr ""
+
+#: R/singlearm.b.R
+#: R/survival.b.R
+#: R/survivalcont.b.R
+msgid "Not reached or not estimable within the observed follow-up."
+msgstr ""
+
+#: R/survivalcont.b.R
+msgid ""
+"Not reached: the Kaplan-Meier curve (or its confidence limit) did not cross "
+"50% in this group during observed follow-up."
+msgstr ""
+
+#: R/outcomeorganizer.b.R
+msgid "not set"
+msgstr ""
+
+#: R/oddsratio.b.R
+msgid "Not shown (odds ratio not estimable): {terms}"
+msgstr ""
+
+#: R/oddsratio.b.R
+msgid "Not shown (odds ratio too extreme to print): {terms}"
+msgstr ""
+
+#: R/survival.b.R
+msgid "Not shown here: {missing}."
+msgstr ""
+
+#: R/timeinterval.b.R
+msgid "Note: {n} missing values were detected."
+msgstr ""
+
+#: R/survival.b.R
+msgid "Number"
+msgstr ""
+
+#: R/lassocox.b.R
+msgid "Number of CV folds must be an integer of at least 3."
+msgstr ""
+
+#: survival/options/rcs_knots.description
+msgid ""
+"Number of knots for restricted cubic splines. 3 knots = 2 df (simplest), 4 "
+"knots = 3 df (recommended default), 5 knots = 4 df (more flexible). Uses "
+"natural splines with interior knots at equally spaced quantiles and boundary "
+"knots at the observed minimum and maximum, as in splines::ns(). More knots "
+"allow detection of complex non-linear patterns but may overfit with small "
+"samples."
+msgstr ""
+
+#: R/oddsratio.b.R
+msgid "Observed outcome levels:"
+msgstr ""
+
+#: oddsratio/results/fittedTable.title
+msgid "Odds Ratios"
+msgstr ""
+
+#: R/oddsratio.b.R
+msgid "Odds ratios interpretation (Positive vs Negative)"
+msgstr ""
+
+#: R/datetimeconverter.b.R
+msgid "OK"
+msgstr ""
+
+#: R/outcomeorganizer.b.R
+msgid "one outcome level counted as death"
+msgstr ""
+
+#: R/outcomeorganizer.b.R
+msgid ""
+"Only {levels} is coded 1; every other level is coded 0 and treated as "
+"censored, including any other category of death (for example death from "
+"other causes). For overall survival, which counts death from any cause, "
+"enable Multiple Event Levels and assign each death category."
+msgstr ""
+
+#: R/timeinterval.b.R
+msgid ""
+"Only {percent}% of non-missing values in '{column}' were parsed with format "
+"'{format}'. Please verify that the selected format matches all values or "
+"standardize the column."
+msgstr ""
+
+#: R/lassocox.b.R
+msgid ""
+"Only one categorical predictor supplied (represented by multiple mutually "
+"exclusive indicator columns); between-predictor collinearity is not "
+"applicable."
+msgstr ""
+
+#: R/outcomeorganizer.b.R
+msgid "Only one outcome level counts as death"
+msgstr ""
+
+#: R/outcomeorganizer.b.R
+msgid ""
+"Only outcome level '{level}' counts as death here. The other levels with "
+"rows coded 0 are {levels}. A death in one of these levels is coded 0, not as "
+"an event. To count every death, turn on Multiple Event Levels and assign "
+"each level."
+msgstr ""
+
+#: R/outcomeorganizer.b.R
+msgid ""
+"Only recurrence/progression level '{level}' counts as an event. The other "
+"levels are {levels}, and all of them are coded as no recurrence/progression, "
+"so another kind of recurrence is not counted and an unknown status is "
+"treated as event-free. Merge the levels that are recurrences into one level "
+"and set unknown values to missing before this analysis."
+msgstr ""
+
+#: R/datetimeconverter.b.R
+msgid "Originally Missing:"
+msgstr ""
+
+#: R/outcomeorganizer.b.R
+msgid "Other recurrence levels coded as no recurrence"
+msgstr ""
+
+#: R/singlearm.b.R
+msgid "Other-cause deaths censored: 1 - KM overstates the absolute risk"
+msgstr ""
+
+#: R/outcomeorganizer.b.R
+msgid "outcome level {levels}"
+msgstr ""
+
+#: R/outcomeorganizer.b.R
+msgid "Outcome level {levels}: coded as 1"
+msgstr ""
+
+#: R/oddsratio.b.R
+msgid ""
+"Outcome level modeled as the event: '{level}' (negative/reference level: "
+"'{neg}')."
+msgstr ""
+
+#: R/outcomeorganizer.b.R
+msgid "Outcome level(s) {levels} without recurrence/progression: coded as 0"
+msgstr ""
+
+#: R/outcomeorganizer.b.R
+msgid "outcome level(s) {levels}, treated as censored"
+msgstr ""
+
+#: R/oddsratio.b.R
+msgid ""
+"Outcome positive and negative levels must be different (both set to "
+"'{level}')."
+msgstr ""
+
+#: R/oddsratio.b.R
+msgid ""
+"Outcome positive and negative levels must be different. Please select "
+"distinct positive and negative outcome levels."
+msgstr ""
+
+#: R/outcomeorganizer.b.R
+msgid ""
+"Outcome recoding completed. Use Add Recoded Outcome to Data to write the "
+"status to a new column."
+msgstr ""
+
+#: R/survival.b.R
+msgid ""
+"Outcome variable analyzed here: {var}. The definition of the endpoint "
+"belongs in the manuscript."
+msgstr ""
+
+#: R/oddsratio.b.R
+msgid ""
+"Outcome variable has {n} observed levels ({allLevels}). Excluded {nExcl} "
+"observation(s) with unselected outcome level(s) ({excluded}) so only '{pos}' "
+"(positive) vs '{neg}' (negative) are analyzed."
+msgstr ""
+
+#: R/singlearm.b.R
+msgid "Overall (from landmark)"
+msgstr ""
+
+#: R/survivalcont.b.R
+msgid "Overall Log-rank Test"
+msgstr ""
+
+#: R/survivalcont.b.R
+msgid "Overall Log-rank Test (unadjusted)"
+msgstr ""
+
+#: R/timeinterval.b.R
+msgid "Overall Quality:"
+msgstr ""
+
+#: R/outcomeorganizer.b.R
+msgid "Overall Survival (OS) Analysis"
+msgstr ""
+
+#: R/survival.b.R
+msgid "Pairwise comparisons require at least two observed groups."
+msgstr ""
+
+#: R/survival.b.R
+msgid "pairwise tests with {method} adjustment"
+msgstr ""
+
+#: datetimeconverter/results/qualityCounts.title
+msgid "Parsing Counts"
+msgstr ""
+
+#: R/datetimeconverter.b.R
+msgid "Partial Dates: No Day Recorded"
+msgstr ""
+
+#: R/survival.b.R
+msgid ""
+"Patients and events per group are in the median survival table. The flow of "
+"patients and the reasons for exclusion belong in the manuscript."
+msgstr ""
+
+#: R/multisurvival.b.R
+msgid ""
+"Patients whose follow-up ended at or before the landmark were excluded (n = "
+"{n} removed)."
+msgstr ""
+
+#: R/multisurvival.b.R
+msgid ""
+"Patients with no follow-up time could not be assessed at the landmark and "
+"were also excluded (n = {n})."
+msgstr ""
+
+#: R/outcomeorganizer.b.R
+msgid ""
+"patients with outcome level(s) {levels} and recurrence/progression level(s) "
+"{others}"
+msgstr ""
+
+#: R/oddsratio.b.R
+msgid ""
+"Perfect collinearity: {variables} is fully determined by the other "
+"explanatory variables, so its odds ratio cannot be estimated. Remove it, or "
+"the variable it duplicates."
+msgstr ""
+
+#: package/analyses/multisurvival.description
+#: multisurvival/options.description.main
+msgid ""
+"Performs multivariable survival analysis using Cox proportional hazards "
+"regression. With competing events it fits a Fine-Gray subdistribution hazard "
+"model. In multivariable survival analysis, person-time follow-up is crucial "
+"for properly adjusting for covariates while accounting for varying "
+"observation periods. The Cox proportional hazards model incorporates "
+"person-time by modeling the hazard function, which represents the "
+"instantaneous event rate per unit of person-time. When stratifying analyses "
+"or examining multiple predictors, the model accounts for how these factors "
+"influence event rates relative to the person-time at risk in each subgroup. "
+"Each row must represent one independent patient with one event or censoring "
+"time. Repeated visits, recurrent events, delayed entry, clustering and "
+"time-dependent covariates require a different analysis designed for those "
+"data."
+msgstr ""
+
+#: R/singlearm.b.R
+msgid "Person-Time Analysis (rates per {m} person-{unit})"
+msgstr ""
+
+#: R/multisurvival.b.R
+msgid "Person-time is counted from the landmark at {offset} {unit}."
+msgstr ""
+
+#: R/survival.b.R
+msgid "Peto-Peto (Fleming-Harrington rho = 1)"
+msgstr ""
+
+#: R/multisurvival.b.R
+msgid "Please select a variable for adjusted curves."
+msgstr ""
+
+#: R/oddsratio.b.R
+msgid ""
+"Please select both the 'Positive Level' (event, e.g., 'Dead', 'Event', "
+"'Yes') and the 'Negative Level' (reference/non-event, e.g., 'Alive', 'No "
+"Event', 'No') of your outcome variable."
+msgstr ""
+
+#: R/oddsratio.b.R
+msgid ""
+"Please select both the positive and negative outcome levels from the "
+"dropdown menus below the outcome variable."
+msgstr ""
+
+#: singlearm/options/ce.description
+msgid ""
+"Plot the cumulative probability of the event over time, 1 - S(t), estimated "
+"by Kaplan-Meier. This is a probability on a 0-1 scale, not a running count "
+"of events: a raw count ignores censoring and is not comparable between "
+"cohorts of different size or follow-up. Read it as \"the estimated "
+"proportion of the cohort that had had the event by time t\", except under "
+"Cause Specific survival, where other-cause deaths are censored and 1 - S(t) "
+"overstates that proportion."
+msgstr ""
+
+#: R/oddsratio.b.R
+msgid "Positive and Negative Outcome Levels Required"
+msgstr ""
+
+#: R/survival.b.R
+msgid "Precisely define all clinical endpoints examined."
+msgstr ""
+
+#: R/oddsratio.b.R
+msgid ""
+"Prediction nomogram was not generated because maximum-likelihood estimates "
+"could not be identified for separated predictor(s): {variables}."
+msgstr ""
+
+#: R/oddsratio.b.R
+msgid "Predictor level"
+msgstr ""
+
+#: oddsratio/options/predictorNegativeLevel.title
+#: oddsratio/ui[0][2]/predictorNegativeLevel.label
+msgid "Predictor Negative Level"
+msgstr ""
+
+#: R/oddsratio.b.R
+msgid ""
+"Predictor positive and negative levels for '{variable}' must be different "
+"(both set to '{level}')."
+msgstr ""
+
+#: R/oddsratio.b.R
+msgid ""
+"Predictor positive and negative levels must be different (both set to "
+"'{level}')."
+msgstr ""
+
+#: R/survival.b.R
+msgid ""
+"Present univariable analyses showing the relation between the marker and "
+"outcome, with the estimated effect (for example, hazard ratio and survival "
+"probability). Preferably provide similar analyses for all other variables "
+"being analyzed. For the effect of a tumor marker on a time-to-event outcome, "
+"a Kaplan-Meier plot is recommended."
+msgstr ""
+
+#: R/outcomeorganizer.b.R
+msgid "Progression ({levels}): coded as 1"
+msgstr ""
+
+#: R/survival.b.R
+msgid "proportional hazards test"
+msgstr ""
+
+#: R/multisurvival.b.R
+msgid "Proportional hazards test could not be computed: {msg}"
+msgstr ""
+
+#: R/oddsratio.b.R
+msgid "Provides exact 2x2 p-values and finite penalized odds ratios in small samples"
+msgstr ""
+
+#: R/survivalcont.b.R
+msgid "Rate multiplier must be a positive number; defaulting to 100."
+msgstr ""
+
+#: R/multisurvival.b.R
+#: R/survival.b.R
+#: R/survivalcont.b.R
+msgid "Rates are per {m} person-{unit}."
+msgstr ""
+
+#: R/survival.b.R
+msgid "RCS analysis unavailable"
+msgstr ""
+
+#: R/outcomeorganizer.b.R
+msgid "Recoded outcome:"
+msgstr ""
+
+#: R/outcomeorganizer.b.R
+msgid "Recurrence/Progression ({levels}): coded as 1"
+msgstr ""
+
+#: R/outcomeorganizer.b.R
+msgid "recurrence/progression (level {rec}) or outcome level {levels}"
+msgstr ""
+
+#: R/outcomeorganizer.b.R
+msgid ""
+"Recurrence/progression and the outcome levels listed above count as events "
+"for {analysis} analysis; the other outcome levels are coded 0 unless "
+"recurrence/progression occurred."
+msgstr ""
+
+#: R/outcomeorganizer.b.R
+msgid ""
+"Recurrence/progression and the selected outcome level both count as events "
+"for {analysis} analysis; any other outcome level, including other categories "
+"of death, is coded 0 unless recurrence/progression occurred."
+msgstr ""
+
+#: R/outcomeorganizer.b.R
+msgid ""
+"Recurrence/progression level(s) {levels}: not counted as "
+"recurrence/progression"
+msgstr ""
+
+#: R/multisurvival.b.R
+msgid "Reference level changed"
+msgstr ""
+
+#: survival/results/remarkItems.title
+msgid "REMARK Reporting Items"
+msgstr ""
+
+#: R/survival.b.R
+msgid ""
+"Report distributions of basic demographic characteristics (at least age and "
+"sex), standard (disease-specific) prognostic variables, and tumor marker, "
+"including numbers of missing values."
+msgstr ""
+
+#: R/survival.b.R
+msgid "Report in the manuscript"
+msgstr ""
+
+#: R/survival.b.R
+msgid "Reported in this output"
+msgstr ""
+
+#: R/survivalcont.b.R
+msgid "Residual diagnostics could not be computed"
+msgstr ""
+
+#: R/datetimeconverter.b.R
+msgid ""
+"Restored a lost leading zero on {count} value(s) (for example {before} as "
+"{after}), since these are packed dates and some values already have the full "
+"width."
+msgstr ""
+
+#: R/datetimeconverter.b.R
+msgid ""
+"Restored a lost leading zero on {count} value(s) (for example {before} as "
+"{after}): that is the only reading under which every value is a valid date "
+"in the selected format."
+msgstr ""
+
+#: R/survival.b.R
+msgid "Restricted cubic spline assessment suppressed: fewer than 10 events."
+msgstr ""
+
+#: R/survivalcont.b.R
+msgid ""
+"Restricted mean survival time (rmean) in this table is integrated up to the "
+"longest observed follow-up ({max} {unit}, survival::survfit default). For "
+"RMST at a prespecified or common group horizon (tau), see the Restricted "
+"Mean Survival Time table."
+msgstr ""
+
+#: R/singlearm.b.R
+msgid ""
+"Restricted mean survival time is the area under the Kaplan-Meier curve from "
+"the landmark to the largest observed time after it (%s %s). It is therefore "
+"horizon-dependent and should only be compared when the same restriction time "
+"is used."
+msgstr ""
+
+#: R/multisurvival.b.R
+msgid ""
+"Risk stratification identified <b>{groups} distinct risk groups</b> from the "
+"Fine-Gray model."
+msgstr ""
+
+#: R/survival.b.R
+msgid "RMST calculation unavailable"
+msgstr ""
+
+#: R/survivalcont.b.R
+msgid ""
+"RMST time horizon must be a non-negative finite number (use 0 for the "
+"default 75th percentile horizon)."
+msgstr ""
+
+#: R/outcomeorganizer.b.R
+msgid "Rows without a patient ID"
+msgstr ""
+
+#: R/survival.b.R
+msgid "Run here: {methods}."
+msgstr ""
+
+#: R/datetimeconverter.b.R
+msgid "Sample of Failed Values:"
+msgstr ""
+
+#: survival/options/spline_scale.description
+msgid ""
+"Scale for spline-based models. Hazard scale models log cumulative hazard, "
+"odds scale models log cumulative odds, normal scale models normal scores."
+msgstr ""
+
+#: R/survival.b.R
+msgid "Section"
+msgstr ""
+
+#: survival/options/rcs_variable.description
+msgid ""
+"Select a continuous predictor variable to assess for non-linear effects. The "
+"variable will be modeled with restricted cubic splines and compared to a "
+"linear model. Common candidates include age, tumor size and biomarker levels."
+msgstr ""
+
+#: R/oddsratio.b.R
+msgid ""
+"Select one outcome variable, identify its positive (event) and negative "
+"(reference) levels, and add one or more categorical or continuous "
+"explanatory variables. The analysis reports logistic-regression odds ratios "
+"with confidence intervals and a matching forest plot."
+msgstr ""
+
+#: R/outcomeorganizer.b.R
+msgid ""
+"Selected recurrence/progression event level '{level}' is not a level of "
+"'{var}'. Levels available: {levels}."
+msgstr ""
+
+#: R/lassocox.b.R
+msgid "Selected variables are not present in the dataset: {vars}."
+msgstr ""
+
+#: R/lassocox.b.R
+msgid "Selected-refit test {p}"
+msgstr ""
+
+#: R/lassocox.b.R
+msgid ""
+"Selection depends on the units of each predictor; changing a unit can change "
+"which predictors are selected."
+msgstr ""
+
+#: R/oddsratio.b.R
+msgid ""
+"Sensitivity and specificity above already use exact Clopper-Pearson "
+"intervals; for 2x2 association testing or sparse-cell odds ratios, use exact "
+"or penalized methods"
+msgstr ""
+
+#: R/datetimeconverter.b.R
+msgid ""
+"Set {count} infinite value(s) (Inf/-Inf) to missing before numeric date "
+"conversion."
+msgstr ""
+
+#: survival/options/adjusted_curves.description
+msgid ""
+"Show survival curves standardized for age with the Cox model (direct "
+"standardization). Every patient is assigned to each group in turn, so all "
+"groups share the age distribution of the whole cohort."
+msgstr ""
+
+#: R/survival.b.R
+msgid "Show the relation of the marker to standard prognostic variables."
+msgstr ""
+
+#: R/lassocox.b.R
+msgid ""
+"Showing {shown} of {total} paths on the original scale: selected columns "
+"first, then by summed absolute coefficient times column SD (not clinical "
+"importance). Long legend labels are abbreviated."
+msgstr ""
+
+#: R/datetimeconverter.b.R
+msgid "Showing first {n} of {total} observations"
+msgstr ""
+
+#: R/survival.b.R
+msgid "Shown here: {items}."
+msgstr ""
+
+#: package/datasets/histopathologyincludinganalysis.description
+msgid ""
+"Simulated histopathology cohort with a saved survival analysis, for "
+"demonstration only. Patient names are invented. Outcome 1 = dead, 0 = alive; "
+"OverallTime is in months."
+msgstr ""
+
+#: R/oddsratio.b.R
+msgid ""
+"Small expected cell counts detected (minimum = {min}). Asymptotic 2x2 "
+"approximations and log-method likelihood-ratio intervals may be imprecise."
+msgstr ""
+
+#: R/outcomeorganizer.b.R
+msgid ""
+"Small sample size: {n} observations. As a general rule of thumb (< 30 "
+"observations), consider a larger sample for more reliable estimates."
+msgstr ""
+
+#: R/singlearm.b.R
+msgid "Smoothed Hazard Rate"
+msgstr ""
+
+#: R/survival.b.R
+msgid ""
+"Some ages at exit exceed 120 years (maximum {max}). Check that {unit} is the "
+"unit of the time variable and that age is in years."
+msgstr ""
+
+#: R/survivalcont.b.R
+msgid "Some survival time points were ignored"
+msgstr ""
+
+#: R/oddsratio.b.R
+msgid ""
+"Specified negative outcome level '{level}' not found in outcome variable. "
+"Available levels: {levels}"
+msgstr ""
+
+#: R/survival.b.R
+msgid ""
+"Specify all statistical methods, including details of any variable selection "
+"procedures and other model-building issues, how model assumptions were "
+"verified, and how missing data were handled."
+msgstr ""
+
+#: R/survival.b.R
+msgid ""
+"Specify the assay method used and provide (or reference) a detailed "
+"protocol, including specific reagents or kits used, quality control "
+"procedures, reproducibility assessments, quantitation methods, and scoring "
+"and reporting protocols. Specify whether and how assays were performed "
+"blinded to the study endpoint."
+msgstr ""
+
+#: survivalcont/options/landmark.description
+msgid ""
+"Specify the landmark time at which to evaluate survival probabilities in "
+"landmark analysis. Patients with an event or censoring at or before this "
+"time are excluded. This option is only available if you enable the \"Use "
+"Landmark Time\" option."
+msgstr ""
+
+#: survival/options/rate_multiplier.description
+msgid ""
+"Specify the multiplier for incidence rates. Rates are per this many "
+"person-units of the selected time type, for example per 100 person-months "
+"when time is in months."
+msgstr ""
+
+#: oddsratio/options/outcomeNegativeLevel.description.main
+msgid ""
+"Specify which outcome level represents the negative/reference case (e.g., "
+"\"Alive\", \"No Event\", \"No\"). Both Positive and Negative outcome levels "
+"must be selected; any other outcome levels are excluded."
+msgstr ""
+
+#: oddsratio/options/outcomeLevel.description.main
+msgid ""
+"Specify which outcome level represents the positive case (e.g., \"Dead\", "
+"\"Event\", \"Yes\"). Both Positive and Negative outcome levels must be "
+"selected; any other outcome levels are excluded."
+msgstr ""
+
+#: R/survival.b.R
+msgid "Specimen characteristics"
+msgstr ""
+
+#: R/survivalcont.b.R
+msgid "Standard error could not be estimated, so no confidence interval is shown."
+msgstr ""
+
+#: R/multisurvival.b.R
+msgid ""
+"Standardized curves end at {end} {unit}, the shortest follow-up among the "
+"strata they average over; a stratum has no estimate after its own follow-up "
+"ends."
+msgstr ""
+
+#: R/timeinterval.b.R
+msgid "Start dates missing or unreadable"
+msgstr ""
+
+#: R/survival.b.R
+msgid ""
+"State the marker examined, the study objectives, and any pre-specified "
+"hypotheses."
+msgstr ""
+
+#: R/survival.b.R
+msgid ""
+"State the method of case selection, including whether prospective or "
+"retrospective and whether stratification or matching (for example, by stage "
+"of disease or age) was used. Specify the time period from which cases were "
+"taken, the end of the follow-up period, and the median follow-up time."
+msgstr ""
+
+#: R/survival.b.R
+msgid "Statistical analysis methods"
+msgstr ""
+
+#: R/survival.b.R
+msgid "Stratified by {var}"
+msgstr ""
+
+#: R/survivalcont.b.R
+msgid "Stratified Cox model could not be fitted"
+msgstr ""
+
+#: R/survivalcont.b.R
+msgid "Stratified Cox regression failed: {msg}"
+msgstr ""
+
+#: R/multisurvival.b.R
+msgid ""
+"Subgroup p-values are exploratory and are not adjusted for multiple "
+"comparisons. Significance in one subgroup but not another does not establish "
+"effect modification; use the interaction test."
+msgstr ""
+
+#: R/datetimeconverter.b.R
+msgid "Successfully Parsed:"
+msgstr ""
+
+#: lassocox/results/suitabilityChecks.title
+msgid "Suitability Checks"
+msgstr ""
+
+#: package/analyses/survivalcont.description
+#: survivalcont/options.description.main
+msgid ""
+"Survival analysis for one continuous explanatory variable: Cox regression on "
+"the continuous scale, and optional data-derived cut-offs with Kaplan-Meier "
+"groups. A cut-off chosen from the same data overstates the effect and needs "
+"independent validation. These methods describe associations and do not "
+"establish causality."
+msgstr ""
+
+#: R/survival.b.R
+msgid "Survival at {time} {unit} for the {group} group was {survival}%."
+msgstr ""
+
+#: R/survival.b.R
+msgid "Survival Curves Standardized for {age}"
+msgstr ""
+
+#: R/survivalcont.b.R
+msgid ""
+"Survival estimates are not reported (blank cells) for time points exceeding "
+"a group's longest observed follow-up: {groups}."
+msgstr ""
+
+#: package.title
+msgid "Survival Module of ClinicoPath for jamovi"
+msgstr ""
+
+#: R/survival.b.R
+msgid "survival probabilities"
+msgstr ""
+
+#: survivalcont/ui[5][0][0]/cutp.label
+msgid "Survival time points (default: 1, 3, 5 years)"
+msgstr ""
+
+#: survivalcont/ui[6][1][0]/rmst_tau.label
+msgid "Tau (restriction time)"
+msgstr ""
+
+#: R/survival.b.R
+msgid "Test: {test}."
+msgstr ""
+
+#: R/datetimeconverter.b.R
+msgid "Text After The Date Was Ignored"
+msgstr ""
+
+#: R/survivalcont.b.R
+msgid ""
+"The candidate space contains %s cut-off combinations. A reproducible random "
+"sample of %d unique combinations was drawn using seed %d, and the %d that "
+"met the minimum group size were compared. The reported solution is "
+"approximate and must be validated independently."
+msgstr ""
+
+#: R/singlearm.b.R
+msgid ""
+"The confidence interval of the median is the Brookmeyer-Crowley inversion of "
+"the log-log pointwise band of the Kaplan-Meier curve."
+msgstr ""
+
+#: R/survivalcont.b.R
+msgid ""
+"The cut-off is the value that maximizes the standardized log-rank statistic "
+"(maximally selected rank statistic, survminer::surv_cutpoint / maxstat). The "
+"adjusted p in the cut-off table accounts for that search. A p-value computed "
+"afterwards on the low and high groups does not, and is not a valid test. "
+"Report the continuous Cox model as the primary analysis and validate the "
+"cut-off in independent data. When publishing, cite survminer and maxstat."
+msgstr ""
+
+#: R/timeinterval.b.R
+msgid ""
+"The date format could not be settled from these dates, so the order of their "
+"day, month and year is unproven"
+msgstr ""
+
+#: singlearm/options/dxdate.description
+msgid ""
+"The date of diagnosis or study entry. Accepts: (1) Date/datetime text (e.g., "
+"\"2024-01-15\"), (2) Numeric values, which must be Unix epoch SECONDS since "
+"1970 (the DateTime Converter's corrected_datetime_numeric output). Day "
+"counts, Excel serials, YYYYMMDD numbers and years are refused, because a "
+"bare number has no unit. Time intervals are calculated as the difference "
+"from the follow-up date."
+msgstr ""
+
+#: singlearm/options/fudate.description
+msgid ""
+"The date of last follow-up or event. Accepts: (1) Date/datetime text (e.g., "
+"\"2024-01-15\"), (2) Numeric values, which must be Unix epoch SECONDS since "
+"1970, as for the diagnosis date. Must be in the same format as the diagnosis "
+"date."
+msgstr ""
+
+#: R/outcomeorganizer.b.R
+msgid ""
+"the event of interest ({levels}); this outcome also carries competing "
+"states, listed below"
+msgstr ""
+
+#: R/survival.b.R
+msgid ""
+"The explanatory variable has only two levels, so there is a single {test} "
+"comparison and no multiplicity adjustment is applied."
+msgstr ""
+
+#: R/multisurvival.b.R
+msgid ""
+"The focal variable is in a second interaction, so a row labelled at a value "
+"applies only at that value ({values}). At other values of that variable the "
+"hazard ratio differs."
+msgstr ""
+
+#: R/multisurvival.b.R
+msgid ""
+"The interaction model shares a baseline hazard and the non-interacting "
+"covariate effects across moderator levels, within any selected strata. "
+"Separate subgroup models estimate these independently. Their HRs, confidence "
+"intervals and p-values can differ substantially; neither closer estimates "
+"nor narrower intervals are guaranteed."
+msgstr ""
+
+#: R/singlearm.b.R
+msgid ""
+"The Kaplan-Meier median is the first time at which estimated event-free "
+"probability is 50% or lower; if the curve is exactly 50% over an interval, "
+"the midpoint of that interval is reported."
+msgstr ""
+
+#: R/oddsratio.b.R
+msgid ""
+"The level '{level}' is treated as a positive test result as specified "
+"(negative test result: '{neg}')."
+msgstr ""
+
+#: R/survivalcont.b.R
+msgid ""
+"The longest time in {var} is {longest} {unit}, which is more than 50 years. "
+"Check that {unit} is the unit this column is recorded in."
+msgstr ""
+
+#: R/singlearm.b.R
+msgid ""
+"The median time to the event of interest was not reached within interior "
+"follow-up: the cumulative incidence of the event of interest reached 50%% "
+"only at the final observed follow-up time (%.1f %s, reaching %.1f%%), where "
+"the step is driven by the last observation(s); report fixed-time cumulative "
+"incidence estimates instead"
+msgstr ""
+
+#: R/singlearm.b.R
+msgid ""
+"The median was not reached: the Kaplan-Meier curve did not reach 50% before "
+"follow-up ended, so no median time-to-event can be estimated from these "
+"data. This is not a statement that survival is good or poor - it reflects "
+"the number of events and the length of follow-up."
+msgstr ""
+
+#: R/multisurvival.b.R
+msgid ""
+"The nomogram estimates cumulative incidence by <b>{timepoints}</b> of "
+"follow-up, one risk scale per timepoint. Harrell's C-index is not reported "
+"for the expanded Fine-Gray fit; validation requires a cause- and "
+"horizon-specific measure."
+msgstr ""
+
+#: R/oddsratio.b.R
+msgid ""
+"The odds ratio could not be estimated for: {variables}. The data separate "
+"the outcome on these terms, alone or jointly, so the maximum-likelihood "
+"estimate does not exist and the fit only stops at an arbitrary value. The "
+"cell is shown as 'not estimable': this is neither a large odds ratio nor "
+"evidence of no association. Enable Firth penalized logistic regression to "
+"obtain a finite estimate, or combine sparse categories. Terms whose "
+"multivariable odds ratio is not estimable are omitted from the forest plot."
+msgstr ""
+
+#: R/oddsratio.b.R
+msgid ""
+"The odds ratio for {variables} exists but cannot be printed: its value or a "
+"confidence limit is too extreme, or a confidence limit could not be "
+"computed. This is not separation. Rescale the variable to read it in the "
+"table."
+msgstr ""
+
+#: R/outcomeorganizer.b.R
+msgid "The outcome supplied is already a multi-state coding, so it was recoded to:"
+msgstr ""
+
+#: R/outcomeorganizer.b.R
+msgid ""
+"The outcome variable '<b>%s</b>' was recoded for <b>%s</b> analysis. Code 1 "
+"represents %s. Code 0 represents %s. The recoded variable contains <b>%d %s "
+"(%.1f%%)</b> and <b>%d coded 0 (%.1f%%)</b> out of %d coded records.%s"
+msgstr ""
+
+#: R/survivalcont.b.R
+msgid "The overall log-rank test across the cut-off groups could not be computed: %s"
+msgstr ""
+
+#: R/lassocox.b.R
+msgid ""
+"The penalty search stopped after {kept} of {searched} lambda values. Smaller "
+"penalties gave a patient a linear predictor above 30 (relative hazard above "
+"1e13), where glmnet cannot compute the cross-validation curve correctly, so "
+"they were not used."
+msgstr ""
+
+#: R/outcomeorganizer.b.R
+msgid ""
+"The recurrence variable decides the disease-free survival event. {nawd} "
+"patient(s) coded '{awd}' (Alive with Disease) have no recurrence recorded "
+"and are counted as event-free. {nawod} patient(s) coded '{awod}' (Alive "
+"without Disease) have recurrence level '{level}' and are counted as events. "
+"Check these rows for a coding error before reporting."
+msgstr ""
+
+#: R/lassocox.b.R
+msgid ""
+"The selected columns depend on the cross-validation split, so a different "
+"seed or row order can select a different set."
+msgstr ""
+
+#: R/oddsratio.b.R
+msgid ""
+"The selected negative outcome level '{level}' is not present among paired "
+"complete observations. Available levels: {levels}."
+msgstr ""
+
+#: R/oddsratio.b.R
+msgid ""
+"The selected negative predictor level '{level}' is not present among paired "
+"complete observations. Available levels: {levels}."
+msgstr ""
+
+#: R/survivalcont.b.R
+msgid ""
+"The statistic is the largest standardized log-rank score statistic over all "
+"candidate cut-offs. It uses a permutation variance, so it differs from the "
+"square root of a log-rank chi-square at the same cut. Adjusted p allows for "
+"that search (the smaller of the Lausen and Schumacher 1992 and Lausen, "
+"Sauerbrei and Schumacher 1994 approximations) and is conservative. A p-value "
+"computed on the low and high groups, including after exporting them, ignores "
+"the search and is not a valid test: it falls below 0.05 in about 43% of "
+"simulated data sets with no association. Validate the cut-off in independent "
+"data."
+msgstr ""
+
+#: R/survival.b.R
+msgid ""
+"The survival time cannot be used as a spline predictor: it is the outcome, "
+"so any association with it is built in."
+msgstr ""
+
+#: R/outcomeorganizer.b.R
+msgid ""
+"The TTP status marks %d patient(s) as having progressed, while deaths "
+"without progression are coded 0 (censored). This analysis writes the STATUS "
+"only: it has no progression date variable. Pairing this status with overall "
+"survival or death time overstates time to progression for every patient who "
+"progressed before dying or last contact - their progression event is "
+"recorded at the later death/contact time. Supply time to progression (or "
+"time to last tumor assessment/death for non-progressing patients) as the "
+"time variable in downstream survival analyses."
+msgstr ""
+
+#: R/timeinterval.b.R
+msgid ""
+"The UTC timezone setting applies only to values carrying a time of day. "
+"These dates were read as \"{format}\", so they are calendar days and the "
+"timezone has no effect on the intervals."
+msgstr ""
+
+#: R/outcomeorganizer.b.R
+msgid "These counts are after censoring at an administrative cut-off."
+msgstr ""
+
+#: R/oddsratio.b.R
+msgid ""
+"These explanatory variables produce the same model term name, so their odds "
+"ratios cannot be told apart: {variables}. Rename one of them."
+msgstr ""
+
+#: R/multisurvival.b.R
+msgid ""
+"These rows are not overall effects, because the variables are in an "
+"interaction. {terms}. At other values the hazard ratio differs and can "
+"change direction."
+msgstr ""
+
+#: R/timeinterval.b.R
+msgid ""
+"These rows cannot be analyzed: a negative interval subtracts from total "
+"person-time and would corrupt any incidence rate computed from that "
+"denominator."
+msgstr ""
+
+#: R/datetimeconverter.b.R
+msgid ""
+"These values give a month and a year but no day, for example \"{example}\". "
+"• Each was set to the 1st of its month, so the day in the converted column "
+"is not data. • Anything computed from these dates is accurate to about a "
+"month at best."
+msgstr ""
+
+#: R/outcomeorganizer.b.R
+msgid ""
+"This coding only treats disease progression as events; deaths without "
+"progression are censored. The outcome variable and its Event Level are not "
+"used."
+msgstr ""
+
+#: R/datetimeconverter.b.R
+msgid ""
+"This column was converted as Unix epoch seconds, but its {which} value "
+"({value}) converts to {date}. • Epoch seconds for a realistic clinical date "
+"are roughly 1e8 to 4e9 (1973 to 2096). • These values look like Unix epoch "
+"MILLISECONDS (1000 times larger than seconds). Select Auto-detect, which "
+"recognises and converts epoch milliseconds."
+msgstr ""
+
+#: R/outcomeorganizer.b.R
+msgid ""
+"This is NOT a two-level survival indicator. Kaplan-Meier and Cox treat any "
+"non-zero status as the same event, so use a competing-risks method "
+"(cumulative incidence, Fine-Gray) instead."
+msgstr ""
+
+#: R/outcomeorganizer.b.R
+msgid "This is standard coding for Cox regression and Kaplan-Meier analysis."
+msgstr ""
+
+#: R/multisurvival.b.R
+msgid ""
+"This nomogram is derived from a multivariable Fine-Gray "
+"subdistribution-hazards model fitted on <b>%s patients</b> with <b>%s events "
+"of interest</b>. Its risk scales describe cumulative incidence of the event "
+"of interest while accounting for competing events."
+msgstr ""
+
+#: R/survivalcont.b.R
+msgid ""
+"This unadjusted p is not a valid test: the cut-offs were chosen from the "
+"same survival outcomes, so it falls below 0.05 in about 30% to 65% of "
+"simulated data sets with no association (150 patients, two cut-offs). No "
+"selection-adjusted p-value is available for several cut-offs chosen "
+"together. Validate data-derived cut-points independently before clinical use."
+msgstr ""
+
+#: R/singlearm.b.R
+msgid "Time (%s)"
+msgstr ""
+
+#: survivalcont/ui[7][0][0]/time_intervals.label
+msgid "Time intervals"
+msgstr ""
+
+#: R/singlearm.b.R
+msgid "Time since landmark ({unit})"
+msgstr ""
+
+#: R/singlearm.b.R
+msgid "time since landmark, {offset} {unit}; {n} of {total} at risk there"
+msgstr ""
+
+#: R/outcomeorganizer.b.R
+msgid "Time to Progression (TTP) Analysis"
+msgstr ""
+
+#: R/survival.b.R
+msgid ""
+"Time-point estimates in competing-risks mode are cumulative incidences; turn "
+"on 'All event types at selected times' to show them."
+msgstr ""
+
+#: package.description
+msgid ""
+"Time-to-event analysis for clinicopathological research in 'jamovi': "
+"Kaplan-Meier estimates, log-rank tests, Cox regression, competing-risk "
+"cumulative incidence, cut-off analysis of continuous markers, multivariable "
+"and LASSO Cox models, odds ratios, and preparation of dates and outcomes for "
+"survival analysis. Part of the ClinicoPath suite. For comments, suggestions, "
+"feature requests or reporting bugs, please open an issue at "
+"<https://github.com/sbalci/ClinicoPathJamoviModule/issues/>."
+msgstr ""
+
+#: R/datetimeconverter.b.R
+msgid "Times In A Daylight-Saving Gap"
+msgstr ""
+
+#: R/oddsratio.b.R
+msgid "too extreme to print"
+msgstr ""
+
+#: R/datetimeconverter.b.R
+msgid "Total Observations:"
+msgstr ""
+
+#: R/outcomeorganizer.b.R
+msgid "TTP status produced - pair it with time to progression"
+msgstr ""
+
+#: R/outcomeorganizer.b.R
+msgid ""
+"TTP: Only progression events counted, deaths censored (%d events, %d "
+"censored, %d missing). This analysis produces the STATUS only - pair it with "
+"time to progression (or last disease assessment/death for censored rows), "
+"not overall survival time."
+msgstr ""
+
+#: R/oddsratio.b.R
+msgid ""
+"Unadjusted 2×2 estimates. Clopper-Pearson exact intervals for sensitivity "
+"and specificity; log method (Simel et al. 1991) for the likelihood ratios. "
+"Computed as in epiR::epi.tests() with its default settings."
+msgstr ""
+
+#: R/oddsratio.b.R
+msgid "Univariable and multivariable columns use the same {n} complete cases."
+msgstr ""
+
+#: R/survival.b.R
+#: R/survivalcont.b.R
+msgid "Unreadable dates"
+msgstr ""
+
+#: R/timeinterval.b.R
+msgid "Unsupported output unit."
+msgstr ""
+
+#: R/timeinterval.b.R
+msgid "Unsupported time basis."
+msgstr ""
+
+#: R/timeinterval.b.R
+msgid "Unsupported timezone setting."
+msgstr ""
+
+#: survival/options/age_time_scale.description
+msgid ""
+"Use chronological age as the time axis instead of follow-up time. The Cox "
+"model becomes Surv(age_at_entry, age_at_event, event). Suited to cohorts "
+"followed for disease onset; for patients timed from diagnosis it is a "
+"sensitivity analysis."
+msgstr ""
+
+#: R/multisurvival.b.R
+msgid ""
+"Use finite follow-up times. Infinite time values cannot be analyzed; check "
+"the elapsed-time column or the selected dates."
+msgstr ""
+
+#: R/oddsratio.b.R
+msgid ""
+"Use the 'Positive Level' and 'Negative Level' dropdown menus below the "
+"outcome variable to make your selections. Any other levels in a multi-level "
+"outcome variable will be excluded."
+msgstr ""
+
+#: R/survivalcont.b.R
+msgid ""
+"Using both optimal cut-off and multiple cut-offs may lead to overfitting. "
+"Consider validation in independent dataset or cross-validation."
+msgstr ""
+
+#: R/datetimeconverter.b.R
+msgid "Values That Cannot Have This Format"
+msgstr ""
+
+#: R/survivalcont.b.R
+msgid ""
+"Variable \"%s\" is categorical (non-numeric) and cannot be analyzed as a "
+"continuous explanatory variable. Select a numeric variable, or use Survival "
+"Analysis for categorical predictors."
+msgstr ""
+
+#: R/survival.b.R
+msgid "Variable analyzed here: {var}."
+msgstr ""
+
+#: R/multisurvival.b.R
+msgid ""
+"Variables in an interaction are not ranked here: their hazard ratios and "
+"p-values apply only at the values stated under the table."
+msgstr ""
+
+#: R/outcomeorganizer.b.R
+msgid ""
+"Very small sample size: {n} observations. As a general rule of thumb (< 10 "
+"observations), results may be unreliable."
+msgstr ""
+
+#: R/outcomeorganizer.b.R
+msgid "Vital status and recurrence disagree - please check these patients"
+msgstr ""
+
+#: R/datetimeconverter.b.R
+msgid "Week #"
+msgstr ""
+
+#: R/datetimeconverter.b.R
+msgid ""
+"Week # counts 7-day blocks from 1 January (lubridate::week), not ISO-8601 "
+"weeks."
+msgstr ""
+
+#: R/survivalcont.b.R
+msgid "When {factor_val}, median survival is {median_val} {ci_str} {units}."
+msgstr ""
+
+#: R/survivalcont.b.R
+msgid ""
+"When {factor_val}, median survival was not reached during the observation "
+"period (the survival curve does not drop below 1/2)."
+msgstr ""
+
+#: R/survivalcont.b.R
+msgid "When {strata_val}, {time_val} {units} survival is {survival} {ci_str}."
+msgstr ""
+
+#: R/survivalcont.b.R
+msgid ""
+"When {strata_val}, {time_val} {units} survival is not estimable (exceeds "
+"maximum observed follow-up in this group)."
+msgstr ""
+
+#: R/outcomeorganizer.b.R
+msgid ""
+"With no Recurrence/Progression variable, a patient who recurred and is now "
+"free of disease is coded as event-free. Select that variable if the data "
+"have it."
+msgstr ""
+
+#: survivalcont/ui[4][1][0]/yend_plot.label
+msgid "Y-axis end"
+msgstr ""
+
+#: survivalcont/ui[4][1][0]/ybegin_plot.label
+msgid "Y-axis start"
+msgstr ""
+
+#: R/oddsratio.b.R
+msgid ""
+"Zero cells detected in the 2x2 table. Sensitivity or specificity may be "
+"exactly 0 or 1, a likelihood ratio may be undefined, and confidence "
+"intervals are less reliable."
+msgstr ""
+
+#: R/timeinterval.b.R
+msgid "Zero Intervals"
+msgstr ""

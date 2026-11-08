@@ -80,8 +80,7 @@ development model; it does not establish clinical importance or causality.
 | **LASSO** | $\lambda \sum |\beta_j|$ (L1) | Yes - sets some to zero | Sparse models, feature selection |
 | **Elastic Net** | $\alpha \lambda \sum |\beta_j| + (1-\alpha) \lambda \sum \beta_j^2$ | Yes - can retain correlated columns together more readily | Correlated candidate predictors |
 
-In ClinicoPath: `lassocox` uses alpha=1 (pure LASSO). For Elastic Net or Ridge,
-use the **Penalized Cox Regression** module.
+In `jsurvival`: `lassocox` uses $\alpha = 1$ (pure LASSO).
 
 ---
 
@@ -240,7 +239,7 @@ The suitability report should flag:
 
 - **Multicollinearity**: a warning describing the high correlation
 - **Top correlated pair**: var1 & var2
-- **Recommendation**: Consider Elastic Net (Penalized Cox in ClinicoPath)
+- **Recommendation**: Consider prespecified clinical variable selection or Elastic Net regularization when predictors are strongly collinear
 
 ---
 
@@ -623,15 +622,15 @@ the complete resampling procedure.
 
 ---
 
-## Related ClinicoPath Functions
+## Related Survival Functions in `jsurvival`
 
 | Function | Use When |
 |----------|----------|
-| **Survival Analysis** | Standard Kaplan-Meier with log-rank test (few predictors) |
-| **Multivariable Survival** | Standard Cox with multiple predictors (no regularization needed) |
-| **Penalized Cox Regression** | Elastic Net or Ridge (retain correlated predictors) |
-| **Adaptive LASSO** | Two-stage LASSO with oracle properties |
-| **Group LASSO** | Select/exclude grouped variables together |
+| **Survival Analysis (`survival`)** | Kaplan-Meier, RMST, competing risks, and univariable Cox with group comparisons |
+| **Multivariable Survival (`multisurvival`)** | Multivariable Cox or Fine-Gray regression with prespecified predictors |
+| **Continuous Survival (`survivalcont`)** | Continuous biomarker Cox regression and cut-point analysis |
+| **Single Arm Survival (`singlearm`)** | Overall cohort survival, milestone probabilities, and person-time rates |
+| **Outcome Organizer (`outcomeorganizer`)** | Preparing overall, cause-specific, competing-risk, or PFS/DFS outcomes |
 
 ---
 

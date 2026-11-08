@@ -53,7 +53,7 @@ of advanced methods into a single, unified analysis.
 
 **Clinical safety features:**
 
-- Analysis is blocked when fewer than 10 events are detected
+- Model-based analyses (Cox regression, calibration, splines, bootstrap validation) are suppressed when fewer than 10 events are detected, while non-parametric estimates (Kaplan-Meier, median survival, survival tables) remain available
 - Warnings are issued for low event counts (10-19, 20-49)
 - Competing risk mode automatically skips analyses that are not valid in that context
 
@@ -88,7 +88,7 @@ The key columns are:
 A minimal call requires three variables: `elapsedtime`, `outcome`, and
 `explanatory`. The function automatically computes median survival,
 Cox regression, and survival probability tables. Note that `dod`, `dooc`,
-`awd`, and `awod` must be supplied (as empty strings) even when not used.
+`awd`, and `awod` default to `NULL` when `multievent = FALSE`.
 
 ```{r basic-analysis}
 result <- survival(
@@ -96,11 +96,7 @@ result <- survival(
   elapsedtime = "elapsedtime",
   outcome = "outcome",
   outcomeLevel = "1",
-  explanatory = "treatment",
-  dod = "",
-  dooc = "",
-  awd = "",
-  awod = ""
+  explanatory = "treatment"
 )
 ```
 
@@ -127,10 +123,6 @@ result_plots <- survival(
   outcome = "outcome",
   outcomeLevel = "1",
   explanatory = "treatment",
-  dod = "",
-  dooc = "",
-  awd = "",
-  awod = "",
   sc = TRUE,
   ci95 = TRUE,
   risktable = TRUE,
@@ -165,10 +157,6 @@ result_ce <- survival(
   outcome = "outcome",
   outcomeLevel = "1",
   explanatory = "treatment",
-  dod = "",
-  dooc = "",
-  awd = "",
-  awod = "",
   ce = TRUE,
   endplot = 60,
   byplot = 12
@@ -186,10 +174,6 @@ result_ch <- survival(
   outcome = "outcome",
   outcomeLevel = "1",
   explanatory = "treatment",
-  dod = "",
-  dooc = "",
-  awd = "",
-  awod = "",
   ch = TRUE,
   endplot = 60,
   byplot = 12
@@ -208,10 +192,6 @@ result_kmunicate <- survival(
   outcome = "outcome",
   outcomeLevel = "1",
   explanatory = "treatment",
-  dod = "",
-  dooc = "",
-  awd = "",
-  awod = "",
   kmunicate = TRUE,
   endplot = 60,
   byplot = 12
@@ -231,10 +211,6 @@ result_loglog <- survival(
   outcome = "outcome",
   outcomeLevel = "1",
   explanatory = "treatment",
-  dod = "",
-  dooc = "",
-  awd = "",
-  awod = "",
   loglog = TRUE
 )
 ```
@@ -251,10 +227,6 @@ result_table <- survival(
   outcome = "outcome",
   outcomeLevel = "1",
   explanatory = "treatment",
-  dod = "",
-  dooc = "",
-  awd = "",
-  awod = "",
   cutp = "6, 12, 24, 36, 48, 60"
 )
 ```
@@ -278,10 +250,6 @@ result_pw <- survival(
   outcome = "outcome",
   outcomeLevel = "1",
   explanatory = "treatment",
-  dod = "",
-  dooc = "",
-  awd = "",
-  awod = "",
   pw = TRUE,
   padjustmethod = "bonferroni"
 )
@@ -303,10 +271,6 @@ result_ph <- survival(
   outcome = "outcome",
   outcomeLevel = "1",
   explanatory = "treatment",
-  dod = "",
-  dooc = "",
-  awd = "",
-  awod = "",
   ph_cox = TRUE
 )
 ```
@@ -335,10 +299,6 @@ result_rmst <- survival(
   outcome = "outcome",
   outcomeLevel = "1",
   explanatory = "treatment",
-  dod = "",
-  dooc = "",
-  awd = "",
-  awod = "",
   rmst_analysis = TRUE,
   rmst_tau = 48
 )
@@ -367,10 +327,6 @@ result_pt <- survival(
   outcome = "outcome",
   outcomeLevel = "1",
   explanatory = "treatment",
-  dod = "",
-  dooc = "",
-  awd = "",
-  awod = "",
   person_time = TRUE,
   time_intervals = "12, 24, 36, 48, 60",
   rate_multiplier = 100
@@ -400,10 +356,6 @@ result_wlr <- survival(
   outcome = "outcome",
   outcomeLevel = "1",
   explanatory = "treatment",
-  dod = "",
-  dooc = "",
-  awd = "",
-  awod = "",
   weightedLogRank = TRUE,
   survivalTestType = "fh_rho0_5"
 )
@@ -435,10 +387,6 @@ result_boot <- survival(
   outcome = "outcome",
   outcomeLevel = "1",
   explanatory = "treatment",
-  dod = "",
-  dooc = "",
-  awd = "",
-  awod = "",
   bootstrapValidation = TRUE,
   bootstrapValN = 200
 )
@@ -475,10 +423,6 @@ result_cal <- survival(
   outcome = "outcome",
   outcomeLevel = "1",
   explanatory = "treatment",
-  dod = "",
-  dooc = "",
-  awd = "",
-  awod = "",
   calibration_curves = TRUE,
   calibration_timepoint = 36,
   calibration_ngroups = 5
@@ -510,10 +454,6 @@ result_rcs <- survival(
   outcome = "outcome",
   outcomeLevel = "1",
   explanatory = "treatment",
-  dod = "",
-  dooc = "",
-  awd = "",
-  awod = "",
   rcs_analysis = TRUE,
   rcs_variable = "biomarker_value",
   rcs_knots = 4
@@ -529,8 +469,9 @@ The output includes:
    with 95% confidence band. The reference value is typically the median.
 
 Knot recommendations: 3 knots (simplest, 2 df), 4 knots (recommended default,
-3 df), 5 knots (more flexible, 4 df). Knots are placed at Harrell-recommended
-percentiles.
+3 df), 5 knots (more flexible, 4 df). Fitted via `splines::ns(..., df = rcs_knots - 1)`
+with boundary knots at the observed range and interior knots at equally spaced
+quantiles.
 
 ## 14. Age-Adjusted Analysis
 
@@ -549,10 +490,6 @@ result_age <- survival(
   outcome = "outcome",
   outcomeLevel = "1",
   explanatory = "treatment",
-  dod = "",
-  dooc = "",
-  awd = "",
-  awod = "",
   age_adjustment = TRUE,
   age_variable = "age"
 )
@@ -569,10 +506,6 @@ result_age_int <- survival(
   outcome = "outcome",
   outcomeLevel = "1",
   explanatory = "treatment",
-  dod = "",
-  dooc = "",
-  awd = "",
-  awod = "",
   age_adjustment = TRUE,
   age_variable = "age",
   age_interaction = TRUE
@@ -590,10 +523,6 @@ result_age_km <- survival(
   outcome = "outcome",
   outcomeLevel = "1",
   explanatory = "treatment",
-  dod = "",
-  dooc = "",
-  awd = "",
-  awod = "",
   age_adjustment = TRUE,
   age_variable = "age",
   age_stratified_km = TRUE,
@@ -614,10 +543,6 @@ result_age_ts <- survival(
   outcome = "outcome",
   outcomeLevel = "1",
   explanatory = "treatment",
-  dod = "",
-  dooc = "",
-  awd = "",
-  awod = "",
   age_adjustment = TRUE,
   age_variable = "age",
   age_time_scale = TRUE
@@ -640,7 +565,7 @@ result_compete <- survival(
   data = histopathology,
   elapsedtime = "OverallTime",
   outcome = "Outcome2",
-  outcomeLevel = "",
+  outcomeLevel = NULL,
   explanatory = "Grade_Level",
   multievent = TRUE,
   dod = "DOD",
@@ -657,6 +582,7 @@ result_compete <- survival(
 - `overall` - standard overall survival (death from any cause)
 - `cause` - cause-specific survival (censors deaths from other causes)
 - `compete` - competing risks (cumulative incidence functions)
+- `dfs` - disease-free / progression-free survival (treats DOD, DOOC, and AWD as events; AWOD as censored)
 
 **Important:** When `analysistype = "compete"`, the following analyses are
 automatically skipped because they are not valid for competing risks: Cox
@@ -676,10 +602,6 @@ result_landmark <- survival(
   outcome = "outcome",
   outcomeLevel = "1",
   explanatory = "treatment",
-  dod = "",
-  dooc = "",
-  awd = "",
-  awod = "",
   uselandmark = TRUE,
   landmark = 12
 )
@@ -700,10 +622,6 @@ result_resid <- survival(
   outcome = "outcome",
   outcomeLevel = "1",
   explanatory = "treatment",
-  dod = "",
-  dooc = "",
-  awd = "",
-  awod = "",
   residual_diagnostics = TRUE
 )
 ```
@@ -729,10 +647,6 @@ result_explain <- survival(
   outcome = "outcome",
   outcomeLevel = "1",
   explanatory = "treatment",
-  dod = "",
-  dooc = "",
-  awd = "",
-  awod = "",
   showExplanations = TRUE
 )
 ```
@@ -750,10 +664,6 @@ result_summary <- survival(
   outcome = "outcome",
   outcomeLevel = "1",
   explanatory = "treatment",
-  dod = "",
-  dooc = "",
-  awd = "",
-  awod = "",
   showSummaries = TRUE
 )
 ```
@@ -777,10 +687,6 @@ result_remark <- survival(
   outcome = "outcome",
   outcomeLevel = "1",
   explanatory = "treatment",
-  dod = "",
-  dooc = "",
-  awd = "",
-  awod = "",
   remark_checklist = TRUE
 )
 ```
@@ -808,11 +714,7 @@ result_export <- survival(
   elapsedtime = "elapsedtime",
   outcome = "outcome",
   outcomeLevel = "1",
-  explanatory = "treatment",
-  dod = "",
-  dooc = "",
-  awd = "",
-  awod = ""
+  explanatory = "treatment"
 )
 
 # the survival table as a plain data frame, ready to write out.
@@ -833,10 +735,6 @@ result_full <- survival(
   outcome = "outcome",
   outcomeLevel = "1",
   explanatory = "treatment",
-  dod = "",
-  dooc = "",
-  awd = "",
-  awod = "",
 
   # Survival probability cutpoints
 
@@ -907,7 +805,7 @@ result_full <- survival(
 | `dooc` | Level | - | Dead of Other Causes level |
 | `awd` | Level | - | Alive with Disease level |
 | `awod` | Level | - | Alive without Disease level |
-| `analysistype` | List | overall | overall/cause/compete |
+| `analysistype` | List | overall | overall/cause/compete/dfs |
 | `sc` | Bool | FALSE | Survival curve plot |
 | `kmunicate` | Bool | FALSE | KMunicate-style plot |
 | `ce` | Bool | FALSE | Cumulative events plot |

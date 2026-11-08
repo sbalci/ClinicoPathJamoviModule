@@ -227,6 +227,14 @@ decisionClass <- if (requireNamespace("jmvcore"))
                 }
                 if (self$options$showMisclassified) {
                     discordant <- which(!is.na(call) & !is.na(reference) & call != reference)
+                    if (length(discordant) > self$options$maxCasesShow) {
+                        self$results$comparatorCases$setNote(
+                            "truncated",
+                            .fmt(.("Showing the first {shown} of {total} discordant cases."),
+                                shown = sprintf("%d", as.integer(self$options$maxCasesShow)),
+                                total = sprintf("%d", length(discordant)))
+                        )
+                    }
                     for (i in utils::head(discordant, self$options$maxCasesShow)) {
                         self$results$comparatorCases$addRow(rowKey = i, values = list(
                             row = mydata$original_row_index[match(i, idx)],
@@ -2311,7 +2319,7 @@ decisionClass <- if (requireNamespace("jmvcore"))
                                       diag.or = ratio_rules$dor) == "undefined"
                 # Sign of the observed Youden's index, from the counts (exact integers): the
                 # direction every likelihood-ratio sentence must agree with (.lrBand).
-                youden_direction <- sign(TP * TN - FP * FN)
+                youden_direction <- sign(as.numeric(TP) * as.numeric(TN) - as.numeric(FP) * as.numeric(FN))
                 private$.youdenDirection <- youden_direction
                 private$.youdenRunCI <- private$.youdenCI(TP, TP + FN, FP, FP + TN)
 

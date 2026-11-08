@@ -87,6 +87,37 @@ items:
 
 
     # Static section divider (rendered via .r.yaml title; no setContent needed)
+    - name: fittedTable
+      title: Model Estimates
+      type: Table
+      rows: 0
+      columns: []
+      refs: finalfit
+      clearWith:
+          - outcome
+          - outcomeLevel
+          - elapsedtime
+          - explanatory
+          - contexpl
+          - fudate
+          - dxdate
+          - tint
+          - multievent
+          - analysistype
+          - dod
+          - dooc
+          - awd
+          - awod
+          - timetypeoutput
+          - use_stratify
+          - stratvar
+          - interactions
+          - uselandmark
+          - landmark
+          - timetypedata
+          - showSummaries
+
+
     - name:  text
       title: Multivariable Survival
       type:  Html
@@ -114,7 +145,7 @@ items:
           - landmark
           - timetypedata
           - showSummaries
-      
+
 
     - name:  text2
       title: ''

@@ -608,6 +608,7 @@ items:
     - name: plot4
       title: 'Cutpoint Plot'
       type: Image
+      requiresData: true
       width:  600
       height: 450
       renderFun: .plot4

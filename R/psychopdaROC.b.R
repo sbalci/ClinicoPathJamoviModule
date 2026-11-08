@@ -1038,7 +1038,7 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
             .("{variable}: the achieved specificity, {achieved}, is below the target of {target}. Choose Stepwise to get the cutoff that meets or exceeds the target."),
           variable = .rocLabel(var), achieved = as.character(signif(achieved_target, 4)),
           target = as.character(signif(target_value, 4)))
-        table$setNote(paste0("missed_target_", make.names(var)), missed, init = FALSE)
+        table$setNote(paste0("missed_target_", var), missed, init = FALSE)
 
         # Add row to table
         table$addRow(rowKey = var, values = list(
@@ -1196,6 +1196,12 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
               specificity = coords$specificity,
               sensitivity = coords$sensitivity,
               auc = pROC::auc(smooth_roc)
+            ))
+          } else {
+            reason <- trimws(gsub("^Error[^:]*:\\s*", "", as.character(smooth_roc)))
+            private$.warnUser(.fmt(
+              .("ROC curve smoothing ({method}) could not be computed: {reason}"),
+              method = method, reason = reason
             ))
           }
         }

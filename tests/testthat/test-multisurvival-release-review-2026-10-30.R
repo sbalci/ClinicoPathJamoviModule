@@ -68,7 +68,7 @@ test_that("MS-02: a main effect under an interaction states where it applies", {
     expect_true(any(grepl("arm: at age = 0", notes, fixed = TRUE)))
     expect_true(any(grepl("outside the observed range", notes, fixed = TRUE)))
   }
-  expect_match(.rr_plain(r$text$content), "arm: at age = 0", fixed = TRUE)
+  expect_match(.rr_plain(paste(r$fittedTable$asString(), r$text$content)), "arm: at age = 0", fixed = TRUE)
 })
 
 test_that("MS-02: a categorical partner is named by its reference level", {
@@ -88,7 +88,7 @@ test_that("MS-02: a variable in an interaction is never the strongest predictor"
   cen <- runif(n, 10, 100); d$time <- pmin(t, cen); d$status <- as.integer(t <= cen)
   r <- .rr_ms(d, explanatory = c("arm", "site", "grade"), interactions = list(c("arm", "site")))
   main <- .rr_plain(r$multivariableCoxSummary$content)
-  clin <- .rr_plain(r$text$content)
+  clin <- .rr_plain(paste(r$fittedTable$asString(), r$text$content))
   for (txt in list(main, clin)) {
     expect_match(txt, "Strongest predictor: grade", perl = TRUE)
     expect_match(txt, "are not ranked here", fixed = TRUE)
@@ -149,7 +149,7 @@ test_that("MS-06: Fine-Gray with strata matches a by-hand stratified fit", {
   }))
   f <- coxph(Surv(fgstart, fgstop, fgstatus) ~ arm + age + strata(site), fg, weights = fgwt, cluster = id)
   hr <- sprintf("%.2f", exp(coef(f)[["armB"]]))
-  expect_match(.rr_plain(r$text$content), paste0("(vs A) ", hr, " ("), fixed = TRUE)
+  expect_match(.rr_plain(paste(r$fittedTable$asString(), r$text$content)), paste0("(vs A) ", hr, " ("), fixed = TRUE)
 })
 
 test_that("MS-07: a small rate is not rounded to zero", {
@@ -247,7 +247,7 @@ test_that("F16: a column named after an R keyword runs", {
   d <- .rr_data(); d$IF <- d$site
   r <- .rr_ms(d, explanatory = c("arm", "IF"))
   expect_false(grepl("Error generating", r$text$content, fixed = TRUE))
-  expect_match(.rr_plain(r$text$content), "IF", fixed = TRUE)
+  expect_match(.rr_plain(paste(r$fittedTable$asString(), r$text$content)), "IF", fixed = TRUE)
 })
 
 test_that("median follow-up does not count an other-cause death as still observed", {

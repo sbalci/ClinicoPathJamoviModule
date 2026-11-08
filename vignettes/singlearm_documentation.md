@@ -3,7 +3,7 @@
 ## Feature-to-Code Mapping
 
 - **Analysis Function**: `singlearm`
-- **Module**: `SurvivalT`
+- **Module**: `Survival`
 
 | Feature / Option | UI Binding | Backend Handler | Target Result Item |
 | :--- | :--- | :--- | :--- |
@@ -47,6 +47,7 @@
 | `showExplanations` | UI Control `showExplanations` | `self$options$showExplanations` | Output item / Table |
 | `showSummaries` | UI Control `showSummaries` | `self$options$showSummaries` | Output item / Table |
 | `advancedDiagnostics` | UI Control `advancedDiagnostics` | `self$options$advancedDiagnostics` | Output item / Table |
+| `cif_all_causes` | UI Control `cif_all_causes` | `self$options$cif_all_causes` | Output item / Table |
 
 ## Verification Checklist
 

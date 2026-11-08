@@ -4,7 +4,7 @@
 
 - **Function**: `timeinterval`
 - **Title**: Comprehensive Time Interval Calculator
-- **Module**: `SurvivalT`
+- **Module**: `Survival`
 - **Files**:
   - `jamovi/timeinterval.u.yaml` - User Interface Definition
   - `jamovi/timeinterval.a.yaml` - Options & Schema Definition

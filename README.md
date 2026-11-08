@@ -20,7 +20,7 @@ address this gap, we developed **ClinicoPath**, an open-source umbrella
 toolkit built for the [jamovi](https://www.jamovi.org) statistical
 platform and R.
 
-**Architecture:** ClinicoPath coordinates **62 production analyses**
+**Architecture:** ClinicoPath coordinates **61 production analyses**
 distributed across **5 focused, specialized submodules** available
 directly in the jamovi library, alongside an active development and
 staging infrastructure:
@@ -51,12 +51,13 @@ staging infrastructure:
     with marginals, correlation matrices, raincloud and ridgeline
     distributions, waffle charts, arc networks, and automated
     intelligent plot selection).
-5.  **[OncoPath](https://www.serdarbalci.com/OncoPath/) (5 analyses):**
+5.  **[OncoPath](https://www.serdarbalci.com/OncoPath/) (4 analyses):**
     Specialized oncology and pathology research tools including swimmer
     plots for patient timelines, waterfall and spider plots for tumor
-    burden response (adapted RECIST v1.1 thresholds), diagnostic test
-    meta-analysis for pathology & AI validation, quantitative IHC marker
-    heterogeneity, and multi-rater pathology diagnostic agreement.
+    burden response (response categories adapted from RECIST v1.1
+    thresholds), diagnostic test meta-analysis for pathology & AI
+    validation, and regional IHC biomarker sampling agreement and
+    spatial heterogeneity analysis.
 
 **Conclusion:** ClinicoPath provides a powerful, accessible, and
 free-to-use toolkit that empowers medical researchers to conduct
@@ -282,60 +283,80 @@ remotes::install_github("sbalci/OncoPath")
 
 ### 3. meddecide (15 Analyses)
 
-*Menu: **meddecide***
+*Menu: **meddecide** (12 analyses) and **Power → Power Analysis by meddecide** (3 analyses)*
 
 -   **[Medical Decision](https://www.serdarbalci.com/meddecide/)
-    (`decision`)**: Diagnostic test accuracy metrics: Sensitivity,
-    Specificity, PPV, NPV, Positive/Negative Likelihood Ratios, DOR, and
-    accuracy with 95% CIs.
+    (`decision`)**: Diagnostic test accuracy metrics (Sensitivity,
+    Specificity, PPV, NPV, LR+, LR-, DOR, Youden's J, NND with 95% CIs),
+    FDA comparator agreement mode (PPA, NPA, OPA), validation context
+    ledger, and Fagan nomograms.
 -   **[Decision Calculator](https://www.serdarbalci.com/meddecide/)
-    (`decisioncalculator`)**: Interactive clinical calculator for pre-
-    and post-test probabilities with Fagan nomograms.
+    (`decisioncalculator`)**: Interactive 2x2 table calculator for pre-
+    and post-test probabilities, multi-prevalence screening workload
+    projections, and Fagan nomograms.
 -   **[Compare Tests](https://www.serdarbalci.com/meddecide/)
-    (`decisioncompare`)**: Direct statistical comparison of two or more
-    diagnostic tests against a reference standard.
+    (`decisioncompare`)**: Paired comparison of 2 or 3 diagnostic tests
+    on the same patients via McNemar tests, Newcombe paired
+    sensitivity/specificity difference intervals, Cochran's Q, and
+    comparator mode.
 -   **[Combine Tests](https://www.serdarbalci.com/meddecide/)
-    (`decisioncombine`)**: Combinatorial evaluation of 2 to 3 diagnostic
-    tests to find optimal panel algorithms; includes decision heatmaps.
+    (`decisioncombine`)**: Combinatorial evaluation of 2 or 3 diagnostic
+    tests across all result patterns and serial/parallel (AND/OR/majority)
+    rules against a reference standard or comparator.
 -   **[Co-Testing Analysis](https://www.serdarbalci.com/meddecide/)
-    (`cotest`)**: Simultaneous (parallel) testing strategies to quantify
-    sensitivity gains and specificity trade-offs.
+    (`cotest`)**: Simultaneous dual-test evaluation under conditional
+    independence or user-specified conditional dependence, with post-test
+    probability updates and Fagan nomograms.
 -   **[Sequential Testing](https://www.serdarbalci.com/meddecide/)
-    (`sequentialtests`)**: Two-stage serial testing algorithms
-    (screening followed by confirmatory testing).
+    (`sequentialtests`)**: Two-stage serial and parallel testing
+    strategies with population flow, stage-level resource/cost
+    accounting, and conditional dependence adjustment.
 -   **[No Gold Standard](https://www.serdarbalci.com/meddecide/)
-    (`nogoldstandard`)**: Diagnostic accuracy estimation when reference
-    standards are imperfect, using latent class analysis and Bayesian
-    Hui-Walter estimation.
+    (`nogoldstandard`)**: Diagnostic accuracy estimation for 3 to 5
+    binary tests without a gold standard using 2-class latent class
+    analysis (`poLCA`), penalized EM, composite reference rules,
+    prior-weighted bootstrap resampling, and bivariate residual
+    dependence checks.
 -   **[Decision Curve Analysis
     (DCA)](https://www.serdarbalci.com/meddecide/) (`decisioncurve`)**:
-    Clinical net benefit evaluation across threshold probabilities,
-    comparing “treat all”, “treat none”, and model-guided strategies;
-    calculates interventions avoided.
+    Clinical net benefit evaluation across threshold probabilities against
+    treat-all and treat-none strategies, net interventions avoided,
+    standardized net benefit, relative utility, and pointwise or
+    simultaneous bootstrap bands.
 -   **[Clinical ROC Analysis](https://www.serdarbalci.com/meddecide/)
-    (`enhancedROC`)**: Publication-ready ROC curves, empirical and
-    smooth AUC with DeLong/bootstrap CIs, and optimal cutoff detection.
+    (`enhancedROC`)**: Publication-ready ROC and Precision-Recall curves,
+    empirical and smoothed AUC with DeLong/bootstrap CIs, Youden and
+    constrained cutoff optimization, partial AUC, calibration/Brier
+    score, and frozen-model validation.
 -   **[Advanced ROC Analysis](https://www.serdarbalci.com/meddecide/)
-    (`psychopdaROC`)**: In-depth ROC coordinate evaluation with
-    threshold tables and cost-weighted cutoff optimization.
+    (`psychopdaROC`)**: Multi-marker ROC analysis via `cutpointr`,
+    threshold and confusion-matrix tables, fixed sensitivity/specificity
+    interpolation, DeLong comparisons, NRI/IDI reclassification, and
+    bootstrap intervals.
 -   **[Interrater Reliability](https://www.serdarbalci.com/meddecide/)
-    (`agreement`)**: Cohen’s Kappa, Fleiss’ Kappa, weighted kappa for
-    ordinal scales, Gwet’s AC1, and percentage agreement.
+    (`agreement`)**: Cohen's, weighted, Fleiss', Conger's exact, and
+    Light's kappa, Gwet's AC1/AC2, Krippendorff's alpha,
+    ICC(1,1)–ICC(3,k), Lin's CCC, Bland-Altman limits of agreement,
+    specific agreement, hierarchical/mixed-effects ICC, latent ordinal
+    grading models, and rater/case clustering.
 -   **[LASSO Logistic
     Regression](https://www.serdarbalci.com/meddecide/)
-    (`lassologistic`)**: L1-penalized logistic regression for
-    regularized binary outcome prediction and sparse biomarker
-    selection.
+    (`lassologistic`)**: Penalized binary logistic regression (LASSO,
+    ridge, elastic net, adaptive LASSO) via `glmnet` with cross-validated
+    $\lambda$, stability selection, integer risk-scoring systems, and
+    optimism-corrected bootstrap validation.
 -   **[Kappa Sample Size (CI)](https://www.serdarbalci.com/meddecide/)
     (`kappaSizeCI`)**: Precision-based sample size calculator
-    determining required subjects for a target confidence interval
-    half-width.
+    determining required subjects for a target two-sided confidence
+    interval around $\kappa_0$ (`kappaL`, `kappaU`) across 2–5 categories
+    and 2–6 raters.
 -   **[Kappa Fixed N Analysis](https://www.serdarbalci.com/meddecide/)
-    (`kappaSizeFixedN`)**: Calculates lowest expected Kappa and lower
-    confidence bound for a fixed sample size.
+    (`kappaSizeFixedN`)**: Calculates the lowest expected lower
+    confidence bound ($\kappa_L$) achievable for a fixed sample size (`n`).
 -   **[Kappa Power Analysis](https://www.serdarbalci.com/meddecide/)
-    (`kappaSizePower`)**: Hypothesis testing power-based sample size
-    calculator for inter-observer agreement.
+    (`kappaSizePower`)**: Hypothesis-testing sample size calculator for
+    detecting $\kappa_1 > \kappa_0$ at specified power ($1 - \beta$) and
+    $\alpha$.
 
 ------------------------------------------------------------------------
 
@@ -388,39 +409,41 @@ remotes::install_github("sbalci/OncoPath")
 
 ------------------------------------------------------------------------
 
-### 5. OncoPath (5 Analyses)
+### 5. OncoPath (4 Analyses)
 
 *Menu: **OncoPath***
 
 -   **[Swimmer Plot](https://www.serdarbalci.com/OncoPath/)
     (`swimmerplot`)**: Patient timeline visualization using enhanced
     `ggswim`; displays disease duration, clinical milestones, discrete
-    events, adverse event flags, and response durations for oncology
-    trial reporting.
+    events, censoring status arrows, reverse Kaplan-Meier follow-up, and
+    response summaries for oncology trial reporting.
 -   **[Treatment Response: Waterfall &
     Spider](https://www.serdarbalci.com/OncoPath/) (`waterfall`)**:
     Patient-level tumor burden analysis; generates publication-ready
-    waterfall and spider plots; measures progression against nadir;
-    categorizes response (CR, PR, SD, PD) using adapted RECIST v1.1
-    thresholds; reports ORR, DCR, and person-time metrics.
+    waterfall and spider plots; measures progression against the nadir;
+    categorizes response (CR, PR, SD, PD) using response categories
+    adapted from RECIST v1.1 thresholds (single-measure percentage
+    cut-points; not a RECIST v1.1 implementation); reports ORR, DCR,
+    Kaplan-Meier duration of response, and person-time metrics.
 -   **[Diagnostic Test
     Meta-Analysis](https://www.serdarbalci.com/OncoPath/)
     (`diagnosticmeta`)**: Meta-analysis of diagnostic accuracy studies
     in pathology and AI/ML algorithm validation; implements bivariate
-    random-effects modeling (Reitsma method), proportional-hazards SROC
-    (Holling model), meta-regression, and publication-ready forest/SROC
-    plots.
+    random-effects modeling (Reitsma method), hierarchical SROC (HSROC),
+    univariate DerSimonian-Laird pooling, meta-regression, Deeks’ funnel
+    plot test, and publication-ready forest and SROC plots.
 -   **[IHC Heterogeneity
     Analysis](https://www.serdarbalci.com/OncoPath/)
-    (`ihcheterogeneity`)**: Statistical analysis of immunohistochemical
-    biomarker heterogeneity; evaluates intratumoral expression variance,
-    multi-marker profiles, spatial distribution indices, and
-    clinical-pathological correlates.
--   **[Pathology Agreement](https://www.serdarbalci.com/OncoPath/)
-    (`pathagreement`)**: Multi-rater agreement analysis tailored to
-    histopathology; computes Cohen’s Kappa, Fleiss’ Kappa,
-    Krippendorff’s alpha, diagnostic consensus determinations (majority,
-    super-majority), and rater concordance matrices.
+    (`ihcheterogeneity`)**: Regional sampling agreement and spatial
+    heterogeneity analysis for immunohistochemical biomarkers across
+    biopsy cores and whole-section reference standards (or pairwise
+    inter-regional designs); computes ICC(2,1)/ICC(3,1), Spearman rank
+    correlation with Bonett-Wright CIs, Fieller 90% TOST equivalence and
+    Bonferroni material-bias intervals, Krouwer three-slope HC3
+    proportional-bias tests, Bland-Altman limits of agreement,
+    within-case CVs, variance components, and spatial compartment
+    comparisons.
 
 ------------------------------------------------------------------------
 

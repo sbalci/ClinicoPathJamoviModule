@@ -30,6 +30,7 @@ library(testthat)
   add <- function(kind) function(m) log$msgs <- c(log$msgs, paste0(kind, ": ", m))
 
   stub <- new.env(parent = globalenv())
+  stub$. <- jmvcore::`.`
   bind <- function(f) { environment(f) <- stub; f }
   # jmvcore's .() resolves `self` from the calling frame and calls
   # self$options$translate(). The real Options object provides it; this stub

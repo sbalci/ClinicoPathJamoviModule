@@ -82,6 +82,16 @@
 oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
     "oddsratioClass",
     inherit = oddsratioBase,
+    public = list(
+        #' @description Initialize safely when the supplied data has no selected variables.
+        #' @param noThrow Whether initialization errors are stored in the results.
+        init = function(noThrow = FALSE) {
+            if (!is.null(private$.data) && length(self$options$varsRequired) == 0L) {
+                private$.data <- data.frame()
+            }
+            super$init(noThrow = noThrow)
+        }
+    ),
     private = list(
 
         .nom_object = NULL,
@@ -462,7 +472,9 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
         # Main execution function that orchestrates the entire odds ratio analysis
         # Handles data preprocessing, model fitting, and result generation
-        .run = function() {
+        .prepareOddsRun = function() {
+            for (name in c("fittedTable", "diagnosticContingency"))
+                .populateSurvivalTable(self$results[[name]], data.frame())
 
             # Reset notices and cached state at start of each run
             private$.resetNotices()
@@ -538,7 +550,7 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 html$setContent(todo)
                 return()
                 
-            } else {
+            }
 
                 # All required selections are present: clear the To Do banner and let
                 # the main outputs fill in below.
@@ -598,6 +610,10 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 }
 
                 # Perform input validation before processing
+            private$.validateOddsData(name, is_empty_level, model_columns, mydata, x, values)
+        },
+
+        .validateOddsData = function(name, is_empty_level, model_columns, mydata, x, values) {
                 validation_results <- private$.validateInputs(
                     mydata[, model_columns, drop = FALSE],
                     self$options$outcome,
@@ -735,6 +751,10 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 # predictor, whereas the regression complete cases are outcome +
                 # explanatory variables. Neither path is affected by unrelated
                 # columns or by missingness in the other path.
+            private$.prepareOddsDesign(name, is_empty_level, mydata, x, values, all_labels, dependent_variable_name_from_label, warn_msg, explanatory_variable_names, v)
+        },
+
+        .prepareOddsDesign = function(name, is_empty_level, mydata, x, values, all_labels, dependent_variable_name_from_label, warn_msg, explanatory_variable_names, v) {
                 diagnostic_source <- mydata
 
                 model_names <- unique(c(
@@ -868,6 +888,10 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 }
 
                 # Additional diagnostics: EPV and separation checks
+            private$.prepareOddsFit(is_empty_level, mydata, x, values, all_labels, dependent_variable_name_from_label, warn_msg, explanatory_variable_names, v, diagnostic_source, n_dataframe)
+        },
+
+        .prepareOddsFit = function(is_empty_level, mydata, x, values, all_labels, dependent_variable_name_from_label, warn_msg, explanatory_variable_names, v, diagnostic_source, n_dataframe) {
                 extra_warnings <- c()
                 if (!is.null(dependent_variable_name_from_label) && !is.null(self$options$outcomeLevel)) {
                     # Events-per-variable uses the rarer of the two outcome classes:
@@ -1001,29 +1025,35 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         # keep_fit_id = TRUE gives each row its model term, which
                         # lets the forest plot drop exactly the rows the table
                         # marks "not estimable"; the column is removed below.
-                        ci_type <- "profile"
-                        df_out <- tryCatch(
-                            .quietly(finalfit::finalfit(
-                                .data = mydata,
-                                dependent = formulaDependent,
-                                explanatory = formulaExplanatory,
-                                metrics = FALSE,
-                                cont_cut = 0,
-                                keep_fit_id = TRUE
-                            )),
-                            error = function(e_prof) {
-                                ci_type <<- "default"
-                                .quietly(finalfit::finalfit(
+                        ff_res <- tryCatch(
+                            list(
+                                df = .quietly(finalfit::finalfit(
                                     .data = mydata,
                                     dependent = formulaDependent,
                                     explanatory = formulaExplanatory,
                                     metrics = FALSE,
                                     cont_cut = 0,
-                                    confint_type = "default",
                                     keep_fit_id = TRUE
-                                ))
+                                )),
+                                ci_type = "profile"
+                            ),
+                            error = function(e_prof) {
+                                list(
+                                    df = .quietly(finalfit::finalfit(
+                                        .data = mydata,
+                                        dependent = formulaDependent,
+                                        explanatory = formulaExplanatory,
+                                        metrics = FALSE,
+                                        cont_cut = 0,
+                                        confint_type = "default",
+                                        keep_fit_id = TRUE
+                                    )),
+                                    ci_type = "default"
+                                )
                             }
                         )
+                        ci_type <- ff_res$ci_type
+                        df_out <- ff_res$df
                         fit_ids <- as.character(df_out$fit_id)
                         df_out <- df_out[, setdiff(names(df_out), c("fit_id", "index")), drop = FALSE]
 
@@ -1089,6 +1119,10 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 }
 
                 # Use Firth penalized logistic regression if requested and package is available
+            private$.publishOddsFit(is_empty_level, mydata, values, all_labels, dependent_variable_name_from_label, warn_msg, explanatory_variable_names, v, diagnostic_source, n_dataframe, formulaDependent, formulaExplanatory, fit_standard_model, ci_type, separated, scale_notes, message)
+        },
+
+        .publishOddsFit = function(is_empty_level, mydata, values, all_labels, dependent_variable_name_from_label, warn_msg, explanatory_variable_names, v, diagnostic_source, n_dataframe, formulaDependent, formulaExplanatory, fit_standard_model, ci_type, separated, scale_notes, message) {
                 if (isTRUE(self$options$usePenalized)) {
                     if (requireNamespace("logistf", quietly = TRUE)) {
                         private$.checkpoint()
@@ -1191,23 +1225,15 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
                 self$results$text2$setContent(text2)
 
-                results1 <-  knitr::kable(tOdds[[1]],
-                             row.names = FALSE,
-                             align = c("l", "l", "r", "r", "r", "r"),
-                             format = "html")
+                .populateSurvivalTable(self$results$fittedTable, tOdds[[1]])
                 self$results$text$setContent(paste0(
-                    results1, "<p><small>", htmltools::htmlEscape(ci_note), "</small></p>"))
-
-
-
+                    "<p><small>", htmltools::htmlEscape(ci_note), "</small></p>"))
 
                 ## plot Data ----
-                # `filteredTable` used to be built here and stored below. Nothing
-                # ever read it: .plot() assigned it to a local and then drew the
-                # plot from finalfit::or_plot(), which refits from `plotData`.
-                # It cost ~5.8 KB of serialized state in every saved .omv.
+                # Save variable/term metadata only. The renderer reads the dataset
+                # through requiresData and reconstructs the same model frame.
                 plotData <- list(
-                    "plotData" = mydata,
+                    "stateVersion" = 2L,
                     "formulaDependent" = formulaDependent,
                     "formulaExplanatory" = formulaExplanatory,
                     "originalNames" = all_labels,
@@ -1228,6 +1254,10 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 # ponytail: this fits the penalized model once more than strictly
                 # necessary (the renderer refits it to draw); cache the grob if the
                 # second fit ever shows up in a profile.
+            private$.publishOddsDiagnostics(is_empty_level, mydata, all_labels, dependent_variable_name_from_label, warn_msg, explanatory_variable_names, v, diagnostic_source, formulaDependent, formulaExplanatory, separated, message, nonest, plotData)
+        },
+
+        .publishOddsDiagnostics = function(is_empty_level, mydata, all_labels, dependent_variable_name_from_label, warn_msg, explanatory_variable_names, v, diagnostic_source, formulaDependent, formulaExplanatory, separated, message, nonest, plotData) {
                 if (isTRUE(self$options$usePenalized) &&
                     requireNamespace("logistf", quietly = TRUE)) {
                     private$.checkpoint()
@@ -1326,8 +1356,9 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         # A numeric with two distinct values (0/1 marker) is a
                         # binary test, not a continuous one; factor() below
                         # turns it into a two-level 2x2 margin.
-                        pred_is_continuous <- is.numeric(diagnostic_source[[diagnostic_predictor]]) &&
-                            length(unique(stats::na.omit(diagnostic_source[[diagnostic_predictor]]))) > 2L
+                        .dp_vals <- diagnostic_source[[diagnostic_predictor]]
+                        pred_is_continuous <- is.numeric(.dp_vals) &&
+                            length(unique(.dp_vals[!is.na(.dp_vals)])) > 2L
                         diagnostic_data <- diagnostic_source[, c(
                             dependent_variable_name_from_label,
                             diagnostic_predictor
@@ -1660,6 +1691,10 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     }
                 }
                 # Educational Explanations ----
+            private$.finishOddsRun()
+        },
+
+        .finishOddsRun = function() {
                 if (self$options$showExplanations) {
                     private$.addExplanations()
                 }
@@ -1668,8 +1703,11 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 private$.addNotice(jmvcore::NoticeType$INFO,
                     .("Odds ratio analysis completed successfully."))
 
-            }
 
+        },
+
+        .run = function() {
+            private$.prepareOddsRun()
         }
 
 
@@ -2307,19 +2345,69 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
         # Creates forest plot for odds ratios using finalfit
         ,
+        # Reconstruct the validated model frame from the current dataset on redraw.
+        # requiresData is already true for this image; patient rows never enter state.
+        .plotModelData = function(state) {
+            labels <- state$originalNames
+            columns <- unname(unlist(labels))
+            if (is.null(self$data) || !length(columns) ||
+                !all(columns %in% names(self$data))) return(NULL)
+            dat <- jmvcore::select(self$data, columns)
+            for (nm in names(dat)) {
+                x <- dat[[nm]]
+                if (is.factor(x) && anyNA(levels(x))) {
+                    old_levels <- levels(x)
+                    values <- attr(x, "values", exact = TRUE)
+                    levels(x) <- old_levels
+                    if (!is.null(values) && length(values) == length(old_levels)) {
+                        attr(x, "values") <- values[!is.na(old_levels)]
+                    }
+                    dat[[nm]] <- x
+                }
+            }
+            names(dat) <- names(labels)
+            dat <- labelled::set_variable_labels(dat, .labels = labels)
+            dep <- state$formulaDependent
+            expl <- state$formulaExplanatory
+            levels_outcome <- c(self$options$outcomeNegativeLevel, self$options$outcomeLevel)
+            raw <- as.character(dat[[dep]])
+            dat <- dat[is.na(raw) | raw %in% levels_outcome, , drop = FALSE]
+            dat[[dep]] <- factor(as.character(dat[[dep]]), levels = levels_outcome)
+            for (nm in expl) {
+                if (is.ordered(dat[[nm]])) dat[[nm]] <- factor(dat[[nm]], ordered = FALSE)
+            }
+            dat <- jmvcore::naOmit(dat[, unique(c(dep, expl)), drop = FALSE])
+            for (nm in names(dat)) {
+                if (is.factor(dat[[nm]])) dat[[nm]] <- droplevels(dat[[nm]])
+            }
+            for (nm in expl) {
+                if (is.numeric(dat[[nm]]) && length(unique(dat[[nm]])) == 2L) {
+                    dat[[nm]] <- factor(dat[[nm]])
+                }
+            }
+            dat
+        },
+
         .plot = function(image, ggtheme, theme, ...) {
           # - the plot function ----
                     # plotData <- image$state
                     if (is.null(self$options$explanatory) || is.null(self$options$outcome))
                 return()
                     if (nrow(self$data) == 0)
-                jmvcore::reject(.("Data contains no (complete) rows"))
+                return(FALSE)
                     plotList <- image$state
 
                     if (is.null(plotList))
                         return(FALSE)
 
-                    mydata <- plotList$plotData
+                    # Remove patient rows from legacy saved plot states as well.
+                    if (!is.null(plotList$plotData)) {
+                        plotList$plotData <- NULL
+                        plotList$stateVersion <- 2L
+                        image$setState(plotList)
+                    }
+                    mydata <- private$.plotModelData(plotList)
+                    if (is.null(mydata) || nrow(mydata) == 0L) return(FALSE)
                     formulaDependent <- plotList$formulaDependent
                     formulaExplanatory <- plotList$formulaExplanatory
                     originalNames <- plotList$originalNames
@@ -2580,70 +2668,7 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             
             # Nomogram Analysis Explanation
             tryCatch({
-                self$results$nomogramAnalysisExplanation$setContent('
-            <div style="margin-bottom: 20px; padding: 15px; background-color: rgba(216, 33, 50, 0.18); border-left: 4px solid #dc3545; color: inherit;">
-                <h4 style="margin-top: 0; color: inherit;">Understanding Prediction and Diagnostic Outputs</h4>
-
-                <p><strong>Prediction nomogram:</strong> The plotted nomogram assigns points to all explanatory variables in the maximum-likelihood logistic regression model and maps total points to predicted outcome probability. It is not a Fagan nomogram and does not display pre-test-to-post-test probability conversion.</p>
-
-                <h5 style="color: inherit;">Prediction Nomogram Components:</h5>
-                <ul>
-                    <li><strong>Points:</strong> Contribution assigned to each predictor value</li>
-                    <li><strong>Total Points:</strong> Sum of predictor contributions</li>
-                    <li><strong>Predicted Probability:</strong> Model-based probability corresponding to total points</li>
-                </ul>
-
-                <p><strong>Important:</strong> The plot is a visual representation of the fitted model, not evidence of calibration, discrimination, transportability, or clinical utility. Internal and external validation are required before clinical use. It is not generated when Firth regression is selected because that would mix different estimation methods. Predicted probabilities need a cohort sample with the real event rate: in a case-control sample the odds ratios hold but the predicted probabilities do not.</p>
-
-                <hr style="margin: 15px 0; border: none; border-top: 1px solid #f5c6cb;">
-
-                <h5 style="color: inherit; margin-top: 15px;">What is a Diagnostic Predictor?</h5>
-
-                <p><strong>The diagnostic predictor is the single binary variable you want to evaluate as a diagnostic test.</strong></p>
-
-                <div style="background-color: rgba(255, 202, 33, 0.23); padding: 10px; border-radius: 5px; margin: 10px 0; color: inherit;">
-                    <strong>Example:</strong> If you select "LVI" (Lymphovascular Invasion: Absent/Present) as the diagnostic predictor,
-                    the diagnostic table answers: <em>"How well does LVI alone distinguish the selected outcome states?"</em>
-                </div>
-
-                <p><strong>Requirements:</strong></p>
-                <ul>
-                    <li> Compares two explicitly selected levels (<strong>Predictor Positive Level</strong> vs <strong>Predictor Negative Level</strong>): e.g., Yes/No, Present/Absent, Positive/Negative</li>
-                    <li> Examples: LVI (Absent/Present), an immunostain (Negative/Positive), a frozen-section call (Benign/Malignant)</li>
-                    <li> Cannot use continuous variables: Age, Tumor Size (infinite possible values)</li>
-                    <li> Multi-category variables (e.g., Grade 1/2/3): Only observations with the selected positive and negative levels are included in the 2\u00d72 diagnostic table; unselected levels are excluded with a warning</li>
-                </ul>
-
-                <p><strong>Why Two Selected Levels?</strong></p>
-                <p>Diagnostic test performance metrics (sensitivity, specificity, likelihood ratios) are calculated from a 2\u00d72 contingency table:</p>
-
-                <table style="border-collapse: collapse; margin: 10px 0; font-size: 0.9em;">
-                    <tr><th style="border: 1px solid #ddd; padding: 5px;"></th>
-                        <th style="border: 1px solid #ddd; padding: 5px;">Outcome +</th>
-                        <th style="border: 1px solid #ddd; padding: 5px;">Outcome -</th></tr>
-                    <tr><td style="border: 1px solid #ddd; padding: 5px;">Test +</td>
-                        <td style="border: 1px solid #ddd; padding: 5px;">True Positive</td>
-                        <td style="border: 1px solid #ddd; padding: 5px;">False Positive</td></tr>
-                    <tr><td style="border: 1px solid #ddd; padding: 5px;">Test -</td>
-                        <td style="border: 1px solid #ddd; padding: 5px;">False Negative</td>
-                        <td style="border: 1px solid #ddd; padding: 5px;">True Negative</td></tr>
-                </table>
-
-                <p><small><em>Sensitivity = TP/(TP+FN), Specificity = TN/(TN+FP), LR+ = Sensitivity/(1-Specificity)</em></small></p>
-
-                <p><strong>Selection Guidelines:</strong></p>
-                <ul>
-                    <li><strong>Not specified:</strong> Uses the first explanatory variable automatically (in the jamovi GUI, select the variable in the Diagnostic Predictor box to enable the Predictor Positive Level and Predictor Negative Level dropdowns)</li>
-                    <li><strong>In your regression model:</strong> Diagnostic metrics are still unadjusted and use only its paired 2\u00d72 table</li>
-                    <li><strong>Not in your model:</strong> Evaluates it independently using paired complete outcome/test observations</li>
-                </ul>
-
-                <div style="background-color: rgba(33, 163, 188, 0.21); padding: 10px; border-radius: 5px; margin: 10px 0; color: inherit;">
-                    <strong> Clinical Tip:</strong> If your first variable is continuous (e.g., Age), you must manually select
-                    a binary diagnostic predictor to obtain sensitivity, specificity, and likelihood ratios. The prediction nomogram can still be generated from the regression variables.
-                </div>
-            </div>
-            ')
+                self$results$nomogramAnalysisExplanation$setContent(.("<div style=\"margin-bottom: 20px; padding: 15px; background-color: rgba(216, 33, 50, 0.18); border-left: 4px solid #dc3545; color: inherit;\"> <h4 style=\"margin-top: 0; color: inherit;\">Understanding Prediction and Diagnostic Outputs</h4> <p><strong>Prediction nomogram:</strong> The plotted nomogram assigns points to all explanatory variables in the maximum-likelihood logistic regression model and maps total points to predicted outcome probability. It is not a Fagan nomogram and does not display pre-test-to-post-test probability conversion.</p> <h5 style=\"color: inherit;\">Prediction Nomogram Components:</h5> <ul> <li><strong>Points:</strong> Contribution assigned to each predictor value</li> <li><strong>Total Points:</strong> Sum of predictor contributions</li> <li><strong>Predicted Probability:</strong> Model-based probability corresponding to total points</li> </ul> <p><strong>Important:</strong> The plot is a visual representation of the fitted model, not evidence of calibration, discrimination, transportability, or clinical utility. Internal and external validation are required before clinical use. It is not generated when Firth regression is selected because that would mix different estimation methods. Predicted probabilities need a cohort sample with the real event rate: in a case-control sample the odds ratios hold but the predicted probabilities do not.</p> <hr style=\"margin: 15px 0; border: none; border-top: 1px solid #f5c6cb;\"> <h5 style=\"color: inherit; margin-top: 15px;\">What is a Diagnostic Predictor?</h5> <p><strong>The diagnostic predictor is the single binary variable you want to evaluate as a diagnostic test.</strong></p> <div style=\"background-color: rgba(255, 202, 33, 0.23); padding: 10px; border-radius: 5px; margin: 10px 0; color: inherit;\"> <strong>Example:</strong> If you select \"LVI\" (Lymphovascular Invasion: Absent/Present) as the diagnostic predictor, the diagnostic table answers: <em>\"How well does LVI alone distinguish the selected outcome states?\"</em> </div> <p><strong>Requirements:</strong></p> <ul> <li> Compares two explicitly selected levels (<strong>Predictor Positive Level</strong> vs <strong>Predictor Negative Level</strong>): e.g., Yes/No, Present/Absent, Positive/Negative</li> <li> Examples: LVI (Absent/Present), an immunostain (Negative/Positive), a frozen-section call (Benign/Malignant)</li> <li> Cannot use continuous variables: Age, Tumor Size (infinite possible values)</li> <li> Multi-category variables (e.g., Grade 1/2/3): Only observations with the selected positive and negative levels are included in the 2\u00d72 diagnostic table; unselected levels are excluded with a warning</li> </ul> <p><strong>Why Two Selected Levels?</strong></p> <p>Diagnostic test performance metrics (sensitivity, specificity, likelihood ratios) are calculated from a 2\u00d72 contingency table:</p> <table style=\"border-collapse: collapse; margin: 10px 0; font-size: 0.9em;\"> <tr><th style=\"border: 1px solid #ddd; padding: 5px;\"></th> <th style=\"border: 1px solid #ddd; padding: 5px;\">Outcome +</th> <th style=\"border: 1px solid #ddd; padding: 5px;\">Outcome -</th></tr> <tr><td style=\"border: 1px solid #ddd; padding: 5px;\">Test +</td> <td style=\"border: 1px solid #ddd; padding: 5px;\">True Positive</td> <td style=\"border: 1px solid #ddd; padding: 5px;\">False Positive</td></tr> <tr><td style=\"border: 1px solid #ddd; padding: 5px;\">Test -</td> <td style=\"border: 1px solid #ddd; padding: 5px;\">False Negative</td> <td style=\"border: 1px solid #ddd; padding: 5px;\">True Negative</td></tr> </table> <p><small><em>Sensitivity = TP/(TP+FN), Specificity = TN/(TN+FP), LR+ = Sensitivity/(1-Specificity)</em></small></p> <p><strong>Selection Guidelines:</strong></p> <ul> <li><strong>Not specified:</strong> Uses the first explanatory variable automatically (in the jamovi GUI, select the variable in the Diagnostic Predictor box to enable the Predictor Positive Level and Predictor Negative Level dropdowns)</li> <li><strong>In your regression model:</strong> Diagnostic metrics are still unadjusted and use only its paired 2\u00d72 table</li> <li><strong>Not in your model:</strong> Evaluates it independently using paired complete outcome/test observations</li> </ul> <div style=\"background-color: rgba(33, 163, 188, 0.21); padding: 10px; border-radius: 5px; margin: 10px 0; color: inherit;\"> <strong> Clinical Tip:</strong> If your first variable is continuous (e.g., Age), you must manually select a binary diagnostic predictor to obtain sensitivity, specificity, and likelihood ratios. The prediction nomogram can still be generated from the regression variables. </div> </div>"))
 
             }, error = function(e) {
                 # Silently ignore if result doesn't exist
@@ -3160,19 +3185,13 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         },
 
         .formatContingencyGuide = function(outcome_levels, predictor_levels, cont_table) {
-            paste0(
-                "<table style='border-collapse: collapse; margin: 5px 0;'>",
-                "<tr><th style='border: 1px solid #ddd; padding: 5px;'></th>",
-                "<th style='border: 1px solid #ddd; padding: 5px;'>", htmltools::htmlEscape(outcome_levels[1]), " (+)</th>",
-                "<th style='border: 1px solid #ddd; padding: 5px;'>", htmltools::htmlEscape(outcome_levels[2]), " (\u2212)</th></tr>",
-                "<tr><td style='border: 1px solid #ddd; padding: 5px;'><b>", htmltools::htmlEscape(predictor_levels[1]), " (+)</b></td>",
-                "<td style='border: 1px solid #ddd; padding: 5px;'>", cont_table[1,1], "</td>",
-                "<td style='border: 1px solid #ddd; padding: 5px;'>", cont_table[1,2], "</td></tr>",
-                "<tr><td style='border: 1px solid #ddd; padding: 5px;'><b>", htmltools::htmlEscape(predictor_levels[2]), " (\u2212)</b></td>",
-                "<td style='border: 1px solid #ddd; padding: 5px;'>", cont_table[2,1], "</td>",
-                "<td style='border: 1px solid #ddd; padding: 5px;'>", cont_table[2,2], "</td></tr>",
-                "</table>"
-            )
+            values <- data.frame(predictor = predictor_levels,
+                positive = as.numeric(cont_table[, 1]), negative = as.numeric(cont_table[, 2]))
+            names(values) <- c(.("Predictor level"), paste0(outcome_levels[1], " (+)"),
+                paste0(outcome_levels[2], " (\u2212)"))
+            .populateSurvivalTable(self$results$diagnosticContingency, values,
+                c("", "dp:0", "dp:0"))
+            ""
         }
 
         )

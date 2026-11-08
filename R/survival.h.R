@@ -84,7 +84,7 @@ survivalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             seed = 42, ...) {
 
             super$initialize(
-                package="jsurvival",
+                package="ClinicoPath",
                 name="survival",
                 requiresData=TRUE,
                 ...)
@@ -778,6 +778,7 @@ survivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ageStandardizationInterpretation = function() private$.items[["ageStandardizationInterpretation"]],
         ageStratifiedKMPlot = function() private$.items[["ageStratifiedKMPlot"]],
         adjustedCurvesPlot = function() private$.items[["adjustedCurvesPlot"]],
+        remarkItems = function() private$.items[["remarkItems"]],
         remarkChecklist = function() private$.items[["remarkChecklist"]],
         cox_ph = function() private$.items[["cox_ph"]],
         phInterpretation = function() private$.items[["phInterpretation"]],
@@ -1619,6 +1620,28 @@ survivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "dooc",
                     "awd",
                     "awod",
+                    "uselandmark",
+                    "landmark")))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="remarkItems",
+                title="REMARK Reporting Items",
+                rows=0,
+                columns=list(),
+                visible="(remark_checklist)",
+                clearWith=list(
+                    "remark_checklist",
+                    "explanatory",
+                    "outcome",
+                    "elapsedtime",
+                    "age_adjustment",
+                    "multievent",
+                    "analysistype",
+                    "outcomeLevel",
+                    "tint",
+                    "timetypedata",
+                    "dxdate",
+                    "fudate",
                     "uselandmark",
                     "landmark")))
             self$add(jmvcore::Html$new(
@@ -3332,6 +3355,7 @@ survivalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   \code{results$ageStandardizationInterpretation} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$ageStratifiedKMPlot} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$adjustedCurvesPlot} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$remarkItems} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$remarkChecklist} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$cox_ph} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$phInterpretation} \tab \tab \tab \tab \tab a html \cr

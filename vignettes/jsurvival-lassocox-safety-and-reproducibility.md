@@ -1,6 +1,6 @@
 # LASSO Cox: encoding and reproducibility
 
-These changes apply to analysis version 0.0.6, under the `Survival` menu group (`menuSubgroup: Penalized Cox Regression`).
+These changes apply to `jsurvival` version 1.1.3, under the `Survival` menu group (`menuSubgroup: Penalized Cox Regression`).
 
 ## Input requirements
 
@@ -93,10 +93,7 @@ If `glmnet` or `survival` is unavailable, an actionable error stops fitting. If 
 `survminer` is unavailable, survival curves use a base-R fallback without a risk
 table.
 
-See the [audit repair and validation report](../quality-reports/lassocox-fixes-2026-08-31.md)
-for tested behavior and remaining validation limitations.
-
-## Review repairs in 0.0.6
+## Review repairs in 1.1.3
 
 Optional unpenalized Cox comparison rows are now left unavailable when `coxph`
 warns, fails to converge cleanly, or returns non-finite estimates. The same guard

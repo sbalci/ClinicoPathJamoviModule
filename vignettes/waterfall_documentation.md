@@ -12,8 +12,9 @@
 | `responseVar` | UI Control `responseVar` | `self$options$responseVar` | Output item / Table |
 | `timeVar` | UI Control `timeVar` | `self$options$timeVar` | Output item / Table |
 | `groupVar` | UI Control `groupVar` | `self$options$groupVar` | Output item / Table |
-| `inputType` | UI Control `inputType` | `self$options$inputType` | Output item / Table |
-| `sortBy` | UI Control `sortBy` | `self$options$sortBy` | Output item / Table |
+| `inputType` | UI Control `inputType` | `self$options$inputType` | `summaryTable`, `clinicalMetrics`, `personTimeTable`, `waterfallplot`, `spiderplot` |
+| `measurementUnit` | UI Control `measurementUnit` | `self$options$measurementUnit` | Enables the RECIST v1.1 >= 5 mm absolute increase rule (`mm`, `cm`, `unspecified`) |
+| `sortBy` | UI Control `sortBy` | `self$options$sortBy` | `waterfallplot` |
 | `sortDirection` | UI Control `sortDirection` | `self$options$sortDirection` | Output item / Table |
 | `showBaseline` | UI Control `showBaseline` | `self$options$showBaseline` | Output item / Table |
 | `confirmationVar` | UI Control `confirmationVar` | `self$options$confirmationVar` | Output item / Table |
@@ -39,9 +40,11 @@
 | `generateCopyReadyReport` | UI Control `generateCopyReadyReport` | `self$options$generateCopyReadyReport` | Output item / Table |
 | `showClinicalSignificance` | UI Control `showClinicalSignificance` | `self$options$showClinicalSignificance` | Output item / Table |
 | `showConfidenceIntervals` | UI Control `showConfidenceIntervals` | `self$options$showConfidenceIntervals` | Output item / Table |
-| `enableGuidedMode` | UI Control `enableGuidedMode` | `self$options$enableGuidedMode` | Output item / Table |
-| `showExplanations` | UI Control `showExplanations` | `self$options$showExplanations` | Output item / Table |
-| `showResponseDuration` | UI Control `showResponseDuration` | `self$options$showResponseDuration` | Output item / Table |
+| `enableGuidedMode` | UI Control `enableGuidedMode` | `self$options$enableGuidedMode` | `guidedAnalysis` |
+| `showExplanations` | UI Control `showExplanations` | `self$options$showExplanations` | `clinicalSummary`, `aboutAnalysis` |
+| `showClinicalSummary` | UI Control `showClinicalSummary` | `self$options$showClinicalSummary` | `clinicalSummary` |
+| `showAboutAnalysis` | UI Control `showAboutAnalysis` | `self$options$showAboutAnalysis` | `aboutAnalysis` |
+| `showResponseDuration` | UI Control `showResponseDuration` | `self$options$showResponseDuration` | `responseDurationTable` |
 | `addResponseCategory` | UI Control `addResponseCategory` | `self$options$addResponseCategory` | Output item / Table |
 | `seed` | UI Control `seed` | `self$options$seed` | Output item / Table |
 

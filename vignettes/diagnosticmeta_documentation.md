@@ -3,8 +3,8 @@
 ## Feature-to-Code Mapping
 
 - **Analysis Function**: `diagnosticmeta`
-- **Module**: `OncoPath` (`jamovi/diagnosticmeta.a.yaml` currently declares `menuGroup: OncoPathT`, the JamoviTest routing suffix used while the analysis is under review)
-- **Verified against**: `jamovi/diagnosticmeta.a.yaml`, `jamovi/diagnosticmeta.u.yaml`, `jamovi/diagnosticmeta.r.yaml` and `R/diagnosticmeta.b.R` on 2026-09-20
+- **Module**: `OncoPath` (`menuGroup: OncoPath`, `version: 1.1.3`)
+- **Verified against**: `jamovi/diagnosticmeta.a.yaml`, `jamovi/diagnosticmeta.u.yaml`, `jamovi/diagnosticmeta.r.yaml` and `R/diagnosticmeta.b.R` on 2026-11-07
 
 Three things to know before reading the table:
 
@@ -33,7 +33,7 @@ Three things to know before reading the table:
 | `sroc_plot` | UI Control `sroc_plot` | `self$options$sroc_plot` | `srocplot` Image (`renderFun: .srocplot`); also gates `srocplot_explanation` visibility |
 | `funnel_plot` | UI Control `funnel_plot` | `self$options$funnel_plot` | `funnelplot` Image (`renderFun: .funnelplot`); also gates `funnelplot_explanation` visibility |
 | `show_individual_studies` | UI Control `show_individual_studies` | `self$options$show_individual_studies` | `individualstudies` |
-| `show_interpretation` | UI Control `show_interpretation` | `self$options$show_interpretation` | `interpretation` (Html); `visible: (show_interpretation)` reveals the pane and the same option gates `.populateInterpretation()` in `.init()`, so nothing is built when it is off |
+| `show_interpretation` | UI Control `show_interpretation` | `self$options$show_interpretation` | `interpretation` (Html), `likelihoodRatioGuide` (Table), `predictiveValues` (Table); `visible: (show_interpretation)` reveals the panes and gates `.populateInterpretation()`, `.populateLikelihoodRatioGuide()` and `.populatePredictiveValues()` |
 | `show_methodology` | UI Control `show_methodology` | `self$options$show_methodology` | `about` (Html); `visible: (show_methodology)` reveals the pane and the same option gates `.populateAboutPanel()` in `.init()` |
 | `show_analysis_summary` | UI Control `show_analysis_summary` | `self$options$show_analysis_summary` | `summary` (Html); `visible: (show_analysis_summary)` reveals the pane and the same option gates `.generateSummary()` / `.generateBasicSummary()` in `.run()`. It also feeds the "Nothing selected to display" notice |
 | `color_palette` | UI Control `color_palette` | `self$options$color_palette` (resolved by `.getColorPalette()`) | `forestplot`, `srocplot`, `funnelplot` |

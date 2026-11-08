@@ -4,7 +4,7 @@
 
 - **Function**: `survivalcont`
 - **Title**: Survival Analysis for Continuous Variable
-- **Module**: `SurvivalT`
+- **Module**: `Survival`
 - **Files**:
   - `jamovi/survivalcont.u.yaml` - User Interface Definition
   - `jamovi/survivalcont.a.yaml` - Options & Schema Definition

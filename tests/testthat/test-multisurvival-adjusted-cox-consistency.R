@@ -71,13 +71,8 @@ skip_if(is.null(.msacc_ns), "multisurvival not available in this distribution")
 # univariable column has an identical format, so it cannot be matched by shape.
 # (?s) is required -- knitr::kable puts a newline inside every <tr>.
 .msacc_ff_multi <- function(res) {
-    h <- res$text$content
-    rows <- regmatches(h, gregexpr("(?s)<tr>.*?</tr>", h, perl = TRUE))[[1]]
-    last <- vapply(rows, function(r) {
-        tds <- regmatches(r, gregexpr("(?s)<td[^>]*>.*?</td>", r, perl = TRUE))[[1]]
-        if (!length(tds)) return(NA_character_)
-        trimws(gsub("<[^>]*>", "", tds[length(tds)]))
-    }, character(1), USE.NAMES = FALSE)
+    d <- res$fittedTable$asDF
+    last <- as.character(d[[ncol(d)]])
     last[!is.na(last) & grepl("^[0-9.]+ \\([0-9.]+-[0-9.]+", last)]
 }
 
@@ -115,7 +110,7 @@ test_that("the main table and the Adjusted Cox table are the same model", {
     # Same p-values. finalfit prints 3 dp with a "<0.001" floor.
     p_ff  <- sort(sub("^.*p([&<=][^)]*)\\)$", "\\1", ff))
     p_adj <- sort(vapply(adj$Pvalue, function(p)
-        if (p < 0.0005) "&lt;0.001" else sprintf("=%.3f", p), character(1)))
+        if (p < 0.0005) "<0.001" else sprintf("=%.3f", p), character(1)))
     expect_equal(p_adj, p_ff)
 })
 
@@ -127,7 +122,7 @@ test_that("an ordinal covariate in contexpl is one linear-trend row in BOTH tabl
 
     # finalfit describes it as a continuous variable ("Mean (SD)") rather than
     # listing its levels -- the visible proof that cont_cut = 0 took effect.
-    main <- .msacc_text(res$text$content)
+    main <- .msacc_text(paste(apply(res$fittedTable$asDF, 1, paste, collapse = " "), collapse = "\n"))
     expect_true(grepl("performance_status", main, fixed = TRUE))
     expect_match(main, "performance_status\\s*\\n?\\s*Mean \\(SD\\)")
 

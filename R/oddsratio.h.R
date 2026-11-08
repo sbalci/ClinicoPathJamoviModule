@@ -127,6 +127,7 @@ oddsratioResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         strongWarnings = function() private$.items[["strongWarnings"]],
         warnings = function() private$.items[["warnings"]],
         infoMessages = function() private$.items[["infoMessages"]],
+        fittedTable = function() private$.items[["fittedTable"]],
         text = function() private$.items[["text"]],
         text2 = function() private$.items[["text2"]],
         plot = function() private$.items[["plot"]],
@@ -134,6 +135,7 @@ oddsratioResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         riskMeasuresExplanation = function() private$.items[["riskMeasuresExplanation"]],
         diagnosticTestExplanation = function() private$.items[["diagnosticTestExplanation"]],
         plot_nomogram = function() private$.items[["plot_nomogram"]],
+        diagnosticContingency = function() private$.items[["diagnosticContingency"]],
         diagnosticMetrics = function() private$.items[["diagnosticMetrics"]],
         nomogram = function() private$.items[["nomogram"]],
         nomogramAnalysisExplanation = function() private$.items[["nomogramAnalysisExplanation"]]),
@@ -184,6 +186,19 @@ oddsratioResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 name="infoMessages",
                 title="Information",
                 visible=FALSE))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="fittedTable",
+                title="Odds Ratios",
+                rows=0,
+                columns=list(),
+                visible="(length(explanatory) > 0 && length(outcome) > 0 && length(outcomeLevel) > 0 && length(outcomeNegativeLevel) > 0)",
+                clearWith=list(
+                    "explanatory",
+                    "outcome",
+                    "outcomeLevel",
+                    "outcomeNegativeLevel",
+                    "usePenalized")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="text",
@@ -259,6 +274,21 @@ oddsratioResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "outcomeLevel",
                     "outcomeNegativeLevel",
                     "usePenalized")))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="diagnosticContingency",
+                title="Diagnostic Contingency Table",
+                rows=0,
+                columns=list(),
+                visible="(showNomogram)",
+                clearWith=list(
+                    "explanatory",
+                    "outcome",
+                    "outcomeLevel",
+                    "outcomeNegativeLevel",
+                    "diagnosticPredictor",
+                    "predictorLevel",
+                    "predictorNegativeLevel")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="diagnosticMetrics",
@@ -371,6 +401,7 @@ oddsratioBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   \code{results$strongWarnings} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$warnings} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$infoMessages} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$fittedTable} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$text} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$text2} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$plot} \tab \tab \tab \tab \tab an image \cr
@@ -378,10 +409,17 @@ oddsratioBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   \code{results$riskMeasuresExplanation} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$diagnosticTestExplanation} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$plot_nomogram} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$diagnosticContingency} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$diagnosticMetrics} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$nomogram} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$nomogramAnalysisExplanation} \tab \tab \tab \tab \tab a html \cr
 #' }
+#'
+#' Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
+#'
+#' \code{results$fittedTable$asDF}
+#'
+#' \code{as.data.frame(results$fittedTable)}
 #'
 #' @export
 oddsratio <- function(

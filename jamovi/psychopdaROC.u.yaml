@@ -122,8 +122,9 @@ children:
             name: metric
             label: Optimization metric
             enable: >-
-              (!method:oc_manual && !method:oc_cost_ratio &&
-              !method:oc_equal_sens_spec && !method:oc_closest_01)
+              (method:maximize_metric || method:minimize_metric ||
+              method:maximize_loess_metric || method:minimize_loess_metric ||
+              method:maximize_boot_metric || method:minimize_boot_metric)
           - type: TextBox
             name: specifyCutScore
             format: string
@@ -151,6 +152,10 @@ children:
               - type: ComboBox
                 name: break_ties
                 label: Tie breaking method
+                enable: >-
+                  (method:maximize_metric || method:minimize_metric ||
+                  method:maximize_loess_metric || method:minimize_loess_metric ||
+                  method:maximize_boot_metric || method:minimize_boot_metric)
               - type: TextBox
                 name: boot_runs
                 format: number

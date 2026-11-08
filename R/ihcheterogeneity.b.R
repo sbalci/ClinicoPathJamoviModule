@@ -127,7 +127,7 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
             # region stuck at one value against a varying reference plainly changes
             # with the level.)
             few_values <- private$.fewValues
-            fit_on <- !constant && !is.null(level) && !(few_values(x) && few_values(y))
+            fit_on <- !constant && !isTRUE(private$.ordinal) && !is.null(level) && !(few_values(x) && few_values(y))
             ok <- if (fit_on) is.finite(level)
             prop <- if (fit_on) private$.levelFit(d[ok], level[ok])
             prop_ref <- if (fit_on && bounds) private$.levelFit(d[ok], y[ok])
@@ -1061,6 +1061,7 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
                     ok <- !is.na(X[, a]) & !is.na(X[, b])
                     if (sum(ok) < min_pairs) {
                         sparse <- c(sparse, sprintf("%s / %s (n = %d)", region_names[a], region_names[b], sum(ok)))
+                        unassessed_pairs <- c(unassessed_pairs, sprintf("%s / %s", region_names[a], region_names[b]))
                         next
                     }
                     if (is_constant(X[ok, a]) || is_constant(X[ok, b])) {
@@ -1393,7 +1394,8 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
                     ok <- !is.na(whole_section) & is.finite(region_mean)
                     # The mean of several ordinal cores has many values, but its
                     # inputs are still ordinal: no slope when every input has few.
-                    ordinal_inputs <- private$.fewValues(whole_section) && all(apply(X, 2, private$.fewValues))
+                    ordinal_inputs <- isTRUE(private$.ordinal) ||
+                        (private$.fewValues(whole_section) && all(apply(X, 2, private$.fewValues)))
                     if (sum(ok) >= min_pairs) add(region_mean[ok], whole_section[ok], NA_character_, TRUE, "reference",
                                                   level = if (!ordinal_inputs) (region_mean[ok] + whole_section[ok]) / 2)
                 }
@@ -1436,6 +1438,7 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
             # MATERIAL by the slope, which with one reading per method cannot be
             # fully told from an unequal-error artefact (.levelFit).
             reference_constant <- has_reference && private$.isConstant(whole_section)
+            not_judged <- reference_constant || isTRUE(private$.ordinal)
             m <- max(n_planned, 1)
             level_material <- 1 - 0.10 / m
             slope_gate <- 0.05 / m
@@ -1448,7 +1451,7 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
                 rows[[i]]$rel_ci90 <- ci90
                 rows[[i]]$rel_ci_material <- ci_adj
                 rows[[i]]$level_material <- level_material
-                rows[[i]]$material <- !reference_constant && if (isTRUE(r$constant)) {
+                rows[[i]]$material <- !not_judged && if (isTRUE(r$constant)) {
                     # An identical difference in every case has no estimable
                     # precision. It is called material only when a sign test could
                     # show it: every case beyond the margin in the same direction, and
@@ -1458,7 +1461,7 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
                 } else {
                     !any(is.na(ci_adj)) && (min(ci_adj) > margin || max(ci_adj) < -margin)
                 }
-                rows[[i]]$equivalent <- !isTRUE(r$constant) && !any(is.na(ci90)) && all(abs(ci90) <= margin)
+                rows[[i]]$equivalent <- !not_judged && !isTRUE(r$constant) && !any(is.na(ci90)) && all(abs(ci90) <= margin)
                 margin_abs <- margin / 100 * abs(r$ref_mean)
                 rows[[i]]$margin_abs <- margin_abs
                 # Error alone tilts the slope on the reference (or the second
@@ -1483,9 +1486,13 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
             # comparison stays inconclusive, and "more cases" is the only advice.
             # Said once, with the resolution, for the comparisons not ruled out.
             fine <- Filter(function(r) {
-                if (isTRUE(r$equivalent) || is.na(r$rel) || !is.finite(r$margin_abs)) return(FALSE)
+                if (isTRUE(r$equivalent) || isTRUE(r$material) || isTRUE(r$constant) ||
+                    is.na(r$rel) || !is.finite(r$margin_abs)) return(FALSE)
                 steps <- abs(r$d)[abs(r$d) > sqrt(.Machine$double.eps) * max(1, abs(r$ref_mean))]
-                length(steps) > 0 && r$margin_abs < min(steps)
+                if (length(steps) == 0 || r$margin_abs >= min(steps)) return(FALSE)
+                u <- sort(unique(c(0, round(steps, 8))))
+                step <- min(diff(u))
+                step > r$margin_abs && all(abs(steps / step - round(steps / step)) < 1e-4)
             }, rows)
             if (length(fine) > 0 && !reference_constant && !isTRUE(private$.ordinal)) {
                 f <- fine[[1]]
@@ -1511,7 +1518,7 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
                     effect_size = r$g,
                     slope = if (is.null(r$prop)) NA_real_ else r$prop$slope,
                     slope_p = if (is.null(r$prop)) NA_real_ else r$prop$p,
-                    clinical_impact = private$.impactText(r, judged = !reference_constant))))
+                    clinical_impact = private$.impactText(r, judged = !not_judged))))
             }
 
             if (m > 1 && length(rows) > 0) {
@@ -1899,6 +1906,7 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
                 case_cvs <- private$.perCaseCV(region_ws, region_bd, has_reference, private$.cv_floor)
                 region_cv <- private$.rmsCV(case_cvs)
                 heterogeneity_level <- if (is.na(region_cv)) .("Not estimable") else
+                    if (isTRUE(private$.ordinal)) .("Not graded: ordinal or binned values") else
                     if (region_cv <= cv_thr / 2) .("Low") else
                     if (region_cv <= cv_thr) .("Moderate") else .("High")
 
@@ -2548,7 +2556,7 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
                     .("Whether a difference changed with the level (proportional bias) was assessed by regressing it on the reference value, on the region value and on the mean of the two, with heteroscedasticity-robust standard errors (Bland & Altman 1995, 1999); because measurement error alone tilts the first slope downwards and the second upwards, a difference was considered to change with the level only when all three slopes differed from zero in the same direction (p below 0.05 divided by the number of comparisons) (Krouwer 2008). Such a difference was judged at the 5th and 95th percentiles of the mean of the two measurements and was considered ruled out only if it lay within the margin at both.")
                 else
                     .("Whether a difference changed with the level (proportional bias) was assessed by regressing it on each of the two regions compared and on their mean, with heteroscedasticity-robust standard errors (Bland & Altman 1999); because measurement error alone tilts the slope on one region downwards and on the other upwards, a difference was considered to change with the level only when all three slopes differed from zero in the same direction (p below 0.05 divided by the number of comparisons) (Krouwer 2008). Such a difference was judged at the 5th and 95th percentiles of the mean of the two regions and was considered ruled out only if it lay within the margin at both."),
-                if (has_reference && length(ref_corr) > 0)
+                if ((has_reference && length(ref_corr) > 0) || (!has_reference && length(metrics$pair_corr) > 0))
                     .("Confidence intervals for Spearman correlations used the Fisher z transformation with the variance of Bonett and Wright (2000)."),
                 .("Sampling variability was quantified as the within-case coefficient of variation (CV), the root mean square of the per-case CVs; cases whose mean was near zero were left out."),
                 sprintf(.("Quality thresholds were set at correlation \u2265%s and CV \u2264%s%%."), correlation_threshold, cv_threshold)
@@ -2830,7 +2838,7 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
                 "<li>McGraw KO, Wong SP. Psychol Methods 1996;1(1):30-46.</li>",
                 "<li>Bland JM, Altman DG. Lancet 1986;1(8476):307-310.</li>",
                 "<li>Bland JM, Altman DG. Stat Methods Med Res 1999;8(2):135-160.</li>",
-                if (metrics$has_reference) "<li>Bonett DG, Wright TA. Psychometrika 2000;65(1):23-28.</li>",
+                if (metrics$has_reference || length(metrics$pair_corr) > 0) "<li>Bonett DG, Wright TA. Psychometrika 2000;65(1):23-28.</li>",
                 "<li>Schuirmann DJ. J Pharmacokinet Biopharm 1987;15(6):657-680.</li>",
                 if (any(vapply(metrics$bias_rows, function(r) !is.null(r$prop), logical(1))))
                     "<li>MacKinnon JG, White H. J Econometrics 1985;29(3):305-325.</li>",
@@ -3199,7 +3207,9 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
                         if (band(st$cv) > band(oc)) higher <- c(higher, o)
                         if (band(st$cv) < band(oc)) lower <- c(lower, o)
                     }
-                    comparison <- if (compared == 0) {
+                    comparison <- if (isTRUE(private$.ordinal)) {
+                        .("Not graded: ordinal or binned values")
+                    } else if (compared == 0) {
                         .("No comparison available")
                     } else if (length(higher) + length(lower) == 0) {
                         .("Same CV band as every other compartment")
@@ -3287,11 +3297,15 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
                 # as less heterogeneous: 39% (Kruskal-Wallis) and 61% (Brown-Forsythe)
                 # false positives at 2 vs 5 values per case, against a nominal 5%.
                 cm <- if (has_reference) cbind(ws, as.matrix(cv_regions[mask, , drop = FALSE])) else as.matrix(cv_regions[mask, , drop = FALSE])
-                complete_case <- rowSums(!is.na(cm)) == ncol(cm)
-                n_incomplete_cv <- n_incomplete_cv + sum(!complete_case)
-                cvs <- private$.perCaseCV(if (has_reference) ws[complete_case] else NULL,
-                                          cv_regions[mask, , drop = FALSE][complete_case, , drop = FALSE], has_reference, private$.cv_floor)
-                n_no_cv <- n_no_cv + sum(is.na(cvs))
+                if (ncol(cm) >= 2) {
+                    complete_case <- rowSums(!is.na(cm)) == ncol(cm)
+                    n_incomplete_cv <- n_incomplete_cv + sum(!complete_case)
+                    cvs <- private$.perCaseCV(if (has_reference) ws[complete_case] else NULL,
+                                              cv_regions[mask, , drop = FALSE][complete_case, , drop = FALSE], has_reference, private$.cv_floor)
+                    n_no_cv <- n_no_cv + sum(is.na(cvs))
+                } else {
+                    cvs <- numeric(0)
+                }
                 # The compartment minimum applies to the cases the tests use.
                 if (sum(!is.na(cvs)) < groups$min_n) {
                     cv_small <- c(cv_small, sprintf("%s (n = %d)", region, sum(!is.na(cvs))))

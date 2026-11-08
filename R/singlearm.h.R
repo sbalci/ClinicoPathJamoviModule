@@ -47,7 +47,7 @@ singlearmOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             advancedDiagnostics = FALSE, ...) {
 
             super$initialize(
-                package="jsurvival",
+                package="ClinicoPath",
                 name="singlearm",
                 requiresData=TRUE,
                 ...)

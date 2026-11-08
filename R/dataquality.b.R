@@ -176,6 +176,11 @@ dataqualityClass <- if (requireNamespace("jmvcore")) R6::R6Class("dataqualityCla
         self$results$summary$setContent("")
         self$results$recommendations$setContent("")
         self$results$explanations$setContent("")
+        # Invalidate old drawings before ordinary validation returns. A later
+        # valid run below repopulates only the requested plots.
+        self$results$plotDataOverview$setState(NULL)
+        self$results$plotMissingPatterns$setState(NULL)
+        self$results$plotDataTypes$setState(NULL)
 
         # TODO (forward-looking, perf): the visdat plot callbacks can be slow
         # on wide tables; add render-safe cancellation points when supported.
@@ -288,7 +293,7 @@ dataqualityClass <- if (requireNamespace("jmvcore")) R6::R6Class("dataqualityCla
                 if (n_nonmiss > 10) {
                     q <- stats::quantile(data_vec, probs = c(0.25, 0.75), na.rm = TRUE, names = FALSE)
                     iqr <- q[2] - q[1]
-                    if (!is.na(iqr) && iqr > 0) {
+                    if (!is.na(iqr)) {
                         lower <- q[1] - 1.5 * iqr
                         upper <- q[2] + 1.5 * iqr
                         outlier_n <- sum(data_vec < lower | data_vec > upper, na.rm = TRUE)
@@ -934,7 +939,7 @@ dataqualityClass <- if (requireNamespace("jmvcore")) R6::R6Class("dataqualityCla
 
         # Count variables exceeding the user's own stated missingness tolerance
         vars_above_threshold <- sum(vapply(summary_rows, function(r) {
-            !is.na(r$missing_pct) && r$missing_pct > threshold
+            private$.missingAbove(r, threshold)
         }, logical(1)))
 
         # Shared "no flags" criterion, used for both the prose assessment and the
@@ -1119,7 +1124,11 @@ dataqualityClass <- if (requireNamespace("jmvcore")) R6::R6Class("dataqualityCla
         # flag different variables for the same data.
         threshold <- self$options$missing_threshold_visual
         moderate_missing_vars <- vapply(summary_rows, function(r) {
-            if (!is.na(r$missing_pct) && r$missing_pct > threshold && r$missing_pct <= 50) r$variable else NA_character_
+            if (private$.missingAbove(r, threshold) && !private$.missingAbove(r, 50)) {
+                r$variable
+            } else {
+                NA_character_
+            }
         }, character(1))
         moderate_missing_vars <- moderate_missing_vars[!is.na(moderate_missing_vars)]
 

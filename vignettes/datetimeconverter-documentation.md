@@ -4,7 +4,7 @@
 
 - **Function**: `datetimeconverter`
 - **Title**: DateTime Converter
-- **Module**: `SurvivalT`
+- **Module**: `Survival`
 - **Files**:
   - `jamovi/datetimeconverter.u.yaml` - User Interface Definition
   - `jamovi/datetimeconverter.a.yaml` - Options & Schema Definition

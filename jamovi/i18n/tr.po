@@ -81840,7 +81840,7 @@ msgstr "Fagan nomogramı grafiği"
 
 #: biomarkerdiscovery/results/quality_control_summary.columns.title
 msgid "Failed"
-msgstr ""
+msgstr "Başarısız"
 
 #: enhancedROC/results/results/frozenMetrics.columns.title
 msgid "Failed draws"
@@ -101437,7 +101437,7 @@ msgstr ""
 #: patientreported/results/factor_loadings.columns.title
 #: sequentialtests/results/cost_analysis_table.columns.title
 msgid "Item"
-msgstr "Öğe"
+msgstr "Madde"
 
 #: patientreported/results/item_correlations.columns.title
 msgid "Item 1"
@@ -116037,7 +116037,7 @@ msgstr ""
 #: enhancedfrequency/ui[1][3][0].label
 #: jjoncoplot/results/clinicalSummary.columns.title
 msgid "Missing Values"
-msgstr ""
+msgstr "Eksik değerler"
 
 #: gtsummary/options/statistics/missing.title
 msgid "Missing values"
@@ -133333,7 +133333,7 @@ msgstr ""
 #: datevalidator/results/corrected_data.columns.title
 #: pathagreement/results/stabilityTable.columns.title
 msgid "Original Value"
-msgstr ""
+msgstr "Özgün değer"
 
 #: R/waterfall.b.R
 msgid "ORR"
@@ -200727,7 +200727,7 @@ msgstr "Çalışmadaki tüm hastalar genelinde toplam gözlem süresi"
 #: R/swimmerplot.b.R
 #: stagemigration/results/frailtyModelsOverview.columns.title
 msgid "Total Observations"
-msgstr "Toplam Gözlem"
+msgstr "Toplam gözlem"
 
 #: R/clinicalscore.b.R
 msgid "Total observations"
@@ -221158,3 +221158,3584 @@ msgstr "Kaydedilmiş Değerlendiriciler Arası Güvenilirlik, Tıbbi Karar, Tıb
 #: meddecide jamovi/0000.yaml 2026-11-07
 msgid "Medical decision analysis for clinicians and pathologists. Diagnostic test accuracy: sensitivity, specificity, predictive values at a chosen prevalence and likelihood ratios with exact intervals and an explicit zero-cell rule, Fagan nomograms, comparison and combination of tests, co-testing and sequential testing, and analysis without a gold standard (latent class models). ROC analysis: optimal cut-points, partial AUC, DeLong comparisons, NRI and IDI, calibration and frozen-model validation. Decision curve analysis and LASSO logistic prediction models. Interrater reliability: Cohen's, Fleiss' and weighted kappa, Krippendorff's alpha, Gwet's AC1/AC2, ICC, specific agreement and related measures. Sample-size and power calculators for kappa studies are in the Power menu. Results support research and teaching; they do not replace clinical judgement. Report problems at <https://github.com/sbalci/ClinicoPathJamoviModule/issues/>."
 msgstr "Klinisyenler ve patologlar için tıbbi karar analizi. Tanısal test doğruluğu: duyarlılık, özgüllük, seçilen bir prevalansta öngörü değerleri ve kesin aralıklar ile açık bir sıfır hücre kuralına sahip olabilirlik oranları, Fagan nomogramları, testlerin karşılaştırılması ve birleştirilmesi, birlikte test ve sıralı test ile altın standart olmadan analiz (gizil sınıf modelleri). ROC analizi: optimal kesim noktaları, kısmi AUC, DeLong karşılaştırmaları, NRI ve IDI, kalibrasyon ve dondurulmuş model doğrulaması. Karar eğrisi analizi ve LASSO lojistik tahmin modelleri. Değerlendiriciler arası güvenilirlik: Cohen, Fleiss ve ağırlıklı kappa, Krippendorff alfa, Gwet AC1/AC2, ICC, özgül uyum ve ilişkili ölçüler. Kappa çalışmaları için örneklem büyüklüğü ve güç hesaplayıcıları Power menüsündedir. Sonuçlar araştırma ve eğitimi destekler; klinik yargının yerini tutmaz. Sorunları <https://github.com/sbalci/ClinicoPathJamoviModule/issues/> adresinden bildirin."
+
+#: R/outcomeorganizer.b.R
+msgid "{analysis} Analysis"
+msgstr "{analysis} Analizi"
+
+#: R/timeinterval.b.R
+msgid ""
+"{count} date value(s) give a month and a year but no day, for example "
+"\"{example}\". Each was set to the 1st of its month, so the day is not data "
+"and an interval between two such dates is ambiguous by up to a month either "
+"way."
+msgstr ""
+"{count} tarih değeri ay ve yıl içeriyor ancak gün içermiyor, örneğin "
+"\"{example}\". Her biri ilgili ayın 1. gününe ayarlandı; bu nedenle gün "
+"bilgisi gerçek veri değildir ve bu tür iki tarih arasındaki aralık her iki "
+"yönde de bir aya kadar belirsizdir."
+
+#: R/timeinterval.b.R
+msgid ""
+"{count} date value(s) have text after the date, for example \"{example}\". "
+"Only the date at the start of each value was read and the rest was ignored. "
+"Check that the ignored text does not change the date (a second date, a time, "
+"or a note such as 'approx.'), and clean the column so it holds dates only."
+msgstr ""
+"{count} tarih değerinde tarihten sonra metin var, örneğin \"{example}\". Her "
+"değerin yalnızca başındaki tarih okundu, geri kalanı yok sayıldı. Yok "
+"sayılan metnin tarihi değiştirmediğini (ikinci bir tarih, bir saat veya "
+"'yaklaşık' gibi bir not) kontrol edin ve sütunu yalnızca tarih içerecek "
+"şekilde temizleyin."
+
+#: R/timeinterval.b.R
+msgid ""
+"{count} date value(s) here were written with a two-digit year, which is read "
+"as 2000-2068 for 00-68: a 1965 date written as 65 becomes 2065 and falls "
+"after its end date. If the Examples below show a start date in the future, "
+"rewrite the column with four-digit years."
+msgstr ""
+"Buradaki {count} tarih değeri iki basamaklı yılla yazılmış; 00-68 arası "
+"2000-2068 olarak okunur: 65 olarak yazılmış 1965 tarihli bir değer 2065 olur "
+"ve bitiş tarihinden sonraya düşer. Aşağıdaki örneklerde gelecekte bir "
+"başlangıç tarihi görüyorsanız sütunu dört basamaklı yıllarla yeniden yazın."
+
+#: R/timeinterval.b.R
+msgid ""
+"{count} date value(s) were left empty because that clock time does not exist "
+"on this computer's timezone: it falls in the hour skipped when "
+"daylight-saving time starts (first: {example}). If the times were recorded "
+"in UTC or another fixed offset, set Timezone to UTC; otherwise correct the "
+"times at source."
+msgstr ""
+"{count} tarih değeri boş bırakıldı, çünkü bu saat, bu bilgisayarın saat "
+"diliminde mevcut değil: yaz saati uygulamasına geçişte atlanan saate denk "
+"geliyor (ilki: {example}). Saatler UTC'de veya başka bir sabit ofsette "
+"kaydedildiyse Saat Dilimi'ni UTC olarak ayarlayın; aksi halde saatleri "
+"kaynağında düzeltin."
+
+#: R/timeinterval.b.R
+msgid ""
+"{count} date value(s) were left empty because their text cannot have the "
+"date format used, for example \"{example}\". Reading them would mean "
+"splitting digits in the wrong place or inventing a day that was never "
+"recorded."
+msgstr ""
+"{count} tarih değeri boş bırakıldı, çünkü metinleri kullanılan tarih "
+"biçiminde olamaz, örneğin \"{example}\". Bunları okumak, rakamları yanlış "
+"yerden bölmek veya hiç kaydedilmemiş bir gün uydurmak anlamına gelirdi."
+
+#: R/timeinterval.b.R
+msgid "{count} date value(s) with no day recorded"
+msgstr "Gün bilgisi kaydedilmemiş {count} tarih değeri"
+
+#: R/timeinterval.b.R
+msgid "{count} date value(s) with text after the date that was ignored"
+msgstr "tarihten sonra yok sayılan metin içeren {count} tarih değeri"
+
+#: R/timeinterval.b.R
+msgid "{count} date value(s) written with a two-digit year"
+msgstr "iki basamaklı yılla yazılmış {count} tarih değeri"
+
+#: R/datetimeconverter.b.R
+msgid ""
+"{count} of {total} date(s) converted from numeric serial values fall outside "
+"the plausible range (<1900 or >1 year in the future); the first is "
+"{example}. • If this column holds packed calendar dates such as DDMMYY or "
+"YYYYMMDD, select the matching text format instead, so the digits are read as "
+"day, month and year."
+msgstr ""
+"Sayısal seri değerlerden dönüştürülen {total} tarihin {count} tanesi makul "
+"aralığın dışında (1900'den önce veya 1 yıldan daha ileride); ilki {example}. "
+"• Bu sütun GGAAYY veya YYYYAAGG gibi bitişik takvim tarihleri içeriyorsa, "
+"rakamların gün, ay ve yıl olarak okunması için bunun yerine uygun metin "
+"biçimini seçin."
+
+#: R/timeinterval.b.R
+msgid ""
+"{count} rows may have the day and month entered the other way round from the "
+"rest of the column, so the total person-time may be wrong (see the strong "
+"warning above)"
+msgstr ""
+"{count} satırda gün ve ay sütunun geri kalanına göre ters girilmiş olabilir; "
+"bu nedenle toplam kişi-zamanı yanlış olabilir (yukarıdaki güçlü uyarıya "
+"bakın)"
+
+#: R/datetimeconverter.b.R
+msgid ""
+"{count} value(s) could not be converted because that clock time does not "
+"exist in the {tz} timezone: it falls in the hour skipped when "
+"daylight-saving time starts (first: {example}). • These rows are left empty. "
+"• If the times were recorded in UTC or another fixed offset, set Timezone to "
+"UTC; otherwise correct the times at source."
+msgstr ""
+"{count} değer dönüştürülemedi, çünkü bu saat {tz} saat diliminde mevcut "
+"değil: yaz saati uygulamasına geçişte atlanan saate denk geliyor (ilki: "
+"{example}). • Bu satırlar boş bırakıldı. • Saatler UTC'de veya başka bir "
+"sabit ofsette kaydedildiyse Saat Dilimi'ni UTC olarak ayarlayın; aksi halde "
+"saatleri kaynağında düzeltin."
+
+#: R/datetimeconverter.b.R
+msgid ""
+"{count} value(s) have text after the date, for example \"{example}\". • Only "
+"the date at the start of each value was read and the rest was ignored. • "
+"Check that the ignored text does not change the date (a second date, a time, "
+"or a note such as 'approx.'), and clean the column so it holds dates only."
+msgstr ""
+"{count} değerde tarihten sonra metin var, örneğin \"{example}\". • Her "
+"değerin yalnızca başındaki tarih okundu, geri kalanı yok sayıldı. • Yok "
+"sayılan metnin tarihi değiştirmediğini (ikinci bir tarih, bir saat veya "
+"'yaklaşık' gibi bir not) kontrol edin ve sütunu yalnızca tarih içerecek "
+"şekilde temizleyin."
+
+#: R/datetimeconverter.b.R
+msgid ""
+"{count} value(s) were left empty because their text cannot have the format "
+"{fmt}, for example \"{example}\". • Reading them would mean splitting digits "
+"in the wrong place or inventing a day that was never recorded. • Choose the "
+"format that matches the text, or select Auto-detect."
+msgstr ""
+"{count} değer boş bırakıldı, çünkü metinleri {fmt} biçiminde olamaz, örneğin "
+"\"{example}\". • Bunları okumak, rakamları yanlış yerden bölmek veya hiç "
+"kaydedilmemiş bir gün uydurmak anlamına gelirdi. • Metinle eşleşen biçimi "
+"seçin veya Biçimi Otomatik Algıla seçeneğini kullanın."
+
+#: R/datetimeconverter.b.R
+msgid "{days} days ({years} years)"
+msgstr "{days} gün ({years} yıl)"
+
+#: R/survival-competingrisks.R
+msgid ""
+"{feature} is not available for competing-risks analysis. It assumes a single "
+"event type, and the competing-risk outcome is coded 0/1/2. Use the "
+"cumulative incidence output instead, or supply an outcome with one event "
+"type."
+msgstr ""
+"{feature} yarışan riskler analizi için kullanılamaz. Tek bir olay türü "
+"varsayar ve yarışan risk sonucu 0/1/2 olarak kodlanmıştır. Bunun yerine "
+"kümülatif insidans çıktısını kullanın veya tek olay türü içeren bir sonuç "
+"değişkeni sağlayın."
+
+#: R/multisurvival.b.R
+msgid ""
+"{k} of {total} bootstrap resamples were excluded because the Cox refit "
+"failed or gave a non-estimable coefficient or concordance (for example, a "
+"factor level absent from the resample). Resamples whose refit only warned "
+"(such as monotone likelihood) are included."
+msgstr ""
+"{total} bootstrap yeniden örnekleminden {k} tanesi, Cox modeli yeniden "
+"uydurulamadığı veya tahmin edilemeyen bir katsayı ya da uyum değeri verdiği "
+"için dışlandı (örneğin yeniden örneklemde bulunmayan bir faktör düzeyi). "
+"Yeniden uydurulması yalnızca uyarı veren (monoton olabilirlik gibi) yeniden "
+"örneklemler dahil edildi."
+
+#: R/singlearm.b.R
+msgid ""
+"{levels} were treated as censored. If any of these is a death or another "
+"terminal event, 1 minus Kaplan-Meier overstates absolute risk; use Multiple "
+"Event Levels with Competing Risk."
+msgstr ""
+"{levels} sansürlü olarak değerlendirildi. Bunlardan herhangi biri ölüm veya "
+"başka bir terminal olaysa, 1 eksi Kaplan-Meier mutlak riski olduğundan "
+"yüksek gösterir; Yarışan Risk ile birlikte Çoklu Olay Düzeyleri seçeneğini "
+"kullanın."
+
+#: R/multisurvival.b.R
+#: R/singlearm.b.R
+#: R/survival.b.R
+#: R/survivalcont.b.R
+msgid ""
+"{n} dates in {var} fall outside a plausible range (for example {example}). "
+"Replace placeholder dates before analyzing; a follow-up date such as "
+"2199-01-01 is not a censoring date."
+msgstr ""
+"{var} değişkenindeki {n} tarih makul aralığın dışında kalıyor (örneğin "
+"{example}). Analizden önce yer tutucu tarihleri değiştirin; 2199-01-01 gibi "
+"bir takip tarihi sansürleme tarihi değildir."
+
+#: R/timeinterval.b.R
+msgid "{n} dates in the future detected"
+msgstr "gelecekte {n} tarih saptandı"
+
+#: R/singlearm.b.R
+msgid ""
+"{n} death(s) from other causes were censored, so 1 minus Kaplan-Meier "
+"overstates the absolute risk of the event. Use Competing Risk for cumulative "
+"incidence."
+msgstr ""
+"Başka nedenlerden {n} ölüm sansürlendi; bu nedenle 1 eksi Kaplan-Meier "
+"olayın mutlak riskini olduğundan yüksek gösterir. Kümülatif insidans için "
+"Yarışan Risk seçeneğini kullanın."
+
+#: R/singlearm.b.R
+msgid ""
+"{n} event(s) at time zero are counted with no follow-up time, which raises "
+"the rate. The Kaplan-Meier or cumulative-incidence estimate shows them as a "
+"drop at the origin."
+msgstr ""
+"Sıfır zamanındaki {n} olay takip süresi olmadan sayılır; bu, hızı yükseltir. "
+"Kaplan-Meier veya kümülatif insidans tahmini bunları başlangıç noktasında "
+"bir düşüş olarak gösterir."
+
+#: R/survival.b.R
+msgid ""
+"{n} patients with survival time 0, including {events} with an event, were "
+"excluded from this model because it needs positive times."
+msgstr ""
+"Sağkalım süresi 0 olan, {events} tanesinde olay bulunan {n} hasta, bu model "
+"pozitif süreler gerektirdiği için modelden hariç tutuldu."
+
+#: R/timeinterval.b.R
+msgid "{n} potentially extreme time intervals detected"
+msgstr "potansiyel olarak uç {n} zaman aralığı saptandı"
+
+#: R/outcomeorganizer.b.R
+msgid ""
+"{n} row(s) have no patient ID, so they were left out of the event hierarchy "
+"and kept as coded."
+msgstr ""
+"{n} satırda hasta kimliği yok; bu nedenle bu satırlar olay hiyerarşisinin "
+"dışında bırakıldı ve kodlandıkları gibi korundu."
+
+#: R/outcomeorganizer.b.R
+msgid ""
+"{n} row(s) with a missing status and follow-up past the cut-off were coded "
+"0, as event-free at the cut-off."
+msgstr ""
+"Durumu eksik olan ve takibi kesme noktasını aşan {n} satır, kesme noktasında "
+"olaysız olarak 0 kodlandı."
+
+#: R/timeinterval.b.R
+msgid "{n} with follow-up shorter than {amount}"
+msgstr "takip süresi {amount} değerinden kısa {n} kayıt"
+
+#: R/timeinterval.b.R
+msgid "{n} with missing follow-up"
+msgstr "takip süresi eksik {n} kayıt"
+
+#: R/timeinterval.b.R
+msgid ""
+"{n} zero-length intervals ({pct}% of valid intervals) - start and end date "
+"are the same day, which contributes no person-time"
+msgstr ""
+"{n} sıfır uzunlukta aralık (geçerli aralıkların %{pct}'si) - başlangıç ve "
+"bitiş tarihi aynı gün; bu durum kişi-zamanına katkıda bulunmaz"
+
+#: R/survival.b.R
+#: R/survivalcont.b.R
+msgid ""
+"{nfailed} of {ninputs} dates could not be read, so those patients were "
+"excluded. Check the date format: when it does not match the data, the dates "
+"that were read may have day and month swapped."
+msgstr ""
+"{ninputs} tarihin {nfailed} tanesi okunamadı; bu nedenle ilgili hastalar "
+"hariç tutuldu. Tarih biçimini kontrol edin: biçim veriyle uyuşmadığında, "
+"okunabilen tarihlerde gün ve ay yer değiştirmiş olabilir."
+
+#: R/multisurvival.b.R
+#: R/singlearm.b.R
+msgid ""
+"{nfailed} of {ninputs} dates could not be read, so those patients were "
+"excluded. Check the date format."
+msgstr ""
+"{ninputs} tarihin {nfailed} tanesi okunamadı; bu nedenle ilgili hastalar "
+"hariç tutuldu. Tarih biçimini kontrol edin."
+
+#: R/survivalcont.b.R
+msgid ""
+"{previous_text}<p><b>Landmark Analysis:</b> Analysis is conditional on "
+"remaining under observation and event-free through {time} {units}. This can "
+"address guarantee-time bias when the landmark is prespecified, but it "
+"changes the target population and does not remove ordinary confounding or "
+"lead-time bias.</p>"
+msgstr "{previous_text}<p><b>Landmark analizi:</b> Analiz, {time} {units} süresince izlemde ve olaysız kalmış olma koşuluna bağlıdır. Landmark önceden belirlendiğinde garanti süre yanlılığını ele alabilir; ancak hedef popülasyonu değiştirir ve olağan karıştırıcılığı veya erken tanı kaynaklı süre yanlılığını ortadan kaldırmaz.</p>"
+
+#: R/survivalcont.b.R
+msgid "{tooltip}<p><b>Model Metrics:</b> {metrics}</p>"
+msgstr "{tooltip}<p><b>Model ölçütleri:</b> {metrics}</p>"
+
+#: R/outcomeorganizer.b.R
+msgid ""
+"{type} is built from a Recurrence/Progression variable, and none is "
+"selected. Without it the column would hold the outcome level alone under the "
+"{type} name. Select that variable and its Event Level, or choose Overall "
+"Survival."
+msgstr ""
+"{type}, bir Nüks/İlerleme değişkeninden oluşturulur ve hiçbiri seçilmedi. Bu "
+"değişken olmadan sütun, {type} adı altında yalnızca sonuç düzeyini içerirdi. "
+"Bu değişkeni ve Olay Düzeyini seçin veya Genel Sağkalım seçeneğini seçin."
+
+#: R/multisurvival.b.R
+msgid "{unit} from the landmark"
+msgstr "landmark zamanından itibaren {unit}"
+
+#: R/multisurvival.b.R
+msgid ""
+"{var} = 0 is outside the observed range ({low} to {high}), so that row "
+"describes no actual patient. To read the effect at a clinical value, "
+"subtract that value from {var} in the data and refit."
+msgstr ""
+"{var} = 0 gözlenen aralığın ({low} ila {high}) dışındadır; bu nedenle bu "
+"satır gerçek bir hastayı tanımlamaz. Etkiyi klinik bir değerde okumak için "
+"bu değeri verideki {var} değişkeninden çıkarın ve modeli yeniden kurun."
+
+#: R/multisurvival.b.R
+#: R/singlearm.b.R
+#: R/survival.b.R
+#: R/survivalcont.b.R
+msgid ""
+"{var} contains numbers that cannot be read as dates (for example {example}). "
+"Numeric date columns must hold seconds since 1970. Convert the column with "
+"Date-Time Converter, or store the dates as text such as 2021-03-15."
+msgstr ""
+"{var} tarih olarak okunamayan sayılar içeriyor (örneğin {example}). Sayısal "
+"tarih sütunları 1970'ten bu yana geçen saniyeleri içermelidir. Sütunu "
+"Tarih-Saat Dönüştürücü ile dönüştürün veya tarihleri 2021-03-15 gibi metin "
+"olarak saklayın."
+
+#: R/multisurvival.b.R
+msgid "{var}: no analyzed patient has {levels}, so that level was dropped."
+msgstr ""
+"{var}: analiz edilen hiçbir hastada {levels} yok; bu nedenle bu düzey "
+"çıkarıldı."
+
+#: R/multisurvival.b.R
+msgid ""
+"{var}: no analyzed patient has {levels}, so that level was dropped. Hazard "
+"ratios are compared with {reference}, not with {old}."
+msgstr ""
+"{var}: analiz edilen hiçbir hastada {levels} yok; bu nedenle bu düzey "
+"çıkarıldı. Tehlike oranları {old} ile değil, {reference} ile "
+"karşılaştırılmıştır."
+
+#: R/lassocox.b.R
+msgid "{variable}: {level} (vs {reference})"
+msgstr "{variable}: {level} ({reference} ile karşılaştırıldığında)"
+
+#: R/oddsratio.b.R
+msgid ""
+"{variable}: the odds ratio per one unit is unreadable at two decimals "
+"because of the measurement scale. The odds ratio per 1 SD ({unit} units) is "
+"{or} (95% CI {lower} to {upper}). To show this in the table, rescale the "
+"variable."
+msgstr ""
+"{variable}: bir birim başına odds oranı, ölçüm ölçeği nedeniyle iki ondalık "
+"basamakta okunamıyor. 1 SS ({unit} birim) başına odds oranı {or} (%95 GA "
+"{lower} ila {upper}). Bunu tabloda göstermek için değişkeni yeniden "
+"ölçekleyin."
+
+#: R/survivalcont.b.R
+msgid ""
+"%d of %d analyzed record(s) had missing values in stratification variable "
+"'%s' and were excluded from the stratified Cox model (n=%d, events=%d "
+"analyzed)."
+msgstr ""
+"Analiz edilen %d / %d kayıtta '%s' tabakalandırma değişkeninde eksik değer "
+"vardı ve bu kayıtlar tabakalı Cox modelinden hariç tutuldu (analiz edilen "
+"n=%d, olay=%d)."
+
+#: R/survivalcont.b.R
+msgid "%d of %d record(s) were excluded because survival time was missing."
+msgstr "%d / %d kayıt, sağkalım süresi eksik olduğu için hariç tutuldu."
+
+#: R/survivalcont.b.R
+msgid ""
+"%d of the entries in '%s' were not positive numbers and were ignored. "
+"Survival is shown at: %s."
+msgstr ""
+"'%2$s' içindeki girdilerden %1$d tanesi pozitif sayı değildi ve yok sayıldı. "
+"Sağkalım şu noktalarda gösteriliyor: %3$s."
+
+#: R/outcomeorganizer.b.R
+msgid ""
+"%d patient(s) have more than one row. For each, the EARLIEST record carrying "
+"the priority outcome (%s) was kept as the event and their tied or later rows "
+"were censored, so the event is not moved earlier in time. However, this "
+"analysis does not collapse the dataset to one row per patient: passing "
+"multiple rows per patient into an unclustered survival analysis (Surv(time, "
+"status)) treats repeated rows as independent subjects and double-counts "
+"censored person-time. Reduce your data to one row per patient (or use a "
+"clustered/counting-process model) before running downstream survival "
+"analyses."
+msgstr ""
+"%d hastanın birden fazla satırı var. Her biri için öncelikli sonucu (%s) "
+"taşıyan EN ERKEN kayıt olay olarak korundu ve aynı zamanlı veya daha sonraki "
+"satırları sansürlendi; böylece olay zamanda öne alınmaz. Ancak bu analiz "
+"veri kümesini hasta başına tek satıra indirmez: hasta başına birden fazla "
+"satırı kümelenmemiş bir sağkalım analizine (Surv(time, status)) vermek, "
+"yinelenen satırları bağımsız bireyler olarak ele alır ve sansürlü "
+"kişi-zamanı iki kez sayar. Sonraki sağkalım analizlerini çalıştırmadan önce "
+"verinizi hasta başına tek satıra indirin (veya kümelenmiş/sayım süreci "
+"modeli kullanın)."
+
+#: survival/results/survTable.title
+msgid "`Survival at Selected Time Points - ${explanatory}`"
+msgstr "`Seçilen Zaman Noktalarında Sağkalım - ${explanatory}`"
+
+#: survival/results/survTableSummary.title
+msgid "`Survival at Selected Time Points, Summary - ${explanatory}`"
+msgstr "`Seçilen Zaman Noktalarında Sağkalım, Özet - ${explanatory}`"
+
+#: R/oddsratio.b.R
+msgid ""
+"<div style=\"margin-bottom: 20px; padding: 15px; background-color: rgba(216, "
+"33, 50, 0.18); border-left: 4px solid #dc3545; color: inherit;\"> <h4 "
+"style=\"margin-top: 0; color: inherit;\">Understanding Prediction and "
+"Diagnostic Outputs</h4> <p><strong>Prediction nomogram:</strong> The plotted "
+"nomogram assigns points to all explanatory variables in the "
+"maximum-likelihood logistic regression model and maps total points to "
+"predicted outcome probability. It is not a Fagan nomogram and does not "
+"display pre-test-to-post-test probability conversion.</p> <h5 style=\"color: "
+"inherit;\">Prediction Nomogram Components:</h5> <ul> "
+"<li><strong>Points:</strong> Contribution assigned to each predictor "
+"value</li> <li><strong>Total Points:</strong> Sum of predictor "
+"contributions</li> <li><strong>Predicted Probability:</strong> Model-based "
+"probability corresponding to total points</li> </ul> "
+"<p><strong>Important:</strong> The plot is a visual representation of the "
+"fitted model, not evidence of calibration, discrimination, transportability, "
+"or clinical utility. Internal and external validation are required before "
+"clinical use. It is not generated when Firth regression is selected because "
+"that would mix different estimation methods. Predicted probabilities need a "
+"cohort sample with the real event rate: in a case-control sample the odds "
+"ratios hold but the predicted probabilities do not.</p> <hr style=\"margin: "
+"15px 0; border: none; border-top: 1px solid #f5c6cb;\"> <h5 style=\"color: "
+"inherit; margin-top: 15px;\">What is a Diagnostic Predictor?</h5> "
+"<p><strong>The diagnostic predictor is the single binary variable you want "
+"to evaluate as a diagnostic test.</strong></p> <div "
+"style=\"background-color: rgba(255, 202, 33, 0.23); padding: 10px; "
+"border-radius: 5px; margin: 10px 0; color: inherit;\"> "
+"<strong>Example:</strong> If you select \"LVI\" (Lymphovascular Invasion: "
+"Absent/Present) as the diagnostic predictor, the diagnostic table answers: "
+"<em>\"How well does LVI alone distinguish the selected outcome "
+"states?\"</em> </div> <p><strong>Requirements:</strong></p> <ul> <li> "
+"Compares two explicitly selected levels (<strong>Predictor Positive "
+"Level</strong> vs <strong>Predictor Negative Level</strong>): e.g., Yes/No, "
+"Present/Absent, Positive/Negative</li> <li> Examples: LVI (Absent/Present), "
+"an immunostain (Negative/Positive), a frozen-section call "
+"(Benign/Malignant)</li> <li> Cannot use continuous variables: Age, Tumor "
+"Size (infinite possible values)</li> <li> Multi-category variables (e.g., "
+"Grade 1/2/3): Only observations with the selected positive and negative "
+"levels are included in the 2×2 diagnostic table; unselected levels are "
+"excluded with a warning</li> </ul> <p><strong>Why Two Selected "
+"Levels?</strong></p> <p>Diagnostic test performance metrics (sensitivity, "
+"specificity, likelihood ratios) are calculated from a 2×2 contingency "
+"table:</p> <table style=\"border-collapse: collapse; margin: 10px 0; "
+"font-size: 0.9em;\"> <tr><th style=\"border: 1px solid #ddd; padding: "
+"5px;\"></th> <th style=\"border: 1px solid #ddd; padding: 5px;\">Outcome "
+"+</th> <th style=\"border: 1px solid #ddd; padding: 5px;\">Outcome "
+"-</th></tr> <tr><td style=\"border: 1px solid #ddd; padding: 5px;\">Test "
+"+</td> <td style=\"border: 1px solid #ddd; padding: 5px;\">True "
+"Positive</td> <td style=\"border: 1px solid #ddd; padding: 5px;\">False "
+"Positive</td></tr> <tr><td style=\"border: 1px solid #ddd; padding: "
+"5px;\">Test -</td> <td style=\"border: 1px solid #ddd; padding: 5px;\">False "
+"Negative</td> <td style=\"border: 1px solid #ddd; padding: 5px;\">True "
+"Negative</td></tr> </table> <p><small><em>Sensitivity = TP/(TP+FN), "
+"Specificity = TN/(TN+FP), LR+ = Sensitivity/(1-Specificity)</em></small></p> "
+"<p><strong>Selection Guidelines:</strong></p> <ul> <li><strong>Not "
+"specified:</strong> Uses the first explanatory variable automatically (in "
+"the jamovi GUI, select the variable in the Diagnostic Predictor box to "
+"enable the Predictor Positive Level and Predictor Negative Level "
+"dropdowns)</li> <li><strong>In your regression model:</strong> Diagnostic "
+"metrics are still unadjusted and use only its paired 2×2 table</li> "
+"<li><strong>Not in your model:</strong> Evaluates it independently using "
+"paired complete outcome/test observations</li> </ul> <div "
+"style=\"background-color: rgba(33, 163, 188, 0.21); padding: 10px; "
+"border-radius: 5px; margin: 10px 0; color: inherit;\"> <strong> Clinical "
+"Tip:</strong> If your first variable is continuous (e.g., Age), you must "
+"manually select a binary diagnostic predictor to obtain sensitivity, "
+"specificity, and likelihood ratios. The prediction nomogram can still be "
+"generated from the regression variables. </div> </div>"
+msgstr "<div><h4>Tahmin ve tanısal çıktıları anlama</h4><p><strong>Tahmin nomogramı:</strong> Çizilen nomogram, maksimum olabilirlik lojistik regresyon modelindeki tüm açıklayıcı değişkenlere puan verir ve toplam puanı tahmini sonuç olasılığına dönüştürür. Bu bir Fagan nomogramı değildir; test öncesi olasılıktan test sonrası olasılığa dönüşümü göstermez.</p><h5>Tahmin nomogramının bileşenleri:</h5><ul><li><strong>Puanlar:</strong> Her yordayıcı değerine atanan katkı</li><li><strong>Toplam puan:</strong> Yordayıcı katkılarının toplamı</li><li><strong>Tahmini olasılık:</strong> Toplam puana karşılık gelen, modele dayalı olasılık</li></ul><p><strong>Önemli:</strong> Grafik, kurulan modelin görsel sunumudur; kalibrasyon, ayırt etme, başka popülasyonlara aktarılabilirlik veya klinik yarar kanıtı değildir. Klinik kullanımdan önce iç ve dış doğrulama gerekir. Farklı tahmin yöntemlerini karıştıracağı için Firth regresyonu seçildiğinde oluşturulmaz. Tahmini olasılıklar, gerçek olay oranını yansıtan bir kohort örneklemi gerektirir: olgu-kontrol örnekleminde odds oranları geçerliliğini korusa da tahmini olasılıklar korumaz.</p><h5>Tanısal yordayıcı nedir?</h5><p><strong>Tanısal yordayıcı, tanı testi olarak değerlendirmek istediğiniz tek bir ikili değişkendir.</strong></p><p><strong>Örnek:</strong> Tanısal yordayıcı olarak LVI (Lenfovasküler İnvazyon: Yok/Var) seçerseniz, tanısal tablo şu soruyu yanıtlar: LVI tek başına seçilen sonuç durumlarını ne kadar iyi ayırt ediyor?</p><p><strong>Gereklilikler:</strong></p><ul><li>Açıkça seçilen iki düzeyi karşılaştırır (Yordayıcı Pozitif Düzeyi ve Yordayıcı Negatif Düzeyi): örneğin Evet/Hayır, Var/Yok, Pozitif/Negatif</li><li>Örnekler: LVI (Yok/Var), immün boyama (Negatif/Pozitif), frozen kesit değerlendirmesi (Benign/Malign)</li><li>Yaş veya tümör boyutu gibi sürekli değişkenler kullanılamaz (olası değerler sınırsızdır)</li><li>Çok kategorili değişkenlerde (örneğin Derece 1/2/3) yalnızca seçilen pozitif ve negatif düzeylere ait gözlemler 2×2 tanısal tabloya alınır; seçilmeyen düzeyler bir uyarıyla dışlanır</li></ul><p><strong>Neden iki seçili düzey?</strong></p><p>Tanısal test performansı ölçütleri (duyarlılık, özgüllük, olabilirlik oranları) 2×2 çapraz tablodan hesaplanır:</p><table><tr><th></th><th>Sonuç +</th><th>Sonuç -</th></tr><tr><td>Test +</td><td>Gerçek Pozitif</td><td>Yanlış Pozitif</td></tr><tr><td>Test -</td><td>Yanlış Negatif</td><td>Gerçek Negatif</td></tr></table><p>Duyarlılık = GP/(GP+YN), Özgüllük = GN/(GN+YP), LR+ = Duyarlılık/(1-Özgüllük)</p><p><strong>Seçim rehberi:</strong></p><ul><li><strong>Belirtilmemişse:</strong> İlk açıklayıcı değişken otomatik kullanılır (jamovi arayüzünde Yordayıcı Pozitif Düzeyi ve Yordayıcı Negatif Düzeyi menülerini etkinleştirmek için Tanısal Yordayıcı kutusunda değişkeni seçin)</li><li><strong>Regresyon modelinizdeyse:</strong> Tanısal ölçütler yine düzeltilmemiştir ve yalnızca ilgili 2×2 tabloyu kullanır</li><li><strong>Modelinizde değilse:</strong> Sonuç ve testin birlikte kaydedildiği tam gözlemlerle bağımsız değerlendirilir</li></ul><p><strong>Klinik ipucu:</strong> İlk değişkeniniz sürekli ise (örneğin Yaş), duyarlılık, özgüllük ve olabilirlik oranlarını elde etmek için ikili bir tanısal yordayıcıyı elle seçmelisiniz. Tahmin nomogramı yine regresyon değişkenlerinden oluşturulabilir.</p></div>"
+
+#: R/survivalcont.b.R
+msgid ""
+"<h4>Person-Time Analysis Summary</h4>\n"
+"                    <p>Total follow-up time: <b>{total_time_val} "
+"{units}</b></p>\n"
+"                    <p>Number of events: <b>{events}</b></p>\n"
+"                    <p>Overall incidence rate: <b>{rate}</b> per "
+"{multiplier} {units} {ci_str}</p>\n"
+"                    <p>{scope}</p>\n"
+"                    <p>This represents the rate at which events occurred in "
+"your study population. The incidence rate is calculated as the number of "
+"events divided by the total person-time at risk, accounting for varying "
+"follow-up durations across patients.</p>"
+msgstr "<h4>Kişi-zaman analizi özeti</h4>\n                    <p>Toplam izlem süresi: <b>{total_time_val} {units}</b></p>\n                    <p>Olay sayısı: <b>{events}</b></p>\n                    <p>Genel insidans hızı: <b>{rate}</b> / {multiplier} {units} {ci_str}</p>\n                    <p>{scope}</p>\n                    <p>Bu değer, çalışma popülasyonunuzda olayların gerçekleşme hızını gösterir. İnsidans hızı, hastalar arasındaki farklı izlem süreleri dikkate alınarak olay sayısının risk altındaki toplam kişi-zamana bölünmesiyle hesaplanır.</p>"
+
+#: R/outcomeorganizer.b.R
+msgid ""
+"A Censored/Event/Competing column cannot be the outcome of {analysis}, which "
+"has no competing code. Select the original vital status column instead."
+msgstr ""
+"Censored/Event/Competing sütunu, yarışan kodu olmayan {analysis} analizinin "
+"sonuç değişkeni olamaz. Bunun yerine özgün yaşam durumu sütununu seçin."
+
+#: R/survival.b.R
+msgid "a Kaplan-Meier plot"
+msgstr "bir Kaplan-Meier grafiği"
+
+#: R/survival.b.R
+msgid ""
+"A p-value is given for covariate effects only; testing a distribution "
+"parameter (shape, scale, rate) against zero has no clinical meaning."
+msgstr ""
+"p değeri yalnızca kovaryat etkileri için verilir; bir dağılım parametresinin "
+"(şekil, ölçek, oran) sıfıra karşı test edilmesinin klinik bir anlamı yoktur."
+
+#: R/singlearm.b.R
+msgid ""
+"A smoothed hazard was not estimated because automatic binning produced %d "
+"usable interval(s). At least three interval-rate estimates are needed for "
+"this exploratory smoother."
+msgstr ""
+"Otomatik kutulama %d kullanılabilir aralık ürettiği için düzleştirilmiş "
+"tehlike tahmin edilmedi. Bu keşifsel düzleştirici için en az üç aralık hızı "
+"tahmini gerekir."
+
+#: R/datetimeconverter.b.R
+msgid ""
+"A text date format is selected, so the numeric values were read as digit "
+"strings (for example 150321 as 15-03-21), not as Excel or Unix serial "
+"numbers."
+msgstr ""
+"Bir metin tarih biçimi seçildiği için sayısal değerler Excel veya Unix seri "
+"numarası olarak değil, rakam dizisi olarak okundu (örneğin 150321, 15-03-21 "
+"olarak)."
+
+#: R/survival.b.R
+msgid "Aalen-Johansen cumulative incidence and Gray's test"
+msgstr "Aalen-Johansen kümülatif insidansı ve Gray testi"
+
+#: R/multisurvival.b.R
+msgid ""
+"Adjusted curves require the selected variable to be part of the fitted "
+"model. Add it under Explanatory Variables or Stratification Variables."
+msgstr "Düzeltilmiş eğriler için seçilen değişken kurulan modelde yer almalıdır. Değişkeni Açıklayıcı Değişkenler veya Tabakalama Değişkenleri bölümüne ekleyin."
+
+#: R/outcomeorganizer.b.R
+msgid ""
+"Administrative censoring applied at the supplied cut-off: follow-up "
+"truncated for %d patient(s); %d event(s) with a recorded time after the "
+"cut-off were reset to censored. Use the truncated follow-up time this "
+"analysis writes back, not the original follow-up column."
+msgstr ""
+"Sağlanan kesme noktasında idari sansürleme uygulandı: %d hasta için takip "
+"süresi kırpıldı; kayıtlı zamanı kesme noktasından sonra olan %d olay "
+"sansürlenmiş olarak sıfırlandı. Orijinal takip sütununu değil, bu analizin "
+"geri yazdığı kırpılmış takip süresini kullanın."
+
+#: R/timeinterval.b.R
+msgid "after excluding {parts} (landmark analysis)"
+msgstr "{parts} dışlandıktan sonra (yer işareti analizi)"
+
+#: R/survival.b.R
+msgid "Age interaction test suppressed: fewer than 10 events."
+msgstr "Yaş etkileşim testi baskılandı: 10'dan az olay."
+
+#: R/survival.b.R
+msgid "Age interaction test unavailable"
+msgstr "Yaş etkileşimi testi kullanılamıyor"
+
+#: R/survival.b.R
+msgid "Age standardization unavailable"
+msgstr "Yaşa göre standardizasyon kullanılamıyor"
+
+#: R/survival.b.R
+msgid "Age-adjusted analysis unavailable"
+msgstr "Yaşa göre düzeltilmiş analiz kullanılamıyor"
+
+#: R/survival.b.R
+msgid "age-adjusted Cox regression"
+msgstr "yaşa göre düzeltilmiş Cox regresyonu"
+
+#: R/survival.b.R
+msgid "Age-adjusted Cox regression suppressed: fewer than 10 events."
+msgstr "Yaşa göre düzeltilmiş Cox regresyonu baskılandı: 10'dan az olay."
+
+#: R/survival.b.R
+msgid "Age-as-time-scale analysis unavailable"
+msgstr "Zaman ölçeği olarak yaş analizi kullanılamıyor"
+
+#: R/survival.b.R
+msgid "Age-as-time-scale Cox regression suppressed: fewer than 10 events."
+msgstr ""
+"Zaman ölçeği olarak yaşın kullanıldığı Cox regresyonu baskılandı: 10'dan az "
+"olay."
+
+#: R/outcomeorganizer.b.R
+msgid ""
+"all other patients (recurrence/progression level(s) {levels}), including "
+"those who died without progression"
+msgstr ""
+"diğer tüm hastalar (nüks/progresyon düzey(ler)i {levels}), progresyon "
+"olmadan ölenler dahil"
+
+#: R/survival.b.R
+msgid ""
+"Among patients event-free at the landmark of {offset} {unit}, with time "
+"measured from the landmark."
+msgstr ""
+"{offset} {unit} landmark zamanında olaysız olan hastalar arasında, süre "
+"landmark zamanından itibaren ölçülmüştür."
+
+#: R/survival.b.R
+msgid ""
+"Among reported results, provide estimated effects with confidence intervals "
+"from an analysis in which the marker and standard prognostic variables are "
+"included, regardless of their statistical significance."
+msgstr ""
+"Bildirilen sonuçlar arasında, belirteç ile standart prognostik değişkenlerin "
+"istatistiksel anlamlılıklarına bakılmaksızın dahil edildiği bir analizden "
+"elde edilen tahmini etkileri güven aralıklarıyla birlikte verin."
+
+#: R/outcomeorganizer.b.R
+msgid ""
+"An event hierarchy with priority code {code} was applied to repeated patient "
+"records."
+msgstr ""
+"Yinelenen hasta kayıtlarına öncelik kodu {code} olan bir olay hiyerarşisi "
+"uygulandı."
+
+#: R/survival.b.R
+msgid "Analysis and presentation"
+msgstr "Analiz ve sunum"
+
+#: R/survival.b.R
+msgid ""
+"Analyzed by level of {var}. Any cutpoint and how it was chosen belong in the "
+"manuscript."
+msgstr ""
+"{var} düzeylerine göre analiz edildi. Kullanılan herhangi bir kesim noktası "
+"ve nasıl seçildiği makalede belirtilmelidir."
+
+#: R/survival.b.R
+msgid "Assay methods"
+msgstr "Ölçüm (assay) yöntemleri"
+
+#: R/multisurvival.b.R
+msgid ""
+"Assign every observed outcome level under Multiple Event Levels to continue. "
+"Categories absent from the cohort may remain unselected."
+msgstr ""
+"Devam etmek için gözlenen her sonuç düzeyini Çoklu Olay Düzeyleri altında "
+"atayın. Kohortta bulunmayan kategoriler seçilmeden kalabilir."
+
+#: R/multisurvival.b.R
+msgid "Assign outcome levels"
+msgstr "Sonuç düzeylerini atayın"
+
+#: R/lassocox.b.R
+msgid ""
+"At most 30 paths are shown: selected columns first, then by summed absolute "
+"coefficient times column SD across the path. All retained columns remain in "
+"fitting; trace rank is not clinical importance."
+msgstr ""
+"En fazla 30 yol gösterilir: önce seçilen sütunlar, ardından yol boyunca "
+"mutlak katsayı ile sütun SS çarpımının toplamına göre sıralanır. Korunan tüm "
+"sütunlar modelde kalır; çizgi sırası klinik önem belirtmez."
+
+#: R/timeinterval.b.R
+msgid ""
+"Auto-detection is ambiguous: {formats} all parse these dates equally well "
+"({pct}% success) and place them in a plausible range of years. The "
+"'{format}' format was used - please verify it matches your data or select "
+"the format manually."
+msgstr ""
+"Otomatik algılama belirsiz: {formats} biçimlerinin tümü bu tarihleri eşit "
+"başarıyla okuyor (%{pct} başarı) ve makul bir yıl aralığına yerleştiriyor. "
+"'{format}' biçimi kullanıldı - lütfen verilerinizle uyuştuğunu doğrulayın "
+"veya biçimi elle seçin."
+
+#: R/singlearm.b.R
+msgid ""
+"Because the curve changes in steps, it need not equal exactly 50%; this is a "
+"cohort-level estimate, not a prediction that exactly half of individual "
+"patients survive beyond that time."
+msgstr "Eğri basamaklar halinde değiştiğinden tam %50'ye eşit olması gerekmez; bu, kohort düzeyinde bir tahmindir ve hastaların tam yarısının bu süreden daha uzun yaşayacağına ilişkin bireysel bir öngörü değildir."
+
+#: R/survivalcont.b.R
+msgid "Beyond the observed follow-up of this group."
+msgstr "Bu grubun gözlemlenen takip süresinin ötesinde."
+
+#: R/outcomeorganizer.b.R
+msgid "Binary Outcome Coding"
+msgstr "İkili Sonuç Kodlaması"
+
+#: R/survival.b.R
+msgid "bootstrap internal validation"
+msgstr "bootstrap dahili doğrulama"
+
+#: R/survival.b.R
+msgid "Bootstrap validation unavailable"
+msgstr "Bootstrap doğrulaması kullanılamıyor"
+
+#: R/survival.b.R
+msgid ""
+"Both models are stratified by {var}; the unadjusted column differs from the "
+"adjusted one only by age."
+msgstr ""
+"Her iki model de {var} değişkenine göre tabakalandırılmıştır; düzeltilmemiş "
+"sütun düzeltilmiş sütundan yalnızca yaş açısından farklıdır."
+
+#: R/survival.b.R
+msgid ""
+"Calibration here is apparent, on the data used to fit the model, and is not "
+"validation."
+msgstr ""
+"Buradaki kalibrasyon, modelin kurulduğu veride hesaplanan görünür "
+"kalibrasyondur ve doğrulama değildir."
+
+#: R/survival.b.R
+msgid "Calibration unavailable"
+msgstr "Kalibrasyon kullanılamıyor"
+
+#: lassocox/ui[0][2].label
+msgid "Candidate Predictors"
+msgstr "Aday Yordayıcılar"
+
+#: R/lassocox.b.R
+msgid "Caution"
+msgstr "Dikkat"
+
+#: R/outcomeorganizer.b.R
+msgid "Censored ({levels}): coded as 0"
+msgstr "Sansürlü ({levels}): 0 olarak kodlandı"
+
+#: R/outcomeorganizer.b.R
+msgid "censored records ({levels})"
+msgstr "sansürlü kayıtlar ({levels})"
+
+#: R/oddsratio.b.R
+msgid ""
+"Check that the positive and negative outcome and predictor levels are "
+"correct for your study"
+msgstr ""
+"Pozitif ve negatif sonuç ve belirteç düzeylerinin çalışmanız için doğru "
+"olduğunu kontrol edin"
+
+#: R/survivalcont.b.R
+msgid "Check the time unit"
+msgstr "Zaman birimini kontrol edin"
+
+#: oddsratio/options/diagnosticPredictor.description.main
+msgid ""
+"Choose which categorical predictor to use for the separate, unadjusted "
+"sensitivity, specificity, and likelihood-ratio calculations. In the jamovi "
+"interface, select this variable here so the 'Predictor Positive Level' and "
+"'Predictor Negative Level' selectors below can list its levels; in R, if "
+"left empty, the first explanatory variable is used."
+msgstr ""
+"Ayrı, düzeltilmemiş duyarlılık, özgüllük ve olabilirlik oranı "
+"hesaplamalarında hangi kategorik belirtecin kullanılacağını seçin. jamovi "
+"arayüzünde, aşağıdaki 'Belirteç Pozitif Düzeyi' ve 'Belirteç Negatif Düzeyi' "
+"seçicilerinin düzeylerini listeleyebilmesi için bu değişkeni burada seçin; "
+"R'de boş bırakılırsa ilk açıklayıcı değişken kullanılır."
+
+#: oddsratio/options/predictorNegativeLevel.description.main
+msgid ""
+"Choose which level of the diagnostic predictor is the negative test result "
+"(e.g., \"Absent\", \"Test-\", \"No\"). Both Predictor Positive Level and "
+"Predictor Negative Level must be selected for diagnostic metrics; they are "
+"never taken from the level names or their order, and any other levels are "
+"excluded. While either is empty the diagnostic metrics wait for them and "
+"list the observed levels, and the logistic model, odds ratios, forest plot "
+"and nomogram still run."
+msgstr ""
+"Tanısal belirtecin hangi düzeyinin negatif test sonucu olduğunu seçin (ör. "
+"\"Absent\", \"Test-\", \"No\"). Tanısal metrikler için hem Belirteç Pozitif "
+"Düzeyi hem de Belirteç Negatif Düzeyi seçilmelidir; bunlar hiçbir zaman "
+"düzey adlarından veya sıralarından çıkarılmaz ve diğer tüm düzeyler hariç "
+"tutulur. Bunlardan biri boş olduğu sürece tanısal metrikler bu seçimi bekler "
+"ve gözlenen düzeyleri listeler; lojistik model, odds oranları, orman grafiği "
+"ve nomogram çalışmaya devam eder."
+
+#: oddsratio/options/predictorLevel.description.main
+msgid ""
+"Choose which level of the diagnostic predictor is the positive test result "
+"(e.g., \"Present\", \"Test+\", \"Yes\"). Both Predictor Positive Level and "
+"Predictor Negative Level must be selected for diagnostic metrics; they are "
+"never taken from the level names or their order, and any other levels are "
+"excluded. While either is empty the diagnostic metrics wait for them and "
+"list the observed levels, and the logistic model, odds ratios, forest plot "
+"and nomogram still run."
+msgstr ""
+"Tanısal belirtecin hangi düzeyinin pozitif test sonucu olduğunu seçin (ör. "
+"\"Present\", \"Test+\", \"Yes\"). Tanısal metrikler için hem Belirteç "
+"Pozitif Düzeyi hem de Belirteç Negatif Düzeyi seçilmelidir; bunlar hiçbir "
+"zaman düzey adlarından veya sıralarından çıkarılmaz ve diğer tüm düzeyler "
+"hariç tutulur. Bunlardan biri boş olduğu sürece tanısal metrikler bu seçimi "
+"bekler ve gözlenen düzeyleri listeler; lojistik model, odds oranları, orman "
+"grafiği ve nomogram çalışmaya devam eder."
+
+#: R/survival.b.R
+msgid ""
+"Clarify how marker values were handled in the analyses; if relevant, "
+"describe methods used for cutpoint determination."
+msgstr ""
+"Belirteç değerlerinin analizlerde nasıl ele alındığını açıklayın; uygunsa "
+"kesim noktası belirlemede kullanılan yöntemleri tanımlayın."
+
+#: survival/options/age_group_cutpoints.description
+msgid ""
+"Comma-separated age cutpoints for creating age groups. For example, 50, 65, "
+"75 creates groups 50 or younger, over 50 to 65, over 65 to 75, and over 75. "
+"Each upper cutpoint is included in the preceding group."
+msgstr ""
+"Yaş grupları oluşturmak için virgülle ayrılmış yaş kesme noktaları. Örneğin "
+"50, 65, 75; 50 yaş ve altı, 50 üzeri-65, 65 üzeri-75 ve 75 üzeri gruplarını "
+"oluşturur. Her üst kesme noktası bir önceki gruba dahildir."
+
+#: R/multisurvival.b.R
+msgid ""
+"Compare models on the same complete-case rows and choose the model "
+"assumptions to match the study question."
+msgstr ""
+"Modelleri aynı tam olgu satırlarında karşılaştırın ve model varsayımlarını "
+"çalışma sorusuyla uyumlu olacak şekilde seçin."
+
+#: R/multisurvival.b.R
+msgid "Comparison with separate subgroup fits."
+msgstr "Ayrı alt grup modelleriyle karşılaştırma."
+
+#: R/outcomeorganizer.b.R
+msgid "Competing event ({levels}): coded as 2"
+msgstr "Yarışan olay ({levels}): 2 olarak kodlandı"
+
+#: R/survival.b.R
+msgid ""
+"Competing-risk mode is selected, so this analysis reports cumulative "
+"incidence and Gray's test, and fits no Cox model. Two models answer two "
+"different questions. A cause-specific Cox model censors competing events and "
+"estimates the cause-specific hazard, the event rate among patients still "
+"free of every event. A Fine-Gray model estimates the subdistribution hazard, "
+"which relates a variable to the cumulative incidence of the event."
+msgstr ""
+"Yarışan risk modu seçili olduğundan bu analiz kümülatif insidansı ve Gray "
+"testini bildirir ve Cox modeli kurmaz. İki model iki farklı soruyu yanıtlar. "
+"Nedene özgü Cox modeli yarışan olayları sansürler ve henüz hiçbir olay "
+"yaşamamış hastalardaki olay hızı olan nedene özgü tehlikeyi tahmin eder. "
+"Fine-Gray modeli ise bir değişkeni olayın kümülatif insidansıyla "
+"ilişkilendiren alt dağılım tehlikesini tahmin eder."
+
+#: R/outcomeorganizer.b.R
+msgid "Competing-Risks Coding Detected"
+msgstr "Yarışan Risk Kodlaması Saptandı"
+
+#: R/survival.b.R
+msgid "Competing-risks mode reports cumulative incidence instead."
+msgstr "Yarışan riskler modu bunun yerine kümülatif insidansı bildirir."
+
+#: R/survival.b.R
+msgid "Complete-case analysis: {n} of {total} rows were used."
+msgstr "Tam olgu analizi: {total} satırın {n} tanesi kullanıldı."
+
+#: R/lassocox.b.R
+msgid "Concern"
+msgstr "Sorun"
+
+#: R/multisurvival.b.R
+msgid ""
+"Confidence intervals are computed for the concordance index only; the Brier "
+"score, time-dependent AUC and integrated Brier score are reported without "
+"intervals."
+msgstr ""
+"Güven aralıkları yalnızca uyum indeksi için hesaplanır; Brier skoru, zamana "
+"bağlı EAA ve entegre Brier skoru aralık olmadan raporlanır."
+
+#: R/multisurvival.b.R
+msgid ""
+"Confidence intervals for standardized curves are not implemented here and "
+"are left blank. Appropriate uncertainty estimation, such as patient-level "
+"bootstrapping, is required."
+msgstr ""
+"Standardize edilmiş eğriler için güven aralıkları burada uygulanmamıştır ve "
+"boş bırakılmıştır. Hasta düzeyinde bootstrap gibi uygun bir belirsizlik "
+"kestirimi gereklidir."
+
+#: R/survivalcont.b.R
+msgid ""
+"Confidence intervals use the complementary log-log transformation "
+"(conf.type='log-log'), as in Single Arm Survival, based on Greenwood's "
+"variance estimate; the median CI is the Brookmeyer-Crowley inversion of that "
+"pointwise band."
+msgstr ""
+"Güven aralıkları, Tek Kollu Sağkalım'da olduğu gibi, Greenwood varyans "
+"tahminine dayalı tamamlayıcı log-log dönüşümünü (conf.type='log-log') "
+"kullanır; medyan GA, bu noktasal bandın Brookmeyer-Crowley ters çevrimidir."
+
+#: R/survival.b.R
+msgid ""
+"Confidence intervals use the complementary log-log transformation with "
+"Greenwood's variance, as in Single Arm Survival."
+msgstr ""
+"Güven aralıkları, Tek Kollu Sağkalım'da olduğu gibi, Greenwood varyansıyla "
+"tamamlayıcı log-log dönüşümünü kullanır."
+
+#: R/multisurvival.b.R
+msgid ""
+"Confidence intervals use the log transformation (conf.type='log'); the "
+"median CI is the Brookmeyer-Crowley inversion of that pointwise band."
+msgstr ""
+"Güven aralıkları log dönüşümünü (conf.type='log') kullanır; medyan GA, bu "
+"noktasal bandın Brookmeyer-Crowley ters çevrimidir."
+
+#: R/oddsratio.b.R
+msgid "Confidence intervals: profile likelihood. P-values: Wald test."
+msgstr "Güven aralıkları: profil olabilirlik. P değerleri: Wald testi."
+
+#: R/oddsratio.b.R
+msgid ""
+"Confidence intervals: profile penalized likelihood. P-values: penalized "
+"likelihood-ratio test."
+msgstr ""
+"Güven aralıkları: profil cezalı olabilirlik. P değerleri: cezalı olabilirlik "
+"oranı testi."
+
+#: R/oddsratio.b.R
+msgid ""
+"Confidence intervals: Wald (profile-likelihood intervals could not be "
+"computed for this model). P-values: Wald test."
+msgstr ""
+"Güven aralıkları: Wald (bu model için profil olabilirlik aralıkları "
+"hesaplanamadı). P değerleri: Wald testi."
+
+#: R/timeinterval.b.R
+msgid "Confidence level must be between 90 and 99."
+msgstr "Güven düzeyi 90 ile 99 arasında olmalıdır."
+
+#: R/survivalcont.b.R
+msgid "Confidence limits could not be estimated for this survival estimate."
+msgstr "Bu sağkalım tahmini için güven sınırları hesaplanamadı."
+
+#: datetimeconverter/results/conversionRows.title
+msgid "Conversion Values"
+msgstr "Dönüştürülen değerler"
+
+#: R/datetimeconverter.b.R
+msgid "Converted DateTime"
+msgstr "Dönüştürülen tarih ve saat"
+
+#: R/survivalcont.b.R
+msgid "Could not be computed: %s"
+msgstr "Hesaplanamadı: %s"
+
+#: R/timeinterval.b.R
+msgid ""
+"Counts below describe the data as supplied, before any filter or landmark is "
+"applied, so the total may exceed the number of observations in the "
+"statistical summary."
+msgstr "Aşağıdaki sayılar, herhangi bir filtre veya landmark uygulanmadan önceki veriyi tanımlar; bu nedenle toplam, istatistiksel özetteki gözlem sayısından fazla olabilir."
+
+#: R/survivalcont.b.R
+msgid "Cox model residual calculation failed: {msg}"
+msgstr "Cox modeli artık hesaplaması başarısız oldu: {msg}"
+
+#: R/survivalcont.b.R
+msgid ""
+"Cox regression analysis failed. This may be due to insufficient data, "
+"convergence issues, or inappropriate data structure. Please check your "
+"variables and try again."
+msgstr "Cox regresyon analizi başarısız oldu. Yetersiz veri, yakınsama sorunları veya uygun olmayan veri yapısı buna neden olabilir. Değişkenlerinizi kontrol edip yeniden deneyin."
+
+#: R/survival.b.R
+msgid ""
+"Cox regression estimated {direction} for {comparison}, with a hazard ratio "
+"of {hr} (95% CI: {lower} to {upper}, {p}), which was {significance}."
+msgstr ""
+"Cox regresyonu {comparison} için {direction} tahmin etti; tehlike oranı {hr} "
+"(%95 GA: {lower} ila {upper}, {p}) olup bu sonuç {significance}."
+
+#: R/survival.b.R
+msgid ""
+"Cox regression estimated a hazard ratio of {hr} for {comparison} (95% CI: "
+"{lower} to {upper}, {p}); the interval includes 1, so these data are "
+"compatible with both a lower and a higher hazard."
+msgstr ""
+"Cox regresyonu {comparison} için tehlike oranını {hr} olarak tahmin etti "
+"(%95 GA: {lower} ila {upper}, {p}); aralık 1 değerini içerdiğinden bu "
+"veriler hem daha düşük hem de daha yüksek bir tehlike ile uyumludur."
+
+#: R/survival.b.R
+msgid "cox.zph test of proportional hazards"
+msgstr "cox.zph orantılı tehlikeler testi"
+
+#: R/oddsratio.b.R
+msgid ""
+"Critical validation errors detected: {errors}. Ensure distinct positive and "
+"negative outcome levels are selected, explanatory variables have sufficient "
+"variation, and consider removing rows with missing data."
+msgstr ""
+"Kritik doğrulama hataları saptandı: {errors}. Birbirinden farklı pozitif ve "
+"negatif sonuç düzeylerinin seçildiğinden ve açıklayıcı değişkenlerin yeterli "
+"değişkenlik gösterdiğinden emin olun; eksik veri içeren satırları çıkarmayı "
+"değerlendirin."
+
+#: R/singlearm.b.R
+msgid "Crude Cause-Specific Person-Time Rate (rates per {m} person-{unit})"
+msgstr "Kaba Nedene Özgü Kişi-Zaman Hızı ({m} kişi-{unit} başına hızlar)"
+
+#: R/survival.b.R
+msgid "Cumulative incidence did not reach 50% within the observed follow-up."
+msgstr "Kümülatif insidans gözlenen izlem süresinde %50'ye ulaşmadı."
+
+#: survivalcont/ui[1][2].label
+msgid "Cut-off Constraints"
+msgstr "Kesim Noktası Kısıtları"
+
+#: timeinterval/results/qualityCounts.title
+msgid "Data Quality Counts"
+msgstr "Veri kalitesi sayıları"
+
+#: survival/results/residualsTable.columns.title
+msgid "Data row"
+msgstr "Veri satırı"
+
+#: R/survivalcont.b.R
+msgid "Dataset contains no rows."
+msgstr "Veri kümesinde satır yok."
+
+#: R/datetimeconverter.b.R
+msgid ""
+"Dataset contains no rows. • Please ensure your dataset has at least one "
+"observation. • Check for data loading or filtering issues."
+msgstr ""
+"Veri kümesinde hiç satır yok. • Lütfen veri kümenizde en az bir gözlem "
+"olduğundan emin olun. • Veri yükleme veya filtreleme sorunlarını kontrol "
+"edin."
+
+#: R/datetimeconverter.b.R
+msgid "Date Range:"
+msgstr "Tarih aralığı:"
+
+#: R/survival.b.R
+msgid ""
+"Describe the characteristics (for example, disease stage or co-morbidities) "
+"of the study patients, including their source and inclusion and exclusion "
+"criteria."
+msgstr ""
+"Çalışma hastalarının özelliklerini (örneğin hastalık evresi veya eşlik eden "
+"hastalıklar), kaynakları ile dahil etme ve dışlama ölçütleriyle birlikte "
+"tanımlayın."
+
+#: R/survival.b.R
+msgid ""
+"Describe the flow of patients through the study, including the number of "
+"patients included in each stage of the analysis (a diagram may be helpful) "
+"and reasons for dropout. Specifically, both overall and for each subgroup "
+"extensively examined report the number of patients and the number of events."
+msgstr ""
+"Hastaların çalışma boyunca akışını, analizin her aşamasına dahil edilen "
+"hasta sayısını (bir diyagram yararlı olabilir) ve çalışmadan ayrılma "
+"nedenlerini tanımlayın. Özellikle hem genel olarak hem de kapsamlı incelenen "
+"her alt grup için hasta ve olay sayılarını bildirin."
+
+#: R/survival.b.R
+msgid ""
+"Describe treatments received and how chosen (for example, randomized or "
+"rule-based)."
+msgstr ""
+"Uygulanan tedavileri ve nasıl seçildiklerini (örneğin randomize veya kurala "
+"dayalı) tanımlayın."
+
+#: R/survival.b.R
+msgid ""
+"Describe type of biological material used (including control samples) and "
+"methods of preservation and storage."
+msgstr ""
+"Kullanılan biyolojik materyalin türünü (kontrol örnekleri dahil) ve korunma "
+"ve saklama yöntemlerini tanımlayın."
+
+#: R/lassocox.b.R
+msgid ""
+"Deviance was still falling at the last lambda used, so lambda.min is only "
+"the smallest penalty that could be evaluated, and the data may separate the "
+"outcome almost perfectly."
+msgstr ""
+"Sapma, kullanılan son lambda değerinde hâlâ azalıyordu; bu nedenle "
+"lambda.min yalnızca değerlendirilebilen en küçük cezadır ve veri sonucu "
+"neredeyse mükemmel biçimde ayırıyor olabilir."
+
+#: R/outcomeorganizer.b.R
+msgid "DFS built from vital status alone"
+msgstr "Yalnızca yaşam durumundan oluşturulan DFS"
+
+#: oddsratio/results/diagnosticContingency.title
+msgid "Diagnostic Contingency Table"
+msgstr "Tanısal çapraz tablo"
+
+#: R/oddsratio.b.R
+msgid ""
+"Diagnostic metrics are waiting for the Predictor Positive Level and "
+"Predictor Negative Level. Choose which levels of '{variable}' represent the "
+"positive and negative test results. Observed levels: {levels}. The logistic "
+"model, odds ratios, forest plot and nomogram are not affected."
+msgstr ""
+"Tanısal metrikler Belirteç Pozitif Düzeyi ve Belirteç Negatif Düzeyi "
+"seçimlerini bekliyor. '{variable}' değişkeninin hangi düzeylerinin pozitif "
+"ve negatif test sonuçlarını temsil ettiğini seçin. Gözlenen düzeyler: "
+"{levels}. Lojistik model, odds oranları, orman grafiği ve nomogram bundan "
+"etkilenmez."
+
+#: R/oddsratio.b.R
+msgid ""
+"Diagnostic metrics for '{variable}' require both outcome levels to be "
+"present among the selected positive and negative predictor levels. The "
+"prediction nomogram is unaffected."
+msgstr ""
+"'{variable}' için tanısal metrikler, seçilen pozitif ve negatif belirteç "
+"düzeyleri arasında her iki sonuç düzeyinin de bulunmasını gerektirir. Tahmin "
+"nomogramı bundan etkilenmez."
+
+#: R/oddsratio.b.R
+msgid ""
+"Diagnostic metrics for '{variable}' require paired complete observations "
+"with at least two observed categorical predictor levels and two observed "
+"outcome levels. The prediction nomogram is unaffected."
+msgstr ""
+"'{variable}' için tanısal metrikler, en az iki gözlenen kategorik belirteç "
+"düzeyi ve iki gözlenen sonuç düzeyi içeren eşleştirilmiş eksiksiz gözlemler "
+"gerektirir. Tahmin nomogramı bundan etkilenmez."
+
+#: R/oddsratio.b.R
+msgid ""
+"Diagnostic metrics were not calculated because a valid paired 2×2 table "
+"could not be formed."
+msgstr ""
+"Geçerli bir eşleştirilmiş 2×2 tablo oluşturulamadığı için tanısal metrikler "
+"hesaplanmadı."
+
+#: R/oddsratio.b.R
+msgid ""
+"Diagnostic predictor '{variable}' has {n} observed levels ({allLevels}). "
+"Excluded {nExcl} observation(s) with unselected predictor level(s) "
+"({excluded}) from the 2x2 diagnostic table so only '{pos}' (+) vs '{neg}' "
+"(-) are compared."
+msgstr ""
+"Tanısal belirteç '{variable}' {n} gözlenen düzeye sahip ({allLevels}). "
+"Yalnızca '{pos}' (+) ile '{neg}' (-) karşılaştırılsın diye, seçilmemiş "
+"belirteç düzeyine ({excluded}) sahip {nExcl} gözlem 2x2 tanısal tablodan "
+"hariç tutuldu."
+
+#: R/survival.b.R
+msgid ""
+"Direct standardization is not estimable for {group}: no person-time in "
+"required age band(s) {bands}. Use groups with overlapping age support or "
+"combine age bands before comparing standardized rates."
+msgstr ""
+"{group} için doğrudan standardizasyon tahmin edilemiyor: gerekli yaş "
+"bant(lar)ında {bands} kişi-zaman yok. Standardize hızları karşılaştırmadan "
+"önce yaş açısından örtüşen gruplar kullanın veya yaş bantlarını birleştirin."
+
+#: R/survival.b.R
+msgid ""
+"Direct standardization: all {n} patients assigned to each group; Cox model "
+"{group} + {age}"
+msgstr ""
+"Doğrudan standardizasyon: {n} hastanın tümü her gruba atandı; Cox modeli "
+"{group} + {age}"
+
+#: R/multisurvival.b.R
+msgid ""
+"Discrimination may be overstated and prediction error understated. These "
+"estimates are not bounds on performance in new patients; use internal "
+"validation and external validation in the intended population."
+msgstr ""
+"Ayırt etme gücü olduğundan yüksek ve öngörü hatası olduğundan düşük tahmin "
+"edilmiş olabilir. Bu tahminler yeni hastalardaki performansın sınırları "
+"değildir; dahili doğrulama ve hedeflenen popülasyonda dış doğrulama kullanın."
+
+#: R/survival.b.R
+msgid "Discuss implications for future research and clinical value."
+msgstr "Gelecekteki araştırmalar ve klinik değer açısından çıkarımları tartışın."
+
+#: R/survival.b.R
+msgid "Discussion"
+msgstr "Tartışma"
+
+#: R/outcomeorganizer.b.R
+msgid "disease progression only (recurrence/progression level {levels})"
+msgstr "yalnızca hastalık progresyonu (nüks/progresyon düzeyi {levels})"
+
+#: R/multisurvival.b.R
+msgid "Disease-free endpoint timing"
+msgstr "Hastalıksız sonlanım zamanlaması"
+
+#: R/singlearm.b.R
+msgid ""
+"Disease-free survival counts Alive with Disease as an event at the recorded "
+"time. That is correct only if the time runs to recurrence or progression, "
+"not to last follow-up."
+msgstr ""
+"Hastalıksız sağkalım, Hastalıkla Yaşıyor durumunu kaydedilen zamanda olay "
+"olarak sayar. Bu yalnızca süre son takibe değil, nüks veya progresyona kadar "
+"ölçülüyorsa doğrudur."
+
+#: survival/options/remark_checklist.description
+msgid ""
+"Display the 20-item REMARK (REporting recommendations for tumor MARKer "
+"prognostic studies) checklist, marking the items reported in this output and "
+"those to report in the manuscript."
+msgstr ""
+"Bu çıktıda raporlanan maddeleri ve makalede raporlanması gerekenleri "
+"işaretleyen 20 maddelik REMARK (tümör belirteci prognostik çalışmaları için "
+"raporlama önerileri) kontrol listesini görüntüleyin."
+
+#: R/multisurvival.b.R
+msgid ""
+"Each coefficient row tests an interaction contrast. For a term spanning "
+"several coefficients, read the joint test to assess overall effect "
+"modification. HR = 1 means no modification on that contrast."
+msgstr ""
+"Her katsayı satırı bir etkileşim kontrastını test eder. Birden fazla "
+"katsayıyı kapsayan bir terimde genel etki değişimini değerlendirmek için "
+"ortak testi okuyun. TO = 1, o kontrastta değişim olmadığı anlamına gelir."
+
+#: R/multisurvival.b.R
+msgid "Empty level dropped"
+msgstr "Boş düzey çıkarıldı"
+
+#: R/timeinterval.b.R
+msgid "End dates missing or unreadable"
+msgstr "Bitiş tarihi eksik veya okunamayan"
+
+#: R/outcomeorganizer.b.R
+msgid "Event ({levels}): coded as 1"
+msgstr "Olay ({levels}): 1 olarak kodlandı"
+
+#: R/outcomeorganizer.b.R
+msgid ""
+"Event hierarchy is only available for overall, cause-specific and "
+"competing-risk coding with Multiple Event Levels enabled. It was requested "
+"but has been ignored for this analysis, and the outcome is unchanged."
+msgstr ""
+"Olay hiyerarşisi yalnızca Çoklu Olay Düzeyleri etkinken genel, nedene özgü "
+"ve yarışan risk kodlaması için kullanılabilir. İstendi ancak bu analiz için "
+"yok sayıldı ve sonuç değişmedi."
+
+#: R/outcomeorganizer.b.R
+msgid "Event of interest ({levels}): coded as 1"
+msgstr "İlgilenilen olay ({levels}): 1 olarak kodlandı"
+
+#: R/singlearm.b.R
+msgid "Events per person-%s"
+msgstr "Kişi-%s başına olay"
+
+#: singlearm/results/survTable.columns.title
+#: survival/results/survTable.columns.title
+#: survivalcont/results/survTable.columns.title
+msgid "Events since previous time"
+msgstr "Önceki zamandan bu yana olaylar"
+
+#: datetimeconverter/results/componentRows.title
+msgid "Extracted Component Values"
+msgstr "Çıkarılan bileşen değerleri"
+
+#: R/timeinterval.b.R
+msgid "Extreme threshold multiplier must be between 1.5 and 5."
+msgstr "Uç değer eşiği çarpanı 1.5 ile 5 arasında olmalıdır."
+
+#: R/timeinterval.b.R
+msgid "Extreme Values"
+msgstr "Uç değerler"
+
+#: R/timeinterval.b.R
+msgid "Extreme-value filtering could not act on these data"
+msgstr "Uç değer filtrelemesi bu verilere uygulanamadı"
+
+#: R/lassocox.b.R
+msgid ""
+"Factor '{var}' lost level(s) ({dropped}) after complete-case filtering; "
+"reference level is '{ref}'."
+msgstr ""
+"'{var}' faktörü tam olgu filtrelemesinden sonra düzey(ler) kaybetti "
+"({dropped}); referans düzey '{ref}'."
+
+#: R/datetimeconverter.b.R
+msgid "Failed Parsing:"
+msgstr "Ayrıştırılamayan:"
+
+#: R/outcomeorganizer.b.R
+msgid ""
+"Few events: only {nEv} of {nTotal} non-missing outcomes ({pct}%) are "
+"'{level}'. As a general rule of thumb (< 5 events), Kaplan-Meier and Cox "
+"estimates are unstable with fewer than 5 events."
+msgstr ""
+"Az olay: eksik olmayan {nTotal} sonucun yalnızca {nEv} tanesi (%{pct}) "
+"'{level}'. Genel bir kural olarak (< 5 olay), 5'ten az olayla Kaplan-Meier "
+"ve Cox tahminleri kararsızdır."
+
+#: R/timeinterval.b.R
+msgid "Filters applied:"
+msgstr "Uygulanan filtreler:"
+
+#: R/oddsratio.b.R
+msgid "Fisher's exact test / Firth regression"
+msgstr "Fisher kesin testi / Firth regresyonu"
+
+#: R/survival.b.R
+msgid "Fleming-Harrington (rho = {rho})"
+msgstr "Fleming-Harrington (rho = {rho})"
+
+#: multisurvival/ui[0][5].label
+#: singlearm/ui[0][3].label
+#: survival/ui[0][4].label
+msgid "Follow-Up Date"
+msgstr "İzlem tarihi"
+
+#: R/outcomeorganizer.b.R
+msgid ""
+"Follow-up was truncated for %d of %d patient(s) and %d of %d event(s) with a "
+"recorded time after the cut-off were reset to censored. Check that the "
+"cut-off is in the same units as the follow-up time before using these "
+"numbers, and pair the recoded outcome with the truncated follow-up column "
+"this analysis writes back, not with your original follow-up column."
+msgstr ""
+"%d / %d hasta için takip süresi kırpıldı ve kayıtlı zamanı kesme noktasından "
+"sonra olan %d / %d olay sansürlenmiş olarak sıfırlandı. Bu sayıları "
+"kullanmadan önce kesme noktasının takip süresiyle aynı birimde olduğunu "
+"kontrol edin ve yeniden kodlanan sonucu orijinal takip sütununuzla değil, bu "
+"analizin geri yazdığı kırpılmış takip sütunuyla eşleştirin."
+
+#: R/outcomeorganizer.b.R
+msgid ""
+"For {analysis}, Follow-up Time must be the time to that endpoint's event. "
+"This analysis has no recurrence date, so with a last-contact time a "
+"recurrence before the cut-off is erased when last contact falls after it."
+msgstr ""
+"{analysis} için Takip Süresi, o sonlanımın olayına kadar geçen süre "
+"olmalıdır. Bu analizde nüks tarihi yoktur; bu nedenle son temas süresi "
+"kullanıldığında, son temas kesme noktasından sonraysa kesme noktasından "
+"önceki bir nüks silinir."
+
+#: R/multisurvival.b.R
+msgid ""
+"For {variable} = {level} compared with {variable} = {reference}, the "
+"adjusted {effect} is {estimate} at {conditions}, with the other covariates "
+"in the model held constant. This is not an overall effect, because "
+"{variable} is in an interaction."
+msgstr ""
+"{variable} = {reference} ile karşılaştırıldığında {variable} = {level} için "
+"düzeltilmiş {effect}, {conditions} noktasında ve modeldeki diğer kovaryatlar "
+"sabit tutulduğunda {estimate}. {variable} bir etkileşimde yer aldığı için bu "
+"genel bir etki değildir."
+
+#: R/multisurvival.b.R
+msgid "For {variable}, the adjusted {effect} is {estimate} at {conditions}."
+msgstr "{variable} için düzeltilmiş {effect}, {conditions} noktasında {estimate}."
+
+#: R/multisurvival.b.R
+msgid ""
+"For {variable}, the adjusted {effect} is {estimate} per 1-unit increase in "
+"{variable} at {conditions}, with the other covariates in the model held "
+"constant. This is not an overall effect, because {variable} is in an "
+"interaction."
+msgstr ""
+"{variable} için düzeltilmiş {effect}, {conditions} noktasında {variable} "
+"değişkenindeki 1 birimlik artış başına ve modeldeki diğer kovaryatlar sabit "
+"tutulduğunda {estimate}. {variable} bir etkileşimde yer aldığı için bu genel "
+"bir etki değildir."
+
+#: R/multisurvival.b.R
+msgid ""
+"For disease-free survival, follow-up must end at the first qualifying "
+"recurrence or death, or at censoring if neither occurred. Disease status at "
+"the last visit alone cannot establish the time of the first event."
+msgstr ""
+"Hastalıksız sağkalım için takip, ilk nitelikli nüks veya ölümde ya da ikisi "
+"de gerçekleşmediyse sansürlemede sona ermelidir. Yalnızca son vizitteki "
+"hastalık durumu ilk olayın zamanını belirleyemez."
+
+#: R/multisurvival.b.R
+msgid ""
+"For each two-way interaction with a categorical moderator, these are "
+"conditional effects implied by the single full interaction model. The "
+"moderator is releveled and the same model is refitted; its focal coefficient "
+"and covariance give the subgroup HR, CI and p-value."
+msgstr ""
+"Kategorik moderatörlü her iki yönlü etkileşim için bunlar, tek bir tam "
+"etkileşim modelinin ima ettiği koşullu etkilerdir. Moderatörün referans "
+"düzeyi değiştirilir ve aynı model yeniden kurulur; odak katsayısı ve "
+"kovaryansı alt grup TO, GA ve p değerini verir."
+
+#: R/survival.b.R
+msgid ""
+"For key multivariable analyses, report estimated effects (for example, "
+"hazard ratio) with confidence intervals for the marker and, at least for the "
+"final model, all other variables in the model."
+msgstr ""
+"Temel çok değişkenli analizler için belirtecin ve en azından son modelde, "
+"modeldeki diğer tüm değişkenlerin tahmini etkilerini (örneğin tehlike oranı) "
+"güven aralıklarıyla birlikte bildirin."
+
+#: R/survival.b.R
+msgid ""
+"For the {group} group the cumulative incidence of the event of interest did "
+"not reach 50% during the observed follow-up."
+msgstr ""
+"{group} grubu için ilgilenilen olayın kümülatif insidansı gözlenen takip "
+"süresi içinde %50'ye ulaşmadı."
+
+#: R/survival.b.R
+msgid ""
+"For the {group} group the cumulative incidence of the event of interest "
+"reached 50% at {median} {unit}."
+msgstr ""
+"{group} grubu için ilgilenilen olayın kümülatif insidansı {median} {unit} "
+"zamanında %50'ye ulaştı."
+
+#: R/multisurvival.b.R
+msgid ""
+"For the interaction {variable}, the adjusted {effect} is {estimate} at "
+"{conditions}. This is a ratio of hazard ratios (how one variable's effect "
+"differs across the other), not the effect for any single group."
+msgstr ""
+"{variable} etkileşimi için düzeltilmiş {effect}, {conditions} noktasında "
+"{estimate}. Bu, tehlike oranlarının oranıdır (bir değişkenin etkisinin "
+"diğerine göre nasıl farklılaştığı); tek bir grubun etkisi değildir."
+
+#: R/survival.b.R
+msgid ""
+"Give rationale for sample size; if the study was designed to detect a "
+"specified effect size, give the target power and effect size."
+msgstr ""
+"Örneklem büyüklüğünün gerekçesini belirtin; çalışma belirli bir etki "
+"büyüklüğünü saptamak üzere tasarlandıysa hedef gücü ve etki büyüklüğünü "
+"verin."
+
+#: R/survival.b.R
+msgid ""
+"Gray's test for equality of cumulative incidence of the event of interest "
+"across groups: chi-square = {stat}, df = {df}, {p}."
+msgstr ""
+"İlgilenilen olayın kümülatif insidansının gruplar arasında eşitliği için "
+"Gray testi: ki-kare = {stat}, sd = {df}, {p}."
+
+#: R/survival.b.R
+msgid "hazard ratios"
+msgstr "tehlike oranları"
+
+#: R/survival.b.R
+msgid "Hazard ratios are now relative to {level}."
+msgstr "Tehlike oranları artık {level} düzeyine görelidir."
+
+#: R/survival.b.R
+msgid ""
+"Hazard ratios with confidence intervals are shown here for the marker and "
+"age."
+msgstr ""
+"Belirteç ve yaş için tehlike oranları güven aralıklarıyla burada "
+"gösterilmektedir."
+
+#: R/survival.b.R
+msgid "Hazard ratios, survival probabilities and a Kaplan-Meier plot are shown here."
+msgstr ""
+"Tehlike oranları, sağkalım olasılıkları ve bir Kaplan-Meier grafiği burada "
+"gösterilmektedir."
+
+#: package/datasets/histopathologyincludinganalysis.name
+msgid "histopathology including analysis"
+msgstr "histopatoloji dahil analiz"
+
+#: R/survival.b.R
+msgid ""
+"If done, report results of further investigations, such as checking "
+"assumptions, sensitivity analyses, and internal validation."
+msgstr ""
+"Yapıldıysa varsayımların kontrolü, duyarlılık analizleri ve dahili doğrulama "
+"gibi ileri incelemelerin sonuçlarını bildirin."
+
+#: singlearm/options/outcomeredefined.description
+msgid ""
+"If enabled, the recoded event indicator is added to your data as a new "
+"variable, so you can verify how the outcome levels were mapped: 0 = "
+"censored, 1 = event, or, for competing risks, a Censored/Event/Competing "
+"factor that the survival analyses read back as competing risks. It covers "
+"every row of the dataset; a row whose original outcome was missing or was "
+"mapped to no category stays empty."
+msgstr ""
+"Etkinleştirilirse, yeniden kodlanan olay göstergesi verilerinize yeni bir "
+"değişken olarak eklenir; böylece sonuç düzeylerinin nasıl eşlendiğini "
+"doğrulayabilirsiniz: 0 = sansürlü, 1 = olay veya yarışan riskler için "
+"sağkalım analizlerinin yarışan riskler olarak geri okuduğu "
+"Censored/Event/Competing faktörü. Veri kümesinin her satırını kapsar; özgün "
+"sonucu eksik olan veya hiçbir kategoriye eşlenmeyen satır boş kalır."
+
+#: R/oddsratio.b.R
+msgid ""
+"If incorrect, use the 'Positive Level', 'Negative Level', 'Predictor "
+"Positive Level', and 'Predictor Negative Level' dropdowns to specify the "
+"correct levels"
+msgstr ""
+"Yanlışsa doğru düzeyleri belirtmek için 'Pozitif Düzey', 'Negatif Düzey', "
+"'Belirteç Pozitif Düzeyi' ve 'Belirteç Negatif Düzeyi' açılır menülerini "
+"kullanın"
+
+#: R/multisurvival.b.R
+msgid ""
+"If only one variable is categorical, that variable defines the subgroups. "
+"Continuous-by-continuous and higher-order interactions do not have discrete "
+"subgroup HRs here."
+msgstr ""
+"Yalnızca bir değişken kategorikse alt grupları o değişken tanımlar. "
+"Sürekli-sürekli ve daha yüksek dereceli etkileşimlerin burada ayrık alt grup "
+"TO değerleri yoktur."
+
+#: survivalcont/options/calculatedcutoff.description
+msgid ""
+"If you enable this option, the calculated cut-off group will be added to "
+"your data as a new variable with two levels (\"low\" for values less than or "
+"equal to the cut-off and \"high\" for values strictly above the cut-off) "
+"based on the data-derived cut-off point found using the maximally selected "
+"rank statistic. This option is only available if you enable the \"Find "
+"Cut-off for Continuous Explanatory Variable\" option."
+msgstr ""
+"Bu seçeneği etkinleştirirseniz, hesaplanan kesim noktası grubu, maksimum "
+"seçilmiş sıra istatistiği kullanılarak bulunan veriden türetilmiş kesim "
+"noktasına göre iki düzeyli (\"low\": kesim noktasına eşit veya ondan küçük "
+"değerler; \"high\": kesim noktasının kesinlikle üzerindeki değerler) yeni "
+"bir değişken olarak verilerinize eklenir. Bu seçenek yalnızca \"Sürekli "
+"açıklayıcı değişken için kesim noktası bul\" seçeneğini etkinleştirirseniz "
+"kullanılabilir."
+
+#: R/survival.b.R
+msgid ""
+"In the {group} group the cumulative incidence of the event of interest did "
+"not reach 50% during the observed follow-up."
+msgstr ""
+"{group} grubunda ilgilenilen olayın kümülatif insidansı gözlenen takip "
+"süresi içinde %50'ye ulaşmadı."
+
+#: R/survival.b.R
+msgid ""
+"In the {group} group the cumulative incidence of the event of interest "
+"reached 50% at {median} {unit}."
+msgstr ""
+"{group} grubunda ilgilenilen olayın kümülatif insidansı {median} {unit} "
+"zamanında %50'ye ulaştı."
+
+#: R/survival.b.R
+msgid "In the {group} group, half of the patients had the event by {median} {unit}."
+msgstr ""
+"{group} grubunda hastaların yarısı {median} {unit} zamanına kadar olayı "
+"yaşadı."
+
+#: R/multisurvival.b.R
+msgid ""
+"In the observed group, {atrisk} patients were still at risk at that time and "
+"{events} events had occurred by that time."
+msgstr ""
+"Gözlenen grupta o zamanda {atrisk} hasta hâlâ risk altındaydı ve o zamana "
+"kadar {events} olay gerçekleşmişti."
+
+#: R/oddsratio.b.R
+msgid "infinite (no false positives)"
+msgstr "sonsuz (yanlış pozitif yok)"
+
+#: R/oddsratio.b.R
+msgid "infinite (no true negatives)"
+msgstr "sonsuz (gerçek negatif yok)"
+
+#: R/multisurvival.b.R
+msgid "Interactions in model: {terms}"
+msgstr "Modeldeki etkileşimler: {terms}"
+
+#: R/survival.b.R
+msgid ""
+"Interpret the results in the context of the pre-specified hypotheses and "
+"other relevant studies; include a discussion of limitations of the study."
+msgstr ""
+"Sonuçları önceden belirlenmiş hipotezler ve ilgili diğer çalışmalar "
+"bağlamında yorumlayın; çalışmanın sınırlılıklarına ilişkin bir tartışma "
+"ekleyin."
+
+#: R/survival.b.R
+msgid "Introduction"
+msgstr "Giriş"
+
+#: R/survivalcont.b.R
+msgid "Invalid minimum group size"
+msgstr "Geçersiz minimum grup büyüklüğü"
+
+#: R/survivalcont.b.R
+msgid "Invalid rate multiplier"
+msgstr "Geçersiz hız çarpanı"
+
+#: R/survivalcont.b.R
+msgid "Invalid RMST horizon"
+msgstr "Geçersiz RMST ufku"
+
+#: R/lassocox.b.R
+msgid "Invalid variable selection."
+msgstr "Geçersiz değişken seçimi."
+
+#: R/survival.b.R
+msgid ""
+"Joint likelihood-ratio test of all interaction terms: chi-square = {stat}, "
+"df = {df}, {p}."
+msgstr ""
+"Tüm etkileşim terimlerinin ortak olabilirlik oranı testi: ki-kare = {stat}, "
+"sd = {df}, {p}."
+
+#: R/survival.b.R
+msgid "Kaplan-Meier estimation"
+msgstr "Kaplan-Meier tahmini"
+
+#: R/lassocox.b.R
+msgid "Lambda values used / searched"
+msgstr "Kullanılan / aranan lambda değerleri"
+
+#: R/survival.b.R
+msgid ""
+"Landmark analysis at {time} {unit}: {n} patients excluded (follow-up ended "
+"at or before the landmark) and {missing} with missing time. All estimates "
+"are conditional on being event-free at the landmark and are not comparable "
+"with unlandmarked survival times."
+msgstr ""
+"{time} {unit} zamanında landmark analizi: {n} hasta (takibi landmark "
+"zamanında veya öncesinde sona erdi) ve süresi eksik {missing} hasta hariç "
+"tutuldu. Tüm tahminler landmark zamanında olaysız olma koşuluna bağlıdır ve "
+"landmark uygulanmamış sağkalım süreleriyle karşılaştırılamaz."
+
+#: R/singlearm.b.R
+msgid ""
+"Landmark analysis at %s %s: no subject was excluded, but every time is "
+"measured from the landmark and estimates are conditional on surviving to it."
+msgstr ""
+"%s %s noktasında yer işareti analizi: hiçbir denek dışlanmadı, ancak tüm "
+"süreler yer işaretinden itibaren ölçülür ve tahminler o zamana kadar hayatta "
+"kalmaya bağlıdır."
+
+#: R/multisurvival.b.R
+msgid ""
+"Landmark analysis is on: rows with follow-up ending at or before the "
+"landmark time were excluded before this check."
+msgstr ""
+"Landmark analizi açık: takibi landmark zamanında veya öncesinde sona eren "
+"satırlar bu kontrolden önce hariç tutuldu."
+
+#: R/timeinterval.b.R
+msgid ""
+"Landmark analysis is switched on but the landmark time is 0, so nothing was "
+"excluded and no interval was shortened - these results are the same as with "
+"landmark analysis off. Set a landmark greater than zero, in the same unit as "
+"the results, or untick landmark analysis."
+msgstr "Landmark analizi açık, ancak landmark zamanı 0 olduğundan hiçbir gözlem dışlanmadı ve hiçbir aralık kısaltılmadı; sonuçlar landmark analizi kapalıyken elde edilenlerle aynıdır. Sonuçlarla aynı birimde sıfırdan büyük bir landmark belirleyin veya landmark analizini kapatın."
+
+#: R/survivalcont.b.R
+msgid ""
+"Landmark at %.2f %s: %d of %d patient(s) (%.1f%%) had an event or censoring "
+"at or before the landmark and were excluded; %d remain at risk. Reported "
+"times are measured FROM the landmark."
+msgstr ""
+"%.2f %s zamanında landmark: %d / %d hastada (%.1f%%) landmark zamanında veya "
+"öncesinde olay ya da sansürleme gerçekleşti ve bu hastalar hariç tutuldu; %d "
+"hasta risk altında kalmaya devam etmektedir. Bildirilen süreler landmark "
+"zamanından İTİBAREN ölçülmüştür."
+
+#: R/timeinterval.b.R
+msgid "Landmark time must be a finite non-negative number"
+msgstr "Landmark zamanı sonlu ve negatif olmayan bir sayı olmalıdır"
+
+#: R/survival.b.R
+msgid "Landmark time must be zero or positive."
+msgstr "Landmark zamanı sıfır veya pozitif olmalıdır."
+
+#: R/outcomeorganizer.b.R
+msgid ""
+"Large amount of missing outcome data: {pct}% ({missing} out of {total} "
+"rows). Complete-case analysis drops missing rows (general rule of thumb > "
+"10% missing)."
+msgstr ""
+"Büyük miktarda eksik sonuç verisi: %{pct} ({total} satırın {missing} "
+"tanesi). Tam olgu analizi eksik satırları çıkarır (genel kural olarak > %10 "
+"eksik)."
+
+#: R/survival.b.R
+msgid ""
+"List all candidate variables initially examined or considered for inclusion "
+"in models."
+msgstr ""
+"Başlangıçta incelenen veya modellere dahil edilmesi düşünülen tüm aday "
+"değişkenleri listeleyin."
+
+#: R/survival.b.R
+msgid "log-rank"
+msgstr "log-rank"
+
+#: R/oddsratio.b.R
+msgid ""
+"Logistic regression needs the same outcome window for every patient. For a "
+"status taken from censored or unequal follow-up, use the survival analyses "
+"instead."
+msgstr ""
+"Lojistik regresyon her hasta için aynı sonuç penceresini gerektirir. "
+"Sansürlü veya eşit olmayan takipten alınan bir durum için bunun yerine "
+"sağkalım analizlerini kullanın."
+
+#: R/survival.b.R
+msgid ""
+"Main-effect rows are hazard ratios at age 0, because age is not centered, "
+"and are not meaningful on their own. Read the interaction rows and the joint "
+"test."
+msgstr ""
+"Ana etki satırları, yaş merkezlenmediği için yaş 0'daki tehlike oranlarıdır "
+"ve tek başlarına anlamlı değildir. Etkileşim satırlarını ve ortak testi "
+"okuyun."
+
+#: R/datetimeconverter.b.R
+msgid "Maximum DateTime:"
+msgstr "En geç tarih ve saat:"
+
+#: R/oddsratio.b.R
+msgid ""
+"Maximum-likelihood odds ratios could not be estimated due to separation for: "
+"{variables}. Enable Firth penalized regression or combine sparse categories "
+"before interpreting model-based predictions."
+msgstr ""
+"Şu değişkenler için ayrılma (separation) nedeniyle maksimum olabilirlik odds "
+"oranları tahmin edilemedi: {variables}. Modele dayalı tahminleri "
+"yorumlamadan önce Firth cezalı regresyonu etkinleştirin veya seyrek "
+"kategorileri birleştirin."
+
+#: R/multisurvival.b.R
+msgid "Mean over {b} of {total} resamples"
+msgstr "{total} yeniden örneklemin {b} tanesinin ortalaması"
+
+#: R/survival.b.R
+msgid "Median survival for the {group} group was {median} {unit}."
+msgstr "{group} grubu için medyan sağkalım {median} {unit} idi."
+
+#: R/datetimeconverter.b.R
+msgid "Minimum DateTime:"
+msgstr "En erken tarih ve saat:"
+
+#: R/survivalcont.b.R
+msgid "Minimum group size (%) must be between 5 and 30; defaulting to 10%."
+msgstr ""
+"Minimum grup büyüklüğü (%) 5 ile 30 arasında olmalıdır; varsayılan olarak "
+"%10 kullanılıyor."
+
+#: R/oddsratio.b.R
+msgid ""
+"Missing observations are removed only for variables used by each analysis "
+"path (complete cases across the selected outcome and explanatory variables "
+"for the regression table; paired complete outcome and diagnostic-predictor "
+"observations for diagnostic metrics). Variable names with spaces or special "
+"characters are handled automatically and restored in the output."
+msgstr ""
+"Eksik gözlemler yalnızca her analiz yolunda kullanılan değişkenler için "
+"çıkarılır (regresyon tablosu için seçilen sonuç ve açıklayıcı değişkenlerde "
+"tam olgular; tanısal metrikler için eşleştirilmiş eksiksiz sonuç ve tanısal "
+"belirteç gözlemleri). Boşluk veya özel karakter içeren değişken adları "
+"otomatik olarak işlenir ve çıktıda geri yüklenir."
+
+#: R/survivalcont.b.R
+msgid "Missing stratification values excluded"
+msgstr "Eksik tabakalandırma değerleri hariç tutuldu"
+
+#: R/oddsratio.b.R
+msgid "Missing: {n}"
+msgstr "Eksik: {n}"
+
+#: multisurvival/results/fittedTable.title
+msgid "Model Estimates"
+msgstr "Model tahminleri"
+
+#: R/lassocox.b.R
+msgid ""
+"Moderate dimensionality with ample events. LASSO is valid, and standard Cox "
+"regression (Multivariable Survival in ClinicoPath) may also be considered."
+msgstr ""
+"Yeterli olayla orta boyutluluk. LASSO geçerlidir; standart Cox regresyonu da "
+"(ClinicoPath içinde Çok Değişkenli Sağkalım) değerlendirilebilir."
+
+#: R/outcomeorganizer.b.R
+msgid "Multi-State Outcome Coding:"
+msgstr "Çok durumlu sonuç kodlaması:"
+
+#: survivalcont/ui[1][1].label
+msgid "Multiple Cut-off Detection"
+msgstr "Çoklu Kesim Noktası Tespiti"
+
+#: R/survival.b.R
+msgid "Multivariable Survival fits such a model."
+msgstr "Çok Değişkenli Sağkalım böyle bir model kurar."
+
+#: R/survival.b.R
+msgid "N = {n} observations."
+msgstr "N = {n} gözlem."
+
+#: R/lassocox.b.R
+msgid "N/A (single factor)"
+msgstr "Uygulanamaz (tek faktör)"
+
+#: R/survival.b.R
+msgid ""
+"Needs a model holding the standard prognostic variables; Multivariable "
+"Survival fits one."
+msgstr ""
+"Standart prognostik değişkenleri içeren bir model gerektirir; Çok Değişkenli "
+"Sağkalım böyle bir model kurar."
+
+#: R/timeinterval.b.R
+msgid "Negative Intervals"
+msgstr "Negatif aralıklar"
+
+#: R/oddsratio.b.R
+msgid "Negative outcome level:"
+msgstr "Negatif sonuç düzeyi:"
+
+#: R/oddsratio.b.R
+msgid "Negative predictor level:"
+msgstr "Negatif belirteç düzeyi:"
+
+#: R/datetimeconverter.b.R
+msgid ""
+"No components selected for extraction. Use the preview checkboxes or 'Add to "
+"Data' toggles in the left panel to extract datetime components."
+msgstr "Çıkarılacak bileşen seçilmedi. Tarih ve saat bileşenlerini çıkarmak için sol paneldeki önizleme kutularını veya 'Veriye ekle' seçeneklerini kullanın."
+
+#: R/survival.b.R
+msgid ""
+"No event of interest was observed, so its cumulative incidence is zero "
+"throughout follow-up and no time can be reported."
+msgstr ""
+"İlgilenilen olay gözlenmedi; bu nedenle kümülatif insidansı takip boyunca "
+"sıfırdır ve hiçbir zaman bildirilemez."
+
+#: R/lassocox.b.R
+msgid "No issue detected"
+msgstr "Sorun saptanmadı"
+
+#: R/singlearm.b.R
+msgid ""
+"No patient is mapped to Alive with Disease, so no recurrence is counted: "
+"every event is a death and this disease-free analysis equals overall "
+"survival."
+msgstr ""
+"Hiçbir hasta Hastalıkla Yaşıyor durumuna eşlenmedi, bu nedenle hiçbir nüks "
+"sayılmıyor: her olay bir ölümdür ve bu hastalıksız analiz genel sağkalıma "
+"eşittir."
+
+#: R/survival.b.R
+msgid ""
+"No patients remain in level(s) {levels} of {var} after exclusions, so they "
+"were dropped."
+msgstr ""
+"Hariç tutmalardan sonra {var} değişkeninin {levels} düzey(ler)inde hasta "
+"kalmadı; bu nedenle bu düzeyler çıkarıldı."
+
+#: R/outcomeorganizer.b.R
+msgid "No progression ({levels}), including deaths: coded as 0"
+msgstr "Progresyon yok ({levels}), ölümler dahil: 0 olarak kodlandı"
+
+#: R/survival.b.R
+msgid "No such investigation was completed in this run."
+msgstr "Bu çalıştırmada böyle bir inceleme tamamlanmadı."
+
+#: R/singlearm.b.R
+#: R/survival.b.R
+msgid "Not computed for the cumulative-incidence median; see the table note."
+msgstr "Kümülatif insidans medyanı için hesaplanmadı; tablo notuna bakın."
+
+#: R/survival.b.R
+msgid "Not defined: the survival estimate has reached 0%."
+msgstr "Tanımlı değil: sağkalım tahmini %0'a ulaştı."
+
+#: R/lassocox.b.R
+msgid "Not determined"
+msgstr "Belirlenmedi"
+
+#: R/singlearm.b.R
+msgid "Not estimable at this time point; see the table note."
+msgstr "Bu zaman noktasında tahmin edilemez; tablo notuna bakın."
+
+#: R/survivalcont.b.R
+msgid "Not estimable at this time point."
+msgstr "Bu zaman noktasında tahmin edilemez."
+
+#: R/multisurvival.b.R
+msgid "Not estimable in this subgroup."
+msgstr "Bu alt grupta tahmin edilemez."
+
+#: R/multisurvival.b.R
+msgid ""
+"Not estimable: dropping this term removes no estimable coefficient (it is "
+"aliased)."
+msgstr ""
+"Tahmin edilemez: bu terimin çıkarılması tahmin edilebilir hiçbir katsayıyı "
+"kaldırmıyor (terim eşdoğrusal)."
+
+#: R/oddsratio.b.R
+msgid "Not estimable: the data separate the outcome, so no finite odds ratio exists."
+msgstr ""
+"Tahmin edilemez: veri sonucu ayırıyor, bu nedenle sonlu bir odds oranı "
+"yoktur."
+
+#: R/multisurvival.b.R
+msgid ""
+"Not estimable: this interaction coefficient is aliased (a combination of "
+"levels with no observations, or redundant with other terms)."
+msgstr ""
+"Tahmin edilemez: bu etkileşim katsayısı eşdoğrusal (gözlem içermeyen bir "
+"düzey kombinasyonu veya diğer terimlerle gereksiz)."
+
+#: R/singlearm.b.R
+#: R/survival.b.R
+#: R/survivalcont.b.R
+msgid "Not reached or not estimable within the observed follow-up."
+msgstr "Gözlemlenen takip süresi içinde ulaşılamadı veya tahmin edilemez."
+
+#: R/survivalcont.b.R
+msgid ""
+"Not reached: the Kaplan-Meier curve (or its confidence limit) did not cross "
+"50% in this group during observed follow-up."
+msgstr ""
+"Ulaşılamadı: Kaplan-Meier eğrisi (veya güven sınırı) bu grupta gözlemlenen "
+"takip süresi boyunca %50'yi geçmedi."
+
+#: R/outcomeorganizer.b.R
+msgid "not set"
+msgstr "ayarlanmadı"
+
+#: R/oddsratio.b.R
+msgid "Not shown (odds ratio not estimable): {terms}"
+msgstr "Gösterilmedi (odds oranı tahmin edilemez): {terms}"
+
+#: R/oddsratio.b.R
+msgid "Not shown (odds ratio too extreme to print): {terms}"
+msgstr "Gösterilmedi (odds oranı yazdırılamayacak kadar uç): {terms}"
+
+#: R/survival.b.R
+msgid "Not shown here: {missing}."
+msgstr "Burada gösterilmeyen: {missing}."
+
+#: R/timeinterval.b.R
+msgid "Note: {n} missing values were detected."
+msgstr "Not: {n} eksik değer saptandı."
+
+#: R/survival.b.R
+msgid "Number"
+msgstr "Numara"
+
+#: R/lassocox.b.R
+msgid "Number of CV folds must be an integer of at least 3."
+msgstr "Çapraz doğrulama katı sayısı en az 3 olan bir tam sayı olmalıdır."
+
+#: survival/options/rcs_knots.description
+msgid ""
+"Number of knots for restricted cubic splines. 3 knots = 2 df (simplest), 4 "
+"knots = 3 df (recommended default), 5 knots = 4 df (more flexible). Uses "
+"natural splines with interior knots at equally spaced quantiles and boundary "
+"knots at the observed minimum and maximum, as in splines::ns(). More knots "
+"allow detection of complex non-linear patterns but may overfit with small "
+"samples."
+msgstr ""
+"Kısıtlı kübik splinelar için düğüm sayısı. 3 düğüm = 2 sd (en basit), 4 "
+"düğüm = 3 sd (önerilen varsayılan), 5 düğüm = 4 sd (daha esnek). "
+"splines::ns() işlevindeki gibi, iç düğümleri eşit aralıklı kantillerde ve "
+"sınır düğümleri gözlenen minimum ve maksimumda olan doğal splinelar "
+"kullanır. Daha fazla düğüm karmaşık doğrusal olmayan örüntülerin "
+"saptanmasına olanak tanır ancak küçük örneklemlerde aşırı uyuma yol açabilir."
+
+#: R/oddsratio.b.R
+msgid "Observed outcome levels:"
+msgstr "Gözlenen sonuç düzeyleri:"
+
+#: oddsratio/results/fittedTable.title
+msgid "Odds Ratios"
+msgstr "Odds oranları"
+
+#: R/oddsratio.b.R
+msgid "Odds ratios interpretation (Positive vs Negative)"
+msgstr "Odds oranlarının yorumu (Pozitif - Negatif karşılaştırması)"
+
+#: R/datetimeconverter.b.R
+msgid "OK"
+msgstr "Başarılı"
+
+#: R/outcomeorganizer.b.R
+msgid "one outcome level counted as death"
+msgstr "ölüm olarak sayılan tek sonuç düzeyi"
+
+#: R/outcomeorganizer.b.R
+msgid ""
+"Only {levels} is coded 1; every other level is coded 0 and treated as "
+"censored, including any other category of death (for example death from "
+"other causes). For overall survival, which counts death from any cause, "
+"enable Multiple Event Levels and assign each death category."
+msgstr ""
+"Yalnızca {levels} 1 olarak kodlandı; diğer tüm düzeyler 0 olarak kodlanır ve "
+"sansürlü kabul edilir, diğer ölüm kategorileri de dahil (örneğin başka "
+"nedenlere bağlı ölüm). Her nedene bağlı ölümü sayan genel sağkalım için "
+"Çoklu Olay Düzeyleri'ni etkinleştirin ve her ölüm kategorisini atayın."
+
+#: R/timeinterval.b.R
+msgid ""
+"Only {percent}% of non-missing values in '{column}' were parsed with format "
+"'{format}'. Please verify that the selected format matches all values or "
+"standardize the column."
+msgstr ""
+"'{column}' içindeki eksik olmayan değerlerin yalnızca %{percent} kadarı "
+"'{format}' biçimiyle ayrıştırıldı. Lütfen seçilen biçimin tüm değerlerle "
+"eşleştiğini doğrulayın veya sütunu standart hale getirin."
+
+#: R/lassocox.b.R
+msgid ""
+"Only one categorical predictor supplied (represented by multiple mutually "
+"exclusive indicator columns); between-predictor collinearity is not "
+"applicable."
+msgstr ""
+"Yalnızca bir kategorik yordayıcı sağlandı (birbirini dışlayan birden fazla "
+"gösterge sütunuyla temsil edilir); yordayıcılar arası çoklu bağlantı "
+"uygulanabilir değildir."
+
+#: R/outcomeorganizer.b.R
+msgid "Only one outcome level counts as death"
+msgstr "Yalnızca bir sonuç düzeyi ölüm olarak sayılıyor"
+
+#: R/outcomeorganizer.b.R
+msgid ""
+"Only outcome level '{level}' counts as death here. The other levels with "
+"rows coded 0 are {levels}. A death in one of these levels is coded 0, not as "
+"an event. To count every death, turn on Multiple Event Levels and assign "
+"each level."
+msgstr ""
+"Burada yalnızca '{level}' sonuç düzeyi ölüm olarak sayılır. 0 olarak "
+"kodlanan satırlara sahip diğer düzeyler: {levels}. Bu düzeylerden birindeki "
+"ölüm olay olarak değil, 0 olarak kodlanır. Her ölümü saymak için Çoklu Olay "
+"Düzeyleri seçeneğini açın ve her düzeyi atayın."
+
+#: R/outcomeorganizer.b.R
+msgid ""
+"Only recurrence/progression level '{level}' counts as an event. The other "
+"levels are {levels}, and all of them are coded as no recurrence/progression, "
+"so another kind of recurrence is not counted and an unknown status is "
+"treated as event-free. Merge the levels that are recurrences into one level "
+"and set unknown values to missing before this analysis."
+msgstr ""
+"Yalnızca '{level}' nüks/progresyon düzeyi olay olarak sayılır. Diğer "
+"düzeyler {levels} ve tümü nüks/progresyon yok olarak kodlanmıştır; "
+"dolayısıyla başka türden bir nüks sayılmaz ve bilinmeyen durum olaysız kabul "
+"edilir. Bu analizden önce nüks olan düzeyleri tek bir düzeyde birleştirin ve "
+"bilinmeyen değerleri eksik olarak ayarlayın."
+
+#: R/datetimeconverter.b.R
+msgid "Originally Missing:"
+msgstr "Başlangıçta eksik:"
+
+#: R/outcomeorganizer.b.R
+msgid "Other recurrence levels coded as no recurrence"
+msgstr "Nüks yok olarak kodlanan diğer nüks düzeyleri"
+
+#: R/singlearm.b.R
+msgid "Other-cause deaths censored: 1 - KM overstates the absolute risk"
+msgstr ""
+"Başka nedenlerden ölümler sansürlendi: 1 - KM mutlak riski olduğundan yüksek "
+"gösterir"
+
+#: R/outcomeorganizer.b.R
+msgid "outcome level {levels}"
+msgstr "sonuç düzeyi {levels}"
+
+#: R/outcomeorganizer.b.R
+msgid "Outcome level {levels}: coded as 1"
+msgstr "Sonuç düzeyi {levels}: 1 olarak kodlandı"
+
+#: R/oddsratio.b.R
+msgid ""
+"Outcome level modeled as the event: '{level}' (negative/reference level: "
+"'{neg}')."
+msgstr ""
+"Olay olarak modellenen sonuç düzeyi: '{level}' (negatif/referans düzey: "
+"'{neg}')."
+
+#: R/outcomeorganizer.b.R
+msgid "Outcome level(s) {levels} without recurrence/progression: coded as 0"
+msgstr "Nüks/progresyon olmadan sonuç düzey(ler)i {levels}: 0 olarak kodlandı"
+
+#: R/outcomeorganizer.b.R
+msgid "outcome level(s) {levels}, treated as censored"
+msgstr "sonuç düzey(ler)i {levels}, sansürlü kabul edildi"
+
+#: R/oddsratio.b.R
+msgid ""
+"Outcome positive and negative levels must be different (both set to "
+"'{level}')."
+msgstr ""
+"Sonuç pozitif ve negatif düzeyleri farklı olmalıdır (ikisi de '{level}' "
+"olarak ayarlı)."
+
+#: R/oddsratio.b.R
+msgid ""
+"Outcome positive and negative levels must be different. Please select "
+"distinct positive and negative outcome levels."
+msgstr ""
+"Sonuç pozitif ve negatif düzeyleri farklı olmalıdır. Lütfen birbirinden "
+"farklı pozitif ve negatif sonuç düzeyleri seçin."
+
+#: R/outcomeorganizer.b.R
+msgid ""
+"Outcome recoding completed. Use Add Recoded Outcome to Data to write the "
+"status to a new column."
+msgstr ""
+"Sonuç yeniden kodlaması tamamlandı. Durumu yeni bir sütuna yazmak için "
+"Yeniden Kodlanan Sonucu Veriye Ekle seçeneğini kullanın."
+
+#: R/survival.b.R
+msgid ""
+"Outcome variable analyzed here: {var}. The definition of the endpoint "
+"belongs in the manuscript."
+msgstr ""
+"Burada analiz edilen sonuç değişkeni: {var}. Sonlanımın tanımı makalede "
+"belirtilmelidir."
+
+#: R/oddsratio.b.R
+msgid ""
+"Outcome variable has {n} observed levels ({allLevels}). Excluded {nExcl} "
+"observation(s) with unselected outcome level(s) ({excluded}) so only '{pos}' "
+"(positive) vs '{neg}' (negative) are analyzed."
+msgstr ""
+"Sonuç değişkeni {n} gözlenen düzeye sahip ({allLevels}). Yalnızca '{pos}' "
+"(pozitif) ile '{neg}' (negatif) analiz edilsin diye, seçilmemiş sonuç "
+"düzeyine ({excluded}) sahip {nExcl} gözlem hariç tutuldu."
+
+#: R/singlearm.b.R
+msgid "Overall (from landmark)"
+msgstr "Genel (landmark zamanından itibaren)"
+
+#: R/survivalcont.b.R
+msgid "Overall Log-rank Test"
+msgstr "Genel Log-rank Testi"
+
+#: R/survivalcont.b.R
+msgid "Overall Log-rank Test (unadjusted)"
+msgstr "Genel Log-rank Testi (düzeltilmemiş)"
+
+#: R/timeinterval.b.R
+msgid "Overall Quality:"
+msgstr "Genel kalite:"
+
+#: R/outcomeorganizer.b.R
+msgid "Overall Survival (OS) Analysis"
+msgstr "Genel Sağkalım (OS) Analizi"
+
+#: R/survival.b.R
+msgid "Pairwise comparisons require at least two observed groups."
+msgstr "İkili karşılaştırmalar en az iki gözlenen grup gerektirir."
+
+#: R/survival.b.R
+msgid "pairwise tests with {method} adjustment"
+msgstr "{method} düzeltmeli ikili testler"
+
+#: datetimeconverter/results/qualityCounts.title
+msgid "Parsing Counts"
+msgstr "Ayrıştırma sayıları"
+
+#: R/datetimeconverter.b.R
+msgid "Partial Dates: No Day Recorded"
+msgstr "Kısmi Tarihler: Gün Kaydedilmemiş"
+
+#: R/survival.b.R
+msgid ""
+"Patients and events per group are in the median survival table. The flow of "
+"patients and the reasons for exclusion belong in the manuscript."
+msgstr ""
+"Grup başına hasta ve olay sayıları medyan sağkalım tablosundadır. Hasta "
+"akışı ve hariç tutma nedenleri makalede belirtilmelidir."
+
+#: R/multisurvival.b.R
+msgid ""
+"Patients whose follow-up ended at or before the landmark were excluded (n = "
+"{n} removed)."
+msgstr ""
+"Takibi landmark zamanında veya öncesinde sona eren hastalar hariç tutuldu (n "
+"= {n} çıkarıldı)."
+
+#: R/multisurvival.b.R
+msgid ""
+"Patients with no follow-up time could not be assessed at the landmark and "
+"were also excluded (n = {n})."
+msgstr ""
+"Takip süresi olmayan hastalar landmark zamanında değerlendirilemedi ve onlar "
+"da hariç tutuldu (n = {n})."
+
+#: R/outcomeorganizer.b.R
+msgid ""
+"patients with outcome level(s) {levels} and recurrence/progression level(s) "
+"{others}"
+msgstr ""
+"sonuç düzey(ler)i {levels} ve nüks/progresyon düzey(ler)i {others} olan "
+"hastalar"
+
+#: R/oddsratio.b.R
+msgid ""
+"Perfect collinearity: {variables} is fully determined by the other "
+"explanatory variables, so its odds ratio cannot be estimated. Remove it, or "
+"the variable it duplicates."
+msgstr ""
+"Tam çoklu bağlantı: {variables} diğer açıklayıcı değişkenler tarafından "
+"tamamen belirleniyor, bu nedenle odds oranı tahmin edilemez. Bu değişkeni "
+"veya yinelediği değişkeni çıkarın."
+
+#: package/analyses/multisurvival.description
+#: multisurvival/options.description.main
+msgid ""
+"Performs multivariable survival analysis using Cox proportional hazards "
+"regression. With competing events it fits a Fine-Gray subdistribution hazard "
+"model. In multivariable survival analysis, person-time follow-up is crucial "
+"for properly adjusting for covariates while accounting for varying "
+"observation periods. The Cox proportional hazards model incorporates "
+"person-time by modeling the hazard function, which represents the "
+"instantaneous event rate per unit of person-time. When stratifying analyses "
+"or examining multiple predictors, the model accounts for how these factors "
+"influence event rates relative to the person-time at risk in each subgroup. "
+"Each row must represent one independent patient with one event or censoring "
+"time. Repeated visits, recurrent events, delayed entry, clustering and "
+"time-dependent covariates require a different analysis designed for those "
+"data."
+msgstr ""
+"Cox orantılı tehlikeler regresyonu kullanarak çok değişkenli sağkalım "
+"analizi yapar. Yarışan olaylar varsa Fine-Gray alt dağılım tehlike modeli "
+"kurar. Çok değişkenli sağkalım analizinde kişi-zaman takibi, değişen gözlem "
+"sürelerini hesaba katarken kovaryatlara göre doğru düzeltme yapmak için çok "
+"önemlidir. Cox orantılı tehlikeler modeli, birim kişi-zaman başına anlık "
+"olay hızını temsil eden tehlike fonksiyonunu modelleyerek kişi-zamanı "
+"dikkate alır. Analizler tabakalandırıldığında veya birden fazla yordayıcı "
+"incelendiğinde model, bu faktörlerin her alt gruptaki risk altındaki "
+"kişi-zamana göre olay hızlarını nasıl etkilediğini hesaba katar. Her satır, "
+"bir olay veya sansürleme zamanı olan bağımsız bir hastayı temsil etmelidir. "
+"Yinelenen viziteler, tekrarlayan olaylar, gecikmeli giriş, kümelenme ve "
+"zamana bağlı kovaryatlar bu veriler için tasarlanmış farklı bir analiz "
+"gerektirir."
+
+#: R/singlearm.b.R
+msgid "Person-Time Analysis (rates per {m} person-{unit})"
+msgstr "Kişi-Zaman Analizi ({m} kişi-{unit} başına hızlar)"
+
+#: R/multisurvival.b.R
+msgid "Person-time is counted from the landmark at {offset} {unit}."
+msgstr "Kişi-zaman, {offset} {unit} landmark zamanından itibaren sayılır."
+
+#: R/survival.b.R
+msgid "Peto-Peto (Fleming-Harrington rho = 1)"
+msgstr "Peto-Peto (Fleming-Harrington rho = 1)"
+
+#: R/multisurvival.b.R
+msgid "Please select a variable for adjusted curves."
+msgstr "Düzeltilmiş eğriler için bir değişken seçin."
+
+#: R/oddsratio.b.R
+msgid ""
+"Please select both the 'Positive Level' (event, e.g., 'Dead', 'Event', "
+"'Yes') and the 'Negative Level' (reference/non-event, e.g., 'Alive', 'No "
+"Event', 'No') of your outcome variable."
+msgstr ""
+"Lütfen sonuç değişkeninizin hem 'Pozitif Düzey' (olay, ör. 'Dead', 'Event', "
+"'Yes') hem de 'Negatif Düzey' (referans/olay dışı, ör. 'Alive', 'No Event', "
+"'No') seçimini yapın."
+
+#: R/oddsratio.b.R
+msgid ""
+"Please select both the positive and negative outcome levels from the "
+"dropdown menus below the outcome variable."
+msgstr ""
+"Lütfen sonuç değişkeninin altındaki açılır menülerden hem pozitif hem de "
+"negatif sonuç düzeyini seçin."
+
+#: singlearm/options/ce.description
+msgid ""
+"Plot the cumulative probability of the event over time, 1 - S(t), estimated "
+"by Kaplan-Meier. This is a probability on a 0-1 scale, not a running count "
+"of events: a raw count ignores censoring and is not comparable between "
+"cohorts of different size or follow-up. Read it as \"the estimated "
+"proportion of the cohort that had had the event by time t\", except under "
+"Cause Specific survival, where other-cause deaths are censored and 1 - S(t) "
+"overstates that proportion."
+msgstr ""
+"Olayın zamana göre kümülatif olasılığını, 1 - S(t), Kaplan-Meier ile tahmin "
+"ederek çizin. Bu 0-1 ölçeğinde bir olasılıktır, olayların birikimli sayısı "
+"değildir: ham bir sayım sansürlemeyi yok sayar ve farklı büyüklükte veya "
+"takip süresinde kohortlar arasında karşılaştırılamaz. Bunu \"t zamanına "
+"kadar olayı yaşamış kohortun tahmini oranı\" olarak okuyun; ancak başka "
+"nedenlerden ölümlerin sansürlendiği ve 1 - S(t) değerinin bu oranı "
+"olduğundan yüksek gösterdiği Nedene Özgü sağkalım bunun istisnasıdır."
+
+#: R/oddsratio.b.R
+msgid "Positive and Negative Outcome Levels Required"
+msgstr "Pozitif ve Negatif Sonuç Düzeyleri Gerekli"
+
+#: R/survival.b.R
+msgid "Precisely define all clinical endpoints examined."
+msgstr "İncelenen tüm klinik sonlanımları kesin olarak tanımlayın."
+
+#: R/oddsratio.b.R
+msgid ""
+"Prediction nomogram was not generated because maximum-likelihood estimates "
+"could not be identified for separated predictor(s): {variables}."
+msgstr ""
+"Ayrılmış belirteç(ler) için maksimum olabilirlik tahminleri "
+"belirlenemediğinden tahmin nomogramı üretilmedi: {variables}."
+
+#: R/oddsratio.b.R
+msgid "Predictor level"
+msgstr "Yordayıcı düzeyi"
+
+#: oddsratio/options/predictorNegativeLevel.title
+#: oddsratio/ui[0][2]/predictorNegativeLevel.label
+msgid "Predictor Negative Level"
+msgstr "Belirteç Negatif Düzeyi"
+
+#: R/oddsratio.b.R
+msgid ""
+"Predictor positive and negative levels for '{variable}' must be different "
+"(both set to '{level}')."
+msgstr ""
+"'{variable}' için belirteç pozitif ve negatif düzeyleri farklı olmalıdır "
+"(ikisi de '{level}' olarak ayarlı)."
+
+#: R/oddsratio.b.R
+msgid ""
+"Predictor positive and negative levels must be different (both set to "
+"'{level}')."
+msgstr ""
+"Belirteç pozitif ve negatif düzeyleri farklı olmalıdır (ikisi de '{level}' "
+"olarak ayarlı)."
+
+#: R/survival.b.R
+msgid ""
+"Present univariable analyses showing the relation between the marker and "
+"outcome, with the estimated effect (for example, hazard ratio and survival "
+"probability). Preferably provide similar analyses for all other variables "
+"being analyzed. For the effect of a tumor marker on a time-to-event outcome, "
+"a Kaplan-Meier plot is recommended."
+msgstr ""
+"Belirteç ile sonuç arasındaki ilişkiyi tahmini etkiyle (örneğin tehlike "
+"oranı ve sağkalım olasılığı) gösteren tek değişkenli analizleri sunun. "
+"Tercihen analiz edilen diğer tüm değişkenler için de benzer analizler verin. "
+"Bir tümör belirtecinin olaya kadar geçen süre sonucu üzerindeki etkisi için "
+"Kaplan-Meier grafiği önerilir."
+
+#: R/outcomeorganizer.b.R
+msgid "Progression ({levels}): coded as 1"
+msgstr "Progresyon ({levels}): 1 olarak kodlandı"
+
+#: R/survival.b.R
+msgid "proportional hazards test"
+msgstr "orantılı tehlikeler testi"
+
+#: R/multisurvival.b.R
+msgid "Proportional hazards test could not be computed: {msg}"
+msgstr "Orantılı tehlikeler testi hesaplanamadı: {msg}"
+
+#: R/oddsratio.b.R
+msgid "Provides exact 2x2 p-values and finite penalized odds ratios in small samples"
+msgstr ""
+"Küçük örneklemlerde kesin 2x2 p değerleri ve sonlu cezalı odds oranları "
+"sağlar"
+
+#: R/survivalcont.b.R
+msgid "Rate multiplier must be a positive number; defaulting to 100."
+msgstr "Hız çarpanı pozitif bir sayı olmalıdır; varsayılan olarak 100 kullanılıyor."
+
+#: R/multisurvival.b.R
+#: R/survival.b.R
+#: R/survivalcont.b.R
+msgid "Rates are per {m} person-{unit}."
+msgstr "Hızlar {m} kişi-{unit} başınadır."
+
+#: R/survival.b.R
+msgid "RCS analysis unavailable"
+msgstr "Kısıtlı kübik spline analizi kullanılamıyor"
+
+#: R/outcomeorganizer.b.R
+msgid "Recoded outcome:"
+msgstr "Yeniden kodlanmış sonuç:"
+
+#: R/outcomeorganizer.b.R
+msgid "Recurrence/Progression ({levels}): coded as 1"
+msgstr "Nüks/Progresyon ({levels}): 1 olarak kodlandı"
+
+#: R/outcomeorganizer.b.R
+msgid "recurrence/progression (level {rec}) or outcome level {levels}"
+msgstr "nüks/progresyon (düzey {rec}) veya sonuç düzeyi {levels}"
+
+#: R/outcomeorganizer.b.R
+msgid ""
+"Recurrence/progression and the outcome levels listed above count as events "
+"for {analysis} analysis; the other outcome levels are coded 0 unless "
+"recurrence/progression occurred."
+msgstr ""
+"{analysis} analizinde nüks/progresyon ve yukarıda listelenen sonuç düzeyleri "
+"olay olarak sayılır; diğer sonuç düzeyleri, nüks/progresyon olmadıkça 0 "
+"olarak kodlanır."
+
+#: R/outcomeorganizer.b.R
+msgid ""
+"Recurrence/progression and the selected outcome level both count as events "
+"for {analysis} analysis; any other outcome level, including other categories "
+"of death, is coded 0 unless recurrence/progression occurred."
+msgstr ""
+"{analysis} analizinde nüks/progresyon ve seçilen sonuç düzeyi olay olarak "
+"sayılır; diğer ölüm kategorileri dahil diğer tüm sonuç düzeyleri, "
+"nüks/progresyon olmadıkça 0 olarak kodlanır."
+
+#: R/outcomeorganizer.b.R
+msgid ""
+"Recurrence/progression level(s) {levels}: not counted as "
+"recurrence/progression"
+msgstr "Nüks/progresyon düzey(ler)i {levels}: nüks/progresyon olarak sayılmadı"
+
+#: R/multisurvival.b.R
+msgid "Reference level changed"
+msgstr "Referans düzey değişti"
+
+#: survival/results/remarkItems.title
+msgid "REMARK Reporting Items"
+msgstr "REMARK raporlama maddeleri"
+
+#: R/survival.b.R
+msgid ""
+"Report distributions of basic demographic characteristics (at least age and "
+"sex), standard (disease-specific) prognostic variables, and tumor marker, "
+"including numbers of missing values."
+msgstr ""
+"Temel demografik özelliklerin (en azından yaş ve cinsiyet), standart "
+"(hastalığa özgü) prognostik değişkenlerin ve tümör belirtecinin "
+"dağılımlarını eksik değer sayılarıyla birlikte bildirin."
+
+#: R/survival.b.R
+msgid "Report in the manuscript"
+msgstr "Makalede raporlayın"
+
+#: R/survival.b.R
+msgid "Reported in this output"
+msgstr "Bu çıktıda raporlandı"
+
+#: R/survivalcont.b.R
+msgid "Residual diagnostics could not be computed"
+msgstr "Artık tanılamaları hesaplanamadı"
+
+#: R/datetimeconverter.b.R
+msgid ""
+"Restored a lost leading zero on {count} value(s) (for example {before} as "
+"{after}), since these are packed dates and some values already have the full "
+"width."
+msgstr ""
+"{count} değerde kaybolmuş baştaki sıfır geri eklendi (örneğin {before}, "
+"{after} olarak), çünkü bunlar paketlenmiş tarihlerdir ve bazı değerler zaten "
+"tam genişliktedir."
+
+#: R/datetimeconverter.b.R
+msgid ""
+"Restored a lost leading zero on {count} value(s) (for example {before} as "
+"{after}): that is the only reading under which every value is a valid date "
+"in the selected format."
+msgstr ""
+"{count} değerde kaybolmuş baştaki sıfır geri eklendi (örneğin {before}, "
+"{after} olarak): seçilen biçimde her değerin geçerli bir tarih olduğu tek "
+"okuma budur."
+
+#: R/survival.b.R
+msgid "Restricted cubic spline assessment suppressed: fewer than 10 events."
+msgstr "Kısıtlı kübik spline değerlendirmesi baskılandı: 10'dan az olay."
+
+#: R/survivalcont.b.R
+msgid ""
+"Restricted mean survival time (rmean) in this table is integrated up to the "
+"longest observed follow-up ({max} {unit}, survival::survfit default). For "
+"RMST at a prespecified or common group horizon (tau), see the Restricted "
+"Mean Survival Time table."
+msgstr ""
+"Bu tablodaki kısıtlı ortalama sağkalım süresi (rmean), gözlenen en uzun "
+"takibe ({max} {unit}, survival::survfit varsayılanı) kadar integre edilir. "
+"Önceden belirlenmiş veya ortak bir grup ufkundaki (tau) RMST için Kısıtlı "
+"Ortalama Sağkalım Süresi tablosuna bakın."
+
+#: R/singlearm.b.R
+msgid ""
+"Restricted mean survival time is the area under the Kaplan-Meier curve from "
+"the landmark to the largest observed time after it (%s %s). It is therefore "
+"horizon-dependent and should only be compared when the same restriction time "
+"is used."
+msgstr ""
+"Kısıtlı ortalama sağkalım süresi, landmark zamanından bu zamandan sonra "
+"gözlenen en büyük zamana (%s %s) kadar Kaplan-Meier eğrisi altındaki "
+"alandır. Bu nedenle ufka bağlıdır ve yalnızca aynı kısıtlama süresi "
+"kullanıldığında karşılaştırılmalıdır."
+
+#: R/multisurvival.b.R
+msgid ""
+"Risk stratification identified <b>{groups} distinct risk groups</b> from the "
+"Fine-Gray model."
+msgstr ""
+"Risk katmanlama Fine-Gray modelinden <b>{groups} ayrı risk grubu</b> "
+"belirledi."
+
+#: R/survival.b.R
+msgid "RMST calculation unavailable"
+msgstr "Kısıtlı ortalama sağkalım süresi hesaplanamıyor"
+
+#: R/survivalcont.b.R
+msgid ""
+"RMST time horizon must be a non-negative finite number (use 0 for the "
+"default 75th percentile horizon)."
+msgstr ""
+"RMST zaman ufku negatif olmayan sonlu bir sayı olmalıdır (varsayılan 75. "
+"persentil ufku için 0 kullanın)."
+
+#: R/outcomeorganizer.b.R
+msgid "Rows without a patient ID"
+msgstr "Hasta kimliği olmayan satırlar"
+
+#: R/survival.b.R
+msgid "Run here: {methods}."
+msgstr "Burada çalıştırılan: {methods}."
+
+#: R/datetimeconverter.b.R
+msgid "Sample of Failed Values:"
+msgstr "Ayrıştırılamayan değerlerden örnekler:"
+
+#: survival/options/spline_scale.description
+msgid ""
+"Scale for spline-based models. Hazard scale models log cumulative hazard, "
+"odds scale models log cumulative odds, normal scale models normal scores."
+msgstr ""
+"Spline tabanlı modeller için ölçek. Hazard ölçeği log kümülatif tehlikeyi, "
+"odds ölçeği log kümülatif odds değerini, normal ölçek normal skorları "
+"modeller."
+
+#: R/survival.b.R
+msgid "Section"
+msgstr "Bölüm"
+
+#: survival/options/rcs_variable.description
+msgid ""
+"Select a continuous predictor variable to assess for non-linear effects. The "
+"variable will be modeled with restricted cubic splines and compared to a "
+"linear model. Common candidates include age, tumor size and biomarker levels."
+msgstr ""
+"Doğrusal olmayan etkileri değerlendirmek için sürekli bir öngörücü değişken "
+"seçin. Değişken kısıtlı kübik splinelar ile modellenecek ve doğrusal bir "
+"modelle karşılaştırılacaktır. Yaygın adaylar arasında yaş, tümör boyutu ve "
+"biyobelirteç düzeyleri yer alır."
+
+#: R/oddsratio.b.R
+msgid ""
+"Select one outcome variable, identify its positive (event) and negative "
+"(reference) levels, and add one or more categorical or continuous "
+"explanatory variables. The analysis reports logistic-regression odds ratios "
+"with confidence intervals and a matching forest plot."
+msgstr ""
+"Bir sonuç değişkeni seçin, pozitif (olay) ve negatif (referans) düzeylerini "
+"belirleyin ve bir veya daha fazla kategorik veya sürekli açıklayıcı değişken "
+"ekleyin. Analiz, güven aralıklarıyla lojistik regresyon odds oranlarını ve "
+"eşleşen bir orman grafiğini bildirir."
+
+#: R/outcomeorganizer.b.R
+msgid ""
+"Selected recurrence/progression event level '{level}' is not a level of "
+"'{var}'. Levels available: {levels}."
+msgstr ""
+"Seçilen nüks/progresyon olay düzeyi '{level}', '{var}' değişkeninin bir "
+"düzeyi değil. Mevcut düzeyler: {levels}."
+
+#: R/lassocox.b.R
+msgid "Selected variables are not present in the dataset: {vars}."
+msgstr "Seçilen değişkenler veri kümesinde yok: {vars}."
+
+#: R/lassocox.b.R
+msgid "Selected-refit test {p}"
+msgstr "Seçilen değişkenlerle yeniden kurulum testi {p}"
+
+#: R/lassocox.b.R
+msgid ""
+"Selection depends on the units of each predictor; changing a unit can change "
+"which predictors are selected."
+msgstr ""
+"Seçim, her yordayıcının birimlerine bağlıdır; bir birimi değiştirmek hangi "
+"yordayıcıların seçildiğini değiştirebilir."
+
+#: R/oddsratio.b.R
+msgid ""
+"Sensitivity and specificity above already use exact Clopper-Pearson "
+"intervals; for 2x2 association testing or sparse-cell odds ratios, use exact "
+"or penalized methods"
+msgstr ""
+"Yukarıdaki duyarlılık ve özgüllük zaten kesin Clopper-Pearson aralıklarını "
+"kullanıyor; 2x2 ilişki testi veya seyrek hücreli odds oranları için kesin "
+"veya cezalı yöntemleri kullanın"
+
+#: R/datetimeconverter.b.R
+msgid ""
+"Set {count} infinite value(s) (Inf/-Inf) to missing before numeric date "
+"conversion."
+msgstr ""
+"Sayısal tarih dönüştürmesinden önce {count} sonsuz değer (Inf/-Inf) eksik "
+"olarak ayarlandı."
+
+#: survival/options/adjusted_curves.description
+msgid ""
+"Show survival curves standardized for age with the Cox model (direct "
+"standardization). Every patient is assigned to each group in turn, so all "
+"groups share the age distribution of the whole cohort."
+msgstr ""
+"Cox modeliyle yaşa göre standardize edilmiş sağkalım eğrilerini gösterin "
+"(doğrudan standardizasyon). Her hasta sırayla her gruba atanır; böylece tüm "
+"gruplar tüm kohortun yaş dağılımını paylaşır."
+
+#: R/survival.b.R
+msgid "Show the relation of the marker to standard prognostic variables."
+msgstr "Belirtecin standart prognostik değişkenlerle ilişkisini gösterin."
+
+#: R/lassocox.b.R
+msgid ""
+"Showing {shown} of {total} paths on the original scale: selected columns "
+"first, then by summed absolute coefficient times column SD (not clinical "
+"importance). Long legend labels are abbreviated."
+msgstr ""
+"Özgün ölçekte {total} yolun {shown} tanesi gösteriliyor: önce seçilen "
+"sütunlar, ardından mutlak katsayı ile sütun SS çarpımının toplamına göre "
+"sıralanır (klinik öneme göre değil). Uzun gösterge etiketleri kısaltılmıştır."
+
+#: R/datetimeconverter.b.R
+msgid "Showing first {n} of {total} observations"
+msgstr "{total} gözlemin ilk {n} tanesi gösteriliyor"
+
+#: R/survival.b.R
+msgid "Shown here: {items}."
+msgstr "Burada gösterilen: {items}."
+
+#: package/datasets/histopathologyincludinganalysis.description
+msgid ""
+"Simulated histopathology cohort with a saved survival analysis, for "
+"demonstration only. Patient names are invented. Outcome 1 = dead, 0 = alive; "
+"OverallTime is in months."
+msgstr ""
+"Kayıtlı bir sağkalım analizi içeren, yalnızca gösterim amaçlı simüle "
+"histopatoloji kohortu. Hasta adları uydurmadır. Outcome 1 = ölü, 0 = sağ; "
+"OverallTime ay cinsindendir."
+
+#: R/oddsratio.b.R
+msgid ""
+"Small expected cell counts detected (minimum = {min}). Asymptotic 2x2 "
+"approximations and log-method likelihood-ratio intervals may be imprecise."
+msgstr ""
+"Küçük beklenen hücre sayıları saptandı (minimum = {min}). Asimptotik 2x2 "
+"yaklaşımları ve log yöntemi olabilirlik oranı aralıkları kesin olmayabilir."
+
+#: R/outcomeorganizer.b.R
+msgid ""
+"Small sample size: {n} observations. As a general rule of thumb (< 30 "
+"observations), consider a larger sample for more reliable estimates."
+msgstr ""
+"Küçük örneklem büyüklüğü: {n} gözlem. Genel bir kural olarak (< 30 gözlem), "
+"daha güvenilir tahminler için daha büyük bir örneklem düşünün."
+
+#: R/singlearm.b.R
+msgid "Smoothed Hazard Rate"
+msgstr "Düzleştirilmiş Tehlike Hızı"
+
+#: R/survival.b.R
+msgid ""
+"Some ages at exit exceed 120 years (maximum {max}). Check that {unit} is the "
+"unit of the time variable and that age is in years."
+msgstr ""
+"Bazı çıkış yaşları 120 yılı aşıyor (maksimum {max}). {unit} biriminin zaman "
+"değişkeninin birimi olduğunu ve yaşın yıl cinsinden olduğunu kontrol edin."
+
+#: R/survivalcont.b.R
+msgid "Some survival time points were ignored"
+msgstr "Bazı sağkalım zaman noktaları yok sayıldı"
+
+#: R/oddsratio.b.R
+msgid ""
+"Specified negative outcome level '{level}' not found in outcome variable. "
+"Available levels: {levels}"
+msgstr ""
+"Belirtilen negatif sonuç düzeyi '{level}' sonuç değişkeninde bulunamadı. "
+"Mevcut düzeyler: {levels}"
+
+#: R/survival.b.R
+msgid ""
+"Specify all statistical methods, including details of any variable selection "
+"procedures and other model-building issues, how model assumptions were "
+"verified, and how missing data were handled."
+msgstr ""
+"Değişken seçim prosedürleri ve diğer model kurma konularının ayrıntıları, "
+"model varsayımlarının nasıl doğrulandığı ve eksik verilerin nasıl ele "
+"alındığı dahil tüm istatistiksel yöntemleri belirtin."
+
+#: R/survival.b.R
+msgid ""
+"Specify the assay method used and provide (or reference) a detailed "
+"protocol, including specific reagents or kits used, quality control "
+"procedures, reproducibility assessments, quantitation methods, and scoring "
+"and reporting protocols. Specify whether and how assays were performed "
+"blinded to the study endpoint."
+msgstr ""
+"Kullanılan ölçüm (assay) yöntemini belirtin ve kullanılan özgül reaktifler "
+"veya kitler, kalite kontrol prosedürleri, tekrarlanabilirlik "
+"değerlendirmeleri, kantitasyon yöntemleri, skorlama ve raporlama "
+"protokolleri dahil ayrıntılı bir protokol verin (veya kaynak gösterin). "
+"Ölçümlerin çalışma sonlanımına körlenmiş olarak yapılıp yapılmadığını ve "
+"nasıl yapıldığını belirtin."
+
+#: survivalcont/options/landmark.description
+msgid ""
+"Specify the landmark time at which to evaluate survival probabilities in "
+"landmark analysis. Patients with an event or censoring at or before this "
+"time are excluded. This option is only available if you enable the \"Use "
+"Landmark Time\" option."
+msgstr ""
+"Landmark analizinde sağkalım olasılıklarının değerlendirileceği landmark "
+"zamanını belirtin. Bu zamanda veya öncesinde olay ya da sansürleme yaşayan "
+"hastalar hariç tutulur. Bu seçenek yalnızca \"Landmark zamanı kullan\" "
+"seçeneğini etkinleştirirseniz kullanılabilir."
+
+#: survival/options/rate_multiplier.description
+msgid ""
+"Specify the multiplier for incidence rates. Rates are per this many "
+"person-units of the selected time type, for example per 100 person-months "
+"when time is in months."
+msgstr ""
+"İnsidans hızları için çarpanı belirtin. Hızlar, seçilen zaman türünün bu "
+"kadar kişi-birimi başınadır; örneğin süre ay cinsindeyse 100 kişi-ay başına."
+
+#: oddsratio/options/outcomeNegativeLevel.description.main
+msgid ""
+"Specify which outcome level represents the negative/reference case (e.g., "
+"\"Alive\", \"No Event\", \"No\"). Both Positive and Negative outcome levels "
+"must be selected; any other outcome levels are excluded."
+msgstr ""
+"Hangi sonuç düzeyinin negatif/referans durumu temsil ettiğini belirtin (ör. "
+"\"Alive\", \"No Event\", \"No\"). Hem Pozitif hem de Negatif sonuç düzeyi "
+"seçilmelidir; diğer tüm sonuç düzeyleri hariç tutulur."
+
+#: oddsratio/options/outcomeLevel.description.main
+msgid ""
+"Specify which outcome level represents the positive case (e.g., \"Dead\", "
+"\"Event\", \"Yes\"). Both Positive and Negative outcome levels must be "
+"selected; any other outcome levels are excluded."
+msgstr ""
+"Hangi sonuç düzeyinin pozitif durumu temsil ettiğini belirtin (ör. \"Dead\", "
+"\"Event\", \"Yes\"). Hem Pozitif hem de Negatif sonuç düzeyi seçilmelidir; "
+"diğer tüm sonuç düzeyleri hariç tutulur."
+
+#: R/survival.b.R
+msgid "Specimen characteristics"
+msgstr "Örnek özellikleri"
+
+#: R/survivalcont.b.R
+msgid "Standard error could not be estimated, so no confidence interval is shown."
+msgstr "Standart hata tahmin edilemediği için güven aralığı gösterilmiyor."
+
+#: R/multisurvival.b.R
+msgid ""
+"Standardized curves end at {end} {unit}, the shortest follow-up among the "
+"strata they average over; a stratum has no estimate after its own follow-up "
+"ends."
+msgstr ""
+"Standardize edilmiş eğriler, ortalaması alınan tabakalar arasındaki en kısa "
+"takip olan {end} {unit} zamanında sona erer; bir tabakanın kendi takibi "
+"bittikten sonra tahmini yoktur."
+
+#: R/timeinterval.b.R
+msgid "Start dates missing or unreadable"
+msgstr "Başlangıç tarihi eksik veya okunamayan"
+
+#: R/survival.b.R
+msgid ""
+"State the marker examined, the study objectives, and any pre-specified "
+"hypotheses."
+msgstr ""
+"İncelenen belirteci, çalışma amaçlarını ve önceden belirlenmiş hipotezleri "
+"belirtin."
+
+#: R/survival.b.R
+msgid ""
+"State the method of case selection, including whether prospective or "
+"retrospective and whether stratification or matching (for example, by stage "
+"of disease or age) was used. Specify the time period from which cases were "
+"taken, the end of the follow-up period, and the median follow-up time."
+msgstr ""
+"Olgu seçim yöntemini, prospektif veya retrospektif olup olmadığını ve "
+"tabakalandırma veya eşleştirme (örneğin hastalık evresi veya yaşa göre) "
+"kullanılıp kullanılmadığını belirtin. Olguların alındığı zaman dilimini, "
+"takip döneminin sonunu ve medyan takip süresini belirtin."
+
+#: R/survival.b.R
+msgid "Statistical analysis methods"
+msgstr "İstatistiksel analiz yöntemleri"
+
+#: R/survival.b.R
+msgid "Stratified by {var}"
+msgstr "{var} değişkenine göre tabakalandırılmış"
+
+#: R/survivalcont.b.R
+msgid "Stratified Cox model could not be fitted"
+msgstr "Tabakalı Cox modeli kurulamadı"
+
+#: R/survivalcont.b.R
+msgid "Stratified Cox regression failed: {msg}"
+msgstr "Tabakalı Cox regresyonu başarısız oldu: {msg}"
+
+#: R/multisurvival.b.R
+msgid ""
+"Subgroup p-values are exploratory and are not adjusted for multiple "
+"comparisons. Significance in one subgroup but not another does not establish "
+"effect modification; use the interaction test."
+msgstr ""
+"Alt grup p değerleri keşifseldir ve çoklu karşılaştırmalar için "
+"düzeltilmemiştir. Bir alt grupta anlamlı olup diğerinde olmaması etki "
+"değişimini kanıtlamaz; etkileşim testini kullanın."
+
+#: R/datetimeconverter.b.R
+msgid "Successfully Parsed:"
+msgstr "Başarıyla ayrıştırılan:"
+
+#: lassocox/results/suitabilityChecks.title
+msgid "Suitability Checks"
+msgstr "Uygunluk kontrolleri"
+
+#: package/analyses/survivalcont.description
+#: survivalcont/options.description.main
+msgid ""
+"Survival analysis for one continuous explanatory variable: Cox regression on "
+"the continuous scale, and optional data-derived cut-offs with Kaplan-Meier "
+"groups. A cut-off chosen from the same data overstates the effect and needs "
+"independent validation. These methods describe associations and do not "
+"establish causality."
+msgstr ""
+"Tek bir sürekli açıklayıcı değişken için sağkalım analizi: sürekli ölçekte "
+"Cox regresyonu ve isteğe bağlı olarak veriden türetilen kesim noktaları ile "
+"Kaplan-Meier grupları. Aynı veriden seçilen bir kesim noktası etkiyi "
+"olduğundan büyük gösterir ve bağımsız doğrulama gerektirir. Bu yöntemler "
+"ilişkileri tanımlar ve nedenselliği kanıtlamaz."
+
+#: R/survival.b.R
+msgid "Survival at {time} {unit} for the {group} group was {survival}%."
+msgstr "{group} grubu için {time} {unit} zamanındaki sağkalım %{survival} idi."
+
+#: R/survival.b.R
+msgid "Survival Curves Standardized for {age}"
+msgstr "{age} için Standardize Edilmiş Sağkalım Eğrileri"
+
+#: R/survivalcont.b.R
+msgid ""
+"Survival estimates are not reported (blank cells) for time points exceeding "
+"a group's longest observed follow-up: {groups}."
+msgstr ""
+"Bir grubun gözlemlenen en uzun takip süresini aşan zaman noktaları için "
+"sağkalım tahminleri bildirilmez (boş hücreler): {groups}."
+
+#: package.title
+msgid "Survival Module of ClinicoPath for jamovi"
+msgstr "jamovi için ClinicoPath Sağkalım Modülü"
+
+#: R/survival.b.R
+msgid "survival probabilities"
+msgstr "sağkalım olasılıkları"
+
+#: survivalcont/ui[5][0][0]/cutp.label
+msgid "Survival time points (default: 1, 3, 5 years)"
+msgstr "Sağkalım zaman noktaları (varsayılan: 1, 3, 5 yıl)"
+
+#: survivalcont/ui[6][1][0]/rmst_tau.label
+msgid "Tau (restriction time)"
+msgstr "Tau (kısıtlama zamanı)"
+
+#: R/survival.b.R
+msgid "Test: {test}."
+msgstr "Test: {test}."
+
+#: R/datetimeconverter.b.R
+msgid "Text After The Date Was Ignored"
+msgstr "Tarihten Sonraki Metin Yok Sayıldı"
+
+#: R/survivalcont.b.R
+msgid ""
+"The candidate space contains %s cut-off combinations. A reproducible random "
+"sample of %d unique combinations was drawn using seed %d, and the %d that "
+"met the minimum group size were compared. The reported solution is "
+"approximate and must be validated independently."
+msgstr ""
+"Aday uzayı %s kesim noktası kombinasyonu içeriyor. %d benzersiz "
+"kombinasyondan oluşan yeniden üretilebilir rastgele bir örneklem %d tohumu "
+"kullanılarak çekildi ve minimum grup büyüklüğünü karşılayan %d kombinasyon "
+"karşılaştırıldı. Bildirilen çözüm yaklaşıktır ve bağımsız olarak "
+"doğrulanmalıdır."
+
+#: R/singlearm.b.R
+msgid ""
+"The confidence interval of the median is the Brookmeyer-Crowley inversion of "
+"the log-log pointwise band of the Kaplan-Meier curve."
+msgstr ""
+"Medyanın güven aralığı, Kaplan-Meier eğrisinin log-log noktasal bandının "
+"Brookmeyer-Crowley ters çevrimidir."
+
+#: R/survivalcont.b.R
+msgid ""
+"The cut-off is the value that maximizes the standardized log-rank statistic "
+"(maximally selected rank statistic, survminer::surv_cutpoint / maxstat). The "
+"adjusted p in the cut-off table accounts for that search. A p-value computed "
+"afterwards on the low and high groups does not, and is not a valid test. "
+"Report the continuous Cox model as the primary analysis and validate the "
+"cut-off in independent data. When publishing, cite survminer and maxstat."
+msgstr ""
+"Kesim noktası, standartlaştırılmış log-rank istatistiğini en üst düzeye "
+"çıkaran değerdir (maksimum seçilmiş sıra istatistiği, "
+"survminer::surv_cutpoint / maxstat). Kesim noktası tablosundaki düzeltilmiş "
+"p bu aramayı hesaba katar. Düşük ve yüksek gruplarda sonradan hesaplanan bir "
+"p değeri bunu yapmaz ve geçerli bir test değildir. Sürekli Cox modelini "
+"birincil analiz olarak raporlayın ve kesim noktasını bağımsız verilerde "
+"doğrulayın. Yayınlarken survminer ve maxstat paketlerine atıfta bulunun."
+
+#: R/timeinterval.b.R
+msgid ""
+"The date format could not be settled from these dates, so the order of their "
+"day, month and year is unproven"
+msgstr ""
+"Tarih biçimi bu tarihlerden kesinleştirilemedi; bu nedenle gün, ay ve yıl "
+"sıraları kanıtlanmış değildir"
+
+#: singlearm/options/dxdate.description
+msgid ""
+"The date of diagnosis or study entry. Accepts: (1) Date/datetime text (e.g., "
+"\"2024-01-15\"), (2) Numeric values, which must be Unix epoch SECONDS since "
+"1970 (the DateTime Converter's corrected_datetime_numeric output). Day "
+"counts, Excel serials, YYYYMMDD numbers and years are refused, because a "
+"bare number has no unit. Time intervals are calculated as the difference "
+"from the follow-up date."
+msgstr ""
+"Tanı veya çalışmaya giriş tarihi. Şunları kabul eder: (1) Tarih/tarih-saat "
+"metni (ör. \"2024-01-15\"), (2) 1970'ten bu yana geçen Unix epoch SANİYELERİ "
+"olması gereken sayısal değerler (Tarih-Saat Dönüştürücü'nün "
+"corrected_datetime_numeric çıktısı). Gün sayıları, Excel seri numaraları, "
+"YYYYMMDD sayıları ve yıllar reddedilir, çünkü çıplak bir sayının birimi "
+"yoktur. Zaman aralıkları takip tarihinden fark olarak hesaplanır."
+
+#: singlearm/options/fudate.description
+msgid ""
+"The date of last follow-up or event. Accepts: (1) Date/datetime text (e.g., "
+"\"2024-01-15\"), (2) Numeric values, which must be Unix epoch SECONDS since "
+"1970, as for the diagnosis date. Must be in the same format as the diagnosis "
+"date."
+msgstr ""
+"Son takip veya olay tarihi. Şunları kabul eder: (1) Tarih/tarih-saat metni "
+"(ör. \"2024-01-15\"), (2) tanı tarihinde olduğu gibi, 1970'ten bu yana geçen "
+"Unix epoch SANİYELERİ olması gereken sayısal değerler. Tanı tarihi ile aynı "
+"biçimde olmalıdır."
+
+#: R/outcomeorganizer.b.R
+msgid ""
+"the event of interest ({levels}); this outcome also carries competing "
+"states, listed below"
+msgstr ""
+"ilgilenilen olay ({levels}); bu sonuç aşağıda listelenen yarışan durumları "
+"da içeriyor"
+
+#: R/survival.b.R
+msgid ""
+"The explanatory variable has only two levels, so there is a single {test} "
+"comparison and no multiplicity adjustment is applied."
+msgstr ""
+"Açıklayıcı değişken yalnızca iki düzeye sahiptir, bu nedenle tek bir {test} "
+"karşılaştırması vardır ve çoklu karşılaştırma düzeltmesi uygulanmaz."
+
+#: R/multisurvival.b.R
+msgid ""
+"The focal variable is in a second interaction, so a row labelled at a value "
+"applies only at that value ({values}). At other values of that variable the "
+"hazard ratio differs."
+msgstr ""
+"Odak değişken ikinci bir etkileşimde yer alıyor; bu nedenle bir değerde "
+"etiketlenen satır yalnızca o değerde ({values}) geçerlidir. Bu değişkenin "
+"diğer değerlerinde tehlike oranı farklıdır."
+
+#: R/multisurvival.b.R
+msgid ""
+"The interaction model shares a baseline hazard and the non-interacting "
+"covariate effects across moderator levels, within any selected strata. "
+"Separate subgroup models estimate these independently. Their HRs, confidence "
+"intervals and p-values can differ substantially; neither closer estimates "
+"nor narrower intervals are guaranteed."
+msgstr ""
+"Etkileşim modeli, seçilen tabakalar içinde, temel tehlikeyi ve etkileşime "
+"girmeyen kovaryat etkilerini moderatör düzeyleri arasında paylaşır. Ayrı alt "
+"grup modelleri bunları bağımsız olarak tahmin eder. TO değerleri, güven "
+"aralıkları ve p değerleri önemli ölçüde farklılaşabilir; ne daha yakın "
+"tahminler ne de daha dar aralıklar garanti edilir."
+
+#: R/singlearm.b.R
+msgid ""
+"The Kaplan-Meier median is the first time at which estimated event-free "
+"probability is 50% or lower; if the curve is exactly 50% over an interval, "
+"the midpoint of that interval is reported."
+msgstr "Kaplan-Meier medyanı, tahmini olaysız kalma olasılığının ilk kez %50 veya altına indiği zamandır; eğri bir aralık boyunca tam %50 ise bu aralığın orta noktası bildirilir."
+
+#: R/oddsratio.b.R
+msgid ""
+"The level '{level}' is treated as a positive test result as specified "
+"(negative test result: '{neg}')."
+msgstr ""
+"'{level}' düzeyi belirtildiği gibi pozitif test sonucu olarak ele alınıyor "
+"(negatif test sonucu: '{neg}')."
+
+#: R/survivalcont.b.R
+msgid ""
+"The longest time in {var} is {longest} {unit}, which is more than 50 years. "
+"Check that {unit} is the unit this column is recorded in."
+msgstr ""
+"{var} içindeki en uzun süre {longest} {unit} olup 50 yıldan fazladır. {unit} "
+"biriminin bu sütunun kaydedildiği birim olduğunu kontrol edin."
+
+#: R/singlearm.b.R
+msgid ""
+"The median time to the event of interest was not reached within interior "
+"follow-up: the cumulative incidence of the event of interest reached 50%% "
+"only at the final observed follow-up time (%.1f %s, reaching %.1f%%), where "
+"the step is driven by the last observation(s); report fixed-time cumulative "
+"incidence estimates instead"
+msgstr ""
+"İlgilenilen olaya kadar geçen medyan süreye iç takip aralığında ulaşılmadı: "
+"ilgilenilen olayın kümülatif insidansı %%50'ye yalnızca son gözlenen takip "
+"zamanında (%.1f %s, %.1f%% düzeyine ulaşarak) ulaştı; bu noktada basamak son "
+"gözlem(ler) tarafından belirlenir; bunun yerine sabit zamanlı kümülatif "
+"insidans tahminlerini bildirin"
+
+#: R/singlearm.b.R
+msgid ""
+"The median was not reached: the Kaplan-Meier curve did not reach 50% before "
+"follow-up ended, so no median time-to-event can be estimated from these "
+"data. This is not a statement that survival is good or poor - it reflects "
+"the number of events and the length of follow-up."
+msgstr "Medyana ulaşılamadı: Kaplan-Meier eğrisi izlem bitmeden önce %50'ye ulaşmadığından bu verilerden medyan olaya kadar geçen süre tahmin edilemez. Bu, sağkalımın iyi veya kötü olduğunu göstermez; olay sayısını ve izlem süresini yansıtır."
+
+#: R/multisurvival.b.R
+msgid ""
+"The nomogram estimates cumulative incidence by <b>{timepoints}</b> of "
+"follow-up, one risk scale per timepoint. Harrell's C-index is not reported "
+"for the expanded Fine-Gray fit; validation requires a cause- and "
+"horizon-specific measure."
+msgstr ""
+"Nomogram, <b>{timepoints}</b> takip zamanına kadar kümülatif insidansı, "
+"zaman noktası başına bir risk ölçeğiyle tahmin eder. Genişletilmiş Fine-Gray "
+"modeli için Harrell C-indeksi bildirilmez; doğrulama, nedene ve ufka özgü "
+"bir ölçüt gerektirir."
+
+#: R/oddsratio.b.R
+msgid ""
+"The odds ratio could not be estimated for: {variables}. The data separate "
+"the outcome on these terms, alone or jointly, so the maximum-likelihood "
+"estimate does not exist and the fit only stops at an arbitrary value. The "
+"cell is shown as 'not estimable': this is neither a large odds ratio nor "
+"evidence of no association. Enable Firth penalized logistic regression to "
+"obtain a finite estimate, or combine sparse categories. Terms whose "
+"multivariable odds ratio is not estimable are omitted from the forest plot."
+msgstr ""
+"Şunlar için odds oranı tahmin edilemedi: {variables}. Veri bu terimlerde, "
+"tek başına veya birlikte, sonucu ayırıyor; bu nedenle maksimum olabilirlik "
+"tahmini mevcut değildir ve uydurma yalnızca rastgele bir değerde durur. "
+"Hücre 'tahmin edilemez' olarak gösterilir: bu ne büyük bir odds oranıdır ne "
+"de ilişki olmadığının kanıtıdır. Sonlu bir tahmin elde etmek için Firth "
+"cezalı lojistik regresyonunu etkinleştirin veya seyrek kategorileri "
+"birleştirin. Çok değişkenli odds oranı tahmin edilemeyen terimler orman "
+"grafiğinde gösterilmez."
+
+#: R/oddsratio.b.R
+msgid ""
+"The odds ratio for {variables} exists but cannot be printed: its value or a "
+"confidence limit is too extreme, or a confidence limit could not be "
+"computed. This is not separation. Rescale the variable to read it in the "
+"table."
+msgstr ""
+"{variables} için odds oranı mevcuttur ancak yazdırılamaz: değeri veya bir "
+"güven sınırı çok uçtur ya da bir güven sınırı hesaplanamamıştır. Bu bir "
+"ayrılma (separation) değildir. Tabloda okumak için değişkeni yeniden "
+"ölçekleyin."
+
+#: R/outcomeorganizer.b.R
+msgid "The outcome supplied is already a multi-state coding, so it was recoded to:"
+msgstr ""
+"Sağlanan sonuç zaten çok durumlu bir kodlama olduğundan şu şekilde yeniden "
+"kodlandı:"
+
+#: R/outcomeorganizer.b.R
+msgid ""
+"The outcome variable '<b>%s</b>' was recoded for <b>%s</b> analysis. Code 1 "
+"represents %s. Code 0 represents %s. The recoded variable contains <b>%d %s "
+"(%.1f%%)</b> and <b>%d coded 0 (%.1f%%)</b> out of %d coded records.%s"
+msgstr ""
+"'<b>%s</b>' sonuç değişkeni <b>%s</b> analizi için yeniden kodlandı. Kod 1 "
+"şunu temsil eder: %s. Kod 0 şunu temsil eder: %s. Yeniden kodlanan değişken "
+"<b>%d %s (%.1f%%)</b> ve <b>%d adet 0 kodlu (%.1f%%)</b> olmak üzere toplam "
+"%d kodlanmış kayıttan oluşmaktadır.%s"
+
+#: R/survivalcont.b.R
+msgid "The overall log-rank test across the cut-off groups could not be computed: %s"
+msgstr "Kesme noktası grupları arasındaki genel log-rank testi hesaplanamadı: %s"
+
+#: R/lassocox.b.R
+msgid ""
+"The penalty search stopped after {kept} of {searched} lambda values. Smaller "
+"penalties gave a patient a linear predictor above 30 (relative hazard above "
+"1e13), where glmnet cannot compute the cross-validation curve correctly, so "
+"they were not used."
+msgstr ""
+"Ceza araması {searched} lambda değerinden {kept} tanesinden sonra durdu. "
+"Daha küçük cezalar bir hastaya 30'un üzerinde doğrusal öngörücü (1e13'ün "
+"üzerinde göreli tehlike) verdi; bu noktada glmnet çapraz doğrulama eğrisini "
+"doğru hesaplayamaz, bu nedenle bu cezalar kullanılmadı."
+
+#: R/outcomeorganizer.b.R
+msgid ""
+"The recurrence variable decides the disease-free survival event. {nawd} "
+"patient(s) coded '{awd}' (Alive with Disease) have no recurrence recorded "
+"and are counted as event-free. {nawod} patient(s) coded '{awod}' (Alive "
+"without Disease) have recurrence level '{level}' and are counted as events. "
+"Check these rows for a coding error before reporting."
+msgstr ""
+"Hastalıksız sağkalım olayını nüks değişkeni belirler. '{awd}' (Hastalıkla "
+"Yaşıyor) olarak kodlanan {nawd} hastada nüks kaydı yoktur ve bu hastalar "
+"olaysız sayılır. '{awod}' (Hastalıksız Yaşıyor) olarak kodlanan {nawod} "
+"hastada '{level}' nüks düzeyi vardır ve bu hastalar olay olarak sayılır. "
+"Raporlamadan önce bu satırları kodlama hatası açısından kontrol edin."
+
+#: R/lassocox.b.R
+msgid ""
+"The selected columns depend on the cross-validation split, so a different "
+"seed or row order can select a different set."
+msgstr ""
+"Seçilen sütunlar çapraz doğrulama bölünmesine bağlıdır; bu nedenle farklı "
+"bir tohum değeri veya satır sırası farklı bir küme seçebilir."
+
+#: R/oddsratio.b.R
+msgid ""
+"The selected negative outcome level '{level}' is not present among paired "
+"complete observations. Available levels: {levels}."
+msgstr ""
+"Seçilen negatif sonuç düzeyi '{level}', eşleştirilmiş eksiksiz gözlemler "
+"arasında mevcut değildir. Mevcut düzeyler: {levels}."
+
+#: R/oddsratio.b.R
+msgid ""
+"The selected negative predictor level '{level}' is not present among paired "
+"complete observations. Available levels: {levels}."
+msgstr ""
+"Seçilen negatif belirteç düzeyi '{level}', eşleştirilmiş eksiksiz gözlemler "
+"arasında mevcut değildir. Mevcut düzeyler: {levels}."
+
+#: R/survivalcont.b.R
+msgid ""
+"The statistic is the largest standardized log-rank score statistic over all "
+"candidate cut-offs. It uses a permutation variance, so it differs from the "
+"square root of a log-rank chi-square at the same cut. Adjusted p allows for "
+"that search (the smaller of the Lausen and Schumacher 1992 and Lausen, "
+"Sauerbrei and Schumacher 1994 approximations) and is conservative. A p-value "
+"computed on the low and high groups, including after exporting them, ignores "
+"the search and is not a valid test: it falls below 0.05 in about 43% of "
+"simulated data sets with no association. Validate the cut-off in independent "
+"data."
+msgstr ""
+"İstatistik, tüm aday kesim noktaları üzerindeki en büyük standartlaştırılmış "
+"log-rank skor istatistiğidir. Permütasyon varyansı kullandığından, aynı "
+"kesim noktasındaki log-rank ki-karenin karekökünden farklıdır. Düzeltilmiş p "
+"bu aramayı hesaba katar (Lausen ve Schumacher 1992 ile Lausen, Sauerbrei ve "
+"Schumacher 1994 yaklaşımlarından küçük olanı) ve muhafazakârdır. Düşük ve "
+"yüksek gruplarda, dışa aktarıldıktan sonra dahil, hesaplanan bir p değeri "
+"aramayı yok sayar ve geçerli bir test değildir: ilişkinin olmadığı "
+"simülasyon veri kümelerinin yaklaşık %43'ünde 0.05'in altına düşer. Kesim "
+"noktasını bağımsız verilerde doğrulayın."
+
+#: R/survival.b.R
+msgid ""
+"The survival time cannot be used as a spline predictor: it is the outcome, "
+"so any association with it is built in."
+msgstr ""
+"Sağkalım süresi spline öngörücüsü olarak kullanılamaz: sonuç değişkenidir, "
+"bu nedenle onunla herhangi bir ilişki yapısal olarak yerleşiktir."
+
+#: R/outcomeorganizer.b.R
+msgid ""
+"The TTP status marks %d patient(s) as having progressed, while deaths "
+"without progression are coded 0 (censored). This analysis writes the STATUS "
+"only: it has no progression date variable. Pairing this status with overall "
+"survival or death time overstates time to progression for every patient who "
+"progressed before dying or last contact - their progression event is "
+"recorded at the later death/contact time. Supply time to progression (or "
+"time to last tumor assessment/death for non-progressing patients) as the "
+"time variable in downstream survival analyses."
+msgstr ""
+"TTP durumu %d hastayı progresyon geçirmiş olarak işaretlerken progresyonsuz "
+"ölümler 0 (sansürlü) olarak kodlanır. Bu analiz yalnızca DURUMU yazar: "
+"progresyon tarihi değişkeni yoktur. Bu durumu genel sağkalım veya ölüm "
+"süresiyle eşleştirmek, ölümden veya son temastan önce progresyon geçiren her "
+"hasta için progresyona kadar geçen süreyi olduğundan uzun gösterir - "
+"progresyon olayları daha sonraki ölüm/temas zamanında kaydedilmiş olur. "
+"Sonraki sağkalım analizlerinde zaman değişkeni olarak progresyona kadar "
+"geçen süreyi (progresyon geçirmeyen hastalar için son tümör "
+"değerlendirmesine/ölüme kadar geçen süreyi) sağlayın."
+
+#: R/timeinterval.b.R
+msgid ""
+"The UTC timezone setting applies only to values carrying a time of day. "
+"These dates were read as \"{format}\", so they are calendar days and the "
+"timezone has no effect on the intervals."
+msgstr ""
+"UTC saat dilimi ayarı yalnızca günün saatini taşıyan değerlere uygulanır. Bu "
+"tarihler \"{format}\" olarak okundu; dolayısıyla takvim günleridir ve saat "
+"diliminin aralıklar üzerinde etkisi yoktur."
+
+#: R/outcomeorganizer.b.R
+msgid "These counts are after censoring at an administrative cut-off."
+msgstr "Bu sayılar idari bir kesme noktasında sansürlemeden sonrakilerdir."
+
+#: R/oddsratio.b.R
+msgid ""
+"These explanatory variables produce the same model term name, so their odds "
+"ratios cannot be told apart: {variables}. Rename one of them."
+msgstr ""
+"Bu açıklayıcı değişkenler aynı model terim adını üretiyor, bu nedenle odds "
+"oranları birbirinden ayırt edilemiyor: {variables}. Bunlardan birini yeniden "
+"adlandırın."
+
+#: R/multisurvival.b.R
+msgid ""
+"These rows are not overall effects, because the variables are in an "
+"interaction. {terms}. At other values the hazard ratio differs and can "
+"change direction."
+msgstr ""
+"Değişkenler bir etkileşimde yer aldığı için bu satırlar genel etkiler "
+"değildir. {terms}. Diğer değerlerde tehlike oranı farklıdır ve yön "
+"değiştirebilir."
+
+#: R/timeinterval.b.R
+msgid ""
+"These rows cannot be analyzed: a negative interval subtracts from total "
+"person-time and would corrupt any incidence rate computed from that "
+"denominator."
+msgstr ""
+"Bu satırlar analiz edilemez: negatif bir aralık toplam kişi-zamandan düşer "
+"ve bu paydadan hesaplanan her insidans hızını bozar."
+
+#: R/datetimeconverter.b.R
+msgid ""
+"These values give a month and a year but no day, for example \"{example}\". "
+"• Each was set to the 1st of its month, so the day in the converted column "
+"is not data. • Anything computed from these dates is accurate to about a "
+"month at best."
+msgstr ""
+"Bu değerler ay ve yıl içeriyor ancak gün içermiyor, örneğin \"{example}\". • "
+"Her biri ilgili ayın 1. gününe ayarlandı; bu nedenle dönüştürülen sütundaki "
+"gün gerçek veri değildir. • Bu tarihlerden hesaplanan her şey en iyi "
+"ihtimalle yaklaşık bir ay duyarlıdır."
+
+#: R/outcomeorganizer.b.R
+msgid ""
+"This coding only treats disease progression as events; deaths without "
+"progression are censored. The outcome variable and its Event Level are not "
+"used."
+msgstr ""
+"Bu kodlama yalnızca hastalık progresyonunu olay olarak kabul eder; "
+"progresyon olmadan gerçekleşen ölümler sansürlenir. Sonuç değişkeni ve Olay "
+"Düzeyi kullanılmaz."
+
+#: R/datetimeconverter.b.R
+msgid ""
+"This column was converted as Unix epoch seconds, but its {which} value "
+"({value}) converts to {date}. • Epoch seconds for a realistic clinical date "
+"are roughly 1e8 to 4e9 (1973 to 2096). • These values look like Unix epoch "
+"MILLISECONDS (1000 times larger than seconds). Select Auto-detect, which "
+"recognises and converts epoch milliseconds."
+msgstr ""
+"Bu sütun Unix epoch saniyesi olarak dönüştürüldü, ancak {which} değeri "
+"({value}) {date} tarihine karşılık geliyor. • Gerçekçi bir klinik tarih için "
+"epoch saniyesi yaklaşık 1e8 ile 4e9 arasındadır (1973-2096). • Bu değerler "
+"Unix epoch MİLİSANİYESİ gibi görünüyor (saniyeden 1000 kat büyük). Epoch "
+"milisaniyelerini tanıyıp dönüştüren Otomatik Algıla seçeneğini seçin."
+
+#: R/outcomeorganizer.b.R
+msgid ""
+"This is NOT a two-level survival indicator. Kaplan-Meier and Cox treat any "
+"non-zero status as the same event, so use a competing-risks method "
+"(cumulative incidence, Fine-Gray) instead."
+msgstr ""
+"Bu iki düzeyli bir sağkalım göstergesi DEĞİLDİR. Kaplan-Meier ve Cox sıfır "
+"olmayan her durumu aynı olay olarak ele alır; bu nedenle bunun yerine bir "
+"yarışan risk yöntemi (kümülatif insidans, Fine-Gray) kullanın."
+
+#: R/outcomeorganizer.b.R
+msgid "This is standard coding for Cox regression and Kaplan-Meier analysis."
+msgstr "Bu, Cox regresyonu ve Kaplan-Meier analizi için standart kodlamadır."
+
+#: R/multisurvival.b.R
+msgid ""
+"This nomogram is derived from a multivariable Fine-Gray "
+"subdistribution-hazards model fitted on <b>%s patients</b> with <b>%s events "
+"of interest</b>. Its risk scales describe cumulative incidence of the event "
+"of interest while accounting for competing events."
+msgstr ""
+"Bu nomogram, <b>%s hasta</b> üzerinde <b>%s ilgilenilen olay</b> ile kurulan "
+"çok değişkenli Fine-Gray alt dağılım tehlikeleri modelinden türetilmiştir. "
+"Risk ölçekleri, yarışan olayları hesaba katarak ilgilenilen olayın kümülatif "
+"insidansını tanımlar."
+
+#: R/survivalcont.b.R
+msgid ""
+"This unadjusted p is not a valid test: the cut-offs were chosen from the "
+"same survival outcomes, so it falls below 0.05 in about 30% to 65% of "
+"simulated data sets with no association (150 patients, two cut-offs). No "
+"selection-adjusted p-value is available for several cut-offs chosen "
+"together. Validate data-derived cut-points independently before clinical use."
+msgstr ""
+"Bu düzeltilmemiş p geçerli bir test değildir: kesim noktaları aynı sağkalım "
+"sonuçlarından seçildiği için, ilişkinin olmadığı simülasyon veri kümelerinin "
+"yaklaşık %30 ila %65'inde 0.05'in altına düşer (150 hasta, iki kesim "
+"noktası). Birlikte seçilen birden fazla kesim noktası için seçime göre "
+"düzeltilmiş p değeri mevcut değildir. Veriden türetilen kesim noktalarını "
+"klinik kullanımdan önce bağımsız olarak doğrulayın."
+
+#: R/singlearm.b.R
+msgid "Time (%s)"
+msgstr "Zaman (%s)"
+
+#: survivalcont/ui[7][0][0]/time_intervals.label
+msgid "Time intervals"
+msgstr "Zaman aralıkları"
+
+#: R/singlearm.b.R
+msgid "Time since landmark ({unit})"
+msgstr "Landmark zamanından bu yana geçen süre ({unit})"
+
+#: R/singlearm.b.R
+msgid "time since landmark, {offset} {unit}; {n} of {total} at risk there"
+msgstr ""
+"landmark zamanından bu yana geçen süre, {offset} {unit}; orada {total} "
+"bireyin {n} tanesi risk altında"
+
+#: R/outcomeorganizer.b.R
+msgid "Time to Progression (TTP) Analysis"
+msgstr "Progresyona Kadar Geçen Süre (TTP) Analizi"
+
+#: R/survival.b.R
+msgid ""
+"Time-point estimates in competing-risks mode are cumulative incidences; turn "
+"on 'All event types at selected times' to show them."
+msgstr ""
+"Yarışan riskler modunda zaman noktası tahminleri kümülatif insidanslardır; "
+"bunları göstermek için 'All event types at selected times' seçeneğini açın."
+
+#: package.description
+msgid ""
+"Time-to-event analysis for clinicopathological research in 'jamovi': "
+"Kaplan-Meier estimates, log-rank tests, Cox regression, competing-risk "
+"cumulative incidence, cut-off analysis of continuous markers, multivariable "
+"and LASSO Cox models, odds ratios, and preparation of dates and outcomes for "
+"survival analysis. Part of the ClinicoPath suite. For comments, suggestions, "
+"feature requests or reporting bugs, please open an issue at "
+"<https://github.com/sbalci/ClinicoPathJamoviModule/issues/>."
+msgstr ""
+"jamovi için klinikopatolojik araştırmalarda olaya kadar geçen süre analizi: "
+"Kaplan-Meier kestirimleri, log-rank testleri, Cox regresyonu, yarışan risk "
+"kümülatif insidansı, sürekli belirteçler için kesim noktası analizi, çok "
+"değişkenli ve LASSO Cox modelleri, odds oranları ile sağkalım analizi için "
+"tarih ve sonuçların hazırlanması. ClinicoPath paketinin bir parçasıdır. "
+"Yorum, öneri, özellik istekleri veya hata bildirimleri için lütfen "
+"<https://github.com/sbalci/ClinicoPathJamoviModule/issues/> adresinde bir "
+"konu açın."
+
+#: R/datetimeconverter.b.R
+msgid "Times In A Daylight-Saving Gap"
+msgstr "Yaz Saati Geçiş Boşluğundaki Saatler"
+
+#: R/oddsratio.b.R
+msgid "too extreme to print"
+msgstr "yazdırılamayacak kadar uç"
+
+#: R/datetimeconverter.b.R
+msgid "Total Observations:"
+msgstr "Toplam gözlem:"
+
+#: R/outcomeorganizer.b.R
+msgid "TTP status produced - pair it with time to progression"
+msgstr "TTP durumu üretildi - progresyona kadar geçen süreyle eşleştirin"
+
+#: R/outcomeorganizer.b.R
+msgid ""
+"TTP: Only progression events counted, deaths censored (%d events, %d "
+"censored, %d missing). This analysis produces the STATUS only - pair it with "
+"time to progression (or last disease assessment/death for censored rows), "
+"not overall survival time."
+msgstr ""
+"TTP: Yalnızca progresyon olayları sayıldı, ölümler sansürlendi (%d olay, %d "
+"sansürlü, %d eksik). Bu analiz yalnızca DURUMU üretir - bunu genel sağkalım "
+"süresiyle değil, progresyona kadar geçen süreyle (sansürlü satırlar için son "
+"hastalık değerlendirmesine/ölüme kadar geçen süreyle) eşleştirin."
+
+#: R/oddsratio.b.R
+msgid ""
+"Unadjusted 2×2 estimates. Clopper-Pearson exact intervals for sensitivity "
+"and specificity; log method (Simel et al. 1991) for the likelihood ratios. "
+"Computed as in epiR::epi.tests() with its default settings."
+msgstr ""
+"Düzeltilmemiş 2×2 tahminleri. Duyarlılık ve özgüllük için Clopper-Pearson "
+"kesin aralıkları; olabilirlik oranları için log yöntemi (Simel ve ark. "
+"1991). Varsayılan ayarlarıyla epiR::epi.tests() ile aynı şekilde "
+"hesaplanmıştır."
+
+#: R/oddsratio.b.R
+msgid "Univariable and multivariable columns use the same {n} complete cases."
+msgstr "Tek değişkenli ve çok değişkenli sütunlar aynı {n} tam olguyu kullanır."
+
+#: R/survival.b.R
+#: R/survivalcont.b.R
+msgid "Unreadable dates"
+msgstr "Okunamayan tarihler"
+
+#: R/timeinterval.b.R
+msgid "Unsupported output unit."
+msgstr "Desteklenmeyen çıktı birimi."
+
+#: R/timeinterval.b.R
+msgid "Unsupported time basis."
+msgstr "Desteklenmeyen zaman esası."
+
+#: R/timeinterval.b.R
+msgid "Unsupported timezone setting."
+msgstr "Desteklenmeyen saat dilimi ayarı."
+
+#: survival/options/age_time_scale.description
+msgid ""
+"Use chronological age as the time axis instead of follow-up time. The Cox "
+"model becomes Surv(age_at_entry, age_at_event, event). Suited to cohorts "
+"followed for disease onset; for patients timed from diagnosis it is a "
+"sensitivity analysis."
+msgstr ""
+"Takip süresi yerine zaman ekseni olarak takvim yaşını kullanın. Cox modeli "
+"Surv(age_at_entry, age_at_event, event) haline gelir. Hastalık başlangıcı "
+"için izlenen kohortlara uygundur; süresi tanıdan itibaren ölçülen hastalarda "
+"bir duyarlılık analizidir."
+
+#: R/multisurvival.b.R
+msgid ""
+"Use finite follow-up times. Infinite time values cannot be analyzed; check "
+"the elapsed-time column or the selected dates."
+msgstr ""
+"Sonlu takip süreleri kullanın. Sonsuz zaman değerleri analiz edilemez; geçen "
+"süre sütununu veya seçilen tarihleri kontrol edin."
+
+#: R/oddsratio.b.R
+msgid ""
+"Use the 'Positive Level' and 'Negative Level' dropdown menus below the "
+"outcome variable to make your selections. Any other levels in a multi-level "
+"outcome variable will be excluded."
+msgstr ""
+"Seçimlerinizi yapmak için sonuç değişkeninin altındaki 'Pozitif Düzey' ve "
+"'Negatif Düzey' açılır menülerini kullanın. Çok düzeyli bir sonuç "
+"değişkenindeki diğer tüm düzeyler hariç tutulur."
+
+#: R/survivalcont.b.R
+msgid ""
+"Using both optimal cut-off and multiple cut-offs may lead to overfitting. "
+"Consider validation in independent dataset or cross-validation."
+msgstr "Hem en uygun kesim noktasının hem de çoklu kesim noktalarının kullanılması aşırı uyuma yol açabilir. Bağımsız bir veri kümesinde doğrulamayı veya çapraz doğrulamayı değerlendirin."
+
+#: R/datetimeconverter.b.R
+msgid "Values That Cannot Have This Format"
+msgstr "Bu Biçimde Olamayacak Değerler"
+
+#: R/survivalcont.b.R
+msgid ""
+"Variable \"%s\" is categorical (non-numeric) and cannot be analyzed as a "
+"continuous explanatory variable. Select a numeric variable, or use Survival "
+"Analysis for categorical predictors."
+msgstr ""
+"Değişken \"%s\" kategoriktir (sayısal değildir) ve sürekli açıklayıcı "
+"değişken olarak analiz edilemez. Sayısal bir değişken seçin veya kategorik "
+"yordayıcılar için Sağkalım Analizi kullanın."
+
+#: R/survival.b.R
+msgid "Variable analyzed here: {var}."
+msgstr "Burada analiz edilen değişken: {var}."
+
+#: R/multisurvival.b.R
+msgid ""
+"Variables in an interaction are not ranked here: their hazard ratios and "
+"p-values apply only at the values stated under the table."
+msgstr ""
+"Etkileşimdeki değişkenler burada sıralanmaz: tehlike oranları ve p değerleri "
+"yalnızca tablonun altında belirtilen değerlerde geçerlidir."
+
+#: R/outcomeorganizer.b.R
+msgid ""
+"Very small sample size: {n} observations. As a general rule of thumb (< 10 "
+"observations), results may be unreliable."
+msgstr ""
+"Çok küçük örneklem büyüklüğü: {n} gözlem. Genel bir kural olarak (< 10 "
+"gözlem), sonuçlar güvenilir olmayabilir."
+
+#: R/outcomeorganizer.b.R
+msgid "Vital status and recurrence disagree - please check these patients"
+msgstr "Yaşam durumu ile nüks uyuşmuyor - lütfen bu hastaları kontrol edin"
+
+#: R/datetimeconverter.b.R
+msgid "Week #"
+msgstr "Hafta no"
+
+#: R/datetimeconverter.b.R
+msgid ""
+"Week # counts 7-day blocks from 1 January (lubridate::week), not ISO-8601 "
+"weeks."
+msgstr "Hafta numarası, ISO-8601 haftaları yerine 1 Ocak'tan başlayan 7 günlük blokları sayar (lubridate::week)."
+
+#: R/survivalcont.b.R
+msgid "When {factor_val}, median survival is {median_val} {ci_str} {units}."
+msgstr "{factor_val} için medyan sağkalım {median_val} {ci_str} {units} değerindedir."
+
+#: R/survivalcont.b.R
+msgid ""
+"When {factor_val}, median survival was not reached during the observation "
+"period (the survival curve does not drop below 1/2)."
+msgstr "{factor_val} için gözlem süresince medyan sağkalıma ulaşılamadı (sağkalım eğrisi 1/2'nin altına düşmüyor)."
+
+#: R/survivalcont.b.R
+msgid "When {strata_val}, {time_val} {units} survival is {survival} {ci_str}."
+msgstr "{strata_val} için {time_val} {units} sağkalımı {survival} {ci_str} değerindedir."
+
+#: R/survivalcont.b.R
+msgid ""
+"When {strata_val}, {time_val} {units} survival is not estimable (exceeds "
+"maximum observed follow-up in this group)."
+msgstr "{strata_val} için {time_val} {units} sağkalımı tahmin edilemiyor (bu grupta gözlenen en uzun izlemi aşıyor)."
+
+#: R/outcomeorganizer.b.R
+msgid ""
+"With no Recurrence/Progression variable, a patient who recurred and is now "
+"free of disease is coded as event-free. Select that variable if the data "
+"have it."
+msgstr ""
+"Nüks/İlerleme değişkeni yoksa nüks geçirmiş ve şu anda hastalıksız olan "
+"hasta olaysız olarak kodlanır. Veride varsa bu değişkeni seçin."
+
+#: survivalcont/ui[4][1][0]/yend_plot.label
+msgid "Y-axis end"
+msgstr "Y ekseni bitişi"
+
+#: survivalcont/ui[4][1][0]/ybegin_plot.label
+msgid "Y-axis start"
+msgstr "Y ekseni başlangıcı"
+
+#: R/oddsratio.b.R
+msgid ""
+"Zero cells detected in the 2x2 table. Sensitivity or specificity may be "
+"exactly 0 or 1, a likelihood ratio may be undefined, and confidence "
+"intervals are less reliable."
+msgstr ""
+"2x2 tabloda sıfır hücreler saptandı. Duyarlılık veya özgüllük tam olarak 0 "
+"veya 1 olabilir, bir olabilirlik oranı tanımsız olabilir ve güven aralıkları "
+"daha az güvenilirdir."
+
+#: R/timeinterval.b.R
+msgid "Zero Intervals"
+msgstr "Sıfır aralıklar"

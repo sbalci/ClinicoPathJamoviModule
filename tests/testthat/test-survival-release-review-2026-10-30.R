@@ -16,7 +16,7 @@ suppressMessages(library(survival))
     n <- tb$notes
     if (length(n)) paste(vapply(n, function(x) x$note, ""), collapse = " | ") else ""
 }
-.rr_txt <- function(x) gsub("<[^>]+>", " ", paste(x$content, collapse = " "))
+.rr_txt <- function(x) if (inherits(x, "Table")) x$asString() else gsub("<[^>]+>", " ", paste(x$content, collapse = " "))
 .rr_data <- function(n = 300, seed = 1) {
     set.seed(seed)
     d <- data.frame(id = seq_len(n), grp = factor(sample(c("A", "B", "C"), n, TRUE)),
@@ -318,17 +318,16 @@ test_that("a risk group exhausted before t has observed survival 0, not a blank"
 
 test_that("REMARK has the 20 published items and reports only what ran", {
     d <- .rr_data()
-    h <- .rr_txt(.rr_ss(d, remark_checklist = TRUE)$remarkChecklist)
-    expect_length(regmatches(h, gregexpr("\\b[0-9]+\\. [A-Z]", h))[[1]], 20)
+    h <- .rr_txt(.rr_ss(d, remark_checklist = TRUE)$remarkItems)
+    expect_equal(.rr_ss(d, remark_checklist = TRUE)$remarkItems$rowCount, 20)
     expect_match(h, "Discuss implications for future research and clinical value.", fixed = TRUE)
     expect_match(h, "Give rationale for sample size", fixed = TRUE)
 
-    ticks <- function(res) lengths(regmatches(res$remarkChecklist$content,
-                                              gregexpr("✅</td>", res$remarkChecklist$content)))
+    ticks <- function(res) sum(res$remarkItems$asDF[[4]] == "Reported in this output")
 
     # apparent calibration is not validation
     r <- .rr_ss(d, remark_checklist = TRUE, calibration_curves = TRUE, calibration_timepoint = 30)
-    expect_match(.rr_txt(r$remarkChecklist), "is not validation", fixed = TRUE)
+    expect_match(.rr_txt(r$remarkItems), "is not validation", fixed = TRUE)
     expect_equal(ticks(r), 0)
 
     # the plot, the hazard ratios and the probabilities together make item 15
@@ -343,7 +342,7 @@ test_that("REMARK has the 20 published items and reports only what ran", {
     # nothing Cox-based under competing risks
     r <- .rr_cr(.rr_cr_data(), remark_checklist = TRUE, sc = TRUE)
     expect_equal(ticks(r), 0)
-    expect_match(.rr_txt(r$remarkChecklist), "cumulative incidence", fixed = TRUE)
+    expect_match(.rr_txt(r$remarkItems), "cumulative incidence", fixed = TRUE)
 })
 
 test_that("time-zero rows are disclosed by the models that drop them", {
@@ -396,7 +395,7 @@ test_that("the outcome time is refused as a spline predictor", {
 })
 
 test_that("no stale Cox text survives an unfitted model; plots clear with their options", {
-    src <- paste(deparse(ClinicoPath:::survivalClass$private_methods$.run), collapse = " ")
+    src <- paste(vapply(ClinicoPath:::survivalClass$private_methods, function(f) paste(deparse(f), collapse = " "), character(1)), collapse = " ")
     expect_true(grepl("self$results$coxSummary$setContent(\"\")", src, fixed = TRUE))
     r <- .rr_ss(.rr_data(), stratified_cox = TRUE)
     expect_equal(r$coxTable$rowCount, 0)

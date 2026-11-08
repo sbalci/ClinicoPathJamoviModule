@@ -157,6 +157,7 @@ and a survey of stakeholder views: KMunicate. BMJ Open, 9(9), e030215.
 \section{Methods}{
 \subsection{Public methods}{
   \itemize{
+    \item \href{#method-survivalcontClass-init}{\code{survivalcontClass$init()}}
     \item \href{#method-survivalcontClass-asSource}{\code{survivalcontClass$asSource()}}
     \item \href{#method-survivalcontClass-clone}{\code{survivalcontClass$clone()}}
   }
@@ -180,7 +181,6 @@ and a survey of stakeholder views: KMunicate. BMJ Open, 9(9), e030215.
   <li><span class="pkg-link" data-pkg="jmvcore" data-topic="Analysis" data-id="addAddon"><a href='../../jmvcore/html/Analysis.html#method-Analysis-addAddon'><code>jmvcore::Analysis$addAddon()</code></a></span></li>
   <li><span class="pkg-link" data-pkg="jmvcore" data-topic="Analysis" data-id="asProtoBuf"><a href='../../jmvcore/html/Analysis.html#method-Analysis-asProtoBuf'><code>jmvcore::Analysis$asProtoBuf()</code></a></span></li>
   <li><span class="pkg-link" data-pkg="jmvcore" data-topic="Analysis" data-id="check"><a href='../../jmvcore/html/Analysis.html#method-Analysis-check'><code>jmvcore::Analysis$check()</code></a></span></li>
-  <li><span class="pkg-link" data-pkg="jmvcore" data-topic="Analysis" data-id="init"><a href='../../jmvcore/html/Analysis.html#method-Analysis-init'><code>jmvcore::Analysis$init()</code></a></span></li>
   <li><span class="pkg-link" data-pkg="jmvcore" data-topic="Analysis" data-id="optionsChangedHandler"><a href='../../jmvcore/html/Analysis.html#method-Analysis-optionsChangedHandler'><code>jmvcore::Analysis$optionsChangedHandler()</code></a></span></li>
   <li><span class="pkg-link" data-pkg="jmvcore" data-topic="Analysis" data-id="postInit"><a href='../../jmvcore/html/Analysis.html#method-Analysis-postInit'><code>jmvcore::Analysis$postInit()</code></a></span></li>
   <li><span class="pkg-link" data-pkg="jmvcore" data-topic="Analysis" data-id="print"><a href='../../jmvcore/html/Analysis.html#method-Analysis-print'><code>jmvcore::Analysis$print()</code></a></span></li>
@@ -193,6 +193,25 @@ and a survey of stakeholder views: KMunicate. BMJ Open, 9(9), e030215.
   <li><code>survivalcontBase$initialize()</code></li>
 </ul>
 </details>}}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-survivalcontClass-init"></a>}}
+\if{latex}{\out{\hypertarget{method-survivalcontClass-init}{}}}
+\subsection{\code{survivalcontClass$init()}}{
+  Initialize safely when the supplied data has no selected variables.
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{survivalcontClass$init(noThrow = FALSE)}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{noThrow}}{Whether initialization errors are stored in the results.}
+    }
+    \if{html}{\out{</div>}}
+  }
+}
+
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-survivalcontClass-asSource"></a>}}
 \if{latex}{\out{\hypertarget{method-survivalcontClass-asSource}{}}}

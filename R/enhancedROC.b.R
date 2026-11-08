@@ -1371,7 +1371,8 @@ enhancedROCClass <- R6::R6Class(
         # "ci_method" too (cross-analysis review XA-05, 2026-10-21): an interval is not read
         # correctly without its method, and the default page never named DeLong.
         .keptTableNotes = c("seed", "rule", "cutpoint_optimism", "venkatraman", "multiplicity",
-                            "ovr_average", "ovr_direction", "ovo_direction", "pair_order", "ci_method"),
+                            "ovr_average", "ovr_direction", "ovo_direction", "pair_order", "ci_method",
+                            "mcclish_below_diagonal"),
         .applyTableNotesOption = function() {
             if (isTRUE(self$options$showTableNotes)) return(invisible(NULL))
             strip <- function(item) {
@@ -2585,9 +2586,9 @@ enhancedROCClass <- R6::R6Class(
                     predictor = .rocLabel(predictor, note = FALSE),
                     cutoff = optimal$cutoff,
                     sensitivity = optimal$sensitivity,
-                    sensitivity_ci = paste0("(", round(sens_ci[1], 3), ", ", round(sens_ci[2], 3), ")"),
+                    sensitivity_ci = sprintf("(%.3f, %.3f)", sens_ci[1], sens_ci[2]),
                     specificity = optimal$specificity,
-                    specificity_ci = paste0("(", round(spec_ci[1], 3), ", ", round(spec_ci[2], 3), ")"),
+                    specificity_ci = sprintf("(%.3f, %.3f)", spec_ci[1], spec_ci[2]),
                     accuracy = optimal$accuracy,
                     balanced_accuracy = balanced_acc
                 )
@@ -3191,11 +3192,11 @@ enhancedROCClass <- R6::R6Class(
                         # This maps pAUC to [0.5, 1.0] scale where 0.5 = chance, 1.0 = perfect
                         normalized_pauc <- tryCatch(
                             {
-                                pauc_corrected <- pROC::auc(roc_obj,
+                                pauc_corrected <- suppressWarnings(pROC::auc(roc_obj,
                                     partial.auc = c(range_max, range_min),
                                     partial.auc.focus = range_type_name,
                                     partial.auc.correct = TRUE
-                                )
+                                ))
                                 as.numeric(pauc_corrected)
                             },
                             error = function(e) NA_real_
@@ -3248,8 +3249,9 @@ enhancedROCClass <- R6::R6Class(
                         # F-28: pROC returns NA (with a warning) for a curve below the diagonal over
                         # the focus range; jamovi prints that NA as "NaN".
                         if (!is.finite(row$normalized_pauc)) {
-                            private$.blankCells(paTable, key, "normalized_pauc",
-                                .("Not defined: the McClish correction rescales a partial AUC to 0.5 (chance) to 1 (perfect) only when the curve lies above the chance diagonal over the focus range, and this curve lies below it. The raw partial AUC is shown."))
+                            below_diag_msg <- .("Not defined: the McClish correction rescales a partial AUC to 0.5 (chance) to 1 (perfect) only when the curve lies above the chance diagonal over the focus range, and this curve lies below it. The raw partial AUC is shown.")
+                            private$.blankCells(paTable, key, "normalized_pauc", below_diag_msg)
+                            paTable$setNote("mcclish_below_diagonal", below_diag_msg)
                         }
                         # Only when the interval was asked for: otherwise pa_ci is NULL by design and
                         # the columns are hidden.

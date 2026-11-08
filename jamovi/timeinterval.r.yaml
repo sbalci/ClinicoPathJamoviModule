@@ -21,6 +21,13 @@ items:
       title: Understanding Person-Time Analysis
       type: Html
 
+    - name: qualityCounts
+      title: Data Quality Counts
+      type: Table
+      rows: 0
+      columns: []
+      visible: (include_quality_metrics)
+
     - name: qualityAssessment
       title: Data Quality Assessment
       type: Html

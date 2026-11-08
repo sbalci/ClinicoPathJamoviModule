@@ -1163,6 +1163,7 @@ survivalcontResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                 options=options,
                 name="plot4",
                 title="Cutpoint Plot",
+                requiresData=TRUE,
                 width=600,
                 height=450,
                 renderFun=".plot4",

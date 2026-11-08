@@ -4,7 +4,7 @@
 
 - **Function**: `outcomeorganizer`
 - **Title**: Outcome Organizer for Survival Analysis
-- **Module**: `SurvivalT`
+- **Module**: `Survival`
 - **Files**:
   - `jamovi/outcomeorganizer.u.yaml` - User Interface Definition
   - `jamovi/outcomeorganizer.a.yaml` - Options & Schema Definition

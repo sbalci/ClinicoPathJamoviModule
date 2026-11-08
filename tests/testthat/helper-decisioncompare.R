@@ -19,9 +19,17 @@
 #
 # This is a test-harness convenience only. Real user code and the roxygen @examples
 # pass the arguments directly, because that is the API once the module is built.
+.decisioncompare_fn <- function() {
+    if ("ClinicoPath" %in% loadedNamespaces()) return(get("decisioncompare", asNamespace("ClinicoPath")))
+    if ("meddecide" %in% loadedNamespaces()) return(get("decisioncompare", asNamespace("meddecide")))
+    if (exists("decisioncompare", envir = globalenv(), mode = "function")) return(get("decisioncompare", globalenv()))
+    ClinicoPath::decisioncompare
+}
+
 call_decisioncompare <- function(...) {
     args <- list(...)
-    accepted <- names(formals(ClinicoPath::decisioncompare))
+    fn <- .decisioncompare_fn()
+    accepted <- names(formals(fn))
     dropped <- setdiff(names(args), accepted)
 
     # Only ever silently drop the forward-compatible Level options. Anything else
@@ -31,13 +39,13 @@ call_decisioncompare <- function(...) {
     if (length(unexpected) > 0)
         stop("Unknown decisioncompare() argument(s): ", paste(unexpected, collapse = ", "))
 
-    do.call(ClinicoPath::decisioncompare, args[names(args) %in% accepted])
+    do.call(fn, args[names(args) %in% accepted])
 }
 
 # TRUE once jmvtools::prepare() has compiled the new Level options into the wrapper.
 # Use to skip assertions that can only hold post-regeneration.
 decisioncompare_has_negative_levels <- function() {
-    "goldNegative" %in% names(formals(ClinicoPath::decisioncompare))
+    "goldNegative" %in% names(formals(.decisioncompare_fn()))
 }
 
 # McNemar oracles, transcribed from Fagerland, Lydersen & Laake (BMC Med Res Methodol 2013;13:91)

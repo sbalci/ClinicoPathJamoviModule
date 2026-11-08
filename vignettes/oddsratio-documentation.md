@@ -4,7 +4,7 @@
 
 - **Function**: `oddsratio`
 - **Title**: Odds Ratio Table and Plot
-- **Module**: `SurvivalT`
+- **Module**: `Survival`
 - **Files**:
   - `jamovi/oddsratio.u.yaml` - User Interface Definition
   - `jamovi/oddsratio.a.yaml` - Options & Schema Definition
@@ -25,8 +25,10 @@
 | `explanatory` | `Variables` | `NULL` | Explanatory Variables |
 | `outcome` | `Variable` | `NULL` | Binary Outcome |
 | `outcomeLevel` | `Level` | `NULL` | Positive Level |
+| `outcomeNegativeLevel` | `Level` | `NULL` | Negative / Reference Level |
 | `diagnosticPredictor` | `Variable` | `NULL` | Diagnostic Predictor (for LRs) |
 | `predictorLevel` | `Level` | `NULL` | Predictor Positive Level |
+| `predictorNegativeLevel` | `Level` | `NULL` | Predictor Negative / Reference Level |
 | `usePenalized` | `Bool` | `FALSE` | Use Firth penalized logistic regression |
 | `showNomogram` | `Bool` | `FALSE` | Prediction nomogram and diagnostic metrics |
 | `showExplanations` | `Bool` | `FALSE` | Educational explanations |
@@ -35,6 +37,7 @@
 
 | Output ID | Type | Title | Description |
 | :--- | :--- | :--- | :--- |
+| `eventRecodeInfo` | `Html` | `Outcome Recode` |  |
 | `todo` | `Html` | `To Do` |  |
 | `errors` | `Html` | `Critical Errors` |  |
 | `strongWarnings` | `Html` | `Strong Warnings` |  |

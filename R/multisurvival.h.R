@@ -61,7 +61,7 @@ multisurvivalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             showSummaries = TRUE, ...) {
 
             super$initialize(
-                package="jsurvival",
+                package="ClinicoPath",
                 name="multisurvival",
                 requiresData=TRUE,
                 ...)
@@ -561,6 +561,7 @@ multisurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
         strongWarnings = function() private$.items[["strongWarnings"]],
         warnings = function() private$.items[["warnings"]],
         infoMessages = function() private$.items[["infoMessages"]],
+        fittedTable = function() private$.items[["fittedTable"]],
         text = function() private$.items[["text"]],
         text2 = function() private$.items[["text2"]],
         interactionExplanation = function() private$.items[["interactionExplanation"]],
@@ -700,6 +701,36 @@ multisurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 name="infoMessages",
                 title="Information",
                 visible=FALSE))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="fittedTable",
+                title="Model Estimates",
+                rows=0,
+                columns=list(),
+                refs="finalfit",
+                clearWith=list(
+                    "outcome",
+                    "outcomeLevel",
+                    "elapsedtime",
+                    "explanatory",
+                    "contexpl",
+                    "fudate",
+                    "dxdate",
+                    "tint",
+                    "multievent",
+                    "analysistype",
+                    "dod",
+                    "dooc",
+                    "awd",
+                    "awod",
+                    "timetypeoutput",
+                    "use_stratify",
+                    "stratvar",
+                    "interactions",
+                    "uselandmark",
+                    "landmark",
+                    "timetypedata",
+                    "showSummaries")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="text",
@@ -2558,6 +2589,7 @@ multisurvivalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   \code{results$strongWarnings} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$warnings} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$infoMessages} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$fittedTable} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$text} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$text2} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$interactionExplanation} \tab \tab \tab \tab \tab a html \cr
@@ -2614,9 +2646,9 @@ multisurvivalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'
 #' Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
 #'
-#' \code{results$interactionTest$asDF}
+#' \code{results$fittedTable$asDF}
 #'
-#' \code{as.data.frame(results$interactionTest)}
+#' \code{as.data.frame(results$fittedTable)}
 #'
 #' @export
 multisurvival <- function(

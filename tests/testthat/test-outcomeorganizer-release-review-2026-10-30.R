@@ -80,7 +80,7 @@ test_that("F2: one Event Level on a multi-level outcome names what it leaves out
                  recurrenceLevel = "Yes", analysistype = "pfs", showGlossary = TRUE)
     expect_equal(sum(r$val == 1), 15L)
     sw <- .rr_html(r, "strongWarnings")
-    expect_match(sw, "'DOC' (3)", fixed = TRUE)
+    expect_match(sw, sprintf("'DOC' (%d)", sum(.d4$vs == "DOC")), fixed = TRUE)
     expect_match(sw, "Multiple Event Levels", fixed = TRUE)
     expect_false(grepl("progression-free survival", r$title, fixed = TRUE))
     expect_match(.rr_html(r, "eventRecodeInfo"), "one outcome level counted as death", fixed = TRUE)

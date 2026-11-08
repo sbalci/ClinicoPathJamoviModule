@@ -238,6 +238,7 @@ lassocoxResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     inherit = jmvcore::Group,
     active = list(
         todo = function() private$.items[["todo"]],
+        suitabilityChecks = function() private$.items[["suitabilityChecks"]],
         suitabilityReport = function() private$.items[["suitabilityReport"]],
         modelSummary = function() private$.items[["modelSummary"]],
         coefficients = function() private$.items[["coefficients"]],
@@ -286,6 +287,24 @@ lassocoxResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "censorLevel",
                     "elapsedtime",
                     "explanatory",
+                    "lambda",
+                    "nfolds",
+                    "standardize",
+                    "random_seed")))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="suitabilityChecks",
+                title="Suitability Checks",
+                rows=0,
+                columns=list(),
+                visible="(suitabilityCheck)",
+                clearWith=list(
+                    "outcome",
+                    "outcomeLevel",
+                    "censorLevel",
+                    "elapsedtime",
+                    "explanatory",
+                    "suitabilityCheck",
                     "lambda",
                     "nfolds",
                     "standardize",
@@ -837,6 +856,7 @@ lassocoxBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$suitabilityChecks} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$suitabilityReport} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$modelSummary} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$coefficients} \tab \tab \tab \tab \tab a table \cr
@@ -862,9 +882,9 @@ lassocoxBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'
 #' Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
 #'
-#' \code{results$modelSummary$asDF}
+#' \code{results$suitabilityChecks$asDF}
 #'
-#' \code{as.data.frame(results$modelSummary)}
+#' \code{as.data.frame(results$suitabilityChecks)}
 #'
 #' @export
 lassocox <- function(

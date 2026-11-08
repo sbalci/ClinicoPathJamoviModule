@@ -1,3 +1,168 @@
+## Unreleased — jsurvival module audit repairs (2026-11-08)
+
+- **Module audit repairs (2026-11-08):** Configured fatal inputs now raise framework errors in
+  DateTime Converter, Outcome Organizer, Single-Arm Survival and Continuous Survival. Untouched
+  selections retain guidance. Nine native result grids replace computed HTML grids across six
+  analyses, preserving the estimates and counts. Turkish message extraction/catalog gaps and
+  the identified English median/nomogram narratives are localized. Seven long run methods are
+  split into ordered phases; the bootstrap formula fallback uses the shared safe parser.
+  Statistical methods, defaults and clinical thresholds are unchanged.
+
+## Unreleased — OncoPath 1.1.3: 2026-11-07 pre-submission review corrections
+
+- **Diagnostic Test Meta-Analysis (`diagnosticmeta`):**
+  - Pooled sensitivity or specificity above `99.95%` (for example `99.979%`) is no longer rounded to
+    `"100.0%"` with `"missing only 0"` and `"LR- = 0.00"` in the narrative and copy-ready summary;
+    `.fmtPct()` and `.fmtRatio()` preserve significant digits near `0%`, `100%`, and performance or
+    likelihood-ratio category boundaries (`70%`, `80%`, `90%`, `99%`, and `0.1`, `0.2`, `0.5`, `2`,
+    `5`, `10`), and IEEE-754 boundary values such as `90.0%` (`89.999999999999986`) are classified in
+    the `"excellent"` (`>= 90%`) band without duplicating the likelihood-ratio caution note.
+  - The zero-FP notice claims an unbounded `LR+` only when every study has `FP = 0`.
+  - Meta-regression labels polynomial (`contr.poly`) and non-treatment factor contrasts with the
+    user's variable name instead of `"covariate"`, formats near-zero contrast weights cleanly, and
+    treats non-finite numeric covariate values (`Inf`/`-Inf`) as missing.
+  - SROC curves are withheld when between-study variance collapses ($\hat{\tau}^2 \le 10^{-3}$) or
+    observed false-positive rates have zero range, preventing degenerate vertical curves.
+  - SROC prediction-region guidance clarifies that the 95% prediction region converges to the
+    between-study dispersion ellipse rather than a single point, and the predictive-values table
+    attaches the substantial-heterogeneity footnote only when heterogeneity is actually substantial.
+- **IHC Heterogeneity Analysis (`ihcheterogeneity`):**
+  - Inter-regional (no-reference) designs now apply the Krouwer (2008) three-slope rule (requiring the
+    HC3 slope of $y - x$ on $x$, $y$, and $(x+y)/2$ to be significant in the same direction) so
+    unequal measurement error between two regions is no longer misclassified as proportional bias.
+  - Inter-regional pairwise Spearman correlations now report 95% confidence intervals using the Fisher
+    $z$ transformation with the Bonett & Wright (2000) variance, downgrade the overall verdict when a
+    pair's correlation CI lies entirely below the threshold or a pair has too few observations
+    ($3 \le n < 5$) to estimate a correlation, and cite Bonett & Wright (2000) in the copy-ready
+    methods and assumptions panels.
+  - Coarsely binned ordinal scores such as Allred scores (`0, 2-8`) are detected alongside `0-3+`
+    scores, omit proportional-bias slopes, and report `"Not graded: ordinal or binned values"` across
+    the reproducibility, sampling-bias, spatial-analysis, and compartment-comparison tables instead of
+    grading CVs or 5% equivalence margins on integer codes.
+  - A discretization warning is emitted when the equivalence margin in marker units is finer than the
+    smallest non-zero step on a discrete measurement grid (without firing on material systematic bias
+    or continuous random measurements).
+  - The reference-design CV row is labelled `"Within-case CV (%) - reference and regions"` to state
+    what it pools.
+- **Swimmer Plot (`swimmerplot`):**
+  - A patient-level best overall response repeated across a patient's episodes is no longer warned as
+    an unconfirmed derived response; only patients with more than one distinct recorded response
+    category across episodes trigger the per-episode derivation disclosure.
+  - Excluded rows (missing or invalid start/end times) record their surviving row indices so excluded
+    episodes cannot leak responses, censoring flags, milestones, event markers, or sort values into
+    retained timelines, and relative-time mode preserves raw values on unanchored patients so
+    `end < start` on a later row is not misclassified as a non-numeric value.
+  - An all-missing `responseVar` paired with `groupVar` no longer emits contradictory group-response
+    warnings or `0.0%` response footnotes in the Group Comparison table.
+  - `"Non-CR/Non-PD"` is recognized as the standard RECIST v1.1 non-target category, literal `"NA"`
+    strings in `responseVar` are treated as missing, response summary rows follow clinical order
+    (`CR, PR, SD, Non-CR/Non-PD, PD, NE`), and `sortOrder = "response"` groups non-RECIST categories
+    ahead of missing responses.
+- **Treatment Response: Waterfall & Spider (`waterfall`):**
+  - The percent-of-baseline scale guard (detecting values where `100` means no change) now runs both
+    with and without a time variable (`timeVar`), while exempting cohorts that include explicit `0%`
+    baselines.
+  - Per-visit supplied response categories (`responseCategoryVar` with multiple categories per
+    patient) now derive each patient's best response in time order up to the first `PD`, cap post-`PD`
+    target shrinkage in `.processData()`, and propagate per-visit `CR`/`PR` and `PD` times into Time
+    to First Response (`TTR`) and Duration of Response (`DoR`).
+  - A `responseCategoryVar` or `groupVar` column literally named `"response"` is read from the source
+    data frame before `processed_df$response` is written, preventing silent overwrite by calculated
+    percent changes.
+  - Supplied `"NE"` or `"Unknown"` categories are excluded from waterfall bars and median/bootstrap CI
+    calculations, retained as `"Unknown / not evaluable"` even when the numeric response is `NA`, and
+    reported once without duplicate unevaluable notices.
+
+## Unreleased — jsurvival 1.1.3: 2026-11-07 pre-release review corrections
+
+- **Saved plot state:** odds-ratio forest plots and continuous-survival cutoff plots retain
+  metadata instead of patient records. Redraws and exports reconstruct the needed data from the
+  dataset, and legacy plot states are cleared when redrawn.
+- **R API input guidance:** survival-module wrappers accept a supplied data frame with no
+  selected variables and return guidance. Regression tests now provide their translation binding
+  and verify excluded-outcome counts against the fixture.
+- **Survival Analysis (`survival`):** RMST handles time horizons (`tau`) shorter than the earliest
+  observed follow-up (`RMST = tau`, `SE = 0`) and bounds confidence intervals to `[0, tau]`.
+  Restricted cubic splines (`rcs_analysis`) include the stratification variable when **Stratified Cox
+  regression** is enabled. Competing-risks mode hides the Kaplan-Meier survival table when a 3-level
+  competing-risks outcome from Outcome Organizer is used directly, and adds an explanatory footnote
+  when cumulative incidence does not reach 50%.
+- **Survival Analysis for Continuous Variable (`survivalcont`):** **Add Redefined Outcome to Data**
+  writes every source row before landmark filtering, and the median and survival-table summaries
+  report `"not reached"` instead of `"NA"` when a median or confidence limit is not reached.
+- **Multivariable Survival (`multisurvival`):** Fine-Gray competing-risks nomograms weight the
+  covariate reference distribution (`datadist`) at the patient level rather than by expanded
+  Fine-Gray counting-process rows, and risk-group cumulative incidence curves preserve `"Censored"`
+  as the reference status level even when a risk group has zero censored observations.
+- **Outcome Organizer (`outcomeorganizer`):** Event hierarchy (`useHierarchy`) leaves missing
+  outcomes (`NA`) as missing instead of recoding them to censored (`0`) or the priority event, and
+  censors undated duplicate priority rows after retaining the dated priority event. Multi-state mode
+  populates the Outcome Recode summary card.
+- **Date-Time Converter (`datetimeconverter`):** `Date` columns preserve their calendar day across
+  Western Hemisphere timezones instead of shifting back by one day at UTC midnight, and
+  implausible-year warnings (`< 1900` or future years) apply to pre-formatted `Date` and `POSIXct`
+  columns as well as text and numeric dates.
+
+## Unreleased — meddecide 1.1.3: 2026-11-07 pre-release review corrections
+
+- **Medical Decision (`decision`):**
+  - When the 95% confidence interval for Youden's index includes 0, the Clinical Summary and
+    Clinical Interpretation panels report `"no statistically detectable discrimination"` / `"No
+    evidence of discrimination in this sample"` instead of calling the test `"poor"` or `"worse
+    than chance"`.
+  - Unestimable likelihood-ratio sentences give the actual reason (for example a zero true-negative
+    count), NPV values within 0.05 percentage points of 100% are not rounded to `"100.0%"`, Youden
+    direction guards against 32-bit integer overflow at very large sample sizes, and
+    `comparatorCases` adds a truncation note when discordant cases exceed `maxCasesShow`.
+- **Medical Decision Calculator (`decisioncalculator`):**
+  - F1 score is `0` (not blank) when `TP = 0` with `FP + FN > 0`, and an undefined PPV (`TP = 0,
+    FP = 0`) blanks its interval instead of printing `[0, 1]`.
+- **Compare Medical Decision Tests (`decisioncompare`):**
+  - Original-data cross-tabulation (`originalCrossTab`) notes rows omitted due to missing test or
+    reference values, and each per-test 2x2 table (`cTable1`–`cTable3`) includes a `"levels"` note
+    naming the reference and test levels.
+- **Interrater Reliability (`agreement`):**
+  - Specific agreement matches `specificPositiveCategory` case-insensitively and after trimming
+    whitespace under the default `specificAllCategories = TRUE`, warns when a category is not found
+    in the data, and treats whitespace-only input as empty.
+  - Gwet's AC under unanimous ratings blanks the zero-SE confidence interval and p-value and
+    explains why.
+  - Enabling `hierarchicalKappa` without `clusterVariable` (or `mixedEffectsComparison` without
+    `conditionVariable`) emits a single warning notice instead of repeating it for each sub-table.
+  - Section headings are native `Group` containers (`irrtableGroup`, `specificAgreementGroup`,
+    `gwetGroup`, `krippTableGroup`, etc.), `predictionRater` is a `Variable` selector (`iotaStandardize`
+    is hidden), and `exct` documentation reflects Gwet linearized-variance inference for Conger's
+    exact kappa.
+- **Clinical ROC Analysis (`enhancedROC`):**
+  - `validationNegative` is a `Level` selector, `partialAucFrom` / `partialAucTo` are numeric
+    controls, and `plotTheme` defaults to `"jamovi"` (`jamovi (follow global)`).
+  - Diagnostic Performance sensitivity/specificity CIs retain three decimal places (`(%.3f, %.3f)`),
+    partial AUC below the chance diagonal suppresses raw R warnings and sets a kept table note on
+    `partialAucAnalysis`, and `validationContext` marks `"slide (default setting)"` for `Unit of
+    observation`.
+- **Advanced ROC Analysis (`psychopdaROC`):**
+  - Confusion matrices in `sensSpecTable` are native `Table` elements (`Decision based on measure`
+    by `Criterion`), `treatmentThresholdMin` / `Max` / `Step` are numeric controls, and
+    `metaAnalysis` is hidden.
+  - `delongComparisonTable` warns when a marker has AUC < 0.5 in the selected direction,
+    `metric` and `break_ties` are enabled only for metric-optimizing methods, `fixedSensSpecTable`
+    `missed_target_` note keys preserve raw variable names (`A B` vs `A.B`), and failed parametric
+    or kernel ROC smoothing emits a user-facing warning.
+- **Decision Curve Analysis (`decisioncurve`):**
+  - `benefitRangeTable` adds a `"window_edge"` note when a model's observed range of benefit
+    reaches the boundary of the analyzed threshold window, and confidence-interval guidance
+    distinguishes pointwise from simultaneous bands.
+- **LASSO Logistic Regression (`lassologistic`):**
+  - Suitability assessment (`suitabilityReport`) is a native `Table`, collinearity notes distinguish
+    variable-selection instability from prediction accuracy, and elastic-net guidance is suppressed
+    when elastic net is already active.
+
+## Unreleased — meddecide 1.1.2: 2026-10-23
+
+- **Example dataset update:** replaced the no-gold-standard Data Library entry for pathologist
+  readings with `nogoldstandard_validation.omv` (190 simulated patients, three imperfect binary
+  diagnostic tests, latent-class analysis with 1,000 bootstrap refits, seed 42).
+
 ## Unreleased — meddecide 1.1.1: 2026-10-21 independent-review corrections
 
 - psychopdaROC: IDI and NRI no longer replace a marker whose risk runs against the
@@ -155,7 +320,7 @@ Other fixes:
   explained instead of shown as empty tables or "Inf".
 - Each extreme value and each narrative panel is reported once. The results title matches the
   analysis name. A rejected run in guided mode shows "STOPPED", not "Ready to run".
-- The analysis is routed to `OncoPathT` for validation; production promotion is separate.
+- The analysis ships in the `OncoPath` menu.
 
 ## Unreleased — OncoPath: Swimmer Plot release-profile fixes
 
@@ -207,7 +372,7 @@ Other fixes:
 - The export panel describes the tables shown (first 500 patients) and is cleared on each run.
 - The About and glossary panels state the missing-data and best-response rules actually applied.
 - Syntax mode quotes milestone names and the censoring coding.
-- The analysis is routed to `OncoPathT` for validation; production promotion is separate.
+- The analysis ships in the `OncoPath` menu.
 
 ## Unreleased — OncoPath: IHC Heterogeneity release-profile fixes
 

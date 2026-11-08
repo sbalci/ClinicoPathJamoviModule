@@ -22,16 +22,30 @@ The **`ihcheterogeneity`** analysis (IHC Heterogeneity Analysis) provides clinic
 
 ## Key Capabilities
 
-- With a reference measurement (whole section, hotspot or overall score): the Spearman
-  correlation of each region with the reference, the absolute-agreement ICC(2,1), the per-case
-  coefficient of variation, and for each region the mean difference from the reference with its
-  95% CI and Bland-Altman limits of agreement.
-- Without a reference: the same statistics between the regions.
-- Each systematic difference is judged against a margin you set (`bias_margin`, default 5% of the
-  comparison mean): ruled out when its 90% CI lies inside the margin (two one-sided tests), shown
-  to be material when a Bonferroni-adjusted CI lies entirely beyond it, inconclusive otherwise.
-- Optional variance components, sample-size planning for ICC precision (Bonett 2002) and
-  comparisons between spatial compartments.
+- **Reference-based design** (whole section, hotspot or overall score supplied in `wholesection`):
+  computes the Spearman rank correlation of each region with the reference (with Fisher-$z$ 95% CIs
+  using the Bonett & Wright 2000 variance), the absolute-agreement ICC(2,1) and consistency ICC(3,1)
+  with F-based 95% CIs (McGraw & Wong 1996), the within-case coefficient of variation (root mean
+  square of per-case CVs across the reference and regions), and for each region (plus the mean of
+  all regions) the mean difference from the reference with its 95% CI, Hedges' $g$, and Bland-Altman
+  95% limits of agreement with approximate 95% CIs (Bland & Altman 1999).
+- **Inter-regional design** (no reference supplied): computes pairwise Spearman correlations with
+  Bonett & Wright (2000) 95% CIs, inter-regional ICC(2,1)/ICC(3,1), within-case CV across regions,
+  and all pairwise regional differences with Fieller percentage-difference CIs and Bland-Altman LoAs.
+- **Equivalence, material bias, and proportional bias**: each systematic difference is judged against
+  a user-specified margin (`bias_margin`, default 5% of the comparison mean) using Fieller intervals:
+  ruled out when its 90% CI lies inside the margin (two one-sided tests, Schuirmann 1987), shown to
+  be material when a Bonferroni-adjusted CI lies entirely beyond it, and inconclusive otherwise.
+  Proportional bias (whether the difference changes with the biomarker level) is tested using
+  heteroscedasticity-robust HC3 standard errors (MacKinnon & White 1985) and the Krouwer (2008)
+  three-slope rule across both measurements and their mean so unequal measurement precision alone
+  does not trigger false proportional-bias warnings.
+- **Ordinal / coarsely binned score guard**: integer scores such as HER2 (`0-3+`) or Allred (`0, 2-8`)
+  are automatically detected and marked `"Not graded: ordinal or binned values"` rather than graded
+  by CVs or 5% continuous equivalence margins.
+- **Optional analyses**: two-way random-effects variance components (`variance_components`), sample-size
+  planning for ICC precision (`sample_size_planning`, Bonett 2002), and spatial compartment comparisons
+  (`compareCompartments`, `compartmentTests`).
 
 # Example Workflow in R
 

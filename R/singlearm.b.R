@@ -80,6 +80,16 @@ NULL
 singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
     "singlearmClass",
     inherit = singlearmBase,
+    public = list(
+        #' @description Initialize safely when the supplied data has no selected variables.
+        #' @param noThrow Whether initialization errors are stored in the results.
+        init = function(noThrow = FALSE) {
+            if (!is.null(private$.data) && length(self$options$varsRequired) == 0L) {
+                private$.data <- data.frame()
+            }
+            super$init(noThrow = noThrow)
+        }
+    ),
     # Constants and cache
     private = list(
         .sourcifyOption = function(option) {
@@ -169,6 +179,11 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
       # Message Accumulation Methods (for HTML notice panels) ----
       .addError = function(message) {
         private$.errorMessages <- c(private$.errorMessages, message)
+      },
+
+      .rejectInputErrors = function() {
+        private$.displayMessages()
+        jmvcore::reject(paste(unique(private$.errorMessages), collapse = " "))
       },
 
       .addWarning = function(message, strong = FALSE) {
@@ -1662,7 +1677,7 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
       # Run Analysis ----
       ,
-      .run = function() {
+        .prepareSingleArmRun = function() {
         # Clear any previous messages
         private$.clearMessages()
         private$.resetRunOutputs()
@@ -1713,8 +1728,7 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         }
         if (length(role_errors) > 0) {
           for (msg in unique(role_errors)) private$.addError(msg)
-          private$.displayMessages()
-          return()
+          private$.rejectInputErrors()
         }
 
         # jamovi column names are normally unique, but the exported R function
@@ -1737,16 +1751,14 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         if (length(duplicated_roles) > 0) {
           private$.addError(sprintf(.('Selected variable name(s) are duplicated in the data: %s. Rename the duplicate columns so each analysis role identifies exactly one variable.'),
             paste(sprintf('"%s"', duplicated_roles), collapse = ", ")))
-          private$.displayMessages()
-          return()
+          private$.rejectInputErrors()
         }
 
         ## Empty data ----
 
         if (nrow(self$data) == 0) {
           private$.addError(.('Dataset contains no complete rows. Please ensure your data is properly loaded and contains observations.'))
-          private$.displayMessages()
-          return()
+          private$.rejectInputErrors()
         }
 
         private$.checkpoint()
@@ -1771,7 +1783,7 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
         # Check if cleandata failed (returned NULL due to validation errors)
         if (is.null(results)) {
-          return()
+          private$.rejectInputErrors()
         }
 
         for (caveat in recode_caveats) private$.addWarning(caveat)
@@ -1807,6 +1819,10 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         # `visible:` binding from singlearm.r.yaml with a literal, so a one-way
         # setVisible(FALSE) kept the populated hazard table hidden for the rest
         # of the session after the user switched back to ordinary survival.
+            private$.publishSingleArmResults(results, cr)
+        },
+
+        .publishSingleArmResults = function(results, cr) {
         private$.hazardSectionVisibility(cr)
 
         ## Data Quality Assessment ----
@@ -1941,6 +1957,10 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         }
 
         ## Analysis Completion Notice ----
+            private$.finishSingleArmRun(data_quality)
+        },
+
+        .finishSingleArmRun = function(data_quality) {
         analysis_type <- if(private$.isCompetingRisk()) 'Competing risk' else 'Standard'
         method_used <- if(private$.isCompetingRisk())
           'cumulative-incidence (Aalen-Johansen/cmprsk)' else 'Kaplan-Meier'
@@ -1970,6 +1990,10 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
         # Display all accumulated messages
         private$.displayMessages()
+        },
+
+      .run = function() {
+            private$.prepareSingleArmRun()
       }
 
       # Competing Risk Analysis Function ----
@@ -2354,13 +2378,10 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         }, error = function(e) FALSE)
 
         .median_meaning <- if (.median_estimable)
-          c("The Kaplan-Meier median is the first time at which estimated event-free probability is 50% or lower; if the curve is exactly 50% over an interval, the midpoint of that interval is reported.",
-            "Because the curve changes in steps, it need not equal exactly 50%; this is a cohort-level estimate, not a prediction that exactly half of individual patients survive beyond that time.")
+          c(.("The Kaplan-Meier median is the first time at which estimated event-free probability is 50% or lower; if the curve is exactly 50% over an interval, the midpoint of that interval is reported."),
+            .("Because the curve changes in steps, it need not equal exactly 50%; this is a cohort-level estimate, not a prediction that exactly half of individual patients survive beyond that time."))
         else
-          c(paste0("The median was not reached: the Kaplan-Meier curve did not reach 50% ",
-                   "before follow-up ended, so no median time-to-event can be estimated from these data.",
-                   " This is not a statement that survival is good or poor - it reflects the number of",
-                   " events and the length of follow-up."))
+          .("The median was not reached: the Kaplan-Meier curve did not reach 50% before follow-up ended, so no median time-to-event can be estimated from these data. This is not a statement that survival is good or poor - it reflects the number of events and the length of follow-up.")
 
         # Different explanations for competing risk vs standard
         if (private$.isCompetingRisk()) {

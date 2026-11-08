@@ -248,6 +248,16 @@ survivalClass <- if (requireNamespace('jmvcore'))
     R6::R6Class(
         "survivalClass",
         inherit = survivalBase,
+    public = list(
+        #' @description Initialize safely when the supplied data has no selected variables.
+        #' @param noThrow Whether initialization errors are stored in the results.
+        init = function(noThrow = FALSE) {
+            if (!is.null(private$.data) && length(self$options$varsRequired) == 0L) {
+                private$.data <- data.frame()
+            }
+            super$init(noThrow = noThrow)
+        }
+    ),
         private = list(
             .sourcifyOption = function(option) {
                 if (!option$name %in% names(formals(survival)))
@@ -1098,7 +1108,8 @@ survivalClass <- if (requireNamespace('jmvcore'))
 
             # Main Run Function (Refactored) ----
             ,
-            .run = function() {
+        .prepareSurvivalRun = function() {
+                .populateSurvivalTable(self$results$remarkItems, data.frame())
 
                 # Reset cached data for this analysis cycle
                 private$.cachedGetData <- NULL
@@ -1254,6 +1265,10 @@ survivalClass <- if (requireNamespace('jmvcore'))
                         }
                     }
                 }
+            private$.publishSurvivalEstimates(results, n_events)
+        },
+
+        .publishSurvivalEstimates = function(results, n_events) {
                 private$.checkpoint()  # Add checkpoint here
 
                 ## Cox ----
@@ -1379,6 +1394,10 @@ survivalClass <- if (requireNamespace('jmvcore'))
                 private$.checkpoint()  # Add checkpoint here
 
                 ## Calibration Curves ----
+            private$.publishSurvivalDiagnostics(results, n_events)
+        },
+
+        .publishSurvivalDiagnostics = function(results, n_events) {
                 if (self$options$calibration_curves) {
                     if (private$.isCompetingRisk()) {
                         self$results$calibrationTable$setNote(
@@ -1504,6 +1523,10 @@ survivalClass <- if (requireNamespace('jmvcore'))
                 private$.populateEnhancedClinicalContent()
 
                 # Analysis completion summary
+            private$.finishSurvivalRun(results, n_events)
+        },
+
+        .finishSurvivalRun = function(results, n_events) {
                 tryCatch({
                     n_obs <- nrow(results$cleanData)
                     # Count only primary events (status == 1), matching the event-count
@@ -1522,6 +1545,10 @@ survivalClass <- if (requireNamespace('jmvcore'))
                         )
                     )
                 }, error = function(e) invisible(NULL))
+        },
+
+            .run = function() {
+            private$.prepareSurvivalRun()
             }
 
             # RMST Analysis Function ----
@@ -1583,29 +1610,39 @@ survivalClass <- if (requireNamespace('jmvcore'))
 
                     private$.checkpoint()
 
-                    km_fit <- survival::survfit(formula, data = mydata, conf.type = "log-log")
+                    # Calculate RMST for each group, guarding tau < min(group_time)
+                    # where survival:::survmean would otherwise error with
+                    # "Truncation point for the mean is < smallest survival".
+                    groups <- if (!is.null(myfactor) && myfactor %in% names(mydata)) {
+                        levels(droplevels(factor(mydata[[myfactor]])))
+                    } else {
+                        "Overall"
+                    }
+                    rmst_values <- numeric(length(groups))
+                    rmst_se <- numeric(length(groups))
+                    grp_names <- as.character(groups)
 
-                    # Calculate RMST for each group
-                    rmst_summary <- summary(km_fit, rmean = tau, extend = TRUE)
-                    rmst_mat <- if (is.matrix(rmst_summary$table)) {
-                        rmst_summary$table
-                    } else {
-                        matrix(
-                            rmst_summary$table,
-                            nrow = 1,
-                            dimnames = list(
-                                levels(droplevels(factor(mydata[[myfactor]])))[1],
-                                names(rmst_summary$table)
+                    for (gi in seq_along(groups)) {
+                        g_data <- if (!is.null(myfactor) && myfactor %in% names(mydata)) {
+                            mydata[mydata[[myfactor]] == groups[gi], , drop = FALSE]
+                        } else {
+                            mydata
+                        }
+                        min_obs_t <- suppressWarnings(min(g_data[[mytime]], na.rm = TRUE))
+                        if (is.finite(min_obs_t) && tau < min_obs_t) {
+                            rmst_values[gi] <- tau
+                            rmst_se[gi] <- 0
+                        } else {
+                            g_fit <- survival::survfit(
+                                survival::Surv(g_data[[mytime]], g_data[[myoutcome]]) ~ 1,
+                                conf.type = "log-log"
                             )
-                        )
+                            g_tbl <- summary(g_fit, rmean = tau, extend = TRUE)$table
+                            rmst_values[gi] <- if (is.matrix(g_tbl)) unname(g_tbl[1, "rmean"]) else unname(g_tbl[["rmean"]])
+                            rmst_se[gi] <- if (is.matrix(g_tbl)) unname(g_tbl[1, "se(rmean)"]) else unname(g_tbl[["se(rmean)"]])
+                        }
                     }
-                    rmst_values <- rmst_mat[, "rmean"]
-                    rmst_se <- rmst_mat[, "se(rmean)"]
-                    grp_names <- if (!is.null(km_fit$strata)) {
-                        .stripPrefix(names(km_fit$strata), paste0(myfactor, "="))
-                    } else {
-                        rownames(rmst_mat)
-                    }
+
                     rmst_table <- data.frame(
                         Group = grp_names,
                         RMST = round(rmst_values, 2),
@@ -1614,9 +1651,10 @@ survivalClass <- if (requireNamespace('jmvcore'))
                         stringsAsFactors = FALSE
                     )
 
-                    # Wald intervals supplied on the unrounded estimate scale.
-                    rmst_table$CI_Lower <- round(rmst_values - 1.96 * rmst_se, 2)
-                    rmst_table$CI_Upper <- round(rmst_values + 1.96 * rmst_se, 2)
+                    # Wald intervals supplied on the unrounded estimate scale and clamped to [0, tau].
+                    valid_se <- is.finite(rmst_se) & rmst_se > 0
+                    rmst_table$CI_Lower <- ifelse(valid_se, round(pmax(0, rmst_values - 1.96 * rmst_se), 2), NA_real_)
+                    rmst_table$CI_Upper <- ifelse(valid_se, round(pmin(tau, rmst_values + 1.96 * rmst_se), 2), NA_real_)
                     
                     return(list(
                         table = rmst_table,
@@ -1698,8 +1736,9 @@ survivalClass <- if (requireNamespace('jmvcore'))
                             ci_lower <- NA
                             ci_upper <- NA
 
-                            if (length(cif_est) > 0 && max(cif_est, na.rm = TRUE) >= 0.5) {
-                                median_idx <- which(cif_est >= 0.5)[1]
+                            half <- 0.5 - sqrt(.Machine$double.eps)
+                            if (length(cif_est) > 0 && any(!is.na(cif_est)) && max(cif_est, na.rm = TRUE) >= half) {
+                                median_idx <- which(!is.na(cif_est) & cif_est >= half)[1]
                                 median_time <- cif_times[median_idx]
                             }
 
@@ -1719,13 +1758,15 @@ survivalClass <- if (requireNamespace('jmvcore'))
                             ))
                         }
                     } else {
-                        # No grouping variable - overall CIF
-                        cif_est <- cuminc_fit[["1"]]$est  # Event type 1
-                        cif_times <- cuminc_fit[["1"]]$time
+                        # No grouping variable - overall CIF ("1 1" in cmprsk::cuminc)
+                        cif_key <- if ("1 1" %in% names(cuminc_fit)) "1 1" else "1"
+                        cif_est <- cuminc_fit[[cif_key]]$est
+                        cif_times <- cuminc_fit[[cif_key]]$time
 
                         median_time <- NA
-                        if (max(cif_est, na.rm = TRUE) >= 0.5) {
-                            median_idx <- which(cif_est >= 0.5)[1]
+                        half <- 0.5 - sqrt(.Machine$double.eps)
+                        if (length(cif_est) > 0 && any(!is.na(cif_est)) && max(cif_est, na.rm = TRUE) >= half) {
+                            median_idx <- which(!is.na(cif_est) & cif_est >= half)[1]
                             median_time <- cif_times[median_idx]
                         }
 
@@ -1768,11 +1809,6 @@ survivalClass <- if (requireNamespace('jmvcore'))
                         janitor::clean_names(dat = ., case = "snake") %>%
                         tibble::rownames_to_column(.data = .)
 
-
-                results1html[, 1] <- gsub(pattern = ", ",
-                                          replacement = " and ",
-                                          x = results1html[, 1])
-
                 results1table <- results1html
 
                 names(results1table)[1] <- "factor"
@@ -1807,6 +1843,12 @@ survivalClass <- if (requireNamespace('jmvcore'))
                         if (private$.isCompetingRisk())
                             .("Not computed for the cumulative-incidence median; see the table note.")
                         else .("Not reached or not estimable within the observed follow-up."))
+                    if (private$.isCompetingRisk() && is.na(row_values$median) && isTRUE(row_values$events > 0)) {
+                        medianTable$addFootnote(
+                            rowKey = i, col = "median",
+                            .("Cumulative incidence did not reach 50% within the observed follow-up.")
+                        )
+                    }
                 }
 
                 # Add note for competing risk median CI limitation
@@ -2693,19 +2735,25 @@ survivalClass <- if (requireNamespace('jmvcore'))
             .survTable = function(results) {
                 self$results$cifTable$setVisible(
                     isTRUE(self$options$cif_all_causes) && private$.isCompetingRisk())
+                self$results$survTable$setVisible(!private$.isCompetingRisk())
+                self$results$survTableSummary$setVisible(
+                    isTRUE(self$options$showSummaries) && !private$.isCompetingRisk())
                 self$results$survTable$getColumn("time")$setTitle(private$.timeAxisLabel())
                 if (private$.isCompetingRisk()) {
                     if (isTRUE(self$options$cif_all_causes)) {
-                        times <- suppressWarnings(as.numeric(trimws(
-                            strsplit(self$options$cutp, ",", fixed = TRUE)[[1]])))
+                        raw_tokens <- trimws(unlist(strsplit(self$options$cutp, ",")))
+                        raw_tokens <- raw_tokens[nzchar(raw_tokens)]
+                        times <- suppressWarnings(as.numeric(raw_tokens))
                         valid <- is.finite(times) & times >= 0
+                        cif_times <- times[valid]
+                        if (length(cif_times) == 0) cif_times <- c(12, 36, 60)
                         self$results$cifTable$setNote("cutpoints", if (any(!valid))
                             "Invalid time points were omitted; enter non-negative finite numbers."
                             else NULL)
                         d <- results$cleanData
                         .populateObservedCif(self$results$cifTable,
                             jmvcore::toNumeric(d[[results$name1time]]),
-                            d[[results$name2outcome]], times[valid],
+                            d[[results$name2outcome]], cif_times,
                             if (is.null(results$name3explanatory)) NULL
                             else d[[results$name3explanatory]],
                             extend_exhausted = TRUE)
@@ -2944,8 +2992,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
 
                 formula_p <- .asSurvivalFormula(private$.buildSurvFormula(mytime, myoutcome, myfactor))
 
-                padjustmethod <-
-                    jmvcore::constructFormula(terms = self$options$padjustmethod)
+                padjustmethod <- self$options$padjustmethod
 
                 private$.checkpoint()
 
@@ -3013,7 +3060,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
                 ))
 
                 pairwiseTable$setNote(
-                    key = padjustmethod,
+                    key = "padjust",
                     note = paste0(.fmt(.("Test: {test}."), test = pw_test),
                                   " p-value adjustment method: ", padjustmethod)
                 )
@@ -3297,7 +3344,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
                                 predict(boot_fit, newdata = mydata, type = "lp"),
                                 error = function(e) {
                                     mm <- stats::model.matrix(
-                                        stats::reformulate(jmvcore::composeTerm(myfactor)),
+                                        .asSurvivalFormula(paste("~", jmvcore::composeTerm(myfactor))),
                                         data = mydata
                                     )
                                     cf <- stats::coef(boot_fit)
@@ -3550,7 +3597,13 @@ survivalClass <- if (requireNamespace('jmvcore'))
                 time_unit <- self$options$timetypeoutput
 
                 # Get rate multiplier
-                rate_multiplier <- self$options$rate_multiplier
+                rate_multiplier <- suppressWarnings(as.numeric(self$options$rate_multiplier))
+                if (length(rate_multiplier) != 1L || !is.finite(rate_multiplier) || rate_multiplier <= 0) {
+                    rate_multiplier <- 100
+                }
+                if (!is.finite(total_time) || total_time <= 0) {
+                    return()
+                }
 
                 # Calculate overall incidence rate
                 overall_rate <- (total_events / total_time) * rate_multiplier
@@ -3634,7 +3687,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
 
                 # Parse time intervals for stratified analysis
                 max_followup <- max(mydata[[mytime]], na.rm = TRUE)
-                time_intervals <- suppressWarnings(as.numeric(unlist(strsplit(self$options$time_intervals, ","))))
+                time_intervals <- suppressWarnings(as.numeric(unlist(strsplit(self$options$time_intervals, "[,[:space:]]+"))))
                 time_intervals <- sort(unique(time_intervals[!is.na(time_intervals) & time_intervals > 0 & time_intervals < max_followup]))
 
                 if (length(time_intervals) > 0) {
@@ -5661,7 +5714,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
                         return()
                     }
 
-                    n_unique <- length(unique(na.omit(rcs_values)))
+                    n_unique <- length(unique(rcs_values[!is.na(rcs_values)]))
                     if (n_unique < n_knots + 2) {
                         msg <- paste0("Too few unique values (", n_unique,
                                       ") for ", n_knots, " knots. Need at least ", n_knots + 2, ".")
@@ -5670,19 +5723,31 @@ survivalClass <- if (requireNamespace('jmvcore'))
                         return()
                     }
 
-                    # Build formulas
+                    # Build formulas (preserving stratification when stratified_cox is active)
                     surv_part <- private$.buildSurvFormula(mytime, myoutcome)
+                    strata_suffix <- ""
+                    if (isTRUE(self$options$stratified_cox) &&
+                        !is.null(self$options$strata_variable) &&
+                        self$options$strata_variable %in% names(self$data)) {
+                        strata_var <- self$options$strata_variable
+                        strata_col <- private$.sourceColumn(strata_var)
+                        mydata[[strata_var]] <- strata_col[private$.originalRowIndex(mydata)]
+                        mydata <- mydata[!is.na(mydata[[strata_var]]), , drop = FALSE]
+                        if (length(unique(mydata[[strata_var]])) >= 2) {
+                            strata_suffix <- paste0(" + strata(", jmvcore::composeTerm(strata_var), ")")
+                        }
+                    }
 
                     # Linear model
                     rcs_var_safe <- jmvcore::composeTerm(rcs_var)
                     if (!is.null(myfactor) && nchar(myfactor) > 0) {
-                        formula_linear <- .asSurvivalFormula(paste0(surv_part, ' ~ ', rcs_var_safe, ' + ', myfactor))
+                        formula_linear <- .asSurvivalFormula(paste0(surv_part, ' ~ ', rcs_var_safe, ' + ', myfactor, strata_suffix))
                         formula_spline <- .asSurvivalFormula(paste0(surv_part, ' ~ splines::ns(', rcs_var_safe,
-                                                            ', df = ', n_knots - 1, ') + ', myfactor))
+                                                            ', df = ', n_knots - 1, ') + ', myfactor, strata_suffix))
                     } else {
-                        formula_linear <- .asSurvivalFormula(paste0(surv_part, ' ~ ', rcs_var_safe))
+                        formula_linear <- .asSurvivalFormula(paste0(surv_part, ' ~ ', rcs_var_safe, strata_suffix))
                         formula_spline <- .asSurvivalFormula(paste0(surv_part, ' ~ splines::ns(', rcs_var_safe,
-                                                            ', df = ', n_knots - 1, ')'))
+                                                            ', df = ', n_knots - 1, ')', strata_suffix))
                     }
 
                     # Fit both models
@@ -7193,32 +7258,18 @@ survivalClass <- if (requireNamespace('jmvcore'))
             },
 
             .generateRemarkGuide = function(reported, notes) {
-                html_parts <- list("<h3>REMARK Reporting Checklist</h3>")
-                html_parts <- c(html_parts, "<p><small>Items from Altman DG et al. <i>BMC Med</i> 2012;10:51 (doi:10.1186/1741-7015-10-51), Table 1, explaining McShane LM et al. <i>JNCI</i> 2005;97(16):1180-1184</small></p>")
-                html_parts <- c(html_parts, "<table style='border-collapse: collapse; width: 100%; font-size: 0.9em;'>")
-                html_parts <- c(html_parts, "<tr style='background-color: rgba(33, 33, 33, 0.07); color: inherit;'><th style='padding: 6px; text-align: left; border: 1px solid #ddd;'>Item</th><th style='padding: 6px; text-align: left; border: 1px solid #ddd;'>Status</th><th style='padding: 6px; text-align: left; border: 1px solid #ddd;'>Note</th></tr>")
-
                 items <- private$.remarkItems()
-                for (i in seq_along(items)) {
-                    icon <- if (reported[i]) "\u{2705}" else "\u{270e}"
-                    bg <- if (reported[i]) "rgba(76, 175, 80, 0.12)" else "rgba(33, 150, 243, 0.12)"
-                    html_parts <- c(html_parts, paste0(
-                        "<tr style='background-color: ", bg, "; color: inherit;'>",
-                        "<td style='padding: 6px; border: 1px solid #ddd;'><b>", i, ". ", items[[i]][1], "</b><br><small>", items[[i]][2], "</small></td>",
-                        "<td style='padding: 6px; border: 1px solid #ddd; text-align: center;'>", icon, "</td>",
-                        "<td style='padding: 6px; border: 1px solid #ddd;'><small>", htmltools::htmlEscape(notes[i]), "</small></td>",
-                        "</tr>"
-                    ))
-                }
-
-                html_parts <- c(html_parts, "</table>")
-                html_parts <- c(html_parts, "<p><small>",
-                    "\u{2705} = Reported in this output | ",
-                    "\u{270e} = Report in the manuscript",
-                    "</small></p>")
-
-                paste(html_parts, collapse = "\n")
-            }
+                values <- data.frame(number = seq_along(items),
+                    section = vapply(items, function(x) x[1], character(1)),
+                    item = vapply(items, function(x) x[2], character(1)),
+                    status = ifelse(reported, .("Reported in this output"),
+                        .("Report in the manuscript")), note = notes)
+                names(values) <- c(.("Number"), .("Section"), .("Item"), .("Status"), .("Note"))
+                .populateSurvivalTable(self$results$remarkItems, values)
+                self$results$remarkItems$setNote("reference",
+                    "Altman DG et al. BMC Med 2012;10:51 (doi:10.1186/1741-7015-10-51), Table 1; McShane LM et al. JNCI 2005;97(16):1180-1184.")
+                "<p>REMARK: Altman DG et al. (2012); McShane LM et al. (2005).</p>"
+        }
 
         )
     )

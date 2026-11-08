@@ -78,7 +78,7 @@ test_that("an infinite follow-up time is rejected instead of poisoning every sum
     d <- simple_data(c(1, 2, 3, 4, 5, Inf),
                      c(TRUE, FALSE, TRUE, FALSE, TRUE, FALSE))
 
-    res <- run_singlearm(data = d, elapsedtime = "time", outcome = "status",
+    res <- run_singlearm_failed(data = d, elapsedtime = "time", outcome = "status",
                          outcomeLevel = "Dead", person_time = TRUE)
 
     expect_match(strip_html(res$errors$content), "infinite")
@@ -145,7 +145,7 @@ test_that("a user variable named row_names is not overwritten by the join key", 
 
 test_that("the same variable cannot serve as elapsed time and outcome", {
     d <- data.frame(x = c(0, 1, 1, 0, 1))
-    res <- run_singlearm(data = d, elapsedtime = "x", outcome = "x",
+    res <- run_singlearm_failed(data = d, elapsedtime = "x", outcome = "x",
                          outcomeLevel = "1")
 
     expect_match(strip_html(res$errors$content),
@@ -157,7 +157,7 @@ test_that("start and end dates must be different variables", {
     d <- data.frame(
         date = as.Date("2020-01-01") + 0:4,
         status = factor(c("Alive", "Dead", "Alive", "Dead", "Alive")))
-    res <- run_singlearm(data = d, tint = TRUE, dxdate = "date", fudate = "date",
+    res <- run_singlearm_failed(data = d, tint = TRUE, dxdate = "date", fudate = "date",
                          outcome = "status", outcomeLevel = "Dead")
 
     expect_match(strip_html(res$errors$content),

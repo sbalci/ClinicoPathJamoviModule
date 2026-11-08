@@ -42,7 +42,7 @@ test_that("numeric YYYYMMDD dates are refused with the shared sentence (F1)", {
     d <- data.frame(dx = c(20190115, 20190220, 20190311, 20190405, 20190512, 20190601),
                     fu = c(20200115, 20210220, 20200611, 20220405, 20210512, 20230601),
                     e = c(1, 0, 1, 1, 0, 1))
-    r <- sa(d, tint = TRUE, dxdate = "dx", fudate = "fu", outcome = "e")
+    r <- .audit_failed_result("singlearm", data = d, tint = TRUE, dxdate = "dx", fudate = "fu", outcome = "e")
     expect_match(plain(r$errors$content),
                  "dx contains numbers that cannot be read as dates (for example 20190115). Numeric date columns must hold seconds since 1970.",
                  fixed = TRUE)
@@ -56,7 +56,7 @@ test_that("years, day counts and Excel serials are refused, not reinterpreted (F
         days = data.frame(dx = 17000 + 0:5, fu = 17400 + 0:5, e = c(1, 0, 1, 1, 0, 1)),
         excel = data.frame(dx = 43000 + 0:5, fu = 43400 + 0:5, e = c(1, 0, 1, 1, 0, 1)))
     for (d in fixtures) {
-        r <- sa(d, tint = TRUE, dxdate = "dx", fudate = "fu", outcome = "e")
+        r <- .audit_failed_result("singlearm", data = d, tint = TRUE, dxdate = "dx", fudate = "fu", outcome = "e")
         expect_match(plain(r$errors$content), "cannot be read as dates", fixed = TRUE)
         expect_equal(nrow(r$medianTable$asDF), 0)
     }
@@ -83,7 +83,7 @@ test_that("a registry placeholder date is refused with the shared sentence", {
     d <- data.frame(dx = sprintf("2020-01-%02d", 1:6),
                     fu = c(sprintf("2021-01-%02d", 1:5), "2199-12-31"),
                     e = c(1, 0, 1, 1, 0, 1))
-    r <- sa(d, tint = TRUE, dxdate = "dx", fudate = "fu", outcome = "e", timetypedata = "ymd")
+    r <- .audit_failed_result("singlearm", data = d, tint = TRUE, dxdate = "dx", fudate = "fu", outcome = "e", timetypedata = "ymd")
     expect_match(plain(r$errors$content),
                  "1 dates in fu fall outside a plausible range (for example 2199-12-31). Replace placeholder dates before analyzing; a follow-up date such as 2199-01-01 is not a censoring date.",
                  fixed = TRUE)
@@ -295,7 +295,7 @@ test_that("the Preformatted panels are cleared as text, not as markup (F9)", {
     r <- sa(d, elapsedtime = "t", outcome = "e", outcomeLevel = "d", cutp = "50, 60",
             showSummaries = TRUE)
     expect_false(grepl("<", paste(r$survTableSummary$content), fixed = TRUE))
-    r <- sa(transform(d, t = c(-1, 2:10)), elapsedtime = "t", outcome = "e", outcomeLevel = "d",
+    r <- .audit_failed_result("singlearm", data = transform(d, t = c(-1, 2:10)), elapsedtime = "t", outcome = "e", outcomeLevel = "d",
             showSummaries = TRUE)
     expect_false(grepl("<", paste(r$medianSummary$content), fixed = TRUE))
 })

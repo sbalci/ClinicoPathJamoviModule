@@ -3,7 +3,7 @@
 ## Feature-to-Code Mapping
 
 - **Analysis Function**: `survival`
-- **Module**: `SurvivalT`
+- **Module**: `Survival`
 
 | Feature / Option | UI Binding | Backend Handler | Target Result Item |
 | :--- | :--- | :--- | :--- |
@@ -85,6 +85,8 @@
 | `bootstrapValidation` | UI Control `bootstrapValidation` | `self$options$bootstrapValidation` | Output item / Table |
 | `bootstrapValN` | UI Control `bootstrapValN` | `self$options$bootstrapValN` | Output item / Table |
 | `seed` | UI Control `seed` | `self$options$seed` | Output item / Table |
+| `cif_all_causes` | UI Control `cif_all_causes` | `self$options$cif_all_causes` | Output item / Table |
+| `show_followup_support` | UI Control `show_followup_support` | `self$options$show_followup_support` | Output item / Table |
 
 ## Verification Checklist
 

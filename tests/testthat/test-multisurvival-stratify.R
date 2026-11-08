@@ -42,9 +42,9 @@ quiet <- function(expr) { sink(tempfile()); on.exit(sink()); suppressWarnings(fo
 }
 
 # Split the kable HTML the analysis emits into per-row character vectors.
-.ms_cells <- function(html) {
-    rows <- unlist(strsplit(as.character(html), "<tr>", fixed = TRUE))
-    lapply(rows, function(r) trimws(gsub("<[^>]*>", "", unlist(strsplit(r, "</td>", fixed = TRUE)))))
+.ms_cells <- function(table) {
+    d <- table$asDF
+    lapply(seq_len(nrow(d)), function(i) unname(as.character(d[i, ])))
 }
 
 test_that("a stratified fit reports the stratified hazard ratio and drops the strata rows", {
@@ -58,7 +58,7 @@ test_that("a stratified fit reports the stratified hazard ratio and drops the st
     expect_false(isTRUE(all.equal(hr_unstrat, hr_strat, tolerance = 1e-3)))  # the two must differ
 
     r <- .ms_run(d, c("grp", "site"), use_stratify = TRUE, stratvar = "site")
-    cs <- .ms_cells(r$text$content)
+    cs <- .ms_cells(r$fittedTable)
 
     # The multivariable HR for grp level B must match the STRATIFIED reference.
     hit <- Filter(function(x) length(x) >= 5 && identical(x[2], "B"), cs)

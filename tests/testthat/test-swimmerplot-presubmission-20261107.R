@@ -91,3 +91,65 @@ test_that("SW-L5: an unestimable follow-up bound is not printed as NE", {
     expect_false(grepl("^NE", txt))
     expect_match(txt, "25.00", fixed = TRUE)
 })
+
+test_that("SW-R1: relative mode classifies end < start on a later row when first row has start = NA", {
+    d <- data.frame(
+        id = c("P1", "P1", "P2", "P3"),
+        s  = c(NA, 10, 0, 0),
+        e  = c(5,   4, 8, 12)
+    )
+    r <- sp7(data = d, patientID = "id", startTime = "s", endTime = "e", timeDisplay = "relative")
+    txt <- sp7_txt(r$notices$content)
+    expect_match(txt, "1 had an end time before the start time", fixed = TRUE)
+    expect_false(grepl("not a number", txt, fixed = TRUE))
+})
+
+test_that("SW-R2: an all-missing responseVar with groupVar does not claim group response rates or 0.0% footnotes", {
+    d <- data.frame(
+        id  = sprintf("P%d", 1:6),
+        s   = rep(0, 6),
+        e   = c(4, 6, 8, 10, 12, 14),
+        rsp = rep(NA_character_, 6),
+        grp = rep(c("Arm A", "Arm B"), 3)
+    )
+    r <- sp7(data = d, patientID = "id", startTime = "s", endTime = "e",
+             responseVar = "rsp", groupVar = "grp")
+    txt <- sp7_txt(r$notices$content)
+    expect_false(grepl("Group response rates in the Group Comparison table", txt, fixed = TRUE))
+    expect_equal(sp7_note(r$groupComparisonTest, "response_comparison"), "")
+})
+
+test_that("SW-R3: excluded rows do not leak milestones, event markers, or sort values into valid episodes", {
+    d <- data.frame(
+        id     = c("P1", "P1", "P2", "P3"),
+        s      = c(0, 5, 0, 0),
+        e      = c(6, NA, 8, 10),
+        m1     = c(NA, 4, 3, 2),
+        ev     = c(NA, "Tox", "Response", NA),
+        evtime = c(NA, 4, 3, NA),
+        sortv  = c(100, 1, 50, 10)
+    )
+    r <- sp7(data = d, patientID = "id", startTime = "s", endTime = "e",
+             milestone1Date = "m1", milestone1Name = "M1",
+             eventVar = "ev", eventTimeVar = "evtime",
+             sortVariable = "sortv")
+    st <- r$plot$state
+    expect_false("P1" %in% as.character(st$milestone_data$patient_id))
+    expect_false("P1" %in% as.character(st$event_markers$patient_id))
+    expect_equal(rev(levels(st$patient_data$patient_id)), c("P3", "P2", "P1"))
+})
+
+test_that("SW-R4: sortOrder = response groups non-RECIST responses ahead of missing responses", {
+    d <- data.frame(
+        id  = c("P1", "P2", "P3", "P4"),
+        s   = c(0, 0, 0, 0),
+        e   = c(5, 6, 7, 8),
+        rsp = c(NA, "MR", "PR", "MR")
+    )
+    r <- sp7(data = d, patientID = "id", startTime = "s", endTime = "e",
+             responseVar = "rsp", sortOrder = "response")
+    ord <- rev(levels(r$plot$state$patient_data$patient_id))
+    expect_equal(ord[1], "P3")
+    expect_true(all(ord[2:3] %in% c("P2", "P4")))
+    expect_equal(ord[4], "P1")
+})

@@ -6,7 +6,10 @@
 # isTRUE(private$.value$value) - so a test that passes consensusVar = TRUE that way
 # is testing the OFF state. Same shape as run_survivalcont_jamovi().
 agreement_run <- function(data, ..., outputs = character()) {
-    ns <- asNamespace("ClinicoPath")
+    ns <- if ("ClinicoPath" %in% loadedNamespaces()) asNamespace("ClinicoPath")
+          else if ("meddecide" %in% loadedNamespaces()) asNamespace("meddecide")
+          else if (exists("agreementOptions", envir = globalenv())) globalenv()
+          else asNamespace("ClinicoPath")
     options <- ns$agreementOptions$new(...)
     for (nm in outputs) {
         opt <- options$option(nm)   # an R6 reference, so this sets it on `options`

@@ -11,9 +11,10 @@
 | `patientID` | UI Control `patientID` | `self$options$patientID` | Output item / Table |
 | `startTime` | UI Control `startTime` | `self$options$startTime` | Output item / Table |
 | `endTime` | UI Control `endTime` | `self$options$endTime` | Output item / Table |
-| `responseVar` | UI Control `responseVar` | `self$options$responseVar` | Output item / Table |
-| `censorVar` | UI Control `censorVar` | `self$options$censorVar` | Output item / Table |
-| `groupVar` | UI Control `groupVar` | `self$options$groupVar` | Output item / Table |
+| `responseVar` | UI Control `responseVar` | `self$options$responseVar` | `plot`, `summary`, `personTimeTable`, `advancedMetrics`, `groupComparisonTest`, `copyReadyReport` |
+| `censorVar` | UI Control `censorVar` | `self$options$censorVar` | `plot` (status arrows), `summary` / `advancedMetrics` (reverse KM median follow-up), `groupComparisonTest` (log-rank test) |
+| `censorCoding` | UI Control `censorCoding` | `self$options$censorCoding` | Direction of Yes/No, TRUE/FALSE and 1/2 censoring columns (`auto`, `event_yes`, `censored_yes`, `1_2`, `2_1`) |
+| `groupVar` | UI Control `groupVar` | `self$options$groupVar` | `plot` (facets/colors), `groupComparisonTest` |
 | `timeType` | UI Control `timeType` | `self$options$timeType` | Output item / Table |
 | `dateFormat` | UI Control `dateFormat` | `self$options$dateFormat` | Output item / Table |
 | `timeUnit` | UI Control `timeUnit` | `self$options$timeUnit` | Output item / Table |

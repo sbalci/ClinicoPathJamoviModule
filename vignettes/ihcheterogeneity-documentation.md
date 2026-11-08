@@ -4,42 +4,45 @@
 
 - **Function**: `ihcheterogeneity`
 - **Title**: IHC Heterogeneity Analysis
-- **Module**: `OncoPath`
+- **Module**: `OncoPath` (`menuGroup: OncoPath`, `menuSubgroup: IHC Analysis`, `version: 1.1.3`)
 - **Files**:
   - `jamovi/ihcheterogeneity.u.yaml` - User Interface Definition
   - `jamovi/ihcheterogeneity.a.yaml` - Options & Schema Definition
   - `jamovi/ihcheterogeneity.r.yaml` - Results Layout & Tables
   - `R/ihcheterogeneity.b.R` - Backend Implementation
-- **Summary**: Analysis for IHC Heterogeneity Analysis
+- **Summary**: Evaluates regional sampling agreement and spatial heterogeneity of immunohistochemical (IHC) biomarkers across tumor regions and biopsy cores relative to whole-section reference measurements (or pairwise across regions). Computes ICC(2,1) and ICC(3,1) (McGraw & Wong 1996), Spearman rank correlations with Bonett & Wright (2000) CIs, Fieller 90% TOST equivalence and Bonferroni material-bias intervals, Krouwer (2008) three-slope HC3 proportional-bias tests, Bland-Altman 95% limits of agreement with CIs (Bland & Altman 1999), within-case CVs (root-mean-square over cases), two-way random-effects variance components, ICC precision sample-size tables (Bonett 2002), and spatial compartment comparisons.
 
 ## 1a. Changelog
 
 - **Date**: 2026-08-29
 - **Summary**: Comprehensive documentation suite created & verified against active schemas and backend implementation.
+- **Date**: 2026-11-07
+- **Summary**: Updated for OncoPath 1.1.3 release: added `showInterpretation` option, documented the Krouwer (2008) three-slope proportional-bias rule for both reference and inter-regional designs, Bonett & Wright (2000) CIs for pairwise Spearman correlations, Allred/ordinal scale guards across all tables, and discretization margin checks.
 
 ## 2. Options Reference (`.a.yaml`)
 
 | Option | Type | Default | Description |
 | :--- | :--- | :--- | :--- |
-| `data` | `Data` | `NULL` |  |
-| `wholesection` | `Variable` | `NULL` | Overall / Whole Slide / HotSpot (Optional) |
+| `data` | `Data` | `NULL` | The data as a data frame |
+| `wholesection` | `Variable` | `NULL` | Reference Measurement (Whole Section / Hotspot / Overall Score) |
 | `biopsy1` | `Variable` | `NULL` | Regional Measurement 1 (any of slots 1-4 or the Additional list starts the analysis) |
 | `biopsy2` | `Variable` | `NULL` | Regional Measurement 2 (Optional) |
 | `biopsy3` | `Variable` | `NULL` | Regional Measurement 3 (Optional) |
 | `biopsy4` | `Variable` | `NULL` | Regional Measurement 4 (Optional) |
 | `biopsies` | `Variables` | `NULL` | Additional Regional Measurements |
-| `spatial_id` | `Variable` | `NULL` | Spatial Region ID (Optional) |
+| `spatial_id` | `Variable` | `NULL` | Spatial Region / Compartment ID (Optional) |
 | `compareCompartments` | `Bool` | `FALSE` | Spatial compartment comparison |
 | `compartmentTests` | `Bool` | `FALSE` | Compartment comparison tests |
-| `analysis_type` | `List` | `comprehensive` | Analysis Focus |
-| `sampling_strategy` | `List` | `unknown` | Sampling Strategy |
-| `cv_threshold` | `Number` | `20` | CV Threshold for Acceptable Variability |
-| `correlation_threshold` | `Number` | `0.8` | Minimum Acceptable Correlation |
-| `bias_margin` | `Number` | `5` | Systematic difference margin (% of the comparison mean) |
+| `analysis_type` | `List` | `comprehensive` | Analysis Focus (`comprehensive`, `reproducibility`, `bias`, `variability`) |
+| `sampling_strategy` | `List` | `unknown` | Sampling Strategy (`unknown`, `systematic`, `random`, `hotspot`, `invasive_margin`, `central_core`, `multicore`) |
+| `cv_threshold` | `Number` | `20` | CV Threshold (%) for Acceptable Variability (`1` to `100`) |
+| `correlation_threshold` | `Number` | `0.8` | Minimum Acceptable Correlation (`0` to `1`) |
+| `bias_margin` | `Number` | `5` | Systematic difference margin (% of the comparison mean, `0.5` to `100`) |
 | `show_variability_plots` | `Bool` | `FALSE` | Variability plots |
 | `variance_components` | `Bool` | `FALSE` | Variance component analysis |
 | `sample_size_planning` | `Bool` | `FALSE` | Sample size for ICC precision (Bonett 2002) |
 | `generate_recommendations` | `Bool` | `FALSE` | Clinical recommendations |
+| `showInterpretation` | `Bool` | `FALSE` | Clinical interpretation and analysis summary |
 | `showSummary` | `Bool` | `FALSE` | Plain-language summary |
 | `showGlossary` | `Bool` | `FALSE` | Statistical glossary |
 | `showReportSentences` | `Bool` | `FALSE` | Copy-ready report sentences |

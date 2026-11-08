@@ -86,7 +86,7 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
                 seq_along(v), match(patient_id, unique(patient_id)),
                 FUN = function(ix) {
                     vals <- v[ix]
-                    if (all(is.na(vals))) ix[1] else ix[which.min(vals)]
+                    if (all(is.na(vals))) NA_integer_ else ix[which.min(vals)]
                 }
             )
         },
@@ -315,7 +315,7 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
             if (!is.character(date_str)) return(NULL)
             if (length(date_str) == 0 || nchar(trimws(date_str)) == 0) return(NULL)
             ds <- trimws(date_str)
-            parsed <- tryCatch({
+            parsed <- tryCatch(suppressWarnings({
                 switch(self$options$dateFormat,
                     "ymdhms" = lubridate::ymd_hms(ds),
                     "ymd"    = lubridate::ymd(ds),
@@ -324,9 +324,9 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
                     "myd"    = lubridate::myd(ds),
                     "dmy"    = lubridate::dmy(ds),
                     "dym"    = lubridate::dym(ds),
-                    suppressWarnings(lubridate::ymd(ds))
+                    lubridate::ymd(ds)
                 )
-            }, error = function(e) NA)
+            }), error = function(e) NA)
             if (is.na(parsed)) return(NULL)
             parsed
         },
@@ -567,11 +567,12 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
                     anchor <- patient_data$original_start[aidx]
                     patient_data$anchor_start <- anchor
 
-                    patient_data$start_time <- lubridate::time_length(
-                        lubridate::interval(anchor, patient_data$original_start),
+                    has_anchor <- !is.na(anchor)
+                    patient_data$start_time[has_anchor] <- lubridate::time_length(
+                        lubridate::interval(anchor[has_anchor], patient_data$original_start[has_anchor]),
                         unit = self$options$timeUnit)
-                    patient_data$end_time <- lubridate::time_length(
-                        lubridate::interval(anchor, patient_data$original_end),
+                    patient_data$end_time[has_anchor] <- lubridate::time_length(
+                        lubridate::interval(anchor[has_anchor], patient_data$original_end[has_anchor]),
                         unit = self$options$timeUnit)
                 }
             } else {
@@ -667,8 +668,9 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
                         anchor <- patient_data$original_start[aidx]
                         patient_data$anchor_start <- anchor
 
-                        patient_data$start_time <- patient_data$original_start - anchor
-                        patient_data$end_time   <- patient_data$original_end - anchor
+                        has_anchor <- !is.na(anchor)
+                        patient_data$start_time[has_anchor] <- patient_data$original_start[has_anchor] - anchor[has_anchor]
+                        patient_data$end_time[has_anchor]   <- patient_data$original_end[has_anchor] - anchor[has_anchor]
                     }
                 }
             }
@@ -804,6 +806,7 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
             }
 
             patient_data <- patient_data[valid_rows, ]
+            attr(patient_data, "valid_rows") <- which(valid_rows)
 
             # One censoring coding per run, from every analysed row; every
             # consumer reads the classified column ("censored"/"event"/NA).
@@ -940,19 +943,21 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
 
                 if (!is.null(self$options[[date_opt]]) && nzchar(milestone_label)) {
 
-                    milestone_dates <- self$data[[self$options[[date_opt]]]]
+                    vr <- attr(patient_data, "valid_rows")
+                    src_df <- if (!is.null(vr)) self$data[vr, , drop = FALSE] else self$data
+                    milestone_dates <- src_df[[self$options[[date_opt]]]]
 
                     # Realign to the validated patient table BY PATIENT ID,
                     # taking each patient's FIRST NON-MISSING milestone value.
                     #
-                    # milestone_dates is read from self$data (unfiltered), while
+                    # milestone_dates is read from the surviving source rows, while
                     # patient_data has had rows removed and deduplicated. A plain
                     # match() took the FIRST source row per patient, so in
                     # multi-episode data a milestone recorded on a later episode
                     # row was silently lost from the plot and the summary table.
                     if (!is.null(self$options$patientID) &&
-                        self$options$patientID %in% names(self$data)) {
-                        src_ids <- .patientIDLabels(self$data[[self$options$patientID]])
+                        self$options$patientID %in% names(src_df)) {
+                        src_ids <- .patientIDLabels(src_df[[self$options$patientID]])
                         # A blank cell is not a value: it hid a later episode's
                         # real milestone, which was then dropped unannounced.
                         nn <- which(!is.na(milestone_dates) &
@@ -1198,10 +1203,12 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
 
                 if (!is.null(event_var)) {
                     event_data <- tryCatch({
+                        vr <- attr(patient_data, "valid_rows")
+                        src_df <- if (!is.null(vr)) self$data[vr, , drop = FALSE] else self$data
                         # Ensure all variables exist and get their lengths
-                        patient_ids <- .patientIDLabels(self$data[[self$options$patientID]])
-                        event_times <- self$data[[event_time_var]]
-                        event_labels <- as.character(self$data[[event_var]])
+                        patient_ids <- .patientIDLabels(src_df[[self$options$patientID]])
+                        event_times <- src_df[[event_time_var]]
+                        event_labels <- as.character(src_df[[event_var]])
 
                         # Find the minimum length to avoid row mismatch
                         min_length <- min(length(patient_ids), length(event_times), length(event_labels))
@@ -3515,8 +3522,8 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
             # counted" notice, and calling it here with the group cohort's size
             # printed a second copy with counts that matched neither table.
             rc <- stats$response_counts
-            if (!is.null(rc) && (length(private$.nonRecistLabels(rc)) > 0 ||
-                                 !any(names(rc) %in% c("CR", "PR", "SD", "PD")))) {
+            if (is.null(rc) || length(private$.nonRecistLabels(rc)) > 0 ||
+                !any(names(rc) %in% c("CR", "PR", "SD", "PD"))) {
                 explain(.("No comparison was run: objective response and disease control are defined only for RECIST-coded responses (CR, PR, SD, PD, NE), and the response variable has values that are not, or no assessed response at all. Recode the response variable to compare groups."))
                 return()
             }
@@ -3764,7 +3771,7 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
                             stringsAsFactors = FALSE
                         ))
                         summary_export <- rbind(summary_export, data.frame(
-                            metric = paste0(response, "_percent"),
+                            metric = .rocLabel(paste0(response, "_percent"), note = FALSE),
                             value = stats$response_percentages[[response]],
                             stringsAsFactors = FALSE
                         ))
@@ -4204,7 +4211,8 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
             ord <- seq_len(nrow(patient_data))
             if (!is.null(self$options$sortVariable)) {
                 sv <- self$options$sortVariable
-                df <- self$data
+                vr <- attr(patient_data, "valid_rows")
+                df <- if (!is.null(vr)) self$data[vr, , drop = FALSE] else self$data
                 tmp <- data.frame(
                     patient_id = .patientIDLabels(df[[self$options$patientID]]),
                     sort_val = df[[sv]],
@@ -4250,7 +4258,9 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
                         as.character(patient_data$response[keep]),
                         patient_data$start_time[keep], patient_data$end_time[keep]))
                 }, "")
-                rank <- match(best[pid_s], c("CR", "PR", "SD", "PD", "NE"))
+                known <- c("CR", "PR", "SD", "PD", "NE")
+                lvls <- c(known, sort(unique(best[!is.na(best) & !best %in% known])))
+                rank <- match(best[pid_s], lvls)
                 ord <- order(rank, patient_data$patient_id, na.last = TRUE, method = "auto")
             } else {
                 if (self$options$sortOrder == "response") {

@@ -142,7 +142,8 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         # category override) is CR/PR, so TTR/DoR describe the same patients as the
         # ORR numerator. `final_categories` is data.frame(<patientID>, category).
         .calculateTimeToEventMetrics = function(df, patientID, timeVar, responseVar,
-                                                final_categories = NULL) {
+                                                final_categories = NULL,
+                                                categoryVar = self$options$responseCategoryVar) {
           if (is.null(timeVar) || !timeVar %in% names(df)) {
             return(NULL)
           }
@@ -153,22 +154,41 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             pr_thr <- private$RECIST_PR_THRESHOLD + private$RECIST_TOL
 
             min_abs_all <- if ("min_abs_pct" %in% names(df)) df$min_abs_pct else rep(NA_real_, nrow(df))
-            one_patient <- function(t, v, m) {
+            cats_all <- if (".cat_override_norm" %in% names(df)) {
+              df$.cat_override_norm
+            } else if (!is.null(categoryVar) && categoryVar %in% names(df) &&
+                       !identical(categoryVar, responseVar)) {
+              private$.normaliseCategory(df[[categoryVar]])
+            } else {
+              rep(NA_character_, nrow(df))
+            }
+            recognised_cats <- c("CR", "PR", "SD", "PD", "UNKNOWN")
+            one_patient <- function(t, v, m, c_vec) {
               m <- m[!is.na(m)][1]
-              ok <- !is.na(t) & !is.na(v)
-              t <- t[ok]; v <- v[ok]
-              o <- order(t, -v); t <- t[o]; v <- v[o]   # same tie rule as .progressionTimes
-              post <- t > 0 & t <= private$.firstProgression(t, v, m)
-              best <- if (any(post)) min(v[post]) else NA_real_
-              ttb <- if (any(post)) t[post][which.min(v[post])] else NA_real_
-              last <- if (length(t)) max(t) else NA_real_
-              resp <- post & v <= pr_thr
+              ok <- !is.na(t) & (!is.na(v) | (!is.na(c_vec) & c_vec %in% recognised_cats))
+              t <- t[ok]; v <- v[ok]; c_vec <- c_vec[ok]
+              o <- order(t, ifelse(is.na(v), Inf, -v))
+              t <- t[o]; v <- v[o]; c_vec <- c_vec[o]   # same tie rule as .progressionTimes
+              per_visit_cats <- length(unique(c_vec[!is.na(c_vec) & c_vec %in% recognised_cats])) > 1
+              num_first_pd <- private$.firstProgression(t[!is.na(v)], v[!is.na(v)], m)
+              cat_first_pd <- if (per_visit_cats && any(t > 0 & !is.na(c_vec) & c_vec == "PD"))
+                min(t[t > 0 & !is.na(c_vec) & c_vec == "PD"]) else Inf
+              first_pd <- min(num_first_pd, cat_first_pd)
+              post <- t > 0 & t <= first_pd
+              post_v <- post & !is.na(v)
+              best <- if (any(post_v)) min(v[post_v]) else NA_real_
+              ttb <- if (any(post_v)) t[post_v][which.min(v[post_v])] else NA_real_
+              last <- if (any(!is.na(v))) max(t[!is.na(v)]) else if (length(t)) max(t) else NA_real_
+              resp <- post & ((!is.na(v) & v <= pr_thr) |
+                              (per_visit_cats & !is.na(c_vec) & c_vec %in% c("CR", "PR")))
               if (!any(resp)) {
                 return(c(ttr = NA_real_, dor = NA_real_, event = NA_real_,
                          best = best, ttb = ttb, last = last))
               }
               first <- min(t[resp])
-              prog <- private$.progressionTimes(t, v, first, m)
+              prog_num <- private$.progressionTimes(t[!is.na(v)], v[!is.na(v)], first, m)
+              prog_cat <- if (per_visit_cats) t[t > first & !is.na(c_vec) & c_vec == "PD"] else numeric(0)
+              prog <- sort(unique(c(prog_num, prog_cat)))
               if (length(prog) > 0)
                 c(ttr = first, dor = min(prog) - first, event = 1, best = best, ttb = ttb, last = last)
               else
@@ -182,7 +202,7 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             patient_groups <- split(kept, factor(match(ids[keep_id], patient_ids),
                                                 levels = seq_along(patient_ids)))
             per <- lapply(patient_groups,
-                          function(i) one_patient(times_all[i], values_all[i], min_abs_all[i]))
+                          function(i) one_patient(times_all[i], values_all[i], min_abs_all[i], cats_all[i]))
             all_patients <- data.frame(
               pid = patient_ids,
               time_to_first_response = vapply(per, `[[`, numeric(1), "ttr"),
@@ -311,24 +331,47 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
           src_pid_name <- self$options$patientID
           if (is.null(src_pid_name) || !(src_pid_name %in% names(source_df)))
             return(wdf)
-          # Patient-level value: the first non-missing one in time order. match()
-          # on the patient ID read only the patient's FIRST row, so an override
+
+          # recist_category is a factor with levels CR/PR/SD/PD/Unknown. Assigning
+          # a label outside that set silently produced NA (with an "invalid factor
+          # level" warning), and if EVERY row was overridden the whole column went
+          # NA, after which downstream `if (orr > ...)` tests aborted the run with
+          # "missing value where TRUE/FALSE needed". Accept only known labels and
+          # say which ones were rejected.
+          valid <- c("CR", "PR", "SD", "PD", "Unknown")
+          recognised <- toupper(valid)
+          ids_all <- source_df[[src_pid_name]]
+          cat_raw_norm <- private$.normaliseCategory(source_df[[categoryVar]])
+          bad_entries <- !is.na(ids_all) & !is.na(cat_raw_norm) & cat_raw_norm != "" &
+            !(cat_raw_norm %in% recognised)
+          rejected <- unique(cat_raw_norm[bad_entries])
+          norm_recognised <- function(x) {
+            v <- private$.normaliseCategory(x)
+            v[!is.na(v) & v != "" & !(v %in% recognised)] <- NA_character_
+            v
+          }
+
+          # Patient-level value: the first non-missing recognized one in time order.
+          # match() on the patient ID read only the patient's FIRST row, so an override
           # recorded on a follow-up row (e.g. a new lesion at week 12) was ignored.
-          field <- private$.resolvePatientField(source_df, src_pid_name, categoryVar, timeVar,
-                                                normalize = private$.normaliseCategory)
+          cat_all <- norm_recognised(source_df[[categoryVar]])
+          source_clean <- source_df
+          source_clean[[categoryVar]] <- cat_all
+          field <- private$.resolvePatientField(source_clean, src_pid_name, categoryVar, timeVar,
+                                                normalize = norm_recognised)
           idx <- match(wdf[[pidCol]], field$ids)
-          user_cat <- private$.normaliseCategory(as.character(field$value)[idx])
+          user_cat <- norm_recognised(as.character(field$value)[idx])
 
           # Values that differ within a patient are per-visit (timepoint)
           # responses, as in long trial data. Taking the earliest one made a
           # patient with SD, PR, PR an SD. Derive the best response from them
           # instead: in time order up to and including the first PD, the best of
           # CR > PR > SD > PD; NE / Unknown visits do not count.
-          ids_all <- source_df[[src_pid_name]]
-          cat_all <- private$.normaliseCategory(source_df[[categoryVar]])
-          keep <- !is.na(ids_all) & !is.na(cat_all) & cat_all != ""
           has_time <- !is.null(timeVar) && timeVar %in% names(source_df)
-          o <- if (has_time) order(jmvcore::toNumeric(source_df[[timeVar]]), na.last = TRUE)
+          tv_num <- if (has_time) jmvcore::toNumeric(source_df[[timeVar]]) else NULL
+          keep <- !is.na(ids_all) & !is.na(cat_all) & cat_all != "" &
+            (if (has_time) !is.na(tv_num) else rep(TRUE, length(ids_all)))
+          o <- if (has_time) order(tv_num, na.last = TRUE)
                else seq_along(ids_all)
           o <- o[keep[o]]
           u <- unique(ids_all[o])
@@ -337,11 +380,13 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
           if (any(multi)) {
             ranks <- c("CR", "PR", "SD", "PD")
             derive <- function(s) {
-              s <- s[s %in% ranks]
-              if (length(s) == 0) return(NA_character_)
-              pd <- match("PD", s)
-              if (!is.na(pd)) s <- s[seq_len(pd)]
-              ranks[ranks %in% s][1]
+              s_eval <- s[s %in% ranks]
+              if (length(s_eval) == 0) {
+                return(if ("UNKNOWN" %in% s) "UNKNOWN" else NA_character_)
+              }
+              pd <- match("PD", s_eval)
+              if (!is.na(pd)) s_eval <- s_eval[seq_len(pd)]
+              ranks[ranks %in% s_eval][1]
             }
             derived <- vapply(seqs[multi], derive, character(1))
             j <- match(wdf[[pidCol]], u[multi])
@@ -359,18 +404,7 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             )
           }
 
-          # recist_category is a factor with levels CR/PR/SD/PD/Unknown. Assigning
-          # a label outside that set silently produced NA (with an "invalid factor
-          # level" warning), and if EVERY row was overridden the whole column went
-          # NA, after which downstream `if (orr > ...)` tests aborted the run with
-          # "missing value where TRUE/FALSE needed". Accept only known labels and
-          # say which ones were rejected.
-          valid <- c("CR", "PR", "SD", "PD", "Unknown")
-          recognised <- toupper(valid)
           ok <- !is.na(user_cat) & user_cat != "" & user_cat %in% recognised
-
-          rejected <- unique(user_cat[!is.na(user_cat) & user_cat != "" &
-                                        !(user_cat %in% recognised)])
           if (length(rejected) > 0) {
             private$.addNotice(
               type = "WARNING",
@@ -399,6 +433,7 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
           # Which patients' categories were supplied; counted (evaluable ones
           # only) after the invalid-raw reset in .accountForUnevaluablePatients.
           attr(wdf, "overridden_ids") <- wdf[[pidCol]][ok]
+          attr(wdf, "ne_override_ids") <- wdf[[pidCol]][ne]
           wdf
         },
 
@@ -589,11 +624,15 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 # self$data is the untouched dataset; source_df has already been
                 # through .validateData, which caps at -100 before we ever see it.
                 raw_df <- self$data
+                raw_has_pid <- if (!is.null(raw_df) && !is.null(patientID) &&
+                                   patientID %in% names(raw_df))
+                    !is.na(raw_df[[patientID]]) else logical(0)
                 src_vals <- if (!is.null(raw_df) && !is.null(responseVar) &&
                                 identical(inputType, "percentage") &&
                                 responseVar %in% names(raw_df))
                     jmvcore::toNumeric(raw_df[[responseVar]]) else numeric(0)
-                src_bad <- !is.na(src_vals) & src_vals < -100
+                src_bad <- !is.na(src_vals) & src_vals < -100 &
+                    (if (length(raw_has_pid) == length(src_vals)) raw_has_pid else TRUE)
 
                 too_small <- !is.na(waterfall_data$response) & waterfall_data$response < -100
                 if (any(too_small) || any(src_bad)) {
@@ -601,6 +640,7 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                                patientID %in% names(raw_df))
                         unique(raw_df[[patientID]][src_bad]) else
                         waterfall_data[[patientID]][too_small]
+                    ids <- ids[!is.na(ids)]
                     worst <- min(c(src_vals[src_bad], waterfall_data$response[too_small]),
                                  na.rm = TRUE)
                     waterfall_data$response[too_small] <- -100
@@ -715,7 +755,11 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
           }
 
           if (length(no_post_idx) > 0) {
-            uneval_idx <- no_post_idx[as.character(waterfall_data$recist_category[no_post_idx]) == "Unknown"]
+            ne_override_ids <- attr(waterfall_data, "ne_override_ids")
+            uneval_idx <- no_post_idx[
+              as.character(waterfall_data$recist_category[no_post_idx]) == "Unknown" &
+              !(waterfall_data[[patientID]][no_post_idx] %in% c(bad_raw_ids, ne_override_ids))
+            ]
             # Measured follow-ups with a blank time are a different reason from
             # missing measurements, and the notice used to blame the latter.
             untimed_idx <- uneval_idx[waterfall_data[[patientID]][uneval_idx] %in% untimed_only]
@@ -1376,6 +1420,16 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
           processed_df$min_abs_pct <- NA_real_   # sizes unknown: 5 mm rule cannot apply
         }
 
+        cat_var <- self$options$responseCategoryVar
+        cv_df <- if (!is.null(cat_var) && cat_var %in% names(df)) {
+          private$.normaliseCategory(df[[cat_var]])
+        } else {
+          NULL
+        }
+        if (!is.null(cv_df)) {
+          processed_df$.cat_override_norm <- cv_df
+        }
+
         # Best response = the most negative change over POST-BASELINE assessments.
         # With a time variable the time = 0 row is the baseline itself (0% by
         # definition for raw input, and the format the welcome text suggests for
@@ -1391,10 +1445,20 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
           # scan and shrank later was scored SD or PR.
           patient_group <- match(processed_df[[patientID]],
                                  unique(processed_df[[patientID]]))
-          first_pd <- vapply(split(seq_len(nrow(processed_df)), patient_group), function(i)
-            private$.firstProgression(tv[i], processed_df$response[i],
-                                      processed_df$min_abs_pct[i][!is.na(processed_df$min_abs_pct[i])][1]),
-            numeric(1))
+          recognised_cats <- c("CR", "PR", "SD", "PD", "UNKNOWN")
+          first_pd <- vapply(split(seq_len(nrow(processed_df)), patient_group), function(i) {
+            num_pd <- private$.firstProgression(tv[i], processed_df$response[i],
+                                                processed_df$min_abs_pct[i][!is.na(processed_df$min_abs_pct[i])][1])
+            if (!is.null(cv_df)) {
+              c_i <- cv_df[i]
+              timed_c <- c_i[!is.na(tv[i]) & !is.na(c_i) & c_i %in% recognised_cats]
+              if (length(unique(timed_c)) > 1) {
+                pd_times <- tv[i][!is.na(tv[i]) & tv[i] > 0 & !is.na(c_i) & c_i == "PD"]
+                if (length(pd_times) > 0) num_pd <- min(num_pd, min(pd_times))
+              }
+            }
+            num_pd
+          }, numeric(1))
           post <- post & tv <= first_pd[as.character(patient_group)]
         }
         df_waterfall <- processed_df[post, , drop = FALSE] %>%
@@ -1408,15 +1472,13 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         # Patients with no usable value at all are reported as excluded later.
         with_value <- unique(processed_df[[patientID]][!is.na(processed_df$response)])
         no_post <- setdiff(with_value, df_waterfall[[patientID]])
-        # A patient with NO value at all but a supplied CR/PR/SD/PD category -
+        # A patient with NO value at all but a supplied CR/PR/SD/PD/NE category -
         # clinical progression or death before the first scan, the documented use
         # of the override - is kept too, so the override can classify them. They
         # used to be dropped as "excluded": six patients gave DCR 100% (4/4) with
         # one row per patient and 66.7% (4/6) in long format (release review WF-1).
-        cat_var <- self$options$responseCategoryVar
-        if (!is.null(cat_var) && cat_var %in% names(processed_df)) {
-          cv <- private$.normaliseCategory(processed_df[[cat_var]])
-          supplied <- unique(processed_df[[patientID]][!is.na(cv) & cv %in% c("CR", "PR", "SD", "PD")])
+        if (!is.null(cv_df)) {
+          supplied <- unique(df[[patientID]][!is.na(cv_df) & cv_df %in% c("CR", "PR", "SD", "PD", "UNKNOWN")])
           no_post <- union(no_post, setdiff(supplied, df_waterfall[[patientID]]))
         }
         if (length(no_post) > 0) {
@@ -1489,10 +1551,12 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
         # One group per patient: the first non-missing value in time order. Joining
         # on distinct (patient, group) pairs made a patient whose group changed
-        # between rows appear once per group.
+        # between rows appear once per group. Read from `df` rather than
+        # `processed_df` so a group column named "response" is not shadowed by the
+        # calculated numeric response column.
         df_spider <- processed_df
-        if (!is.null(groupVar) && groupVar %in% names(processed_df)) {
-          g <- private$.resolvePatientField(processed_df, patientID, groupVar,
+        if (!is.null(groupVar) && groupVar %in% names(df)) {
+          g <- private$.resolvePatientField(df, patientID, groupVar,
                                             if (has_time) timeVar)
           group_levels <- levels(factor(g$value))
           df_waterfall$patient_group <- factor(
@@ -1579,7 +1643,8 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
       # disagree with the Response Categories table; patients who are not
       # evaluable are left out and counted in `n_excluded`.
       .calculatePersonTimeMetrics = function(df, patientID, timeVar, responseVar,
-                                             final_categories = NULL, tte = NULL) {
+                                             final_categories = NULL, tte = NULL,
+                                             n_supplied = NULL) {
         if (is.null(timeVar) || !timeVar %in% names(df))
           return(NULL)
         if (!patientID %in% names(df) || nrow(df) == 0)
@@ -1592,7 +1657,8 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                            category = as.character(final_categories$category),
                            stringsAsFactors = FALSE)
         evaluable <- cats$pid[cats$category %in% c("CR", "PR", "SD", "PD")]
-        n_excluded <- length(setdiff(cats$pid, evaluable))
+        n_excluded <- max(length(setdiff(cats$pid, evaluable)),
+                          as.integer((n_supplied %||% length(cats$pid)) - length(evaluable)))
 
         pt_by_patient <- ap[ap[[patientID]] %in% evaluable, , drop = FALSE]
         if (nrow(pt_by_patient) == 0)
@@ -2419,7 +2485,8 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
           person_time_metrics <- tryCatch({
             private$.calculatePersonTimeMetrics(
               processed_data$spider, safe_patientID, safe_timeVar, safe_responseVar,
-              final_categories, tte_metrics)
+              final_categories, tte_metrics,
+              n_supplied = processed_data$n_supplied)
           }, error = function(e) {
             private$.addNotice(
               type = "WARNING",
@@ -2707,7 +2774,9 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
           values <- factor(as.character(values),
                            levels = levels(cats$recist_category))
 
-          self$results$addResponseCategory$setRowNums(rownames(self$data))
+          row_nums <- suppressWarnings(as.integer(rownames(self$data)))
+          if (anyNA(row_nums)) row_nums <- seq_len(nrow(self$data))
+          self$results$addResponseCategory$setRowNums(row_nums)
           self$results$addResponseCategory$setValues(values)
         }
       },
@@ -3429,7 +3498,7 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         # evaluable-only ORR/DCR, so the same panel contradicted itself.
         n_total <- processed_data$n_supplied %||% nrow(processed_data$waterfall)
         n_eval <- metrics$n
-        n_unknown <- if (!is.null(metrics$n_unknown)) metrics$n_unknown else (n_total - n_eval)
+        n_unknown <- max(0L, as.integer(n_total - n_eval), as.integer(metrics$n_unknown %||% 0L))
         orr <- metrics$ORR
         dcr <- metrics$DCR
 
