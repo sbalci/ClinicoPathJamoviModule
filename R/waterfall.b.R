@@ -3497,7 +3497,11 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
               size = 3,
               color = "gray50"
             ) +
-            ggplot2::labs(caption = .("Progression is judged against each patient's nadir, not against the +20% line from baseline."))
+            ggplot2::labs(caption = paste(strwrap(
+              .("Progression is judged against each patient's nadir, not against the +20% line from baseline."),
+              width = 60), collapse = "\n")) +
+            ggplot2::theme(plot.caption = ggplot2::element_text(hjust = 0),
+                           plot.caption.position = "plot")
         }
 
         # No median line on the spider plot (R73): a median per exact time value
