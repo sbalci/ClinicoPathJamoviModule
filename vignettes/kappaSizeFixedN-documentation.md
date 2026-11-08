@@ -4,7 +4,7 @@
 
 - **Function**: `kappaSizeFixedN`
 - **Title**: Lowest Expected Kappa for a Fixed Sample Size
-- **Module**: `PowerT`
+- **Module**: `meddecide` (`menuGroup: Power #meddecide`)
 - **Files**:
   - `jamovi/kappaSizeFixedN.u.yaml` - User Interface Definition
   - `jamovi/kappaSizeFixedN.a.yaml` - Options & Schema Definition

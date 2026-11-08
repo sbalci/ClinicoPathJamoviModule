@@ -167,8 +167,8 @@ sequenceDiagram
   option-change parity, and image/PDF export require separate regression coverage.
 - **Readiness**: software verification does not establish population-specific clinical
   validity. Performance tables are apparent unless explicitly labeled bootstrap corrected;
-  score simplification and threshold selection still require external validation. The
-  analysis remains in the `meddecideT` menu during release preparation.
+  score simplification and threshold selection still require external validation. Shipped
+  in the `meddecide` module (`menuGroup: meddecide`, `menuSubgroup: Prediction Models`).
 - **Data Filtering**: Ensure observations with missing values are handled gracefully according to analysis options.
 - **Formula Conflicts**: Use isolated environment calls or base formula methods when interacting with `ggstatsplot` or formula parsers.
 - **Safe Deparsing**: Use `deparse(val)` in syntax generation (`asSource()`) to escape column names with spaces or special symbols.

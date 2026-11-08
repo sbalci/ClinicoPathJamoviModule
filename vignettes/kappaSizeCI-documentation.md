@@ -2,7 +2,7 @@
 
 ## 1. Overview
 
-- **Function**: `kappaSizeCI` (menu: Power Analysis by meddecide; `menuGroup: PowerT` while under test)
+- **Function**: `kappaSizeCI` (module: `meddecide`; menu: `Power -> Power Analysis by meddecide`, `menuGroup: Power #meddecide`)
 - **Files**:
   - `jamovi/kappaSizeCI.a.yaml` - options
   - `jamovi/kappaSizeCI.u.yaml` - UI; `jamovi/js/kappaSizeCI.events.js` resets `props` when `outcome` changes
@@ -36,15 +36,18 @@
 | `props` | String | `0.20, 0.80` | category proportions; commas, semicolons or spaces; one value is enough for binary |
 | `raters` | List 2-6 | `2` | raters per subject |
 | `alpha` | Number | 0.05 | 0.001-0.20 |
+| `showExplanations` | Bool | `FALSE` | Methodology and study explanation |
+| `showSummary` | Bool | `FALSE` | kappaSize package summary |
 
 ## 3. Results (`.r.yaml`)
 
 | Item | Type | Content |
 | :--- | :--- | :--- |
-| `notices` | Html | warnings (Sparse categories, Rare category, Small sample, very large n), then the answer, then Methodology |
+| `notices` | Html | warnings (Sparse categories, Rare category, Small sample, very large n), then the answer |
 | `text1` | Preformatted | the required n and a conditional sentence ("if the observed kappa comes in at kappa0") |
-| `text_summary` | Preformatted | kappaSize's own `summary()`, plus a line explaining any difference from the reported n |
-| `text2` | Preformatted | Study Explanation: design, the governing limit, and the arithmetic `ceiling(crit / slope)` |
+| `text_summary` | Preformatted | kappaSize's own `summary()`, plus a line explaining any difference from the reported n (visible with `showSummary`) |
+| `text2` | Preformatted | Study Explanation: design, the governing limit, and the arithmetic `ceiling(crit / slope)` (visible with `showExplanations`) |
+| `methodology` | Html | caveats always; method detail with `showExplanations` |
 
 Every option is in every item's `clearWith`.
 

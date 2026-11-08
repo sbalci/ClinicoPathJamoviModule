@@ -14,6 +14,9 @@
 
 ## 1a. Changelog
 
+- **Date**: 2026-11-07, meddecide 1.1.3
+- **Summary**: Added a `"missing"` note on `originalCrossTab` when rows with missing test or reference results are omitted from the original-data cross-tabulation. Added a `"levels"` note on `cTable1`/`cTable2`/`cTable3` naming the Reference Positive, Reference Negative, Test Positive, and Test Negative levels.
+
 - **Date**: 2026-10-04
 - **Summary**: Analysis 1.1.0 - `referenceType`, `referenceDescription`, `targetDefinition`; explicit positive and negative levels required for every selected variable; level-mapping, reference-definition and comparator outputs added; validation-provenance options (`showValidationContext`, `cohortRole`, `samplingDesign`, `thresholdSource`, `modelVersion`, `analysisUnit`) and the `validationContext` table added (displayed only, not validated); `pprob` bounds widened to 1e-9 to 1 − 1e-9.
 

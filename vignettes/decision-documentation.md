@@ -14,6 +14,9 @@
 
 ## 1a. Changelog
 
+- **Date**: 2026-11-07, meddecide 1.1.3
+- **Summary**: Prevented 32-bit integer overflow in the phi determinant (`as.numeric(TP) * as.numeric(TN) - as.numeric(FP) * as.numeric(FN)`). Added a `"truncated"` table note on `comparatorCases` when discordant cases exceed `maxCasesShow`. Synchronized options and results tables with `jamovi/decision.a.yaml` and `jamovi/decision.r.yaml` (`referenceType`, `referenceDescription`, `targetDefinition`, `excludeIndeterminate`, `faganPalette`, `showValidationContext`, `cohortRole`, `samplingDesign`, `thresholdSource`, `modelVersion`, `analysisUnit`, and the `levelMapping`, `referenceDefinition`, `comparator*`, and `validationContext` outputs).
+
 - **Date**: 2026-08-29
 - **Summary**: Comprehensive documentation suite created & verified against active schemas and backend implementation.
 - **Date**: 2026-09-26
@@ -24,18 +27,23 @@
 | Option | Type | Default | Description |
 | :--- | :--- | :--- | :--- |
 | `data` | `Data` | `NULL` |  |
+| `referenceType` | `List` | `legacy` | Reference interpretation (`legacy`, `disease`, `consensus`, `method`) |
+| `referenceDescription` | `String` | `` | Comparator description |
+| `targetDefinition` | `String` | `` | Target definition |
 | `gold` | `Variable` | `NULL` | Gold Standard (Reference) |
 | `goldPositive` | `Level` | `NULL` | Disease present level |
 | `newtest` | `Variable` | `NULL` | Test Under Evaluation |
 | `testPositive` | `Level` | `NULL` | Test positive level |
 | `goldNegative` | `Level` | `NULL` | Disease absent level |
 | `testNegative` | `Level` | `NULL` | Test negative level |
+| `excludeIndeterminate` | `Bool` | `FALSE` | Exclude other observed levels |
 | `pp` | `Bool` | `FALSE` | Known population prevalence |
 | `pprob` | `Number` | `0.3` | Population disease prevalence |
 | `od` | `Bool` | `FALSE` | Raw data tables |
 | `fnote` | `Bool` | `FALSE` | Explanatory footnotes |
 | `ci` | `Bool` | `FALSE` | 95 percent confidence intervals |
 | `fagan` | `Bool` | `FALSE` | Fagan nomogram plot |
+| `faganPalette` | `List` | `default` | Fagan nomogram palette |
 | `showNaturalLanguage` | `Bool` | `FALSE` | Clinical summary |
 | `showClinicalInterpretation` | `Bool` | `FALSE` | Clinical interpretation guide |
 | `showReportTemplate` | `Bool` | `FALSE` | Copy-ready results paragraph |
@@ -43,6 +51,12 @@
 | `showMisclassified` | `Bool` | `FALSE` | Misclassified cases analysis |
 | `maxCasesShow` | `Integer` | `50` | Maximum cases to display |
 | `saveClassifications` | `Output` | `NULL` | Save classifications to data |
+| `showValidationContext` | `Bool` | `FALSE` | Validation context table |
+| `cohortRole` | `String` | `` | Cohort role |
+| `samplingDesign` | `String` | `` | Sampling design |
+| `thresholdSource` | `String` | `` | Threshold source |
+| `modelVersion` | `String` | `` | Model version |
+| `analysisUnit` | `String` | `` | Unit of observation |
 
 ## 3. Results Definition (`.r.yaml`)
 
@@ -69,6 +83,14 @@
 | `falseNegativeTable` | `Table` | `False Negative Cases (Test- but Disease+)` |  |
 | `misclassificationInterpretation` | `Html` | `Interpretation of Misclassified Cases` |  |
 | `saveClassifications` | `Output` | `Classification Groups` |  |
+| `levelMapping` | `Table` | `Selected Levels and Exclusions` |  |
+| `referenceDefinition` | `Table` | `Reference and target` |  |
+| `comparatorCounts` | `Table` | `Binary comparator counts` |  |
+| `comparatorPopulation` | `Table` | `Comparison populations` |  |
+| `comparatorMetrics` | `Table` | `Agreement with comparator` |  |
+| `comparatorReport` | `Html` | `Comparator interpretation` |  |
+| `comparatorCases` | `Table` | `Discordant cases` |  |
+| `validationContext` | `Table` | `Validation context` |  |
 
 ## 4. Architecture & Data Flow Diagram
 

@@ -15,6 +15,7 @@
 | `data` | UI Control `data` | `self$options$data` | Output item / Table |
 | `outcome` | UI Control `outcome` | `self$options$outcome` | Output item / Table |
 | `positiveClass` | UI Control `positiveClass` | `self$options$positiveClass` | Output item / Table |
+| `validationNegative` | UI Control `validationNegative` | `self$options$validationNegative` | `validationContext`, `validationExclusions` |
 | `predictors` | UI Control `predictors` | `self$options$predictors` | Output item / Table |
 | `analysisType` | UI Control `analysisType` | `self$options$analysisType` | Output item / Table |
 | `direction` | UI Control `direction` | `self$options$direction` | Output item / Table |
@@ -40,7 +41,8 @@
 | `smoothMethod` | UI Control `smoothMethod` | `self$options$smoothMethod` | Output item / Table |
 | `partialAuc` | UI Control `partialAuc` | `self$options$partialAuc` | Output item / Table |
 | `partialAucType` | UI Control `partialAucType` | `self$options$partialAucType` | Output item / Table |
-| `partialAucFrom` / `partialAucTo` | UI Control `partialAucFrom` / `partialAucTo` | `self$options$partialAucFrom/partialAucTo` | Output item / Table |
+| `partialAucFrom` | UI Control `partialAucFrom` | `self$options$partialAucFrom` | Output item / Table |
+| `partialAucTo` | UI Control `partialAucTo` | `self$options$partialAucTo` | Output item / Table |
 | `crocAnalysis` | UI Control `crocAnalysis` | `self$options$crocAnalysis` | Output item / Table |
 | `crocAlpha` | UI Control `crocAlpha` | `self$options$crocAlpha` | Output item / Table |
 | `convexHull` | UI Control `convexHull` | `self$options$convexHull` | Output item / Table |
@@ -62,6 +64,7 @@
 | `showMetricsDiff` | UI Control `showMetricsDiff` | `self$options$showMetricsDiff` | Output item / Table |
 | `statisticalComparison` | UI Control `statisticalComparison` | `self$options$statisticalComparison` | Output item / Table |
 | `calibrationAnalysis` | UI Control `calibrationAnalysis` | `self$options$calibrationAnalysis` | Output item / Table |
+| `predictionScale` | UI Control `predictionScale` | `self$options$predictionScale` | Output item / Table |
 | `calibrationPlot` | UI Control `calibrationPlot` | `self$options$calibrationPlot` | Output item / Table |
 | `hosmerLemeshow` | UI Control `hosmerLemeshow` | `self$options$hosmerLemeshow` | Output item / Table |
 | `hlGroups` | UI Control `hlGroups` | `self$options$hlGroups` | Output item / Table |
@@ -81,6 +84,18 @@
 | `internalValidation` | UI Control `internalValidation` | `self$options$internalValidation` | Output item / Table |
 | `validationMethod` | UI Control `validationMethod` | `self$options$validationMethod` | Output item / Table |
 | `decisionImpactCurves` | UI Control `decisionImpactCurves` | `self$options$decisionImpactCurves` | Output item / Table |
+| `showTableNotes` | UI Control `showTableNotes` | `self$options$showTableNotes` | Table notes |
+| `validationPanel` | UI Control `validationPanel` | `self$options$validationPanel` | `validationContext`, `validationExclusions`, `validationOperatingPoint`, `validationTargetCheck`, `validationSummary` |
+| `cohortRole` | UI Control `cohortRole` | `self$options$cohortRole` | `validationContext` |
+| `samplingDesign` | UI Control `samplingDesign` | `self$options$samplingDesign` | `validationContext` |
+| `thresholdSource` | UI Control `thresholdSource` | `self$options$thresholdSource` | `validationContext` |
+| `modelVersion` | UI Control `modelVersion` | `self$options$modelVersion` | `validationContext` |
+| `analysisUnit` | UI Control `analysisUnit` | `self$options$analysisUnit` | `validationContext` |
+| `prespecifiedThreshold` | UI Control `prespecifiedThreshold` | `self$options$prespecifiedThreshold` | `validationOperatingPoint`, `validationTargetCheck` |
+| `targetSensitivity` | UI Control `targetSensitivity` | `self$options$targetSensitivity` | `validationTargetCheck` |
+| `targetSpecificity` | UI Control `targetSpecificity` | `self$options$targetSpecificity` | `validationTargetCheck` |
+| `targetPPV` | UI Control `targetPPV` | `self$options$targetPPV` | `validationTargetCheck` |
+| `targetNPV` | UI Control `targetNPV` | `self$options$targetNPV` | `validationTargetCheck` |
 
 ## Verification Checklist
 

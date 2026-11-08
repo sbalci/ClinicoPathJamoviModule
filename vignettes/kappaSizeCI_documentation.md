@@ -3,9 +3,9 @@
 ## Feature-to-Code Mapping
 
 - **Analysis Function**: `kappaSizeCI`
-- **Module**: `PowerT`
+- **Module**: `meddecide` (`menuGroup: Power #meddecide`)
 
-| Feature / Option | UI Binding | Backend Handler | Results affected (notices, text1, text_summary, text2) |
+| Feature / Option | UI Binding | Backend Handler | Results affected (notices, text1, text_summary, text2, methodology) |
 | :--- | :--- | :--- | :--- |
 | `outcome` | UI Control `outcome` | `self$options$outcome` | all panes; engine choice |
 | `citype` | UI Control `citype` | `self$options$citype` | all panes; critical value |
@@ -15,6 +15,8 @@
 | `props` | UI Control `props` | `self$options$props` | all panes; Rare category panel |
 | `raters` | UI Control `raters` | `self$options$raters` | all panes |
 | `alpha` | UI Control `alpha` | `self$options$alpha` | all panes; confidence level |
+| `showExplanations` | UI Control `showExplanations` | `self$options$showExplanations` | `text2`, `methodology` |
+| `showSummary` | UI Control `showSummary` | `self$options$showSummary` | `text_summary` |
 
 ## Verification Checklist
 

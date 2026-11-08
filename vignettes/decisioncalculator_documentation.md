@@ -16,10 +16,15 @@
 | `fnote` | UI Control `fnote` | `self$options$fnote` | Output item / Table |
 | `ci` | UI Control `ci` | `self$options$ci` | Output item / Table |
 | `fagan` | UI Control `fagan` | `self$options$fagan` | Output item / Table |
+| `faganPalette` | UI Control `faganPalette` | `self$options$faganPalette` | `plot1` |
 | `showWelcome` | UI Control `showWelcome` | `self$options$showWelcome` | Output item / Table |
 | `showSummary` | UI Control `showSummary` | `self$options$showSummary` | Output item / Table |
 | `showAbout` | UI Control `showAbout` | `self$options$showAbout` | Output item / Table |
 | `showGlossary` | UI Control `showGlossary` | `self$options$showGlossary` | Output item / Table |
+| `showWorkload` | UI Control `showWorkload` | `self$options$showWorkload` | `workloadTable` |
+| `populationSize` | UI Control `populationSize` | `self$options$populationSize` | `workloadTable` |
+| `utilityThreshold` | UI Control `utilityThreshold` | `self$options$utilityThreshold` | `workloadTable` |
+| `prevalenceScenarios` | UI Control `prevalenceScenarios` | `self$options$prevalenceScenarios` | `workloadTable` |
 | `multiplecuts` | UI Control `multiplecuts` | `self$options$multiplecuts` | Output item / Table |
 | `cutoff1` | UI Control `cutoff1` | `self$options$cutoff1` | Output item / Table |
 | `tp1` | UI Control `tp1` | `self$options$tp1` | Output item / Table |

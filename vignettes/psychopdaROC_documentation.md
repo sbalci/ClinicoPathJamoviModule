@@ -1,6 +1,6 @@
 # Advanced ROC Analysis — Feature Mapping
 
-Analysis 1.0.88, `meddecideT` (JamoviTest). This is a source/schema map, not evidence that every option combination was executed.
+Analysis 1.0.90, `meddecide`. This is a source/schema map, not evidence that every option combination was executed.
 
 The results column includes both top-level and array-template `clearWith` and `visible` dependencies. Runtime computation can affect other results too. `data` is supplied by jamovi and read through `self$data`.
 

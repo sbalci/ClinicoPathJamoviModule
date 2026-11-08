@@ -11,6 +11,7 @@
 | `outcome` | UI Control `outcome` | `self$options$outcome` | Output item / Table |
 | `outcomeLevel` | UI Control `outcomeLevel` | `self$options$outcomeLevel` | Output item / Table |
 | `explanatory` | UI Control `explanatory` | `self$options$explanatory` | Output item / Table |
+| `patientID` | UI Control `patientID` | `self$options$patientID` | Independence / duplicate-ID validation |
 | `penalty` | UI Control `penalty` | `self$options$penalty` | Output item / Table |
 | `alpha` | UI Control `alpha` | `self$options$alpha` | Output item / Table |
 | `lambda` | UI Control `lambda` | `self$options$lambda` | Output item / Table |

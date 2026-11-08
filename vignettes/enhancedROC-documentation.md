@@ -14,6 +14,9 @@
 
 ## 1a. Changelog
 
+- **Date**: 2026-11-07, meddecide 1.1.3
+- **Summary**: Fixed 95% confidence interval formatting in `diagnosticPerformance` so trailing zeros are preserved (`sprintf("(%.3f, %.3f)", ...)`). Wrapped `pROC::auc(..., partial.auc.correct = TRUE)` in `suppressWarnings()` when partial AUC is below the chance diagonal and ensured `partialAucAnalysis` always carries the `"mcclish_below_diagonal"` table note even when `showTableNotes = FALSE`. Marked the default `analysisUnit` (`"slide (default setting)"`) in `validationContext` to match `cohortRole`, `samplingDesign`, and `thresholdSource`.
+
 - **Date**: 2026-10-11, analysis version 1.0.84
 - **Summary**: AUC table notes, methods, and copy-ready reports identify the actual
   interval method per marker, including bootstrap failures followed by DeLong and
@@ -58,6 +61,7 @@
 | `data` | `Data` | `NULL` |  |
 | `outcome` | `Variable` | `NULL` | Outcome Variable |
 | `positiveClass` | `Level` | `NULL` (allowNone) | Positive class; never inferred from level order (numeric 0/1 outcome: 1) |
+| `validationNegative` | `Level` | `NULL` (allowNone) | Negative class (frozen-model validation) |
 | `predictors` | `Variables` | `NULL` | Predictor Variables |
 | `analysisType` | `List` | `single` | Analysis Type |
 | `direction` | `List` | `higher` | Direction |
@@ -83,7 +87,8 @@
 | `smoothMethod` | `List` | `none` | ROC Curve Smoothing |
 | `partialAuc` | `Bool` | `FALSE` | Partial AUC analysis |
 | `partialAucType` | `List` | `specificity` | Partial AUC Type |
-| `partialAucFrom` / `partialAucTo` | `Number` | `0.8` / `1` | Partial AUC Range |
+| `partialAucFrom` | `Number` | `0.8` | Partial AUC From |
+| `partialAucTo` | `Number` | `1` | Partial AUC To |
 | `crocAnalysis` | `Bool` | `FALSE` | CROC analysis |
 | `crocAlpha` | `Number` | `7` | CROC Alpha Parameter |
 | `convexHull` | `Bool` | `FALSE` | ROC convex hull |
@@ -97,7 +102,7 @@
 | `clinicalPresets` | `List` | `custom` | Clinical Presets |
 | `comprehensive_output` | `Bool` | `FALSE` | Comprehensive statistical output |
 | `clinical_interpretation` | `Bool` | `FALSE` | Clinical interpretation |
-| `plotTheme` | `List` | `clinical` | Plot Theme |
+| `plotTheme` | `List` | `jamovi` | Plot Theme |
 | `plotWidth` | `Integer` | `600` | Plot Width |
 | `plotHeight` | `Integer` | `600` | Plot Height |
 | `showCutoffPoints` | `Bool` | `FALSE` | Cutoff points |
@@ -125,6 +130,18 @@
 | `internalValidation` | `Bool` | `FALSE` | Internal validation |
 | `validationMethod` | `List` | `bootstrap` | Validation Method |
 | `decisionImpactCurves` | `Bool` | `FALSE` | Decision impact curves |
+| `showTableNotes` | `Bool` | `FALSE` | Routine explanatory footnotes |
+| `validationPanel` | `Bool` | `FALSE` | Frozen-model / threshold validation |
+| `cohortRole` | `List` | `validation` | Cohort Role |
+| `samplingDesign` | `List` | `consecutive` | Sampling Design |
+| `thresholdSource` | `List` | `external` | Threshold Source |
+| `modelVersion` | `String` | `` | Model / Assay Version |
+| `analysisUnit` | `List` | `slide` | Unit of Observation |
+| `prespecifiedThreshold` | `String` | `` | Pre-Specified Cutoff |
+| `targetSensitivity` | `Number` | `0` | Minimum Acceptable Sensitivity |
+| `targetSpecificity` | `Number` | `0` | Minimum Acceptable Specificity |
+| `targetPPV` | `Number` | `0` | Minimum Acceptable PPV |
+| `targetNPV` | `Number` | `0` | Minimum Acceptable NPV |
 
 ## 3. Results Definition (`.r.yaml`)
 

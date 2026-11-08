@@ -14,6 +14,9 @@
 
 ## 1a. Changelog
 
+- **Date**: 2026-11-07, meddecide 1.1.3
+- **Summary**: Added a `"window_edge"` note on `benefitRangeTable` when a model's observed range of benefit touches the minimum or maximum of the analyzed threshold grid, clarifying that the range is bounded by the analyzed window.
+
 - **Date**: 2026-08-29
 - **Summary**: Comprehensive documentation suite created & verified against active schemas and backend implementation.
 

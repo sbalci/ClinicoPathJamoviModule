@@ -4,7 +4,7 @@
 
 - **Function**: `kappaSizePower`
 - **Title**: Power Approach for the Number of Subjects Required
-- **Module**: `PowerT`
+- **Module**: `meddecide` (`menuGroup: Power #meddecide`)
 - **Files**:
   - `jamovi/kappaSizePower.u.yaml` - User Interface Definition
   - `jamovi/kappaSizePower.a.yaml` - Options & Schema Definition
@@ -28,6 +28,8 @@
 | `raters` | `List` | `2` | raters |
 | `alpha` | `Number` | `0.05` | alpha |
 | `power` | `Number` | `0.8` | power |
+| `showExplanations` | `Bool` | `FALSE` | Methodology and study explanation |
+| `showSummary` | `Bool` | `FALSE` | kappaSize package summary |
 
 ## 3. Results Definition (`.r.yaml`)
 
@@ -35,8 +37,9 @@
 | :--- | :--- | :--- | :--- |
 | `notices` | `Html` | `Notes` |  |
 | `text1` | `Preformatted` | `Analysis result` |  |
-| `text_summary` | `Preformatted` | `Summary` |  |
-| `text2` | `Preformatted` | `Study Explanation` |  |
+| `text_summary` | `Preformatted` | `Summary by the published formula (kappaSize)` | visible with `showSummary` |
+| `text2` | `Preformatted` | `Study Explanation` | visible with `showExplanations` |
+| `methodology` | `Html` | `Methodology` | caveats always; method detail with `showExplanations` |
 
 ## 4. Architecture & Data Flow Diagram
 

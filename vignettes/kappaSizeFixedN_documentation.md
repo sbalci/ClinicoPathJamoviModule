@@ -3,7 +3,7 @@
 ## Feature-to-Code Mapping
 
 - **Analysis Function**: `kappaSizeFixedN`
-- **Module**: `PowerT`
+- **Module**: `meddecide` (`menuGroup: Power #meddecide`)
 
 | Feature / Option | UI Binding | Backend Handler | Target Result Item |
 | :--- | :--- | :--- | :--- |
@@ -13,6 +13,8 @@
 | `raters` | UI Control `raters` | `self$options$raters` | Output item / Table |
 | `alpha` | UI Control `alpha` | `self$options$alpha` | Output item / Table |
 | `n` | UI Control `n` | `self$options$n` | Output item / Table |
+| `showExplanations` | UI Control `showExplanations` | `self$options$showExplanations` | `text2`, `methodology` |
+| `showSummary` | UI Control `showSummary` | `self$options$showSummary` | `text_summary` |
 
 ## Verification Checklist
 

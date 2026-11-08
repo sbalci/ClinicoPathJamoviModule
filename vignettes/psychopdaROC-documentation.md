@@ -4,7 +4,7 @@
 
 - **Function**: `psychopdaROC`
 - **Title**: Advanced ROC Analysis
-- **Module**: `JamoviTest` (`meddecideT` testing route)
+- **Module**: `meddecide`
 - **Files**:
   - `jamovi/psychopdaROC.u.yaml` - User Interface Definition
   - `jamovi/psychopdaROC.a.yaml` - Options & Schema Definition
@@ -13,6 +13,9 @@
 - **Summary**: Receiver Operating Characteristic (ROC) curve analysis with optimal cutpoint determination.
 
 ## 1a. Changelog
+
+- **Date**: 2026-11-07, meddecide 1.1.3
+- **Summary**: Restricted UI enablement of `metric` and `break_ties` to the 6 metric-optimizing methods (`maximize_metric`, `minimize_metric`, `maximize_loess_metric`, `minimize_loess_metric`, `maximize_boot_metric`, `minimize_boot_metric`), matching `tol_metric`. Preserved exact variable names in `fixedSensSpecTable` missed-target note keys (`paste0("missed_target_", var)` instead of `make.names(var)`). Added a user-facing warning notice when `pROC::smooth()` fails in `.createSmoothedROC()`.
 
 - **Date**: 2026-08-29
 - **Summary**: Comprehensive documentation suite created & verified against active schemas and backend implementation.
@@ -116,6 +119,9 @@ Analysis 1.0.89; all optional checkboxes default to false. `data` is supplied th
 | `positiveClass` | `Level` | `Required; allowNone` | Positive Class |
 | `negativeClass` | `Level` | `Required; allowNone` | Negative Class |
 | `subGroup` | `Variable` | `NULL` | Subgroup Variable (Optional) |
+| `patientID` | `Variable` | `NULL` | Patient ID (Optional) |
+| `analysisUnit` | `List` | `rows` | Analysis Unit (`rows`, `patientMean`, `patientMedian`) |
+| `aucInference` | `List` | `logit` | Single-AUC Inference (`logit`, `delong`) |
 | `method` | `List` | `maximize_metric` | Cutpoint Method |
 | `metric` | `List` | `youden` | Optimization Metric |
 | `direction` | `List` | `>=` | Classification Direction |
@@ -171,7 +177,9 @@ Analysis 1.0.89; all optional checkboxes default to false. `data` is supplied th
 | `priorAUC` | `Number` | `0.7` | Prior AUC Belief |
 | `priorPrecision` | `Number` | `10` | Prior Precision |
 | `clinicalUtilityAnalysis` | `Bool` | `FALSE` | Clinical utility analysis |
-| `treatmentThresholdMin` / `Max` / `Step` | `Number` | `0.05` / `0.5` / `0.05` | Treatment Threshold Range |
+| `treatmentThresholdMin` | `Number` | `0.05` | Minimum Treatment Threshold |
+| `treatmentThresholdMax` | `Number` | `0.5` | Maximum Treatment Threshold |
+| `treatmentThresholdStep` | `Number` | `0.05` | Threshold Step Size |
 | `harmBenefitRatio` | `Number` | `0.25` | Harm-to-Benefit Ratio |
 | `interventionCost` | `Bool` | `FALSE` | Intervention cost analysis |
 | `fixedSensSpecAnalysis` | `Bool` | `FALSE` | Fixed sensitivity/Specificity analysis |
@@ -181,10 +189,10 @@ Analysis 1.0.89; all optional checkboxes default to false. `data` is supplied th
 | `showFixedROC` | `Bool` | `FALSE` | Fixed point ROC curve |
 | `fixedInterpolation` | `List` | `linear` | Interpolation Method |
 | `showFixedExplanation` | `Bool` | `FALSE` | Analysis guide |
-| `metaAnalysis` | `Bool` | `FALSE` | Meta-analysis of ROC curves |
-| `metaAnalysisMethod` | `List` | `both` | Meta-Analysis Method |
-| `heterogeneityTest` | `Bool` | `FALSE` | Test for heterogeneity |
-| `forestPlot` | `Bool` | `FALSE` | Forest plot |
+| `metaAnalysis` | `Bool` | `FALSE` | Meta-analysis of ROC curves (`hidden: true`; retired) |
+| `metaAnalysisMethod` | `List` | `both` | Meta-Analysis Method (`hidden: true`; retired) |
+| `heterogeneityTest` | `Bool` | `FALSE` | Test for heterogeneity (`hidden: true`; retired) |
+| `forestPlot` | `Bool` | `FALSE` | Forest plot (`hidden: true`; retired) |
 | `overrideMetaAnalysisWarning` | `Bool` | `FALSE` | Deprecated, hidden and ignored; pooling is unavailable |
 
 ## 3. Results Definition (`.r.yaml`)

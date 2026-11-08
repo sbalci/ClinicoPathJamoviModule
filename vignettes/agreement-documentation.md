@@ -14,6 +14,9 @@
 
 ## 1a. Changelog
 
+- **Date**: 2026-11-07, meddecide 1.1.3
+- **Summary**: Deduplicated top-level warning notices in `.hierarchicalBlankNote()` and `.mixedEffectsBlankNote()` so each sub-analysis failure emits one warning notice instead of repeating per child table. Updated the `exct` option description to clarify that Conger's exact kappa inference uses Gwet's (2014) linearized variance across all observed ratings. Synchronized Section 3 (`Results Definition`) with `jamovi/agreement.r.yaml` by replacing the 15 legacy `*Heading` `Preformatted` rows with the 16 `type: Group` containers (`irrtableGroup`, `contingencyTableGroup`, `blandAltmanGroup`, `krippTableGroup`, `lightKappaTableGroup`, `raterBiasGroup`, `hierarchicalGroup`, `advancedGroup`, `gwetGroup`, `iccGroup`, `maxwellREGroup`, `specificAgreementGroup`, `computedVariablesGroup`, `subgroupGroup`, `raterClusterGroup`, `pairedAgreementGroup`).
+
 - **Date**: 2026-09-23
 - **Summary**: Hand-synchronised against `jamovi/agreement.a.yaml` and `jamovi/agreement.r.yaml` after the iota rescope - 63 option titles and 7 result titles corrected, `kappaCIMethod` and `loaOutput` added, 3 rows for removed result headings dropped, and the module corrected from `meddecideT` to `meddecide`. Sections 4-6 below were not re-derived. Do NOT regenerate this file with `/document-function`: per CLAUDE.md that command appends a `T` to `menuGroup`, which parks a shipped analysis (that is how the `meddecideT` header got here).
 
@@ -63,7 +66,7 @@
 | `tdiLimit` | `Number` | `10` | Acceptable limit |
 | `showTDIGuide` | `Bool` | `FALSE` | When to use TDI |
 | `iota` | `Bool` | `FALSE` | Iota coefficient (single variable) |
-| `iotaStandardize` | `Bool` | `TRUE` | Standardize quantitative ratings (no effect on a single variable) |
+| `iotaStandardize` | `Bool` | `TRUE` | Standardize quantitative ratings (`hidden: true`; no effect on a single variable) |
 | `showIotaGuide` | `Bool` | `FALSE` | When to use iota coefficient |
 | `finn` | `Bool` | `FALSE` | Finn coefficient (variance-based agreement) |
 | `finnLevels` | `Integer` | `3` | Number of Rating Categories (Finn) |
@@ -184,22 +187,22 @@
 | Output ID | Type | Title | Description |
 | :--- | :--- | :--- | :--- |
 | `welcome` | `Html` | `` |  |
-| `irrtableHeading` | `Preformatted` | `Interrater Reliability` |  |
+| `irrtableGroup` | `Group` | `Interrater Reliability` |  |
 | `irrtable` | `Table` | `Interrater Reliability` |  |
-| `contingencyTableHeading` | `Preformatted` | `Data Summary` |  |
+| `contingencyTableGroup` | `Group` | `Data Summary` |  |
 | `contingencyTable` | `Table` | `Contingency Table (2 Raters)` |  |
 | `ratingCombinationsTable` | `Table` | `Rating Combinations (3+ Raters)` |  |
 | `contingencyTableExplanation` | `Html` | `About Contingency Table & Rating Combinations` |  |
-| `blandAltmanHeading` | `Preformatted` | `Bland-Altman Method Comparison` |  |
+| `blandAltmanGroup` | `Group` | `Bland-Altman Method Comparison` |  |
 | `blandAltman` | `Image` | `Bland-Altman Plot` |  |
 | `agreementHeatmapPlot` | `Image` | `Agreement Heatmap (Confusion Matrix)` |  |
 | `agreementHeatmapExplanation` | `Html` | `About Agreement Heatmap` |  |
 | `blandAltmanExplanation` | `Html` | `About Bland-Altman Analysis` |  |
 | `blandAltmanStats` | `Table` | `Bland-Altman Statistics` |  |
-| `krippTableHeading` | `Preformatted` | `Krippendorff's Alpha` |  |
+| `krippTableGroup` | `Group` | `Krippendorff's Alpha` |  |
 | `krippTable` | `Table` | `Krippendorff's Alpha Results` |  |
 | `krippExplanation` | `Html` | `About Krippendorff's Alpha` |  |
-| `lightKappaTableHeading` | `Preformatted` | `Additional Categorical Agreement Measures` |  |
+| `lightKappaTableGroup` | `Group` | `Additional Categorical Agreement Measures` |  |
 | `lightKappaTable` | `Table` | `Light's Kappa Results` |  |
 | `lightKappaExplanation` | `Html` | `About Light's Kappa` |  |
 | `finnTable` | `Table` | `Finn Coefficient Results (Variance-Based Agreement)` |  |
@@ -210,7 +213,7 @@
 | `robinsonAExplanation` | `Html` | `About Robinson's A` |  |
 | `meanSpearmanTable` | `Table` | `Mean Spearman Rho (Average Rank Correlation) Results` |  |
 | `meanSpearmanExplanation` | `Html` | `About Mean Spearman Rho` |  |
-| `raterBiasHeading` | `Preformatted` | `Directional Discordance and Marginal Homogeneity Tests` |  |
+| `raterBiasGroup` | `Group` | `Directional Discordance and Marginal Homogeneity Tests` |  |
 | `raterBiasTable` | `Table` | `Directional Discordance Test (ordinal, 2 raters)` |  |
 | `raterBiasExplanation` | `Html` | `About Directional Discordance Test` |  |
 | `bhapkarTable` | `Table` | `Bhapkar Test for Marginal Homogeneity` |  |
@@ -223,14 +226,14 @@
 | `allPairsKappaExplanation` | `Html` | `About All-Pairs Kappa Analysis` |  |
 | `itemModalAgreementTable` | `Table` | `Agreement by Item Modal Category` |  |
 | `itemModalAgreementExplanation` | `Html` | `About Per-Category Item-Modal Agreement` |  |
-| `hierarchicalHeading` | `Preformatted` | `Hierarchical / Multilevel Agreement` |  |
+| `hierarchicalGroup` | `Group` | `Hierarchical / Multilevel Agreement` |  |
 | `hierarchicalOverallTable` | `Table` | `Hierarchical Kappa - Overall Agreement` |  |
 | `clusterSpecificTable` | `Table` | `Cluster-Specific Kappa Estimates` |  |
 | `varianceDecompositionTable` | `Table` | `Variance Component Decomposition` |  |
 | `hierarchicalICCTable` | `Table` | `Hierarchical ICC Decomposition` |  |
 | `homogeneityTestTable` | `Table` | `Cluster Homogeneity Test Results` |  |
 | `hierarchicalExplanation` | `Html` | `About Hierarchical/Multilevel Kappa` |  |
-| `advancedHeading` | `Preformatted` | `Advanced Agreement Analyses` |  |
+| `advancedGroup` | `Group` | `Advanced Agreement Analyses` |  |
 | `mixedEffectsTable` | `Table` | `Mixed-Effects Condition Comparison` |  |
 | `mixedEffectsVarianceTable` | `Table` | `Mixed-Effects Variance Components` |  |
 | `mixedEffectsExplanation` | `Html` | `About Mixed-Effects Condition Comparison` |  |
@@ -242,12 +245,12 @@
 | `concordanceF1Table` | `Table` | `Multi-Annotator Concordance Metrics` |  |
 | `concordanceF1PerClassTable` | `Table` | `Per-Class Concordance F1` |  |
 | `concordanceF1Explanation` | `Html` | `About Multi-Annotator Concordance` |  |
-| `gwetHeading` | `Preformatted` | `Chance-Corrected Agreement Variants` |  |
+| `gwetGroup` | `Group` | `Chance-Corrected Agreement Variants` |  |
 | `gwetTable` | `Table` | `Gwet's AC1/AC2 Results` |  |
 | `gwetExplanation` | `Html` | `About Gwet's AC Coefficient` |  |
 | `pabakTable` | `Table` | `PABAK & Prevalence/Bias Indices` |  |
 | `pabakExplanation` | `Html` | `About PABAK & Prevalence/Bias Indices` |  |
-| `iccHeading` | `Preformatted` | `Continuous Agreement Measures` |  |
+| `iccGroup` | `Group` | `Continuous Agreement Measures` |  |
 | `iccTable` | `Table` | `Intraclass Correlation Coefficient (ICC) Results` |  |
 | `iccExplanation` | `Html` | `About Intraclass Correlation Coefficient (ICC)` |  |
 | `meanPearsonTable` | `Table` | `Mean Pearson Correlation (Linear Association) Results` |  |
@@ -256,7 +259,7 @@
 | `linCCCExplanation` | `Html` | `About Lin's Concordance Correlation Coefficient` |  |
 | `tdiTable` | `Table` | `Empirical Total Deviation Index (TDI)` |  |
 | `tdiExplanation` | `Html` | `About Total Deviation Index (TDI)` |  |
-| `maxwellREHeading` | `Preformatted` | `Error Decomposition & Reliability` |  |
+| `maxwellREGroup` | `Group` | `Error Decomposition & Reliability` |  |
 | `maxwellRETable` | `Table` | `Rater Variance Decomposition - Systematic vs Random Disagreement` |  |
 | `maxwellREExplanation` | `Html` | `About the rater variance decomposition` |  |
 | `interIntraRaterIntraTable` | `Table` | `Intra-Rater Reliability (Test-Retest Consistency)` |  |
@@ -265,13 +268,14 @@
 | `iotaTable` | `Table` | `Iota Coefficient Results (Single Variable)` |  |
 | `iotaExplanation` | `Html` | `About Iota Coefficient` |  |
 | `weightedKappaGuide` | `Html` | `Weighted Kappa Interpretation Guide` |  |
-| `specificAgreementHeading` | `Preformatted` | `Category-Specific Agreement` |  |
+| `specificAgreementGroup` | `Group` | `Category-Specific Agreement` |  |
 | `specificAgreementTable` | `Table` | `Specific Agreement Indices (Category-Focused Agreement)` |  |
 | `specificAgreementExplanation` | `Html` | `About Specific Agreement Indices` |  |
 | `levelInfoTable` | `Table` | `Level Ordering Information` |  |
 | `summary` | `Html` | `Summary` |  |
 | `about` | `Html` | `About This Analysis` |  |
 | `clinicalUseCases` | `Html` | `Clinical Use Cases & Method Selection Guide` |  |
+| `computedVariablesGroup` | `Group` | `Computed Variables` |  |
 | `consensusTable` | `Table` | `Consensus Variable Summary` |  |
 | `loaTable` | `Table` | `Level of Agreement Distribution` |  |
 | `loaDetailTable` | `Table` | `Case-Level Agreement Details` |  |
@@ -280,10 +284,11 @@
 | `loaOutput` | `Output` | `Add Case Agreement Categorization to Data` |  |
 | `raterProfilePlot` | `Image` | `Rater Profile Plots (Rating Distribution by Rater)` |  |
 | `raterProfileExplanation` | `Html` | `About Rater Profile Plots` |  |
+| `subgroupGroup` | `Group` | `Agreement by Subgroup` |  |
 | `subgroupAgreementTable` | `Table` | `Agreement by Subgroup (Stratified Analysis)` |  |
 | `subgroupForestPlotImage` | `Image` | `Forest Plot of Agreement by Subgroup` |  |
 | `subgroupExplanation` | `Html` | `About Agreement by Subgroup` |  |
-| `raterClusterHeading` | `Preformatted` | `Rater & Case Clustering` |  |
+| `raterClusterGroup` | `Group` | `Rater & Case Clustering` |  |
 | `raterClusterTable` | `Table` | `Rater Cluster Assignments` |  |
 | `raterDendrogram` | `Image` | `Rater Clustering Dendrogram` |  |
 | `raterClusterHeatmap` | `Image` | `Rater Similarity Heatmap with Clusters` |  |
@@ -292,7 +297,7 @@
 | `caseDendrogram` | `Image` | `Case Clustering Dendrogram` |  |
 | `caseClusterHeatmap` | `Image` | `Case Similarity Heatmap with Clusters` |  |
 | `caseClusterExplanation` | `Html` | `About Case Clustering` |  |
-| `pairedAgreementHeading` | `Preformatted` | `Paired Agreement & Sample Size` |  |
+| `pairedAgreementGroup` | `Group` | `Paired Agreement & Sample Size` |  |
 | `pairedAgreementTable` | `Table` | `Paired Agreement Comparison` |  |
 | `pairedAgreementExplanation` | `Html` | `About Paired Agreement Comparison` |  |
 | `agreementSampleSizeTable` | `Table` | `Sample Size for Agreement Study` |  |

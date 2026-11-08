@@ -547,9 +547,8 @@ test_that("jsurvival image states hold drawing data, not patient rows", {
   audit_skip_unloaded(wanted)
 })
 
-# library-audit 2026-09-15 jsurvival [LOW] PARTIAL: lassocox .cleanData() delegates outcome coding
-# and design-matrix construction to .encodeOutcome() and .buildDesignMatrix(), and .assessSuitability()
-# delegates collinearity and PH checks to .assessCollinearity() and .assessPhAssumption()
+# library-audit 2026-09-15 jsurvival [LOW] DONE: cleaning and suitability delegate their
+#   coding/design and collinearity/PH phases without changing the fitted inputs.
 test_that("lassocox extracted outcome-coding, design-matrix, and suitability helpers match .cleanData()", {
   wanted <- "lassocox"
   skip_if_not_installed("glmnet")
@@ -664,4 +663,24 @@ test_that("pre-release mathematical and clinical edge cases remain guarded", {
   }
 
   audit_skip_unloaded(wanted)
+})
+
+# library-audit 2026-09-15 jsurvival [LOW] DONE: reviewed entry points delegate phases;
+#   endpoint coding and optional censoring must not grow back into one orchestration body.
+test_that("reviewed survival orchestration methods remain readable phase entry points", {
+  sites <- list(
+    timeinterval = ".run", oddsratio = ".run",
+    outcomeorganizer = c(".run", ".organizeOutcomes"),
+    datetimeconverter = ".run", survivalcont = ".run",
+    lassocox = c(".cleanData", ".assessSuitability")
+  )
+  for (name in audit_loaded(names(sites))) {
+    methods <- get(paste0(name, "Class"))$private_methods
+    for (method in sites[[name]]) {
+      # Deparse measures executable structure independently of comment density.
+      expect_true(length(deparse(body(methods[[method]]), width.cutoff = 100L)) <= 200L,
+        info = paste(name, method))
+    }
+  }
+  audit_skip_unloaded(names(sites))
 })

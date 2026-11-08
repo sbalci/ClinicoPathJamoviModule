@@ -30,10 +30,15 @@
 | `fnote` | `Bool` | `FALSE` | Explanatory footnotes |
 | `ci` | `Bool` | `FALSE` | 95 percent confidence intervals |
 | `fagan` | `Bool` | `FALSE` | Fagan nomogram plot |
+| `faganPalette` | `List` | `default` | Fagan nomogram palette |
 | `showWelcome` | `Bool` | `FALSE` | Welcome message |
 | `showSummary` | `Bool` | `FALSE` | Plain-language summary |
 | `showAbout` | `Bool` | `FALSE` | About this analysis |
 | `showGlossary` | `Bool` | `FALSE` | Clinical terms glossary |
+| `showWorkload` | `Bool` | `FALSE` | Workload & prevalence scenario projection |
+| `populationSize` | `Integer` | `1000` | Hypothetical cohort size |
+| `utilityThreshold` | `Number` | `0.1` | Treatment threshold probability |
+| `prevalenceScenarios` | `String` | `0.01, 0.05, 0.10, 0.25, 0.50` | Prevalence scenarios |
 | `multiplecuts` | `Bool` | `FALSE` | Multiple cut-off evaluation |
 | `cutoff1` | `String` | `Higher sensitivity example` | Cut-off scenario 1 name |
 | `tp1` | `Number` | `100` | TP (Cut-off 1) |
@@ -64,6 +69,7 @@
 | `epirTable_number` | `Table` | `` |  |
 | `faganSummary` | `Html` | `Reading the Nomogram` | Plain-language reading of the Fagan nomogram: the pre-test probability, the likelihood ratios, and where a positive or a negative result moves the probability of disease. |
 | `plot1` | `Image` | `Fagan nomogram` |  |
+| `workloadTable` | `Table` | `Prevalence Scenario & Workload Projection` |  |
 | `multipleCutoffTable` | `Table` | `Cut-off Comparison` |  |
 
 ## 4. Architecture & Data Flow Diagram

@@ -302,9 +302,8 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         },
 
         # Comprehensive data cleaning and validation
-        # library-audit 2026-09-15 jsurvival [LOW] PARTIAL: extracted .encodeOutcome() and .buildDesignMatrix()
-        #   from .cleanData(), and .assessCollinearity() and .assessPhAssumption() from .assessSuitability();
-        #   older .run() bodies remain deferred background cleanup (guide §2)
+        # library-audit 2026-09-15 jsurvival [LOW] DONE: cleaning delegates outcome/design
+        #   encoding; suitability delegates collinearity and proportional-hazards checks.
         .cleanData = function() {
             data <- self$data
             time_var <- self$options$elapsedtime
