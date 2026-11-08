@@ -47,9 +47,11 @@ of this grouping variable. Creates a panel of pie charts, one for each
 group level (e.g., separate charts by treatment center or study site).}
 
 \item{typestatistics}{Type of statistical test for categorical association
-analysis. 'parametric' uses Pearson's Chi-square test, 'nonparametric' uses
-contingency table tests, 'robust' uses robust association measures, 'bayes'
-provides Bayesian analysis with Bayes factors.}
+analysis. For categorical count data, 'parametric', 'nonparametric', and
+'robust' all compute frequentist Pearson's chi-squared tests (with Fisher's
+exact test automatically substituted on sparse unpaired 2x2 tables when
+statistical results are shown), while 'bayes' provides Bayesian contingency
+table and proportion analysis with Bayes factors.}
 
 \item{seed}{Random seed for the statistics computed by posterior sampling
 (the Bayesian contingency test, and the Bayes factor caption of a
@@ -85,8 +87,8 @@ pie slice.}
 \item{proportiontest}{Decides whether proportion test for x variable is to
 be carried out for each level of y.}
 
-\item{bfmessage}{Display Bayes Factor in favor of the null hypothesis.
-Only relevant for parametric test.}
+\item{bfmessage}{Display Bayes Factor in favor of the null hypothesis in
+the plot caption during frequentist analyses.}
 
 \item{messages}{Display statistical messages in console.  Disabling
 improves performance.}
@@ -136,7 +138,7 @@ A results object containing:
 }
 }
 \description{
-'Wrapper Function for ggstatsplot::ggpiestats and
-ggstatsplot::grouped_ggpiestats to generate Pie Charts with
-statistical analysis.'
+Wrapper Function for ggstatsplot::ggpiestats and
+ggstatsplot::grouped_ggpiestats to generate Pie Charts with statistical
+analysis.
 }

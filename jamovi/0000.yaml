@@ -1829,10 +1829,10 @@ analyses:
     menuTitle: Pie Charts
     ribbon: analyses
     category: analyses
-    description: |
-      'Wrapper Function for ggstatsplot::ggpiestats and
-      ggstatsplot::grouped_ggpiestats to generate Pie Charts with
-      statistical analysis.'
+    description: >
+      Wrapper Function for ggstatsplot::ggpiestats and
+      ggstatsplot::grouped_ggpiestats to generate Pie Charts with statistical
+      analysis.
   - title: Waffle Charts
     name: jwaffle
     ns: ClinicoPath

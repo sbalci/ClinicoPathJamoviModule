@@ -224754,3 +224754,31 @@ msgstr "Seçilirse, uydurulan Cox katsayılarının grafiğini oluşturur. Etkil
 
 msgid "Percentage of all observations"
 msgstr "Tüm gözlemlerin yüzdesi"
+
+#: agreement.events.js
+msgid "Enable specific agreement to see the available categories."
+msgstr "Kullanılabilir kategorileri görmek için kategoriye özgü uyumu etkinleştirin."
+
+#: agreement.events.js
+msgid "Select rater variables to see the available categories."
+msgstr "Kullanılabilir kategorileri görmek için değerlendirici değişkenlerini seçin."
+
+#: agreement.events.js
+msgid "Loading categories..."
+msgstr "Kategoriler yükleniyor..."
+
+#: agreement.events.js
+msgid "No categories available. Select nominal or ordinal rater variables."
+msgstr "Kullanılabilir kategori yok. Nominal veya sıralı değerlendirici değişkenlerini seçin."
+
+#: agreement.events.js
+msgid "Available categories: {categories}"
+msgstr "Kullanılabilir kategoriler: {categories}"
+
+#: agreement.events.js
+msgid "Available categories (first 30 of {total}): {categories}"
+msgstr "Kullanılabilir kategoriler (toplam {total} kategorinin ilk 30’u): {categories}"
+
+#: agreement.events.js
+msgid "Categories could not be loaded. Check the levels in the selected rater variables."
+msgstr "Kategoriler yüklenemedi. Seçili değerlendirici değişkenlerinin düzeylerini kontrol edin."

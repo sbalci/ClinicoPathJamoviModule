@@ -24,10 +24,8 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         .fisherDecision = NULL,
         .fisherDecisionHash = NULL,
 
-        # Notice collection helpers. A single Preformatted (plain-text) output item:
-        # avoids BOTH the jmvcore::Notice serialization error from
-        # self$results$insert(999, Notice) AND any HTML in notices (project convention:
-        # notice content must be plain text). ====
+        # Notice collection helpers. A single Preformatted (plain-text) output item
+        # keeps all notices in plain text with no HTML markup (project convention). ====
         .noticeList = list(),
 
         .addNotice = function(type, title, content) {
@@ -77,6 +75,16 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             self$results$plot2$setSize(650, 450)
 
+
+            if (!is.null(self$options$grvar) && nzchar(self$options$grvar)) {
+                if (is.null(self$options$group) || !nzchar(self$options$group)) {
+                    if (!is.null(self$options$dep) && nzchar(self$options$dep)) {
+                        self$results$plot4$setTitle(
+                            paste0(self$options$dep, " by ", self$options$grvar)
+                        )
+                    }
+                }
+            }
 
             if (!is.null(self$options$group) && !is.null(self$options$grvar)) {
 
@@ -231,9 +239,9 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         
         .generateAboutContent = function() {
             preset_info <- switch(self$options$clinicalpreset %||% "custom",
-                "diagnostic" = .('This analysis is optimized for diagnostic test evaluation, focusing on sensitivity, specificity, and predictive values.'),
+                "diagnostic" = .('This analysis is configured for diagnostic test evaluation using 2\u00d72 contingency table association testing and within-group proportion tests (place the reference standard in Grouping Variable and the index test in Dependent Variable so within-group slice proportions represent sensitivity and specificity).'),
                 "treatment" = .('This analysis is optimized for treatment response comparison across multiple treatment groups.'), 
-                "biomarker" = .('This analysis is optimized for biomarker distribution analysis with robust statistical methods.'),
+                "biomarker" = .('This analysis is configured for biomarker distribution analysis across groups, displaying both counts and percentages with contingency table association testing.'),
                 .('This analysis uses custom settings for pie chart generation with statistical testing.')
             )
             
@@ -366,6 +374,40 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                             paste("", .('Some categories have very few observations. Consider combining categories or collecting more data.'))
                         )
                     }
+
+                    grvar <- self$options$grvar
+                    if (!is.null(grvar) && nzchar(grvar) && grvar %in% names(df)) {
+                        sparse_strata <- character()
+                        for (lv in levels(droplevels(as.factor(df[[grvar]])))) {
+                            sub_g <- df[!is.na(df[[grvar]]) & df[[grvar]] == lv, , drop = FALSE]
+                            if (nrow(sub_g) == 0) next
+                            tb_g <- if (!is.null(counts_var) && counts_var != "" && counts_var %in% names(sub_g)) {
+                                sub_g <- sub_g[!is.na(sub_g[[counts_var]]) & sub_g[[counts_var]] > 0, , drop = FALSE]
+                                sub_g[[self$options$dep]] <- droplevels(as.factor(sub_g[[self$options$dep]]))
+                                sub_g[[self$options$group]] <- droplevels(as.factor(sub_g[[self$options$group]]))
+                                f_g <- paste0(jmvcore::composeTerm(counts_var), " ~ ",
+                                              jmvcore::composeTerm(self$options$dep), " + ",
+                                              jmvcore::composeTerm(self$options$group))
+                                stats::xtabs(jmvcore::asFormula(f_g), data = sub_g)
+                            } else {
+                                table(droplevels(as.factor(sub_g[[self$options$dep]])),
+                                      droplevels(as.factor(sub_g[[self$options$group]])))
+                            }
+                            if (nrow(tb_g) >= 2L && ncol(tb_g) >= 2L) {
+                                exp_g <- suppressWarnings(stats::chisq.test(tb_g)$expected)
+                                if (any(exp_g < 5)) {
+                                    sparse_strata <- c(sparse_strata, lv)
+                                }
+                            }
+                        }
+                        if (length(sparse_strata) > 0) {
+                            warnings_list <- c(warnings_list,
+                                sprintf(.('In Split By (%s), expected cell counts are below 5 in: %s. Check the notices panel for exact p-values per stratum.'),
+                                        htmltools::htmlEscape(grvar),
+                                        htmltools::htmlEscape(paste(sparse_strata, collapse = ", ")))
+                            )
+                        }
+                    }
                 }, error = function(e) {
                     # Silently continue if table creation fails
                 })
@@ -490,7 +532,7 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             else .("Pearson's chi-squared test")
             if (!is.null(opts$grvar) && !isTRUE(opts$paired) &&
                 !identical(opts$typestatistics, "bayes"))
-                method_name <- paste0(method_name, .("; split panels use Pearson's chi-squared test"))
+                method_name <- paste0(method_name, "; ", .("split panels use Pearson's chi-squared test"))
 
             
             # Interpolate the {outcome}/{groups}/{method} placeholders with glue.
@@ -501,6 +543,14 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                      outcome = htmltools::htmlEscape(self$options$dep),
                      groups = htmltools::htmlEscape(self$options$group),
                      method = method_name)
+            } else if (isTRUE(opts$resultssubtitle)) {
+                one_way_method <- if (identical(opts$typestatistics, "bayes"))
+                    .('a Bayesian goodness-of-fit proportion analysis')
+                else
+                    .("Pearson's chi-squared goodness-of-fit test")
+                glue::glue(.('We analyzed the distribution of {outcome} using {method}.'),
+                     outcome = htmltools::htmlEscape(self$options$dep),
+                     method = one_way_method)
             } else {
                 glue::glue(.('We analyzed the distribution of {outcome} using descriptive statistics.'),
                      outcome = htmltools::htmlEscape(self$options$dep))
@@ -526,6 +576,22 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         },
         
         # Helper Methods for Validation ----
+
+        .normalizeFactorCol = function(col) {
+            if (inherits(col, "haven_labelled") && requireNamespace("haven", quietly = TRUE)) {
+                col <- haven::as_factor(col)
+            }
+            if (is.factor(col)) {
+                lv <- levels(col)
+                bad <- is.na(lv) | lv == "<NA>"
+                if (any(bad)) {
+                    col <- factor(as.character(col), levels = lv[!bad])
+                }
+            } else if (is.character(col)) {
+                col[col == "<NA>"] <- NA_character_
+            }
+            col
+        },
         
         .validateVariables = function() {
             dep <- self$options$dep
@@ -578,6 +644,12 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         
         .validateStatisticalRequirements = function(dep, group) {
             df <- self$data
+            if (!is.null(dep) && dep != "" && dep %in% names(df)) {
+                df[[dep]] <- private$.normalizeFactorCol(df[[dep]])
+            }
+            if (!is.null(group) && group != "" && group %in% names(df)) {
+                df[[group]] <- private$.normalizeFactorCol(df[[group]])
+            }
             counts_var <- self$options$counts
             has_valid_counts <- !is.null(counts_var) && counts_var != "" &&
                 counts_var %in% names(df) && is.numeric(df[[counts_var]])
@@ -667,6 +739,29 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     message = sprintf(
                         .('Counts variable "%s" contains only missing values (NA). Cannot compute statistics with no valid counts.'),
                         counts_var
+                    )
+                ))
+            }
+
+            non_na_counts <- data[[counts_var]][!is.na(data[[counts_var]])]
+            if (any(!is.finite(non_na_counts))) {
+                return(list(
+                    valid = FALSE,
+                    message = sprintf(
+                        .('Counts variable "%s" contains non-finite values (Inf/NaN). Frequency counts must be finite whole numbers.'),
+                        counts_var
+                    )
+                ))
+            }
+
+            if (any(abs(non_na_counts - round(non_na_counts)) > 1e-7)) {
+                frac_count <- sum(abs(non_na_counts - round(non_na_counts)) > 1e-7)
+                return(list(
+                    valid = FALSE,
+                    message = sprintf(
+                        .('Counts variable "%s" contains %d non-integer (fractional) value(s). Frequency counts must be whole numbers.'),
+                        counts_var,
+                        frac_count
                     )
                 ))
             }
@@ -784,13 +879,23 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             if (is.null(group_var) || !nzchar(group_var))
                 return(NULL)
             tryCatch({
+                has_cv <- !is.null(counts_var) && nzchar(counts_var) && counts_var %in% names(data) &&
+                    is.numeric(data[[counts_var]])
+                if (has_cv) {
+                    wt <- ifelse(is.na(data[[counts_var]]), 0, data[[counts_var]])
+                    active_dep <- names(which(tapply(wt, as.character(data[[dep_var]]), sum) > 0))
+                    active_grp <- names(which(tapply(wt, as.character(data[[group_var]]), sum) > 0))
+                    active_all <- union(active_dep, active_grp)
+                    data <- data[as.character(data[[dep_var]]) %in% active_all &
+                                 as.character(data[[group_var]]) %in% active_all, , drop = FALSE]
+                }
                 lev_dep <- levels(droplevels(as.factor(data[[dep_var]])))
                 lev_grp <- levels(droplevels(as.factor(data[[group_var]])))
                 if (!setequal(lev_dep, lev_grp))
                     return(NULL)
                 data[[dep_var]] <- factor(data[[dep_var]], levels = lev_dep)
                 data[[group_var]] <- factor(data[[group_var]], levels = lev_dep)
-                if (!is.null(counts_var) && nzchar(counts_var) && counts_var %in% names(data)) {
+                if (has_cv) {
                     formula_str <- paste0(jmvcore::composeTerm(counts_var), " ~ ",
                                           jmvcore::composeTerm(dep_var), " + ",
                                           jmvcore::composeTerm(group_var))
@@ -892,6 +997,18 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 ))
             }
 
+            counts_var <- self$options$counts
+            has_cv <- !is.null(counts_var) && counts_var != "" && counts_var %in% names(data) &&
+                is.numeric(data[[counts_var]])
+            if (has_cv) {
+                wt <- ifelse(is.na(data[[counts_var]]), 0, data[[counts_var]])
+                active_dep <- names(which(tapply(wt, as.character(data[[dep_var]]), sum) > 0))
+                active_grp <- names(which(tapply(wt, as.character(data[[group_var]]), sum) > 0))
+                active_all <- union(active_dep, active_grp)
+                data <- data[as.character(data[[dep_var]]) %in% active_all &
+                             as.character(data[[group_var]]) %in% active_all, , drop = FALSE]
+            }
+
             lev_dep <- levels(droplevels(as.factor(data[[dep_var]])))
             lev_grp <- levels(droplevels(as.factor(data[[group_var]])))
             if (length(lev_dep) == 2L && length(lev_grp) == 2L && !setequal(lev_dep, lev_grp)) {
@@ -907,11 +1024,13 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             if (setequal(lev_dep, lev_grp)) {
                 data[[dep_var]] <- factor(data[[dep_var]], levels = lev_dep)
                 data[[group_var]] <- factor(data[[group_var]], levels = lev_dep)
+            } else {
+                data[[dep_var]] <- droplevels(as.factor(data[[dep_var]]))
+                data[[group_var]] <- droplevels(as.factor(data[[group_var]]))
             }
 
             # Create contingency table (use weighted if counts variable present)
-            counts_var <- self$options$counts
-            if (!is.null(counts_var) && counts_var != "" && counts_var %in% names(data)) {
+            if (has_cv) {
                 # Weighted contingency table
                 formula_str <- paste0(jmvcore::composeTerm(counts_var),
                                       " ~ ", jmvcore::composeTerm(dep_var),
@@ -1043,6 +1162,15 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             mydata <- self$data
 
+            # Normalize explicit <NA> factor levels (from addNA / factor(exclude = NULL))
+            # and haven_labelled vectors before complete.cases() so missing values are
+            # excluded rather than treated as an active category level.
+            for (v in c(self$options$dep, self$options$group, self$options$grvar)) {
+                if (!is.null(v) && length(v) == 1L && nzchar(v) && v %in% names(mydata)) {
+                    mydata[[v]] <- private$.normalizeFactorCol(mydata[[v]])
+                }
+            }
+
             # Selective NA omission - only remove rows with NAs in unsplit analysis variables
             # (grvar NAs are omitted only when rendering split-by panels in .plot4 / .emitRunNotices)
             relevant_cols <- c(self$options$dep)
@@ -1086,8 +1214,19 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 counts_var != "" && counts_var %in% names(mydata) &&
                 is.numeric(mydata[[counts_var]])
 
-            if (has_counts && !isTRUE(self$options$paired)) {
-                mydata <- mydata[mydata[[counts_var]] > 0, , drop = FALSE]
+            if (has_counts) {
+                mydata[[counts_var]] <- as.integer(round(mydata[[counts_var]]))
+                if (!isTRUE(self$options$paired)) {
+                    mydata <- mydata[mydata[[counts_var]] > 0L, , drop = FALSE]
+                } else if (!is.null(self$options$group) && nzchar(self$options$group) &&
+                           self$options$group %in% names(mydata)) {
+                    wt <- mydata[[counts_var]]
+                    active_dep <- names(which(tapply(wt, as.character(mydata[[self$options$dep]]), sum) > 0))
+                    active_grp <- names(which(tapply(wt, as.character(mydata[[self$options$group]]), sum) > 0))
+                    active_all <- union(active_dep, active_grp)
+                    mydata <- mydata[as.character(mydata[[self$options$dep]]) %in% active_all &
+                                     as.character(mydata[[self$options$group]]) %in% active_all, , drop = FALSE]
+                }
             }
 
             total_obs <- if (has_counts) sum(mydata[[counts_var]], na.rm = TRUE) else nrow(mydata)
@@ -1280,8 +1419,8 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                                 sprintf(
                                     .('%d of %d expected cell counts are below 5 in the %d\u00d7%d contingency table, so the Pearson chi-square shown on the chart subtitle may be unreliable.%s'),
                                     n_low, n_tot, nrow(tb), ncol(tb),
-                                    if (is.finite(fp)) sprintf(.(' Fisher\'s exact test on this table gives %s.'), private$.fmtP(fp, html = FALSE))
-                                    else .(' Consider collapsing sparse categories.')
+                                    if (is.finite(fp)) paste0(" ", sprintf(.('Fisher\'s exact test on this table gives %s.'), private$.fmtP(fp, html = FALSE)))
+                                    else paste0(" ", .('Consider collapsing sparse categories.'))
                                 ))
                         }
                     }
@@ -1312,11 +1451,16 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                             stats::xtabs(jmvcore::asFormula(f), data = sub_df)
                         } else table(droplevels(as.factor(sub_df[[dep]])),
                                      droplevels(as.factor(sub_df[[group]])))
-                        if (!identical(dim(tb), c(2L, 2L))) NULL
+                        if (nrow(tb) < 2L || ncol(tb) < 2L) NULL
                         else if (!any(suppressWarnings(chisq.test(tb)$expected) < 5)) NULL
                         else {
-                            fp <- stats::fisher.test(tb)$p.value
-                            sprintf("%s: %s", lv, private$.fmtP(fp, html = FALSE))
+                            fp <- if (prod(dim(tb)) <= 30) {
+                                tryCatch(stats::fisher.test(tb)$p.value, error = function(e) NA_real_)
+                            } else NA_real_
+                            if (is.finite(fp))
+                                sprintf("%s: %s", lv, private$.fmtP(fp, html = FALSE))
+                            else
+                                sprintf(.("%s: sparse contingency table (expected cell counts < 5)"), lv)
                         }
                     }, error = function(e) NULL)
                     if (!is.null(r)) lines <- c(lines, r)
@@ -1361,6 +1505,36 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     else if (m < 10)
                         private$.addNotice("INFO", .('Few discordant pairs'),
                             sprintf(.('Only %d discordant pairs, so McNemar\'s test has little power here; a non-significant result does not show that the proportions are the same.'), m))
+                }
+
+                if (!is.null(grvar) && nzchar(grvar) && grvar %in% names(prepared_data) &&
+                    !is.null(group) && nzchar(group) && private$.isMcNemar()) {
+                    split_pair_notes <- character()
+                    for (lv in levels(droplevels(as.factor(prepared_data[[grvar]])))) {
+                        sub_df <- prepared_data[!is.na(prepared_data[[grvar]]) &
+                                                prepared_data[[grvar]] == lv, , drop = FALSE]
+                        if (nrow(sub_df) == 0) next
+                        v_sub <- private$.validatePairedData(sub_df, dep, group)
+                        m_sub <- private$.pairedDiscordant(sub_df, dep, group, self$options$counts)
+                        if (!v_sub$valid) {
+                            split_pair_notes <- c(split_pair_notes, sprintf("%s: %s", lv, v_sub$message))
+                        } else if (!is.null(m_sub)) {
+                            if (m_sub == 0) {
+                                split_pair_notes <- c(split_pair_notes,
+                                    sprintf(.("%s: No discordant pairs (no test result shown)."), lv))
+                            } else if (stats::pchisq(m_sub, df = 1, lower.tail = FALSE) >= 0.05) {
+                                split_pair_notes <- c(split_pair_notes,
+                                    sprintf(.("%s: Only %d discordant pair(s) (cannot reach p < 0.05)."), lv, m_sub))
+                            } else if (m_sub < 10) {
+                                split_pair_notes <- c(split_pair_notes,
+                                    sprintf(.("%s: Only %d discordant pairs (low power)."), lv, m_sub))
+                            }
+                        }
+                    }
+                    if (length(split_pair_notes) > 0) {
+                        private$.addNotice("WARNING", .('Split By paired panels'),
+                            paste(split_pair_notes, collapse = " "))
+                    }
                 }
             }
 
@@ -1460,9 +1634,17 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         paste(",", .('split by'), htmltools::htmlEscape(self$options$grvar))
                     } else { "" }
                     
+                    obs_count <- if (!is.null(self$options$counts) && nzchar(self$options$counts) &&
+                                     self$options$counts %in% names(prepared_data) &&
+                                     is.numeric(prepared_data[[self$options$counts]])) {
+                        sum(prepared_data[[self$options$counts]], na.rm = TRUE)
+                    } else {
+                        nrow(prepared_data)
+                    }
+
                     todo <- glue::glue(
                         "<br>{ready_msg} {dep_info}{group_info}{split_info}.<br>
-                        <br>{data_msg}: {nrow(prepared_data)} {obs_msg}{cache_status}.<br>
+                        <br>{data_msg}: {obs_count} {obs_msg}{cache_status}.<br>
                         <br>{method_msg}: {if (private$.isMcNemar()) 'McNemar' else tools::toTitleCase(private$.effectiveOptionsList()$typestatistics)} {analysis_msg}.<br>
                         {perf_warning}
                         {if(prep_time > 0.1) paste0('<br>', prep_time_msg, ': ', prep_time, ' ', seconds_msg, '.<br>') else ''}
@@ -1631,13 +1813,13 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             print(plot1)
             TRUE
 
-        }
+        },
 
 
         # the plot2 function ----
 
 
-        , .plot2 = function(image, ggtheme, theme, ...) {
+        .plot2 = function(image, ggtheme, theme, ...) {
 
             # The Bayesian contingency test samples its posterior, and a frequentist run with
             # the Bayes factor message draws one too: seed them and name the seed.
@@ -1744,7 +1926,7 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     proportion.test = options_data$proportiontest,
                     palette = private$.selectPalette(mydata, dep),
                     ggplot.component = NULL,
-                    results.subtitle = options_data$resultssubtitle && is.null(exact_sub)
+                    results.subtitle = options_data$resultssubtitle && (is.null(exact_sub) || isTRUE(options_data$bfmessage))
                 )
 
             if (!is.null(exact_sub))
@@ -1760,7 +1942,7 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             }
 
 
-            if (isTRUE(options_data$resultssubtitle) && is.null(exact_sub) &&
+            if (isTRUE(options_data$resultssubtitle) &&
                 (statsSeedMatters(options_data$typestatistics, "contingency") ||
                  (!isTRUE(options_data$paired) &&
                   captionSeedMatters(options_data$typestatistics, "contingency", 2L, options_data$bfmessage))))
@@ -1769,7 +1951,7 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # Print Plot2 ----
             print(plot2)
             TRUE
-        }
+        },
 
 
         # the plot4 function ----
@@ -1777,7 +1959,7 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
 
 
-        , .plot4 = function(image, ggtheme, theme, ...) {
+        .plot4 = function(image, ggtheme, theme, ...) {
 
             # The Bayesian contingency test samples its posterior, and a frequentist run with
             # the Bayes factor message draws one too: seed them and name the seed.
@@ -1856,6 +2038,8 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     sub_df <- mydata[mydata[[grvar]] == lv, , drop = FALSE]
                     if (nrow(sub_df) == 0) next
                     if (isTRUE(options_data$paired) && has_group) {
+                        v_sub <- private$.validatePairedData(sub_df, dep, group)
+                        if (!v_sub$valid) next
                         lev_d <- levels(droplevels(as.factor(sub_df[[dep]])))
                         lev_g <- levels(droplevels(as.factor(sub_df[[group]])))
                         shared_lev <- union(lev_d, lev_g)
@@ -1869,8 +2053,11 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     }
                     if (nlevels(sub_df[[dep]]) < 1L) next
                     ratio_sub <- private$.applyRatioLengthGuard(options_data$ratio, sub_df, dep)
+                    exact_sub <- if (has_group && isTRUE(options_data$resultssubtitle))
+                        private$.exactSubtitle(sub_df, dep, group, counts_var,
+                                               options_data$conflevel, options_data$digits) else NULL
                     p_sub <- if (has_group) {
-                        ggstatsplot::ggpiestats(
+                        p_tmp <- ggstatsplot::ggpiestats(
                             data = sub_df,
                             x = !!rlang::sym(dep),
                             y = !!rlang::sym(group),
@@ -1884,11 +2071,13 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                             conf.level = options_data$conflevel,
                             proportion.test = options_data$proportiontest,
                             bf.message = options_data$bfmessage,
-                            results.subtitle = options_data$resultssubtitle,
+                            results.subtitle = options_data$resultssubtitle && (is.null(exact_sub) || isTRUE(options_data$bfmessage)),
                             title = paste0(grvar, ": ", lv),
                             ggtheme = selected_theme,
                             palette = private$.selectPalette(sub_df, dep)
                         )
+                        if (!is.null(exact_sub)) p_tmp <- p_tmp + ggplot2::labs(subtitle = exact_sub)
+                        p_tmp
                     } else {
                         ggstatsplot::ggpiestats(
                             data = sub_df,
@@ -1926,9 +2115,9 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # Print Plot4 ----
             print(plot4)
             TRUE
-        }
+        },
 
-        , .plotDonut = function(image, ggtheme, theme, ...) {
+        .plotDonut = function(image, ggtheme, theme, ...) {
 
             if (!self$options$addGGPubrDonut) return()
             # CRITICAL FIX: Check for zero-length character vectors

@@ -38,9 +38,13 @@ items:
         - group
         - grvar
         - counts
+        - ratio
         - typestatistics
         - seed
         - paired
+        - clinicalpreset
+        - messages
+        - conflevel
 
     - name: about
       title: About This Analysis
@@ -96,7 +100,7 @@ items:
       height: 300
       renderFun: .plot1
       requiresData: true
-      visible: (dep)
+      visible: (dep && !paired)
 
     - name: donutPlot
       title: 'Donut Chart'

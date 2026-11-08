@@ -3,6 +3,10 @@ name: agreement
 jus: '3.0'
 stage: 0
 compilerMode: tame
+events:
+  loaded: ./agreement.events::refreshCategoryHint
+  updated: ./agreement.events::refreshCategoryHint
+  remoteDataChanged: ./agreement.events::onRemoteDataChanged
 children:
   - type: VariableSupplier
     persistentItems: false
@@ -14,6 +18,8 @@ children:
           - type: VariablesListBox
             name: vars
             isTarget: true
+            events:
+              change: ./agreement.events::refreshCategoryHint
       - type: TargetLayoutBox
         label: Cluster/Institution Variable
         children:
@@ -179,10 +185,17 @@ children:
             children:
               - type: CheckBox
                 name: specificAgreement
+                events:
+                  change: ./agreement.events::refreshCategoryHint
               - type: TextBox
                 name: specificPositiveCategory
                 format: string
                 enable: (specificAgreement)
+              - type: CustomControl
+                name: specificCategoryHint
+                margin: small
+                events:
+                  creating: ./agreement.events::createCategoryHint
               - type: CheckBox
                 name: specificAllCategories
                 enable: (specificAgreement)

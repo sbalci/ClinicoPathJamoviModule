@@ -189,6 +189,15 @@ test_that("[C06] Sparse 2x2 table swaps subtitle to Fisher's exact test with con
   sub_z1 <- paste(deparse(capture_jjpie_plot(opts_z, d_z1, ".plot2")$labels$subtitle), collapse = " ")
   sub_z2 <- paste(deparse(capture_jjpie_plot(opts_z, d_z2, ".plot2")$labels$subtitle), collapse = " ")
   expect_identical(grepl('widehat\\(italic\\("OR"\\)\\)', sub_z1), grepl('widehat\\(italic\\("OR"\\)\\)', sub_z2))
+
+  # Sparse 2x2 with bfmessage = TRUE preserves Bayes factor caption alongside Fisher exact subtitle
+  p_bf_sp <- capture_jjpie_plot(
+    ClinicoPath:::jjpiestatsOptions$new(
+      dep = "dep", group = "grp", resultssubtitle = TRUE, bfmessage = TRUE
+    ),
+    d_a5_val, ".plot2"
+  )
+  expect_false(is.null(p_bf_sp$labels$caption))
 })
 
 test_that("[C07] Paired 2x2 McNemar chi-square, p-value, and Cohen's g match Fagerland et al. (2013, Table 6)", {
@@ -347,6 +356,17 @@ test_that("[C13] Missing-data handling drops NA rows cleanly without corrupting 
   )
   sub_with_split <- paste(deparse(capture_jjpie_plot(opts_split, d_split_na, ".plot2")$labels$subtitle), collapse = "")
   expect_identical(sub_with_split, sub_base)
+
+  # Explicit <NA> factor level (from addNA / factor(exclude = NULL)) is stripped and dropped as missing
+  d_addna <- data.frame(
+    dep = addNA(factor(c(rep("Pos", 15), rep("Neg", 15), rep(NA, 5)), levels = c("Pos", "Neg")))
+  )
+  p_addna <- capture_jjpie_plot(
+    ClinicoPath:::jjpiestatsOptions$new(dep = "dep", resultssubtitle = TRUE),
+    d_addna, ".plot1"
+  )
+  expect_identical(nrow(p_addna$data), 2L)
+  expect_identical(sum(p_addna$data$counts), 30L)
 })
 
 test_that("[C14] Aggregated counts weighting (tidyr::uncount) reproduces row-expanded data exactly", {
@@ -456,19 +476,23 @@ test_that("[C20] Category count guards reject 1-level variables and handle >8 le
   )
 })
 
-test_that("[C21] Counts variable guard rejects non-numeric, negative, all-NA, and zero-sum weights", {
-  # .validateCountsVariable checks numeric, >= 0, non-NA, sum > 0
+test_that("[C21] Counts variable guard rejects non-numeric, negative, fractional, non-finite, all-NA, and zero-sum weights", {
+  # .validateCountsVariable checks numeric, finite, >= 0, integer, non-NA, sum > 0
   d_bad <- data.frame(
-    dep = factor(c("A", "B", "C")),
-    neg = c(10, -5, 5),
-    chr = c("10", "5", "5"),
-    na  = c(NA_real_, NA_real_, NA_real_),
-    zro = c(0, 0, 0)
+    dep  = factor(c("A", "B", "C")),
+    neg  = c(10, -5, 5),
+    chr  = c("10", "5", "5"),
+    na   = c(NA_real_, NA_real_, NA_real_),
+    zro  = c(0, 0, 0),
+    frac = c(2.5, 3.5, 4.0),
+    infv = c(10, Inf, 5)
   )
   expect_error(ClinicoPath::jjpiestats(data = d_bad, dep = "dep", counts = "neg"), "negative")
   expect_error(ClinicoPath::jjpiestats(data = d_bad, dep = "dep", counts = "chr"), "numeric")
   expect_error(ClinicoPath::jjpiestats(data = d_bad, dep = "dep", counts = "na"), "NA")
   expect_error(ClinicoPath::jjpiestats(data = d_bad, dep = "dep", counts = "zro"), "zero")
+  expect_error(ClinicoPath::jjpiestats(data = d_bad, dep = "dep", counts = "frac"), "non-integer")
+  expect_error(ClinicoPath::jjpiestats(data = d_bad, dep = "dep", counts = "infv"), "non-finite")
 })
 
 test_that("[C22] Paired McNemar guards enforce 2x2 structure, N >= 10, discordant thresholds, and matching levels", {
@@ -500,6 +524,28 @@ test_that("[C22] Paired McNemar guards enforce 2x2 structure, N >= 10, discordan
     data = d_long, dep = "Response", group = "Timepoint", counts = "n", paired = TRUE
   ))
   expect_match(strip_html_tags(r_long$notices$content), "Paired analysis not shown", fixed = TRUE)
+
+  # Weighted paired 2x2 with a 0-weight 3rd unused level is accepted as 2x2
+  d_wp3 <- data.frame(
+    pre  = factor(c("Pos", "Pos", "Neg", "Neg", "Indet"), levels = c("Pos", "Neg", "Indet")),
+    post = factor(c("Pos", "Neg", "Pos", "Neg", "Indet"), levels = c("Pos", "Neg", "Indet")),
+    n    = c(15, 3, 8, 12, 0)
+  )
+  r_wp3 <- suppressWarnings(ClinicoPath::jjpiestats(
+    data = d_wp3, dep = "pre", group = "post", counts = "n", paired = TRUE
+  ))
+  expect_no_match(strip_html_tags(r_wp3$notices$content), "3×3 levels", fixed = TRUE)
+
+  # Split By with paired = TRUE warns when a stratum has < 10 pairs or 0 discordant pairs
+  d_pair_split <- data.frame(
+    pre  = factor(c(rep("Pos", 10), rep("Neg", 10), rep("Pos", 2), rep("Neg", 2)), levels = c("Pos", "Neg")),
+    post = factor(c(rep("Pos", 8), rep("Neg", 12), rep("Pos", 2), rep("Neg", 2)), levels = c("Pos", "Neg")),
+    site = factor(c(rep("SiteA", 20), rep("SiteB", 4)), levels = c("SiteA", "SiteB"))
+  )
+  r_pair_split <- suppressWarnings(ClinicoPath::jjpiestats(
+    data = d_pair_split, dep = "pre", group = "post", grvar = "site", paired = TRUE
+  ))
+  expect_match(strip_html_tags(r_pair_split$notices$content), "SiteB", fixed = TRUE)
 })
 
 test_that("[C23] Duplicate variable selection (dep == group or grvar) warns and renders without crashing", {
@@ -526,6 +572,19 @@ test_that("[C24] Contingency table expected-count assumption checks agree with p
     data = d_g4, dep = "dep", group = "grp", resultssubtitle = TRUE, showAssumptions = FALSE
   ))
   expect_true(nzchar(strip_html_tags(res_g4$notices$content)))
+
+  # Split By per-stratum expected-count checks in assumptions and notices when pooled table has min E >= 5
+  d_sp_split <- data.frame(
+    dep  = factor(c(rep("Pos", 4), rep("Neg", 1), rep("Pos", 1), rep("Neg", 4),
+                    rep("Pos", 20), rep("Neg", 5), rep("Pos", 5), rep("Neg", 20)), levels = c("Pos", "Neg")),
+    grp  = factor(c(rep("T1", 5), rep("T2", 5), rep("T1", 25), rep("T2", 25)), levels = c("T1", "T2")),
+    site = factor(c(rep("SmallSite", 10), rep("BigSite", 50)), levels = c("SmallSite", "BigSite"))
+  )
+  res_sp_split <- suppressWarnings(ClinicoPath::jjpiestats(
+    data = d_sp_split, dep = "dep", group = "grp", grvar = "site",
+    resultssubtitle = TRUE, showAssumptions = TRUE
+  ))
+  expect_match(strip_html_tags(res_sp_split$assumptions$content), "SmallSite", fixed = TRUE)
 })
 
 test_that("[C25] Analysis Summary panel (showSummary = TRUE) reports variable names, method, and input row count", {

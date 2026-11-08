@@ -309,9 +309,13 @@ jjpiestatsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "group",
                     "grvar",
                     "counts",
+                    "ratio",
                     "typestatistics",
                     "seed",
-                    "paired")))
+                    "paired",
+                    "clinicalpreset",
+                    "messages",
+                    "conflevel")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="about",
@@ -403,9 +407,9 @@ jjpiestatsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 
 #' Pie Charts
 #'
-#' 'Wrapper Function for ggstatsplot::ggpiestats and
-#' ggstatsplot::grouped_ggpiestats to generate Pie Charts with
-#' statistical analysis.'
+#' Wrapper Function for ggstatsplot::ggpiestats and 
+#' ggstatsplot::grouped_ggpiestats to generate Pie Charts with statistical 
+#' analysis.
 #' 
 #' @param data The data as a data frame.
 #' @param dep The categorical variable to display in the pie chart. This
@@ -418,9 +422,11 @@ jjpiestatsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   of this grouping variable. Creates a panel of pie charts, one for each
 #'   group level (e.g., separate charts by treatment center or study site).
 #' @param typestatistics Type of statistical test for categorical association
-#'   analysis. 'parametric' uses Pearson's Chi-square test, 'nonparametric' uses
-#'   contingency table tests, 'robust' uses robust association measures, 'bayes'
-#'   provides Bayesian analysis with Bayes factors.
+#'   analysis. For categorical count data, 'parametric', 'nonparametric', and
+#'   'robust' all compute frequentist Pearson's chi-squared tests (with Fisher's
+#'   exact test automatically substituted on sparse unpaired 2x2 tables when
+#'   statistical results are shown), while 'bayes' provides Bayesian contingency
+#'   table and proportion analysis with Bayes factors.
 #' @param seed Random seed for the statistics computed by posterior sampling
 #'   (the Bayesian contingency test, and the Bayes factor caption of a
 #'   frequentist test). The plot caption names the seed whenever it affected the
@@ -446,8 +452,8 @@ jjpiestatsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param conflevel Confidence/credible interval level.
 #' @param proportiontest Decides whether proportion test for x variable is to
 #'   be carried out for each level of y.
-#' @param bfmessage Display Bayes Factor in favor of the null hypothesis.
-#'   Only relevant for parametric test.
+#' @param bfmessage Display Bayes Factor in favor of the null hypothesis in
+#'   the plot caption during frequentist analyses.
 #' @param messages Display statistical messages in console.  Disabling
 #'   improves performance.
 #' @param clinicalpreset Predefined configurations for common clinical

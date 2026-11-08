@@ -16029,7 +16029,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                     .("Setup Progress"),
                     "</h3>\n                <div style='margin-bottom: 10px; font-size: 14px;'>",
                     paste0("\n                ", jmvcore::format(.("{tag1} {tag2} Raters: 0/2 minimum - Select at least 2 rater variables to begin"), tag1 = "[", tag2 = "]"), "\n                "),
-                    "</div>\n                </div>\n\n                <table style='width: 100%; border-collapse: collapse; margin-bottom: 20px;'>\n                <tr>\n                <td style='width: 50%; border: 1px solid #ccc; padding: 15px; vertical-align: top;'>\n                <h4 style='margin: 0 0 10px 0; font-size: 15px;'>",
+                    "</div>\n                </div>\n\n                <div style='margin-bottom: 20px;'>\n                <h4 style='margin: 0 0 10px 0; font-size: 15px;'>",
                     .("Quick Start"),
                     "</h4>\n                <ol style='margin: 0; padding-left: 20px; font-size: 14px;'>\n                <li>",
                     .("Select 2+ rater variables"),
@@ -16037,7 +16037,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                     .("For ordinal data, choose weighted kappa"),
                     "</li>\n                <li>",
                     .("Enable optional outputs as needed"),
-                    "</li>\n                </ol>\n                </td>\n                <td style='width: 50%; border: 1px solid #ccc; padding: 15px; vertical-align: top;'>\n                <h4 style='margin: 0 0 10px 0; font-size: 15px;'>",
+                    "</li>\n                </ol>\n                </div>\n                <div style='margin-bottom: 20px;'>\n                <h4 style='margin: 0 0 10px 0; font-size: 15px;'>",
                     .("Available Methods"),
                     "</h4>\n                <ul style='margin: 0; padding-left: 20px; font-size: 14px;'>\n                <li>",
                     jmvcore::format(.("{tag1}Cohen's kappa:{tag2} 2 raters"), tag1 = "<strong>", tag2 = "</strong>"),
@@ -16045,7 +16045,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                     jmvcore::format(.("{tag1}Fleiss' kappa:{tag2} 3+ raters"), tag1 = "<strong>", tag2 = "</strong>"),
                     "</li>\n                <li>",
                     jmvcore::format(.("{tag1}Krippendorff's alpha:{tag2} Alternative measure"), tag1 = "<strong>", tag2 = "</strong>"),
-                    "</li>\n                </ul>\n                </td>\n                </tr>\n                </table>\n                </div>"
+                    "</li>\n                </ul>\n                </div>\n                </div>"
                 )
                     )
 

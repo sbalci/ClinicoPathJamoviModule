@@ -206018,3 +206018,31 @@ msgstr ""
 
 msgid "Percentage of all observations"
 msgstr ""
+
+#: agreement.events.js
+msgid "Enable specific agreement to see the available categories."
+msgstr ""
+
+#: agreement.events.js
+msgid "Select rater variables to see the available categories."
+msgstr ""
+
+#: agreement.events.js
+msgid "Loading categories..."
+msgstr ""
+
+#: agreement.events.js
+msgid "No categories available. Select nominal or ordinal rater variables."
+msgstr ""
+
+#: agreement.events.js
+msgid "Available categories: {categories}"
+msgstr ""
+
+#: agreement.events.js
+msgid "Available categories (first 30 of {total}): {categories}"
+msgstr ""
+
+#: agreement.events.js
+msgid "Categories could not be loaded. Check the levels in the selected rater variables."
+msgstr ""

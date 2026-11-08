@@ -4,16 +4,6 @@ jus: '3.0'
 stage: 0
 compilerMode: tame
 children:
-  - type: CollapseBox
-    label: Quick Clinical Setup
-    collapsed: true
-    children:
-      - type: ComboBox
-        name: clinicalpreset
-        label: Analysis type
-      - type: CheckBox
-        name: showexplanations
-        label: Clinical guidance
   - type: VariableSupplier
     persistentItems: false
     stretchFactor: 1
@@ -47,6 +37,16 @@ children:
             maxItemCount: 1
             isTarget: true
   - type: CollapseBox
+    label: Quick Clinical Setup
+    collapsed: true
+    children:
+      - type: ComboBox
+        name: clinicalpreset
+        label: Analysis type
+      - type: CheckBox
+        name: showexplanations
+        label: Clinical guidance
+  - type: CollapseBox
     label: Statistical Analysis
     collapsed: true
     children:
@@ -77,7 +77,7 @@ children:
                 label: Proportion tests
               - type: CheckBox
                 name: bfmessage
-                label: Bayes factor (for Bayesian)
+                label: Bayes factor caption
       - type: Label
         label: Advanced Parameters
         fitToGrid: true
