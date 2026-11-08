@@ -1498,7 +1498,7 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
                 f <- fine[[1]]
                 steps <- abs(f$d)[abs(f$d) > sqrt(.Machine$double.eps) * max(1, abs(f$ref_mean))]
                 private$.addNotice("INFO", .("Margin finer than the recorded values"), sprintf(
-                    .("A margin of %s%% of the comparison mean is ±%s in the measurement's own units, smaller than the smallest non-zero difference recorded between paired measurements (%s). Ruling out a difference that small needs many cases and may be finer than matters clinically; check that the systematic difference margin suits this marker and its level."),
+                    .("A margin of %s%% of the comparison mean is \u00b1%s in the measurement's own units, smaller than the smallest non-zero difference recorded between paired measurements (%s). Ruling out a difference that small needs many cases and may be finer than matters clinically; check that the systematic difference margin suits this marker and its level."),
                     margin, signif(f$margin_abs, 2), signif(min(steps), 3)))
             }
 

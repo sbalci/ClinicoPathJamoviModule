@@ -1289,7 +1289,7 @@ diagnosticmetaClass <- R6::R6Class(
             bivariate_table$setNote("scope", scope_note)
 
             bivariate_table$setNote("pvalue_meaning",
-                .("P-values on the sensitivity and specificity rows test the null hypothesis that the parameter equals 50% (no better than chance), not that the test meets any clinical threshold. They are significant for essentially any usable assay and should not be read as evidence of adequate accuracy - use the confidence and prediction intervals for that. Sensitivity and specificity rows are percentages; likelihood ratios and the diagnostic odds ratio are ratios."))
+                .("P-values on the sensitivity and specificity rows test the null hypothesis that the parameter equals 50% for that margin, not that the test meets any clinical threshold. They are significant for essentially any usable assay and should not be read as evidence of adequate accuracy - use the confidence and prediction intervals for that. Sensitivity and specificity rows are percentages; likelihood ratios and the diagnostic odds ratio are ratios."))
 
             private$.pooled_sens_ci <- sens_ci * 100
             private$.pooled_spec_ci <- spec_ci * 100
@@ -1392,12 +1392,12 @@ diagnosticmetaClass <- R6::R6Class(
             if (is.null(private$.pooled_sens_pi)) {
                 is_fixed <- identical(self$options$method, "fixed")
                 bivariate_table$setNote("no_prediction", if (is_fixed)
-                    .("No prediction interval is available: the fixed-effect method assumes every study estimates the SAME sensitivity and specificity, so it estimates no between-study variance. The confidence interval above is therefore narrower than a random-effects interval by construction, and no prediction region is drawn on the SROC plot. Check the Heterogeneity Assessment table before relying on it: if Q is significant or I-squared is large, a single fixed-effect estimate does not describe this body of evidence and REML should be used instead.")
+                    .("No prediction interval is available: the fixed-effect method assumes every study estimates the SAME sensitivity and specificity, so it estimates no between-study variance. The confidence interval above describes uncertainty under that common-effect assumption, and no prediction region is drawn on the SROC plot. Use this model only when a common sensitivity and specificity are substantively justified. A non-significant heterogeneity test does not establish that assumption; REML remains the default.")
                 else
                     .("No prediction interval is available: the model did not return a between-study covariance matrix. The confidence interval above describes only how precisely the pooled average is estimated, not how much studies differ."))
                 if (is_fixed)
                     private$.addNotice("STRONG_WARNING", .("Fixed-effect model: heterogeneity not assessed"),
-                        .("The fixed-effect method assumes a single common sensitivity and specificity across studies. It produces no prediction interval, no SROC prediction region and no heterogeneity warning, and its confidence intervals are narrower than the random-effects equivalents whatever the studies actually show. Use it only when the Heterogeneity Assessment table gives no sign of heterogeneity; REML (the default) is the appropriate choice otherwise."))
+                        .("The fixed-effect method assumes a single common sensitivity and specificity across studies. It produces no prediction interval, no SROC prediction region and no heterogeneity warning, and its confidence intervals do not include between-study variability. Use it only when a common sensitivity and specificity are substantively justified, not merely because a heterogeneity test is non-significant. REML remains the default."))
             }
 
             bivariate_table$setRow(rowKey = "sensitivity", values = private$.tableValues(list(

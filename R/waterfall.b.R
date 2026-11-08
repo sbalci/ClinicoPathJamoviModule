@@ -20,6 +20,14 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             })
         },
 
+        # Only working frames use these aliases; options and source data retain user names.
+        .columnMap = NULL,
+        .processedName = function(name) {
+            if (is.null(name) || length(name) == 0 || is.null(private$.columnMap)) return(name)
+            alias <- unname(private$.columnMap[name])
+            if (length(alias) == 1 && !is.na(alias)) alias else name
+        },
+
         # RECIST v1.1 Constants ----
         RECIST_CR_THRESHOLD = -100,  # Complete Response threshold (\u2264-100%)
         RECIST_PR_THRESHOLD = -30,   # Partial Response threshold (\u2264-30%)
@@ -464,7 +472,8 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # One value per patient: the first non-missing one in time order (a
             # value on a follow-up row was lost when only the first row was read).
             long <- do.call(rbind, lapply(vars, function(v) {
-                f <- private$.resolvePatientField(src, pid, v, plotData$options$timeVar)
+                f <- private$.resolvePatientField(src, plotData$options$sourcePatientID %||% pid, v,
+                                                 plotData$options$sourceTimeVar %||% plotData$options$timeVar)
                 data.frame(
                     bar   = seq_len(nrow(df)),
                     track = v,
@@ -579,6 +588,7 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             #    patients are made unevaluable rather than guessed at.
             .enforceMeasurementLimits = function(waterfall_data, source_df, patientID,
                                                  responseVar, inputType) {
+                working_id <- private$.processedName(patientID)
                 if (is.null(waterfall_data) || !is.data.frame(waterfall_data) ||
                     nrow(waterfall_data) == 0 || !"response" %in% names(waterfall_data)) {
                     return(waterfall_data)
@@ -588,14 +598,14 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 if (identical(inputType, "raw") && !is.null(source_df) &&
                     !is.null(responseVar) && responseVar %in% names(source_df) &&
                     !is.null(patientID) && patientID %in% names(source_df) &&
-                    patientID %in% names(waterfall_data)) {
+                    working_id %in% names(waterfall_data)) {
 
                     vals <- jmvcore::toNumeric(source_df[[responseVar]])
                     bad <- !is.na(vals) & vals < 0
                     if (any(bad)) {
                         bad_ids <- unique(source_df[[patientID]][bad])
                         attr(waterfall_data, "bad_raw_ids") <- bad_ids
-                        idx <- which(waterfall_data[[patientID]] %in% bad_ids)
+                        idx <- which(waterfall_data[[working_id]] %in% bad_ids)
                         if (length(idx) > 0) {
                             waterfall_data$response[idx] <- NA_real_
                             waterfall_data$recist_category <-
@@ -639,7 +649,7 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     ids <- if (any(src_bad) && !is.null(patientID) &&
                                patientID %in% names(raw_df))
                         unique(raw_df[[patientID]][src_bad]) else
-                        waterfall_data[[patientID]][too_small]
+                        waterfall_data[[working_id]][too_small]
                     ids <- ids[!is.na(ids)]
                     worst <- min(c(src_vals[src_bad], waterfall_data$response[too_small]),
                                  na.rm = TRUE)
@@ -677,6 +687,7 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                                                   inputType = "percentage",
                                                   analysis_data = NULL,
                                                   categoryVar = NULL) {
+          working_id <- private$.processedName(patientID)
           if (is.null(waterfall_data) || !is.data.frame(waterfall_data) ||
               is.null(patientID) || is.null(source_df) ||
               !patientID %in% names(source_df)) {
@@ -688,8 +699,8 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
           # An empty frame still needs explaining, so handle it before requiring
           # the patient column to be present.
           kept_ids <- if (nrow(waterfall_data) > 0 &&
-                          patientID %in% names(waterfall_data))
-            unique(waterfall_data[[patientID]]) else character(0)
+                          working_id %in% names(waterfall_data))
+            unique(waterfall_data[[working_id]]) else character(0)
           dropped <- setdiff(all_ids, kept_ids)
 
           # Nothing can be computed: a fatal stop, not an ERROR banner over a run
@@ -722,7 +733,7 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             n_untimed <- tabulate(g_pid[is.na(tv) & measured], nbins = length(u_pid))
             no_post <- u_pid[n_post == 0]
             untimed_only <- u_pid[n_post == 0 & n_untimed > 0]
-            no_post_idx <- which(waterfall_data[[patientID]] %in% no_post)
+            no_post_idx <- which(waterfall_data[[working_id]] %in% no_post)
             if (length(no_post_idx) > 0) {
               waterfall_data$response[no_post_idx] <- NA_real_
               waterfall_data$recist_category <- private$.categorizeRECIST(
@@ -738,9 +749,9 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
           bad_raw_ids <- attr(waterfall_data, "bad_raw_ids")
           if (!is.null(categoryVar) && !is.null(analysis_data)) {
             waterfall_data <- private$.applyCategoryOverride(
-              waterfall_data, analysis_data, patientID, categoryVar, timeVar)
+              waterfall_data, analysis_data, working_id, categoryVar, timeVar)
             if (length(bad_raw_ids) > 0) {
-              bad_idx <- which(waterfall_data[[patientID]] %in% bad_raw_ids)
+              bad_idx <- which(waterfall_data[[working_id]] %in% bad_raw_ids)
               if (length(bad_idx) > 0) {
                 waterfall_data$recist_category[bad_idx] <- "Unknown"
               }
@@ -750,7 +761,7 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # to "Unknown", or one reset for an invalid raw value, is not a
             # supplied category of anyone in the rates.
             ov <- attr(waterfall_data, "overridden_ids")
-            private$.nOverridden <- sum(waterfall_data[[patientID]] %in% ov &
+            private$.nOverridden <- sum(waterfall_data[[working_id]] %in% ov &
               as.character(waterfall_data$recist_category) %in% c("CR", "PR", "SD", "PD"))
           }
 
@@ -758,11 +769,11 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             ne_override_ids <- attr(waterfall_data, "ne_override_ids")
             uneval_idx <- no_post_idx[
               as.character(waterfall_data$recist_category[no_post_idx]) == "Unknown" &
-              !(waterfall_data[[patientID]][no_post_idx] %in% c(bad_raw_ids, ne_override_ids))
+              !(waterfall_data[[working_id]][no_post_idx] %in% c(bad_raw_ids, ne_override_ids))
             ]
             # Measured follow-ups with a blank time are a different reason from
             # missing measurements, and the notice used to blame the latter.
-            untimed_idx <- uneval_idx[waterfall_data[[patientID]][uneval_idx] %in% untimed_only]
+            untimed_idx <- uneval_idx[waterfall_data[[working_id]][uneval_idx] %in% untimed_only]
             uneval_idx <- setdiff(uneval_idx, untimed_idx)
             if (length(untimed_idx) > 0) {
               private$.addNotice(
@@ -771,7 +782,7 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 content = sprintf(
                   .("%d patient(s) have no timed, measured post-baseline assessment, and some of their measured rows have no time, so they are not response-evaluable: %s. They are reported as \"Unknown\". Fill in the visit times to include them."),
                   length(untimed_idx),
-                  paste(utils::head(.patientIDLabels(waterfall_data[[patientID]][untimed_idx]), 10),
+                  paste(utils::head(.patientIDLabels(waterfall_data[[working_id]][untimed_idx]), 10),
                         collapse = ", "))
               )
             }
@@ -782,7 +793,7 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 content = sprintf(
                   .("%d patient(s) have a baseline but no post-baseline measurement (no later row, or the later measurements are missing) and are therefore not response-evaluable: %s. They are reported as \"Unknown\" rather than as stable disease, so they do not inflate the disease control rate."),
                   length(uneval_idx),
-                  paste(utils::head(.patientIDLabels(waterfall_data[[patientID]][uneval_idx]), 10),
+                  paste(utils::head(.patientIDLabels(waterfall_data[[working_id]][uneval_idx]), 10),
                         collapse = ", "))
               )
             }
@@ -1380,6 +1391,29 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
           ))
         }
 
+        # Protect every source column that could be overwritten by processing or plotting.
+        # Fresh aliases are checked against ALL source names, including unused columns.
+        source_names <- names(df)
+        reserved <- c("response", "min_abs_pct", "recist_category", ".cat_override_norm",
+                      "patient_group", "confirm_status", "ongoing_flag", "responder_status")
+        identity_fields <- c("time", "time_to_first_response", "duration_of_response",
+                             "duration_censored", "best_response", "time_to_best_response",
+                             "last_assessment", "response_cat", "follow_up_time",
+                             "time_to_best", "time_in_response", "dor_event")
+        if (patientID %in% identity_fields) reserved <- c(reserved, patientID)
+        hit <- which(source_names %in% reserved)
+        aliases <- source_names
+        if (length(hit)) {
+          fresh <- tail(make.unique(c(source_names, paste0(".waterfall.source.", hit))), length(hit))
+          aliases[hit] <- fresh
+        }
+        private$.columnMap <- stats::setNames(aliases, source_names)
+        names(df) <- aliases
+        patientID <- private$.processedName(patientID)
+        responseVar <- private$.processedName(responseVar)
+        timeVar <- private$.processedName(timeVar)
+        groupVar <- private$.processedName(groupVar)
+
         has_time <- !is.null(timeVar) && timeVar %in% names(df)
         df[[responseVar]] <- jmvcore::toNumeric(df[[responseVar]])
         if (has_time) df[[timeVar]] <- jmvcore::toNumeric(df[[timeVar]])
@@ -1420,7 +1454,7 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
           processed_df$min_abs_pct <- NA_real_   # sizes unknown: 5 mm rule cannot apply
         }
 
-        cat_var <- self$options$responseCategoryVar
+        cat_var <- private$.processedName(self$options$responseCategoryVar)
         cv_df <- if (!is.null(cat_var) && cat_var %in% names(df)) {
           private$.normaliseCategory(df[[cat_var]])
         } else {
@@ -2012,10 +2046,11 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             processed_data$waterfall, validated_data, safe_patientID,
             safe_responseVar, self$options$inputType)
 
+          working_id <- private$.processedName(safe_patientID)
           bad_raw_ids <- attr(processed_data$waterfall, "bad_raw_ids")
           if (length(bad_raw_ids) > 0 && !is.null(processed_data$spider) &&
-              safe_patientID %in% names(processed_data$spider)) {
-            s_idx <- which(processed_data$spider[[safe_patientID]] %in% bad_raw_ids)
+              working_id %in% names(processed_data$spider)) {
+            s_idx <- which(processed_data$spider[[working_id]] %in% bad_raw_ids)
             if (length(s_idx) > 0) {
               processed_data$spider <- processed_data$spider[-s_idx, , drop = FALSE]
             }
@@ -2168,10 +2203,10 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
       .generateTablesAndResults = function(processed_data) {
         # Use RAW variable names as data-frame keys (jamovi delivers self$data with
         # original names; make.names()-escaping breaks lookups for names with spaces).
-        safe_patientID <- self$options$patientID
-        safe_responseVar <- self$options$responseVar
-        safe_timeVar <- self$options$timeVar
-        safe_groupVar <- self$options$groupVar
+        safe_patientID <- private$.processedName(self$options$patientID)
+        safe_responseVar <- private$.processedName(self$options$responseVar)
+        safe_timeVar <- private$.processedName(self$options$timeVar)
+        safe_groupVar <- private$.processedName(self$options$groupVar)
 
         # Extract data
         df_waterfall <- processed_data$waterfall
@@ -2575,10 +2610,10 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
       .generateVisualizations = function(processed_data, metrics) {
         # Use RAW variable names as data-frame keys (jamovi delivers self$data with
         # original names; make.names()-escaping breaks lookups for names with spaces).
-        safe_patientID <- self$options$patientID
-        safe_responseVar <- self$options$responseVar
-        safe_timeVar <- self$options$timeVar
-        safe_groupVar <- self$options$groupVar
+        safe_patientID <- private$.processedName(self$options$patientID)
+        safe_responseVar <- private$.processedName(self$options$responseVar)
+        safe_timeVar <- private$.processedName(self$options$timeVar)
+        safe_groupVar <- private$.processedName(self$options$groupVar)
 
         # Attach optional confirmation / ongoing annotations (issue #1 markers).
         # Baked into the waterfall data so the plot state carries them to render.
@@ -2606,7 +2641,7 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         ann_vars <- tryCatch(self$options$annotationVars, error = function(e) NULL)
         if (isTRUE(self$options$showWaterfallPlot) && length(ann_vars) > 0) {
           conflicts <- unlist(lapply(ann_vars[ann_vars %in% names(self$data)], function(v) {
-            f <- private$.resolvePatientField(self$data, safe_patientID, v, safe_timeVar)
+            f <- private$.resolvePatientField(self$data, self$options$patientID, v, self$options$timeVar)
             if (length(f$conflicts)) sprintf("%s (%s)", v, paste(utils::head(f$conflicts, 5), collapse = ", "))
           }))
           if (length(conflicts) > 0) {
@@ -2633,6 +2668,8 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
           "data" = list(waterfall = waterfall_frame),
           options = list(
             "patientID" = safe_patientID,
+            "sourcePatientID" = self$options$patientID,
+            "sourceTimeVar" = self$options$timeVar,
             "response" = safe_responseVar,
             "timeVar" = safe_timeVar,
             "sortBy" = self$options$sortBy,
@@ -2723,10 +2760,10 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
       .generateReportsAndContent = function(processed_data, metrics, person_time_metrics) {
         # Use RAW variable names as data-frame keys (jamovi delivers self$data with
         # original names; make.names()-escaping breaks lookups for names with spaces).
-        safe_patientID <- self$options$patientID
-        safe_responseVar <- self$options$responseVar
-        safe_timeVar <- self$options$timeVar
-        safe_groupVar <- self$options$groupVar
+        safe_patientID <- private$.processedName(self$options$patientID)
+        safe_responseVar <- private$.processedName(self$options$responseVar)
+        safe_timeVar <- private$.processedName(self$options$timeVar)
+        safe_groupVar <- private$.processedName(self$options$groupVar)
 
         # Generate enhanced clinical metrics with confidence intervals ----
         private$.wideIntervalNotice(processed_data, metrics)
@@ -2766,7 +2803,7 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             dplyr::select(!!rlang::sym(safe_patientID), recist_category) %>%
             dplyr::distinct()
 
-          idx <- match(self$data[[safe_patientID]], cats[[safe_patientID]])
+          idx <- match(self$data[[self$options$patientID]], cats[[safe_patientID]])
           values <- cats$recist_category[idx]
           # Keep the full level set even when a category is absent, so the
           # exported column is a stable factor rather than one whose levels
@@ -2811,6 +2848,7 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
       # Refactored run method ----
       .run = function() {
+        private$.columnMap <- NULL
 
         # Reset accumulated notices at the start of every run. jamovi reuses the
         # analysis R6 instance across re-runs within a session, so without this

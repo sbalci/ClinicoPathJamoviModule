@@ -124042,22 +124042,9 @@ msgid "No power curve could be computed for these settings."
 msgstr ""
 
 #: R/diagnosticmeta.b.R
-msgid ""
-"No prediction interval is available: the fixed-effect method assumes every "
-"study estimates the SAME sensitivity and specificity, so it estimates no "
-"between-study variance. The confidence interval above is therefore narrower "
-"than a random-effects interval by construction, and no prediction region is "
-"drawn on the SROC plot. Check the Heterogeneity Assessment table before "
-"relying on it: if Q is significant or I-squared is large, a single "
-"fixed-effect estimate does not describe this body of evidence and REML "
-"should be used instead."
-msgstr ""
-"Öngörü aralığı yoktur: sabit etki yöntemi her çalışmanın AYNI duyarlılık ve "
-"özgüllüğü tahmin ettiğini varsayar; çalışmalar arası varyansı tahmin etmez. "
-"Yukarıdaki güven aralığı yapısal olarak rastgele etkiler aralığından dardır "
-"ve SROC grafiğinde öngörü bölgesi çizilmez. Buna dayanmadan önce "
-"heterojenlik tablosunu kontrol edin: Q anlamlı veya I-kare yüksekse tek "
-"sabit etki tahmini bu kanıtları temsil etmez; REML kullanılmalıdır."
+msgid "No prediction interval is available: the fixed-effect method assumes every study estimates the SAME sensitivity and specificity, so it estimates no between-study variance. The confidence interval above describes uncertainty under that common-effect assumption, and no prediction region is drawn on the SROC plot. Use this model only when a common sensitivity and specificity are substantively justified. A non-significant heterogeneity test does not establish that assumption; REML remains the default."
+msgstr "Öngörü aralığı yoktur: sabit etki yöntemi her çalışmanın AYNI duyarlılık ve özgüllüğü tahmin ettiğini varsayar; çalışmalar arası varyansı tahmin etmez. Yukarıdaki güven aralığı, bu ortak etki varsayımı altındaki belirsizliği gösterir; SROC grafiğinde öngörü bölgesi çizilmez. Bu modeli yalnızca ortak duyarlılık ve özgüllük varsayımı bilimsel olarak gerekçelendirilebiliyorsa kullanın. Anlamlı olmayan bir heterojenlik testi bu varsayımı doğrulamaz; varsayılan yöntem REML olmaya devam eder."
+
 
 #: R/diagnosticmeta.b.R
 msgid ""
@@ -136027,21 +136014,9 @@ msgid "P-values for each coefficient."
 msgstr ""
 
 #: R/diagnosticmeta.b.R
-msgid ""
-"P-values on the sensitivity and specificity rows test the null hypothesis "
-"that the parameter equals 50% (no better than chance), not that the test "
-"meets any clinical threshold. They are significant for essentially any "
-"usable assay and should not be read as evidence of adequate accuracy - use "
-"the confidence and prediction intervals for that. Sensitivity and "
-"specificity rows are percentages; likelihood ratios and the diagnostic odds "
-"ratio are ratios."
-msgstr ""
-"Duyarlılık ve özgüllük satırlarındaki p-değerleri, parametrenin %50'ye eşit "
-"olduğu (şanstann daha iyi olmadığı) sıfır hipotezini test eder, testin "
-"herhangi bir klinik eşiği karşıladığını değil. Neredeyse kullanılabilir her "
-"test için anlamlı çıkarlar ve yeterli doğruluğun kanıtı olarak okunmamalıdır "
-"- bunun için güven ve tahmin aralıklarını kullanın. Duyarlılık ve özgüllük "
-"satırları yüzdelerdir; olabilirlik oranları ve tanısal odds oranı oranlardır."
+msgid "P-values on the sensitivity and specificity rows test the null hypothesis that the parameter equals 50% for that margin, not that the test meets any clinical threshold. They are significant for essentially any usable assay and should not be read as evidence of adequate accuracy - use the confidence and prediction intervals for that. Sensitivity and specificity rows are percentages; likelihood ratios and the diagnostic odds ratio are ratios."
+msgstr "Duyarlılık ve özgüllük satırlarındaki p-değerleri, ilgili parametrenin %50'ye eşit olduğu sıfır hipotezini test eder; testin herhangi bir klinik eşiği karşıladığını test etmez. Kullanılabilir testlerin çoğunda anlamlı çıkarlar ve yeterli doğruluğun kanıtı olarak okunmamalıdır; bunun için güven ve öngörü aralıklarını kullanın. Duyarlılık ve özgüllük satırları yüzdelerdir; olabilirlik oranları ve tanısal odds oranı oranlardır."
+
 
 #: pathsampling/results/multifocalProbTable.columns.title
 msgid "P(>=1 positive sample)"
@@ -188594,20 +188569,9 @@ msgid "The fitted risk probabilities are unavailable."
 msgstr "Modelden tahmin edilen risk olasılıkları elde edilemedi."
 
 #: R/diagnosticmeta.b.R
-msgid ""
-"The fixed-effect method assumes a single common sensitivity and specificity "
-"across studies. It produces no prediction interval, no SROC prediction "
-"region and no heterogeneity warning, and its confidence intervals are "
-"narrower than the random-effects equivalents whatever the studies actually "
-"show. Use it only when the Heterogeneity Assessment table gives no sign of "
-"heterogeneity; REML (the default) is the appropriate choice otherwise."
-msgstr ""
-"Sabit etki yöntemi tüm çalışmalarda tek ortak duyarlılık ve özgüllük "
-"varsayar. Öngörü aralığı, SROC öngörü bölgesi veya heterojenlik uyarısı "
-"üretmez; çalışmalar ne gösterirse göstersin güven aralıkları rastgele "
-"etkiler eşdeğerlerinden dardır. Yalnızca heterojenlik tablosunda "
-"heterojenlik işareti yoksa kullanın; diğer durumlarda REML (varsayılan) "
-"uygundur."
+msgid "The fixed-effect method assumes a single common sensitivity and specificity across studies. It produces no prediction interval, no SROC prediction region and no heterogeneity warning, and its confidence intervals do not include between-study variability. Use it only when a common sensitivity and specificity are substantively justified, not merely because a heterogeneity test is non-significant. REML remains the default."
+msgstr "Sabit etki yöntemi tüm çalışmalarda tek ortak duyarlılık ve özgüllük varsayar. Öngörü aralığı, SROC öngörü bölgesi veya heterojenlik uyarısı üretmez; güven aralıkları çalışmalar arası değişkenliği içermez. Yalnızca ortak duyarlılık ve özgüllük varsayımı bilimsel olarak gerekçelendirilebiliyorsa kullanın; yalnızca heterojenlik testinin anlamlı olmaması yeterli değildir. Varsayılan yöntem REML olmaya devam eder."
+
 
 #: R/nogoldstandard.b.R
 msgid ""
