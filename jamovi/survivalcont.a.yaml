@@ -4,7 +4,7 @@ title: Survival Analysis for Continuous Explanatory Variable
 menuGroup: Survival
 menuSubgroup: ClinicoPath Survival
 menuSubtitle: 'Cut-off & Univariate Survival Analysis'
-version: '1.1.3'
+version: '1.1.4'
 jas: '1.2'
 
 description:
