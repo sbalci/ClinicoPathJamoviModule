@@ -427,7 +427,7 @@ analyses:
   - title: Outlier Detection
     name: outlierdetection
     ns: ClinicoPath
-    menuGroup: Exploration
+    menuGroup: ExplorationT
     menuSubgroup: ClinicoPath Data Quality
     menuTitle: Outlier Detection
     menuSubtitle: easystats Performance Package
@@ -1809,7 +1809,7 @@ analyses:
   - title: Bar Charts
     name: jjbarstats
     ns: ClinicoPath
-    menuGroup: JJStatsPlotT
+    menuGroup: JJStatsPlot
     menuSubgroup: Categorical vs Categorical
     menuTitle: Bar Charts
     description: >

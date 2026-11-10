@@ -153,7 +153,7 @@ the dataset. Whether any analysis should opt in is a per-analysis decision, not 
 
 #### Minimum jamovi version (not an `.a.yaml` key)
 
-The minimum app version is set once per module by `minApp:` in `jamovi/0000.yaml`, not per analysis. For the [`File`](#file-jamovi-283) option and [`Text`](jamovi_r_yaml_guide.md#text-jamovi-283) results the official docs say to declare `minApp: 28.3.0` so jamovi prevents installation on older versions; the compiler does not enforce it. Raising it locks every older jamovi user out of the whole module, so it is a deliberate release decision: see [Version Gating: minApp](jamovi_module_patterns_guide.md#version-gating-minapp).
+The minimum app version is set once per module by `minApp:` in `jamovi/0000.yaml`, not per analysis. For the [`File`](#file-jamovi-283) option and [`Text`](jamovi_r_yaml_guide.md#text-jamovi-283) results the official docs say to declare `minApp: 28.4.0` for `File` and `minApp: 28.11.0` for `Text` (docs checked 2026-11-09; `Text` was first documented as 28.3.0, then bumped upstream in commit `7145eb8`; `File` was bumped from 28.3.0 to 28.4.0 in `bde820a`) so jamovi prevents installation on older versions; the compiler does not enforce it. Raising it locks every older jamovi user out of the whole module, so it is a deliberate release decision: see [Version Gating: minApp](jamovi_module_patterns_guide.md#version-gating-minapp).
 
 ### Documentation Properties
 
@@ -503,7 +503,7 @@ Creates new columns in the dataset.
 
 #### `File` (jamovi 28.3+)
 
-The user picks a file (a lexicon, stimulus list or reference table) that the analysis reads alongside the dataset. This is jamovi's sanctioned way for analyses to consume files. It replaces String options holding a path, which do not work on jamovi cloud and relied on deprecated Electron features (legacy in-repo example: `trainingFile` in `jamovi/ihcpredict.a.yaml`). (jamovi 28.3+; module-wide `minApp: 28.3.0` - see [jamovi 28.3 Features](jamovi_module_patterns_guide.md#jamovi-283-features-file-text-vector-images).)
+The user picks a file (a lexicon, stimulus list or reference table) that the analysis reads alongside the dataset. This is jamovi's sanctioned way for analyses to consume files. It replaces String options holding a path, which do not work on jamovi cloud and relied on deprecated Electron features (legacy in-repo example: `trainingFile` in `jamovi/ihcpredict.a.yaml`). (jamovi 28.4+ per the current docs; module-wide `minApp: 28.4.0` - see [jamovi 28.3 Features](jamovi_module_patterns_guide.md#jamovi-283-features-file-text-vector-images).)
 
 ```yaml
 - name: lexicon

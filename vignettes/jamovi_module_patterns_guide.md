@@ -88,7 +88,7 @@ analyses:
 - `analyses`: List of functions available in menu
 - `menuGroup` / `menuSubgroup`: Menu organization
 - `minApp`: minimum jamovi version, **module-wide**. `File` options and `Text` results
-  need `28.3.0`; see [Version Gating: minApp](#version-gating-minapp) before raising it.
+  need `28.4.0` and `28.11.0` respectively (`Svg` results and `mode: vector` images need 28.3.0 or nothing); see [Version Gating: minApp](#version-gating-minapp) before raising it.
 
 ### DESCRIPTION: Dependencies (`Imports` vs `Remotes`)
 
@@ -270,9 +270,21 @@ CRAN release has these classes yet), and do not add jmvcore to `Remotes`.
 
 ### Version Gating: minApp
 
-For both `File` and `Text` the dev docs say: "Available in jamovi 28.3 and newer. Declare
-minApp: 28.3.0 in 0000.yaml so jamovi prevents installation on older versions." They say
-nothing about `mode: vector`.
+Current dev docs (checked 2026-11-09) give each feature its own minimum: `File` option
+**28.4**, `Text` result **28.11**, `Svg` result 28.3, Action `openExternal` 28.4, Action
+`export` 28.7. They say "Declare this in 0000.yaml using minApp so jamovi prevents
+installation on older versions". `mode: vector` needs no `minApp`: "Older versions of jamovi
+ignore `mode`, and render the image as raster". (Earlier snapshots of these pages said
+28.3 for `File` and `Text`; upstream changed them in commits `bde820a` and `7145eb8`.)
+
+| Feature | Minimum jamovi / `minApp` |
+|---------|--------------------------|
+| `Svg` results element | 28.3.0 |
+| `mode: vector` Image | none (ignored by older jamovi) |
+| `File` option | 28.4.0 |
+| Action `openExternal` | 28.4.0 |
+| Action `export` | 28.7.0 |
+| `Text` results element | 28.11.0 |
 
 - **Module-wide.** `minApp` lives in `jamovi/0000.yaml`; raising it for one analysis locks
   every jamovi ≤ 28.2 user out of the whole module. It is a deliberate release decision the
@@ -287,7 +299,8 @@ nothing about `mode: vector`.
   Install jamovi 28.3 first.
 - **Gate:** `python3 tools/release_gate.py` (`check_min_app()`) FAILs when any
   `jamovi/*.a.yaml` declares `type: File` or any `*.r.yaml` declares a `type: Text` result
-  (table columns of `type: Text` are skipped) while `minApp` < 28.3.0. It only WARNs on an
+  (table columns of `type: Text` are skipped) while `minApp` < 28.3.0 (**script is stale**: the
+  docs now say 28.4.0 for File and 28.11.0 for Text; see the 2026-11 sync report). It only WARNs on an
   Image with `mode: vector` under `minApp` < 28.3.0, because its behaviour in an older app
   is unverified. For a submodule: `--root ../<sibling>`.
 
@@ -315,22 +328,27 @@ nothing about `mode: vector`.
 
 | Release / page | What | Developer action |
 |----------------|------|------------------|
-| jamovi 28.4 (2026-09-30) | "module support for opening external files" (release note only) | none: no dev docs page found; do not use |
-| jamovi 28.7 (2026-10-03) | "module support for exporting files" (release note only) | none: no dev docs page found; do not use |
+| jamovi 28.4 (2026-09-30) | Action `openExternal` (open a produced file in the OS app / download) and `File` option; both now documented | optional, needs `minApp: 28.4.0`: [actions guide](jamovi_actions_guide.md#supported-action-types) |
+| jamovi 28.7 (2026-10-03) | Action `export` (save dialog / download); documented 2026-10-10 | optional, needs `minApp: 28.7.0`: [actions guide](jamovi_actions_guide.md#supported-action-types) |
+| jamovi 28.11 (2026-10-12) | `Text` results element now documented as requiring 28.11 | module-wide `minApp: 28.11.0` if used |
+| 28.9, 28.12-28.17 (to 2026-11-02) | fixes; 28.14 adds a colour analysis option; no developer-facing change | none |
+| `api/svg`, `Image` `mode` / `setMode()` | `Svg` results element documented (2026-10-10) | optional, none adopted |
 | 28.5, 28.6, 28.8 | NA handling in computed variables, language selection, bug fixes | none |
 | jamovi 2.7.16 | `setSize2` responsive image sizing | optional, guarded: [plots guide](jamovi_plots_guide.md#responsive-sizing-with-setsize2-jamovi-2716) |
 | Tutorial 02b (weighted data) | `weightsSupport` header key | [a.yaml guide](jamovi_a_yaml_guide.md#weightssupport-optional-upstream-tutorial-02b) |
 | `api/notice` page | `type: Notice` in `.r.yaml` documented | contradicts our empirical result: [notices guide](jamovi_notices_guide.md) |
 
-The report with sources and open decisions: `vignettes/jamovi_docs_sync_2026-10.md`.
+The reports with sources and open decisions: `vignettes/jamovi_docs_sync_2026-10.md`, `vignettes/jamovi_docs_sync_2026-11.md`.
 
 ### Exists Upstream, Not Yet Documented
 
 These exist upstream but have no documentation yet. Do not use them:
 
-- `type: Svg` results element.
-- `Action` results with `'openExternal'` (jmvcore 2026-09-19, unreleased).
 - The jmvtools install target `--home docker:<container>`.
+
+`Svg` (results element) and the `openExternal` / `export` Action types were on this list
+until 2026-11-09; they are now documented upstream (see the tables above). The module does
+not use them yet.
 
 The jmvtools 28.3.1 results schema accepts `Table`, `Group`, `Array`, `Image`,
 `Preformatted`, `Text`, `Html`, `Svg`, `State`, `Property`, `Output`, `Notification` and
@@ -405,7 +423,7 @@ options:
 - `Number` - Numeric input
 - `String` - Text input
 - `File` - User-selected file(s), jamovi 28.3+; takes no `default:`. See
-  [`File`](jamovi_a_yaml_guide.md#file-jamovi-283) (module-wide `minApp: 28.3.0` -
+  [`File`](jamovi_a_yaml_guide.md#file-jamovi-283) (module-wide `minApp: 28.4.0` -
   [Version Gating](#version-gating-minapp))
 
 ### 2. Backend Implementation (.b.R)
@@ -1018,9 +1036,9 @@ theme-safe rules in `jamovi_library_review_guide.md`.
 }
 ```
 
-### Pattern 5: Text (Markdown, jamovi 28.3+)
+### Pattern 5: Text (Markdown, jamovi 28.11+)
 
-Module-wide `minApp: 28.3.0` - see [Version Gating](#version-gating-minapp).
+Module-wide `minApp: 28.11.0` - see [Version Gating](#version-gating-minapp).
 
 ```yaml
 - name: summary            # .r.yaml

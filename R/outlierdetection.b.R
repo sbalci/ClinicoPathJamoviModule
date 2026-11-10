@@ -231,6 +231,12 @@ outlierdetectionClass <- if (requireNamespace("jmvcore")) R6::R6Class("outlierde
             # TODO (forward-looking): no `.()` wrapping in this file (~1.5k
             # LOC of educational and method-description text). Address in
             # a /prepare-translation pass.
+            # Invalidate prior computed outputs before any validation return.
+            for (name in c("outlier_table", "method_comparison",
+                           "exclusion_summary", "interpretation"))
+                self$results[[name]]$setContent("")
+            self$results$plot$setState(NULL)
+
             # Reset messages
             private$.resetMessages()
 

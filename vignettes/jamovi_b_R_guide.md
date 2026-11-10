@@ -764,7 +764,7 @@ color_scheme <- self$options$colorScheme %||% "default"
 
 ### Reading a `File` Option (jamovi 28.3+)
 
-A `File` option is the sanctioned way for an analysis to consume a user-supplied file. It replaces the old hack of a `String` option holding a path, which does not work on jamovi cloud and relies on deprecated Electron features. Schema: [jamovi_a_yaml_guide.md → `File`](jamovi_a_yaml_guide.md#file-jamovi-283). It needs jamovi 28.3 and a module-wide `minApp: 28.3.0` decision: see [jamovi 28.3 Features](jamovi_module_patterns_guide.md#jamovi-283-features-file-text-vector-images).
+A `File` option is the sanctioned way for an analysis to consume a user-supplied file. It replaces the old hack of a `String` option holding a path, which does not work on jamovi cloud and relies on deprecated Electron features. Schema: [jamovi_a_yaml_guide.md → `File`](jamovi_a_yaml_guide.md#file-jamovi-283). It needs jamovi 28.3 and a module-wide `minApp: 28.4.0` decision: see [jamovi 28.3 Features](jamovi_module_patterns_guide.md#jamovi-283-features-file-text-vector-images).
 
 | Declaration | Unset | Set |
 |---|---|---|
@@ -913,7 +913,7 @@ Populating tables defined in `.r.yaml`:
 
 ### HTML Content Population
 
-> **Narrative text belongs in `Text`, not Html.** The official jamovi guidance: "For narrative or explanatory text, prefer Text, which supports basic inline formatting without the overhead and inconsistency of hand-rolled HTML." A summary like `.generateSummaryHtml()` below becomes a `Text` result ([Text Content Population](#text-content-population-jamovi-283)) once the module's `minApp` is 28.3.0; Text has no headings (raw `<h4>` is stripped and a markdown heading is flattened to a plain paragraph), so write a heading as a `**bold**` line. Keep Html for what Text cannot express (tables, code blocks) and follow the theme-safe rules in `jamovi_library_review_guide.md`.
+> **Narrative text belongs in `Text`, not Html.** The official jamovi guidance: "For narrative or explanatory text, prefer Text, which supports basic inline formatting without the overhead and inconsistency of hand-rolled HTML." A summary like `.generateSummaryHtml()` below becomes a `Text` result ([Text Content Population](#text-content-population-jamovi-283)) once the module's `minApp` is 28.11.0 (upstream bumped the `Text` requirement from 28.3.0 on 2026-10-13); Text has no headings (raw `<h4>` is stripped and a markdown heading is flattened to a plain paragraph), so write a heading as a `**bold**` line. Keep Html for what Text cannot express (tables, code blocks) and follow the theme-safe rules in `jamovi_library_review_guide.md`.
 
 ```R
 .populateHtmlResults = function(analysis_results) {

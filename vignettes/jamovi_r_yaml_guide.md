@@ -209,7 +209,7 @@ The jamovi 28.3 additions:
 
 - **`Text`** — Markdown prose. Needs jamovi 28.3+ (and, for R-side tests, a
   jmvcore that exports `Text`); see [`Text`](#text-jamovi-283).
-- **`Svg`** — in the schema enum and upstream, but undocumented. Do not use it yet (see [Exists Upstream, Not Yet Documented](jamovi_module_patterns_guide.md#exists-upstream-not-yet-documented)).
+- **`Svg`** — interactive SVG graphic (`setContent()` markup + optional `setScripts()` JavaScript from `inst/`); copied/exported like an image; sized by the `<svg>` `width`/`height`. Documented upstream since 2026-10-10 (`/api/svg`), `minApp: 28.3.0`. Poor fit for one-shape-per-observation plots. We have no analysis that needs it: do not adopt it without a concrete interactive use case (see the 2026-11 sync report). Vendored copy: `development-documentations-dev.jamovi.org-master/api_svg.md`.
 
 Two traps in that list:
 
@@ -279,7 +279,7 @@ Renders rich HTML content with full formatting capability.
 For narrative or explanatory text (instructions, summaries, interpretation), the
 official jamovi dev docs say: *"For narrative or explanatory text, prefer Text,
 which supports basic inline formatting without the overhead and inconsistency of
-hand-rolled HTML."* `Text` needs jamovi 28.3+ and a module-wide `minApp: 28.3.0`,
+hand-rolled HTML."* `Text` needs jamovi 28.11+ (docs checked 2026-11-09) and a module-wide `minApp: 28.11.0`,
 so existing Html narrative stays Html until the module deliberately raises
 `minApp` — see [`Text`](#text-jamovi-283).
 
@@ -292,7 +292,7 @@ self$results$summaryText$setContent(html_content)
 #### `Text` (jamovi 28.3+)
 Renders one string as a small subset of Markdown, sanitized by the jamovi client.
 
-> **Availability:** jamovi 28.3+; module-wide `minApp: 28.3.0`; for R-side
+> **Availability:** jamovi 28.11+ per the current docs (first documented as 28.3, bumped to 28.11 upstream on 2026-10-13); module-wide `minApp: 28.11.0`; for R-side
 > development and tests, a jmvcore that exports `Text` — see [jamovi 28.3 Features](jamovi_module_patterns_guide.md#jamovi-283-features-file-text-vector-images)
 > and [Installing Current jmvtools and jmvcore](jamovi_module_patterns_guide.md#installing-current-jmvtools-and-jmvcore).
 
@@ -697,7 +697,7 @@ items:
     # Instructions/Overview
     - name: overview
       title: Analysis Overview
-      # narrative: prefer type: Text once the module sets minApp: 28.3.0 (see #text-jamovi-283)
+      # narrative: prefer type: Text once the module sets minApp: 28.11.0 (see #text-jamovi-283)
       type: Html
       visible: (showInstructions)
       
@@ -1029,7 +1029,7 @@ items:
     # 1. Overview/Instructions (if needed)
     - name: instructions
       title: Analysis Guide
-      # narrative: prefer type: Text once the module sets minApp: 28.3.0 (see #text-jamovi-283)
+      # narrative: prefer type: Text once the module sets minApp: 28.11.0 (see #text-jamovi-283)
       type: Html
       visible: (showInstructions)
       

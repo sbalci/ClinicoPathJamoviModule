@@ -214,7 +214,7 @@ self$results$add(ok)   # append; insert(999, ...) corrupts the results tree - re
 
 
 > **Current limitation & co-existence with Html outputs:**  
-> Notices are currently **single-line only** and cannot contain line breaks. For rich, multi-line explanations, keep using your existing Html results (e.g., summary paragraphs, detailed interpretation blocks) **in addition to** Notices. New narrative prose in a module with `minApp: 28.3.0` prefers a `type: Text` result (markdown; the jamovi dev docs: "For narrative or explanatory text, prefer Text") — see [`Text`](../../vignettes/jamovi_r_yaml_guide.md#text-jamovi-283); Html stays for headings, tables and other structure Text cannot render. Use Notices as concise, single-line banners (errors, strong warnings, key info) that point to the more detailed Html/Text content instead of trying to replace it.
+> Notices are currently **single-line only** and cannot contain line breaks. For rich, multi-line explanations, keep using your existing Html results (e.g., summary paragraphs, detailed interpretation blocks) **in addition to** Notices. New narrative prose in a module with `minApp: 28.11.0` prefers a `type: Text` result (markdown; the jamovi dev docs: "For narrative or explanatory text, prefer Text") — see [`Text`](../../vignettes/jamovi_r_yaml_guide.md#text-jamovi-283); Html stays for headings, tables and other structure Text cannot render. Use Notices as concise, single-line banners (errors, strong warnings, key info) that point to the more detailed Html/Text content instead of trying to replace it.
 
 ---
 
@@ -378,7 +378,7 @@ grep -n "^\s*warning(" R/<fn>.b.R      # jamovi never shows R warnings to the us
 grep -n "addRow(rowKey" R/<fn>.b.R     # a fixed / option-determined row set belongs in .init()
 grep -n "visible: *( *!" jamovi/<fn>.r.yaml   # a leading "!" is silently ALWAYS VISIBLE
 grep -nE '\.\(\s*"[[:space:],;:.]|\.\(\s*"[^"]*[[:space:]]"\s*[,)]' R/<fn>.b.R   # separator/padding inside .()
-grep -nE '^\s*(type: *(File|Text)|mode: *vector)\s*$' jamovi/<fn>.a.yaml jamovi/<fn>.r.yaml; grep -n '^minApp' jamovi/0000.yaml   # File/Text need module-wide minApp: 28.3.0 (Text table columns are false hits); vector = bounded-mark plots only
+grep -nE '^\s*(type: *(File|Text)|mode: *vector)\s*$' jamovi/<fn>.a.yaml jamovi/<fn>.r.yaml; grep -n '^minApp' jamovi/0000.yaml   # File/Text need module-wide `minApp: 28.4.0` (File) / `28.11.0` (Text) (Text table columns are false hits); vector = bounded-mark plots only
 python3 tools/release_gate.py          # requiresData contract, CollapseBox Title Case, refs, column format tokens, fabricated statistics (FAIL = blocking)
 grep -n "format:" jamovi/<fn>.r.yaml   # comma-separated zto|pvalue|pc|log10|dp:N|sf:N ONLY - "zto:4" is one unknown token and is dropped in silence
 grep -nE '(grepl?|sub|gsub|regexpr)\(' R/<fn>.b.R   # a pattern built from a user column name needs fixed = TRUE / startsWith() / .stripPrefix()
@@ -428,7 +428,7 @@ Checklist:
       `R/utils.R`; `jmvcore::composeTerm()` only when the target is a model term (§22).
 - [ ] **Do not add `type: Notice` to `.r.yaml`** — it is not in the compiler enum and
       `jmvtools::prepare()` fails on it. `type: Notification` compiles but breaks at runtime.
-- [ ] **A `type: File` option or `type: Text` result needs `minApp: 28.3.0`** in
+- [ ] **A `type: File` option or `type: Text` result needs `minApp: 28.4.0` (File) / `28.11.0` (Text)** in
       `jamovi/0000.yaml`; `python3 tools/release_gate.py` fails otherwise. minApp is
       module-wide (jamovi 28.2 and older can no longer install any of the module), so raising
       it is a release decision — ask first. Image `mode: vector` only on bounded-mark plots

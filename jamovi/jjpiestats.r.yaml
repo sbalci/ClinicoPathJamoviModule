@@ -100,7 +100,7 @@ items:
       height: 300
       renderFun: .plot1
       requiresData: true
-      visible: (dep && !paired)
+      visible: (length(dep) > 0 && paired == FALSE)
 
     - name: donutPlot
       title: 'Donut Chart'

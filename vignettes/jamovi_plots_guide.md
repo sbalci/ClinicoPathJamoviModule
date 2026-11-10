@@ -146,9 +146,9 @@ number of drawn marks grows with the number of rows, keep `raster`.
   raster, no error), so tests run against it cannot show vector output.
   Check it in jamovi 28.3 — see
   [Installing Current jmvtools and jmvcore](jamovi_module_patterns_guide.md#installing-current-jmvtools-and-jmvcore).
-- **Older jamovi:** behaviour inside a jamovi < 28.3 app is unverified.
-  `python3 tools/release_gate.py` warns when a module below `minApp: 28.3.0`
-  uses `mode: vector`; see
+- **Older jamovi:** the official Image page (2026-10-10) now states that older jamovi ignores `mode` and renders the image as raster, so `mode: vector` needs no `minApp`. A runtime `image$setMode('raster'|'vector')` exists too (our guide still recommends the static `.r.yaml` setting).
+  `python3 tools/release_gate.py` still warns when a module below `minApp: 28.3.0`
+  uses `mode: vector` (conservative; see the 2026-11 sync report); see
   [Version Gating: minApp](jamovi_module_patterns_guide.md#version-gating-minapp).
 
 ### Dynamic Titles with Variables

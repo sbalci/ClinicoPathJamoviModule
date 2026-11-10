@@ -253,7 +253,7 @@ External sources (if available and check_external=true):
 7) **Welcome/Intro Styling**
    - When `style_welcome=true`, add decisionpanel-style intro (HTML/markdown) visible when no variables are selected.
      The snippet below stays `type: Html` (its `<h3>` heading would be flattened by `Text`); a plain-paragraph
-     intro may be `type: Text` once the module has `minApp: 28.3.0`.
+     intro may be `type: Text` once the module has `minApp: 28.11.0`.
 
 8) **Validation & Errors**
    - Validate required vars; handle empty data and missing values; surface friendly errors.
@@ -349,7 +349,7 @@ grep -n "^\s*warning(" R/<fn>.b.R      # jamovi never shows R warnings to the us
 grep -n "addRow(rowKey" R/<fn>.b.R     # a fixed / option-determined row set belongs in .init()
 grep -n "visible: *( *!" jamovi/<fn>.r.yaml   # a leading "!" is silently ALWAYS VISIBLE
 grep -nE '\.\(\s*"[[:space:],;:.]|\.\(\s*"[^"]*[[:space:]]"\s*[,)]' R/<fn>.b.R   # separator/padding inside .()
-grep -nE '^\s*(type: *(File|Text)|mode: *vector)\s*$' jamovi/<fn>.a.yaml jamovi/<fn>.r.yaml; grep -n '^minApp' jamovi/0000.yaml   # File/Text need module-wide minApp: 28.3.0 (Text table columns are false hits); vector = bounded-mark plots only
+grep -nE '^\s*(type: *(File|Text)|mode: *vector)\s*$' jamovi/<fn>.a.yaml jamovi/<fn>.r.yaml; grep -n '^minApp' jamovi/0000.yaml   # File/Text need module-wide `minApp: 28.4.0` (File) / `28.11.0` (Text) (Text table columns are false hits); vector = bounded-mark plots only
 python3 tools/release_gate.py          # requiresData, CollapseBox Title Case, refs, .() " [..]"/\u{}/padding, translation %-specifiers, notice title colours, column format tokens, fabricated statistics (FAIL = blocking)
 grep -n "format:" jamovi/<fn>.r.yaml   # comma-separated zto|pvalue|pc|log10|dp:N|sf:N ONLY - "zto:4" is one unknown token and is dropped in silence
 grep -nE '(grepl?|sub|gsub|regexpr)\(' R/<fn>.b.R   # a pattern built from a user column name needs fixed = TRUE / startsWith() / .stripPrefix()
@@ -399,7 +399,7 @@ Checklist:
       `R/utils.R`; `jmvcore::composeTerm()` only when the target is a model term (§22).
 - [ ] **Do not add `type: Notice` to `.r.yaml`** — it is not in the compiler enum and
       `jmvtools::prepare()` fails on it. `type: Notification` compiles but breaks at runtime.
-- [ ] **A `type: File` option or `type: Text` result needs `minApp: 28.3.0`** in
+- [ ] **A `type: File` option or `type: Text` result needs `minApp: 28.4.0` (File) / `28.11.0` (Text)** in
       `jamovi/0000.yaml`; `python3 tools/release_gate.py` fails otherwise. minApp is
       module-wide (jamovi 28.2 and older can no longer install any of the module), so raising
       it is a release decision — ask first. Image `mode: vector` only on bounded-mark plots

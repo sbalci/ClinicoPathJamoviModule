@@ -1,3 +1,5 @@
+<!-- Vendored verbatim from https://github.com/jamovi/dev.jamovi.org/blob/7145eb8/src/content/docs/reference/api/option-file.md (fetched 2026-11-09; published at https://dev.jamovi.org). -->
+
 ---
 layout: ../layouts/BaseLayout.astro
 title: File Option
@@ -5,15 +7,12 @@ description: "Reference for the File option, letting users select one or more fi
 type: article
 ---
 
-<!-- Vendored from https://github.com/jamovi/dev.jamovi.org/blob/17737bbc/src/content/docs/reference/api/option-file.md
-     (fetched 2026-09-19; published at https://dev.jamovi.org). Newer than the rest of this snapshot. -->
-
 The `File` option lets the user select one or more files from their computer for the analysis to read, such as a stimulus list, a custom lexicon, etc.
 
-Available in jamovi 28.3 and newer. Declare this in your module's `0000.yaml` using `minApp`, so jamovi prevents installation on older versions that don't support it:
+Available in jamovi 28.4 and newer. Declare this in your module's `0000.yaml` using `minApp`, so jamovi prevents installation on older versions that don't support it:
 
 ```yaml
-minApp: 28.3.0
+minApp: 28.4.0
 ```
 
 ## Description

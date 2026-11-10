@@ -17,12 +17,7 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         .data_hash = NULL,
         .validation_passed = FALSE,
         .plotTheme = NULL,
-
-        # Memoized Fisher's-exact decision, keyed on the same data+option hash
-        # as .processedData so the chi-square assumption check (an independent
-        # chisq.test) runs once per data/option state instead of once per plot.
-        .fisherDecision = NULL,
-        .fisherDecisionHash = NULL,
+        .droppedInfo = NULL,
 
         # Notice collection helpers. A single Preformatted (plain-text) output item
         # keeps all notices in plain text with no HTML markup (project convention). ====
@@ -86,25 +81,22 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 }
             }
 
-            if (!is.null(self$options$group) && !is.null(self$options$grvar)) {
+            if (!is.null(self$options$grvar) && nzchar(self$options$grvar)) {
 
                 mydata <- self$data
+                grvar <- self$options$grvar
 
-                grvar <-  self$options$grvar
+                if (!is.null(mydata) && grvar %in% names(mydata)) {
+                    num_levels <- max(1L, nlevels(as.factor(mydata[[grvar]])))
+                    group <- self$options$group
 
-                num_levels <- nlevels(
-                    as.factor(mydata[[grvar]])
-                )
-
-                group <-  self$options$group
-
-                num_levels_group <- nlevels(
-                    as.factor(mydata[[group]])
-                )
-
-                # self$results$plot3$setSize((num_levels + num_levels_group) * 600, 450)
-
-                self$results$plot4$setSize((num_levels + num_levels_group) * 600, 450)
+                    if (!is.null(group) && nzchar(group) && group %in% names(mydata)) {
+                        num_levels_group <- max(1L, nlevels(as.factor(mydata[[group]])))
+                        self$results$plot4$setSize((num_levels + num_levels_group) * 600, 450)
+                    } else {
+                        self$results$plot4$setSize(num_levels * 600, 450)
+                    }
+                }
 
             }
 
@@ -114,23 +106,62 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         
         .effectiveOptionsList = function() {
             # Build a derived options list without mutating self$options
+            valid_types <- c("parametric", "nonparametric", "robust", "bayes")
+            typestatistics <- if (isTRUE(self$options$typestatistics %in% valid_types)) {
+                self$options$typestatistics
+            } else {
+                "parametric"
+            }
+
+            valid_labels <- c("percentage", "counts", "both")
+            label <- if (isTRUE(self$options$label %in% valid_labels)) {
+                self$options$label
+            } else {
+                "percentage"
+            }
+
+            valid_presets <- c("custom", "diagnostic", "treatment", "biomarker")
+            clinicalpreset <- if (isTRUE(self$options$clinicalpreset %in% valid_presets)) {
+                self$options$clinicalpreset
+            } else {
+                "custom"
+            }
+
+            valid_palettes <- c("jco", "npg", "aaas", "lancet", "jama", "nejm")
+            ggpubrDonutPalette <- if (isTRUE(self$options$ggpubrDonutPalette %in% valid_palettes)) {
+                self$options$ggpubrDonutPalette
+            } else {
+                "jco"
+            }
+
+            digits <- suppressWarnings(as.integer(self$options$digits))
+            if (length(digits) != 1L || is.na(digits) || digits < 0L || digits > 5L) {
+                digits <- 2L
+            }
+
+            conflevel <- suppressWarnings(as.numeric(self$options$conflevel))
+            if (length(conflevel) != 1L || is.na(conflevel) || conflevel < 0.50 || conflevel > 0.99) {
+                conflevel <- 0.95
+            }
+
             opts <- list(
                 dep = self$options$dep,
                 group = self$options$group,
                 grvar = self$options$grvar,
-                typestatistics = self$options$typestatistics,
+                typestatistics = typestatistics,
                 counts = self$options$counts,
                 raw_ratio = self$options$ratio,
-                paired = self$options$paired %||% FALSE,
-                label = self$options$label %||% "percentage",
-                digits = self$options$digits %||% 2L,
-                conflevel = self$options$conflevel %||% 0.95,
-                proportiontest = self$options$proportiontest %||% FALSE,
-                bfmessage = self$options$bfmessage %||% FALSE,
-                messages = self$options$messages %||% FALSE,
-                resultssubtitle = self$options$resultssubtitle,
-                originaltheme = self$options$originaltheme,
-                clinicalpreset = self$options$clinicalpreset %||% "custom"
+                paired = isTRUE(self$options$paired),
+                label = label,
+                digits = digits,
+                conflevel = conflevel,
+                proportiontest = isTRUE(self$options$proportiontest),
+                bfmessage = isTRUE(self$options$bfmessage),
+                messages = isTRUE(self$options$messages),
+                resultssubtitle = isTRUE(self$options$resultssubtitle),
+                originaltheme = isTRUE(self$options$originaltheme),
+                clinicalpreset = clinicalpreset,
+                ggpubrDonutPalette = ggpubrDonutPalette
             )
 
             preset <- opts$clinicalpreset
@@ -167,10 +198,13 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             opts
         },
         
-        .getPlotTheme = function() {
+        .getPlotTheme = function(ggtheme = NULL) {
             # Hash-based invalidation - without this, toggling `originaltheme`
             # between .run() invocations on the same R6 instance returns a stale theme.
             current_originaltheme <- isTRUE(self$options$originaltheme)
+            if (!current_originaltheme && !is.null(ggtheme)) {
+                return(ggtheme)
+            }
             if (is.null(private$.plotTheme) ||
                 !identical(attr(private$.plotTheme, "originaltheme"), current_originaltheme)) {
                 private$.plotTheme <- if (!current_originaltheme) {
@@ -672,9 +706,6 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             if (!is.null(group) && group != "" && group %in% names(df)) {
                 group_sizes <- table(droplevels(as.factor(df[[group]])), useNA = "no")
 
-                if (any(group_sizes < 5)) {
-                }
-
                 if (length(group_sizes) < 2) {
                     jmvcore::reject(.('Grouping variable must have at least 2 categories for comparison.'))
                 }
@@ -780,80 +811,6 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             # All validations passed
             return(list(valid = TRUE, message = .('Counts variable validated successfully.')))
-        },
-
-        .checkFisherNeeded = function(data, dep_var, group_var, counts_var = NULL) {
-            # Memoize on the current data+option hash (set by .getCachedData, which
-            # every plot calls before this). The decision is a pure function of
-            # data/dep/group/counts, all captured by .data_hash, so recomputing the
-            # chi-square assumption check once per plot render is wasteful.
-            cache_key <- private$.data_hash
-            if (!is.null(cache_key) &&
-                identical(private$.fisherDecisionHash, cache_key) &&
-                !is.null(private$.fisherDecision)) {
-                return(private$.fisherDecision)
-            }
-
-            result <- private$.computeFisherNeeded(data, dep_var, group_var, counts_var)
-
-            if (!is.null(cache_key)) {
-                private$.fisherDecision <- result
-                private$.fisherDecisionHash <- cache_key
-            }
-
-            result
-        },
-
-        .computeFisherNeeded = function(data, dep_var, group_var, counts_var = NULL) {
-            # CRITICAL FIX #5: Check if Fisher's exact test should be used
-            # Returns list with use_fisher, low_count_cells, total_cells, pct_low
-
-            if (is.null(group_var) || group_var == "") {
-                return(list(use_fisher = FALSE, low_count_cells = 0, total_cells = 0, pct_low = 0))
-            }
-
-            tryCatch({
-                # Create contingency table (weighted if counts present)
-                if (!is.null(counts_var) && counts_var != "" && counts_var %in% names(data)) {
-                    formula_str <- paste0(jmvcore::composeTerm(counts_var),
-                                          " ~ ", jmvcore::composeTerm(dep_var),
-                                          " + ", jmvcore::composeTerm(group_var))
-                    cont_table <- xtabs(jmvcore::asFormula(formula_str), data = data)
-                } else {
-                    cont_table <- table(data[[dep_var]], data[[group_var]])
-                }
-
-                # Chi-square test requires at least 2x2 table
-                if (nrow(cont_table) < 2 || ncol(cont_table) < 2) {
-                    return(list(use_fisher = FALSE, low_count_cells = 0, total_cells = 0, pct_low = 0))
-                }
-
-                # Calculate expected counts
-                expected <- suppressWarnings(chisq.test(cont_table)$expected)
-
-                # Count cells with expected count < 5
-                low_count_cells <- sum(expected < 5)
-                total_cells <- length(expected)
-                pct_low <- 100 * low_count_cells / total_cells
-
-                # Fisher's exact recommended when >20% of cells have expected count < 5
-                # For 2x2 tables, use if ANY cell < 5
-                use_fisher <- if (total_cells == 4) {  # 2x2 table
-                    low_count_cells > 0
-                } else {
-                    pct_low > 20
-                }
-
-                return(list(
-                    use_fisher = use_fisher,
-                    low_count_cells = low_count_cells,
-                    total_cells = total_cells,
-                    pct_low = pct_low
-                ))
-
-            }, error = function(e) {
-                return(list(use_fisher = FALSE, low_count_cells = 0, total_cells = 0, pct_low = 0))
-            })
         },
 
         # The chart shows McNemar only for a paired, non-Bayesian run:
@@ -1155,10 +1112,8 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 jmvcore::reject(.('Dependent variable is required but not properly set'))
             }
 
-            # Prepare data with progress feedback
-            self$results$todo$setContent(
-                glue::glue("<br>{msg}<br><hr>", msg = .('Processing data for pie chart analysis...'))
-            )
+            # No progress message in `todo` here: this also runs from the plot
+            # renderers (cache miss), where it overwrote the status set by .run().
 
             mydata <- self$data
 
@@ -1193,20 +1148,16 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             mydata <- mydata[complete.cases(mydata[relevant_cols]), , drop = FALSE]
             n_after <- nrow(mydata)
 
-            # Report dropped rows
-            if (n_before > n_after) {
-                n_dropped <- n_before - n_after
-                pct_dropped <- round(100 * n_dropped / n_before, 1)
-                self$results$todo$setContent(
-                    glue::glue(
-                        "<br> <b>{info_title}:</b> {n_dropped} {rows_msg} ({pct_dropped}%) {excluded_msg} {vars_msg}: {var_list}.<br><hr>",
-                        info_title = .('Info'),
-                        rows_msg = ngettext(n_dropped, 'row', 'rows'),
-                        excluded_msg = .('excluded due to missing values in'),
-                        vars_msg = .('analysis variables'),
-                        var_list = htmltools::htmlEscape(paste(relevant_cols, collapse = ', '))
-                    )
+            # Record dropped rows so .emitRunNotices() can surface them without
+            # being overwritten when .run() writes the ready status into todo.
+            private$.droppedInfo <- if (n_before > n_after) {
+                list(
+                    n_dropped = n_before - n_after,
+                    n_before  = n_before,
+                    vars      = relevant_cols
                 )
+            } else {
+                NULL
             }
 
             counts_var <- self$options$counts
@@ -1317,10 +1268,8 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # .effectiveOptionsList() is cheap and always current, so the cache bought
             # nothing and cost correctness.
 
-            # Prepare options with progress feedback
-            self$results$todo$setContent(
-                glue::glue("<br>{msg}<br><hr>", msg = .('Preparing pie chart analysis options...'))
-            )
+            # No progress message in `todo`: every plot renderer calls this, and the
+            # write replaced the status set by .run() (seen after Bayesian renders).
 
             # Defensive validation: ensure dep is not zero-length
             if (is.null(self$options$dep) || length(self$options$dep) == 0 || (length(self$options$dep) == 1 && self$options$dep == "")) {
@@ -1427,11 +1376,12 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 }, error = function(e) NULL)
             }
 
-            # Split By draws one panel per level via grouped_ggpiestats, which
-            # returns a combined patchwork - its per-panel subtitles cannot be
-            # swapped the way plot2's single subtitle is. Where a panel's own 2x2
-            # is too sparse for chi-square, give the exact p-value for that panel
-            # here so the figure is not the only source.
+            # Split By panels with a sparse table: give the exact p-value for each
+            # one here. .plot4 builds each panel itself and, when the subtitle is
+            # on, already prints Fisher's exact test on a sparse 2x2 panel (same
+            # table, same p); a larger sparse panel still shows a chi-square, and
+            # with the subtitle off no test is shown. The wording must hold in all
+            # three cases, so it must not claim a chi-square is on the panel.
             grvar <- opts$grvar
             if (!is.null(grvar) && !is.null(group) && nzchar(grvar) && nzchar(group) &&
                 grvar %in% names(prepared_data) && !isTRUE(opts$paired) &&
@@ -1468,7 +1418,7 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
                 if (length(lines))
                     private$.addNotice("WARNING", .('Split By panels: use these exact p-values'),
-                        paste0(sprintf(.('In %d of the Split By panels the expected cell counts are too small for the chi-square shown on that panel. Fisher\'s exact test gives:'),
+                        paste0(sprintf(.('In %d of the Split By panels the expected cell counts are below 5, so a chi-square test is unreliable there. Fisher\'s exact test gives:'),
                                        length(lines)),
                                " ", paste(lines, collapse = "; "), "."))
             }
@@ -1545,6 +1495,18 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 private$.addNotice("STRONG_WARNING", .('Variable compared with itself'),
                     sprintf(.('\'%s\' is used as both the outcome and the grouping variable. The contingency table is then diagonal by construction, so the association test reports a near-zero p-value that reflects the setup rather than the data. Choose a different grouping variable.'),
                             dep))
+
+            # Rows excluded for missing values. Previously written into `todo`
+            # by .prepareData() and immediately overwritten by .run()'s status
+            # message, so the exclusion was never seen.
+            di <- private$.droppedInfo
+            if (!is.null(di) && isTRUE(di$n_dropped > 0)) {
+                private$.addNotice("INFO", .('Missing values excluded'),
+                    sprintf(.('%d of %d rows (%.1f%%) were excluded because of missing values in the analysis variables: %s.'),
+                            as.integer(di$n_dropped), as.integer(di$n_before),
+                            100 * di$n_dropped / di$n_before,
+                            paste(di$vars, collapse = ", ")))
+            }
 
             if (isTRUE(self$options$messages)) {
                 opts <- private$.effectiveOptionsList()
@@ -1667,37 +1629,12 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     private$.emitRunNotices(prepared_data)
 
                 }, error = function(e) {
-                    # Reset cache on error
+                    # Reset cache on error, then let jamovi present the
+                    # jmvcore::reject() message once. Writing a second HTML
+                    # error card into `todo` duplicated it (notices guide 13.6).
                     private$.processedData <- NULL
                     private$.validation_passed <- FALSE
-                    
-                    # Enhanced error reporting with more context
-                    error_context <- ""
-                    if (grepl("continuous", e$message, ignore.case = TRUE)) {
-                        error_context <- paste0("<br> <b>", .('Tip:'), "</b> ", .('Use Data > Transform to create categorical groups from continuous variables.'), "<br>")
-                    } else if (grepl("minimum|group size", e$message, ignore.case = TRUE)) {
-                        error_context <- paste0("<br> <b>", .('Tip:'), "</b> ", .('Consider combining small categories or collecting more data.'), "<br>")
-                    } else if (grepl("variation|level", e$message, ignore.case = TRUE)) {
-                        error_context <- paste0("<br> <b>", .('Tip:'), "</b> ", .('Ensure your variables have multiple categories for meaningful pie charts.'), "<br>")
-                    }
-                    
-                    error_msg <- glue::glue(
-                        "<br> <b>{error_title}:</b><br>
-                        <br>{htmltools::htmlEscape(e$message)}<br>
-                        {error_context}
-                        <br><b>{troubleshoot_title}:</b><br>
-                        \u2022 {check1}<br>
-                        \u2022 {check2}<br>
-                        \u2022 {check3}<br>
-                        \u2022 {check4}<br><hr>",
-                        error_title = .('Error in Pie Chart Analysis'),
-                        troubleshoot_title = .('General Troubleshooting'),
-                        check1 = .('Ensure dependent variable is categorical'),
-                        check2 = .('Check that selected variables exist in your dataset'),
-                        check3 = .('Verify sufficient sample sizes in each category (\u22655 recommended)'),
-                        check4 = .('Confirm variables have adequate variation (\u22652 categories)')
-                    )
-                    self$results$todo$setContent(error_msg)
+                    private$.droppedInfo <- NULL
                     stop(e)
                 })
                 
@@ -1728,13 +1665,13 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             tryCatch({
                 mydata <- private$.getCachedData()
             }, error = function(e) {
-                stop(glue::glue('Data preparation failed in plot1: {e$message}'))
+                stop(paste0('Data preparation failed in plot1: ', conditionMessage(e)), call. = FALSE)
             })
 
             tryCatch({
                 options_data <- private$.prepareOptions()
             }, error = function(e) {
-                stop(glue::glue('Options preparation failed in plot1: {e$message}'))
+                stop(paste0('Options preparation failed in plot1: ', conditionMessage(e)), call. = FALSE)
             })
 
             dep <- options_data$dep
@@ -1751,18 +1688,15 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             } else {
                 NULL
             }
+            # ggpiestats tidy-selects `counts`; passing a character variable by
+            # name triggers tidyselect's "external vector" deprecation warning.
+            counts_sym <- if (!is.null(counts_var)) rlang::sym(counts_var) else NULL
 
-            # CRITICAL FIX #3: Validate paired data before McNemar test
-            if (options_data$paired) {
-                # plot1 has no grouping variable (y=NULL), so paired doesn't apply.
-                # Explain the empty plot instead of silently returning nothing.
-                private$.addNotice(
-                    "WARNING",
-                    .('Single-variable pie chart not shown'),
-                    .('The paired/repeated-measures option requires a two-way (grouped) comparison, so the single-variable pie chart cannot be drawn. Disable the "Paired" option to display this chart, or use the grouped charts for the paired analysis.')
-                )
+            # plot1 has no grouping variable (y = NULL), so paired does not apply.
+            # r.yaml hides plot1 when paired is on, and .emitRunNotices() explains
+            # why; a notice raised here (during .plot()) would be discarded.
+            if (options_data$paired)
                 return()
-            }
 
             # Guard: expected proportions must match the number of outcome levels.
             # Keep the result in a LOCAL (as .plot2/.plot4 do). Assigning NULL back
@@ -1778,7 +1712,7 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     data = mydata,
                     x = !!rlang::sym(dep),
                     y = NULL,
-                    counts = counts_var,
+                    counts = !!counts_sym,
                     ratio = ratio_vec,
                     paired = FALSE,  # Always FALSE for single variable
                     type = options_data$typestatistics,
@@ -1800,8 +1734,8 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
 
 
-            # Apply cached theme for better performance
-            plot1 <- plot1 + private$.getPlotTheme()
+            # Apply the theme: jamovi's ggtheme unless the ggstatsplot theme is requested
+            plot1 <- plot1 + private$.getPlotTheme(ggtheme)
 
             if (isTRUE(options_data$resultssubtitle) &&
                 (statsSeedMatters(options_data$typestatistics, "contingency") ||
@@ -1838,7 +1772,7 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 mydata <- private$.getCachedData()
                 options_data <- private$.prepareOptions()
             }, error = function(e) {
-                stop(glue::glue('Plot preparation failed: {e$message}'))
+                stop(paste0('Plot preparation failed: ', conditionMessage(e)), call. = FALSE)
             })
             
             dep <- options_data$dep
@@ -1858,22 +1792,17 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             } else {
                 NULL
             }
+            counts_sym <- if (!is.null(counts_var)) rlang::sym(counts_var) else NULL
 
             # Guard: expected proportions must match the number of outcome levels
             ratio_vec <- private$.applyRatioLengthGuard(options_data$ratio, mydata, dep)
 
-            # CRITICAL FIX #3: Validate paired data before McNemar test
+            # Invalid paired data: draw nothing. The reason is reported by
+            # .emitRunNotices() during .run(); a notice raised here is discarded.
             if (options_data$paired) {
                 validation <- private$.validatePairedData(mydata, dep, group)
-                if (!validation$valid) {
-                    # Explain the empty plot instead of silently returning nothing.
-                    private$.addNotice(
-                        "WARNING",
-                        .('Paired analysis not shown'),
-                        validation$message
-                    )
+                if (!validation$valid)
                     return()
-                }
             }
 
             # The old "auto-switch to Fisher's exact" rewrote the user's chosen type
@@ -1889,11 +1818,11 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # Checkpoint before expensive statistical computation
             private$.checkpoint()
 
-            # Additional checkpoint with timing for Bayesian analysis
+            # Flush before the slow Bayesian computation. Do not write to `todo`
+            # here: this runs during .plot(), where jamovi discards the update, and
+            # under the R wrapper it overwrote the status written by .run(), which
+            # already carries the Bayesian performance note.
             if (override_type == "bayes") {
-                self$results$todo$setContent(
-                    glue::glue("<br> {msg}<br><hr>", msg = .('Computing Bayesian analysis... This may take 30-60 seconds depending on data size.'))
-                )
                 private$.checkpoint(flush = TRUE)
             }
 
@@ -1909,7 +1838,7 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     data = mydata,
                     x = !!rlang::sym(dep),
                     y = !!rlang::sym(group),
-                    counts = counts_var,
+                    counts = !!counts_sym,
                     ratio = ratio_vec,  # Use enhanced parsed ratio
                     paired = options_data$paired,
                     type = override_type,  # Use potentially overridden type
@@ -1932,14 +1861,7 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             if (!is.null(exact_sub))
                 plot2 <- plot2 + ggplot2::labs(subtitle = exact_sub)
 
-            originaltheme <- options_data$originaltheme
-
-            if (!originaltheme) {
-                plot2 <- plot2 + ggtheme
-            } else {
-                plot2 <- plot2 + ggstatsplot::theme_ggstatsplot()
-                # ggplot2::theme_bw()
-            }
+            plot2 <- plot2 + private$.getPlotTheme(ggtheme)
 
 
             if (isTRUE(options_data$resultssubtitle) &&
@@ -1978,7 +1900,7 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 mydata <- private$.getCachedData()
                 options_data <- private$.prepareOptions()
             }, error = function(e) {
-                stop(glue::glue('Grouped plot preparation failed: {e$message}'))
+                stop(paste0('Grouped plot preparation failed: ', conditionMessage(e)), call. = FALSE)
             })
             
             dep <- options_data$dep
@@ -1997,26 +1919,21 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             if ( !is.null(grvar) ) {
 
-                selected_theme <- private$.getPlotTheme()
+                selected_theme <- private$.getPlotTheme(ggtheme)
 
                 counts_var <- if (!is.null(options_data$counts) && options_data$counts != "") {
                     options_data$counts
                 } else {
                     NULL
                 }
+                counts_sym <- if (!is.null(counts_var)) rlang::sym(counts_var) else NULL
 
-                # CRITICAL FIX #3: Validate paired data before McNemar test
+                # Invalid paired data: draw nothing. .emitRunNotices() reports why.
                 if (options_data$paired) {
                     if (!has_group) return()
                     validation <- private$.validatePairedData(mydata, dep, group)
-                    if (!validation$valid) {
-                        private$.addNotice(
-                            "WARNING",
-                            .('Paired analysis not shown'),
-                            validation$message
-                        )
+                    if (!validation$valid)
                         return()
-                    }
                 }
 
                 override_type <- options_data$typestatistics
@@ -2024,11 +1941,9 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 # Checkpoint before expensive grouped statistical computation
                 private$.checkpoint()
 
-                # Additional checkpoint with timing for Bayesian analysis
+                # Flush before the slow Bayesian computation (no `todo` write
+                # during .plot(); see .plot2).
                 if (override_type == "bayes") {
-                    self$results$todo$setContent(
-                        glue::glue("<br> {msg}<br><hr>", msg = .('Computing Bayesian analysis for grouped data... This may take 1-2 minutes depending on number of groups and data size.'))
-                    )
                     private$.checkpoint(flush = TRUE)
                 }
 
@@ -2061,7 +1976,7 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                             data = sub_df,
                             x = !!rlang::sym(dep),
                             y = !!rlang::sym(group),
-                            counts = counts_var,
+                            counts = !!counts_sym,
                             type = override_type,
                             ratio = ratio_sub,
                             paired = options_data$paired,
@@ -2083,7 +1998,7 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                             data = sub_df,
                             x = !!rlang::sym(dep),
                             y = NULL,
-                            counts = counts_var,
+                            counts = !!counts_sym,
                             type = override_type,
                             ratio = ratio_sub,
                             paired = FALSE,
@@ -2129,7 +2044,7 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 mydata <- private$.getCachedData()
                 options_data <- private$.prepareOptions()
             }, error = function(e) {
-                stop(glue::glue('Donut plot preparation failed: {e$message}'))
+                stop(paste0('Donut plot preparation failed: ', conditionMessage(e)), call. = FALSE)
             })
             
             dep <- options_data$dep
@@ -2178,7 +2093,7 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 label = dep,
                 fill = dep,
                 color = "white",
-                palette = self$options$ggpubrDonutPalette,
+                palette = options_data$ggpubrDonutPalette,
                 lab.pos = "in", 
                 lab.font = "white"
             )
@@ -2203,6 +2118,28 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             
             print(plot)
             TRUE
+        },
+
+        .sourcifyOption = function(option) {
+            if (!option$name %in% setdiff(names(formals(jjpiestats)), "data"))
+                return("")
+            val <- option$value
+            if (is.null(val) || is.list(val) || length(val) == 0)
+                return("")
+            if (identical(val, option$default))
+                return("")
+            if (is.character(val)) {
+                if (all(!nzchar(val)))
+                    return("")
+                escaped <- encodeString(val, quote = '"')
+                val_str <- if (length(escaped) == 1L) {
+                    escaped
+                } else {
+                    paste0("c(", paste(escaped, collapse = ", "), ")")
+                }
+                return(paste0(option$name, " = ", val_str))
+            }
+            super$.sourcifyOption(option)
         }
 
     ), # End of private list
@@ -2211,33 +2148,17 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         #' Generate R source code for Pie Chart Statistics analysis
         #' @return Character string with R syntax for reproducible analysis
         asSource = function() {
-            # Build the argument list in option-declaration order.
-            #
-            # private$.asArgs() emitted variable names as BARE symbols, so a column
-            # called `Tumor Grade ("high")` produced
-            #     dep = Tumor Grade ("high")
-            # which is not valid R - copying the syntax pane into a script raised
-            # "unexpected symbol". Emit every variable-name option as a deparse()'d
-            # string literal instead; deparse() escapes quotes and backslashes
-            # correctly. Detecting the option by CLASS rather than by name means a
-            # variable option added later is escaped automatically. Non-variable
-            # options keep jmvcore's per-option sourcify so formatting matches the
-            # rest of jamovi. Do NOT also call .asArgs() - emitting both duplicates
-            # every variable in the generated call.
+            # Build the argument list in option-declaration order via
+            # private$.sourcifyOption(), which filters against declared formals,
+            # suppresses list values, and escapes all character values (including
+            # variable names) with encodeString(..., quote = '"').
             args <- character(0)
             for (option in private$.options$options) {
                 if (option$name == 'data')
                     next
-                if (inherits(option, 'OptionVariable') || inherits(option, 'OptionVariables')) {
-                    val <- option$value
-                    if (!is.null(val) && length(val) > 0)
-                        args <- c(args, paste0(option$name, ' = ',
-                                               paste0(deparse(val), collapse = '')))
-                } else {
-                    as <- private$.sourcifyOption(option)
-                    if (!identical(as, ''))
-                        args <- c(args, as)
-                }
+                as <- private$.sourcifyOption(option)
+                if (!identical(as, ''))
+                    args <- c(args, as)
             }
 
             # Get package name dynamically

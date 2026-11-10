@@ -322,7 +322,7 @@ Level selection for `Level` options from `.a.yaml`.
 - `enable`: Usually conditional on variable selection
 
 #### `FileSelector`
-File picker for `File` options from `.a.yaml` (jamovi 28.3+; module-wide `minApp: 28.3.0` - see [jamovi 28.3 Features](jamovi_module_patterns_guide.md#jamovi-283-features-file-text-vector-images)).
+File picker for `File` options from `.a.yaml` (jamovi 28.4+; module-wide `minApp: 28.4.0` - see [jamovi 28.3 Features](jamovi_module_patterns_guide.md#jamovi-283-features-file-text-vector-images)).
 
 ```yaml
 - type: FileSelector
@@ -1874,7 +1874,7 @@ Small details that lift the perceived polish of SummaryTables:
 | `RadioButton` | `optionName` + `optionPart` | mutually exclusive sub-panels |
 | `VariableSupplier` | `persistentItems: false` | reset on dataset change |
 | `LayoutBox` | `cell: { column: N, row: M }` | side-by-side columns |
-| `FileSelector` | bound to `type: File` option (`extensions` / `multiple` set in `.a.yaml`) | file picker; jamovi 28.3+ (module `minApp: 28.3.0`) |
+| `FileSelector` | bound to `type: File` option (`extensions` / `multiple` set in `.a.yaml`) | file picker; jamovi 28.4+ (module `minApp: 28.4.0`) |
 
 ---
 

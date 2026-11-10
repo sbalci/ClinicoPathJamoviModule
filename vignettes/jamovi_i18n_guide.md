@@ -912,7 +912,7 @@ html <- jmvcore::format(template, list(
 ))
 ```
 
-For narrative text such as this summary, jamovi 28.3+ offers a `type: Text` result instead (module-wide `minApp: 28.3.0`): see [7.6](#76-markdown-in-text-results-jamovi-283).
+For narrative text such as this summary, jamovi 28.11+ offers a `type: Text` result instead (module-wide `minApp: 28.11.0`): see [7.6](#76-markdown-in-text-results-jamovi-283).
 
 ### 7.6 Markdown in `Text` Results (jamovi 28.3+)
 

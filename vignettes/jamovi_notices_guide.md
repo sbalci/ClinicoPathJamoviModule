@@ -594,7 +594,7 @@ Four renderers, four different rules. Pick by what the text is for:
 | `type: Text` | `.r.yaml` + `setContent()` | Markdown subset: `**bold**`, `*italic*`, `~~strike~~`, `[link](url)`, `-` / `1.` lists, `<sub>`/`<sup>` | `\n\n` = paragraph; single `\n` does not break | markdown-escape user text ([`.mdEscape`](jamovi_b_R_guide.md#text-content-population-jamovi-283)); decodes only `&lt; &gt; &amp; &quot; &#39;`; write other characters as `\uXXXX` | narrative, summaries, interpretation |
 
 - dev.jamovi.org: "For narrative or explanatory text, prefer Text, which supports basic inline formatting without the overhead and inconsistency of hand-rolled HTML." The Text sanitizer strips style attributes and every tag outside its whitelist, so a module cannot add CSS to it.
-- Text is a declared `.r.yaml` element holding a plain string, not an inserted `jmvcore::Notice` object (.omv round-trip unverified). It is jamovi 28.3+ (module-wide `minApp: 28.3.0` - see [jamovi 28.3 Features](jamovi_module_patterns_guide.md#jamovi-283-features-file-text-vector-images)).
+- Text is a declared `.r.yaml` element holding a plain string, not an inserted `jmvcore::Notice` object (.omv round-trip unverified). It needs jamovi 28.11+ per the current docs (module-wide `minApp: 28.11.0` - see [jamovi 28.3 Features](jamovi_module_patterns_guide.md#jamovi-283-features-file-text-vector-images)).
 - Full reference (keys, markdown subset, `*`/`_` escaping, testing): [`Text` in the r.yaml guide](jamovi_r_yaml_guide.md#text-jamovi-283).
 
 ### Internationalization Support

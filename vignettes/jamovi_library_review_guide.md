@@ -117,10 +117,10 @@ python3 tools/release_gate.py      # FAIL lines block; read every WARN for shipp
 python3 tools/release_gate.py --root ../<Module>   # the same checks on the tree the reviewer reads
 
 # 10. jamovi 28.3 features vs module-wide minApp                        [anticipatory]
-grep -n '^minApp' jamovi/0000.yaml          # File option / Text result => must be >= 28.3.0
+grep -n '^minApp' jamovi/0000.yaml          # File option / Text result => must be >= 28.4.0 (File) / 28.11.0 (Text)
 grep -nE 'type: (File|Text) *$|mode: vector' jamovi/*.a.yaml jamovi/*.r.yaml
 #    a `type: Text` table COLUMN is not a Text result (false hit); release_gate.py
-#    check_min_app (run in item 9) skips columns, FAILs File/Text under minApp < 28.3.0
+#    check_min_app (run in item 9) skips columns, FAILs File/Text under minApp < 28.3.0 (script not yet updated: should be 28.4.0 for File, 28.11.0 for Text)
 #    and WARNs on mode: vector
 
 # 11. An ERROR the user sees before they have configured anything      [MEDIUM]
@@ -157,7 +157,7 @@ Plus the cheap metadata gates the reviewer checks first:
 - No committed build artifacts (`*.tar.gz`, `*.jmo`, anything under `build/` or `dist/`),
   and `.gitignore` covers `build/`, `dist/` and `*.jmo` (an official requirement).
 - `compilerMode: tame` on every `.u.yaml`.
-- *(anticipatory)* A `type: File` option or `type: Text` result needs `minApp: 28.3.0` in
+- *(anticipatory)* A `type: File` option or `type: Text` result needs `minApp: 28.4.0` (File) / `28.11.0` (Text) in
   `jamovi/0000.yaml`. `minApp` is module-wide, so raising it locks every jamovi 28.2-or-older
   user out of the whole module: a deliberate release decision, never a side effect. Setup,
   gating and testing: [jamovi 28.3 Features](jamovi_module_patterns_guide.md#jamovi-283-features-file-text-vector-images)
@@ -469,7 +469,7 @@ You cannot fix this by declaring a `Notice` in `.r.yaml` — see
 [section 13](#13-notices-the-native-element-and-the-insert-trap).
 
 *(anticipatory)* What you can do from jamovi 28.3: move plain narrative with no severity to a
-`type: Text` element (module-wide `minApp: 28.3.0`, see [Version Gating: minApp](jamovi_module_patterns_guide.md#version-gating-minapp)).
+`type: Text` element (module-wide `minApp: 28.11.0`, see [Version Gating: minApp](jamovi_module_patterns_guide.md#version-gating-minapp)).
 The Text sanitizer strips style attributes and every tag outside its whitelist, so a module
 cannot add CSS to it ([renderer table](jamovi_notices_guide.md#which-text-renderer-notice-setnote-html-or-text)).
 
@@ -524,7 +524,7 @@ message beside it is the fix.
 | Element depends on several options | `visible: (a \|\| b)` in `.r.yaml` |
 | Fatal, user must change something | `jmvcore::reject(.("..."), code = "...")` |
 | Non-fatal warning, rest of output still valid | An always-visible `Html` notice element |
-| Explanatory / narrative text, no severity *(anticipatory)* | A `type: Text` element (jamovi 28.3+, module-wide `minApp: 28.3.0`); otherwise the `Html` element |
+| Explanatory / narrative text, no severity *(anticipatory)* | A `type: Text` element (jamovi 28.11+, module-wide `minApp: 28.11.0`); otherwise the `Html` element |
 | Deliberate methodological guard (e.g. no post-hoc when omnibus n.s.) | Hide it **and** explain why — this one is fine |
 | Onboarding / welcome panel before variables are chosen | `setVisible()` is fine — this is option state |
 
@@ -1167,8 +1167,7 @@ Unable to compile 'nt.r.yaml':
 
 No `Notice`. **`Notification` is worse:** it *is* in the enum, so it compiles, and emits
 `self$add(list(name=..., type="Notification"))` — a plain list, because `jmvcore::Notification`
-does not exist. It fails at run time instead of at compile time. `Svg` exists upstream but is
-undocumented; do not use it yet.
+does not exist. It fails at run time instead of at compile time. `Svg` is a valid, documented results element since 2026-10-10 (`minApp: 28.3.0`; see the patterns guide); we do not use it.
 
 ### 13.2 `jmvcore::Notice` at run time works — the old claim here was FALSE
 
@@ -1297,7 +1296,7 @@ suggestions are both cheap:
 |---|---|
 | Fatal validation error | `jmvcore::reject(.("..."), code = "...")` — see [section 25](#25-rule-an-unconfigured-analysis-is-not-an-error) |
 | Non-fatal warning shown inline | `type: Html` element + theme-safe styling ([section 4](#4-rule-html-output-must-be-theme-safe)) |
-| Narrative / explanatory text, no severity | `type: Text` (jamovi 28.3+, module-wide `minApp: 28.3.0`) |
+| Narrative / explanatory text, no severity | `type: Text` (jamovi 28.11+, module-wide `minApp: 28.11.0`) |
 | A native severity banner | `jmvcore::Notice` + `$setContent()` + `$add()`/`insert(1, …)` — works, but plain text and single-line |
 | Tabular reference data | a `Table` result, never HTML ([section 26](#26-rule-tabular-data-belongs-in-a-table-result)) |
 

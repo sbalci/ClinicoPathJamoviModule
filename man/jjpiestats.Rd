@@ -142,3 +142,33 @@ Wrapper Function for ggstatsplot::ggpiestats and
 ggstatsplot::grouped_ggpiestats to generate Pie Charts with statistical
 analysis.
 }
+\examples{
+\donttest{
+# Load test data
+data(jjpiestats_test)
+
+# Basic pie chart
+jjpiestats(
+  data = jjpiestats_test,
+  dep = "treatment_response",
+  typestatistics = "parametric"
+)
+
+# Pie chart with grouping
+jjpiestats(
+  data = jjpiestats_test,
+  dep = "treatment_response",
+  group = "treatment_arm",
+  resultssubtitle = TRUE
+)
+
+# Grouped pie charts by split variable
+jjpiestats(
+  data = jjpiestats_test,
+  dep = "disease_severity",
+  group = "gender",
+  grvar = "hospital_site",
+  typestatistics = "nonparametric"
+)
+}
+}

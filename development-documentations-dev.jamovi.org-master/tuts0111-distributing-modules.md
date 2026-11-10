@@ -1,12 +1,11 @@
+<!-- Vendored verbatim from https://github.com/jamovi/dev.jamovi.org/blob/7145eb8/src/content/docs/learn/tutorial/tuts0111-distributing-modules.md (fetched 2026-11-09; published at https://dev.jamovi.org). -->
+
 ---
 layout: ../layouts/BaseLayout.astro
 title: "Distributing Modules"
 type: article
 description: "Share your jamovi module with others by side-loading .jmo files or submitting to the jamovi library."
 ---
-
-<!-- Vendored from https://github.com/jamovi/dev.jamovi.org/blob/07352e9b/src/content/docs/learn/tutorial/tuts0111-distributing-modules.md
-     (fetched 2026-10-08; published at https://dev.jamovi.org/tutorial/tuts0111-distributing-modules). Newer than the rest of this snapshot. -->
 
 Once your module is working as expected, it's time to share it with the world. There are two primary ways to distribute a jamovi module: **Local Testing** (side-loading) and **Public Release** (the jamovi library).
 
@@ -92,6 +91,7 @@ As you continue to improve your module, you will want to push updates to the lib
 
 1. **Update the Version:** Increment the version number in both your `0000.yaml` and your `DESCRIPTION` file using standard [Semantic Versioning](https://semver.org/) (e.g., change `1.0.1` to `1.0.2`). jamovi uses these version numbers to notify users when an update is available.
 2. **Push to Source Control:** Push your latest code changes to your GitHub repository (or whichever source control platform you use).
-3. **Notify the Team:** Send a quick follow-up email to the jamovi team, or drop a message in the jamovi Slack, letting them know a new version is ready to be built.
+3. **Resubmit:** Submit the module again through the **[module submission form](/submit)**. As with the first submission, the maintainer will be asked to confirm it by email.
 4. **New Version is Published:** The jamovi team will update the module in the library. Updates are typically pushed once a week (i.e. Mondays).
+
 **Next Step:** You've completed the core tutorial series! For some final technical tips, check out the **[Additional Notes](/tutorial/tuts0112-additional-notes)**.

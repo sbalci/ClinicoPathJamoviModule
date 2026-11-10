@@ -165,7 +165,7 @@ Since jamovi 28.3: a `type: Text` inside a Table's `columns:` (e.g. classificati
   - No used-but-unimported bare symbols: every infix operator (`%>%`, `%||%`, …) and unqualified call must resolve from the module's own `NAMESPACE` — `Imports:` alone puts nothing in scope (guide §19)
   - UI label conventions (action-verb→noun, sentence-case controls); named-HTML-symbol-entities → Unicode
   - No orphaned non-analysis source files shipped in the build
-  - `minApp` covers the jamovi 28.3 features: a `type: File` option or `type: Text` result needs `minApp: 28.3.0` in `jamovi/0000.yaml` (module-wide; the maintainer's release decision). Run `python3 tools/release_gate.py` (`--root ../<sibling>` for a submodule): a `check_min_app` FAIL blocks release; its `mode: vector` WARN is advisory. See [Version Gating: minApp](../../vignettes/jamovi_module_patterns_guide.md#version-gating-minapp)
+  - `minApp` covers the jamovi 28.3 features: a `type: File` option or `type: Text` result needs `minApp: 28.4.0` (File) / `28.11.0` (Text) in `jamovi/0000.yaml` (module-wide; the maintainer's release decision). Run `python3 tools/release_gate.py` (`--root ../<sibling>` for a submodule): a `check_min_app` FAIL blocks release; its `mode: vector` WARN is advisory. See [Version Gating: minApp](../../vignettes/jamovi_module_patterns_guide.md#version-gating-minapp)
 - **Time:** ~10 minutes per function
 
 ## Auto-Discovery Algorithm

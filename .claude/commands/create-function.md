@@ -76,7 +76,7 @@ Your choice [1-7]:
 ☐ Paired/matched data
 ☐ Multiple groups
 ☐ Covariates/adjustment variables
-☐ A user-supplied file (lexicon, lookup table) → `type: File` option (jamovi 28.3+) — needs module-wide `minApp: 28.3.0`; ask before choosing
+☐ A user-supplied file (lexicon, lookup table) → `type: File` option (jamovi 28.4+) — needs module-wide `minApp: 28.4.0`; ask before choosing
 
 Select all that apply [space to toggle, enter when done]:
 ```
@@ -88,7 +88,7 @@ Select all that apply [space to toggle, enter when done]:
 1. Statistical table (estimates, CIs, p-values)
 2. Plot/graph
 3. Both table and plot
-4. Text summary (markdown; needs module-wide `minApp: 28.3.0`) or Html report
+4. Text summary (markdown; needs module-wide `minApp: 28.11.0`) or Html report
 5. Multiple outputs (will configure later)
 
 Your choice [1-5]:
@@ -213,7 +213,7 @@ python3 tools/release_gate.py | grep "fixed rows built"   # a table whose whole 
 grep -n "set\.seed(" R/<fn>.b.R        # one R process per session: use withr::local_seed() so the seed does not leak into the next analysis
 grep -n "visible: *( *!" jamovi/<fn>.r.yaml   # a leading "!" is silently ALWAYS VISIBLE
 grep -nE '\.\(\s*"[[:space:],;:.]|\.\(\s*"[^"]*[[:space:]]"\s*[,)]' R/<fn>.b.R   # separator/padding inside .()
-grep -nE '^\s*(type: *(File|Text)|mode: *vector)\s*$' jamovi/<fn>.a.yaml jamovi/<fn>.r.yaml; grep -n '^minApp' jamovi/0000.yaml   # File/Text need module-wide minApp: 28.3.0 (Text table columns are false hits); vector = bounded-mark plots only
+grep -nE '^\s*(type: *(File|Text)|mode: *vector)\s*$' jamovi/<fn>.a.yaml jamovi/<fn>.r.yaml; grep -n '^minApp' jamovi/0000.yaml   # File/Text need module-wide `minApp: 28.4.0` (File) / `28.11.0` (Text) (Text table columns are false hits); vector = bounded-mark plots only
 python3 tools/release_gate.py          # requiresData contract, CollapseBox Title Case, refs, column format tokens, fabricated statistics (FAIL = blocking)
 grep -n "format:" jamovi/<fn>.r.yaml   # comma-separated zto|pvalue|pc|log10|dp:N|sf:N ONLY - "zto:4" is one unknown token and is dropped in silence
 Rscript -e 'testthat::test_file("tests/testthat/test-zzz-results-rendering-contract.R")'
@@ -269,7 +269,7 @@ Checklist:
       document's plots to agree. Apply the scales BEFORE `ggtheme`, which replaces them (§23).
 - [ ] **Do not add `type: Notice` to `.r.yaml`** — it is not in the compiler enum and
       `jmvtools::prepare()` fails on it. `type: Notification` compiles but breaks at runtime.
-- [ ] **A `type: File` option or `type: Text` result needs `minApp: 28.3.0`** in
+- [ ] **A `type: File` option or `type: Text` result needs `minApp: 28.4.0` (File) / `28.11.0` (Text)** in
       `jamovi/0000.yaml`; `python3 tools/release_gate.py` fails otherwise. minApp is
       module-wide (jamovi 28.2 and older can no longer install any of the module), so raising
       it is a release decision — ask first. Image `mode: vector` only on bounded-mark plots

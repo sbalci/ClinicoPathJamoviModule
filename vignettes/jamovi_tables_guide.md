@@ -1256,8 +1256,8 @@ out (a `gtsummary` Table 1), and even then the user loses number formatting,
 Copy as a grid and Copy Latex. For narrative or
 explanatory text about a table (interpretation, methods summary), the official jamovi
 dev docs say to prefer `type: Text` over hand-rolled HTML - see
-[`Text`](jamovi_r_yaml_guide.md#text-jamovi-283) (jamovi 28.3+; module-wide
-`minApp: 28.3.0` - see [jamovi 28.3 Features](jamovi_module_patterns_guide.md#jamovi-283-features-file-text-vector-images)).
+[`Text`](jamovi_r_yaml_guide.md#text-jamovi-283) (jamovi 28.11+; module-wide
+`minApp: 28.11.0` - see [jamovi 28.3 Features](jamovi_module_patterns_guide.md#jamovi-283-features-file-text-vector-images)).
 
 ### Integration with R Table Packages
 

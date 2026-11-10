@@ -115,17 +115,21 @@ Every action in jamovi is defined as an `Action` type option in the `.a.yaml` fi
 | `name` | string | Unique identifier for the action | Yes |
 | `title` | string | Button text displayed in UI | Yes |
 | `type` | string | Must be "Action" for actions | Yes |
-| `action` | string | Action type (currently only "open") | Yes |
+| `action` | string | Action type: `open`, `openExternal` (28.4+) or `export` (28.7+) | Yes |
 
 ### Supported Action Types
 
-Currently, jamovi supports only one action type:
+jamovi supports three action types (per dev.jamovi.org, checked 2026-11-09):
 
-- **`open`**: Opens a new dataset in a new window/tab (or browser tab in web version)
+- **`open`** (jamovi 2.7.12+): Opens a new dataset in a new window/tab (or browser tab in web version)
+- **`openExternal`** (jamovi 28.4+): hands a file the analysis produced to the user; the desktop app opens it in the OS-associated application, a browser downloads it. Name the button **Open**, not "Open in Word"
+- **`export`** (jamovi 28.7+): saves a file the analysis produced; the desktop app shows a save dialog, a browser downloads it. Name the button **Export**
 
-**Note**: The `action` field in `.a.yaml` must be set to `"open"` - this is currently the only supported value. Future jamovi versions may introduce additional action types.
+For `openExternal` and `export` the R side is `option$perform(function(action) { ...write to action$params$fullPath...; list(filename = "x.csv") })`. The save dialog (`export`) appears after your R code has written the file; cancelling it is silent. `openExternal` only opens common document/data/image types (pdf, docx, xlsx, csv, png, ...); other files are only revealed in the file manager, whereas `export` accepts any type. Full text: `development-documentations-dev.jamovi.org-master/api_option-action.md`. Declare `minApp: 28.4.0` / `28.7.0` in `0000.yaml` (module-wide, a release decision; our `minApp` is lower, so do not adopt without the maintainer's approval).
 
-**Not yet:** upstream jmvcore gained an `openExternal` Action (2026-09-19). It is unreleased and undocumented; do not use it until jamovi documents it ([Exists Upstream, Not Yet Documented](jamovi_module_patterns_guide.md#exists-upstream-not-yet-documented)).
+**Note**: `open` is the only value older jamovi (< 28.4) understands. The examples below use `open`.
+
+**Status:** `openExternal` and `export` are released and documented (2026-10-10). An Action that is unavailable at run time degrades to `is.null(option$perform)`, but `minApp` still gates installation; see [Version Gating: minApp](jamovi_module_patterns_guide.md#version-gating-minapp).
 
 ### Basic Example
 
@@ -1047,7 +1051,7 @@ safeFileWrite <- function(data, filepath, format = "csv") {
 
 ## 7. Version Compatibility
 
-> **Not a template for the jamovi 28.3 features.** An Action can degrade at run time (`is.null(option$perform)` below). A `File` option or `Text` result cannot: the generated `.h.R` constructs them, so under a jmvcore without those classes (the copy bundled with jamovi 28.2 and older, or the CRAN build in R-side tests) the analysis fails before `.b.R` runs. Their gate is `minApp: 28.3.0` in `jamovi/0000.yaml`, and `minApp` is module-wide: see [Version Gating: minApp](jamovi_module_patterns_guide.md#version-gating-minapp).
+> **Not a template for the jamovi 28.3 features.** An Action can degrade at run time (`is.null(option$perform)` below). A `File` option or `Text` result cannot: the generated `.h.R` constructs them, so under a jmvcore without those classes (the copy bundled with jamovi 28.2 and older, or the CRAN build in R-side tests) the analysis fails before `.b.R` runs. Their gate is `minApp: 28.4.0` (File) / `28.11.0` (Text) in `jamovi/0000.yaml`, and `minApp` is module-wide: see [Version Gating: minApp](jamovi_module_patterns_guide.md#version-gating-minapp).
 
 ### Supporting Multiple jamovi Versions
 
@@ -1585,7 +1589,7 @@ option$perform(function(action) {
 - name: export
   title: Export Data
   type: Action    # Must be exactly "Action"
-  action: open    # Must be exactly "open"
+  action: open    # "open" (2.7.12+), "openExternal" (28.4+) or "export" (28.7+)
 ```
 
 ```R
