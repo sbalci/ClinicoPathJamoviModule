@@ -23,6 +23,7 @@ items:
         - y_is_count
         - show_statistical_tests
         - fisher_exact
+        - confidence_level
 
     - name: plot
       title: Segmented Total Bar Chart
@@ -36,6 +37,7 @@ items:
         # analysis_preset now fills in palette/style/percentage controls the user
         # has left at their defaults, so the plot must be redrawn when it changes.
         - analysis_preset
+        - show_plot
         - x_var
         - y_var
         - fill_var
@@ -48,6 +50,8 @@ items:
         - orientation
         - sort_categories
         - bar_width
+        - plot_width
+        - plot_height
         - plot_title
         - x_title
         - y_title

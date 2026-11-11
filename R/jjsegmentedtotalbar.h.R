@@ -471,7 +471,8 @@ jjsegmentedtotalbarResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6:
                     "exclude_missing",
                     "y_is_count",
                     "show_statistical_tests",
-                    "fisher_exact")))
+                    "fisher_exact",
+                    "confidence_level")))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="plot",
@@ -483,6 +484,7 @@ jjsegmentedtotalbarResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6:
                 renderFun=".plot",
                 clearWith=list(
                     "analysis_preset",
+                    "show_plot",
                     "x_var",
                     "y_var",
                     "fill_var",
@@ -495,6 +497,8 @@ jjsegmentedtotalbarResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6:
                     "orientation",
                     "sort_categories",
                     "bar_width",
+                    "plot_width",
+                    "plot_height",
                     "plot_title",
                     "x_title",
                     "y_title",

@@ -296,3 +296,219 @@ test_that("the template panel names the controls it fills and the override rule"
     expect_match(g, "anything under Statistical Tests")
     expect_false(grepl("statistical options", g, fixed = TRUE))
 })
+
+
+# ---- security regressions (2026-11-11) --------------------------------------
+
+test_that("SEC-1: syntax pane escapes quote-breaking strings, backslashes, non-syntactic variables, and drops undeclared/list options", {
+    d <- stats::setNames(
+        data.frame(
+            factor(c("A", "A", "B", "B")),
+            factor(c("X", "Y", "X", "Y")),
+            c(10, 20, 15, 25)
+        ),
+        c('weird"name', 'weird`tick', 'cnt')
+    )
+
+    payload_title <- 'My Title", show_plot = {stop("CANARY"); TRUE}, x_title = "ok'
+    opts <- jjsegmentedtotalbarOptions$new(
+        x_var = 'weird"name',
+        y_var = 'cnt',
+        fill_var = 'weird`tick',
+        plot_title = payload_title,
+        x_title = 'trailing\\',
+        legend_title = "line1\nline2"
+    )
+    opts$.addOption(jmvcore:::Option$new('y_title = "a", show_plot = {stop("CANARY"); TRUE}, bar_width', 0.8))
+
+    an <- jjsegmentedtotalbarClass$new(options = opts, data = d)
+    src <- an$asSource()
+    ex <- parse(text = src)[[1]]
+    mc <- match.call(jjsegmentedtotalbar, ex)
+    arg_names <- names(as.list(mc))[-1]
+
+    expect_false("show_plot" %in% arg_names)
+    expect_false("bar_width" %in% arg_names)
+    expect_identical(mc$plot_title, payload_title)
+    expect_identical(mc$x_title, 'trailing\\')
+    expect_identical(mc$legend_title, "line1\nline2")
+    expect_identical(mc$x_var, 'weird"name')
+    expect_identical(mc$fill_var, 'weird`tick')
+    expect_true(is.symbol(mc$y_var) && identical(as.character(mc$y_var), "cnt"))
+})
+
+test_that("SEC-2: self-referential {placeholder} column and level names terminate via .fmt()", {
+    d <- stats::setNames(
+        data.frame(
+            factor(c("{cat}", "{cat}", "{groups}", "{groups}")),
+            factor(c("{seg}", "Y", "{seg}", "Y")),
+            c(2, 1, 15, 25)
+        ),
+        c("{xvar}", "{fill}", "{var}")
+    )
+
+    res <- jjsegmentedtotalbar(
+        data = d,
+        x_var = "{xvar}",
+        y_var = "{var}",
+        fill_var = "{fill}",
+        show_statistical_tests = TRUE,
+        showInterpretation = TRUE,
+        showSummary = TRUE
+    )
+
+    expect_match(stb_warn(res), "\\(var\\)")
+    expect_match(as.character(res$clinical_summary$content), "\\(xvar\\)")
+})
+
+test_that("SEC-3: bracketed names do not truncate setNote() and tag-like labels stay safe in cells and HTML", {
+    stb_skip_without_affirm()
+    d <- stats::setNames(
+        data.frame(
+            factor(c("<LOD", "<LOD", "B [high]", "B [high]")),
+            factor(c("<img src=x onerror=alert(1)>", "Y", "<img src=x onerror=alert(1)>", "Y")),
+            factor(c("P1 [a]", "P1 [a]", "P2", "P2")),
+            c(30, 10, 15, 25)
+        ),
+        c("Cat <x>", "Seg <y>", "Site [North]", "Count [n]")
+    )
+
+    res <- jjsegmentedtotalbar(
+        data = d,
+        x_var = "Cat <x>",
+        y_var = "Count [n]",
+        fill_var = "Seg <y>",
+        facet_var = "Site [North]",
+        y_is_count = TRUE,
+        show_statistical_tests = TRUE,
+        showInterpretation = TRUE,
+        showSummary = TRUE
+    )
+
+    sum_note <- res$summary$notes$summed_value$note
+    stat_note <- res$statistical_tests$notes$count_assumption$note
+    expect_match(sum_note, "Count \\(n\\)")
+    expect_match(sum_note, "counts cases\\.$")
+    expect_match(stat_note, "Site \\(North\\)")
+    expect_match(stat_note, "significance\\.$")
+
+    comp_df <- res$composition_table$asDF
+    expect_true(any(grepl("^< LOD \\[P1 \\[a\\]\\]$", comp_df$category)))
+    expect_true(any(grepl("^< img src=x", comp_df$segment)))
+
+    expect_false(grepl("<img", as.character(res$interpretation$content), fixed = TRUE))
+    expect_false(grepl("<img", as.character(res$clinical_summary$content), fixed = TRUE))
+    expect_match(as.character(res$clinical_summary$content), "&lt;img")
+})
+
+test_that("FIX-1: plot clearWith covers dimensions/show_plot and .run() syncs Image size", {
+    stb_skip_without_affirm()
+    opts <- jjsegmentedtotalbarOptions$new(
+        x_var = "cat",
+        y_var = "cnt",
+        fill_var = "seg",
+        show_plot = TRUE,
+        plot_width = 12,
+        plot_height = 8
+    )
+    an <- jjsegmentedtotalbarClass$new(options = opts, data = data.frame(
+        cat = factor(c("A", "B")),
+        seg = factor(c("X", "Y")),
+        cnt = c(10, 20)
+    ))
+    an$init()
+    expect_equal(an$results$plot$width, 12 * 72)
+    expect_equal(an$results$plot$height, 8 * 72)
+
+    plot_cw <- an$results$plot$.__enclos_env__$private$.clearWith
+    warn_cw <- an$results$warnings$.__enclos_env__$private$.clearWith
+    expect_true(all(c("show_plot", "plot_width", "plot_height") %in% plot_cw))
+    expect_true("confidence_level" %in% warn_cw)
+})
+
+test_that("FIX-2: dynamic footnotes clear on R6 reuse and persist across .omv protobuf restore", {
+    stb_skip_without_affirm()
+    d3 <- data.frame(
+        cat = factor(rep(c("A", "B", "C"), each = 3)),
+        seg = factor(rep(c("X", "Y", "Z"), times = 3)),
+        cnt = c(50, 5, 5, 5, 50, 5, 5, 5, 50)
+    )
+    opts <- jjsegmentedtotalbarOptions$new(
+        x_var = "cat",
+        y_var = "cnt",
+        fill_var = "seg",
+        y_is_count = TRUE,
+        show_statistical_tests = TRUE
+    )
+    an1 <- jjsegmentedtotalbarClass$new(options = opts, data = d3)
+    an1$run()
+
+    expect_true("summed_value" %in% names(an1$results$summary$notes))
+    expect_true("most_variable_def" %in% names(an1$results$detailed_stats$notes))
+    expect_true(all(c("count_assumption", "stdres_note") %in% names(an1$results$statistical_tests$notes)))
+
+    # Protobuf round-trip (.omv reopen without re-running .run())
+    resp_pb <- an1$asProtoBuf(includeState = TRUE)
+    an_reopen <- jjsegmentedtotalbarClass$new(options = opts)
+    an_reopen$init()
+    an_reopen$results$fromProtoBuf(resp_pb$results, character(), character())
+
+    expect_true("summed_value" %in% names(an_reopen$results$summary$notes))
+    expect_true("most_variable_def" %in% names(an_reopen$results$detailed_stats$notes))
+    expect_true(all(c("count_assumption", "stdres_note") %in% names(an_reopen$results$statistical_tests$notes)))
+
+    # Reusing R6 instance on 2x2 non-significant data must drop stale stdres_note
+    d2 <- data.frame(
+        cat = factor(c("A", "A", "B", "B")),
+        seg = factor(c("X", "Y", "X", "Y")),
+        cnt = c(20, 20, 20, 20)
+    )
+    an1$.__enclos_env__$private$.data <- d2
+    an1$run()
+    expect_false("stdres_note" %in% names(an1$results$statistical_tests$notes))
+    expect_true("count_assumption" %in% names(an1$results$statistical_tests$notes))
+
+    # Invalid data transition must clear summary summed_value note as well
+    d_bad <- data.frame(
+        cat = factor(c("A", "B")),
+        seg = factor(c("X", "Y")),
+        cnt = c(-5, 10)
+    )
+    an1$.__enclos_env__$private$.data <- d_bad
+    an1$run()
+    expect_false("summed_value" %in% names(an1$results$summary$notes))
+    expect_false("count_assumption" %in% names(an1$results$statistical_tests$notes))
+})
+
+test_that("FIX-3: .plot() returns FALSE on early-exit guards and restores NULL preset from state", {
+    stb_skip_without_affirm()
+    d <- data.frame(
+        cat = factor(c("A", "A", "B", "B")),
+        seg = factor(c("X", "Y", "X", "Y")),
+        cnt = c(10, 20, 30, 40)
+    )
+    opts_off <- jjsegmentedtotalbarOptions$new(
+        x_var = "cat", y_var = "cnt", fill_var = "seg", show_plot = FALSE
+    )
+    an_off <- jjsegmentedtotalbarClass$new(options = opts_off, data = d)
+    an_off$run()
+    expect_identical(
+        an_off$.__enclos_env__$private$.plot(an_off$results$plot, ggplot2::theme_minimal(), list(palette = "jmv")),
+        FALSE
+    )
+
+    opts_on <- jjsegmentedtotalbarOptions$new(
+        x_var = "cat", y_var = "cnt", fill_var = "seg", show_plot = TRUE
+    )
+    an_on <- jjsegmentedtotalbarClass$new(options = opts_on, data = d)
+    an_on$init()
+    expect_identical(
+        an_on$.__enclos_env__$private$.plot(an_on$results$plot, ggplot2::theme_minimal(), list(palette = "jmv")),
+        FALSE
+    )
+    an_on$results$plot$setState("malformed")
+    expect_identical(
+        an_on$.__enclos_env__$private$.plot(an_on$results$plot, ggplot2::theme_minimal(), list(palette = "jmv")),
+        FALSE
+    )
+})

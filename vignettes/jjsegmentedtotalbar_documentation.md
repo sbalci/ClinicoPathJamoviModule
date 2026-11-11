@@ -39,11 +39,14 @@
 | `flerlage_label_color` | UI Control `flerlage_label_color` | `self$options$flerlage_label_color` | Output item / Table |
 | `flerlage_alpha` | UI Control `flerlage_alpha` | `self$options$flerlage_alpha` | Output item / Table |
 | `flerlage_box_color` | UI Control `flerlage_box_color` | `self$options$flerlage_box_color` | Output item / Table |
-| `y_is_count` | UI Control `y_is_count` | `self$options$y_is_count` | Output item / Table |
-| `show_statistical_tests` | UI Control `show_statistical_tests` | `self$options$show_statistical_tests` | Output item / Table |
-| `confidence_level` | UI Control `confidence_level` | `self$options$confidence_level` | Output item / Table |
-| `exclude_missing` | UI Control `exclude_missing` | `self$options$exclude_missing` | Output item / Table |
-| `showExplanations` | UI Control `showExplanations` | `self$options$showExplanations` | Output item / Table |
+| `y_is_count` | UI Control `y_is_count` | `private$.optionOr("y_is_count", FALSE)` | `statistical_tests`, `warnings`, `summary` |
+| `show_statistical_tests` | UI Control `show_statistical_tests` | `self$options$show_statistical_tests` | `statistical_tests`, `warnings` |
+| `fisher_exact` | UI Control `fisher_exact` | `private$.optionOr("fisher_exact", FALSE)` | `statistical_tests`, `warnings` |
+| `confidence_level` | UI Control `confidence_level` | `self$options$confidence_level` | `statistical_tests` |
+| `exclude_missing` | UI Control `exclude_missing` | `self$options$exclude_missing` | All tables, `plot`, `warnings` |
+| `showInterpretation` | UI Control `showInterpretation` | `private$.optionOr("showInterpretation", FALSE)` | `interpretation` |
+| `showSummary` | UI Control `showSummary` | `private$.optionOr("showSummary", FALSE)` | `clinical_summary` |
+| `showExplanations` | UI Control `showExplanations` | `self$options$showExplanations` | `explanations` |
 
 ## Verification Checklist
 
