@@ -359,7 +359,7 @@ test_that("C22, C23: clinical_summary prose, XSS escaping, and clinical readines
   df <- build_hand_fixture()
   res <- suppressWarnings(jjsegmentedtotalbar(
     data = df, x_var = "Gréade sc", y_var = "cnt", fill_var = "resp",
-    show_statistical_tests = TRUE, y_is_count = TRUE, show_plot = FALSE
+    show_statistical_tests = TRUE, y_is_count = TRUE, showSummary = TRUE, show_plot = FALSE
   ))
   clin_txt <- strip_html(res$clinical_summary$content)
   expect_match(clin_txt, "examined 10 rows across 3 categories of Gréade sc", fixed = TRUE)
@@ -374,7 +374,7 @@ test_that("C22, C23: clinical_summary prose, XSS escaping, and clinical readines
   )
   res_xss <- suppressWarnings(jjsegmentedtotalbar(
     data = df_xss, x_var = "cat", y_var = "cnt", fill_var = "seg",
-    show_plot = FALSE
+    showSummary = TRUE, show_plot = FALSE
   ))
   expect_false(grepl("<script>", res_xss$clinical_summary$content, fixed = TRUE))
   expect_true(grepl("&lt;script&gt;", res_xss$clinical_summary$content, fixed = TRUE))
@@ -512,7 +512,7 @@ test_that("VAL-jjsegmentedtotalbar-03 (C12, C14, C15, C21 / IR-03): empty (0%) s
   )
   res <- suppressWarnings(jjsegmentedtotalbar(
     data = df_zero, x_var = "cat", y_var = "cnt", fill_var = "seg",
-    show_plot = FALSE
+    showInterpretation = TRUE, show_plot = FALSE
   ))
   tb_det <- res$detailed_stats$asDF
   expect_equal(row_by_key(tb_det, "min_pct")$value, "0%")
@@ -533,7 +533,7 @@ test_that("VAL-jjsegmentedtotalbar-04 (C21 / IR-04): interpretation HTML does no
   )
   res <- suppressWarnings(jjsegmentedtotalbar(
     data = df_cont, x_var = "cat", y_var = "val", fill_var = "seg",
-    y_is_count = FALSE, show_plot = FALSE
+    y_is_count = FALSE, showInterpretation = TRUE, show_plot = FALSE
   ))
   interp_txt <- strip_html(res$interpretation$content)
   expect_false(grepl("Total observations: 11.5", interp_txt, fixed = TRUE))
@@ -660,7 +660,8 @@ test_that("VAL-jjsegmentedtotalbar-10 (IR-05, IR-06, IR-11, IR-14): uniform null
   )
   res_null <- suppressWarnings(jjsegmentedtotalbar(
     data = d_null, x_var = "arm", y_var = "cnt", fill_var = "resp",
-    show_statistical_tests = TRUE, y_is_count = TRUE, showExplanations = TRUE, show_plot = FALSE
+    show_statistical_tests = TRUE, y_is_count = TRUE,
+    showSummary = TRUE, showExplanations = TRUE, show_plot = FALSE
   ))
   null_clin <- strip_html(res_null$clinical_summary$content)
   expect_false(grepl("Distribution patterns varied across categories", null_clin, fixed = TRUE))
@@ -674,7 +675,8 @@ test_that("VAL-jjsegmentedtotalbar-10 (IR-05, IR-06, IR-11, IR-14): uniform null
     val = c(1.25, 2.25, 3.50, 4.50)
   )
   opts_trans <- stb_internal("jjsegmentedtotalbarOptions")$new(
-    x_var = "arm", y_var = "val", fill_var = "seg", y_is_count = FALSE, show_plot = TRUE
+    x_var = "arm", y_var = "val", fill_var = "seg", y_is_count = FALSE,
+    showSummary = TRUE, showInterpretation = TRUE, show_plot = TRUE
   )
   a_trans <- stb_internal("jjsegmentedtotalbarClass")$new(options = opts_trans, data = d_cont)
   suppressWarnings(a_trans$run())
@@ -822,7 +824,21 @@ test_that("VAL-jjsegmentedtotalbar-12 (Release Profile): labelled variables, glo
   expect_false(ana_empty$results$plot$visible)
   expect_false(ana_empty$results$statistical_tests$visible)
   expect_false(ana_empty$results$preset_guidance$visible)
+  expect_false(ana_empty$results$interpretation$visible)
+  expect_false(ana_empty$results$clinical_summary$visible)
   expect_false(ana_empty$results$explanations$visible)
+
+  # Default run keeps natural-language panels hidden and unrendered until requested
+  res_def_vis <- suppressWarnings(jjsegmentedtotalbar(
+    data = df_sub4,
+    x_var = "g",
+    y_var = "v",
+    fill_var = "s"
+  ))
+  expect_false(res_def_vis$interpretation$visible)
+  expect_false(res_def_vis$clinical_summary$visible)
+  expect_equal(strip_html(res_def_vis$interpretation$content), "")
+  expect_equal(strip_html(res_def_vis$clinical_summary$content), "")
 
   res_vis <- suppressWarnings(jjsegmentedtotalbar(
     data = df_sub4,
@@ -831,11 +847,76 @@ test_that("VAL-jjsegmentedtotalbar-12 (Release Profile): labelled variables, glo
     fill_var = "s",
     analysis_preset = "biomarker",
     show_plot = TRUE,
+    showInterpretation = TRUE,
+    showSummary = TRUE,
     showExplanations = TRUE
   ))
   expect_false(res_vis$instructions$visible)
   expect_true(res_vis$plot$visible)
   expect_true(res_vis$preset_guidance$visible)
+  expect_true(res_vis$interpretation$visible)
+  expect_true(res_vis$clinical_summary$visible)
   expect_true(res_vis$explanations$visible)
+  expect_true(nzchar(strip_html(res_vis$interpretation$content)))
+  expect_true(nzchar(strip_html(res_vis$clinical_summary$content)))
+})
+
+test_that("VAL-jjsegmentedtotalbar-13 (Review Fixes): Cramer's V, Fisher's exact test + OR/CI, notice severity ordering/prefixes, and degenerate test warning", {
+  # 1. Cramer's V and 2x2 Fisher's exact test + conditional OR & CI
+  d_sparse <- data.frame(
+    arm = factor(c("ArmA", "ArmA", "ArmB", "ArmB"), levels = c("ArmA", "ArmB")),
+    resp = factor(c("Pos", "Neg", "Pos", "Neg"), levels = c("Pos", "Neg")),
+    cnt = c(9, 1, 2, 8)
+  )
+  res_fe <- suppressWarnings(jjsegmentedtotalbar(
+    data = d_sparse,
+    x_var = "arm",
+    y_var = "cnt",
+    fill_var = "resp",
+    y_is_count = TRUE,
+    show_statistical_tests = TRUE,
+    fisher_exact = TRUE,
+    confidence_level = 0.90,
+    show_plot = FALSE
+  ))
+  st_fe <- res_fe$statistical_tests$asDF
+  expect_equal(nrow(st_fe), 2L)
+  expect_equal(st_fe$test_name, c("Pearson's Chi-square", "Fisher's Exact Test"))
+
+  mat_ref <- matrix(c(9, 2, 1, 8), nrow = 2, dimnames = list(c("ArmA", "ArmB"), c("Pos", "Neg")))
+  chi_ref <- suppressWarnings(stats::chisq.test(mat_ref, correct = FALSE))
+  v_ref <- sqrt(unname(chi_ref$statistic) / (sum(mat_ref) * 1))
+  fe_ref <- stats::fisher.test(mat_ref, conf.level = 0.90)
+
+  expect_equal(st_fe$cramers_v[1], v_ref, tolerance = 1e-10)
+  expect_true(is.na(st_fe$cramers_v[2]))
+  expect_equal(st_fe$p_value[2], fe_ref$p.value, tolerance = 1e-10)
+  expect_equal(st_fe$statistic[2], unname(fe_ref$estimate), tolerance = 1e-10)
+  expect_match(st_fe$interpretation[2], "90% CI:", fixed = TRUE)
+
+  # 2. Notice priority ordering (STRONG_WARNING -> WARNING -> INFO) & non-color text prefixes
+  w_txt <- strip_html(res_fe$warnings$content)
+  expect_match(w_txt, "Warning: Low expected counts", fixed = TRUE)
+  expect_match(w_txt, "Note: Analysis Info", fixed = TRUE)
+  expect_lt(regexpr("Warning: Low expected counts", w_txt, fixed = TRUE)[1],
+            regexpr("Note: Analysis Info", w_txt, fixed = TRUE)[1])
+
+  # 3. Degenerate <2 non-empty category table emits WARNING notice alongside table fallback row
+  d_one <- data.frame(
+    arm = factor(c("OnlyArm", "OnlyArm")),
+    resp = factor(c("Pos", "Neg")),
+    cnt = c(10, 5)
+  )
+  res_deg <- suppressWarnings(jjsegmentedtotalbar(
+    data = d_one,
+    x_var = "arm",
+    y_var = "cnt",
+    fill_var = "resp",
+    y_is_count = TRUE,
+    show_statistical_tests = TRUE,
+    show_plot = FALSE
+  ))
+  expect_match(strip_html(res_deg$warnings$content), "Warning: Statistical Test Skipped", fixed = TRUE)
+  expect_match(res_deg$statistical_tests$asDF$interpretation[1], "Test failed:", fixed = TRUE)
 })
 

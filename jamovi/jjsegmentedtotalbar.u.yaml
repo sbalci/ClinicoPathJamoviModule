@@ -260,6 +260,10 @@ children:
             name: show_statistical_tests
             label: Chi-square test
             enable: (y_is_count)
+          - type: CheckBox
+            name: fisher_exact
+            label: Fisher's exact test (for sparse counts)
+            enable: (y_is_count && show_statistical_tests)
           - type: TextBox
             name: confidence_level
             enable: (y_is_count && show_statistical_tests)
@@ -277,4 +281,11 @@ children:
             name: exclude_missing
             label: Exclude missing values
           - type: CheckBox
+            name: showInterpretation
+            label: Show chart interpretation
+          - type: CheckBox
+            name: showSummary
+            label: Show clinical summary
+          - type: CheckBox
             name: showExplanations
+            label: Show explanations

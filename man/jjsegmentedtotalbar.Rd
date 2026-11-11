@@ -39,8 +39,11 @@ jjsegmentedtotalbar(
   flerlage_box_color = "lightgrey",
   y_is_count = FALSE,
   show_statistical_tests = FALSE,
+  fisher_exact = FALSE,
   confidence_level = 0.95,
   exclude_missing = TRUE,
+  showInterpretation = FALSE,
+  showSummary = FALSE,
   showExplanations = FALSE
 )
 }
@@ -120,10 +123,18 @@ because the test treats the summed values as cell counts.}
 \item{show_statistical_tests}{Whether to perform chi-square tests for
 proportion differences.}
 
+\item{fisher_exact}{Whether to perform an exact Fisher contingency test
+(recommended when expected cell counts are below 5).}
+
 \item{confidence_level}{Confidence level for statistical tests (0.80-0.99).}
 
 \item{exclude_missing}{Whether to exclude rows with missing values in key
 variables.}
+
+\item{showInterpretation}{Show plain-language chart interpretation panel.}
+
+\item{showSummary}{Show natural-language clinical summary and copy-ready
+manuscript sentence.}
 
 \item{showExplanations}{Show explanations of the statistical results.}
 }
@@ -131,6 +142,7 @@ variables.}
 A results object containing:
 \tabular{llllll}{
 \code{results$instructions} \tab \tab \tab \tab \tab a html \cr
+\code{results$warnings} \tab \tab \tab \tab \tab a html \cr
 \code{results$plot} \tab \tab \tab \tab \tab an image \cr
 \code{results$summary} \tab \tab \tab \tab \tab a table \cr
 \code{results$composition_table} \tab \tab \tab \tab \tab a table \cr
@@ -139,7 +151,6 @@ A results object containing:
 \code{results$clinical_summary} \tab \tab \tab \tab \tab a html \cr
 \code{results$statistical_tests} \tab \tab \tab \tab \tab a table \cr
 \code{results$preset_guidance} \tab \tab \tab \tab \tab a html \cr
-\code{results$warnings} \tab \tab \tab \tab \tab a html \cr
 \code{results$explanations} \tab \tab \tab \tab \tab a html \cr
 }
 

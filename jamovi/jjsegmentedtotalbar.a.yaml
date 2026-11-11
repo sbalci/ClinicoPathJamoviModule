@@ -455,6 +455,14 @@ options:
         R: Whether to perform chi-square tests for proportion differences.
         jamovi: Add statistical tests comparing proportions across categories.
 
+    - name: fisher_exact
+      title: "Fisher's exact test"
+      type: Bool
+      default: false
+      description:
+        R: Whether to perform an exact Fisher contingency test (recommended when expected cell counts are below 5).
+        jamovi: Compute exact Fisher contingency p-values (and exact conditional odds ratio with CI for 2x2 tables).
+
     - name: confidence_level
       title: "Confidence Level"
       type: Number
@@ -463,7 +471,7 @@ options:
       default: 0.95
       description:
         R: Confidence level for statistical tests (0.80-0.99).
-        jamovi: Confidence level for proportion comparisons.
+        jamovi: Confidence level for proportion comparisons and 2x2 exact odds ratio intervals.
 
     - name: exclude_missing
       title: "Exclude missing values"
@@ -472,6 +480,22 @@ options:
       description:
         R: Whether to exclude rows with missing values in key variables.
         jamovi: Automatically remove rows with missing data from the analysis.
+
+    - name: showInterpretation
+      title: "Chart Interpretation"
+      type: Bool
+      default: false
+      description:
+        R: Show plain-language chart interpretation panel.
+        jamovi: Display an automated plain-language overview of category and segment patterns.
+
+    - name: showSummary
+      title: "Clinical Summary"
+      type: Bool
+      default: false
+      description:
+        R: Show natural-language clinical summary and copy-ready manuscript sentence.
+        jamovi: Display a natural-language clinical summary and copy-ready report sentence.
 
     - name: showExplanations
       title: Explanations

@@ -91,7 +91,7 @@ test_that("a summed measurement is never reported as an observation count", {
 test_that("the copy-ready sentence puts N on the rows, not on the sum", {
     # This line is the one most likely to be pasted into a manuscript.
     res <- jjsegmentedtotalbar(data = stb_cost(), x_var = "arm", fill_var = "path",
-                               y_var = "cost", showExplanations = TRUE)
+                               y_var = "cost", showSummary = TRUE, showExplanations = TRUE)
     t <- stb_txt(res$clinical_summary$content)
     expect_match(t, "(N=90 rows", fixed = TRUE)
     expect_false(grepl("N=26678", t, fixed = TRUE))

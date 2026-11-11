@@ -18,17 +18,16 @@
 #'
 #' @importFrom R6 R6Class
 #' @importFrom jmvcore .
-#' @importFrom ggplot2 ggplot aes geom_col position_fill position_dodge coord_flip geom_bar
-#' @importFrom ggplot2 theme_minimal theme_classic theme_bw theme_void labs scale_fill_brewer
+#' @importFrom magrittr %>%
+#' @importFrom ggplot2 ggplot aes geom_col position_dodge coord_flip
+#' @importFrom ggplot2 theme_minimal theme_classic theme_bw labs scale_fill_brewer
 #' @importFrom ggplot2 scale_fill_viridis_d geom_text element_text element_blank theme element_rect
-#' @importFrom ggplot2 element_line margin scale_y_continuous scale_fill_manual expansion annotate unit
+#' @importFrom ggplot2 element_line margin scale_y_continuous scale_fill_manual expansion unit
 #' @importFrom ggplot2 facet_wrap vars
-#' @importFrom dplyr group_by summarise mutate arrange desc count ungroup filter slice pull if_else n rename
-#' @importFrom stats chisq.test mantelhaen.test xtabs sd qnorm
+#' @importFrom dplyr group_by summarise mutate arrange desc count ungroup filter if_else n
+#' @importFrom stats chisq.test fisher.test mantelhaen.test xtabs sd qnorm
 #' @importFrom grDevices colorRampPalette
-#' @importFrom tidyr pivot_wider
 #' @importFrom scales percent
-#' @importFrom RColorBrewer brewer.pal
 #' @importFrom stringr str_to_title
 #' @importFrom rlang sym .data
 #' @return An \code{R6} class generator object for the \code{jjsegmentedtotalbarClass} backend; used internally by the jamovi analysis wrapper and not called directly.
@@ -156,7 +155,9 @@ jjsegmentedtotalbarClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R
             user_value
         },
 
-        # Add a notice to the collection
+        # Collect notices into a single pre-declared `type: Html` item (`warnings`) so
+        # multiple severity-sorted clinical and data-quality messages render in one
+        # place without dynamic `Group$insert()` calls (see vignettes/jamovi_notices_guide.md).
         .addNotice = function(type, title, content) {
           private$.noticeList[[length(private$.noticeList) + 1]] <- list(
             type = type,
@@ -165,7 +166,8 @@ jjsegmentedtotalbarClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R
           )
         },
 
-        # Render collected notices as HTML (theme-safe: inherit text color so dark mode stays readable)
+        # Render collected notices as HTML ordered by severity with non-color text prefixes
+        # (theme-safe: inherit text color so dark mode stays readable)
         .renderNotices = function() {
           if (length(private$.noticeList) == 0) {
             self$results$warnings$setContent("")
@@ -174,26 +176,40 @@ jjsegmentedtotalbarClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R
           }
 
           typeStyles <- list(
-            ERROR = list(bgcolor = "rgba(220, 38, 38, 0.08)", border = "#dc2626", icon = ""),
-            STRONG_WARNING = list(bgcolor = "rgba(234, 88, 12, 0.08)", border = "#ea580c", icon = ""),
-            WARNING = list(bgcolor = "rgba(202, 138, 4, 0.08)", border = "#ca8a04", icon = ""),
-            INFO = list(bgcolor = "rgba(37, 99, 235, 0.08)", border = "#2563eb", icon = "")
+            ERROR = list(bgcolor = "rgba(220, 38, 38, 0.08)", border = "#dc2626", prefix = .("Error:")),
+            STRONG_WARNING = list(bgcolor = "rgba(234, 88, 12, 0.08)", border = "#ea580c", prefix = .("Important:")),
+            WARNING = list(bgcolor = "rgba(202, 138, 4, 0.08)", border = "#ca8a04", prefix = .("Warning:")),
+            INFO = list(bgcolor = "rgba(37, 99, 235, 0.08)", border = "#2563eb", prefix = .("Note:"))
           )
+
+          severity_rank <- match(
+            vapply(private$.noticeList, function(x) if (is.null(x$type)) "INFO" else as.character(x$type), character(1)),
+            names(typeStyles),
+            nomatch = 4L
+          )
+          ordered_notices <- private$.noticeList[order(severity_rank)]
 
           html <- "<div style='margin: 10px 0; color: inherit;'>"
 
-          for (notice in private$.noticeList) {
+          for (notice in ordered_notices) {
             style <- typeStyles[[notice$type]]
             if (is.null(style)) {
               style <- typeStyles$INFO
             }
+            raw_title <- if (is.null(notice$title)) "" else as.character(notice$title)
+            pfx <- style$prefix
+            header_txt <- if (nzchar(pfx) && !startsWith(tolower(trimws(raw_title)), tolower(sub(":$", "", pfx)))) {
+              paste(pfx, raw_title)
+            } else {
+              raw_title
+            }
 
             html <- paste0(html,
-              "<div style='background-color: ", style$bgcolor, "; ",
+              "<div role='status' style='background-color: ", style$bgcolor, "; ",
               "border-left: 4px solid ", style$border, "; ",
               "padding: 12px; margin: 8px 0; border-radius: 4px; color: inherit;'>",
               "<strong style='color: inherit;'>",
-              style$icon, " ", htmltools::htmlEscape(notice$title), "</strong><br>",
+              htmltools::htmlEscape(header_txt), "</strong><br>",
               "<span style='color: inherit;'>", htmltools::htmlEscape(notice$content), "</span>",
               "</div>"
             )
@@ -401,12 +417,16 @@ jjsegmentedtotalbarClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R
                     preset = private$.preset_config,
                     var_labels = private$.var_labels))
 
-                # Update summary, composition, detailed stats, and narrative panels
+                # Update summary, composition, detailed stats, and opt-in narrative panels
                 private$.updateSummary()
                 private$.updateComposition()
                 private$.updateDetailedStats()
-                private$.createInterpretation()
-                private$.createClinicalSummary()
+                if (isTRUE(private$.optionOr("showInterpretation", FALSE))) {
+                    private$.createInterpretation()
+                }
+                if (isTRUE(private$.optionOr("showSummary", FALSE))) {
+                    private$.createClinicalSummary()
+                }
             }
 
             # Perform statistical tests if requested.
@@ -422,12 +442,16 @@ jjsegmentedtotalbarClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R
             if (self$options$show_statistical_tests) {
                 if (!isTRUE(private$.optionOr("y_is_count", FALSE))) {
                     private$.addNotice("STRONG_WARNING", "Chi-square not run",
-                        sprintf(.("The chi-square test needs the summed values to be frequencies. Tick 'Value Variable counts cases' to confirm that '%s' counts cases, not a measurement such as cost, size or score. The test manufactures significance on a measurement because its value depends on the unit you measured in."),
-                                self$options$y_var))
+                        jmvcore::format(
+                            .("The chi-square test needs the summed values to be frequencies. Tick 'Value Variable counts cases' to confirm that '{var}' counts cases, not a measurement such as cost, size or score. The test manufactures significance on a measurement because its value depends on the unit you measured in."),
+                            var = self$options$y_var
+                        ))
                 } else if (!private$.isCountData()) {
                     private$.addNotice("STRONG_WARNING", "Chi-square not run",
-                        sprintf(.("'%s' was declared to be a count, but its category totals are fractional or negative, so they cannot be frequencies. The chi-square test was skipped."),
-                                self$options$y_var))
+                        jmvcore::format(
+                            .("'{var}' was declared to be a count, but its category totals are fractional or negative, so they cannot be frequencies. The chi-square test was skipped."),
+                            var = self$options$y_var
+                        ))
                 } else {
                     if (identical(self$options$analysis_preset, "temporal")) {
                         private$.addNotice("STRONG_WARNING", "Repeated-measures caution",
@@ -450,10 +474,14 @@ jjsegmentedtotalbarClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R
                 n_rows_val <- if (is.null(private$.n_rows_analysed)) NA_real_ else private$.n_rows_analysed
 
                 private$.addNotice("INFO", "Analysis Info",
-                    sprintf(.("Analyzed %s rows across %s categories and %s segments. The bars total %s of '%s' - a summed quantity, which is the sample size only if that variable counts cases."),
-                            private$.fmtTotal(n_rows_val),
-                            n_categories, n_segments,
-                            private$.fmtTotal(n_total), self$options$y_var))
+                    jmvcore::format(
+                        .("Analyzed {rows} rows across {cats} categories and {segs} segments. The bars total {tot} of '{var}' - a summed quantity, which is the sample size only if that variable counts cases."),
+                        rows = private$.fmtTotal(n_rows_val),
+                        cats = n_categories,
+                        segs = n_segments,
+                        tot = private$.fmtTotal(n_total),
+                        var = self$options$y_var
+                    ))
             }
 
             # Render all collected notices as HTML (errors, warnings, info).
@@ -513,13 +541,13 @@ jjsegmentedtotalbarClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R
             missing_vars <- setdiff(required_vars, names(data))
             if (length(missing_vars) > 0) {
                 private$.addNotice("ERROR", "Missing Variables",
-                    paste(.("Missing variables in data:"), paste(missing_vars, collapse = ", ")))
+                    jmvcore::format(.("Missing variables in data: {vars}"), vars = paste(missing_vars, collapse = ", ")))
                 return()
             }
 
             if (!is.null(facet_var) && !facet_var %in% names(data)) {
                 private$.addNotice("ERROR", "Missing Facet Variable",
-                    paste(.("Facet variable"), facet_var, .("not found in data")))
+                    jmvcore::format(.("Facet variable {var} not found in data"), var = facet_var))
                 return()
             }
 
@@ -534,7 +562,7 @@ jjsegmentedtotalbarClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R
             # Check if y_var is numeric before subsetting rows
             if (!is.numeric(data[[y_var]])) {
                 private$.addNotice("ERROR", "Invalid Variable Type",
-                    paste(y_var, .("must be a numeric variable")))
+                    jmvcore::format(.("{var} must be a numeric variable"), var = y_var))
                 return()
             }
 
@@ -545,11 +573,11 @@ jjsegmentedtotalbarClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R
                 if (na_count > 0) {
                     if (isTRUE(self$options$exclude_missing)) {
                         private$.addNotice("WARNING", "Missing Data",
-                            sprintf(.("Found %d NA values in %s - these will be removed"), na_count, cv))
+                            jmvcore::format(.("Found {n} NA values in {var} - these will be removed"), n = na_count, var = cv))
                         data <- data[!is.na(data[[cv]]), , drop = FALSE]
                     } else {
                         private$.addNotice("INFO", "Missing Data Present",
-                            sprintf(.("Found %d NA values in %s - these will be included as '(Missing)'"), na_count, cv))
+                            jmvcore::format(.("Found {n} NA values in {var} - these will be included as '(Missing)'"), n = na_count, var = cv))
                     }
                 }
             }
@@ -572,7 +600,7 @@ jjsegmentedtotalbarClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R
             invalid_values <- !is.finite(data[[y_var]])
             if (any(invalid_values)) {
                 private$.addNotice("WARNING", "Missing or non-finite values excluded",
-                    sprintf(.("%d rows lack a finite Value Variable and were excluded; missing values are not zero counts."), sum(invalid_values)))
+                    jmvcore::format(.("{n} rows lack a finite Value Variable and were excluded; missing values are not zero counts."), n = sum(invalid_values)))
                 data <- data[!invalid_values, , drop = FALSE]
             }
             if (!nrow(data)) {
@@ -602,19 +630,19 @@ jjsegmentedtotalbarClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R
             # Check for sufficient levels
             if (length(levels(data[[x_var]])) < 1) {
                 private$.addNotice("ERROR", "Empty Variable",
-                    paste(x_var, .("must have at least one category")))
+                    jmvcore::format(.("{var} must have at least one category"), var = x_var))
                 return()
             }
 
             if (length(levels(data[[fill_var]])) < 1) {
                 private$.addNotice("ERROR", "Empty Variable",
-                    paste(fill_var, .("must have at least one segment")))
+                    jmvcore::format(.("{var} must have at least one segment"), var = fill_var))
                 return()
             }
 
             if (!is.null(facet_var) && length(levels(data[[facet_var]])) < 1) {
                 private$.addNotice("ERROR", "Empty Variable",
-                    paste(facet_var, .("must have at least one panel level")))
+                    jmvcore::format(.("{var} must have at least one panel level"), var = facet_var))
                 return()
             }
 
@@ -730,9 +758,10 @@ jjsegmentedtotalbarClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R
                 if (nrow(zero_totals) > 0) {
                     zero_labels <- paste0(as.character(zero_totals[[x_var]]), " (", as.character(zero_totals[[facet_var]]), ")")
                     private$.addNotice("WARNING", "Zero Total Categories",
-                        paste(.("Category-panel bars with zero totals found:"),
-                            paste(zero_labels, collapse = ", "),
-                            .("- these may appear empty in the plot")))
+                        jmvcore::format(
+                            .("Category-panel bars with zero totals found: {bars} - these may appear empty in the plot"),
+                            bars = paste(zero_labels, collapse = ", ")
+                        ))
                 }
             } else {
                 zero_totals <- processed_data %>%
@@ -741,9 +770,10 @@ jjsegmentedtotalbarClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R
                     dplyr::filter(.data$..tot == 0)
                 if (nrow(zero_totals) > 0) {
                     private$.addNotice("WARNING", "Zero Total Categories",
-                        paste(.("Categories with zero totals found:"),
-                            paste(zero_totals[[x_var]], collapse = ", "),
-                            .("- these may appear empty in the plot")))
+                        jmvcore::format(
+                            .("Categories with zero totals found: {cats} - these may appear empty in the plot"),
+                            cats = paste(zero_totals[[x_var]], collapse = ", ")
+                        ))
                 }
             }
 
@@ -833,8 +863,10 @@ jjsegmentedtotalbarClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R
                 if (nrow(small_categories) > 0) {
                     small_labels <- paste0(as.character(small_categories[[x_var]]), " (", as.character(small_categories[[facet_var]]), ")")
                     private$.addNotice("STRONG_WARNING", "Small Sample Size",
-                        paste(.("Some categories have fewer than 5 observations. Results may be unreliable for small groups:"),
-                            paste(small_labels, collapse = ", ")))
+                        jmvcore::format(
+                            .("Some categories have fewer than 5 observations. Results may be unreliable for small groups: {groups}"),
+                            groups = paste(small_labels, collapse = ", ")
+                        ))
                 }
             } else {
                 category_counts <- data %>%
@@ -844,8 +876,10 @@ jjsegmentedtotalbarClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R
                     dplyr::filter(.data$..tot_cnt < 5)
                 if (nrow(small_categories) > 0) {
                     private$.addNotice("STRONG_WARNING", "Small Sample Size",
-                        paste(.("Some categories have fewer than 5 observations. Results may be unreliable for small groups:"),
-                            paste(small_categories[[x_var]], collapse = ", ")))
+                        jmvcore::format(
+                            .("Some categories have fewer than 5 observations. Results may be unreliable for small groups: {groups}"),
+                            groups = paste(small_categories[[x_var]], collapse = ", ")
+                        ))
                 }
             }
 
@@ -871,23 +905,29 @@ jjsegmentedtotalbarClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R
             n_categories <- length(unique(data[[x_var]]))
             if (n_categories > 10) {
                 private$.addNotice("WARNING", "Too Many Categories",
-                    sprintf(.("Large number of categories (%d) may make the chart difficult to interpret. Consider grouping similar categories."),
-                            n_categories))
+                    jmvcore::format(
+                        .("Large number of categories ({n}) may make the chart difficult to interpret. Consider grouping similar categories."),
+                        n = n_categories
+                    ))
             }
 
             # Check for reasonable number of segments
             n_segments <- length(unique(data[[fill_var]]))
             if (n_segments > 8) {
                 private$.addNotice("WARNING", "Too Many Segments",
-                    sprintf(.("Large number of segments (%d) may make colors difficult to distinguish. Consider grouping similar segments."),
-                            n_segments))
+                    jmvcore::format(
+                        .("Large number of segments ({n}) may make colors difficult to distinguish. Consider grouping similar segments."),
+                        n = n_segments
+                    ))
             }
 
             # Check for missing combinations (unobserved cells in the category x segment [x facet] grid)
             if (unobserved_cells > 0L) {
                 private$.addNotice("WARNING", "Missing Data Combinations",
-                    sprintf(.("Missing data combinations detected: %d empty category-segment pairs. This may indicate sparse data."),
-                            unobserved_cells))
+                    jmvcore::format(
+                        .("Missing data combinations detected: {n} empty category-segment pairs. This may indicate sparse data."),
+                        n = unobserved_cells
+                    ))
             }
         },
 
@@ -1067,8 +1107,10 @@ jjsegmentedtotalbarClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R
             self$results$summary$setRow(rowNo = 1, values = summary_row)
             self$results$summary$setNote(
                 "summed_value",
-                sprintf(.("Summed Value is the total of '%s' across all bars. It equals the number of cases only when that variable counts cases."),
-                        self$options$y_var))
+                jmvcore::format(
+                    .("Summed Value is the total of '{var}' across all bars. It equals the number of cases only when that variable counts cases."),
+                    var = self$options$y_var
+                ))
         },
 
         .updateComposition = function() {
@@ -1147,11 +1189,11 @@ jjsegmentedtotalbarClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R
             }
 
             cat_bal <- active_comp %>%
-                dplyr::group_by(category) %>%
+                dplyr::group_by(.data$category) %>%
                 dplyr::summarise(
                     cv = dplyr::if_else(
-                        dplyr::n() >= 2L & mean(percentage, na.rm = TRUE) > 0,
-                        stats::sd(percentage, na.rm = TRUE) / mean(percentage, na.rm = TRUE),
+                        dplyr::n() >= 2L & mean(.data$percentage, na.rm = TRUE) > 0,
+                        stats::sd(.data$percentage, na.rm = TRUE) / mean(.data$percentage, na.rm = TRUE),
                         0
                     ),
                     .groups = "drop"
@@ -1216,11 +1258,11 @@ jjsegmentedtotalbarClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R
                 most_var_str <- "N/A"
             } else {
                 seg_cv <- active_comp %>%
-                    dplyr::group_by(segment) %>%
+                    dplyr::group_by(.data$segment) %>%
                     dplyr::summarise(
                         cv = dplyr::if_else(
-                            mean(percentage, na.rm = TRUE) > 0,
-                            stats::sd(percentage, na.rm = TRUE) / mean(percentage, na.rm = TRUE),
+                            mean(.data$percentage, na.rm = TRUE) > 0,
+                            stats::sd(.data$percentage, na.rm = TRUE) / mean(.data$percentage, na.rm = TRUE),
                             0
                         ),
                         .groups = "drop"
@@ -1485,6 +1527,12 @@ jjsegmentedtotalbarClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R
             }
             val_col <- if ("..value" %in% names(df)) "..value" else "value"
 
+            # Reuse category ordering already computed by .applySorting() in .processData();
+            # only recompute if un-factored data enters .plotFlerlage() directly.
+            if (self$options$sort_categories != "none" && !is.factor(df[[x_var]])) {
+                df <- private$.applySorting(df, x_var, fill_var, facet_col)
+            }
+
             if (!is.null(facet_col)) {
                 plot_data <- df %>%
                     dplyr::group_by(!!rlang::sym(x_var), !!rlang::sym(facet_col)) %>%
@@ -1497,38 +1545,8 @@ jjsegmentedtotalbarClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R
                     dplyr::ungroup()
             }
 
-            plot_data$..group <- plot_data[[x_var]]
-            plot_data$..segment <- plot_data[[fill_var]]
-
-            # Apply sorting consistently with .applySorting()
-            if (self$options$sort_categories != "none") {
-                if (self$options$sort_categories == "total") {
-                    category_order <- plot_data %>%
-                        dplyr::group_by(.data$..group) %>%
-                        dplyr::summarise(..tot = sum(!!rlang::sym(val_col), na.rm = TRUE), .groups = "drop") %>%
-                        dplyr::arrange(dplyr::desc(.data$..tot)) %>%
-                        dplyr::pull(.data$..group)
-                    plot_data$..group <- factor(plot_data$..group, levels = unique(as.character(category_order)))
-                } else if (self$options$sort_categories == "largest_segment") {
-                    category_order <- plot_data %>%
-                        dplyr::group_by(.data$..group, .data$..segment) %>%
-                        dplyr::summarise(..seg_val = sum(!!rlang::sym(val_col), na.rm = TRUE), .groups = "drop") %>%
-                        dplyr::group_by(.data$..group) %>%
-                        dplyr::mutate(
-                            ..cat_tot = sum(.data$..seg_val, na.rm = TRUE),
-                            ..seg_pct = dplyr::if_else(.data$..cat_tot > 0, .data$..seg_val / .data$..cat_tot * 100, 0)
-                        ) %>%
-                        dplyr::summarise(..max_pct = max(.data$..seg_pct, na.rm = TRUE), .groups = "drop") %>%
-                        dplyr::arrange(dplyr::desc(.data$..max_pct)) %>%
-                        dplyr::pull(.data$..group)
-                    plot_data$..group <- factor(plot_data$..group, levels = unique(as.character(category_order)))
-                } else if (self$options$sort_categories == "alpha") {
-                    plot_data$..group <- factor(plot_data$..group, levels = sort(unique(as.character(plot_data$..group))))
-                }
-            } else {
-                plot_data$..group <- as.factor(plot_data$..group)
-            }
-            plot_data$..segment <- as.factor(plot_data$..segment)
+            plot_data$..group <- as.factor(plot_data[[x_var]])
+            plot_data$..segment <- as.factor(plot_data[[fill_var]])
 
             vals_num <- plot_data[[val_col]]
             max_tot <- max(plot_data$..total, na.rm = TRUE)
@@ -1724,11 +1742,15 @@ jjsegmentedtotalbarClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R
                 0
             } else {
                 seg_disp <- active_comp %>%
-                    dplyr::group_by(segment) %>%
-                    dplyr::summarise(seg_rng = max(percentage, na.rm = TRUE) - min(percentage, na.rm = TRUE), .groups = "drop")
+                    dplyr::group_by(.data$segment) %>%
+                    dplyr::summarise(
+                        seg_rng = max(.data$percentage, na.rm = TRUE) - min(.data$percentage, na.rm = TRUE),
+                        .groups = "drop"
+                    )
                 max(seg_disp$seg_rng, na.rm = TRUE)
             }
             patterns_vary <- is.finite(cross_cat_rng) && cross_cat_rng > 1e-9
+            max_p_fmt <- sprintf("%.1f", max_p)
 
             if (within_uniform) {
                 cat_names_safe <- paste(
@@ -1740,22 +1762,34 @@ jjsegmentedtotalbarClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R
                 } else {
                     ""
                 }
-                summary_text <- sprintf(
-                    .("This analysis examined %s rows across %s categories of %s%s, with data segmented by %s into %s distinct groups, summing %s of %s. Segment proportions were uniform across all categories and segments (%.1f%% per segment), with no single predominant outcome."),
-                    n_rows_safe, n_categories, x_var_safe, cat_clause, fill_var_safe, n_segments, total_obs_safe, y_var_safe, max_p
+                summary_text <- jmvcore::format(
+                    .("This analysis examined {rows} rows across {cats} categories of {xvar}{clause}, with data segmented by {fill} into {segs} distinct groups, summing {tot} of {yvar}. Segment proportions were uniform across all categories and segments ({pct}% per segment), with no single predominant outcome."),
+                    rows = n_rows_safe,
+                    cats = n_categories,
+                    xvar = x_var_safe,
+                    clause = cat_clause,
+                    fill = fill_var_safe,
+                    segs = n_segments,
+                    tot = total_obs_safe,
+                    yvar = y_var_safe,
+                    pct = max_p_fmt
                 )
-                report_sentence <- sprintf(
-                    .("Segmented total bar chart analysis of %s by %s (N=%s rows; total %s = %s): segment proportions were uniform across all categories (%.1f%% each), with no between-category variation in composition."),
-                    y_var_safe, x_var_safe, n_rows_safe, y_var_safe, total_obs_safe, max_p
+                report_sentence <- jmvcore::format(
+                    .("Segmented total bar chart analysis of {yvar} by {xvar} (N={rows} rows; total {yvar} = {tot}): segment proportions were uniform across all categories ({pct}% each), with no between-category variation in composition."),
+                    yvar = y_var_safe,
+                    xvar = x_var_safe,
+                    rows = n_rows_safe,
+                    tot = total_obs_safe,
+                    pct = max_p_fmt
                 )
             } else {
                 top_rows <- active_comp[abs(active_comp$percentage - max_p) < 1e-9, , drop = FALSE]
                 cat_bal <- active_comp %>%
-                    dplyr::group_by(category) %>%
+                    dplyr::group_by(.data$category) %>%
                     dplyr::summarise(
                         cv = dplyr::if_else(
-                            dplyr::n() >= 2L & mean(percentage, na.rm = TRUE) > 0,
-                            stats::sd(percentage, na.rm = TRUE) / mean(percentage, na.rm = TRUE),
+                            dplyr::n() >= 2L & mean(.data$percentage, na.rm = TRUE) > 0,
+                            stats::sd(.data$percentage, na.rm = TRUE) / mean(.data$percentage, na.rm = TRUE),
                             0
                         ),
                         .groups = "drop"
@@ -1767,13 +1801,17 @@ jjsegmentedtotalbarClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R
                 if (nrow(top_rows) == 1L) {
                     largest_segment_safe <- htmltools::htmlEscape(as.character(top_rows$segment[1]))
                     largest_category_safe <- htmltools::htmlEscape(as.character(top_rows$category[1]))
-                    prominent_summary <- sprintf(
-                        .("The most prominent finding was '%s' in the '%s' category, representing %.1f%% of that group's total."),
-                        largest_segment_safe, largest_category_safe, max_p
+                    prominent_summary <- jmvcore::format(
+                        .("The most prominent finding was '{seg}' in the '{cat}' category, representing {pct}% of that group's total."),
+                        seg = largest_segment_safe,
+                        cat = largest_category_safe,
+                        pct = max_p_fmt
                     )
-                    prominent_report <- sprintf(
-                        .("%s was the predominant segment in %s (%.1f%%)."),
-                        largest_segment_safe, largest_category_safe, max_p
+                    prominent_report <- jmvcore::format(
+                        .("{seg} was the predominant segment in {cat} ({pct}%)."),
+                        seg = largest_segment_safe,
+                        cat = largest_category_safe,
+                        pct = max_p_fmt
                     )
                 } else {
                     tied_summary <- paste(
@@ -1788,18 +1826,26 @@ jjsegmentedtotalbarClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R
                                 htmltools::htmlEscape(as.character(top_rows$category))),
                         collapse = " and "
                     )
-                    prominent_summary <- sprintf(.("The highest segment share (%.1f%%) was tied across %s."), max_p, tied_summary)
-                    prominent_report <- sprintf(.("The highest segment share (%.1f%%) was tied across %s."), max_p, tied_report)
+                    prominent_summary <- jmvcore::format(
+                        .("The highest segment share ({pct}%) was tied across {ties}."),
+                        pct = max_p_fmt,
+                        ties = tied_summary
+                    )
+                    prominent_report <- jmvcore::format(
+                        .("The highest segment share ({pct}%) was tied across {ties}."),
+                        pct = max_p_fmt,
+                        ties = tied_report
+                    )
                 }
 
                 if (patterns_vary) {
-                    balance_summary <- sprintf(
-                        .("The '%s' category showed the most balanced distribution across all segments, indicating relatively equal representation of different outcomes within that group."),
-                        balanced_category_safe
+                    balance_summary <- jmvcore::format(
+                        .("The '{cat}' category showed the most balanced distribution across all segments, indicating relatively equal representation of different outcomes within that group."),
+                        cat = balanced_category_safe
                     )
-                    balance_report <- sprintf(
-                        .("Distribution patterns varied across categories, with %s showing the most balanced composition."),
-                        balanced_category_safe
+                    balance_report <- jmvcore::format(
+                        .("Distribution patterns varied across categories, with {cat} showing the most balanced composition."),
+                        cat = balanced_category_safe
                     )
                 } else if (n_active_cats < 2L) {
                     balance_summary <- .("Only one non-empty category was analyzed, so between-category variation was not assessed.")
@@ -1810,18 +1856,27 @@ jjsegmentedtotalbarClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R
                 }
 
                 summary_text <- paste(
-                    sprintf(
-                        .("This analysis examined %s rows across %s categories of %s, with data segmented by %s into %s distinct groups, summing %s of %s."),
-                        n_rows_safe, n_categories, x_var_safe, fill_var_safe, n_segments, total_obs_safe, y_var_safe
+                    jmvcore::format(
+                        .("This analysis examined {rows} rows across {cats} categories of {xvar}, with data segmented by {fill} into {segs} distinct groups, summing {tot} of {yvar}."),
+                        rows = n_rows_safe,
+                        cats = n_categories,
+                        xvar = x_var_safe,
+                        fill = fill_var_safe,
+                        segs = n_segments,
+                        tot = total_obs_safe,
+                        yvar = y_var_safe
                     ),
                     prominent_summary,
                     balance_summary
                 )
 
                 report_sentence <- paste(
-                    sprintf(
-                        .("Segmented total bar chart analysis of %s by %s (N=%s rows; total %s = %s):"),
-                        y_var_safe, x_var_safe, n_rows_safe, y_var_safe, total_obs_safe
+                    jmvcore::format(
+                        .("Segmented total bar chart analysis of {yvar} by {xvar} (N={rows} rows; total {yvar} = {tot}):"),
+                        yvar = y_var_safe,
+                        xvar = x_var_safe,
+                        rows = n_rows_safe,
+                        tot = total_obs_safe
                     ),
                     prominent_report,
                     balance_report
@@ -1973,10 +2028,79 @@ jjsegmentedtotalbarClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R
             # Clear existing results
             private$.clearTableRows(self$results$statistical_tests)
 
+            calc_cramers_v <- function(chi_stat, mat) {
+                n_tot <- sum(mat, na.rm = TRUE)
+                k_min <- min(nrow(mat), ncol(mat)) - 1L
+                if (!is.finite(chi_stat) || !is.finite(n_tot) || n_tot <= 0 || k_min < 1L) {
+                    return(NA_real_)
+                }
+                sqrt(as.numeric(chi_stat) / (n_tot * k_min))
+            }
+
+            build_fisher_row <- function(mat, alpha_lvl, conf_lvl, panel_lbl = NULL) {
+                t_name <- if (is.null(panel_lbl)) {
+                    "Fisher's Exact Test"
+                } else {
+                    paste0("Fisher's Exact Test (", panel_lbl, ")")
+                }
+                ft <- tryCatch(
+                    stats::fisher.test(mat, workspace = 2e7, conf.level = conf_lvl),
+                    error = function(err) err
+                )
+                if (inherits(ft, "error")) {
+                    private$.addNotice(
+                        "WARNING",
+                        .("Fisher's Exact Workspace Exceeded"),
+                        jmvcore::format(
+                            .("Exact Fisher network calculation exceeded memory limits ({msg}). Reduce table dimensions or collapse rare levels."),
+                            msg = ft$message
+                        )
+                    )
+                    return(list(
+                        test_name = t_name,
+                        statistic = NA_real_,
+                        df = NA_integer_,
+                        p_value = NA_real_,
+                        cramers_v = NA_real_,
+                        interpretation = paste0("Exact calculation unavailable: ", ft$message)
+                    ))
+                }
+
+                f_sig <- is.finite(ft$p.value) && ft$p.value < alpha_lvl
+                or_val <- NA_real_
+                or_clause <- ""
+                if (nrow(mat) == 2L && ncol(mat) == 2L && !is.null(ft$estimate) && length(ft$estimate) == 1L) {
+                    or_val <- as.numeric(ft$estimate[[1]])
+                    if (!is.null(ft$conf.int) && length(ft$conf.int) == 2L) {
+                        ci_pct <- round(conf_lvl * 100)
+                        or_clause <- sprintf(
+                            "; conditional OR = %.2f (%d%% CI: %.2f-%.2f)",
+                            or_val, ci_pct, ft$conf.int[1], ft$conf.int[2]
+                        )
+                    }
+                }
+                prefix_lbl <- if (is.null(panel_lbl)) "" else paste0("Panel ", panel_lbl, ": ")
+                f_interp <- if (f_sig) {
+                    paste0(prefix_lbl, "Exact test: significant association (p < ", alpha_lvl, ")", or_clause)
+                } else {
+                    paste0(prefix_lbl, "Exact test: no significant association detected (p >= ", alpha_lvl, ")", or_clause)
+                }
+                list(
+                    test_name = t_name,
+                    statistic = or_val,
+                    df = NA_integer_,
+                    p_value = as.numeric(ft$p.value),
+                    cramers_v = NA_real_,
+                    interpretation = f_interp
+                )
+            }
+
             tryCatch({
                 x_var <- self$options$x_var
                 fill_var <- self$options$fill_var
-                alpha <- 1 - self$options$confidence_level
+                conf_lvl <- self$options$confidence_level
+                alpha <- 1 - conf_lvl
+                use_fisher <- isTRUE(private$.optionOr("fisher_exact", FALSE))
 
                 cnt_vec <- private$.metricVec(data, "count")
 
@@ -2003,8 +2127,10 @@ jjsegmentedtotalbarClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R
 
                     self$results$statistical_tests$setNote(
                         "count_assumption",
-                        sprintf(.("Stratified by '%s' rather than pooling across split panels (which can induce Simpson's paradox). Cells are the summed Value Variable, treated as independent case frequencies; on a measurement the statistic scales with the unit of measurement and <b>overstates</b> significance."),
-                                facet_var)
+                        jmvcore::format(
+                            .("Stratified by '{facet}' rather than pooling across split panels (which can induce Simpson's paradox). Cells are the summed Value Variable, treated as independent case frequencies; on a measurement the statistic scales with the unit of measurement and <b>overstates</b> significance."),
+                            facet = facet_var
+                        )
                     )
 
                     row_idx <- 1L
@@ -2032,6 +2158,7 @@ jjsegmentedtotalbarClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R
                                     statistic = as.numeric(cmh_test$statistic[[1]]),
                                     df = as.integer(cmh_test$parameter[[1]]),
                                     p_value = as.numeric(cmh_test$p.value),
+                                    cramers_v = NA_real_,
                                     interpretation = cmh_interp
                                 )
                             )
@@ -2056,6 +2183,7 @@ jjsegmentedtotalbarClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R
                                     statistic = NA_real_,
                                     df = NA_integer_,
                                     p_value = NA_real_,
+                                    cramers_v = NA_real_,
                                     interpretation = sprintf("Panel '%s' has fewer than two non-empty categories or segments.", p_lbl)
                                 )
                             )
@@ -2084,16 +2212,28 @@ jjsegmentedtotalbarClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R
                                 statistic = as.numeric(chi_k$statistic[[1]]),
                                 df = as.integer(chi_k$parameter[[1]]),
                                 p_value = as.numeric(chi_k$p.value),
+                                cramers_v = calc_cramers_v(chi_k$statistic[[1]], sub_m),
                                 interpretation = interp_k
                             )
                         )
                         row_idx <- row_idx + 1L
+
+                        if (use_fisher) {
+                            self$results$statistical_tests$addRow(
+                                rowKey = row_idx,
+                                values = build_fisher_row(sub_m, alpha, conf_lvl, panel_lbl = p_lbl)
+                            )
+                            row_idx <- row_idx + 1L
+                        }
                     }
 
                     if (total_low_cells > 0L) {
                         private$.addNotice("WARNING", "Low expected counts",
-                            sprintf(.("%d of %d within-panel cells have expected counts below 5, so chi-square approximations may be unreliable in sparse panels."),
-                                    total_low_cells, total_checked_cells))
+                            jmvcore::format(
+                                .("{low} of {tot} within-panel cells have expected counts below 5, so chi-square approximations may be unreliable in sparse panels."),
+                                low = total_low_cells,
+                                tot = total_checked_cells
+                            ))
                     }
                     return()
                 }
@@ -2121,8 +2261,11 @@ jjsegmentedtotalbarClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R
                 low <- sum(chi_test$expected < 5)
                 if (low > 0)
                     private$.addNotice("WARNING", "Low expected counts",
-                        sprintf(.("%d of %d cells have expected counts below 5, so the chi-square approximation is unreliable here."),
-                                low, length(chi_test$expected)))
+                        jmvcore::format(
+                            .("{low} of {tot} cells have expected counts below 5, so the chi-square approximation is unreliable here."),
+                            low = low,
+                            tot = length(chi_test$expected)
+                        ))
 
                 is_significant <- is.finite(chi_test$p.value) && chi_test$p.value < alpha
 
@@ -2139,15 +2282,26 @@ jjsegmentedtotalbarClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R
                         length(chi_test$expected), " cells with expected count < 5) - ",
                         "Fisher's exact test is the alternative")
 
+                next_row_key <- 1L
                 test_row <- list(
                     test_name = "Pearson's Chi-square",
                     statistic = chi_test$statistic[[1]],
                     df = as.integer(chi_test$parameter[[1]]),
                     p_value = chi_test$p.value,
+                    cramers_v = calc_cramers_v(chi_test$statistic[[1]], contingency_matrix),
                     interpretation = interpretation
                 )
 
-                self$results$statistical_tests$addRow(rowKey = 1, values = test_row)
+                self$results$statistical_tests$addRow(rowKey = next_row_key, values = test_row)
+                next_row_key <- next_row_key + 1L
+
+                if (use_fisher) {
+                    self$results$statistical_tests$addRow(
+                        rowKey = next_row_key,
+                        values = build_fisher_row(contingency_matrix, alpha, conf_lvl, panel_lbl = NULL)
+                    )
+                    next_row_key <- next_row_key + 1L
+                }
 
                 # Post-hoc Haberman (1973) adjusted standardized residuals for any significant table > 2x2
                 if (is_significant && (nrow(contingency_matrix) > 2 || ncol(contingency_matrix) > 2)) {
@@ -2171,31 +2325,44 @@ jjsegmentedtotalbarClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R
                             statistic = residual_value,
                             df = NA_integer_,
                             p_value = NA_real_,
+                            cramers_v = NA_real_,
                             interpretation = residual_interpretation
                         )
 
-                        self$results$statistical_tests$addRow(rowKey = 2, values = residual_row)
+                        self$results$statistical_tests$addRow(rowKey = next_row_key, values = residual_row)
 
                         n_cells <- length(residuals)
                         z_bonf <- stats::qnorm(1 - alpha / (2 * n_cells))
                         self$results$statistical_tests$setNote(
                             "stdres_note",
-                            sprintf(.("Standardized Residuals reports the largest Haberman (1973) adjusted residual (chisq.test()$stdres), asymptotically N(0, 1) under independence (Bonferroni-adjusted critical |z| = %.2f across %d cells)."),
-                                    z_bonf, n_cells)
+                            jmvcore::format(
+                                .("Standardized Residuals reports the largest Haberman (1973) adjusted residual (chisq.test()$stdres), asymptotically N(0, 1) under independence (Bonferroni-adjusted critical |z| = {z} across {n} cells)."),
+                                z = sprintf("%.2f", z_bonf),
+                                n = n_cells
+                            )
                         )
                     }
                 }
 
             }, error = function(e) {
+                private$.addNotice(
+                    "WARNING",
+                    .("Statistical Test Skipped"),
+                    jmvcore::format(
+                        .("Contingency test could not be computed: {msg}"),
+                        msg = e$message
+                    )
+                )
                 error_row <- list(
                     test_name = "Chi-square Test",
-                    statistic = NA,
-                    df = NA,
-                    p_value = NA,
+                    statistic = NA_real_,
+                    df = NA_integer_,
+                    p_value = NA_real_,
+                    cramers_v = NA_real_,
                     interpretation = paste("Test failed:", e$message)
                 )
 
-                self$results$statistical_tests$addRow(rowKey = 1, values = error_row)
+                self$results$statistical_tests$addRow(rowKey = 1L, values = error_row)
             })
             # Notices are rendered once at the end of .run() (not here), so they
             # appear whether or not statistical tests are requested.

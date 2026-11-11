@@ -39,8 +39,11 @@ jjsegmentedtotalbarOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6:
             flerlage_box_color = "lightgrey",
             y_is_count = FALSE,
             show_statistical_tests = FALSE,
+            fisher_exact = FALSE,
             confidence_level = 0.95,
             exclude_missing = TRUE,
+            showInterpretation = FALSE,
+            showSummary = FALSE,
             showExplanations = FALSE, ...) {
 
             super$initialize(
@@ -275,6 +278,10 @@ jjsegmentedtotalbarOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6:
                 "show_statistical_tests",
                 show_statistical_tests,
                 default=FALSE)
+            private$..fisher_exact <- jmvcore::OptionBool$new(
+                "fisher_exact",
+                fisher_exact,
+                default=FALSE)
             private$..confidence_level <- jmvcore::OptionNumber$new(
                 "confidence_level",
                 confidence_level,
@@ -285,6 +292,14 @@ jjsegmentedtotalbarOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6:
                 "exclude_missing",
                 exclude_missing,
                 default=TRUE)
+            private$..showInterpretation <- jmvcore::OptionBool$new(
+                "showInterpretation",
+                showInterpretation,
+                default=FALSE)
+            private$..showSummary <- jmvcore::OptionBool$new(
+                "showSummary",
+                showSummary,
+                default=FALSE)
             private$..showExplanations <- jmvcore::OptionBool$new(
                 "showExplanations",
                 showExplanations,
@@ -323,8 +338,11 @@ jjsegmentedtotalbarOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6:
             self$.addOption(private$..flerlage_box_color)
             self$.addOption(private$..y_is_count)
             self$.addOption(private$..show_statistical_tests)
+            self$.addOption(private$..fisher_exact)
             self$.addOption(private$..confidence_level)
             self$.addOption(private$..exclude_missing)
+            self$.addOption(private$..showInterpretation)
+            self$.addOption(private$..showSummary)
             self$.addOption(private$..showExplanations)
         }),
     active = list(
@@ -361,8 +379,11 @@ jjsegmentedtotalbarOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6:
         flerlage_box_color = function() private$..flerlage_box_color$value,
         y_is_count = function() private$..y_is_count$value,
         show_statistical_tests = function() private$..show_statistical_tests$value,
+        fisher_exact = function() private$..fisher_exact$value,
         confidence_level = function() private$..confidence_level$value,
         exclude_missing = function() private$..exclude_missing$value,
+        showInterpretation = function() private$..showInterpretation$value,
+        showSummary = function() private$..showSummary$value,
         showExplanations = function() private$..showExplanations$value),
     private = list(
         ..analysis_preset = NA,
@@ -398,8 +419,11 @@ jjsegmentedtotalbarOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6:
         ..flerlage_box_color = NA,
         ..y_is_count = NA,
         ..show_statistical_tests = NA,
+        ..fisher_exact = NA,
         ..confidence_level = NA,
         ..exclude_missing = NA,
+        ..showInterpretation = NA,
+        ..showSummary = NA,
         ..showExplanations = NA)
 )
 
@@ -408,6 +432,7 @@ jjsegmentedtotalbarResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6:
     inherit = jmvcore::Group,
     active = list(
         instructions = function() private$.items[["instructions"]],
+        warnings = function() private$.items[["warnings"]],
         plot = function() private$.items[["plot"]],
         summary = function() private$.items[["summary"]],
         composition_table = function() private$.items[["composition_table"]],
@@ -416,7 +441,6 @@ jjsegmentedtotalbarResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6:
         clinical_summary = function() private$.items[["clinical_summary"]],
         statistical_tests = function() private$.items[["statistical_tests"]],
         preset_guidance = function() private$.items[["preset_guidance"]],
-        warnings = function() private$.items[["warnings"]],
         explanations = function() private$.items[["explanations"]]),
     private = list(),
     public=list(
@@ -433,6 +457,21 @@ jjsegmentedtotalbarResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6:
                 name="instructions",
                 title="Instructions",
                 visible=FALSE))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="warnings",
+                title="Analysis Notices",
+                visible=FALSE,
+                clearWith=list(
+                    "x_var",
+                    "y_var",
+                    "fill_var",
+                    "facet_var",
+                    "analysis_preset",
+                    "exclude_missing",
+                    "y_is_count",
+                    "show_statistical_tests",
+                    "fisher_exact")))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="plot",
@@ -571,6 +610,7 @@ jjsegmentedtotalbarResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6:
                 options=options,
                 name="interpretation",
                 title="Chart Interpretation",
+                visible="(showInterpretation)",
                 clearWith=list(
                     "x_var",
                     "y_var",
@@ -578,11 +618,13 @@ jjsegmentedtotalbarResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6:
                     "facet_var",
                     "sort_categories",
                     "y_is_count",
-                    "exclude_missing")))
+                    "exclude_missing",
+                    "showInterpretation")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="clinical_summary",
                 title="Clinical Summary",
+                visible="(showSummary)",
                 clearWith=list(
                     "x_var",
                     "y_var",
@@ -590,7 +632,8 @@ jjsegmentedtotalbarResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6:
                     "facet_var",
                     "sort_categories",
                     "y_is_count",
-                    "exclude_missing")))
+                    "exclude_missing",
+                    "showSummary")))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="statistical_tests",
@@ -603,6 +646,7 @@ jjsegmentedtotalbarResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6:
                     "facet_var",
                     "analysis_preset",
                     "show_statistical_tests",
+                    "fisher_exact",
                     "y_is_count",
                     "confidence_level",
                     "exclude_missing"),
@@ -625,6 +669,11 @@ jjsegmentedtotalbarResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6:
                         `type`="number", 
                         `format`="zto,pvalue"),
                     list(
+                        `name`="cramers_v", 
+                        `title`="Cramer's V", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
                         `name`="interpretation", 
                         `title`="Interpretation", 
                         `type`="text"))))
@@ -635,20 +684,6 @@ jjsegmentedtotalbarResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6:
                 visible="(analysis_preset:treatment_response || analysis_preset:demographics || analysis_preset:biomarker || analysis_preset:quality || analysis_preset:temporal)",
                 clearWith=list(
                     "analysis_preset")))
-            self$add(jmvcore::Html$new(
-                options=options,
-                name="warnings",
-                title="Warnings",
-                visible=FALSE,
-                clearWith=list(
-                    "x_var",
-                    "y_var",
-                    "fill_var",
-                    "facet_var",
-                    "analysis_preset",
-                    "exclude_missing",
-                    "y_is_count",
-                    "show_statistical_tests")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="explanations",
@@ -751,13 +786,19 @@ jjsegmentedtotalbarBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
 #'   because the test treats the summed values as cell counts.
 #' @param show_statistical_tests Whether to perform chi-square tests for
 #'   proportion differences.
+#' @param fisher_exact Whether to perform an exact Fisher contingency test
+#'   (recommended when expected cell counts are below 5).
 #' @param confidence_level Confidence level for statistical tests (0.80-0.99).
 #' @param exclude_missing Whether to exclude rows with missing values in key
 #'   variables.
+#' @param showInterpretation Show plain-language chart interpretation panel.
+#' @param showSummary Show natural-language clinical summary and copy-ready
+#'   manuscript sentence.
 #' @param showExplanations Show explanations of the statistical results.
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$instructions} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$warnings} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$plot} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$summary} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$composition_table} \tab \tab \tab \tab \tab a table \cr
@@ -766,7 +807,6 @@ jjsegmentedtotalbarBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
 #'   \code{results$clinical_summary} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$statistical_tests} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$preset_guidance} \tab \tab \tab \tab \tab a html \cr
-#'   \code{results$warnings} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$explanations} \tab \tab \tab \tab \tab a html \cr
 #' }
 #'
@@ -812,8 +852,11 @@ jjsegmentedtotalbar <- function(
     flerlage_box_color = "lightgrey",
     y_is_count = FALSE,
     show_statistical_tests = FALSE,
+    fisher_exact = FALSE,
     confidence_level = 0.95,
     exclude_missing = TRUE,
+    showInterpretation = FALSE,
+    showSummary = FALSE,
     showExplanations = FALSE) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
@@ -869,8 +912,11 @@ jjsegmentedtotalbar <- function(
         flerlage_box_color = flerlage_box_color,
         y_is_count = y_is_count,
         show_statistical_tests = show_statistical_tests,
+        fisher_exact = fisher_exact,
         confidence_level = confidence_level,
         exclude_missing = exclude_missing,
+        showInterpretation = showInterpretation,
+        showSummary = showSummary,
         showExplanations = showExplanations)
 
     analysis <- jjsegmentedtotalbarClass$new(
