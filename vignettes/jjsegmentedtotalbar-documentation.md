@@ -14,8 +14,8 @@
 
 ## 1a. Changelog
 
-- **Date**: 2026-08-29
-- **Summary**: Comprehensive documentation suite created & verified against active schemas and backend implementation.
+- **Date**: 2026-11-11
+- **Summary**: Release-profile audit & synchronization across schemas, variable-collision hardening, labelled-data support, global jamovi theme/palette options, declarative visibility, and upstream `ggsegmentedtotalbar` boundary guards.
 
 ## 2. Options Reference (`.a.yaml`)
 
@@ -29,12 +29,12 @@
 | `facet_var` | `Variable` | `NULL` | Panel Variable (Optional) |
 | `show_plot` | `Bool` | `FALSE` | Plot |
 | `plot_type` | `List` | `stacked` | Plot Type |
-| `chart_style` | `List` | `clinical` | Chart Style |
-| `color_palette` | `List` | `clinical` | Color Palette |
+| `chart_style` | `List` | `clinical` | Chart Style (includes `jamovi` global theme) |
+| `color_palette` | `List` | `clinical` | Color Palette (includes `jamovi` global palette) |
 | `show_percentages` | `Bool` | `FALSE` | Percentages |
 | `percentage_format` | `List` | `integer` | Percentage Format |
 | `show_counts` | `Bool` | `FALSE` | Raw counts |
-| `label_threshold` | `Number` | `5` | Min Segment Size for Labels ( percent) |
+| `label_threshold` | `Number` | `5` | Min Segment Size for Labels (percent) |
 | `orientation` | `List` | `vertical` | Bar Orientation |
 | `sort_categories` | `List` | `none` | Sort Categories |
 | `plot_title` | `String` | `` | Plot Title |
@@ -48,7 +48,7 @@
 | `add_outline` | `Bool` | `FALSE` | Segment outlines |
 | `outline_color` | `List` | `white` | Outline Color |
 | `export_ready` | `Bool` | `FALSE` | Export ready |
-| `flerlage_show_labels` | `Bool` | `FALSE` | Value labels (flerlage) |
+| `flerlage_show_labels` | `Bool` | `FALSE` | Value labels (Flerlage) |
 | `flerlage_label_size` | `Number` | `4` | Label Size (Flerlage) |
 | `flerlage_label_color` | `List` | `black` | Label Color (Flerlage) |
 | `flerlage_alpha` | `Number` | `0.3` | Background Transparency (Flerlage) |

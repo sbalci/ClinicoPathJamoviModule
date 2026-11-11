@@ -110,6 +110,7 @@ jjsegmentedtotalbarOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6:
                 "chart_style",
                 chart_style,
                 options=list(
+                    "jamovi",
                     "clean",
                     "publication",
                     "presentation",
@@ -121,6 +122,7 @@ jjsegmentedtotalbarOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6:
                 "color_palette",
                 color_palette,
                 options=list(
+                    "jamovi",
                     "default",
                     "viridis",
                     "set1",
@@ -430,14 +432,15 @@ jjsegmentedtotalbarResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6:
                 options=options,
                 name="instructions",
                 title="Instructions",
-                visible=TRUE))
+                visible=FALSE))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="plot",
                 title="Segmented Total Bar Chart",
                 width=650,
                 height=450,
-                requiresData=TRUE,
+                visible="(show_plot)",
+                requiresData=FALSE,
                 renderFun=".plot",
                 clearWith=list(
                     "analysis_preset",
@@ -445,6 +448,7 @@ jjsegmentedtotalbarResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6:
                     "y_var",
                     "fill_var",
                     "facet_var",
+                    "y_is_count",
                     "exclude_missing",
                     "plot_type",
                     "chart_style",
@@ -479,6 +483,8 @@ jjsegmentedtotalbarResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6:
                     "y_var",
                     "fill_var",
                     "facet_var",
+                    "plot_type",
+                    "y_is_count",
                     "exclude_missing"),
                 columns=list(
                     list(
@@ -511,6 +517,7 @@ jjsegmentedtotalbarResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6:
                     "fill_var",
                     "facet_var",
                     "sort_categories",
+                    "y_is_count",
                     "exclude_missing"),
                 columns=list(
                     list(
@@ -549,6 +556,7 @@ jjsegmentedtotalbarResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6:
                     "fill_var",
                     "facet_var",
                     "sort_categories",
+                    "y_is_count",
                     "exclude_missing"),
                 columns=list(
                     list(
@@ -569,6 +577,7 @@ jjsegmentedtotalbarResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6:
                     "fill_var",
                     "facet_var",
                     "sort_categories",
+                    "y_is_count",
                     "exclude_missing")))
             self$add(jmvcore::Html$new(
                 options=options,
@@ -580,16 +589,19 @@ jjsegmentedtotalbarResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6:
                     "fill_var",
                     "facet_var",
                     "sort_categories",
+                    "y_is_count",
                     "exclude_missing")))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="statistical_tests",
                 title="Statistical Tests",
-                visible=FALSE,
+                visible="(show_statistical_tests)",
                 clearWith=list(
                     "x_var",
                     "y_var",
                     "fill_var",
+                    "facet_var",
+                    "analysis_preset",
                     "show_statistical_tests",
                     "y_is_count",
                     "confidence_level",
@@ -620,19 +632,20 @@ jjsegmentedtotalbarResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6:
                 options=options,
                 name="preset_guidance",
                 title="Template Guidance",
-                visible=FALSE,
+                visible="(analysis_preset:treatment_response || analysis_preset:demographics || analysis_preset:biomarker || analysis_preset:quality || analysis_preset:temporal)",
                 clearWith=list(
                     "analysis_preset")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="warnings",
                 title="Warnings",
-                visible=TRUE,
+                visible=FALSE,
                 clearWith=list(
                     "x_var",
                     "y_var",
                     "fill_var",
                     "facet_var",
+                    "analysis_preset",
                     "exclude_missing",
                     "y_is_count",
                     "show_statistical_tests")))
@@ -640,7 +653,7 @@ jjsegmentedtotalbarResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6:
                 options=options,
                 name="explanations",
                 title="Explanations",
-                visible=FALSE,
+                visible="(showExplanations)",
                 clearWith=list(
                     "showExplanations")))}))
 
@@ -668,10 +681,35 @@ jjsegmentedtotalbarBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
 #' Segmented Total Bar Charts
 #'
 #' Create segmented total bar charts (100 percent stacked bars) that show 
-#' proportional 
-#' breakdowns within categories. Perfect for displaying composition data where 
-#' each bar represents 100 percent and segments show relative proportions.
+#' proportional breakdowns within categories. Designed for displaying 
+#' composition data where each bar represents 100 percent and segments show 
+#' relative proportions.
 #' 
+#'
+#' @examples
+#' \donttest{
+#' # Basic 100 percent stacked bar chart of clinical response by treatment arm
+#' data(jjsegmentedtotalbar_test)
+#' jjsegmentedtotalbar(
+#'     data = jjsegmentedtotalbar_test,
+#'     x_var = "treatment",
+#'     y_var = "tumor_response_score",
+#'     fill_var = "response_category",
+#'     show_plot = TRUE,
+#'     show_percentages = TRUE
+#' )
+#'
+#' # Count-affirmed contingency chi-square test on patient demographics
+#' data(jjsegmentedtotalbar_demographics)
+#' jjsegmentedtotalbar(
+#'     data = jjsegmentedtotalbar_demographics,
+#'     x_var = "treatment_center",
+#'     y_var = "patient_count",
+#'     fill_var = "ecog_performance_status",
+#'     y_is_count = TRUE,
+#'     show_statistical_tests = TRUE
+#' )
+#'}
 #' @param data The data as a data frame.
 #' @param analysis_preset Predefined clinical analysis configurations.
 #' @param x_var Categorical variable for x-axis categories.
@@ -716,7 +754,7 @@ jjsegmentedtotalbarBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
 #' @param confidence_level Confidence level for statistical tests (0.80-0.99).
 #' @param exclude_missing Whether to exclude rows with missing values in key
 #'   variables.
-#' @param showExplanations Show explanations of the statistical results
+#' @param showExplanations Show explanations of the statistical results.
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$instructions} \tab \tab \tab \tab \tab a html \cr

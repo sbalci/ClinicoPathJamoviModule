@@ -828,9 +828,9 @@ test_that("[C38] asSource() and .effectiveOptionsList() harden against injected 
     ratio = '0.5,0.5"); system("id"); ("'
   )
   # Simulate tampered .omv option values and an undeclared option
-  opts$.__enclos_env__$private$.options$typestatistics$.__enclos_env__$private$.value <- 'bayes"); system("id"); ("'
+  opts$.__enclos_env__$private$..typestatistics$.__enclos_env__$private$.value <- 'bayes"); system("id"); ("'
   evil_opt <- jmvcore::OptionString$new("evil_injected", value = 'y"); system("id"); ("', default = "")
-  opts$.__enclos_env__$private$.AddOption(evil_opt)
+  opts$.addOption(evil_opt)
 
   a <- ClinicoPath:::jjpiestatsClass$new(options = opts, data = d_a4_val)
   src <- a$asSource()
@@ -850,9 +850,9 @@ test_that("[C38] asSource() and .effectiveOptionsList() harden against injected 
   expect_false("system" %in% call_heads)
 
   # Out-of-range numeric and enum options clamp to safe defaults in .effectiveOptionsList()
-  opts$.__enclos_env__$private$.options$conflevel$.__enclos_env__$private$.value <- 2.5
-  opts$.__enclos_env__$private$.options$digits$.__enclos_env__$private$.value <- -3L
-  opts$.__enclos_env__$private$.options$label$.__enclos_env__$private$.value <- "invalid_label"
+  opts$.__enclos_env__$private$..conflevel$.__enclos_env__$private$.value <- 2.5
+  opts$.__enclos_env__$private$..digits$.__enclos_env__$private$.value <- -3L
+  opts$.__enclos_env__$private$..label$.__enclos_env__$private$.value <- "invalid_label"
   eff <- a$.__enclos_env__$private$.effectiveOptionsList()
   expect_identical(eff$typestatistics, "parametric")
   expect_identical(eff$label, "percentage")

@@ -8,16 +8,34 @@ version: '1.0.81'
 jas: '1.2'
 
 description:
-    main: |
-        Create segmented total bar charts (100 percent stacked bars) that show proportional 
-        breakdowns within categories. Perfect for displaying composition data where 
+    main: >
+        Create segmented total bar charts (100 percent stacked bars) that show proportional
+        breakdowns within categories. Designed for displaying composition data where
         each bar represents 100 percent and segments show relative proportions.
-    # R:
-    #     dontrun: true
-    #     usage: |
-    #         # Example usage for segmented total bar charts:
-    #         # Shows proportional composition within categories
-    #         # Each bar totals to 100 percent with segments showing relative proportions
+    R:
+        dontrun: true
+        usage: |
+            # Basic 100 percent stacked bar chart of clinical response by treatment arm
+            data(jjsegmentedtotalbar_test)
+            jjsegmentedtotalbar(
+                data = jjsegmentedtotalbar_test,
+                x_var = "treatment",
+                y_var = "tumor_response_score",
+                fill_var = "response_category",
+                show_plot = TRUE,
+                show_percentages = TRUE
+            )
+
+            # Count-affirmed contingency chi-square test on patient demographics
+            data(jjsegmentedtotalbar_demographics)
+            jjsegmentedtotalbar(
+                data = jjsegmentedtotalbar_demographics,
+                x_var = "treatment_center",
+                y_var = "patient_count",
+                fill_var = "ecog_performance_status",
+                y_is_count = TRUE,
+                show_statistical_tests = TRUE
+            )
 
 options:
     - name: data
@@ -112,6 +130,8 @@ options:
       title: "Chart Style"
       type: List
       options:
+        - title: "jamovi Default"
+          name: jamovi
         - title: "Clean & Modern"
           name: clean
         - title: "Publication Ready"
@@ -133,6 +153,8 @@ options:
       title: "Color Palette"
       type: List
       options:
+        - title: "jamovi (Follow Global)"
+          name: jamovi
         - title: "Default ggplot2"
           name: default
         - title: "Viridis"
@@ -192,7 +214,7 @@ options:
         jamovi: Show raw count values in addition to percentages.
 
     - name: label_threshold
-      title: "Min Segment Size for Labels ( percent)"
+      title: "Min Segment Size for Labels (percent)"
       type: Number
       min: 0
       max: 50
@@ -346,7 +368,7 @@ options:
         jamovi: Optimize plot for publication/presentation export.
 
     - name: flerlage_show_labels
-      title: "Value labels (flerlage)"
+      title: "Value labels (Flerlage)"
       type: Bool
       default: false
       description:
@@ -456,7 +478,5 @@ options:
       type: Bool
       default: false
       description:
-          ui: >
-            Show explanations of the statistical results
-          R: >
-            Show explanations of the statistical results
+        R: Show explanations of the statistical results.
+        jamovi: Show explanations of the statistical results.

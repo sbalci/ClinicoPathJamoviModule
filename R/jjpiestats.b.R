@@ -67,6 +67,9 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         .init = function() {
 
             self$results$plot1$setSize(650, 450)
+            if (isTRUE(self$options$paired)) {
+                self$results$plot1$setVisible(FALSE)
+            }
 
             self$results$plot2$setSize(650, 450)
 
@@ -127,7 +130,7 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 "custom"
             }
 
-            valid_palettes <- c("jco", "npg", "aaas", "lancet", "jama", "nejm")
+            valid_palettes <- c("jco", "npg", "lancet")
             ggpubrDonutPalette <- if (isTRUE(self$options$ggpubrDonutPalette %in% valid_palettes)) {
                 self$options$ggpubrDonutPalette
             } else {
@@ -225,8 +228,9 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # showSummary/showAssumptions/showInterpretation toggles render empty
             # panels whenever 'showexplanations' was off. 'showexplanations' now
             # acts as a master switch that also reveals the granular panels.
+            opts <- private$.effectiveOptionsList()
             show_expl <- isTRUE(self$options$showexplanations)
-            preset_active <- !identical(self$options$clinicalpreset %||% "custom", "custom")
+            preset_active <- !identical(opts$clinicalpreset, "custom")
             panel_data <- prepared_data %||% self$data
 
             # Generate About content
@@ -272,7 +276,7 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         },
         
         .generateAboutContent = function() {
-            preset_info <- switch(self$options$clinicalpreset %||% "custom",
+            preset_info <- switch(private$.effectiveOptionsList()$clinicalpreset,
                 "diagnostic" = .('This analysis is configured for diagnostic test evaluation using 2\u00d72 contingency table association testing and within-group proportion tests (place the reference standard in Grouping Variable and the index test in Dependent Variable so within-group slice proportions represent sensitivity and specificity).'),
                 "treatment" = .('This analysis is optimized for treatment response comparison across multiple treatment groups.'), 
                 "biomarker" = .('This analysis is configured for biomarker distribution analysis across groups, displaying both counts and percentages with contingency table association testing.'),
@@ -478,9 +482,10 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         .generateInterpretationContent = function() {
             # Paired runs show McNemar's test, whatever the frequentist type: the
             # chi-square, expected-count and Fisher guidance below does not apply.
+            opts <- private$.effectiveOptionsList()
             method_guidance <- if (private$.isMcNemar())
                 .('McNemar\'s test compares the pairs that changed in one direction with those that changed in the other. p < 0.05 indicates that the proportion differs between the paired measurements. The expected-count rule does not apply, and no exact p-value replaces the result on the chart.')
-            else switch(private$.effectiveOptionsList()$typestatistics,
+            else switch(opts$typestatistics,
                 "parametric" = .('Chi-square test results show whether group differences are statistically significant. Look for p-values < 0.05 for significant associations. Example: \u03c7\u00b2(1) = 5.2, p = 0.023 indicates significant difference between groups.'),
                 # For a contingency table, ggstatsplot computes the SAME Pearson
                 # chi-square for parametric, nonparametric and robust - it offers no
@@ -492,7 +497,7 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 .('Statistical analysis will be performed based on your data characteristics.')
             )
 
-            clinical_context <- switch(self$options$clinicalpreset %||% "custom",
+            clinical_context <- switch(opts$clinicalpreset,
                 "diagnostic" = .('For diagnostic tests: Focus on sensitivity (true positive rate) and specificity (true negative rate). Example: Sensitivity = 85% means test correctly identifies 85 out of 100 diseased patients. Specificity = 92% means test correctly identifies 92 out of 100 healthy individuals. PPV and NPV depend on disease prevalence in your population.'),
                 "treatment" = .('For treatment response: Look for significant differences between treatment arms. Example: 45% response in Treatment A vs 25% in Treatment B (p = 0.012, Cram\u00e9r\'s V = 0.31) indicates a moderate effect size. Whether a difference of this magnitude matters for patients is a judgement about the outcome, not a property of the statistic; on the count scale the same contrast is an absolute risk difference of 20 percentage points, i.e. a number needed to treat of 1/0.20 = 5.'),
                 "biomarker" = .('For biomarker analysis: Examine distribution patterns across patient groups. Example: High biomarker expression in 65% of responders vs 30% in non-responders (p < 0.001, OR = 4.3, 95% CI 2.1 to 8.7) describes an association between expression and response in this sample. A cross-sectional association does not establish predictive value; that requires evaluation in an independent cohort.'),
@@ -1238,19 +1243,12 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         # length, so a mismatched vector (e.g. "0.5,0.5" for a 3-level outcome)
         # would otherwise be passed straight to ggpiestats(ratio=...) and error
         # inside the statsExpressions goodness-of-fit test. On mismatch, fall back
-        # to NULL (equal theoretical proportions) and tell the user why.
+        # to NULL (equal theoretical proportions); .emitRunNotices() reports why
+        # during .run() so plot renderers stay free of notice side effects.
         .applyRatioLengthGuard = function(ratio, data, dep) {
             if (is.null(ratio) || is.null(dep) || is.null(data[[dep]])) return(ratio)
             n_lev <- nlevels(droplevels(as.factor(data[[dep]])))
             if (length(ratio) != n_lev) {
-                private$.addNotice(
-                    "WARNING",
-                    .('Expected proportions ignored'),
-                    sprintf(
-                        .('You supplied %d expected proportion(s), but the outcome variable has %d level(s). The number of expected proportions must match the number of outcome categories. Falling back to equal theoretical proportions.'),
-                        length(ratio), n_lev
-                    )
-                )
                 return(NULL)
             }
             ratio
@@ -1321,10 +1319,19 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 else if (abs(sum(vals) - 1) > 0.001)
                     ignored(sprintf(.('\'%s\' sums to %s, but expected proportions must sum to 1.'),
                                     raw, formatC(sum(vals), format = "f", digits = 3)))
-                else
-                    # Valid numbers: the remaining failure is a length mismatch,
-                    # which .applyRatioLengthGuard reports.
-                    invisible(private$.applyRatioLengthGuard(vals, prepared_data, dep))
+                else if (!is.null(dep) && !is.null(prepared_data[[dep]])) {
+                    n_lev <- nlevels(droplevels(as.factor(prepared_data[[dep]])))
+                    if (length(vals) != n_lev) {
+                        private$.addNotice(
+                            "WARNING",
+                            .('Expected proportions ignored'),
+                            sprintf(
+                                .('You supplied %d expected proportion(s), but the outcome variable has %d level(s). The number of expected proportions must match the number of outcome categories. Falling back to equal theoretical proportions.'),
+                                length(vals), n_lev
+                            )
+                        )
+                    }
+                }
             }
 
             # A pie chart encodes proportion as angle, which readers compare poorly
@@ -1582,8 +1589,9 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     }
                     
                     # Performance warnings
+                    eff_opts <- private$.effectiveOptionsList()
                     perf_warning <- ""
-                    if (self$options$typestatistics == "bayes") {
+                    if (identical(eff_opts$typestatistics, "bayes")) {
                         perf_warning <- paste0("<br> <b>", .('Performance Note:'), "</b> ", .('Bayesian analysis is computationally intensive.'), "<br>")
                     }
                     
@@ -1607,7 +1615,7 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     todo <- glue::glue(
                         "<br>{ready_msg} {dep_info}{group_info}{split_info}.<br>
                         <br>{data_msg}: {obs_count} {obs_msg}{cache_status}.<br>
-                        <br>{method_msg}: {if (private$.isMcNemar()) 'McNemar' else tools::toTitleCase(private$.effectiveOptionsList()$typestatistics)} {analysis_msg}.<br>
+                        <br>{method_msg}: {if (private$.isMcNemar()) 'McNemar' else tools::toTitleCase(eff_opts$typestatistics)} {analysis_msg}.<br>
                         {perf_warning}
                         {if(prep_time > 0.1) paste0('<br>', prep_time_msg, ': ', prep_time, ' ', seconds_msg, '.<br>') else ''}
                         <hr>",

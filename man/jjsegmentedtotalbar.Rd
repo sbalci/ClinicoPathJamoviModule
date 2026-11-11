@@ -125,7 +125,7 @@ proportion differences.}
 \item{exclude_missing}{Whether to exclude rows with missing values in key
 variables.}
 
-\item{showExplanations}{Show explanations of the statistical results}
+\item{showExplanations}{Show explanations of the statistical results.}
 }
 \value{
 A results object containing:
@@ -151,7 +151,32 @@ Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.f
 }
 \description{
 Create segmented total bar charts (100 percent stacked bars) that show
-proportional
-breakdowns within categories. Perfect for displaying composition data where
-each bar represents 100 percent and segments show relative proportions.
+proportional breakdowns within categories. Designed for displaying
+composition data where each bar represents 100 percent and segments show
+relative proportions.
+}
+\examples{
+\donttest{
+# Basic 100 percent stacked bar chart of clinical response by treatment arm
+data(jjsegmentedtotalbar_test)
+jjsegmentedtotalbar(
+    data = jjsegmentedtotalbar_test,
+    x_var = "treatment",
+    y_var = "tumor_response_score",
+    fill_var = "response_category",
+    show_plot = TRUE,
+    show_percentages = TRUE
+)
+
+# Count-affirmed contingency chi-square test on patient demographics
+data(jjsegmentedtotalbar_demographics)
+jjsegmentedtotalbar(
+    data = jjsegmentedtotalbar_demographics,
+    x_var = "treatment_center",
+    y_var = "patient_count",
+    fill_var = "ecog_performance_status",
+    y_is_count = TRUE,
+    show_statistical_tests = TRUE
+)
+}
 }

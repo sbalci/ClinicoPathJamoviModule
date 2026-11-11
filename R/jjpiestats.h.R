@@ -371,7 +371,7 @@ jjpiestatsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 height=300,
                 renderFun=".plot1",
                 requiresData=TRUE,
-                visible="(dep)"))
+                visible="(length(dep) > 0 && paired == FALSE)"))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="donutPlot",

@@ -62,6 +62,21 @@ reportcatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 # backtick-quoted, which would break the data[[ ]] lookups.)
                 myvars <- unlist(self$options$vars)
 
+                # A genuine NA factor level is missing data, even when is.na(x)
+                # sees its stored integer code as observed. Normalize the local
+                # copy before validation and every summary; keep literal "NA".
+                for (var in myvars) {
+                    x <- mydata[[var]]
+                    if (is.factor(x) && anyNA(levels(x))) {
+                        old_levels <- levels(x)
+                        values <- attr(x, "values", exact = TRUE)
+                        levels(x) <- old_levels
+                        if (!is.null(values) && length(values) == length(old_levels))
+                            attr(x, "values") <- values[!is.na(old_levels)]
+                        mydata[[var]] <- x
+                    }
+                }
+
                 # No not-in-data check here: jmvcore rejects unknown variable
                 # names by name before .run() is entered (wrapper and GUI alike),
                 # so such a branch is unreachable - see the "handles missing
