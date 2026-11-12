@@ -1,19 +1,14 @@
 ---
 name: advancedraincloud
 title: Advanced Raincloud Plot
-menuGroup: JJStatsPlot
+menuGroup: JJStatsPlotT
 menuSubgroup: Categorical vs Continuous
 version: '1.0.81'
 jas: '1.2'
 
 description:
-  main: |
-    Creates advanced raincloud plots with longitudinal connections using ggrain package.
-    This module complements the existing Raincloud Plot module by providing advanced 
-    features including longitudinal data connections, Likert scale support, and flexible
-    raincloud positioning. Perfect for repeated measures data, survey analysis, and 
-    complex distribution visualization in clinical research. Uses the ggrain package
-    for enhanced customization and connectivity features.
+  main: >
+    Creates advanced raincloud plots with longitudinal connections using ggrain package. This module complements the existing Raincloud Plot module by providing advanced features including longitudinal data connections, Likert scale support, and flexible raincloud positioning. Perfect for repeated measures data, survey analysis, and complex distribution visualization in clinical research. Uses the ggrain package for enhanced customization and connectivity features.
   # R:
   #   dontrun: true
   #   usage: |
@@ -145,7 +140,7 @@ options:
       title: Point Size
       type: Number
       min: 0.1
-      max: 5
+      max: 10
       default: 1.5
       description:
         R: >
@@ -174,7 +169,7 @@ options:
     - name: boxplot_width
       title: Boxplot Width
       type: Number
-      min: 0.1
+      min: 0.01
       max: 1
       default: 0.1
       description:
@@ -193,6 +188,8 @@ options:
       title: Color Palette
       type: List
       options:
+        - title: "jamovi (Follow Global)"
+          name: jamovi
         - title: "Clinical"
           name: clinical
         - title: "Viridis"
@@ -237,7 +234,7 @@ options:
     - name: show_statistics
       title: Summary statistics
       type: Bool
-      default: true
+      default: false
       description:
         R: >
           If TRUE, displays summary statistics table.
@@ -253,14 +250,14 @@ options:
     - name: show_interpretation
       title: Usage guide
       type: Bool
-      default: true
+      default: false
       description:
         R: >
           If TRUE, displays interpretation and feature guide.
 
     # Clinical Significance Options
     - name: show_clinical_cutoff
-      title: Show Clinical Cutoff
+      title: Clinical cutoff line
       type: Bool
       default: false
       description:
@@ -276,7 +273,7 @@ options:
           Add horizontal line for clinical threshold or decision boundary.
 
     - name: show_reference_range
-      title: Show Reference Range
+      title: Reference range band
       type: Bool
       default: false
       description:
@@ -357,8 +354,10 @@ options:
           Name or level of the baseline/reference group.
           
     - name: responder_threshold
-      title: Response Threshold ( percent)
+      title: Response Threshold (%)
       type: Number
+      min: -100
+      max: 100
       default: 20
       description:
         R: >
@@ -368,7 +367,7 @@ options:
     - name: show_sample_size
       title: Sample sizes
       type: Bool
-      default: true
+      default: false
       description:
         R: >
           Show sample size (N) for each group on the plot.
@@ -516,7 +515,7 @@ options:
           Generate comprehensive clinical analysis report.
           
     - name: include_methods
-      title: Include methods text
+      title: Methods section text
       type: Bool
       default: false
       description:

@@ -35,14 +35,16 @@
 | `violin_alpha` | `Number` | `0.7` | Violin Transparency |
 | `boxplot_width` | `Number` | `0.1` | Boxplot Width |
 | `jitter_seed` | `Number` | `42` | Jitter Seed |
-| `color_palette` | `List` | `clinical` | Color Palette |
+| `color_palette` | `List` | `clinical` | Color Palette (`jamovi`, `clinical`, `viridis`, `set1`, `set2`, `pastel`, `dark2`) |
 | `plot_title` | `String` | `Advanced Raincloud Plot` | Plot Title |
 | `x_label` | `String` | `` | X-Axis Label |
 | `y_label` | `String` | `` | Y-Axis Label |
-| `show_statistics` | `Bool` | `TRUE` | Summary statistics |
+| `show_statistics` | `Bool` | `FALSE` | Summary statistics |
 | `show_comparisons` | `Bool` | `FALSE` | Group comparisons |
-| `show_interpretation` | `Bool` | `TRUE` | Usage guide |
+| `show_interpretation` | `Bool` | `FALSE` | Usage guide |
+| `show_clinical_cutoff` | `Bool` | `FALSE` | Clinical cutoff line |
 | `clinical_cutoff` | `Number` | `0` | Clinical Cutoff Value |
+| `show_reference_range` | `Bool` | `FALSE` | Reference range band |
 | `reference_range_min` | `Number` | `0` | Reference Range Minimum |
 | `reference_range_max` | `Number` | `0` | Reference Range Maximum |
 | `show_mcid` | `Bool` | `FALSE` | MCID band |
@@ -51,8 +53,8 @@
 | `effect_size_type` | `List` | `cohens_d` | Effect Size Type |
 | `show_change_scores` | `Bool` | `FALSE` | Change analysis |
 | `baseline_group` | `String` | `` | Baseline Group Identifier |
-| `responder_threshold` | `Number` | `20` | Response Threshold ( percent) |
-| `show_sample_size` | `Bool` | `TRUE` | Sample sizes |
+| `responder_threshold` | `Number` | `20` | Response Threshold (%) |
+| `show_sample_size` | `Bool` | `FALSE` | Sample sizes |
 | `show_missing_info` | `Bool` | `FALSE` | Missing data info |
 | `trial_arms` | `String` | `` | Treatment Arm Labels |
 | `time_labels` | `String` | `` | Time Point Labels |
@@ -65,7 +67,7 @@
 | `p_value_position` | `List` | `above` | P-value Display Position |
 | `journal_style` | `List` | `default` | Journal Style Format |
 | `generate_report` | `Bool` | `FALSE` | Clinical report |
-| `include_methods` | `Bool` | `FALSE` | Include methods text |
+| `include_methods` | `Bool` | `FALSE` | Methods section text |
 
 ## 3. Results Definition (`.r.yaml`)
 

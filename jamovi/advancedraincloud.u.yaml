@@ -56,13 +56,59 @@ children:
             name: likert_mode
           - type: CheckBox
             name: show_longitudinal
+          - type: CheckBox
+            name: show_sample_size
   - type: CollapseBox
-    label: Clinical Significance
+    label: Analysis & Comparisons
+    collapsed: false
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: CheckBox
+            name: show_statistics
+          - type: CheckBox
+            name: show_missing_info
+          - type: CheckBox
+            name: show_comparisons
+          - type: ComboBox
+            name: p_value_position
+            enable: (show_comparisons)
+          - type: CheckBox
+            name: show_effect_size
+          - type: ComboBox
+            name: effect_size_type
+            enable: (show_effect_size)
+          - type: CheckBox
+            name: show_interpretation
+  - type: CollapseBox
+    label: Longitudinal Change Analysis
     collapsed: true
     children:
       - type: LayoutBox
         margin: large
         children:
+          - type: CheckBox
+            name: show_change_scores
+          - type: TextBox
+            name: baseline_group
+            format: string
+            enable: (show_change_scores)
+          - type: TextBox
+            name: responder_threshold
+            format: number
+            enable: (show_change_scores)
+  - type: CollapseBox
+    label: Clinical Thresholds & Biomarkers
+    collapsed: true
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: CheckBox
+            name: log_transform
+          - type: ComboBox
+            name: outlier_method
           - type: CheckBox
             name: show_clinical_cutoff
           - type: TextBox
@@ -85,65 +131,6 @@ children:
             name: mcid_value
             format: number
             enable: (show_mcid)
-  - type: CollapseBox
-    label: Effect Size & Comparisons
-    collapsed: true
-    children:
-      - type: LayoutBox
-        margin: large
-        children:
-          - type: CheckBox
-            name: show_effect_size
-          - type: ComboBox
-            name: effect_size_type
-            enable: (show_effect_size)
-          - type: CheckBox
-            name: show_change_scores
-          - type: TextBox
-            name: baseline_group
-            format: string
-            enable: (show_change_scores)
-          - type: TextBox
-            name: responder_threshold
-            format: number
-            enable: (show_change_scores)
-  - type: CollapseBox
-    label: Sample Size & Data Info
-    collapsed: true
-    children:
-      - type: LayoutBox
-        margin: large
-        children:
-          - type: CheckBox
-            name: show_sample_size
-          - type: CheckBox
-            name: show_missing_info
-  - type: CollapseBox
-    label: Clinical Trial Settings
-    collapsed: true
-    children:
-      - type: LayoutBox
-        margin: large
-        children:
-          - type: TextBox
-            name: trial_arms
-            format: string
-          - type: TextBox
-            name: time_labels
-            format: string
-          - type: ComboBox
-            name: population_type
-  - type: CollapseBox
-    label: Biomarker Analysis
-    collapsed: true
-    children:
-      - type: LayoutBox
-        margin: large
-        children:
-          - type: CheckBox
-            name: log_transform
-          - type: ComboBox
-            name: outlier_method
           - type: CheckBox
             name: show_cv_bands
           - type: TextBox
@@ -155,12 +142,35 @@ children:
             format: number
             enable: (show_cv_bands)
   - type: CollapseBox
-    label: Visual Appearance
+    label: Clinical Trial & Publication
     collapsed: true
     children:
       - type: LayoutBox
         margin: large
         children:
+          - type: ComboBox
+            name: population_type
+          - type: TextBox
+            name: trial_arms
+            format: string
+          - type: TextBox
+            name: time_labels
+            format: string
+          - type: ComboBox
+            name: journal_style
+          - type: CheckBox
+            name: generate_report
+          - type: CheckBox
+            name: include_methods
+  - type: CollapseBox
+    label: Visual Appearance & Labels
+    collapsed: true
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: ComboBox
+            name: color_palette
           - type: TextBox
             name: point_size
             format: number
@@ -173,18 +183,9 @@ children:
           - type: TextBox
             name: boxplot_width
             format: number
-          - type: ComboBox
-            name: color_palette
           - type: TextBox
             name: jitter_seed
             format: number
-  - type: CollapseBox
-    label: Labels & Titles
-    collapsed: true
-    children:
-      - type: LayoutBox
-        margin: large
-        children:
           - type: TextBox
             name: plot_title
             format: string
@@ -194,31 +195,3 @@ children:
           - type: TextBox
             name: y_label
             format: string
-  - type: CollapseBox
-    label: Publication & Export
-    collapsed: true
-    children:
-      - type: LayoutBox
-        margin: large
-        children:
-          - type: ComboBox
-            name: p_value_position
-          - type: ComboBox
-            name: journal_style
-          - type: CheckBox
-            name: generate_report
-          - type: CheckBox
-            name: include_methods
-  - type: CollapseBox
-    label: Analysis & Output
-    collapsed: false
-    children:
-      - type: LayoutBox
-        margin: large
-        children:
-          - type: CheckBox
-            name: show_statistics
-          - type: CheckBox
-            name: show_comparisons
-          - type: CheckBox
-            name: show_interpretation

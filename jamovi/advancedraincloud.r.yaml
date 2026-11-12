@@ -21,7 +21,9 @@ clearWith:
     - plot_title
     - x_label
     - y_label
+    - show_clinical_cutoff
     - clinical_cutoff
+    - show_reference_range
     - reference_range_min
     - reference_range_max
     - show_mcid
@@ -72,7 +74,7 @@ items:
     - name: statistics
       title: Summary Statistics
       type: Html
-      visible: (show_statistics)
+      visible: (show_statistics || show_missing_info)
 
     - name: comparisons
       title: Group Comparisons
@@ -88,6 +90,8 @@ items:
       title: Effect Size Analysis
       type: Html
       visible: (show_effect_size)
+      refs:
+          - Cohen1988
 
     - name: change_analysis
       title: Change Score Analysis
@@ -109,6 +113,7 @@ refs:
     - ClinicoPathJamoviModule
     - ggplot2
     - ggrain
+    - RColorBrewer
     - viridis
     - viridisLite
 ...

@@ -25,12 +25,14 @@
 | `plot_title` | UI Control `plot_title` | `self$options$plot_title` | Output item / Table |
 | `x_label` | UI Control `x_label` | `self$options$x_label` | Output item / Table |
 | `y_label` | UI Control `y_label` | `self$options$y_label` | Output item / Table |
-| `show_statistics` | UI Control `show_statistics` | `self$options$show_statistics` | Output item / Table |
-| `show_comparisons` | UI Control `show_comparisons` | `self$options$show_comparisons` | Output item / Table |
-| `show_interpretation` | UI Control `show_interpretation` | `self$options$show_interpretation` | Output item / Table |
-| `clinical_cutoff` | UI Control `clinical_cutoff` | `self$options$clinical_cutoff` | Output item / Table |
-| `reference_range_min` | UI Control `reference_range_min` | `self$options$reference_range_min` | Output item / Table |
-| `reference_range_max` | UI Control `reference_range_max` | `self$options$reference_range_max` | Output item / Table |
+| `show_statistics` | UI Control `show_statistics` | `self$options$show_statistics` | `self$results$statistics` |
+| `show_comparisons` | UI Control `show_comparisons` | `self$options$show_comparisons` | `self$results$comparisons` |
+| `show_interpretation` | UI Control `show_interpretation` | `self$options$show_interpretation` | `self$results$interpretation` |
+| `show_clinical_cutoff` | UI Control `show_clinical_cutoff` | `self$options$show_clinical_cutoff` | `self$results$plot` |
+| `clinical_cutoff` | UI Control `clinical_cutoff` | `self$options$clinical_cutoff` | `self$results$plot` |
+| `show_reference_range` | UI Control `show_reference_range` | `self$options$show_reference_range` | `self$results$plot` |
+| `reference_range_min` | UI Control `reference_range_min` | `self$options$reference_range_min` | `self$results$plot` |
+| `reference_range_max` | UI Control `reference_range_max` | `self$options$reference_range_max` | `self$results$plot` |
 | `show_mcid` | UI Control `show_mcid` | `self$options$show_mcid` | Output item / Table |
 | `mcid_value` | UI Control `mcid_value` | `self$options$mcid_value` | Output item / Table |
 | `show_effect_size` | UI Control `show_effect_size` | `self$options$show_effect_size` | Output item / Table |
