@@ -11,7 +11,6 @@
 #' @importFrom stats wilcox.test kruskal.test complete.cases quantile median sd aggregate qnorm setNames
 #' @importFrom RColorBrewer brewer.pal
 #' @importFrom viridis viridis
-#' @importFrom htmltools htmlEscape
 advancedraincloudClass <- if (requireNamespace("jmvcore")) {
     R6::R6Class("advancedraincloudClass",
         inherit = advancedraincloudBase,

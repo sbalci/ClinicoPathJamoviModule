@@ -23,9 +23,9 @@ advancedraincloud(
   plot_title = "Advanced Raincloud Plot",
   x_label = "",
   y_label = "",
-  show_statistics = TRUE,
+  show_statistics = FALSE,
   show_comparisons = FALSE,
-  show_interpretation = TRUE,
+  show_interpretation = FALSE,
   show_clinical_cutoff = FALSE,
   clinical_cutoff = 0,
   show_reference_range = FALSE,
@@ -38,7 +38,7 @@ advancedraincloud(
   show_change_scores = FALSE,
   baseline_group = "",
   responder_threshold = 20,
-  show_sample_size = TRUE,
+  show_sample_size = FALSE,
   show_missing_info = FALSE,
   trial_arms = "",
   time_labels = "",
@@ -186,14 +186,10 @@ A results object containing:
 }
 \description{
 Creates advanced raincloud plots with longitudinal connections using ggrain
-package.
-This module complements the existing Raincloud Plot module by providing
-advanced
-features including longitudinal data connections, Likert scale support, and
-flexible
-raincloud positioning. Perfect for repeated measures data, survey analysis,
-and
-complex distribution visualization in clinical research. Uses the ggrain
-package
-for enhanced customization and connectivity features.
+package. This module complements the existing Raincloud Plot module by
+providing advanced features including longitudinal data connections, Likert
+scale support, and flexible raincloud positioning. Perfect for repeated
+measures data, survey analysis, and complex distribution visualization in
+clinical research. Uses the ggrain package for enhanced customization and
+connectivity features.
 }

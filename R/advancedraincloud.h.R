@@ -23,9 +23,9 @@ advancedraincloudOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
             plot_title = "Advanced Raincloud Plot",
             x_label = "",
             y_label = "",
-            show_statistics = TRUE,
+            show_statistics = FALSE,
             show_comparisons = FALSE,
-            show_interpretation = TRUE,
+            show_interpretation = FALSE,
             show_clinical_cutoff = FALSE,
             clinical_cutoff = 0,
             show_reference_range = FALSE,
@@ -38,7 +38,7 @@ advancedraincloudOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
             show_change_scores = FALSE,
             baseline_group = "",
             responder_threshold = 20,
-            show_sample_size = TRUE,
+            show_sample_size = FALSE,
             show_missing_info = FALSE,
             trial_arms = "",
             time_labels = "",
@@ -131,7 +131,7 @@ advancedraincloudOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
                 "point_size",
                 point_size,
                 min=0.1,
-                max=5,
+                max=10,
                 default=1.5)
             private$..point_alpha <- jmvcore::OptionNumber$new(
                 "point_alpha",
@@ -148,7 +148,7 @@ advancedraincloudOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
             private$..boxplot_width <- jmvcore::OptionNumber$new(
                 "boxplot_width",
                 boxplot_width,
-                min=0.1,
+                min=0.01,
                 max=1,
                 default=0.1)
             private$..jitter_seed <- jmvcore::OptionNumber$new(
@@ -159,6 +159,7 @@ advancedraincloudOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
                 "color_palette",
                 color_palette,
                 options=list(
+                    "jamovi",
                     "clinical",
                     "viridis",
                     "set1",
@@ -181,7 +182,7 @@ advancedraincloudOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
             private$..show_statistics <- jmvcore::OptionBool$new(
                 "show_statistics",
                 show_statistics,
-                default=TRUE)
+                default=FALSE)
             private$..show_comparisons <- jmvcore::OptionBool$new(
                 "show_comparisons",
                 show_comparisons,
@@ -189,7 +190,7 @@ advancedraincloudOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
             private$..show_interpretation <- jmvcore::OptionBool$new(
                 "show_interpretation",
                 show_interpretation,
-                default=TRUE)
+                default=FALSE)
             private$..show_clinical_cutoff <- jmvcore::OptionBool$new(
                 "show_clinical_cutoff",
                 show_clinical_cutoff,
@@ -241,11 +242,13 @@ advancedraincloudOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
             private$..responder_threshold <- jmvcore::OptionNumber$new(
                 "responder_threshold",
                 responder_threshold,
+                min=-100,
+                max=100,
                 default=20)
             private$..show_sample_size <- jmvcore::OptionBool$new(
                 "show_sample_size",
                 show_sample_size,
-                default=TRUE)
+                default=FALSE)
             private$..show_missing_info <- jmvcore::OptionBool$new(
                 "show_missing_info",
                 show_missing_info,
@@ -492,6 +495,7 @@ advancedraincloudResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
                     "ClinicoPathJamoviModule",
                     "ggplot2",
                     "ggrain",
+                    "RColorBrewer",
                     "viridis",
                     "viridisLite"),
                 clearWith=list(
@@ -512,7 +516,9 @@ advancedraincloudResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
                     "plot_title",
                     "x_label",
                     "y_label",
+                    "show_clinical_cutoff",
                     "clinical_cutoff",
+                    "show_reference_range",
                     "reference_range_min",
                     "reference_range_max",
                     "show_mcid",
@@ -559,7 +565,7 @@ advancedraincloudResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
                 options=options,
                 name="statistics",
                 title="Summary Statistics",
-                visible="(show_statistics)"))
+                visible="(show_statistics || show_missing_info)"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="comparisons",
@@ -574,7 +580,9 @@ advancedraincloudResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
                 options=options,
                 name="effect_sizes",
                 title="Effect Size Analysis",
-                visible="(show_effect_size)"))
+                visible="(show_effect_size)",
+                refs=list(
+                    "Cohen1988")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="change_analysis",
@@ -615,16 +623,12 @@ advancedraincloudBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
 #' Advanced Raincloud Plot
 #'
 #' Creates advanced raincloud plots with longitudinal connections using ggrain 
-#' package.
-#' This module complements the existing Raincloud Plot module by providing 
-#' advanced 
-#' features including longitudinal data connections, Likert scale support, and 
-#' flexible
-#' raincloud positioning. Perfect for repeated measures data, survey analysis, 
-#' and 
-#' complex distribution visualization in clinical research. Uses the ggrain 
-#' package
-#' for enhanced customization and connectivity features.
+#' package. This module complements the existing Raincloud Plot module by 
+#' providing advanced features including longitudinal data connections, Likert 
+#' scale support, and flexible raincloud positioning. Perfect for repeated 
+#' measures data, survey analysis, and complex distribution visualization in 
+#' clinical research. Uses the ggrain package for enhanced customization and 
+#' connectivity features.
 #' 
 #' @param data The data as a data frame.
 #' @param y_var Continuous variable for distribution visualization on Y-axis.
@@ -727,9 +731,9 @@ advancedraincloud <- function(
     plot_title = "Advanced Raincloud Plot",
     x_label = "",
     y_label = "",
-    show_statistics = TRUE,
+    show_statistics = FALSE,
     show_comparisons = FALSE,
-    show_interpretation = TRUE,
+    show_interpretation = FALSE,
     show_clinical_cutoff = FALSE,
     clinical_cutoff = 0,
     show_reference_range = FALSE,
@@ -742,7 +746,7 @@ advancedraincloud <- function(
     show_change_scores = FALSE,
     baseline_group = "",
     responder_threshold = 20,
-    show_sample_size = TRUE,
+    show_sample_size = FALSE,
     show_missing_info = FALSE,
     trial_arms = "",
     time_labels = "",

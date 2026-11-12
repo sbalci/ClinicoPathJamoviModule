@@ -276,13 +276,11 @@ test_that("C17-C18-C20-C21-C23: outlier handling, log(y+0.01) summary stats, plo
 })
 
 # =============================================================================
-# OPEN DEFECT REGRESSION GUARDS (VAL-advancedraincloud-01 .. VAL-advancedraincloud-12)
-# Each test asserts the CORRECT expected behaviour and is skip()-guarded until fixed.
+# RESOLVED DEFECT REGRESSION GUARDS (VAL-advancedraincloud-01 .. VAL-advancedraincloud-12)
 # =============================================================================
 
 test_that("VAL-advancedraincloud-01 (C09): repeated-measures guard suppresses independent tests when id_var is set even if show_longitudinal=FALSE", {
   # Oracle: longitudinal repeated-measures design on ClinicoPath::advancedraincloud_data (300 patients x 3 visits); independent rank tests invalid.
-  skip("VAL-advancedraincloud-01 open defect: id_var omitted from analysis_vars when show_longitudinal=FALSE and show_change_scores=FALSE, bypassing .hasRepeatedSubjects(). Remove this skip when fixed.")
   res <- quiet_arc(ClinicoPath::advancedraincloud(
     data = ClinicoPath::advancedraincloud_data,
     y_var = "biomarker_level", x_var = "time_point", id_var = "patient_id",
@@ -295,7 +293,6 @@ test_that("VAL-advancedraincloud-01 (C09): repeated-measures guard suppresses in
 
 test_that("VAL-advancedraincloud-02 (C10-C12): pairwise effect sizes respect factor levels() regardless of row order and Glass's delta divides by Group 1 (Control) SD", {
   # Oracle: effsize::cohen.d, effectsize::cohens_d, and Glass (1976, DOI: 10.3102/0013189X005010003).
-  skip("VAL-advancedraincloud-02 open defect: .generate_effect_sizes() uses unique(data[[x_var]]) row order instead of levels(), and glass_delta divides by sd2 instead of sd1. Remove this skip when fixed.")
   skip_if_not_installed("effsize")
   tg <- datasets::ToothGrowth
   res_tg <- quiet_arc(ClinicoPath::advancedraincloud(
@@ -322,7 +319,6 @@ test_that("VAL-advancedraincloud-02 (C10-C12): pairwise effect sizes respect fac
 
 test_that("VAL-advancedraincloud-03 (C15): negative responder_threshold (-30) computes decrease responders (RECIST <= -30%)", {
   # Oracle: RECIST 1.1 partial response threshold (-30% change from baseline) and .generate_change_analysis() signed branch.
-  skip("VAL-advancedraincloud-03 open defect: .validate_options() restricts responder_threshold to [0, 100], making the threshold < 0 decrease-responder branch unreachable. Remove this skip when fixed.")
   df <- data.frame(
     id = factor(rep(paste0("PT", 1:4), each = 2)),
     visit = factor(rep(c("Baseline", "Week 12"), 4), levels = c("Baseline", "Week 12")),
@@ -337,7 +333,6 @@ test_that("VAL-advancedraincloud-03 (C15): negative responder_threshold (-30) co
 
 test_that("VAL-advancedraincloud-04 (C14): jamovi Nominal-integer factor y_var is decoded to numeric labels rather than 1..K level indices in Change Score Analysis", {
   # Oracle: paired differences of labels (0->10, 10->20, 20->30, 30->40) equal +10 +- 0 with 3 evaluable non-zero baselines.
-  skip("VAL-advancedraincloud-04 open defect: R/advancedraincloud.b.R:438 calls bare as.numeric(factor), turning 0,10,20,30,40 into 1,2,3,4,5. Remove this skip when fixed.")
   df <- data.frame(
     id = factor(rep(paste0("P", 1:4), 2)),
     visit = factor(rep(c("Base", "End"), each = 4), levels = c("Base", "End")),
@@ -355,7 +350,6 @@ test_that("VAL-advancedraincloud-04 (C14): jamovi Nominal-integer factor y_var i
 
 test_that("VAL-advancedraincloud-05 (C18-C19-C21): log_transform=TRUE transforms clinical plot overlays, labels Clinical Report log scale, and rejects negative y in (-0.01, 0)", {
   # Oracle: identical log(y + 0.01) scale across plotted data and clinical cutoffs/reference bands; non-negative domain guard.
-  skip("VAL-advancedraincloud-05 open defect: log_transform leaves plot overlays in raw units, omits log label in Clinical Report, and accepts negative y in (-0.01, 0). Remove this skip when fixed.")
   df <- data.frame(
     y = c(10, 12, 14, 16, 20, 25, 30, 35),
     g = factor(rep(c("Control", "Treated"), each = 4), levels = c("Control", "Treated"))
@@ -378,7 +372,6 @@ test_that("VAL-advancedraincloud-05 (C18-C19-C21): log_transform=TRUE transforms
 
 test_that("VAL-advancedraincloud-06 (C22): trial_arms labels fill_var treatment arms without overwriting X-axis timepoint labels", {
   # Oracle: X-axis represents x_var (timepoint), while fill_var represents treatment arms.
-  skip("VAL-advancedraincloud-06 open defect: trial_arms calls scale_x_discrete(), overwriting X-axis timepoint labels with treatment arm names. Remove this skip when fixed.")
   df <- data.frame(
     pain_score = c(7, 6, 5, 7, 5, 4, 7, 4, 2, 8, 7, 6, 8, 5, 3, 8, 3, 1),
     timepoint = factor(rep(c("Baseline", "Week 4", "Week 12"), 6), levels = c("Baseline", "Week 4", "Week 12")),
@@ -391,31 +384,33 @@ test_that("VAL-advancedraincloud-06 (C22): trial_arms labels fill_var treatment 
     time_labels = "Visit 0,Visit 4w,Visit 12w",
     show_longitudinal = FALSE
   ))
-  b <- ggplot2::ggplot_build(capture_arc_plot(res))
-  x_lbls <- unname(b$layout$panel_params[[1]]$x$get_labels())
-  expect_false(identical(x_lbls, c("Arm Placebo", "Arm Low", "Arm High")))
+  p_built <- capture_arc_plot(res)
+  b <- ggplot2::ggplot_build(p_built)
+  x_lbls <- as.character(b$layout$panel_params[[1]]$x$get_labels())
+  expect_identical(x_lbls, c("Visit 0", "Visit 4w", "Visit 12w"))
+  fill_scale <- b$plot$scales$get_scales("fill")
+  expect_identical(as.character(fill_scale$get_labels()), c("Arm Placebo", "Arm Low", "Arm High"))
 })
 
-test_that("VAL-advancedraincloud-07 (C16): Summary Statistics, Group Comparisons, and Effect Sizes use a consistent grouping factor when fill_var is set", {
-  # Oracle: internal cross-table coherence invariant across Summary Statistics, Group Comparisons, and Effect Size Analysis.
-  skip("VAL-advancedraincloud-07 open defect: Summary Statistics and Group Comparisons switch to fill_var while Effect Sizes and Clinical Report group by x_var. Remove this skip when fixed.")
+test_that("VAL-advancedraincloud-07 (C16): Summary Statistics, Group Comparisons, Effect Sizes, and Clinical Report use a consistent grouping factor when fill_var is set", {
+  # Oracle: internal cross-table coherence invariant across Summary Statistics, Group Comparisons, Effect Size Analysis, and Clinical Report.
   df <- data.frame(
     y = c(10, 11, 12, 20, 21, 22, 15, 16, 17, 30, 31, 32),
     stage = factor(rep(c("Early", "Advanced"), each = 6), levels = c("Early", "Advanced")),
-    arm = factor(rep(c("Placebo", "Drug", "Placebo", "Drug"), each = 3), levels = c("Placebo", "Drug"))
+    arm = factor(rep(c("Placebo", "Drug1", "Drug2", "Placebo"), each = 3), levels = c("Placebo", "Drug1", "Drug2"))
   )
   res <- quiet_arc(ClinicoPath::advancedraincloud(
     data = df, y_var = "y", x_var = "stage", fill_var = "arm",
-    show_statistics = TRUE, show_comparisons = TRUE, show_effect_size = TRUE
+    show_statistics = TRUE, show_comparisons = TRUE, show_effect_size = TRUE, generate_report = TRUE
   ))
   st <- parse_arc_stats(res$statistics$content)
   es <- parse_arc_es(res$effect_sizes$content)
-  expect_identical(es$Comparison[1], paste(st$Group, collapse = " vs "))
+  expect_identical(es$Comparison[1], paste(st$Group[1:2], collapse = " vs "))
+  expect_match(clean_arc_html(res$clinical_report$content), "Number of groups: 3")
 })
 
 test_that("VAL-advancedraincloud-08 (C06-C17-C19): outlier trimming is not misreported as missing data and is respected by Change Score Analysis", {
   # Oracle: 0-NA dataset has 0 incomplete exclusions; outlier_method='trim' applies consistently across outputs.
-  skip("VAL-advancedraincloud-08 open defect: trimmed outliers are reported as missing/incomplete exclusions and ignored by Change Score Analysis. Remove this skip when fixed.")
   set.seed(101)
   df <- data.frame(
     y = c(stats::rnorm(50, 10, 1), stats::rnorm(50, 20, 1)),
@@ -431,7 +426,6 @@ test_that("VAL-advancedraincloud-08 (C06-C17-C19): outlier trimming is not misre
 
 test_that("VAL-advancedraincloud-09 (C07): unused factor levels in fill_var are dropped before group-count branching and wilcox.test()", {
   # Oracle: 2 observed groups run Wilcoxon rank-sum test; 1 observed group refuses comparison cleanly without crashing.
-  skip("VAL-advancedraincloud-09 open defect: missing droplevels() on fill_var triggers Kruskal-Wallis on 2 observed groups and crashes wilcox.test on empty 2nd group. Remove this skip when fixed.")
   df_3lvl <- data.frame(
     y = c(1, 2, 3, 4, 10, 11, 12, 13),
     x = factor(rep(c("T1", "T2"), 4)),
@@ -455,7 +449,6 @@ test_that("VAL-advancedraincloud-09 (C07): unused factor levels in fill_var are 
 
 test_that("VAL-advancedraincloud-10 (C14-C15): exact +20% responder boundary holds under IEEE-754 arithmetic and character Pre/Post x_var preserves visit order", {
   # Oracle: exact arithmetic (1.2 - 1.0)/1.0 = 20% >= 20%; 'Post' after 'Pre' is follow-up, not pre-baseline.
-  skip("VAL-advancedraincloud-10 open defect: ((1.2 - 1.0)/1.0)*100 < 20 fails responder threshold without tolerance, and character x_var sorts 'Post' before 'Pre'. Remove this skip when fixed.")
   df_fp <- data.frame(
     id = factor(c("P1", "P1", "P2", "P2")),
     visit = factor(c("Base", "End", "Base", "End"), levels = c("Base", "End")),
@@ -470,7 +463,6 @@ test_that("VAL-advancedraincloud-10 (C14-C15): exact +20% responder boundary hol
 
 test_that("VAL-advancedraincloud-11 (C21-C23): show_clinical_cutoff=FALSE and show_reference_range=FALSE suppress overlays and reference_range min >= max is rejected when max=0", {
   # Oracle: boolean UI checkboxes control overlay visibility; reference_range_min < reference_range_max required for any numeric bounds.
-  skip("VAL-advancedraincloud-11 open defect: else-if fallback ignores FALSE checkboxes when numeric values are non-zero, and validator skips min >= max when max == 0. Remove this skip when fixed.")
   df <- data.frame(
     y = c(10, 12, 14, 16, 20, 25, 30, 35),
     g = factor(rep(c("Control", "Treated"), each = 4), levels = c("Control", "Treated"))
@@ -491,7 +483,6 @@ test_that("VAL-advancedraincloud-11 (C21-C23): show_clinical_cutoff=FALSE and sh
 
 test_that("VAL-advancedraincloud-12 (C07-C24): displayed rounded P-value agrees with '< 0.05' verdict and 0.2/0.5/0.8 effect-size bands cite Cohen (1988)", {
   # Oracle: narrative/number internal coherence around alpha = 0.05 and Cohen (1988) citation requirement.
-  skip("VAL-advancedraincloud-12 open defect: p in (0.0495, 0.0500) rounds to '0.05' alongside 'Evidence against the null at 0.05', and 0.2/0.5/0.8 bands omit Cohen (1988). Remove this skip when fixed.")
   set.seed(77)
   found_df <- NULL
   for (iter in 1:2000) {
@@ -509,4 +500,71 @@ test_that("VAL-advancedraincloud-12 (C07-C24): displayed rounded P-value agrees 
   kv <- parse_arc_kv(res$comparisons$content)
   expect_false(as.numeric(kv[["P-value"]]) >= 0.05 && identical(kv[["Result"]], "Evidence against the null at 0.05"))
   expect_match(clean_arc_html(res$effect_sizes$content), "Cohen")
+})
+
+# =============================================================================
+# RELEASE PROFILE REGRESSION GUARDS (special-char names, labelled factors,
+# Bool defaults FALSE, jamovi global palette)
+# =============================================================================
+
+test_that("release: special-character/Unicode variable names across all 5 roles, jamovi text-labelled factor decoding, Bool defaults FALSE, and jamovi palette work", {
+  skip_if_not_installed("ggrain")
+
+  # 1. All Bool defaults in advancedraincloud() formals are FALSE
+  fn_formals <- formals(ClinicoPath::advancedraincloud)
+  bool_opts <- c(
+    "likert_mode", "show_longitudinal", "show_statistics", "show_comparisons",
+    "show_interpretation", "show_clinical_cutoff", "show_reference_range",
+    "show_mcid", "show_effect_size", "show_change_scores", "show_sample_size",
+    "show_missing_info", "log_transform", "show_cv_bands", "generate_report",
+    "include_methods"
+  )
+  for (opt in bool_opts) {
+    expect_identical(fn_formals[[opt]], FALSE, info = paste("Bool default must be FALSE:", opt))
+  }
+
+  # 2. Special characters / spaces / Unicode in all 5 variable roles + jamovi labelled factor
+  df_special <- data.frame(
+    `Biomarker (ng/mL)` = factor(
+      c("0 - None", "10 - Mild", "20 - Moderate", "30 - High",
+        "10 - Mild", "20 - Moderate", "30 - High", "40 - Very High",
+        "20 - Moderate", "30 - High", "40 - Very High", "50 - Critical"),
+      levels = c("0 - None", "10 - Mild", "20 - Moderate", "30 - High", "40 - Very High", "50 - Critical")
+    ),
+    `Visit / Phase` = factor(
+      rep(c("Visit 1", "Visit 2", "Visit 3"), each = 4),
+      levels = c("Visit 1", "Visit 2", "Visit 3")
+    ),
+    "Arm [mg/kg]" = factor(rep(c("Placebo", "Active"), 6), levels = c("Placebo", "Active")),
+    "Patient #ID" = factor(rep(paste0("SUBJ-", 1:4), 3)),
+    "Covariate: \u03b1-Score" = c(1.1, 2.2, 3.3, 4.4, 1.5, 2.5, 3.5, 4.5, 1.9, 2.9, 3.9, 4.9),
+    check.names = FALSE
+  )
+  attr(df_special[["Biomarker (ng/mL)"]], "values") <- c(0L, 10L, 20L, 30L, 40L, 50L)
+
+  res_special <- quiet_arc(ClinicoPath::advancedraincloud(
+    data = df_special,
+    y_var = "Biomarker (ng/mL)",
+    x_var = "Visit / Phase",
+    fill_var = "Arm [mg/kg]",
+    id_var = "Patient #ID",
+    cov_var = "Covariate: \u03b1-Score",
+    color_palette = "jamovi",
+    show_longitudinal = TRUE,
+    show_statistics = TRUE,
+    show_comparisons = TRUE,
+    show_effect_size = TRUE,
+    show_change_scores = TRUE,
+    baseline_group = "Visit 1",
+    responder_threshold = 20,
+    generate_report = TRUE,
+    include_methods = TRUE
+  ))
+
+  # Verify attr(x, "values") preserved 0, 10, ..., 50 (not 1..6 rank codes):
+  # Each of 4 subjects increases by +20 from Visit 1 to Visit 3 -> Mean change = 20 +- 0
+  kv_sp <- parse_arc_kv(res_special$change_analysis$content)
+  expect_identical(kv_sp[["Mean change"]], "20 \u00b1 0")
+  p_sp <- capture_arc_plot(res_special)
+  expect_s3_class(p_sp, "ggplot")
 })
