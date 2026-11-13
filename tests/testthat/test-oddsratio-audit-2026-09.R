@@ -78,7 +78,7 @@ test_that("M1: complete-case filtering uses jmvcore::naOmit and keeps labels", {
   src <- readLines(.osrc("oddsratio.b.R"), warn = FALSE)
   expect_false(any(grepl("complete.cases(mydata), ,", src, fixed = TRUE)))
   expect_false(any(grepl("complete.cases(diagnostic_data)", src, fixed = TRUE)))
-  expect_equal(sum(grepl("jmvcore::naOmit(", src, fixed = TRUE)), 2L)
+  expect_equal(sum(grepl("jmvcore::naOmit(", src, fixed = TRUE)), 3L)
 
   d <- data.frame(a = c(1, NA, 3), b = c("x", "y", "z"))
   attr(d$a, "label") <- "Original A"

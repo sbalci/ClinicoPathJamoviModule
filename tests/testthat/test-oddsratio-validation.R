@@ -33,30 +33,10 @@ strip_html_val <- function(x) {
   gsub("\\s+", " ", trimws(txt))
 }
 
-parse_html_table_val <- function(html) {
-  if (is.null(html) || !nzchar(html)) return(data.frame())
-  html <- gsub("[\r\n]+", " ", html)
-  tr_m <- gregexpr("<tr[^>]*>(.*?)</tr>", html, perl = TRUE)
-  trs <- regmatches(html, tr_m)[[1]]
-  if (length(trs) == 0) return(data.frame())
-  rows <- lapply(trs, function(tr) {
-    cell_m <- gregexpr("<t[dh][^>]*>(.*?)</t[dh]>", tr, perl = TRUE)
-    cells <- regmatches(tr, cell_m)[[1]]
-    vapply(cells, function(c) {
-      inner <- sub("^<t[dh][^>]*>(.*)</t[dh]>$", "\\1", c, perl = TRUE)
-      strip_html_val(inner)
-    }, character(1), USE.NAMES = FALSE)
-  })
-  header <- rows[[1]]
-  body <- rows[-1]
-  if (length(body) == 0) return(data.frame())
-  mat <- do.call(rbind, lapply(body, function(r) {
-    length(r) <- length(header)
-    r
-  }))
-  df <- as.data.frame(mat, stringsAsFactors = FALSE)
-  names(df) <- header
-  df
+parse_native_table_val <- function(table) {
+  d <- table$asDF
+  names(d) <- vapply(table$columns, function(x) x$title, character(1))
+  d
 }
 
 parse_or_cell_val <- function(cell) {
@@ -87,7 +67,7 @@ test_that("A-01..A-12: 2x2 closed-form ML and Firth odds ratio, profile-likeliho
     outcomeLevel = "Event", outcomeNegativeLevel = "NoEvent",
     predictorLevel = "Pos", predictorNegativeLevel = "Neg"
   )
-  tbl_ml <- parse_html_table_val(res_ml$text$content)
+  tbl_ml <- parse_native_table_val(res_ml$fittedTable)
   c_ml <- parse_or_cell_val(tbl_ml[2, "OR (univariable)"])
 
   expect_equal(c_ml$or, 6.00, tolerance = 1e-12)
@@ -101,7 +81,7 @@ test_that("A-01..A-12: 2x2 closed-form ML and Firth odds ratio, profile-likeliho
     outcomeLevel = "Event", outcomeNegativeLevel = "NoEvent",
     predictorLevel = "Pos", predictorNegativeLevel = "Neg", usePenalized = TRUE
   )
-  tbl_firth <- parse_html_table_val(res_firth$text$content)
+  tbl_firth <- parse_native_table_val(res_firth$fittedTable)
   c_firth_uni <- parse_or_cell_val(tbl_firth[2, "OR (univariable, Firth)"])
   c_firth_multi <- parse_or_cell_val(tbl_firth[2, "OR (multivariable, Firth)"])
 
@@ -117,7 +97,7 @@ test_that("A-01..A-12: 2x2 closed-form ML and Firth odds ratio, profile-likeliho
     exposure = factor(c(rep("Pos", 46), rep("Neg", 54)), levels = c("Neg", "Pos"))
   )
   res_mod_ml <- oddsratio(d_mod, "exposure", "outcome", outcomeLevel = "Event", outcomeNegativeLevel = "NoEvent", predictorLevel = "Pos", predictorNegativeLevel = "Neg")
-  c_mod_ml <- parse_or_cell_val(parse_html_table_val(res_mod_ml$text$content)[2, "OR (univariable)"])
+  c_mod_ml <- parse_or_cell_val(parse_native_table_val(res_mod_ml$fittedTable)[2, "OR (univariable)"])
   wald_z <- log((28 * 32) / (18 * 22)) / sqrt(1 / 28 + 1 / 18 + 1 / 22 + 1 / 32)
   expect_equal(c_mod_ml$or, round((28 * 32) / (18 * 22), 2), tolerance = 1e-12)
   expect_equal(c_mod_ml$p, round(2 * pnorm(-abs(wald_z)), 3), tolerance = 1e-12)
@@ -174,7 +154,7 @@ test_that("B-01..B-30: Multivariable ML, Firth, Model Metrics, and Nomogram matc
   res_ml <- oddsratio(d_mv, c("lvi", "grade", "age"), "status",
                       outcomeLevel = "Dead", outcomeNegativeLevel = "Alive",
                       predictorLevel = "Present", predictorNegativeLevel = "Absent", showNomogram = TRUE)
-  tbl_ml <- parse_html_table_val(res_ml$text$content)
+  tbl_ml <- parse_native_table_val(res_ml$fittedTable)
   glm_fit <- stats::glm(status ~ lvi + grade + age, data = d_mv, family = stats::binomial())
   glm_ci <- suppressMessages(stats::confint(glm_fit))
 
@@ -190,7 +170,7 @@ test_that("B-01..B-30: Multivariable ML, Firth, Model Metrics, and Nomogram matc
   res_firth <- oddsratio(d_mv, c("lvi", "grade", "age"), "status",
                          outcomeLevel = "Dead", outcomeNegativeLevel = "Alive",
                          predictorLevel = "Present", predictorNegativeLevel = "Absent", usePenalized = TRUE)
-  tbl_firth <- parse_html_table_val(res_firth$text$content)
+  tbl_firth <- parse_native_table_val(res_firth$fittedTable)
   lf <- logistf::logistf(status ~ lvi + grade + age, data = d_mv, pl = TRUE)
   idx_g3 <- match("gradeG3", lf$terms)
   c_g3_f <- parse_or_cell_val(tbl_firth[5, "OR (multivariable, Firth)"])
@@ -216,7 +196,7 @@ test_that("C-01..C-10: Metamorphic invariants (permutation, outcome/predictor in
 
   # Outcome inversion: OR = 6.00 -> 1/6 = 0.17
   res_inv_out <- oddsratio(d_2x2, "exposure", "outcome", outcomeLevel = "NoEvent", outcomeNegativeLevel = "Event", predictorLevel = "Pos", predictorNegativeLevel = "Neg")
-  c_inv <- parse_or_cell_val(parse_html_table_val(res_inv_out$text$content)[2, "OR (univariable)"])
+  c_inv <- parse_or_cell_val(parse_native_table_val(res_inv_out$fittedTable)[2, "OR (univariable)"])
   expect_equal(c_inv$or, round(1 / 6, 2), tolerance = 1e-12)
 
   # Predictor inversion: Se -> 1-Se (40.0%), Sp -> 1-Sp (20.0%), LR+ -> 0.50, LR- -> 3.00
@@ -235,8 +215,8 @@ test_that("C-01..C-10: Metamorphic invariants (permutation, outcome/predictor in
   d_na$exp_plain <- factor(exp_chr, levels = c("Neg", "Pos"))
   r_addna <- oddsratio(d_na, "exp_addna", "outcome", outcomeLevel = "Event", outcomeNegativeLevel = "NoEvent", predictorLevel = "Pos", predictorNegativeLevel = "Neg")
   r_plain <- oddsratio(d_na, "exp_plain", "outcome", outcomeLevel = "Event", outcomeNegativeLevel = "NoEvent", predictorLevel = "Pos", predictorNegativeLevel = "Neg")
-  expect_identical(parse_html_table_val(r_addna$text$content)[, -1],
-                   parse_html_table_val(r_plain$text$content)[, -1])
+  expect_identical(parse_native_table_val(r_addna$fittedTable)[, -1],
+                   parse_native_table_val(r_plain$fittedTable)[, -1])
 })
 
 test_that("D-01..D-08, E-01..E-07, H-01..H-06, I-01..I-02: Boundary guards, option semantics, notice thresholds, and state-based plot redraws hold", {
@@ -255,10 +235,10 @@ test_that("D-01..D-08, E-01..E-07, H-01..H-06, I-01..I-02: Boundary guards, opti
     exposure = factor(c(rep("Neg", 25), rep("Pos", 25)), levels = c("Neg", "Pos"))
   )
   r_sep_ml <- suppressWarnings(oddsratio(d_sep, "exposure", "outcome", outcomeLevel = "Event", outcomeNegativeLevel = "NoEvent", predictorLevel = "Pos", predictorNegativeLevel = "Neg"))
-  expect_match(parse_html_table_val(r_sep_ml$text$content)[2, "OR (univariable)"], "not estimable", fixed = TRUE)
+  expect_match(parse_native_table_val(r_sep_ml$fittedTable)[2, "OR (univariable)"], "not estimable", fixed = TRUE)
 
   r_sep_firth <- suppressWarnings(oddsratio(d_sep, "exposure", "outcome", outcomeLevel = "Event", outcomeNegativeLevel = "NoEvent", predictorLevel = "Pos", predictorNegativeLevel = "Neg", usePenalized = TRUE))
-  c_sep_f <- parse_or_cell_val(parse_html_table_val(r_sep_firth$text$content)[2, "OR (multivariable, Firth)"])
+  c_sep_f <- parse_or_cell_val(parse_native_table_val(r_sep_firth$fittedTable)[2, "OR (multivariable, Firth)"])
   expect_equal(c_sep_f$or, 2601.00, tolerance = 1e-12)
 })
 
@@ -273,7 +253,7 @@ test_that("VAL-oddsratio-01 (Claims D-09, D-10, D-11): Quasi-complete 1-zero-cel
     exposure = factor(c(rep("Neg", 30), rep("Pos", 30)), levels = c("Neg", "Pos"))
   )
   res_qsep <- suppressWarnings(oddsratio(d_qsep, "exposure", "outcome", outcomeLevel = "Event", outcomeNegativeLevel = "NoEvent", predictorLevel = "Pos", predictorNegativeLevel = "Neg"))
-  tbl_qsep <- parse_html_table_val(res_qsep$text$content)
+  tbl_qsep <- parse_native_table_val(res_qsep$fittedTable)
   expect_match(tbl_qsep[2, "OR (univariable)"], "not estimable", fixed = TRUE)
 
   # D-10: Continuous predictor with negative complete separation
@@ -282,7 +262,7 @@ test_that("VAL-oddsratio-01 (Claims D-09, D-10, D-11): Quasi-complete 1-zero-cel
     x = c(26:50, 1:25)
   )
   res_csep <- suppressWarnings(oddsratio(d_csep, "x", "outcome", outcomeLevel = "Event", outcomeNegativeLevel = "NoEvent", predictorLevel = NULL, predictorNegativeLevel = NULL))
-  tbl_csep <- parse_html_table_val(res_csep$text$content)
+  tbl_csep <- parse_native_table_val(res_csep$fittedTable)
   expect_match(tbl_csep[1, "OR (univariable)"], "not estimable", fixed = TRUE)
 
   # D-11: 3-level factor with a zero cell in G3 (0/30 events)
@@ -293,7 +273,7 @@ test_that("VAL-oddsratio-01 (Claims D-09, D-10, D-11): Quasi-complete 1-zero-cel
     grade = factor(c(rep("G1", 30), rep("G2", 30), rep("G3", 30)), levels = c("G1", "G2", "G3"))
   )
   res_3sep <- suppressWarnings(oddsratio(d_3sep, "grade", "outcome", outcomeLevel = "Event", outcomeNegativeLevel = "NoEvent", predictorLevel = NULL, predictorNegativeLevel = NULL))
-  tbl_3sep <- parse_html_table_val(res_3sep$text$content)
+  tbl_3sep <- parse_native_table_val(res_3sep$fittedTable)
   expect_match(tbl_3sep[3, "OR (univariable)"], "not estimable", fixed = TRUE)
 })
 
@@ -318,7 +298,7 @@ test_that("VAL-oddsratio-02 (Claim I-03): Firth forest plot (.firthOrPlot) plots
   priv <- ana_sp$.__enclos_env__$private
   pl_sp <- ana_sp$results$plot$state
   pd_sp <- priv$.createPlotDataWithOriginalNames(
-    pl_sp$plotData, pl_sp$originalNames, pl_sp$formulaDependent, pl_sp$formulaExplanatory
+    priv$.plotModelData(pl_sp), pl_sp$originalNames, pl_sp$formulaDependent, pl_sp$formulaExplanatory
   )
   fml_sp <- stats::as.formula(jmvcore::constructFormula(pd_sp$formulaDependent, as.list(pd_sp$formulaExplanatory)))
   est_sp <- priv$.firthEstimates(logistf::logistf(fml_sp, data = pd_sp$data))
@@ -339,7 +319,7 @@ test_that("VAL-oddsratio-03 (Claim D-12): .restoreOriginalNamesInTable preserves
   res_pref <- oddsratio(d_pref, c("T", "tumor size (mm)", "score*"), "outcome",
                         outcomeLevel = "Dead", outcomeNegativeLevel = "Alive",
                         predictorLevel = "High", predictorNegativeLevel = "Low")
-  tbl_pref <- parse_html_table_val(res_pref$text$content)
+  tbl_pref <- parse_native_table_val(res_pref$fittedTable)
   expect_equal(tbl_pref[3, 1], "tumor size (mm)")
   expect_equal(tbl_pref[4, 1], "score*")
 })
@@ -382,7 +362,7 @@ test_that("IR-oddsratio-01b/c, IR-oddsratio-04, IR-oddsratio-08 (Claims D-13, D-
     data = d_sep_mv
   )
   suppressWarnings(ana_sep_mv$run())
-  tbl_sep_mv <- parse_html_table_val(ana_sep_mv$results$text$content)
+  tbl_sep_mv <- parse_native_table_val(ana_sep_mv$results$fittedTable)
   expect_match(tbl_sep_mv[2, "OR (multivariable)"], "not estimable", fixed = TRUE)
   expect_null(ana_sep_mv$.__enclos_env__$private$.nom_object)
 
@@ -394,7 +374,7 @@ test_that("IR-oddsratio-01b/c, IR-oddsratio-04, IR-oddsratio-08 (Claims D-13, D-
     age = rnorm(60, 60, 10)
   )
   res_qsep_mv <- suppressWarnings(oddsratio(d_qsep_mv, c("exposure", "age"), "outcome", outcomeLevel = "Event", outcomeNegativeLevel = "NoEvent", predictorLevel = "Pos", predictorNegativeLevel = "Neg"))
-  tbl_qsep_mv <- parse_html_table_val(res_qsep_mv$text$content)
+  tbl_qsep_mv <- parse_native_table_val(res_qsep_mv$fittedTable)
   expect_match(tbl_qsep_mv[2, "OR (multivariable)"], "not estimable", fixed = TRUE)
 
   # SC-02: Diagnostic metrics panel with min_expected < 5 does not falsely claim 'Chi-square assumptions may be violated'

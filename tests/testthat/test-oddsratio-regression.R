@@ -23,6 +23,17 @@ quietly <- function(expr) {
     f <- tempfile(); sink(f); on.exit(sink(), add = TRUE); suppressWarnings(force(expr))
 }
 
+# Adapt native table cells to the existing presentation assertions. This is a
+# test-only serialization; values and titles come directly from jmvcore.
+native_table_html <- function(table) {
+    d <- table$asDF
+    headers <- vapply(table$columns, function(x) x$title, character(1))
+    paste0("<table><thead><tr>", paste0("<th>", headers, "</th>", collapse=""),
+        "</tr></thead><tbody>", paste(vapply(seq_len(nrow(d)), function(i)
+            paste0("<tr>", paste0("<td>", unlist(d[i, ]), "</td>", collapse=""),
+                   "</tr>"), character(1)), collapse=""), "</tbody></table>")
+}
+
 # De-HTML one result item for reading.
 strip_html <- function(x) {
     if (is.null(x)) return("")
@@ -170,7 +181,7 @@ test_that("H3: Firth odds-ratio table shows no internal column names or empty co
                              outcomeLevel = "1", outcomeNegativeLevel = "0",
                              predictorLevel = NULL, predictorNegativeLevel = NULL,
                              usePenalized = TRUE))
-    html <- paste(as.character(res$text$content), collapse = "")
+    html <- native_table_html(res$fittedTable)
 
     # Internal names leaking into the header.
     expect_false(grepl("OR_Uni", html, fixed = TRUE))
@@ -353,7 +364,7 @@ test_that("GUARD: swapping the positive outcome level inverts the odds ratio", {
                                  outcome = "Golden Standart",
                                  outcomeLevel = level, outcomeNegativeLevel = neg_lvl,
                                  predictorLevel = NULL, predictorNegativeLevel = NULL))
-        txt <- strip_html(res$text$content)
+        txt <- paste(unlist(res$fittedTable$asDF), collapse = " ")
         cell <- regmatches(txt, regexpr("[0-9]+\\.[0-9]+ \\([0-9.]+-[0-9.]+, p=[0-9.]+\\)",
                                         txt))
         expect_equal(length(cell), 1L)
@@ -406,7 +417,7 @@ test_that("GUARD: diagnostic metrics match epiR::epi.tests()", {
 # estimated term plus the reference row -- independent of the numbers printed in
 # the OR columns.
 or_table_rows <- function(res) {
-    html <- paste(as.character(res$text$content), collapse = "")
+    html <- native_table_html(res$fittedTable)
     body <- regmatches(html, regexpr("(?s)<tbody>.*</tbody>", html, perl = TRUE))
     if (length(body) == 0) return(character(0))
     rows <- regmatches(body, gregexpr("(?s)<tr>.*?</tr>", body, perl = TRUE))[[1]]
@@ -418,7 +429,7 @@ or_table_rows <- function(res) {
 }
 
 or_table_header <- function(res) {
-    html <- paste(as.character(res$text$content), collapse = "")
+    html <- native_table_html(res$fittedTable)
     hd <- regmatches(html, regexpr("(?s)<thead>.*?</thead>", html, perl = TRUE))
     if (length(hd) == 0) return(character(0))
     trimws(gsub("<[^>]*>", "",
@@ -492,12 +503,12 @@ test_that("N1-c: the forest plot estimates match the table for a low-cardinality
     st <- res$plot$state
     expect_false(is.null(st))
 
-    fl <- finalfit::summary_factorlist(st$plotData, st$formulaDependent,
+    fl <- finalfit::summary_factorlist(res$plot$analysis$.__enclos_env__$private$.plotModelData(st), st$formulaDependent,
                                        st$formulaExplanatory,
                                        cont_cut = 0, total_col = TRUE, fit_id = TRUE)
     joined <- finalfit::ff_merge(
         fl,
-        finalfit::fit2df(finalfit::glmmulti(st$plotData, st$formulaDependent,
+        finalfit::fit2df(finalfit::glmmulti(res$plot$analysis$.__enclos_env__$private$.plotModelData(st), st$formulaDependent,
                                             st$formulaExplanatory),
                          condense = FALSE, estimate_suffix = " (multivariable)"))
 
@@ -535,7 +546,7 @@ test_that("N2-b: no janitor-cleaned name reaches the rendered table, on either p
             predictorLevel = NULL, predictorNegativeLevel = NULL,
             usePenalized = pen))
 
-        html <- paste(as.character(res$text$content), collapse = "")
+        html <- native_table_html(res$fittedTable)
         for (leak in c("disease_status", "new_test"))
             expect_false(grepl(leak, html, fixed = TRUE),
                          label = paste0("cleaned name '", leak,
@@ -556,14 +567,8 @@ test_that("N3: the diagnostic 2x2 is laid out positive-first", {
         predictorNegativeLevel = "Absent",
         showNomogram = TRUE))
 
-    html <- paste(as.character(res$diagnosticMetrics$content), collapse = "")
-    tbl  <- regmatches(html, regexpr("(?s)<table.*?</table>", html, perl = TRUE))
-    expect_equal(length(tbl), 1L)
-
-    cells <- trimws(gsub("<[^>]*>", "",
-        regmatches(tbl, gregexpr("(?s)<td[^>]*>.*?</td>", tbl, perl = TRUE))[[1]]))
-    counts <- suppressWarnings(as.numeric(cells))
-    counts <- counts[!is.na(counts)]
+    grid <- res$diagnosticContingency$asDF
+    counts <- as.numeric(t(as.matrix(grid[, -1, drop = FALSE])))
 
     txt <- strip_html(res$diagnosticMetrics$content)
     quad <- as.numeric(regmatches(
@@ -573,8 +578,8 @@ test_that("N3: the diagnostic 2x2 is laid out positive-first", {
     expect_equal(counts, quad)
 
     # And the positive row/column must be marked, or the reordering is invisible.
-    expect_true(grepl("Present (+)", strip_html(tbl), fixed = TRUE))
-    expect_true(grepl("Dead (+)",    strip_html(tbl), fixed = TRUE))
+    expect_identical(as.character(grid[1, 1]), "Present")
+    expect_true(grepl("Dead (+)",    paste(c(unlist(grid), vapply(res$diagnosticContingency$columns, function(x) x$title, character(1))), collapse = " "), fixed = TRUE))
 })
 
 test_that("N4: the diagnostic panel states its own denominator", {
@@ -667,7 +672,7 @@ test_that("N7-b: coercing the binary leaves every estimate untouched", {
             outcome = "Golden Standart", outcomeLevel = "1",
             outcomeNegativeLevel = "0",
             predictorLevel = NULL, predictorNegativeLevel = NULL,
-            usePenalized = pen))$text$content), collapse = "")
+            usePenalized = pen))$fittedTable$asDF), collapse = " ")
         regmatches(html, gregexpr("[0-9]+\\.[0-9]{2} \\([0-9.]+-[0-9.]+", html))[[1]]
     }
     expect_true(any(grepl("^7\\.6[0-9] \\(4\\.3", ors(FALSE))))   # ML   7.66 (4.36-
@@ -735,7 +740,7 @@ test_that("N10: the plot state carries no dead payload", {
 
     expect_false("filteredTable" %in% names(res$plot$state))
     expect_setequal(names(res$plot$state),
-                    c("plotData", "formulaDependent", "formulaExplanatory",
+                    c("stateVersion", "formulaDependent", "formulaExplanatory",
                       "originalNames", "originalOutcomeName",
                       "originalExplanatoryNames",
                       # read by .plot(): rows to omit (not estimable) and

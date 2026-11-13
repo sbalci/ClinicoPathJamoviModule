@@ -60,7 +60,7 @@ test_that("an empty predictor positive or negative level leaves the diagnostic m
         expect_false(grepl("Predictor Positive Level", strip(res$warnings$content), fixed = TRUE))
 
         # The logistic model, odds ratios and nomogram are unaffected.
-        or_html <- strip(res$text$content)
+        or_html <- paste(unlist(res$fittedTable$asDF), collapse = " ")
         expect_match(or_html, "[0-9]+\\.[0-9]{2} \\([0-9.]+-[0-9.]+, p", label = label)
         expect_match(itxt, "Odds ratio analysis completed successfully.", fixed = TRUE)
         expect_false(is.null(res$plot_nomogram$state), label = label)

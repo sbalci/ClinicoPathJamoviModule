@@ -123,7 +123,7 @@ test_that("forest plot omits terms the table marks not estimable and captions th
     data = d)
   a$init()
   suppressWarnings(a$run())
-  expect_match(rf_strip(a$results$text$content), "not estimable", fixed = TRUE)
+  expect_match(paste(unlist(a$results$fittedTable$asDF), collapse = " "), "not estimable", fixed = TRUE)
   st <- a$results$plot$state
   expect_identical(st$excludedFitIds, "gradeG3")
   expect_match(st$excludedLabels, "G3", fixed = TRUE)

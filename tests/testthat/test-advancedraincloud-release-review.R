@@ -187,3 +187,295 @@ test_that("clinical cutoff line rendering logic executes without error for 0 and
     expect_s3_class(res0, "advancedraincloudResults")
 })
 
+
+# ---- pre-release audit additions -------------------------------------------
+
+test_that("ITT contradiction is surfaced in always-visible analysisNotes even when generate_report is FALSE", {
+    d <- arc_two(); d$y[1:6] <- NA
+    res <- advancedraincloud(data = d, y_var = "y", x_var = "g",
+                             generate_report = FALSE, population_type = "itt")
+    notes <- arc_txt(res$analysisNotes$content)
+    expect_match(notes, "6 of 60 supplied row")
+    expect_match(notes, "Intention-to-Treat")
+    expect_match(notes, "complete-case")
+})
+
+test_that("pooled outlier handling discloses modified/excluded counts and between-group attenuation caveat", {
+    d <- arc_two()
+    d$y[c(1, 60)] <- c(-25, 85)
+
+    res_win <- advancedraincloud(data = d, y_var = "y", x_var = "g", outlier_method = "winsorize")
+    expect_match(arc_txt(res_win$analysisNotes$content), "Winsorization clipped")
+    expect_match(arc_txt(res_win$analysisNotes$content), "pooled sample")
+
+    res_trim <- advancedraincloud(data = d, y_var = "y", x_var = "g", outlier_method = "trim")
+    expect_match(arc_txt(res_trim$analysisNotes$content), "5th/95th percentile trimming")
+    expect_match(arc_txt(res_trim$analysisNotes$content), "pooled sample")
+
+    res_iqr <- advancedraincloud(data = d, y_var = "y", x_var = "g", outlier_method = "iqr")
+    expect_match(arc_txt(res_iqr$analysisNotes$content), "1.5 x IQR filtering")
+    expect_match(arc_txt(res_iqr$analysisNotes$content), "pooled sample")
+})
+
+test_that("small-sample groups emit explicit rank-test discreteness and normal-z CI warnings", {
+    d_tiny <- data.frame(
+        y = c(10, 11, 12, 20, 21, 22),
+        g = factor(rep(c("A", "B"), each = 3))
+    )
+    res_tiny <- advancedraincloud(data = d_tiny, y_var = "y", x_var = "g",
+                                  show_comparisons = TRUE, show_effect_size = TRUE)
+    notes_tiny <- arc_txt(res_tiny$analysisNotes$content)
+    expect_match(notes_tiny, "both groups have n (&lt;|<)= 3")
+    expect_match(notes_tiny, "0\\.10")
+
+    d_small <- data.frame(
+        y = c(10, 11, 12, 13, 20, 21, 22, 23, 24, 25),
+        g = factor(c(rep("A", 4), rep("B", 6)))
+    )
+    res_small <- advancedraincloud(data = d_small, y_var = "y", x_var = "g",
+                                   show_effect_size = TRUE)
+    expect_match(arc_txt(res_small$analysisNotes$content), "minimum group n = 4 (&lt;|<) 5")
+})
+
+test_that("negative clinical thresholds are rejected when log_transform is enabled", {
+    d <- arc_two(); d$y <- abs(d$y) + 1
+    expect_error(
+        advancedraincloud(data = d, y_var = "y", x_var = "g",
+                          log_transform = TRUE, show_clinical_cutoff = TRUE,
+                          clinical_cutoff = -2),
+        "non-negative"
+    )
+    expect_error(
+        advancedraincloud(data = d, y_var = "y", x_var = "g",
+                          log_transform = TRUE, show_reference_range = TRUE,
+                          reference_range_min = -1, reference_range_max = 5),
+        "non-negative"
+    )
+})
+
+test_that("CV bands on non-positive group means emit a ratio-scale warning", {
+    d <- data.frame(
+        y = c(-6, -5, -4, -3, 4, 5, 6, 7),
+        g = factor(rep(c("NegativeMean", "PositiveMean"), each = 4))
+    )
+    res <- advancedraincloud(data = d, y_var = "y", x_var = "g", show_cv_bands = TRUE)
+    expect_match(arc_txt(res$analysisNotes$content), "strictly positive ratio-scale")
+})
+
+test_that("effect_sizes avoids duplicate Cohen (1988) footnote and comparisons omits orphan star legend", {
+    d <- arc_two()
+    res <- advancedraincloud(data = d, y_var = "y", x_var = "g",
+                             show_comparisons = TRUE, show_effect_size = TRUE,
+                             effect_size_type = "cohens_d", include_methods = TRUE,
+                             outlier_method = "winsorize", log_transform = TRUE)
+    es_txt <- arc_txt(res$effect_sizes$content)
+    expect_equal(length(gregexpr("Cohen \\(1988\\)", es_txt)[[1]]), 1L)
+    expect_match(es_txt, "Cohen's d")
+    expect_false(grepl("cohens_d", es_txt, fixed = TRUE))
+
+    comp_txt <- arc_txt(res$comparisons$content)
+    expect_false(grepl("\\*\\*\\* p < 0.001", comp_txt))
+    expect_match(comp_txt, "without significance stars")
+
+    m_txt <- arc_txt(res$methods_text$content)
+    expect_match(m_txt, "log\\(y \\+ 0.01\\)")
+    expect_match(m_txt, "5th/95th percentile Winsorization")
+    expect_match(m_txt, "Wilcoxon rank-sum")
+    expect_match(m_txt, "Cohen's d")
+    expect_false(grepl("cohens_d", m_txt, fixed = TRUE))
+})
+
+test_that("asSource escapes adversarial option strings and drops list/vector/undeclared options", {
+    f_names <- setdiff(names(formals(advancedraincloud)), "data")
+    payloads <- c(
+        'foo", system("id"), x = "',
+        "trail\\",
+        'multi\nline"quote'
+    )
+
+    for (opt_name in f_names) {
+        for (pl in payloads) {
+            opts <- advancedraincloudOptions$new()
+            o <- opts$option(opt_name)
+            o$value <- pl
+            an <- advancedraincloudClass$new(options = opts, data = data.frame())
+            parsed <- parse(text = an$asSource())
+            expect_length(parsed, 1L)
+            mc <- match.call(advancedraincloud, parsed[[1]])
+            arg_names <- setdiff(names(as.list(mc))[-1], "data")
+            expect_identical(arg_names, opt_name)
+            expect_identical(mc[[opt_name]], pl)
+        }
+
+        opts_l <- advancedraincloudOptions$new()
+        o_l <- opts_l$option(opt_name)
+        o_l$value <- list(a = quote(stop("RCE")))
+        an_l <- advancedraincloudClass$new(options = opts_l, data = data.frame())
+        mc_l <- match.call(advancedraincloud, parse(text = an_l$asSource())[[1]])
+        expect_length(setdiff(names(as.list(mc_l))[-1], "data"), 0L)
+
+        opts_v <- advancedraincloudOptions$new()
+        o_v <- opts_v$option(opt_name)
+        o_v$value <- c("a", 'b", stop("RCE")')
+        an_v <- advancedraincloudClass$new(options = opts_v, data = data.frame())
+        mc_v <- match.call(advancedraincloud, parse(text = an_v$asSource())[[1]])
+        expect_length(setdiff(names(as.list(mc_v))[-1], "data"), 0L)
+    }
+
+    opts_u <- advancedraincloudOptions$new()
+    evil_opt <- jmvcore::OptionString$new("injected_arg", value = 'foo", stop("RCE"), bar = "')
+    opts_u$.addOption(evil_opt)
+    an_u <- advancedraincloudClass$new(options = opts_u, data = data.frame())
+    mc_u <- match.call(advancedraincloud, parse(text = an_u$asSource())[[1]])
+    expect_false("injected_arg" %in% names(as.list(mc_u)))
+})
+
+test_that("adversarial column names, factor levels, and tampered enum fallbacks are HTML-escaped and formula-safe", {
+    df_adv <- data.frame(
+        check.names = FALSE,
+        "<img src=x onerror=alert(1)>" = c(1.2, 2.4, 3.1, 4.5, 5.2, 6.1, 2.0, 3.8, 4.9),
+        'stop(paste(collapse=", ", system("id", intern=TRUE)))' = factor(
+            rep(c("<script>alert(1)</script>", 'weird"level\\name', "G3 & <b onmouseover=x>"), each = 3)
+        ),
+        "id<b>1</b>" = factor(rep(c("P<1>", 'P"2"', "P&3"), times = 3))
+    )
+
+    res_adv <- advancedraincloud(
+        data = df_adv,
+        y_var = "<img src=x onerror=alert(1)>",
+        x_var = 'stop(paste(collapse=", ", system("id", intern=TRUE)))',
+        id_var = "id<b>1</b>",
+        show_statistics = TRUE,
+        show_comparisons = TRUE,
+        show_interpretation = TRUE,
+        show_effect_size = TRUE,
+        show_change_scores = TRUE,
+        baseline_group = "<script>alert(1)</script>",
+        generate_report = TRUE,
+        show_missing_info = TRUE
+    )
+
+    for (nm in c("statistics", "comparisons", "interpretation", "effect_sizes",
+                 "change_analysis", "clinical_report", "analysisNotes")) {
+        expect_false(
+            grepl("<(script|img|svg|b\\b)", res_adv[[nm]]$content),
+            info = nm
+        )
+    }
+
+    opts_fb <- advancedraincloudOptions$new(
+        y_var = "<img src=x onerror=alert(1)>",
+        x_var = 'stop(paste(collapse=", ", system("id", intern=TRUE)))',
+        show_interpretation = TRUE,
+        include_methods = TRUE,
+        show_effect_size = TRUE
+    )
+    an_fb <- advancedraincloudClass$new(options = opts_fb, data = df_adv)
+    an_fb$init()
+    o_rs <- opts_fb$option("rain_side"); o_rs$value <- "<svg onload=alert(1)>"
+    o_om <- opts_fb$option("outlier_method"); o_om$value <- "<img src=x onerror=alert(2)>"
+    o_es <- opts_fb$option("effect_size_type"); o_es$value <- "<script>alert(3)</script>"
+    an_fb$.__enclos_env__$private$.run()
+    combined_fb <- paste(an_fb$results$interpretation$content, an_fb$results$methods_text$content)
+    expect_false(grepl("<(script|img|svg)", combined_fb))
+    expect_match(combined_fb, "&lt;svg onload=alert\\(1\\)&gt;")
+    expect_match(combined_fb, "&lt;img src=x onerror=alert\\(2\\)&gt;")
+    expect_match(combined_fb, "&lt;script&gt;alert\\(3\\)&lt;/script&gt;")
+})
+
+test_that("non-finite or non-scalar numeric options reject cleanly and early return clears cached state", {
+    d <- data.frame(y = c(1, 2, 3, 4, 5, 6), g = factor(rep(c("A", "B"), each = 3)))
+    for (bad_val in list(NA_real_, NaN, Inf, numeric(0), c(1, 2))) {
+        opts_na <- advancedraincloudOptions$new(y_var = "y", x_var = "g")
+        o_ps <- opts_na$option("point_size")
+        o_ps$value <- bad_val
+        an_na <- advancedraincloudClass$new(options = opts_na, data = d)
+        expect_error(an_na$.__enclos_env__$private$.run(), "Point size must be a numeric value")
+    }
+
+    opts_run <- advancedraincloudOptions$new(y_var = "y", x_var = "g")
+    an_run <- advancedraincloudClass$new(options = opts_run, data = d)
+    an_run$run()
+    expect_false(is.null(an_run$.__enclos_env__$private$.analysis_data))
+
+    o_xv <- opts_run$option("x_var")
+    o_xv$value <- NULL
+    an_run$.__enclos_env__$private$.run()
+    expect_null(an_run$.__enclos_env__$private$.analysis_data)
+    expect_null(an_run$results$plot$state)
+})
+
+test_that("duplicate variable roles reject cleanly and plot/effect-size edge cases preserve state and clear labels", {
+    d <- data.frame(
+        y = c(10, 12, 14, 20, 22, 24),
+        x_num = c(1, 1, 1, 2, 2, 2),
+        id = c(1, 2, 3, 1, 2, NA)
+    )
+    expect_error(
+        advancedraincloud(data = d, y_var = "y", x_var = "y"),
+        "distinct from the grouping"
+    )
+    expect_error(
+        advancedraincloud(data = d, y_var = "y", x_var = "x_num", fill_var = "y"),
+        "distinct from the grouping"
+    )
+    expect_error(
+        advancedraincloud(data = d, y_var = "y", x_var = "x_num", id_var = "x_num"),
+        "longitudinal ID variable must be distinct"
+    )
+
+    # Singleton group (n = 1) reports sample-size requirement rather than zero variance
+    d_n1 <- data.frame(
+        y = c(10, 20, 22, 24, 26),
+        g = factor(c("Singleton", rep("Reference", 4)), levels = c("Singleton", "Reference"))
+    )
+    res_n1 <- advancedraincloud(data = d_n1, y_var = "y", x_var = "g", show_effect_size = TRUE)
+    expect_match(arc_txt(res_n1$effect_sizes$content), "at least 2 observations")
+    expect_false(grepl("no variation", arc_txt(res_n1$effect_sizes$content), fixed = TRUE))
+
+    # Longitudinal plot with NA IDs filters before ggplot() and preserves comparison attribute on cached state
+    d_long_na <- data.frame(
+        y = c(10, 12, 14, 20, 22, 24, 30),
+        g = factor(c("T1", "T1", "T1", "T2", "T2", "T2", "T2"), levels = c("T1", "T2")),
+        subj = factor(c("S1", "S2", "S3", "S1", "S2", "S3", NA))
+    )
+    opts_ln <- advancedraincloudOptions$new(
+        y_var = "y", x_var = "g", id_var = "subj",
+        show_longitudinal = FALSE, show_comparisons = TRUE
+    )
+    an_ln <- advancedraincloudClass$new(options = opts_ln, data = d_long_na)
+    an_ln$run()
+    # Now enable longitudinal connections on state-only redraw where one row has NA subj
+    o_sl <- opts_ln$option("show_longitudinal")
+    o_sl$value <- TRUE
+    f_pdf <- tempfile(fileext = ".pdf")
+    grDevices::pdf(f_pdf, width = 8, height = 6)
+    on.exit({
+        try(grDevices::dev.off(), silent = TRUE)
+        unlink(f_pdf)
+    }, add = TRUE)
+    ok_ln <- suppressWarnings(an_ln$.__enclos_env__$private$.plot(
+        an_ln$results$plot, ggtheme = ggplot2::theme_classic(), theme = NULL
+    ))
+    p_last <- ggplot2::last_plot()
+    expect_true(ok_ln)
+    expect_equal(nrow(p_last$data), 6L)
+
+    # Zero-variance 3-group tied Kruskal-Wallis comparison (p = NaN) renders 'p: not estimable' rather than 'p = NA'
+    d_const <- data.frame(
+        y = rep(5, 9),
+        g = factor(rep(c("A", "B", "C"), each = 3))
+    )
+    res_const <- suppressMessages(suppressWarnings(advancedraincloud(
+        data = d_const, y_var = "y", x_var = "g",
+        show_comparisons = TRUE, p_value_position = "legend"
+    )))
+    suppressWarnings(print(res_const$plot))
+    p_const <- ggplot2::last_plot()
+    expect_match(p_const$labels$caption, "p: not estimable")
+    expect_false(grepl("p = NA", p_const$labels$caption, fixed = TRUE))
+})
+
+
+
+

@@ -25,7 +25,7 @@ test_that('VAL-oddsratio-01 explicit missing predictor levels match true missing
     before <- d
     clean <- d; clean$test <- factor(as.character(d$test), levels=c('Absent','Present'), ordered=ordered)
     a <- or_daily_run(d, firth=firth); b <- or_daily_run(clean, firth=firth)
-    expect_identical(or_daily_text(a$text$content), or_daily_text(b$text$content))
+    expect_identical(a$fittedTable$asDF, b$fittedTable$asDF)
     expect_identical(or_daily_text(a$text2$content), or_daily_text(b$text2$content))
     expect_match(or_daily_text(a$text2$content), if(firth) 'Observations: 115' else 'Number in model = 115', fixed=TRUE)
     expect_match(or_daily_text(a$infoMessages$content), '5 out of 120', fixed=TRUE)
@@ -38,7 +38,7 @@ test_that('VAL-oddsratio-01 explicit missing outcomes match true missingness', {
   clean <- d; clean$out <- factor(as.character(d$out), levels=c('No','Yes'))
   for (firth in c(FALSE, TRUE)) {
     a <- or_daily_run(d, firth=firth); b <- or_daily_run(clean, firth=firth)
-    expect_identical(or_daily_text(a$text$content), or_daily_text(b$text$content))
+    expect_identical(a$fittedTable$asDF, b$fittedTable$asDF)
     expect_identical(or_daily_text(a$text2$content), or_daily_text(b$text2$content))
   }
 })
@@ -59,7 +59,7 @@ test_that('VAL-oddsratio-01 literal NA remains an observed category', {
   d$test <- factor(x, levels=c('Absent','Present','NA'))
   a <- or_daily_run(d, firth=TRUE)
   expect_match(or_daily_text(a$text2$content), 'Observations: 120', fixed=TRUE)
-  expect_match(or_daily_text(a$text$content), ' NA ', fixed=TRUE)
+  expect_match(paste(unlist(a$fittedTable$asDF), collapse=' '), ' NA ', fixed=TRUE)
 })
 
 test_that('VAL-oddsratio-02 Firth criterion discloses parameterisation dependence', {
