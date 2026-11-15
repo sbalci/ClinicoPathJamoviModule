@@ -12,8 +12,14 @@ clearWith:
     - typestatistics
     - conflevel
     - k
+    - trimprop
+    - bfprior
+    - nboot
+    - ciresamples
+    - mapresamples
     - resultssubtitle
     - showSummaryTable
+    - showWeightedTable
     - centralityplotting
     - centralitytype
     - originaltheme
@@ -61,6 +67,38 @@ items:
             title: 'vs Reference'
             type: number
 
+    - name: weightsensitivity
+      title: Benchmarking Sensitivity Check (Weighting Comparison)
+      type: Table
+      visible: (showWeightedTable)
+      rows: 0
+      columns:
+          - name: scheme
+            title: Weighting scheme
+            type: text
+          - name: units
+            title: Effective units
+            type: text
+          - name: estimate
+            title: Estimate
+            type: number
+          - name: se
+            title: SE
+            type: number
+          - name: ci_low
+            title: Lower
+            type: number
+          - name: ci_high
+            title: Upper
+            type: number
+          - name: vsref
+            title: 'vs Reference'
+            type: number
+          - name: pvalue
+            title: p
+            type: number
+            format: zto,pvalue
+
     - name: plot2
       title: '`${dep} by {group}, split by {grvar}`'
       type: Image
@@ -80,7 +118,19 @@ items:
 
 refs:
     - ClinicoPathJamoviModule
+    - Cleveland1984
+    - DerSimonian1986
+    - Hedges1981
+    - Kerby2014
+    - Phipson2010
+    - btt
     - ggplot2
     - ggstatsplot
     - statsExpressions
+    - patchwork
+    - WRS2
+    - BayesFactor
+    - bayestestR
+    - effectsize
+    - datawizard
 ...

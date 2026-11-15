@@ -1,65 +1,18 @@
 ---
 name:  jjbetweenstats
 title: Box-Violin Plots to Compare Between Groups
-menuGroup: JJStatsPlot
+menuGroup: JJStatsPlotT
 menuSubgroup: 'Categorical vs Continuous'
 menuSubtitle: 'Independent Samples'
 version: '1.0.81'
 jas: '1.2'
 
-
 description:
-    main: |
-        Wrapper Function for ggstatsplot::ggbetweenstats and
-        ggstatsplot::grouped_ggbetweenstats to generate Box-Violin Plots
-        for comparing continuous variables between groups with statistical
-        annotations.
-    # R:
-    #     dontrun: true
-    #     usage: |
-    #         # Basic comparison between groups
-    #         jjbetweenstats(
-    #             data = iris,
-    #             dep = "Sepal.Length",
-    #             group = "Species",
-    #             typestatistics = "parametric",
-    #             pairwisecomparisons = TRUE
-    #         )
-            
-    #         # Multiple variables comparison
-    #         jjbetweenstats(
-    #             data = mtcars,
-    #             dep = c("mpg", "hp", "wt"),
-    #             group = "cyl",
-    #             typestatistics = "nonparametric",
-    #             pairwisecomparisons = TRUE,
-    #             pairwisedisplay = "significant",
-    #             padjustmethod = "bonferroni"
-    #         )
-            
-    #         # Grouped analysis with split variable
-    #         jjbetweenstats(
-    #             data = mtcars,
-    #             dep = "mpg",
-    #             group = "cyl",
-    #             grvar = "am",
-    #             typestatistics = "robust",
-    #             centralityplotting = TRUE,
-    #             centralitytype = "robust",
-    #         )
-            
-    #         # Bayesian analysis with custom aesthetics
-    #         jjbetweenstats(
-    #             data = ToothGrowth,
-    #             dep = "len",
-    #             group = "supp",
-    #             grvar = "dose",
-    #             typestatistics = "bayes",
-    #             bfmessage = TRUE,
-    #             mytitle = "Tooth Growth by Supplement Type",
-    #             xtitle = "Supplement",
-    #             ytitle = "Tooth Length"
-    #         )
+    main: >
+        Wrapper function for ggstatsplot::ggbetweenstats and
+        ggstatsplot::grouped_ggbetweenstats to generate box-violin plots
+        for comparing continuous variables between independent groups with
+        statistical annotations.
 
 options:
     - name: data
@@ -68,18 +21,31 @@ options:
           R: >
             The data as a data frame.
 
-
     - name: dep
       title: Dependent Variables
       type: Variables
       suggested: [ continuous ]
       permitted: [ numeric ]
+      description:
+          R: >
+            One or more continuous numeric variables to compare across independent groups.
+            When multiple variables are supplied, each variable is analyzed separately using
+            its own non-missing observations.
+          ui: >
+            Select one or more continuous numeric outcomes (for example, biomarker level,
+            Ki-67 index, or laboratory measurement) to compare between groups.
 
     - name: group
       title: Grouping Variable
       type: Variable
       suggested: [ ordinal, nominal ]
       permitted: [ factor ]
+      description:
+          R: >
+            Categorical variable defining two or more independent comparison groups.
+          ui: >
+            Select the categorical variable defining independent patient or sample groups
+            (for example, treatment arm, tumor stage, or diagnostic subtype).
 
     - name: grvar
       title: 'Split By (Optional)'
@@ -87,129 +53,219 @@ options:
       suggested: [ ordinal, nominal ]
       permitted: [ factor ]
       default: NULL
-
+      description:
+          R: >
+            Optional categorical variable used to stratify the between-group comparison into
+            separate subgroup panels via grouped_ggbetweenstats.
+          ui: >
+            Optionally stratify the comparison into separate panels for each level of a
+            subgroup variable (for example, sex, cohort, or specimen type).
 
     - name: centralityplotting
-      title: Centrality
+      title: Centrality markers
       type: Bool
       default: false
+      description:
+          R: >
+            Whether to plot group centrality points and value labels on the box-violin plot.
+          ui: >
+            Display group centrality markers (mean, median, trimmed mean, or MAP estimate)
+            and numeric labels on each group distribution.
 
     - name: centralitytype
-      title: 'Centrality Type'
+      title: Centrality type
       type: List
       options:
-        - title: mean (parametric)
+        - title: Mean (parametric)
           name: parametric
-        - title: median (nonparametric)
+        - title: Median (nonparametric)
           name: nonparametric
-        - title: robust (trimmed mean)
+        - title: Trimmed mean (robust)
           name: robust
-        - title: bayes (MAP estimator)
-          name: bayes 
-      default: parametric
-
-
-    - name: typestatistics
-      title: 'Type of Statistic'
-      type: List
-      options:
-        - title: Parametric (t-test/ANOVA)
-          name: parametric
-        - title: Nonparametric (Mann-Whitney/Kruskal-Wallis)
-          name: nonparametric
-        - title: Robust (Trimmed Means)
-          name: robust
-        - title: Bayes (Bayesian Analysis)
+        - title: MAP estimator (Bayesian)
           name: bayes
       default: parametric
+      description:
+          R: >
+            Centrality measure displayed when centralityplotting is enabled: parametric mean,
+            nonparametric median, robust 20 percent trimmed mean, or Bayesian MAP estimate.
+          ui: >
+            Choose which summary measure to highlight when Centrality markers is enabled.
+
+    - name: typestatistics
+      title: Statistical approach
+      type: List
+      options:
+        - title: Parametric (t-test / ANOVA)
+          name: parametric
+        - title: Nonparametric (Mann-Whitney / Kruskal-Wallis)
+          name: nonparametric
+        - title: Robust (trimmed means)
+          name: robust
+        - title: Bayesian
+          name: bayes
+      default: parametric
+      description:
+          R: >
+            Statistical framework used for group comparisons: parametric (Welch or Student t-test /
+            one-way ANOVA), nonparametric (Mann-Whitney U / Kruskal-Wallis), robust (Yuen trimmed-mean
+            test / heteroscedastic trimmed-mean ANOVA), or Bayesian (Jeffreys-Zellner-Siow Bayes factor).
+          ui: >
+            Select the statistical test family: Parametric for approximately normal data,
+            Nonparametric for skewed or ordinal scores, Robust for outlier-resistant trimmed
+            means, or Bayesian for Bayes factor evidence.
 
     - name: seed
       title: Random seed
       type: Integer
       default: 20250101
+      min: 1
+      max: 2147483647
       description:
           R: >
-            Random seed for the statistics computed by resampling or posterior sampling (robust tests, Bayesian estimates, and some nonparametric effect-size intervals). The plot caption names the seed whenever it affected the numbers shown. The default reproduces the previous fixed behavior.
+            Random seed for statistics computed by resampling or posterior sampling (robust tests,
+            Bayesian estimates, and some nonparametric effect-size intervals). Each dependent variable
+            starts from this seed independently, and the plot caption names the seed whenever it
+            affected the numbers shown.
+          ui: >
+            Integer seed (1 to 2147483647) for reproducible point jitter, bootstrap confidence
+            intervals, and Bayesian posterior sampling.
 
     - name: pairwisecomparisons
       title: Pairwise comparisons
       type: Bool
       default: false
+      description:
+          R: >
+            Whether to compute and display post-hoc pairwise comparison brackets when comparing
+            three or more groups.
+          ui: >
+            Show post-hoc pairwise significance brackets between group pairs when comparing
+            three or more groups.
 
     - name: pairwisedisplay
-      title: 'Pairwise Display'
+      title: Pairwise display
       type: List
       options:
-        - title: significant
+        - title: Significant only
           name: significant
-        - title: non-significant
+        - title: Non-significant only
           name: non-significant
-        - title: everything
+        - title: All comparisons
           name: everything
       default: significant
+      description:
+          R: >
+            Which pairwise comparison brackets to draw when pairwisecomparisons is enabled:
+            significant pairs only, non-significant pairs only, or all pairs.
+          ui: >
+            Choose whether to draw brackets only for statistically significant pairs, only for
+            non-significant pairs, or for every group pair.
 
     - name: padjustmethod
-      title: 'Adjustment Method'
+      title: Adjustment method
       type: List
       options:
-        - title: holm
+        - title: Holm
           name: holm
-        - title: hochberg
+        - title: Hochberg
           name: hochberg
-        - title: hommel
+        - title: Hommel
           name: hommel
-        - title: bonferroni
+        - title: Bonferroni
           name: bonferroni
-        - title: BH
+        - title: Benjamini-Hochberg (BH)
           name: BH
-        - title: BY
+        - title: Benjamini-Yekutieli (BY)
           name: BY
-        - title: fdr
+        - title: False discovery rate (FDR)
           name: fdr
-        - title: none
+        - title: None
           name: none
       default: holm
+      description:
+          R: >
+            Multiple-comparison p-value adjustment method for post-hoc pairwise tests. For
+            three or more parametric groups, Games-Howell uses its single-step studentized-range
+            family-wise error rate adjustment unless 'none' is selected.
+          ui: >
+            Select how post-hoc pairwise p-values are adjusted for multiple comparisons.
+            Note that 3+ group parametric comparisons use single-step Games-Howell FWER
+            adjustment unless 'None' is chosen.
 
     - name: effsizetype
-      title: 'Effect Size Needed for Parametric Tests'
+      title: Parametric effect size
       type: List
       options:
-        - title: biased
+        - title: "Cohen's d / partial eta-squared (biased)"
           name: biased
-        - title: unbiased
+        - title: "Hedges' g / partial omega-squared (unbiased)"
           name: unbiased
-        - title: eta
+        - title: Partial eta-squared (ANOVA)
           name: eta
-        - title: omega
+        - title: Partial omega-squared (ANOVA)
           name: omega
       default: biased
-
+      description:
+          R: >
+            Effect size reported for parametric tests: Cohen's d or partial eta-squared ('biased'),
+            small-sample corrected Hedges' g or partial omega-squared ('unbiased'), or explicit
+            ANOVA 'eta' / 'omega' options.
+          ui: >
+            Choose between standard ('biased': Cohen's d / eta-squared) and bias-corrected
+            ('unbiased': Hedges' g / omega-squared) parametric effect sizes.
 
     - name: mytitle
-      title: Title
+      title: Plot title
       type: String
       default: 'Between Group Comparison'
+      description:
+          R: >
+            Main title displayed above the plot. Pass an empty string to omit the title.
+          ui: >
+            Custom plot title. Clear the field to display no title.
 
     - name: xtitle
-      title: X-Title
+      title: X-axis title
       type: String
       default: ''
+      description:
+          R: >
+            Custom label for the horizontal grouping axis. Defaults to the grouping variable name when empty.
+          ui: >
+            Custom X-axis label. Leave blank to use the grouping variable name.
 
     - name: ytitle
-      title: Y-Title
+      title: Y-axis title
       type: String
       default: ''
+      description:
+          R: >
+            Custom label for the vertical outcome axis. Defaults to the dependent variable name when empty.
+          ui: >
+            Custom Y-axis label (for example, 'Ki-67 Index (%)'). Leave blank to use the variable name.
 
     - name: originaltheme
-      title: Add GGStatsPlot layer
+      title: Original ggstatsplot theme
       type: Bool
       default: false
+      description:
+          R: >
+            Whether to use ggstatsplot::theme_ggstatsplot() instead of the active jamovi plot theme.
+          ui: >
+            Use the original ggstatsplot visual theme instead of matching jamovi's plot theme.
 
     - name: resultssubtitle
       title: Statistical results
       type: Bool
       default: false
-
+      description:
+          R: >
+            Whether to compute and display the omnibus test statistic, p-value, effect size,
+            confidence interval, and sample size in the plot subtitle.
+          ui: >
+            Show the statistical test summary (statistic, p-value, effect size, and interval)
+            in the plot subtitle and populate exact numbers in the Copy-Ready Report Template.
 
     - name: bfmessage
       title: Bayes factor message
@@ -217,10 +273,13 @@ options:
       default: false
       description:
           R: >
-            Whether to display Bayes Factor in the subtitle when using Bayesian analysis.
+            Whether to display a Bayes factor caption (log_e BF_01) beneath a two-group parametric plot when Statistical results is enabled.
+          ui: >
+            Append a Bayes factor caption (log_e BF_01) below two-group parametric plots when
+            Statistical results is enabled.
 
     - name: k
-      title: Decimal Places
+      title: Decimal places
       type: Integer
       default: 2
       min: 0
@@ -228,16 +287,21 @@ options:
       description:
           R: >
             Number of decimal places for displaying statistics in the subtitle.
+          ui: >
+            Number of decimal places (0 to 5) shown for test statistics, p-values, and effect sizes.
 
     - name: conflevel
-      title: Confidence Level
+      title: Confidence level
       type: Number
       default: 0.95
       min: 0.5
       max: 0.999
       description:
           R: >
-            Confidence level for confidence intervals.
+            Confidence or credible level for effect-size intervals.
+          ui: >
+            Confidence or credible interval level as a proportion between 0.50 and 0.999
+            (for example, 0.95 for 95 percent intervals).
 
     - name: varequal
       title: Equal variances
@@ -246,12 +310,15 @@ options:
       description:
           R: >
             Whether to assume equal variances across groups for parametric tests.
+          ui: >
+            Assume equal group variances (Student's t-test / Fisher's ANOVA). Leave unchecked
+            to use Welch's heteroscedasticity-robust test (recommended default).
 
     - name: multiEndpointCorrection
-      title: Multiple Endpoint Correction Guidance
+      title: Multiple endpoint correction guidance
       type: List
       options:
-        - title: None (show warning only)
+        - title: None (warning only)
           name: none
         - title: Bonferroni (manual guidance)
           name: bonferroni
@@ -265,7 +332,7 @@ options:
             Display guidance for multiple testing correction when analyzing multiple dependent variables.
             IMPORTANT: This option does NOT automatically adjust p-values. It provides instructions for
             manual correction. When testing multiple endpoints (e.g., cholesterol, glucose, triglycerides),
-            the family-wise error rate increases. For example, testing 3 variables at α=0.05 gives actual
+            the family-wise error rate increases. For example, testing 3 variables at alpha = 0.05 gives an
             error rate of ~14 percent. Select a correction method to see step-by-step instructions for manually
             applying that correction to the p-values shown in the plots.
           ui: >
@@ -274,10 +341,8 @@ options:
             warning about inflated error rates, or select a correction method to see detailed instructions
             for manual application.
 
-
-
     - name: plotwidth
-      title: Plot Width
+      title: Plot width
       type: Integer
       default: 650
       min: 300
@@ -285,9 +350,11 @@ options:
       description:
           R: >
             Width of the plot in pixels. Default is 650.
+          ui: >
+            Plot width in pixels (300 to 1200).
 
     - name: plotheight
-      title: Plot Height
+      title: Plot height
       type: Integer
       default: 450
       min: 300
@@ -295,14 +362,18 @@ options:
       description:
           R: >
             Height of the plot in pixels. Default is 450.
+          ui: >
+            Plot height per variable panel in pixels (300 to 800).
 
     - name: colorblindSafe
-      title: Use colorblind-safe palette
+      title: Colorblind-safe palette
       type: Bool
       default: false
       description:
           R: >
-            Whether to use colorblind-safe color palette for plot elements.
+            Whether to apply a colorblind-safe Viridis palette to plot elements.
+          ui: >
+            Apply a colorblind-safe Viridis palette to both main and companion plots.
 
     - name: showexplanations
       title: Explanations and guides
@@ -317,35 +388,41 @@ options:
             and a copy-ready report template. Helpful for learning and preparing manuscripts.
 
     - name: addGGPubrPlot
-      title: Add ggpubr plot variant
+      title: Companion publication plot
       type: Bool
       default: false
       description:
           R: >
-            Add publication-ready plot using ggpubr package. This provides an alternative visualization with publication-quality aesthetics.
+            Display a companion publication-ready plot panel with journal palettes.
+          ui: >
+            Add a clean ggpubr companion figure formatted for clinical and pathology journals.
 
     - name: ggpubrPlotType
-      title: ggpubr Plot Type
+      title: Companion plot type
       type: List
       options:
-        - title: Box Plot
+        - title: Box plot
           name: boxplot
-        - title: Violin Plot
+        - title: Violin plot
           name: violin
-        - title: Box-Violin Combined
+        - title: Combined box-violin plot
           name: boxviolin
       default: boxplot
       description:
           R: >
-            Type of ggpubr plot to display when addGGPubrPlot is enabled.
+            Type of companion plot to display when addGGPubrPlot is enabled.
+          ui: >
+            Geometry used for the companion publication plot (box, violin, or combined box-violin).
 
     - name: ggpubrPalette
-      title: ggpubr Color Palette
+      title: Companion color palette
       type: List
       options:
-        - title: Journal of Clinical Oncology (jco)
+        - title: jamovi (follow global)
+          name: jamovi
+        - title: Journal of Clinical Oncology (JCO)
           name: jco
-        - title: Nature Publishing Group (npg)
+        - title: Nature Publishing Group (NPG)
           name: npg
         - title: AAAS Science
           name: aaas
@@ -353,31 +430,39 @@ options:
           name: lancet
         - title: JAMA
           name: jama
-        - title: New England Journal of Medicine (nejm)
+        - title: New England Journal of Medicine (NEJM)
           name: nejm
-        - title: Gray scale
+        - title: Grayscale
           name: grey
         - title: Default ggplot2
           name: default
       default: jco
       description:
           R: >
-            Color palette for ggpubr plot.
+            Color palette for the companion publication plot.
+          ui: >
+            Journal or jamovi color palette for the companion plot (disabled when Colorblind-safe
+            palette is active).
 
     - name: ggpubrAddStats
-      title: Add statistical comparisons (ggpubr)
-      type: Bool
-      default: true
-      description:
-          R: >
-            Add statistical comparison p-values to ggpubr plot.
-
-    - name: ggpubrAddPoints
-      title: Add individual points (ggpubr)
+      title: Statistical comparisons on companion plot
       type: Bool
       default: false
       description:
           R: >
-            Overlay individual data points on ggpubr plot.
+            Display omnibus statistical comparison p-values on the companion plot.
+          ui: >
+            Annotate the companion plot with the overall group-comparison p-value (honoring
+            Welch's ANOVA when Equal variances is unchecked).
+
+    - name: ggpubrAddPoints
+      title: Individual points on companion plot
+      type: Bool
+      default: false
+      description:
+          R: >
+            Overlay jittered individual data points on the companion plot.
+          ui: >
+            Overlay jittered individual observations on the companion plot.
 
 ...

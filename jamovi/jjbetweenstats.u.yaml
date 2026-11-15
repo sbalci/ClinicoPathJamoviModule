@@ -41,11 +41,20 @@ children:
             children:
               - type: ComboBox
                 name: typestatistics
+              - type: CheckBox
+                name: varequal
+                enable: (typestatistics:parametric)
+              - type: TextBox
+                name: conflevel
+                format: number
+              - type: TextBox
+                name: k
+                format: number
               - type: TextBox
                 name: seed
                 format: number
       - type: Label
-        label: Statistical Options
+        label: Effect Size and Bayes Factor
         fitToGrid: true
         children:
           - type: LayoutBox
@@ -53,17 +62,10 @@ children:
             children:
               - type: ComboBox
                 name: effsizetype
-              - type: TextBox
-                name: conflevel
-                format: number
+                enable: (typestatistics:parametric)
               - type: CheckBox
                 name: bfmessage
                 enable: (typestatistics:parametric && resultssubtitle)
-              - type: TextBox
-                name: k
-                format: number
-              - type: CheckBox
-                name: varequal
       - type: Label
         label: Pairwise Comparisons
         fitToGrid: true
@@ -81,7 +83,7 @@ children:
                     name: padjustmethod
                     enable: (pairwisecomparisons)
       - type: Label
-        label: Multiple Endpoint Correction
+        label: Multiple Endpoint Guidance
         fitToGrid: true
         children:
           - type: LayoutBox
@@ -90,28 +92,11 @@ children:
               - type: ComboBox
                 name: multiEndpointCorrection
   - type: CollapseBox
-    label: Plot Display
+    label: Plot Display and Appearance
     collapsed: true
     children:
       - type: Label
-        label: Statistical Features
-        fitToGrid: true
-        children:
-          - type: LayoutBox
-            margin: large
-            children:
-              - type: CheckBox
-                name: centralityplotting
-                children:
-                  - type: ComboBox
-                    name: centralitytype
-                    enable: (centralityplotting)
-  - type: CollapseBox
-    label: Plot Appearance
-    collapsed: true
-    children:
-      - type: Label
-        label: Display Options
+        label: Annotations and Guides
         fitToGrid: true
         children:
           - type: LayoutBox
@@ -120,11 +105,24 @@ children:
               - type: CheckBox
                 name: resultssubtitle
               - type: CheckBox
+                name: centralityplotting
+                children:
+                  - type: ComboBox
+                    name: centralitytype
+                    enable: (centralityplotting)
+              - type: CheckBox
+                name: showexplanations
+      - type: Label
+        label: Theme and Accessibility
+        fitToGrid: true
+        children:
+          - type: LayoutBox
+            margin: large
+            children:
+              - type: CheckBox
                 name: originaltheme
               - type: CheckBox
                 name: colorblindSafe
-              - type: CheckBox
-                name: showexplanations
       - type: Label
         label: Plot Labels
         fitToGrid: true
@@ -144,10 +142,6 @@ children:
                 name: ytitle
                 format: string
                 width: large
-  - type: CollapseBox
-    label: Plot Configuration
-    collapsed: true
-    children:
       - type: Label
         label: Plot Dimensions
         fitToGrid: true
@@ -162,13 +156,13 @@ children:
                 name: plotheight
                 format: number
   - type: CollapseBox
-    label: Publication-Ready Plot (ggpubr)
+    label: Publication-Ready Companion Plot
     collapsed: true
     children:
       - type: CheckBox
         name: addGGPubrPlot
       - type: Label
-        label: ggpubr Options
+        label: Companion Plot Options
         fitToGrid: true
         children:
           - type: LayoutBox

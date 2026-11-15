@@ -13,8 +13,14 @@ jjdotchart(
   typestatistics = "parametric",
   conflevel = 0.95,
   k = 2,
+  trimprop = 0.2,
+  bfprior = 0.707,
+  nboot = 200,
+  ciresamples = 2000,
+  mapresamples = 500,
   resultssubtitle = TRUE,
   showSummaryTable = TRUE,
+  showWeightedTable = FALSE,
   centralityplotting = FALSE,
   centralitytype = "parametric",
   originaltheme = FALSE,
@@ -29,64 +35,95 @@ jjdotchart(
 \arguments{
 \item{data}{The data as a data frame.}
 
-\item{dep}{The continuous variable to summarize. Each group is reduced to
-one point on the chart - its mean, median, trimmed mean or MAP estimate,
-whichever matches the Statistical Test selected below.}
+\item{dep}{The continuous variable to summarize across complete finite
+observations within each group. Each group is reduced to one point on the
+chart - its mean, median, 20 percent trimmed mean, or kernel MAP estimate,
+matching the Statistical test selected below.}
 
-\item{group}{The grouping variable. Every level becomes one point on the
-chart, and the number of levels is the sample size of the statistical test.}
+\item{group}{The clustering or unit variable (for example laboratory,
+center, or rater). Every observed non-missing level contributes one equally
+weighted point (weight 1/k), and the number of groups k is the sample size
+of the one-sample test.}
 
-\item{grvar}{Optional variable producing a separate dot chart for each of
-its levels.}
+\item{grvar}{Optional stratification variable producing a separate dot
+chart and separate per-stratum one-sample test (sample size k_s groups
+within each stratum) for each non-missing level, without removing rows that
+are missing only Split By from the unstratified table and chart.}
 
-\item{testvalue}{The value the k group summaries are tested against. Choose
-something clinically meaningful on the scale of your measurement - an upper
-limit of normal, a target turnaround time, a published benchmark. The
-default of 0 is rarely the right choice: for a measurement that is not
-centered near zero it makes the standardized effect enormous, and the
-statistics package then fails to compute a confidence interval for the
-effect size and returns NO statistics at all. The analysis detects this and
-says so rather than showing an empty result.}
+\item{testvalue}{The target benchmark value that the k group summaries are
+tested against (for example an upper limit of normal, a target turnaround
+time, or an external calibration standard). Replace the default of 0
+whenever 0 is not a meaningful clinical benchmark on the scale of your
+measurement, because extreme separation from 0 can make standardized
+effect-size intervals non-estimable.}
 
-\item{typestatistics}{The one-sample test comparing the k group summaries
-to the Reference Value. This also decides WHICH summary is plotted for each
-group (mean, median, 20 percent trimmed mean or MAP estimate respectively),
-so changing it moves the points, not just the caption.}
+\item{typestatistics}{Selects both the within-group summary and the
+one-sample test across the k group summaries: Parametric uses arithmetic
+means (Student-t within-group CIs) and a one-sample t-test with Hedges' g;
+Nonparametric uses medians (B = 2000 percentile bootstrap CIs) and a
+continuity-corrected Wilcoxon signed-rank test with Fisher-z rank-biserial
+correlation; Robust uses 20 percent trimmed means (Yuen Winsorized-t
+within-group CIs) and Wilcox's bootstrapped trimmed-mean t-test (nboot =
+200, Phipson-Smyth bounded p-values); Bayesian uses 1024-grid
+Sheather-Jones kernel MAP modes (B = 500 percentile bootstrap CIs) and a
+Cauchy-JZS Bayes factor t-test (r = 0.707, where positive log_e(BF_01)
+favors the Reference Value null).}
 
-\item{conflevel}{Confidence level for the intervals, 0.95 giving 95 percent
-intervals.}
+\item{conflevel}{Confidence (or credible) level for both the within-group
+error bars in the chart and Group Summaries table and the one-sample
+effect-size interval in the plot subtitle (0.95 gives 95 percent
+intervals).}
 
 \item{k}{Number of decimal places for the statistics annotated on the plot
-(the test result subtitle). It does NOT control the Group Summaries table:
-jamovi formats table numbers from its own global 'Number format' preference
-in the Results panel settings, which no analysis can override.}
+subtitle and optional centrality label. Table cell rounding follows
+jamovi's global Results number-format setting.}
 
-\item{resultssubtitle}{Show the test result as a subtitle. Defaults to TRUE
-here, unlike the sibling plot analyses: the comparison against the
-Reference Value is the whole point of this chart, so hiding it leaves a
-figure whose title makes a claim nothing on the plot supports.}
+\item{trimprop}{Symmetric tail-trimming proportion (0.05 to 0.40 per tail;
+default 0.20 for 20 percent trimmed means) used in Robust mode for
+within-group trimmed means, Yuen Winsorized-t intervals, the bootstrapped
+trimmed-mean test, and the optional trimmed-mean center line.}
 
-\item{showSummaryTable}{Show the per-group table behind the chart - the
-number of observations, the plotted summary value, and its spread. This is
-what makes the aggregation auditable: it states how many observations each
-single plotted point represents. The summary column is labeled with the
-statistic actually used, which changes with the Statistical Test.}
+\item{bfprior}{Scale parameter r (0.10 to 2.00; default 0.707 = sqrt(2)/2
+medium prior) of the zero-centered Cauchy Jeffreys-Zellner-Siow prior on
+standardized effect size in Bayesian mode.}
 
-\item{centralityplotting}{Draw a SECOND vertical line at the center of the
-k plotted summaries - i.e. the average of the group averages. This is not
-the Reference Value; the Reference Value line is always drawn and is
-labeled. Off by default deliberately. The statistics package draws this
-line by default and draws NO line at the reference value, so the only
-vertical line on an unmodified figure sits at the center of the data while
-the user believes it marks the threshold they typed in (measured: identical
-line position for reference values of 0, 12 and 999). This analysis inverts
-that - the reference line is always present, and this optional second line
-is drawn in a different style and named in the caption.}
+\item{nboot}{Number of percentile-t bootstrap resamples (100 to 5000;
+default 200) for Wilcox's one-sample trimmed-mean test across the k group
+summaries in Robust mode. Larger values refine the Phipson-Smyth lower
+p-value bound 1 / (B + 1).}
+
+\item{ciresamples}{Number of within-group percentile bootstrap resamples
+(200 to 10000; default 2000) used to form group-median confidence intervals
+and bootstrap standard errors in Nonparametric mode.}
+
+\item{mapresamples}{Number of within-group percentile bootstrap resamples
+(100 to 5000; default 500) used to form Sheather-Jones kernel MAP mode
+intervals and bootstrap standard errors in Bayesian mode.}
+
+\item{resultssubtitle}{Show the one-sample test result against the
+Reference Value as the plot subtitle.}
+
+\item{showSummaryTable}{Show the per-group audit table behind the chart:
+complete observation count, plotted group summary (dynamically titled Mean,
+Median, Trimmed mean, or MAP estimate), raw within-group SD, within-group
+confidence limits matching the plotted error bars, and signed difference
+from the Reference Value.}
+
+\item{showWeightedTable}{Display a companion sensitivity table comparing
+the unweighted group mean (equal weight 1/k per group) against a
+caseload-weighted cluster-robust estimate (weights n_g / N with CR1 cluster
+sandwich SE) and a DerSimonian-Laird random-effects precision-weighted
+estimate (inverse-variance weights incorporating between-group
+heterogeneity tau-squared and I-squared) relative to the Reference Value.}
+
+\item{centralityplotting}{Draw a second solid blue vertical line at the
+center of the k plotted group summaries (distinct from the dashed red
+Reference Value line, which is always drawn and labeled in the caption).}
 
 \item{centralitytype}{Which center to use for the optional second line,
-when 'Also mark the center of the plotted points' is ticked. It affects
-that line ONLY - the plotted points always follow the Statistical Test.
-Leave it matching your Statistical Test unless you have a specific reason.}
+when 'Center line across plotted points' is ticked. It affects that line
+ONLY - the plotted points always follow the Statistical test. Leave it
+matching your Statistical test unless you have a specific reason.}
 
 \item{originaltheme}{Use the original ggstatsplot theme rather than
 jamovi's default.}
@@ -113,6 +150,7 @@ A results object containing:
 \code{results$todo} \tab \tab \tab \tab \tab a html \cr
 \code{results$notices} \tab \tab \tab \tab \tab a html \cr
 \code{results$summary} \tab \tab \tab \tab \tab a table \cr
+\code{results$weightsensitivity} \tab \tab \tab \tab \tab a table \cr
 \code{results$plot2} \tab \tab \tab \tab \tab an image \cr
 \code{results$plot} \tab \tab \tab \tab \tab an image \cr
 }
@@ -124,33 +162,26 @@ Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.f
 \code{as.data.frame(results$summary)}
 }
 \description{
-Cleveland dot chart: one summary point per group, ordered by value, with
-a confidence interval and a reference line. Wraps
-ggstatsplot::ggdotplotstats and ggstatsplot::grouped_ggdotplotstats.
-}
-\details{
-IMPORTANT - what is tested. Every observation in a group is collapsed to a
-SINGLE summary value, and the test is a ONE-SAMPLE test of those k summary
-values against your Reference Value. The sample size of the test is
-therefore the NUMBER OF GROUPS, not the number of patients: 120 patients
-in 3 groups gives a one-sample t-test with n = 3 and 2 degrees of freedom.
-It answers "are the group summaries, taken together, different from this
-value?" - NOT "do these groups differ from each other".
-
-Which summary is plotted follows the Statistical Test you choose, and the
-test then runs on those same values: parametric plots the group MEANS,
-nonparametric the MEDIANS, robust the 20 percent TRIMMED MEANS, Bayesian
-the MAP estimates. Verified on skewed data where they differ sharply
-(mean 33.77 vs median 9.75 for the same group), so switching test type
-genuinely changes the picture, not just the caption.
-
-To compare groups WITH EACH OTHER using every observation, use
-"Box-Violin Plots to Compare Between Groups" or
-"Horizontal Box-Violin Comparison" instead.
-
-Best suited to many labels each contributing one meaningful summary -
-mean turnaround time across 20 laboratories, median biomarker by center -
-which is what a Cleveland dot plot is designed for. With only two or three
-groups the test has 1-2 degrees of freedom and is of little value, even
-though the chart itself is still a fair picture of the group averages.
+Cleveland dot chart for cross-sectional multi-unit benchmarking: collapses
+finite complete observations within each level of Groups to a single
+within-group location summary, orders the k groups ascending by summary
+value with within-group confidence intervals and a dashed Reference Value
+line, and runs an unweighted one-sample test of those k group summaries
+(equal weight 1/k per group, sample size n = k groups rather than N
+patients; per-stratum n = k_s when Split By is used) against the Reference
+Value. Selecting Parametric plots group arithmetic means with Student-t
+intervals and a one-sample t-test (Hedges' g); Nonparametric plots group
+medians with percentile bootstrap intervals and a Wilcoxon signed-rank test
+(rank-biserial r); Robust plots symmetric trimmed means with Yuen
+Winsorized-t intervals and a bootstrapped trimmed-mean test; and Bayesian
+plots Sheather-Jones kernel-density MAP modes with percentile bootstrap
+intervals alongside a Gaussian Cauchy-JZS Bayes factor test (where
+log_e(BF_01) > 0 favors the null hypothesis that the group-summary mean
+equals the Reference Value). Because equal cluster weights can diverge from
+caseload-weighted or precision-weighted benchmarks when group sizes or
+within-group standard errors vary, an optional Weighted sensitivity table
+compares unweighted (1/k), caseload-weighted cluster-robust (n_g/N), and
+DerSimonian-Laird random-effects precision-weighted estimates against the
+Reference Value; to compare groups directly using individual observations,
+use Box-Violin Plots to Compare Between Groups instead.
 }

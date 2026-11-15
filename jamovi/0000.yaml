@@ -18,7 +18,7 @@ analyses:
   - title: Table One
     name: tableone
     ns: ClinicoPath
-    menuGroup: Exploration
+    menuGroup: ExplorationT
     menuSubgroup: ClinicoPath Descriptives
     menuTitle: Table One
     description: >
@@ -32,7 +32,7 @@ analyses:
   - title: Summary of Continuous Variables
     name: summarydata
     ns: ClinicoPath
-    menuGroup: Exploration
+    menuGroup: ExplorationT
     menuSubgroup: ClinicoPath Descriptives
     menuTitle: Summary of Continuous Variables
     description: >
@@ -1122,7 +1122,7 @@ analyses:
   - title: Odds Ratio Table and Plot
     name: oddsratio
     ns: ClinicoPath
-    menuGroup: Survival
+    menuGroup: SurvivalT
     menuSubgroup: General Statistics
     menuTitle: Odds Ratio Table and Plot
     menuSubtitle: Odds Ratio for Binary Outcomes
@@ -1772,16 +1772,16 @@ analyses:
   - title: Box-Violin Plots to Compare Between Groups
     name: jjbetweenstats
     ns: ClinicoPath
-    menuGroup: JJStatsPlot
+    menuGroup: JJStatsPlotT
     menuSubgroup: Categorical vs Continuous
     menuTitle: Box-Violin Plots to Compare Between Groups
     menuSubtitle: Independent Samples
     ribbon: analyses
     category: analyses
-    description: |
-      Wrapper Function for ggstatsplot::ggbetweenstats and
-      ggstatsplot::grouped_ggbetweenstats to generate Box-Violin Plots
-      for comparing continuous variables between groups with statistical
+    description: >
+      Wrapper function for ggstatsplot::ggbetweenstats and
+      ggstatsplot::grouped_ggbetweenstats to generate box-violin plots for
+      comparing continuous variables between independent groups with statistical
       annotations.
   - title: Box-Violin Plots to Compare Within Groups
     name: jjwithinstats
@@ -5878,10 +5878,29 @@ analyses:
     menuGroup: JJStatsPlot
     menuSubgroup: Categorical vs Continuous
     menuTitle: Dot Chart (Summary vs Reference Value)
-    description: |-
-      Cleveland dot chart: one summary point per group, ordered by value, with
-      a confidence interval and a reference line. Wraps
-      ggstatsplot::ggdotplotstats and ggstatsplot::grouped_ggdotplotstats.
+    description: >
+      Cleveland dot chart for cross-sectional multi-unit benchmarking: collapses
+      finite complete observations within each level of Groups to a single
+      within-group location summary, orders the k groups ascending by summary
+      value with within-group confidence intervals and a dashed Reference Value
+      line, and runs an unweighted one-sample test of those k group summaries
+      (equal weight 1/k per group, sample size n = k groups rather than N
+      patients; per-stratum n = k_s when Split By is used) against the Reference
+      Value. Selecting Parametric plots group arithmetic means with Student-t
+      intervals and a one-sample t-test (Hedges' g); Nonparametric plots group
+      medians with percentile bootstrap intervals and a Wilcoxon signed-rank
+      test (rank-biserial r); Robust plots symmetric trimmed means with Yuen
+      Winsorized-t intervals and a bootstrapped trimmed-mean test; and Bayesian
+      plots Sheather-Jones kernel-density MAP modes with percentile bootstrap
+      intervals alongside a Gaussian Cauchy-JZS Bayes factor test (where
+      log_e(BF_01) > 0 favors the null hypothesis that the group-summary mean
+      equals the Reference Value). Because equal cluster weights can diverge
+      from caseload-weighted or precision-weighted benchmarks when group sizes
+      or within-group standard errors vary, an optional Weighted sensitivity
+      table compares unweighted (1/k), caseload-weighted cluster-robust (n_g/N),
+      and DerSimonian-Laird random-effects precision-weighted estimates against
+      the Reference Value; to compare groups directly using individual
+      observations, use Box-Violin Plots to Compare Between Groups instead.
   - title: Agreement Method Guide
     name: agreementintro
     ns: ClinicoPath

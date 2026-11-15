@@ -30,8 +30,6 @@ clearWith:
     - colorblindSafe
     - showexplanations
 
-
-
 items:
 
     - name:  todo
@@ -78,7 +76,7 @@ items:
     - name: plot2
       title: '`Violin Plot by ${grvar}`'
       type: Image
-      width:  600
+      width:  650
       height: 450
       renderFun: .plot2
       requiresData: true
@@ -87,7 +85,7 @@ items:
     - name: plot
       title: 'Violin Plot'
       type: Image
-      width:  600
+      width:  650
       height: 450
       renderFun: .plot
       requiresData: true
@@ -103,6 +101,7 @@ items:
       clearWith:
         - dep
         - group
+        - grvar
         - typestatistics
         - seed
         - varequal
@@ -110,6 +109,9 @@ items:
         - mytitle
         - xtitle
         - ytitle
+        - plotwidth
+        - plotheight
+        - addGGPubrPlot
         - ggpubrPlotType
         - ggpubrPalette
         - ggpubrAddStats
@@ -118,7 +120,7 @@ items:
     - name: ggpubrPlot2
       title: '`Publication-Ready Plot by ${grvar} (ggpubr)`'
       type: Image
-      width:  600
+      width:  650
       height: 450
       renderFun: .plotGGPubr2
       requiresData: true
@@ -126,19 +128,21 @@ items:
       clearWith:
         - dep
         - group
+        - grvar
         - typestatistics
         - seed
         - varequal
         - colorblindSafe
-        - grvar
         - mytitle
         - xtitle
         - ytitle
+        - plotwidth
+        - plotheight
+        - addGGPubrPlot
         - ggpubrPlotType
         - ggpubrPalette
         - ggpubrAddStats
         - ggpubrAddPoints
-
 
 refs:
     - ClinicoPathJamoviModule
@@ -146,5 +150,8 @@ refs:
     - statsExpressions
     - ggpubr
     - car
-    - digest
+    - WRS2
+    - BayesFactor
+    - effectsize
+    - PMCMRplus
 ...

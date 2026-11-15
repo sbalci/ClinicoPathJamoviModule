@@ -381,3 +381,317 @@ test_that("only oneway.test is collateral damage from as.character.formula", {
         expect_equal(length(as.character(y ~ g)), 3L)
     }
 })
+
+
+test_that("Bayesian report distinguishes 2-group posterior difference (ETI) from 3+ group Bayesian R-squared (HDI)", {
+    a2 <- jb_run(jb_2group(), typestatistics = "bayes", resultssubtitle = TRUE, showexplanations = TRUE)
+    rep2 <- jb_text(a2$results$report$content)
+    expect_match(rep2, "posterior difference", fixed = TRUE)
+    expect_match(rep2, "ETI", fixed = TRUE)
+    expect_false(grepl("posterior Bayesian R", rep2, fixed = TRUE))
+
+    a3 <- jb_run(jb_3group(), typestatistics = "bayes", resultssubtitle = TRUE, showexplanations = TRUE)
+    rep3 <- jb_text(a3$results$report$content)
+    expect_match(rep3, "posterior Bayesian R\u00b2", fixed = TRUE)
+    expect_match(rep3, "HDI", fixed = TRUE)
+    expect_false(grepl("posterior difference", rep3, fixed = TRUE))
+    expect_false(grepl("ETI", rep3, fixed = TRUE))
+
+    a3_tpl <- jb_run(jb_3group(), typestatistics = "bayes", resultssubtitle = FALSE, showexplanations = TRUE)
+    rep3_tpl <- jb_text(a3_tpl$results$report$content)
+    expect_match(rep3_tpl, "posterior Bayesian R\u00b2", fixed = TRUE)
+    expect_match(rep3_tpl, "HDI", fixed = TRUE)
+    expect_false(grepl("posterior difference", rep3_tpl, fixed = TRUE))
+})
+
+
+test_that("degenerate constant or singleton-arm variables do not crash multi-variable or pairwise plots", {
+    set.seed(101)
+    d_deg <- data.frame(
+        g = factor(rep(c("A", "B", "C"), each = 10)),
+        s = factor(rep(rep(c("S1", "S2"), each = 5), 3)),
+        valid_var = c(rnorm(10, 10, 2), rnorm(10, 14, 2), rnorm(10, 18, 2)),
+        const_var = rep(5.0, 30),
+        n1_arm_var = c(10.5, rep(NA, 9), rnorm(10, 14, 2), rnorm(10, 18, 2))
+    )
+
+    render_ok <- function(res_img) {
+        tf <- tempfile(fileext = ".png")
+        grDevices::png(tf, width = 700, height = 550)
+        on.exit({
+            try(grDevices::dev.off(), silent = TRUE)
+            unlink(tf)
+        }, add = TRUE)
+        !inherits(try(res_img$.render(), silent = TRUE), "try-error")
+    }
+
+    for (ts in c("parametric", "nonparametric", "robust", "bayes")) {
+        for (bad_col in c("const_var", "n1_arm_var")) {
+            a <- jb_run(
+                d_deg,
+                dep = c("valid_var", bad_col),
+                grvar = "s",
+                typestatistics = ts,
+                resultssubtitle = TRUE,
+                pairwisecomparisons = TRUE,
+                addGGPubrPlot = TRUE,
+                ggpubrAddStats = TRUE
+            )
+            expect_true(render_ok(a$results$plot), info = paste(ts, bad_col, "plot"))
+            expect_true(render_ok(a$results$plot2), info = paste(ts, bad_col, "plot2"))
+            expect_true(render_ok(a$results$ggpubrPlot), info = paste(ts, bad_col, "ggpubrPlot"))
+            expect_true(render_ok(a$results$ggpubrPlot2), info = paste(ts, bad_col, "ggpubrPlot2"))
+        }
+    }
+
+    # Single constant variable with resultssubtitle = TRUE must carry no 'NA' subtitle expression
+    a_const <- jb_run(d_deg, dep = "const_var", typestatistics = "parametric",
+                      resultssubtitle = TRUE, pairwisecomparisons = TRUE)
+    expect_null(jb_plot(a_const)$labels$subtitle)
+})
+
+
+test_that("assumption p-values and companion Welch labels never emit p = 0.000 or p = <", {
+    d_skew <- data.frame(
+        g = factor(rep(c("A", "B", "C"), each = 20)),
+        y = c(c(rep(1.0, 18), 50, 60), seq(10, 14, length.out = 20), seq(40, 340, length.out = 20))
+    )
+    a <- jb_run(d_skew, typestatistics = "parametric", varequal = TRUE, showexplanations = TRUE)
+    diag <- jb_text(a$results$diagnostics$content)
+    assm <- jb_text(a$results$assumptions$content)
+    expect_false(grepl("0.000", diag, fixed = TRUE))
+    expect_false(grepl("0.000", assm, fixed = TRUE))
+    expect_match(diag, "p &lt; 0.001", fixed = TRUE)
+    expect_match(a$results$items[[1]]$content, "p < 0.001", fixed = TRUE)
+
+    a_welch <- jb_run(d_skew, typestatistics = "parametric", varequal = FALSE,
+                      addGGPubrPlot = TRUE, ggpubrAddStats = TRUE)
+    tf <- tempfile(fileext = ".png")
+    grDevices::png(tf, 700, 550)
+    a_welch$results$ggpubrPlot$.render()
+    p_ggp <- ggplot2::last_plot()
+    grDevices::dev.off()
+    unlink(tf)
+    gb <- ggplot2::ggplot_build(p_ggp)
+    lbl_idx <- which(vapply(gb$data, function(df) "label" %in% names(df), logical(1)))
+    expect_true(length(lbl_idx) >= 1L)
+    lbl <- gb$data[[lbl_idx[1]]]$label[1]
+    expect_match(lbl, "^Welch ANOVA, p (<|=) ")
+    expect_false(grepl("p = <", lbl, fixed = TRUE))
+})
+
+
+test_that("reverse-order plot rendering preserves sibling HTML and guide names exact UI control", {
+    d <- jb_3group()
+    a <- jb_run(d, grvar = "s", addGGPubrPlot = TRUE, ggpubrAddStats = TRUE,
+                resultssubtitle = FALSE, showexplanations = TRUE)
+    guide_txt <- jb_text(a$results$interpretation$content)
+    expect_match(guide_txt, "'Statistical results'", fixed = TRUE)
+    expect_false(grepl("'Statistical results subtitle'", guide_txt, fixed = TRUE))
+
+    before <- list(
+        diag = a$results$diagnostics$content,
+        clin = a$results$clinicalSummary$content,
+        summ = a$results$summary$content,
+        assm = a$results$assumptions$content,
+        rep  = a$results$report$content
+    )
+    for (nm in c("ggpubrPlot2", "ggpubrPlot", "plot2", "plot")) {
+        tf <- tempfile(fileext = ".png")
+        grDevices::png(tf, 700, 550)
+        expect_true(a$results[[nm]]$.render())
+        grDevices::dev.off()
+        unlink(tf)
+    }
+    after <- list(
+        diag = a$results$diagnostics$content,
+        clin = a$results$clinicalSummary$content,
+        summ = a$results$summary$content,
+        assm = a$results$assumptions$content,
+        rep  = a$results$report$content
+    )
+    expect_identical(before, after)
+})
+
+
+test_that("ggpubr companion plots do not evaluate expression-shaped or punctuated column names", {
+    set.seed(20261115)
+    d_adv <- data.frame(
+        rnorm(24),
+        factor(rep(c("Arm A", "Arm B"), 12)),
+        factor(rep(c("Stratum 1", "Stratum 2"), each = 12)),
+        check.names = FALSE
+    )
+    dep_col <- 'stop("CANARY_DEP_EVALUATED")'
+    grp_col <- "score (mg/dL)"
+    grv_col <- 'I(stop("CANARY_FACET_EVALUATED"))'
+    names(d_adv) <- c(dep_col, grp_col, grv_col)
+
+    a <- jb_run(
+        d_adv,
+        dep = dep_col,
+        group = grp_col,
+        grvar = grv_col,
+        typestatistics = "parametric",
+        varequal = TRUE,
+        resultssubtitle = TRUE,
+        addGGPubrPlot = TRUE,
+        ggpubrAddStats = TRUE,
+        showexplanations = TRUE
+    )
+
+    expect_false(grepl("onclick=", a$results$report$content, fixed = TRUE))
+
+    for (nm in c("plot", "plot2", "ggpubrPlot", "ggpubrPlot2")) {
+        tf <- tempfile(fileext = ".png")
+        grDevices::png(tf, 700, 550)
+        expect_no_error(expect_true(a$results[[nm]]$.render()))
+        grDevices::dev.off()
+        unlink(tf)
+    }
+})
+
+
+test_that("asSource() strips names and ignores non-atomic or undeclared option payloads", {
+    d <- jb_2group()
+    opts <- ClinicoPath:::jjbetweenstatsOptions$new(dep = "y", group = "g")
+    an <- ClinicoPath:::jjbetweenstatsClass$new(options = opts, data = d)
+
+    o_title <- an$options$option("mytitle")
+    for (bad_val in list(
+        stats::setNames(list("hello"), 'x`, k = {stop("CANARY_LIST"); 2L}, `y'),
+        stats::setNames("hello", 'x`, k = {stop("CANARY_CHR"); 2L}, `y'),
+        quote(stop("CANARY_CALL"))
+    )) {
+        o_title$value <- bad_val
+        src <- an$asSource()
+        expect_false(grepl("CANARY_", src, fixed = TRUE))
+        parsed <- parse(text = src)[[1]]
+        mc <- match.call(ClinicoPath::jjbetweenstats, parsed)
+        for (arg_expr in as.list(mc)[-1]) {
+            expect_true(is.symbol(arg_expr) || is.atomic(arg_expr))
+        }
+    }
+
+    an$options$.addOption(jmvcore:::Option$new('injected = {stop("CANARY_UNDECL"); 1}, z', "a"))
+    expect_false(grepl("CANARY_UNDECL", an$asSource(), fixed = TRUE))
+})
+
+
+test_that(".init() clamps malformed plot dimensions and withBaseFormulaChar() short-circuits re-entry", {
+    d <- jb_3group()
+    for (bad_pw in list(NA_integer_, "not_a_number", list(1), 99999L, -50L)) {
+        opts <- ClinicoPath:::jjbetweenstatsOptions$new(dep = c("y", "y2"), group = "g", grvar = "s")
+        d2 <- d
+        d2$y2 <- d2$y * 2
+        opw <- opts$option("plotwidth")
+        opw$value <- bad_pw
+        an <- ClinicoPath:::jjbetweenstatsClass$new(options = opts, data = d2)
+        expect_no_error(an$.__enclos_env__$private$.init())
+        expect_lte(an$results$plot2$width, 4096L)
+        expect_gte(an$results$plot$width, 300L)
+    }
+
+    res_nested <- ClinicoPath:::withBaseFormulaChar(
+        ClinicoPath:::withBaseFormulaChar(as.character(y ~ x))
+    )
+    expect_identical(res_nested, c("~", "y", "x"))
+})
+
+
+test_that("overlapping variable roles and missing grvar column reject cleanly in .run()", {
+    d <- jb_3group()
+    d$num_grp <- as.numeric(d$g)
+
+    expect_error(
+        jb_run(d, dep = "y", group = "g", grvar = "g"),
+        "The 'Grouping Variable' and 'Split By' variable must be different columns"
+    )
+    expect_error(
+        jb_run(d, dep = "num_grp", group = "num_grp"),
+        "The grouping variable 'num_grp' cannot also be selected in 'Dependent Variables'"
+    )
+    expect_error(
+        jb_run(d, dep = "num_grp", group = "s", grvar = "num_grp"),
+        "The 'Split By' variable 'num_grp' cannot also be selected in 'Dependent Variables'"
+    )
+
+    opts_missing_grv <- ClinicoPath:::jjbetweenstatsOptions$new(
+        dep = "y", group = "g", grvar = "nonexistent_stratum"
+    )
+    an_missing_grv <- ClinicoPath:::jjbetweenstatsClass$new(options = opts_missing_grv, data = d)
+    expect_error(
+        an_missing_grv$run(),
+        'Split-by variable "nonexistent_stratum" not found in data'
+    )
+})
+
+
+test_that("duplicate entries in dep are deduplicated across FWER guidance, summaries, plots, and asSource()", {
+    d <- jb_2group()
+    a_dup <- jb_run(
+        d,
+        dep = c("y", "y"),
+        group = "g",
+        multiEndpointCorrection = "bonferroni",
+        showexplanations = TRUE,
+        resultssubtitle = TRUE
+    )
+    a_one <- jb_run(
+        d,
+        dep = "y",
+        group = "g",
+        multiEndpointCorrection = "bonferroni",
+        showexplanations = TRUE,
+        resultssubtitle = TRUE
+    )
+
+    expect_identical(a_dup$results$mecGuidance$content, "")
+    expect_identical(a_dup$results$clinicalSummary$content, a_one$results$clinicalSummary$content)
+    expect_identical(a_dup$results$summary$content, a_one$results$summary$content)
+    expect_identical(a_dup$results$assumptions$content, a_one$results$assumptions$content)
+    expect_identical(a_dup$results$report$content, a_one$results$report$content)
+    expect_identical(a_dup$asSource(), a_one$asSource())
+    expect_identical(a_dup$results$plot$height, a_one$results$plot$height)
+})
+
+
+test_that("disabling showexplanations clears stale explanatory HTML blocks and resultssubtitle preserves data cache", {
+    d <- jb_2group()
+    opts <- ClinicoPath:::jjbetweenstatsOptions$new(
+        dep = "y",
+        group = "g",
+        showexplanations = TRUE,
+        resultssubtitle = FALSE
+    )
+    an <- ClinicoPath:::jjbetweenstatsClass$new(options = opts, data = d)
+    an$run()
+    expect_true(nzchar(an$results$about$content))
+    expect_true(nzchar(an$results$summary$content))
+    expect_true(nzchar(an$results$assumptions$content))
+    expect_true(nzchar(an$results$interpretation$content))
+    expect_true(nzchar(an$results$report$content))
+
+    hash_before <- an$.__enclos_env__$private$.data_hash
+    opts$option("resultssubtitle")$value <- TRUE
+    opts$option("showexplanations")$value <- FALSE
+    an$run()
+
+    expect_identical(an$results$about$content, "")
+    expect_identical(an$results$summary$content, "")
+    expect_identical(an$results$assumptions$content, "")
+    expect_identical(an$results$interpretation$content, "")
+    expect_identical(an$results$report$content, "")
+    expect_identical(an$.__enclos_env__$private$.data_hash, hash_before)
+})
+
+
+test_that("jjbetweenstatsResults schema declares consistent 650px default plot widths", {
+    d <- jb_3group()
+    opts <- ClinicoPath:::jjbetweenstatsOptions$new(dep = "y", group = "g", grvar = "s", addGGPubrPlot = TRUE)
+    an <- ClinicoPath:::jjbetweenstatsClass$new(options = opts, data = d)
+    expect_equal(an$results$plot$width, 650)
+    expect_equal(an$results$plot2$width, 650)
+    expect_equal(an$results$ggpubrPlot$width, 650)
+    expect_equal(an$results$ggpubrPlot2$width, 650)
+})

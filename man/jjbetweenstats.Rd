@@ -34,56 +34,82 @@ jjbetweenstats(
   addGGPubrPlot = FALSE,
   ggpubrPlotType = "boxplot",
   ggpubrPalette = "jco",
-  ggpubrAddStats = TRUE,
+  ggpubrAddStats = FALSE,
   ggpubrAddPoints = FALSE
 )
 }
 \arguments{
 \item{data}{The data as a data frame.}
 
-\item{dep}{.}
+\item{dep}{One or more continuous numeric variables to compare across
+independent groups. When multiple variables are supplied, each variable is
+analyzed separately using its own non-missing observations.}
 
-\item{group}{.}
+\item{group}{Categorical variable defining two or more independent
+comparison groups.}
 
-\item{grvar}{.}
+\item{grvar}{Optional categorical variable used to stratify the
+between-group comparison into separate subgroup panels via
+grouped_ggbetweenstats.}
 
-\item{centralityplotting}{.}
+\item{centralityplotting}{Whether to plot group centrality points and value
+labels on the box-violin plot.}
 
-\item{centralitytype}{.}
+\item{centralitytype}{Centrality measure displayed when centralityplotting
+is enabled: parametric mean, nonparametric median, robust 20 percent
+trimmed mean, or Bayesian MAP estimate.}
 
-\item{typestatistics}{.}
+\item{typestatistics}{Statistical framework used for group comparisons:
+parametric (Welch or Student t-test / one-way ANOVA), nonparametric
+(Mann-Whitney U / Kruskal-Wallis), robust (Yuen trimmed-mean test /
+heteroscedastic trimmed-mean ANOVA), or Bayesian (Jeffreys-Zellner-Siow
+Bayes factor).}
 
-\item{seed}{Random seed for the statistics computed by resampling or
-posterior sampling (robust tests, Bayesian estimates, and some
-nonparametric effect-size intervals). The plot caption names the seed
-whenever it affected the numbers shown. The default reproduces the previous
-fixed behavior.}
+\item{seed}{Random seed for statistics computed by resampling or posterior
+sampling (robust tests, Bayesian estimates, and some nonparametric
+effect-size intervals). Each dependent variable starts from this seed
+independently, and the plot caption names the seed whenever it affected the
+numbers shown.}
 
-\item{pairwisecomparisons}{.}
+\item{pairwisecomparisons}{Whether to compute and display post-hoc pairwise
+comparison brackets when comparing three or more groups.}
 
-\item{pairwisedisplay}{.}
+\item{pairwisedisplay}{Which pairwise comparison brackets to draw when
+pairwisecomparisons is enabled: significant pairs only, non-significant
+pairs only, or all pairs.}
 
-\item{padjustmethod}{.}
+\item{padjustmethod}{Multiple-comparison p-value adjustment method for
+post-hoc pairwise tests. For three or more parametric groups, Games-Howell
+uses its single-step studentized-range family-wise error rate adjustment
+unless 'none' is selected.}
 
-\item{effsizetype}{.}
+\item{effsizetype}{Effect size reported for parametric tests: Cohen's d or
+partial eta-squared ('biased'), small-sample corrected Hedges' g or partial
+omega-squared ('unbiased'), or explicit ANOVA 'eta' / 'omega' options.}
 
-\item{mytitle}{.}
+\item{mytitle}{Main title displayed above the plot. Pass an empty string to
+omit the title.}
 
-\item{xtitle}{.}
+\item{xtitle}{Custom label for the horizontal grouping axis. Defaults to
+the grouping variable name when empty.}
 
-\item{ytitle}{.}
+\item{ytitle}{Custom label for the vertical outcome axis. Defaults to the
+dependent variable name when empty.}
 
-\item{originaltheme}{.}
+\item{originaltheme}{Whether to use ggstatsplot::theme_ggstatsplot()
+instead of the active jamovi plot theme.}
 
-\item{resultssubtitle}{.}
+\item{resultssubtitle}{Whether to compute and display the omnibus test
+statistic, p-value, effect size, confidence interval, and sample size in
+the plot subtitle.}
 
-\item{bfmessage}{Whether to display Bayes Factor in the subtitle when using
-Bayesian analysis.}
+\item{bfmessage}{Whether to display a Bayes factor caption (log_e BF_01)
+beneath a two-group parametric plot when Statistical results is enabled.}
 
 \item{k}{Number of decimal places for displaying statistics in the
 subtitle.}
 
-\item{conflevel}{Confidence level for confidence intervals.}
+\item{conflevel}{Confidence or credible level for effect-size intervals.}
 
 \item{varequal}{Whether to assume equal variances across groups for
 parametric tests.}
@@ -93,7 +119,7 @@ correction when analyzing multiple dependent variables. IMPORTANT: This
 option does NOT automatically adjust p-values. It provides instructions for
 manual correction. When testing multiple endpoints (e.g., cholesterol,
 glucose, triglycerides), the family-wise error rate increases. For example,
-testing 3 variables at alpha=0.05 gives actual error rate of ~14 percent.
+testing 3 variables at alpha = 0.05 gives an error rate of ~14 percent.
 Select a correction method to see step-by-step instructions for manually
 applying that correction to the p-values shown in the plots.}
 
@@ -101,24 +127,26 @@ applying that correction to the p-values shown in the plots.}
 
 \item{plotheight}{Height of the plot in pixels. Default is 450.}
 
-\item{colorblindSafe}{Whether to use colorblind-safe color palette for plot
-elements.}
+\item{colorblindSafe}{Whether to apply a colorblind-safe Viridis palette to
+plot elements.}
 
 \item{showexplanations}{Display additional explanatory content including
 about section, summary, assumptions, interpretation guide, and copy-ready
 report template.}
 
-\item{addGGPubrPlot}{Add publication-ready plot using ggpubr package. This
-provides an alternative visualization with publication-quality aesthetics.}
+\item{addGGPubrPlot}{Display a companion publication-ready plot panel with
+journal palettes.}
 
-\item{ggpubrPlotType}{Type of ggpubr plot to display when addGGPubrPlot is
-enabled.}
+\item{ggpubrPlotType}{Type of companion plot to display when addGGPubrPlot
+is enabled.}
 
-\item{ggpubrPalette}{Color palette for ggpubr plot.}
+\item{ggpubrPalette}{Color palette for the companion publication plot.}
 
-\item{ggpubrAddStats}{Add statistical comparison p-values to ggpubr plot.}
+\item{ggpubrAddStats}{Display omnibus statistical comparison p-values on
+the companion plot.}
 
-\item{ggpubrAddPoints}{Overlay individual data points on ggpubr plot.}
+\item{ggpubrAddPoints}{Overlay jittered individual data points on the
+companion plot.}
 }
 \value{
 A results object containing:
@@ -139,8 +167,8 @@ A results object containing:
 }
 }
 \description{
-Wrapper Function for ggstatsplot::ggbetweenstats and
-ggstatsplot::grouped_ggbetweenstats to generate Box-Violin Plots
-for comparing continuous variables between groups with statistical
+Wrapper function for ggstatsplot::ggbetweenstats and
+ggstatsplot::grouped_ggbetweenstats to generate box-violin plots for
+comparing continuous variables between independent groups with statistical
 annotations.
 }

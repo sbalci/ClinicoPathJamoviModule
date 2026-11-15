@@ -5,42 +5,43 @@
 - **Analysis Function**: `jjbetweenstats`
 - **Module**: `JJStatsPlotT`
 
-| Feature / Option | UI Binding | Backend Handler | Target Result Item |
+| Feature / Option | UI Binding (`.u.yaml`) | Backend Handler (`R/jjbetweenstats.b.R`) | Target Result Item (`.r.yaml`) |
 | :--- | :--- | :--- | :--- |
-| `data` | UI Control `data` | `self$options$data` | Output item / Table |
-| `dep` | UI Control `dep` | `self$options$dep` | Output item / Table |
-| `group` | UI Control `group` | `self$options$group` | Output item / Table |
-| `grvar` | UI Control `grvar` | `self$options$grvar` | Output item / Table |
-| `centralityplotting` | UI Control `centralityplotting` | `self$options$centralityplotting` | Output item / Table |
-| `centralitytype` | UI Control `centralitytype` | `self$options$centralitytype` | Output item / Table |
-| `typestatistics` | UI Control `typestatistics` | `self$options$typestatistics` | Output item / Table |
-| `pairwisecomparisons` | UI Control `pairwisecomparisons` | `self$options$pairwisecomparisons` | Output item / Table |
-| `pairwisedisplay` | UI Control `pairwisedisplay` | `self$options$pairwisedisplay` | Output item / Table |
-| `padjustmethod` | UI Control `padjustmethod` | `self$options$padjustmethod` | Output item / Table |
-| `effsizetype` | UI Control `effsizetype` | `self$options$effsizetype` | Output item / Table |
-| `mytitle` | UI Control `mytitle` | `self$options$mytitle` | Output item / Table |
-| `xtitle` | UI Control `xtitle` | `self$options$xtitle` | Output item / Table |
-| `ytitle` | UI Control `ytitle` | `self$options$ytitle` | Output item / Table |
-| `originaltheme` | UI Control `originaltheme` | `self$options$originaltheme` | Output item / Table |
-| `resultssubtitle` | UI Control `resultssubtitle` | `self$options$resultssubtitle` | Output item / Table |
-| `bfmessage` | UI Control `bfmessage` | `self$options$bfmessage` | Output item / Table |
-| `k` | UI Control `k` | `self$options$k` | Output item / Table |
-| `conflevel` | UI Control `conflevel` | `self$options$conflevel` | Output item / Table |
-| `varequal` | UI Control `varequal` | `self$options$varequal` | Output item / Table |
-| `multiEndpointCorrection` | UI Control `multiEndpointCorrection` | `self$options$multiEndpointCorrection` | Output item / Table |
-| `plotwidth` | UI Control `plotwidth` | `self$options$plotwidth` | Output item / Table |
-| `plotheight` | UI Control `plotheight` | `self$options$plotheight` | Output item / Table |
-| `colorblindSafe` | UI Control `colorblindSafe` | `self$options$colorblindSafe` | Output item / Table |
-| `showexplanations` | UI Control `showexplanations` | `self$options$showexplanations` | Output item / Table |
-| `addGGPubrPlot` | UI Control `addGGPubrPlot` | `self$options$addGGPubrPlot` | Output item / Table |
-| `ggpubrPlotType` | UI Control `ggpubrPlotType` | `self$options$ggpubrPlotType` | Output item / Table |
-| `ggpubrPalette` | UI Control `ggpubrPalette` | `self$options$ggpubrPalette` | Output item / Table |
-| `ggpubrAddStats` | UI Control `ggpubrAddStats` | `self$options$ggpubrAddStats` | Output item / Table |
-| `ggpubrAddPoints` | UI Control `ggpubrAddPoints` | `self$options$ggpubrAddPoints` | Output item / Table |
+| `data` | Implicit dataset | `self$data` (column-scoped hash in `.prepareData()`) | All outputs |
+| `dep` | `VariablesListBox` (`dep`) | `self$options$dep`, `.subsetVar()`, `.subsetStratifiedVar()` | `plot`, `plot2`, `ggpubrPlot`, `ggpubrPlot2`, `diagnostics`, `clinicalSummary`, `mecGuidance`, `summary`, `report` |
+| `group` | `VariablesListBox` (`group`) | `self$options$group`, `.cleanFactor()` | All active outputs |
+| `grvar` | `VariablesListBox` (`grvar`) | `self$options$grvar`, `.subsetStratifiedVar()`, `.fixGroupedParametricPairwise()` | `plot2`, `ggpubrPlot2`, `diagnostics`, `summary`, `report` |
+| `centralityplotting` | `CheckBox` (`centralityplotting`) | `self$options$centralityplotting` | `plot`, `plot2` |
+| `centralitytype` | `ComboBox` (`centralitytype`) | `self$options$centralitytype` | `plot`, `plot2` |
+| `typestatistics` | `ComboBox` (`typestatistics`) | `self$options$typestatistics`, `.computeStatsResult()`, `.subtitleExpr()`, `.ggpubrStatLayer()` | `plot`, `plot2`, `ggpubrPlot`, `ggpubrPlot2`, `diagnostics`, `clinicalSummary`, `mecGuidance`, `summary`, `assumptions`, `interpretation`, `report` |
+| `pairwisecomparisons` | `CheckBox` (`pairwisecomparisons`) | `self$options$pairwisecomparisons`, `.fixParametricPairwise()`, `.fixGroupedParametricPairwise()` | `plot`, `plot2`, `diagnostics`, `summary`, `report` |
+| `pairwisedisplay` | `ComboBox` (`pairwisedisplay`) | `.pairwiseDisplay()` | `plot`, `plot2` |
+| `padjustmethod` | `ComboBox` (`padjustmethod`) | `self$options$padjustmethod`, `.fixParametricPairwise()`, `.fixGroupedParametricPairwise()` | `plot`, `plot2`, `diagnostics`, `summary`, `report` |
+| `effsizetype` | `ComboBox` (`effsizetype`) | `self$options$effsizetype`, `.computeStatsResult()` | `plot`, `plot2`, `diagnostics`, `summary`, `report` |
+| `mytitle` | `TextBox` (`mytitle`) | `self$options$mytitle`, `.processTitle()` | `plot`, `plot2`, `ggpubrPlot`, `ggpubrPlot2` |
+| `xtitle` | `TextBox` (`xtitle`) | `self$options$xtitle`, `.processTitle()` | `plot`, `plot2`, `ggpubrPlot`, `ggpubrPlot2` |
+| `ytitle` | `TextBox` (`ytitle`) | `self$options$ytitle`, `.processTitle()` | `plot`, `plot2`, `ggpubrPlot`, `ggpubrPlot2` |
+| `originaltheme` | `CheckBox` (`originaltheme`) | `.applyTheme()` | `plot`, `plot2` |
+| `resultssubtitle` | `CheckBox` (`resultssubtitle`) | `.computeStatsResult()`, `.subtitleExpr()`, `.formatAutoFilledReportLine()` | `plot`, `plot2`, `diagnostics`, `clinicalSummary`, `report` |
+| `bfmessage` | `CheckBox` (`bfmessage`) | `.bfCaptionExpr()` | `plot`, `plot2`, `diagnostics` |
+| `k` | `TextBox` (`k`) | `self$options$k`, `.fmtStatVal()` | `plot`, `plot2`, `report` |
+| `conflevel` | `TextBox` (`conflevel`) | `self$options$conflevel` | `plot`, `plot2`, `summary`, `report` |
+| `varequal` | `CheckBox` (`varequal`) | `self$options$varequal`, `.computeStatsResult()`, `.ggpubrStatLayer()`, `.syncValidityNotice()` | `plot`, `plot2`, `ggpubrPlot`, `ggpubrPlot2`, `diagnostics`, `clinicalSummary`, `summary`, `assumptions`, `report` |
+| `multiEndpointCorrection` | `ComboBox` (`multiEndpointCorrection`) | `.endpointGuidanceHtml()` | `mecGuidance` |
+| `plotwidth` | `TextBox` (`plotwidth`) | `.init()` `setSize()` | `plot`, `plot2`, `ggpubrPlot`, `ggpubrPlot2` |
+| `plotheight` | `TextBox` (`plotheight`) | `.init()` `setSize()` | `plot`, `plot2`, `ggpubrPlot`, `ggpubrPlot2` |
+| `colorblindSafe` | `CheckBox` (`colorblindSafe`) | `.applyTheme()`, `.ggpubrPaletteFor()`, `.plot2()` | `plot`, `plot2`, `ggpubrPlot`, `ggpubrPlot2` |
+| `showexplanations` | `CheckBox` (`showexplanations`) | `.run()` explanation generators | `about`, `summary`, `assumptions`, `interpretation`, `report` |
+| `addGGPubrPlot` | `CheckBox` (`addGGPubrPlot`) | `.plotGGPubr()`, `.plotGGPubr2()` | `ggpubrPlot`, `ggpubrPlot2` |
+| `ggpubrPlotType` | `ComboBox` (`ggpubrPlotType`) | `.buildOneGGPubrPanel()` | `ggpubrPlot`, `ggpubrPlot2` |
+| `ggpubrPalette` | `ComboBox` (`ggpubrPalette`) | `.ggpubrPaletteFor()` | `ggpubrPlot`, `ggpubrPlot2` |
+| `ggpubrAddStats` | `CheckBox` (`ggpubrAddStats`) | `.ggpubrStatLayer()` | `ggpubrPlot`, `ggpubrPlot2` |
+| `ggpubrAddPoints` | `CheckBox` (`ggpubrAddPoints`) | `.buildOneGGPubrPanel()` | `ggpubrPlot`, `ggpubrPlot2` |
+| `seed` | `TextBox` (`seed`) | `.safeSeed()`, `withr::local_seed()` | `plot`, `plot2`, `ggpubrPlot`, `ggpubrPlot2`, `report` |
 
 ## Verification Checklist
 
-- [x] All options defined in `.a.yaml` have matching UI bindings in `.u.yaml`.
-- [x] Backend `R/jjbetweenstats.b.R` references all declared options safely.
-- [x] Results definitions in `.r.yaml` correspond to populated output containers.
-
+- [x] All 31 options defined in `.a.yaml` have matching UI bindings in `.u.yaml` (except implicit `data`) and full `R:`/`ui:` descriptions.
+- [x] All `Bool` options in `.a.yaml` default to `false`.
+- [x] Backend `R/jjbetweenstats.b.R` references all declared options safely, scopes data hashing, memoizes `statsExpressions` results, and escapes variable names.
+- [x] All 13 results definitions in `.r.yaml` correspond to populated output containers.

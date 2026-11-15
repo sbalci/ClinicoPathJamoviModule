@@ -16,7 +16,7 @@ children:
             maxItemCount: 1
             isTarget: true
       - type: TargetLayoutBox
-        label: Groups (one point each)
+        label: Groups (One Point Each)
         children:
           - type: VariablesListBox
             name: group
@@ -29,21 +29,18 @@ children:
             name: grvar
             maxItemCount: 1
             isTarget: true
-  - type: LayoutBox
-    margin: large
+  - type: CollapseBox
+    label: Reference Value to Test Against
+    collapsed: false
     children:
-      - type: Label
-        label: Reference Value to test against
-        fitToGrid: true
+      - type: LayoutBox
+        margin: large
         children:
-          - type: LayoutBox
-            margin: large
-            children:
-              - type: TextBox
-                name: testvalue
-                format: number
-              - type: ComboBox
-                name: typestatistics
+          - type: TextBox
+            name: testvalue
+            format: number
+          - type: ComboBox
+            name: typestatistics
   - type: CollapseBox
     label: Statistical Options
     collapsed: true
@@ -52,13 +49,33 @@ children:
         margin: large
         children:
           - type: TextBox
-            name: seed
-            format: number
-          - type: TextBox
             name: conflevel
             format: number
           - type: TextBox
             name: k
+            format: number
+          - type: TextBox
+            name: trimprop
+            format: number
+            enable: (typestatistics:robust || (centralityplotting && centralitytype:robust))
+          - type: TextBox
+            name: bfprior
+            format: number
+            enable: (typestatistics:bayes)
+          - type: TextBox
+            name: nboot
+            format: number
+            enable: (typestatistics:robust)
+          - type: TextBox
+            name: ciresamples
+            format: number
+            enable: (typestatistics:nonparametric)
+          - type: TextBox
+            name: mapresamples
+            format: number
+            enable: (typestatistics:bayes)
+          - type: TextBox
+            name: seed
             format: number
   - type: CollapseBox
     label: Output
@@ -69,6 +86,8 @@ children:
         children:
           - type: CheckBox
             name: showSummaryTable
+          - type: CheckBox
+            name: showWeightedTable
           - type: CheckBox
             name: resultssubtitle
           - type: CheckBox

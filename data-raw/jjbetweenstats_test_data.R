@@ -562,10 +562,10 @@ FILES GENERATED
 ═══════════════════════════════════════════════════════════
 
 ✓ All test data files generated successfully!
-✓ Summary saved to: JJBETWEENSTATS_TEST_DATA_SUMMARY.md
+✓ Summary saved to: vignettes/jjbetweenstats-test-data-summary.md
 ")
 
 cat(summary_text)
-writeLines(summary_text, here("JJBETWEENSTATS_TEST_DATA_SUMMARY.md"))
+writeLines(summary_text, here("vignettes", "jjbetweenstats-test-data-summary.md"))
 
 cat("\n✓ jjbetweenstats test data generation complete!\n")

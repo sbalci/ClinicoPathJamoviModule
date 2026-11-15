@@ -68,41 +68,61 @@ test_that("the plotted summary follows the selected test, and the table agrees",
 })
 
 test_that("every table row matches the point and error bar actually drawn", {
-    # The block above pins the ARITHMETIC but compares the table only against a
-    # formula written here, so it cannot see the table drifting away from the
-    # figure - and it skips bayes entirely. It did drift: the table reported the
-    # mean (33.77) under a column headed "MAP estimate" while the chart plotted
-    # the MAP (9.19), and the interval was a t interval on the mean rather than
-    # the type-specific bootstrap the error bars use.
-    #
-    # Oracle is the upstream figure itself. Its interval is bootstrapped, so it
-    # has to be built under the same seed the analysis pins internally.
+    # Inspect the actual ggplot object built by jjdotchartClass across all four
+    # statistical modes so any drift between the Group Summaries table and the
+    # rendered points / horizontal error bars is caught immediately.
+    opts_cls <- if (exists("jjdotchartOptions", inherits = TRUE)) get("jjdotchartOptions", inherits = TRUE) else ClinicoPath:::jjdotchartOptions
+    ana_cls  <- if (exists("jjdotchartClass", inherits = TRUE)) get("jjdotchartClass", inherits = TRUE) else ClinicoPath:::jjdotchartClass
     d <- dc_skew()
     for (ty in c("parametric", "nonparametric", "robust", "bayes")) {
-        tab <- jjdotchart(data = d, dep = "v", group = "g",
-                          testvalue = 12, typestatistics = ty)$summary$asDF
-        fig <- as.data.frame(withr::with_seed(20250101L,
-            ggstatsplot::ggdotplotstats(data = d, x = v, y = g, type = ty,
-                                        test.value = 12, results.subtitle = FALSE,
-                                        conf.level = 0.95, digits = 2))$data)
-        m <- merge(tab, fig, by.x = "grp", by.y = "g")
+        opts <- opts_cls$new(
+            dep = "v", group = "g", testvalue = 12,
+            typestatistics = ty, conflevel = 0.95, k = 2
+        )
+        ana <- ana_cls$new(options = opts, data = d)
+        suppressWarnings(ana$run())
+        tab <- ana$results$summary$asDF
+
+        prep <- ana$.__enclos_env__$private$.prepareData()
+        p <- ana$.__enclos_env__$private$.buildMainPlot(prep, ggplot2::theme_bw())
+        gb <- ggplot2::ggplot_build(p)
+        err_layer <- gb$data[[1]]
+        pt_layer  <- gb$data[[2]]
+        y_labels  <- gb$layout$panel_params[[1]]$y$get_labels()
+
+        drawn <- data.frame(
+            grp      = as.character(y_labels[pt_layer$y]),
+            x_drawn  = as.numeric(pt_layer$x),
+            lo_drawn = as.numeric(err_layer$xmin),
+            hi_drawn = as.numeric(err_layer$xmax),
+            stringsAsFactors = FALSE
+        )
+        m <- merge(tab, drawn, by = "grp")
         expect_equal(nrow(m), 3L, info = ty)
-        expect_equal(m$value,   m$v,         tolerance = 1e-9, info = ty)
-        expect_equal(m$ci_low,  m$conf.low,  tolerance = 1e-9, info = ty)
-        expect_equal(m$ci_high, m$conf.high, tolerance = 1e-9, info = ty)
+        expect_equal(m$value,   m$x_drawn,  tolerance = 1e-12, info = ty)
+        expect_equal(m$ci_low,  m$lo_drawn, tolerance = 1e-12, info = ty)
+        expect_equal(m$ci_high, m$hi_drawn, tolerance = 1e-12, info = ty)
     }
 })
 
 test_that("the summary column is labelled with the statistic actually used", {
     d <- dc_skew()
-    note <- function(ty) {
+    expected_titles <- c(
+        parametric    = "Mean",
+        nonparametric = "Median",
+        robust        = "Trimmed mean (20%)",
+        bayes         = "MAP estimate"
+    )
+    for (ty in names(expected_titles)) {
         res <- jjdotchart(data = d, dep = "v", group = "g", typestatistics = ty, testvalue = 12)
+        expect_identical(res$summary$columns$value$title, expected_titles[[ty]], info = ty)
         nt <- res$summary$notes
-        paste(vapply(nt, function(x) if (is.character(x)) x else x$note %||% "", character(1)),
-              collapse = " ")
+        note_txt <- paste(
+            vapply(nt, function(x) if (is.character(x)) x else x$note %||% "", character(1)),
+            collapse = " "
+        )
+        expect_match(note_txt, expected_titles[[ty]], fixed = TRUE, info = ty)
     }
-    expect_match(note("parametric"), "mean", ignore.case = TRUE)
-    expect_match(note("nonparametric"), "median", ignore.case = TRUE)
 })
 
 test_that("the table reports n per group, making the aggregation auditable", {
@@ -374,5 +394,370 @@ test_that("all four statistical types render", {
                                   testvalue = 10, typestatistics = ty))
         expect_true(isTRUE(r$ok), info = ty)
         expect_false(grepl("could not be drawn", r$txt, fixed = TRUE), info = ty)
+    }
+})
+
+test_that("haven_labelled value labels and SPSS na_values/na_range are honored", {
+    d <- data.frame(
+        y = structure(
+            c(10, 12, 14, 999, 20, 22, 24, 30, 32, 34, 15, 16),
+            na_values = 999,
+            class = c("haven_labelled_spss", "haven_labelled", "vctrs_vctr", "double")
+        ),
+        g = structure(
+            c(1, 1, 1, 1, 2, 2, 2, 3, 3, 3, 99, 99),
+            labels = c("Site Alpha" = 1, "Site Beta" = 2, "Site Gamma" = 3, "Missing Site" = 99),
+            na_values = 99,
+            class = c("haven_labelled_spss", "haven_labelled", "vctrs_vctr", "double")
+        )
+    )
+    opts_cls <- if (exists("jjdotchartOptions", inherits = TRUE)) get("jjdotchartOptions", inherits = TRUE) else ClinicoPath:::jjdotchartOptions
+    ana_cls  <- if (exists("jjdotchartClass", inherits = TRUE)) get("jjdotchartClass", inherits = TRUE) else ClinicoPath:::jjdotchartClass
+    opts <- opts_cls$new(dep = "y", group = "g", testvalue = 20)
+    ana <- ana_cls$new(options = opts, data = d)
+    suppressWarnings(ana$run())
+    tab <- ana$results$summary$asDF
+    expect_identical(sort(tab$grp), c("Site Alpha", "Site Beta", "Site Gamma"))
+    expect_equal(tab$n[tab$grp == "Site Alpha"], 3L)
+    expect_equal(tab$value[tab$grp == "Site Alpha"], 12, tolerance = 1e-12)
+})
+
+test_that("variables and group levels with spaces, regex metacharacters, HTML, and Unicode are safe", {
+    d <- data.frame(
+        `ALT (U/L) [A+B] % #` = c(10, 12, 14, Inf, 20, 22, 24, 30, 32, 34),
+        `Hospital & Clinic <Unit>` = factor(c(
+            rep("Lab <A+B>", 4),
+            rep("Şişli — Merkez", 3),
+            rep("Site (Gamma) [3]", 3)
+        )),
+        `Region + Cohort` = factor(rep(c("North <1>", "South & West"), length.out = 10)),
+        check.names = FALSE
+    )
+    res <- jjdotchart(
+        data = d,
+        dep = "ALT (U/L) [A+B] % #",
+        group = "Hospital & Clinic <Unit>",
+        grvar = "Region + Cohort",
+        testvalue = 20
+    )
+    expect_equal(nrow(res$summary$asDF), 3L)
+    expect_match(res$notices$content, "ALT \\(U/L\\) \\[A\\+B\\] % #")
+    expect_false(grepl("<Unit>", res$notices$content, fixed = TRUE))
+    r1 <- dc_render(res, "plot")
+    expect_true(isTRUE(r1$ok))
+})
+
+# ---- release-review lifecycle, serialization, and scale regressions ---------
+
+test_that("stateful A -> B recalculation on one R6 instance matches fresh B", {
+    opts_cls <- if (exists("jjdotchartOptions", inherits = TRUE)) get("jjdotchartOptions", inherits = TRUE) else ClinicoPath:::jjdotchartOptions
+    ana_cls  <- if (exists("jjdotchartClass", inherits = TRUE)) get("jjdotchartClass", inherits = TRUE) else ClinicoPath:::jjdotchartClass
+
+    d <- dc_skew()
+    opts_a <- opts_cls$new(
+        dep = "v", group = "g", grvar = "s",
+        typestatistics = "robust", testvalue = 999,
+        conflevel = 0.90, centralityplotting = TRUE,
+        centralitytype = "nonparametric", seed = 7L
+    )
+    inst <- ana_cls$new(options = opts_a, data = d)
+    inst$run()
+
+    opts_a$.__enclos_env__$private$..grvar$value <- NULL
+    opts_a$.__enclos_env__$private$..typestatistics$value <- "nonparametric"
+    opts_a$.__enclos_env__$private$..testvalue$value <- 12
+    opts_a$.__enclos_env__$private$..conflevel$value <- 0.95
+    opts_a$.__enclos_env__$private$..centralityplotting$value <- FALSE
+    opts_a$.__enclos_env__$private$..seed$value <- 42L
+    inst$run()
+
+    fresh_b <- jjdotchart(
+        data = d, dep = "v", group = "g", grvar = NULL,
+        typestatistics = "nonparametric", testvalue = 12,
+        conflevel = 0.95, centralityplotting = FALSE, seed = 42L
+    )
+
+    expect_equal(inst$results$summary$asDF, fresh_b$summary$asDF, tolerance = 1e-12)
+    expect_identical(inst$results$notices$content, fresh_b$notices$content)
+    expect_identical(inst$results$plot$state, fresh_b$plot$state)
+    expect_identical(inst$results$plot2$state, fresh_b$plot2$state)
+})
+
+test_that(".omv reopen renders main and split plots from restored image$state without .run()", {
+    opts_cls <- if (exists("jjdotchartOptions", inherits = TRUE)) get("jjdotchartOptions", inherits = TRUE) else ClinicoPath:::jjdotchartOptions
+    ana_cls  <- if (exists("jjdotchartClass", inherits = TRUE)) get("jjdotchartClass", inherits = TRUE) else ClinicoPath:::jjdotchartClass
+
+    d <- dc_skew()
+    saved <- jjdotchart(
+        data = d, dep = "v", group = "g", grvar = "s",
+        typestatistics = "parametric", testvalue = 12,
+        centralityplotting = TRUE
+    )
+    expect_true(is.logical(saved$plot$state) && length(saved$plot$state) == 1L)
+    expect_true(is.logical(saved$plot2$state) && length(saved$plot2$state) == 1L)
+
+    reopen_opts <- opts_cls$new(
+        dep = "v", group = "g", grvar = "s",
+        typestatistics = "parametric", testvalue = 12,
+        centralityplotting = TRUE
+    )
+    reopened <- ana_cls$new(options = reopen_opts, data = d)
+    reopened$results$plot$setState(saved$plot$state)
+    reopened$results$plot2$setState(saved$plot2$state)
+
+    tf <- tempfile(fileext = ".pdf")
+    on.exit(unlink(tf), add = TRUE)
+    grDevices::pdf(tf)
+    ok1 <- reopened$.__enclos_env__$private$.plot(reopened$results$plot, ggplot2::theme_bw(), list())
+    ok2 <- reopened$.__enclos_env__$private$.plot2(reopened$results$plot2, ggplot2::theme_bw(), list())
+    grDevices::dev.off()
+
+    expect_true(isTRUE(ok1))
+    expect_true(isTRUE(ok2))
+    expect_gt(file.info(tf)$size, 1000)
+})
+
+test_that("streaming bootstrap (n_g > 5000) and large numeric seeds avoid integer overflow", {
+    opts_cls <- if (exists("jjdotchartOptions", inherits = TRUE)) get("jjdotchartOptions", inherits = TRUE) else ClinicoPath:::jjdotchartOptions
+    ana_cls  <- if (exists("jjdotchartClass", inherits = TRUE)) get("jjdotchartClass", inherits = TRUE) else ClinicoPath:::jjdotchartClass
+
+    set.seed(101)
+    big_d <- data.frame(
+        y = c(rnorm(5100, mean = 10, sd = 2), rnorm(40, mean = 13, sd = 2), rnorm(40, mean = 16, sd = 2)),
+        g = factor(c(rep("BigRegistry", 5100), rep("ClinicB", 40), rep("ClinicC", 40)))
+    )
+    opts <- opts_cls$new(dep = "y", group = "g", typestatistics = "nonparametric", testvalue = 12)
+    opts$.__enclos_env__$private$..seed$value <- 3e9
+    ana <- ana_cls$new(options = opts, data = big_d)
+    expect_no_warning(ana$run())
+    tab <- ana$results$summary$asDF
+    big_row <- tab[tab$grp == "BigRegistry", ]
+    expect_equal(big_row$n, 5100L)
+    expect_true(is.finite(big_row$ci_low) && is.finite(big_row$ci_high))
+    expect_lte(big_row$ci_low, big_row$value)
+    expect_gte(big_row$ci_high, big_row$value)
+})
+
+test_that("weightsensitivity table matches balanced, CR1 caseload-weighted, and DerSimonian-Laird oracles", {
+    # Hidden by default
+    d_bal <- dc_many()
+    res_off <- jjdotchart(data = d_bal, dep = "v", group = "g", showWeightedTable = FALSE)
+    expect_false(isTRUE(res_off$weightsensitivity$visible))
+
+    # 1. Balanced caseloads: caseload-weighted equals unweighted to machine precision
+    res_bal <- jjdotchart(
+        data = d_bal, dep = "v", group = "g",
+        typestatistics = "parametric", testvalue = 12, conflevel = 0.95,
+        showWeightedTable = TRUE
+    )
+    expect_true(isTRUE(res_bal$weightsensitivity$visible))
+    wt_bal <- res_bal$weightsensitivity$asDF
+    expect_equal(nrow(wt_bal), 3L)
+    expect_equal(wt_bal$estimate[2], wt_bal$estimate[1], tolerance = 1e-12)
+    expect_equal(wt_bal$se[2],       wt_bal$se[1],       tolerance = 1e-12)
+    expect_equal(wt_bal$ci_low[2],   wt_bal$ci_low[1],   tolerance = 1e-12)
+    expect_equal(wt_bal$ci_high[2],  wt_bal$ci_high[1],  tolerance = 1e-12)
+    expect_equal(wt_bal$pvalue[2],   wt_bal$pvalue[1],   tolerance = 1e-12)
+
+    # 2. Skewed caseloads: exact CR1 sandwich + DerSimonian-Laird random-effects synthesis
+    set.seed(2026)
+    d_unbal <- data.frame(
+        y = c(
+            rnorm(120, mean = 18.0, sd = 2.0),
+            rnorm(15,  mean = 9.0,  sd = 3.5),
+            rnorm(12,  mean = 10.5, sd = 4.0),
+            rnorm(10,  mean = 8.5,  sd = 3.0),
+            rnorm(8,   mean = 11.0, sd = 4.5)
+        ),
+        grp = factor(c(
+            rep("Hub", 120), rep("SiteB", 15), rep("SiteC", 12),
+            rep("SiteD", 10), rep("SiteE", 8)
+        ), levels = c("Hub", "SiteB", "SiteC", "SiteD", "SiteE"))
+    )
+    tv <- 13.0
+    res_unbal <- jjdotchart(
+        data = d_unbal, dep = "y", group = "grp",
+        typestatistics = "parametric", testvalue = tv, conflevel = 0.90,
+        showWeightedTable = TRUE
+    )
+    tab <- res_unbal$summary$asDF
+    wt  <- res_unbal$weightsensitivity$asDF
+    k   <- nrow(tab)
+    tcrit <- qt(0.95, df = k - 1L)
+    zcrit <- qnorm(0.95)
+
+    # Parametric caseload-weighted mean equals grand observation mean
+    expect_equal(wt$estimate[2], mean(d_unbal$y), tolerance = 1e-12)
+    w_obs <- tab$n / sum(tab$n)
+    cr1_se <- sqrt((k / (k - 1L)) * sum((w_obs^2) * ((tab$value - wt$estimate[2])^2)))
+    expect_equal(wt$se[2],      cr1_se, tolerance = 1e-12)
+    expect_equal(wt$ci_low[2],  wt$estimate[2] - tcrit * cr1_se, tolerance = 1e-12)
+    expect_equal(wt$ci_high[2], wt$estimate[2] + tcrit * cr1_se, tolerance = 1e-12)
+    expect_equal(wt$pvalue[2],  2 * pt(-abs((wt$estimate[2] - tv) / cr1_se), df = k - 1L), tolerance = 1e-12)
+
+    # Independent DerSimonian-Laird (1986) reference calculation
+    yi <- vapply(levels(d_unbal$grp), function(g) mean(d_unbal$y[d_unbal$grp == g]), numeric(1))
+    vi <- vapply(levels(d_unbal$grp), function(g) {
+        xg <- d_unbal$y[d_unbal$grp == g]
+        var(xg) / length(xg)
+    }, numeric(1))
+    # Sort in table order
+    ord_idx <- match(tab$grp, names(yi))
+    yi <- unname(yi[ord_idx])
+    vi <- unname(vi[ord_idx])
+    wi <- 1 / vi
+    mu_fe <- sum(wi * yi) / sum(wi)
+    Q <- sum(wi * ((yi - mu_fe)^2))
+    c_dl <- sum(wi) - sum(wi^2) / sum(wi)
+    tau2 <- max(0, (Q - (k - 1L)) / c_dl)
+    wi_re <- 1 / (vi + tau2)
+    dl_est <- sum(wi_re * yi) / sum(wi_re)
+    dl_se  <- sqrt(1 / sum(wi_re))
+
+    expect_equal(wt$estimate[3], dl_est, tolerance = 1e-11)
+    expect_equal(wt$se[3],       dl_se,  tolerance = 1e-11)
+    expect_equal(wt$ci_low[3],   dl_est - zcrit * dl_se, tolerance = 1e-11)
+    expect_equal(wt$ci_high[3],  dl_est + zcrit * dl_se, tolerance = 1e-11)
+    expect_equal(wt$pvalue[3],   2 * pnorm(-abs((dl_est - tv) / dl_se)), tolerance = 1e-11)
+
+    if (requireNamespace("metafor", quietly = TRUE)) {
+        rma_fit <- metafor::rma.uni(yi = yi - tv, vi = vi, method = "DL", level = 90)
+        expect_equal(wt$vsref[3],  as.numeric(rma_fit$b[1]), tolerance = 1e-10)
+        expect_equal(wt$se[3],     as.numeric(rma_fit$se),   tolerance = 1e-10)
+        expect_equal(wt$pvalue[3], as.numeric(rma_fit$pval), tolerance = 1e-10)
+    }
+
+    # 3. Single-observation groups gracefully excluded from inverse-variance row
+    d_sing <- data.frame(
+        y   = c(10, 12, 14, 20, 22),
+        grp = factor(paste0("G", 1:5))
+    )
+    res_sing <- jjdotchart(
+        data = d_sing, dep = "y", group = "grp",
+        testvalue = 15, showWeightedTable = TRUE
+    )
+    wt_sing <- res_sing$weightsensitivity$asDF
+    expect_true(is.finite(wt_sing$estimate[1]))
+    expect_true(is.finite(wt_sing$estimate[2]))
+    expect_true(is.na(wt_sing$estimate[3]))
+    expect_match(wt_sing$units[3], "0 of 5")
+})
+
+test_that("configurable hyperparameters (trimprop, bfprior, nboot, ciresamples, mapresamples) match exact oracles", {
+    d <- dc_skew()
+
+    # 1. trimprop + nboot (robust) + robust centrality line
+    r10 <- jjdotchart(
+        data = d, dep = "v", group = "g",
+        typestatistics = "robust", trimprop = 0.10, nboot = 300L,
+        centralityplotting = TRUE, centralitytype = "robust",
+        testvalue = 12, seed = 42L
+    )
+    r35 <- jjdotchart(
+        data = d, dep = "v", group = "g",
+        typestatistics = "robust", trimprop = 0.35, nboot = 300L,
+        centralityplotting = TRUE, centralitytype = "robust",
+        testvalue = 12, seed = 42L
+    )
+    t10 <- r10$summary$asDF
+    t35 <- r35$summary$asDF
+    for (i in seq_len(nrow(t10))) {
+        xg <- d$v[d$g == t10$grp[i]]
+        expect_equal(t10$value[i], mean(xg, trim = 0.10), tolerance = 1e-12)
+    }
+    for (i in seq_len(nrow(t35))) {
+        xg <- d$v[d$g == t35$grp[i]]
+        expect_equal(t35$value[i], mean(xg, trim = 0.35), tolerance = 1e-12)
+    }
+    expect_false(isTRUE(all.equal(t10$value, t35$value)))
+    expect_match(r10$summary$columns$value$title, "10%")
+    expect_match(r35$summary$columns$value$title, "35%")
+
+    # 2. bfprior + mapresamples (Bayesian) against BayesFactor::ttestBF(rscale = ...)
+    d_m <- dc_many()
+    b_narrow <- jjdotchart(
+        data = d_m, dep = "v", group = "g",
+        typestatistics = "bayes", bfprior = 0.35, mapresamples = 200L,
+        testvalue = 12, seed = 42L
+    )
+    b_wide <- jjdotchart(
+        data = d_m, dep = "v", group = "g",
+        typestatistics = "bayes", bfprior = 1.414, mapresamples = 200L,
+        testvalue = 12, seed = 42L
+    )
+    modes_vec <- b_narrow$summary$asDF$value
+    bf_n_ref <- -as.numeric(BayesFactor::ttestBF(x = modes_vec, mu = 12, rscale = 0.35)@bayesFactor$bf[1])
+    bf_w_ref <- -as.numeric(BayesFactor::ttestBF(x = modes_vec, mu = 12, rscale = 1.414)@bayesFactor$bf[1])
+    svg_n <- dc_render(b_narrow)
+    svg_w <- dc_render(b_wide)
+    expect_true(isTRUE(svg_n$ok) && isTRUE(svg_w$ok))
+    expect_false(identical(svg_n$txt, svg_w$txt))
+    expect_match(svg_n$txt, sprintf("%.2f", abs(bf_n_ref)), fixed = TRUE)
+    expect_match(svg_w$txt, sprintf("%.2f", abs(bf_w_ref)), fixed = TRUE)
+    expect_match(b_wide$notices$content, "B = 200", fixed = TRUE)
+    expect_match(b_wide$notices$content, "r = 1.414", fixed = TRUE)
+
+    # 3. ciresamples (nonparametric median bootstrap)
+    np_small <- jjdotchart(
+        data = d_m, dep = "v", group = "g",
+        typestatistics = "nonparametric", ciresamples = 250L,
+        testvalue = 12, seed = 42L
+    )
+    expect_match(np_small$summary$notes$agg$note, "B = 250", fixed = TRUE)
+})
+
+test_that("Turkish tr.po localization covers all jjdotchart strings with intact placeholders", {
+    po_candidates <- c(
+        "jamovi/i18n/tr.po",
+        "../../jamovi/i18n/tr.po"
+    )
+    po_path <- po_candidates[file.exists(po_candidates)][1]
+    skip_if(is.na(po_path), "tr.po catalog not found relative to test working directory")
+
+    lines <- readLines(po_path, encoding = "UTF-8", warn = FALSE)
+    blocks <- list()
+    cur <- character(0)
+    for (ln in lines) {
+        if (nzchar(trimws(ln))) {
+            cur <- c(cur, ln)
+        } else if (length(cur) > 0L) {
+            blocks[[length(blocks) + 1L]] <- cur
+            cur <- character(0)
+        }
+    }
+    if (length(cur) > 0L) blocks[[length(blocks) + 1L]] <- cur
+
+    jj_blocks <- Filter(function(b) any(grepl("jjdotchart", b[grepl("^#:", b)], fixed = TRUE)), blocks)
+    expect_gt(length(jj_blocks), 40L)
+
+    unquo <- function(s) {
+        s <- sub('^"[ ]*', "", s)
+        sub('"$', "", s)
+    }
+    extract_field <- function(b, prefix) {
+        idx <- which(startsWith(b, paste0(prefix, " ")))
+        if (length(idx) == 0L) return("")
+        parts <- sub(paste0("^", prefix, "\\s+"), "", b[idx[1]])
+        k <- idx[1] + 1L
+        while (k <= length(b) && startsWith(b[k], '"')) {
+            parts <- c(parts, b[k])
+            k <- k + 1L
+        }
+        paste(vapply(parts, unquo, character(1)), collapse = "")
+    }
+    ph_set <- function(s) {
+        m <- gregexpr("\\{[A-Za-z0-9_]+\\}", s)
+        vals <- regmatches(s, m)[[1]]
+        sort(unique(vals))
+    }
+
+    for (b in jj_blocks) {
+        expect_false(any(grepl("^#,.*fuzzy", b)), info = paste(b, collapse = "\n"))
+        mid <- extract_field(b, "msgid")
+        mstr <- extract_field(b, "msgstr")
+        if (nzchar(mid)) {
+            expect_true(nzchar(mstr), info = paste("Untranslated msgid:", mid))
+            expect_identical(ph_set(mstr), ph_set(mid), info = paste("Placeholder mismatch for:", mid))
+        }
     }
 })

@@ -55,14 +55,15 @@ Box-Violin Plots to Compare Between Groups
 \if{html}{\out{<a id="method-jjbetweenstatsClass-asSource"></a>}}
 \if{latex}{\out{\hypertarget{method-jjbetweenstatsClass-asSource}{}}}
 \subsection{\code{jjbetweenstatsClass$asSource()}}{
-  Generate R source code for Between-Groups Statistics analysis
+  Generate R source code for Between-Groups Statistics analysis with safe
+quoting for non-syntactic, spaced, or Unicode variable names.
   \subsection{Usage}{
     \if{html}{\out{<div class="r">}}
     \preformatted{jjbetweenstatsClass$asSource()}
     \if{html}{\out{</div>}}
   }
   \subsection{Returns}{
-    Character string with R syntax for reproducible analysis
+    Character string with parseable R syntax for reproducible analysis
   }
 }
 

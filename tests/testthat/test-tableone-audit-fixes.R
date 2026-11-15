@@ -219,7 +219,7 @@ test_that("installed analysis serializes full responses and reruns exported synt
     analysis <- tableone_audit_analysis(d, vars = names(d), sty = style)
     analysis$run()
     response <- analysis$asProtoBuf(final = TRUE)
-    expect_length(response$references, 6L)
+    expect_length(response$references, 7L)
     expect_gt(length(RProtoBuf::serialize(response, NULL)), 0L)
     code <- analysis$asSource()
     restored <- eval(parse(text = code), envir = list(data = d))

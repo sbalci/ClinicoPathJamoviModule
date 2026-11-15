@@ -34,7 +34,7 @@ jjbetweenstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
             addGGPubrPlot = FALSE,
             ggpubrPlotType = "boxplot",
             ggpubrPalette = "jco",
-            ggpubrAddStats = TRUE,
+            ggpubrAddStats = FALSE,
             ggpubrAddPoints = FALSE, ...) {
 
             super$initialize(
@@ -92,7 +92,9 @@ jjbetweenstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
             private$..seed <- jmvcore::OptionInteger$new(
                 "seed",
                 seed,
-                default=20250101)
+                default=20250101,
+                min=1,
+                max=2147483647)
             private$..pairwisecomparisons <- jmvcore::OptionBool$new(
                 "pairwisecomparisons",
                 pairwisecomparisons,
@@ -212,6 +214,7 @@ jjbetweenstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 "ggpubrPalette",
                 ggpubrPalette,
                 options=list(
+                    "jamovi",
                     "jco",
                     "npg",
                     "aaas",
@@ -224,7 +227,7 @@ jjbetweenstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
             private$..ggpubrAddStats <- jmvcore::OptionBool$new(
                 "ggpubrAddStats",
                 ggpubrAddStats,
-                default=TRUE)
+                default=FALSE)
             private$..ggpubrAddPoints <- jmvcore::OptionBool$new(
                 "ggpubrAddPoints",
                 ggpubrAddPoints,
@@ -355,7 +358,10 @@ jjbetweenstatsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                     "statsExpressions",
                     "ggpubr",
                     "car",
-                    "digest"),
+                    "WRS2",
+                    "BayesFactor",
+                    "effectsize",
+                    "PMCMRplus"),
                 clearWith=list(
                     "dep",
                     "group",
@@ -427,7 +433,7 @@ jjbetweenstatsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 options=options,
                 name="plot2",
                 title="`Violin Plot by ${grvar}`",
-                width=600,
+                width=650,
                 height=450,
                 renderFun=".plot2",
                 requiresData=TRUE,
@@ -436,7 +442,7 @@ jjbetweenstatsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 options=options,
                 name="plot",
                 title="Violin Plot",
-                width=600,
+                width=650,
                 height=450,
                 renderFun=".plot",
                 requiresData=TRUE))
@@ -452,6 +458,7 @@ jjbetweenstatsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 clearWith=list(
                     "dep",
                     "group",
+                    "grvar",
                     "typestatistics",
                     "seed",
                     "varequal",
@@ -459,6 +466,9 @@ jjbetweenstatsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                     "mytitle",
                     "xtitle",
                     "ytitle",
+                    "plotwidth",
+                    "plotheight",
+                    "addGGPubrPlot",
                     "ggpubrPlotType",
                     "ggpubrPalette",
                     "ggpubrAddStats",
@@ -467,7 +477,7 @@ jjbetweenstatsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 options=options,
                 name="ggpubrPlot2",
                 title="`Publication-Ready Plot by ${grvar} (ggpubr)`",
-                width=600,
+                width=650,
                 height=450,
                 renderFun=".plotGGPubr2",
                 requiresData=TRUE,
@@ -475,14 +485,17 @@ jjbetweenstatsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 clearWith=list(
                     "dep",
                     "group",
+                    "grvar",
                     "typestatistics",
                     "seed",
                     "varequal",
                     "colorblindSafe",
-                    "grvar",
                     "mytitle",
                     "xtitle",
                     "ytitle",
+                    "plotwidth",
+                    "plotheight",
+                    "addGGPubrPlot",
                     "ggpubrPlotType",
                     "ggpubrPalette",
                     "ggpubrAddStats",
@@ -511,37 +524,63 @@ jjbetweenstatsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
 
 #' Box-Violin Plots to Compare Between Groups
 #'
-#' Wrapper Function for ggstatsplot::ggbetweenstats and
-#' ggstatsplot::grouped_ggbetweenstats to generate Box-Violin Plots
-#' for comparing continuous variables between groups with statistical
+#' Wrapper function for ggstatsplot::ggbetweenstats and 
+#' ggstatsplot::grouped_ggbetweenstats to generate box-violin plots for 
+#' comparing continuous variables between independent groups with statistical 
 #' annotations.
 #' 
 #' @param data The data as a data frame.
-#' @param dep .
-#' @param group .
-#' @param grvar .
-#' @param centralityplotting .
-#' @param centralitytype .
-#' @param typestatistics .
-#' @param seed Random seed for the statistics computed by resampling or
-#'   posterior sampling (robust tests, Bayesian estimates, and some
-#'   nonparametric effect-size intervals). The plot caption names the seed
-#'   whenever it affected the numbers shown. The default reproduces the previous
-#'   fixed behavior.
-#' @param pairwisecomparisons .
-#' @param pairwisedisplay .
-#' @param padjustmethod .
-#' @param effsizetype .
-#' @param mytitle .
-#' @param xtitle .
-#' @param ytitle .
-#' @param originaltheme .
-#' @param resultssubtitle .
-#' @param bfmessage Whether to display Bayes Factor in the subtitle when using
-#'   Bayesian analysis.
+#' @param dep One or more continuous numeric variables to compare across
+#'   independent groups. When multiple variables are supplied, each variable is
+#'   analyzed separately using its own non-missing observations.
+#' @param group Categorical variable defining two or more independent
+#'   comparison groups.
+#' @param grvar Optional categorical variable used to stratify the
+#'   between-group comparison into separate subgroup panels via
+#'   grouped_ggbetweenstats.
+#' @param centralityplotting Whether to plot group centrality points and value
+#'   labels on the box-violin plot.
+#' @param centralitytype Centrality measure displayed when centralityplotting
+#'   is enabled: parametric mean, nonparametric median, robust 20 percent
+#'   trimmed mean, or Bayesian MAP estimate.
+#' @param typestatistics Statistical framework used for group comparisons:
+#'   parametric (Welch or Student t-test / one-way ANOVA), nonparametric
+#'   (Mann-Whitney U / Kruskal-Wallis), robust (Yuen trimmed-mean test /
+#'   heteroscedastic trimmed-mean ANOVA), or Bayesian (Jeffreys-Zellner-Siow
+#'   Bayes factor).
+#' @param seed Random seed for statistics computed by resampling or posterior
+#'   sampling (robust tests, Bayesian estimates, and some nonparametric
+#'   effect-size intervals). Each dependent variable starts from this seed
+#'   independently, and the plot caption names the seed whenever it affected the
+#'   numbers shown.
+#' @param pairwisecomparisons Whether to compute and display post-hoc pairwise
+#'   comparison brackets when comparing three or more groups.
+#' @param pairwisedisplay Which pairwise comparison brackets to draw when
+#'   pairwisecomparisons is enabled: significant pairs only, non-significant
+#'   pairs only, or all pairs.
+#' @param padjustmethod Multiple-comparison p-value adjustment method for
+#'   post-hoc pairwise tests. For three or more parametric groups, Games-Howell
+#'   uses its single-step studentized-range family-wise error rate adjustment
+#'   unless 'none' is selected.
+#' @param effsizetype Effect size reported for parametric tests: Cohen's d or
+#'   partial eta-squared ('biased'), small-sample corrected Hedges' g or partial
+#'   omega-squared ('unbiased'), or explicit ANOVA 'eta' / 'omega' options.
+#' @param mytitle Main title displayed above the plot. Pass an empty string to
+#'   omit the title.
+#' @param xtitle Custom label for the horizontal grouping axis. Defaults to
+#'   the grouping variable name when empty.
+#' @param ytitle Custom label for the vertical outcome axis. Defaults to the
+#'   dependent variable name when empty.
+#' @param originaltheme Whether to use ggstatsplot::theme_ggstatsplot()
+#'   instead of the active jamovi plot theme.
+#' @param resultssubtitle Whether to compute and display the omnibus test
+#'   statistic, p-value, effect size, confidence interval, and sample size in
+#'   the plot subtitle.
+#' @param bfmessage Whether to display a Bayes factor caption (log_e BF_01)
+#'   beneath a two-group parametric plot when Statistical results is enabled.
 #' @param k Number of decimal places for displaying statistics in the
 #'   subtitle.
-#' @param conflevel Confidence level for confidence intervals.
+#' @param conflevel Confidence or credible level for effect-size intervals.
 #' @param varequal Whether to assume equal variances across groups for
 #'   parametric tests.
 #' @param multiEndpointCorrection Display guidance for multiple testing
@@ -549,23 +588,25 @@ jjbetweenstatsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
 #'   option does NOT automatically adjust p-values. It provides instructions for
 #'   manual correction. When testing multiple endpoints (e.g., cholesterol,
 #'   glucose, triglycerides), the family-wise error rate increases. For example,
-#'   testing 3 variables at alpha=0.05 gives actual error rate of ~14 percent.
+#'   testing 3 variables at alpha = 0.05 gives an error rate of ~14 percent.
 #'   Select a correction method to see step-by-step instructions for manually
 #'   applying that correction to the p-values shown in the plots.
 #' @param plotwidth Width of the plot in pixels. Default is 650.
 #' @param plotheight Height of the plot in pixels. Default is 450.
-#' @param colorblindSafe Whether to use colorblind-safe color palette for plot
-#'   elements.
+#' @param colorblindSafe Whether to apply a colorblind-safe Viridis palette to
+#'   plot elements.
 #' @param showexplanations Display additional explanatory content including
 #'   about section, summary, assumptions, interpretation guide, and copy-ready
 #'   report template.
-#' @param addGGPubrPlot Add publication-ready plot using ggpubr package. This
-#'   provides an alternative visualization with publication-quality aesthetics.
-#' @param ggpubrPlotType Type of ggpubr plot to display when addGGPubrPlot is
-#'   enabled.
-#' @param ggpubrPalette Color palette for ggpubr plot.
-#' @param ggpubrAddStats Add statistical comparison p-values to ggpubr plot.
-#' @param ggpubrAddPoints Overlay individual data points on ggpubr plot.
+#' @param addGGPubrPlot Display a companion publication-ready plot panel with
+#'   journal palettes.
+#' @param ggpubrPlotType Type of companion plot to display when addGGPubrPlot
+#'   is enabled.
+#' @param ggpubrPalette Color palette for the companion publication plot.
+#' @param ggpubrAddStats Display omnibus statistical comparison p-values on
+#'   the companion plot.
+#' @param ggpubrAddPoints Overlay jittered individual data points on the
+#'   companion plot.
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
@@ -614,7 +655,7 @@ jjbetweenstats <- function(
     addGGPubrPlot = FALSE,
     ggpubrPlotType = "boxplot",
     ggpubrPalette = "jco",
-    ggpubrAddStats = TRUE,
+    ggpubrAddStats = FALSE,
     ggpubrAddPoints = FALSE) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))

@@ -71,11 +71,14 @@ withBaseFormulaChar <- function(expr) {
 
     if (shield) {
         old <- get("as.character.formula", envir = tbl, inherits = FALSE)
-        assign("as.character.formula",
-               function(x, ...) as.character(unclass(x)), envir = tbl)
-        # add = TRUE so this still runs if `expr` itself registers an on.exit,
-        # and it runs on the error path as well as the happy one.
-        on.exit(assign("as.character.formula", old, envir = tbl), add = TRUE)
+        if (!isTRUE(attr(old, "jj_base_formula_shim"))) {
+            shim_fn <- function(x, ...) as.character(unclass(x))
+            attr(shim_fn, "jj_base_formula_shim") <- TRUE
+            assign("as.character.formula", shim_fn, envir = tbl)
+            # add = TRUE so this still runs if `expr` itself registers an on.exit,
+            # and it runs on the error path as well as the happy one.
+            on.exit(assign("as.character.formula", old, envir = tbl), add = TRUE)
+        }
     }
 
     force(expr)
