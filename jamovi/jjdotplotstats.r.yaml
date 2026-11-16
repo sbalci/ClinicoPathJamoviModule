@@ -71,5 +71,8 @@ refs:
     - ggplot2
     - ggstatsplot
     - statsExpressions
-    - digest
+    - effectsize
+    - WRS2
+    - BayesFactor
+    - PMCMRplus
 ...

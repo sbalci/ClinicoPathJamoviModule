@@ -761,3 +761,196 @@ test_that("Turkish tr.po localization covers all jjdotchart strings with intact 
         }
     }
 })
+
+test_that("security hardening: syntax codegen, non-finite testvalue, self-referential column names, and clamped bounds", {
+    d <- dc_many()
+    pkg_ns <- environment(jjdotchart)
+
+    # 1. Syntax pane codegen (.sourcifyOption) blocks quote/backtick/vector/omv injection
+    bad_dep <- 'dep` + stop("CANARY") + "x'
+    d_adv <- d
+    names(d_adv)[names(d_adv) == "v"] <- bad_dep
+
+    opts <- pkg_ns$jjdotchartOptions$new(
+        dep = bad_dep,
+        group = "g",
+        mytitle = 'ok", testvalue = {stop("CANARY"); 5}, xtitle = "end',
+        centralityplotting = TRUE
+    )
+    an <- pkg_ns$jjdotchartClass$new(options = opts, data = d_adv)
+
+    # Simulate crafted .omv option payloads (multi-element vector, list, call, non-finite, undeclared)
+    opts$.__enclos_env__$private$..xtitle$.__enclos_env__$private$.value <-
+        c("ok", 'b", testvalue = {stop("CANARY"); 5}, ytitle = "c')
+    opts$.__enclos_env__$private$..ytitle$.__enclos_env__$private$.value <-
+        list(a = quote(stop("CANARY")))
+    opts$.__enclos_env__$private$..typestatistics$.__enclos_env__$private$.value <-
+        'parametric", testvalue = {stop("CANARY"); 5}, k = "2'
+    opts$.__enclos_env__$private$..testvalue$.__enclos_env__$private$.value <- Inf
+
+    fake_opt <- jmvcore::OptionString$new('evil = {stop("CANARY"); 1}, mytitle', value = "boom", default = "")
+    expect_identical(an$.__enclos_env__$private$.sourcifyOption(fake_opt), "")
+
+    call_opt <- jmvcore::OptionString$new("mytitle", value = "x", default = "")
+    call_opt$.__enclos_env__$private$.value <- quote(stop("CANARY"))
+    expect_identical(an$.__enclos_env__$private$.sourcifyOption(call_opt), "")
+
+    src <- an$asSource()
+    parsed <- parse(text = src)
+    expect_length(parsed, 1L)
+    ast_calls <- character(0)
+    walk_calls <- function(expr) {
+        if (is.call(expr)) {
+            ast_calls <<- c(ast_calls, paste(deparse(expr[[1]]), collapse = ""))
+            for (i in seq_along(expr)[-1]) walk_calls(expr[[i]])
+        }
+    }
+    walk_calls(parsed[[1]])
+    expect_false("stop" %in% ast_calls)
+    mc <- match.call(jjdotchart, parsed[[1]])
+    expect_true(all(names(mc)[-1] %in% names(formals(jjdotchart))))
+
+    # 2. Non-finite testvalue (NA, NaN, Inf, -Inf) rejected cleanly with ERROR notice
+    for (bad_tv in list(NA_real_, NaN, Inf, -Inf)) {
+        res_tv <- jjdotchart(data = d, dep = "v", group = "g", testvalue = bad_tv)
+        expect_equal(res_tv$summary$rowCount, 0L)
+        expect_match(dc_notices(res_tv), "Reference value must be a finite number", fixed = TRUE)
+        expect_false(grepl("zero discrepancy", dc_notices(res_tv), fixed = TRUE))
+    }
+
+    # 3. Self-referential {dep}/{group}/{grvar} + HTML tags do not hang format() or inject raw HTML
+    d_brace <- data.frame(
+        v = c(Inf, d$v[-1]),
+        g = d$g,
+        s = factor(rep(c("S1", "S2"), length.out = nrow(d))),
+        check.names = FALSE
+    )
+    dep_brace <- "<img src=x onerror=alert(1)>{dep}"
+    grp_brace <- "unit{group}"
+    grv_brace <- "stratum{grvar}"
+    names(d_brace) <- c(dep_brace, grp_brace, grv_brace)
+
+    t0 <- proc.time()[["elapsed"]]
+    res_brace <- jjdotchart(
+        data = d_brace,
+        dep = "<img src=x onerror=alert(1)>{dep}",
+        group = "unit{group}",
+        grvar = "stratum{grvar}",
+        testvalue = 10
+    )
+    elapsed <- proc.time()[["elapsed"]] - t0
+    expect_lt(elapsed, 10)
+    expect_identical(res_brace$plot$title, "<img src=x onerror=alert(1)>(dep) by unit(group)")
+    expect_identical(
+        res_brace$plot2$title,
+        "<img src=x onerror=alert(1)>(dep) by unit(group), split by stratum(grvar)"
+    )
+    expect_false(grepl("<img", res_brace$notices$content %||% "", fixed = TRUE))
+    expect_match(res_brace$notices$content %||% "", "&lt;img", fixed = TRUE)
+
+    # 4. Out-of-range options under noThrow = TRUE clamp cleanly without NaN or sprintf errors
+    opts_clamp <- pkg_ns$jjdotchartOptions$new(
+        dep = "v", group = "g", testvalue = 10,
+        centralityplotting = TRUE, showWeightedTable = TRUE
+    )
+    opts_clamp$.__enclos_env__$private$..conflevel$.__enclos_env__$private$.value <- 1.5
+    opts_clamp$.__enclos_env__$private$..k$.__enclos_env__$private$.value <- 500L
+    opts_clamp$.__enclos_env__$private$..plotwidth$.__enclos_env__$private$.value <- -50L
+    opts_clamp$.__enclos_env__$private$..plotheight$.__enclos_env__$private$.value <- 99999L
+    an_clamp <- pkg_ns$jjdotchartClass$new(options = opts_clamp, data = d)
+    warns <- character(0)
+    withCallingHandlers({
+        an_clamp$init(noThrow = TRUE)
+        an_clamp$run(noThrow = TRUE)
+    }, warning = function(w) {
+        warns <<- c(warns, conditionMessage(w))
+        invokeRestart("muffleWarning")
+    })
+    expect_false(any(grepl("NaNs produced", warns, fixed = TRUE)))
+    expect_equal(an_clamp$results$plot$width, 300L)
+    expect_equal(an_clamp$results$plot$height, 800L)
+    df_clamp <- an_clamp$results$summary$asDF
+    expect_true(all(is.finite(df_clamp$ci_low)))
+    expect_true(all(is.finite(df_clamp$ci_high)))
+    svg_clamp <- dc_render(an_clamp$results)
+    expect_true(isTRUE(svg_clamp$ok))
+})
+
+test_that("duplicate variable slots, per-item clearWith isolation, all-NA Split By state, and FALSE render guard", {
+    pkg_ns <- environment(jjdotchart)
+    d <- data.frame(
+        score = rep(1:4, each = 10),
+        grp = factor(rep(paste0("G", 1:4), each = 10)),
+        spl = factor(rep(c("S1", "S2"), length.out = 40)),
+        spl_na = factor(rep(NA_character_, 40), levels = c("S1", "S2"))
+    )
+
+    # 1. Duplicate variable slots emit a clean ERROR notice with zero R warnings
+    warns <- character(0)
+    withCallingHandlers({
+        r_dup2 <- jjdotchart(data = d, dep = "score", group = "grp", grvar = "grp", testvalue = 2)
+        an_dup1 <- pkg_ns$jjdotchartClass$new(
+            options = pkg_ns$jjdotchartOptions$new(dep = "score", group = "score", testvalue = 2),
+            data = d
+        )
+        an_dup1$init(noThrow = TRUE)
+        an_dup1$run(noThrow = TRUE)
+        r_dup1 <- an_dup1$results
+
+        an_dup3 <- pkg_ns$jjdotchartClass$new(
+            options = pkg_ns$jjdotchartOptions$new(dep = "score", group = "grp", grvar = "score", testvalue = 2),
+            data = d
+        )
+        an_dup3$init(noThrow = TRUE)
+        an_dup3$run(noThrow = TRUE)
+        r_dup3 <- an_dup3$results
+    }, warning = function(w) {
+        warns <<- c(warns, conditionMessage(w))
+        invokeRestart("muffleWarning")
+    })
+    expect_length(warns, 0L)
+    for (r_dup in list(r_dup1, r_dup2, r_dup3)) {
+        expect_equal(r_dup$summary$rowCount, 0L)
+        expect_match(
+            dc_notices(r_dup),
+            "Measurement, Groups, and Split By must be distinct variables.",
+            fixed = TRUE
+        )
+    }
+
+    # 2. Per-item clearWith isolates display toggles and cosmetic plot options
+    res_cw <- jjdotchart(data = d, dep = "score", group = "grp", grvar = "spl", testvalue = 2)
+    cw_of <- function(elem) unlist(elem$.__enclos_env__$private$.clearWith, use.names = FALSE)
+    for (item_nm in c("summary", "weightsensitivity", "plot", "plot2")) {
+        cw <- cw_of(res_cw[[item_nm]])
+        expect_false("showSummaryTable" %in% cw, info = item_nm)
+        expect_false("showWeightedTable" %in% cw, info = item_nm)
+    }
+    for (tbl_nm in c("summary", "weightsensitivity")) {
+        cw <- cw_of(res_cw[[tbl_nm]])
+        expect_false("mytitle" %in% cw, info = tbl_nm)
+        expect_false("plotwidth" %in% cw, info = tbl_nm)
+        expect_false("k" %in% cw, info = tbl_nm)
+    }
+    expect_false("grvar" %in% cw_of(res_cw$weightsensitivity))
+    expect_false("grvar" %in% cw_of(res_cw$plot))
+    expect_true("grvar" %in% cw_of(res_cw$plot2))
+
+    # 3. All-NA Split By keeps main plot valid while marking plot2 invalid (FALSE)
+    res_na_spl <- jjdotchart(data = d, dep = "score", group = "grp", grvar = "spl_na", testvalue = 2)
+    expect_identical(res_na_spl$plot$state, TRUE)
+    expect_identical(res_na_spl$plot2$state, FALSE)
+    expect_match(dc_notices(res_na_spl), "No complete rows remain for Split By", fixed = TRUE)
+
+    # 4. Early renderer exits return FALSE (not NULL)
+    opts_inv <- pkg_ns$jjdotchartOptions$new(dep = "score", group = "grp", grvar = "spl", testvalue = 2)
+    an_inv <- pkg_ns$jjdotchartClass$new(options = opts_inv, data = d)
+    expect_identical(
+        an_inv$.__enclos_env__$private$.plot(an_inv$results$plot, ggplot2::theme_bw(), list()),
+        FALSE
+    )
+    expect_identical(
+        an_inv$.__enclos_env__$private$.plot2(an_inv$results$plot2, ggplot2::theme_bw(), list()),
+        FALSE
+    )
+})

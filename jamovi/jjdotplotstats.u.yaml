@@ -51,16 +51,18 @@ children:
             children:
               - type: ComboBox
                 name: effsizetype
+                enable: (typestatistics:parametric)
               - type: ComboBox
                 name: pairwisedisplay
               - type: ComboBox
                 name: padjustmethod
-                enable: (!pairwisedisplay:none)
+                enable: (!pairwisedisplay:none && !typestatistics:bayes)
               - type: TextBox
                 name: conflevel
                 format: number
               - type: CheckBox
                 name: bfmessage
+                enable: (resultssubtitle && typestatistics:parametric)
               - type: TextBox
                 name: k
                 format: number

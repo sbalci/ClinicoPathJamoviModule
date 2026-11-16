@@ -17,12 +17,16 @@ jjdotplotstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         .options_hash = NULL,
         .messages = NULL,
         .noticesList = NULL,
-        # Cached result of .validateInputs(); computed once per .run() so the
-        # render paths (.plot / .plot2) gate silently instead of re-validating.
+        # Cached result of .validateInputs() and .validateSplitInputs(); computed
+        # once per .run() so the render paths (.plot / .plot2) gate silently.
         .inputsValid = FALSE,
+        .splitValid = TRUE,
         # Set by .subtitleExpr() when the statsExpressions takeover could not be
-        # used, so .run() can say that the effect-size selection was ignored.
+        # used even though ggbetweenstats can still draw its default subtitle.
         .subtitleFallback = NULL,
+        # Set by .subtitleExpr() when no statistical subtitle can be computed at
+        # all (e.g. singleton group n < 2 or zero post-trim spread).
+        .subtitleUncomputable = NULL,
         # Subtitle expression computed in .run() (see .subtitleExpr) and read by
         # .plot(). Computing it during rendering was useless for reporting: any
         # notice raised there is discarded, because jamovi has already composed
@@ -39,16 +43,23 @@ jjdotplotstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         # .inputsValid holds its FALSE initial value and both renderers return before drawing
         # - a blank exported image - while the two expression caches come back NULL and the
         # figure silently loses its subtitle and Bayes-factor caption. image$state is part of
-        # the serialised results, so publish all three there. They are small: a
+        # the serialised results, so publish all state fields there. They are small: a
         # statsExpressions subtitle is an ordinary `call`, ~0.9 KB serialised (measured).
         .publishRenderState = function() {
-            st <- list(valid = isTRUE(private$.inputsValid),
-                       subtitle = private$.subtitleCache,
-                       caption = private$.captionCache)
-            for (nm in c("plot", "plot2")) {
-                img <- self$results[[nm]]
-                if (!is.null(img)) img$setState(st)
-            }
+            st_main <- list(
+                valid = isTRUE(private$.inputsValid),
+                uncomputable = !is.null(private$.subtitleUncomputable),
+                subtitle = private$.subtitleCache,
+                caption = private$.captionCache
+            )
+            st_split <- list(
+                valid = isTRUE(private$.inputsValid),
+                splitValid = isTRUE(private$.splitValid)
+            )
+            if (!is.null(self$results$plot))
+                self$results$plot$setState(st_main)
+            if (!is.null(self$results$plot2))
+                self$results$plot2$setState(st_split)
         },
 
         # image$state is the ONLY source, deliberately. .run() publishes it before any
@@ -86,44 +97,33 @@ jjdotplotstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         # them (see .prepareData).
         .data_messages = NULL,
 
-        # Notice accumulation system (HTML-based, avoids serialization issues)
+        # Severity-ordered theme-safe HTML notice panel helper
         .addNotice = function(message, type = "INFO") {
             if (is.null(private$.noticesList)) {
                 private$.noticesList <- list()
             }
 
-            # Determine styling based on type
+            # Translucent rgba() fills composite cleanly over both light and dark jamovi themes
             style_info <- switch(type,
                 "ERROR" = list(
-                    color = "#721c24",
-                    bg = "#f8d7da",
-                    border = "#f5c6cb",
-                    icon = ""
+                    bg = "rgba(216, 33, 50, 0.18)",
+                    border = "#dc3545"
                 ),
                 "STRONG_WARNING" = list(
-                    color = "#856404",
-                    bg = "#fff3cd",
-                    border = "#ffeaa7",
-                    icon = ""
+                    bg = "rgba(255, 202, 33, 0.23)",
+                    border = "#fd7e14"
                 ),
                 "WARNING" = list(
-                    color = "#856404",
-                    bg = "#fff3cd",
-                    border = "#ffeaa7",
-                    icon = ""
+                    bg = "rgba(255, 202, 33, 0.23)",
+                    border = "#ffc107"
                 ),
                 "INFO" = list(
-                    color = "#004085",
-                    bg = "#cce5ff",
-                    border = "#b8daff",
-                    icon = ""
+                    bg = "rgba(0, 123, 255, 0.14)",
+                    border = "#007bff"
                 ),
-                # Default
                 list(
-                    color = "#004085",
-                    bg = "#cce5ff",
-                    border = "#b8daff",
-                    icon = ""
+                    bg = "rgba(0, 123, 255, 0.14)",
+                    border = "#007bff"
                 )
             )
 
@@ -141,9 +141,9 @@ jjdotplotstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # that changes with the interface language.
             notice_html <- paste0(
                 "<div data-severity='", type, "' style='background-color: ", style_info$bg,
-                "; border-left: 4px solid ", style_info$border,
-                "; padding: 12px; margin: 8px 0; color: ", style_info$color, ";'>",
-                "<strong>", type_label, ":</strong> ", message,
+                "; color: inherit; border-left: 4px solid ", style_info$border,
+                "; padding: 12px; margin: 8px 0;'>",
+                "<strong style='color: inherit;'>", type_label, ":</strong> ", message,
                 "</div>")
 
             private$.noticesList <- c(private$.noticesList,
@@ -180,43 +180,69 @@ jjdotplotstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             self$results$notices$setContent("")
         },
 
+        # Clean categorical columns: preserve haven_labelled value labels in declared
+        # order and convert explicit <NA> factor levels (from addNA()) back to true NA
+        # so missing group memberships are never analyzed as an extra biological cohort.
+        .cleanFactor = function(x) {
+            if (is.null(x)) return(NULL)
+            if (inherits(x, "haven_labelled")) {
+                lbls <- attr(x, "labels", exact = TRUE)
+                if (!is.null(lbls) && length(lbls) > 0L) {
+                    raw_vals <- unclass(x)
+                    m <- match(raw_vals, unname(lbls))
+                    out_chr <- ifelse(is.na(raw_vals), NA_character_,
+                                      ifelse(!is.na(m), names(lbls)[m], as.character(raw_vals)))
+                    lvl_names <- unique(c(names(lbls), stats::na.omit(unique(out_chr))))
+                    return(factor(out_chr, levels = lvl_names))
+                }
+            }
+            if (is.factor(x)) {
+                raw_lvls <- levels(x)
+                if (anyNA(raw_lvls)) {
+                    keep_lvls <- raw_lvls[!is.na(raw_lvls)]
+                    chr <- raw_lvls[as.integer(x)]
+                    return(factor(chr, levels = keep_lvls, ordered = is.ordered(x)))
+                }
+                return(x)
+            }
+            as.factor(x)
+        },
+
+        .fmtStatVal = function(val, digits = 2L) {
+            digits <- as.integer(digits)
+            if (!is.finite(val)) return(NA_character_)
+            if (val != 0 && abs(val) < 1e-4 && abs(val) < 10^(-digits)) {
+                formatC(val, digits = digits, format = "e")
+            } else {
+                sprintf(paste0("%.", digits, "f"), val)
+            }
+        },
+
         # init ----
 
         .init = function() {
-            # Since dep is single variable, use fixed size
-            # Use configurable plot dimensions
             plotwidth <- if (!is.null(self$options$plotwidth)) self$options$plotwidth else 650
             plotheight <- if (!is.null(self$options$plotheight)) self$options$plotheight else 450
-            
+
             self$results$plot$setSize(plotwidth, plotheight)
 
-
             if (!is.null(self$options$grvar)) {
-
                 mydata <- self$data
-
-                grvar <-  self$options$grvar
-
-                num_levels <- nlevels(
-                    droplevels(as.factor(mydata[[grvar]]))
-                )
-
-                # num_levels * plotwidth is unbounded: a Split By variable with
-                # 10 levels asked for a 6500-pixel canvas. Cap the total and let
-                # the panels narrow instead, and use droplevels() so empty
-                # levels of a filtered factor do not reserve space for panels
-                # that are never drawn.
+                grvar <- self$options$grvar
+                num_levels <- if (!is.null(mydata) && grvar %in% names(mydata)) {
+                    nlevels(droplevels(private$.cleanFactor(mydata[[grvar]])))
+                } else {
+                    1L
+                }
                 self$results$plot2$setSize(
                     min(max(num_levels, 1L) * plotwidth, 3000L), plotheight)
-
             }
-
         }
 
 
 ,
-        # Shared validation helper
-        .validateInputs = function() {
+        # Shared validation helper operating on the cleaned finite analysis data
+        .validateInputs = function(mydata = NULL) {
             if (is.null(self$options$dep) || is.null(self$options$group))
                 return(FALSE)
 
@@ -225,9 +251,8 @@ jjdotplotstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 return(FALSE)
             }
 
-            # Check variable existence with better context
             if (!(self$options$dep %in% names(self$data))) {
-                available_vars <- htmltools::htmlEscape(paste(names(self$data), collapse=", "))
+                available_vars <- htmltools::htmlEscape(paste(names(self$data), collapse = ", "))
                 private$.addNotice(.fmt(
                     .("Variable '{name}' was not found in the data. Available variables are: {available}. Please select a valid continuous variable for the dependent variable."),
                     name = htmltools::htmlEscape(self$options$dep), available = available_vars), "ERROR")
@@ -235,19 +260,38 @@ jjdotplotstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             }
 
             if (!(self$options$group %in% names(self$data))) {
-                available_vars <- htmltools::htmlEscape(paste(names(self$data), collapse=", "))
+                available_vars <- htmltools::htmlEscape(paste(names(self$data), collapse = ", "))
                 private$.addNotice(.fmt(
                     .("Variable '{name}' was not found in the data. Available variables are: {available}. Please select a valid grouping variable."),
                     name = htmltools::htmlEscape(self$options$group), available = available_vars), "ERROR")
                 return(FALSE)
             }
 
-            # Require at least two groups with complete data
-            relevant_cols <- c(self$options$dep, self$options$group)
-            if (!is.null(self$options$grvar))
-                relevant_cols <- c(relevant_cols, self$options$grvar)
-            complete_rows <- complete.cases(self$data[relevant_cols])
-            group_levels <- nlevels(droplevels(as.factor(self$data[[self$options$group]][complete_rows])))
+            if (!is.null(self$options$grvar) && !(self$options$grvar %in% names(self$data))) {
+                available_vars <- htmltools::htmlEscape(paste(names(self$data), collapse = ", "))
+                private$.addNotice(.fmt(
+                    .("Variable '{name}' was not found in the data. Available variables are: {available}. Please select a valid Split By variable."),
+                    name = htmltools::htmlEscape(self$options$grvar), available = available_vars), "ERROR")
+                return(FALSE)
+            }
+
+            if (identical(self$options$dep, self$options$group)) {
+                private$.addNotice(.("Dependent Variable and Grouping Variable must be distinct columns."), "ERROR")
+                return(FALSE)
+            }
+            if (!is.null(self$options$grvar) &&
+                (identical(self$options$grvar, self$options$dep) ||
+                 identical(self$options$grvar, self$options$group))) {
+                private$.addNotice(.("The Split By variable must be distinct from Dependent Variable and Grouping Variable."), "ERROR")
+                return(FALSE)
+            }
+
+            if (is.null(mydata))
+                mydata <- private$.prepareData()
+
+            # Require at least two groups with complete finite data on (dep, group)
+            clean_grp <- droplevels(private$.cleanFactor(mydata[[self$options$group]]))
+            group_levels <- nlevels(clean_grp)
             if (group_levels < 2) {
                 private$.addNotice(.fmt(
                     .("At least two groups with data are required for a comparison. Groups found with complete data: {found}. Please check for missing values or select different variables."),
@@ -255,24 +299,16 @@ jjdotplotstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 return(FALSE)
             }
 
-            # No confidence-level guard here. The .a.yaml constrains conflevel
-            # to [0.5, 0.999] and jmvcore rejects anything outside that before
-            # .run() is ever entered ("conflevel must be between 0.5 and 0.999
-            # (is 1)"), from the GUI and from the R wrapper alike, so the check
-            # that used to sit here could not fire and only read as protection
-            # that was not there.
-
-            # Check total sample size
-            n_total <- sum(complete_rows)
+            # Check total finite sample size
+            n_total <- nrow(mydata)
             if (n_total < 30) {
                 private$.addNotice(.fmt(
                     .("Small total sample size (N = {n}). Statistical tests may be unreliable below 30 observations. Interpret the result cautiously or collect more data."),
                     n = n_total), "STRONG_WARNING")
             }
 
-            # Check minimum group size
-            group_data <- self$data[[self$options$group]][complete_rows]
-            group_sizes <- table(droplevels(as.factor(group_data)))
+            # Check minimum finite group size
+            group_sizes <- table(clean_grp)
             min_group_n <- min(group_sizes)
             if (min_group_n < 10) {
                 min_group_name <- names(which.min(group_sizes))
@@ -281,13 +317,8 @@ jjdotplotstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     n = min_group_n, group = htmltools::htmlEscape(min_group_name)), "STRONG_WARNING")
             }
 
-            # A dependent variable with no spread makes ggstatsplot die inside its
-            # own layout code ("arguments imply differing number of rows: 0, 1")
-            # and hand back an EMPTY plot box. Catching it here, in .run(), is the
-            # difference between an actionable message and a blank figure - the
-            # error raised at render time cannot reach the results panel, which
-            # jamovi has already composed by then.
-            dep_vals <- jmvcore::toNumeric(self$data[[self$options$dep]][complete_rows])
+            # Guard against constant dependent variable before plotting
+            dep_vals <- jmvcore::toNumeric(mydata[[self$options$dep]])
             dep_vals <- dep_vals[is.finite(dep_vals)]
             if (length(dep_vals) > 0 && length(unique(dep_vals)) < 2) {
                 private$.addNotice(.fmt(
@@ -301,6 +332,81 @@ jjdotplotstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             private$.validateCentralityOptions()
 
             return(TRUE)
+        },
+
+        # Validate per-stratum sample sizes and group counts for Split By (plot2)
+        .validateSplitInputs = function(mydata) {
+            grvar <- self$options$grvar
+            if (is.null(grvar) || !(grvar %in% names(mydata)))
+                return(TRUE)
+
+            sp_df <- private$.prepareSplitData(mydata)
+            n_grvar_na <- nrow(mydata) - nrow(sp_df)
+            if (n_grvar_na > 0L) {
+                private$.addNotice(.fmt(
+                    .("The Split By variable '{grvar}' is missing for {count} observation(s); those rows are excluded from the Split By panels only and remain in the main unsplit comparison."),
+                    grvar = htmltools::htmlEscape(grvar),
+                    count = n_grvar_na), "INFO")
+            }
+
+            if (nrow(sp_df) == 0L) {
+                private$.addNotice(.fmt(
+                    .("No complete observations remain for Split By variable '{grvar}', so the Split By figure cannot be drawn."),
+                    grvar = htmltools::htmlEscape(grvar)), "WARNING")
+                return(FALSE)
+            }
+
+            st_fac <- droplevels(private$.cleanFactor(sp_df[[grvar]]))
+            deg_levels <- character()
+            valid_levels <- character()
+            singleton_levels <- character()
+            small_levels <- character()
+
+            for (lv in levels(st_fac)) {
+                sub_lv <- sp_df[st_fac == lv, , drop = FALSE]
+                grp_lv <- droplevels(private$.cleanFactor(sub_lv[[self$options$group]]))
+                y_lv <- sub_lv[[self$options$dep]]
+                y_lv <- y_lv[is.finite(y_lv)]
+                if (nlevels(grp_lv) < 2L || length(unique(y_lv)) < 2L) {
+                    deg_levels <- c(deg_levels, lv)
+                } else {
+                    valid_levels <- c(valid_levels, lv)
+                    g_tab <- table(grp_lv)
+                    if (any(g_tab < 2L)) {
+                        singleton_levels <- c(singleton_levels, lv)
+                    } else if (any(g_tab < 10L)) {
+                        small_levels <- c(small_levels, lv)
+                    }
+                }
+            }
+
+            if (length(valid_levels) == 0L) {
+                private$.addNotice(.fmt(
+                    .("Every level of Split By variable '{grvar}' ({levels}) has fewer than two groups or no variation in '{dep}', so no stratified comparison could be computed."),
+                    grvar = htmltools::htmlEscape(grvar),
+                    levels = htmltools::htmlEscape(paste(deg_levels, collapse = ", ")),
+                    dep = htmltools::htmlEscape(self$options$dep)), "WARNING")
+                return(FALSE)
+            }
+
+            if (length(deg_levels) > 0L) {
+                private$.addNotice(.fmt(
+                    .("Split By level(s) '{levels}' had fewer than two groups with data or no variation in '{dep}', so statistical test results could not be computed for those panel(s)."),
+                    levels = htmltools::htmlEscape(paste(deg_levels, collapse = ", ")),
+                    dep = htmltools::htmlEscape(self$options$dep)), "WARNING")
+            }
+
+            if (length(singleton_levels) > 0L) {
+                private$.addNotice(.fmt(
+                    .("Split By level(s) '{levels}' contain at least one group with fewer than 2 observations, so statistical test subtitles could not be computed for those panel(s)."),
+                    levels = htmltools::htmlEscape(paste(singleton_levels, collapse = ", "))), "WARNING")
+            } else if (length(small_levels) > 0L) {
+                private$.addNotice(.fmt(
+                    .("Small subgroup sample sizes (fewer than 10 observations in at least one group) occur within Split By level(s) '{levels}'; interpret per-panel tests cautiously."),
+                    levels = htmltools::htmlEscape(paste(small_levels, collapse = ", "))), "WARNING")
+            }
+
+            TRUE
         },
         
         # Centrality parameter validation helper
@@ -348,43 +454,224 @@ jjdotplotstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             withBaseFormulaChar(expr)
         },
 
-        # How many group levels actually carry data.
+        # How many group levels actually carry data (after stripping <NA> levels).
         .nGroupLevels = function(data, group_var) {
             if (is.null(group_var) || !group_var %in% names(data)) return(NA_integer_)
-            nlevels(droplevels(as.factor(data[[group_var]])))
+            nlevels(droplevels(private$.cleanFactor(data[[group_var]])))
+        },
+
+        # Clamp Wilcox & Tian (2011) explanatory measure xi and its bootstrap CI
+        # to [0, 1] (WRS2::t1way does not clamp bootstrap bounds above 1.0).
+        .clampXiExpr = function(expr, digits = 2L) {
+            if (is.null(expr)) return(NULL)
+            ex <- if (is.expression(expr)) expr[[1]] else expr
+            if (!is.call(ex) || length(ex) < 6L) return(expr)
+            s <- paste(deparse(ex), collapse = " ")
+            if (!grepl("widehat(xi)", s, fixed = TRUE)) return(expr)
+            tryCatch({
+                est <- suppressWarnings(as.numeric(ex[[4]][[3]]))
+                lo  <- suppressWarnings(as.numeric(ex[[5]][[3]][[3]]))
+                hi  <- suppressWarnings(as.numeric(ex[[6]][[2]]))
+                if (is.finite(est) && (est < 0 || est > 1))
+                    ex[[4]][[3]] <- private$.fmtStatVal(min(max(est, 0), 1), digits)
+                if (is.finite(lo) && (lo < 0 || lo > 1))
+                    ex[[5]][[3]][[3]] <- private$.fmtStatVal(min(max(lo, 0), 1), digits)
+                if (is.finite(hi) && (hi < 0 || hi > 1))
+                    ex[[6]][[2]] <- private$.fmtStatVal(min(max(hi, 0), 1), digits)
+                if (is.expression(expr)) as.expression(ex) else ex
+            }, error = function(e) expr)
+        },
+
+        # Pure helper for 3+-group Bayesian one-way ANOVA subtitle expression.
+        # statsExpressions 2.1.1 errors inside performance::r2_bayes on K >= 3
+        # even when BayesFactor::anovaBF succeeds. Try statsExpressions first; on
+        # failure, compute exact Rouder et al. (2012) JZS log_e(BF_01) and Gelman
+        # et al. (2019) posterior Bayesian R-squared credible interval via Gibbs draws.
+        .bayesAnovaSubtitle = function(data, group_var, dep_var, opts, seed_val) {
+            se_res <- tryCatch(
+                withr::with_seed(seed_val,
+                    private$.withBaseFormulaChar(rlang::inject(
+                        statsExpressions::oneway_anova(
+                            data       = data,
+                            x          = !!rlang::sym(group_var),
+                            y          = !!rlang::sym(dep_var),
+                            type       = "bayes",
+                            digits     = opts$digits,
+                            conf.level = opts$conflevel)))),
+                error = function(e) e)
+
+            if (!inherits(se_res, "condition") &&
+                !is.null(se_res$expression) && length(se_res$expression) > 0L &&
+                !is.null(se_res$expression[[1]])) {
+                return(se_res$expression[[1]])
+            }
+
+            if (!requireNamespace("BayesFactor", quietly = TRUE)) {
+                err_msg <- if (inherits(se_res, "condition")) conditionMessage(se_res) else "BayesFactor package unavailable"
+                return(structure(list(), error_msg = err_msg))
+            }
+
+            df_bf <- data.frame(
+                .jj_y = as.numeric(data[[dep_var]]),
+                .jj_g = droplevels(private$.cleanFactor(data[[group_var]]))
+            )
+            df_bf <- df_bf[is.finite(df_bf$.jj_y) & !is.na(df_bf$.jj_g), , drop = FALSE]
+            df_bf$.jj_g <- droplevels(df_bf$.jj_g)
+            if (nlevels(df_bf$.jj_g) < 2L || nrow(df_bf) <= nlevels(df_bf$.jj_g) ||
+                !is.finite(stats::sd(df_bf$.jj_y)) || stats::sd(df_bf$.jj_y) == 0) {
+                return(structure(list(), error_msg = "insufficient within-group variation for Bayesian ANOVA"))
+            }
+
+            bf_calc <- tryCatch(
+                withr::with_seed(seed_val,
+                    private$.withBaseFormulaChar({
+                        bf_obj <- BayesFactor::anovaBF(
+                            .jj_y ~ .jj_g, data = df_bf,
+                            rscaleFixed = "medium", progress = FALSE
+                        )
+                        bf_tbl <- BayesFactor::extractBF(bf_obj)
+                        bf10 <- as.numeric(bf_tbl$bf[1])
+                        log_bf01 <- -log(bf10)
+                        post <- BayesFactor::posterior(bf_obj, iterations = 4000L, progress = FALSE)
+                        g_cols <- paste0(".jj_g-", levels(df_bf$.jj_g))
+                        mu_draws <- as.numeric(post[, "mu"])
+                        eff_mat <- as.matrix(post[, g_cols, drop = FALSE])
+                        fitted_draws <- mu_draws + eff_mat[, as.integer(df_bf$.jj_g), drop = FALSE]
+                        n_obs_bf <- nrow(df_bf)
+                        centered <- fitted_draws - rowMeans(fitted_draws)
+                        var_fit <- rowSums(centered * centered) / (n_obs_bf - 1L)
+                        sig2_draws <- as.numeric(post[, "sig2"])
+                        r2_draws <- pmin(pmax(var_fit / (var_fit + sig2_draws), 0), 1)
+                        alpha_tail <- (1 - opts$conflevel) / 2
+                        r2_med <- stats::median(r2_draws, na.rm = TRUE)
+                        r2_ci <- stats::quantile(
+                            r2_draws, probs = c(alpha_tail, 1 - alpha_tail),
+                            na.rm = TRUE, names = FALSE
+                        )
+                        ci_lbl <- paste0(round(100 * opts$conflevel), "%")
+                        bquote(list(
+                            log[e] * (BF["01"]) == .(private$.fmtStatVal(log_bf01, opts$digits)),
+                            widehat(italic(R)^2)["Bayesian"] == .(private$.fmtStatVal(r2_med, opts$digits)),
+                            CI[.(ci_lbl)]^ETI ~ "[" * .(private$.fmtStatVal(r2_ci[1], opts$digits)),
+                            .(private$.fmtStatVal(r2_ci[2], opts$digits)) * "]",
+                            italic(r)["Cauchy"]^"JZS" == .(private$.fmtStatVal(0.5, opts$digits)),
+                            italic("n")["obs"] == .(as.character(n_obs_bf))
+                        ))
+                    })
+                ),
+                error = function(e) e
+            )
+
+            if (inherits(bf_calc, "condition")) {
+                return(structure(list(), error_msg = conditionMessage(bf_calc)))
+            }
+            bf_calc
+        },
+
+        # Probe whether the base statistical test itself can run on `data` (used
+        # only when statsExpressions errors, to distinguish a true uncomputable
+        # test from an effsizetype-only fallback).
+        .canComputeDefaultTest = function(data, group_var, dep_var, typestatistics) {
+            df_t <- data.frame(
+                .jj_y = as.numeric(data[[dep_var]]),
+                .jj_g = droplevels(private$.cleanFactor(data[[group_var]]))
+            )
+            df_t <- df_t[is.finite(df_t$.jj_y) & !is.na(df_t$.jj_g), , drop = FALSE]
+            df_t$.jj_g <- droplevels(df_t$.jj_g)
+            k_g <- nlevels(df_t$.jj_g)
+            if (k_g < 2L) return(FALSE)
+            ok <- tryCatch(
+                private$.withBaseFormulaChar({
+                    if (identical(typestatistics, "parametric")) {
+                        if (k_g == 2L) stats::t.test(.jj_y ~ .jj_g, data = df_t)
+                        else           stats::oneway.test(.jj_y ~ .jj_g, data = df_t)
+                    } else if (identical(typestatistics, "nonparametric")) {
+                        if (k_g == 2L) stats::wilcox.test(.jj_y ~ .jj_g, data = df_t)
+                        else           stats::kruskal.test(.jj_y ~ .jj_g, data = df_t)
+                    } else if (identical(typestatistics, "robust") && requireNamespace("WRS2", quietly = TRUE)) {
+                        if (k_g == 2L) WRS2::yuen(.jj_y ~ .jj_g, data = df_t)
+                        else           WRS2::t1way(.jj_y ~ .jj_g, data = df_t)
+                    } else {
+                        NULL
+                    }
+                }),
+                error = function(e) NULL
+            )
+            if (is.null(ok)) return(FALSE)
+            stat_v <- if (!is.null(ok$statistic)) as.numeric(ok$statistic[1])
+                      else if (!is.null(ok$test)) as.numeric(ok$test[1])
+                      else NA_real_
+            is.finite(stat_v)
         },
 
         # Build the plot subtitle ourselves.
-        #
-        # ggstatsplot 1.0.0 dropped `effsize.type` from ggbetweenstats: it is
-        # swallowed by `...`, so the four-way "Effect Size Measure" selector was
-        # completely inert. Measured on three groups of 40 - Cohen's d, Hedge's
-        # g, eta-squared and omega-squared all returned the identical subtitle
-        # reporting omega-squared (0.37). statsExpressions, which ggstatsplot
-        # calls internally, still honours the argument, so compute the
-        # expression here and hand it to the plot with results.subtitle = FALSE.
-        #
-        # Returns NULL when the takeover cannot be used, in which case
-        # ggstatsplot produces its own subtitle:
-        #   - subtitles switched off
-        #   - Bayesian type (statsExpressions errors on this combination)
-        #   - fewer than two groups with data
         .subtitleExpr = function(data, group_var, dep_var, opts) {
+            private$.subtitleFallback <- NULL
+            private$.subtitleUncomputable <- NULL
             if (!isTRUE(opts$resultssubtitle)) return(NULL)
-            if (identical(opts$typestatistics, "bayes")) return(NULL)
 
-            n_lev <- private$.nGroupLevels(data, group_var)
-            if (is.na(n_lev) || n_lev < 2) return(NULL)
+            grp_clean <- droplevels(private$.cleanFactor(data[[group_var]]))
+            grp_counts <- table(grp_clean)
+            n_lev <- length(grp_counts)
+            if (n_lev < 2L) return(NULL)
+
+            if (any(grp_counts < 2L)) {
+                small_grp <- names(grp_counts)[which(grp_counts < 2L)[1]]
+                private$.subtitleUncomputable <- .fmt(
+                    .("group '{group}' has fewer than 2 observations (n = {n})"),
+                    group = small_grp, n = as.integer(grp_counts[[small_grp]]))
+                return(NULL)
+            }
+
+            if (identical(opts$typestatistics, "robust")) {
+                h_counts <- grp_counts - 2L * floor(0.2 * grp_counts)
+                if (any(h_counts < 2L)) {
+                    small_grp <- names(h_counts)[which(h_counts < 2L)[1]]
+                    private$.subtitleUncomputable <- .fmt(
+                        .("group '{group}' retains fewer than 2 observations after 20 percent trimming"),
+                        group = small_grp)
+                    return(NULL)
+                }
+            }
+
+            if (identical(opts$typestatistics, "bayes")) {
+                if (n_lev == 2L) {
+                    res_b2 <- tryCatch(
+                        withr::with_seed(private$.seed(),
+                            private$.withBaseFormulaChar(rlang::inject(
+                                statsExpressions::two_sample_test(
+                                    data       = data,
+                                    x          = !!rlang::sym(group_var),
+                                    y          = !!rlang::sym(dep_var),
+                                    type       = "bayes",
+                                    digits     = opts$digits,
+                                    conf.level = opts$conflevel)))),
+                        error = function(e) e)
+                    if (inherits(res_b2, "condition") || is.null(res_b2$expression) || length(res_b2$expression) == 0L) {
+                        private$.subtitleUncomputable <- if (inherits(res_b2, "condition")) conditionMessage(res_b2) else "Bayesian t-test returned no expression"
+                        return(NULL)
+                    }
+                    return(res_b2$expression[[1]])
+                }
+
+                sub_b3 <- private$.bayesAnovaSubtitle(data, group_var, dep_var, opts, private$.seed())
+                err_b3 <- attr(sub_b3, "error_msg", exact = TRUE)
+                if (!is.null(err_b3)) {
+                    private$.subtitleUncomputable <- err_b3
+                    return(NULL)
+                }
+                return(sub_b3)
+            }
 
             # two_sample_test rejects "eta"/"omega" (they are ANOVA-only); map
             # them onto the equivalent two-group family so the selector still
             # means something when there are exactly two groups.
             eff <- opts$effsizetype
-            if (n_lev == 2 && identical(eff, "eta"))   eff <- "biased"
-            if (n_lev == 2 && identical(eff, "omega")) eff <- "unbiased"
+            if (n_lev == 2L && identical(eff, "eta"))   eff <- "biased"
+            if (n_lev == 2L && identical(eff, "omega")) eff <- "unbiased"
 
-            fn <- if (n_lev == 2) statsExpressions::two_sample_test
-                  else            statsExpressions::oneway_anova
+            fn <- if (n_lev == 2L) statsExpressions::two_sample_test
+                  else             statsExpressions::oneway_anova
 
             res <- tryCatch(
                 withr::with_seed(private$.seed(),
@@ -398,23 +685,25 @@ jjdotplotstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         conf.level   = opts$conflevel)))),
                 error = function(e) e)
 
-            # Not hypothetical: `formula.tools` registers an
-            # `as.character.formula` returning one deparsed string where base R
-            # returns c("~", "y", "g"), which makes stats::oneway.test reject
-            # every valid formula with "a two-sided formula is required". It
-            # arrives transitively via logistf, so any session that has run a
-            # Firth regression loses the three-or-more-group takeover. Falling
-            # back to ggstatsplot's subtitle is safe but silently ignores the
-            # effect-size choice, so record it and say so in .run().
             if (inherits(res, "condition")) {
-                private$.subtitleFallback <- conditionMessage(res)
+                if (isTRUE(private$.canComputeDefaultTest(data, group_var, dep_var, opts$typestatistics))) {
+                    private$.subtitleFallback <- conditionMessage(res)
+                } else {
+                    private$.subtitleUncomputable <- conditionMessage(res)
+                }
                 return(NULL)
             }
-            if (is.null(res$expression) || length(res$expression) == 0) {
-                private$.subtitleFallback <- "the statistics engine returned no expression"
+            if (is.null(res$expression) || length(res$expression) == 0L) {
+                private$.subtitleUncomputable <- .("the statistics engine returned no expression")
                 return(NULL)
             }
-            res$expression[[1]]
+            if (("statistic" %in% names(res) && !is.finite(res$statistic[1])) ||
+                ("p.value" %in% names(res) && !is.finite(res$p.value[1]))) {
+                private$.subtitleUncomputable <- .("the test statistic could not be evaluated (zero within-group spread)")
+                return(NULL)
+            }
+
+            private$.clampXiExpr(res$expression[[1]], opts$digits)
         },
 
         # Build the Bayes-factor caption ourselves, for the same reason as the
@@ -499,37 +788,30 @@ jjdotplotstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             assumptions <- switch(opts$typestatistics,
                 parametric = c(
-                    .("The values are roughly symmetric within each group. The test tolerates mild skew at these sample sizes but not a long tail or a floor/ceiling effect - read the violins."),
-                    .("Groups do NOT have to share the same spread. Welch's correction is used throughout, which is why the degrees of freedom are fractional."),
-                    .("Observations are independent. Repeated measurements on the same patient, or several blocks from one specimen, break this and need a paired or mixed model instead.")),
+                    .("The values are roughly symmetric within each group. The test tolerates mild skew at moderate sample sizes but not a heavy tail or a floor/ceiling effect - inspect the violins."),
+                    .("Groups do NOT have to share the same spread. Welch's unequal-variance correction is used throughout, which is why the degrees of freedom are fractional."),
+                    .("Observations are independent. Repeated measurements on the same patient, or multiple cores/blocks from one specimen, violate independence and need a paired or mixed-effects model instead.")),
                 nonparametric = c(
-                    .("No distributional assumption. The test compares ranks, so it answers whether one group tends to give higher values, not whether the means differ."),
-                    .("Groups should have a broadly similar distribution SHAPE if you want to read the result as a difference in medians; otherwise read it as stochastic dominance."),
-                    .("Observations are independent.")),
+                    .("No normality assumption. The test compares ranks, so it evaluates whether one group tends to yield larger values rather than whether arithmetic means differ."),
+                    .("Groups should share a broadly similar distribution shape if you interpret the result as a median shift; otherwise interpret it as stochastic dominance."),
+                    .("Observations are independent across patients or specimens; clustered or repeated measurements require a paired or mixed-effects rank procedure.")),
                 robust = c(
-                    .("The comparison uses 20 percent trimmed means, so the most extreme 20 percent at each end of every group is discarded before testing. This is the right choice when outliers are real measurements you do not want to delete but do not want to dominate the result either."),
+                    .("The comparison uses 20 percent trimmed means, discarding the most extreme 20 percent in each tail of every group before testing. Use this when real extreme observations should neither be deleted nor dominate the estimate."),
                     .("Groups do NOT have to share the same spread."),
-                    .("Observations are independent. With small groups, trimming 20 percent from each tail can leave very few values - check the per-group sizes.")),
+                    .("Observations are independent across patients or specimens. In small groups, trimming 20 percent from each tail leaves few effective observations - check per-group sizes.")),
                 bayes = c(
-                    .("The Bayes factor is computed against a default (Cauchy) prior on the effect size, not one elicited for your setting. Treat it as evidence strength under a conventional prior, not as a posterior probability that the groups differ."),
-                    .("Observations are independent."),
-                    .("A Bayes factor near 1 means the data do not discriminate between the hypotheses - which is different from evidence of no difference, and is worth stating explicitly when you report it.")),
+                    .("The Bayes factor is computed under a default Jeffreys-Zellner-Siow Cauchy prior on standardized effects (r = 0.707 for two groups; r = 0.5 for three or more groups). Treat it as relative evidence under a conventional prior, not as a posterior probability that a hypothesis is true."),
+                    .("Observations are independent across patients or specimens; repeated or multi-core measurements from one patient violate independence."),
+                    .("The figure displays log_e(BF_01), the natural logarithm of the Bayes factor favoring the null over the alternative: 0 indicates equal support (BF_01 = 1), negative values favor a group difference (below -1.10 moderate evidence, BF_10 > 3; below -2.30 strong evidence, BF_10 > 10), and positive values (above +1.10 or +2.30) favor the null hypothesis of no difference.")),
                 .("Observations are independent."))
 
             test_line <- switch(opts$typestatistics,
                 parametric    = if (n_groups == 2) .("Welch's t-test") else .("Welch's one-way analysis of variance"),
                 nonparametric = if (n_groups == 2) .("the Mann-Whitney U test") else .("the Kruskal-Wallis test"),
                 robust        = if (n_groups == 2) .("Yuen's trimmed-mean test") else .("a heteroscedastic one-way comparison of trimmed means"),
-                bayes         = if (n_groups == 2) .("a Bayesian t-test") else .("a Bayesian analysis of variance"),
+                bayes         = if (n_groups == 2) .("a Bayesian t-test") else .("a Bayesian one-way analysis of variance"),
                 .("the selected test"))
 
-            # Only the parametric family honours "Effect Size Measure"; the
-            # other three each report one fixed statistic of their own.
-            # Measured, both group counts, all four selector values:
-            #   parametric    3+ eta^2p / omega^2p     2 Cohen's d / Hedges' g
-            #   nonparametric 3+ epsilon^2 (ordinal)   2 rank-biserial correlation
-            #   robust        3+ xi                    2 robust (AKP) delta
-            #   bayes            Bayes factor + posterior delta
             eff_line <- switch(opts$typestatistics,
                 parametric = if (n_groups == 2)
                         switch(opts$effsizetype, unbiased = , omega = .("Hedges' g"), .("Cohen's d"))
@@ -540,65 +822,94 @@ jjdotplotstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                                 else .("ordinal epsilon-squared"),
                 robust        = if (n_groups == 2) .("the robust (AKP) standardized difference")
                                 else .("the explanatory measure of effect size (xi)"),
-                bayes         = .("the posterior median difference"),
+                bayes         = if (n_groups == 2) .("the posterior median difference")
+                                else .("posterior Bayesian R-squared"),
                 .("the selected effect size"))
 
             interval_word <- if (identical(opts$typestatistics, "bayes"))
                 .("credible") else .("confidence")
 
-            pw_line <- if (identical(self$options$pairwisedisplay, "none")) {
-                .("No pairwise comparisons were drawn.")
+            if (n_groups <= 2) {
+                pw_reading <- ""
+                pw_methods <- ""
+            } else if (identical(self$options$pairwisedisplay, "none")) {
+                pw_reading <- paste0(" ", htmltools::htmlEscape(.("No pairwise comparisons were drawn.")))
+                pw_methods <- paste0(" ", .("No post-hoc pairwise comparisons were drawn."))
+            } else if (identical(opts$typestatistics, "bayes")) {
+                pw_msg <- .("Pairwise comparisons between every pair of groups are shown as brackets reporting unadjusted natural-log JZS Bayes factors (log_e(BF_01)).")
+                pw_reading <- paste0(" ", htmltools::htmlEscape(pw_msg))
+                pw_methods <- paste0(" ", pw_msg)
+            } else if (identical(opts$typestatistics, "parametric") &&
+                       !identical(self$options$padjustmethod, "none")) {
+                pw_msg <- .fmt(
+                    .("Pairwise comparisons between {which} are shown as brackets using the Games-Howell single-step studentized-range procedure for family-wise error control."),
+                    which = if (identical(self$options$pairwisedisplay, "all"))
+                                .("every pair of groups") else .("the pairs that reached significance"))
+                pw_reading <- paste0(" ", htmltools::htmlEscape(pw_msg))
+                pw_methods <- paste0(" ", pw_msg)
             } else {
                 adj <- switch(self$options$padjustmethod,
                               holm = .("Holm"), fdr = .("Benjamini-Hochberg"),
                               bonferroni = .("Bonferroni"), none = .("no"),
                               self$options$padjustmethod)
-                .fmt(
+                pw_msg <- .fmt(
                     .("Pairwise comparisons between {which} are shown as brackets, with {adjustment} adjustment for multiple testing."),
                     which = if (identical(self$options$pairwisedisplay, "all"))
                                 .("every pair of groups") else .("the pairs that reached significance"),
                     adjustment = adj)
+                pw_reading <- paste0(" ", htmltools::htmlEscape(pw_msg))
+                pw_methods <- paste0(" ", pw_msg)
             }
 
-            # The effect size is taken from the same model as the test. For the
-            # parametric family that model is Welch's, so this number does NOT
-            # equal the one a classical equal-variance ANOVA reports - measured
-            # on one dataset, 0.52 here against 0.38 from stats::aov. Say so,
-            # because someone will cross-check it in another package.
-            model_note <- if (identical(opts$typestatistics, "parametric") && n_groups > 2)
-                paste0("<p>", .("The effect size is estimated from the same Welch model as the test, so it will not match the value a classical equal-variance ANOVA reports for these data. That is expected, not an error."), "</p>") else ""
+            model_note <- if (identical(opts$typestatistics, "parametric") && n_groups > 2) {
+                paste0("<p>", .("The effect size is estimated from the Welch model rather than an equal-variance ANOVA, and its interval is reported as a one-sided lower confidence bound up to 1.00 (Steiger, 2004)."), "</p>")
+            } else if (identical(opts$typestatistics, "nonparametric") && n_groups == 2) {
+                paste0("<p>", .("The Mann-Whitney p value uses the tie-adjusted normal approximation with continuity correction."), "</p>")
+            } else if (identical(opts$typestatistics, "robust") && n_groups == 2) {
+                paste0("<p>", .("Yuen's test reports an unsigned |t| statistic, while the robust AKP effect size standardizes the trimmed-mean difference by the first group's Winsorized spread."), "</p>")
+            } else {
+                ""
+            }
 
             seed_note <- if (statsSeedMatters(opts$typestatistics, "between", n_groups) &&
-                             !identical(opts$typestatistics, "bayes"))
+                             !identical(opts$typestatistics, "bayes")) {
                 paste0("<p>", .fmt(
-                    .("The confidence interval on the effect size is obtained by resampling. It is computed with a fixed random seed ({seed}) so this figure reproduces exactly; change the seed under Plot Configuration to check that a borderline interval is not an artefact of one resample."),
+                    .("The confidence interval on the effect size is obtained by bootstrap resampling with a fixed random seed ({seed}) so this figure reproduces exactly; change the seed under Plot Configuration to verify that a borderline interval is stable across resamples."),
                     seed = private$.seed()), "</p>")
-            else if (identical(opts$typestatistics, "bayes") && n_groups == 2)
-                paste0("<p>", .fmt(.("Random seed: {seed}"), seed = private$.seed()), "</p>")
-            else ""
+            } else if (identical(opts$typestatistics, "bayes") ||
+                       captionSeedMatters(opts$typestatistics, "between", n_groups, opts$bfmessage)) {
+                paste0("<p>", .fmt(
+                    .("Bayesian posterior quantities and credible intervals use Markov chain Monte Carlo sampling with fixed random seed {seed} for exact reproducibility."),
+                    seed = private$.seed()), "</p>")
+            } else {
+                ""
+            }
 
-            methods <- .fmt(
-                .("A comparison of {outcome} across {groups} groups of {factor} was performed using {test}, with {effect} reported as the effect size and a {level} per cent {interval} interval. {pairwise}"),
-                outcome = dep_lab, groups = n_groups, factor = group_lab,
-                test = test_line, effect = eff_line,
-                level = base::format(100 * opts$conflevel),
-                interval = interval_word, pairwise = pw_line)
+            methods <- paste0(
+                .fmt(
+                    .("A comparison of {outcome} across {groups} groups of {factor} was performed using {test}, with {effect} reported as the effect size and a {level} per cent {interval} interval."),
+                    outcome = dep_lab, groups = n_groups, factor = group_lab,
+                    test = test_line, effect = eff_line,
+                    level = base::format(100 * opts$conflevel),
+                    interval = interval_word),
+                pw_methods
+            )
 
             html <- paste0(
-                "<div style=\'background-color: rgba(127,127,127,0.08); border-left: 4px solid rgba(66,133,244,0.7); padding: 12px 16px; margin: 8px 0; color: inherit;\'>",
-                "<h3 style=\'margin-top:0; color: inherit;\'>", .("What this analysis assumes"), "</h3><ul>",
+                "<div style='background-color: rgba(127,127,127,0.08); color: inherit; border-left: 4px solid rgba(66,133,244,0.7); padding: 12px 16px; margin: 8px 0;'>",
+                "<h3 style='margin-top:0; color: inherit;'>", .("What this analysis assumes"), "</h3><ul>",
                 paste0("<li>", vapply(assumptions, htmltools::htmlEscape, ""), "</li>", collapse = ""),
                 "</ul>",
                 model_note, seed_note,
-                "<h3 style=\'color: inherit;\'>", .("Reading the figure"), "</h3>",
+                "<h3 style='color: inherit;'>", .("Reading the figure"), "</h3>",
                 "<p>", .("Each group is drawn as a violin (the shape of its distribution), a boxplot (median and quartiles) and its individual observations."),
-                " ", .("The comparison is horizontal, so values run along the bottom axis and group labels down the side."), " ",
-                htmltools::htmlEscape(pw_line), "</p>",
-                "<h3 style=\'color: inherit;\'>", .("Methods sentence you can copy"), "</h3>",
-                "<p style=\'font-style: italic;\'>", htmltools::htmlEscape(methods), "</p>",
+                " ", .("The comparison is horizontal, so values run along the bottom axis and group labels down the side."),
+                pw_reading, "</p>",
+                "<h3 style='color: inherit;'>", .("Methods sentence you can copy"), "</h3>",
+                "<p style='font-style: italic;'>", htmltools::htmlEscape(methods), "</p>",
                 "<p><strong>", .("Before you report this"), ":</strong> ",
                 .fmt(
-                    .("The {comparison} tells you that the groups differ, not by how much any one pair differs or whether that difference matters clinically. Read the effect size and its interval, not the p value alone."),
+                    .("The {comparison} tests whether the groups differ overall, not by how much any one pair differs or whether a difference matters clinically. Read the effect size and its interval alongside the test statistic."),
                     comparison = omnibus), "</p>",
                 "</div>")
 
@@ -667,39 +978,43 @@ jjdotplotstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             }
         },
         
-        # Outlier detection helper
-        .detectOutliers = function(data, var) {
+        # Within-group IQR outlier detection helper (conditions on group so well-separated
+        # clinical cohorts are not falsely flagged as marginal pooled outliers).
+        .detectOutliers = function(data, var, group_var = self$options$group) {
             vals <- jmvcore::toNumeric(data[[var]])
-            vals <- vals[!is.na(vals)]
-            if (length(vals) > 0) {
-                # Checkpoint before expensive quantile calculations
-                private$.checkpoint()
-                Q1 <- quantile(vals, 0.25, na.rm = TRUE)
-                Q3 <- quantile(vals, 0.75, na.rm = TRUE)
-                IQR <- Q3 - Q1
-                outliers <- which(data[[var]] < (Q1 - 1.5 * IQR) | data[[var]] > (Q3 + 1.5 * IQR))
-                if (length(outliers) > 0) {
-                    private$.accumulateDataMessage(
-                        paste0("<br> ", .fmt(
-                            .("Potential outliers detected in {name}: {count}."),
-                            name = htmltools::htmlEscape(var),
-                            count = length(outliers)), "<br>")
-                    )
+            if (is.null(group_var) || !(group_var %in% names(data))) return()
+            grps <- droplevels(private$.cleanFactor(data[[group_var]]))
+            if (sum(is.finite(vals)) == 0L || nlevels(grps) == 0L) return()
+
+            private$.checkpoint()
+            flag <- rep(FALSE, length(vals))
+            for (lvl in levels(grps)) {
+                idx <- which(grps == lvl & is.finite(vals))
+                if (length(idx) < 4L) next
+                g_vals <- vals[idx]
+                q1 <- stats::quantile(g_vals, 0.25, na.rm = TRUE)
+                q3 <- stats::quantile(g_vals, 0.75, na.rm = TRUE)
+                iqr_val <- q3 - q1
+                if (is.finite(iqr_val) && iqr_val > 0) {
+                    flag[idx] <- g_vals < (q1 - 1.5 * iqr_val) | g_vals > (q3 + 1.5 * iqr_val)
                 }
             }
+            n_out <- sum(flag)
+            if (n_out > 0L) {
+                private$.accumulateDataMessage(
+                    paste0("<br> ", .fmt(
+                        .("Potential outliers detected within groups in {name}: {count}."),
+                        name = htmltools::htmlEscape(var),
+                        count = n_out), "<br>")
+                )
+            }
         },
-        
+
         # Statistical summary helper.
-        #
-        # Counted straight off the already-filtered frame. The previous tapply()
-        # route returned NULL for any factor level left with no rows - exactly
-        # what happens after a whole group is lost to missingness - which made
-        # sum(sapply(...)) error out and the summary line vanish into the
-        # tryCatch that used to sit here.
         .addDataSummary = function(data, dep_var, group_var) {
             if (is.null(dep_var) || is.null(group_var)) return()
-            n_groups <- nlevels(droplevels(as.factor(data[[group_var]])))
-            total_n <- sum(!is.na(data[[dep_var]]))
+            n_groups <- nlevels(droplevels(private$.cleanFactor(data[[group_var]])))
+            total_n <- sum(is.finite(data[[dep_var]]))
             private$.accumulateDataMessage(
                 paste0("<br> ", .fmt(
                     .("Analysis summary: {groups} groups, {total} total observations."),
@@ -707,15 +1022,23 @@ jjdotplotstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             )
         },
 
+        # Subset cleaned unsplit data to non-missing Split By observations for plot2
+        .prepareSplitData = function(mydata) {
+            grvar <- self$options$grvar
+            grp <- self$options$group
+            if (is.null(grvar) || !(grvar %in% names(mydata)))
+                return(mydata[0, , drop = FALSE])
+            keep <- !is.na(mydata[[grvar]])
+            sp_df <- mydata[keep, , drop = FALSE]
+            if (nrow(sp_df) > 0L) {
+                sp_df[[grvar]] <- droplevels(private$.cleanFactor(sp_df[[grvar]]))
+                sp_df[[grp]] <- droplevels(private$.cleanFactor(sp_df[[grp]]))
+            }
+            sp_df
+        },
+
         # Optimized data preparation with robust caching
         .prepareData = function(force_refresh = FALSE) {
-            # Create a hash of the current data to detect changes. This keys on
-            # the analysis variables plus the data's dimensions and column names
-            # rather than the individual cell values. jamovi re-instantiates the
-            # analysis object whenever the underlying data is edited, so within a
-            # single object lifecycle identical dims + names imply identical
-            # values; add a value digest here if this helper is ever reused
-            # outside jamovi's lifecycle.
             current_hash <- digest::digest(list(
                 dep = self$options$dep,
                 group = self$options$group,
@@ -723,61 +1046,55 @@ jjdotplotstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 col_names = names(self$data),
                 grvar = self$options$grvar
             ), algo = "md5")
-            
-            # Only reprocess if data has changed or forced refresh
-            if (!is.null(private$.processedData) && 
-                private$.data_hash == current_hash && 
+
+            if (!is.null(private$.processedData) &&
+                private$.data_hash == current_hash &&
                 !force_refresh) {
                 for (msg in private$.data_messages)
                     private$.accumulateMessage(msg)
                 return(private$.processedData)
             }
 
-            # Clear previous messages and add processing feedback
             private$.messages <- NULL
             private$.data_messages <- NULL
             private$.accumulateDataMessage(
                 paste0("<br>", .("Processing data for the comparison..."), "<br><hr>")
             )
-            
-            # Track processing time for large datasets
-            start_time <- Sys.time()
 
+            start_time <- Sys.time()
             mydata <- self$data
 
-            # Convert dependent variable to numeric (single variable)
             dep_var <- self$options$dep
-            if (!is.null(dep_var)) {
+            if (!is.null(dep_var) && dep_var %in% names(mydata)) {
                 mydata[[dep_var]] <- jmvcore::toNumeric(mydata[[dep_var]])
                 if (!is.numeric(mydata[[dep_var]]))
-                    jmvcore::reject("The dependent variable must be numeric.")
+                    jmvcore::reject(.("The dependent variable must be numeric."))
             }
 
-            # SELECTIVE NA OMISSION - only remove rows with NAs in analysis variables
-            # This prevents dropping patients with NAs in unused columns
-            if (!is.null(dep_var) && !is.null(self$options$group)) {
-                relevant_cols <- c(dep_var, self$options$group)
+            group_var <- self$options$group
+            if (!is.null(group_var) && group_var %in% names(mydata)) {
+                mydata[[group_var]] <- private$.cleanFactor(mydata[[group_var]])
+            }
+            if (!is.null(self$options$grvar) && self$options$grvar %in% names(mydata)) {
+                mydata[[self$options$grvar]] <- private$.cleanFactor(mydata[[self$options$grvar]])
+            }
 
-                # Add grouping variable if present
-                if (!is.null(self$options$grvar)) {
-                    relevant_cols <- c(relevant_cols, self$options$grvar)
-                }
-
+            # Selective omission on (dep, group) ONLY so missingness in optional
+            # Split By (grvar) never drops complete patients from unsplit outputs.
+            if (!is.null(dep_var) && dep_var %in% names(mydata) &&
+                !is.null(group_var) && group_var %in% names(mydata)) {
                 private$.checkpoint()
 
-                # Count rows before and after NA removal
+                before_lv <- levels(droplevels(private$.cleanFactor(self$data[[group_var]])))
                 n_before <- nrow(mydata)
-                mydata <- mydata[complete.cases(mydata[relevant_cols]), ]
-                n_after <- nrow(mydata)
 
-                # complete.cases() follows is.na(), which is TRUE for NaN but
-                # FALSE for Inf, so an infinite measurement survived into
-                # ggstatsplot and killed the whole figure with "'from' must be a
-                # finite number" - an EMPTY plot box sitting under this module's
-                # own "Analysis completed successfully" notice. Measured on 120
-                # rows with a single Inf: zero text elements in the rendered SVG.
+                na_keep <- !is.na(mydata[[dep_var]]) & !is.na(mydata[[group_var]])
+                mydata <- mydata[na_keep, , drop = FALSE]
+                n_after_na <- nrow(mydata)
+                n_missing_dropped <- n_before - n_after_na
+
                 private$.nonFiniteDropped <- 0L
-                finite_rows <- is.finite(jmvcore::toNumeric(mydata[[dep_var]]))
+                finite_rows <- is.finite(mydata[[dep_var]])
                 if (any(!finite_rows)) {
                     private$.nonFiniteDropped <- sum(!finite_rows)
                     mydata <- mydata[finite_rows, , drop = FALSE]
@@ -787,16 +1104,10 @@ jjdotplotstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                             count = private$.nonFiniteDropped,
                             name = htmltools::htmlEscape(dep_var)), "<br>")
                     )
-                    n_after <- nrow(mydata)
                 }
 
-                # A group whose measurements are ALL missing disappears from the
-                # comparison entirely. The row count alone does not reveal that:
-                # a clinician who selected Control/DrugA/DrugB and lost Control
-                # to missingness would otherwise read a two-group result as
-                # though that is what they asked for. Name what went.
-                before_lv <- levels(droplevels(as.factor(self$data[[self$options$group]])))
-                after_lv  <- levels(droplevels(as.factor(mydata[[self$options$group]])))
+                mydata[[group_var]] <- droplevels(mydata[[group_var]])
+                after_lv <- levels(mydata[[group_var]])
                 gone <- setdiff(before_lv, after_lv)
                 if (length(gone) > 0) {
                     private$.accumulateDataMessage(
@@ -807,35 +1118,42 @@ jjdotplotstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     )
                 }
 
-                # Report NA removal if any occurred
-                if (n_before > n_after) {
-                    n_dropped <- n_before - n_after
+                if (n_missing_dropped > 0L) {
+                    n_kept <- nrow(mydata)
                     private$.accumulateDataMessage(
                         paste0("<br> ", .fmt(
                             .("Rows excluded for missing values in the analysis variables: {dropped}."),
-                            dropped = n_dropped), "<br>",
+                            dropped = n_missing_dropped), "<br>",
                             .fmt(
                                 .("Rows with data: {kept} of {total} ({percent} percent)."),
-                                kept = n_after, total = n_before,
-                                percent = round(100 * n_after / n_before, 1)), "<br>")
+                                kept = n_kept, total = n_before,
+                                percent = round(100 * n_kept / n_before, 1)), "<br>")
                     )
                 }
+
+                if (!is.null(self$options$grvar) && self$options$grvar %in% names(mydata)) {
+                    n_grvar_na <- sum(is.na(mydata[[self$options$grvar]]))
+                    if (n_grvar_na > 0L) {
+                        private$.accumulateDataMessage(
+                            paste0("<br> ", .fmt(
+                                .("Split By note: {count} observation(s) with missing {grvar} are excluded from the Split By panels only."),
+                                count = n_grvar_na,
+                                grvar = htmltools::htmlEscape(self$options$grvar)), "<br>")
+                        )
+                    }
+                }
             }
-            
-            # Validate data quality
-            if (!is.null(dep_var)) {
+
+            if (!is.null(dep_var) && dep_var %in% names(mydata)) {
                 private$.validateDataQuality(mydata, dep_var)
             }
-            
-            # Detect outliers for datasets with sufficient size
-            if (nrow(mydata) > 10 && !is.null(dep_var)) {
-                private$.detectOutliers(mydata, dep_var)
+
+            if (nrow(mydata) > 10 && !is.null(dep_var) && dep_var %in% names(mydata)) {
+                private$.detectOutliers(mydata, dep_var, group_var)
             }
-            
-            # Add statistical summary
-            private$.addDataSummary(mydata, dep_var, self$options$group)
-            
-            # Add processing time feedback for large datasets
+
+            private$.addDataSummary(mydata, dep_var, group_var)
+
             elapsed <- difftime(Sys.time(), start_time, units = "secs")
             if (nrow(mydata) > 1000) {
                 private$.accumulateDataMessage(
@@ -845,7 +1163,6 @@ jjdotplotstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 )
             }
 
-            # Cache the processed data with hash
             private$.processedData <- mydata
             private$.data_hash <- current_hash
             return(mydata)
@@ -1000,22 +1317,156 @@ jjdotplotstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             return(options_list)
         },
 
+        # Prevent statsExpressions::pairwise_comparisons from double-adjusting
+        # PMCMRplus::gamesHowellTest studentized-range FWER p-values on K >= 3
+        # parametric comparisons, and compute genuine unadjusted pairwise Welch
+        # t-test p-values when padjustmethod == "none".
+        .fixParametricPairwise = function(plot_obj, sub_data, group_var, dep_var, opts) {
+            if (is.null(plot_obj) || !inherits(plot_obj, "gg")) return(plot_obj)
+            if (identical(opts$pairwise.display, "none") ||
+                !identical(opts$typestatistics, "parametric"))
+                return(plot_obj)
+            n_lev <- private$.nGroupLevels(sub_data, group_var)
+            if (is.na(n_lev) || n_lev < 3L) return(plot_obj)
+
+            sig_idx <- which(vapply(plot_obj$layers,
+                                    function(l) inherits(l$geom, "GeomSignif"), logical(1)))
+            if (length(sig_idx) == 0L) return(plot_obj)
+            idx <- sig_idx[1]
+            sp <- plot_obj$layers[[idx]]$stat_params
+            comps <- sp$comparisons
+            if (is.null(comps) || length(comps) == 0L) return(plot_obj)
+
+            if (!identical(opts$p.adjust.method, "none")) {
+                sp$annotations <- gsub("italic(p)[unadj.]", 'italic(p)["GH-adj."]',
+                                       sp$annotations, fixed = TRUE)
+                plot_obj$layers[[idx]]$stat_params <- sp
+                return(plot_obj)
+            }
+
+            # padjustmethod == "none": compute genuine unadjusted pairwise Welch t-test p-values
+            y_vec <- as.numeric(sub_data[[dep_var]])
+            g_vec <- droplevels(private$.cleanFactor(sub_data[[group_var]]))
+            pvals <- vapply(comps, function(pair) {
+                tt <- tryCatch(
+                    stats::t.test(
+                        x = y_vec[g_vec == pair[1]],
+                        y = y_vec[g_vec == pair[2]],
+                        var.equal = FALSE
+                    ),
+                    error = function(e) NULL
+                )
+                if (is.null(tt)) NA_real_ else unname(tt$p.value)
+            }, numeric(1))
+
+            keep_mask <- if (identical(opts$pairwise.display, "significant")) {
+                !is.na(pvals) & pvals < 0.05
+            } else {
+                !is.na(pvals)
+            }
+
+            for (sc in plot_obj$scales$scales) {
+                if (!is.null(sc$secondary.axis) && !inherits(sc$secondary.axis, "waiver")) {
+                    sc$secondary.axis$name <- as.expression(bquote(list(
+                        "Pairwise test:" ~ bold("Welch's t"),
+                        "Bars shown:" ~ bold(.(opts$pairwise.display)),
+                        alpha == 0.05
+                    )))
+                }
+            }
+
+            if (!any(keep_mask)) {
+                plot_obj$layers[[idx]] <- NULL
+                return(plot_obj)
+            }
+            sp$comparisons <- comps[keep_mask]
+            sp$annotations <- vapply(pvals[keep_mask], function(pv) {
+                paste0('list(italic(p)[unadj.] == "', private$.fmtStatVal(pv, opts$digits), '")')
+            }, character(1))
+            plot_obj$layers[[idx]]$stat_params <- sp
+            plot_obj
+        },
+
+        # Replace ggstatsplot's misleading Bayesian secondary-axis pairwise label
+        # ("Pairwise test: Student's t, Bars shown: all, alpha == 0.05") with an
+        # accurate Bayesian JZS label free of frequentist alpha claims.
+        .fixBayesPairwise = function(plot_obj, sub_data, group_var, opts) {
+            if (is.null(plot_obj) || !inherits(plot_obj, "gg")) return(plot_obj)
+            if (identical(opts$pairwise.display, "none") ||
+                !identical(opts$typestatistics, "bayes"))
+                return(plot_obj)
+            n_lev <- private$.nGroupLevels(sub_data, group_var)
+            if (is.na(n_lev) || n_lev < 3L) return(plot_obj)
+
+            for (sc in plot_obj$scales$scales) {
+                if (!is.null(sc$secondary.axis) && !inherits(sc$secondary.axis, "waiver")) {
+                    sc$secondary.axis$name <- expression(list(
+                        "Pairwise test:" ~ bold("Bayesian JZS t-test"),
+                        "Pairs shown:" ~ bold("all")
+                    ))
+                }
+            }
+            plot_obj
+        },
+
+        # Harmonize Split-By (plot2) sub-panels with main-plot post-hoc fixes,
+        # Wilcox-Tian xi [0, 1] clamping, and 3+-group Bayesian ANOVA subtitles.
+        .enhanceSplitPanels = function(grouped_plot, group_var, dep_var, opts, seed_val) {
+            if (is.null(grouped_plot)) return(grouped_plot)
+
+            enhance_one <- function(panel_i) {
+                if (!inherits(panel_i, "gg") || is.null(panel_i$data) ||
+                    !all(c(group_var, dep_var) %in% names(panel_i$data))) {
+                    return(panel_i)
+                }
+                panel_i <- private$.fixParametricPairwise(
+                    panel_i, panel_i$data, group_var, dep_var, opts
+                )
+                panel_i <- private$.fixBayesPairwise(
+                    panel_i, panel_i$data, group_var, opts
+                )
+                if (isTRUE(opts$resultssubtitle)) {
+                    if (!is.null(panel_i$labels$subtitle)) {
+                        panel_i$labels$subtitle <- private$.clampXiExpr(
+                            panel_i$labels$subtitle, opts$digits
+                        )
+                    } else if (identical(opts$typestatistics, "bayes") &&
+                               private$.nGroupLevels(panel_i$data, group_var) >= 3L) {
+                        sub_i <- private$.bayesAnovaSubtitle(
+                            panel_i$data, group_var, dep_var, opts, seed_val
+                        )
+                        if (is.null(attr(sub_i, "error_msg", exact = TRUE))) {
+                            panel_i <- panel_i + ggplot2::labs(subtitle = sub_i)
+                        }
+                    }
+                }
+                panel_i
+            }
+
+            if (inherits(grouped_plot, "patchwork")) {
+                for (i in seq_len(length(grouped_plot))) {
+                    grouped_plot[[i]] <- enhance_one(grouped_plot[[i]])
+                }
+                return(grouped_plot)
+            }
+            enhance_one(grouped_plot)
+        },
+
         # run ----
         .run = function() {
             # Clear messages, notices, and cached validity at start of new run
             private$.messages <- NULL
             private$.clearNotices()
             private$.inputsValid <- FALSE
+            private$.splitValid <- TRUE
             private$.subtitleFallback <- NULL
+            private$.subtitleUncomputable <- NULL
             private$.subtitleCache <- NULL
             private$.captionCache <- NULL
             private$.captionUnavailable <- NULL
 
             # Initial Message ----
-            if ( is.null(self$options$dep) || is.null(self$options$group)) {
-
-                # todo ----
-
+            if (is.null(self$options$dep) || is.null(self$options$group)) {
                 todo <- paste0(
                     "<br>", .("Welcome to ClinicoPath"), "<br><br>",
                     .("This analysis compares a continuous variable across groups and draws the comparison horizontally, as a box-violin figure with the individual observations shown."),
@@ -1030,45 +1481,29 @@ jjdotplotstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     "<br><hr>")
 
                 self$results$todo$setContent(todo)
-
                 return()
-
             } else {
-
-                # No intro line here: .prepareData() writes the same Html item
-                # through .accumulateMessage() a few lines below, so anything set
-                # now is overwritten before the panel is ever sent. The data
-                # messages are the useful content and they own this item.
-
                 if (nrow(self$data) == 0) {
                     private$.addNotice(.("Data contains no complete rows after filtering. Please check for missing values."), "ERROR")
                     return()
                 }
 
-                # Pre-process data and options for performance with enhanced validation
                 private$.inputsValid <- FALSE
+                private$.splitValid <- TRUE
                 private$.publishRenderState()
                 tryCatch({
                     mydata <- private$.prepareData()
                     options_data <- private$.prepareOptions()
 
-                    # Validate inputs once per run. All validation notices are
-                    # emitted here (not in the render paths) so they neither
-                    # duplicate when a Split-By variable makes both plots render,
-                    # nor accumulate on plot-only re-renders such as resizing.
-                    private$.inputsValid <- private$.validateInputs()
+                    private$.inputsValid <- private$.validateInputs(mydata)
+                    if (isTRUE(private$.inputsValid) && !is.null(self$options$grvar)) {
+                        private$.splitValid <- private$.validateSplitInputs(mydata)
+                    }
                     private$.publishRenderState()
 
-                    # Describe the analysis; do NOT claim it succeeded. .run()
-                    # finishes before a single pixel is drawn, so the old
-                    # "Analysis completed successfully" notice was published
-                    # while the figure could still fail - and it regularly did,
-                    # leaving a confident success message above an empty plot
-                    # box (measured with one Inf value, and with a constant
-                    # dependent variable).
                     if (isTRUE(private$.inputsValid)) {
                         n_obs <- nrow(mydata)
-                        n_groups <- length(unique(mydata[[options_data$group]]))
+                        n_groups <- private$.nGroupLevels(mydata, options_data$group)
                         test_name <- switch(options_data$typestatistics,
                             "parametric" = "parametric (t-test/ANOVA)",
                             "nonparametric" = "nonparametric (Mann-Whitney/Kruskal-Wallis)",
@@ -1080,39 +1515,23 @@ jjdotplotstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                             .("Comparing {groups} groups with N = {n} observations using a {test} test."),
                             groups = n_groups, n = n_obs, test = test_name), "INFO")
 
-                        # Computed HERE, not in .plot(): a notice raised during
-                        # rendering is thrown away, so this is the only place the
-                        # user can be told the effect-size choice was dropped.
-                        # The robust family bootstraps 100 resamples in here:
-                        # 12.7 s at N = 50,000, during which jamovi has no way
-                        # to interrupt or report progress without a checkpoint.
                         private$.checkpoint()
                         private$.subtitleCache <- private$.subtitleExpr(
                             mydata, options_data$group, options_data$dep, options_data)
                         private$.captionCache <- private$.captionExpr(
                             mydata, options_data$group, options_data$dep, options_data)
-                        # republish now the caches are settled: the earlier call recorded
-                        # validity while both were still NULL
                         private$.publishRenderState()
 
-                        # The statsExpressions takeover is what makes the effect
-                        # size selector work; say so when it could not be used.
-                        if (!is.null(private$.subtitleFallback) && isTRUE(self$options$resultssubtitle))
+                        if (!is.null(private$.subtitleUncomputable) && isTRUE(self$options$resultssubtitle)) {
+                            private$.addNotice(.fmt(
+                                .("Statistical test results could not be computed ({reason}), so no test subtitle is shown on the plot."),
+                                reason = htmltools::htmlEscape(private$.subtitleUncomputable)), "WARNING")
+                        } else if (!is.null(private$.subtitleFallback) && isTRUE(self$options$resultssubtitle)) {
                             private$.addNotice(.fmt(
                                 .("The effect size measure you selected could not be applied ({reason}), so the plot shows the statistics package default instead."),
                                 reason = htmltools::htmlEscape(private$.subtitleFallback)), "WARNING")
+                        }
 
-                        # The takeover covers the single figure only.
-                        # grouped_ggbetweenstats builds one subtitle per panel
-                        # inside itself and takes no list of expressions, so
-                        # effsize.type stays inert on the split figure. Measured
-                        # on 3 groups x 2 split levels: "Cohen's d" and
-                        # "Omega-squared" both rendered omega-squared, with no
-                        # message anywhere - the comment in .plot2() claimed
-                        # .run() disclosed this, and it did not.
-                        # The selector has no counterpart outside the parametric
-                        # family: each of the other three reports one fixed
-                        # statistic of its own, so a changed selection is dropped.
                         if (!identical(self$options$effsizetype, "biased") &&
                             !identical(self$options$typestatistics, "parametric") &&
                             isTRUE(self$options$resultssubtitle))
@@ -1123,15 +1542,25 @@ jjdotplotstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                                               robust = "robust", bayes = "Bayesian",
                                               self$options$typestatistics)), "INFO")
 
-                        if (!is.null(self$options$grvar) && isTRUE(self$options$resultssubtitle))
+                        if (!is.null(self$options$grvar) &&
+                            identical(self$options$typestatistics, "parametric") &&
+                            isTRUE(self$options$resultssubtitle))
                             private$.addNotice(.("The 'Effect Size Measure' setting does not reach the Split By panels: the statistics package computes one subtitle per panel internally and always uses its own default there. The single unsplit figure below honours your selection."), "INFO")
 
-                        # Say why the box did nothing rather than leaving the
-                        # user to notice the caption is missing.
-                        # Uncorrected pairwise p values overstate significance,
-                        # and the figure does not say how many comparisons were
-                        # made, so the reader cannot discount them for themselves.
-                        if (!identical(self$options$pairwisedisplay, "none") &&
+                        if (n_groups > 2 &&
+                            identical(self$options$typestatistics, "parametric") &&
+                            !identical(self$options$pairwisedisplay, "none") &&
+                            !identical(self$options$padjustmethod, "none"))
+                            private$.addNotice(.("For three or more groups, parametric pairwise brackets use the Games-Howell single-step studentized-range procedure for family-wise error control (p_GH-adj); a second adjustment pass is not applied on top of it."), "INFO")
+
+                        if (n_groups > 2 &&
+                            identical(self$options$typestatistics, "bayes") &&
+                            identical(self$options$pairwisedisplay, "significant"))
+                            private$.addNotice(.("Bayesian pairwise comparisons report natural-log JZS Bayes factors rather than frequentist p values, so all group pairs are shown on the plot."), "INFO")
+
+                        if (n_groups > 2 &&
+                            !identical(self$options$typestatistics, "bayes") &&
+                            !identical(self$options$pairwisedisplay, "none") &&
                             identical(self$options$padjustmethod, "none"))
                             private$.addNotice(.fmt(
                                 .("Pairwise comparisons are shown without any adjustment for multiple testing. With {groups} groups that is {pairs} comparisons, so even if no groups truly differ there is about a {risk} percent chance that at least one of them reaches significance. Use Holm unless you have a specific reason not to."),
@@ -1151,35 +1580,36 @@ jjdotplotstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         reason = htmltools::htmlEscape(e$message)), "ERROR")
                     return()
                 })
-
             }
         }
 
 
         ,
         .plot = function(image, ggtheme, theme, ...) {
-            # Inputs are validated once in .run(); the render path only reads the
-            # cached result so validation notices are not re-emitted per render. ----
             rs <- private$.renderState(image)
             if (!isTRUE(rs$valid))
                 return()
 
-            # Use cached data and options for performance ----
             mydata <- private$.prepareData()
             options_data <- private$.prepareOptions()
 
-
-            # ggbetweenstats ----
-            # https://www.indrapatil.com/ggstatsplot/reference/ggbetweenstats.html
-
-            # Checkpoint before expensive ggstatsplot computation
             private$.checkpoint()
 
-            # effsize.type is inert in ggstatsplot 1.0.0, so the subtitle is
-            # computed through statsExpressions in .run() and switched off here
-            # when the takeover succeeded.
             sub_expr <- rs$subtitle
             cap_expr <- rs$caption
+            uncomputable <- isTRUE(rs$uncomputable)
+            n_lev <- private$.nGroupLevels(mydata, options_data$group)
+
+            pw_disp <- if (uncomputable) "none" else options_data$pairwise.display
+            p_adj_arg <- options_data$p.adjust.method
+            if (!identical(pw_disp, "none") &&
+                identical(options_data$typestatistics, "parametric") &&
+                !is.na(n_lev) && n_lev >= 3L) {
+                p_adj_arg <- "none"
+                if (identical(options_data$p.adjust.method, "none")) {
+                    pw_disp <- "all"
+                }
+            }
 
             plot <- tryCatch({
                 p <- withr::with_seed(private$.seed(),
@@ -1193,21 +1623,22 @@ jjdotplotstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     type = options_data$typestatistics,
                     conf.level = options_data$conflevel,
                     digits = options_data$digits,
-                    bf.message = options_data$bfmessage,
+                    bf.message = if (uncomputable) FALSE else options_data$bfmessage,
                     centrality.plotting = options_data$centrality.plotting,
                     centrality.type = options_data$centrality.type,
-                    results.subtitle = if (is.null(sub_expr)) options_data$resultssubtitle else FALSE,
-                    pairwise.display = options_data$pairwise.display,
-                    p.adjust.method = options_data$p.adjust.method,
+                    results.subtitle = if (uncomputable || !is.null(sub_expr)) FALSE else options_data$resultssubtitle,
+                    pairwise.display = pw_disp,
+                    p.adjust.method = p_adj_arg,
                     ggplot.component = options_data$ggplot.component,
                     ggtheme = if (options_data$originaltheme) ggstatsplot::theme_ggstatsplot() else ggtheme
                 )))
-                # Attach after construction: do.call()/quote-based routes either
-                # evaluate the plotmath language object ("could not find function
-                # 'italic'") or break the rlang::sym() arguments.
+                p <- private$.fixParametricPairwise(
+                    p, mydata, options_data$group, options_data$dep, options_data
+                )
+                p <- private$.fixBayesPairwise(
+                    p, mydata, options_data$group, options_data
+                )
                 if (!is.null(sub_expr)) p <- p + ggplot2::labs(subtitle = sub_expr)
-                # Same channel ggstatsplot uses for bf.message, restored here
-                # because results.subtitle = FALSE closed its own.
                 if (!is.null(cap_expr)) p <- p + ggplot2::labs(caption = cap_expr)
                 p
             }, error = function(e) e)
@@ -1216,54 +1647,58 @@ jjdotplotstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 return(private$.plotFailure(.fmt(
                     .("The plot could not be drawn: {reason}. Check the dependent variable for constant values, extreme outliers or too few observations per group, or try a different statistical test."),
                     reason = conditionMessage(plot))))
-            # the subtitle's effect-size interval / Bayes factor is resampled for some tests
-            .k <- nlevels(droplevels(as.factor(mydata[[options_data$group]])))
+
+            .k <- if (is.na(n_lev)) 0L else n_lev
             if (statsSeedMatters(options_data$typestatistics, "between", .k) ||
                 captionSeedMatters(options_data$typestatistics, "between", .k, options_data$bfmessage))
-                plot <- addSeedCaption(plot, self, self$options$seed)
+                plot <- addSeedCaption(plot, self, private$.seed())
 
             if (is.null(plot)) return()
 
-            # Print Plot ----
-
-            print(plot)
+            tryCatch(
+                print(plot),
+                error = function(e) {
+                    private$.plotFailure(.fmt(
+                        .("The plot could not be drawn: {reason}. Check the dependent variable for constant values, extreme outliers or too few observations per group, or try a different statistical test."),
+                        reason = conditionMessage(e)))
+                }
+            )
             TRUE
-
         }
 
 
         ,
 
         .plot2 = function(image, ggtheme, theme, ...) {
-            # Inputs are validated once in .run(); the render path only reads the
-            # cached result. The Split-By variable must also be present. ----
-            if (!isTRUE(private$.renderState(image)$valid) || is.null(self$options$grvar))
+            rs <- private$.renderState(image)
+            if (!isTRUE(rs$valid) || isFALSE(rs$splitValid) || is.null(self$options$grvar))
                 return()
 
-            # Use cached data and options for performance ----
-            mydata <- private$.prepareData()
+            base_data <- private$.prepareData()
+            mydata <- private$.prepareSplitData(base_data)
+            if (nrow(mydata) == 0L)
+                return()
             options_data <- private$.prepareOptions()
 
+            grvar <- self$options$grvar
+            private$.checkpoint()
 
-            # grouped_ggbetweenstats ----
-            # https://www.indrapatil.com/ggstatsplot/reference/grouped_ggbetweenstats.html
+            n_lev <- private$.nGroupLevels(mydata, options_data$group)
+            pw_disp <- options_data$pairwise.display
+            p_adj_arg <- options_data$p.adjust.method
+            if (!identical(pw_disp, "none") &&
+                identical(options_data$typestatistics, "parametric") &&
+                !is.na(n_lev) && n_lev >= 3L) {
+                p_adj_arg <- "none"
+                if (identical(options_data$p.adjust.method, "none")) {
+                    pw_disp <- "all"
+                }
+            }
 
-
-
-            if (!is.null(self$options$grvar)) {
-                grvar <- self$options$grvar
-
-                # Checkpoint before expensive grouped ggstatsplot computation
-                private$.checkpoint()
-
-                plot2 <- tryCatch({
-                    # No takeover here: grouped_ggbetweenstats computes one
-                    # subtitle per panel internally and there is no supported way
-                    # to hand it a list of expressions. effsize.type is therefore
-                    # still inert on this figure - .run() says so.
-                    withr::with_seed(private$.seed(),
+            run_grouped <- function(df_in, pw_arg) {
+                withr::with_seed(private$.seed(),
                     private$.withBaseFormulaChar(ggstatsplot::grouped_ggbetweenstats(
-                        data = mydata,
+                        data = df_in,
                         x = !!rlang::sym(options_data$group),
                         y = !!rlang::sym(options_data$dep),
                         grouping.var = !!rlang::sym(grvar),
@@ -1272,46 +1707,50 @@ jjdotplotstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         digits = options_data$digits,
                         bf.message = options_data$bfmessage,
                         results.subtitle = options_data$resultssubtitle,
-                        pairwise.display = options_data$pairwise.display,
-                        p.adjust.method = options_data$p.adjust.method,
+                        pairwise.display = pw_arg,
+                        p.adjust.method = p_adj_arg,
                         centrality.plotting = options_data$centrality.plotting,
                         centrality.type = options_data$centrality.type,
                         ggplot.component = options_data$ggplot.component,
                         ggtheme = if (options_data$originaltheme) ggstatsplot::theme_ggstatsplot() else ggtheme,
                         xlab = options_data$xlab,
                         ylab = options_data$ylab,
-                        # NOT `title =`. grouped_ggbetweenstats sets the title of
-                        # each panel to that panel's level name, so passing one
-                        # through `...` collided with its own argument and threw
-                        # "formal argument \"title\" matched by multiple actual
-                        # arguments" for EVERY Split By analysis - the whole
-                        # feature had never produced a figure. The error went to a
-                        # notice raised at render time, which jamovi discards, so
-                        # the user saw an empty panel under a success message.
-                        # The overall title belongs to the patchwork annotation.
                         annotation.args = list(title = options_data$mytitle)
-                    )))
-                }, error = function(e) e)
-
-                if (inherits(plot2, "condition"))
-                    return(private$.plotFailure(.fmt(
-                        .("The split figure could not be drawn: {reason}. Check that every level of the Split By variable has enough data in at least two groups."),
-                        reason = conditionMessage(plot2))))
-                if (is.null(plot2)) return()
+                    ))
+                )
             }
 
+            plot2 <- tryCatch(run_grouped(mydata, pw_disp), error = function(e) e)
 
-            # the subtitle's effect-size interval / Bayes factor is resampled for some tests
-            .k <- nlevels(droplevels(as.factor(mydata[[options_data$group]])))
+            # Fallback if a degenerate stratum crashes pairwise comparisons (e.g. WRS2::lincon on singleton)
+            if (inherits(plot2, "condition") && !identical(pw_disp, "none")) {
+                plot2 <- tryCatch(run_grouped(mydata, "none"), error = function(e) e)
+            }
+
+            if (inherits(plot2, "condition"))
+                return(private$.plotFailure(.fmt(
+                    .("The split figure could not be drawn: {reason}. Check that every level of the Split By variable has enough data in at least two groups."),
+                    reason = conditionMessage(plot2))))
+            if (is.null(plot2)) return()
+
+            plot2 <- private$.enhanceSplitPanels(
+                plot2, options_data$group, options_data$dep, options_data, private$.seed()
+            )
+
+            .k <- if (is.na(n_lev)) 0L else n_lev
             if (statsSeedMatters(options_data$typestatistics, "between", .k) ||
                 captionSeedMatters(options_data$typestatistics, "between", .k, options_data$bfmessage))
-                plot2 <- addSeedCaption(plot2, self, self$options$seed)
+                plot2 <- addSeedCaption(plot2, self, private$.seed())
 
-            # Print Plot ----
-
-            print(plot2)
+            tryCatch(
+                print(plot2),
+                error = function(e) {
+                    private$.plotFailure(.fmt(
+                        .("The split figure could not be drawn: {reason}. Check that every level of the Split By variable has enough data in at least two groups."),
+                        reason = conditionMessage(e)))
+                }
+            )
             TRUE
-
         }
 
 

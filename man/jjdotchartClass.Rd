@@ -17,6 +17,7 @@ Dot Chart (Summary vs Reference Value)
 \section{Methods}{
 \subsection{Public methods}{
   \itemize{
+    \item \href{#method-jjdotchartClass-init}{\code{jjdotchartClass$init()}}
     \item \href{#method-jjdotchartClass-clone}{\code{jjdotchartClass$clone()}}
   }
 }
@@ -40,7 +41,6 @@ Dot Chart (Summary vs Reference Value)
   <li><span class="pkg-link" data-pkg="jmvcore" data-topic="Analysis" data-id="asProtoBuf"><a href='../../jmvcore/html/Analysis.html#method-Analysis-asProtoBuf'><code>jmvcore::Analysis$asProtoBuf()</code></a></span></li>
   <li><span class="pkg-link" data-pkg="jmvcore" data-topic="Analysis" data-id="asSource"><a href='../../jmvcore/html/Analysis.html#method-Analysis-asSource'><code>jmvcore::Analysis$asSource()</code></a></span></li>
   <li><span class="pkg-link" data-pkg="jmvcore" data-topic="Analysis" data-id="check"><a href='../../jmvcore/html/Analysis.html#method-Analysis-check'><code>jmvcore::Analysis$check()</code></a></span></li>
-  <li><span class="pkg-link" data-pkg="jmvcore" data-topic="Analysis" data-id="init"><a href='../../jmvcore/html/Analysis.html#method-Analysis-init'><code>jmvcore::Analysis$init()</code></a></span></li>
   <li><span class="pkg-link" data-pkg="jmvcore" data-topic="Analysis" data-id="optionsChangedHandler"><a href='../../jmvcore/html/Analysis.html#method-Analysis-optionsChangedHandler'><code>jmvcore::Analysis$optionsChangedHandler()</code></a></span></li>
   <li><span class="pkg-link" data-pkg="jmvcore" data-topic="Analysis" data-id="postInit"><a href='../../jmvcore/html/Analysis.html#method-Analysis-postInit'><code>jmvcore::Analysis$postInit()</code></a></span></li>
   <li><span class="pkg-link" data-pkg="jmvcore" data-topic="Analysis" data-id="print"><a href='../../jmvcore/html/Analysis.html#method-Analysis-print'><code>jmvcore::Analysis$print()</code></a></span></li>
@@ -53,6 +53,25 @@ Dot Chart (Summary vs Reference Value)
   <li><code>jjdotchartBase$initialize()</code></li>
 </ul>
 </details>}}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-jjdotchartClass-init"></a>}}
+\if{latex}{\out{\hypertarget{method-jjdotchartClass-init}{}}}
+\subsection{\code{jjdotchartClass$init()}}{
+  Initialize analysis options and guard non-finite reference values.
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{jjdotchartClass$init(noThrow = FALSE)}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{noThrow}}{Logical; whether to catch initialization exceptions.}
+    }
+    \if{html}{\out{</div>}}
+  }
+}
+
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-jjdotchartClass-clone"></a>}}
 \if{latex}{\out{\hypertarget{method-jjdotchartClass-clone}{}}}

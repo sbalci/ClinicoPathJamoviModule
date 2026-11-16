@@ -1188,6 +1188,14 @@ msgstr ""
 msgid "{days} days ({years} years)"
 msgstr "{days} gün ({years} yıl)"
 
+#: R/jjdotchart.b.R
+msgid "{dep} by {group}"
+msgstr "{group} grubuna göre {dep}"
+
+#: R/jjdotchart.b.R
+msgid "{dep} by {group}, split by {grvar}"
+msgstr "{group} grubuna göre {dep} ({grvar} alt grubuna göre)"
+
 #: R/jjbetweenstats.b.R
 msgid "{deps} by {group}"
 msgstr "{group} bazında {deps}"
@@ -2161,9 +2169,9 @@ msgid ""
 "values usually mean a division by zero or an out-of-range entry - check the "
 "source data."
 msgstr ""
-"'{dep}' değişkeninde sonsuz değere sahip {ninf} satır analiz dışı "
-"bırakıldı. Sonsuz değerler genellikle sıfıra bölmeyi veya aralık dışı bir "
-"girişi gösterir - kaynak veriyi kontrol edin."
+"'{dep}' değişkeninde sonsuz değere sahip {ninf} satır analiz dışı bırakıldı. "
+"Sonsuz değerler genellikle sıfıra bölmeyi veya aralık dışı bir girişi "
+"gösterir - kaynak veriyi kontrol edin."
 
 #: R/jjdotchart.b.R
 msgid ""
@@ -2220,8 +2228,8 @@ msgid ""
 "group still counts equally in the {test}."
 msgstr ""
 "{nsmall} grupta 3'ten az gözlem bulunmaktadır. Bu grupların {stat} değeri "
-"kararsızdır; tek gözlemli bir grup sıfır genişlikli aralıkla çizilir ve "
-"her grup yine de {test} içinde eşit ağırlıkla yer alır."
+"kararsızdır; tek gözlemli bir grup sıfır genişlikli aralıkla çizilir ve her "
+"grup yine de {test} içinde eşit ağırlıkla yer alır."
 
 #: R/agepyramid.b.R
 msgid ""
@@ -11002,14 +11010,6 @@ msgstr ""
 msgid "`${dep} - ${group}`"
 msgstr ""
 
-#: jjdotchart/results/plot2.title
-msgid "`${dep} by {group}, split by {grvar}`"
-msgstr "`{group} bazında ${dep}, {grvar} alt gruplarına göre bölünmüş`"
-
-#: jjdotchart/results/plot.title
-msgid "`${dep} by {group}`"
-msgstr "`{group} bazında ${dep}`"
-
 #: jjscatterstats/results/plot2.title
 msgid "`${dep} vs ${group} by ${grvar}`"
 msgstr ""
@@ -18023,8 +18023,8 @@ msgid ""
 msgstr ""
 "<strong>Testin örneklem büyüklüğü hasta sayısı değil, grup "
 "sayısıdır.</strong> Her gözlemi kullanarak grupları birbirleriyle "
-"karşılaştırmak için bunun yerine <strong>Box-Violin Plots to Compare "
-"Between Groups</strong> analizini kullanın."
+"karşılaştırmak için bunun yerine <strong>Box-Violin Plots to Compare Between "
+"Groups</strong> analizini kullanın."
 
 #: R/diagnosticmeta.b.R
 msgid ""
@@ -27661,8 +27661,8 @@ msgid ""
 "all group summaries equal the Reference Value (zero discrepancy and zero "
 "between-group variance)"
 msgstr ""
-"tüm grup özetleri Referans Değerine eşit (sıfır sapma ve sıfır gruplar "
-"arası varyans)"
+"tüm grup özetleri Referans Değerine eşit (sıfır sapma ve sıfır gruplar arası "
+"varyans)"
 
 #: R/decisioncurve.b.R
 msgid ""
@@ -42881,8 +42881,8 @@ msgid ""
 "Cauchy JZS prior width r (0.10 to 2.00; 0.707 = medium default) for the "
 "Bayesian one-sample test."
 msgstr ""
-"Bayesyen tek örneklem testi için Cauchy JZS önsel ölçek genişliği r (0.10 "
-"- 2.00; 0.707 = orta düzey varsayılan)."
+"Bayesyen tek örneklem testi için Cauchy JZS önsel ölçek genişliği r (0.10 - "
+"2.00; 0.707 = orta düzey varsayılan)."
 
 #: jjdotchart/options/bfprior.title
 msgid "Cauchy prior scale"
@@ -46259,24 +46259,23 @@ msgstr ""
 "özetine indirger, k grubu grup içi güven aralıkları ve kesikli Referans "
 "Değeri çizgisiyle artan özet değerine göre sıralar ve bu k grup özetine "
 "Referans Değerine karşı ağırlıksız bir tek örneklem testi uygular (grup "
-"başına eşit 1/k ağırlık; örneklem büyüklüğü N hasta değil n = k gruptur; "
-"Alt Gruba Göre Böl kullanıldığında katman başına n = k_s). Parametrik "
-"seçeneği Student-t aralıkları ve tek örneklem t-testi (Hedges' g) ile grup "
-"aritmetik ortalamalarını; Parametrik Olmayan seçeneği yüzdelik bootstrap "
-"aralıkları ve Wilcoxon işaretli sıra testi (sıra-iki serili r) ile grup "
-"medyanlarını; Dirençli seçeneği Yuen Winsorize-t aralıkları ve bootstrap "
-"budanmış ortalama testi ile simetrik budanmış ortalamaları; Bayesyen "
-"seçeneği ise yüzdelik bootstrap aralıkları ve Gauss Cauchy-JZS Bayes "
-"faktörü testi ile Sheather-Jones çekirdek yoğunluğu MAP modlarını çizer "
-"(burada log_e(BF_01) > 0 grup özeti ortalamasının Referans Değerine eşit "
-"olduğu sıfır hipotezini destekler). Grup büyüklükleri veya grup içi "
-"standart hatalar değiştiğinde eşit küme ağırlıkları olgu yükü veya "
-"kesinlik ağırlıklı kıyaslamalardan ayrışabileceğinden, isteğe bağlı "
-"Ağırlıklı duyarlılık tablosu ağırlıksız (1/k), olgu yükü ağırlıklı "
-"küme-dirençli (n_g/N) ve DerSimonian-Laird rastgele etkili kesinlik "
-"ağırlıklı tahminleri Referans Değerine karşı karşılaştırır; grupları "
-"bireysel gözlemler üzerinden doğrudan karşılaştırmak için Box-Violin Plots "
-"to Compare Between Groups analizini kullanın."
+"başına eşit 1/k ağırlık; örneklem büyüklüğü N hasta değil n = k gruptur; Alt "
+"Gruba Göre Böl kullanıldığında katman başına n = k_s). Parametrik seçeneği "
+"Student-t aralıkları ve tek örneklem t-testi (Hedges' g) ile grup aritmetik "
+"ortalamalarını; Parametrik Olmayan seçeneği yüzdelik bootstrap aralıkları ve "
+"Wilcoxon işaretli sıra testi (sıra-iki serili r) ile grup medyanlarını; "
+"Dirençli seçeneği Yuen Winsorize-t aralıkları ve bootstrap budanmış ortalama "
+"testi ile simetrik budanmış ortalamaları; Bayesyen seçeneği ise yüzdelik "
+"bootstrap aralıkları ve Gauss Cauchy-JZS Bayes faktörü testi ile "
+"Sheather-Jones çekirdek yoğunluğu MAP modlarını çizer (burada log_e(BF_01) > "
+"0 grup özeti ortalamasının Referans Değerine eşit olduğu sıfır hipotezini "
+"destekler). Grup büyüklükleri veya grup içi standart hatalar değiştiğinde "
+"eşit küme ağırlıkları olgu yükü veya kesinlik ağırlıklı kıyaslamalardan "
+"ayrışabileceğinden, isteğe bağlı Ağırlıklı duyarlılık tablosu ağırlıksız "
+"(1/k), olgu yükü ağırlıklı küme-dirençli (n_g/N) ve DerSimonian-Laird "
+"rastgele etkili kesinlik ağırlıklı tahminleri Referans Değerine karşı "
+"karşılaştırır; grupları bireysel gözlemler üzerinden doğrudan karşılaştırmak "
+"için Box-Violin Plots to Compare Between Groups analizini kullanın."
 
 #: groupedbar/options/plottype/cleveland.title
 msgid "Cleveland Dot Plot"
@@ -52164,8 +52163,8 @@ msgid ""
 "Precision-weighted random-effects synthesis requires at least 2 groups with "
 "n >= 2 and positive within-group dispersion."
 msgstr ""
-"Ağırlıksız (1/k) ve olgu yükü ağırlıklı (n_g / N, küme-dirençli CR1 SH, sd "
-"= {dfk}) sentezleri Referans Değerine ({tv}) karşı karşılaştırır. Kesinlik "
+"Ağırlıksız (1/k) ve olgu yükü ağırlıklı (n_g / N, küme-dirençli CR1 SH, sd = "
+"{dfk}) sentezleri Referans Değerine ({tv}) karşı karşılaştırır. Kesinlik "
 "ağırlıklı rastgele etkiler sentezi, n >= 2 ve pozitif grup içi dağılıma "
 "sahip en az 2 grup gerektirir."
 
@@ -56130,8 +56129,8 @@ msgid ""
 "Confidence or credible level (0.50 to 0.999) for per-group error bars and "
 "subtitle effect-size intervals."
 msgstr ""
-"Grup başına hata çubukları ve alt başlıktaki etki büyüklüğü aralıkları "
-"için güven veya inanılırlık düzeyi (0.50 - 0.999)."
+"Grup başına hata çubukları ve alt başlıktaki etki büyüklüğü aralıkları için "
+"güven veya inanılırlık düzeyi (0.50 - 0.999)."
 
 #: R/diagnosticmeta.b.R
 msgid "Confidence region vs prediction region"
@@ -62917,9 +62916,7 @@ msgstr ""
 msgid ""
 "Custom horizontal axis label (leave blank to use the Measurement variable "
 "name)."
-msgstr ""
-"Özel yatay eksen etiketi (Ölçüm değişkeni adını kullanmak için boş "
-"bırakın)."
+msgstr "Özel yatay eksen etiketi (Ölçüm değişkeni adını kullanmak için boş bırakın)."
 
 #: groupedforest/options/custom_hr_max.title
 msgid "Custom HR Maximum"
@@ -72132,8 +72129,8 @@ msgid ""
 "Display the per-group numerical summary table (N obs, location summary, SD, "
 "confidence interval, and difference vs Reference)."
 msgstr ""
-"Grup bazında sayısal özet tablosunu göster (Gözlem sayısı, konum özeti, "
-"SS, güven aralığı ve Referansa göre fark)."
+"Grup bazında sayısal özet tablosunu göster (Gözlem sayısı, konum özeti, SS, "
+"güven aralığı ve Referansa göre fark)."
 
 #: decisioncombine/options/showCITables.description.ui
 msgid ""
@@ -73163,6 +73160,16 @@ msgid "Dot"
 msgstr ""
 
 #: R/jjdotchart.b.R
+#: jjdotchart/results/plot.title
+msgid "Dot Chart"
+msgstr "Nokta Grafiği"
+
+#: R/jjdotchart.b.R
+#: jjdotchart/results/plot2.title
+msgid "Dot Chart (Split By)"
+msgstr "Nokta Grafiği (Alt Gruba Göre)"
+
+#: R/jjdotchart.b.R
 #: package/analyses/jjdotchart.title
 #: package/analyses/jjdotchart.menuTitle
 #: jjdotchart/options.title
@@ -73336,8 +73343,8 @@ msgid ""
 "Draw an optional solid blue vertical line marking the overall center of the "
 "k plotted group summaries."
 msgstr ""
-"Çizilen k grup özetinin genel merkezini gösteren isteğe bağlı düz mavi "
-"dikey çizgi çiz."
+"Çizilen k grup özetinin genel merkezini gösteren isteğe bağlı düz mavi dikey "
+"çizgi çiz."
 
 #: jviolin/options/draw_quantiles.description
 msgid "Draw horizontal lines at specified quantiles"
@@ -74068,8 +74075,8 @@ msgid ""
 msgstr ""
 "{k} grubun her biri tek bir noktaya (kendi {stat} değerine) indirgenir; bu "
 "nedenle {test}, {nobs} bireysel gözlem üzerinde DEĞİL, {k} grup özeti "
-"üzerinde çalışır. Bu test ağırlıksız grup özetlerini Referans Değerine "
-"karşı sınar; grupları birbirleriyle karşılaştırmaz."
+"üzerinde çalışır. Bu test ağırlıksız grup özetlerini Referans Değerine karşı "
+"sınar; grupları birbirleriyle karşılaştırmaz."
 
 #: R/enhancedROC.b.R
 msgid ""
@@ -84597,8 +84604,8 @@ msgid ""
 "fewer than two non-zero differences from the Reference Value remain after "
 "removing exact ties"
 msgstr ""
-"tam eşitlikler çıkarıldıktan sonra Referans Değerinden sıfır olmayan "
-"ikiden az fark kaldı"
+"tam eşitlikler çıkarıldıktan sonra Referans Değerinden sıfır olmayan ikiden "
+"az fark kaldı"
 
 #: R/agreement.b.R
 msgid "Fewer, more flexible"
@@ -91832,11 +91839,10 @@ msgid ""
 "and random-effects precision-weighted estimates."
 msgstr ""
 "Grup büyüklükleri oldukça dengesizdir ({nmin} ile {nmax} gözlem arası), "
-"ancak her grup eşit ağırlıklı tek bir nokta (1/{k}) ile katıldığından "
-"küçük gruplar testi yüksek hacimli gruplar kadar etkiler. Ağırlıksız, olgu "
-"yükü ağırlıklı ve rastgele etkili kesinlik ağırlıklı tahminleri "
-"karşılaştırmak için Çıktı altındaki 'Ağırlıklı duyarlılık tablosu' "
-"seçeneğini etkinleştirin."
+"ancak her grup eşit ağırlıklı tek bir nokta (1/{k}) ile katıldığından küçük "
+"gruplar testi yüksek hacimli gruplar kadar etkiler. Ağırlıksız, olgu yükü "
+"ağırlıklı ve rastgele etkili kesinlik ağırlıklı tahminleri karşılaştırmak "
+"için Çıktı altındaki 'Ağırlıklı duyarlılık tablosu' seçeneğini etkinleştirin."
 
 #: R/lollipop.b.R
 msgid ""
@@ -101174,8 +101180,8 @@ msgid ""
 "Integer random seed for reproducible bootstrap confidence intervals and "
 "stochastic p-values."
 msgstr ""
-"Tekrarlanabilir bootstrap güven aralıkları ve stokastik p-değerleri için "
-"tam sayı rastgelelik tohumu."
+"Tekrarlanabilir bootstrap güven aralıkları ve stokastik p-değerleri için tam "
+"sayı rastgelelik tohumu."
 
 #: jjbetweenstats/options/seed.description.ui
 msgid ""
@@ -104039,12 +104045,10 @@ msgstr ""
 #: package/analyses/lollipop.menuGroup
 #: package/analyses/jjarcdiagram.menuGroup
 #: package/analyses/jjridges.menuGroup
-#: package/analyses/jjdotchart.menuGroup
 #: hullplot/options.menuGroup
 #: jjarcdiagram/options.menuGroup
 #: jjbarstats/options.menuGroup
 #: jjcorrmat/options.menuGroup
-#: jjdotchart/options.menuGroup
 #: jjdotplotstats/options.menuGroup
 #: jjhistostats/options.menuGroup
 #: jjridges/options.menuGroup
@@ -104115,8 +104119,10 @@ msgstr ""
 #: package/analyses/jjbetweenstats.menuGroup
 #: package/analyses/jjpiestats.menuGroup
 #: package/analyses/jjsegmentedtotalbar.menuGroup
+#: package/analyses/jjdotchart.menuGroup
 #: advancedraincloud/options.menuGroup
 #: jjbetweenstats/options.menuGroup
+#: jjdotchart/options.menuGroup
 #: jjpiestats/options.menuGroup
 #: jjsegmentedtotalbar/options.menuGroup
 msgid "JJStatsPlotT"
@@ -114093,6 +114099,10 @@ msgstr ""
 #: stereology/ui/variableSupplier[0].label
 msgid "Measurement Variables"
 msgstr ""
+
+#: R/jjdotchart.b.R
+msgid "Measurement, Groups, and Split By must be distinct variables."
+msgstr "Ölçüm, Gruplar ve Alt Gruba Göre değişkenleri birbirinden farklı olmalıdır."
 
 #: R/decisioncalculator.b.R
 msgid "Measures"
@@ -135427,8 +135437,8 @@ msgid ""
 "Optional stratification variable creating a separate dot chart panel and "
 "separate test (n = k_s groups) for each level."
 msgstr ""
-"Her düzey için ayrı bir nokta grafiği paneli ve ayrı bir test (n = k_s "
-"grup) oluşturan isteğe bağlı katmanlama değişkeni."
+"Her düzey için ayrı bir nokta grafiği paneli ve ayrı bir test (n = k_s grup) "
+"oluşturan isteğe bağlı katmanlama değişkeni."
 
 #: coxdiagnostics/options/strata_var.description.ui
 msgid "Optional stratification variable for Cox model."
@@ -158986,6 +158996,10 @@ msgstr ""
 msgid "Reference value line"
 msgstr ""
 
+#: R/jjdotchart.b.R
+msgid "Reference value must be a finite number."
+msgstr "Referans değeri sonlu bir sayı olmalıdır."
+
 #: jjdotchart/ui[1].label
 msgid "Reference Value to Test Against"
 msgstr "Test Edilecek Referans Değeri"
@@ -178889,9 +178903,9 @@ msgid ""
 "{lvls}; per-panel p-values and effect sizes have very low degrees of freedom "
 "and should be treated with caution."
 msgstr ""
-"Alt Gruba Göre Böl, {lvls} içinde 4'ten az gruba sahip her panelde ayrı "
-"bir test çalıştırır; panel bazlı p-değerleri ve etki büyüklükleri çok "
-"düşük serbestlik derecesine sahiptir ve dikkatle yorumlanmalıdır."
+"Alt Gruba Göre Böl, {lvls} içinde 4'ten az gruba sahip her panelde ayrı bir "
+"test çalıştırır; panel bazlı p-değerleri ve etki büyüklükleri çok düşük "
+"serbestlik derecesine sahiptir ve dikkatle yorumlanmalıdır."
 
 #: R/jjdotchart.b.R
 msgid ""
@@ -178899,8 +178913,8 @@ msgid ""
 "one-sample test require at least 2 groups per panel."
 msgstr ""
 "Alt Gruba Göre Böl katmanı {lvls} içinde verisi olan 2'den az grup "
-"bulunmaktadır; nokta grafiği ve tek örneklem testi panel başına en az 2 "
-"grup gerektirir."
+"bulunmaktadır; nokta grafiği ve tek örneklem testi panel başına en az 2 grup "
+"gerektirir."
 
 #: R/jjdotchart.b.R
 msgid "Split By variable has no observed levels."
@@ -193070,8 +193084,7 @@ msgid ""
 "Measurement variable is numeric and that each group has usable observations."
 msgstr ""
 "Bu veri için grup özetleri hesaplanamadı. Ölçüm değişkeninin sayısal "
-"olduğunu ve her grubun kullanılabilir gözlemlere sahip olduğunu kontrol "
-"edin."
+"olduğunu ve her grubun kullanılabilir gözlemlere sahip olduğunu kontrol edin."
 
 #: R/jjbetweenstats.b.R
 msgid ""
@@ -196610,8 +196623,8 @@ msgstr ""
 "Referans Değeri ({tv}), grup {stats} aralığının ({r1} ile {r2} arası) "
 "oldukça dışında yer almaktadır. Bu durum standardize etki büyüklüğünün "
 "sınırlandırılmasını olanaksız hale getirebilir ve grafiği istatistiksel "
-"sonuçsuz bırakabilir - bilimsel olarak önceden belirlenmiş referansı "
-"koruyun ve farklı bir çıkarımsal yöntem değerlendirin."
+"sonuçsuz bırakabilir - bilimsel olarak önceden belirlenmiş referansı koruyun "
+"ve farklı bir çıkarımsal yöntem değerlendirin."
 
 #: R/ihcheterogeneity.b.R
 msgid ""
@@ -198683,10 +198696,10 @@ msgid ""
 "'Weighted sensitivity table' under Output."
 msgstr ""
 "{k} grup özetinin ağırlıksız ortalaması ({unw}) ile tüm {ntot} gözlem "
-"genelindeki gözlem ağırlıklı ortalama ({wt}), Referans Değerinin ({tv}) "
-"ZIT taraflarında yer almaktadır. Eşit ağırlıklı küme testi, hasta "
-"ağırlıklı uyumdan farklı bir soruyu yanıtlar; Çıktı altındaki 'Ağırlıklı "
-"duyarlılık tablosu'nu inceleyin."
+"genelindeki gözlem ağırlıklı ortalama ({wt}), Referans Değerinin ({tv}) ZIT "
+"taraflarında yer almaktadır. Eşit ağırlıklı küme testi, hasta ağırlıklı "
+"uyumdan farklı bir soruyu yanıtlar; Çıktı altındaki 'Ağırlıklı duyarlılık "
+"tablosu'nu inceleyin."
 
 #: R/categorize.b.R
 msgid "the upper boundary (mean + {k} SD)"
@@ -198951,10 +198964,10 @@ msgid ""
 "can disagree; treat a borderline p-value as borderline."
 msgstr ""
 "Wilcoxon işaretli sıra p-değeri tam dağılım yerine süreklilik düzeltmeli "
-"normal yaklaşımla hesaplanır; bu nedenle bu örneklem büyüklüğünde (k = "
-"{k}) R'nin varsayılan wilcox.test() sonucundan farklılık gösterebilir. "
-"0.05 eşiği yakınında iki yöntem uyuşmayabilir; sınırda bir p-değerini "
-"sınırda olarak değerlendirin."
+"normal yaklaşımla hesaplanır; bu nedenle bu örneklem büyüklüğünde (k = {k}) "
+"R'nin varsayılan wilcox.test() sonucundan farklılık gösterebilir. 0.05 eşiği "
+"yakınında iki yöntem uyuşmayabilir; sınırda bir p-değerini sınırda olarak "
+"değerlendirin."
 
 #: R/jjwithinstats.b.R
 msgid ""
@@ -201671,9 +201684,9 @@ msgid ""
 "This tool draws a <strong>Cleveland dot chart</strong>: each group becomes "
 "ONE point, and those points are tested against a Reference Value you choose."
 msgstr ""
-"Bu araç bir <strong>Cleveland nokta grafiği</strong> çizer: her grup TEK "
-"bir noktaya dönüştürülür ve bu noktalar seçtiğiniz Referans Değerine karşı "
-"test edilir."
+"Bu araç bir <strong>Cleveland nokta grafiği</strong> çizer: her grup TEK bir "
+"noktaya dönüştürülür ve bu noktalar seçtiğiniz Referans Değerine karşı test "
+"edilir."
 
 #: R/reportcat.b.R
 msgid "This tool generates a summary of your selected categorical variables."
@@ -209616,9 +209629,8 @@ msgid ""
 "Unit or cluster variable (such as laboratory, hospital center, or rater); "
 "each group becomes one equally weighted dot (n = k groups)."
 msgstr ""
-"Birim veya küme değişkeni (laboratuvar, hastane merkezi veya "
-"değerlendirici gibi); her grup eşit ağırlıklı tek bir noktaya dönüşür (n = "
-"k grup)."
+"Birim veya küme değişkeni (laboratuvar, hastane merkezi veya değerlendirici "
+"gibi); her grup eşit ağırlıklı tek bir noktaya dönüşür (n = k grup)."
 
 #: plscox/options/scaling_method/unit_variance.title
 msgid "Unit Variance Scaling"
@@ -219061,8 +219073,8 @@ msgid ""
 msgstr ""
 "k = {kv} grup varken yüzdelik-t bootstrap yeniden örneklemleri uç "
 "çekilişlerde sıfır Winsorize varyans üretti (sonsuz bootstrap GA); bunun "
-"yerine analitik Winsorize-t %{cp} güven sınırları (sd = {dfw}) kullanıldı "
-"ve bootstrap p-değeri dikkatle yorumlanmalıdır."
+"yerine analitik Winsorize-t %{cp} güven sınırları (sd = {dfw}) kullanıldı ve "
+"bootstrap p-değeri dikkatle yorumlanmalıdır."
 
 #: R/agreement.b.R
 msgid ""
@@ -219100,8 +219112,7 @@ msgid ""
 "p-value and effect estimate with caution."
 msgstr ""
 "Yalnızca {k} grup bulunduğundan grup özetlerinden yapılan çıkarım düşük "
-"kesinliktedir; p-değerini ve etki büyüklüğü tahminini dikkatle "
-"değerlendirin."
+"kesinliktedir; p-değerini ve etki büyüklüğü tahminini dikkatle değerlendirin."
 
 #: R/enhancedROC.b.R
 msgid ""
@@ -219493,9 +219504,8 @@ msgstr ""
 "Grup içi standart hatalar gruplar arasında büyük farklılık göstermektedir "
 "({se1} ile {se2} arası, {ratio}x oran); buna karşın {test} ters varyans "
 "ağırlıklandırması yapmadan tüm {k} grup özetini eşit ağırlıklandırır. "
-"DerSimonian-Laird rastgele etkili kesinlik ağırlıklı sentezi incelemek "
-"için Çıktı altındaki 'Ağırlıklı duyarlılık tablosu' seçeneğini "
-"etkinleştirin."
+"DerSimonian-Laird rastgele etkili kesinlik ağırlıklı sentezi incelemek için "
+"Çıktı altındaki 'Ağırlıklı duyarlılık tablosu' seçeneğini etkinleştirin."
 
 #: multisurvival/results/subgroupHR.title
 msgid "Within-Subgroup Hazard Ratios"

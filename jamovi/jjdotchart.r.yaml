@@ -3,47 +3,50 @@ name:  jjdotchart
 title: Dot Chart (Summary vs Reference Value)
 jrs:   '1.1'
 
-clearWith:
-    - seed
-    - dep
-    - group
-    - grvar
-    - testvalue
-    - typestatistics
-    - conflevel
-    - k
-    - trimprop
-    - bfprior
-    - nboot
-    - ciresamples
-    - mapresamples
-    - resultssubtitle
-    - showSummaryTable
-    - showWeightedTable
-    - centralityplotting
-    - centralitytype
-    - originaltheme
-    - mytitle
-    - xtitle
-    - ytitle
-    - plotwidth
-    - plotheight
-
 items:
 
     - name: todo
       title: To Do
       type: Html
+      clearWith:
+          - dep
+          - group
 
     - name: notices
       title: Notices
       type: Html
+      clearWith:
+          - seed
+          - dep
+          - group
+          - grvar
+          - testvalue
+          - typestatistics
+          - conflevel
+          - k
+          - trimprop
+          - bfprior
+          - nboot
+          - ciresamples
+          - mapresamples
+          - resultssubtitle
 
     - name: summary
       title: Group Summaries (one row per plotted point)
       type: Table
       visible: (showSummaryTable)
       rows: 0
+      clearWith:
+          - seed
+          - dep
+          - group
+          - grvar
+          - testvalue
+          - typestatistics
+          - conflevel
+          - trimprop
+          - ciresamples
+          - mapresamples
       columns:
           - name: grp
             title: Group
@@ -72,6 +75,16 @@ items:
       type: Table
       visible: (showWeightedTable)
       rows: 0
+      clearWith:
+          - seed
+          - dep
+          - group
+          - testvalue
+          - typestatistics
+          - conflevel
+          - trimprop
+          - ciresamples
+          - mapresamples
       columns:
           - name: scheme
             title: Weighting scheme
@@ -100,21 +113,66 @@ items:
             format: zto,pvalue
 
     - name: plot2
-      title: '`${dep} by {group}, split by {grvar}`'
+      title: Dot Chart (Split By)
       type: Image
       width:  800
       height: 450
       renderFun: .plot2
       requiresData: true
       visible: (grvar)
+      clearWith:
+          - seed
+          - dep
+          - group
+          - grvar
+          - testvalue
+          - typestatistics
+          - conflevel
+          - k
+          - trimprop
+          - bfprior
+          - nboot
+          - ciresamples
+          - mapresamples
+          - resultssubtitle
+          - centralityplotting
+          - centralitytype
+          - originaltheme
+          - mytitle
+          - xtitle
+          - ytitle
+          - plotwidth
+          - plotheight
 
     - name: plot
-      title: '`${dep} by {group}`'
+      title: Dot Chart
       type: Image
       width:  650
       height: 450
       renderFun: .plot
       requiresData: true
+      clearWith:
+          - seed
+          - dep
+          - group
+          - testvalue
+          - typestatistics
+          - conflevel
+          - k
+          - trimprop
+          - bfprior
+          - nboot
+          - ciresamples
+          - mapresamples
+          - resultssubtitle
+          - centralityplotting
+          - centralitytype
+          - originaltheme
+          - mytitle
+          - xtitle
+          - ytitle
+          - plotwidth
+          - plotheight
 
 refs:
     - ClinicoPathJamoviModule

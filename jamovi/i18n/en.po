@@ -991,6 +991,14 @@ msgstr ""
 msgid "{days} days ({years} years)"
 msgstr ""
 
+#: R/jjdotchart.b.R
+msgid "{dep} by {group}"
+msgstr ""
+
+#: R/jjdotchart.b.R
+msgid "{dep} by {group}, split by {grvar}"
+msgstr ""
+
 #: R/jjbetweenstats.b.R
 msgid "{deps} by {group}"
 msgstr ""
@@ -9735,14 +9743,6 @@ msgstr ""
 
 #: jjdotplotstats/results/plot.title
 msgid "`${dep} - ${group}`"
-msgstr ""
-
-#: jjdotchart/results/plot2.title
-msgid "`${dep} by {group}, split by {grvar}`"
-msgstr ""
-
-#: jjdotchart/results/plot.title
-msgid "`${dep} by {group}`"
 msgstr ""
 
 #: jjscatterstats/results/plot2.title
@@ -67793,6 +67793,16 @@ msgid "Dot"
 msgstr ""
 
 #: R/jjdotchart.b.R
+#: jjdotchart/results/plot.title
+msgid "Dot Chart"
+msgstr ""
+
+#: R/jjdotchart.b.R
+#: jjdotchart/results/plot2.title
+msgid "Dot Chart (Split By)"
+msgstr ""
+
+#: R/jjdotchart.b.R
 #: package/analyses/jjdotchart.title
 #: package/analyses/jjdotchart.menuTitle
 #: jjdotchart/options.title
@@ -96799,12 +96809,10 @@ msgstr ""
 #: package/analyses/lollipop.menuGroup
 #: package/analyses/jjarcdiagram.menuGroup
 #: package/analyses/jjridges.menuGroup
-#: package/analyses/jjdotchart.menuGroup
 #: hullplot/options.menuGroup
 #: jjarcdiagram/options.menuGroup
 #: jjbarstats/options.menuGroup
 #: jjcorrmat/options.menuGroup
-#: jjdotchart/options.menuGroup
 #: jjdotplotstats/options.menuGroup
 #: jjhistostats/options.menuGroup
 #: jjridges/options.menuGroup
@@ -96875,8 +96883,10 @@ msgstr ""
 #: package/analyses/jjbetweenstats.menuGroup
 #: package/analyses/jjpiestats.menuGroup
 #: package/analyses/jjsegmentedtotalbar.menuGroup
+#: package/analyses/jjdotchart.menuGroup
 #: advancedraincloud/options.menuGroup
 #: jjbetweenstats/options.menuGroup
+#: jjdotchart/options.menuGroup
 #: jjpiestats/options.menuGroup
 #: jjsegmentedtotalbar/options.menuGroup
 msgid "JJStatsPlotT"
@@ -106360,6 +106370,10 @@ msgstr ""
 
 #: stereology/ui/variableSupplier[0].label
 msgid "Measurement Variables"
+msgstr ""
+
+#: R/jjdotchart.b.R
+msgid "Measurement, Groups, and Split By must be distinct variables."
 msgstr ""
 
 #: R/decisioncalculator.b.R
@@ -148476,6 +148490,10 @@ msgstr ""
 
 #: jjdotplotstats/options/testvalueline.title
 msgid "Reference value line"
+msgstr ""
+
+#: R/jjdotchart.b.R
+msgid "Reference value must be a finite number."
 msgstr ""
 
 #: jjdotchart/ui[1].label

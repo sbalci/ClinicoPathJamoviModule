@@ -287,7 +287,18 @@ jjdotchartResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "BayesFactor",
                     "bayestestR",
                     "effectsize",
-                    "datawizard"),
+                    "datawizard"))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="todo",
+                title="To Do",
+                clearWith=list(
+                    "dep",
+                    "group")))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="notices",
+                title="Notices",
                 clearWith=list(
                     "seed",
                     "dep",
@@ -302,31 +313,24 @@ jjdotchartResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "nboot",
                     "ciresamples",
                     "mapresamples",
-                    "resultssubtitle",
-                    "showSummaryTable",
-                    "showWeightedTable",
-                    "centralityplotting",
-                    "centralitytype",
-                    "originaltheme",
-                    "mytitle",
-                    "xtitle",
-                    "ytitle",
-                    "plotwidth",
-                    "plotheight"))
-            self$add(jmvcore::Html$new(
-                options=options,
-                name="todo",
-                title="To Do"))
-            self$add(jmvcore::Html$new(
-                options=options,
-                name="notices",
-                title="Notices"))
+                    "resultssubtitle")))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="summary",
                 title="Group Summaries (one row per plotted point)",
                 visible="(showSummaryTable)",
                 rows=0,
+                clearWith=list(
+                    "seed",
+                    "dep",
+                    "group",
+                    "grvar",
+                    "testvalue",
+                    "typestatistics",
+                    "conflevel",
+                    "trimprop",
+                    "ciresamples",
+                    "mapresamples"),
                 columns=list(
                     list(
                         `name`="grp", 
@@ -362,6 +366,16 @@ jjdotchartResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 title="Benchmarking Sensitivity Check (Weighting Comparison)",
                 visible="(showWeightedTable)",
                 rows=0,
+                clearWith=list(
+                    "seed",
+                    "dep",
+                    "group",
+                    "testvalue",
+                    "typestatistics",
+                    "conflevel",
+                    "trimprop",
+                    "ciresamples",
+                    "mapresamples"),
                 columns=list(
                     list(
                         `name`="scheme", 
@@ -399,20 +413,65 @@ jjdotchartResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$add(jmvcore::Image$new(
                 options=options,
                 name="plot2",
-                title="`${dep} by {group}, split by {grvar}`",
+                title="Dot Chart (Split By)",
                 width=800,
                 height=450,
                 renderFun=".plot2",
                 requiresData=TRUE,
-                visible="(grvar)"))
+                visible="(grvar)",
+                clearWith=list(
+                    "seed",
+                    "dep",
+                    "group",
+                    "grvar",
+                    "testvalue",
+                    "typestatistics",
+                    "conflevel",
+                    "k",
+                    "trimprop",
+                    "bfprior",
+                    "nboot",
+                    "ciresamples",
+                    "mapresamples",
+                    "resultssubtitle",
+                    "centralityplotting",
+                    "centralitytype",
+                    "originaltheme",
+                    "mytitle",
+                    "xtitle",
+                    "ytitle",
+                    "plotwidth",
+                    "plotheight")))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="plot",
-                title="`${dep} by {group}`",
+                title="Dot Chart",
                 width=650,
                 height=450,
                 renderFun=".plot",
-                requiresData=TRUE))}))
+                requiresData=TRUE,
+                clearWith=list(
+                    "seed",
+                    "dep",
+                    "group",
+                    "testvalue",
+                    "typestatistics",
+                    "conflevel",
+                    "k",
+                    "trimprop",
+                    "bfprior",
+                    "nboot",
+                    "ciresamples",
+                    "mapresamples",
+                    "resultssubtitle",
+                    "centralityplotting",
+                    "centralitytype",
+                    "originaltheme",
+                    "mytitle",
+                    "xtitle",
+                    "ytitle",
+                    "plotwidth",
+                    "plotheight")))}))
 
 jjdotchartBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "jjdotchartBase",

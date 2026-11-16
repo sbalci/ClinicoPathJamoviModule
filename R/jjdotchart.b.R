@@ -11,6 +11,19 @@
 jjdotchartClass <- if (requireNamespace("jmvcore")) R6::R6Class(
     "jjdotchartClass",
     inherit = jjdotchartBase,
+    public = list(
+        #' @description Initialize analysis options and guard non-finite reference values.
+        #' @param noThrow Logical; whether to catch initialization exceptions.
+        init = function(noThrow = FALSE) {
+            opt_tv <- self$options$option("testvalue")
+            if (!is.null(opt_tv)) {
+                tv <- opt_tv$value
+                if (!is.numeric(tv) || length(tv) != 1L || is.na(tv))
+                    opt_tv$value <- Inf
+            }
+            super$init(noThrow = noThrow)
+        }
+    ),
     private = list(
 
         .noticeList = list(),
@@ -19,6 +32,18 @@ jjdotchartClass <- if (requireNamespace("jmvcore")) R6::R6Class(
         .tab = NULL,
         .ostMain = NULL,
         .splitCache = NULL,
+
+        .sourcifyOption = function(option) {
+            if (!option$name %in% names(formals(jjdotchart))) return("")
+            value <- option$value
+            if (identical(value, option$default)) return("")
+            if (is.list(value) || length(value) != 1L) return("")
+            if (!(is.character(value) || is.numeric(value) || is.logical(value))) return("")
+            if (is.na(value) || (is.numeric(value) && !is.finite(value))) return("")
+            if (is.character(value))
+                return(paste0(option$name, " = ", encodeString(value, quote = '"')))
+            super$.sourcifyOption(option)
+        },
 
         # Mirror of .inputsValid into every Image's state so .omv reopen and
         # right-click image export can render without re-running .run().
@@ -118,6 +143,30 @@ jjdotchartClass <- if (requireNamespace("jmvcore")) R6::R6Class(
             b <- suppressWarnings(as.integer(self$options$mapresamples %||% 500L)[1])
             if (length(b) != 1L || is.na(b)) return(500L)
             min(max(b, 100L), 5000L)
+        },
+
+        .confVal = function() {
+            cf <- suppressWarnings(as.double(self$options$conflevel %||% 0.95)[1])
+            if (length(cf) != 1L || !is.finite(cf)) return(0.95)
+            min(max(cf, 0.50), 0.999)
+        },
+
+        .digitsVal = function() {
+            dg <- suppressWarnings(as.integer(self$options$k %||% 2L)[1])
+            if (length(dg) != 1L || is.na(dg)) return(2L)
+            min(max(dg, 0L), 5L)
+        },
+
+        .plotWidthVal = function() {
+            pw <- suppressWarnings(as.integer(self$options$plotwidth %||% 650L)[1])
+            if (length(pw) != 1L || is.na(pw)) return(650L)
+            min(max(pw, 300L), 1200L)
+        },
+
+        .plotHeightVal = function() {
+            ph <- suppressWarnings(as.integer(self$options$plotheight %||% 450L)[1])
+            if (length(ph) != 1L || is.na(ph)) return(450L)
+            min(max(ph, 300L), 800L)
         },
 
         # ---- notices ----------------------------------------------------------
@@ -232,6 +281,32 @@ jjdotchartClass <- if (requireNamespace("jmvcore")) R6::R6Class(
             wt <- self$results$weightsensitivity
             if (!is.null(wt)) {
                 wt$setTitle(.("Benchmarking Sensitivity Check (Weighting Comparison)"))
+            }
+            p1 <- self$results$plot
+            if (!is.null(p1)) {
+                if (!is.null(self$options$dep) && !is.null(self$options$group)) {
+                    p1$setTitle(.fmt(
+                        .("{dep} by {group}"),
+                        dep   = self$options$dep,
+                        group = self$options$group
+                    ))
+                } else {
+                    p1$setTitle(.("Dot Chart"))
+                }
+            }
+            p2 <- self$results$plot2
+            if (!is.null(p2)) {
+                if (!is.null(self$options$dep) && !is.null(self$options$group) &&
+                    !is.null(self$options$grvar)) {
+                    p2$setTitle(.fmt(
+                        .("{dep} by {group}, split by {grvar}"),
+                        dep   = self$options$dep,
+                        group = self$options$group,
+                        grvar = self$options$grvar
+                    ))
+                } else {
+                    p2$setTitle(.("Dot Chart (Split By)"))
+                }
             }
             invisible(NULL)
         },
@@ -392,7 +467,7 @@ jjdotchartClass <- if (requireNamespace("jmvcore")) R6::R6Class(
 
             sd_g <- if (ng > 1L) stats::sd(xg) else NA_real_
             se_est <- NA_real_
-            conf <- self$options$conflevel
+            conf <- private$.confVal()
             alpha <- 1 - conf
             ty <- as.character(self$options$typestatistics)
 
@@ -557,8 +632,8 @@ jjdotchartClass <- if (requireNamespace("jmvcore")) R6::R6Class(
             }
 
             tv <- self$options$testvalue
-            conf <- self$options$conflevel
-            dig <- self$options$k
+            conf <- private$.confVal()
+            dig <- private$.digitsVal()
             ty <- as.character(self$options$typestatistics)
             tol0 <- 1e-14 * max(1, abs(tv), max(abs(values)))
 
@@ -807,6 +882,15 @@ jjdotchartClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                 )
                 return(FALSE)
             }
+
+            tv <- self$options$testvalue
+            if (!is.numeric(tv) || length(tv) != 1L || !is.finite(tv)) {
+                private$.addNotice(
+                    .("Reference value must be a finite number."),
+                    "ERROR"
+                )
+                return(FALSE)
+            }
             if (prep$n_inf > 0L) {
                 private$.addNotice(.fmt(
                     .("{ninf} row(s) had an infinite value for '{dep}' and were excluded. Infinite values usually mean a division by zero or an out-of-range entry - check the source data."),
@@ -893,7 +977,6 @@ jjdotchartClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                 ), "WARNING")
             }
 
-            tv <- self$options$testvalue
             unw_center <- mean(tab$value)
             w_center <- stats::weighted.mean(tab$value, tab$n)
             if (is.finite(unw_center) && is.finite(w_center) &&
@@ -965,6 +1048,8 @@ jjdotchartClass <- if (requireNamespace("jmvcore")) R6::R6Class(
 
             sdf <- prep$split_data
             if (is.null(sdf) || nrow(sdf) == 0L) {
+                if (!is.null(self$results$plot2))
+                    self$results$plot2$setState(FALSE)
                 private$.addNotice(.fmt(
                     .("No complete rows remain for Split By ('{grv}'); the split chart cannot be drawn."),
                     grv = htmltools::htmlEscape(grv)
@@ -1036,11 +1121,9 @@ jjdotchartClass <- if (requireNamespace("jmvcore")) R6::R6Class(
 
         # ---- lifecycle --------------------------------------------------------
 
-        .init = function() {
-            private$.syncTableTitles()
-            private$.initWeightedTable()
-            w <- self$options$plotwidth %||% 650
-            h <- self$options$plotheight %||% 450
+        .syncPlotSizes = function() {
+            w <- private$.plotWidthVal()
+            h <- private$.plotHeightVal()
             self$results$plot$setSize(w, h)
             if (!is.null(self$options$grvar) && self$options$grvar %in% names(self$data)) {
                 n <- nlevels(private$.cleanFactor(self$data[[self$options$grvar]]))
@@ -1048,11 +1131,18 @@ jjdotchartClass <- if (requireNamespace("jmvcore")) R6::R6Class(
             }
         },
 
+        .init = function() {
+            private$.syncTableTitles()
+            private$.initWeightedTable()
+            private$.syncPlotSizes()
+        },
+
         .run = function() {
             private$.clearNotices()
             private$.clearTableRows(self$results$summary)
             private$.resetWeightedTable()
             private$.syncTableTitles()
+            private$.syncPlotSizes()
             private$.inputsValid <- FALSE
             private$.publishValidity(FALSE)
             private$.prepared <- NULL
@@ -1085,6 +1175,15 @@ jjdotchartClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                 return()
             }
             self$results$todo$setContent("")
+
+            sel_vars <- c(self$options$dep, self$options$group, self$options$grvar)
+            if (anyDuplicated(sel_vars) > 0L) {
+                private$.addNotice(
+                    .("Measurement, Groups, and Split By must be distinct variables."),
+                    "ERROR"
+                )
+                return()
+            }
 
             if (nrow(self$data) == 0L) {
                 private$.addNotice(.("Data contains no rows."), "ERROR")
@@ -1142,7 +1241,7 @@ jjdotchartClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                 scope    = scope_prefix,
                 stat     = private$.summaryLabel(),
                 statlow  = private$.summaryLabelLower(),
-                cp       = base::format(100 * self$options$conflevel, trim = TRUE),
+                cp       = base::format(100 * private$.confVal(), trim = TRUE),
                 cimethod = private$.ciMethodLabel(),
                 tv       = base::format(self$options$testvalue)
             ))
@@ -1168,7 +1267,7 @@ jjdotchartClass <- if (requireNamespace("jmvcore")) R6::R6Class(
 
             k <- nrow(tab)
             tv <- self$options$testvalue
-            conf <- self$options$conflevel
+            conf <- private$.confVal()
             alpha <- 1 - conf
             tol0 <- 1e-14 * max(1, abs(tv), max(abs(tab$value)))
             t_crit <- stats::qt(1 - alpha / 2, df = k - 1L)
@@ -1354,7 +1453,7 @@ jjdotchartClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                 )
 
             if (isTRUE(o$centralityplotting)) {
-                cent <- private$.centralityStat(plot_df$value, o$centralitytype, o$k)
+                cent <- private$.centralityStat(plot_df$value, o$centralitytype, private$.digitsVal())
                 p <- p +
                     ggplot2::geom_vline(
                         xintercept = cent$val,
@@ -1459,9 +1558,9 @@ jjdotchartClass <- if (requireNamespace("jmvcore")) R6::R6Class(
         },
 
         .plot = function(image, ggtheme, theme, ...) {
-            if (!private$.validHere(image)) return()
+            if (!private$.validHere(image)) return(FALSE)
             prep <- private$.prepareData()
-            if (is.null(prep)) return()
+            if (is.null(prep)) return(FALSE)
 
             private$.checkpoint()
             err <- tryCatch({
@@ -1480,9 +1579,9 @@ jjdotchartClass <- if (requireNamespace("jmvcore")) R6::R6Class(
         },
 
         .plot2 = function(image, ggtheme, theme, ...) {
-            if (!private$.validHere(image) || is.null(self$options$grvar)) return()
+            if (!private$.validHere(image) || is.null(self$options$grvar)) return(FALSE)
             prep <- private$.prepareData()
-            if (is.null(prep)) return()
+            if (is.null(prep)) return(FALSE)
 
             private$.checkpoint()
             err <- tryCatch({

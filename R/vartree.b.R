@@ -115,6 +115,12 @@ vartreeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
         .run = function() {
             private$.noticeList <- list()
+            private$.renderNotices()
+            # Clear the previous cohort before any validation can return early.
+            self$results$text1$setContent(" ")
+            self$results$text2$setContent("")
+            self$results$reportSentence$setContent("")
+            self$results$interpretation$setContent(" ")
             # NOTE: the previously commented-out `jmvcore::Notice$new(...) +
             # insert(999, notice)` blocks have been migrated to the
             # serialization-safe plain-text notices pattern via

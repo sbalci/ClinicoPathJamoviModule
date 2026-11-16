@@ -5875,7 +5875,7 @@ analyses:
     name: jjdotchart
     ns: ClinicoPath
     category: analyses
-    menuGroup: JJStatsPlot
+    menuGroup: JJStatsPlotT
     menuSubgroup: Categorical vs Continuous
     menuTitle: Dot Chart (Summary vs Reference Value)
     description: >
