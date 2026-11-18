@@ -23,7 +23,7 @@
 | `centralityplotting` | `CheckBox` `centralityplotting` | `centrality_plotting` in `.prepareOptions()`, `.validateCentralityOptions()` | `notices`, `plot`, `plot2` |
 | `centralityparameter` | `ComboBox` `centralityparameter` (`enable: (centralityplotting)`) | Legacy suppression/disagreement check in `.prepareOptions()`, `.validateCentralityOptions()` | `notices`, `plot`, `plot2` |
 | `centralitytype` | `ComboBox` `centralitytype` (`enable: (centralityplotting)`) | `centrality_type` in `.prepareOptions()`, `.validateCentralityOptions()` | `notices`, `plot`, `plot2` |
-| `centralityk` | `TextBox` `centralityk` (deprecated) | Deprecation `INFO` notice in `.validateCentralityOptions()` | `notices` |
+| `centralityk` | Hidden (`hidden: true`, deprecated) | Deprecation `INFO` notice in `.validateCentralityOptions()` | `notices` |
 | `resultssubtitle` | `CheckBox` `resultssubtitle` | `.subtitleExpr()`, `.captionExpr()`, `.enhanceSplitPanels()`, `.plot()`, `.plot2()` | `notices`, `plot`, `plot2` |
 | `showexplanation` | `CheckBox` `showexplanation` | `.renderExplanation()`, `.plainResultSentence()` | `explanation` (`visible: (showexplanation)`) |
 | `originaltheme` | `CheckBox` `originaltheme` | `ggstatsplot::theme_ggstatsplot()` switch in `.plot()`, `.plot2()` | `plot`, `plot2` |
@@ -37,6 +37,6 @@
 
 ## Verification Checklist
 
-- [x] All 26 options defined in `jamovi/jjdotplotstats.a.yaml` have matching UI bindings in `jamovi/jjdotplotstats.u.yaml` (except implicit `data`) and `clearWith` entries in `jamovi/jjdotplotstats.r.yaml`.
+- [x] All 26 options defined in `jamovi/jjdotplotstats.a.yaml` have matching UI bindings in `jamovi/jjdotplotstats.u.yaml` (except implicit `data` and `hidden: true` legacy `centralityk`) and `clearWith` entries in `jamovi/jjdotplotstats.r.yaml`.
 - [x] Backend `R/jjdotplotstats.b.R` wires all declared options without dead code or hardcoded placeholders.
 - [x] Results definitions in `jamovi/jjdotplotstats.r.yaml` (`todo`, `notices`, `explanation`, `plot2`, `plot`) correspond to populated output items with serialized `image$state` guards.

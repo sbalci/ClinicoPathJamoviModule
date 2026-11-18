@@ -401,6 +401,7 @@ options:
             keep running.
 
     - name: centralityk
+      hidden: true
       title: 'Central Tendency Precision (no longer used)'
       type: Integer
       default: 2

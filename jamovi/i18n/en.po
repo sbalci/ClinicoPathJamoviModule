@@ -31286,6 +31286,10 @@ msgstr ""
 msgid "Bayes prior scale"
 msgstr ""
 
+#: R/jjdotplotstats.b.R
+msgid "BayesFactor package unavailable"
+msgstr ""
+
 #: R/jjscatterstats.b.R
 #: jextractggstats/options/statistical_test/bayes.title
 #: jjbarstats/options/typestatistics/bayes.title
@@ -94237,6 +94241,10 @@ msgstr ""
 msgid "insufficient within-group variation"
 msgstr ""
 
+#: R/jjdotplotstats.b.R
+msgid "insufficient within-group variation for Bayesian ANOVA"
+msgstr ""
+
 #: advancedbarplot/options/value_format/integer.title
 #: jggheatmap/options/value_format/integer.title
 msgid "Integer"
@@ -124417,8 +124425,6 @@ msgstr ""
 #: package/analyses/waterfall.menuGroup
 #: package/analyses/swimmerplot.menuGroup
 #: package/analyses/ihcheterogeneity.menuGroup
-#: package/analyses/diagnosticmeta.menuGroup
-#: diagnosticmeta/options.menuGroup
 #: ihcheterogeneity/options.menuGroup
 #: swimmerplot/options.menuGroup
 #: waterfall/options.menuGroup
@@ -124552,7 +124558,9 @@ msgstr ""
 msgid "OncoPathP"
 msgstr ""
 
+#: package/analyses/diagnosticmeta.menuGroup
 #: package/analyses/pathagreement.menuGroup
+#: diagnosticmeta/options.menuGroup
 #: pathagreement/options.menuGroup
 msgid "OncoPathT"
 msgstr ""
@@ -173180,6 +173188,7 @@ msgstr ""
 #: package/analyses/survival.menuGroup
 #: package/analyses/survivalcont.menuGroup
 #: package/analyses/multisurvival.menuGroup
+#: package/analyses/oddsratio.menuGroup
 #: package/analyses/timeinterval.menuGroup
 #: package/analyses/datetimeconverter.menuGroup
 #: package/analyses/outcomeorganizer.menuGroup
@@ -173190,6 +173199,7 @@ msgstr ""
 #: lassocox/options.menuGroup
 #: marginalrecurrent/results/survivalFunction.columns.title
 #: multisurvival/options.menuGroup
+#: oddsratio/options.menuGroup
 #: outcomeorganizer/options.menuGroup
 #: semimarkov/results/reliabilityAnalysis.columns.title
 #: simonmakuch/results/survivalEstimates.columns.title
@@ -174306,11 +174316,6 @@ msgstr ""
 #: highdimcox/options.menuGroup
 #: lassointro/options.menuGroup
 msgid "SurvivalP"
-msgstr ""
-
-#: package/analyses/oddsratio.menuGroup
-#: oddsratio/options.menuGroup
-msgid "SurvivalT"
 msgstr ""
 
 #: multisurvival/options/sty/t3.title

@@ -56,34 +56,6 @@
   "score": 12.84
  },
  {
-  "name": "oddsratio",
-  "group": "SurvivalT",
-  "loc": 3199,
-  "computes": true,
-  "wired": 0.76,
-  "declared": 17,
-  "tests": 13,
-  "vignettes": 8,
-  "refs": 1,
-  "i18n": 156,
-  "debt": 0,
-  "commits": 0,
-  "conv": {
-   "prune": 0,
-   "fmt": 0,
-   "fake": 0,
-   "rx": 0,
-   "verb": 0,
-   "state": 0,
-   "nockpt": false,
-   "desc": 0,
-   "sentinel": 0
-  },
-  "conv_penalty": 0.0,
-  "blockers": 0,
-  "score": 12.63
- },
- {
   "name": "jjsegmentedtotalbar",
   "group": "JJStatsPlotT",
   "loc": 2432,
@@ -114,14 +86,14 @@
  {
   "name": "jjdotplotstats",
   "group": "JJStatsPlotT",
-  "loc": 2258,
+  "loc": 2318,
   "computes": true,
   "wired": 1.0,
   "declared": 5,
   "tests": 9,
   "vignettes": 6,
   "refs": 1,
-  "i18n": 166,
+  "i18n": 168,
   "debt": 0,
   "commits": 0,
   "conv": {
@@ -137,7 +109,7 @@
   },
   "conv_penalty": 0.15,
   "blockers": 3,
-  "score": 12.14
+  "score": 12.2
  },
  {
   "name": "jjpiestats",
@@ -194,6 +166,34 @@
   "conv_penalty": 1.55,
   "blockers": 2,
   "score": 11.89
+ },
+ {
+  "name": "diagnosticmeta",
+  "group": "OncoPathT",
+  "loc": 4546,
+  "computes": true,
+  "wired": 1.0,
+  "declared": 19,
+  "tests": 3,
+  "vignettes": 10,
+  "refs": 4,
+  "i18n": 585,
+  "debt": 0,
+  "commits": 0,
+  "conv": {
+   "prune": 0,
+   "fmt": 0,
+   "fake": 0,
+   "rx": 0,
+   "verb": 2,
+   "state": 0,
+   "nockpt": false,
+   "desc": 0,
+   "sentinel": 0
+  },
+  "conv_penalty": 0.1,
+  "blockers": 2,
+  "score": 11.8
  },
  {
   "name": "jjdotchart",

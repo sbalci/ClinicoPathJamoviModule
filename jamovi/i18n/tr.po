@@ -225,9 +225,9 @@ msgid ""
 "variation to compare between groups. Check that the correct variable is "
 "selected."
 msgstr ""
-"'{name}' değişkeni her satırda aynı değeri ({value}) almaktadır; bu "
-"nedenle gruplar arasında karşılaştırılacak bir değişim yoktur. Doğru "
-"değişkenin seçildiğini kontrol edin."
+"'{name}' değişkeni her satırda aynı değeri ({value}) almaktadır; bu nedenle "
+"gruplar arasında karşılaştırılacak bir değişim yoktur. Doğru değişkenin "
+"seçildiğini kontrol edin."
 
 #: R/jjdotchart.b.R
 msgid "'{slv}' ({ks} groups, df = {df})"
@@ -377,10 +377,9 @@ msgid ""
 "package dropped that setting. Use 'Statistical Precision (Decimal Places)' "
 "instead; it controls the centrality labels too."
 msgstr ""
-"'Merkezi Eğilim Hassasiyeti' seçeneğinin artık bir etkisi yoktur; "
-"istatistik paketi bu ayarı kaldırmıştır. Bunun yerine merkezi eğilim "
-"etiketlerini de kontrol eden 'İstatistiksel Hassasiyet (Ondalık Basamak)' "
-"ayarını kullanın."
+"'Merkezi Eğilim Hassasiyeti' seçeneğinin artık bir etkisi yoktur; istatistik "
+"paketi bu ayarı kaldırmıştır. Bunun yerine merkezi eğilim etiketlerini de "
+"kontrol eden 'İstatistiksel Hassasiyet (Ondalık Basamak)' ayarını kullanın."
 
 #: package/analyses/jjridges.description
 #: jjridges/options.description.main
@@ -35047,6 +35046,10 @@ msgstr ""
 msgid "Bayes prior scale"
 msgstr ""
 
+#: R/jjdotplotstats.b.R
+msgid "BayesFactor package unavailable"
+msgstr "BayesFactor paketi kullanılamıyor"
+
 #: R/jjscatterstats.b.R
 #: jextractggstats/options/statistical_test/bayes.title
 #: jjbarstats/options/typestatistics/bayes.title
@@ -35415,8 +35418,8 @@ msgid ""
 "Carlo sampling with fixed random seed {seed} for exact reproducibility."
 msgstr ""
 "Bayesyen sonsal büyüklükler ve inanılırlık aralıkları, tam "
-"tekrarlanabilirlik için sabit rastgelelik tohumu ({seed}) ile Markov "
-"zinciri Monte Carlo örneklemesi kullanır."
+"tekrarlanabilirlik için sabit rastgelelik tohumu ({seed}) ile Markov zinciri "
+"Monte Carlo örneklemesi kullanır."
 
 #: comprehensiveSurvivalPower/options/statistical_method/bayesian.title
 msgid "Bayesian Power"
@@ -43797,8 +43800,8 @@ msgid ""
 "Centrality plotting is enabled but the centrality parameter is set to none, "
 "so no centrality lines will be displayed."
 msgstr ""
-"Merkezi eğilim çizimi etkinleştirilmiş ancak merkezi eğilim parametresi "
-"yok olarak ayarlandığından merkezi eğilim çizgisi gösterilmeyecektir."
+"Merkezi eğilim çizimi etkinleştirilmiş ancak merkezi eğilim parametresi yok "
+"olarak ayarlandığından merkezi eğilim çizgisi gösterilmeyecektir."
 
 #: jjbetweenstats/options/centralitytype.title
 #: jjwithinstats/options/centralitytype.title
@@ -52122,11 +52125,11 @@ msgid ""
 "reference value, use Dot Chart (Summary vs Reference Value) instead."
 msgstr ""
 "Sürekli bir değişkeni bağımsız gruplar arasında karşılaştırır ve "
-"karşılaştırmayı yatay olarak çizer (değerler x ekseninde, grup etiketleri "
-"y ekseninde); keman grafiği, kutu grafiği, bireysel gözlemler ve isteğe "
-"bağlı dikey referans eşik çizgisi içerir. Welch t-testi veya Welch ANOVA "
-"(parametrik), Mann-Whitney U veya Kruskal-Wallis (parametrik olmayan), "
-"Yuen veya Wilcox yüzde 20 budanmış ortalama testleri (dayanıklı) ve "
+"karşılaştırmayı yatay olarak çizer (değerler x ekseninde, grup etiketleri y "
+"ekseninde); keman grafiği, kutu grafiği, bireysel gözlemler ve isteğe bağlı "
+"dikey referans eşik çizgisi içerir. Welch t-testi veya Welch ANOVA "
+"(parametrik), Mann-Whitney U veya Kruskal-Wallis (parametrik olmayan), Yuen "
+"veya Wilcox yüzde 20 budanmış ortalama testleri (dayanıklı) ve "
 "Jeffreys-Zellner-Siow Bayes faktörlerini (Bayesyen) kullanarak ggstatsplot "
 "gruplar arası karşılaştırmalarını sunar. Grup başına tek özet noktanın "
 "referans değere karşı test edildiği Cleveland nokta grafiği için bunun "
@@ -64256,8 +64259,8 @@ msgid ""
 "Data contains no complete rows after filtering. Please check for missing "
 "values."
 msgstr ""
-"Filtreleme sonrasında veride eksiksiz satır kalmadı. Lütfen kayıp "
-"değerleri kontrol edin."
+"Filtreleme sonrasında veride eksiksiz satır kalmadı. Lütfen kayıp değerleri "
+"kontrol edin."
 
 #: R/jjcorrmat.b.R
 msgid ""
@@ -64574,8 +64577,8 @@ msgid ""
 "Data processing failed: {reason}. Please check your variable selections and "
 "try again."
 msgstr ""
-"Veri işleme başarısız oldu: {reason}. Lütfen değişken seçimlerinizi "
-"kontrol edip tekrar deneyin."
+"Veri işleme başarısız oldu: {reason}. Lütfen değişken seçimlerinizi kontrol "
+"edip tekrar deneyin."
 
 #: R/singlearm.b.R
 msgid "Data processing failed. Please check your input variables."
@@ -67127,9 +67130,7 @@ msgstr ""
 
 #: R/jjdotplotstats.b.R
 msgid "Dependent Variable and Grouping Variable must be distinct columns."
-msgstr ""
-"Bağımlı Değişken ve Gruplama Değişkeni birbirinden farklı sütunlar "
-"olmalıdır."
+msgstr "Bağımlı Değişken ve Gruplama Değişkeni birbirinden farklı sütunlar olmalıdır."
 
 #: jextractggstats/options/dep_var.description
 msgid "Dependent variable for analysis"
@@ -72371,9 +72372,9 @@ msgid ""
 "Displaying all {pairs} Bayesian pairwise brackets across {groups} groups can "
 "crowd the figure; consider setting Pairwise Comparisons to 'None'."
 msgstr ""
-"{groups} grup genelinde tüm {pairs} Bayesyen ikili karşılaştırma "
-"parantezini göstermek grafiği kalabalıklaştırabilir; İkili "
-"Karşılaştırmalar ayarını 'Yok' olarak seçmeyi düşünün."
+"{groups} grup genelinde tüm {pairs} Bayesyen ikili karşılaştırma parantezini "
+"göstermek grafiği kalabalıklaştırabilir; İkili Karşılaştırmalar ayarını "
+"'Yok' olarak seçmeyi düşünün."
 
 #: R/jjdotplotstats.b.R
 msgid ""
@@ -72876,8 +72877,8 @@ msgid ""
 "via {test} was not estimable ({reason})."
 msgstr ""
 "{factor} değişkeninin {groups} grubu genelinde (N = {total}) {outcome} "
-"dağılımları yatay kutu-keman grafikleriyle gösterilmiş; {test} ile "
-"biçimsel hipotez testi hesaplanamamıştır ({reason})."
+"dağılımları yatay kutu-keman grafikleriyle gösterilmiş; {test} ile biçimsel "
+"hipotez testi hesaplanamamıştır ({reason})."
 
 #: qualityoflife/results/health_utilities_summary.columns.title
 msgid "Disutility Cases"
@@ -74079,8 +74080,8 @@ msgid ""
 "Each group is drawn as a violin (the shape of its distribution), a boxplot "
 "(median and quartiles) and its individual observations."
 msgstr ""
-"Her grup bir keman grafiği (dağılımın biçimi), bir kutu grafiği (ortanca "
-"ve çeyreklikler) ve bireysel gözlemleriyle birlikte çizilir."
+"Her grup bir keman grafiği (dağılımın biçimi), bir kutu grafiği (ortanca ve "
+"çeyreklikler) ve bireysel gözlemleriyle birlikte çizilir."
 
 #: R/advancedraincloud.b.R
 msgid "Each group requires at least 2 observations to estimate standard deviation"
@@ -80025,8 +80026,8 @@ msgid ""
 "computed."
 msgstr ""
 "Alt Gruba Göre Böl değişkeni '{grvar}' içindeki her düzeyde ({levels}) "
-"ikiden az grup bulunmakta veya '{dep}' değişkeninde değişim "
-"bulunmamaktadır; bu nedenle tabakalı karşılaştırma hesaplanamadı."
+"ikiden az grup bulunmakta veya '{dep}' değişkeninde değişim bulunmamaktadır; "
+"bu nedenle tabakalı karşılaştırma hesaplanamadı."
 
 #: R/psychopdaROC.b.R
 msgid ""
@@ -87635,8 +87636,7 @@ msgid ""
 msgstr ""
 "Üç veya daha fazla grup için parametrik ikili karşılaştırma parantezleri, "
 "aile bazlı hata kontrolü amacıyla tek adımlı Games-Howell öğrenci-aralığı "
-"yöntemini (p_GH-adj) kullanır; bunun üzerine ikinci bir düzeltme "
-"uygulanmaz."
+"yöntemini (p_GH-adj) kullanır; bunun üzerine ikinci bir düzeltme uygulanmaz."
 
 #: R/agreement.b.R
 msgid ""
@@ -91600,8 +91600,7 @@ msgstr "'{group}' grubunda 2'den az gözlem var (n = {n})"
 
 #: R/jjdotplotstats.b.R
 msgid "group '{group}' retains fewer than 2 observations after 20 percent trimming"
-msgstr ""
-"yüzde 20 budama sonrasında '{group}' grubunda 2'den az gözlem kalmaktadır"
+msgstr "yüzde 20 budama sonrasında '{group}' grubunda 2'den az gözlem kalmaktadır"
 
 #: R/pathagreement.b.R
 msgid "Group {group}"
@@ -92506,9 +92505,9 @@ msgid ""
 "correction is used throughout, which is why the degrees of freedom are "
 "fractional."
 msgstr ""
-"Grupların aynı yayılıma sahip olması GEREKMEZ. Tüm hesaplamalarda Welch "
-"eşit olmayan varyans düzeltmesi kullanılır; serbestlik derecelerinin "
-"kesirli olmasının nedeni budur."
+"Grupların aynı yayılıma sahip olması GEREKMEZ. Tüm hesaplamalarda Welch eşit "
+"olmayan varyans düzeltmesi kullanılır; serbestlik derecelerinin kesirli "
+"olmasının nedeni budur."
 
 #: R/jjdotplotstats.b.R
 msgid "Groups dropped"
@@ -101349,6 +101348,10 @@ msgstr "Kruskal-Wallis testi için gruplar arasında yeterli değişim yok"
 msgid "insufficient within-group variation"
 msgstr "grup içi değişim yetersiz"
 
+#: R/jjdotplotstats.b.R
+msgid "insufficient within-group variation for Bayesian ANOVA"
+msgstr "Bayesyen ANOVA için grup içi değişim yetersiz"
+
 #: advancedbarplot/options/value_format/integer.title
 #: jggheatmap/options/value_format/integer.title
 msgid "Integer"
@@ -109914,9 +109917,9 @@ msgid ""
 "each other."
 msgstr ""
 "Grup başına tek bir özet noktanın referans değere karşı test edildiği "
-"Cleveland nokta grafiğini mi arıyorsunuz? Bunun yerine 'Nokta Grafiği "
-"(Özet ve Referans Değer)' analizini kullanın. Bu analiz her gözlemi "
-"kullanır ve grupları birbirleriyle karşılaştırır."
+"Cleveland nokta grafiğini mi arıyorsunuz? Bunun yerine 'Nokta Grafiği (Özet "
+"ve Referans Değer)' analizini kullanın. Bu analiz her gözlemi kullanır ve "
+"grupları birbirleriyle karşılaştırır."
 
 #: advancedSurvivalPower/options/loss_followup.title
 msgid "Loss to Follow-up Rate (per Year)"
@@ -120975,8 +120978,7 @@ msgstr "Orta düzeyde değerlendirici etkileri"
 
 #: R/jjdotplotstats.b.R
 msgid "moderate relative evidence favoring the null hypothesis of no difference"
-msgstr ""
-"fark olmadığı yönündeki sıfır hipotezi lehine orta düzeyde göreli kanıt"
+msgstr "fark olmadığı yönündeki sıfır hipotezi lehine orta düzeyde göreli kanıt"
 
 #: R/jjdotplotstats.b.R
 msgid "moderate relative evidence for a group difference"
@@ -126526,8 +126528,8 @@ msgid ""
 "differ."
 msgstr ""
 "Normallik varsayımı yoktur. Test sıralamaları karşılaştırır; dolayısıyla "
-"aritmetik ortalamaların farklılığından ziyade bir grubun daha büyük "
-"değerler üretme eğilimini değerlendirir."
+"aritmetik ortalamaların farklılığından ziyade bir grubun daha büyük değerler "
+"üretme eğilimini değerlendirir."
 
 #: multiplexanalysis/options/normalization_method/none.title
 #: treatmenteffects/options/weight_normalization/none.title
@@ -132598,16 +132600,15 @@ msgid ""
 "repeated measurements require a paired or mixed-effects rank procedure."
 msgstr ""
 "Gözlemler hastalar veya örnekler arasında bağımsızdır; kümelenmiş ya da "
-"tekrarlı ölçümler eşleştirilmiş veya karma etkili sıra yöntemleri "
-"gerektirir."
+"tekrarlı ölçümler eşleştirilmiş veya karma etkili sıra yöntemleri gerektirir."
 
 #: R/jjdotplotstats.b.R
 msgid ""
 "Observations are independent across patients or specimens; repeated or "
 "multi-core measurements from one patient violate independence."
 msgstr ""
-"Gözlemler hastalar veya örnekler arasında bağımsızdır; aynı hastadan "
-"alınan tekrarlı veya çoklu doku koru ölçümleri bağımsızlığı ihlal eder."
+"Gözlemler hastalar veya örnekler arasında bağımsızdır; aynı hastadan alınan "
+"tekrarlı veya çoklu doku koru ölçümleri bağımsızlığı ihlal eder."
 
 #: R/jjdotplotstats.b.R
 msgid ""
@@ -132629,9 +132630,9 @@ msgid ""
 "multiple cores/blocks from one specimen, violate independence and need a "
 "paired or mixed-effects model instead."
 msgstr ""
-"Gözlemler birbirinden bağımsızdır. Aynı hastadaki tekrarlı ölçümler veya "
-"tek bir örnekten alınan çoklu kor/blok ölçümleri bağımsızlığı ihlal eder; "
-"bunun yerine eşleştirilmiş veya karma etkili model gerekir."
+"Gözlemler birbirinden bağımsızdır. Aynı hastadaki tekrarlı ölçümler veya tek "
+"bir örnekten alınan çoklu kor/blok ölçümleri bağımsızlığı ihlal eder; bunun "
+"yerine eşleştirilmiş veya karma etkili model gerekir."
 
 #: R/benford.b.R
 msgid ""
@@ -133556,8 +133557,6 @@ msgstr ""
 #: package/analyses/waterfall.menuGroup
 #: package/analyses/swimmerplot.menuGroup
 #: package/analyses/ihcheterogeneity.menuGroup
-#: package/analyses/diagnosticmeta.menuGroup
-#: diagnosticmeta/options.menuGroup
 #: ihcheterogeneity/options.menuGroup
 #: swimmerplot/options.menuGroup
 #: waterfall/options.menuGroup
@@ -133691,7 +133690,9 @@ msgstr ""
 msgid "OncoPathP"
 msgstr ""
 
+#: package/analyses/diagnosticmeta.menuGroup
 #: package/analyses/pathagreement.menuGroup
+#: diagnosticmeta/options.menuGroup
 #: pathagreement/options.menuGroup
 msgid "OncoPathT"
 msgstr "OncoPathT"
@@ -136202,9 +136203,9 @@ msgid ""
 "Ordinal epsilon-squared is accompanied by a two-sided bias-corrected and "
 "accelerated (BCa) bootstrap confidence interval across 1,000 resamples."
 msgstr ""
-"Ordinal epsilon-kare ölçütüne, 1.000 yeniden örnekleme üzerinden "
-"hesaplanan iki yönlü yanlılık düzeltmeli ve hızlandırılmış (BCa) bootstrap "
-"güven aralığı eşlik eder."
+"Ordinal epsilon-kare ölçütüne, 1.000 yeniden örnekleme üzerinden hesaplanan "
+"iki yönlü yanlılık düzeltmeli ve hızlandırılmış (BCa) bootstrap güven "
+"aralığı eşlik eder."
 
 #: R/pathagreement.b.R
 msgid ""
@@ -140126,9 +140127,9 @@ msgid ""
 msgstr ""
 "İkili karşılaştırmalar çoklu test düzeltmesi yapılmadan gösterilmektedir. "
 "{groups} grupta bu durum {pairs} karşılaştırma anlamına gelir; gruplar "
-"arasında gerçekte hiçbir fark olmasa bile en az bir karşılaştırmanın "
-"anlamlı çıkma olasılığı yaklaşık yüzde {risk} düzeyindedir. Özel bir "
-"gerekçeniz yoksa Holm düzeltmesini kullanın."
+"arasında gerçekte hiçbir fark olmasa bile en az bir karşılaştırmanın anlamlı "
+"çıkma olasılığı yaklaşık yüzde {risk} düzeyindedir. Özel bir gerekçeniz "
+"yoksa Holm düzeltmesini kullanın."
 
 #: R/jjdotplotstats.b.R
 msgid ""
@@ -140145,8 +140146,8 @@ msgid ""
 "Games-Howell single-step studentized-range procedure for family-wise error "
 "control."
 msgstr ""
-"{which} arasındaki ikili karşılaştırmalar, aile bazlı hata kontrolü için "
-"tek adımlı Games-Howell öğrenci-aralığı yöntemi kullanılarak parantezlerle "
+"{which} arasındaki ikili karşılaştırmalar, aile bazlı hata kontrolü için tek "
+"adımlı Games-Howell öğrenci-aralığı yöntemi kullanılarak parantezlerle "
 "gösterilmiştir."
 
 #: R/jjdotplotstats.b.R
@@ -149461,8 +149462,7 @@ msgstr ""
 
 #: R/jjdotplotstats.b.R
 msgid "Potential outliers detected within groups in {name}: {count}."
-msgstr ""
-"{name} değişkeninde grup içi olası aykırı değerler saptandı: {count}."
+msgstr "{name} değişkeninde grup içi olası aykırı değerler saptandı: {count}."
 
 #: R/summarydata.b.R
 msgid ""
@@ -163790,8 +163790,7 @@ msgstr ""
 
 #: jjdotplotstats/options/typestatistics/robust.title
 msgid "Robust (20 percent trimmed means, handles outliers)"
-msgstr ""
-"Dayanıklı (yüzde 20 budanmış ortalamalar, aykırı değerlere dirençli)"
+msgstr "Dayanıklı (yüzde 20 budanmış ortalamalar, aykırı değerlere dirençli)"
 
 #: jjhistostats/options/typestatistics/robust.title
 msgid "Robust (bootstrap-t on a trimmed mean)"
@@ -164922,9 +164921,9 @@ msgid ""
 "values usually indicate a division by zero or an out-of-range entry - check "
 "the source data."
 msgstr ""
-"{name} değişkeni sonsuz değer içerdiği için çıkarılan satır sayısı: "
-"{count}. Sonsuz değerler genellikle sıfıra bölmeyi veya aralık dışı bir "
-"girişi gösterir; kaynak veriyi kontrol edin."
+"{name} değişkeni sonsuz değer içerdiği için çıkarılan satır sayısı: {count}. "
+"Sonsuz değerler genellikle sıfıra bölmeyi veya aralık dışı bir girişi "
+"gösterir; kaynak veriyi kontrol edin."
 
 #: R/crosstable.b.R
 msgid "Rows excluded for missing values"
@@ -176599,8 +176598,8 @@ msgid ""
 "cautiously."
 msgstr ""
 "Alt Gruba Göre Böl düzey(ler)i '{levels}' içinde küçük alt grup örneklem "
-"büyüklükleri (en az bir grupta 10'dan az gözlem) bulunmaktadır; panel "
-"bazlı testleri dikkatle yorumlayın."
+"büyüklükleri (en az bir grupta 10'dan az gözlem) bulunmaktadır; panel bazlı "
+"testleri dikkatle yorumlayın."
 
 #: R/nogoldstandard.b.R
 msgid "Small Test Categories"
@@ -176617,9 +176616,9 @@ msgid ""
 "Small total sample size (N = {n}). Statistical tests may be unreliable below "
 "30 observations. Interpret the result cautiously or collect more data."
 msgstr ""
-"Toplam örneklem büyüklüğü küçük (N = {n}). 30 gözlemin altında "
-"istatistiksel testler güvenilir olmayabilir. Sonucu dikkatle yorumlayın "
-"veya daha fazla veri toplayın."
+"Toplam örneklem büyüklüğü küçük (N = {n}). 30 gözlemin altında istatistiksel "
+"testler güvenilir olmayabilir. Sonucu dikkatle yorumlayın veya daha fazla "
+"veri toplayın."
 
 #: vartree/options/useprunesmaller.title
 msgid "Small-node pruning"
@@ -179221,8 +179220,8 @@ msgid ""
 "observations, so statistical test subtitles could not be computed for those "
 "panel(s)."
 msgstr ""
-"Alt Gruba Göre Böl düzey(ler)i '{levels}', 2'den az gözleme sahip en az "
-"bir grup içerdiğinden bu panel(ler) için istatistiksel test alt başlıkları "
+"Alt Gruba Göre Böl düzey(ler)i '{levels}', 2'den az gözleme sahip en az bir "
+"grup içerdiğinden bu panel(ler) için istatistiksel test alt başlıkları "
 "hesaplanamadı."
 
 #: R/jjdotplotstats.b.R
@@ -185215,6 +185214,7 @@ msgstr ""
 #: package/analyses/survival.menuGroup
 #: package/analyses/survivalcont.menuGroup
 #: package/analyses/multisurvival.menuGroup
+#: package/analyses/oddsratio.menuGroup
 #: package/analyses/timeinterval.menuGroup
 #: package/analyses/datetimeconverter.menuGroup
 #: package/analyses/outcomeorganizer.menuGroup
@@ -185225,6 +185225,7 @@ msgstr ""
 #: lassocox/options.menuGroup
 #: marginalrecurrent/results/survivalFunction.columns.title
 #: multisurvival/options.menuGroup
+#: oddsratio/options.menuGroup
 #: outcomeorganizer/options.menuGroup
 #: semimarkov/results/reliabilityAnalysis.columns.title
 #: simonmakuch/results/survivalEstimates.columns.title
@@ -186381,11 +186382,6 @@ msgstr ""
 #: highdimcox/options.menuGroup
 #: lassointro/options.menuGroup
 msgid "SurvivalP"
-msgstr ""
-
-#: package/analyses/oddsratio.menuGroup
-#: oddsratio/options.menuGroup
-msgid "SurvivalT"
 msgstr ""
 
 #: multisurvival/options/sty/t3.title
@@ -189586,9 +189582,9 @@ msgid ""
 "selection."
 msgstr ""
 "'Etki Büyüklüğü Ölçütü' ayarı Alt Gruba Göre Böl panellerine uygulanmaz: "
-"istatistik paketi her panel için alt başlığı dahili olarak hesaplar ve "
-"orada kendi varsayılanını kullanır. Aşağıdaki bölünmemiş ana grafik "
-"seçiminizi uygular."
+"istatistik paketi her panel için alt başlığı dahili olarak hesaplar ve orada "
+"kendi varsayılanını kullanır. Aşağıdaki bölünmemiş ana grafik seçiminizi "
+"uygular."
 
 #: R/chisqposttest.b.R
 msgid "The 'Exclude missing values' box has no effect"
@@ -189707,8 +189703,8 @@ msgid ""
 msgstr ""
 "Bu {comparison}, herhangi bir çiftin ne kadar farklılaştığını veya farkın "
 "klinik açıdan önemli olup olmadığını değil, grupların genel olarak "
-"farklılaşıp farklılaşmadığını test eder. Etki büyüklüğünü ve aralığını "
-"test istatistiğiyle birlikte değerlendirin."
+"farklılaşıp farklılaşmadığını test eder. Etki büyüklüğünü ve aralığını test "
+"istatistiğiyle birlikte değerlendirin."
 
 #: R/benford.b.R
 msgid ""
@@ -190446,8 +190442,8 @@ msgid ""
 "The Bayes factor caption is omitted on the unsplit figure ({reason}), but is "
 "shown on two-group Split By panels."
 msgstr ""
-"Bölünmemiş grafikte Bayes faktörü alt yazısı gösterilmemektedir "
-"({reason}); ancak iki gruplu Alt Gruba Göre Böl panellerinde gösterilir."
+"Bölünmemiş grafikte Bayes faktörü alt yazısı gösterilmemektedir ({reason}); "
+"ancak iki gruplu Alt Gruba Göre Böl panellerinde gösterilir."
 
 #: R/jjdotplotstats.b.R
 msgid ""
@@ -190458,11 +190454,11 @@ msgid ""
 "probability that a hypothesis is true."
 msgstr ""
 "Bayes faktörü, gruplar arasında ortak kalıntı varyansı varsayımıyla "
-"standartlaştırılmış etkiler üzerinde varsayılan Jeffreys-Zellner-Siow "
-"Cauchy önsel dağılımı (iki grup için r = 0.707; üç veya daha fazla grup "
-"için r = 0.5) altında hesaplanır. Bunu bir hipotezin doğru olma sonsal "
-"olasılığı olarak değil, geleneksel bir önsel dağılım altındaki göreli "
-"kanıt olarak değerlendirin."
+"standartlaştırılmış etkiler üzerinde varsayılan Jeffreys-Zellner-Siow Cauchy "
+"önsel dağılımı (iki grup için r = 0.707; üç veya daha fazla grup için r = "
+"0.5) altında hesaplanır. Bunu bir hipotezin doğru olma sonsal olasılığı "
+"olarak değil, geleneksel bir önsel dağılım altındaki göreli kanıt olarak "
+"değerlendirin."
 
 #: R/jjwithinstats.b.R
 msgid ""
@@ -191302,9 +191298,9 @@ msgid ""
 "percent in each tail of every group before testing. Use this when real "
 "extreme observations should neither be deleted nor dominate the estimate."
 msgstr ""
-"Karşılaştırma yüzde 20 budanmış ortalamaları kullanır ve test öncesinde "
-"her grubun her iki ucundaki en aşırı yüzde 20'lik kısmı dışarıda bırakır. "
-"Gerçek uç gözlemlerin ne silinmesi ne de tahmini tek başına belirlemesi "
+"Karşılaştırma yüzde 20 budanmış ortalamaları kullanır ve test öncesinde her "
+"grubun her iki ucundaki en aşırı yüzde 20'lik kısmı dışarıda bırakır. Gerçek "
+"uç gözlemlerin ne silinmesi ne de tahmini tek başına belirlemesi "
 "istendiğinde bu yöntemi kullanın."
 
 #: R/singlearm.b.R
@@ -191401,9 +191397,9 @@ msgid ""
 msgstr ""
 "Etki büyüklüğüne ilişkin güven aralığı, grafiğin birebir tekrarlanabilmesi "
 "için sabit bir rastgelelik tohumu ({seed}) kullanılarak bootstrap yeniden "
-"örneklemesiyle elde edilir; sınırda kalan bir aralığın yeniden "
-"örneklemeler arasında kararlı olduğunu doğrulamak için Grafik "
-"Yapılandırması altından tohumu değiştirebilirsiniz."
+"örneklemesiyle elde edilir; sınırda kalan bir aralığın yeniden örneklemeler "
+"arasında kararlı olduğunu doğrulamak için Grafik Yapılandırması altından "
+"tohumu değiştirebilirsiniz."
 
 #: R/agreement.b.R
 msgid ""
@@ -192670,9 +192666,9 @@ msgid ""
 "equal-variance ANOVA, and its interval is reported as a one-sided lower "
 "confidence bound up to 1.00 (Steiger, 2004)."
 msgstr ""
-"Etki büyüklüğü eşit varyanslı ANOVA yerine Welch modelinden tahmin edilir "
-"ve aralığı 1.00 üst sınırına kadar tek yönlü alt güven sınırı olarak "
-"raporlanır (Steiger, 2004)."
+"Etki büyüklüğü eşit varyanslı ANOVA yerine Welch modelinden tahmin edilir ve "
+"aralığı 1.00 üst sınırına kadar tek yönlü alt güven sınırı olarak raporlanır "
+"(Steiger, 2004)."
 
 #: R/jjdotplotstats.b.R
 msgid ""
@@ -193060,9 +193056,8 @@ msgstr ""
 "Grafik, sıfır hipotezini alternatif hipoteze karşı destekleyen Bayes "
 "faktörünün doğal logaritmasını (log_e(BF_01)) gösterir: 0 eşit desteği "
 "(BF_01 = 1), negatif değerler grup farkını (-1.10 altı orta düzey kanıt, "
-"BF_10 > 3; -2.30 altı güçlü kanıt, BF_10 > 10), pozitif değerler ise "
-"(+1.10 veya +2.30 üstü) fark olmadığı yönündeki sıfır hipotezini "
-"destekler."
+"BF_10 > 3; -2.30 altı güçlü kanıt, BF_10 > 10), pozitif değerler ise (+1.10 "
+"veya +2.30 üstü) fark olmadığı yönündeki sıfır hipotezini destekler."
 
 #: R/agreement.b.R
 msgid ""
@@ -194668,8 +194663,8 @@ msgid ""
 "The Mann-Whitney p value uses the tie-adjusted normal approximation with "
 "continuity correction."
 msgstr ""
-"Mann-Whitney p-değeri, süreklilik düzeltmeli ve bağlı sıra (tie) "
-"uyarlamalı normal yaklaşımı kullanır."
+"Mann-Whitney p-değeri, süreklilik düzeltmeli ve bağlı sıra (tie) uyarlamalı "
+"normal yaklaşımı kullanır."
 
 #: R/jjdotplotstats.b.R
 msgid "the Mann-Whitney U test"
@@ -215435,10 +215430,9 @@ msgid ""
 "Groups below 10 observations may produce unreliable test results. Consider "
 "combining groups or collecting more data."
 msgstr ""
-"Çok küçük grup örneklem büyüklükleri saptandı: en küçüğü '{group}' "
-"grubunda n = {n}. 10 gözlemin altındaki gruplar güvenilir olmayan test "
-"sonuçları üretebilir. Grupları birleştirmeyi veya daha fazla veri "
-"toplamayı düşünün."
+"Çok küçük grup örneklem büyüklükleri saptandı: en küçüğü '{group}' grubunda "
+"n = {n}. 10 gözlemin altındaki gruplar güvenilir olmayan test sonuçları "
+"üretebilir. Grupları birleştirmeyi veya daha fazla veri toplamayı düşünün."
 
 #: R/summarydata.b.R
 #: R/waterfall.b.R
@@ -221511,11 +221505,10 @@ msgid ""
 "selects {selected}. The plot shows the {drawn}, because 'Central Tendency "
 "Display' only decides whether a line is drawn at all."
 msgstr ""
-"İki merkezi eğilim ayarınız birbiriyle uyuşmuyor: 'Merkezi Eğilim "
-"Gösterimi' eski '{legacy}' değerini taşırken 'Merkezi Eğilim Ölçütü' "
-"{selected} seçeneğini belirlemektedir. 'Merkezi Eğilim Gösterimi' yalnızca "
-"çizginin çizilip çizilmeyeceğini belirlediğinden grafikte {drawn} "
-"gösterilmektedir."
+"İki merkezi eğilim ayarınız birbiriyle uyuşmuyor: 'Merkezi Eğilim Gösterimi' "
+"eski '{legacy}' değerini taşırken 'Merkezi Eğilim Ölçütü' {selected} "
+"seçeneğini belirlemektedir. 'Merkezi Eğilim Gösterimi' yalnızca çizginin "
+"çizilip çizilmeyeceğini belirlediğinden grafikte {drawn} gösterilmektedir."
 
 #: R/jjdotchart.b.R
 msgid "Yuen Winsorized-t interval ({pct}% trim)"
@@ -221528,8 +221521,8 @@ msgid ""
 "Winsorized spread."
 msgstr ""
 "Yuen testi işaretsiz |t| istatistiğini raporlar; dayanıklı AKP etki "
-"büyüklüğü ise budanmış ortalama farkını ilk grubun Winsorize yayılımına "
-"göre standartlaştırır."
+"büyüklüğü ise budanmış ortalama farkını ilk grubun Winsorize yayılımına göre "
+"standartlaştırır."
 
 #: R/jjdotplotstats.b.R
 msgid "Yuen's trimmed-mean test"

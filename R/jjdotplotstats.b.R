@@ -520,16 +520,27 @@ jjdotplotstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         # failure, compute exact Rouder et al. (2012) JZS log_e(BF_01) and Gelman
         # et al. (2019) posterior Bayesian R-squared credible interval via Gibbs draws.
         .bayesAnovaSubtitle = function(data, group_var, dep_var, opts, seed_val) {
+            df_bf <- data.frame(
+                .jj_y = as.numeric(data[[dep_var]]),
+                .jj_g = droplevels(private$.cleanFactor(data[[group_var]]))
+            )
+            df_bf <- df_bf[is.finite(df_bf$.jj_y) & !is.na(df_bf$.jj_g), , drop = FALSE]
+            df_bf$.jj_g <- droplevels(df_bf$.jj_g)
+            if (nlevels(df_bf$.jj_g) < 2L || nrow(df_bf) <= nlevels(df_bf$.jj_g) ||
+                !is.finite(stats::sd(df_bf$.jj_y)) || stats::sd(df_bf$.jj_y) == 0) {
+                return(structure(list(), error_msg = .("insufficient within-group variation for Bayesian ANOVA")))
+            }
+
             se_res <- tryCatch(
                 withr::with_seed(seed_val,
-                    private$.withBaseFormulaChar(rlang::inject(
+                    private$.withBaseFormulaChar(
                         statsExpressions::oneway_anova(
-                            data       = data,
-                            x          = !!rlang::sym(group_var),
-                            y          = !!rlang::sym(dep_var),
+                            data       = df_bf,
+                            x          = .jj_g,
+                            y          = .jj_y,
                             type       = "bayes",
                             digits     = opts$digits,
-                            conf.level = opts$conflevel)))),
+                            conf.level = opts$conflevel))),
                 error = function(e) e)
 
             if (!inherits(se_res, "condition") &&
@@ -539,19 +550,8 @@ jjdotplotstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             }
 
             if (!requireNamespace("BayesFactor", quietly = TRUE)) {
-                err_msg <- if (inherits(se_res, "condition")) conditionMessage(se_res) else "BayesFactor package unavailable"
+                err_msg <- if (inherits(se_res, "condition")) conditionMessage(se_res) else .("BayesFactor package unavailable")
                 return(structure(list(), error_msg = err_msg))
-            }
-
-            df_bf <- data.frame(
-                .jj_y = as.numeric(data[[dep_var]]),
-                .jj_g = droplevels(private$.cleanFactor(data[[group_var]]))
-            )
-            df_bf <- df_bf[is.finite(df_bf$.jj_y) & !is.na(df_bf$.jj_g), , drop = FALSE]
-            df_bf$.jj_g <- droplevels(df_bf$.jj_g)
-            if (nlevels(df_bf$.jj_g) < 2L || nrow(df_bf) <= nlevels(df_bf$.jj_g) ||
-                !is.finite(stats::sd(df_bf$.jj_y)) || stats::sd(df_bf$.jj_y) == 0) {
-                return(structure(list(), error_msg = "insufficient within-group variation for Bayesian ANOVA"))
             }
 
             bf_calc <- tryCatch(
@@ -775,18 +775,23 @@ jjdotplotstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 }
             }
 
+            df_se <- data.frame(
+                .jj_y = as.numeric(data[[dep_var]]),
+                .jj_g = grp_clean
+            )
+
             if (identical(opts$typestatistics, "bayes")) {
                 if (n_lev == 2L) {
                     res_b2 <- tryCatch(
                         withr::with_seed(private$.seed(),
-                            private$.withBaseFormulaChar(rlang::inject(
+                            private$.withBaseFormulaChar(
                                 statsExpressions::two_sample_test(
-                                    data       = data,
-                                    x          = !!rlang::sym(group_var),
-                                    y          = !!rlang::sym(dep_var),
+                                    data       = df_se,
+                                    x          = .jj_g,
+                                    y          = .jj_y,
                                     type       = "bayes",
                                     digits     = opts$digits,
-                                    conf.level = opts$conflevel)))),
+                                    conf.level = opts$conflevel))),
                         error = function(e) e)
                     if (inherits(res_b2, "condition") || is.null(res_b2$expression) || length(res_b2$expression) == 0L) {
                         private$.subtitleUncomputable <- if (inherits(res_b2, "condition")) conditionMessage(res_b2) else .("Bayesian t-test returned no expression")
@@ -826,14 +831,14 @@ jjdotplotstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             res <- tryCatch(
                 withr::with_seed(private$.seed(),
-                    private$.withBaseFormulaChar(rlang::inject(fn(
-                        data         = data,
-                        x            = !!rlang::sym(group_var),
-                        y            = !!rlang::sym(dep_var),
+                    private$.withBaseFormulaChar(fn(
+                        data         = df_se,
+                        x            = .jj_g,
+                        y            = .jj_y,
                         type         = opts$typestatistics,
                         effsize.type = eff,
                         digits       = opts$digits,
-                        conf.level   = opts$conflevel)))),
+                        conf.level   = opts$conflevel))),
                 error = function(e) e)
 
             if (inherits(res, "condition")) {
@@ -889,16 +894,21 @@ jjdotplotstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 return(NULL)
             }
 
+            df_cap <- data.frame(
+                .jj_y = as.numeric(data[[dep_var]]),
+                .jj_g = droplevels(private$.cleanFactor(data[[group_var]]))
+            )
+
             res <- tryCatch(
                 withr::with_seed(private$.seed(),
-                    private$.withBaseFormulaChar(rlang::inject(
+                    private$.withBaseFormulaChar(
                         statsExpressions::two_sample_test(
-                            data       = data,
-                            x          = !!rlang::sym(group_var),
-                            y          = !!rlang::sym(dep_var),
+                            data       = df_cap,
+                            x          = .jj_g,
+                            y          = .jj_y,
                             type       = "bayes",
                             digits     = opts$digits,
-                            conf.level = opts$conflevel)))),
+                            conf.level = opts$conflevel))),
                 error = function(e) e)
 
             if (inherits(res, "condition")) {
@@ -1139,7 +1149,8 @@ jjdotplotstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     .("The confidence interval on the effect size is obtained by bootstrap resampling with a fixed random seed ({seed}) so this figure reproduces exactly; change the seed under Plot Configuration to verify that a borderline interval is stable across resamples."),
                     seed = private$.seed()), "</p>")
             } else if (identical(opts$typestatistics, "bayes") ||
-                       captionSeedMatters(opts$typestatistics, "between", n_groups, opts$bfmessage)) {
+                       captionSeedMatters(opts$typestatistics, "between", n_groups,
+                                          isTRUE(opts$bfmessage) && isTRUE(opts$resultssubtitle))) {
                 paste0("<p>", .fmt(
                     .("Bayesian posterior quantities and credible intervals use Markov chain Monte Carlo sampling with fixed random seed {seed} for exact reproducibility."),
                     seed = private$.seed()), "</p>")
@@ -2077,19 +2088,29 @@ jjdotplotstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 }
             }
 
+            use_alias <- !identical(make.names(options_data$dep), options_data$dep) ||
+                !identical(make.names(options_data$group), options_data$group)
+            if (use_alias) {
+                mydata$.jj_dep <- as.numeric(mydata[[options_data$dep]])
+                mydata$.jj_group <- droplevels(private$.cleanFactor(mydata[[options_data$group]]))
+            }
+            x_col <- if (use_alias) ".jj_group" else options_data$group
+            y_col <- if (use_alias) ".jj_dep" else options_data$dep
+            bf_effective <- isTRUE(options_data$bfmessage) && isTRUE(options_data$resultssubtitle)
+
             plot <- tryCatch({
                 p <- withr::with_seed(private$.seed(),
                      private$.withBaseFormulaChar(ggstatsplot::ggbetweenstats(
                     data = mydata,
-                    x = !!rlang::sym(options_data$group),
-                    y = !!rlang::sym(options_data$dep),
+                    x = !!rlang::sym(x_col),
+                    y = !!rlang::sym(y_col),
                     title = options_data$mytitle,
                     xlab = options_data$xlab,
                     ylab = options_data$ylab,
                     type = options_data$typestatistics,
                     conf.level = options_data$conflevel,
                     digits = options_data$digits,
-                    bf.message = if (uncomputable) FALSE else options_data$bfmessage,
+                    bf.message = if (uncomputable || !bf_effective || !is.null(cap_expr)) FALSE else TRUE,
                     centrality.plotting = options_data$centrality.plotting,
                     centrality.type = options_data$centrality.type,
                     results.subtitle = if (uncomputable || !is.null(sub_expr)) FALSE else options_data$resultssubtitle,
@@ -2099,10 +2120,10 @@ jjdotplotstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     ggtheme = if (options_data$originaltheme) ggstatsplot::theme_ggstatsplot() else ggtheme
                 )))
                 p <- private$.fixParametricPairwise(
-                    p, mydata, options_data$group, options_data$dep, options_data
+                    p, mydata, x_col, y_col, options_data
                 )
                 p <- private$.fixBayesPairwise(
-                    p, mydata, options_data$group, options_data
+                    p, mydata, x_col, options_data
                 )
                 grp_lv <- levels(droplevels(private$.cleanFactor(mydata[[options_data$group]])))
                 p <- private$.applyPalette(p, grp_lv, theme, options_data)
@@ -2118,7 +2139,7 @@ jjdotplotstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             .k <- if (is.na(n_lev)) 0L else n_lev
             if ((statsSeedMatters(options_data$typestatistics, "between", .k) && !uncomputable) ||
-                (captionSeedMatters(options_data$typestatistics, "between", .k, options_data$bfmessage) && !uncomputable))
+                (!is.null(cap_expr) && !uncomputable))
                 plot <- addSeedCaption(plot, self, private$.seed())
 
             if (is.null(plot)) return()
@@ -2163,17 +2184,27 @@ jjdotplotstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 }
             }
 
+            use_alias <- !identical(make.names(options_data$dep), options_data$dep) ||
+                !identical(make.names(options_data$group), options_data$group)
+            if (use_alias) {
+                mydata$.jj_dep <- as.numeric(mydata[[options_data$dep]])
+                mydata$.jj_group <- droplevels(private$.cleanFactor(mydata[[options_data$group]]))
+            }
+            x_col <- if (use_alias) ".jj_group" else options_data$group
+            y_col <- if (use_alias) ".jj_dep" else options_data$dep
+            bf_effective <- isTRUE(options_data$bfmessage) && isTRUE(options_data$resultssubtitle)
+
             run_grouped <- function(df_in, pw_arg) {
                 withr::with_seed(private$.seed(),
                     private$.withBaseFormulaChar(ggstatsplot::grouped_ggbetweenstats(
                         data = df_in,
-                        x = !!rlang::sym(options_data$group),
-                        y = !!rlang::sym(options_data$dep),
+                        x = !!rlang::sym(x_col),
+                        y = !!rlang::sym(y_col),
                         grouping.var = !!rlang::sym(grvar),
                         type = options_data$typestatistics,
                         conf.level = options_data$conflevel,
                         digits = options_data$digits,
-                        bf.message = options_data$bfmessage,
+                        bf.message = bf_effective,
                         results.subtitle = options_data$resultssubtitle,
                         pairwise.display = pw_arg,
                         p.adjust.method = p_adj_arg,
@@ -2202,7 +2233,7 @@ jjdotplotstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             if (is.null(plot2)) return()
 
             plot2 <- private$.enhanceSplitPanels(
-                plot2, options_data$group, options_data$dep, options_data, private$.seed()
+                plot2, x_col, y_col, options_data, private$.seed()
             )
             grp_lv_all <- levels(droplevels(private$.cleanFactor(base_data[[options_data$group]])))
             plot2 <- private$.applyPalette(plot2, grp_lv_all, theme, options_data)
@@ -2214,7 +2245,7 @@ jjdotplotstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             k_vec <- unique(c(if (is.na(n_lev)) integer(0) else n_lev, k_vec[!is.na(k_vec)]))
             seed_matters_split <- any(vapply(k_vec, function(ki) {
                 statsSeedMatters(options_data$typestatistics, "between", ki) ||
-                    captionSeedMatters(options_data$typestatistics, "between", ki, options_data$bfmessage)
+                    captionSeedMatters(options_data$typestatistics, "between", ki, bf_effective)
             }, logical(1)))
             if (seed_matters_split)
                 plot2 <- addSeedCaption(plot2, self, private$.seed())

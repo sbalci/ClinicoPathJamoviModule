@@ -923,3 +923,54 @@ test_that("SEC-jjdotplotstats-02: adversarial column names and factor levels nei
   expect_false(grepl("<img src=x", all_html, fixed = TRUE))
   expect_false(grepl("<script>alert", all_html, fixed = TRUE))
 })
+
+test_that("FIX-jjdotplotstats-01: quoted LIMS column headers succeed in 2-group Bayesian plot, Split By, and bfmessage", {
+  set.seed(42)
+  df_q <- data.frame(
+    check.names = FALSE,
+    `Marker ("Hotspot")` = c(stats::rnorm(12, 10, 2), stats::rnorm(12, 15, 2)),
+    `Group ("Arm")` = factor(rep(c("A", "B"), each = 12)),
+    `Site ("Center")` = factor(rep(c("S1", "S2"), times = 12))
+  )
+  r_b2 <- suppressWarnings(ClinicoPath::jjdotplotstats(
+    data = df_q, dep = 'Marker ("Hotspot")', group = 'Group ("Arm")', grvar = 'Site ("Center")',
+    typestatistics = "bayes", resultssubtitle = TRUE
+  ))
+  expect_false(isTRUE(r_b2$plot$state$uncomputable))
+  expect_false(is.null(r_b2$plot$state$subtitle))
+  im_sp <- val_jdp_render_png(r_b2$plot2)
+  expect_s3_class(im_sp$plot, "patchwork")
+  expect_false(is.null(im_sp$plot[[1]]$labels$subtitle))
+
+  r_bf <- suppressWarnings(ClinicoPath::jjdotplotstats(
+    data = df_q, dep = 'Marker ("Hotspot")', group = 'Group ("Arm")',
+    typestatistics = "parametric", resultssubtitle = TRUE, bfmessage = TRUE
+  ))
+  expect_false(is.null(r_bf$plot$state$caption))
+})
+
+test_that("FIX-jjdotplotstats-02: bfmessage=TRUE with resultssubtitle=FALSE omits spurious seed caption and MCMC prose", {
+  d2 <- val_jdp_ka2()
+  res <- suppressWarnings(ClinicoPath::jjdotplotstats(
+    data = d2, dep = "y", group = "g",
+    typestatistics = "parametric", resultssubtitle = FALSE, bfmessage = TRUE, showexplanation = TRUE
+  ))
+  im <- val_jdp_render_png(res$plot)
+  expect_null(im$plot$labels$caption)
+  expect_no_match(val_jdp_strip_html(res$explanation$content), "Markov chain Monte Carlo")
+})
+
+test_that("FIX-jjdotplotstats-03: centralityk is marked hidden in .a.yaml and absent from .u.yaml while preserving R API notice", {
+  a_path <- testthat::test_path("..", "..", "jamovi", "jjdotplotstats.a.yaml")
+  u_path <- testthat::test_path("..", "..", "jamovi", "jjdotplotstats.u.yaml")
+  if (file.exists(a_path) && file.exists(u_path)) {
+    a_yml <- yaml::read_yaml(a_path)
+    ck_opt <- Filter(function(o) identical(o$name, "centralityk"), a_yml$options)[[1]]
+    expect_true(isTRUE(ck_opt$hidden))
+    u_txt <- paste(readLines(u_path, warn = FALSE), collapse = "\n")
+    expect_false(grepl("name:\\s*centralityk", u_txt))
+  }
+  d2 <- val_jdp_ka2()
+  r_ck <- suppressWarnings(ClinicoPath::jjdotplotstats(d2, "y", "g", centralityk = 4))
+  expect_match(val_jdp_strip_html(r_ck$notices$content), "no longer has any effect")
+})

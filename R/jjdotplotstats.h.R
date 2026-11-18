@@ -175,6 +175,7 @@ jjdotplotstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
             private$..centralityk <- jmvcore::OptionInteger$new(
                 "centralityk",
                 centralityk,
+                hidden=TRUE,
                 default=2,
                 min=0,
                 max=5)
