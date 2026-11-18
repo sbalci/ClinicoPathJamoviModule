@@ -16,6 +16,7 @@ clearWith:
     - xtitle
     - ytitle
     - originaltheme
+    - colorpalette
     - resultssubtitle
     - testvalue
     - bfmessage

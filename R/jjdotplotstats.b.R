@@ -37,6 +37,8 @@ jjdotplotstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         .captionCache = NULL,
         # Why bfmessage could not be honoured, so .run() can say so.
         .captionUnavailable = NULL,
+        # Exact numeric p-value from the most recent omnibus evaluation in .run().
+        .lastExactP = NA_real_,
 
         # Private fields die with the analysis instance. jmvcore restores results from disk
         # and renders without calling .run() (right-click > Export...), so on that path
@@ -286,8 +288,16 @@ jjdotplotstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 return(FALSE)
             }
 
+            raw_dep_num <- suppressWarnings(jmvcore::toNumeric(self$data[[self$options$dep]]))
+            if (sum(is.finite(raw_dep_num)) == 0L) {
+                private$.addNotice(.fmt(
+                    .("Variable '{name}' contains no finite numeric measurements. Please select a valid continuous numeric variable."),
+                    name = htmltools::htmlEscape(self$options$dep)), "ERROR")
+                return(FALSE)
+            }
+
             if (is.null(mydata))
-                mydata <- private$.prepareData()
+                mydata <- private$.prepareData(emit_messages = FALSE)
 
             # Require at least two groups with complete finite data on (dep, group)
             clean_grp <- droplevels(private$.cleanFactor(mydata[[self$options$group]]))
@@ -427,6 +437,28 @@ jjdotplotstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             if (!self$options$centralityplotting && self$options$centralitytype != "parametric") {
                 private$.addNotice(.("A centrality type is selected but centrality plotting is switched off, so the type setting has no effect."), "INFO")
+            }
+
+            if (isTRUE(self$options$centralityplotting) && self$options$centralityparameter != "none") {
+                centrality_type <- self$options$centralitytype
+                if (is.null(centrality_type) || centrality_type == "")
+                    centrality_type <- self$options$typestatistics
+                implied <- switch(self$options$centralityparameter,
+                                  mean = "parametric", median = "nonparametric", NULL)
+                if (!is.null(implied) && !identical(implied, centrality_type)) {
+                    shown <- switch(centrality_type,
+                                    parametric = "mean", nonparametric = "median",
+                                    robust = "trimmed mean", bayes = "Bayesian (MAP) estimate",
+                                    htmltools::htmlEscape(as.character(centrality_type)))
+                    private$.addNotice(.fmt(
+                        .("Your two central-tendency settings disagree: 'Central Tendency Display' still carries the legacy value '{legacy}' while 'Central Tendency Measure' selects {selected}. The plot shows the {drawn}, because 'Central Tendency Display' only decides whether a line is drawn at all."),
+                        legacy = htmltools::htmlEscape(as.character(self$options$centralityparameter)),
+                        selected = switch(centrality_type, parametric = "Mean",
+                                          nonparametric = "Median", robust = "Trimmed Mean",
+                                          bayes = "Bayesian Estimate",
+                                          htmltools::htmlEscape(as.character(centrality_type))),
+                        drawn = shown), "WARNING")
+                }
             }
         },
         
@@ -604,11 +636,120 @@ jjdotplotstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             is.finite(stat_v)
         },
 
-        # Build the plot subtitle ourselves.
-        .subtitleExpr = function(data, group_var, dep_var, opts) {
+        # Pure helper for 3+-group Kruskal-Wallis H and ordinal epsilon-squared
+        # with a 1,000-resample i.i.d. bias-corrected and accelerated (BCa)
+        # bootstrap confidence interval clamped to [0, 1] (fixes upward tie bias
+        # in statsExpressions/effectsize's 100-draw stratified percentile CI).
+        .kruskalBcaSubtitle = function(data, group_var, dep_var, opts, seed_val) {
+            df_kw <- data.frame(
+                .jj_y = as.numeric(data[[dep_var]]),
+                .jj_g = droplevels(private$.cleanFactor(data[[group_var]]))
+            )
+            df_kw <- df_kw[is.finite(df_kw$.jj_y) & !is.na(df_kw$.jj_g), , drop = FALSE]
+            df_kw$.jj_g <- droplevels(df_kw$.jj_g)
+            n_obs <- nrow(df_kw)
+            k_g <- nlevels(df_kw$.jj_g)
+            if (k_g < 3L || n_obs <= k_g || length(unique(df_kw$.jj_y)) < 2L) {
+                return(structure(list(), error_msg = .("insufficient variation across groups for Kruskal-Wallis test")))
+            }
+
+            calc_kw <- function(yv, gv) {
+                N <- length(yv)
+                ug <- unique(gv)
+                if (length(ug) < 2L || N <= 2L) return(c(H = NA_real_, eps2 = NA_real_))
+                r <- rank(yv, ties.method = "average")
+                gi <- match(gv, ug)
+                ni <- tabulate(gi)
+                rs <- as.numeric(rowsum(r, gi, reorder = FALSE))
+                H_raw <- (12 / (N * (N + 1))) * sum((rs * rs) / ni) - 3 * (N + 1)
+                t_tab <- tabulate(match(yv, unique(yv)))
+                denom <- 1 - sum(t_tab^3 - t_tab) / (N^3 - N)
+                if (!is.finite(denom) || denom <= 0) return(c(H = NA_real_, eps2 = NA_real_))
+                H_val <- max(0, H_raw / denom)
+                c(H = H_val, eps2 = min(max(H_val / (N - 1L), 0), 1))
+            }
+
+            yv <- df_kw$.jj_y
+            gv <- as.integer(df_kw$.jj_g)
+            obs_kw <- calc_kw(yv, gv)
+            if (!is.finite(obs_kw[["H"]])) {
+                return(structure(list(), error_msg = .("the test statistic could not be evaluated (zero within-group spread)")))
+            }
+
+            H_stat <- obs_kw[["H"]]
+            df_kw_val <- as.integer(k_g - 1L)
+            p_val <- stats::pchisq(H_stat, df = df_kw_val, lower.tail = FALSE)
+            est <- obs_kw[["eps2"]]
+
+            ci_bounds <- tryCatch(
+                withr::with_seed(seed_val, {
+                    B <- 1000L
+                    boot <- numeric(B)
+                    for (b in seq_len(B)) {
+                        idb <- sample.int(n_obs, n_obs, replace = TRUE)
+                        boot[b] <- calc_kw(yv[idb], gv[idb])[["eps2"]]
+                    }
+                    boot <- boot[is.finite(boot)]
+                    if (length(boot) < 20L) {
+                        c(est, est)
+                    } else {
+                        B_eff <- length(boot)
+                        prop_less <- (sum(boot < est) + 0.5 * sum(boot == est)) / B_eff
+                        prop_less <- min(max(prop_less, 0.5 / B_eff), 1 - 0.5 / B_eff)
+                        z0 <- stats::qnorm(prop_less)
+                        if (n_obs <= 300L) {
+                            jack <- numeric(n_obs)
+                            for (i in seq_len(n_obs)) {
+                                jack[i] <- calc_kw(yv[-i], gv[-i])[["eps2"]]
+                            }
+                        } else {
+                            n_blocks <- 200L
+                            blk_id <- ((seq_len(n_obs) - 1L) %% n_blocks) + 1L
+                            jack <- vapply(seq_len(n_blocks), function(b) {
+                                calc_kw(yv[blk_id != b], gv[blk_id != b])[["eps2"]]
+                            }, numeric(1))
+                        }
+                        jack <- jack[is.finite(jack)]
+                        acc <- 0
+                        if (length(jack) > 2L) {
+                            j_diff <- mean(jack) - jack
+                            denom_a <- 6 * (sum(j_diff * j_diff))^(1.5)
+                            if (is.finite(denom_a) && denom_a > 0) {
+                                acc <- sum(j_diff^3) / denom_a
+                            }
+                        }
+                        alpha_tail <- (1 - opts$conflevel) / 2
+                        za <- stats::qnorm(c(alpha_tail, 1 - alpha_tail))
+                        denom_bca <- 1 - acc * (z0 + za)
+                        adj_p <- ifelse(denom_bca <= 1e-6, c(0, 1),
+                                        stats::pnorm(z0 + (z0 + za) / denom_bca))
+                        adj_p <- pmin(pmax(adj_p, 0), 1)
+                        raw_ci <- stats::quantile(boot, probs = adj_p, names = FALSE, type = 7)
+                        c(max(0, min(raw_ci[1], est)), min(1, max(raw_ci[2], est)))
+                    }
+                }),
+                error = function(e) c(est, est)
+            )
+
+            private$.lastExactP <- p_val
+            ci_lbl <- paste0(round(100 * opts$conflevel), "%")
+            bquote(list(
+                chi["Kruskal-Wallis"]^2 * "(" * .(df_kw_val) * ")" == .(private$.fmtStatVal(H_stat, opts$digits)),
+                italic(p) == .(private$.fmtStatVal(p_val, opts$digits)),
+                widehat(epsilon)["ordinal"]^2 == .(private$.fmtStatVal(est, opts$digits)),
+                CI[.(ci_lbl)] ~ "[" * .(private$.fmtStatVal(ci_bounds[1], opts$digits)),
+                .(private$.fmtStatVal(ci_bounds[2], opts$digits)) * "]",
+                italic("n")["obs"] == .(as.character(n_obs))
+            ))
+        },
+
+        # Build the plot subtitle ourselves (also invoked with force_compute = TRUE
+        # when showexplanation or post-hoc brackets need omnibus computability/values).
+        .subtitleExpr = function(data, group_var, dep_var, opts, force_compute = FALSE) {
             private$.subtitleFallback <- NULL
             private$.subtitleUncomputable <- NULL
-            if (!isTRUE(opts$resultssubtitle)) return(NULL)
+            private$.lastExactP <- NA_real_
+            if (!isTRUE(opts$resultssubtitle) && !isTRUE(force_compute)) return(NULL)
 
             grp_clean <- droplevels(private$.cleanFactor(data[[group_var]]))
             grp_counts <- table(grp_clean)
@@ -648,7 +789,7 @@ jjdotplotstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                                     conf.level = opts$conflevel)))),
                         error = function(e) e)
                     if (inherits(res_b2, "condition") || is.null(res_b2$expression) || length(res_b2$expression) == 0L) {
-                        private$.subtitleUncomputable <- if (inherits(res_b2, "condition")) conditionMessage(res_b2) else "Bayesian t-test returned no expression"
+                        private$.subtitleUncomputable <- if (inherits(res_b2, "condition")) conditionMessage(res_b2) else .("Bayesian t-test returned no expression")
                         return(NULL)
                     }
                     return(res_b2$expression[[1]])
@@ -661,6 +802,16 @@ jjdotplotstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     return(NULL)
                 }
                 return(sub_b3)
+            }
+
+            if (identical(opts$typestatistics, "nonparametric") && n_lev >= 3L) {
+                sub_kw <- private$.kruskalBcaSubtitle(data, group_var, dep_var, opts, private$.seed())
+                err_kw <- attr(sub_kw, "error_msg", exact = TRUE)
+                if (!is.null(err_kw)) {
+                    private$.subtitleUncomputable <- err_kw
+                    return(NULL)
+                }
+                return(sub_kw)
             }
 
             # two_sample_test rejects "eta"/"omega" (they are ANOVA-only); map
@@ -702,46 +853,39 @@ jjdotplotstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 private$.subtitleUncomputable <- .("the test statistic could not be evaluated (zero within-group spread)")
                 return(NULL)
             }
+            if ("p.value" %in% names(res)) {
+                private$.lastExactP <- as.numeric(res$p.value[1])
+            }
 
             private$.clampXiExpr(res$expression[[1]], opts$digits)
         },
 
         # Build the Bayes-factor caption ourselves, for the same reason as the
         # subtitle.
-        #
-        # ggstatsplot reads bf.message ONLY inside `if (results.subtitle)`, and
-        # the subtitle takeover above has to switch that off to make the effect
-        # size selector work. So ticking "Bayes factor interpretation" produced
-        # nothing at all on this figure, in every configuration - measured.
-        # Upstream builds the caption by re-running the same test with
-        # type = "bayes", so do exactly that.
-        #
-        # Returns NULL, and records why, whenever the caption cannot exist:
-        #   - the box is unticked, or subtitles are off (nothing to caption)
-        #   - the test is already Bayesian (the subtitle IS the Bayes factor)
-        #   - three or more groups: ggstatsplot gates the caption on
-        #     type == "parametric", and statsExpressions::oneway_anova(type =
-        #     "bayes") errors out anyway ("you seem to have stumbled on some
-        #     weird edge case"), which is why upstream also renders nothing here
         .captionExpr = function(data, group_var, dep_var, opts) {
             private$.captionUnavailable <- NULL
             if (!isTRUE(opts$bfmessage)) return(NULL)
             if (!isTRUE(opts$resultssubtitle)) {
-                private$.captionUnavailable <- "the plot is not showing statistical results at all"
+                private$.captionUnavailable <- .("the plot is not showing statistical results at all")
+                return(NULL)
+            }
+            if (!is.null(private$.subtitleUncomputable)) {
                 return(NULL)
             }
             if (identical(opts$typestatistics, "bayes")) {
-                private$.captionUnavailable <- "the test is already Bayesian, so the subtitle itself reports the Bayes factor"
+                if (!is.null(private$.subtitleCache)) {
+                    private$.captionUnavailable <- .("the test is already Bayesian, so the subtitle itself reports the Bayes factor")
+                }
                 return(NULL)
             }
             if (!identical(opts$typestatistics, "parametric")) {
-                private$.captionUnavailable <- "a Bayes factor is only defined here for the parametric test"
+                private$.captionUnavailable <- .("a Bayes factor is only defined here for the parametric test")
                 return(NULL)
             }
 
             n_lev <- private$.nGroupLevels(data, group_var)
             if (is.na(n_lev) || n_lev != 2) {
-                private$.captionUnavailable <- "the statistics package computes one only for a two-group comparison"
+                private$.captionUnavailable <- .("the statistics package computes one only for a two-group comparison")
                 return(NULL)
             }
 
@@ -762,29 +906,128 @@ jjdotplotstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 return(NULL)
             }
             if (is.null(res$expression) || length(res$expression) == 0) {
-                private$.captionUnavailable <- "the statistics engine returned no Bayes factor"
+                private$.captionUnavailable <- .("the statistics engine returned no Bayes factor")
                 return(NULL)
             }
             res$expression[[1]]
         },
 
+        # Build a plain-language SAMPL-compliant result summary sentence from
+        # cleaned data and the computed omnibus subtitle expression.
+        .plainResultSentence = function(data, opts, n_groups, sub_expr, test_line, eff_line) {
+            grp <- droplevels(private$.cleanFactor(data[[opts$group]]))
+            yv  <- as.numeric(data[[opts$dep]])
+            grp_parts <- vapply(levels(grp), function(lv) {
+                vg <- yv[grp == lv]
+                vg <- vg[is.finite(vg)]
+                ng <- length(vg)
+                if (opts$typestatistics %in% c("parametric", "bayes")) {
+                    m_s  <- if (ng > 0L) private$.fmtStatVal(mean(vg), opts$digits) else "NA"
+                    sd_s <- if (ng >= 2L) private$.fmtStatVal(stats::sd(vg), opts$digits) else "NA"
+                    sprintf("%s (n = %d, mean = %s, SD = %s)", lv, ng, m_s, sd_s)
+                } else if (identical(opts$typestatistics, "nonparametric")) {
+                    med_s <- if (ng > 0L) private$.fmtStatVal(stats::median(vg), opts$digits) else "NA"
+                    iqr_s <- if (ng > 0L) private$.fmtStatVal(stats::IQR(vg), opts$digits) else "NA"
+                    sprintf("%s (n = %d, median = %s, IQR = %s)", lv, ng, med_s, iqr_s)
+                } else {
+                    tm_s  <- if (ng > 0L) private$.fmtStatVal(mean(vg, trim = 0.2), opts$digits) else "NA"
+                    iqr_s <- if (ng > 0L) private$.fmtStatVal(stats::IQR(vg), opts$digits) else "NA"
+                    sprintf("%s (n = %d, 20%% trimmed mean = %s, IQR = %s)", lv, ng, tm_s, iqr_s)
+                }
+            }, character(1))
+            grp_summary_txt <- paste(grp_parts, collapse = "; ")
+            n_tot <- sum(is.finite(yv) & !is.na(grp))
+
+            if (!is.null(private$.subtitleUncomputable) || is.null(sub_expr)) {
+                reason_txt <- if (!is.null(private$.subtitleUncomputable)) {
+                    private$.subtitleUncomputable
+                } else {
+                    .("insufficient within-group variation")
+                }
+                return(.fmt(
+                    .("Across N = {total} complete observations ({groupsummary}), {test} could not be evaluated ({reason}), so no omnibus test statistic, interval, or post-hoc pairwise brackets were produced."),
+                    total = n_tot, groupsummary = grp_summary_txt,
+                    test = test_line, reason = reason_txt
+                ))
+            }
+
+            ex <- if (is.expression(sub_expr)) sub_expr[[1]] else sub_expr
+            parsed <- tryCatch({
+                if (identical(opts$typestatistics, "bayes")) {
+                    logbf_s <- as.character(ex[[2]][[3]])
+                    eff_s   <- as.character(ex[[3]][[3]])
+                    lo_s    <- as.character(ex[[4]][[3]][[3]])
+                    hi_s    <- as.character(ex[[5]][[2]])
+                    lbf_num <- suppressWarnings(as.numeric(logbf_s))
+                    ev_phrase <- if (!is.finite(lbf_num)) {
+                        .("relative evidence evaluated under the JZS prior")
+                    } else if (lbf_num < -2.30) {
+                        .("strong relative evidence for a group difference")
+                    } else if (lbf_num < -1.10) {
+                        .("moderate relative evidence for a group difference")
+                    } else if (lbf_num < 0) {
+                        .("weak relative evidence toward a group difference")
+                    } else if (lbf_num == 0) {
+                        .("equal relative support for the null and alternative models")
+                    } else if (lbf_num <= 1.10) {
+                        .("weak relative evidence toward the null hypothesis of no difference")
+                    } else if (lbf_num <= 2.30) {
+                        .("moderate relative evidence favoring the null hypothesis of no difference")
+                    } else {
+                        .("strong relative evidence favoring the null hypothesis of no difference")
+                    }
+                    .fmt(
+                        .("Across N = {total} complete observations ({groupsummary}), {test} yielded log_e(BF_01) = {logbf} ({evidence}), with {effname} = {effval} ({level} per cent credible interval {cilow} to {cihigh})."),
+                        total = n_tot, groupsummary = grp_summary_txt, test = test_line,
+                        logbf = logbf_s, evidence = ev_phrase, effname = eff_line,
+                        effval = eff_s, level = base::format(100 * opts$conflevel),
+                        cilow = lo_s, cihigh = hi_s
+                    )
+                } else {
+                    stat_s <- as.character(ex[[2]][[3]])
+                    p_s    <- as.character(ex[[3]][[3]])
+                    eff_s  <- as.character(ex[[4]][[3]])
+                    lo_s   <- as.character(ex[[5]][[3]][[3]])
+                    hi_s   <- as.character(ex[[6]][[2]])
+                    p_num  <- if (is.finite(private$.lastExactP)) private$.lastExactP else suppressWarnings(as.numeric(p_s))
+                    stat_sym <- switch(opts$typestatistics,
+                        parametric    = if (n_groups == 2) "t" else "F",
+                        nonparametric = if (n_groups == 2) "W" else "chi-squared",
+                        robust        = if (n_groups == 2) "|t|" else "F",
+                        "statistic"
+                    )
+                    verdict_txt <- if (is.finite(p_num) && p_num < 0.05) {
+                        .("statistically significant at the 0.05 threshold")
+                    } else {
+                        .("not statistically significant at the 0.05 threshold; absence of significance does not establish equivalence")
+                    }
+                    .fmt(
+                        .("Across N = {total} complete observations ({groupsummary}), {test} gave {statname} = {statval}, p = {pval} ({verdict}), with {effname} = {effval} ({level} per cent confidence interval {cilow} to {cihigh})."),
+                        total = n_tot, groupsummary = grp_summary_txt, test = test_line,
+                        statname = stat_sym, statval = stat_s, pval = p_s, verdict = verdict_txt,
+                        effname = eff_line, effval = eff_s, level = base::format(100 * opts$conflevel),
+                        cilow = lo_s, cihigh = hi_s
+                    )
+                }
+            }, error = function(e) NULL)
+
+            if (is.null(parsed)) {
+                return(.fmt(
+                    .("Group summary across N = {total} complete observations: {groupsummary}."),
+                    total = n_tot, groupsummary = grp_summary_txt
+                ))
+            }
+            parsed
+        },
+
         # The "Assumptions and interpretation" panel.
-        #
-        # Everything the analysis publishes today says what was RUN; nothing says
-        # what was FOUND, what the test assumes, or which of the four test
-        # families was appropriate. That is the gap a clinician has to close from
-        # memory, so close it here: the assumptions of the test actually
-        # selected, the result as a sentence, and a methods line that can be
-        # pasted into a report.
-        #
         # Translucent rgba() fills and inherited colour, never an opaque hex
         # background: jamovi renders results in a dark theme too.
-        .renderExplanation = function(data, opts, n_groups) {
+        .renderExplanation = function(data, opts, n_groups, sub_expr = NULL) {
             if (!isTRUE(self$options$showexplanation)) return()
 
-            dep_lab   <- htmltools::htmlEscape(opts$dep)
-            group_lab <- htmltools::htmlEscape(opts$group)
-            omnibus   <- if (n_groups == 2) .("two-group comparison") else .("omnibus comparison across all groups")
+            omnibus <- if (n_groups == 2) .("two-group comparison") else .("omnibus comparison across all groups")
+            uncomputable <- !is.null(private$.subtitleUncomputable)
 
             assumptions <- switch(opts$typestatistics,
                 parametric = c(
@@ -800,7 +1043,7 @@ jjdotplotstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     .("Groups do NOT have to share the same spread."),
                     .("Observations are independent across patients or specimens. In small groups, trimming 20 percent from each tail leaves few effective observations - check per-group sizes.")),
                 bayes = c(
-                    .("The Bayes factor is computed under a default Jeffreys-Zellner-Siow Cauchy prior on standardized effects (r = 0.707 for two groups; r = 0.5 for three or more groups). Treat it as relative evidence under a conventional prior, not as a posterior probability that a hypothesis is true."),
+                    .("The Bayes factor is computed under a default Jeffreys-Zellner-Siow Cauchy prior on standardized effects (r = 0.707 for two groups; r = 0.5 for three or more groups) assuming a shared residual variance across groups. Treat it as relative evidence under a conventional prior, not as a posterior probability that a hypothesis is true."),
                     .("Observations are independent across patients or specimens; repeated or multi-core measurements from one patient violate independence."),
                     .("The figure displays log_e(BF_01), the natural logarithm of the Bayes factor favoring the null over the alternative: 0 indicates equal support (BF_01 = 1), negative values favor a group difference (below -1.10 moderate evidence, BF_10 > 3; below -2.30 strong evidence, BF_10 > 10), and positive values (above +1.10 or +2.30) favor the null hypothesis of no difference.")),
                 .("Observations are independent."))
@@ -832,6 +1075,10 @@ jjdotplotstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             if (n_groups <= 2) {
                 pw_reading <- ""
                 pw_methods <- ""
+            } else if (uncomputable) {
+                pw_suppressed <- .("Post-hoc pairwise brackets were suppressed because the omnibus test could not be evaluated.")
+                pw_reading <- paste0(" ", htmltools::htmlEscape(pw_suppressed))
+                pw_methods <- ""
             } else if (identical(self$options$pairwisedisplay, "none")) {
                 pw_reading <- paste0(" ", htmltools::htmlEscape(.("No pairwise comparisons were drawn.")))
                 pw_methods <- paste0(" ", .("No post-hoc pairwise comparisons were drawn."))
@@ -840,11 +1087,24 @@ jjdotplotstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 pw_reading <- paste0(" ", htmltools::htmlEscape(pw_msg))
                 pw_methods <- paste0(" ", pw_msg)
             } else if (identical(opts$typestatistics, "parametric") &&
-                       !identical(self$options$padjustmethod, "none")) {
+                       identical(self$options$padjustmethod, "holm")) {
                 pw_msg <- .fmt(
                     .("Pairwise comparisons between {which} are shown as brackets using the Games-Howell single-step studentized-range procedure for family-wise error control."),
                     which = if (identical(self$options$pairwisedisplay, "all"))
                                 .("every pair of groups") else .("the pairs that reached significance"))
+                pw_reading <- paste0(" ", htmltools::htmlEscape(pw_msg))
+                pw_methods <- paste0(" ", pw_msg)
+            } else if (identical(opts$typestatistics, "parametric")) {
+                adj <- switch(self$options$padjustmethod,
+                              fdr = .("Benjamini-Hochberg"),
+                              bonferroni = .("Bonferroni"),
+                              none = .("no"),
+                              self$options$padjustmethod)
+                pw_msg <- .fmt(
+                    .("Pairwise comparisons between {which} are shown as brackets using pairwise Welch t-tests with {adjustment} adjustment for multiple testing."),
+                    which = if (identical(self$options$pairwisedisplay, "all"))
+                                .("every pair of groups") else .("the pairs that reached significance"),
+                    adjustment = adj)
                 pw_reading <- paste0(" ", htmltools::htmlEscape(pw_msg))
                 pw_methods <- paste0(" ", pw_msg)
             } else {
@@ -865,6 +1125,8 @@ jjdotplotstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 paste0("<p>", .("The effect size is estimated from the Welch model rather than an equal-variance ANOVA, and its interval is reported as a one-sided lower confidence bound up to 1.00 (Steiger, 2004)."), "</p>")
             } else if (identical(opts$typestatistics, "nonparametric") && n_groups == 2) {
                 paste0("<p>", .("The Mann-Whitney p value uses the tie-adjusted normal approximation with continuity correction."), "</p>")
+            } else if (identical(opts$typestatistics, "nonparametric") && n_groups > 2) {
+                paste0("<p>", .("Ordinal epsilon-squared is accompanied by a two-sided bias-corrected and accelerated (BCa) bootstrap confidence interval across 1,000 resamples."), "</p>")
             } else if (identical(opts$typestatistics, "robust") && n_groups == 2) {
                 paste0("<p>", .("Yuen's test reports an unsigned |t| statistic, while the robust AKP effect size standardizes the trimmed-mean difference by the first group's Winsorized spread."), "</p>")
             } else {
@@ -885,19 +1147,34 @@ jjdotplotstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 ""
             }
 
-            methods <- paste0(
-                .fmt(
-                    .("A comparison of {outcome} across {groups} groups of {factor} was performed using {test}, with {effect} reported as the effect size and a {level} per cent {interval} interval."),
-                    outcome = dep_lab, groups = n_groups, factor = group_lab,
-                    test = test_line, effect = eff_line,
-                    level = base::format(100 * opts$conflevel),
-                    interval = interval_word),
-                pw_methods
+            result_txt <- private$.plainResultSentence(
+                data, opts, n_groups, sub_expr, test_line, eff_line
             )
+
+            methods <- if (uncomputable) {
+                .fmt(
+                    .("Distributions of {outcome} across {groups} groups of {factor} (N = {total}) were displayed using horizontal box-violin plots; formal hypothesis testing via {test} was not estimable ({reason})."),
+                    outcome = opts$dep, groups = n_groups, factor = opts$group,
+                    total = nrow(data), test = test_line,
+                    reason = private$.subtitleUncomputable %||% .("zero within-group variation")
+                )
+            } else {
+                paste0(
+                    .fmt(
+                        .("A comparison of {outcome} across {groups} groups of {factor} was performed using {test}, with {effect} reported as the effect size and a {level} per cent {interval} interval."),
+                        outcome = opts$dep, groups = n_groups, factor = opts$group,
+                        test = test_line, effect = eff_line,
+                        level = base::format(100 * opts$conflevel),
+                        interval = interval_word),
+                    pw_methods
+                )
+            }
 
             html <- paste0(
                 "<div style='background-color: rgba(127,127,127,0.08); color: inherit; border-left: 4px solid rgba(66,133,244,0.7); padding: 12px 16px; margin: 8px 0;'>",
-                "<h3 style='margin-top:0; color: inherit;'>", .("What this analysis assumes"), "</h3><ul>",
+                "<h3 style='margin-top:0; color: inherit;'>", .("Result summary"), "</h3>",
+                "<p>", htmltools::htmlEscape(result_txt), "</p>",
+                "<h3 style='color: inherit;'>", .("What this analysis assumes"), "</h3><ul>",
                 paste0("<li>", vapply(assumptions, htmltools::htmlEscape, ""), "</li>", collapse = ""),
                 "</ul>",
                 model_note, seed_note,
@@ -951,7 +1228,6 @@ jjdotplotstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         # panel whose analysis still excludes them.
         .accumulateDataMessage = function(message) {
             private$.data_messages <- c(private$.data_messages, message)
-            private$.accumulateMessage(message)
         },
         
         
@@ -1037,25 +1313,39 @@ jjdotplotstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             sp_df
         },
 
-        # Optimized data preparation with robust caching
-        .prepareData = function(force_refresh = FALSE) {
+        # Optimized data preparation with robust caching (keyed on selected data columns)
+        .prepareData = function(force_refresh = FALSE, emit_messages = TRUE) {
+            dep_col <- if (!is.null(self$options$dep) && self$options$dep %in% names(self$data))
+                self$data[[self$options$dep]] else NULL
+            group_col <- if (!is.null(self$options$group) && self$options$group %in% names(self$data))
+                self$data[[self$options$group]] else NULL
+            grvar_col <- if (!is.null(self$options$grvar) && self$options$grvar %in% names(self$data))
+                self$data[[self$options$grvar]] else NULL
+
             current_hash <- digest::digest(list(
                 dep = self$options$dep,
                 group = self$options$group,
+                grvar = self$options$grvar,
                 data_dim = dim(self$data),
                 col_names = names(self$data),
-                grvar = self$options$grvar
+                dep_vals = dep_col,
+                group_vals = group_col,
+                grvar_vals = grvar_col
             ), algo = "md5")
 
             if (!is.null(private$.processedData) &&
                 private$.data_hash == current_hash &&
                 !force_refresh) {
-                for (msg in private$.data_messages)
-                    private$.accumulateMessage(msg)
+                if (isTRUE(emit_messages)) {
+                    for (msg in private$.data_messages)
+                        private$.accumulateMessage(msg)
+                }
                 return(private$.processedData)
             }
 
-            private$.messages <- NULL
+            if (isTRUE(emit_messages)) {
+                private$.messages <- NULL
+            }
             private$.data_messages <- NULL
             private$.accumulateDataMessage(
                 paste0("<br>", .("Processing data for the comparison..."), "<br><hr>")
@@ -1066,9 +1356,7 @@ jjdotplotstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             dep_var <- self$options$dep
             if (!is.null(dep_var) && dep_var %in% names(mydata)) {
-                mydata[[dep_var]] <- jmvcore::toNumeric(mydata[[dep_var]])
-                if (!is.numeric(mydata[[dep_var]]))
-                    jmvcore::reject(.("The dependent variable must be numeric."))
+                mydata[[dep_var]] <- suppressWarnings(jmvcore::toNumeric(mydata[[dep_var]]))
             }
 
             group_var <- self$options$group
@@ -1165,11 +1453,15 @@ jjdotplotstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             private$.processedData <- mydata
             private$.data_hash <- current_hash
+            if (isTRUE(emit_messages)) {
+                for (msg in private$.data_messages)
+                    private$.accumulateMessage(msg)
+            }
             return(mydata)
         },
 
         # Optimized options preparation with robust caching
-        .prepareOptions = function(force_refresh = FALSE) {
+        .prepareOptions = function(force_refresh = FALSE, emit_messages = FALSE) {
             # Create robust hash of current options to detect changes
             current_options_hash <- digest::digest(list(
                 dep = self$options$dep,
@@ -1190,7 +1482,11 @@ jjdotplotstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 padjustmethod = self$options$padjustmethod,
                 seed = self$options$seed,
                 titles = list(self$options$mytitle, self$options$xtitle, self$options$ytitle),
-                display = list(self$options$resultssubtitle, self$options$originaltheme)
+                display = list(
+                    self$options$resultssubtitle,
+                    self$options$originaltheme,
+                    self$options$colorpalette
+                )
             ), algo = "md5")
             
             # Only reprocess if options have changed or forced refresh
@@ -1201,7 +1497,7 @@ jjdotplotstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             }
 
             # Add options preparation feedback if not already processing
-            if (is.null(private$.messages)) {
+            if (isTRUE(emit_messages) && is.null(private$.messages)) {
                 private$.accumulateMessage(
                     paste0("<br>", .("Preparing analysis options..."), "<br><hr>")
                 )
@@ -1214,53 +1510,23 @@ jjdotplotstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             dep <- self$options$dep
             group <- self$options$group
 
-            # Centrality settings mapped to ggstatsplot arguments.
-            #
-            # There are two controls for one thing, in two different collapse
-            # boxes: "Central Tendency Display" (centralityparameter:
-            # mean/median/none) and "Central Tendency Measure" (centralitytype:
-            # mean/median/trimmed/Bayesian). They used to contradict each other
-            # silently - measured with centralityparameter = "mean" and
-            # centralitytype = "nonparametric", the plot drew and labelled the
-            # MEDIANS (9.80, 13.56, 11.05) while the user's Display control read
-            # "Mean". centralitytype is the richer control and is the one the UI
-            # enables alongside the plotting checkbox, so it decides; the
-            # Display control keeps only its unique power, which is switching
-            # centrality off. A disagreement is now stated rather than resolved
-            # in silence.
+            # Centrality settings mapped to ggstatsplot arguments (disagreement notice
+            # is emitted unconditionally on every .run() in .validateCentralityOptions()).
             centrality_plotting <- isTRUE(self$options$centralityplotting) && self$options$centralityparameter != "none"
             centrality_type <- self$options$centralitytype
             if (is.null(centrality_type) || centrality_type == "")
                 centrality_type <- typestatistics
 
-            if (centrality_plotting) {
-                implied <- switch(self$options$centralityparameter,
-                                  mean = "parametric", median = "nonparametric", NULL)
-                if (!is.null(implied) && !identical(implied, centrality_type)) {
-                    shown <- switch(centrality_type,
-                                    parametric = "mean", nonparametric = "median",
-                                    robust = "trimmed mean", bayes = "Bayesian (MAP) estimate",
-                                    centrality_type)
-                    private$.addNotice(.fmt(
-                        .("Your two central-tendency settings disagree: 'Central Tendency Display' still carries the legacy value '{legacy}' while 'Central Tendency Measure' selects {selected}. The plot shows the {drawn}, because 'Central Tendency Display' only decides whether a line is drawn at all."),
-                        legacy = self$options$centralityparameter,
-                        selected = switch(centrality_type, parametric = "Mean",
-                                          nonparametric = "Median", robust = "Trimmed Mean",
-                                          bayes = "Bayesian Estimate", centrality_type),
-                        drawn = shown), "WARNING")
-                }
-            }
-
             # Compute axis labels respecting orientation flip (values on x-axis)
             xlab <- self$options$ytitle
-            if (xlab == '') xlab <- group
+            if (xlab == "") xlab <- group
             ylab <- self$options$xtitle
-            if (ylab == '') ylab <- dep
-            
+            if (ylab == "") ylab <- dep
+
             # Process titles
             mytitle <- self$options$mytitle
-            if (mytitle == '') mytitle <- NULL
-            
+            if (mytitle == "") mytitle <- NULL
+
             # Cache the processed options with all parameters
             options_list <- list(
                 typestatistics = typestatistics,
@@ -1274,13 +1540,31 @@ jjdotplotstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 centralitytype = self$options$centralitytype,
                 testvalue = self$options$testvalue,
                 bfmessage = self$options$bfmessage,
-                conflevel = self$options$conflevel,
-                digits = self$options$k,
+                conflevel = if (is.numeric(self$options$conflevel) &&
+                                length(self$options$conflevel) == 1L &&
+                                is.finite(self$options$conflevel)) {
+                    min(max(self$options$conflevel, 0.5), 0.999)
+                } else {
+                    0.95
+                },
+                digits = if (is.numeric(self$options$k) &&
+                             length(self$options$k) == 1L &&
+                             is.finite(self$options$k)) {
+                    min(max(as.integer(self$options$k), 0L), 5L)
+                } else {
+                    2L
+                },
                 testvalueline = self$options$testvalueline,
                 centralityparameter = self$options$centralityparameter,
                 centralityk = self$options$centralityk,
                 resultssubtitle = self$options$resultssubtitle,
-                originaltheme = self$options$originaltheme
+                originaltheme = self$options$originaltheme,
+                colorpalette = if (!is.null(self$options$colorpalette) &&
+                                   nzchar(self$options$colorpalette)) {
+                    self$options$colorpalette
+                } else {
+                    "jamovi"
+                }
             )
 
             # Process centrality parameters if enabled
@@ -1301,7 +1585,7 @@ jjdotplotstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             options_list$p.adjust.method <- switch(self$options$padjustmethod,
                                                    fdr = "BH", self$options$padjustmethod)
             options_list$ggplot.component <- list(ggplot2::coord_flip())
-            if (isTRUE(self$options$testvalueline)) {
+            if (isTRUE(self$options$testvalueline) && is.finite(self$options$testvalue)) {
                 options_list$ggplot.component <- c(
                     options_list$ggplot.component,
                     list(ggplot2::geom_hline(
@@ -1319,8 +1603,9 @@ jjdotplotstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
         # Prevent statsExpressions::pairwise_comparisons from double-adjusting
         # PMCMRplus::gamesHowellTest studentized-range FWER p-values on K >= 3
-        # parametric comparisons, and compute genuine unadjusted pairwise Welch
-        # t-test p-values when padjustmethod == "none".
+        # parametric comparisons under Holm (default), and compute genuine
+        # BH-FDR, Bonferroni, or unadjusted pairwise Welch t-test p-values when
+        # those multiplicity options are explicitly chosen.
         .fixParametricPairwise = function(plot_obj, sub_data, group_var, dep_var, opts) {
             if (is.null(plot_obj) || !inherits(plot_obj, "gg")) return(plot_obj)
             if (identical(opts$pairwise.display, "none") ||
@@ -1337,17 +1622,20 @@ jjdotplotstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             comps <- sp$comparisons
             if (is.null(comps) || length(comps) == 0L) return(plot_obj)
 
-            if (!identical(opts$p.adjust.method, "none")) {
+            if (identical(opts$p.adjust.method, "holm")) {
                 sp$annotations <- gsub("italic(p)[unadj.]", 'italic(p)["GH-adj."]',
                                        sp$annotations, fixed = TRUE)
                 plot_obj$layers[[idx]]$stat_params <- sp
                 return(plot_obj)
             }
 
-            # padjustmethod == "none": compute genuine unadjusted pairwise Welch t-test p-values
+            # padjustmethod %in% c("fdr" -> "BH", "bonferroni", "none"):
+            # compute pairwise unequal-variance Welch t-test p-values across all K*(K-1)/2 pairs
             y_vec <- as.numeric(sub_data[[dep_var]])
             g_vec <- droplevels(private$.cleanFactor(sub_data[[group_var]]))
-            pvals <- vapply(comps, function(pair) {
+            lvls  <- levels(g_vec)
+            all_pairs <- utils::combn(lvls, 2L, simplify = FALSE)
+            raw_all <- vapply(all_pairs, function(pair) {
                 tt <- tryCatch(
                     stats::t.test(
                         x = y_vec[g_vec == pair[1]],
@@ -1356,8 +1644,21 @@ jjdotplotstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     ),
                     error = function(e) NULL
                 )
-                if (is.null(tt)) NA_real_ else unname(tt$p.value)
+                if (is.null(tt) || !is.finite(tt$p.value)) NA_real_ else unname(tt$p.value)
             }, numeric(1))
+
+            adj_all <- if (identical(opts$p.adjust.method, "none")) {
+                raw_all
+            } else {
+                stats::p.adjust(raw_all, method = opts$p.adjust.method)
+            }
+
+            all_keys <- vapply(all_pairs, function(pr) paste(pr[1], pr[2], sep = "\r"), character(1))
+            comp_keys <- vapply(comps, function(pr) {
+                k1 <- paste(pr[1], pr[2], sep = "\r")
+                if (k1 %in% all_keys) k1 else paste(pr[2], pr[1], sep = "\r")
+            }, character(1))
+            pvals <- adj_all[match(comp_keys, all_keys)]
 
             keep_mask <- if (identical(opts$pairwise.display, "significant")) {
                 !is.na(pvals) & pvals < 0.05
@@ -1367,11 +1668,20 @@ jjdotplotstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             for (sc in plot_obj$scales$scales) {
                 if (!is.null(sc$secondary.axis) && !inherits(sc$secondary.axis, "waiver")) {
-                    sc$secondary.axis$name <- as.expression(bquote(list(
-                        "Pairwise test:" ~ bold("Welch's t"),
-                        "Bars shown:" ~ bold(.(opts$pairwise.display)),
-                        alpha == 0.05
-                    )))
+                    if (identical(opts$p.adjust.method, "none")) {
+                        sc$secondary.axis$name <- as.expression(bquote(list(
+                            "Pairwise test:" ~ bold("Welch's t"),
+                            "Bars shown:" ~ bold(.(opts$pairwise.display)),
+                            alpha == 0.05
+                        )))
+                    } else {
+                        adj_lbl <- if (identical(opts$p.adjust.method, "BH")) "BH" else "Bonferroni"
+                        sc$secondary.axis$name <- as.expression(bquote(list(
+                            "Pairwise test:" ~ bold("Welch's t"),
+                            "Bars shown:" ~ bold(.(opts$pairwise.display)),
+                            "p-value adjustment:" ~ bold(.(adj_lbl))
+                        )))
+                    }
                 }
             }
 
@@ -1379,9 +1689,15 @@ jjdotplotstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 plot_obj$layers[[idx]] <- NULL
                 return(plot_obj)
             }
+
+            sub_tag <- switch(opts$p.adjust.method,
+                BH         = '"FDR-corrected"',
+                bonferroni = '"Bonferroni-corrected"',
+                "unadj."
+            )
             sp$comparisons <- comps[keep_mask]
             sp$annotations <- vapply(pvals[keep_mask], function(pv) {
-                paste0('list(italic(p)[unadj.] == "', private$.fmtStatVal(pv, opts$digits), '")')
+                paste0("list(italic(p)[", sub_tag, '] == "', private$.fmtStatVal(pv, opts$digits), '")')
             }, character(1))
             plot_obj$layers[[idx]]$stat_params <- sp
             plot_obj
@@ -1410,7 +1726,8 @@ jjdotplotstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         },
 
         # Harmonize Split-By (plot2) sub-panels with main-plot post-hoc fixes,
-        # Wilcox-Tian xi [0, 1] clamping, and 3+-group Bayesian ANOVA subtitles.
+        # Wilcox-Tian xi [0, 1] clamping, Kruskal-Wallis BCa CIs, and 3+-group
+        # Bayesian ANOVA subtitles.
         .enhanceSplitPanels = function(grouped_plot, group_var, dep_var, opts, seed_val) {
             if (is.null(grouped_plot)) return(grouped_plot)
 
@@ -1426,12 +1743,20 @@ jjdotplotstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     panel_i, panel_i$data, group_var, opts
                 )
                 if (isTRUE(opts$resultssubtitle)) {
-                    if (!is.null(panel_i$labels$subtitle)) {
+                    k_pan <- private$.nGroupLevels(panel_i$data, group_var)
+                    if (identical(opts$typestatistics, "nonparametric") && !is.na(k_pan) && k_pan >= 3L) {
+                        sub_kw_i <- private$.kruskalBcaSubtitle(
+                            panel_i$data, group_var, dep_var, opts, seed_val
+                        )
+                        if (is.null(attr(sub_kw_i, "error_msg", exact = TRUE))) {
+                            panel_i <- panel_i + ggplot2::labs(subtitle = sub_kw_i)
+                        }
+                    } else if (!is.null(panel_i$labels$subtitle)) {
                         panel_i$labels$subtitle <- private$.clampXiExpr(
                             panel_i$labels$subtitle, opts$digits
                         )
                     } else if (identical(opts$typestatistics, "bayes") &&
-                               private$.nGroupLevels(panel_i$data, group_var) >= 3L) {
+                               !is.na(k_pan) && k_pan >= 3L) {
                         sub_i <- private$.bayesAnovaSubtitle(
                             panel_i$data, group_var, dep_var, opts, seed_val
                         )
@@ -1444,7 +1769,7 @@ jjdotplotstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             }
 
             if (inherits(grouped_plot, "patchwork")) {
-                for (i in seq_len(length(grouped_plot))) {
+                for (i in seq_along(grouped_plot)) {
                     grouped_plot[[i]] <- enhance_one(grouped_plot[[i]])
                 }
                 return(grouped_plot)
@@ -1452,11 +1777,94 @@ jjdotplotstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             enhance_one(grouped_plot)
         },
 
+        .paletteColors = function(n_colors, pal_name, theme) {
+            n <- max(as.integer(n_colors), 1L)
+            switch(
+                pal_name,
+                okabeito = {
+                    base_cols <- c(
+                        "#E69F00", "#56B4E9", "#009E73", "#F0E442",
+                        "#0072B2", "#D55E00", "#CC79A7", "#000000"
+                    )
+                    if (n <= length(base_cols)) {
+                        base_cols[seq_len(n)]
+                    } else {
+                        grDevices::colorRampPalette(base_cols)(n)
+                    }
+                },
+                viridis = viridisLite::viridis(n, begin = 0.12, end = 0.88),
+                dark2 = {
+                    base_cols <- c(
+                        "#1B9E77", "#D95F02", "#7570B3", "#E7298A",
+                        "#66A61E", "#E6AB02", "#A6761D", "#666666"
+                    )
+                    if (n <= length(base_cols)) {
+                        base_cols[seq_len(n)]
+                    } else {
+                        grDevices::colorRampPalette(base_cols)(n)
+                    }
+                },
+                jmvcore::colorPalette(
+                    n = n,
+                    pal = if (!is.null(theme$palette)) theme$palette else "jmv"
+                )
+            )
+        },
+
+        .applyPalette = function(plot_obj, group_levels, theme, opts) {
+            pal_name <- opts$colorpalette
+            if (is.null(pal_name) || identical(pal_name, "jamovi")) {
+                return(plot_obj)
+            }
+            n_col <- max(length(group_levels), 1L)
+            cols <- private$.paletteColors(n_col, pal_name, theme)
+            if (length(group_levels) == length(cols) && length(group_levels) > 0L) {
+                names(cols) <- group_levels
+            }
+            add_scales <- function(p_one) {
+                if (!inherits(p_one, "gg")) {
+                    return(p_one)
+                }
+                suppressMessages(
+                    p_one +
+                        ggplot2::scale_color_manual(values = cols) +
+                        ggplot2::scale_fill_manual(values = cols)
+                )
+            }
+            if (inherits(plot_obj, "patchwork")) {
+                for (i in seq_along(plot_obj)) {
+                    plot_obj[[i]] <- add_scales(plot_obj[[i]])
+                }
+                return(plot_obj)
+            }
+            add_scales(plot_obj)
+        },
+
+        .sourcifyOption = function(option) {
+            if (!option$name %in% names(formals(jjdotplotstats)))
+                return("")
+            value <- option$value
+            if (is.list(value) || is.language(value))
+                return("")
+            if (is.character(value)) {
+                if (length(value) != 1L || is.na(value) || identical(value, option$default))
+                    return("")
+                return(paste0(option$name, " = ", encodeString(value, quote = '"')))
+            }
+            if (!is.logical(value) && !is.numeric(value) && !is.null(value))
+                return("")
+            if (length(value) > 1L)
+                return("")
+            super$.sourcifyOption(option)
+        },
+
         # run ----
         .run = function() {
-            # Clear messages, notices, and cached validity at start of new run
+            # Clear messages, notices, explanation, and cached validity at start of new run
             private$.messages <- NULL
             private$.clearNotices()
+            if (!is.null(self$results$explanation))
+                self$results$explanation$setContent("")
             private$.inputsValid <- FALSE
             private$.splitValid <- TRUE
             private$.subtitleFallback <- NULL
@@ -1464,26 +1872,29 @@ jjdotplotstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             private$.subtitleCache <- NULL
             private$.captionCache <- NULL
             private$.captionUnavailable <- NULL
+            private$.lastExactP <- NA_real_
 
             # Initial Message ----
             if (is.null(self$options$dep) || is.null(self$options$group)) {
                 todo <- paste0(
-                    "<br>", .("Welcome to ClinicoPath"), "<br><br>",
-                    .("This analysis compares a continuous variable across groups and draws the comparison horizontally, as a box-violin figure with the individual observations shown."),
-                    "<br><br>",
-                    .("Looking for a Cleveland dot chart - one summary point per group, tested against a reference value? Use 'Dot Chart (Summary vs Reference Value)' instead. This analysis uses every observation and compares the groups with each other."),
-                    "<br><br>",
-                    .("Select a continuous dependent variable and a categorical grouping variable to begin."),
-                    "<br><br>",
+                    "<div style='background-color: rgba(0, 123, 255, 0.08); color: inherit; border-left: 4px solid #007bff; padding: 12px 16px; margin: 8px 0;'>",
+                    "<h3 style='margin-top: 0; color: inherit;'>", .("Welcome to ClinicoPath"), "</h3>",
+                    "<p>", .("This analysis compares a continuous variable across groups and draws the comparison horizontally, as a box-violin figure with the individual observations shown."), "</p>",
+                    "<p>", .("Looking for a Cleveland dot chart - one summary point per group, tested against a reference value? Use 'Dot Chart (Summary vs Reference Value)' instead. This analysis uses every observation and compares the groups with each other."), "</p>",
+                    "<p><strong>", .("Select a continuous dependent variable and a categorical grouping variable to begin."), "</strong></p>",
+                    "<p style='margin-bottom: 0;'>",
                     .fmt(
                         .("This analysis is built on the {pkg1} and {pkg2} packages; please cite jamovi and the packages listed below."),
                         pkg1 = "ggplot2", pkg2 = "ggstatsplot"),
-                    "<br><hr>")
+                    "</p></div>")
 
                 self$results$todo$setContent(todo)
+                private$.publishRenderState()
                 return()
             } else {
                 if (nrow(self$data) == 0) {
+                    self$results$todo$setContent("")
+                    private$.publishRenderState()
                     private$.addNotice(.("Data contains no complete rows after filtering. Please check for missing values."), "ERROR")
                     return()
                 }
@@ -1492,8 +1903,8 @@ jjdotplotstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 private$.splitValid <- TRUE
                 private$.publishRenderState()
                 tryCatch({
-                    mydata <- private$.prepareData()
-                    options_data <- private$.prepareOptions()
+                    mydata <- private$.prepareData(emit_messages = TRUE)
+                    options_data <- private$.prepareOptions(emit_messages = TRUE)
 
                     private$.inputsValid <- private$.validateInputs(mydata)
                     if (isTRUE(private$.inputsValid) && !is.null(self$options$grvar)) {
@@ -1516,13 +1927,18 @@ jjdotplotstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                             groups = n_groups, n = n_obs, test = test_name), "INFO")
 
                         private$.checkpoint()
-                        private$.subtitleCache <- private$.subtitleExpr(
-                            mydata, options_data$group, options_data$dep, options_data)
+                        need_omnibus <- isTRUE(options_data$resultssubtitle) ||
+                            isTRUE(self$options$showexplanation)
+                        computed_sub <- private$.subtitleExpr(
+                            mydata, options_data$group, options_data$dep, options_data,
+                            force_compute = need_omnibus)
+                        private$.subtitleCache <- if (isTRUE(options_data$resultssubtitle)) computed_sub else NULL
                         private$.captionCache <- private$.captionExpr(
                             mydata, options_data$group, options_data$dep, options_data)
                         private$.publishRenderState()
 
-                        if (!is.null(private$.subtitleUncomputable) && isTRUE(self$options$resultssubtitle)) {
+                        if (!is.null(private$.subtitleUncomputable) &&
+                            (isTRUE(self$options$resultssubtitle) || isTRUE(self$options$showexplanation))) {
                             private$.addNotice(.fmt(
                                 .("Statistical test results could not be computed ({reason}), so no test subtitle is shown on the plot."),
                                 reason = htmltools::htmlEscape(private$.subtitleUncomputable)), "WARNING")
@@ -1532,6 +1948,14 @@ jjdotplotstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                                 reason = htmltools::htmlEscape(private$.subtitleFallback)), "WARNING")
                         }
 
+                        if (!isTRUE(self$options$resultssubtitle) &&
+                            !isTRUE(self$options$showexplanation) &&
+                            (!identical(self$options$effsizetype, "biased") ||
+                             !isTRUE(all.equal(self$options$conflevel, 0.95))))
+                            private$.addNotice(
+                                .("Enable 'Statistical results in plot' or 'Assumptions and interpretation' to display the selected effect size or confidence level."),
+                                "INFO")
+
                         if (!identical(self$options$effsizetype, "biased") &&
                             !identical(self$options$typestatistics, "parametric") &&
                             isTRUE(self$options$resultssubtitle))
@@ -1540,25 +1964,46 @@ jjdotplotstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                                 test = switch(self$options$typestatistics,
                                               nonparametric = "nonparametric",
                                               robust = "robust", bayes = "Bayesian",
-                                              self$options$typestatistics)), "INFO")
+                                              htmltools::htmlEscape(as.character(self$options$typestatistics)))), "INFO")
 
                         if (!is.null(self$options$grvar) &&
                             identical(self$options$typestatistics, "parametric") &&
                             isTRUE(self$options$resultssubtitle))
                             private$.addNotice(.("The 'Effect Size Measure' setting does not reach the Split By panels: the statistics package computes one subtitle per panel internally and always uses its own default there. The single unsplit figure below honours your selection."), "INFO")
 
-                        if (n_groups > 2 &&
+                        if (n_groups > 2 && is.null(private$.subtitleUncomputable) &&
                             identical(self$options$typestatistics, "parametric") &&
                             !identical(self$options$pairwisedisplay, "none") &&
-                            !identical(self$options$padjustmethod, "none"))
+                            identical(self$options$padjustmethod, "holm"))
                             private$.addNotice(.("For three or more groups, parametric pairwise brackets use the Games-Howell single-step studentized-range procedure for family-wise error control (p_GH-adj); a second adjustment pass is not applied on top of it."), "INFO")
 
-                        if (n_groups > 2 &&
+                        if (n_groups > 2 && is.null(private$.subtitleUncomputable) &&
+                            identical(self$options$typestatistics, "parametric") &&
+                            !identical(self$options$pairwisedisplay, "none") &&
+                            self$options$padjustmethod %in% c("fdr", "bonferroni"))
+                            private$.addNotice(.fmt(
+                                .("For three or more groups with {adjustment} selected, parametric pairwise brackets use pairwise Welch unequal-variance t-tests with {adjustment} adjustment."),
+                                adjustment = if (identical(self$options$padjustmethod, "fdr")) .("Benjamini-Hochberg") else .("Bonferroni")), "INFO")
+
+                        if (n_groups > 2 && is.null(private$.subtitleUncomputable) &&
                             identical(self$options$typestatistics, "bayes") &&
                             identical(self$options$pairwisedisplay, "significant"))
                             private$.addNotice(.("Bayesian pairwise comparisons report natural-log JZS Bayes factors rather than frequentist p values, so all group pairs are shown on the plot."), "INFO")
 
-                        if (n_groups > 2 &&
+                        if (n_groups > 8L && is.null(private$.subtitleUncomputable) &&
+                            !identical(self$options$pairwisedisplay, "none")) {
+                            if (identical(self$options$typestatistics, "bayes")) {
+                                private$.addNotice(.fmt(
+                                    .("Displaying all {pairs} Bayesian pairwise brackets across {groups} groups can crowd the figure; consider setting Pairwise Comparisons to 'None'."),
+                                    pairs = choose(n_groups, 2L), groups = n_groups), "WARNING")
+                            } else if (identical(self$options$pairwisedisplay, "all")) {
+                                private$.addNotice(.fmt(
+                                    .("Displaying all {pairs} pairwise brackets across {groups} groups can crowd the figure; consider 'Significant pairs only' or 'None'."),
+                                    pairs = choose(n_groups, 2L), groups = n_groups), "WARNING")
+                            }
+                        }
+
+                        if (n_groups > 2 && is.null(private$.subtitleUncomputable) &&
                             !identical(self$options$typestatistics, "bayes") &&
                             !identical(self$options$pairwisedisplay, "none") &&
                             identical(self$options$padjustmethod, "none"))
@@ -1567,12 +2012,33 @@ jjdotplotstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                                 groups = n_groups, pairs = choose(n_groups, 2),
                                 risk = round(100 * (1 - 0.95 ^ choose(n_groups, 2)))), "STRONG_WARNING")
 
-                        private$.renderExplanation(mydata, options_data, n_groups)
+                        private$.renderExplanation(mydata, options_data, n_groups, computed_sub)
 
-                        if (isTRUE(self$options$bfmessage) && !is.null(private$.captionUnavailable))
-                            private$.addNotice(.fmt(
-                                .("No Bayes factor caption is shown because {reason}."),
-                                reason = htmltools::htmlEscape(private$.captionUnavailable)), "INFO")
+                        if (isTRUE(self$options$bfmessage) && !is.null(private$.captionUnavailable)) {
+                            split_has_2grp <- FALSE
+                            if (!is.null(self$options$grvar) && isTRUE(private$.splitValid) &&
+                                isTRUE(self$options$resultssubtitle) &&
+                                identical(self$options$typestatistics, "parametric") &&
+                                n_groups != 2L) {
+                                sp_chk <- private$.prepareSplitData(mydata)
+                                if (nrow(sp_chk) > 0L) {
+                                    st_f <- droplevels(private$.cleanFactor(sp_chk[[self$options$grvar]]))
+                                    k_sp <- vapply(levels(st_f), function(lv) {
+                                        private$.nGroupLevels(sp_chk[st_f == lv, , drop = FALSE], options_data$group)
+                                    }, integer(1))
+                                    split_has_2grp <- any(!is.na(k_sp) & k_sp == 2L)
+                                }
+                            }
+                            if (split_has_2grp) {
+                                private$.addNotice(.fmt(
+                                    .("The Bayes factor caption is omitted on the unsplit figure ({reason}), but is shown on two-group Split By panels."),
+                                    reason = htmltools::htmlEscape(private$.captionUnavailable)), "INFO")
+                            } else {
+                                private$.addNotice(.fmt(
+                                    .("No Bayes factor caption is shown because {reason}."),
+                                    reason = htmltools::htmlEscape(private$.captionUnavailable)), "INFO")
+                            }
+                        }
                     }
                 }, error = function(e) {
                     private$.addNotice(.fmt(
@@ -1590,14 +2056,14 @@ jjdotplotstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             if (!isTRUE(rs$valid))
                 return()
 
-            mydata <- private$.prepareData()
-            options_data <- private$.prepareOptions()
+            mydata <- private$.prepareData(emit_messages = FALSE)
+            options_data <- private$.prepareOptions(emit_messages = FALSE)
 
             private$.checkpoint()
 
-            sub_expr <- rs$subtitle
-            cap_expr <- rs$caption
             uncomputable <- isTRUE(rs$uncomputable)
+            sub_expr <- if (uncomputable) NULL else rs$subtitle
+            cap_expr <- if (uncomputable) NULL else rs$caption
             n_lev <- private$.nGroupLevels(mydata, options_data$group)
 
             pw_disp <- if (uncomputable) "none" else options_data$pairwise.display
@@ -1606,7 +2072,7 @@ jjdotplotstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 identical(options_data$typestatistics, "parametric") &&
                 !is.na(n_lev) && n_lev >= 3L) {
                 p_adj_arg <- "none"
-                if (identical(options_data$p.adjust.method, "none")) {
+                if (!identical(options_data$p.adjust.method, "holm")) {
                     pw_disp <- "all"
                 }
             }
@@ -1638,6 +2104,8 @@ jjdotplotstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 p <- private$.fixBayesPairwise(
                     p, mydata, options_data$group, options_data
                 )
+                grp_lv <- levels(droplevels(private$.cleanFactor(mydata[[options_data$group]])))
+                p <- private$.applyPalette(p, grp_lv, theme, options_data)
                 if (!is.null(sub_expr)) p <- p + ggplot2::labs(subtitle = sub_expr)
                 if (!is.null(cap_expr)) p <- p + ggplot2::labs(caption = cap_expr)
                 p
@@ -1649,14 +2117,14 @@ jjdotplotstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     reason = conditionMessage(plot))))
 
             .k <- if (is.na(n_lev)) 0L else n_lev
-            if (statsSeedMatters(options_data$typestatistics, "between", .k) ||
-                captionSeedMatters(options_data$typestatistics, "between", .k, options_data$bfmessage))
+            if ((statsSeedMatters(options_data$typestatistics, "between", .k) && !uncomputable) ||
+                (captionSeedMatters(options_data$typestatistics, "between", .k, options_data$bfmessage) && !uncomputable))
                 plot <- addSeedCaption(plot, self, private$.seed())
 
             if (is.null(plot)) return()
 
             tryCatch(
-                print(plot),
+                withr::with_seed(private$.seed(), print(plot)),
                 error = function(e) {
                     private$.plotFailure(.fmt(
                         .("The plot could not be drawn: {reason}. Check the dependent variable for constant values, extreme outliers or too few observations per group, or try a different statistical test."),
@@ -1674,11 +2142,11 @@ jjdotplotstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             if (!isTRUE(rs$valid) || isFALSE(rs$splitValid) || is.null(self$options$grvar))
                 return()
 
-            base_data <- private$.prepareData()
+            base_data <- private$.prepareData(emit_messages = FALSE)
             mydata <- private$.prepareSplitData(base_data)
             if (nrow(mydata) == 0L)
                 return()
-            options_data <- private$.prepareOptions()
+            options_data <- private$.prepareOptions(emit_messages = FALSE)
 
             grvar <- self$options$grvar
             private$.checkpoint()
@@ -1690,7 +2158,7 @@ jjdotplotstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 identical(options_data$typestatistics, "parametric") &&
                 !is.na(n_lev) && n_lev >= 3L) {
                 p_adj_arg <- "none"
-                if (identical(options_data$p.adjust.method, "none")) {
+                if (!identical(options_data$p.adjust.method, "holm")) {
                     pw_disp <- "all"
                 }
             }
@@ -1736,14 +2204,23 @@ jjdotplotstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             plot2 <- private$.enhanceSplitPanels(
                 plot2, options_data$group, options_data$dep, options_data, private$.seed()
             )
+            grp_lv_all <- levels(droplevels(private$.cleanFactor(base_data[[options_data$group]])))
+            plot2 <- private$.applyPalette(plot2, grp_lv_all, theme, options_data)
 
-            .k <- if (is.na(n_lev)) 0L else n_lev
-            if (statsSeedMatters(options_data$typestatistics, "between", .k) ||
-                captionSeedMatters(options_data$typestatistics, "between", .k, options_data$bfmessage))
+            st_fac <- droplevels(private$.cleanFactor(mydata[[grvar]]))
+            k_vec <- vapply(levels(st_fac), function(lv) {
+                private$.nGroupLevels(mydata[st_fac == lv, , drop = FALSE], options_data$group)
+            }, integer(1))
+            k_vec <- unique(c(if (is.na(n_lev)) integer(0) else n_lev, k_vec[!is.na(k_vec)]))
+            seed_matters_split <- any(vapply(k_vec, function(ki) {
+                statsSeedMatters(options_data$typestatistics, "between", ki) ||
+                    captionSeedMatters(options_data$typestatistics, "between", ki, options_data$bfmessage)
+            }, logical(1)))
+            if (seed_matters_split)
                 plot2 <- addSeedCaption(plot2, self, private$.seed())
 
             tryCatch(
-                print(plot2),
+                withr::with_seed(private$.seed(), print(plot2)),
                 error = function(e) {
                     private$.plotFailure(.fmt(
                         .("The split figure could not be drawn: {reason}. Check that every level of the Split By variable has enough data in at least two groups."),
@@ -1766,35 +2243,33 @@ jjdotplotstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             dep <- self$options$dep
             group <- self$options$group
 
-            if (is.null(dep) || is.null(group))
-                return('')
+            if (!is.character(dep) || length(dep) != 1L || is.na(dep) || !nzchar(dep) ||
+                !is.character(group) || length(group) != 1L || is.na(group) || !nzchar(group))
+                return("")
 
-            # Build the argument list in option-declaration order.
-            #
-            # Every variable-name option (dep, group, grvar) is emitted as a
-            # deparse()'d string literal. deparse() produces valid, fully-escaped
-            # R for names containing spaces, quotes or backslashes (e.g.
-            # `Tumor Grade`); jmvcore's default sourcify would emit these as bare,
-            # unquoted symbols and yield invalid syntax. Detecting OptionVariable
-            # by class (rather than by name) means any variable option added later
-            # is escaped automatically.
-            #
-            # data/dep/group are NOT re-emitted through private$.asArgs() - doing
-            # so previously duplicated dep and group in the generated syntax (the
-            # "double variables" bug). All non-variable options keep jmvcore's
-            # per-option sourcify so formatting stays consistent with jamovi.
+            # Build the argument list in option-declaration order, filtering out
+            # undeclared .omv options, dropping list/language values, and escaping
+            # all character scalars via encodeString(..., quote = '"').
+            valid_names <- names(formals(jjdotplotstats))
             args <- character(0)
             for (option in private$.options$options) {
-                if (option$name == 'data')
+                if (option$name == "data" || !option$name %in% valid_names)
                     next
-                if (inherits(option, 'OptionVariable') || inherits(option, 'OptionVariables')) {
+                if (inherits(option, "OptionVariable")) {
                     val <- option$value
-                    if (!is.null(val))
-                        args <- c(args, paste0(option$name, ' = ',
-                                               paste0(deparse(val), collapse = '')))
+                    if (is.character(val) && length(val) == 1L && !is.na(val) && nzchar(val))
+                        args <- c(args, paste0(option$name, " = ",
+                                               encodeString(val, quote = '"')))
+                } else if (inherits(option, "OptionVariables")) {
+                    val <- option$value
+                    if (is.character(val) && length(val) >= 1L && !anyNA(val)) {
+                        enc <- encodeString(val, quote = '"')
+                        rhs <- if (length(enc) == 1L) enc else paste0("c(", paste(enc, collapse = ", "), ")")
+                        args <- c(args, paste0(option$name, " = ", rhs))
+                    }
                 } else {
                     as <- private$.sourcifyOption(option)
-                    if (!identical(as, ''))
+                    if (!identical(as, ""))
                         args <- c(args, as)
                 }
             }
@@ -1804,8 +2279,8 @@ jjdotplotstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             if (is.null(pkg_name)) pkg_name <- "ClinicoPath"  # fallback
 
             # Build complete function call
-            paste0(pkg_name, '::jjdotplotstats(\n    data = data,\n    ',
-                   paste(args, collapse = ',\n    '), ')')
+            paste0(pkg_name, "::jjdotplotstats(\n    data = data,\n    ",
+                   paste(args, collapse = ",\n    "), ")")
         }
     ) # End of public list
 )

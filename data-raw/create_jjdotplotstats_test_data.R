@@ -118,8 +118,8 @@ jjdotplotstats_test_data$hemoglobin_level <- ifelse(
 )
 jjdotplotstats_test_data$hemoglobin_level <- round(jjdotplotstats_test_data$hemoglobin_level, 1)
 
-# Save the dataset
-use_data_multi_format(jjdotplotstats_test_data, overwrite = TRUE, save_csv = TRUE)
+# Save comprehensive CSV test fixture to data/ (ignored by R CMD build via .Rbuildignore)
+utils::write.csv(jjdotplotstats_test_data, "data/jjdotplotstats_test_data.csv", row.names = FALSE)
 
 # Preview the data
 print("jjdotplotstats_test_data structure:")

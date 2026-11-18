@@ -102,7 +102,7 @@ analyses:
   - title: Venn Diagram
     name: venn
     ns: ClinicoPath
-    menuGroup: Exploration
+    menuGroup: ExplorationT
     menuSubgroup: ClinicoPath Descriptive Plots
     menuTitle: Venn Diagram
     menuSubtitle: Venn Diagram, UpSet Plot
@@ -111,7 +111,7 @@ analyses:
   - title: Variable Tree
     name: vartree
     ns: ClinicoPath
-    menuGroup: Exploration
+    menuGroup: ExplorationT
     menuSubgroup: ClinicoPath Descriptive Plots
     menuTitle: Variable Tree
     description: >
@@ -1757,18 +1757,22 @@ analyses:
   - title: Horizontal Box-Violin Comparison
     name: jjdotplotstats
     ns: ClinicoPath
-    menuGroup: JJStatsPlot
+    menuGroup: JJStatsPlotT
     menuSubgroup: Categorical vs Continuous
     menuTitle: Horizontal Box-Violin Comparison
     ribbon: analyses
     category: analyses
-    description: |-
-      Compares a continuous variable across groups and draws the comparison
-      horizontally - values on the x axis, group labels down the y axis - with
-      an optional vertical reference line. Wraps ggstatsplot::ggbetweenstats
-      and ggstatsplot::grouped_ggbetweenstats, so the figure is a box-violin
-      plot with the individual observations shown, and the test is a
-      between-groups comparison using every observation.
+    description: >
+      Compares a continuous variable across independent groups and draws the
+      comparison horizontally - values along the x axis and group labels down
+      the y axis - with violins, boxplots, individual observations, and an
+      optional vertical reference threshold line. Wraps ggstatsplot
+      between-group comparisons using Welch's t-test or Welch's ANOVA
+      (parametric), Mann-Whitney U or Kruskal-Wallis (nonparametric), Yuen or
+      Wilcox 20 percent trimmed-mean tests (robust), and Jeffreys-Zellner-Siow
+      Bayes factors (Bayesian). For a Cleveland dot chart with one summary point
+      per group tested against a reference value, use Dot Chart (Summary vs
+      Reference Value) instead.
   - title: Box-Violin Plots to Compare Between Groups
     name: jjbetweenstats
     ns: ClinicoPath

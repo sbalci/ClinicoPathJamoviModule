@@ -555,3 +555,371 @@ test_that("C25 (VAL-jjdotplotstats-15): jjdotplotstats.r.yaml credits primary st
   expect_true(all(c("WRS2", "BayesFactor", "effectsize", "PMCMRplus") %in% r_keys))
   expect_false("digest" %in% r_keys)
 })
+
+# ==============================================================================
+# REGRESSION TESTS FOR INDEPENDENT REVIEW FINDINGS (IND-jjdotplotstats-01..07)
+# ==============================================================================
+
+# Oracle: stateful R6 data updates with identical dimensions and column names must invalidate .prepareData() cache
+test_that("IND-jjdotplotstats-01: stateful R6 equal-dimension cell updates invalidate MD5 cache and enforce constant-dep rejection", {
+  d1 <- val_jdp_ka2()[1:12, ]
+  opts <- ClinicoPath:::jjdotplotstatsOptions$new(
+    dep = "y", group = "g", resultssubtitle = TRUE, showexplanation = TRUE, k = 4
+  )
+  ana <- ClinicoPath:::jjdotplotstatsClass$new(options = opts, data = d1)
+  suppressWarnings(ana$run())
+  expect_true(isTRUE(ana$results$plot$state$valid))
+
+  d_const <- data.frame(y = rep(99, 12), g = d1$g)
+  ana$.__enclos_env__$private$.data <- d_const
+  suppressWarnings(ana$run())
+  expect_false(isTRUE(ana$results$plot$state$valid))
+  expect_match(val_jdp_strip_html(ana$results$notices$content), "no variation to compare")
+  expect_identical(val_jdp_strip_html(ana$results$explanation$content), "")
+})
+
+# Oracle: uncomputable tests (zero-variance floor / binary separation) and Valid->Invalid transitions must never emit false prose
+test_that("IND-jjdotplotstats-02: zero-variance floor, binary separation, and Valid->Invalid transitions clear or qualify explanation and notices", {
+  d_floor <- data.frame(
+    y = c(rep(0, 10), 4:13, c(15, 18, 20, 22, 25, 28, 30, 32, 35, 40)),
+    g = factor(rep(c("Healthy", "StageI", "StageIV"), each = 10), levels = c("Healthy", "StageI", "StageIV"))
+  )
+  res_fl <- suppressWarnings(ClinicoPath::jjdotplotstats(
+    data = d_floor, dep = "y", group = "g", typestatistics = "parametric",
+    resultssubtitle = TRUE, showexplanation = TRUE, pairwisedisplay = "significant", k = 4
+  ))
+  exp_fl <- val_jdp_strip_html(res_fl$explanation$content)
+  not_fl <- val_jdp_strip_html(res_fl$notices$content)
+  expect_no_match(exp_fl, "was performed using Welch's one-way analysis of variance, with partial eta-squared reported", fixed = TRUE)
+  expect_no_match(exp_fl, "shown as brackets", fixed = TRUE)
+  expect_no_match(not_fl, "parametric pairwise brackets use the Games-Howell", fixed = TRUE)
+  expect_match(exp_fl, "not estimable|could not be evaluated")
+
+  d_sep01 <- data.frame(y = c(rep(0, 10), rep(1, 10)), g = factor(rep(c("Neg", "Pos"), each = 10)))
+  res_sep_b <- suppressWarnings(ClinicoPath::jjdotplotstats(
+    data = d_sep01, dep = "y", group = "g", typestatistics = "bayes",
+    resultssubtitle = TRUE, bfmessage = TRUE
+  ))
+  not_sep <- val_jdp_strip_html(res_sep_b$notices$content)
+  expect_false(grepl("no test subtitle is shown", not_sep, fixed = TRUE) &&
+                 grepl("the subtitle itself reports the Bayes factor", not_sep, fixed = TRUE))
+})
+
+# Oracle: Efron (1987) BCa bootstrap CI for ordinal epsilon^2 = H/(N-1) must bracket its point estimate within [0, 1]
+test_that("IND-jjdotplotstats-03: nonparametric 3-group ordinal epsilon^2 BCa CI contains its own point estimate on tied floor data", {
+  d_floor <- data.frame(
+    y = c(rep(0, 10), 4:13, c(15, 18, 20, 22, 25, 28, 30, 32, 35, 40)),
+    g = factor(rep(c("Healthy", "StageI", "StageIV"), each = 10), levels = c("Healthy", "StageI", "StageIV"))
+  )
+  res_np <- suppressWarnings(ClinicoPath::jjdotplotstats(
+    data = d_floor, dep = "y", group = "g", typestatistics = "nonparametric",
+    resultssubtitle = TRUE, seed = 42, k = 4
+  ))
+  sub_np <- val_jdp_parse_sub(res_np$plot$state$subtitle)
+  expect_gte(sub_np$ci_low, 0)
+  expect_lte(sub_np$ci_high, 1)
+  expect_lte(sub_np$ci_low, sub_np$eff)
+  expect_gte(sub_np$ci_high, sub_np$eff)
+})
+
+# Oracle: runtime .h.R refs must match .r.yaml statistical engines
+test_that("IND-jjdotplotstats-04: runtime .h.R bibliography refs match jamovi/jjdotplotstats.r.yaml", {
+  skip_if_not_installed("yaml")
+  ryaml <- testthat::test_path("..", "..", "jamovi", "jjdotplotstats.r.yaml")
+  skip_if_not(file.exists(ryaml))
+  d2 <- val_jdp_ka2()
+  res <- suppressWarnings(ClinicoPath::jjdotplotstats(d2, "y", "g"))
+  runtime_refs <- unlist(res$.__enclos_env__$private$.refs)
+  ryaml_refs   <- yaml::read_yaml(ryaml)$refs
+  expect_setequal(runtime_refs, ryaml_refs)
+})
+
+# Oracle: mixed 2/3-group Split By with bfmessage=TRUE must stamp seed caption and avoid false 'No Bayes factor caption is shown' notice
+test_that("IND-jjdotplotstats-05: mixed 2/3-group Split By with bfmessage=TRUE discloses per-panel BF caption and stamps seed", {
+  d_mix <- rbind(
+    data.frame(y = c(2, 4, 4, 6, 8, 12, 6, 10, 10, 14, 16, 20),
+               g = factor(rep(c("A", "B"), each = 6), levels = c("A", "B", "C")), s = factor("TwoGrp")),
+    data.frame(y = c(2, 4, 6, 8, 10, 12, 6, 10, 12, 14, 16, 20, 15, 18, 20, 22, 25, 30),
+               g = factor(rep(c("A", "B", "C"), each = 6), levels = c("A", "B", "C")), s = factor("ThreeGrp"))
+  )
+  res_mix <- suppressWarnings(ClinicoPath::jjdotplotstats(
+    data = d_mix, dep = "y", group = "g", grvar = "s", typestatistics = "parametric",
+    resultssubtitle = TRUE, bfmessage = TRUE, k = 4
+  ))
+  p_mix <- val_jdp_render_png(res_mix$plot2)$plot
+  not_mix <- val_jdp_strip_html(res_mix$notices$content)
+  expect_no_match(not_mix, "No Bayes factor caption is shown", fixed = TRUE)
+  expect_match(not_mix, "shown on two-group Split By panels", fixed = TRUE)
+  expect_match(p_mix$patches$annotation$caption, "seed", ignore.case = TRUE)
+})
+
+# Oracle: Benjamini & Hochberg (1995) FDR and Bonferroni adjustments on pairwise Welch t-tests when explicitly selected
+test_that("IND-jjdotplotstats-06: parametric 3-group padjustmethod='fdr' and 'bonferroni' compute BH and Bonferroni Welch t p-values", {
+  d3 <- val_jdp_ka3_pw()
+  pairs <- utils::combn(levels(d3$g), 2L, simplify = FALSE)
+  raw_p <- vapply(pairs, function(pr) {
+    stats::t.test(d3$y[d3$g == pr[1]], d3$y[d3$g == pr[2]], var.equal = FALSE)$p.value
+  }, numeric(1))
+  bh_p   <- stats::p.adjust(raw_p, method = "BH")
+  bonf_p <- stats::p.adjust(raw_p, method = "bonferroni")
+
+  p_fdr <- val_jdp_render_png(suppressWarnings(ClinicoPath::jjdotplotstats(
+    data = d3, dep = "y", group = "g", typestatistics = "parametric",
+    pairwisedisplay = "all", padjustmethod = "fdr", k = 5
+  ))$plot)$plot
+  sig_fdr <- Filter(function(l) inherits(l$geom, "GeomSignif"), p_fdr$layers)[[1]]
+  shown_fdr <- vapply(as.character(sig_fdr$stat_params$annotations),
+                      function(a) as.numeric(parse(text = a)[[1]][[2]][[3]]), numeric(1))
+  expect_equal(unname(shown_fdr), unname(round(bh_p, 5)), tolerance = 1e-5)
+
+  p_bonf <- val_jdp_render_png(suppressWarnings(ClinicoPath::jjdotplotstats(
+    data = d3, dep = "y", group = "g", typestatistics = "parametric",
+    pairwisedisplay = "all", padjustmethod = "bonferroni", k = 5
+  ))$plot)$plot
+  sig_bonf <- Filter(function(l) inherits(l$geom, "GeomSignif"), p_bonf$layers)[[1]]
+  shown_bonf <- vapply(as.character(sig_bonf$stat_params$annotations),
+                       function(a) as.numeric(parse(text = a)[[1]][[2]][[3]]), numeric(1))
+  expect_equal(unname(shown_bonf), unname(round(bonf_p, 5)), tolerance = 1e-5)
+})
+
+# Oracle: SAMPL reporting & .a.yaml showexplanation contract ('reports the result as a sentence in plain language')
+test_that("IND-jjdotplotstats-07: showexplanation reports SAMPL per-group summaries and computed omnibus statistics", {
+  d2 <- val_jdp_ka2()
+  res <- suppressWarnings(ClinicoPath::jjdotplotstats(
+    data = d2, dep = "y", group = "g", typestatistics = "parametric",
+    resultssubtitle = FALSE, showexplanation = TRUE, k = 2
+  ))
+  exp_txt <- val_jdp_strip_html(res$explanation$content)
+  expect_match(exp_txt, "Ctrl \\(n = 6, mean = 6\\.00")
+  expect_match(exp_txt, "t = -2\\.65")
+  expect_match(exp_txt, "p = 0\\.03")
+  expect_match(exp_txt, "Cohen's d = -1\\.53")
+})
+
+# Oracle: release-gate rule (CLAUDE.md:198) - no jmvcore::reject() inside tryCatch, and non-numeric dep gets explicit ERROR notice
+test_that("CHK-REL-01: all-NA / non-numeric dep emits explicit ERROR notice and backend contains zero reject() calls inside tryCatch", {
+  d_bad <- data.frame(y = rep(NA_real_, 12), g = factor(rep(c("Ctrl", "Trt"), each = 6)))
+  res_bad <- ClinicoPath::jjdotplotstats(d_bad, "y", "g")
+  expect_false(isTRUE(res_bad$plot$state$valid))
+  expect_match(val_jdp_strip_html(res_bad$notices$content), "contains no finite numeric measurements")
+
+  b_path <- testthat::test_path("..", "..", "R", "jjdotplotstats.b.R")
+  if (file.exists(b_path)) {
+    expect_false(any(grepl("reject\\(", readLines(b_path, warn = FALSE))))
+  }
+})
+
+test_that("REV-jjdotplotstats-01: colorpalette applies distinct colour-blind-safe scales while preserving statistics", {
+  d3 <- val_jdp_ka3_pw()
+  r_jmv <- suppressWarnings(ClinicoPath::jjdotplotstats(
+    data = d3, dep = "y", group = "g", colorpalette = "jamovi", resultssubtitle = TRUE, k = 4
+  ))
+  r_oi <- suppressWarnings(ClinicoPath::jjdotplotstats(
+    data = d3, dep = "y", group = "g", colorpalette = "okabeito", resultssubtitle = TRUE, k = 4
+  ))
+  r_vir <- suppressWarnings(ClinicoPath::jjdotplotstats(
+    data = d3, dep = "y", group = "g", colorpalette = "viridis", resultssubtitle = TRUE, k = 4
+  ))
+  im_jmv <- val_jdp_render_png(r_jmv$plot)
+  im_oi  <- val_jdp_render_png(r_oi$plot)
+  im_vir <- val_jdp_render_png(r_vir$plot)
+
+  expect_false(identical(im_jmv$md5, im_oi$md5))
+  expect_false(identical(im_oi$md5, im_vir$md5))
+  expect_equal(
+    val_jdp_parse_sub(im_jmv$plot$labels$subtitle),
+    val_jdp_parse_sub(im_oi$plot$labels$subtitle)
+  )
+})
+
+test_that("REV-jjdotplotstats-02: large-N (>300) nonparametric K>=3 block-jackknife BCa CI brackets ordinal epsilon-squared", {
+  set.seed(2026)
+  d_big <- data.frame(
+    y = c(stats::rnorm(200, 10, 2), stats::rnorm(200, 12, 2), stats::rnorm(200, 15, 2)),
+    g = factor(rep(c("G1", "G2", "G3"), each = 200), levels = c("G1", "G2", "G3"))
+  )
+  res <- suppressWarnings(ClinicoPath::jjdotplotstats(
+    data = d_big, dep = "y", group = "g", typestatistics = "nonparametric",
+    resultssubtitle = TRUE, seed = 42, k = 5
+  ))
+  sub <- val_jdp_parse_sub(res$plot$state$subtitle)
+  kw_h <- as.numeric(stats::kruskal.test(y ~ g, data = d_big)$statistic)
+  eps2_ref <- kw_h * (600 + 1) / (600^2 - 1)
+
+  expect_equal(sub$eff, eps2_ref, tolerance = 1e-4)
+  expect_lte(sub$ci_low, sub$eff)
+  expect_gte(sub$ci_high, sub$eff)
+})
+
+test_that("REV-jjdotplotstats-03: option-inactivity INFO notice fires when conflevel or effsizetype has no active display", {
+  d2 <- val_jdp_ka2()
+  r_inactive <- suppressWarnings(ClinicoPath::jjdotplotstats(
+    data = d2, dep = "y", group = "g", conflevel = 0.99,
+    resultssubtitle = FALSE, showexplanation = FALSE
+  ))
+  r_active <- suppressWarnings(ClinicoPath::jjdotplotstats(
+    data = d2, dep = "y", group = "g", conflevel = 0.99,
+    resultssubtitle = TRUE, showexplanation = FALSE
+  ))
+  expect_match(
+    val_jdp_strip_html(r_inactive$notices$content),
+    "Enable 'Statistical results in plot' or 'Assumptions and interpretation'"
+  )
+  expect_no_match(
+    val_jdp_strip_html(r_active$notices$content),
+    "Enable 'Statistical results in plot' or 'Assumptions and interpretation'"
+  )
+})
+
+test_that("REV-jjdotplotstats-04: high-cardinality K>8 pairwise crowding WARNING notice fires only when all pairs are drawn", {
+  set.seed(99)
+  d9 <- data.frame(
+    y = stats::rnorm(90, mean = rep(seq_len(9), each = 10), sd = 1.2),
+    g = factor(rep(paste0("Cohort_", seq_len(9)), each = 10))
+  )
+  r_all <- suppressWarnings(ClinicoPath::jjdotplotstats(
+    data = d9, dep = "y", group = "g", pairwisedisplay = "all"
+  ))
+  r_sig <- suppressWarnings(ClinicoPath::jjdotplotstats(
+    data = d9, dep = "y", group = "g", pairwisedisplay = "significant"
+  ))
+  expect_match(
+    val_jdp_strip_html(r_all$notices$content),
+    "Displaying all 36 pairwise brackets across 9 groups"
+  )
+  expect_no_match(
+    val_jdp_strip_html(r_sig$notices$content),
+    "Displaying all 36 pairwise brackets across 9 groups"
+  )
+})
+
+test_that("RR-jjdotplotstats-01: renderers do not duplicate todo HTML, mutate sibling panels on export, or depend on render order", {
+  set.seed(42)
+  d_sp <- data.frame(
+    y = c(stats::rnorm(15, 10, 2), stats::rnorm(15, 14, 2), stats::rnorm(15, 18, 2)),
+    g = factor(rep(c("G1", "G2", "G3"), each = 15)),
+    s = factor(rep(c("S1", "S2", "S1"), times = 15))
+  )
+  res <- suppressWarnings(ClinicoPath::jjdotplotstats(
+    data = d_sp, dep = "y", group = "g", grvar = "s",
+    centralityplotting = TRUE, centralityparameter = "mean", centralitytype = "nonparametric",
+    resultssubtitle = TRUE, seed = 42
+  ))
+  todo_before <- res$todo$content
+  im1 <- val_jdp_render_png(res$plot)
+  im2 <- val_jdp_render_png(res$plot2)
+  expect_identical(res$todo$content, todo_before)
+
+  # Restored export instance must leave todo and notices untouched (0 chars)
+  opts_ro <- ClinicoPath:::jjdotplotstatsOptions$new(
+    dep = "y", group = "g", grvar = "s",
+    centralityplotting = TRUE, centralityparameter = "mean", centralitytype = "nonparametric"
+  )
+  ana_ro <- ClinicoPath:::jjdotplotstatsClass$new(options = opts_ro, data = d_sp)
+  ana_ro$init()
+  ana_ro$results$plot$setState(res$plot$state)
+  invisible(val_jdp_render_png(ana_ro$results$plot))
+  expect_identical(nchar(ana_ro$results$todo$content), 0L)
+  expect_identical(nchar(ana_ro$results$notices$content), 0L)
+
+  # Reverse render order (plot2 before plot) produces identical PNG MD5s
+  res_rev <- suppressWarnings(ClinicoPath::jjdotplotstats(
+    data = d_sp, dep = "y", group = "g", grvar = "s",
+    centralityplotting = TRUE, centralityparameter = "mean", centralitytype = "nonparametric",
+    resultssubtitle = TRUE, seed = 42
+  ))
+  im2_rev <- val_jdp_render_png(res_rev$plot2)
+  im1_rev <- val_jdp_render_png(res_rev$plot)
+  expect_identical(im1$md5, im1_rev$md5)
+  expect_identical(im2$md5, im2_rev$md5)
+})
+
+test_that("RR-jjdotplotstats-02: live R6 re-runs retain centrality-disagreement WARNING across option cache hits", {
+  d2 <- val_jdp_ka2()
+  opts_live <- ClinicoPath:::jjdotplotstatsOptions$new(
+    dep = "y", group = "g",
+    centralityplotting = TRUE, centralityparameter = "mean", centralitytype = "nonparametric"
+  )
+  ana_live <- ClinicoPath:::jjdotplotstatsClass$new(options = opts_live, data = d2)
+  ana_live$run()
+  expect_match(val_jdp_strip_html(ana_live$results$notices$content), "two central-tendency settings disagree")
+  ana_live$run()
+  expect_match(val_jdp_strip_html(ana_live$results$notices$content), "two central-tendency settings disagree")
+})
+
+test_that("RR-jjdotplotstats-03 & 04: 0-row filter resets render state/todo and non-finite testvalue renders safely", {
+  d2 <- val_jdp_ka2()
+  opts <- ClinicoPath:::jjdotplotstatsOptions$new(dep = "y", group = "g")
+  ana <- ClinicoPath:::jjdotplotstatsClass$new(options = opts, data = d2)
+  ana$run()
+  expect_true(isTRUE(ana$results$plot$state$valid))
+
+  # Simulate empty filtered dataset on a new run or non-finite testvalue
+  ana_empty <- ClinicoPath:::jjdotplotstatsClass$new(options = opts, data = d2[0, , drop = FALSE])
+  ana_empty$results$plot$setState(list(valid = TRUE))
+  ana_empty$results$todo$setContent("stale")
+  ana_empty$run()
+  expect_false(isTRUE(ana_empty$results$plot$state$valid))
+  expect_identical(ana_empty$results$todo$content, "")
+
+  res_inf_tv <- suppressWarnings(ClinicoPath::jjdotplotstats(
+    data = d2, dep = "y", group = "g", testvalueline = TRUE, testvalue = Inf
+  ))
+  im_inf <- val_jdp_render_png(res_inf_tv$plot)
+  expect_s3_class(im_inf$plot, "gg")
+})
+
+test_that("SEC-jjdotplotstats-01: asSource escapes quote-breaking strings, backslashes, undeclared names, and list values", {
+  d2 <- val_jdp_ka2()
+  payload <- 'Title", k = {stop("X"); 2}, xtitle = "x'
+
+  # 1. Free-text String options & trailing backslash
+  for (opt_nm in c("mytitle", "xtitle", "ytitle")) {
+    opts <- ClinicoPath:::jjdotplotstatsOptions$new(dep = "y", group = "g")
+    an <- ClinicoPath:::jjdotplotstatsClass$new(options = opts, data = d2)
+    o <- an$options$option(opt_nm)
+    o$value <- payload
+    ex <- parse(text = an$asSource())[[1]]
+    mc <- match.call(ClinicoPath::jjdotplotstats, ex)
+    expect_identical(mc[[opt_nm]], payload)
+    expect_null(mc$k)
+  }
+
+  opts_bs <- ClinicoPath:::jjdotplotstatsOptions$new(dep = "y", group = "g", mytitle = "C:\\temp\\")
+  an_bs <- ClinicoPath:::jjdotplotstatsClass$new(options = opts_bs, data = d2)
+  mc_bs <- match.call(ClinicoPath::jjdotplotstats, parse(text = an_bs$asSource())[[1]])
+  expect_identical(mc_bs$mytitle, "C:\\temp\\")
+
+  # 2. Tampered .omv string on a non-String option, undeclared option name, and list value on OptionVariable
+  opts_omv <- ClinicoPath:::jjdotplotstatsOptions$new(dep = "y", group = "g")
+  an_omv <- ClinicoPath:::jjdotplotstatsClass$new(options = opts_omv, data = d2)
+  o_k <- an_omv$options$option("conflevel")
+  o_k$value <- payload
+  an_omv$options$.addOption(jmvcore:::Option$new('mytitle = "a", k = {stop("X"); 2}, xtitle', "b"))
+  o_gr <- an_omv$options$option("grvar")
+  o_gr$value <- list(bad = quote(stop("X")))
+  mc_omv <- match.call(ClinicoPath::jjdotplotstats, parse(text = an_omv$asSource())[[1]])
+  expect_identical(mc_omv$conflevel, payload)
+  expect_null(mc_omv$k)
+  expect_null(mc_omv$grvar)
+})
+
+test_that("SEC-jjdotplotstats-02: adversarial column names and factor levels neither execute R code nor inject raw HTML", {
+  canary_file <- tempfile(fileext = ".txt")
+  on.exit(unlink(canary_file), add = TRUE)
+  dep_nm <- sprintf('stop({writeLines("RCE", %s); "DEP"})', deparse(canary_file))
+  grp_nm <- '<img src=x onerror=alert(1)>'
+  d_sec <- data.frame(check.names = FALSE, id = seq_len(12))
+  d_sec[[dep_nm]] <- c(stats::rnorm(6, 10, 2), stats::rnorm(6, 15, 2))
+  d_sec[[grp_nm]] <- factor(rep(c('<script>alert(1)</script>', 'a" | print("X") & "'), each = 6))
+
+  opts <- ClinicoPath:::jjdotplotstatsOptions$new(
+    dep = dep_nm, group = grp_nm, resultssubtitle = TRUE, showexplanation = TRUE
+  )
+  an <- ClinicoPath:::jjdotplotstatsClass$new(options = opts, data = d_sec)
+  an$run()
+  expect_false(file.exists(canary_file))
+  all_html <- paste(an$results$todo$content, an$results$notices$content, an$results$explanation$content)
+  expect_false(grepl("<img src=x", all_html, fixed = TRUE))
+  expect_false(grepl("<script>alert", all_html, fixed = TRUE))
+})

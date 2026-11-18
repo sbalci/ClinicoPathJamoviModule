@@ -317,6 +317,21 @@ vennClass <- if (requireNamespace('jmvcore'))
                         trueCount = NA_integer_, falseCount = NA_integer_,
                         totalCount = NA_integer_, truePercentage = NA_real_))
 
+                # Invalidate computed output before any validation return, including
+                # reused-object runs where the client has not applied clearWith.
+                for (img in c("plotGgvenn", "plotGgVennDiagram", "plotUpsetR", "plotComplexUpset"))
+                    self$results[[img]]$setState(NULL)
+                for (nm in c("clinicalSummary", "reportSentences", "setCalculations"))
+                    self$results[[nm]]$setContent("<div></div>")
+                self$results$summary$setNote("levels", NULL)
+                .deleteTableRows(self$results$membershipTable)
+                self$results$membershipTable$setNote("truncated", NULL)
+                # Clear every existing scaffold row even when a required slot is unset.
+                for (i in seq_len(self$results$summary$rowCount))
+                    self$results$summary$setRow(rowNo = i, values = list(
+                        trueCount = NA_integer_, falseCount = NA_integer_,
+                        totalCount = NA_integer_, truePercentage = NA_real_))
+
                 # Validate required variables and their true levels
                 if (!private$.validateVariables()) {
                     private$.displayNotices()

@@ -14,8 +14,10 @@
 
 ## 1a. Changelog
 
+- **Date**: 2026-11-17
+- **Summary**: Added `colorpalette` (`jamovi`, `okabeito`, `viridis`, `dark2`) colour-blind-safe palette selector, delete-block jackknife BCa speedup for `N > 300` nonparametric `K >= 3`, option-inactivity and high-cardinality (`K > 8`) pairwise advisory notices, and full Turkish (`tr.po`) translation catalog coverage.
 - **Date**: 2026-11-16
-- **Summary**: Updated options/results reference and statistical architecture following exhaustive validation and post-hoc, Bayesian, data-hygiene, and Split-By fixes (`v1.0.82`).
+- **Summary**: Fixed all 7 independent-review findings (`IND-jjdotplotstats-01`..`07`): data-column MD5 cache invalidation, uncomputable-test narrative & notice guards, `Valid -> Invalid` explanation clearing, 1,000-resample BCa bootstrap CI for 3+-group nonparametric ordinal epsilon-squared, distinct parametric pairwise adjustment modes (Games-Howell FWER under Holm vs BH/Bonferroni/unadjusted pairwise Welch t-tests), per-stratum `Split By` Bayes-factor & seed-caption handling, SAMPL-compliant plain-language result summaries, and regenerated `.h.R` / `.Rd` / `0000.yaml` (`v1.0.82`).
 - **Date**: 2026-08-29
 - **Summary**: Comprehensive documentation suite created & verified against active schemas and backend implementation.
 
@@ -37,6 +39,7 @@
 | `xtitle` | `String` | `''` | X-axis Label (Values) |
 | `ytitle` | `String` | `''` | Y-axis Label (Groups) |
 | `originaltheme` | `Bool` | `FALSE` | Original ggstatsplot theme |
+| `colorpalette` | `List` | `jamovi` | Color Palette (`jamovi`, `okabeito`, `viridis`, `dark2`) |
 | `resultssubtitle` | `Bool` | `FALSE` | Statistical results in plot |
 | `testvalue` | `Number` | `0` | Reference Line Value |
 | `bfmessage` | `Bool` | `FALSE` | Bayes factor caption (2-group parametric only) |

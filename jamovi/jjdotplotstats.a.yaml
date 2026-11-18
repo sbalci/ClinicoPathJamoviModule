@@ -48,16 +48,17 @@ description:
     #             ytitle = "Species"
     #         )
             
-    #         # Grouped analysis with mtcars dataset
+    #         # Grouped robust analysis with factor-coerced mtcars dataset
+    #         mtcars_f <- transform(mtcars, cyl = factor(cyl), am = factor(am))
     #         jjdotplotstats(
-    #             data = mtcars,
+    #             data = mtcars_f,
     #             dep = "mpg",
     #             group = "cyl",
     #             grvar = "am",
     #             typestatistics = "robust",
+    #             resultssubtitle = TRUE,
     #             centralityplotting = TRUE,
     #             centralitytype = "robust",
-    #             effsizetype = "unbiased",
     #             conflevel = 0.99,
     #             k = 3
     #         )
@@ -68,8 +69,9 @@ description:
     #             dep = "len",
     #             group = "supp",
     #             typestatistics = "bayes",
-    #             bfmessage = TRUE,
-    #             centralityparameter = "mean",
+    #             resultssubtitle = TRUE,
+    #             centralityplotting = TRUE,
+    #             centralitytype = "bayes",
     #             mytitle = "Tooth Growth by Supplement Type"
     #         )
 
@@ -185,13 +187,13 @@ options:
             Which post-hoc comparisons between individual pairs of groups are
             drawn as brackets on comparisons of three or more groups (two-group
             comparisons have only one pair, already tested in the subtitle).
-            Parametric comparisons use the Games-Howell procedure with
-            single-step Tukey studentized-range family-wise error control (or
-            unadjusted pairwise Welch t-tests when Multiple Comparison
-            Adjustment is None); nonparametric comparisons use Dunn's test;
-            robust comparisons use Yuen's trimmed-mean linear contrasts; and
-            Bayesian comparisons display unadjusted natural-log JZS Bayes
-            factors across all pairs.
+            Parametric comparisons use the Games-Howell studentized-range
+            procedure under Holm (default), or pairwise Welch unequal-variance
+            t-tests with Benjamini-Hochberg, Bonferroni, or no multiplicity
+            adjustment when those options are chosen; nonparametric comparisons
+            use Dunn's test; robust comparisons use Yuen's trimmed-mean linear
+            contrasts; and Bayesian comparisons display unadjusted natural-log
+            JZS Bayes factors across all pairs.
 
     - name: padjustmethod
       title: 'Multiple Comparison Adjustment'
@@ -211,12 +213,14 @@ options:
             Multiplicity adjustment for post-hoc pairwise p values when three or
             more groups are compared. For nonparametric (Dunn) and robust (Yuen)
             comparisons, Holm, Benjamini-Hochberg, or Bonferroni adjustment is
-            applied directly; for parametric comparisons, any adjusted choice
-            retains single-step Games-Howell studentized-range family-wise error
-            control without double-adjusting, whereas choosing 'None' computes
-            unadjusted pairwise Welch t-test p values and triggers a multiplicity
-            warning. Bayesian pairwise comparisons report Bayes factors rather
-            than p values and are unaffected.
+            applied directly. For parametric comparisons, 'holm' (default) uses
+            the single-step Games-Howell studentized-range procedure for
+            family-wise error control without double-adjusting, 'fdr' and
+            'bonferroni' apply Benjamini-Hochberg false-discovery-rate or
+            Bonferroni adjustment to pairwise Welch unequal-variance t-tests,
+            and 'none' reports unadjusted pairwise Welch t-test p values with a
+            multiplicity warning. Bayesian pairwise comparisons report Bayes
+            factors rather than p values and are unaffected.
 
     - name: centralityplotting
       title: Central tendency lines
@@ -283,6 +287,25 @@ options:
             Use the original ggstatsplot theme instead of jamovi's default theme.
             The original theme may be more suitable for publications.
 
+    - name: colorpalette
+      title: Color palette
+      type: List
+      options:
+        - title: jamovi (follow global)
+          name: jamovi
+        - title: Okabe-Ito (color-blind safe)
+          name: okabeito
+        - title: Viridis (perceptually uniform)
+          name: viridis
+        - title: Dark2 (classic ggstatsplot)
+          name: dark2
+      default: jamovi
+      description:
+          R: >
+            Discrete color palette for group violins and points. 'jamovi'
+            follows the user's global jamovi plot palette; 'okabeito',
+            'viridis', and 'dark2' provide explicit color-blind-safe overrides.
+
 
     - name: resultssubtitle
       title: Statistical results in plot
@@ -316,7 +339,7 @@ options:
             with Cauchy prior scale r = 0.707 alongside a two-group parametric
             test. On the log_e(BF_01) scale, 0 indicates equal support (BF_01 =
             1), negative values favor a group difference (below -1.10 moderate
-            evidence [BF_10 > 3]; below -2.30 strong evidence [BF_10 > 10]), and
+            evidence, BF_10 > 3; below -2.30 strong evidence, BF_10 > 10), and
             positive values favor the null hypothesis of no difference (above
             +1.10 moderate; above +2.30 strong; Jeffreys, 1961; Lee &
             Wagenmakers, 2014). Applies only when Statistical Test Type is

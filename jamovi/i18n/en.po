@@ -17941,14 +17941,7 @@ msgid "A 3% discount rate means $100 next year is worth $97 today"
 msgstr ""
 
 #: R/jjdotplotstats.b.R
-msgid ""
-"A Bayes factor near 1 means the data do not discriminate between the "
-"hypotheses - which is different from evidence of no difference, and is worth "
-"stating explicitly when you report it."
-msgstr ""
-
-#: R/jjdotplotstats.b.R
-msgid "a Bayesian analysis of variance"
+msgid "a Bayes factor is only defined here for the parametric test"
 msgstr ""
 
 #: R/jjpiestats.b.R
@@ -17957,6 +17950,10 @@ msgstr ""
 
 #: R/jjpiestats.b.R
 msgid "a Bayesian goodness-of-fit proportion analysis"
+msgstr ""
+
+#: R/jjdotplotstats.b.R
+msgid "a Bayesian one-way analysis of variance"
 msgstr ""
 
 #: R/jjdotplotstats.b.R
@@ -18141,7 +18138,7 @@ msgstr ""
 msgid ""
 "A comparison of {outcome} across {groups} groups of {factor} was performed "
 "using {test}, with {effect} reported as the effect size and a {level} per "
-"cent {interval} interval. {pairwise}"
+"cent {interval} interval."
 msgstr ""
 
 #: R/ihcheterogeneity.b.R
@@ -20287,6 +20284,27 @@ msgstr ""
 #: R/jjridges.b.R
 #: R/linechart.b.R
 msgid "across"
+msgstr ""
+
+#: R/jjdotplotstats.b.R
+msgid ""
+"Across N = {total} complete observations ({groupsummary}), {test} could not "
+"be evaluated ({reason}), so no omnibus test statistic, interval, or post-hoc "
+"pairwise brackets were produced."
+msgstr ""
+
+#: R/jjdotplotstats.b.R
+msgid ""
+"Across N = {total} complete observations ({groupsummary}), {test} gave "
+"{statname} = {statval}, p = {pval} ({verdict}), with {effname} = {effval} "
+"({level} per cent confidence interval {cilow} to {cihigh})."
+msgstr ""
+
+#: R/jjdotplotstats.b.R
+msgid ""
+"Across N = {total} complete observations ({groupsummary}), {test} yielded "
+"log_e(BF_01) = {logbf} ({evidence}), with {effname} = {effval} ({level} per "
+"cent credible interval {cilow} to {cihigh})."
 msgstr ""
 
 #: R/agreement.b.R
@@ -31294,7 +31312,7 @@ msgid "Bayesian (Evidence-Based)"
 msgstr ""
 
 #: jjdotplotstats/options/typestatistics/bayes.title
-msgid "Bayesian (provides evidence strength)"
+msgid "Bayesian (JZS Bayes factors and posterior estimation)"
 msgstr ""
 
 #: adaptivetrialdesign/options/design_framework/bayesian.title
@@ -31612,8 +31630,20 @@ msgstr ""
 msgid "Bayesian paired samples t-test"
 msgstr ""
 
+#: R/jjdotplotstats.b.R
+msgid ""
+"Bayesian pairwise comparisons report natural-log JZS Bayes factors rather "
+"than frequentist p values, so all group pairs are shown on the plot."
+msgstr ""
+
 #: R/jjcorrmat.b.R
 msgid "Bayesian Pearson"
+msgstr ""
+
+#: R/jjdotplotstats.b.R
+msgid ""
+"Bayesian posterior quantities and credible intervals use Markov chain Monte "
+"Carlo sampling with fixed random seed {seed} for exact reproducibility."
 msgstr ""
 
 #: comprehensiveSurvivalPower/options/statistical_method/bayesian.title
@@ -31648,6 +31678,10 @@ msgstr ""
 
 #: R/jjbetweenstats.b.R
 msgid "Bayesian t-test"
+msgstr ""
+
+#: R/jjdotplotstats.b.R
+msgid "Bayesian t-test returned no expression"
 msgstr ""
 
 #: bayesianclinical/results/treatment_effect_analysis.title
@@ -32650,7 +32684,7 @@ msgid "Bias-Corrected"
 msgstr ""
 
 #: jjdotplotstats/options/effsizetype/unbiased.title
-msgid "Bias-corrected - Hedge's g with 2 groups, omega-squared with 3+"
+msgid "Bias-corrected - Hedges' g with 2 groups, omega-squared with 3+"
 msgstr ""
 
 #: idi/options/bootstrap_method/bca.title
@@ -46031,6 +46065,7 @@ msgstr ""
 #: alluvial/options/colorPalette.title
 #: jjbarstats/options/palette.title
 #: jjbarstats/ui[3][0][0]/palette.label
+#: jjdotplotstats/options/colorpalette.title
 #: jjpubr/ui[6]/palette.label
 #: jjridges/ui[4][0]/color_palette.label
 #: jjsegmentedtotalbar/ui[4][0]/color_palette.label
@@ -47667,34 +47702,17 @@ msgid "Compared with"
 msgstr ""
 
 #: package/analyses/jjdotplotstats.description
-msgid ""
-"Compares a continuous variable across groups and draws the comparison\n"
-"horizontally - values on the x axis, group labels down the y axis - with\n"
-"an optional vertical reference line. Wraps ggstatsplot::ggbetweenstats\n"
-"and ggstatsplot::grouped_ggbetweenstats, so the figure is a box-violin\n"
-"plot with the individual observations shown, and the test is a\n"
-"between-groups comparison using every observation."
-msgstr ""
-
 #: jjdotplotstats/options.description.main
 msgid ""
-"Compares a continuous variable across groups and draws the comparison\n"
-"horizontally - values on the x axis, group labels down the y axis - with\n"
-"an optional vertical reference line. Wraps ggstatsplot::ggbetweenstats\n"
-"and ggstatsplot::grouped_ggbetweenstats, so the figure is a box-violin\n"
-"plot with the individual observations shown, and the test is a\n"
-"between-groups comparison using every observation.\n"
-"\n"
-"This analysis was previously titled \"Dot Chart\", which described neither\n"
-"the figure nor the statistic: it draws violins and boxplots, not a dot\n"
-"chart, and it is a between-groups test rather than a one-sample one. For\n"
-"a genuine Cleveland dot chart - one summary point per label, tested\n"
-"against a reference value - use \"Dot Chart (Summary vs Reference Value)\",\n"
-"which wraps ggstatsplot::ggdotplotstats.\n"
-"\n"
-"Prefer this over \"Box-Violin Plots to Compare Between Groups\" when the\n"
-"group labels are long or numerous, since the horizontal layout gives them\n"
-"room, or when a clinical threshold line is useful."
+"Compares a continuous variable across independent groups and draws the "
+"comparison horizontally - values along the x axis and group labels down the "
+"y axis - with violins, boxplots, individual observations, and an optional "
+"vertical reference threshold line. Wraps ggstatsplot between-group "
+"comparisons using Welch's t-test or Welch's ANOVA (parametric), Mann-Whitney "
+"U or Kruskal-Wallis (nonparametric), Yuen or Wilcox 20 percent trimmed-mean "
+"tests (robust), and Jeffreys-Zellner-Siow Bayes factors (Bayesian). For a "
+"Cleveland dot chart with one summary point per group tested against a "
+"reference value, use Dot Chart (Summary vs Reference Value) instead."
 msgstr ""
 
 #: R/jjdotchart.b.R
@@ -59109,6 +59127,10 @@ msgstr ""
 msgid "Dark2"
 msgstr ""
 
+#: jjdotplotstats/options/colorpalette/dark2.title
+msgid "Dark2 (classic ggstatsplot)"
+msgstr ""
+
 #: jjbarstats/options/palette/Dark2.title
 msgid "Dark2 (color-blind safe)"
 msgstr ""
@@ -61951,6 +61973,10 @@ msgstr ""
 
 #: statsplot2/ui[0][0].label
 msgid "Dependent Variable (y-axis)"
+msgstr ""
+
+#: R/jjdotplotstats.b.R
+msgid "Dependent Variable and Grouping Variable must be distinct columns."
 msgstr ""
 
 #: jextractggstats/options/dep_var.description
@@ -66935,6 +66961,18 @@ msgstr ""
 msgid "Display waterfall plot with best CONFIRMED response per patient."
 msgstr ""
 
+#: R/jjdotplotstats.b.R
+msgid ""
+"Displaying all {pairs} Bayesian pairwise brackets across {groups} groups can "
+"crowd the figure; consider setting Pairwise Comparisons to 'None'."
+msgstr ""
+
+#: R/jjdotplotstats.b.R
+msgid ""
+"Displaying all {pairs} pairwise brackets across {groups} groups can crowd "
+"the figure; consider 'Significant pairs only' or 'None'."
+msgstr ""
+
 #: R/decision.b.R
 msgid ""
 "Displays the analyzed contingency table and combination counts, and a "
@@ -67410,6 +67448,13 @@ msgstr ""
 
 #: ihccluster/results/distr.title
 msgid "Distributions (Legacy)"
+msgstr ""
+
+#: R/jjdotplotstats.b.R
+msgid ""
+"Distributions of {outcome} across {groups} groups of {factor} (N = {total}) "
+"were displayed using horizontal box-violin plots; formal hypothesis testing "
+"via {test} was not estimable ({reason})."
 msgstr ""
 
 #: qualityoflife/results/health_utilities_summary.columns.title
@@ -70118,6 +70163,12 @@ msgstr ""
 msgid "Enable 'Reorder Edges' to reduce visual crossing complexity"
 msgstr ""
 
+#: R/jjdotplotstats.b.R
+msgid ""
+"Enable 'Statistical results in plot' or 'Assumptions and interpretation' to "
+"display the selected effect size or confidence level."
+msgstr ""
+
 #: stagemigration/options/enableAccessibilityFeatures.description
 msgid ""
 "Enable accessibility features including color-blind safe palettes,  high "
@@ -71688,6 +71739,10 @@ msgstr ""
 
 #: stratifiedparametric/options/knot_placement/quantiles.title
 msgid "Equal Quantiles"
+msgstr ""
+
+#: R/jjdotplotstats.b.R
+msgid "equal relative support for the null and alternative models"
 msgstr ""
 
 #: psychopdaROC/options/method/oc_equal_sens_spec.title
@@ -74054,6 +74109,13 @@ msgid ""
 "divided by the range width."
 msgstr ""
 
+#: R/jjdotplotstats.b.R
+msgid ""
+"Every level of Split By variable '{grvar}' ({levels}) has fewer than two "
+"groups or no variation in '{dep}', so no stratified comparison could be "
+"computed."
+msgstr ""
+
 #: R/psychopdaROC.b.R
 msgid ""
 "Every marker is compared in the selected Classification Direction. %s has an "
@@ -75995,8 +76057,6 @@ msgstr ""
 #: package/analyses/benford.menuGroup
 #: package/analyses/agepyramid.menuGroup
 #: package/analyses/alluvial.menuGroup
-#: package/analyses/venn.menuGroup
-#: package/analyses/vartree.menuGroup
 #: package/analyses/categorize.menuGroup
 #: package/analyses/checkdata.menuGroup
 #: agepyramid/options.menuGroup
@@ -76004,8 +76064,6 @@ msgstr ""
 #: benford/options.menuGroup
 #: categorize/options.menuGroup
 #: checkdata/options.menuGroup
-#: vartree/options.menuGroup
-#: venn/options.menuGroup
 msgid "Exploration"
 msgstr ""
 
@@ -76120,6 +76178,8 @@ msgstr ""
 #: package/analyses/tableone.menuGroup
 #: package/analyses/summarydata.menuGroup
 #: package/analyses/reportcat.menuGroup
+#: package/analyses/venn.menuGroup
+#: package/analyses/vartree.menuGroup
 #: package/analyses/crosstable.menuGroup
 #: package/analyses/dataquality.menuGroup
 #: package/analyses/outlierdetection.menuGroup
@@ -76131,6 +76191,8 @@ msgstr ""
 #: reportcat/options.menuGroup
 #: summarydata/options.menuGroup
 #: tableone/options.menuGroup
+#: vartree/options.menuGroup
+#: venn/options.menuGroup
 msgid "ExplorationT"
 msgstr ""
 
@@ -81079,6 +81141,20 @@ msgid ""
 "size holds them at their anticipated values only."
 msgstr ""
 
+#: R/jjdotplotstats.b.R
+msgid ""
+"For three or more groups with {adjustment} selected, parametric pairwise "
+"brackets use pairwise Welch unequal-variance t-tests with {adjustment} "
+"adjustment."
+msgstr ""
+
+#: R/jjdotplotstats.b.R
+msgid ""
+"For three or more groups, parametric pairwise brackets use the Games-Howell "
+"single-step studentized-range procedure for family-wise error control "
+"(p_GH-adj); a second adjustment pass is not applied on top of it."
+msgstr ""
+
 #: R/agreement.b.R
 msgid ""
 "For three or more raters each institution's kappa uses every observed "
@@ -84889,6 +84965,14 @@ msgstr ""
 msgid "Group"
 msgstr ""
 
+#: R/jjdotplotstats.b.R
+msgid "group '{group}' has fewer than 2 observations (n = {n})"
+msgstr ""
+
+#: R/jjdotplotstats.b.R
+msgid "group '{group}' retains fewer than 2 observations after 20 percent trimming"
+msgstr ""
+
 #: R/pathagreement.b.R
 msgid "Group {group}"
 msgstr ""
@@ -85338,6 +85422,10 @@ msgstr ""
 msgid "Group Summary"
 msgstr ""
 
+#: R/jjdotplotstats.b.R
+msgid "Group summary across N = {total} complete observations: {groupsummary}."
+msgstr ""
+
 #: groupsummary/results/summaryTable.title
 #: permutationsurvival/results/groupSummaryTable.title
 msgid "Group Summary Statistics"
@@ -85770,8 +85858,9 @@ msgstr ""
 
 #: R/jjdotplotstats.b.R
 msgid ""
-"Groups do NOT have to share the same spread. Welch's correction is used "
-"throughout, which is why the degrees of freedom are fractional."
+"Groups do NOT have to share the same spread. Welch's unequal-variance "
+"correction is used throughout, which is why the degrees of freedom are "
+"fractional."
 msgstr ""
 
 #: R/jjdotplotstats.b.R
@@ -85790,9 +85879,8 @@ msgstr ""
 
 #: R/jjdotplotstats.b.R
 msgid ""
-"Groups should have a broadly similar distribution SHAPE if you want to read "
-"the result as a difference in medians; otherwise read it as stochastic "
-"dominance."
+"Groups should share a broadly similar distribution shape if you interpret "
+"the result as a median shift; otherwise interpret it as stochastic dominance."
 msgstr ""
 
 #: R/agreementintro.b.R
@@ -94141,6 +94229,14 @@ msgstr ""
 msgid "Insufficient variables for comparison"
 msgstr ""
 
+#: R/jjdotplotstats.b.R
+msgid "insufficient variation across groups for Kruskal-Wallis test"
+msgstr ""
+
+#: R/jjdotplotstats.b.R
+msgid "insufficient within-group variation"
+msgstr ""
+
 #: advancedbarplot/options/value_format/integer.title
 #: jggheatmap/options/value_format/integer.title
 msgid "Integer"
@@ -96719,6 +96815,7 @@ msgstr ""
 #: diagnosticmeta/options/color_palette/jamovi.title
 #: enhancedROC/options/plotTheme/jamovi.title
 #: jjbetweenstats/options/ggpubrPalette/jamovi.title
+#: jjdotplotstats/options/colorpalette/jamovi.title
 #: swimmerplot/options/plotTheme/jamovi.title
 #: swimmerplot/options/colorPalette/jamovi.title
 #: waterfall/options/colorScheme/jamovi.title
@@ -96800,7 +96897,6 @@ msgstr ""
 #: package/analyses/jjhistostats.menuGroup
 #: package/analyses/jjscatterstats.menuGroup
 #: package/analyses/jjcorrmat.menuGroup
-#: package/analyses/jjdotplotstats.menuGroup
 #: package/analyses/jjwithinstats.menuGroup
 #: package/analyses/jjbarstats.menuGroup
 #: package/analyses/jwaffle.menuGroup
@@ -96813,7 +96909,6 @@ msgstr ""
 #: jjarcdiagram/options.menuGroup
 #: jjbarstats/options.menuGroup
 #: jjcorrmat/options.menuGroup
-#: jjdotplotstats/options.menuGroup
 #: jjhistostats/options.menuGroup
 #: jjridges/options.menuGroup
 #: jjscatterstats/options.menuGroup
@@ -96880,6 +96975,7 @@ msgid "JJStatsPlotD"
 msgstr ""
 
 #: package/analyses/advancedraincloud.menuGroup
+#: package/analyses/jjdotplotstats.menuGroup
 #: package/analyses/jjbetweenstats.menuGroup
 #: package/analyses/jjpiestats.menuGroup
 #: package/analyses/jjsegmentedtotalbar.menuGroup
@@ -96887,6 +96983,7 @@ msgstr ""
 #: advancedraincloud/options.menuGroup
 #: jjbetweenstats/options.menuGroup
 #: jjdotchart/options.menuGroup
+#: jjdotplotstats/options.menuGroup
 #: jjpiestats/options.menuGroup
 #: jjsegmentedtotalbar/options.menuGroup
 msgid "JJStatsPlotT"
@@ -112805,6 +112902,14 @@ msgstr ""
 msgid "Moderate rater effects"
 msgstr ""
 
+#: R/jjdotplotstats.b.R
+msgid "moderate relative evidence favoring the null hypothesis of no difference"
+msgstr ""
+
+#: R/jjdotplotstats.b.R
+msgid "moderate relative evidence for a group difference"
+msgstr ""
+
 #: R/checkdata.b.R
 msgid "Moderate relative variability"
 msgstr ""
@@ -117108,6 +117213,12 @@ msgstr ""
 msgid "No complete observations remain after filtering missing Split By values."
 msgstr ""
 
+#: R/jjdotplotstats.b.R
+msgid ""
+"No complete observations remain for Split By variable '{grvar}', so the "
+"Split By figure cannot be drawn."
+msgstr ""
+
 #: R/alluvial.b.R
 msgid "No complete observations remain for the condensation plot."
 msgstr ""
@@ -117537,12 +117648,6 @@ msgstr ""
 msgid "No diseased or no non-diseased participants: %d study/studies."
 msgstr ""
 
-#: R/jjdotplotstats.b.R
-msgid ""
-"No distributional assumption. The test compares ranks, so it answers whether "
-"one group tends to give higher values, not whether the means differ."
-msgstr ""
-
 #: R/decision.b.R
 #: R/decisioncompare.b.R
 msgid "No eligible denominator"
@@ -117946,6 +118051,13 @@ msgstr ""
 msgid "No nomogram is drawn for this table."
 msgstr ""
 
+#: R/jjdotplotstats.b.R
+msgid ""
+"No normality assumption. The test compares ranks, so it evaluates whether "
+"one group tends to yield larger values rather than whether arithmetic means "
+"differ."
+msgstr ""
+
 #: multiplexanalysis/options/normalization_method/none.title
 #: treatmenteffects/options/weight_normalization/none.title
 msgid "No Normalization"
@@ -118203,6 +118315,10 @@ msgstr ""
 
 #: R/alluvial.b.R
 msgid "No Positive Weights"
+msgstr ""
+
+#: R/jjdotplotstats.b.R
+msgid "No post-hoc pairwise comparisons were drawn."
 msgstr ""
 
 #: R/classicalSurvivalPower.b.R
@@ -120005,7 +120121,7 @@ msgid "Nonparametric (Mann-Whitney / Kruskal-Wallis)"
 msgstr ""
 
 #: jjdotplotstats/options/typestatistics/nonparametric.title
-msgid "Nonparametric (Mann-Whitney U, no distribution assumptions)"
+msgid "Nonparametric (Mann-Whitney U or Kruskal-Wallis)"
 msgstr ""
 
 #: jjhistostats/options/centralitytype/nonparametric.title
@@ -121000,6 +121116,12 @@ msgstr ""
 
 #: R/chisqposttest.b.R
 msgid "not statistically significant at \\u{3B1} = %g"
+msgstr ""
+
+#: R/jjdotplotstats.b.R
+msgid ""
+"not statistically significant at the 0.05 threshold; absence of significance "
+"does not establish equivalence"
 msgstr ""
 
 #: R/tableone.b.R
@@ -123414,20 +123536,33 @@ msgid ""
 msgstr ""
 
 #: R/jjdotplotstats.b.R
+msgid ""
+"Observations are independent across patients or specimens; clustered or "
+"repeated measurements require a paired or mixed-effects rank procedure."
+msgstr ""
+
+#: R/jjdotplotstats.b.R
+msgid ""
+"Observations are independent across patients or specimens; repeated or "
+"multi-core measurements from one patient violate independence."
+msgstr ""
+
+#: R/jjdotplotstats.b.R
+msgid ""
+"Observations are independent across patients or specimens. In small groups, "
+"trimming 20 percent from each tail leaves few effective observations - check "
+"per-group sizes."
+msgstr ""
+
+#: R/jjdotplotstats.b.R
 msgid "Observations are independent."
 msgstr ""
 
 #: R/jjdotplotstats.b.R
 msgid ""
 "Observations are independent. Repeated measurements on the same patient, or "
-"several blocks from one specimen, break this and need a paired or mixed "
-"model instead."
-msgstr ""
-
-#: R/jjdotplotstats.b.R
-msgid ""
-"Observations are independent. With small groups, trimming 20 percent from "
-"each tail can leave very few values - check the per-group sizes."
+"multiple cores/blocks from one specimen, violate independence and need a "
+"paired or mixed-effects model instead."
 msgstr ""
 
 #: R/benford.b.R
@@ -124148,6 +124283,10 @@ msgstr ""
 msgid "OK"
 msgstr ""
 
+#: jjdotplotstats/options/colorpalette/okabeito.title
+msgid "Okabe-Ito (color-blind safe)"
+msgstr ""
+
 #: R/stagemigration.b.R
 msgid ""
 "Old and new Cox models have different initial log-likelihoods, suggesting "
@@ -124203,7 +124342,7 @@ msgid "Omega-squared (ω²)"
 msgstr ""
 
 #: jjdotplotstats/options/effsizetype/omega.title
-msgid "Omega-squared with 3+ groups (Hedge's g with 2 groups)"
+msgid "Omega-squared with 3+ groups (Hedges' g with 2 groups)"
 msgstr ""
 
 #: pathsampling/options/analysisContext/omentum.title
@@ -126572,6 +126711,12 @@ msgstr ""
 
 #: R/jjdotplotstats.b.R
 msgid "ordinal epsilon-squared"
+msgstr ""
+
+#: R/jjdotplotstats.b.R
+msgid ""
+"Ordinal epsilon-squared is accompanied by a two-sided bias-corrected and "
+"accelerated (BCa) bootstrap confidence interval across 1,000 resamples."
 msgstr ""
 
 #: R/pathagreement.b.R
@@ -130281,8 +130426,27 @@ msgstr ""
 
 #: R/jjdotplotstats.b.R
 msgid ""
+"Pairwise comparisons between {which} are shown as brackets using pairwise "
+"Welch t-tests with {adjustment} adjustment for multiple testing."
+msgstr ""
+
+#: R/jjdotplotstats.b.R
+msgid ""
+"Pairwise comparisons between {which} are shown as brackets using the "
+"Games-Howell single-step studentized-range procedure for family-wise error "
+"control."
+msgstr ""
+
+#: R/jjdotplotstats.b.R
+msgid ""
 "Pairwise comparisons between {which} are shown as brackets, with "
 "{adjustment} adjustment for multiple testing."
+msgstr ""
+
+#: R/jjdotplotstats.b.R
+msgid ""
+"Pairwise comparisons between every pair of groups are shown as brackets "
+"reporting unadjusted natural-log JZS Bayes factors (log_e(BF_01))."
 msgstr ""
 
 #: enhancedROC/results/results/rocComparisons.description
@@ -130996,7 +131160,7 @@ msgid "Parametric (t-test / ANOVA)"
 msgstr ""
 
 #: jjdotplotstats/options/typestatistics/parametric.title
-msgid "Parametric (t-test, assumes normal distribution)"
+msgid "Parametric (Welch t-test or Welch ANOVA)"
 msgstr ""
 
 #: flexparametric/results/densityPlot.title
@@ -138737,6 +138901,12 @@ msgstr ""
 msgid "Post-hoc method"
 msgstr ""
 
+#: R/jjdotplotstats.b.R
+msgid ""
+"Post-hoc pairwise brackets were suppressed because the omnibus test could "
+"not be evaluated."
+msgstr ""
+
 #: biomarkerresponse/results/postHocTests.title
 #: cochranq/options/posthoc.title
 #: cochranq/results/pairwiseComparisons.title
@@ -138910,6 +139080,10 @@ msgid ""
 "Posterior\n"
 "Prob.\n"
 "(%)"
+msgstr ""
+
+#: R/jjdotplotstats.b.R
+msgid "posterior Bayesian R-squared"
 msgstr ""
 
 #: R/jjbetweenstats.b.R
@@ -139112,7 +139286,7 @@ msgid ""
 msgstr ""
 
 #: R/jjdotplotstats.b.R
-msgid "Potential outliers detected in {name}: {count}."
+msgid "Potential outliers detected within groups in {name}: {count}."
 msgstr ""
 
 #: R/summarydata.b.R
@@ -145727,7 +145901,6 @@ msgstr ""
 #: R/enhancedROC.b.R
 #: R/jjcorrmat.b.R
 #: R/jjdotchart.b.R
-#: R/jjdotplotstats.b.R
 #: R/jjridges.b.R
 #: R/lassocox.b.R
 #: R/lassologistic.b.R
@@ -149261,6 +149434,10 @@ msgstr ""
 msgid "Relative Efficiency (%)"
 msgstr ""
 
+#: R/jjdotplotstats.b.R
+msgid "relative evidence evaluated under the JZS prior"
+msgstr ""
+
 #: R/agreement.b.R
 msgid "Relative F1 Change"
 msgstr ""
@@ -151286,6 +151463,10 @@ msgstr ""
 #: statsplot2/options/showSummary.title
 #: statsplot2/results/summary.title
 msgid "Result sentence"
+msgstr ""
+
+#: R/jjdotplotstats.b.R
+msgid "Result summary"
 msgstr ""
 
 #: R/jjpiestats.b.R
@@ -164774,6 +164955,13 @@ msgstr ""
 msgid "Small Study Correction"
 msgstr ""
 
+#: R/jjdotplotstats.b.R
+msgid ""
+"Small subgroup sample sizes (fewer than 10 observations in at least one "
+"group) occur within Split By level(s) '{levels}'; interpret per-panel tests "
+"cautiously."
+msgstr ""
+
 #: R/nogoldstandard.b.R
 msgid "Small Test Categories"
 msgstr ""
@@ -167193,6 +167381,26 @@ msgstr ""
 msgid "Split by (optional)"
 msgstr ""
 
+#: R/jjdotplotstats.b.R
+msgid ""
+"Split By level(s) '{levels}' contain at least one group with fewer than 2 "
+"observations, so statistical test subtitles could not be computed for those "
+"panel(s)."
+msgstr ""
+
+#: R/jjdotplotstats.b.R
+msgid ""
+"Split By level(s) '{levels}' had fewer than two groups with data or no "
+"variation in '{dep}', so statistical test results could not be computed for "
+"those panel(s)."
+msgstr ""
+
+#: R/jjdotplotstats.b.R
+msgid ""
+"Split By note: {count} observation(s) with missing {grvar} are excluded from "
+"the Split By panels only."
+msgstr ""
+
 #: R/jjpiestats.b.R
 msgid "Split By paired panels"
 msgstr ""
@@ -169547,6 +169755,12 @@ msgstr ""
 msgid "Statistical Test Results"
 msgstr ""
 
+#: R/jjdotplotstats.b.R
+msgid ""
+"Statistical test results could not be computed ({reason}), so no test "
+"subtitle is shown on the plot."
+msgstr ""
+
 #: chisqposttest/options/testSelection.title
 msgid "Statistical test selection"
 msgstr ""
@@ -169716,6 +169930,10 @@ msgstr ""
 
 #: R/chisqposttest.b.R
 msgid "statistically significant at \\u{3B1} = %g"
+msgstr ""
+
+#: R/jjdotplotstats.b.R
+msgid "statistically significant at the 0.05 threshold"
 msgstr ""
 
 #: R/decisioncompare.b.R
@@ -170980,6 +171198,14 @@ msgstr ""
 
 #: R/decisioncompare.b.R
 msgid "Strong positive evidence"
+msgstr ""
+
+#: R/jjdotplotstats.b.R
+msgid "strong relative evidence favoring the null hypothesis of no difference"
+msgstr ""
+
+#: R/jjdotplotstats.b.R
+msgid "strong relative evidence for a group difference"
 msgstr ""
 
 #: R/decisioncalculator.b.R
@@ -177205,9 +177431,9 @@ msgstr ""
 
 #: R/jjdotplotstats.b.R
 msgid ""
-"The {comparison} tells you that the groups differ, not by how much any one "
-"pair differs or whether that difference matters clinically. Read the effect "
-"size and its interval, not the p value alone."
+"The {comparison} tests whether the groups differ overall, not by how much "
+"any one pair differs or whether a difference matters clinically. Read the "
+"effect size and its interval alongside the test statistic."
 msgstr ""
 
 #: R/benford.b.R
@@ -177786,9 +178012,17 @@ msgstr ""
 
 #: R/jjdotplotstats.b.R
 msgid ""
-"The Bayes factor is computed against a default (Cauchy) prior on the effect "
-"size, not one elicited for your setting. Treat it as evidence strength under "
-"a conventional prior, not as a posterior probability that the groups differ."
+"The Bayes factor caption is omitted on the unsplit figure ({reason}), but is "
+"shown on two-group Split By panels."
+msgstr ""
+
+#: R/jjdotplotstats.b.R
+msgid ""
+"The Bayes factor is computed under a default Jeffreys-Zellner-Siow Cauchy "
+"prior on standardized effects (r = 0.707 for two groups; r = 0.5 for three "
+"or more groups) assuming a shared residual variance across groups. Treat it "
+"as relative evidence under a conventional prior, not as a posterior "
+"probability that a hypothesis is true."
 msgstr ""
 
 #: R/jjwithinstats.b.R
@@ -178422,10 +178656,9 @@ msgstr ""
 
 #: R/jjdotplotstats.b.R
 msgid ""
-"The comparison uses 20 percent trimmed means, so the most extreme 20 percent "
-"at each end of every group is discarded before testing. This is the right "
-"choice when outliers are real measurements you do not want to delete but do "
-"not want to dominate the result either."
+"The comparison uses 20 percent trimmed means, discarding the most extreme 20 "
+"percent in each tail of every group before testing. Use this when real "
+"extreme observations should neither be deleted nor dominate the estimate."
 msgstr ""
 
 #: R/singlearm.b.R
@@ -178493,10 +178726,10 @@ msgstr ""
 
 #: R/jjdotplotstats.b.R
 msgid ""
-"The confidence interval on the effect size is obtained by resampling. It is "
-"computed with a fixed random seed ({seed}) so this figure reproduces "
-"exactly; change the seed under Plot Configuration to check that a borderline "
-"interval is not an artefact of one resample."
+"The confidence interval on the effect size is obtained by bootstrap "
+"resampling with a fixed random seed ({seed}) so this figure reproduces "
+"exactly; change the seed under Plot Configuration to verify that a "
+"borderline interval is stable across resamples."
 msgstr ""
 
 #: R/agreement.b.R
@@ -179449,9 +179682,9 @@ msgstr ""
 
 #: R/jjdotplotstats.b.R
 msgid ""
-"The effect size is estimated from the same Welch model as the test, so it "
-"will not match the value a classical equal-variance ANOVA reports for these "
-"data. That is expected, not an error."
+"The effect size is estimated from the Welch model rather than an "
+"equal-variance ANOVA, and its interval is reported as a one-sided lower "
+"confidence bound up to 1.00 (Steiger, 2004)."
 msgstr ""
 
 #: R/jjdotplotstats.b.R
@@ -179731,6 +179964,15 @@ msgstr ""
 msgid ""
 "The false-positive penalty in net benefit and the treat-all reference rest "
 "on these patients, so the curves and any confidence intervals are imprecise."
+msgstr ""
+
+#: R/jjdotplotstats.b.R
+msgid ""
+"The figure displays log_e(BF_01), the natural logarithm of the Bayes factor "
+"favoring the null over the alternative: 0 indicates equal support (BF_01 = "
+"1), negative values favor a group difference (below -1.10 moderate evidence, "
+"BF_10 > 3; below -2.30 strong evidence, BF_10 > 10), and positive values "
+"(above +1.10 or +2.30) favor the null hypothesis of no difference."
 msgstr ""
 
 #: R/agreement.b.R
@@ -180923,6 +181165,12 @@ msgstr ""
 
 #: bbcplots/options/y_var.description.jamovi
 msgid "The main variable to be plotted on the Y-axis."
+msgstr ""
+
+#: R/jjdotplotstats.b.R
+msgid ""
+"The Mann-Whitney p value uses the tie-adjusted normal approximation with "
+"continuity correction."
 msgstr ""
 
 #: R/jjdotplotstats.b.R
@@ -182121,6 +182369,10 @@ msgid ""
 "The plot could not be drawn: {reason}. Check the dependent variable for "
 "constant values, extreme outliers or too few observations per group, or try "
 "a different statistical test."
+msgstr ""
+
+#: R/jjdotplotstats.b.R
+msgid "the plot is not showing statistical results at all"
 msgstr ""
 
 #: R/jjbetweenstats.b.R
@@ -183697,6 +183949,19 @@ msgid ""
 "or check the predictor. ICI, E50, E90 and Emax are left blank."
 msgstr ""
 
+#: R/jjdotplotstats.b.R
+msgid ""
+"The Split By variable '{grvar}' is missing for {count} observation(s); those "
+"rows are excluded from the Split By panels only and remain in the main "
+"unsplit comparison."
+msgstr ""
+
+#: R/jjdotplotstats.b.R
+msgid ""
+"The Split By variable must be distinct from Dependent Variable and Grouping "
+"Variable."
+msgstr ""
+
 #: R/jjdotchart.b.R
 msgid ""
 "The split chart could not be drawn: {msg}. Check that every level of the "
@@ -183780,9 +184045,18 @@ msgid ""
 "consider a different inferential method."
 msgstr ""
 
+#: R/jjdotplotstats.b.R
+msgid "the statistics engine returned no Bayes factor"
+msgstr ""
+
 #: R/jjbetweenstats.b.R
 #: R/jjdotchart.b.R
+#: R/jjdotplotstats.b.R
 msgid "the statistics engine returned no expression"
+msgstr ""
+
+#: R/jjdotplotstats.b.R
+msgid "the statistics package computes one only for a two-group comparison"
 msgstr ""
 
 #: R/decisioncompare.b.R
@@ -183994,6 +184268,14 @@ msgstr ""
 
 #: R/decision.b.R
 msgid "The test has only one level among the analyzed cases"
+msgstr ""
+
+#: R/jjdotplotstats.b.R
+msgid "the test is already Bayesian, so the subtitle itself reports the Bayes factor"
+msgstr ""
+
+#: R/jjdotplotstats.b.R
+msgid "the test statistic could not be evaluated (zero within-group spread)"
 msgstr ""
 
 #: R/diagnosticmeta.b.R
@@ -184323,8 +184605,8 @@ msgstr ""
 #: R/jjdotplotstats.b.R
 msgid ""
 "The values are roughly symmetric within each group. The test tolerates mild "
-"skew at these sample sizes but not a long tail or a floor/ceiling effect - "
-"read the violins."
+"skew at moderate sample sizes but not a heavy tail or a floor/ceiling effect "
+"- inspect the violins."
 msgstr ""
 
 #: R/benford.b.R
@@ -197187,6 +197469,12 @@ msgstr ""
 msgid "Variable '{name}' cannot be converted to numeric values"
 msgstr ""
 
+#: R/jjdotplotstats.b.R
+msgid ""
+"Variable '{name}' contains no finite numeric measurements. Please select a "
+"valid continuous numeric variable."
+msgstr ""
+
 #: R/jjwithinstats.b.R
 msgid "Variable '{name}' not found in data"
 msgstr ""
@@ -197206,6 +197494,12 @@ msgstr ""
 msgid ""
 "Variable '{name}' was not found in the data. Available variables are: "
 "{available}. Please select a valid grouping variable."
+msgstr ""
+
+#: R/jjdotplotstats.b.R
+msgid ""
+"Variable '{name}' was not found in the data. Available variables are: "
+"{available}. Please select a valid Split By variable."
 msgstr ""
 
 #: R/jjbarstats.b.R
@@ -199564,6 +199858,10 @@ msgstr ""
 msgid "Viridis (colorblind-safe)"
 msgstr ""
 
+#: jjdotplotstats/options/colorpalette/viridis.title
+msgid "Viridis (perceptually uniform)"
+msgstr ""
+
 #: R/dataquality.b.R
 msgid "visdat integration for visual exploration"
 msgstr ""
@@ -200472,6 +200770,14 @@ msgstr ""
 
 #: R/nogoldstandard.b.R
 msgid "Weak identification of latent parameters"
+msgstr ""
+
+#: R/jjdotplotstats.b.R
+msgid "weak relative evidence toward a group difference"
+msgstr ""
+
+#: R/jjdotplotstats.b.R
+msgid "weak relative evidence toward the null hypothesis of no difference"
 msgstr ""
 
 #: R/jjcorrmat.b.R
@@ -204644,6 +204950,13 @@ msgid "Yuen Winsorized-t interval ({pct}% trim)"
 msgstr ""
 
 #: R/jjdotplotstats.b.R
+msgid ""
+"Yuen's test reports an unsigned |t| statistic, while the robust AKP effect "
+"size standardizes the trimmed-mean difference by the first group's "
+"Winsorized spread."
+msgstr ""
+
+#: R/jjdotplotstats.b.R
 msgid "Yuen's trimmed-mean test"
 msgstr ""
 
@@ -204847,6 +205160,10 @@ msgstr ""
 msgid ""
 "Zero values were detected in the Y-axis variable; a 0.01 offset was added "
 "before log transformation (log(y + 0.01))."
+msgstr ""
+
+#: R/jjdotplotstats.b.R
+msgid "zero within-group variation"
 msgstr ""
 
 #: diagnosticmeta/ui[2][0]/zero_cell_correction.label

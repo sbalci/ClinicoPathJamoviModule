@@ -19,6 +19,7 @@ jjdotplotstats(
   xtitle = "",
   ytitle = "",
   originaltheme = FALSE,
+  colorpalette = "jamovi",
   resultssubtitle = FALSE,
   testvalue = 0,
   bfmessage = FALSE,
@@ -45,18 +46,22 @@ Each level will be displayed as a separate group in the dot plot.}
 \item{grvar}{Optional grouping variable to create separate dot plots for
 each level of this variable (grouped analysis).}
 
-\item{typestatistics}{Choose the appropriate statistical test: Parametric
-(t-test) assumes normal distribution and equal variances; Nonparametric
-(Mann-Whitney U) makes no distribution assumptions; Robust uses trimmed
-means to handle outliers by trimming 20 percent from each tail; Bayesian
-provides evidence strength via Bayes factors.}
+\item{typestatistics}{Choose the between-group statistical family:
+Parametric runs Welch's unequal-variance two-sample t-test (2 groups) or
+Welch's one-way ANOVA (3+ groups), assuming approximate within-group
+normality and independent observations without requiring equal variances
+across groups; Nonparametric runs the Mann-Whitney U test (2 groups) or
+Kruskal-Wallis test (3+ groups) on ranks; Robust compares 20 percent
+trimmed means via Yuen's test (2 groups) or Wilcox's heteroscedastic t1way
+test (3+ groups); Bayesian computes Jeffreys-Zellner-Siow Bayes factors and
+posterior effect estimates.}
 
 \item{effsizetype}{Effect size quantifies practical significance. Which
 statistic you get depends on how many groups are compared, because the
 underlying statistics package uses one vocabulary for a two-group test and
 another for a three-or-more-group one. 'biased' and 'eta' both give Cohen's
 d with two groups and partial eta-squared with three or more; 'unbiased'
-and 'omega' both give Hedge's g with two groups and partial omega-squared
+and 'omega' both give Hedges' g with two groups and partial omega-squared
 with three or more. Rules of thumb: d and g small=0.2, medium=0.5,
 large=0.8; eta-squared and omega-squared small=0.01, medium=0.06,
 large=0.14. Two limits: it applies to the parametric test only - the
@@ -66,20 +71,27 @@ panels always use the statistics package default. The analysis says so when
 either limit applies.}
 
 \item{pairwisedisplay}{Which post-hoc comparisons between individual pairs
-of groups are drawn as brackets above the plot. The omnibus test tells you
-only that the groups differ somewhere; these say which pairs. The test used
-follows 'Statistical Test Type' - Games-Howell for the parametric family,
-since it does not assume equal variances, Dunn for the nonparametric one.
-Every p value is adjusted for multiple comparisons by the method selected
-below.}
+of groups are drawn as brackets on comparisons of three or more groups
+(two-group comparisons have only one pair, already tested in the subtitle).
+Parametric comparisons use the Games-Howell studentized-range procedure
+under Holm (default), or pairwise Welch unequal-variance t-tests with
+Benjamini-Hochberg, Bonferroni, or no multiplicity adjustment when those
+options are chosen; nonparametric comparisons use Dunn's test; robust
+comparisons use Yuen's trimmed-mean linear contrasts; and Bayesian
+comparisons display unadjusted natural-log JZS Bayes factors across all
+pairs.}
 
-\item{padjustmethod}{How the pairwise p values are corrected for testing
-several pairs at once. Holm is uniformly more powerful than Bonferroni
-while controlling the same family-wise error rate and is the sensible
-default. Benjamini-Hochberg controls the false discovery rate instead,
-which is a weaker guarantee but more powerful when many pairs are compared.
-Choosing 'None' reports uncorrected p values and will overstate
-significance; the analysis warns when it is selected.}
+\item{padjustmethod}{Multiplicity adjustment for post-hoc pairwise p values
+when three or more groups are compared. For nonparametric (Dunn) and robust
+(Yuen) comparisons, Holm, Benjamini-Hochberg, or Bonferroni adjustment is
+applied directly. For parametric comparisons, 'holm' (default) uses the
+single-step Games-Howell studentized-range procedure for family-wise error
+control without double-adjusting, 'fdr' and 'bonferroni' apply
+Benjamini-Hochberg false-discovery-rate or Bonferroni adjustment to
+pairwise Welch unequal-variance t-tests, and 'none' reports unadjusted
+pairwise Welch t-test p values with a multiplicity warning. Bayesian
+pairwise comparisons report Bayes factors rather than p values and are
+unaffected.}
 
 \item{centralityplotting}{Display lines showing the central tendency (mean,
 median, or trimmed mean) for each group. Helps visualize group differences
@@ -102,6 +114,10 @@ Leave blank to use variable name.}
 \item{originaltheme}{Use the original ggstatsplot theme instead of jamovi's
 default theme. The original theme may be more suitable for publications.}
 
+\item{colorpalette}{Discrete color palette for group violins and points.
+'jamovi' follows the user's global jamovi plot palette; 'okabeito',
+'viridis', and 'dark2' provide explicit color-blind-safe overrides.}
+
 \item{resultssubtitle}{Display statistical test results (p-value, effect
 size, confidence interval) as a subtitle below the plot. Recommended for
 most analyses.}
@@ -112,13 +128,16 @@ such as an upper limit of normal. No hypothesis test is performed against
 this value; it only draws a line, and only when 'Reference value line' is
 ticked.}
 
-\item{bfmessage}{Add a caption reporting the Bayes factor for the null
-hypothesis alongside the usual test. It applies only to a parametric
-comparison of exactly two groups: the statistics package defines no Bayes
-factor for a three-or-more-group comparison, and with the Bayesian test
-selected the subtitle already reports one. The analysis says which of these
-applies whenever the box is ticked and no caption appears. A Bayes factor
-above 3 indicates moderate evidence, above 10 strong evidence.}
+\item{bfmessage}{Add a caption reporting the natural logarithm of the JZS
+Bayes factor for the null over the alternative hypothesis, log_e(BF_01),
+with Cauchy prior scale r = 0.707 alongside a two-group parametric test. On
+the log_e(BF_01) scale, 0 indicates equal support (BF_01 = 1), negative
+values favor a group difference (below -1.10 moderate evidence, BF_10 > 3;
+below -2.30 strong evidence, BF_10 > 10), and positive values favor the
+null hypothesis of no difference (above +1.10 moderate; above +2.30 strong;
+Jeffreys, 1961; Lee & Wagenmakers, 2014). Applies only when Statistical
+Test Type is parametric, Statistical results in plot is enabled, and
+exactly two groups are compared.}
 
 \item{conflevel}{Confidence level for intervals (0.95 = 95 percent
 confidence interval). This represents the probability that the true
@@ -146,12 +165,13 @@ accepts a separate precision for the centrality labels; they follow
 'Statistical Precision (Decimal Places)'. Retained so existing scripts keep
 running, and removed from the user interface.}
 
-\item{seed}{Seed for the resampling that the nonparametric and robust tests
-use to build the effect size confidence interval. It is fixed so that a
-figure re-rendered on the same data comes back identical; without it the
-reported interval moved on every run. Change it only to confirm that a
-borderline interval is not an artefact of one particular resample. It has
-no effect on the parametric or Bayesian tests.}
+\item{seed}{Random seed controlling bootstrap resampling for nonparametric
+(3+ groups) and robust effect-size confidence intervals, Markov chain Monte
+Carlo posterior sampling for Bayesian tests and Bayes factor captions, and
+horizontal point jittering. Fixing the seed ensures that re-rendering on
+the same data reproduces identical intervals and point positions;
+frequentist parametric test statistics and closed-form confidence intervals
+do not depend on the seed unless Bayes factor caption is enabled.}
 
 \item{showexplanation}{Show a panel that states the assumptions behind the
 test that was run, reports the result as a sentence in plain language, and
@@ -174,22 +194,14 @@ A results object containing:
 }
 }
 \description{
-Compares a continuous variable across groups and draws the comparison
-horizontally - values on the x axis, group labels down the y axis - with
-an optional vertical reference line. Wraps ggstatsplot::ggbetweenstats
-and ggstatsplot::grouped_ggbetweenstats, so the figure is a box-violin
-plot with the individual observations shown, and the test is a
-between-groups comparison using every observation.
-}
-\details{
-This analysis was previously titled "Dot Chart", which described neither
-the figure nor the statistic: it draws violins and boxplots, not a dot
-chart, and it is a between-groups test rather than a one-sample one. For
-a genuine Cleveland dot chart - one summary point per label, tested
-against a reference value - use "Dot Chart (Summary vs Reference Value)",
-which wraps ggstatsplot::ggdotplotstats.
-
-Prefer this over "Box-Violin Plots to Compare Between Groups" when the
-group labels are long or numerous, since the horizontal layout gives them
-room, or when a clinical threshold line is useful.
+Compares a continuous variable across independent groups and draws the
+comparison horizontally - values along the x axis and group labels down the
+y axis - with violins, boxplots, individual observations, and an optional
+vertical reference threshold line. Wraps ggstatsplot between-group
+comparisons using Welch's t-test or Welch's ANOVA (parametric),
+Mann-Whitney U or Kruskal-Wallis (nonparametric), Yuen or Wilcox 20 percent
+trimmed-mean tests (robust), and Jeffreys-Zellner-Siow Bayes factors
+(Bayesian). For a Cleveland dot chart with one summary point per group
+tested against a reference value, use Dot Chart (Summary vs Reference
+Value) instead.
 }

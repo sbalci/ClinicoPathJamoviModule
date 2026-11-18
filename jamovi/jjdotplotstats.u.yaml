@@ -141,6 +141,8 @@ children:
                 name: showexplanation
               - type: CheckBox
                 name: originaltheme
+              - type: ComboBox
+                name: colorpalette
       - type: Label
         label: Plot Labels
         fitToGrid: true
