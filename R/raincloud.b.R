@@ -128,11 +128,14 @@ raincloudClass <- if (requireNamespace("jmvcore")) R6::R6Class("raincloudClass",
             color_var <- self$options$color_var
 
             # Prepare analysis data
-            required_vars <- c(dep_var, group_var)
-            if (!is.null(facet_var) && facet_var != "") {
+            stat_vars <- unique(c(dep_var, group_var))
+            required_vars <- stat_vars
+            has_facet <- !is.null(facet_var) && facet_var != ""
+            has_color <- !is.null(color_var) && color_var != ""
+            if (has_facet) {
                 required_vars <- c(required_vars, facet_var)
             }
-            if (!is.null(color_var) && color_var != "") {
+            if (has_color) {
                 required_vars <- c(required_vars, color_var)
             }
             # A variable used in two roles (e.g. facet_var == group_var) must not
@@ -141,10 +144,32 @@ raincloudClass <- if (requireNamespace("jmvcore")) R6::R6Class("raincloudClass",
             # reports the same variable twice.
             required_vars <- unique(required_vars)
 
-            analysis_data <- dataset[required_vars]
-            analysis_data <- analysis_data[complete.cases(analysis_data), ]
-            
-            if (nrow(analysis_data) == 0) {
+            # Strip explicit NA factor levels (e.g. from addNA() or factor(..., exclude = NULL))
+            # so missing values are genuinely NA for complete.cases() and missing counts
+            # rather than being analysed as a real category named "NA".
+            strip_na_level <- function(x) {
+                if (is.factor(x) && any(is.na(levels(x)))) {
+                    lv <- levels(x)
+                    factor(as.character(x), levels = lv[!is.na(lv)], ordered = is.ordered(x))
+                } else {
+                    x
+                }
+            }
+
+            raw_subset <- dataset[required_vars]
+            for (v in required_vars) {
+                raw_subset[[v]] <- strip_na_level(raw_subset[[v]])
+            }
+
+            # Keep statistical tables on complete cases of (dep_var, group_var) so
+            # missing values in optional visual facet_var/color_var do not silently
+            # alter unstratified statistics or group comparisons.
+            raw_subset$.row_id <- seq_len(nrow(raw_subset))
+            stats_cc <- complete.cases(raw_subset[stat_vars])
+            stats_data <- raw_subset[stats_cc, c(stat_vars, ".row_id"), drop = FALSE]
+            n_missing_rows <- nrow(dataset) - nrow(stats_data)
+
+            if (nrow(stats_data) == 0) {
                 jmvcore::reject(.("Error: No complete cases found for the selected variables."))
             }
 
@@ -156,29 +181,65 @@ raincloudClass <- if (requireNamespace("jmvcore")) R6::R6Class("raincloudClass",
             # rank codes. The GUI's `permitted: numeric` keeps factors out of the
             # picker, but an R-API caller reaches here. as.character() first is
             # exact for both factors and numerics.
-            dep_raw <- analysis_data[[dep_var]]
-            analysis_data[[dep_var]] <- if (is.factor(dep_raw))
-                suppressWarnings(as.numeric(as.character(dep_raw)))
-            else suppressWarnings(as.numeric(dep_raw))
+            coerce_dep <- function(x) {
+                if (is.factor(x)) suppressWarnings(as.numeric(as.character(x)))
+                else suppressWarnings(as.numeric(x))
+            }
+
+            stats_data[[dep_var]] <- coerce_dep(stats_data[[dep_var]])
 
             # complete.cases() follows is.na(), which is TRUE for NaN but FALSE
             # for Inf, so an infinite value survives the filter above and then
             # destroys every mean, SD and axis range downstream. The coercion may
             # also have just produced fresh NAs from unparseable text.
-            n_before_finite <- nrow(analysis_data)
-            analysis_data <- analysis_data[is.finite(analysis_data[[dep_var]]), , drop = FALSE]
-            n_nonfinite <- n_before_finite - nrow(analysis_data)
-            if (nrow(analysis_data) == 0)
+            n_before_finite <- nrow(stats_data)
+            stats_data <- stats_data[is.finite(stats_data[[dep_var]]), , drop = FALSE]
+            n_nonfinite <- n_before_finite - nrow(stats_data)
+            if (nrow(stats_data) == 0)
                 jmvcore::reject(.("No usable numeric values remain in the dependent variable after removing missing and non-finite entries."))
 
-            analysis_data[[group_var]] <- droplevels(as.factor(analysis_data[[group_var]]))
-            
-            if (!is.null(facet_var) && facet_var != "") {
-                analysis_data[[facet_var]] <- as.factor(analysis_data[[facet_var]])
+            stats_data[[group_var]] <- droplevels(as.factor(stats_data[[group_var]]))
+
+            # Flag outliers on stats_data using the active outlier_method and carry
+            # those exact row-level flags into plot_data so plotted outlier points
+            # always agree with the Outlier Analysis table even when facet_var/color_var
+            # omit some rows.
+            stats_outlier_ids <- integer(0)
+            if (isTRUE(self$options$show_outliers)) {
+                outlier_method <- tryCatch(self$options$outlier_method, error = function(...) "iqr")
+                if (is.null(outlier_method)) outlier_method <- "iqr"
+                for (grp in levels(stats_data[[group_var]])) {
+                    idx <- which(stats_data[[group_var]] == grp)
+                    flags <- private$.detect_outliers(stats_data[[dep_var]][idx], outlier_method)
+                    if (!is.null(flags)) {
+                        stats_outlier_ids <- c(stats_outlier_ids, stats_data$.row_id[idx[which(flags)]])
+                    }
+                }
             }
-            if (!is.null(color_var) && color_var != "" && color_var != group_var) {
-                analysis_data[[color_var]] <- as.factor(analysis_data[[color_var]])
+
+            # Build plot_data (also filtering on optional facet_var / color_var)
+            plot_cc <- complete.cases(raw_subset[required_vars])
+            plot_data <- raw_subset[plot_cc, c(required_vars, ".row_id"), drop = FALSE]
+            plot_data[[dep_var]] <- coerce_dep(plot_data[[dep_var]])
+            plot_data <- plot_data[is.finite(plot_data[[dep_var]]), , drop = FALSE]
+            if (nrow(plot_data) == 0)
+                jmvcore::reject(.("Error: No complete cases found for the selected variables."))
+
+            plot_data[[group_var]] <- droplevels(as.factor(plot_data[[group_var]]))
+            if (has_facet) {
+                plot_data[[facet_var]] <- droplevels(as.factor(plot_data[[facet_var]]))
             }
+            if (has_color && color_var != group_var) {
+                plot_data[[color_var]] <- droplevels(as.factor(plot_data[[color_var]]))
+            }
+
+            if (isTRUE(self$options$show_outliers)) {
+                plot_data$.is_outlier <- plot_data$.row_id %in% stats_outlier_ids
+            }
+            stats_data$.row_id <- NULL
+            plot_data$.row_id <- NULL
+
+            analysis_data <- stats_data
 
             # Summary info for users
             group_counts <- table(analysis_data[[group_var]])
@@ -186,7 +247,7 @@ raincloudClass <- if (requireNamespace("jmvcore")) R6::R6Class("raincloudClass",
             max_group <- max(group_counts)
             imbalance_note <- if (max_group / min_group > 5) " <span style='color:#d9534f'>(unbalanced groups; interpret comparisons cautiously)</span>" else ""
 
-            missing_counts <- sapply(required_vars, function(v) sum(is.na(dataset[[v]])))
+            missing_counts <- sapply(required_vars, function(v) sum(is.na(raw_subset[[v]])))
             missing_msg <- paste0(
                 "<ul style='margin:6px 0;'>",
                 paste0("<li>", htmltools::htmlEscape(required_vars), ": ", missing_counts, " missing</li>", collapse = ""),
@@ -204,14 +265,26 @@ raincloudClass <- if (requireNamespace("jmvcore")) R6::R6Class("raincloudClass",
             # panel, which destroys the side-by-side comparison the plot exists
             # to make. It is accepted, but the user is told why the plot looks
             # degenerate instead of being left to guess.
-            redundant_role_note <- if (!is.null(facet_var) && facet_var != "" && facet_var == group_var)
+            redundant_role_note <- if (has_facet && facet_var == group_var)
                 paste0(" ", .("<span style='color:#d9534f'>(the faceting variable is the same as the grouping variable, so each panel contains a single group and the groups can no longer be compared side by side)</span>"))
             else ""
+
+            visual_drop_note <- ""
+            if (nrow(plot_data) < nrow(stats_data)) {
+                visual_drop_note <- paste0(
+                    " <span style='color:#856404'>(", nrow(stats_data) - nrow(plot_data),
+                    " row(s) omitted from the plot due to missing facet/color values; summary statistics and group comparisons use all ",
+                    nrow(stats_data), " complete cases and are pooled across facets)</span>")
+            } else if (has_facet && facet_var != group_var) {
+                visual_drop_note <- paste0(
+                    " <span style='color:#6c757d'>(summary statistics and group comparisons are grouped by ",
+                    htmltools::htmlEscape(group_var), " and pooled across ", htmltools::htmlEscape(facet_var), ")</span>")
+            }
 
             summary_msg <- paste0(
                 "<div style='background-color: rgba(138, 155, 172, 0.06);padding:12px;border-radius:8px;margin-bottom:12px; color: inherit;'>",
                 "<strong>Data summary:</strong> ", nrow(analysis_data), " complete rows (removed ",
-                nrow(dataset) - nrow(analysis_data), " with missing values). ",
+                n_missing_rows, " with missing values). ",
                 length(group_counts), " groups: ",
                 paste(paste0(htmltools::htmlEscape(names(group_counts)), " (n=", group_counts, ")"), collapse = ", "),
                 ".", imbalance_note, high_cardinality_note, redundant_role_note,
@@ -219,6 +292,7 @@ raincloudClass <- if (requireNamespace("jmvcore")) R6::R6Class("raincloudClass",
                     " <span style='color:#d9534f'>(", n_nonfinite,
                     " further row(s) removed for non-finite or non-numeric values in ",
                     htmltools::htmlEscape(dep_var), ")</span>") else "",
+                visual_drop_note,
                 "<br><strong>Missing by variable:</strong>", missing_msg,
                 if (min_group < 10) " <span style='color:#d9534f'>(some groups have n < 10; estimates may be imprecise and assumptions need careful assessment)</span>" else "",
                 "</div>"
@@ -257,20 +331,29 @@ raincloudClass <- if (requireNamespace("jmvcore")) R6::R6Class("raincloudClass",
             interpretation_html <- private$.generate_interpretation_guide(analysis_data, dep_var, group_var)
             # Log-transform validation lives in .run() (never in the render function):
             # a non-positive dependent variable cannot be shown on a log scale.
-            if (isTRUE(self$options$log_transform) && any(analysis_data[[dep_var]] <= 0)) {
-                interpretation_html <- paste0(
-                    interpretation_html,
-                    "<div style='background-color: rgba(216, 33, 50, 0.18);color: inherit;padding:12px;border-radius:8px;margin-top:12px;'>",
-                    .("Log transform was requested but the dependent variable contains non-positive values; the log scale was skipped."),
-                    "</div>"
-                )
+            if (isTRUE(self$options$log_transform)) {
+                if (any(analysis_data[[dep_var]] <= 0)) {
+                    interpretation_html <- paste0(
+                        interpretation_html,
+                        "<div style='background-color: rgba(216, 33, 50, 0.18);color: inherit;padding:12px;border-radius:8px;margin-top:12px;'>",
+                        .("Log transform was requested but the dependent variable contains non-positive values; the log scale was skipped."),
+                        "</div>"
+                    )
+                } else {
+                    interpretation_html <- paste0(
+                        interpretation_html,
+                        "<div style='background-color: rgba(33, 152, 239, 0.10);color: inherit;padding:10px;border-radius:6px;margin-top:12px;font-size:12px;'>",
+                        .("Note: The plot Y-axis uses a log10 scale; summary statistics, outlier analysis, normality tests, and group comparisons are computed on the original (untransformed) scale."),
+                        "</div>"
+                    )
+                }
             }
             self$results$interpretation$setContent(interpretation_html)
 
             # Store data AND visual options for plotting using setState
             image <- self$results$plot
             plotState <- list(
-                data = analysis_data,
+                data = plot_data,
                 # Include visual options to trigger updates
                 color_palette = self$options$color_palette,
                 plot_theme = self$options$plot_theme,
@@ -278,6 +361,7 @@ raincloudClass <- if (requireNamespace("jmvcore")) R6::R6Class("raincloudClass",
                 show_boxplot = self$options$show_boxplot,
                 show_dots = self$options$show_dots,
                 show_outliers = self$options$show_outliers,
+                outlier_method = self$options$outlier_method,
                 dots_side = self$options$dots_side,
                 orientation = self$options$orientation,
                 violin_width = self$options$violin_width,
@@ -329,10 +413,24 @@ raincloudClass <- if (requireNamespace("jmvcore")) R6::R6Class("raincloudClass",
             }
             
             if (self$options$show_boxplot) {
+                # Always suppress geom_boxplot's built-in IQR outliers so highlighted
+                # outliers come exclusively from the active outlier_method on raw scale.
                 p <- p + ggplot2::geom_boxplot(
                     width = self$options$box_width,
                     alpha = 0.7,
-                    outlier.shape = if (self$options$show_outliers) 16 else NA
+                    outlier.shape = NA
+                )
+            }
+
+            if (isTRUE(self$options$show_outliers) &&
+                ".is_outlier" %in% names(analysis_data) &&
+                any(analysis_data$.is_outlier, na.rm = TRUE)) {
+                outlier_rows <- analysis_data[analysis_data$.is_outlier, , drop = FALSE]
+                p <- p + ggplot2::geom_point(
+                    data = outlier_rows,
+                    shape = 16,
+                    size = max(2, self$options$dots_size * 1.5),
+                    show.legend = FALSE
                 )
             }
             
@@ -353,7 +451,7 @@ raincloudClass <- if (requireNamespace("jmvcore")) R6::R6Class("raincloudClass",
             # Add faceting if specified
             if (!is.null(facet_var) && facet_var != "") {
                 facet_safe <- private$.escapeVar(facet_var)
-                p <- p + ggplot2::facet_wrap(jmvcore::asFormula(paste("~", facet_safe)))
+                p <- p + ggplot2::facet_wrap(stats::reformulate(facet_safe))
             }
             
             # Apply color palette. Transparency is handled once by the geom alpha
@@ -542,48 +640,50 @@ raincloudClass <- if (requireNamespace("jmvcore")) R6::R6Class("raincloudClass",
         .generate_statistics = function(data, dep_var, group_var) {
             # Generate comprehensive statistics table
             
-            # Calculate skewness and kurtosis with fallback
+            # Calculate skewness and kurtosis with consistent guards for n and zero variance
+            # before calling moments:: (otherwise moments:: emits NaN for constant groups
+            # and 0/1 for n = 2).
             calc_skewness <- function(x) {
+                x_clean <- x[is.finite(x)]
+                n <- length(x_clean)
+                if (n < 3) return(NA_real_)
+                s <- sqrt(mean((x_clean - mean(x_clean))^2))
+                if (!is.finite(s) || s == 0) return(NA_real_)
                 if (requireNamespace("moments", quietly = TRUE)) {
-                    tryCatch(moments::skewness(x, na.rm = TRUE), error = function(e) NA)
+                    tryCatch(moments::skewness(x_clean, na.rm = TRUE), error = function(e) NA_real_)
                 } else {
-                    # Simple skewness approximation
-                    n <- length(x[!is.na(x)])
-                    if (n < 3) return(NA)
-                    x_clean <- x[!is.na(x)]
                     m <- mean(x_clean)
-                    s <- sqrt(mean((x_clean - m)^2))
-                    if (s == 0) return(NA_real_)
                     sum((x_clean - m)^3) / (n * s^3)
                 }
             }
             
             calc_kurtosis <- function(x) {
+                x_clean <- x[is.finite(x)]
+                n <- length(x_clean)
+                if (n < 4) return(NA_real_)
+                s <- sqrt(mean((x_clean - mean(x_clean))^2))
+                if (!is.finite(s) || s == 0) return(NA_real_)
                 if (requireNamespace("moments", quietly = TRUE)) {
-                    tryCatch(moments::kurtosis(x, na.rm = TRUE), error = function(e) NA)
+                    tryCatch(moments::kurtosis(x_clean, na.rm = TRUE), error = function(e) NA_real_)
                 } else {
-                    # Simple kurtosis approximation
-                    n <- length(x[!is.na(x)])
-                    if (n < 4) return(NA)
-                    x_clean <- x[!is.na(x)]
                     m <- mean(x_clean)
-                    s <- sqrt(mean((x_clean - m)^2))
-                    if (s == 0) return(NA_real_)
                     sum((x_clean - m)^4) / (n * s^4)
                 }
             }
             
+            fmt_stat <- function(v) {
+                if (is.null(v) || length(v) == 0 || is.na(v) || !is.finite(v)) "N/A" else as.character(v)
+            }
+
             private$.checkpoint()  # Checkpoint before calculating statistics for all groups
-            stats_summary <- data %>%
-                dplyr::group_by(.data[[group_var]]) %>%
+            stats_summary <- data |>
+                dplyr::group_by(.data[[group_var]]) |>
                 dplyr::summarise(
                     n = dplyr::n(),
                     mean = round(mean(.data[[dep_var]], na.rm = TRUE), 3),
                     median = round(median(.data[[dep_var]], na.rm = TRUE), 3),
                     sd = round(sd(.data[[dep_var]], na.rm = TRUE), 3),
                     mad = round(mad(.data[[dep_var]], na.rm = TRUE), 3),
-                    q1 = round(quantile(.data[[dep_var]], 0.25, na.rm = TRUE), 3),
-                    q3 = round(quantile(.data[[dep_var]], 0.75, na.rm = TRUE), 3),
                     iqr = round(stats::IQR(.data[[dep_var]], na.rm = TRUE), 3),
                     min_val = round(min(.data[[dep_var]], na.rm = TRUE), 3),
                     max_val = round(max(.data[[dep_var]], na.rm = TRUE), 3),
@@ -594,7 +694,7 @@ raincloudClass <- if (requireNamespace("jmvcore")) R6::R6Class("raincloudClass",
             
             stats_html <- paste0(
                 "<div style='background-color: rgba(138, 155, 172, 0.06); padding: 20px; border-radius: 8px; margin-bottom: 20px; color: inherit;'>",
-                "<h3 style='color: #495057; margin-top: 0;'> Distribution Summary Statistics</h3>",
+                "<h3 style='color: #495057; margin-top: 0;'>Distribution Summary Statistics</h3>",
                 "<table style='width: 100%; border-collapse: collapse; font-family: Arial, sans-serif;'>",
                 "<thead><tr style='background-color: #6c757d; color: white;'>",
                 "<th style='padding: 8px; border: 1px solid #dee2e6;'>Group</th>",
@@ -611,20 +711,20 @@ raincloudClass <- if (requireNamespace("jmvcore")) R6::R6Class("raincloudClass",
             )
             
             for (i in seq_len(nrow(stats_summary))) {
-                row_bg <- if (i %% 2 == 0) "#ffffff" else "#f8f9fa"
+                row_bg <- if (i %% 2 == 0) "transparent" else "rgba(138, 155, 172, 0.08)"
                 stats_html <- paste0(
                     stats_html,
-                    "<tr style='background-color: ", row_bg, ";'>",
+                    "<tr style='background-color: ", row_bg, "; color: inherit;'>",
                     "<td><strong>", htmltools::htmlEscape(as.character(stats_summary[[group_var]][i])), "</strong></td>",
                     "<td>", stats_summary$n[i], "</td>",
-                    "<td>", stats_summary$mean[i], "</td>",
-                    "<td>", stats_summary$median[i], "</td>",
-                    "<td>", stats_summary$sd[i], "</td>",
-                    "<td>", stats_summary$mad[i], "</td>",
-                    "<td>", stats_summary$iqr[i], "</td>",
-                    "<td>", stats_summary$min_val[i], " - ", stats_summary$max_val[i], "</td>",
-                    "<td>", stats_summary$skewness[i], "</td>",
-                    "<td>", stats_summary$kurtosis[i], "</td>",
+                    "<td>", fmt_stat(stats_summary$mean[i]), "</td>",
+                    "<td>", fmt_stat(stats_summary$median[i]), "</td>",
+                    "<td>", fmt_stat(stats_summary$sd[i]), "</td>",
+                    "<td>", fmt_stat(stats_summary$mad[i]), "</td>",
+                    "<td>", fmt_stat(stats_summary$iqr[i]), "</td>",
+                    "<td>", fmt_stat(stats_summary$min_val[i]), " - ", fmt_stat(stats_summary$max_val[i]), "</td>",
+                    "<td>", fmt_stat(stats_summary$skewness[i]), "</td>",
+                    "<td>", fmt_stat(stats_summary$kurtosis[i]), "</td>",
                     "</tr>"
                 )
             }
@@ -632,11 +732,33 @@ raincloudClass <- if (requireNamespace("jmvcore")) R6::R6Class("raincloudClass",
             stats_html <- paste0(stats_html, 
                 "</tbody></table>",
                 "<p style='font-size: 12px; color: #6c757d; margin-top: 15px;'>",
-                "<em>IQR = Interquartile Range, SD = Standard Deviation, MAD = Median Absolute Deviation. Skewness: 0 = symmetric, >0 = right-skewed, <0 = left-skewed. Kurtosis: 3 = normal-tailed (excess 0).</em>",
+                "<em>IQR = Interquartile Range, SD = Standard Deviation, MAD = Median Absolute Deviation (scaled by 1.4826 for normal-distribution consistency). Skewness: 0 = symmetric, >0 = right-skewed, <0 = left-skewed (requires n \u2265 3 and SD &gt; 0). Kurtosis: 3 = normal-tailed (excess 0; requires n \u2265 4 and SD &gt; 0).</em>",
                 "</p></div>"
             )
             
             return(stats_html)
+        },
+
+        .detect_outliers = function(group_data, outlier_method) {
+            # Returns logical vector flagging outliers, or NULL when untestable (zero spread).
+            if (outlier_method == "iqr") {
+                q1 <- stats::quantile(group_data, 0.25, na.rm = TRUE)
+                q3 <- stats::quantile(group_data, 0.75, na.rm = TRUE)
+                iqr <- q3 - q1
+                return(group_data < (q1 - 1.5 * iqr) | group_data > (q3 + 1.5 * iqr))
+            } else if (outlier_method == "zscore") {
+                s_dev <- stats::sd(group_data, na.rm = TRUE)
+                if (!is.finite(s_dev) || s_dev == 0) return(NULL)
+                z_scores <- abs((group_data - mean(group_data, na.rm = TRUE)) / s_dev)
+                return(z_scores > 3)
+            } else if (outlier_method == "modified_zscore") {
+                median_val <- stats::median(group_data, na.rm = TRUE)
+                mad_val <- stats::mad(group_data, constant = 1, na.rm = TRUE)
+                if (!is.finite(mad_val) || mad_val == 0) return(NULL)
+                modified_z <- 0.6745 * (group_data - median_val) / mad_val
+                return(abs(modified_z) > 3.5)
+            }
+            rep(FALSE, length(group_data))
         },
 
         .generate_outlier_analysis = function(data, dep_var, group_var) {
@@ -649,37 +771,12 @@ raincloudClass <- if (requireNamespace("jmvcore")) R6::R6Class("raincloudClass",
             for (group in levels(data[[group_var]])) {
                 private$.checkpoint(flush = FALSE)  # Poll for changes without re-pushing results
                 group_data <- data[data[[group_var]] == group, dep_var]
-                
-                if (outlier_method == "iqr") {
-                    q1 <- quantile(group_data, 0.25, na.rm = TRUE)
-                    q3 <- quantile(group_data, 0.75, na.rm = TRUE)
-                    iqr <- q3 - q1
-                    outliers <- which(group_data < (q1 - 1.5 * iqr) | group_data > (q3 + 1.5 * iqr))
-                } else if (outlier_method == "zscore") {
-                    # A zero SD makes every z NaN, and which(NaN > 3) is empty, so
-                    # a constant group silently reported "0 outliers detected" as
-                    # though it had been checked. Mark it untestable instead.
-                    s_dev <- sd(group_data, na.rm = TRUE)
-                    if (!is.finite(s_dev) || s_dev == 0) {
-                        outliers_list[[group]] <- NA_integer_
-                        next
-                    }
-                    z_scores <- abs((group_data - mean(group_data, na.rm = TRUE)) / s_dev)
-                    outliers <- which(z_scores > 3)
-                } else if (outlier_method == "modified_zscore") {
-                    median_val <- median(group_data, na.rm = TRUE)
-                    mad_val <- mad(group_data, constant = 1, na.rm = TRUE)
-                    # Same trap: MAD is 0 whenever more than half the values are
-                    # identical, which is common for rounded lab data.
-                    if (!is.finite(mad_val) || mad_val == 0) {
-                        outliers_list[[group]] <- NA_integer_
-                        next
-                    }
-                    modified_z <- 0.6745 * (group_data - median_val) / mad_val
-                    outliers <- which(abs(modified_z) > 3.5)
+                flags <- private$.detect_outliers(group_data, outlier_method)
+                if (is.null(flags)) {
+                    outliers_list[[group]] <- NA_integer_
+                } else {
+                    outliers_list[[group]] <- sum(flags, na.rm = TRUE)
                 }
-                
-                outliers_list[[group]] <- length(outliers)
             }
             
             outlier_html <- paste0(
@@ -800,6 +897,11 @@ raincloudClass <- if (requireNamespace("jmvcore")) R6::R6Class("raincloudClass",
         .fmtP = function(p) {
             if (is.null(p) || length(p) == 0 || is.na(p) || !is.finite(p)) return(.("not estimable"))
             if (p < 0.001) return("&lt; 0.001")
+            # Avoid rounding 0.0497 to "0.050" (contradicting "p < 0.05") or
+            # 0.0097 to "0.010" (contradicting "p < 0.01").
+            if ((p >= 0.0095 && p < 0.01) || (p >= 0.0495 && p < 0.05)) {
+                return(formatC(p, format = "f", digits = 4))
+            }
             formatC(p, format = "f", digits = 3)
         },
 
@@ -874,35 +976,33 @@ raincloudClass <- if (requireNamespace("jmvcore")) R6::R6Class("raincloudClass",
 
                     test_key <- if (use_parametric) "ttest" else "wilcoxon"
                 } else {
-                    # Multiple groups. `overall_normal` starts TRUE, so if EVERY
-                    # group is untestable (n < 3) it must not silently license a
-                    # parametric test - require at least one group to have been
-                    # testable and none to have failed.
-                    overall_normal <- TRUE
-                    any_testable <- FALSE
-                    for (group in levels(data[[group_var]])) {
+                    # Multiple groups. Unadjusted per-group Shapiro-Wilk at alpha = 0.05
+                    # has familywise false-rejection rate 1 - 0.95^k (14.3% for k = 3),
+                    # which routes heteroscedastic normal data into Kruskal-Wallis where
+                    # Type I error inflates to >10%. Adjust the Shapiro-Wilk threshold
+                    # for the number of testable groups, and apply a stricter threshold
+                    # when variances are unequal (Welch's ANOVA is robust to mild
+                    # non-normality, whereas Kruskal-Wallis breaks under heteroscedasticity).
+                    sw_ps <- vapply(levels(data[[group_var]]), function(group) {
                         private$.checkpoint(flush = FALSE)
                         group_data <- data[data[[group_var]] == group, dep_var]
-                        sw_p <- private$.safe_shapiro_p(group_data)
-                        if (!is.na(sw_p)) {
-                            any_testable <- TRUE
-                            if (sw_p <= 0.05) {
-                                overall_normal <- FALSE
-                                break
-                            }
-                        }
-                    }
+                        private$.safe_shapiro_p(group_data)
+                    }, numeric(1))
+                    sw_valid <- sw_ps[!is.na(sw_ps)]
+                    any_testable <- length(sw_valid) > 0
+                    sw_alpha <- if (unequal_var) 0.005 / max(1L, length(sw_valid)) else 0.05 / max(1L, length(sw_valid))
+                    overall_normal <- any_testable && all(sw_valid > sw_alpha)
                     # Welch's ANOVA when the variances differ - it is the correct
                     # parametric test there, and reduces to ordinary ANOVA when
                     # they do not.
-                    test_key <- if (overall_normal && any_testable) {
+                    test_key <- if (overall_normal) {
                         if (unequal_var) "welch" else "anova"
                     } else {
                         "kruskal"
                     }
                 }
             } else {
-                test_key <- comparison_method  # ttest / wilcoxon / anova / kruskal
+                test_key <- comparison_method  # ttest / wilcoxon / anova / welch / kruskal
             }
 
             # Guard: t-test / Wilcoxon are only defined for exactly two groups.
@@ -958,7 +1058,9 @@ raincloudClass <- if (requireNamespace("jmvcore")) R6::R6Class("raincloudClass",
                             (mean(group1_data) - mean(group2_data)) / sd_unpooled else NA_real_
                         effect_size_html <- paste0(
                             "<tr><td style='padding: 8px; border: 1px solid #ddd;'><strong>",
-                            .("Cohen's d (unpooled SD, matching Welch's t):"),
+                            .("Cohen's d (unpooled SD, matching Welch's t)"),
+                            " [", htmltools::htmlEscape(group_levels[1]), " - ",
+                            htmltools::htmlEscape(group_levels[2]), "]:",
                             "</strong></td><td style='padding: 8px; border: 1px solid #ddd;'>",
                             if (is.na(d)) .("not estimable (zero variance)") else sprintf("%.3f", d),
                             "</td></tr>")
@@ -974,7 +1076,9 @@ raincloudClass <- if (requireNamespace("jmvcore")) R6::R6Class("raincloudClass",
                 if (!inherits(test_result, "condition")) {
                     test_stat <- round(test_result$statistic, 4)
                     p_value <- test_result$p.value
-                    test_details <- paste0("W = ", test_stat)
+                    w_mode <- if (grepl("continuity correction", test_result$method, fixed = TRUE))
+                        .("normal approx., continuity-corrected") else .("exact")
+                    test_details <- paste0("W = ", test_stat, " (", w_mode, ")")
                     if (effect_size_flag) {
                         # This panel does not implement a rank-based effect size for the
                         # Wilcoxon test. State this rather than silently dropping the request.
@@ -985,7 +1089,7 @@ raincloudClass <- if (requireNamespace("jmvcore")) R6::R6Class("raincloudClass",
             } else if (test_key %in% c("anova", "welch")) {
                 dep_safe <- private$.escapeVar(dep_var)
                 group_safe <- private$.escapeVar(group_var)
-                fml <- jmvcore::asFormula(paste(dep_safe, "~", group_safe))
+                fml <- stats::reformulate(group_safe, response = dep_safe)
 
                 if (test_key == "welch") {
                     # withBaseFormulaChar(): logistf pulls in formula.tools, whose
@@ -1014,19 +1118,38 @@ raincloudClass <- if (requireNamespace("jmvcore")) R6::R6Class("raincloudClass",
                     if (unequal_var)
                         assumption_note <- paste0(
                             "<div style='background-color: rgba(216, 33, 50, 0.18);color: inherit;padding:10px;border-radius:6px;margin-top:10px;'>",
-                            sprintf(.("Equal variances are doubtful (Bartlett p = %s), and ordinary ANOVA assumes them. With unequal variances and unequal group sizes it can report a significant difference where none exists. Use Welch's ANOVA (choose Automatic) or Kruskal-Wallis."),
+                            sprintf(.("Equal variances are doubtful (Bartlett p = %s), and ordinary ANOVA assumes them. With unequal variances and unequal group sizes it can report a significant difference where none exists. Use Welch's ANOVA (choose Welch's ANOVA or Automatic) or Kruskal-Wallis."),
                                     private$.fmtP(var_p)),
                             "</div>")
+                }
+                if (effect_size_flag && n_groups == 2) {
+                    effect_size_html <- paste0(
+                        "<tr><td style='padding: 8px; border: 1px solid #ddd;'><strong>Effect size:</strong></td><td style='padding: 8px; border: 1px solid #ddd;'>",
+                        .("Cohen's d is reported only with the t-test. Select t-test (or Automatic for normal groups) to display Cohen's d."),
+                        "</td></tr>")
                 }
 
             } else if (test_key == "kruskal") {
                 dep_safe <- private$.escapeVar(dep_var)
                 group_safe <- private$.escapeVar(group_var)
-                kw_result <- run(kruskal.test(jmvcore::asFormula(paste(dep_safe, "~", group_safe)), data = data))
+                kw_result <- run(kruskal.test(stats::reformulate(group_safe, response = dep_safe), data = data))
                 if (!inherits(kw_result, "condition")) {
                     test_stat <- round(kw_result$statistic, 4)
                     p_value <- kw_result$p.value
                     test_details <- paste0("\u03c7\u00b2 = ", test_stat, ", df = ", kw_result$parameter)
+                }
+                if (unequal_var) {
+                    assumption_note <- paste0(
+                        "<div style='background-color: rgba(255, 202, 33, 0.23);color: inherit;padding:10px;border-radius:6px;margin-top:10px;'>",
+                        sprintf(.("Note: group variances appear unequal (Bartlett p = %s). Kruskal-Wallis tests differences across overall distributions (including spread), not strictly equality of medians."),
+                                private$.fmtP(var_p)),
+                        "</div>")
+                }
+                if (effect_size_flag && n_groups == 2) {
+                    effect_size_html <- paste0(
+                        "<tr><td style='padding: 8px; border: 1px solid #ddd;'><strong>Effect size:</strong></td><td style='padding: 8px; border: 1px solid #ddd;'>",
+                        .("This panel reports standardized mean differences only with the t-test. A rank-based effect size for Kruskal-Wallis is not implemented."),
+                        "</td></tr>")
                 }
             }
 
@@ -1054,11 +1177,22 @@ raincloudClass <- if (requireNamespace("jmvcore")) R6::R6Class("raincloudClass",
                               stats::pairwise.t.test(data[[dep_var]], data[[group_var]],
                                                      p.adjust.method = adjust_method,
                                                      pool.sd = (test_key == "anova")))
+                pw_method_label <- if (test_key == "kruskal") {
+                    .("Pairwise Wilcoxon rank-sum tests (normal approximation with continuity correction)")
+                } else if (test_key == "anova") {
+                    .("Pairwise pooled-SD t-tests")
+                } else {
+                    .("Pairwise Welch's t-tests (unpooled SD)")
+                }
                 if (!inherits(pw, "condition") && !is.null(pw$p.value)) {
                     m <- pw$p.value
                     rows <- ""
+                    # Lower triangle (i >= j) holds all k*(k-1)/2 valid pairs;
+                    # upper triangle (i < j) is structural NA. Retaining i >= j
+                    # ensures NaN cells (e.g., two identical constant groups) are
+                    # displayed as "not estimable" rather than silently dropped.
                     for (i in seq_len(nrow(m))) for (j in seq_len(ncol(m))) {
-                        if (is.na(m[i, j])) next
+                        if (i < j) next
                         rows <- paste0(rows, "<tr><td style='padding:6px;border:1px solid #ddd;'>",
                             htmltools::htmlEscape(rownames(m)[i]), " vs ",
                             htmltools::htmlEscape(colnames(m)[j]),
@@ -1071,7 +1205,9 @@ raincloudClass <- if (requireNamespace("jmvcore")) R6::R6Class("raincloudClass",
                         "<table style='width:100%; border-collapse:collapse;'>",
                         "<tr style='background-color: rgba(33, 33, 33, 0.14); color: inherit;'><th style='padding:6px;border:1px solid #ddd;'>",
                         .("Comparison"), "</th><th style='padding:6px;border:1px solid #ddd;'>",
-                        .("Adjusted p"), "</th></tr>", rows, "</table>")
+                        .("Adjusted p"), "</th></tr>", rows, "</table>",
+                        "<p style='font-size:11px;color:#7b1fa2;margin-top:4px;'><em>",
+                        .("Post-hoc method:"), " ", pw_method_label, ".</em></p>")
                 }
             } else if (adjust_method != "none") {
                 pairwise_html <- paste0(
@@ -1089,9 +1225,19 @@ raincloudClass <- if (requireNamespace("jmvcore")) R6::R6Class("raincloudClass",
                           if (p_value < 0.01) .("p &lt; 0.01") else
                           if (p_value < 0.05) .("p &lt; 0.05") else .("not significant at the 0.05 level")
 
+            auto_note <- if (comparison_method == "auto") {
+                if (n_groups == 2) {
+                    sprintf(.("%s was selected automatically from the normality check (data-dependent test selection can affect Type I error; choose a specific test directly when assumptions are known in advance)."), test_method)
+                } else {
+                    sprintf(.("%s was selected automatically from the normality and equal-variance checks (data-dependent test selection can affect Type I error; choose a specific test directly when assumptions are known in advance)."), test_method)
+                }
+            } else {
+                ""
+            }
+
             comparison_html <- paste0(
                 "<div style='background-color: rgba(153, 33, 170, 0.12); padding: 20px; border-radius: 8px; margin-bottom: 20px; color: inherit;'>",
-                "<h3 style='color: #7b1fa2; margin-top: 0;'> Group Comparison Test</h3>",
+                "<h3 style='color: #7b1fa2; margin-top: 0;'>Group Comparison Test</h3>",
                 "<table style='width: 100%; border-collapse: collapse;'>",
                 "<tr><td style='padding: 8px; border: 1px solid #ddd;'><strong>Test Method:</strong></td><td style='padding: 8px; border: 1px solid #ddd;'>", test_method, "</td></tr>",
                 "<tr><td style='padding: 8px; border: 1px solid #ddd;'><strong>Test Statistic:</strong></td><td style='padding: 8px; border: 1px solid #ddd;'>", test_details, "</td></tr>",
@@ -1102,15 +1248,14 @@ raincloudClass <- if (requireNamespace("jmvcore")) R6::R6Class("raincloudClass",
                 assumption_note,
                 pairwise_html,
                 "<p style='font-size: 12px; color: #7b1fa2; margin-top: 15px;'>",
-                "<em>",
-                if (comparison_method == "auto")
-                    sprintf(.("%s was selected automatically from the normality and equal-variance checks."), test_method)
-                else "",
+                "<em>", auto_note,
+                if (nzchar(auto_note)) " " else "",
+                .("Group comparison tests assume independent observations (one measurement per subject/unit); do not use them for paired before/after or clustered repeated-measures data."),
                 "</em></p></div>"
             )
 
             # Add copy-ready report sentence
-            report_sentence <- private$.generate_report_sentence(test_method, p_value, levels(data[[group_var]]))
+            report_sentence <- private$.generate_report_sentence(test_method, p_value, levels(data[[group_var]]), nrow(data), test_details)
             comparison_html <- paste0(comparison_html, report_sentence)
 
             return(comparison_html)
@@ -1159,7 +1304,7 @@ raincloudClass <- if (requireNamespace("jmvcore")) R6::R6Class("raincloudClass",
                 "<h4 style='color: #2e7d32;'>Clinical/Research Applications:</h4>",
                 "<ul>",
                 "<li><strong>Biomarker Analysis:</strong> Compare distributions across patient groups</li>",
-                "<li><strong>Treatment Effects:</strong> Visualize before/after treatment distributions</li>",
+                "<li><strong>Treatment Arm Comparisons:</strong> Compare distributions across independent treatment groups (for paired before/after or repeated-measures data, use a paired analysis rather than independent-group comparison tests)</li>",
                 "<li><strong>Quality Control:</strong> Identify unusual patterns in laboratory values</li>",
                 "<li><strong>Subgroup Discovery:</strong> Detect hidden subpopulations in data</li>",
                 "</ul>",
@@ -1172,7 +1317,7 @@ raincloudClass <- if (requireNamespace("jmvcore")) R6::R6Class("raincloudClass",
             return(interpretation_html)
         },
         
-        .generate_report_sentence = function(test_method, p_value, groups) {
+        .generate_report_sentence = function(test_method, p_value, groups, n_total = NULL, test_details = NULL) {
             # This block is explicitly offered as "ready to copy into your research
             # report", so every word in it is a claim that ends up in a paper. The
             # previous wording made three that the data cannot support:
@@ -1196,17 +1341,30 @@ raincloudClass <- if (requireNamespace("jmvcore")) R6::R6Class("raincloudClass",
             p_txt <- private$.fmtP(p_value)
             p_txt <- if (base::startsWith(p_txt, "&lt;")) paste0("p ", p_txt) else paste0("p = ", p_txt)
 
+            detail_parts <- character(0)
+            if (!is.null(n_total) && is.finite(n_total)) {
+                detail_parts <- c(detail_parts, sprintf("N = %d", as.integer(n_total)))
+            }
+            if (!is.null(test_details) && nzchar(test_details)) {
+                detail_parts <- c(detail_parts, test_details)
+            }
+            detail_clause <- if (length(detail_parts) > 0) {
+                paste0(" (", paste(detail_parts, collapse = "; "), ")")
+            } else {
+                ""
+            }
+
             report_text <- if (p_value < 0.05)
-                sprintf(.("A %s comparing %s found a statistically significant difference in %s (%s)."),
-                        test_method, paste(groups, collapse = " vs "), quantity, p_txt)
+                sprintf(.("A %s comparing %s%s found a statistically significant difference in %s (%s)."),
+                        test_method, paste(groups, collapse = " vs "), detail_clause, quantity, p_txt)
             else
-                sprintf(.("A %s comparing %s did not find a statistically significant difference in %s (%s). This does not establish that the groups are equivalent; the study may simply lack the power to detect a difference of clinical interest."),
-                        test_method, paste(groups, collapse = " vs "), quantity, p_txt)
+                sprintf(.("A %s comparing %s%s did not find a statistically significant difference in %s (%s). This does not establish that the groups are equivalent; the study may simply lack the power to detect a difference of clinical interest."),
+                        test_method, paste(groups, collapse = " vs "), detail_clause, quantity, p_txt)
             
             return(paste0(
                 "<div style='background-color: rgba(33, 152, 239, 0.13); padding: 15px; border-radius: 5px; margin: 10px 0; color: inherit;'>",
-                "<h4 style='margin-top: 0; color: #1976d2;'> Copy-Ready Result</h4>",
-                "<p style='font-family: monospace; background: white; padding: 10px; border: 1px solid #ddd; border-radius: 3px;'>",
+                "<h4 style='margin-top: 0; color: #1976d2;'>Copy-Ready Result</h4>",
+                "<p style='font-family: monospace; background-color: rgba(138, 155, 172, 0.08); color: inherit; padding: 10px; border: 1px solid #ddd; border-radius: 3px;'>",
                 report_text,
                 "</p>",
                 "<small style='color: #666;'> This sentence is ready to copy into your research report</small>",

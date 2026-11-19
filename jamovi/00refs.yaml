@@ -1212,7 +1212,7 @@ refs:
 
     RGraphGallery:
         type: website
-        author: Holtz Yan
+        author: "Holtz, Y."
         year: 2020
         title: The R Graph Gallery
         publisher: "A website that displays hundreds of R charts https://www.r-graph-gallery.com"
@@ -2446,11 +2446,21 @@ refs:
 
     ggdist:
         type: software
-        author: Matthew Kay , Brenton M. Wiernik
+        author: "Kay, M."
         year: 2025
-        title: "ggdist: R package"
-        publisher: "[R package]. Retrieved from https://CRAN.R-project.org/package=ggdist"
-        url: "https://CRAN.R-project.org/package=ggdist"
+        title: "ggdist: Visualizations of Distributions and Uncertainty"
+        publisher: "[R package]. IEEE Transactions on Visualization and Computer Graphics (2024), 30(1), 414-424"
+        doi: 10.1109/TVCG.2023.3327195
+        url: "https://mjskay.github.io/ggdist/"
+
+    allen_raincloud:
+        type: article
+        author: "Allen, M., Poggiali, D., Whitaker, K., Marshall, T. R., van Langen, J., & Kievit, R. A."
+        year: 2021
+        title: "Raincloud plots: a multi-platform tool for robust data visualization"
+        publisher: "Wellcome Open Research, 4, 63"
+        doi: 10.12688/wellcomeopenres.15191.2
+        url: "https://doi.org/10.12688/wellcomeopenres.15191.2"
 
     ggeconodist:
         type: software
@@ -3328,10 +3338,11 @@ refs:
 
     moments:
         type: software
-        author: Lukasz Komsta, Frederick Novomestky
-        year: 2015
-        title: "moments: R package"
+        author: "Komsta, L., & Novomestky, F."
+        year: 2022
+        title: "moments: Moments, Cumulants, Skewness, Kurtosis and Related Tests"
         publisher: "[R package]. Retrieved from https://CRAN.R-project.org/package=moments"
+        doi: 10.32614/CRAN.package.moments
         url: "https://CRAN.R-project.org/package=moments"
 
     msm:
@@ -4637,11 +4648,12 @@ refs:
 
     viridis:
         type: software
-        author: Simon Garnier
+        author: "Garnier, S., Ross, N., Rudis, R., Camargo, A. P., Sciaini, M., & Scherer, C."
         year: 2024
-        title: "viridis: R package"
+        title: "viridis(Lite) - Colorblind-Friendly Color Maps for R"
         publisher: "[R package]. Retrieved from https://CRAN.R-project.org/package=viridis"
-        url: "https://CRAN.R-project.org/package=viridis"
+        doi: 10.5281/zenodo.4679423
+        url: "https://sjmgarnier.github.io/viridis/"
 
     viridisLite:
         type: software

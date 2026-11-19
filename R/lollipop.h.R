@@ -96,6 +96,7 @@ lollipopOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 colorScheme,
                 options=list(
                     "default",
+                    "jamovi",
                     "clinical",
                     "viridis",
                     "colorblind"),
@@ -285,8 +286,7 @@ lollipopResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 title="`Lollipop Chart {dep} vs {group}`",
                 width=800,
                 height=600,
-                renderFun=".plot",
-                requiresData=TRUE))}))
+                renderFun=".plot"))}))
 
 lollipopBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "lollipopBase",
@@ -296,7 +296,7 @@ lollipopBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             super$initialize(
                 package = "ClinicoPath",
                 name = "lollipop",
-                version = c(1,0,81),
+                version = c(1,0,82),
                 options = options,
                 results = lollipopResults$new(options=options),
                 data = data,

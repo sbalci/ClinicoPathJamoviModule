@@ -22,7 +22,7 @@ jjwithinstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             padjustmethod = "holm",
             pairedEffects = FALSE,
             pairedEstimator = "mean",
-            pairedCIMethod = "bootstrap",
+            pairedCIMethod = "standard",
             pairedBootstrap = 2000,
             pairedUnits = "",
             pairedTimeRatios = FALSE,
@@ -44,7 +44,7 @@ jjwithinstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             ggpubrPlotType = "boxplot",
             ggpubrPalette = "jco",
             ggpubrAddStats = FALSE,
-            ggpubrShowLines = FALSE,
+            ggpubrShowLines = TRUE,
             ggpubrAddPoints = FALSE,
             showExplanations = FALSE, ...) {
 
@@ -168,9 +168,9 @@ jjwithinstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 "pairedCIMethod",
                 pairedCIMethod,
                 options=list(
-                    "bootstrap",
-                    "standard"),
-                default="bootstrap")
+                    "standard",
+                    "bootstrap"),
+                default="standard")
             private$..pairedBootstrap <- jmvcore::OptionInteger$new(
                 "pairedBootstrap",
                 pairedBootstrap,
@@ -285,7 +285,7 @@ jjwithinstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             private$..ggpubrShowLines <- jmvcore::OptionBool$new(
                 "ggpubrShowLines",
                 ggpubrShowLines,
-                default=FALSE)
+                default=TRUE)
             private$..ggpubrAddPoints <- jmvcore::OptionBool$new(
                 "ggpubrAddPoints",
                 ggpubrAddPoints,
@@ -447,8 +447,8 @@ jjwithinstatsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                     "ggstatsplot",
                     "statsExpressions",
                     "ggpubr",
-                    "digest",
-                    "haven"),
+                    "DescTools",
+                    "digest"),
                 clearWith=list(
                     "dep1",
                     "dep2",
@@ -501,7 +501,12 @@ jjwithinstatsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                     "dep4",
                     "typestatistics",
                     "seed",
-                    "clinicalpreset")))
+                    "clinicalpreset",
+                    "bfmessage",
+                    "resultssubtitle",
+                    "effsizetype",
+                    "pairwisecomparisons",
+                    "centralityplotting")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="interpretation",
@@ -684,15 +689,14 @@ jjwithinstatsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 pause = NULL,
                 completeWhenFilled = FALSE,
                 requiresMissings = FALSE,
-                weightsSupport = 'auto')
+                weightsSupport = 'none')
         }))
 
 #' Box-Violin Plots to Compare Within Groups
 #'
-#' Wrapper Function for ggstatsplot::ggwithinstats and
-#' ggstatsplot::grouped_ggwithinstats to generate violin plots
-#' for repeated measurements and within-subjects analysis with
-#' statistical annotations and significance testing.
+#' Wrapper Function for ggstatsplot::ggwithinstats to generate violin plots 
+#' for repeated measurements and within-subjects analysis with statistical 
+#' annotations and significance testing.
 #' 
 #' @param data The data as a data frame.
 #' @param dep1 .
@@ -705,8 +709,9 @@ jjwithinstatsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   visualize the overall trend.  Helps identify if the group as a whole is
 #'   improving, declining, or stable over time.
 #' @param centralitytype .
-#' @param clinicalpreset Choose a preset optimized for common clinical
-#'   scenarios, or select Custom for manual configuration.
+#' @param clinicalpreset Display scenario-specific methodological checklist
+#'   notes in Messages without overriding Statistical test type, or select
+#'   Custom for no preset guidance.
 #' @param typestatistics Parametric: Assumes normal distribution, most
 #'   powerful when appropriate.  Nonparametric: No distribution assumptions,
 #'   robust for skewed biomarker data. Robust: Uses trimmed means, reduces
@@ -730,12 +735,12 @@ jjwithinstatsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   their Hodges-Lehmann pseudomedian (median Walsh average). The pseudomedian
 #'   is not generally the median difference; its location-shift interpretation
 #'   requires symmetric differences.
-#' @param pairedCIMethod Bootstrap resamples complete independent case rows.
-#'   Estimator-specific intervals use a t interval for the mean and the
-#'   normal-approximation signed-rank interval for Hodges-Lehmann; the median
-#'   still uses the paired percentile bootstrap. Constant resampling
-#'   distributions do not produce a confidence interval. All intervals use
-#'   Confidence level.
+#' @param pairedCIMethod Estimator-specific intervals use a paired t interval
+#'   for the mean and the normal-approximation signed-rank interval for
+#'   Hodges-Lehmann; the median uses the paired percentile bootstrap. Bootstrap
+#'   resamples complete independent case rows; percentile intervals can
+#'   under-cover in very small samples. Constant resampling distributions do not
+#'   produce a confidence interval. All intervals use Confidence level.
 #' @param pairedBootstrap Number of case-row resamples for paired change
 #'   intervals. Uses Random seed without changing the caller's random-number
 #'   stream.
@@ -755,8 +760,9 @@ jjwithinstatsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param ytitle .
 #' @param originaltheme .
 #' @param resultssubtitle .
-#' @param bfmessage Whether to display Bayes Factor in the subtitle when using
-#'   Bayesian analysis.
+#' @param bfmessage Display a Bayes factor caption (evidence in favor of the
+#'   null hypothesis, Cauchy prior scale 0.707) under the plot when Statistical
+#'   results is enabled with Parametric tests.
 #' @param conflevel Confidence level for confidence intervals.
 #' @param k Number of decimal places for displaying statistics in the
 #'   subtitle.
@@ -811,7 +817,7 @@ jjwithinstats <- function(
     padjustmethod = "holm",
     pairedEffects = FALSE,
     pairedEstimator = "mean",
-    pairedCIMethod = "bootstrap",
+    pairedCIMethod = "standard",
     pairedBootstrap = 2000,
     pairedUnits = "",
     pairedTimeRatios = FALSE,
@@ -833,7 +839,7 @@ jjwithinstats <- function(
     ggpubrPlotType = "boxplot",
     ggpubrPalette = "jco",
     ggpubrAddStats = FALSE,
-    ggpubrShowLines = FALSE,
+    ggpubrShowLines = TRUE,
     ggpubrAddPoints = FALSE,
     showExplanations = FALSE) {
 

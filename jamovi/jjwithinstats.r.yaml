@@ -60,6 +60,11 @@ items:
         - typestatistics
         - seed
         - clinicalpreset
+        - bfmessage
+        - resultssubtitle
+        - effsizetype
+        - pairwisecomparisons
+        - centralityplotting
 
     - name: interpretation
       title: Clinical Interpretation
@@ -220,6 +225,6 @@ refs:
     - ggstatsplot
     - statsExpressions
     - ggpubr
+    - DescTools
     - digest
-    - haven
 ...

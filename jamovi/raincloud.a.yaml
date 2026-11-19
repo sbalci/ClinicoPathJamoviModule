@@ -1,19 +1,19 @@
 ---
 name: raincloud
 title: Raincloud Plot
-menuGroup: JJStatsPlot
+menuGroup: JJStatsPlotT
 menuSubgroup: Categorical vs Continuous
-version: '1.0.81'
+version: '1.0.82'
 jas: '1.2'
 
 description:
-  main: |
-    Creates Raincloud plots to visualize data distributions using ggdist package.
-    Raincloud plots combine three visualization techniques: half-violin plots showing 
-    distribution density, box plots showing summary statistics, and dot plots showing 
-    individual data points. This provides a comprehensive view of data distribution 
+  main: >
+    Creates Raincloud plots to visualize data distributions using the ggdist package.
+    Raincloud plots combine three visualization techniques: half-violin plots showing
+    distribution density, box plots showing summary statistics, and dot plots showing
+    individual data points. This provides a comprehensive view of data distribution
     that reveals patterns traditional box plots might miss, including multimodality
-    and distribution shape. Based on the ggdist R-Bloggers tutorial.
+    and distribution shape. Based on Allen et al. (2021) and the ggdist package.
   # R:
   #   dontrun: true
   #   usage: |
@@ -376,6 +376,8 @@ options:
           name: wilcoxon
         - title: "ANOVA"
           name: anova
+        - title: "Welch's ANOVA"
+          name: welch
         - title: "Kruskal-Wallis"
           name: kruskal
       default: auto

@@ -1,9 +1,9 @@
 ---
 name: lollipop
 title: Lollipop Chart
-menuGroup: JJStatsPlot
+menuGroup: JJStatsPlotT
 menuSubgroup: Categorical vs Continuous
-version: '1.0.81'
+version: '1.0.82'
 jas: '1.2'
 
 description:
@@ -180,6 +180,8 @@ options:
       options:
         - title: Default
           name: default
+        - title: jamovi (follow global)
+          name: jamovi
         - title: Clinical
           name: clinical
         - title: Viridis

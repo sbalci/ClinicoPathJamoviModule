@@ -10,7 +10,7 @@
   - `jamovi/jjwithinstats.a.yaml` - Options & Schema Definition
   - `jamovi/jjwithinstats.r.yaml` - Results Layout & Tables
   - `R/jjwithinstats.b.R` - Backend Implementation
-- **Summary**: Wrapper Function for ggstatsplot::ggwithinstats and ggstatsplot::grouped_ggwithinstats to generate violin plots for repeated measurements and within-subjects analysis with statistical annotations and significance testing.
+- **Summary**: Wrapper Function for ggstatsplot::ggwithinstats to generate violin plots for repeated measurements and within-subjects analysis with statistical annotations and significance testing.
 
 ## 1a. Changelog
 

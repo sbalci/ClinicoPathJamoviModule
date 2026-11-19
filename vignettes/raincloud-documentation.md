@@ -4,7 +4,7 @@
 
 - **Function**: `raincloud`
 - **Title**: Raincloud Plot
-- **Module**: `JJStatsPlotT`
+- **Module**: `JJStatsPlot`
 - **Files**:
   - `jamovi/raincloud.u.yaml` - User Interface Definition
   - `jamovi/raincloud.a.yaml` - Options & Schema Definition
@@ -46,8 +46,8 @@
 | `outlier_method` | `List` | `iqr` | Outlier Detection Method |
 | `normality_test` | `Bool` | `FALSE` | Test for normality |
 | `comparison_test` | `Bool` | `FALSE` | Group comparison test |
-| `comparison_method` | `List` | `auto` | Comparison Method |
-| `adjust_method` | `List` | `none` | P-value Adjustment |
+| `comparison_method` | `List` | `auto` | Comparison Method (`auto`, `ttest`, `wilcoxon`, `anova`, `welch`, `kruskal`) |
+| `adjust_method` | `List` | `none` | Post-hoc pairwise p-value adjustment for 3+ groups (`none`, `holm`, `bonferroni`, `BH`) |
 | `effect_size` | `Bool` | `FALSE` | Effect size (2 groups) |
 | `log_transform` | `Bool` | `FALSE` | Log-transform Y-axis |
 

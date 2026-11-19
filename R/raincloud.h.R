@@ -212,6 +212,7 @@ raincloudOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "ttest",
                     "wilcoxon",
                     "anova",
+                    "welch",
                     "kruskal"),
                 default="auto")
             private$..adjust_method <- jmvcore::OptionList$new(
@@ -341,6 +342,7 @@ raincloudResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 title="Raincloud Plot",
                 refs=list(
                     "ClinicoPathJamoviModule",
+                    "allen_raincloud",
                     "ggdist",
                     "ggplot2",
                     "ggprism",
@@ -386,6 +388,7 @@ raincloudResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "x_label",
                     "y_label",
                     "show_outliers",
+                    "outlier_method",
                     "log_transform")))
             self$add(jmvcore::Html$new(
                 options=options,

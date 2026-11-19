@@ -44,6 +44,7 @@ items:
         - x_label
         - y_label
         - show_outliers
+        - outlier_method
         - log_transform
 
     - name: statistics
@@ -96,6 +97,7 @@ items:
 
 refs:
     - ClinicoPathJamoviModule
+    - allen_raincloud
     - ggdist
     - ggplot2
     - ggprism

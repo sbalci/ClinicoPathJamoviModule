@@ -22,7 +22,7 @@ jjwithinstats(
   padjustmethod = "holm",
   pairedEffects = FALSE,
   pairedEstimator = "mean",
-  pairedCIMethod = "bootstrap",
+  pairedCIMethod = "standard",
   pairedBootstrap = 2000,
   pairedUnits = "",
   pairedTimeRatios = FALSE,
@@ -44,7 +44,7 @@ jjwithinstats(
   ggpubrPlotType = "boxplot",
   ggpubrPalette = "jco",
   ggpubrAddStats = FALSE,
-  ggpubrShowLines = FALSE,
+  ggpubrShowLines = TRUE,
   ggpubrAddPoints = FALSE,
   showExplanations = FALSE
 )
@@ -70,8 +70,9 @@ improving, declining, or stable over time.}
 
 \item{centralitytype}{.}
 
-\item{clinicalpreset}{Choose a preset optimized for common clinical
-scenarios, or select Custom for manual configuration.}
+\item{clinicalpreset}{Display scenario-specific methodological checklist
+notes in Messages without overriding Statistical test type, or select
+Custom for no preset guidance.}
 
 \item{typestatistics}{Parametric: Assumes normal distribution, most
 powerful when appropriate.  Nonparametric: No distribution assumptions,
@@ -103,12 +104,12 @@ their Hodges-Lehmann pseudomedian (median Walsh average). The pseudomedian
 is not generally the median difference; its location-shift interpretation
 requires symmetric differences.}
 
-\item{pairedCIMethod}{Bootstrap resamples complete independent case rows.
-Estimator-specific intervals use a t interval for the mean and the
-normal-approximation signed-rank interval for Hodges-Lehmann; the median
-still uses the paired percentile bootstrap. Constant resampling
-distributions do not produce a confidence interval. All intervals use
-Confidence level.}
+\item{pairedCIMethod}{Estimator-specific intervals use a paired t interval
+for the mean and the normal-approximation signed-rank interval for
+Hodges-Lehmann; the median uses the paired percentile bootstrap. Bootstrap
+resamples complete independent case rows; percentile intervals can
+under-cover in very small samples. Constant resampling distributions do not
+produce a confidence interval. All intervals use Confidence level.}
 
 \item{pairedBootstrap}{Number of case-row resamples for paired change
 intervals. Uses Random seed without changing the caller's random-number
@@ -141,8 +142,9 @@ shorter. Ratios are withheld for a contrast containing nonpositive times.}
 
 \item{resultssubtitle}{.}
 
-\item{bfmessage}{Whether to display Bayes Factor in the subtitle when using
-Bayesian analysis.}
+\item{bfmessage}{Display a Bayes factor caption (evidence in favor of the
+null hypothesis, Cauchy prior scale 0.707) under the plot when Statistical
+results is enabled with Parametric tests.}
 
 \item{conflevel}{Confidence level for confidence intervals.}
 
@@ -192,8 +194,7 @@ Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.f
 \code{as.data.frame(results$pairedChanges)}
 }
 \description{
-Wrapper Function for ggstatsplot::ggwithinstats and
-ggstatsplot::grouped_ggwithinstats to generate violin plots
-for repeated measurements and within-subjects analysis with
-statistical annotations and significance testing.
+Wrapper Function for ggstatsplot::ggwithinstats to generate violin plots
+for repeated measurements and within-subjects analysis with statistical
+annotations and significance testing.
 }

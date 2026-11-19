@@ -34,13 +34,13 @@
 #' @param ytitle Y-axis label (default: auto from value variable)
 #' @param originaltheme Logical, use ggstatsplot theme (TRUE) or jamovi theme (FALSE)
 #' @param resultssubtitle Logical, display statistical results as subtitle
-#' @param bfmessage Logical, display Bayes Factor message for Bayesian analysis
+#' @param bfmessage Logical, display Bayes factor caption when Statistical results is enabled with Parametric tests
 #' @param conflevel Confidence level for intervals (default: 0.95)
 #' @param k Number of decimal places for statistics (default: 2)
 #' @param plotwidth Plot width in pixels (default: 650)
 #' @param plotheight Plot height in pixels (default: 450)
-#' @param clinicalpreset Clinical analysis preset: "custom", "biomarker",
-#'   "treatment", or "laboratory"
+#' @param clinicalpreset Advisory clinical guidance preset: "custom", "biomarker",
+#'   "treatment", or "laboratory" (emits checklist guidance without overriding test settings)
 #' @param addGGPubrPlot Logical, add publication-ready ggpubr variant plot
 #' @param ggpubrPlotType Type of ggpubr plot: "boxplot", "violin", "paired", or "line"
 #' @param ggpubrPalette Color palette for ggpubr: "jco", "npg", "aaas", "lancet", etc.
@@ -54,21 +54,21 @@
 #'
 #' @details
 #' **Data Requirements:**
-#' - Wide format required (one row per subject)
+#' - Wide format required (one row per independent subject/case; do not stack multiple cores, lesions, or readers per subject)
 #' - Each column represents a different time point or condition
-#' - Complete data required for paired analysis (listwise deletion)
+#' - Complete finite data required across selected measurements (listwise deletion)
 #' - Minimum 3 subjects with complete data across all measurements
 #'
 #' **Statistical Tests:**
-#' - Parametric: Repeated measures ANOVA (assumes normality)
-#' - Nonparametric: Friedman test (no distribution assumptions)
-#' - Robust: Uses trimmed means (resistant to outliers)
-#' - Bayesian: Provides evidence strength via Bayes Factors
+#' - Parametric: Paired t-test (2 measurements) or Greenhouse-Geisser repeated-measures ANOVA (3-4 measurements)
+#' - Nonparametric: Wilcoxon signed-rank test (2 measurements) or Friedman test with Durbin-Conover post-hoc (3-4 measurements)
+#' - Robust: 20%-trimmed means (Yuen's paired test or Wilcox heteroscedastic repeated-measures ANOVA)
+#' - Bayesian: Default Cauchy-prior Bayes factor (prior scale 0.707)
 #'
-#' **Clinical Presets:**
-#' - Biomarker: Optimized for laboratory biomarker tracking (nonparametric)
-#' - Treatment: Optimized for treatment response monitoring (parametric with pairwise)
-#' - Laboratory: Optimized for clinical lab values (robust)
+#' **Clinical Guidance Presets (Advisory Only):**
+#' - Biomarker: Checklist guidance for skewed biomarker tracking (suggests Nonparametric)
+#' - Treatment: Checklist guidance for multi-visit response monitoring (suggests Pairwise comparisons)
+#' - Laboratory: Checklist guidance for outlier-prone lab values (suggests Robust)
 #'
 #' @section Performance Optimization:
 #' The function implements sophisticated caching:
@@ -179,7 +179,7 @@ jjwithinstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 "<strong>Data Format:</strong> Wide format required - each row = one subject, columns = separate time points/measurements.<br><br>",
                 "<strong>Requirements:</strong><br>",
                 "\u2022 Select at least 2 measurements (First and Second Measurement fields)<br>",
-                "\u2022 No missing values allowed<br>",
+                "\u2022 At least 3 independent subjects with complete finite values across all selected measurements (incomplete rows are excluded listwise)<br>",
                 "\u2022 Use for comparing 2-4 measurements from the same subjects<br><br>",
                 "See documentation: <a href='https://www.indrapatil.com/ggstatsplot/reference/ggwithinstats.html' target='_blank'>ggwithinstats</a><br>",
                 "Please cite jamovi and packages as instructed.<br><hr>"
@@ -365,9 +365,13 @@ jjwithinstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     upper = if (is.finite(e$upper)) e$upper else NULL,
                     method = .(e$method), test = test, p = p, note = .(e$note)))
             }
-            table$setNote("intervals", sprintf(
-                .("Intervals are pointwise %.1f%% intervals, without multiplicity adjustment. Bootstrap intervals use %d whole-case resamples (seed %d); a constant resampling distribution does not provide an interval. The median paired change differs from the difference of marginal medians. The Hodges-Lehmann estimate is the median Walsh average of paired differences; its shift interpretation assumes symmetry."),
-                100 * self$options$conflevel, self$options$pairedBootstrap, self$options$seed))
+            used_boot <- any(grepl("bootstrap", effects$method, ignore.case = TRUE))
+            boot_caution <- if (used_boot && nrow(wide) < 15L)
+                paste0(" ", .("Percentile bootstrap intervals can under-cover nominal confidence levels when fewer than 15 complete pairs are available."))
+            else ""
+            table$setNote("intervals", paste0(sprintf(
+                .("Intervals are pointwise %.1f%% intervals, without multiplicity adjustment. Bootstrap intervals (when selected or for medians) use %d whole-case resamples (seed %d); a constant resampling distribution does not provide an interval. The median paired change differs from the difference of marginal medians. The Hodges-Lehmann estimate is the median Walsh average of paired differences; its shift interpretation assumes symmetry."),
+                100 * self$options$conflevel, self$options$pairedBootstrap, self$options$seed), boot_caution))
             table$setNote("testing", sprintf(
                 .("The p column reuses the selected paired test, not a separate test of the displayed estimator or time ratio. With three or more measurements it is available only when Pairwise comparisons is enabled, with adjustment '%s' across all measurement pairs; nonparametric post-hoc tests are Durbin-Conover. With two measurements it is the unadjusted paired t or signed-rank test. Robust/Bayesian tests remain in the plots; their p-values are not supplied here."),
                 self$options$padjustmethod))
@@ -468,7 +472,7 @@ jjwithinstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # set the seed, so once the result became memoised the cached value
             # came from whichever caller ran first - the unseeded probe - and
             # the "same analysis reports the same numbers" guarantee was lost.
-            if (opts$typestatistics %in% c("bayes", "robust"))
+            if (statsSeedMatters(opts$typestatistics, "within", num_measurements))
                 withr::local_seed(self$options$seed)
 
             res <- tryCatch(
@@ -492,40 +496,55 @@ jjwithinstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             res$expression[[1]]
         },
 
-        # Apply clinical presets for common scenarios
+        # Apply clinical presets for common scenarios (advisory checklist only)
         .applyClinicalPresets = function() {
             if (is.null(self$options$clinicalpreset) || self$options$clinicalpreset == "custom") {
                 return()  # No preset to apply
             }
-            
-            # Apply preset configurations based on clinical scenario
+
+            n_m <- sum(!is.null(self$options$dep1), !is.null(self$options$dep2),
+                       !is.null(self$options$dep3), !is.null(self$options$dep4))
+            cur_test <- private$.testLabel(self$options$typestatistics, n_m)
+
             switch(self$options$clinicalpreset,
                 "biomarker" = {
-                    # Biomarker tracking: nonparametric, show individual trajectories
-                    if (self$options$typestatistics == "parametric") {  # Only change if default
-                        # Would need to update options through proper channels
+                    if (self$options$typestatistics == "parametric") {
                         private$.accumulateMessage(.("Biomarker preset: Consider using Nonparametric test for skewed biomarker data<br>"))
                     }
-                    private$.accumulateMessage(.("<strong>Biomarker tracking (guidance only):</strong> Optimized for laboratory values. Please manually ensure 'Nonparametric' is selected if data is skewed.<br>"))
+                    private$.accumulateMessage(sprintf(
+                        .("<strong>Biomarker tracking (guidance only):</strong> Presets do not change settings automatically (currently running: %s). Select 'Nonparametric' if biomarker distributions are skewed.<br>"),
+                        private$.safeHtmlOutput(cur_test)))
                 },
                 "treatment" = {
-                    # Treatment response: parametric with pairwise comparisons
                     if (!self$options$pairwisecomparisons) {
                         private$.accumulateMessage(.("Treatment preset: Enable pairwise comparisons to identify when treatment effects occur<br>"))
                     }
-                    private$.accumulateMessage(.("<strong>Treatment response:</strong> Optimized for clinical treatment monitoring<br>"))
+                    private$.accumulateMessage(sprintf(
+                        .("<strong>Treatment response (guidance only):</strong> Presets do not change settings automatically (currently running: %s). Enable 'Pairwise comparisons' to inspect changes between specific visits.<br>"),
+                        private$.safeHtmlOutput(cur_test)))
                 },
                 "laboratory" = {
-                    # Laboratory values: robust with centrality plotting
                     if (self$options$typestatistics == "parametric") {
                         private$.accumulateMessage(.("Laboratory preset: Consider Robust test to handle outliers common in lab values<br>"))
                     }
                     if (!self$options$centralityplotting) {
                         private$.accumulateMessage(.("Laboratory preset: Enable centrality plotting to see overall trends<br>"))
                     }
-                    private$.accumulateMessage(.("<strong>Laboratory values:</strong> Optimized for clinical lab value monitoring<br>"))
+                    private$.accumulateMessage(sprintf(
+                        .("<strong>Laboratory values (guidance only):</strong> Presets do not change settings automatically (currently running: %s). Select 'Robust' to reduce outlier influence common in clinical laboratory values.<br>"),
+                        private$.safeHtmlOutput(cur_test)))
                 }
             )
+        },
+
+        # Shared numeric coercion helper: unwraps jamovi integer-backed factor
+        # attributes (`values`) and haven_labelled vectors via jmvcore::toNumeric()
+        # before falling back to character-to-numeric parsing.
+        .coerceNumericCol = function(col) {
+            num <- jmvcore::toNumeric(col)
+            if (!is.numeric(num))
+                num <- suppressWarnings(as.numeric(as.character(num)))
+            num
         },
         
         # Enhanced input validation with comprehensive checks
@@ -565,24 +584,24 @@ jjwithinstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 if (!(var %in% names(self$data)))
                     jmvcore::reject(.("Variable '{name}' not found in data"), name = var)
 
-                # Check if variable can be converted to numeric
+                # Check if variable can be converted to numeric (including jamovi integer-backed factors)
                 test_vals <- self$data[[var]]
                 if (!is.numeric(test_vals)) {
-                    converted_vals <- suppressWarnings(as.numeric(as.character(test_vals)))
+                    converted_vals <- private$.coerceNumericCol(test_vals)
                     if (all(is.na(converted_vals)) && !all(is.na(test_vals)))
                         jmvcore::reject(.("Variable '{name}' cannot be converted to numeric values"), name = var)
                 }
             }
         },
         
-        # Data quality validation helper
+        # Data quality validation helper (called AFTER complete-case listwise filtering)
         .validateDataQuality = function(mydata, vars) {
             # Checkpoint before expensive validation loop
             private$.checkpoint()
             
             for (var in vars) {
-                num_vals <- jmvcore::toNumeric(mydata[[var]])
-                num_vals <- num_vals[!is.na(num_vals)]
+                num_vals <- private$.coerceNumericCol(mydata[[var]])
+                num_vals <- num_vals[is.finite(num_vals)]
                 # htmlEscape user column name before flowing into legacy warnings$setContent
                 var_safe <- private$.safeHtmlOutput(var)
 
@@ -598,33 +617,37 @@ jjwithinstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 }
             }
             
-            # Additional clinical misuse detection
+            # Additional clinical misuse detection on complete analyzed subjects
             private$.detectClinicalMisuse(mydata, vars)
         },
         
-        # Clinical misuse detection and guidance
+        # Clinical misuse detection and guidance (evaluates complete-case subjects and paired differences)
         .detectClinicalMisuse = function(mydata, vars) {
             total_subjects <- nrow(mydata)
             
-            # Small sample size warning
+            # Small sample size warning on retained complete cases
             if (total_subjects < 10) {
                 private$.accumulateDataMessage(
                     .("<br> <strong>Small Sample Size:</strong> With fewer than 10 subjects, results may be unreliable. Consider larger sample or descriptive analysis.<br>")
                 )
             }
             
-            # Check for potential outliers across all variables
-            for (var in vars) {
-                num_vals <- jmvcore::toNumeric(mydata[[var]])
-                num_vals <- num_vals[!is.na(num_vals)]
-                
-                if (length(num_vals) > 4) {  # Need enough data points to detect outliers
-                    q75 <- quantile(num_vals, 0.75, na.rm = TRUE)
-                    q25 <- quantile(num_vals, 0.25, na.rm = TRUE)
+            pair_idx <- utils::combn(seq_along(vars), 2L)
+            diffs_list <- lapply(seq_len(ncol(pair_idx)), function(j) {
+                d <- private$.coerceNumericCol(mydata[[vars[pair_idx[2L, j]]]]) -
+                     private$.coerceNumericCol(mydata[[vars[pair_idx[1L, j]]]])
+                d[is.finite(d)]
+            })
+
+            # Check for potential outliers in within-subject paired differences
+            for (diff_vals in diffs_list) {
+                if (length(diff_vals) > 4) {
+                    q75 <- stats::quantile(diff_vals, 0.75, na.rm = TRUE)
+                    q25 <- stats::quantile(diff_vals, 0.25, na.rm = TRUE)
                     iqr <- q75 - q25
-                    outliers <- sum(num_vals > (q75 + 1.5 * iqr) | num_vals < (q25 - 1.5 * iqr))
+                    outliers <- sum(diff_vals > (q75 + 1.5 * iqr) | diff_vals < (q25 - 1.5 * iqr))
                     
-                    if (outliers > length(num_vals) * 0.1) {  # More than 10% outliers
+                    if (outliers > length(diff_vals) * 0.1) {  # More than 10% outliers
                         private$.accumulateDataMessage(
                             .("<br> <strong>Many Outliers Detected:</strong> Consider Robust test type to reduce outlier influence<br>")
                         )
@@ -633,26 +656,16 @@ jjwithinstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 }
             }
             
-            # Check for extremely skewed data that might benefit from nonparametric tests
+            # Check for substantially skewed within-subject differences under parametric tests
             if (self$options$typestatistics == "parametric") {
-                for (var in vars) {
-                    num_vals <- jmvcore::toNumeric(mydata[[var]])
-                    # is.finite(), not !is.na(): is.na() is TRUE for NaN but
-                    # FALSE for Inf, so an infinite value survived into sd(),
-                    # which returned NaN. `NaN > 0` is NA, and the `if (NA)`
-                    # below aborted the entire analysis with the unactionable
-                    # "missing value where TRUE/FALSE needed".
-                    num_vals <- num_vals[is.finite(num_vals)]
-
-                    if (length(num_vals) > 5) {
-                        # Moment coefficient of skewness (g1). |skewness| > 1
-                        # flags a substantially skewed distribution, a far more
-                        # reliable criterion than |mean - median| > sd.
-                        n_v <- length(num_vals)
-                        mean_val <- mean(num_vals)
-                        sd_val <- sd(num_vals)
+                for (diff_vals in diffs_list) {
+                    if (length(diff_vals) > 5) {
+                        # Unbiased Fisher-Pearson sample skewness (G1) on paired differences.
+                        n_v <- length(diff_vals)
+                        mean_val <- mean(diff_vals)
+                        sd_val <- stats::sd(diff_vals)
                         skewness <- if (is.finite(sd_val) && sd_val > 0)
-                            (sum((num_vals - mean_val)^3) / n_v) / (sd_val^3)
+                            (n_v / ((n_v - 1) * (n_v - 2))) * sum(((diff_vals - mean_val) / sd_val)^3)
                         else
                             0
 
@@ -692,6 +705,7 @@ jjwithinstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             current_hash <- digest::digest(list(
                 dep1 = self$options$dep1, dep2 = self$options$dep2,
                 dep3 = self$options$dep3, dep4 = self$options$dep4,
+                typestatistics = self$options$typestatistics,
                 data_dim = dim(self$data), col_names = names(self$data),
                 # CRITICAL FIX: Include actual data content in hash
                 data_content = data_subset
@@ -779,17 +793,7 @@ jjwithinstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 # "both") first: that replaces the real measurement values with
                 # factor position codes (e.g. 10, 20, 30 -> 1, 2, 3), silently
                 # corrupting the within-subjects analysis.
-                num <- jmvcore::toNumeric(col)
-
-                # toNumeric() is a NO-OP on a plain character or factor column:
-                # it only unwraps a jamovi `values` attribute and otherwise
-                # returns its argument untouched. So a text measurement passed
-                # straight through this loop and died two calls later inside
-                # quantile() with "non-numeric argument to binary operator".
-                # jamovi's `permitted: [ numeric ]` keeps text out of the GUI
-                # picker, but an R-API caller reaches here.
-                if (!is.numeric(num))
-                    num <- suppressWarnings(as.numeric(as.character(num)))
+                num <- private$.coerceNumericCol(col)
                 if (all(is.na(num)) && !all(is.na(col)))
                     non_numeric <- c(non_numeric, var)
 
@@ -850,26 +854,15 @@ jjwithinstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 # private$.messages - so this warning never reached the user.
                 private$.accumulateDataMessage(warning_msg)
             }
-
-            # Validate data quality before processing
-            # Note: .validateDataQuality calls .accumulateMessage directly, maybe update it too?
-            # For now, data quality messages are less critical to cache strictly or should be cached too.
-            # Ideally .validateDataQuality should use .accumulateDataMessage logic if passed.
-            private$.validateDataQuality(mydata, vars)
             
-            # Remove NA values once. naOmit() drops NA and NaN but NOT Inf, so
-            # an infinite measurement used to survive into the test: the plot
-            # rendered "t(77) = NA, p = NA" while the panel reassured the user
-            # that all 78 subjects had been retained. Count non-finite values
-            # separately - they signal a data-entry or divide-by-zero problem
-            # rather than an ordinary missing observation.
+            # Remove NA and non-finite values once BEFORE running data-quality and
+            # small-sample checks so diagnostics evaluate the retained complete cases.
             n_nonfinite <- sum(vapply(vars, function(v) {
-                x <- jmvcore::toNumeric(mydata[[v]])
+                x <- mydata[[v]]
                 sum(!is.na(x) & !is.finite(x))
             }, numeric(1)))
             finite_rows <- Reduce(`&`, lapply(vars, function(v) {
-                x <- jmvcore::toNumeric(mydata[[v]])
-                is.finite(x)
+                is.finite(mydata[[v]])
             }))
             subject_ids <- subject_ids[finite_rows]
             mydata <- mydata[finite_rows, , drop = FALSE]
@@ -880,7 +873,7 @@ jjwithinstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             if (dropped_n > 0) {
                  private$.accumulateDataInfoMessage(
-                    glue::glue(.("<br><strong>Data Processing:</strong> {final_n} subjects retained. {dropped_n} incomplete cases removed.<br>"))
+                    glue::glue(.("<br><strong>Data Processing:</strong> {final_n} subjects retained. {dropped_n} incomplete cases removed (complete-case listwise deletion assumes missingness is unrelated to unobserved changes).<br>"))
                 )
                  if (n_nonfinite > 0)
                      private$.accumulateDataMessage(
@@ -899,6 +892,9 @@ jjwithinstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 private$.prepared_data <- NULL
                 return(NULL)
             }
+
+            # Validate data quality on the complete-case cohort actually analyzed
+            private$.validateDataQuality(mydata, vars)
             
             # Checkpoint before expensive data transformation
             private$.checkpoint()
@@ -1054,7 +1050,7 @@ jjwithinstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             )
             
             # What to look for
-            guidance <- .("<strong>What to look for:</strong><br>\u2022 A small p-value is evidence against the null under the model assumptions; it does not prove a treatment effect<br>\u2022 Compare effect estimates and uncertainty with a prespecified clinically important difference<br>\u2022 Individual trajectories reveal response patterns<br>\u2022 Outliers may indicate treatment non-responders or measurement errors")
+            guidance <- .("<strong>What to look for:</strong><br>\u2022 Each row must represent one independent case or subject (do not stack multiple cores, lesions, slides, or readers from the same subject)<br>\u2022 A small p-value is evidence against the null under the model assumptions; it does not prove a treatment effect<br>\u2022 Compare effect estimates and uncertainty with a prespecified clinically important difference<br>\u2022 Two-measurement plot subtitle statistics evaluate First minus Second measurement, whereas Paired Changes reports Second minus First<br>\u2022 Individual trajectories reveal response patterns and potential measurement errors")
             
             interpretation_parts <- list(
                 paste0("<div style='background-color: rgba(138, 155, 172, 0.06);padding:15px;margin:10px 0;border-left:4px solid #007bff; color: inherit;'>"),
@@ -1116,7 +1112,7 @@ jjwithinstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             self$results$explanations$setContent(paste0(
                 "<h3>", .("Explanations"), "</h3>",
                 "<p>", .("This analysis compares repeated measurements taken from the same subjects (a within-subjects design)."),
-                " ", .("It tests whether the measurements differ across time points or conditions."), "</p>",
+                " ", .("Each row must represent one independent case; do not stack multiple cores, lesions, slides, or readers from the same subject."), "</p>",
                 "<p><strong>", .("Violin plots:"), "</strong> ",
                 .("These show the distribution of the data; wider sections contain more observations."),
                 "<br><strong>", .("Box plots:"), "</strong> ",
@@ -1126,14 +1122,17 @@ jjwithinstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 "<li><strong>", .("Parametric:"), "</strong> ",
                 .("A paired t-test for two measurements, or a repeated-measures ANOVA with a Greenhouse-Geisser sphericity correction for three or more. This assumes the within-subject differences are approximately normal."), "</li>",
                 "<li><strong>", .("Nonparametric:"), "</strong> ",
-                .("A Wilcoxon signed-rank test for two measurements, or a Friedman test for three or more. These make no distributional assumption."), "</li>",
+                .("A Wilcoxon signed-rank test for two measurements (assuming symmetric paired differences for a location-shift interpretation), or a Friedman test for three or more (requiring comparable distribution shapes across conditions for a median-shift interpretation)."), "</li>",
                 "<li><strong>", .("Robust:"), "</strong> ",
-                .("A trimmed-means test that resists outliers, which are common in laboratory values."), "</li>",
+                .("A 20%-trimmed means test (tr = 0.20) that resists outliers common in clinical laboratory values."), "</li>",
                 "<li><strong>", .("Bayesian:"), "</strong> ",
-                .("This reports a Bayes factor, quantifying the evidence for and against the null hypothesis."), "</li>",
+                .("This reports a default Cauchy-prior Bayes factor (prior scale 0.707), quantifying relative evidence for and against the null hypothesis."), "</li>",
                 "</ul>",
+                "<p><strong>", .("Contrast direction and effect-size intervals:"), "</strong> ",
+                .("Two-measurement plot subtitle statistics (t, V, Cohen's d, Hedges' g, rank-biserial r, and Bayesian posterior delta) evaluate First Measurement minus Second Measurement (negative when values increase over time), whereas the Paired Changes table reports Later minus Earlier (Second minus First, positive when values increase)."),
+                " ", .("For three or more measurements, confidence intervals reported in the plot subtitle for partial eta-squared, partial omega-squared, and Kendall's W (100 bootstrap iterations) are one-sided lower-bound intervals with fixed upper bound 1.00."), "</p>",
                 "<p><strong>", .("Missing data:"), "</strong> ",
-                .("Only subjects with a value for every selected measurement are analyzed, because a paired comparison needs complete records."), "</p>",
+                .("Only subjects with finite values across every selected measurement are analyzed (complete-case listwise deletion, which assumes missingness is unrelated to unobserved outcome changes)."), "</p>",
                 "<p><strong>", .("Note on the Wilcoxon p-value:"), "</strong> ",
                 .("The signed-rank p-value is computed from the normal approximation with a continuity correction, not from the exact permutation distribution that stats::wilcox.test uses by default, so it may differ from base R for small samples without ties."), "</p>"
             ))
@@ -1166,6 +1165,7 @@ jjwithinstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 
                 # Hide plot output when no variables selected
                 self$results$plot$setVisible(visible = FALSE)
+                self$results$ggpubrPlot$setVisible(visible = FALSE)
                 
                 # Hide other outputs as well
                 self$results$interpretation$setVisible(visible = FALSE)
@@ -1211,12 +1211,14 @@ jjwithinstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         .("<br> <strong>Note:</strong> the plot subtitle uses the package default (%s), so 'Effect size type' and 'Decimal places' do not affect the reported statistic.<br>"),
                         private$.safeHtmlOutput(private$.subtitleFallback)))
                 
-                # Make all outputs visible when variables are selected
+                # Only display plots, summary, and clinical interpretation when prepared data is valid
+                has_data <- !is.null(prepared)
                 self$results$todo$setVisible(visible = TRUE)
-                self$results$plot$setVisible(visible = TRUE)
-                self$results$interpretation$setVisible(visible = TRUE)
+                self$results$plot$setVisible(visible = has_data)
+                self$results$ggpubrPlot$setVisible(visible = has_data && isTRUE(self$options$addGGPubrPlot))
+                self$results$interpretation$setVisible(visible = has_data)
                 if (!is.null(self$results$summary)) {
-                    self$results$summary$setVisible(visible = TRUE)
+                    self$results$summary$setVisible(visible = has_data)
                 }
                 # Visibility is decided at the end of .run(), once we know
                 # whether any warning-grade message was actually raised.
@@ -1324,10 +1326,13 @@ jjwithinstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # The Bayesian (BayesFactor MCMC) and robust (bootstrap) paths in
             # ggstatsplot sample, so the same analysis rendered twice reported
             # different numbers. Seed them; withr restores the caller's stream.
-            if (opts$typestatistics %in% c("bayes", "robust"))
+            n_meas <- length(unique(long_data$measurement))
+            bf_active <- isTRUE(opts$resultssubtitle) &&
+                captionSeedMatters(opts$typestatistics, "within", n_meas, opts$bfmessage)
+            if ((isTRUE(opts$resultssubtitle) && statsSeedMatters(opts$typestatistics, "within", n_meas)) ||
+                bf_active)
                 withr::local_seed(self$options$seed)
 
-            n_meas <- length(unique(long_data$measurement))
             sub_expr <- private$.subtitleExpr(long_data, opts, n_meas)
 
             tryCatch({
@@ -1396,8 +1401,8 @@ jjwithinstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     plot <- plot + ggstatsplot::theme_ggstatsplot()
                 }
 
-                if ((isTRUE(opts$resultssubtitle) && statsSeedMatters(opts$typestatistics, "within", n_meas)) ||
-                    captionSeedMatters(opts$typestatistics, "within", n_meas, opts$bfmessage))
+                if (isTRUE(opts$resultssubtitle) &&
+                    (statsSeedMatters(opts$typestatistics, "within", n_meas) || bf_active))
                     plot <- addSeedCaption(plot, self, self$options$seed)
 
                 # Print Plot ----
@@ -1413,7 +1418,7 @@ jjwithinstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         error = private$.safeHtmlOutput(e$message)),
                     .("<br><br>Please check that:"),
                     .("<br>\u2022 All measurement variables contain numeric values"),
-                    .("<br>\u2022 Data has at least 2 complete rows"),
+                    .("<br>\u2022 Data has at least 3 complete rows"),
                     .("<br>\u2022 Variables have sufficient variance for statistical tests"),
                     .("<br>\u2022 No extreme outliers that might affect analysis"),
                     .("<br><hr>")
@@ -1439,39 +1444,30 @@ jjwithinstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 if (!is.null(self$options$dep3)) deps <- c(deps, self$options$dep3)
                 if (!is.null(self$options$dep4)) deps <- c(deps, self$options$dep4)
 
-                # CRITICAL FIX: Paired analysis requires listwise deletion.
-                # Only keep subjects with data for ALL selected measurements.
-                # Index with RAW variable names (composeTerm/backtick-quoted
-                # names break data.frame column access for names with spaces).
-                mydata <- self$data
-                mydata <- mydata[, deps, drop = FALSE]
-                # is.finite(), matching .prepareData(): naOmit() drops NA and NaN
-                # but NOT Inf. Without this the companion panel kept infinite
-                # rows the primary analysis had already excluded, so the two
-                # figures were drawn from different subjects.
-                finite_rows <- Reduce(`&`, lapply(deps, function(v)
-                    is.finite(jmvcore::toNumeric(mydata[[v]]))))
+                # CRITICAL FIX: Paired analysis requires listwise deletion and
+                # numeric unwrapping (including jamovi integer-backed factors).
+                mydata <- self$data[, deps, drop = FALSE]
+                for (v in deps) {
+                    mydata[[v]] <- private$.coerceNumericCol(mydata[[v]])
+                }
+                finite_rows <- Reduce(`&`, lapply(deps, function(v) is.finite(mydata[[v]])))
                 mydata <- mydata[finite_rows, , drop = FALSE]
-                mydata <- jmvcore::naOmit(mydata)
 
-                # Check for empty data after filtering
-                if (nrow(mydata) == 0) {
-                     return() # Should be handled by main validation
+                # Require at least 3 complete cases, matching .prepareData()
+                if (nrow(mydata) < 3) {
+                     return()
                 }
 
                 # Create subject ID for paired analysis
                 subject_ids <- seq_len(nrow(mydata))
 
-                # Convert to long format using raw variable names
-                long_data <- data.frame()
-                for (i in seq_along(deps)) {
-                    temp <- data.frame(
-                        Subject_ID = subject_ids,
-                        Measurement = deps[i],
-                        Value = mydata[[deps[i]]]
-                    )
-                    long_data <- rbind(long_data, temp)
-                }
+                # Convert to long format using raw variable names and numeric values
+                long_data <- data.frame(
+                    Subject_ID  = rep(subject_ids, times = length(deps)),
+                    Measurement = factor(rep(deps, each = nrow(mydata)), levels = deps),
+                    Value       = as.numeric(unlist(mydata[, deps, drop = FALSE], use.names = FALSE)),
+                    stringsAsFactors = FALSE
+                )
 
                 # Start Plot Construction
                 palette <- self$options$ggpubrPalette
@@ -1574,38 +1570,24 @@ jjwithinstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         NULL
 
                     if (!is.null(ggpubr_method)) {
+                        method_args <- if (identical(ggpubr_method, "wilcox.test"))
+                            list(exact = FALSE, correct = TRUE)
+                        else
+                            list()
                         plot <- plot + ggpubr::stat_compare_means(
                             method = ggpubr_method,
                             paired = TRUE,
-                            label = "p.signif"
+                            label = "p.signif",
+                            method.args = method_args
                         )
                     } else {
-                        # Pairwise t.test/wilcox.test cannot compare >2 groups and
-                        # would error (previously swallowed by the empty handler).
-                        # Use an omnibus test for a single global p-value.
-                        # ggpubr::stat_compare_means has NO paired omnibus test.
-                        # method = "anova" / "kruskal.test" run BETWEEN-subjects
-                        # tests, which throw away the subject effect this whole
-                        # analysis exists to control for. On a 40-subject example
-                        # that printed "Anova, p = 0.13" (exactly
-                        # stats::aov(y ~ time), pairing discarded) directly
-                        # beneath a main panel reporting the correct
-                        # F_Fisher(1.76, 68.5) = 14.26, p = 1.61e-05 - two
-                        # p-values ~8000x apart in one output window.
-                        #
-                        # Annotate the CORRECT p-value instead, computed by the
-                        # same engine the main figure uses. Reached for 3+
-                        # measurements (no paired omnibus test in ggpubr) and for
-                        # the robust / Bayesian choices at any number of
-                        # measurements. Previously "robust" silently fell back to
-                        # a paired t-test: on a 30-subject example with outliers -
-                        # exactly why a user picks robust - the main panel showed
-                        # Yuen p = 0.025 (*) while this companion printed t-test
-                        # p = 0.35 (ns), two contradictory verdicts in one window.
                         stat_fn <- if (length(deps) > 2)
                             statsExpressions::oneway_anova
                         else
                             statsExpressions::two_sample_test
+
+                        if (statsSeedMatters(self$options$typestatistics, "within", length(deps)))
+                            withr::local_seed(self$options$seed)
 
                         rm_res <- tryCatch(
                             rlang::inject(stat_fn(
@@ -1627,10 +1609,12 @@ jjwithinstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
                         if (!is.null(rm_res) && "p.value" %in% names(rm_res) &&
                             is.finite(rm_res$p.value[1])) {
+                            p_val <- rm_res$p.value[1]
+                            p_str <- if (p_val < 1e-4) "p < 0.0001" else paste0("p = ", formatC(p_val, digits = 3, format = "fg"))
                             plot <- plot + ggplot2::labs(subtitle = sprintf(
-                                .("%s: p = %s (n = %d subjects)"),
+                                .("%s: %s (n = %d subjects)"),
                                 private$.testLabel(self$options$typestatistics, length(deps)),
-                                format.pval(rm_res$p.value[1], digits = 3, eps = 1e-4),
+                                p_str,
                                 length(unique(long_data$Subject_ID))))
                         } else {
                             plot <- plot + ggplot2::labs(subtitle = sprintf(
@@ -1663,6 +1647,22 @@ jjwithinstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 )
                 self$results$todo$setContent(error_msg)
             })
+        },
+
+        # Safe syntax-pane serializer: drop undeclared option names (which can
+        # arrive from saved .omv/.omt files), drop list values (jmvcore::sourcify
+        # emits list names raw), and escape character scalars with encodeString().
+        .sourcifyOption = function(option) {
+            if (!option$name %in% names(formals(jjwithinstats)))
+                return('')
+            value <- option$value
+            if (is.list(value))
+                return('')
+            if (is.character(value) && length(value) == 1L && !is.na(value) &&
+                !identical(value, option$default)) {
+                return(paste0(option$name, ' = ', encodeString(value, quote = '"')))
+            }
+            super$.sourcifyOption(option)
         }
 
     ), # End of private list
@@ -1680,26 +1680,27 @@ jjwithinstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # Build the argument list in option-declaration order.
             #
             # Every variable-name option (dep1, dep2, dep3, dep4) is emitted as a
-            # deparse()'d string literal. deparse() produces valid, fully-escaped
-            # R for names containing spaces, quotes or backslashes (e.g.
-            # `Tumor Grade`); jmvcore's default sourcify would emit these as bare,
-            # unquoted symbols and yield invalid syntax. Detecting OptionVariable
-            # by class (rather than by name) means any variable option added later
-            # is escaped automatically.
+            # properly escaped string literal so names containing spaces, quotes,
+            # or backslashes yield valid R syntax; jmvcore's default sourcify
+            # would emit these as bare, unquoted symbols.
             #
-            # dep1..dep4 are NOT re-emitted through private$.asArgs() - doing so
-            # previously duplicated the dep variables in the generated syntax (the
-            # "double variables" bug). All non-variable options keep jmvcore's
-            # per-option sourcify so formatting stays consistent with jamovi.
+            # Undeclared option names and list values (which can arrive unchecked
+            # from saved .omv/.omt files) are dropped, and all other non-default
+            # character scalars are escaped via private$.sourcifyOption().
             args <- character(0)
+            allowed <- names(formals(jjwithinstats))
             for (option in private$.options$options) {
-                if (option$name == 'data')
+                if (option$name == 'data' || !option$name %in% allowed)
                     next
                 if (inherits(option, 'OptionVariable') || inherits(option, 'OptionVariables')) {
                     val <- option$value
-                    if (!is.null(val))
-                        args <- c(args, paste0(option$name, ' = ',
-                                               paste0(deparse(val), collapse = '')))
+                    if (!is.null(val) && !is.list(val)) {
+                        encoded <- if (is.character(val) && length(val) == 1L && !is.na(val))
+                            encodeString(val, quote = '"')
+                        else
+                            paste0(deparse(val), collapse = '')
+                        args <- c(args, paste0(option$name, ' = ', encoded))
+                    }
                 } else {
                     as <- private$.sourcifyOption(option)
                     if (!identical(as, ''))

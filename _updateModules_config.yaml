@@ -48,11 +48,11 @@
 
 
 new_version: "1.1.5"
-new_date: "2026-11-18"
+new_date: "2026-11-19"
 quick: false
 TEST: false
 jjstatsplot: false
-jsurvival: true
+jsurvival: false
 ClinicoPathDescriptives: false
 OncoPath: false
 meddecide: false

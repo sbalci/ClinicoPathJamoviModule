@@ -1790,17 +1790,16 @@ analyses:
   - title: Box-Violin Plots to Compare Within Groups
     name: jjwithinstats
     ns: ClinicoPath
-    menuGroup: JJStatsPlot
+    menuGroup: JJStatsPlotT
     menuSubgroup: Categorical vs Continuous
     menuTitle: Box-Violin Plots to Compare Within Groups
     menuSubtitle: Repeated Continuous Measurements
     ribbon: analyses
     category: analyses
-    description: |
-      Wrapper Function for ggstatsplot::ggwithinstats and
-      ggstatsplot::grouped_ggwithinstats to generate violin plots
-      for repeated measurements and within-subjects analysis with
-      statistical annotations and significance testing.
+    description: >
+      Wrapper Function for ggstatsplot::ggwithinstats to generate violin plots
+      for repeated measurements and within-subjects analysis with statistical
+      annotations and significance testing.
   - title: Bar Charts
     name: jjbarstats
     ns: ClinicoPath
@@ -1892,7 +1891,7 @@ analyses:
   - title: Lollipop Chart
     name: lollipop
     ns: ClinicoPath
-    menuGroup: JJStatsPlot
+    menuGroup: JJStatsPlotT
     menuSubgroup: Categorical vs Continuous
     menuTitle: Lollipop Chart
     ribbon: analyses

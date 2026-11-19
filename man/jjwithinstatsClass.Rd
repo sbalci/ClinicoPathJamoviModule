@@ -16,25 +16,25 @@ treatment response monitoring, and longitudinal clinical studies.
 \details{
 \strong{Data Requirements:}
 \itemize{
-\item Wide format required (one row per subject)
+\item Wide format required (one row per independent subject/case; do not stack multiple cores, lesions, or readers per subject)
 \item Each column represents a different time point or condition
-\item Complete data required for paired analysis (listwise deletion)
+\item Complete finite data required across selected measurements (listwise deletion)
 \item Minimum 3 subjects with complete data across all measurements
 }
 
 \strong{Statistical Tests:}
 \itemize{
-\item Parametric: Repeated measures ANOVA (assumes normality)
-\item Nonparametric: Friedman test (no distribution assumptions)
-\item Robust: Uses trimmed means (resistant to outliers)
-\item Bayesian: Provides evidence strength via Bayes Factors
+\item Parametric: Paired t-test (2 measurements) or Greenhouse-Geisser repeated-measures ANOVA (3-4 measurements)
+\item Nonparametric: Wilcoxon signed-rank test (2 measurements) or Friedman test with Durbin-Conover post-hoc (3-4 measurements)
+\item Robust: 20\%-trimmed means (Yuen's paired test or Wilcox heteroscedastic repeated-measures ANOVA)
+\item Bayesian: Default Cauchy-prior Bayes factor (prior scale 0.707)
 }
 
-\strong{Clinical Presets:}
+\strong{Clinical Guidance Presets (Advisory Only):}
 \itemize{
-\item Biomarker: Optimized for laboratory biomarker tracking (nonparametric)
-\item Treatment: Optimized for treatment response monitoring (parametric with pairwise)
-\item Laboratory: Optimized for clinical lab values (robust)
+\item Biomarker: Checklist guidance for skewed biomarker tracking (suggests Nonparametric)
+\item Treatment: Checklist guidance for multi-visit response monitoring (suggests Pairwise comparisons)
+\item Laboratory: Checklist guidance for outlier-prone lab values (suggests Robust)
 }
 }
 \section{Performance Optimization}{
