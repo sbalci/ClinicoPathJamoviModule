@@ -127,7 +127,8 @@ jjscatterstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             }
 
             # Guard identical x and y variables before correlation calculation.
-            if (identical(self$options$dep, self$options$group)) {
+            same_var <- identical(self$options$dep, self$options$group)
+            if (same_var) {
                 private$.appendWarning(.fmt(.("<b>Same variable on both axes:</b> '{var}' is selected for both x-axis and y-axis. Correlating a variable with itself is trivially 1 and uninformative; choose two distinct variables."),
                     var = htmltools::htmlEscape(self$options$dep)))
             }
@@ -144,6 +145,7 @@ jjscatterstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             x_vals <- checkData[[self$options$dep]]
             y_vals <- checkData[[self$options$group]]
             degenerate <- FALSE
+            n_complete <- 0L
             if (!is.null(x_vals) && !is.null(y_vals)) {
                 # is.finite(), not complete.cases(): complete.cases() counts an Inf as a
                 # present value, so an all-Inf column looked like perfectly good data.
@@ -171,10 +173,13 @@ jjscatterstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             }
 
             # Per-subgroup degenerate and tiny-sample guard for grouped plots.
+            has_subgroup_strong <- FALSE
+            n_active_groups <- 0L
             if (!degenerate && !is.null(self$options$grvar) && !is.null(checkData[[self$options$grvar]])) {
                 g_col <- checkData[[self$options$grvar]]
                 g_non_na <- !is.na(g_col)
                 g_lvls <- unique(as.character(g_col[g_non_na]))
+                n_active_groups <- length(g_lvls)
                 degen_grps <- character(0)
                 tiny_grps <- character(0)
                 for (lv in g_lvls) {
@@ -189,16 +194,83 @@ jjscatterstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     }
                 }
                 if (length(degen_grps) > 0L) {
+                    has_subgroup_strong <- TRUE
                     private$.appendWarning(.fmt(.("<b>Correlation not computed in subgroup(s):</b> {groups}. A correlation needs at least 3 complete pairs and variation in both variables within each group."),
                         groups = paste(degen_grps, collapse = ", ")))
                 }
                 if (length(tiny_grps) > 0L) {
+                    has_subgroup_strong <- TRUE
                     private$.appendWarning(.fmt(.("<b>Very small sample in subgroup(s):</b> {groups}. Correlations from fewer than 10 pairs have very wide confidence intervals and should be treated as descriptive only."),
                         groups = paste(tiny_grps, collapse = ", ")))
                 }
             }
 
-            private$.warnStatisticalCaveats(checkData)
+            has_caveat_strong <- isTRUE(private$.warnStatisticalCaveats(checkData))
+
+            # Native single-line jamovi Notice banners (STRONG_WARNING / WARNING at top,
+            # INFO completion summary appended at bottom via $add()). Fatal input errors
+            # remain exclusively jmvcore::reject() so each error is reported once.
+            has_warnings <- isTRUE(self$results$warnings$visible)
+            if (degenerate || same_var || has_subgroup_strong || has_caveat_strong) {
+                private$.setNativeNotice(
+                    name = "statisticalCaveat",
+                    msg = .("Important data or statistical assumption cautions were detected for this correlation; review the Warnings section below before interpreting the coefficient."),
+                    type = jmvcore::NoticeType$STRONG_WARNING,
+                    position = 1L
+                )
+            } else if (has_warnings) {
+                private$.setNativeNotice(
+                    name = "methodologicalNote",
+                    msg = .("Methodological notes apply to this scatter plot; review the Warnings section below for details."),
+                    type = jmvcore::NoticeType$WARNING,
+                    position = 1L
+                )
+            }
+
+            if (!degenerate && !same_var && n_complete >= 3L) {
+                ty <- as.character(private$.option("typestatistics"))
+                method_lbl <- switch(
+                    ty,
+                    parametric = .("Pearson correlation"),
+                    nonparametric = .("Spearman correlation"),
+                    robust = .("Winsorized Pearson correlation"),
+                    bayes = .("Bayesian Pearson correlation"),
+                    .("Correlation")
+                )
+                info_msg <- if (n_active_groups > 1L) {
+                    .fmt(.("Completed {method} on {n} complete pairs across {groups} groups."),
+                         method = method_lbl, n = n_complete, groups = n_active_groups)
+                } else {
+                    .fmt(.("Completed {method} on {n} complete pairs."),
+                         method = method_lbl, n = n_complete)
+                }
+                private$.setNativeNotice(
+                    name = "analysisComplete",
+                    msg = info_msg,
+                    type = jmvcore::NoticeType$INFO,
+                    position = NULL
+                )
+            }
+        },
+
+        # Insert a single-line plain-text jmvcore::Notice at top (position = 1L) or
+        # append at bottom (position = NULL via $add(), avoiding sentinel indices).
+        .setNativeNotice = function(name, msg, type = jmvcore::NoticeType$INFO, position = NULL) {
+            clean_msg <- trimws(gsub("[\r\n]+", " ", as.character(msg)))
+            existing <- self$results$items[[name]]
+            if (!is.null(existing) && inherits(existing, "Notice")) {
+                existing$set(type, clean_msg)
+                existing$setVisible(TRUE)
+                return(invisible(NULL))
+            }
+            notice <- jmvcore::Notice$new(options = self$options, name = name, type = type)
+            notice$setContent(clean_msg)
+            if (is.null(position)) {
+                self$results$add(notice)
+            } else {
+                self$results$insert(position, notice)
+            }
+            invisible(NULL)
         },
 
         # Statistical guardrails for the reported coefficient. Every one of these was
@@ -223,8 +295,9 @@ jjscatterstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # Below 3 pairs, or with a constant axis, .run() has already said something
             # strictly better; adding more here would just be noise.
             if (n < 3 || length(unique(x)) < 2 || length(unique(y)) < 2)
-                return(invisible(NULL))
+                return(FALSE)
 
+            strong_triggered <- FALSE
             ty <- as.character(private$.option("typestatistics"))
             rank_based <- identical(ty, "nonparametric")
 
@@ -244,6 +317,7 @@ jjscatterstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # A correlation on a handful of points has a confidence interval so wide it
             # is compatible with almost any conclusion.
             if (n < 10) {
+                strong_triggered <- TRUE
                 private$.appendWarning(.fmt(.("<b>Very small sample (n = {n}):</b> a correlation estimated from fewer than 10 pairs is extremely unstable - its confidence interval typically spans most of the range from -1 to 1, so a large coefficient here is not evidence of a large association. Treat this as descriptive only."),
                     n = n))
             } else if (n < 30) {
@@ -282,12 +356,14 @@ jjscatterstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 # that single observation created the entire correlation.
                 zero_var_drop <- den <= (.Machine$double.eps * sqrt(max(1e-30, m * Sxx * m * Syy)))
                 if (any(zero_var_drop)) {
+                    strong_triggered <- TRUE
                     private$.appendWarning(.fmt(.("<b>One observation is driving this result:</b> dropping a single point removes all variation in one of the variables, making the correlation (currently {full}) undefined. A coefficient that depends this heavily on one patient should not be reported on its own - inspect that point on the plot, and consider the 'Robust (Winsorized Pearson)' or 'Nonparametric (Spearman)' test type, which are far less sensitive to it."),
                         full = sprintf("%.2f", r_full)))
                 } else {
                     r_loo <- pmax(-1, pmin(1, (m * sxy - sx * sy) / den))
                     delta <- suppressWarnings(max(abs(r_full - r_loo), na.rm = TRUE))
                     if (is.finite(delta) && delta > 0.2) {
+                        strong_triggered <- TRUE
                         worst <- which.max(abs(r_full - r_loo))
                         private$.appendWarning(.fmt(.("<b>One observation is driving this result:</b> dropping a single point changes the correlation from {full} to {dropped} (a shift of {delta}). A coefficient that depends this heavily on one patient should not be reported on its own - inspect that point on the plot, and consider the 'Robust (Winsorized Pearson)' or 'Nonparametric (Spearman)' test type, which are far less sensitive to it."),
                             full = sprintf("%.2f", r_full),
@@ -320,6 +396,7 @@ jjscatterstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 }
                 r2_quad <- suppressWarnings(max(r2_of(xx, yy), r2_of(yy, xx), na.rm = TRUE))
                 if (is.finite(r2_quad) && (r2_quad - r2_lin) > 0.15) {
+                    strong_triggered <- TRUE
                     # Two whole alternative sentences rather than a glued clause: the
                     # rank and moment cases differ in more than one word once translated.
                     private$.appendWarning(if (rank_based)
@@ -346,7 +423,7 @@ jjscatterstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 }
             }
 
-            invisible(NULL)
+            invisible(strong_triggered)
         },
 
         # decisionpanel-style intro shown until both axis variables are chosen. Every

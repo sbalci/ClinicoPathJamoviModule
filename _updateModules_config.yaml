@@ -56,7 +56,7 @@ jsurvival: false
 ClinicoPathDescriptives: false
 OncoPath: false
 meddecide: false
-ClinicoPath: false
+
 
 
 # ========================================
@@ -294,15 +294,27 @@ modules:
     # These remain legitimate umbrella dependencies but have no production
     # OncoPath call site. document() removes their stale NAMESPACE directives.
     prune_imports:
-      - "cluster"
       - "tidyr"
-      - "psych"
-      - "stringr"
+      # cluster, psych, stringr are NOT pruned: pathagreement (OncoPath) calls
+      # cluster::silhouette, psych::ICC, stringr::str_to_title, and utils-ihc.R
+      # (ihcheterogeneity) needs cluster. prune_conflicts() caught it 2026-11-23.
       # magrittr is NOT pruned: waterfall.b.R and swimmerplot.b.R use %>% 114
       # times. Pruning it stripped the pipe from the generated DESCRIPTION, and
       # with no importFrom anywhere `waterfall` could not run in jamovi at all
       # (2026-09-16 OncoPath audit, CRITICAL). A bare infix operator is not put
       # in scope by Imports: alone -- R/zzz_imports.R carries the importFrom tag.
+    # pathagreement's pkg:: and requireNamespace()-guarded packages. The NAMESPACE->
+    # DESCRIPTION sync cannot see pkg:: calls, and jamovi installs Imports, never
+    # Suggests, so guarded ones belong here too (verify_module caught it 2026-11-23).
+    extra_imports:
+      - "irrCAC"
+      - "kappaSize"
+      - "vcd"
+      - "viridisLite"
+      - "cluster"
+      - "ggdendro"
+      - "gridExtra"
+      - "pheatmap"
     # One example dataset per shipped analysis, sized to demonstrate it, plus `histopathology`
     # (250 x 38), the umbrella's omnibus dataset: no OncoPath analysis references it, but it is
     # kept deliberately as a general-purpose frame for users exploring the module.

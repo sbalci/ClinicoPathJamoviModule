@@ -438,3 +438,40 @@ test_that("C29/C16: no spurious seed caption when resultssubtitle=FALSE and expl
   ))
   expect_null(val_render(r_bf$plot)$labels$caption)
 })
+
+test_that("Native jmvcore::Notice banners are single-line plain text with priority positioning", {
+  notice_type <- function(n) n$.__enclos_env__$private$.type
+
+  set.seed(2026)
+  x_clean <- seq(1, 50)
+  d_clean <- data.frame(x = x_clean, y = 2 * x_clean + rnorm(50, 0, 5))
+  r_clean <- ClinicoPath::jjscatterstats(data = d_clean, dep = "x", group = "y")
+  info_n <- r_clean$items[["analysisComplete"]]
+  expect_true(inherits(info_n, "Notice"))
+  expect_identical(notice_type(info_n), jmvcore::NoticeType$INFO)
+  expect_false(grepl("[\r\n<>]", info_n$content))
+  expect_match(info_n$content, "50 complete pairs", fixed = TRUE)
+  expect_null(r_clean$items[["statisticalCaveat"]])
+  expect_null(r_clean$items[["methodologicalNote"]])
+
+  # Multiplicity -> WARNING at top (index 1) + INFO at bottom
+  x_grp <- seq(1, 60)
+  d_grp <- data.frame(
+    x = x_grp,
+    y = 1.5 * x_grp + rnorm(60, 0, 4),
+    g = factor(rep(c("A", "B", "C"), each = 20))
+  )
+  r_grp <- ClinicoPath::jjscatterstats(data = d_grp, dep = "x", group = "y", grvar = "g")
+  expect_true(inherits(r_grp$items[[1]], "Notice"))
+  expect_identical(notice_type(r_grp$items[[1]]), jmvcore::NoticeType$WARNING)
+  expect_false(grepl("[\r\n<>]", r_grp$items[[1]]$content))
+  expect_match(r_grp$items[["analysisComplete"]]$content, "across 3 groups", fixed = TRUE)
+
+  # Degenerate constant y -> STRONG_WARNING at top (index 1) and no completion INFO
+  d_deg <- data.frame(x = 1:20, y = rep(5, 20))
+  r_deg <- ClinicoPath::jjscatterstats(data = d_deg, dep = "x", group = "y")
+  expect_true(inherits(r_deg$items[[1]], "Notice"))
+  expect_identical(notice_type(r_deg$items[[1]]), jmvcore::NoticeType$STRONG_WARNING)
+  expect_false(grepl("[\r\n<>]", r_deg$items[[1]]$content))
+  expect_null(r_deg$items[["analysisComplete"]])
+})

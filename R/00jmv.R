@@ -2332,6 +2332,13 @@
         `title`="ggsegmentedtotalbar: R package", 
         `publisher`="[R package]. Retrieved from https://CRAN.R-project.org/package=ggsegmentedtotalbar", 
         `url`="https://CRAN.R-project.org/package=ggsegmentedtotalbar"), 
+    `ggside`=list(
+        `type`="software", 
+        `author`="Justin Landis", 
+        `year`=2025, 
+        `title`="ggside: Side Grammar Graphics", 
+        `publisher`="[R package]. Retrieved from https://CRAN.R-project.org/package=ggside", 
+        `url`="https://CRAN.R-project.org/package=ggside"), 
     `ggstats`=list(
         `type`="software", 
         `author`="Joseph Larmarange", 
