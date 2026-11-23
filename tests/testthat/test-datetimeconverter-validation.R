@@ -305,9 +305,15 @@ test_that("VAL-datetimeconverter-02 (S1): Auto-detection is invariant to row ord
 
 test_that("VAL-datetimeconverter-03 (S2): Whitespace-only character column triggers All Values Missing error and never renders 'NA%' in nlSummary", {
   df_blank <- data.frame(dt = c("", "   ", "\t"))
-  res_man <- dtc_fn(data = df_blank, datetime_var = "dt", datetime_format = "ymd", timezone = "UTC", show_summary = TRUE)
-  expect_true(grepl("All Values Missing", html_text(res_man$notices), fixed = TRUE))
-  expect_false(grepl("NA%", html_text(res_man$nlSummary), fixed = TRUE))
+  # The error is now also a jmvcore::reject() (jamovi's error state), raised after the
+  # notice is rendered. Run the instance so the panels can be read after the error.
+  ana_man <- dtc_class$new(
+    options = dtc_opts$new(datetime_var = "dt", datetime_format = "ymd", timezone = "UTC", show_summary = TRUE),
+    data = df_blank)
+  expect_error(ana_man$run(), "All values in dt are missing (NA)", fixed = TRUE)
+  expect_true(grepl("All Values Missing", html_text(ana_man$results$notices), fixed = TRUE))
+  expect_identical(html_text(ana_man$results$nlSummary), "<div></div>")
+  expect_false(grepl("NA%", html_text(ana_man$results$nlSummary), fixed = TRUE))
 })
 
 test_that("VAL-datetimeconverter-04 (S3): Unambiguous ISO-8601 YYYY-MM-DD dates with days <= 12 do not trigger false ydm ambiguity warning", {
@@ -321,7 +327,9 @@ test_that("VAL-datetimeconverter-05 (S3): qualityMetrics HTML table formats midn
   df_mid <- data.frame(dt = c("2024-01-01 00:00:00", "2024-01-01 14:30:00"))
   res_mid <- dtc_fn(data = df_mid, datetime_var = "dt", datetime_format = "ymdhms", timezone = "UTC", show_quality_metrics = TRUE)
   qm <- html_text(res_mid$qualityMetrics)
-  expect_true(grepl("Minimum DateTime:</strong></td><td style='padding: 6px; border: 1px solid #ddd;'>2024-01-01 00:00:00</td>", qm, fixed = TRUE))
+  # The counts moved to the qualityCounts Table; the Html keeps the minimum/maximum lines.
+  expect_true(grepl("Minimum DateTime: 2024-01-01 00:00:00<br>", qm, fixed = TRUE))
+  expect_true(grepl("Maximum DateTime: 2024-01-01 14:30:00<br>", qm, fixed = TRUE))
 })
 
 test_that("VAL-datetimeconverter-06 (S4): .warnAmbiguousFormat() fires at exact 80% tie and copy-ready summary uses human-readable format label", {
@@ -392,12 +400,21 @@ test_that("IR-datetimeconverter-05 (S3): Re-running on an all-NA column clears s
   ana_r <- datetimeconverterClass$new(options = opts_r, data = df_rerun)
   ana_r$run()
   expect_true(nzchar(html_text(ana_r$results$previewTable)))
+  expect_equal(ana_r$results$conversionRows$rowCount, 3)
+  expect_equal(ana_r$results$qualityCounts$rowCount, 4)
   opts_r$.__enclos_env__$private$..datetime_var$.__enclos_env__$private$.value <- "all_na_dt"
-  ana_r$.__enclos_env__$private$.run()
+  # jmvcore keeps only the selected column after a run, so hand the full data back:
+  # otherwise the second run stops at "Variable Not Found" and never sees the all-NA column.
+  ana_r$.__enclos_env__$private$.data <- df_rerun
+  # An all-NA column is a jmvcore::reject() now; the stale panels are cleared before it.
+  expect_error(ana_r$.__enclos_env__$private$.run(), "All values in all_na_dt are missing (NA)", fixed = TRUE)
   # Cleared with "<div></div>", not "": the jamovi client skips an empty Html
   # update, so "" left the stale HTML on screen (2026-10-30).
   expect_identical(html_text(ana_r$results$previewTable), "<div></div>")
   expect_identical(html_text(ana_r$results$qualityMetrics), "<div></div>")
+  # The preview rows and the counts are Tables now; they must be emptied as well.
+  expect_equal(ana_r$results$conversionRows$rowCount, 0)
+  expect_equal(ana_r$results$qualityCounts$rowCount, 0)
 })
 
 test_that("IR-datetimeconverter-06 (S4): monthname and dayname extraction pass explicit C locale", {
@@ -445,7 +462,9 @@ test_that("RV-datetimeconverter-01: .generateComponentPreview handles n=0 safely
     timezone = "UTC",
     extract_weeknum = TRUE
   )
-  expect_true(grepl("lubridate::week", html_text(res_wk$componentPreview), fixed = TRUE))
+  # The definition is a note on the componentRows Table now (the rows moved there from the Html).
+  expect_true(grepl("lubridate::week", res_wk$componentRows$notes[["week"]]$note, fixed = TRUE))
+  expect_true(grepl("not ISO-8601 weeks", res_wk$componentRows$notes[["week"]]$note, fixed = TRUE))
   # Called on an instance: the builder's text goes through .(), which needs `self`.
   gen_comp <- dtc_class$new(options = dtc_opts$new(datetime_var = "dt"),
                             data = data.frame(dt = "2024-01-15"))$.__enclos_env__$private$.generateComponentPreview

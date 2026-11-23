@@ -113,14 +113,9 @@ test_that("the two significance summaries agree and name the strongest predictor
     expect_gt(length(counts), 0)
     expect_equal(length(unique(counts)), 1)
 
-    # The strongest predictor used to render with an empty name, because finalfit
-    # writes the variable name only on the first row of each block and the winning
-    # row was a later level.
-    if (grepl("Strongest predictor", txt)) {
-        nm <- regmatches(txt, regexpr("Strongest predictor:\\s*\\S+", txt))
-        expect_gt(length(nm), 0)
-        expect_false(grepl("Strongest predictor:\\s*was associated", txt))
-    }
+    # The "strongest predictor" sentence was removed (2026-11-23 audit): it ranked a per-unit
+    # hazard ratio against a categorical one. It must not come back with or without a name.
+    expect_false(grepl("Strongest predictor", txt, fixed = TRUE))
 })
 
 test_that(".summariseCoxSignificance counts variables, not coefficient rows", {

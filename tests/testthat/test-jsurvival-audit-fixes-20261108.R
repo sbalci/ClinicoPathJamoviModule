@@ -52,7 +52,9 @@ test_that("native grid replacement clears surplus columns and keeps user strings
   d <- data.frame(x = c("<img src=x>", "A&B"), count = c(2, 5), check.names = FALSE)
   names(d) <- c("A+B (years)", "Count")
   fill(table, d)
-  expect_equal(unname(table$asDF[[1]]), d[[1]])
+  # Not escaped ("A&B" stays as typed; the client shows entities literally), but a "<" that
+  # would open a tag is broken, since the client parses a cell as HTML (2026-11-23 audit).
+  expect_equal(unname(table$asDF[[1]]), c("< img src=x>", "A&B"))
   expect_equal(table$asDF[[2]], d[[2]])
   fill(table, d[1, 1, drop = FALSE])
   expect_equal(table$rowCount, 1)

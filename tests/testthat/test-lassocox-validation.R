@@ -31,6 +31,12 @@ run_lassocox <- function(...) {
   do.call(lassocox, list(...))
 }
 
+# The per-check rows (Status, Check, Value, Detail) are the suitabilityChecks Table, one line
+# per row here; the suitabilityReport Html keeps the overall verdict and the recommendations.
+suitability_checks_text <- function(res) {
+  paste(do.call(paste, res$suitabilityChecks$asDF), collapse = "\n")
+}
+
 get_kv <- function(df, key_col, val_col, key) {
   idx <- which(df[[key_col]] == key)
   if (length(idx) == 0) return(NA_character_)
@@ -271,14 +277,15 @@ test_that("VAL-lassocox-01: suitabilityReport Multicollinearity Check 5 must not
   res <- run_lassocox(data = df, elapsedtime = "time", outcome = "status",
                       outcomeLevel = "Dead", censorLevel = "Alive",
                       explanatory = c("grade", "x1"), suitabilityCheck = TRUE)
-  txt <- gsub("\\s+", " ", gsub("<[^>]+>", " ", res$suitabilityReport$content))
+  txt <- suitability_checks_text(res)
+  expect_match(txt, "Multicollinearity Max \\|r\\| = ")
   expect_false(grepl("gradeG2 (&|&amp;) gradeG3 \\(r=0\\.00\\)", txt))
 
   res_single <- run_lassocox(data = df, elapsedtime = "time", outcome = "status",
                              outcomeLevel = "Dead", censorLevel = "Alive",
                              explanatory = c("grade"), suitabilityCheck = TRUE)
-  txt_single <- gsub("\\s+", " ", gsub("<[^>]+>", " ", res_single$suitabilityReport$content))
-  expect_true(grepl("N/A \\(single", txt_single))
+  txt_single <- suitability_checks_text(res_single)
+  expect_true(grepl("Multicollinearity N/A \\(single factor\\)", txt_single))
 })
 
 test_that("VAL-lassocox-02: .buildRCode matches .stripBackticks() on backticked predictor names and handles jamovi values-attributed time columns", {
@@ -354,7 +361,7 @@ test_that("VAL-lassocox-05: Regularization Need status is monotone in EPV and co
   res <- run_lassocox(data = df, elapsedtime = "time", outcome = "status",
                       outcomeLevel = "Dead", censorLevel = "Alive",
                       explanatory = c("x1", "x2", "x3"), suitabilityCheck = TRUE)
-  txt <- gsub("\\s+", " ", gsub("<[^>]+>", " ", res$suitabilityReport$content))
+  txt <- suitability_checks_text(res)
   expect_false(grepl("p=3, EPV=25 Moderate dimensionality", txt))
   expect_true(grepl("p=3, EPV=25 Low-dimensional with ample events", txt))
 

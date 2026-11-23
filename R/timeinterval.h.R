@@ -230,7 +230,7 @@ timeintervalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                 title="Data Quality Counts",
                 rows=0,
                 columns=list(),
-                visible="(include_quality_metrics)"))
+                visible="(include_quality_metrics && length(dx_date) > 0 && length(fu_date) > 0)"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="qualityAssessment",
@@ -284,7 +284,7 @@ timeintervalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             super$initialize(
                 package = "ClinicoPath",
                 name = "timeinterval",
-                version = c(1,1,5),
+                version = c(1,1,6),
                 options = options,
                 results = timeintervalResults$new(options=options),
                 data = data,
@@ -322,18 +322,21 @@ timeintervalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   dates with a time of day, and year-month dates, which have no day and are
 #'   set to the 1st of the month with a warning. Manual selection ensures
 #'   accurate parsing for specific date formats; a value that cannot have the
-#'   selected format is left empty. Two-digit years are read as 2000-2068 for
-#'   00-68 and as 1969-1999 for 69-99; a message reports how many values were
-#'   parsed that way.
+#'   selected format is left empty. A year-first, day-first or month-first
+#'   choice also reads a time of day after the date, which settles a column
+#'   whose day and month order cannot be detected. Two-digit years are read as
+#'   2000-2068 for 00-68 and as 1969-1999 for 69-99; a message reports how many
+#'   values were parsed that way.
 #' @param output_unit Unit for calculated time intervals. Affects person-time
 #'   calculations and  statistical summaries. Choose based on study duration and
 #'   event frequency.
 #' @param time_basis Controls how months/years are computed. Calendar-aware
-#'   (the default) respects actual month lengths (28 - 31 days), as the survival
-#'   analyses in this module do when they compute time from dates, so the same
-#'   dates give the same months. Standardized uses fixed lengths (30.4375 days
-#'   per month, 365.25 days per year), a constant unit for person-time
-#'   denominators.
+#'   (the default) respects actual month lengths (28 - 31 days), like the
+#'   survival analyses in this module when they compute time from dates;
+#'   row-level values can still differ slightly for start days 29 - 31, where
+#'   the two use different month-end conventions. Standardized uses fixed
+#'   lengths (30.4375 days per month, 365.25 days per year), a constant unit for
+#'   person-time denominators.
 #' @param use_landmark Enables conditional analysis from a specific time
 #'   point. Useful for  studying outcomes conditional on having been followed to
 #'   a landmark time (for example, only participants with at least 6 months of

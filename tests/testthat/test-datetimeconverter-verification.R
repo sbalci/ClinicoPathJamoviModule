@@ -203,9 +203,12 @@ test_that("large numeric inputs are shown in full, not scientific notation", {
     res <- quietly(datetimeconverter(
         data = data.frame(e = c(1700000000, 1700086400)),
         datetime_var = "e", datetime_format = "unix_epoch", preview_rows = 10))
-    preview <- strip_html(res$previewTable$content)
-    expect_match(preview, "1700000000", fixed = TRUE)
-    expect_false(grepl("1.7e+09", preview, fixed = TRUE))
+    # "Original Value" is the second column of the conversionRows Table (the preview rows
+    # moved there from the previewTable Html).
+    rows <- res$conversionRows
+    expect_equal(rows$columns[[2]]$title, "Original Value")
+    expect_equal(rows$asDF[[2]], c("1700000000", "1700086400"))
+    expect_false(any(grepl("e+", unlist(rows$asDF), fixed = TRUE)))
 })
 
 test_that("YYYYMMDD-style numeric input survives the string fallback", {

@@ -70,8 +70,8 @@ test_that("N1: binary-numeric coercion precedes the separation check in .run()",
   coerce_line <- grep("length(unique(mydata[[v]])) == 2L", src, fixed = TRUE)
   sep_line    <- grep("Possible separation detected", src, fixed = TRUE)
   expect_length(coerce_line, 1L)
-  expect_length(sep_line, 1L)
-  expect_lt(coerce_line, sep_line)
+  expect_length(sep_line, 2L)            # two wordings since 2026-11-23: with and without Firth
+  expect_true(all(coerce_line < sep_line))
 })
 
 test_that("M1: complete-case filtering uses jmvcore::naOmit and keeps labels", {

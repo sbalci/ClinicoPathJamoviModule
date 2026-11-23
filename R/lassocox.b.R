@@ -69,7 +69,6 @@
 #' @importFrom R6 R6Class
 #' @importFrom jmvcore .
 #' @return An \code{R6} class generator object for the \code{lassocoxClass} backend; used internally by the jamovi analysis wrapper and not called directly.
-
 lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
     "lassocoxClass",
     inherit = lassocoxBase,
@@ -155,7 +154,7 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
         .modelSummaryLabels = function() {
             c(.("Encoded Predictor Columns"), .("Selected Predictor Columns"),
-              .("Column Selection Proportion"), .("Optimal Lambda"), .("Penalty Selected By"),
+              .("Column Selection Proportion"), .("Selected lambda"), .("Penalty Selected By"),
               .("Stratified CV Folds Used"), .("Sample Size"), .("Number of Events"),
               .("Censoring Rate"), .("Event Level Used"), .("Rows Excluded (Missing Data)"),
               .("Original Candidate Predictors"), .("Selected Original Predictors"),
@@ -182,6 +181,9 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             if (private$.dependencyError()) return()
             # Early exits for missing data or variables
             if (is.null(self$data) || nrow(self$data) == 0) {
+                self$results$todo$setContent(paste0("<div class='alert alert-info'><p>",
+                    .("The dataset has no rows to analyse. If a filter is active, check that it leaves some rows."),
+                    "</p></div>"))
                 return()
             }
 
@@ -205,6 +207,28 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             warn_env <- new.env(parent = emptyenv())
             warn_env$collected <- character(0)
             warn_env$stability <- character(0)
+
+            # Shown on exit, so they also appear when the run ends in a jmvcore::reject():
+            # "Removed constant explanatory variables: ..." is the reason for the refusal
+            # that follows it, and was lost when this ran only after a completed fit.
+            # library-audit 2026-11-20 jsurvival [LOW] DEFERRED: Html message panels kept by maintainer
+            #   decision; revisit when these messages have been tried as jmvcore::Notice in the jamovi app
+            on.exit({
+                if (length(warn_env$stability)) {
+                    self$results$todo$setContent(paste0(self$results$todo$content,
+                        "<div class='alert alert-danger'><h4>", .("Model stability warnings"),
+                        "</h4><ul>", paste0("<li>", htmltools::htmlEscape(unique(warn_env$stability)),
+                            "</li>", collapse = ""), "</ul></div>"))
+                }
+                if (length(warn_env$collected) > 0) {
+                    self$results$todo$setContent(paste0(self$results$todo$content,
+                        "<div class='alert alert-warning'>",
+                        "<h4>", .("Analysis Notes"), "</h4>",
+                        "<ul>", paste0("<li>", htmltools::htmlEscape(unique(warn_env$collected)), "</li>",
+                                       collapse = ""), "</ul>",
+                        "</div>"))
+                }
+            }, add = TRUE)
 
             # Warnings are collected into the results panel. Errors are deliberately
             # NOT caught: a catch-all here swallowed every jmvcore::reject() raised by
@@ -235,28 +259,6 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
                     # Save plot data for rendering
                     private$.savePlotData(results)
-
-                    # library-audit 2026-11-20 jsurvival [LOW] DEFERRED: Html message panels kept by maintainer
-                    #   decision; revisit when these messages have been tried as jmvcore::Notice in the jamovi app
-                    if (length(warn_env$stability)) {
-                        self$results$todo$setContent(paste0(self$results$todo$content,
-                            "<div class='alert alert-danger'><h4>", .("Model stability warnings"),
-                            "</h4><ul>", paste0("<li>", htmltools::htmlEscape(warn_env$stability),
-                                "</li>", collapse = ""), "</ul></div>"))
-                    }
-                    # Display collected warnings in results panel
-                    if (length(warn_env$collected) > 0) {
-                        warn_items <- paste0("<li>", htmltools::htmlEscape(warn_env$collected), "</li>",
-                                             collapse = "")
-                        warn_html <- paste0(
-                            "<div class='alert alert-warning'>",
-                            "<h4>", .("Analysis Notes"), "</h4>",
-                            "<ul>", warn_items, "</ul>",
-                            "</div>"
-                        )
-                        self$results$todo$setContent(paste0(self$results$todo$content, warn_html))
-
-                    }
 
                 },
                 warning = function(w) {
@@ -376,6 +378,10 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             # predictor values on already-excluded incomplete-outcome rows cannot alter
             # complete-case listwise deletion.
             valid_outcome <- !is.na(time) & !is.na(status)
+            # With no usable time/outcome row every predictor looks constant; say what is missing.
+            if (!any(valid_outcome))
+                jmvcore::reject(.fmt(.('Too few complete cases for analysis ({n}). Need at least 10 complete observations.'),
+                    n = 0))
             constant_vars <- sapply(predictors, function(x) {
                 vals <- x[valid_outcome & !is.na(x)]
                 length(unique(vals)) <= 1
@@ -501,7 +507,9 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 outcome_chr <- if (is_lgl_tf) toupper(as.character(outcome_raw)) else as.character(outcome_raw)
                 observed_levels <- sort(unique(outcome_chr[!is.na(outcome_chr)]))
                 if (length(observed_levels) != 2) {
-                    jmvcore::reject(.fmt(.('Outcome variable must have exactly 2 observed values. Found {n} level(s): {levels}. For competing events, construct an explicit binary cause-specific status in which the event of interest is 1 and every non-event observation is 0; do not omit other event types.'),
+                    jmvcore::reject(.fmt(if (length(observed_levels) == 1)
+                        .('Outcome variable has one observed value ({levels}), so {n} level(s) instead of 2. This analysis needs both events and censored observations (at least 3 of each) for its stratified cross-validation, so a cohort in which every patient has the same outcome cannot be analysed here.')
+                    else .('Outcome variable must have exactly 2 observed values. Found {n} level(s): {levels}. For competing events, construct an explicit binary cause-specific status in which the event of interest is 1 and every non-event observation is 0; do not omit other event types.'),
                         n = length(observed_levels), levels = paste(observed_levels, collapse = ", ")))
                 }
 
@@ -847,30 +855,51 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 .quietly(do.call(glmnet::cv.glmnet, args)),
                 error = function(e) jmvcore::reject(.fmt(.('Error in cross-validation: {msg}'),
                     msg = conditionMessage(e))))
-            # Outside any tryCatch: .checkpoint() signals its restart as an error.
-            private$.checkpoint()
-            cv_fit <- run_cv(cv_args)
-
-            # glmnet 5.0 evaluates the Cox likelihood with exp(eta) capped at eta = 30 but
-            # eta itself uncapped, so past 30 the deviance is wrong and can go negative,
-            # and the solver follows the wrong gradient. With few events per column the
-            # fold fits reach 30 inside the default path, held-out rows first. Stop before
-            # the first lambda that reaches it; x_fit is centered, so these etas are already
-            # on the capped scale. Repeat because a supplied lambda makes every fold fit that
-            # exact grid, where the first pass interpolated each fold's own grid. glmnet 4.x
-            # has no such cap and needs no stop.
-            lambda_searched <- length(cv_fit$lambda)
-            while (utils::packageVersion("glmnet") >= "5.0") {
-                eta_max <- pmax(apply(cv_fit$fit.preval, 2, max, na.rm = TRUE),
-                    apply(as.matrix(x_fit %*% cv_fit$glmnet.fit$beta), 2, max))
-                stop_at <- which(eta_max > 30)[1]
-                if (is.na(stop_at)) break
-                # lambda[1] is the exact edge of the empty model; refitted as given, rounding
-                # can admit a column with a zero-sized coefficient, so step just above it.
-                kept <- cv_fit$lambda[seq_len(stop_at - 1L)]
-                cv_args$lambda <- c(1.001 * kept[1], kept[-1])
+            # jamovi calls .run() again for every option change, including a checkbox that
+            # only shows a plot, and the cross-validation is the slow part. The last fit is
+            # kept for the R session and reused when everything that determines it is the
+            # same: the design matrix, the outcome, the fold of each row (which carries the
+            # seed and the fold count), the standardisation and the glmnet version. A
+            # warning the fit raised belongs to the result, so a reused fit raises it again.
+            cv_key <- list(x = x_fit, y = y, foldid = foldid, standardize = cv_args$standardize,
+                glmnet = utils::packageVersion("glmnet"))
+            cached <- .lassocoxCvCache$entry
+            if (!is.null(cached) && identical(cached$key, cv_key)) {
+                .lassocoxCvCache$hits <- 1L + if (is.null(.lassocoxCvCache$hits)) 0L else .lassocoxCvCache$hits
+                cv_fit <- cached$cv_fit
+                lambda_searched <- cached$lambda_searched
+                for (m in cached$warnings) warning(m, call. = FALSE)
+            } else {
+                cv_warnings <- character(0)
+                withCallingHandlers({
+                # Outside any tryCatch: .checkpoint() signals its restart as an error.
                 private$.checkpoint()
                 cv_fit <- run_cv(cv_args)
+
+                # glmnet 5.0 evaluates the Cox likelihood with exp(eta) capped at eta = 30 but
+                # eta itself uncapped, so past 30 the deviance is wrong and can go negative,
+                # and the solver follows the wrong gradient. With few events per column the
+                # fold fits reach 30 inside the default path, held-out rows first. Stop before
+                # the first lambda that reaches it; x_fit is centered, so these etas are already
+                # on the capped scale. Repeat because a supplied lambda makes every fold fit that
+                # exact grid, where the first pass interpolated each fold's own grid. glmnet 4.x
+                # has no such cap and needs no stop.
+                lambda_searched <- length(cv_fit$lambda)
+                while (utils::packageVersion("glmnet") >= "5.0") {
+                    eta_max <- pmax(apply(cv_fit$fit.preval, 2, max, na.rm = TRUE),
+                        apply(as.matrix(x_fit %*% cv_fit$glmnet.fit$beta), 2, max))
+                    stop_at <- which(eta_max > 30)[1]
+                    if (is.na(stop_at)) break
+                    # lambda[1] is the exact edge of the empty model; refitted as given, rounding
+                    # can admit a column with a zero-sized coefficient, so step just above it.
+                    kept <- cv_fit$lambda[seq_len(stop_at - 1L)]
+                    cv_args$lambda <- c(1.001 * kept[1], kept[-1])
+                    private$.checkpoint()
+                    cv_fit <- run_cv(cv_args)
+                }
+                }, warning = function(w) cv_warnings <<- c(cv_warnings, conditionMessage(w)))
+                .lassocoxCvCache$entry <- list(key = cv_key, cv_fit = cv_fit,
+                    lambda_searched = lambda_searched, warnings = cv_warnings)
             }
             if (length(cv_fit$lambda) < lambda_searched)
                 private$.warnInstability(private$.lambdaStopNote(cv_fit, lambda_searched))
@@ -1247,7 +1276,7 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             value <- results$performance_metrics$cindex
             .fillRow(self$results$performance, rowKey = 1L, values = list(
                 metric = .("Apparent C-index"),
-                value = if (is.finite(value)) as.character(round(value, 3)) else .("Not available"),
+                value = if (is.finite(value)) sprintf("%.3f", value) else .("Not available"),
                 interpretation = .("Development data only; optimism not corrected")))
             self$results$performance$setNote("apparent",
                 .("This C-index is apparent (training) performance from the same patients used for preprocessing, penalty selection, and model fitting. Its uncertainty does not include the modeling process. Use bootstrap optimism correction or nested cross-validation that repeats all preprocessing and tuning, followed by external validation before clinical use."), init = FALSE)
@@ -1452,6 +1481,7 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                         conf.int = TRUE,
                         ggtheme = ggtheme,
                         title = .("Exploratory Development-Sample Risk Groups"),
+                        subtitle = .("Split at the development-sample median of the risk score (ties to Low Risk); not validated in new patients"),
                         xlab = .("Time"),
                         ylab = .("Survival Probability"),
                         legend.title = .("Risk Group"),
@@ -1505,7 +1535,7 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                     paths = data.frame(
                         log_lambda = rep(log(path_lambda), times = length(shown)),
                         coefficient = as.numeric(t(path_beta)),
-                        column = rep(rownames(path_beta), each = length(path_lambda)),
+                        column = rep(private$.columnLabels(results$data, shown), each = length(path_lambda)),
                         stringsAsFactors = FALSE),
                     lambda = path_lambda,
                     nzero = as.integer(results$cv_fit$glmnet.fit$df),
@@ -1535,7 +1565,8 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 names(all_coefs) <- results$data$variable_names
                 aligned_coefs <- all_coefs[names(results$var_importance)]
                 coef_plot_data <- list(
-                    var_names = names(results$var_importance),
+                    var_names = private$.columnLabels(results$data,
+                        match(names(results$var_importance), results$data$variable_names)),
                     var_importance = as.numeric(results$var_importance),
                     coef_values = as.numeric(aligned_coefs)
                 )
@@ -2048,7 +2079,7 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             # Interpretation guidance (always shown)
             html <- paste0(html,
                 "<div style='margin-top: 10px; font-size: 12px; color: inherit; opacity: 0.8;'>",
-                "<em>", .("This assessment is advisory and cannot establish model adequacy. The analysis proceeds regardless of the verdict. Green = no issue detected by this limited check, Gray = adequacy not determined by this diagnostic, Yellow = proceed with caution, Red = results may be highly unstable or misspecified."), "</em></div>"
+                "<em>", .("This assessment is advisory and cannot establish model adequacy. The analysis proceeds regardless of the verdict. No issue detected = this limited check found nothing, Not determined = adequacy not determined by this diagnostic, Caution = proceed with caution, Concern = results may be highly unstable or misspecified."), "</em></div>"
             )
 
             self$results$suitabilityReport$setContent(html)
@@ -2111,6 +2142,9 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             fail_env$failures <- character(0)
             tryCatch({
                 # Refit Cox model with only selected variables for AIC/loglik
+                if (length(results$selected_vars) == 0)
+                    self$results$modelComparison$setNote("empty_selection",
+                        .("The penalty selected no predictor column, so there is no selected-variable model to refit; its row is left blank."))
                 if (length(results$selected_vars) > 0) {
                     selected_refit <- private$.coxRefit(results$data, results$selected_vars)
                     # concordance.coxph already applies the Cox score orientation.
@@ -2236,3 +2270,7 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         }
     )
 )
+
+# The last cross-validated fit of this R session; see .fitModel(). One entry, so it
+# holds at most one design matrix and one cv.glmnet object.
+.lassocoxCvCache <- new.env(parent = emptyenv())

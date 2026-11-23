@@ -330,7 +330,7 @@ outcomeorganizerResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
             self$add(jmvcore::Html$new(
                 options=options,
                 name="eventRecodeInfo",
-                title="Outcome Recode",
+                title="Outcome Recode Notes",
                 visible=TRUE,
                 clearWith=list(
                     "outcome",
@@ -618,7 +618,7 @@ outcomeorganizerBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             super$initialize(
                 package = "ClinicoPath",
                 name = "outcomeorganizer",
-                version = c(1,1,5),
+                version = c(1,1,6),
                 options = options,
                 results = outcomeorganizerResults$new(options=options),
                 data = data,
@@ -664,7 +664,8 @@ outcomeorganizerBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
 #'   for.
 #' @param multievent If true, allows for multiple event types (e.g., death
 #'   from disease vs death from other causes). For RFS, PFS and DFS every death
-#'   category then counts as an event; DFS also counts Alive with Disease.
+#'   category then counts as an event; DFS also counts Alive with Disease when
+#'   no recurrence variable is selected.
 #' @param dod The level representing death from the disease of interest.
 #' @param dooc The level representing death from causes other than the disease
 #'   of interest.
@@ -679,8 +680,10 @@ outcomeorganizerBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
 #'   silently erase them all. If the code entered here never occurs in the
 #'   recoded outcome the hierarchy cannot act, and the analysis says so rather
 #'   than reporting that it was applied.
-#' @param intervalCensoring If true, prepares data for interval-censored
-#'   analysis where exact event times are unknown.
+#' @param intervalCensoring If true, checks the two interval columns (start
+#'   not later than end, both on one scale) and reports the result. The recoded
+#'   outcome and the exported columns do not change: this analysis does not
+#'   export interval-censored data.
 #' @param intervalStart Variable containing the start of the interval when the
 #'   event might have occurred.
 #' @param intervalEnd Variable containing the end of the interval when the

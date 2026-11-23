@@ -75,7 +75,9 @@ test_that("the Cox table header names the user's variables, not mytime/myoutcome
   d <- msfx_df()
   res <- .run_multisurvival(data = d, elapsedtime = "time", outcome = "status",
                             explanatory = "Sex")
-  txt <- paste(as.character(res$text$content), collapse = " ")
-  expect_false(grepl("Surv(mytime, myoutcome)", txt, fixed = TRUE))
-  expect_true(grepl("Surv(time, status)", txt, fixed = TRUE))
+  # The Cox results are a Table now (fittedTable); its first column title is the header.
+  hdr <- vapply(res$fittedTable$columns, function(x) x$title, character(1))
+  expect_gt(length(hdr), 0)
+  expect_false(any(grepl("Surv(mytime, myoutcome)", hdr, fixed = TRUE)))
+  expect_true(any(grepl("Surv(time, status)", hdr, fixed = TRUE)))
 })

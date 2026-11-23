@@ -32,6 +32,7 @@ children:
         name: output_unit
       - type: ComboBox
         name: time_basis
+        enable: (output_unit:months || output_unit:years)
       - type: ComboBox
         name: timezone
   - type: CollapseBox
@@ -68,7 +69,7 @@ children:
         name: extreme_multiplier
         format: number
         suffix: x 99th %ile
-        enable: (remove_extreme)
+        enable: (remove_extreme || include_quality_metrics)
       - type: TextBox
         name: confidence_level
         format: number

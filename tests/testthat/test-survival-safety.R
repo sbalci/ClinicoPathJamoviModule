@@ -85,11 +85,11 @@ test_that("survival RMST agrees with survival::survfit reference values", {
   )
   reference <- summary(reference_fit, rmean = 48, extend = TRUE)$table
 
-  expect_equal(observed$rmst, unname(round(reference[, "rmean"], 2)), tolerance = 1e-8)
-  expect_equal(observed$se, unname(round(reference[, "se(rmean)"], 2)), tolerance = 1e-8)
+  expect_equal(observed$rmst, unname(reference[, "rmean"]), tolerance = 1e-8)   # unrounded since 2026-11-23
+  expect_equal(observed$se, unname(reference[, "se(rmean)"]), tolerance = 1e-8)
   expect_equal(
     observed$ci_lower,
-    unname(round(reference[, "rmean"] - 1.96 * reference[, "se(rmean)"], 2)),
+    unname(reference[, "rmean"] - 1.96 * reference[, "se(rmean)"]),
     tolerance = 1e-8
   )
 })
@@ -228,4 +228,31 @@ test_that("survival landmark analysis runs", {
   args <- surv_args(uselandmark = TRUE, landmark = 12)
   result <- do.call(survival, args)
   expect_true(inherits(result, "R6"))
+})
+
+# ─── Release-profile fixes (2026-11-23) ──────────────────
+
+test_that("survival RMST reports the exact automatic horizon it used", {
+  # The horizon was shown to one decimal (78.7) while the estimate used 78.675, so nobody could
+  # reproduce the table from what it displayed.
+  data(survival_rmst, package = "ClinicoPath")
+  result <- do.call(survival, surv_args(data = survival_rmst, explanatory = "treatment",
+                                        rmst_analysis = TRUE, rmst_tau = 0))
+  observed <- result$rmstTable$asDF
+  fit <- survival::survfit(survival::Surv(elapsedtime, outcome) ~ treatment, data = survival_rmst)
+  reference <- summary(fit, rmean = observed$tau[1], extend = TRUE)$table
+  expect_equal(observed$rmst, unname(reference[, "rmean"]), tolerance = 1e-8)   # unrounded since 2026-11-23
+  shown <- base::format(signif(observed$tau[1], 6), trim = TRUE)   # jmvcore masks format()
+  notes <- paste(vapply(result$rmstTable$notes, function(x) x$note, ""), collapse = " ")
+  expect_match(notes, shown, fixed = TRUE)
+  expect_match(gsub("<[^>]*>", " ", result$rmstSummary$content), shown, fixed = TRUE)
+})
+
+test_that("survival names the missing data when no complete record remains", {
+  # An entirely missing time or group column used to surface survival's own
+  # "data set has no non-missing observations".
+  no_time <- survival_test; no_time$elapsedtime <- NA_real_
+  expect_error(do.call(survival, surv_args(data = no_time)), "No complete records remain")
+  no_group <- survival_test; no_group$treatment <- factor(NA, levels = levels(factor(survival_test$treatment)))
+  expect_error(do.call(survival, surv_args(data = no_group)), "No complete records remain")
 })

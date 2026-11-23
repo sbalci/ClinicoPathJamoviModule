@@ -28,6 +28,10 @@ NULL
 # foreground. Severity stays legible in both themes through the left border.
 .singlearmNoticeHTML <- function(message, type = c("ERROR", "STRONG_WARNING", "WARNING", "INFO")) {
     type <- match.arg(type)
+    . <- .callerTranslator(parent.frame())   # jmvcore's .() needs `self`; a file-level helper has none
+    heading <- switch(type,
+        ERROR = .("Error"), STRONG_WARNING = .("Strong warning"),
+        WARNING = .("Warning"), INFO = .("Information"))
 
     # Define styles for each notice type
     styles <- list(
@@ -60,7 +64,7 @@ NULL
         "padding: 15px; margin: 10px 0; border-radius: 5px; ",
         "border-left: 4px solid ", style$border, ";'>",
         "<p style='margin: 0; color: inherit;'>",
-        "<strong>", style$icon, " ", type, ":</strong> ",
+        "<strong>", style$icon, " ", heading, ":</strong> ",
         htmltools::htmlEscape(message),
         "</p>",
         "</div>"
@@ -180,6 +184,11 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
       # Message Accumulation Methods (for HTML notice panels) ----
       # library-audit 2026-11-20 jsurvival [LOW] DEFERRED: Html message panels kept by maintainer
       #   decision; revisit when these messages have been tried as jmvcore::Notice in the jamovi app
+      # Plot window in the output time unit: the factory 60 / 12 mean five years / one year
+      # (.plotWindow() in utils-survivaldata.R), any other value is used as entered.
+      .plotEndTime = function() .plotWindow(self$options$endplot, self$options$byplot, self$options$timetypeoutput)$end,
+      .plotBy = function() .plotWindow(self$options$endplot, self$options$byplot, self$options$timetypeoutput)$by,
+
       .addError = function(message) {
         private$.errorMessages <- c(private$.errorMessages, message)
       },
@@ -349,11 +358,11 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         }
         # Multiple Event Levels is excluded: there the user assigned each level.
         if (!isTRUE(self$options$multievent) && length(res$censored_labels) >= 2L)
-          caveats <- c(caveats, .fmt(.("{levels} were treated as censored. If any of these is a death or another terminal event, 1 minus Kaplan-Meier overstates absolute risk; use Multiple Event Levels with Competing Risk."),
+          caveats <- c(caveats, .fmt(.("{levels} were treated as censored. If any of these is a death or another terminal event, 1 minus Kaplan-Meier overstates absolute risk; use Multiple Event Levels with Competing Risks."),
             levels = paste(res$censored_labels, collapse = ", ")))
         n_other_deaths <- sum(res$status == 0 & !res$alive, na.rm = TRUE)
         if (identical(res$estimand, "cause-specific survival") && n_other_deaths > 0)
-          caveats <- c(caveats, .fmt(.("{n} death(s) from other causes were censored, so 1 minus Kaplan-Meier overstates the absolute risk of the event. Use Competing Risk for cumulative incidence."),
+          caveats <- c(caveats, .fmt(.("{n} death(s) from other causes were censored, so 1 minus Kaplan-Meier overstates the absolute risk of the event. Use Competing Risks for cumulative incidence."),
             n = n_other_deaths))
         caveats
       },
@@ -635,8 +644,9 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         .medianFollowUp(time, as.integer(alive))
       },
 
-      .safeExecute = function(expr, context = "analysis", silent = FALSE) {
+      .safeExecute = function(expr, context = "analysis", silent = FALSE, raise = FALSE) {
         tryCatch(expr, error = function(e) {
+          if (identical(e$code, "restart")) stop(e)   # a jamovi restart is not a failure
           user_msg <- switch(context,
             "data_processing" = .("Data processing failed. Please check your input variables."),
             "survival_calculation" = .("Survival calculation failed. This may be due to insufficient data or data quality issues."),
@@ -659,6 +669,7 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             # early return, so anything raised on the .run() path is rendered;
             # the plot renderers execute after that, which is why the technical
             # detail still goes to the warning stream for both.
+            if (isTRUE(raise)) stop(paste(user_msg, conditionMessage(e)), call. = FALSE)
             private$.addWarning(user_msg)
             warning(paste0("singlearm/", context, ": ", conditionMessage(e)),
                     call. = FALSE)
@@ -1135,7 +1146,7 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             .("For detailed information about survival analysis methods, see the <a href='https://cran.r-project.org/web/packages/survival/vignettes/survival.pdf'>survival package documentation</a>."))
 
         html <- self$results$todo
-        html$setContent(todo)
+        html$setContent(paste0(.multiEventPending(self$options), todo))
 
       }
 
@@ -1214,6 +1225,7 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
           is_numeric_dx <- .isDateLike(mydata[[dxdate]])
           is_numeric_fu <- .isDateLike(mydata[[fudate]])
 
+          date_notes <- list(shape = "", two_digit = NULL)
           if (is_numeric_dx && is_numeric_fu) {
               mydata[["start"]] <- .toDateTime(mydata[[dxdate]])
               mydata[["end"]]   <- .toDateTime(mydata[[fudate]])
@@ -1230,14 +1242,17 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
               )
 
               if (timetypedata %in% names(lubridate_functions)) {
-                  func <- lubridate_functions[[timetypedata]]
-                  # lubridate's warning does not reach the user; the notice below does.
-                  mydata[["start"]] <- suppressWarnings(func(mydata[[dxdate]]))
-                  mydata[["end"]] <- suppressWarnings(func(mydata[[fudate]]))
-                  dx_failed <- .countDateParseFailures(mydata[[dxdate]], mydata[["start"]])
-                  fu_failed <- .countDateParseFailures(mydata[[fudate]], mydata[["end"]])
-                  n_parse_failed <- dx_failed$n_failed + fu_failed$n_failed
-                  n_parse_inputs <- dx_failed$n_inputs + fu_failed$n_inputs
+                  # The shape guard, not the bare parser: lubridate reads text of the wrong
+                  # shape at 100% (ymd_hms("15/01/2020 14:30") is 2015-01-20). Refused values
+                  # come back missing and are reported by the notices below.
+                  date_read <- .readSurvivalDates(mydata[[dxdate]], mydata[[fudate]], timetypedata)
+                  date_notes <- .survivalDateNotes(date_read)
+                  mydata[["start"]] <- date_read$start
+                  mydata[["end"]] <- date_read$end
+                  n_parse_failed <- date_read$n_failed
+                  n_parse_inputs <- date_read$n_inputs
+                  if (!is.null(date_notes$two_digit))
+                    private$.addWarning(date_notes$two_digit, strong = TRUE)
               } else {
                   private$.addError(sprintf(.('Unsupported date format: %s. Supported formats are: %s. Please select the correct format from Time Type options.'), timetypedata, paste(names(lubridate_functions), collapse = ', ')))
                   return(NULL)
@@ -1253,13 +1268,13 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
           if ( sum(!is.na(mydata[["start"]])) == 0 || sum(!is.na(mydata[["end"]])) == 0)  {
             start_valid <- sum(!is.na(mydata[["start"]]))
             end_valid <- sum(!is.na(mydata[["end"]]))
-            private$.addError(sprintf(.('Date parsing failed. Start date valid: %d, End date valid: %d. Please verify date format matches selected type (%s) and check for missing/invalid date values.'), start_valid, end_valid, self$options$timetypedata))
+            private$.addError(trimws(paste(sprintf(.('Date parsing failed. Start date valid: %d, End date valid: %d. Please verify date format matches selected type (%s) and check for missing/invalid date values.'), start_valid, end_valid, self$options$timetypedata), date_notes$shape)))
             return(NULL)
           }
 
           if (n_parse_failed > 0L)
-            private$.addWarning(.fmt(.("{nfailed} of {ninputs} dates could not be read, so those patients were excluded. Check the date format."),
-              nfailed = n_parse_failed, ninputs = n_parse_inputs))
+            private$.addWarning(trimws(paste(.fmt(.("{nfailed} of {ninputs} dates could not be read, so those patients were excluded. Check the date format."),
+              nfailed = n_parse_failed, ninputs = n_parse_inputs), date_notes$shape)))
 
           # Registry placeholders parse as real dates, so refuse them here. The
           # interval check further down stays: two plausible dates can still be
@@ -1330,7 +1345,9 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
           return(NULL)
         }
         n_zero <- sum(df_time$mytime == 0, na.rm = TRUE)
-        if (n_zero > 0)
+        # With a landmark these rows are removed (follow-up must exceed it), and the
+        # landmark notice says so; "retained" would contradict it.
+        if (n_zero > 0 && !isTRUE(self$options$uselandmark))
           private$.addWarning(sprintf(
             .('%d observation(s) have follow-up time zero. They are retained: events at time zero change the Kaplan-Meier or cumulative-incidence estimate at the origin, while zero-time censored observations contribute no person-time. Confirm that same-day events and the time origin are coded as intended.'),
             n_zero))
@@ -1876,12 +1893,23 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         if (private$.isCompetingRisk() && self$options$sc) {
           unavailable <- character()
           if (isTRUE(self$options$censored))
-            unavailable <- c(unavailable, "censoring marks")
+            unavailable <- c(unavailable, .("censoring marks"))
           if (!identical(self$options$medianline, "none"))
-            unavailable <- c(unavailable, "median reference lines")
+            unavailable <- c(unavailable, .("median reference lines"))
           if (length(unavailable) > 0L)
             private$.addInfo(.fmt(.("The competing-risk CIF plot does not display {options}. The cumulative-incidence table remains available for estimates, confidence intervals, and counts at selected times."),
               options = paste(unavailable, collapse = ", ")))
+        }
+        # These three stay tickable in the panel when the outcome column itself brings
+        # competing-risk mode (a Censored/Event/Competing hand-off), and the plots are
+        # hidden above. Ticking one showed nothing and said nothing.
+        if (private$.isCompetingRisk()) {
+          hidden <- c(if (isTRUE(self$options$ce)) .("Cumulative event probability"),
+                      if (isTRUE(self$options$ch)) .("Cumulative hazard"),
+                      if (isTRUE(self$options$kmunicate)) .("KMunicate-style plot"))
+          if (length(hidden) > 0L)
+            private$.addInfo(.fmt(.("{plots}: not drawn for a competing-risk outcome, because each treats a competing event as censoring. The cumulative incidence plot and table report the same follow-up correctly."),
+              plots = paste(hidden, collapse = ", ")))
         }
         if (!private$.isCompetingRisk() && isTRUE(self$options$kmunicate) &&
             (isTRUE(self$options$censored) ||
@@ -1955,9 +1983,9 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         },
 
         .finishSingleArmRun = function(data_quality) {
-        analysis_type <- if(private$.isCompetingRisk()) 'Competing risk' else 'Standard'
+        analysis_type <- if(private$.isCompetingRisk()) .('Competing risk') else .('Standard')
         method_used <- if(private$.isCompetingRisk())
-          'cumulative-incidence (Aalen-Johansen/cmprsk)' else 'Kaplan-Meier'
+          .('cumulative-incidence (Aalen-Johansen/cmprsk)') else 'Kaplan-Meier'
         # The counts must add up to the total. Competing events are neither
         # events of interest nor censored observations (.assessDataQuality
         # subtracts them out of both), so listing only events and censored left
@@ -1969,11 +1997,12 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                   data_quality$n_total, data_quality$n_events,
                   n_competing_total, data_quality$n_censored)
         else
-          sprintf('%d observations (%d events, %d censored)',
+          sprintf(.('%d observations (%d events, %d censored)'),
                   data_quality$n_total, data_quality$n_events, data_quality$n_censored)
         followup_label <- if (isTRUE(data_quality$median_followup_reverse_km))
           .("Median follow-up (reverse Kaplan-Meier)") else
           .("Median observed time (reverse Kaplan-Meier follow-up not estimable)")
+        if (length(private$.errorMessages) == 0)
         private$.addInfo(sprintf(.('Analysis completed: %s. %s: %.1f %s. %s analysis using %s method.'),
                                  counts_text,
                                  followup_label,
@@ -2093,15 +2122,17 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             # months" beside "18% of subjects had the event": two statements a
             # reader cannot reconcile, from a number no follow-up supports.
             #
-            # survfit refuses the analogous Kaplan-Meier case by returning NA
-            # rather than inventing a value. Do the same, and say why -- the
+            # This is deliberately stricter than Kaplan-Meier, where survfit reports a
+            # median that is reached at the last event. Say why -- the
             # existing narrative already has a "not reached" branch keyed on a
             # non-finite median, so leaving median_time as NA routes there.
             max_time  <- suppressWarnings(max(mydata[[mytime]], na.rm = TRUE))
             prev_est  <- if (median_idx > 1L) cif_est[median_idx - 1L] else 0
             n_at_risk <- sum(mydata[[mytime]] >= candidate, na.rm = TRUE)
 
-            if (is.finite(max_time) && candidate >= max_time && prev_est < half) {
+            # prev_est is below 50% by construction (median_idx is the first crossing), so
+            # the rule is simply: a crossing at the last observed time is not reported.
+            if (is.finite(max_time) && candidate >= max_time) {
               reached_at_tail <- TRUE
               private$.cifReachedAtTail <- TRUE
               private$.cifTailPct <- 100 * cif_est[median_idx]
@@ -2173,7 +2204,7 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             # log-log band (see .getCachedSurvfit); the median CI is the
             # Brookmeyer-Crowley inversion of the same band the time-specific
             # table reports.
-            private$.getCachedSurvfit(formula, mydata, "median")
+            private$.getCachedSurvfit(formula, mydata, "km")
           }, context = "survival_calculation")
 
           if (is.null(km_fit)) {
@@ -2263,6 +2294,15 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         missing_columns <- setdiff(median_columns, names(data_frame))
         for (nm in missing_columns) data_frame[[nm]] <- NA_real_
         data_frame <- data_frame[, median_columns, drop = FALSE]
+        if (!private$.isCompetingRisk()) {
+          no_event <- suppressWarnings(as.numeric(data_frame$events)) == 0
+          no_event[is.na(no_event)] <- FALSE
+          if (any(no_event)) {
+            data_frame$se_rmean[no_event] <- NA_real_
+            medianTable$setNote("noevents",
+              .("No event was observed, so the restricted mean is the longest follow-up and has no standard error."))
+          }
+        }
 
         na_note <- if (private$.isCompetingRisk())
           .("Not computed for the cumulative-incidence median; see the table note.")
@@ -2292,7 +2332,7 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         .med   <- suppressWarnings(as.numeric(results1table$median))
         .lcl   <- suppressWarnings(as.numeric(results1table$x0_95lcl))
         .ucl   <- suppressWarnings(as.numeric(results1table$x0_95ucl))
-        .bound <- function(x) if (is.finite(x)) base::format(round(x, 1), trim = TRUE) else "not reached"
+        .bound <- function(x) if (is.finite(x)) base::format(round(x, 1), trim = TRUE) else .("not reached")
         .ci_txt <- if (is.finite(.lcl) || is.finite(.ucl)) {
           paste0(" [95% CI: ", .bound(.lcl), " - ", .bound(.ucl), "]")
         } else {
@@ -2554,6 +2594,10 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
           utimes <- private$.supportedCutpoints(raw_cutp, mydata[[mytime]], mydata[[myoutcome]])
           if (length(utimes) == 0) {
             private$.addWarning(.('No requested time point falls within the observed follow-up, so the cumulative incidence table is empty. Enter cutpoints inside the follow-up range.'))
+            if (isTRUE(self$options$showExplanations))
+              self$results$survivalProbabilityExplanation$setContent(paste0("<p>",
+                .("No requested time point lies within the observed follow-up, so there are no time-point estimates to explain here."),
+                "</p>"))
             return()
           }
 
@@ -2743,7 +2787,7 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
         km_fit <- private$.safeExecute({
           # Same fit and the same log-log band as the median section.
-          private$.getCachedSurvfit(formula, mydata, "survtable")
+          private$.getCachedSurvfit(formula, mydata, "km")
         }, context = "survival_calculation")
 
         if (is.null(km_fit)) {
@@ -2757,6 +2801,10 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         if (length(utimes) == 0) {
           private$.addWarning(.('No requested time point falls within the observed follow-up, so the survival table is empty. Enter cutpoints inside the follow-up range.'))
           self$results$survTableSummary$setContent("")
+          if (isTRUE(self$options$showExplanations))
+            self$results$survivalProbabilityExplanation$setContent(paste0("<p>",
+              .("No requested time point lies within the observed follow-up, so there are no time-point estimates to explain here."),
+              "</p>"))
           return()
         }
 
@@ -3048,7 +3096,7 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
         # Add to personTimeTable - first the overall row
         person_table$addRow(rowKey=1, values=list(
-          interval=if (is.null(private$.landmarkInfo)) "Overall (0-max)" else .("Overall (from landmark)"),
+          interval=if (is.null(private$.landmarkInfo)) .("Overall (0-max)") else .("Overall (from landmark)"),
           events=total_events,
           person_time=round(total_time, 2),
           # Unrounded: round(x, 2) printed a real rate per person-day as 0 (0 to 0).
@@ -3059,7 +3107,7 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
         # Parse time intervals for stratified analysis
         time_intervals <- private$.resolveCutpoints(self$options$time_intervals,
-                                                    "Person-time intervals",
+                                                    .("Person-time intervals"),
                                                     allow_zero = FALSE)
         # (.resolveCutpoints() already sorts; kept as a cheap belt-and-braces.)
         time_intervals <- sort(time_intervals)
@@ -3282,7 +3330,7 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 "</h3>"),
               "<p>",
               .("The plot shows the cumulative incidence of each terminal event state. For the event of interest, this is the estimated probability that it has occurred by time <i>t</i>, with competing events accounted for. It is not 1 minus a Kaplan-Meier curve."),
-              "</p><ul><li><strong>X-axis:</strong> time in ",
+              "</p><ul><li><strong>", .("X-axis:"), "</strong> ", .("time in"), " ",
               unit,
               ".</li>",
               paste0(
@@ -3314,7 +3362,7 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 "</h3>"),
               "<p>",
               .("The Kaplan-Meier curve estimates the probability of remaining event-free over time. It steps down at event times; censoring changes the risk set but does not make the curve step down."),
-              "</p><ul><li><strong>X-axis:</strong> time in ",
+              "</p><ul><li><strong>", .("X-axis:"), "</strong> ", .("time in"), " ",
               unit,
               ".</li>",
               paste0(
@@ -3543,8 +3591,8 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 explanatory = myfactor,
                 xlab = private$.timeAxisLabel(results, original_time_name),
                 legend = 'none',
-                break.time.by = self$options$byplot,
-                xlim = c(0, self$options$endplot),
+                break.time.by = private$.plotBy(),
+                xlim = c(0, private$.plotEndTime()),
                 ylim = c(
                   self$options$ybegin_plot,
                   self$options$yend_plot),
@@ -3656,7 +3704,7 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
               title = .("Cumulative Incidence Function (CIF)"),
               x = private$.timeAxisLabel(results)) +
             ggplot2::coord_cartesian(
-              xlim = c(0, self$options$endplot),
+              xlim = c(0, private$.plotEndTime()),
               ylim = c(self$options$ybegin_plot, self$options$yend_plot))
           cr_subtitle <- .("No terminal event observed; point estimate remains 0")
         } else {
@@ -3670,7 +3718,7 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
               conf.int = self$options$ci95,
               title = .("Cumulative Incidence Function (CIF)"),
               xlab = private$.timeAxisLabel(results),
-              xlim = c(0, self$options$endplot),
+              xlim = c(0, private$.plotEndTime()),
               ylim = c(self$options$ybegin_plot, self$options$yend_plot),
               risk.table = FALSE))
 
@@ -3762,7 +3810,7 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 x = private$.timeAxisLabel(results)
               ) +
               ggplot2::coord_cartesian(
-                xlim = c(0, self$options$endplot),
+                xlim = c(0, private$.plotEndTime()),
                 ylim = c(self$options$ybegin_plot, self$options$yend_plot)
               )
           }
@@ -3788,17 +3836,17 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             # this is the cumulative incidence, not 1 - S(t).
             y = .("Cumulative incidence")) +
           ggplot2::scale_x_continuous(
-            breaks = seq(0, self$options$endplot, by = self$options$byplot)) +
+            breaks = seq(0, private$.plotEndTime(), by = private$.plotBy())) +
           ggplot2::theme(legend.position = 'bottom')
 
         if (isTRUE(self$options$risktable)) {
-          breaks <- seq(0, self$options$endplot, by = self$options$byplot)
+          breaks <- seq(0, private$.plotEndTime(), by = private$.plotBy())
           breaks <- breaks[breaks <= max(plotData[[mytime]], na.rm = TRUE)]
           counts <- vapply(breaks, function(t) sum(plotData[[mytime]] >= t), integer(1))
           risk <- ggplot2::ggplot(data.frame(time = breaks, n = counts),
                                  ggplot2::aes(time, 1, label = n)) +
             ggplot2::geom_text() +
-            ggplot2::scale_x_continuous(limits = c(0, self$options$endplot), breaks = breaks) +
+            ggplot2::scale_x_continuous(limits = c(0, private$.plotEndTime()), breaks = breaks) +
             ggplot2::labs(x = private$.timeAxisLabel(results),
                           y = .("At risk")) + ggtheme +
             ggplot2::theme(axis.text.y = ggplot2::element_blank(),
@@ -3906,8 +3954,8 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             explanatory = myfactor,
             xlab = private$.timeAxisLabel(results),
             legend = 'none',
-            break.time.by = self$options$byplot,
-            xlim = c(0, self$options$endplot),
+            break.time.by = private$.plotBy(),
+            xlim = c(0, private$.plotEndTime()),
             ylim = c(
               self$options$ybegin_plot,
               self$options$yend_plot),
@@ -3995,8 +4043,8 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             xlab = private$.timeAxisLabel(results),
             ylab = .("Cumulative Hazard"),
             legend = 'none',
-            break.time.by = self$options$byplot,
-            xlim = c(0, self$options$endplot),
+            break.time.by = private$.plotBy(),
+            xlim = c(0, private$.plotEndTime()),
             # For cumulative hazard, use NULL to allow auto-scaling beyond 1.0
             ylim = NULL,
             title = .("Cumulative Hazard of the Whole Group"),
@@ -4091,7 +4139,7 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
           survival::survfit(myformula, data = plotData, conf.type = "log-log")
 
         time_scale <-
-          seq(0, self$options$endplot, by = self$options$byplot)
+          seq(0, private$.plotEndTime(), by = private$.plotBy())
 
         private$.checkpoint()
 
@@ -4192,7 +4240,7 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
           print(plot)
           TRUE
-        }, context = "baseline_hazard")
+        }, context = "baseline_hazard", raise = TRUE)
         
         if (is.null(result)) {
           return()
@@ -4340,7 +4388,7 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
           } else {
             return(NULL)
           }
-        }, context = "baseline_hazard")
+        }, context = "baseline_hazard", raise = TRUE)
         
         if (is.null(result)) {
           return()
@@ -4580,9 +4628,13 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
               .("Median time to event of interest was %.1f %s") else
               sprintf(.("%s was %%.1f %%s"), estimand_meta$median)
             median_text <- sprintf(median_label, median_survival, time_unit)
-            if (is.finite(ci_lower) && is.finite(ci_upper))
+            # One bound not reached is still an interval ("18.0-not reached"), and it is
+            # what the median panel shows; dropping it here made the two disagree.
+            if (is.finite(ci_lower) || is.finite(ci_upper)) {
+              ci_bound <- function(x) if (is.finite(x)) sprintf("%.1f", x) else .("not reached")
               median_text <- paste0(median_text, " ", sprintf(
-                .("(95%% CI: %.1f-%.1f %s)"), ci_lower, ci_upper, time_unit))
+                .("(95%% CI: %s-%s %s)"), ci_bound(ci_lower), ci_bound(ci_upper), time_unit))
+            }
           } else if (n_events == 0) {
             # Same estimand distinction as above: with competing risks there is
             # no median survival to be estimated in the first place.

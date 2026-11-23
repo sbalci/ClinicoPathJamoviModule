@@ -4,7 +4,7 @@ title: Single Arm Survival
 menuGroup: Survival
 menuSubgroup: ClinicoPath Survival
 menuSubtitle: 'Survival for whole group, no explanatory factor'
-version: '1.1.5'
+version: '1.1.6'
 jas: '1.2'
 
 description:
@@ -138,7 +138,7 @@ options:
         This is useful for competing risk analysis when there are multiple event types.
 
     - name: dooc
-      title: Dead of Other
+      title: Dead of Other Causes
       type: Level
       variable: (outcome)
       allowNone: true
@@ -147,7 +147,7 @@ options:
         This is useful for competing risk analysis when there are multiple event types.
 
     - name: awd
-      title: Alive w Disease
+      title: Alive with Disease
       type: Level
       variable: (outcome)
       allowNone: true
@@ -156,7 +156,7 @@ options:
         This is useful for competing risk analysis when there are multiple event types.
 
     - name: awod
-      title: Alive w/o Disease
+      title: Alive without Disease
       type: Level
       variable: (outcome)
       allowNone: true
@@ -174,7 +174,7 @@ options:
           name: cause
         - title: Disease-Free
           name: dfs
-        - title: Competing Risk
+        - title: Competing Risks
           name: compete
       default: overall
       description: >-
@@ -183,7 +183,7 @@ options:
         as censored; its Kaplan-Meier probability is net/cause-specific survival and can overstate
         real-world absolute risk when other-cause death competes. Disease-Free counts death and
         Alive with Disease as events; the supplied time for Alive with Disease must be time to
-        recurrence/progression, not last follow-up. Competing Risk estimates cumulative incidence
+        recurrence/progression, not last follow-up. Competing Risks estimates cumulative incidence
         of Dead of Disease while retaining Dead of Other Causes as a competing terminal event.
 
 
@@ -334,7 +334,7 @@ options:
       description: >-
         The maximum time point to include in the survival plots. This is the end time for
         the survival curves and cumulative event/hazard plots, in the selected Time Unit.
-        Must be greater than zero; zero or a negative value is rejected rather than drawn.
+        Must be greater than zero; zero or a negative value is rejected rather than drawn. The factory value 60 means five years in the selected time unit (1825 days, 260 weeks, 60 months, 5 years); any other value is used as entered.
 
     - name: ybegin_plot
       title: Start y-axis
@@ -362,7 +362,7 @@ options:
       default: 12
       description: >-
         The spacing between tick marks on the time axis. Must be greater than zero;
-        zero or a negative value is rejected rather than drawn.
+        zero or a negative value is rejected rather than drawn. The factory value 12 means one year in the selected time unit (365 days, 52 weeks, 12 months, 1 year); any other value is used as entered.
 
 
     - name: multievent

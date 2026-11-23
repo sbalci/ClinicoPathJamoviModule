@@ -502,6 +502,12 @@ paste0("The median follow-up was ", med, " months.")
 - English that is not prose for the user (generated R code, identifiers the code compares, a
   fallback for callers with no translator) is marked `# i18n-exempt: <why>` inside the function;
   `check_untranslated_prose` reads that.
+- **Short labels are invisible to that check.** It counts runs of four or more words, so a file can read 0
+  and still show English in every panel: `"<br> Time basis: "` between two translated parts, a plot
+  axis title, a table row label. `Rscript --vanilla tools/i18n_scan_literals.R R/<file>.R` lists every
+  English literal outside `.()` from the parse tree; read the list and mark what must stay English
+  (a code key, a label that is also written to the data sheet) with `# i18n-exempt:`
+  (2026-11-23 jsurvival: such labels in all nine analyses on a tree the gate called clean).
 
 Prove the rewrite before translating anything: run every analysis over a set of configurations
 with the old and the new sources and compare all text a user reads (it must be identical), then

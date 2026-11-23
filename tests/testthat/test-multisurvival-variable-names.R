@@ -30,7 +30,13 @@ test_that("multisurvival runs on spaced, punctuated and non-ASCII variable names
   expect_s3_class(res, "multisurvivalResults")
   cox_text <- as.character(res$text$content)
   expect_false(grepl("Error generating Cox regression table", cox_text, fixed = TRUE))
-  expect_match(cox_text, "G3", fixed = TRUE)
+  # The Cox estimates are rows of fittedTable; the Html `text` keeps the summary only.
+  hdr <- vapply(res$fittedTable$columns, function(x) x$title, character(1))
+  cells <- unlist(lapply(res$fittedTable$asDF, as.character))
+  expect_true(any(grepl("Surv(Follow-up (months), Vital Status)", hdr, fixed = TRUE)))
+  expect_true("Tumor Grade" %in% cells)
+  expect_true("G3" %in% cells)
+  expect_true("Ya\u015f" %in% cells)
 })
 
 test_that("a one-valued explanatory variable is rejected in plain language", {

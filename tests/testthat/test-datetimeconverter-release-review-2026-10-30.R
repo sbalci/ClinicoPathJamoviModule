@@ -231,7 +231,9 @@ test_that("numeric MMDDYY that looks like a serial is refused or flagged, never 
     d <- d[as.integer(fmt(d, "%m")) <= 9 | seq_along(d) %% 6 == 0]
     x <- as.numeric(fmt(d, "%m%d%y"))
     expect_gte(mean(x < 1e5), 0.8)
-    expect_match(dc(x)$notices, "Implausible", fixed = TRUE)
+    # flagged by the range warning or by the implausible-date warning (2026-11-23: the range
+    # warning speaks first when only some values lie outside the serial-date range)
+    expect_match(dc(x)$notices, "May Not Be Dates|Implausible")
     expect_false(is.null(ti(x, x)$err))
     # a text format chosen by the user settles it for the converter
     expect_equal(substr(dc(x, datetime_format = "mdy")$ch, 1, 10), as.character(d))

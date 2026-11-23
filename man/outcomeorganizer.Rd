@@ -69,7 +69,8 @@ for.}
 
 \item{multievent}{If true, allows for multiple event types (e.g., death
 from disease vs death from other causes). For RFS, PFS and DFS every death
-category then counts as an event; DFS also counts Alive with Disease.}
+category then counts as an event; DFS also counts Alive with Disease when
+no recurrence variable is selected.}
 
 \item{dod}{The level representing death from the disease of interest.}
 
@@ -91,8 +92,10 @@ silently erase them all. If the code entered here never occurs in the
 recoded outcome the hierarchy cannot act, and the analysis says so rather
 than reporting that it was applied.}
 
-\item{intervalCensoring}{If true, prepares data for interval-censored
-analysis where exact event times are unknown.}
+\item{intervalCensoring}{If true, checks the two interval columns (start
+not later than end, both on one scale) and reports the result. The recoded
+outcome and the exported columns do not change: this analysis does not
+export interval-censored data.}
 
 \item{intervalStart}{Variable containing the start of the interval when the
 event might have occurred.}

@@ -199,16 +199,29 @@ test_that("multisurvival handles single event in group", {
   test_data_one <- multisurvival_small
   test_data_one$outcome <- 0
   test_data_one$outcome[test_data_one$treatment == "A"][1] <- 1
-  
-  result <- .run_multisurvival(
-    data = test_data_one,
-    elapsedtime = "elapsedtime",
-    outcome = "outcome",
-    explanatory = "treatment"
+
+  # Arm B has no event, so its hazard ratio is not estimable (monotone likelihood). coxph says
+  # so with a warning on every fit; that warning is a true statement about this data, so it is
+  # asserted here, and any other warning fails the block.
+  fit_warnings <- character(0)
+  result <- withCallingHandlers(
+    .run_multisurvival(
+      data = test_data_one,
+      elapsedtime = "elapsedtime",
+      outcome = "outcome",
+      explanatory = "treatment"
+    ),
+    warning = function(w) {
+      fit_warnings <<- c(fit_warnings, conditionMessage(w))
+      invokeRestart("muffleWarning")
+    }
   )
-  
-  # Should complete but may be unstable
+  expect_gt(length(fit_warnings), 0)
+  expect_true(all(grepl("Loglik converged before variable", fit_warnings, fixed = TRUE)))
+
+  # Should complete, and tell the reader the estimate is not usable
   expect_s3_class(result, "multisurvivalResults")
+  expect_match(as.character(result$strongWarnings$content), "Cox model convergence problem")
 })
 
 test_that("multisurvival handles duplicate time-event pairs", {
@@ -244,19 +257,23 @@ test_that("multisurvival handles very early events", {
 })
 
 test_that("multisurvival handles rare event outcome", {
-  # Very few events
+  # Very few events. The draw is seeded: unseeded, some draws left an arm with no event at all,
+  # which is the separation case tested above ("single event in group"), not this one.
   test_data_rare <- multisurvival_test
   test_data_rare$outcome <- 0
+  set.seed(1)
   test_data_rare$outcome[sample(nrow(test_data_rare), 5)] <- 1
-  
+  expect_true(all(tapply(test_data_rare$outcome, test_data_rare$treatment, sum) >= 1))
+
   result <- .run_multisurvival(
     data = test_data_rare,
     elapsedtime = "elapsedtime",
     outcome = "outcome",
     explanatory = "treatment"
   )
-  
+
   expect_s3_class(result, "multisurvivalResults")
+  expect_match(as.character(result$strongWarnings$content), "Low event count")
 })
 
 test_that("multisurvival handles extreme age values", {

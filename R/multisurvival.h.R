@@ -676,7 +676,7 @@ multisurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             self$add(jmvcore::Html$new(
                 options=options,
                 name="eventRecodeInfo",
-                title="Outcome Recode",
+                title="Outcome Recode Notes",
                 visible=TRUE,
                 clearWith=list(
                     "outcome",
@@ -2565,7 +2565,7 @@ multisurvivalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             super$initialize(
                 package = "ClinicoPath",
                 name = "multisurvival",
-                version = c(1,1,5),
+                version = c(1,1,6),
                 options = options,
                 results = multisurvivalResults$new(options=options),
                 data = data,
@@ -2671,9 +2671,13 @@ multisurvivalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param km If true, produces a Kaplan-Meier survival plot. Useful for
 #'   visualization of survival functions without covariate adjustment.
 #' @param endplot The maximum follow-up time (in units defined by
-#'   \code{timetypeoutput}) to display on survival plots.
+#'   \code{timetypeoutput}) to display on survival plots. The factory value 60
+#'   means five years in the selected time unit (1825 days, 260 weeks, 60
+#'   months, 5 years); any other value is used as entered.
 #' @param byplot The interval (in units defined by \code{timetypeoutput}) at
-#'   which time points or labels are shown on plots.
+#'   which time points or labels are shown on plots. The factory value 12 means
+#'   one year in the selected time unit (365 days, 52 weeks, 12 months, 1 year);
+#'   any other value is used as entered.
 #' @param ci95 If true, displays 95 percent confidence intervals around the
 #'   survival estimates on plots.
 #' @param risktable If true, displays the number of subjects at risk at each

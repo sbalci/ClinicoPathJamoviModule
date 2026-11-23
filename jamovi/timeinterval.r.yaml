@@ -26,7 +26,7 @@ items:
       type: Table
       rows: 0
       columns: []
-      visible: (include_quality_metrics)
+      visible: (include_quality_metrics && length(dx_date) > 0 && length(fu_date) > 0)
 
     - name: qualityAssessment
       title: Data Quality Assessment

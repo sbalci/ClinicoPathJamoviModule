@@ -547,12 +547,13 @@ test_that("Regression: unusable date and stratification inputs are diagnosed, no
   # pre-empt it with "choose an earlier landmark".
   swapped <- data.frame(base, dxd = as.character(dx), fud = as.character(dx - 100))
   for (landmark in list(list(), list(uselandmark = TRUE, landmark = 1))) {
-    res <- do.call(run_survivalcont, c(list(
-      data = swapped, elapsedtime = NULL, outcome = "status", contexpl = "marker",
-      tint = TRUE, dxdate = "dxd", fudate = "fud", timetypedata = "ymd"
-    ), landmark))
-    expect_match(strip_survivalcont_html(res$errors$content),
-                 "negative follow-up time", fixed = TRUE)
+    # Refused with jmvcore::reject(); with or without a landmark the message is the same.
+    expect_error(
+      do.call(run_survivalcont, c(list(
+        data = swapped, elapsedtime = NULL, outcome = "status", contexpl = "marker",
+        tint = TRUE, dxdate = "dxd", fudate = "fud", timetypedata = "ymd"
+      ), landmark)),
+      "120 of 120 record(s) have negative follow-up time", fixed = TRUE)
   }
 
   # Numeric day-count dates are 86400x smaller than the epoch seconds the code
@@ -716,12 +717,18 @@ test_that("Regression: a date-format mismatch is named rather than blamed on mis
   dx <- as.Date("2020-01-01") + sample(0:200, k, TRUE)
   df <- data.frame(
     status = rbinom(k, 1, 0.6), marker = round(rnorm(k, 50, 10), 1),
-    dxd = format(dx, "%d/%m/%Y"), fud = format(dx + 300, "%d/%m/%Y")
+    # base::format: jmvcore masks format() and would not write a date here.
+    dxd = base::format(dx, "%d/%m/%Y"), fud = base::format(dx + 300, "%d/%m/%Y")
   )
-  res <- run_survivalcont(
+  # Three of the pairs that mdy does read come out transposed with the follow-up before the
+  # diagnosis, and negative follow-up is a jmvcore::reject() now. The instance is run directly
+  # so the panels filled before the rejection can be read.
+  analysis <- run_survivalcont_jamovi(
     data = df, elapsedtime = NULL, outcome = "status", contexpl = "marker",
     tint = TRUE, dxdate = "dxd", fudate = "fud", timetypedata = "mdy"
   )
+  expect_error(analysis$run(), "3 of 30 record(s) have negative follow-up time", fixed = TRUE)
+  res <- analysis$results
   combined <- paste(strip_survivalcont_html(res$errors$content),
                     strip_survivalcont_html(res$warnings$content))
   expect_match(combined, "dates could not be read, so those patients were excluded", fixed = TRUE)

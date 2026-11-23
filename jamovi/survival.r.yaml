@@ -156,7 +156,7 @@ items:
             type: integer
 
     - name:  eventRecodeInfo
-      title: 'Outcome Recode'
+      title: 'Outcome Recode Notes'
       type:  Html
       visible: (length(outcome) > 0 && length(explanatory) > 0 && (length(elapsedtime) > 0 || (tint && length(dxdate) > 0 && length(fudate) > 0)))
       clearWith:
@@ -263,10 +263,10 @@ items:
           title: "Events"
           type: integer
         - name: rmean
-          title: "rmean"
+          title: "Restricted mean"
           type: number
         - name: se_rmean
-          title: "se_rmean"
+          title: "SE (restricted mean)"
           type: number
         - name: median
           title: "Median"
@@ -1817,6 +1817,11 @@ items:
         - uselandmark
         - landmark
         - rcs_variable
+        - rcs_analysis
+        - age_adjustment
+        - age_variable
+        - stratified_cox
+        - strata_variable
 
     - name: calibrationGroupTable
       title: 'Calibration by Risk Group'
@@ -1867,6 +1872,11 @@ items:
         - uselandmark
         - landmark
         - rcs_variable
+        - rcs_analysis
+        - age_adjustment
+        - age_variable
+        - stratified_cox
+        - strata_variable
 
     - name: calibrationPlot
       title: 'Calibration Plot'
@@ -1897,6 +1907,11 @@ items:
         - uselandmark
         - landmark
         - rcs_variable
+        - rcs_analysis
+        - age_adjustment
+        - age_variable
+        - stratified_cox
+        - strata_variable
 
     - name: calibrationInterpretation
       title: 'Calibration Assessment Interpretation'
@@ -1924,6 +1939,11 @@ items:
         - uselandmark
         - landmark
         - rcs_variable
+        - rcs_analysis
+        - age_adjustment
+        - age_variable
+        - stratified_cox
+        - strata_variable
 
     # RCS Non-Linearity Assessment Results
     - name: rcsTestTable
@@ -1978,6 +1998,8 @@ items:
         - awod
         - uselandmark
         - landmark
+        - stratified_cox
+        - strata_variable
 
     - name: rcsPlot
       title: 'Hazard Ratio Curve (Spline Effect)'
@@ -2007,6 +2029,8 @@ items:
         - awod
         - uselandmark
         - landmark
+        - stratified_cox
+        - strata_variable
 
     - name: rcsInterpretation
       title: 'Non-Linearity Assessment Interpretation'
@@ -2033,6 +2057,8 @@ items:
         - awod
         - uselandmark
         - landmark
+        - stratified_cox
+        - strata_variable
 
     # Bootstrap Internal Validation Results
     - name: bootstrapValidationTable

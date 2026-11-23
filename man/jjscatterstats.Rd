@@ -53,28 +53,30 @@ biomarker levels, age, tumor size).  This will appear on the horizontal
 axis. Use numeric variables like lab values, measurements, or scores.}
 
 \item{group}{Second continuous variable for correlation analysis (e.g.,
-expression levels, treatment response, survival time).  This will appear on
-the vertical axis. Use numeric variables that you want to correlate with
-the x-axis variable.}
+expression levels, treatment response, tumor size). This will appear on the
+vertical axis. Use independent, uncensored numeric variables that you want
+to correlate with the x-axis variable (for right-censored survival time,
+use survival analysis instead).}
 
 \item{grvar}{Optional categorical variable to create separate correlation
 plots for each group (e.g., by treatment group, tumor stage, or gender).
 Creates multiple panels for comparison.}
 
-\item{colorvar}{Optional variable to map point colors. When specified,
-switches to enhanced scatter plot with full ggplot2 aesthetic control
-instead of ggstatsplot correlation analysis.}
+\item{colorvar}{Optional variable to map point colors. When specified, adds
+an enhanced scatter plot with ggplot2 aesthetic mappings alongside the main
+ggstatsplot correlation plot.}
 
 \item{sizevar}{Optional continuous variable to map point sizes. When
-specified, switches to enhanced scatter plot with full ggplot2 aesthetic
-control instead of ggstatsplot correlation analysis.}
+specified, adds an enhanced scatter plot with ggplot2 aesthetic mappings
+alongside the main ggstatsplot correlation plot.}
 
 \item{shapevar}{Optional categorical variable to map point shapes. When
-specified, switches to enhanced scatter plot. Works best with variables
-having 6 or fewer levels.}
+specified, adds an enhanced scatter plot alongside the main plot. Works
+best with variables having 6 or fewer levels.}
 
 \item{alphavar}{Optional continuous variable to map point transparency
-(alpha). When specified, switches to enhanced scatter plot.}
+(alpha). When specified, adds an enhanced scatter plot alongside the main
+plot.}
 
 \item{labelvar}{Optional variable to label points. Uses ggrepel to avoid
 overlapping labels.}
@@ -83,17 +85,21 @@ overlapping labels.}
 
 \item{marginalType}{Add marginal distribution plots using ggExtra package.}
 
-\item{smoothMethod}{Method for smooth trend line in enhanced scatter plot.}
+\item{smoothMethod}{Method for the fitted smooth trend line on the scatter
+plots.}
 
 \item{typestatistics}{Choose based on your data distribution. Pearson
-assumes normality (common for lab values after transformation).  Spearman
-works for any monotonic relationship (tumor grades, symptom scores).
-Robust uses a WINSORIZED PEARSON correlation, which pulls extreme values in
-to a fixed quantile before computing Pearson's r; report it by that name,
-not as a percentage-bend correlation, which is a different estimator
-(verified: on the same 80 points statsExpressions returns 0.5894, matching
-WRS2::wincor exactly, while WRS2::pbcor returns 0.6152). Bayesian analysis
-quantifies evidence strength for clinical decision-making.}
+assumes bivariate normality and a linear relationship (common for lab
+values after transformation). Spearman works for any monotonic relationship
+(tumor grades, symptom scores), using exact permutation p-values when
+untied (n <= 1290) and Bonett-Wright confidence intervals. Robust uses a
+20\\% two-sided WINSORIZED PEARSON correlation (Wilcox df = n - 2g - 2 with
+seeded percentile-bootstrap confidence intervals), pulling extreme values
+in to the 20th and 80th percentiles before computing Pearson's r; report it
+by that name, not as a percentage-bend correlation. Bayesian analysis uses
+a shifted Beta(1.41, 1.41) prior (rscale = 0.707) and reports log_e(BF01)
+alongside the posterior median and highest-density credible interval at the
+selected confidence level.}
 
 \item{seed}{Random seed for the statistics computed by resampling or
 posterior sampling (robust tests, Bayesian estimates, and some
@@ -175,6 +181,6 @@ A results object containing:
 }
 \description{
 Wrapper Function for ggstatsplot::ggscatterstats and
-ggstatsplot::grouped_ggscatterstats to generate scatter plots
-with correlation analysis and optional marginal distributions.
+ggstatsplot::grouped_ggscatterstats to generate scatter plots with
+correlation analysis and optional marginal distributions.
 }

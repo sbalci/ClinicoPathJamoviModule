@@ -382,12 +382,14 @@ test_that("legitimate packed numeric dates are still accepted", {
 test_that("the quality panel says which date column is missing or unreadable", {
     h <- ti_run(mk_missing_df(n = 40, n_na = 10), dx_date = "s", fu_date = "e",
                 time_format = "ymd", include_quality_metrics = TRUE)
-    txt <- strip_html(h$r$qualityAssessment$content)
-    expect_match(txt, "Start dates missing or unreadable")
-    expect_match(txt, "End dates missing or unreadable")
+    # The counts moved from the qualityAssessment Html into the qualityCounts Table
+    # (metric, count, percentage).
+    counts <- h$r$qualityCounts$asDF
+    n <- stats::setNames(counts[[2]], counts[[1]])
+    expect_true(all(c("Start dates missing or unreadable", "End dates missing or unreadable") %in% names(n)))
     # all 10 NAs are in the END column, so the split must not be symmetric
-    expect_match(txt, "End dates missing or unreadable 10")
-    expect_match(txt, "Start dates missing or unreadable 0")
+    expect_equal(n[["End dates missing or unreadable"]], 10)
+    expect_equal(n[["Start dates missing or unreadable"]], 0)
 })
 
 

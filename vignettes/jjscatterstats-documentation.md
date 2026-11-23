@@ -4,7 +4,7 @@
 
 - **Function**: `jjscatterstats`
 - **Title**: Scatter Plot
-- **Module**: `JJStatsPlotT`
+- **Module**: `JJStatsPlot`
 - **Files**:
   - `jamovi/jjscatterstats.u.yaml` - User Interface Definition
   - `jamovi/jjscatterstats.a.yaml` - Options & Schema Definition
@@ -34,13 +34,14 @@
 | `marginalType` | `List` | `none` | Marginal Plot Type |
 | `smoothMethod` | `List` | `lm` | Smooth Method |
 | `typestatistics` | `List` | `parametric` | Statistical Test Type |
+| `seed` | `Integer` | `20250101` | Random seed |
 | `mytitle` | `String` | `` | Title |
 | `xtitle` | `String` | `` | X-Title |
 | `ytitle` | `String` | `` | Y-Title |
-| `originaltheme` | `Bool` | `FALSE` | Add GGStatsPlot layer |
-| `resultssubtitle` | `Bool` | `FALSE` | Statistical results |
+| `originaltheme` | `Bool` | `FALSE` | GGStatsPlot theme layer |
+| `resultssubtitle` | `Bool` | `TRUE` | Statistical results |
 | `conflevel` | `Number` | `0.95` | Confidence Level |
-| `bfmessage` | `Bool` | `FALSE` | Bayes factor message |
+| `bfmessage` | `Bool` | `FALSE` | Bayes factor for the null (BF01) |
 | `k` | `Integer` | `2` | Decimal Places |
 | `marginal` | `Bool` | `FALSE` | Marginal histograms |
 | `xsidefill` | `String` | `#009E73` | X-axis Marginal Fill Color |

@@ -24,11 +24,11 @@ children:
             fitToGrid: true
           - type: LevelSelector
             name: outcomeLevel
-            label: Positive Level
+            label: Positive level
             enable: (outcome)
           - type: LevelSelector
             name: outcomeNegativeLevel
-            label: Negative Level
+            label: Negative level
             enable: (outcome)
       - type: TargetLayoutBox
         label: Diagnostic Predictor (binary)
@@ -40,25 +40,20 @@ children:
             enable: (showNomogram)
           - type: LevelSelector
             name: predictorLevel
-            label: Predictor Positive Level
+            label: Predictor positive level
             enable: (showNomogram && diagnosticPredictor)
           - type: LevelSelector
             name: predictorNegativeLevel
-            label: Predictor Negative Level
+            label: Predictor negative level
             enable: (showNomogram && diagnosticPredictor)
   - type: LayoutBox
     margin: large
     children:
       - type: CheckBox
+        name: showNomogram
+        label: Prediction nomogram and diagnostic metrics
+      - type: CheckBox
         name: usePenalized
         label: Firth penalized logistic regression
       - type: CheckBox
         name: showExplanations
-  - type: CollapseBox
-    label: Prediction and Diagnostic Options
-    collapsed: true
-    margin: large
-    children:
-      - type: CheckBox
-        name: showNomogram
-        label: Prediction nomogram and diagnostic metrics

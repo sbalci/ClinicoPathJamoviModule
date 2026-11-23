@@ -1,3 +1,342 @@
+# jsurvival 1.1.5 module audit — fix plan (2026-11-23; executed the same day, uncommitted)
+
+Source: `../jsurvival/docs/audit/MODULE_AUDIT_REPORT_20261123-0943.md` (9 analyses; 3 HIGH, 22 MEDIUM,
+about 95 LOW). Finding numbers below are that report's per-analysis numbers ("survival 3" = finding 3 in the
+survival section).
+
+## Goal and acceptance criteria
+
+Goal: clear every HIGH and MEDIUM finding and the shared LOW classes, in the umbrella source, mirrored to
+`../jsurvival`.
+
+Done when all of these hold:
+
+- [x] Every fixed finding has a test that failed on the unfixed tree (0 skips) and passes now.
+- [x] English output is unchanged except where a finding says it must change (36-configuration text diff,
+      old tree vs new tree).
+- [x] `../jsurvival`: suite 0 failing / 0 skips with only jsurvival loaded; `tools/submodule_smoke.R` PASS;
+      dependency guard 5/5; `release_gate.py` 0 blocking on both trees; `_updateModules.R --dry-run` 0 changes.
+- [x] Turkish catalogue: 0 empty entries, `msgfmt -c` clean, `i18n_carry_translations.py` reads 0 to carry.
+- [ ] `/audit-module ../jsurvival --functions <changed>` re-run reports HIGH 0 and no MEDIUM from this list.
+
+## Results (2026-11-23)
+
+Done and verified in `../jsurvival` (nothing committed in either repository):
+
+- Phase 1: all three HIGH findings. Phase 2: all 22 MEDIUM findings, with D1-D6 on their recommended defaults.
+- Phase 3: `<` in table cells; unit-aware plot window in the three analyses that lacked it; static panels in
+  datetimeconverter and outcomeorganizer; the multi-event hint in singlearm and survivalcont; singlearm 2-4;
+  the Time Interval summary labels.
+- Regression file: `tests/testthat/test-jsurvival-audit-fixes-20261123.R`, 37 blocks, 123 expectations; every
+  block was seen failing before its fix except the ones noted under Rulings. Copied to jsurvival by hand
+  (the mirror does not copy new test files).
+- jsurvival: suite 28 files, 1,592 passing, 0 failing, 0 skips, ClinicoPath not loaded; install check
+  `RESULT jsurvival PASS (0 findings, 1276 functions scanned)`; dependency guard 5 passing; release gate
+  0 blocking, 0 advisory; `_updateModules.R --dry-run jsurvival` 0 add, 0 update, 0 delete.
+- Turkish: 32 new or reworded strings translated, 0 empty, `msgfmt -c` clean, 0 to carry.
+- Independent review of the diff (one fresh reader): 0 critical, 5 important, 6 minor. The 5 important ones
+  are fixed with tests: three umbrella tests that pinned removed text; a false two-digit-year warning for
+  date-times with a zone offset; one tick on a shortened plot window; the serial-range warning missing on the
+  forced Excel path; a LASSO Cox message wrong for an all-censored cohort.
+- English output over 36 configurations against commit `450fb61`: 13 items differ, each one an intended
+  change (read item by item; one of them exposed the duplicated variable in the new calibration note, fixed).
+- Umbrella: release gate 0 blocking; `jmvtools::prepare()` changed only the six expected headers.
+- Umbrella tests: the 194 test files of these analyses were run. The 33 with any failure were rerun with the
+  umbrella source loaded, on commit `18bc80d34` and on the new code: no block fails now that passed before,
+  12 that failed before pass now, and 56 blocks fail in both (older failures, not from this work). Seven
+  umbrella test files were updated because they pinned text this work changes.
+
+Rulings made while executing (each is a decision taken without asking):
+
+- CIF median at the last observed time (singlearm 2): behaviour kept, the always-true clause removed and the
+  comment corrected. Cost if wrong: a well-defined median at the last time stays withheld.
+- `<` neutralising applied without a look in the jamovi app (the connector was down), on the strength of the
+  earlier in-repo measurement. Cost if wrong: a harmless space after `<` in such labels.
+- Umbrella `devtools::document()` not run (whole-package load beside other uncommitted work). Cost: the
+  umbrella `man/*.Rd` of survival, singlearm, multisurvival, outcomeorganizer and datetimeconverter lag by
+  the new option-description sentences until the next `document()` run. jsurvival's are regenerated.
+- Three test blocks were not seen failing as tests: the four datetimeconverter blocks (the failure was shown
+  by a probe run instead) and `.plotWindow()` (a new function).
+- Multi-cut log-rank p in survivalcont changed to survdiff's own without a dedicated test (same one-line
+  class as the tested survival fix).
+- outcomeorganizer (D2): only the option description was changed. A retitle to "Interval endpoints check" was
+  tried and reverted, because the run-time messages call the feature "Interval censoring". Cost: the label
+  still names a feature that only checks two columns.
+- The interaction caveat in multisurvival lost its "are not ranked here" wording, since nothing is ranked now.
+- `.plotWindow()`: a window the user shortens below two years with the spacing untouched gets five intervals.
+
+Follow-up pass (2026-11-23, "fix the left open items"; uncommitted):
+
+- Done per analysis: outcomeorganizer (hierarchy and recurrence notices, plot error surfaced, wording);
+  oddsratio (Firth-aware advice, failed nomogram / univariable Firth named, panel layout, labels);
+  lassocox (plot labels, split stated, empty states hidden, wording); timeinterval (timezone line, time basis
+  only for months and years, ambiguity sentence, extreme-count pool, enable rules); datetimeconverter
+  (wording, two-digit notice severity, panel title); survivalcont (PH notice once, restart passed on, failure
+  reason kept, low/high side stated, unit-aware person-time default, seed placement); multisurvival (variable
+  names as typed in the PH, contribution and interaction tables, Fine-Gray titles, forest-style message,
+  dropped time points named); survival (median sentences, RMST unrounded and its bound message, landmark
+  order, stratified column title and missing count, notes for optional steps without a variable); singlearm
+  (readable severity, one Kaplan-Meier fit per run, completion notice only without errors).
+- Shared: `.displayTerm()` in `R/utils-survival-tables.R`; "Outcome Recode Notes" title in five analyses;
+  full category names in option titles.
+- Translation: `tools/i18n_scan_literals.R` (parser-based list of English literals outside `.()`); about 95
+  literals and fragments wrapped; 141 Turkish strings; catalogue 4,307 msgids, 0 empty.
+- Umbrella: `jmvtools::prepare()` and `devtools::document()` run; only these analyses' headers and help
+  pages changed, and each header matches jsurvival's apart from the package name.
+- Verified: regression file 49 blocks, 157 expectations, passing under the jsurvival tree and under the
+  umbrella source; jsurvival suite 28 files, 1,626 passing, 0 failing, 0 skips; install check PASS
+  (1,278 functions); dependency guard 5; release gate 0 blocking, 0 advisory; dry-run 0 changes. Umbrella
+  tests (194 files, umbrella source): no block fails that passed on commit `18bc80d34`; 14 umbrella test
+  files were updated in total because they pinned text or rounding this work changes.
+
+Rulings in the follow-up pass:
+
+- Excel serial dates stay UTC in datetimeconverter (documented and tested behaviour; the note discloses it).
+- Group and risk labels that are also written to the data sheet ("Low marker", "Low Risk"), method keys
+  compared in code, finalfit-style metric lines and distribution names stay English.
+- The literal scan is a list to read, not a gate count.
+- The `strongest_*` computation inside multisurvival's two summary helpers is kept: a test reads the helper's
+  return value. Only the unused locals were removed.
+- `.displayTerm()` joins interaction parts with " * " ("g3: C * g2: Y").
+
+Third pass (2026-11-23, "fix the still open items") - done, uncommitted:
+
+- [x] survival: spline knots read from the fitted model (as stored numbers; an `eval()` first try tripped the
+      no-eval audit test); reference-level notes; competing-risk Cox explanation; calibration plot message.
+      Ruling: the two early explanation writes stay (they are the only content on an early return).
+- [x] multisurvival: significance judged at the table's three decimals in BOTH branches (the first try
+      missed the term-level branch, which is the one used; the re-audit caught it); nomogram failure reason
+      shown; Fine-Gray nomogram axis checked by execution, no change needed.
+- [x] survivalcont: residual plot caption names its model; precision note for a tiny per-unit hazard ratio.
+- [x] singlearm: empty time-point explanation; restricted-mean SE blank with a note when there is no event;
+      a failed hazard renderer shows its error.
+- [x] oddsratio: `Age` and `age` keep their own labels (finalfit gets unlabelled data; cleaned names are unique).
+- [x] lassocox: single-entry cache of the cross-validated fit (`.lassocoxCvCache`), keyed with `identical()`
+      on the design matrix, outcome, folds, standardisation and glmnet version; fit warnings are replayed.
+- [x] datetimeconverter: the 11 `enable:` bindings on the "Add to data" boxes removed. Ruling: "box always
+      usable" over "box ignored while its preview box is off", which could leave an empty data column.
+- [x] "Competing Risks" in every analysis that offers it.
+- [x] Older failing umbrella test blocks: 58, not 56. All repaired in the test files (27 text moved to a
+      table, 14 reject() now asserted, 11 harness, 5 the test's own input, 1 expectation reversed on
+      evidence). No product defect among them.
+- [x] `/audit-module ../jsurvival` re-run: `../jsurvival/docs/audit/MODULE_AUDIT_REPORT_20261123-1641.md`.
+      1 HIGH, 17 MEDIUM, 80 LOW, 15 INFO as raised; 13 HIGH/MEDIUM fixed with tests the same day.
+
+Still open after the re-audit:
+
+- [ ] Nothing was looked at in the jamovi app (the connector does not start: `uvx` not found). This covers
+      every rendering claim: NaN cells, empty headings, notes cut in the client, the "Add to data" boxes.
+- [ ] survival [MEDIUM, not run]: rate-scale estimates at a fixed 3 decimals (`zto`) in the parametric and
+      standardization tables.
+- [ ] survival [MEDIUM, not run]: `pairwiseSummary` and `ageAdjustedCoxHeading` not blanked on skip paths.
+- [ ] survival [MEDIUM, not run]: age-adjusted and age-time-scale Cox keep levels emptied by the strata filter.
+- [ ] survivalcont [MEDIUM, not run]: "Recursive Optimal" re-searches the whole range after removing a
+      0.1 SD band; decide to recurse within subgroups or rename the method.
+- [ ] All analyses [MEDIUM, class]: user names in `setNote()` text (cut at " [") and in text cells (`<` plus a
+      letter). Fixed at 8 survivalcont sites and 1 multisurvival cell; 225 `$setNote(` calls ship. A single
+      wrapper would close the note half.
+- [ ] 80 LOW and 15 INFO findings in the report's per-function sections (visible-but-empty results, a
+      half-finished selection shown as an error, cleaned names in notices, month-scaled defaults, English
+      outside the translator, unbound pass-through arguments).
+- [ ] survivalcont: when day-first dates are read month-first, the refusal names swapped columns; the
+      date-format hint is only in the warnings panel (raised by the test repair, not verified in the app).
+
+## How the work is done (applies to every slice)
+
+1. Grep the umbrella tests for the old behaviour before changing it (a test may pin the thing being fixed).
+2. Write the regression test, run it, record the failure.
+3. Fix in the umbrella `R/` or `jamovi/` source. Edit directly, not through `/fix-function`: that command
+   appends `T` to `menuGroup`, and the mirror then refuses the analysis.
+4. If a yaml changed: snapshot generated files, `jmvtools::prepare()`, diff what it wrote.
+5. `Rscript --vanilla tools/mirror_to_submodule.R --module jsurvival [--regen] <paths>`; verify in the sibling.
+6. New or reworded strings: `i18nUpdate()` in the sibling, Turkish with `po_set.py`, rebuild JSON.
+
+One slice = one commit-sized change. Stop and re-plan if a slice's test shows the finding was wrong.
+
+## Phase 1 — HIGH (three slices; land 1B, then 1C, then 1A — smallest and most isolated first)
+
+### 1A. Text dates read as the wrong dates — survival, survivalcont, singlearm, multisurvival
+
+Root cause: the four date blocks call the lubridate parser for `timetypedata` directly
+(`R/survival.b.R:765`, `R/survivalcont.b.R:921`, `R/singlearm.b.R:1232`, `R/multisurvival.b.R:1457`).
+`.parseDateText()` in `R/utils-dateshape.R:100` already refuses wrong-shaped text; `.dateParser()` already
+accepts the seven `timetypedata` keys.
+
+Measured today with the existing guard:
+
+| Input, setting | Bare lubridate | `.parseDateText()` |
+|---|---|---|
+| `15/01/2020 14:30`, ymdhms | 2015-01-20 (wrong) | refused |
+| `12/2018`, mdy | 2018-12-20 (wrong) | refused |
+| `15/01/20`, ymd | 2015-01-20 (wrong) | 2015-01-20 (still wrong) |
+| `2020-01-15 14:30:00`, ymdhms | correct | correct |
+
+So the guard closes two of the three shapes; two-digit years need a notice of their own.
+
+- [x] Test: the three inputs above, per analysis, assert no wrong time is produced silently (refused values
+      counted in the existing "Unreadable dates" warning; two-digit years raise the new warning).
+- [x] Replace the bare parser call with `.parseDateText(x, timetypedata)` in the four blocks. Refused values
+      then reach `.countDateParseFailures()` and the existing warning with no new text.
+- [x] Check the class each block gets back (Date for date-only, POSIXct UTC for ymdhms) feeds its
+      `interval()` / `time_length()` code as before; one differential run per analysis on ISO dates must be
+      identical to today.
+- [x] Two-digit years: move `timeinterval`'s existing `.countTwoDigitYears()` (called at
+      `R/timeinterval.b.R:876`) to a file-level helper in `R/utils-dateshape.R` and have it also return one
+      raw-to-parsed example. Its rule is the right one: the year lubridate assigned does not appear in the
+      value's own text. A plain "no four-digit token" rule is wrong (it misreads packed `20200115`). Each of
+      the four analyses shows a strong warning that quotes the example ("15/01/20 was read as 2015-01-20"),
+      because a general remark about the century pivot would not explain that reading.
+- [x] Extend the "Unreadable dates" text: when values are refused for shape, say that DateTime Converter can
+      standardise the column first.
+- [x] singlearm (`:1253`) and multisurvival (`:1472`) stop on an entirely unreadable column before their
+      parse-warning code. After the swap a whole column can be refused for shape, so that stop message must
+      name the shape reason too.
+- [x] Behaviour change to state in NEWS.md: values the old parser accepted and the guard refuses (month/year
+      only, `HH:MM` under the seconds format, packed five- or six-digit year-inside strings) now exclude that
+      patient with a warning, where before they produced a wrong time.
+- [x] Per-block differences to respect: survivalcont wraps parsing in `tryCatch`; singlearm also accepts
+      native Date/POSIXt input (`:1206`), which must not go through the text guard.
+- [x] Not in this slice: collapsing the four blocks into one helper. They differ in how they report
+      (notice panel vs `reject()`), and the smallest safe change is the one-line parser swap in each.
+
+### 1B. outcomeorganizer multi-state panel shows n = 0 four times
+
+- [x] Test: multi-state run with known counts; assert the four n in `eventRecodeInfo`.
+- [x] `R/outcomeorganizer.b.R:2141`: count `mydata[["myoutcome"]]`, not `mydata`. Keep the fixed levels 0-3
+      so an absent state still prints 0; do not reuse the sparse `outcome_counts` from the caller. The test
+      uses counts 2, 1, 3, 0 plus a missing value.
+- [x] While there (same panel, report finding 3): for time to progression, name the recurrence variable in the
+      copy-ready text (`:2341`) and the zero-event panel (`:2137`).
+
+### 1C. survival spline curve built on the wrong knots under stratification
+
+- [x] Test: splines + stratified Cox + a stratum with missing values; assert the plotted hazard ratio at a
+      grid point equals `predict()` from the fitted model.
+- [x] `R/survival.b.R:5800`: take `rcs_values` after the stratum filter at `:5825`, and move both guards
+      (all-missing and unique-values, `:5801-5814`) and the empty-level drop (`:5798`) after it as well.
+- [ ] Safer form if cheap: read knots and boundary knots from the fitted model's term instead of rebuilding
+      them, so the two can never diverge again.
+- [x] Add `stratified_cox` and `strata_variable` to the `clearWith` lists of `rcsTestTable`, `rcsPlot` and
+      `rcsInterpretation` in `jamovi/survival.r.yaml` (checked: all three lack both), so the spline results
+      are not left stale when stratification is toggled.
+- [x] Make the test discriminating: give the rows with a missing stratum extreme predictor values, and compare
+      range, median, hazard ratio and interval against a run on data with those rows removed beforehand.
+
+## Phase 2 — MEDIUM, one slice per analysis
+
+### survival
+- [x] 3: median table restricted-mean columns. Decision D3 below.
+- [x] 4: gate the parametric model on the same 10-event rule as the other model paths (`:1400`), or reword
+      the warning at `:1195` to say what is still shown. Gate is recommended.
+- [x] 5: name the calibration model's covariates in its note (`:5429`); add `rcs_analysis`, `age_adjustment`,
+      `age_variable`, `stratified_cox`, `strata_variable` to the calibration `clearWith` lists
+      (`jamovi/survival.r.yaml:1798`).
+- [x] 11 (LOW, one line): weighted log-rank p from `sd_result$pvalue`, not a recomputed df (`:3187`).
+
+### survivalcont
+- [x] 2: rewrite the two sentences that say no adjusted p is reported (`:4921`, `:4943`).
+- [x] 3: stop rounding the RMST horizon in the narrative (`:4313`, `:4325`; same change `survival` got) and the
+      medians in the multi-cut table and summary (`:3898`, `:2419`).
+- [x] 10 (LOW, real logic error): keep the method key in English and translate only at display
+      (`:3563`, `:3855`, `:4080`, `:3288`).
+
+### multisurvival
+- [x] 2: "Analysis complete" shows raw HTML with explanations on. Pass the explanation as trusted markup or
+      write it to its own panel (`:2238`, `:503`).
+- [x] 4: add the landmark disclosure to the Fine-Gray branch (`:6260`).
+- [x] 6: Kaplan-Meier `legend = 'none'` (`:4488`). Render once first to confirm the curves really are
+      unlabelled; then show the legend.
+- [x] 5: caption the risk-group plot's p as apparent, or drop the p there (`:4929`).
+- [x] 7: "strongest predictor". Decision D5 below.
+- [x] 3: write the three failure reasons to a place that is visible with summaries off (table note).
+
+### datetimeconverter
+- [x] 1: close the gap between the two serial-range tests (`:798`, `:835`); correct the comment.
+- [x] 2: when a text format is overridden by the Excel reading, say so (`:2143`) and fix the option
+      description (`jamovi/datetimeconverter.a.yaml:104`).
+- [x] 3: mask large positive missing codes the way negative ones are masked, or report "N values too large to
+      be serial dates" (`:773`). Confirm the reader's inferred step by running it first.
+- [x] 4: append the active caveat to the copy-ready sentence, or withhold it as the grade is withheld (`:1465`).
+
+### oddsratio
+- [x] 1: pre-check for `:` in explanatory factor levels and reject with advice that works in jamovi
+      (`.prepareOddsDesign`, `:759`). Reproduced today.
+- [x] 2: see Phase 3, shared `<` fix.
+
+### lassocox
+- [x] 1: show collected warnings when the run ends in a refusal (`on.exit` flush of `warn_env`, `:214`).
+- [x] 2: Decision D4 below.
+
+### timeinterval
+- [x] 1: count non-missing values that failed to parse separately from missing ones and say so in the summary
+      and the quality text (`:514`, `:739`, `:2213`).
+
+### outcomeorganizer
+- [x] 2: Decision D2 below.
+
+## Phase 3 — shared LOW classes (one slice each; each fixes several analyses)
+
+- [x] `<` plus a letter in table cells: neutralise once in `.populateSurvivalTable()`
+      (`R/utils-survival-tables.R:11`), reusing the rule at `R/utils-eventindicator.R:487`; apply the same
+      helper at the direct `addRow()` sites in survivalcont and outcomeorganizer. Observe one case in jamovi
+      first; this class is "likely", not seen.
+- [x] Month-scaled defaults: one unit-aware default for `endplot`/`byplot` and "12, 36, 60" in the four
+      survival analyses, following survivalcont's `:5285`.
+- [x] Static panels (glossary, explanations, about) filled in `.init()` so they are never visible-but-empty:
+      datetimeconverter, outcomeorganizer, oddsratio, timeinterval.
+- [ ] Cleaned column names: route the secondary tables and notices through `.displayNames()` in
+      multisurvival, survival, survivalcont.
+- [x] Multi-event with no level assigned: let the shared helper's specific message through in singlearm
+      (`:959`) and survivalcont (`:1087`).
+- [x] singlearm 2, 3, 4: the always-true tail condition (`:2104`), the "are retained" wording (`:1332`), the
+      dropped interval in the copy-ready summary (`:4583`).
+- [ ] Untranslated fragments: wrap the sites the report lists per analysis, then extend
+      `check_untranslated_prose` to short labels spliced between translated parts. A pseudo-translation run is
+      the acceptance test.
+- [ ] Remaining per-analysis LOW items: file as TODO rows here after Phase 2; do not batch them into fixes.
+
+## Phase 4 — release
+
+- [x] Turkish for every new or reworded string; `NEWS.md` bullets in plain language.
+- [x] Full verification block from the acceptance criteria.
+- [ ] Re-run the audit on the changed analyses.
+
+## Decisions for the maintainer (recommended default first; work proceeds on the default unless told otherwise)
+
+- **D1 version.** `v1.1.5` is already tagged in jsurvival. Recommended: keep adding under 1.1.5 while
+  unpublished work is pending, and bump to 1.1.6 at release. Affects only `NEWS.md` headings.
+- **D2 outcomeorganizer interval-censoring options** change no result. Recommended: reword the option text to
+  say it checks the two columns and exports nothing. Alternative: remove the three options, which breaks
+  saved `.omv` files and the R wrapper's arguments.
+- **D3 survival median-table `rmean` columns.** Recommended: title them "Restricted mean" and "SE", and add a
+  note naming the horizon (longest follow-up over all groups). Alternative: drop the columns, since the RMST
+  table covers the statistic without extrapolating; that changes default output.
+- **D4 lassocox minimum of 3 censored patients.** Recommended: keep the limit, reword the one-level message so
+  it no longer talks about competing events. Alternative: event-only fold stratification so complete
+  follow-up cohorts can run; larger change, needs its own validation.
+- **D5 multisurvival "strongest predictor".** Recommended: delete the sentence; a ranking that depends on
+  measurement units cannot be made right by wording. Alternative: rank by Wald z and say so.
+- **D6 date-time formats.** After 1A, day-first date-time text is refused with a pointer to DateTime
+  Converter. Recommended: leave it there. Alternative: add `dmyhms` and `mdyhms` to `timetypedata` in four
+  `.a.yaml` files (regenerates four `.h.R`).
+
+## Working notes
+
+- Audited tree: jsurvival `450fb61` plus uncommitted changes; umbrella `18bc80d34` plus uncommitted changes.
+  Nothing from this plan is committed.
+- Evidence levels in the report: 5 findings reproduced by running, 18 confirmed by re-reading, the rest one
+  reader's trace. Treat a "traced" or "likely" finding as a hypothesis: its test comes first.
+- Refuted, do not re-raise: stale Cox narrative beside Fine-Gray (cleared by `clearWith`); day-first
+  four-digit-year dates under ymd (they return missing and are reported); missing Turkish for the
+  "no complete records" message (present, wrapped across lines).
+- The readers never ran jamovi. Phase 3's `<` class and multisurvival 6 need one look in the app or a render.
+- Codex reviewed slices 1A-1C read-only (2026-11-23) and confirmed all three root causes. Its additions are
+  folded in above: the landing order, the two-digit-year rule, the early stops in singlearm and multisurvival,
+  the behaviour change for previously accepted values, and the spline `clearWith` gap (which I checked in the
+  yaml). It also confirmed `.parseDateText()` returns the same classes the four blocks handle today.
+- D6 detail from the same review: `dmyhms`/`mdyhms` would still not read `HH:MM` without seconds; that needs
+  the `_hm` formats too, which is one more reason to leave D6 on its default.
+
 # meddecide 1.1.3 pre-release review — fixes applied, follow-ups (2026-11-07; uncommitted)
 
 Scope: delta 403e034..45e7bc8 (~4,100 changed lines in 15 analyses), 4 oracle reviewers + 1 docs reviewer.

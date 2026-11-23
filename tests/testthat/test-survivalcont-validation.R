@@ -328,8 +328,9 @@ test_that("Boundary & guard conditions: 0 events, <10 events, constant marker, n
 
   # Negative survival time caught before landmark filter
   d_neg <- d; d_neg$time[3] <- -2.0
-  r_neg <- .sc_val_run(d_neg, uselandmark = TRUE, landmark = 10)
-  expect_match(.sc_strip_html(r_neg$errors$content), "Negative survival time", fixed = TRUE)
+  # Refused with jmvcore::reject(); the message is the negative-time one, not the landmark's.
+  expect_error(.sc_val_run(d_neg, uselandmark = TRUE, landmark = 10),
+               "have negative follow-up time", fixed = TRUE)
 
   # Explicit NA factor level (addNA) on strata_variable
   d_addna <- d; d_addna$site[1:10] <- NA; d_addna$site <- addNA(d_addna$site)
@@ -353,8 +354,12 @@ test_that("C11, C12 & C13: State-only jamovi redraws across all 9 plots, R synta
   for (pnm in c("plot4", "plot5", "plot2", "plot3", "plot6", "plot7",
                 "residualsPlot", "plotMultipleCutoffs", "plotMultipleSurvival")) {
     an_redraw <- survivalcontClass$new(options = an$options, data = d)
-    an_redraw$.__enclos_env__$private$.data <- NULL
     img <- an_redraw$results[[pnm]]
+    # An image declared `requiresData: true` (plot4: its state is a version stamp with no
+    # patient rows) gets the dataset re-read by jamovi before the renderer runs; every other
+    # plot must redraw from its state alone.
+    expect_identical(isTRUE(img$requiresData), identical(pnm, "plot4"), info = pnm)
+    if (!isTRUE(img$requiresData)) an_redraw$.__enclos_env__$private$.data <- NULL
     img$setState(an$results[[pnm]]$state)
     tf <- tempfile(fileext = ".png")
     grDevices::png(tf, width = 800, height = 600)
@@ -503,7 +508,9 @@ test_that("IR-survivalcont-01 to IR-survivalcont-07: Independent cold-audit regr
   opt_lm$value <- TRUE
   opt_lm_val <- an_reuse$options$option("landmark")
   opt_lm_val$value <- 99999
-  suppressWarnings(suppressMessages(an_reuse$run()))
+  # A landmark beyond follow-up is a jmvcore::reject() now; the tables are cleared first.
+  expect_error(suppressWarnings(suppressMessages(an_reuse$run())),
+               "No patients remain at risk at landmark time", fixed = TRUE)
   expect_equal(nrow(an_reuse$results$coxTable$asDF), 0L)
   expect_equal(nrow(an_reuse$results$rmstTable$asDF), 0L)
 

@@ -514,10 +514,11 @@ test_that("a format matching exactly 80 percent is accepted", {
 test_that("the preview Status column shows a visible verdict", {
     an <- dtc_obj(data.frame(v = c("2021-03-05", "not a date", NA), stringsAsFactors = FALSE),
                   "v", datetime_format = "ymd")
-    h <- an$results$previewTable$content
-    expect_match(h, ">OK<")
-    expect_match(h, ">Failed<")
-    expect_false(grepl("color: #28a745;'></span>", h, fixed = TRUE))
+    # The preview rows are the conversionRows Table now; Status is its fourth column, one
+    # verdict per row ("-" for a row that was missing to begin with), never an empty cell.
+    rows <- an$results$conversionRows
+    expect_equal(rows$columns[[4]]$title, "Status")
+    expect_equal(rows$asDF[[4]], c("OK", "Failed", "-"))
 })
 
 test_that("no output panel paints an opaque light background", {

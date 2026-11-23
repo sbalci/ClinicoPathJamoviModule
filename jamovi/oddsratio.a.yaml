@@ -4,7 +4,7 @@ title: Odds Ratio Table and Plot
 menuGroup: Survival
 menuSubgroup: General Statistics
 menuSubtitle: 'Odds Ratio for Binary Outcomes'
-version: '1.1.5'
+version: '1.1.6'
 jas: '1.2'
 
 description:
@@ -102,7 +102,7 @@ options:
             them and computes nothing. Any rows with other outcome levels are excluded with a warning.
 
     - name: diagnosticPredictor
-      title: Diagnostic Predictor (for LRs)
+      title: Diagnostic Predictor (binary)
       type: Variable
       suggested: [ nominal ]
       permitted: [ factor ]

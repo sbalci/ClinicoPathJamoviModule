@@ -176,13 +176,17 @@ communication-focused formatting.}
 
 \item{ch}{Displays cumulative hazard over follow-up.}
 
-\item{endplot}{Upper limit of the time axis for survival plots.}
+\item{endplot}{Upper limit of the time axis for survival plots. The factory
+value 60 means five years in the selected time unit (1825 days, 260 weeks,
+60 months, 5 years); any other value is used as entered.}
 
 \item{ybegin_plot}{Lower limit of the probability axis for survival plots.}
 
 \item{yend_plot}{Upper limit of the probability axis for survival plots.}
 
-\item{byplot}{Spacing between labeled time-axis ticks.}
+\item{byplot}{Spacing between labeled time-axis ticks. The factory value 12
+means one year in the selected time unit (365 days, 52 weeks, 12 months, 1
+year); any other value is used as entered.}
 
 \item{multievent}{Enables explicit assignment of multiple outcome levels to
 event and censoring categories.}

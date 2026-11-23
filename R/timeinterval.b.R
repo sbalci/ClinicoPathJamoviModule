@@ -136,6 +136,9 @@ timeintervalClass <- if (requireNamespace("jmvcore")) R6::R6Class(
         .partialDateExample = NULL,
         .misfitCount = 0L,
         .misfitExample = NULL,
+        # Non-empty values the format could not read at all (both columns), and the first one.
+        .unreadableCount = 0L,
+        .unreadableExample = NULL,
         .dstGapCount = 0L,
         .dstGapExample = NULL,
 
@@ -143,13 +146,7 @@ timeintervalClass <- if (requireNamespace("jmvcore")) R6::R6Class(
         # not contain the four-digit year it was read as. Tested on the text rather
         # than a digit-run regex so a packed numeric YYMMDD (200115) is caught as
         # well as "15/01/20", while "2020-01-15" and 20200115 pass.
-        .countTwoDigitYears = function(raw, parsed) {
-            ok <- !is.na(parsed) & !is.na(raw)
-            if (!any(ok)) return(0L)
-            yr <- base::format(parsed[ok], "%Y")
-            txt <- as.character(raw[ok])
-            sum(!mapply(grepl, yr, txt, MoreArgs = list(fixed = TRUE)))
-        },
+        .countTwoDigitYears = function(raw, parsed) .twoDigitYears(raw, parsed)$n,
 
         # Count and first example of values with text after the date (both columns).
         .trailingTextCount = 0L,
@@ -364,7 +361,10 @@ timeintervalClass <- if (requireNamespace("jmvcore")) R6::R6Class(
             amb <- usable & !is.na(sw_start) & !is.na(sw_end) &
                    (as.Date(sw_start) != as.Date(start_dates) |
                     as.Date(sw_end)   != as.Date(end_dates))
-            ref <- usable & !amb                      # rows that prove the order
+            # Rows that prove the order: the swapped reading is not a date for at least one of
+            # the two values. A row whose day equals its month reads the same either way and
+            # proves nothing, so it is neither ambiguous nor a reference.
+            ref <- usable & (is.na(sw_start) | is.na(sw_end))
             days <- function(a, b) as.numeric(difftime(b, a, units = "days"))
             iv_chosen  <- days(start_dates, end_dates)
             iv_swapped <- days(sw_start, sw_end)
@@ -419,7 +419,7 @@ timeintervalClass <- if (requireNamespace("jmvcore")) R6::R6Class(
             worst <- utils::head(order(shift, decreasing = TRUE), min(5L, sum(amb)))
 
             private$.mixedOrderNote <- list(
-                n = sum(amb), total = sum(usable), rows = sort(worst),
+                n = sum(amb), total = sum(usable), proven_by = sum(ref), rows = sort(worst),
                 fmt = fmt, swap = swap, p = p,
                 median_amb = m_a, median_ref = m_r,
                 example_chosen = iv_chosen[worst[1]], example_swapped = iv_swapped[worst[1]])
@@ -434,6 +434,21 @@ timeintervalClass <- if (requireNamespace("jmvcore")) R6::R6Class(
             # Automatic date format detection if not specified
             private$.formatDetectionNote <- NULL
             if (!is.null(specified_format) && specified_format != "auto") {
+                # The list offers day-first and month-first only without a clock. Text
+                # that carries one ("01/05/2020 00:00:00") fitted neither, and automatic
+                # detection cannot tell the two orders apart when every day is 12 or
+                # less, so its advice to choose by hand led nowhere. The chosen ORDER is
+                # kept and the clock is read when the values have one.
+                is_text <- function(v) is.character(v) || is.factor(v)
+                if (specified_format %in% c("ymd", "dmy", "mdy") &&
+                    is_text(start_vector) && is_text(end_vector)) {
+                    values <- as.character(.dateSample(c(
+                        as.character(start_vector[!is.na(start_vector)]),
+                        as.character(end_vector[!is.na(end_vector)]))))
+                    variants <- paste0(specified_format, c("", "_hms", "_hm"))
+                    read <- vapply(variants, function(f) sum(!is.na(.parseDateText(values, f))), numeric(1))
+                    return(variants[which.max(read)])      # a tie keeps the format as chosen
+                }
                 return(specified_format)
             }
 
@@ -496,6 +511,17 @@ timeintervalClass <- if (requireNamespace("jmvcore")) R6::R6Class(
         .validateParsedDates = function(parsed_dates, original_vector, column_name, format_label) {
             total_non_missing <- sum(!is.na(original_vector))
             successful <- sum(!is.na(parsed_dates))
+
+            # A value that is there but could not be read is not a missing date. Up to 20% of
+            # a column may fail before the run is refused below, so keep the count and an
+            # example for the caveats instead of letting those rows pass as "missing".
+            unread <- which(is.na(parsed_dates) & !is.na(original_vector) &
+                            nzchar(trimws(as.character(original_vector))))
+            if (length(unread) > 0) {
+                private$.unreadableExample <- utils::head(unique(c(
+                    private$.unreadableExample, as.character(original_vector[unread]))), 20L)
+                private$.unreadableCount <- private$.unreadableCount + length(unread)
+            }
 
             if (total_non_missing == 0) {
                 jmvcore::reject(.fmt(
@@ -686,8 +712,12 @@ timeintervalClass <- if (requireNamespace("jmvcore")) R6::R6Class(
 
             total_obs <- length(calculated_time)
             non_missing <- sum(!is.na(calculated_time))
+            # The removal filter judges "extreme" after negative intervals are removed; count
+            # on the same pool, or the table and the "k removed" banner disagree.
+            extreme_pool <- if (isTRUE(self$options$remove_negative))
+                calculated_time[is.na(calculated_time) | calculated_time >= 0] else calculated_time
             suppressWarnings({
-                q99 <- stats::quantile(calculated_time, 0.99, na.rm = TRUE, names = FALSE)
+                q99 <- stats::quantile(extreme_pool, 0.99, na.rm = TRUE, names = FALSE)
             })
             # Use the same multiplier as the removal filter so the flagged
             # "Extreme Values" count matches what remove_extreme would drop --
@@ -701,7 +731,7 @@ timeintervalClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                 missing_values = sum(is.na(calculated_time)),
                 negative_intervals = if (non_missing > 0) sum(calculated_time < 0, na.rm = TRUE) else 0,
                 zero_intervals = if (non_missing > 0) sum(calculated_time == 0, na.rm = TRUE) else 0,
-                extreme_values = if (is.finite(extreme_threshold)) sum(calculated_time > extreme_threshold, na.rm = TRUE) else 0,
+                extreme_values = if (is.finite(extreme_threshold)) sum(extreme_pool > extreme_threshold, na.rm = TRUE) else 0,
                 missing_start_dates = sum(is.na(start_dates)),
                 missing_end_dates = sum(is.na(end_dates)),
                 future_dates = sum(lubridate::as_date(start_dates) > Sys.Date(), na.rm = TRUE) +
@@ -924,10 +954,10 @@ timeintervalClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                 # rownames(), not the position: with a jamovi filter active,
                 # self$data drops the filtered rows and keeps the spreadsheet row
                 # numbers as rownames, so a position sends the user to the wrong row.
-                examples <- paste0(
-                    .("Row"), " ", rownames(data)[example_rows], ": Start=", base::format(start_dates_raw[example_rows]),
-                    ", End=", base::format(end_dates_raw[example_rows])
-                )
+                examples <- .pasteT(.("Row {row}: Start={start}, End={end}"),
+                    row = rownames(data)[example_rows],
+                    start = base::format(start_dates_raw[example_rows]),
+                    end = base::format(end_dates_raw[example_rows]))
                 # The old message named a checkbox that does not exist ("Remove
                 # Negative Intervals"); the real .u.yaml label is "Negative-interval
                 # exclusion". It also gave no denominator and no cause. A handful of
@@ -1059,6 +1089,8 @@ timeintervalClass <- if (requireNamespace("jmvcore")) R6::R6Class(
             private$.trailingTextExample <- NULL
             private$.partialDateCount <- 0L
             private$.partialDateExample <- NULL
+            private$.unreadableCount <- 0L
+            private$.unreadableExample <- NULL
             private$.misfitCount <- 0L
             private$.misfitExample <- NULL
             private$.dstGapCount <- 0L
@@ -1256,6 +1288,17 @@ timeintervalClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                         count = private$.misfitCount,
                         example = private$.misfitExample))
                 }
+                # Shape misfits and DST gaps are explained above; what is left was simply
+                # not a date in this format ("unknown", a typo, the other day/month order).
+                n_unread <- private$.unreadableCount - private$.misfitCount - private$.dstGapCount
+                if (n_unread > 0) {
+                    caveats <- c(caveats, .fmt(
+                        .("{count} non-empty date value(s) could not be read with the date format used, for example \"{example}\". Those rows have no interval and are counted with the missing values below; they are not missing in the data."),
+                        count = n_unread,
+                        example = c(setdiff(private$.unreadableExample,
+                            c(private$.misfitExample, private$.dstGapExample, private$.partialDateExample)),
+                            private$.unreadableExample)[1]))
+                }
                 if (private$.dstGapCount > 0) {
                     caveats <- c(caveats, .fmt(
                         .("{count} date value(s) were left empty because that clock time does not exist on this computer's timezone: it falls in the hour skipped when daylight-saving time starts (first: {example}). If the times were recorded in UTC or another fixed offset, set Timezone to UTC; otherwise correct the times at source."),
@@ -1322,7 +1365,7 @@ timeintervalClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                 add_message("strong_warning", .fmt(
                     .("Some rows may have been entered with the day and month the other way round from the rest of this column. {count} of {total} rows read as a valid date under both \"{format}\" and \"{swapped}\"; the other {others} can only be read as \"{format}\", which is how the format was chosen. Those two groups should have the same follow-up on average, because the day of the month has nothing to do with how long a patient is followed - but here the ambiguous rows run at a median of {medianamb} days against {medianref} days for the rest (rank-sum p = {p}), which is what a mis-typed day/month order looks like. Check rows {rows} first: the largest of them spans {examplechosen} days as read and {exampleswapped} days with the day and month swapped. Dates typed in two different orders in one column parse without error and stay positive, so nothing else on this page can see them, and the total person-time is wrong by however much those rows are wrong."),
                     count = mox$n, total = mox$total, format = mox$fmt, swapped = mox$swap,
-                    others = mox$total - mox$n,
+                    others = mox$proven_by,
                     medianamb = base::formatC(mox$median_amb, format = "f", digits = 0),
                     medianref = base::formatC(mox$median_ref, format = "f", digits = 0),
                     p = base::formatC(mox$p, format = "g", digits = 4),
@@ -1846,7 +1889,7 @@ timeintervalClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                     self$options$time_format
                 }
                 fmt_label <- if (identical(self$options$time_format, "auto")) {
-                    paste0(detected_fmt, " (auto-detected)")
+                    .pasteT(.("{format} (auto-detected)"), format = detected_fmt)
                 } else {
                     detected_fmt
                 }
@@ -1858,14 +1901,15 @@ timeintervalClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                     .pasteT(.("Number of observations: {n}"), n = summary_stats$n),
                     "<br> ",
                     .pasteT(.("Date format used: {fmtLabel}"), fmtLabel = fmt_label),
-                    "<br> Time basis: ",
-                    if (self$options$time_basis == 'calendar') .("Calendar-aware (actual month lengths)") else 'Standardized (30.4375-day months, 365.25-day years)',
+                    if (.dateHasTime(detected_fmt)) paste0("<br> ", .pasteT(.("Timezone: {zone}"),
+                        zone = if (identical(self$options$timezone, "utc")) "UTC" else
+                            .pasteT(.("this computer's ({name}); the same file can give other durations on a computer in another zone"), name = Sys.timezone()))),
+                    if (self$options$output_unit %in% c("months", "years")) paste0("<br> ",
+                        .pasteT(.("Time basis: {basis}"), basis = if (self$options$time_basis == 'calendar')
+                            .("Calendar-aware (actual month lengths)") else .("Standardized (30.4375-day months, 365.25-day years)"))),
                     "<br> ",
-                    lm_pt_label,
-                    ": ",
-                    round(summary_stats$total_person_time, 2),
-                    " person-",
-                    self$options$output_unit,
+                    .pasteT(.("{label}: {value} person-{unit}"), label = lm_pt_label,
+                        value = round(summary_stats$total_person_time, 2), unit = self$options$output_unit),
                     "<br> ",
                     lm_mean_label,
                     ": ",
@@ -1873,16 +1917,14 @@ timeintervalClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                     ci_text,
                     "<br> ",
                     .pasteT(.("Median time: {median} (IQR: {q1} to {q3})"), median = round(summary_stats$median, 2), q1 = round(summary_stats$q1, 2), q3 = round(summary_stats$q3, 2)),
-                    "<br> Standard deviation: ",
-                    round(summary_stats$sd, 2),
-                    "<br> Range: ",
-                    round(summary_stats$min, 2),
-                    " to ",
-                    round(summary_stats$max, 2),
-                    "<br> Missing values: ",
-                    missing_text,
-                    "<br> Filters applied: ",
-                    filter_text,
+                    "<br> ",
+                    .pasteT(.("Standard deviation: {sd}"), sd = round(summary_stats$sd, 2)),
+                    "<br> ",
+                    .pasteT(.("Range: {min} to {max}"), min = round(summary_stats$min, 2), max = round(summary_stats$max, 2)),
+                    "<br> ",
+                    .pasteT(.("Missing values: {text}"), text = missing_text),
+                    "<br> ",
+                    .pasteT(.("Filters applied: {text}"), text = filter_text),
                     "<br> ",
                     amb_line,
                     " ",
@@ -2141,9 +2183,9 @@ timeintervalClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                 # the summary panel stated and the pasted sentence did not.
                 unit_def <- if (!unit %in% c("months", "years")) ""
                     else if (identical(self$options$time_basis, "calendar"))
-                        glue::glue("; calendar {unit}")
-                    else if (unit == "months") "; 1 month = 30.4375 days"
-                    else "; 1 year = 365.25 days"
+                        paste0("; ", .pasteT(.("calendar {unit}"), unit = unit))
+                    else if (unit == "months") paste0("; ", .("1 month = 30.4375 days"))
+                    else paste0("; ", .("1 year = 365.25 days"))
                 copy_sentence <- if (lm_on)
                     .pasteT(.("\"A landmark analysis was performed at {lmAmount}: {nObs} {v1} with at least {lmAmount} of follow-up {v2} included, and follow-up time was measured from the landmark rather than from the start date. Observed post-landmark follow-up had a mean of {meanTime} {unit} (median {medianTime} {unit}{unitDef}), contributing {totalPt} post-landmark person-{unit} of observation time.\""), lmAmount = lm_amount, nObs = n_obs, v1 = if (n_obs == 1) .("participant") else .("participants"), v2 = if (n_obs == 1) .("was") else .("were"), meanTime = mean_time, unit = unit, medianTime = median_time, unitDef = unit_def, totalPt = total_pt)
                 else
@@ -2238,9 +2280,14 @@ timeintervalClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                 axp <- private$.ambiguousExposure
                 amb_exposure_html <- if (is.null(axp)) "" else paste0(
                     "<p style='font-size: 0.9em;'>",
-                    .pasteT(.("<strong>Day/month ambiguity:</strong> {n} of {total} rows read as a valid date under both '{fmt}' and '{swap}'{v1}. The '{fmt}' reading was used because {provenBy} other rows can only be read that way. If any of the ambiguous rows were typed in the other order their intervals are wrong, and because they parse without error and stay positive no check on this page can detect it. This is a property of the data, not a fault found in it."), n = axp$n, total = axp$total, fmt = axp$fmt, swap = axp$swap, v1 = if (is.finite(axp$pt_share))
+                    .pasteT(.("<strong>Day/month ambiguity:</strong> {n} of {total} rows read as a valid date under both '{fmt}' and '{swap}'{v1}. {why} If any of the ambiguous rows were typed in the other order their intervals are wrong, and because they parse without error and stay positive no check on this page can detect it. This is a property of the data, not a fault found in it."), n = axp$n, total = axp$total, fmt = axp$fmt, swap = axp$swap, v1 = if (is.finite(axp$pt_share))
                         paste0(", ", .pasteT(.("carrying {ptShare}% of the raw person-time in days, before filters or landmark"), ptShare = round(axp$pt_share)))
-                    else "", provenBy = axp$proven_by),
+                    else "", why = if (!identical(self$options$time_format, "auto"))
+                        .pasteT(.("The '{fmt}' reading was used because that date format is selected."), fmt = axp$fmt)
+                    else if (axp$proven_by > 0)
+                        .pasteT(.("The '{fmt}' reading was used because {provenBy} other rows can only be read that way."), fmt = axp$fmt, provenBy = axp$proven_by)
+                    else
+                        .pasteT(.("The '{fmt}' reading was used, although no row settles the order: every row can be read both ways."), fmt = axp$fmt)),
                     "</p>")
 
                 quality_html <- private$.formatQualityAssessmentGuide(quality, amb_exposure_html, filter_lines, filter_text)

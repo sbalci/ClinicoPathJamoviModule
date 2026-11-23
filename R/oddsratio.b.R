@@ -477,6 +477,14 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         .prepareOddsRun = function() {
             for (name in c("fittedTable", "diagnosticContingency"))
                 .populateSurvivalTable(self$results[[name]], data.frame())
+            # Visible on its checkbox alone; say what it is waiting for until it is filled
+            # (.populateSurvivalTable() clears the note when the table is written).
+            if (isTRUE(self$options$showNomogram))
+                self$results$diagnosticContingency$setNote("pending",
+                    .("Select the Diagnostic Predictor and its positive and negative levels to fill this table."))
+            # Static text, written first, so the panels are not empty headings while the
+            # variables are still being selected or after a refusal.
+            if (isTRUE(self$options$showExplanations)) private$.addExplanations()
 
             # Reset notices and cached state at start of each run
             private$.resetNotices()
@@ -784,6 +792,17 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     }
                 }
 
+                # finalfit refuses a colon in an explanatory factor level (it marks an
+                # interaction there) and says so in R terms. Say it in jamovi's, before it does.
+                if (!isTRUE(self$options$usePenalized)) {
+                    colon_levels <- unlist(lapply(setdiff(names(mydata), dependent_variable_name_from_label),
+                        function(v) if (is.factor(mydata[[v]])) grep(":", levels(mydata[[v]]), fixed = TRUE, value = TRUE)))
+                    if (length(colon_levels) > 0)
+                        jmvcore::reject(.fmt(
+                            .("Standard logistic regression here cannot use factor levels that contain a colon ({levels}). Rename those levels in the data (double-click the column and edit the level names), or tick 'Firth penalized logistic regression', which accepts them."),
+                            levels = paste(utils::head(unique(colon_levels), 5), collapse = ", ")))
+                }
+
                 observed_outcome <- mydata[[dependent_variable_name_from_label]]
                 if (!is.factor(observed_outcome)) {
                     observed_outcome <- factor(observed_outcome)
@@ -919,7 +938,10 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                             # Use STRONG_WARNING for critically low EPV
                             private$.addNotice(jmvcore::NoticeType$STRONG_WARNING,
                                 .fmt(
-                                    .("Low events-per-variable (EPV \u2248 {epv}). Odds ratios may be unstable; consider penalized/Firth logistic regression."),
+                                    if (isTRUE(self$options$usePenalized))
+                                        .("Low events-per-variable (EPV \u2248 {epv}). Odds ratios may be unstable even with Firth penalization; interpret them with caution.")
+                                    else
+                                        .("Low events-per-variable (EPV \u2248 {epv}). Odds ratios may be unstable; consider penalized/Firth logistic regression."),
                                     epv = epv_rounded))
                         } else if (epv < 10) {
                             extra_warnings <- c(extra_warnings,
@@ -936,7 +958,10 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                             if (any(tab == 0)) {
                                 extra_warnings <- c(extra_warnings,
                                     .fmt(
-                                        .("Possible separation detected for '{variable}' (zero cells in 2x2 table). Consider penalized/Firth logistic regression."),
+                                        if (isTRUE(self$options$usePenalized))
+                                            .("Possible separation detected for '{variable}' (a zero cell in its cross-table with the outcome). Firth penalization is in use, which keeps the estimate finite.")
+                                        else
+                                            .("Possible separation detected for '{variable}' (a zero cell in its cross-table with the outcome). Consider penalized/Firth logistic regression."),
                                         variable = all_labels[[v]]))
                             }
                         }
@@ -1027,10 +1052,19 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         # keep_fit_id = TRUE gives each row its model term, which
                         # lets the forest plot drop exactly the rows the table
                         # marks "not estimable"; the column is removed below.
+                        # finalfit prints attr(col, "label") where a column still has one
+                        # and the cleaned name where it does not, then blanks a label that
+                        # repeats the row above. Labels survive on some columns only, so
+                        # `Age` (cleaned "age", label lost) followed by `age` (cleaned
+                        # "age_2", label "age") printed one "age" and an empty cell. Give
+                        # finalfit the cleaned names alone: they are unique, and
+                        # .restoreOriginalNamesInTable() maps each back.
+                        ff_data <- mydata
+                        for (v in names(ff_data)) attr(ff_data[[v]], "label") <- NULL
                         ff_res <- tryCatch(
                             list(
                                 df = .quietly(finalfit::finalfit(
-                                    .data = mydata,
+                                    .data = ff_data,
                                     dependent = formulaDependent,
                                     explanatory = formulaExplanatory,
                                     metrics = FALSE,
@@ -1042,7 +1076,7 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                             error = function(e_prof) {
                                 list(
                                     df = .quietly(finalfit::finalfit(
-                                        .data = mydata,
+                                        .data = ff_data,
                                         dependent = formulaDependent,
                                         explanatory = formulaExplanatory,
                                         metrics = FALSE,
@@ -1099,7 +1133,7 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                                 ", Number in model = ", nrow(mydata),
                                 ", Missing = ", n_dataframe - nrow(mydata),
                                 ", AIC = ", aic_val,
-                                ", C-statistic (in-sample) = ", auc_val,
+                                ", C-statistic (in-sample) = ", if (is.na(auc_val)) "not available" else auc_val,
                                 ", H&L = ", hl_txt
                             ),
                             stringsAsFactors = FALSE
@@ -1708,7 +1742,7 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
                 # Add completion notice for successful analysis
                 private$.addNotice(jmvcore::NoticeType$INFO,
-                    .("Odds ratio analysis completed successfully."))
+                    .("Odds ratio analysis completed; read it together with any warnings above."))
 
 
         },
@@ -2093,7 +2127,7 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         # equals expected in every group by construction, which would print
         # Chi-sq 0.00 (p = 1.000) as if it were evidence of good fit.
         .hosmerLemeshow = function(y, yhat, saturated) {
-            na_txt <- "not applicable (saturated / <3 risk groups)"
+            na_txt <- .("not applicable (saturated / <3 risk groups)")
             qq <- unique(stats::quantile(yhat, probs = seq(0, 1, 0.1), na.rm = TRUE))
             if (saturated || length(unique(yhat)) < 3L || length(qq) < 4L) return(na_txt)
             grp <- cut(yhat, breaks = qq, include.lowest = TRUE)
@@ -2146,7 +2180,7 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         # (platelets in cells/uL: 1.00 (1.00-1.00)), or is too large to print. The
         # OR per 1 SD is what such a row can honestly say. Coefficients on the log
         # scale, so a per-unit OR past 1e308 does not lose the estimate.
-        .perSdNotes = function(terms, b, lower, upper, vars, data, all_labels) {
+        .perSdNotes = function(terms, b, lower, upper, vars, data, all_labels, method = .("Wald")) {
             vars <- Filter(function(v) is.numeric(data[[v]]) && v %in% terms, vars)
             unlist(lapply(vars, function(v) {
                 i <- match(v, terms)
@@ -2154,8 +2188,8 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 if (isTRUE(per_unit[1] != per_unit[2]) && isTRUE(per_unit[2] < 1e12)) return(NULL)
                 unit <- stats::sd(data[[v]])
                 .fmt(
-                    .("{variable}: the odds ratio per one unit is unreadable at two decimals because of the measurement scale. The odds ratio per 1 SD ({unit} units) is {or} (95% CI {lower} to {upper}). To show this in the table, rescale the variable."),
-                    variable = private$.originalNames(v, all_labels),
+                    .("{variable}: the odds ratio per one unit is unreadable at two decimals because of the measurement scale. The odds ratio per 1 SD ({unit} units) is {or} ({method} 95% CI {lower} to {upper}). To show this in the table, rescale the variable."),
+                    variable = private$.originalNames(v, all_labels), method = method,
                     unit = sprintf("%.3g", unit),
                     or = sprintf("%.3g", exp(b[i] * unit)),
                     lower = sprintf("%.3g", exp(lower[i] * unit)),
@@ -2193,7 +2227,7 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     cell <- cells[i]
                     if (is.na(cell) || !nzchar(cell) || identical(trimws(cell), "-")) next
                     if (i <= length(fit_ids) && fit_ids[i] %in% terms) {
-                        cells[i] <- "not estimable"
+                        cells[i] <- .("not estimable")
                         rows[[names(tbl)[j]]] <- c(rows[[names(tbl)[j]]], i)
                         if (!is.na(var_col[i])) flagged <- unique(c(flagged, var_col[i]))
                         next
@@ -2305,9 +2339,9 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             nom <- try({
                 .quietly(rms::nomogram(fit,
                               fun = stats::plogis,  # Convert from log odds to probability
-                              funlabel = "Predicted Probability"
+                              funlabel = .("Predicted probability of the positive outcome level")
                 ))
-            })
+            }, silent = TRUE)
 
             if (!inherits(nom, "try-error")) {
                 nom <- private$.relabelNomogram(nom, all_labels)
@@ -2316,6 +2350,10 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 # Create HTML content for display
                 html_content <- private$.createNomogramDisplay(nom)
                 self$results$nomogram$setContent(html_content)
+            } else {
+                private$.addNotice(jmvcore::NoticeType$WARNING, .fmt(
+                    .("The nomogram could not be drawn: {reason}"),
+                    reason = conditionMessage(attr(nom, "condition"))))
             }
         },
 
@@ -2543,7 +2581,8 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                             column_space = c(-0.5, 0, 0.5),
                             dependent_label = plotList$originalOutcomeName,
                             prefix = "",
-                            suffix = ": OR (95% CI, p-value)",
+                            suffix = if (length(plotList$originalExplanatoryNames) > 1)
+                                paste0(": ", .("multivariable OR (95% CI, p-value)")) else paste0(": ", .("OR (95% CI, p-value)")),
                             plot_opts = plot_opts
                         ),
                         error = function(e) NULL
@@ -2834,8 +2873,11 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     if (is.na(trimmed_name) || trimmed_name == "" || !is.character(trimmed_name)) next
                     
                     # Handle different finalfit naming patterns:
-                    # 0. Already an original label (finalfit preserves attr(col, "label") on numeric rows)
-                    if (trimmed_name %in% unname(name_mapping)) {
+                    # 0. Already an original name, and not also another column's cleaned
+                    #    name ("Age" and "age" clean to "age" and "age_2": the text "age"
+                    #    then means the first column, and rule 1 must translate it).
+                    if (trimmed_name %in% unname(name_mapping) &&
+                        !(trimmed_name %in% names(name_mapping))) {
                         first_col[i] <- trimmed_name
                     }
                     # 1. Direct variable name match
@@ -3225,6 +3267,7 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             # Univariable Firth fits, one per predictor -- the same column
             # finalfit reports, on the same complete cases.
+            uni_failed <- character(0)
             est_uni <- do.call(rbind, c(
                 list(est_multi[0, , drop = FALSE]),
                 lapply(explanatory, function(v) {
@@ -3233,8 +3276,13 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                             .asSurvivalFormula(
                                 jmvcore::constructFormula(dependent, list(v))),
                             data = .data)),
-                        error = function(e) NULL)
+                        error = function(e) { uni_failed <<- c(uni_failed, v); NULL })
                 })))
+            # "-" is also what a reference level shows, so a failed fit is named.
+            if (length(uni_failed) > 0)
+                private$.addNotice(jmvcore::NoticeType$WARNING, .fmt(
+                    .("The univariable Firth model could not be fitted for: {variables}. Their univariable cells show '-'."),
+                    variables = paste(uni_failed, collapse = ", ")))
 
             # Same variable/level/count skeleton the Firth forest plot uses.
             multi <- private$.firthRows(.data, explanatory, est_multi, dependent = dependent)
@@ -3295,7 +3343,7 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             coef_names <- gsub("`", "", names(stats::coef(fit)), fixed = TRUE)
             return(list(summary_table, metrics, NULL, NULL, scale_notes = private$.perSdNotes(
                 coef_names, unname(stats::coef(fit)), unname(fit$ci.lower), unname(fit$ci.upper),
-                explanatory, .data, all_labels)))
+                explanatory, .data, all_labels, method = .("profile penalized likelihood"))))
         },
 
         .formatContingencyGuide = function(outcome_levels, predictor_levels, cont_table) {

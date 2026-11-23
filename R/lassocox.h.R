@@ -297,7 +297,7 @@ lassocoxResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 title="Suitability Checks",
                 rows=0,
                 columns=list(),
-                visible="(suitabilityCheck)",
+                visible="(suitabilityCheck && length(elapsedtime) > 0 && length(outcome) > 0 && length(explanatory) > 0)",
                 clearWith=list(
                     "outcome",
                     "outcomeLevel",
@@ -313,7 +313,7 @@ lassocoxResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 options=options,
                 name="suitabilityReport",
                 title="Data Suitability Assessment",
-                visible="(suitabilityCheck)",
+                visible="(suitabilityCheck && length(elapsedtime) > 0 && length(outcome) > 0 && length(explanatory) > 0)",
                 clearWith=list(
                     "outcome",
                     "outcomeLevel",
@@ -514,7 +514,7 @@ lassocoxResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 name="encoding",
                 title="Predictor Encoding",
                 rows=0,
-                visible="(showEncoding)",
+                visible="(showEncoding && length(elapsedtime) > 0 && length(outcome) > 0 && length(explanatory) > 0)",
                 columns=list(
                     list(
                         `name`="variable", 
@@ -556,7 +556,7 @@ lassocoxResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 name="reproducibility",
                 title="Reproducibility Details",
                 rows=0,
-                visible="(showReproducibility)",
+                visible="(showReproducibility && length(elapsedtime) > 0 && length(outcome) > 0 && length(explanatory) > 0)",
                 columns=list(
                     list(
                         `name`="item", 
@@ -581,7 +581,7 @@ lassocoxResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 options=options,
                 name="rCode",
                 title="Reproducible R Code",
-                visible="(showRCode)",
+                visible="(showRCode && length(elapsedtime) > 0 && length(outcome) > 0 && length(explanatory) > 0)",
                 clearWith=list(
                     "outcome",
                     "outcomeLevel",
@@ -597,7 +597,7 @@ lassocoxResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 options=options,
                 name="summaryText",
                 title="Results Summary",
-                visible="(showSummary)",
+                visible="(showSummary && length(elapsedtime) > 0 && length(outcome) > 0 && length(explanatory) > 0)",
                 clearWith=list(
                     "showSummary",
                     "outcome",
@@ -634,7 +634,7 @@ lassocoxResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 options=options,
                 name="variableImportance",
                 title="Variable Importance Analysis",
-                visible="(showVariableImportance)",
+                visible="(showVariableImportance && length(elapsedtime) > 0 && length(outcome) > 0 && length(explanatory) > 0)",
                 rows=0,
                 columns=list(
                     list(
@@ -670,7 +670,7 @@ lassocoxResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 options=options,
                 name="modelComparison",
                 title="Exploratory Unpenalized Refit Comparison",
-                visible="(showModelComparison)",
+                visible="(showModelComparison && length(elapsedtime) > 0 && length(outcome) > 0 && length(explanatory) > 0)",
                 rows=0,
                 columns=list(
                     list(
@@ -740,7 +740,7 @@ lassocoxBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             super$initialize(
                 package = "ClinicoPath",
                 name = "lassocox",
-                version = c(1,1,5),
+                version = c(1,1,6),
                 options = options,
                 results = lassocoxResults$new(options=options),
                 data = data,

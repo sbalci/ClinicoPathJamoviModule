@@ -4,7 +4,7 @@ title: Outcome Organizer for Survival Analysis
 menuGroup: Survival
 menuSubgroup: Data Preparation
 menuSubtitle: 'Comprehensive Outcome Preparation for Survival Analysis'
-version: '1.1.5'
+version: '1.1.6'
 jas: '1.2'
 
 description:
@@ -165,7 +165,7 @@ options:
           R: >
             If true, allows for multiple event types (e.g., death from disease vs death from other causes).
             For RFS, PFS and DFS every death category then counts as an event; DFS also counts
-            Alive with Disease.
+            Alive with Disease when no recurrence variable is selected.
 
     - name: dod
       title: Dead of Disease
@@ -230,7 +230,9 @@ options:
       default: false
       description:
           R: >
-            If true, prepares data for interval-censored analysis where exact event times are unknown.
+            If true, checks the two interval columns (start not later than end, both on one scale)
+            and reports the result. The recoded outcome and the exported columns do not change:
+            this analysis does not export interval-censored data.
 
     - name: intervalStart
       title: "Interval Start Variable"

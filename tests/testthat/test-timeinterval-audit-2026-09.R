@@ -73,6 +73,10 @@ library(testthat)
             c("messages", "todo", "aboutPanel", "personTimeInfo", "qualityAssessment",
               "caveatsPanel", "summary", "nlSummary", "glossaryPanel", "calculated_time"))
     )
+    # qualityCounts is a Table filled through .populateSurvivalTable() (deleteRows, addColumn,
+    # addRow, notes): a real jmvcore Table, so the stub cannot drift from the Table API again.
+    stub$self$results$qualityCounts <- jmvcore::Table$new(
+        options = jmvcore::Options$new(), name = "qualityCounts", rows = 0, columns = list())
     priv <- new.env(parent = emptyenv())
     for (nm in names(pf)) assign(nm, pf[[nm]], envir = priv)
     for (nm in names(pm)) { f <- pm[[nm]]; environment(f) <- stub; assign(nm, f, envir = priv) }

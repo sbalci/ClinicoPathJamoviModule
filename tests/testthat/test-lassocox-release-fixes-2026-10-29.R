@@ -23,10 +23,14 @@ test_that("PH check prints a small p as 'p < 0.001', never 'p = 0.000'", {
     sim <- data.frame(time = pmin(t1, cen), st = factor(ifelse(t1 <= cen, "D", "A")), x1 = x1, x2 = x2, x3 = x3)
     a <- lassocox_rf_run(sim, elapsedtime = "time", outcome = "st", outcomeLevel = "D", censorLevel = "A",
         explanatory = c("x1", "x2", "x3"), lambda = "lambda.min", random_seed = 42)
-    html <- a$results$suitabilityReport$content
-    expect_true(nzchar(html))
-    expect_match(html, "Selected-refit test p &lt; 0.001", fixed = TRUE)  # escaped inside the HTML cell
-    expect_false(grepl("p = 0.000", html, fixed = TRUE))
+    # The PH row is in the suitabilityChecks Table (Status, Check, Value, Detail); a table
+    # cell is not entity-escaped, so "<" is the character itself.
+    checks <- a$results$suitabilityChecks$asDF
+    ph <- checks[checks[[2]] == "Proportional Hazards", , drop = FALSE]
+    expect_identical(nrow(ph), 1L)
+    expect_identical(ph[[3]], "Selected-refit test p < 0.001")
+    expect_false(any(grepl("p = 0.000", unlist(checks), fixed = TRUE)))
+    expect_false(grepl("p = 0.000", a$results$suitabilityReport$content, fixed = TRUE))
 })
 
 test_that("factor indicators are labelled 'variable: level (vs reference)'; numbers keyed by design column", {

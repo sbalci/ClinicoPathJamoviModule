@@ -117,7 +117,7 @@ items:
             type: integer
 
     - name:  eventRecodeInfo
-      title: 'Outcome Recode'
+      title: 'Outcome Recode Notes'
       type:  Html
       visible: (showExplanations)
       clearWith:
@@ -390,7 +390,7 @@ items:
           - AustinLeeFine2016
       columns:
         - name: 'time'
-          title: "time"
+          title: "Time"
           type: number
           format: zto
         - name: n.risk

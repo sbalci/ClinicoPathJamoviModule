@@ -5,6 +5,175 @@ prevents them. Newest first. Release notes for users live in `NEWS.md`.
 
 ---
 
+## 2026-11-23 — jsurvival third pass and re-audit: a second read found what three fix passes had not
+
+### A fix without a failing test changed the branch that is not used
+
+- **Failure mode:** multisurvival's "significant" count was to be judged at the table's three decimals.
+  The fix rounded `p` in `sig_indices`, but with a term map (always supplied by the analysis) the count
+  comes from another expression, which still read the raw `p`. The item was recorded as done "(no test:
+  needs p in [0.0495, 0.05))".
+- **Detection signal:** a fresh reader of the fixed code quoted both lines side by side.
+- **Prevention rule:** "no test possible" usually means the wrong level was chosen. The helper is a
+  file-level function and takes a data frame; a direct call with `p = 0.0496` is a three-line test, and it
+  failed. A fix that has not been seen failing is recorded as unverified, never as done.
+
+### A source change was checked with the new test only
+
+- **Failure mode:** reading spline knots from the model's `predvars` used `eval()` on the stored element.
+  An existing audit test forbids `eval` in the backends. Only the new test file was run after the change, so
+  the failure appeared two tasks later, at the full-suite run.
+- **Detection signal:** `test-jsurvival-library-audit.R` "audited backends contain no direct
+  code-execution calls".
+- **Prevention rule:** after each source change run the module's standing audit test file as well as the
+  new test. (`makepredictcall()` stores knots as numbers, so no `eval()` was needed.)
+
+### A new cache quietly turned a reproducibility test into a test of the cache
+
+- **Failure mode:** LASSO Cox now keeps its last cross-validated fit. `test-lassocox-integration.R` runs the
+  same analysis twice and compares the tables to show that the seed reproduces the fit. With the cache, the
+  second run reused the first fit, so the test could no longer fail for the reason it exists.
+- **Detection signal:** an agent repairing unrelated blocks in that file counted cache hits and reported it.
+  The test stayed green throughout.
+- **Prevention rule:** when adding a cache, grep the tests for runs repeated with the same inputs and decide
+  for each whether it must bypass the cache. A green test is not evidence that it still tests anything.
+
+### "All values look like X" was switched off by one value that was not X
+
+- **Failure mode:** the date converter treats six-digit text as a packed date when *all* non-blank values
+  are six or eight digits. One `N/A` in the column made that false; the next branch had already converted
+  the text to numbers (dropping the leading zero), saw 10315, and read it as an Excel serial: `010315`
+  became 1928-03-28, status "OK".
+- **Detection signal:** a reader traced the two guards against each other; confirmed by running ten values.
+- **Prevention rule:** compute an "all values" guard over the values the guarded branch will act on (here,
+  those that read as numbers), not over the whole column. A stray word must not change how the other
+  values are read.
+
+### `as.Date()` on user text matches by prefix
+
+- **Failure mode:** the outcome organizer's interval check called `as.Date(x)` on text columns.
+  `as.Date("25/03/2020")` is `0025-03-20`: the `%Y/%m/%d` format matches the first characters. Day-first
+  dates were compared as if the day were the year, so correct intervals were reported as running backwards.
+- **Detection signal:** reader inference, then one line of R.
+- **Prevention rule:** never pass user text to `as.Date()` or a lubridate parser without a shape check
+  first. Same family as the lubridate lesson below; the grep for the next audit is `as.Date(` on anything
+  that can be character.
+
+### A count taken on a subset was reported as the count
+
+- **Failure mode:** "56 older failing blocks" came from the 33 test files that had failed in an earlier run.
+  Over all 149 survival-related files there were 58, and one of the extra ones was a test bug (bare
+  `format()`, masked by jmvcore under a source load).
+- **Detection signal:** rerunning the full file set before starting the repair.
+- **Prevention rule:** state the denominator with the count ("58 blocks in 149 files"), and recount on the
+  full set before planning work from it.
+
+### What a second, unanchored read is worth
+
+- **Failure mode:** after an audit, a plan and three fix passes with a green suite and a clean gate, nine
+  fresh readers who had seen neither the report nor the fixes raised 1 HIGH and 17 MEDIUM findings. Eleven
+  were run and all eleven reproduced; several were in code the fix passes had touched.
+- **Detection signal:** the re-audit itself.
+- **Prevention rule:** the fixer's tests cover what the fixer thought of. Before calling a module release
+  ready, have it read once by someone who has not seen the fix list, and run every claim rather than
+  argue with it.
+
+## 2026-11-23 — jsurvival module audit and fixes: a clean gate, a green suite, and three wrong outputs
+
+### The same parser guard existed in two analyses and was missing from four
+
+- **Failure mode:** `survival`, `survivalcont`, `singlearm` and `multisurvival` read text dates with bare
+  lubridate parsers. lubridate reads text of the wrong shape at 100%: `ymd_hms("15/01/2020 14:30")` is
+  2015-01-20, `mdy("12/2018")` is 2018-12-20. Follow-up times were wrong with no notice. `.parseDateText()`
+  in `R/utils-dateshape.R` already refused those readings, and its header documented them, but only
+  `datetimeconverter` and `timeinterval` called it.
+- **Detection signal:** a per-analysis read by four separate readers, each noticing the absent call; confirmed
+  by running the three inputs. The release gate read 0 blocking and the suite was green throughout.
+- **Prevention rule:** when a guard is added for a class of input, grep every other caller of the function it
+  wraps (`lubridate::ymd`, `survdiff`, `summary(survfit)`) and convert them in the same change. A guard that
+  lives in a helper file is a rule only for the analyses that call it.
+
+### A count taken from the data frame instead of its column
+
+- **Failure mode:** `table(factor(mydata, levels = 0:3))` in `outcomeorganizer`: `mydata` is the data frame, so
+  every count was 0 and the multi-state panel printed n = 0 four times. No test asserted the panel's numbers;
+  the tests checked the exported column.
+- **Detection signal:** a reader traced the argument; running the expression returned four zeros.
+- **Prevention rule:** a displayed count gets a test that asserts the count, on data where the right answer is
+  not 0. A test of the exported column says nothing about the text beside it.
+
+### A reader's "likely" finding needs the yaml before it is believed
+
+- **Failure mode (avoided):** one reader reported, as the most serious finding in `multisurvival`, that a stale
+  Cox narrative stays beside Fine-Gray results. It inferred that jamovi keeps an Html item's old text. Every
+  option change it named is in that item's `clearWith`, so the item is cleared.
+- **Detection signal:** parsing the `.r.yaml` and listing the item's `clearWith` before writing the finding up.
+- **Prevention rule:** a stale-result claim is checked against the parsed `clearWith` of the item, and a claim
+  about package behaviour is run. Four reader claims were dropped or narrowed this way; five were confirmed by
+  running them.
+
+### An older test pinned the behaviour a fix changes
+
+- **Failure mode:** `.populateSurvivalTable()` now breaks a `<` that would open a tag in a cell. A test from
+  2026-11-08 asserted the cell kept `<img src=x>` verbatim, and failed. The plan said to grep the tests for the
+  old behaviour before each change; for this change the grep was skipped.
+- **Detection signal:** the full-suite run after the slice (1 failing of 1,468).
+- **Prevention rule:** before changing a shared helper, `grep -rn '<helper name>' tests/` and read every hit.
+
+### A test run against "the new code" was partly a run against an installed package
+
+- **Failure mode:** to find umbrella tests that pin changed behaviour, 194 umbrella test files were run with
+  the jsurvival tree loaded. Several of them call `ClinicoPath::...` or the exported wrappers, so they ran the
+  installed ClinicoPath 1.0.81.1 and reported the old messages for both the old and the new tree. Equal
+  failure counts then looked like "nothing changed".
+- **Detection signal:** a failure message quoting text the new code no longer contains
+  ("Outcome variable must have exactly 2 observed values").
+- **Prevention rule:** umbrella tests are judged with the umbrella source loaded (`pkgload::load_all()` of the
+  umbrella, `TESTTHAT_PKG=ClinicoPath`), on the committed tree and on the new one, and compared by failing
+  block name, not by count. A count hides one block fixed and another broken.
+
+### A new test used bare `format()` and failed only under the umbrella
+
+- **Failure mode:** `format(parsed[1], "%Y")` in a test passed with the jsurvival tree loaded and failed with
+  the umbrella loaded, where jmvcore's `format()` masks base's.
+- **Detection signal:** the recheck of the new test file under the umbrella source.
+- **Prevention rule:** `base::format` in tests as in the package, and every new shared test file is run under
+  both trees before it is called done.
+
+### A test that reads the source cannot be baselined against an older tree
+
+- **Failure mode:** to classify umbrella test failures, the failing files were rerun with the committed tree
+  loaded. A test that reads `R/oddsratio.b.R` from disk reads the NEW file in both runs, so a failure this
+  work caused (two "Possible separation detected" lines where the test expected one) showed as "fails in both".
+- **Detection signal:** the old-tree message quoted a count only the new source could produce.
+- **Prevention rule:** a block that fails in both runs is read before it is called an older failure when the
+  test opens a source file (`readLines(`, `deparse(`, a path helper). Only behaviour tests are baselined by
+  loading another tree.
+
+### A `visible:` expression written like an `enable:` binding
+
+- **Failure mode:** `visible: (include_quality_metrics && dx_date && fu_date)` in an `.r.yaml`. jmvcore
+  evaluates `visible:` in R, where a Variable option is a string, so the analysis died with
+  "invalid 'y' type in 'x && y'". `(a && b)` on Variables is valid only in `.u.yaml` `enable:`.
+- **Detection signal:** the first run of any test of that analysis.
+- **Prevention rule:** in `.r.yaml`, a Variable inside `visible:` is always `length(x) > 0`.
+
+### New wrapped strings broke the module's own no-splice rule
+
+- **Failure mode:** `paste(.("Error:"), e$message)` was written while wrapping literals; the module's audit
+  test forbids `paste(.(` and `paste0(.(` in `survival` and `singlearm`.
+- **Detection signal:** the full-suite run (1 failing).
+- **Prevention rule:** a value beside a translated label is one template, `.pasteT(.("Error: {message}"), ...)`.
+  After any wrapping pass run `grep -nE 'paste0?\(\.\(' R/<file>` before the suite.
+
+### The before/after output run caught a flaw in a new sentence
+
+- **Failure mode:** the new calibration note listed the model's variables and printed "sex + age + age" when one
+  variable served both splines and age adjustment. The model itself uses it once.
+- **Detection signal:** the 36-configuration text comparison against the committed tree, read item by item.
+- **Prevention rule:** a sentence that lists what a model contains is built from the model's own term vector,
+  or deduplicated the same way the model is. Read every changed item in the comparison, not only the count.
+
 ## 2026-11-23 — jsurvival: every value-built sentence made translatable, and what the before/after run caught
 
 ### Sentences pasted around values never reached the catalogue

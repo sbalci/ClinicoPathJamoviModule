@@ -1,10 +1,10 @@
 ---
 name:  jjcorrmat
 title: Correlation Matrix
-menuGroup: JJStatsPlotT
+menuGroup: JJStatsPlot
 menuSubgroup: Continuous vs Continuous
 # menuSubtitle: Correlation Matrix
-version: '1.0.82'
+version: '1.1.6'
 jas: '1.2'
 
 

@@ -90,8 +90,9 @@ test_that("MS-02: a variable in an interaction is never the strongest predictor"
   main <- .rr_plain(r$multivariableCoxSummary$content)
   clin <- .rr_plain(paste(r$fittedTable$asString(), r$text$content))
   for (txt in list(main, clin)) {
-    expect_match(txt, "Strongest predictor: grade", perl = TRUE)
-    expect_match(txt, "are not ranked here", fixed = TRUE)
+    # No ranking sentence any more (2026-11-23 audit); the interaction caveat stays.
+    expect_false(grepl("Strongest predictor", txt, fixed = TRUE))
+    expect_match(txt, "apply only at the values stated under the table", fixed = TRUE)
   }
 })
 

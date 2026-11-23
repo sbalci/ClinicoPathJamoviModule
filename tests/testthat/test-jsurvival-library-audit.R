@@ -1212,3 +1212,48 @@ test_that("jsurvival summaries and messages built around values go through the t
   }
   audit_skip_unloaded(wanted)
 })
+
+# Release-profile check 2026-11-23: with no complete row left, the message has to name that, not a
+# symptom further down (multisurvival blamed the explanatory variable, lassocox the predictors).
+test_that("an entirely missing time column is reported as missing data", {
+  set.seed(7)
+  n <- 80
+  d <- data.frame(time = NA_real_, status = factor(sample(c("Alive", "Dead"), n, TRUE)),
+                  arm = factor(sample(c("A", "B"), n, TRUE)), age = round(stats::rnorm(n, 60, 10)),
+                  marker = stats::rnorm(n))
+  failure <- function(analysis, ...) {
+    a <- get(paste0(analysis, "Class"))$new(options = get(paste0(analysis, "Options"))$new(...), data = d)
+    tryCatch({ suppressWarnings(suppressMessages({ a$init(); a$run() })); "" }, error = function(e) conditionMessage(e))
+  }
+  wanted <- c("survival", "multisurvival", "lassocox")
+  loaded <- audit_loaded(wanted)
+  if ("survival" %in% loaded) {
+    msg <- failure("survival", elapsedtime = "time", outcome = "status", outcomeLevel = "Dead", explanatory = "arm")
+    expect_match(msg, "No complete records remain")
+    # The horizon a reader sees is the horizon the estimate used (it was shown to one decimal).
+    d$time <- round(stats::rexp(n, 0.05) + 0.513, 3)
+    a <- get("survivalClass")$new(options = get("survivalOptions")$new(
+      elapsedtime = "time", outcome = "status", outcomeLevel = "Dead", explanatory = "arm", rmst_analysis = TRUE), data = d)
+    suppressWarnings(suppressMessages({ a$init(); a$run() }))
+    shown <- a$results$rmstTable$asDF
+    fit <- survival::survfit(survival::Surv(time, status == "Dead") ~ arm, data = d)
+    # Unrounded since the 2026-11-23 audit: the table formats the number, the backend does not round it.
+    expect_equal(shown$rmst, unname(summary(fit, rmean = shown$tau[1], extend = TRUE)$table[, "rmean"]), tolerance = 1e-8)
+    notes <- paste(vapply(a$results$rmstTable$notes, function(x) x$note, ""), collapse = " ")
+    expect_match(notes, base::format(signif(shown$tau[1], 6), trim = TRUE), fixed = TRUE)
+    d$time <- NA_real_
+  }
+  if ("multisurvival" %in% loaded) {
+    msg <- failure("multisurvival", elapsedtime = "time", outcome = "status", outcomeLevel = "Dead",
+                   explanatory = "arm", contexpl = "age")
+    expect_match(msg, "No complete records remain")
+    expect_no_match(msg, "has only one value")
+  }
+  if ("lassocox" %in% loaded) {
+    msg <- failure("lassocox", elapsedtime = "time", outcome = "status", outcomeLevel = "Dead",
+                   explanatory = c("age", "marker", "arm"))
+    expect_match(msg, "Too few complete cases")
+    expect_no_match(msg, "constant predictors")
+  }
+  audit_skip_unloaded(wanted)
+})

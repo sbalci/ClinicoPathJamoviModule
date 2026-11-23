@@ -603,7 +603,7 @@ survivalcontResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
             self$add(jmvcore::Html$new(
                 options=options,
                 name="eventRecodeInfo",
-                title="Outcome Recode",
+                title="Outcome Recode Notes",
                 visible=TRUE,
                 clearWith=list(
                     "outcome",
@@ -1324,11 +1324,11 @@ survivalcontResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                         `type`="integer"),
                     list(
                         `name`="rmean", 
-                        `title`="rmean", 
+                        `title`="Restricted mean", 
                         `type`="number"),
                     list(
                         `name`="se_rmean", 
-                        `title`="se_rmean", 
+                        `title`="SE (restricted mean)", 
                         `type`="number"),
                     list(
                         `name`="median", 
@@ -1416,7 +1416,7 @@ survivalcontResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                         `type`="text"),
                     list(
                         `name`="time", 
-                        `title`="time", 
+                        `title`="Time", 
                         `type`="number", 
                         `format`="zto"),
                     list(
@@ -2095,7 +2095,7 @@ survivalcontBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             super$initialize(
                 package = "ClinicoPath",
                 name = "survivalcont",
-                version = c(1,1,5),
+                version = c(1,1,6),
                 options = options,
                 results = survivalcontResults$new(options=options),
                 data = data,

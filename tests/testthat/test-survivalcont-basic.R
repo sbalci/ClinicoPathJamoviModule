@@ -89,8 +89,10 @@ test_that("survivalcont handles age as continuous variable", {
 })
 
 test_that("survivalcont gives a safe competing-risk handoff", {
-  result <- run_survivalcont(
-    data = survivalcont_compete,
+  # The refusal is a jmvcore::reject() now; the instance is run directly so the error panel
+  # filled before the rejection can still be read.
+  analysis <- run_survivalcont_jamovi(
+    data = as.data.frame(survivalcont_compete),
     elapsedtime = "time_months",
     outcome = "outcome",
     outcomeLevel = "Dead",
@@ -102,9 +104,9 @@ test_that("survivalcont gives a safe competing-risk handoff", {
     awd = "Alive_Disease",
     awod = "Alive_NED"
   )
-  expect_s3_class(result, "survivalcontResults")
-  expect_match(result$errors$content, "Competing risks not available")
-  expect_equal(result$coxTable$rowCount, 0)
+  expect_error(analysis$run(), "does not support competing risks", fixed = TRUE)
+  expect_match(analysis$results$errors$content, "Competing risks not available")
+  expect_equal(analysis$results$coxTable$rowCount, 0)
 })
 
 test_that("survivalcont handles survival plot", {

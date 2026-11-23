@@ -370,14 +370,13 @@ test_that("VAL-C1..C3: Row permutation, positive time scaling, and cohort duplic
 test_that("VAL-D & E: Boundary guards, outcomeorganizer hand-off coding, HTML sweep, and bibliography integrity", {
   # Negative & infinite survival time guards
   d_neg <- data.frame(time = c(-2, 5, 10, 15, 20), status = c(1L, 0L, 1L, 0L, 1L))
-  r_neg <- .sa_val_run(d_neg, elapsedtime = "time", outcome = "status", outcomeLevel = "1")
-  expect_match(.strip_html(r_neg$errors$content), "time value\\(s\\) are negative")
-  expect_equal(nrow(r_neg$medianTable$asDF), 0L)
+  # Refused with jmvcore::reject() now, so the wrapper returns no results object to inspect.
+  expect_error(.sa_val_run(d_neg, elapsedtime = "time", outcome = "status", outcomeLevel = "1"),
+               "time value\\(s\\) are negative")
 
   d_inf <- data.frame(time = c(Inf, 5, 10, 15, 20), status = c(1L, 0L, 1L, 0L, 1L))
-  r_inf <- .sa_val_run(d_inf, elapsedtime = "time", outcome = "status", outcomeLevel = "1")
-  expect_match(.strip_html(r_inf$errors$content), "infinite \\(Inf\\)")
-  expect_equal(nrow(r_inf$medianTable$asDF), 0L)
+  expect_error(.sa_val_run(d_inf, elapsedtime = "time", outcome = "status", outcomeLevel = "1"),
+               "infinite \\(Inf\\)")
 
   # outcomeorganizer hand-off: Event vs Competing refocusing and Censored rejection
   d_ho <- data.frame(
@@ -389,12 +388,13 @@ test_that("VAL-D & E: Boundary guards, outcomeorganizer hand-off coding, HTML sw
                          multievent = FALSE, cutp = "4, 12, 20")
   r_ho_cp <- .sa_val_run(d_ho, elapsedtime = "time", outcome = "status_ho", outcomeLevel = "Competing",
                          multievent = FALSE, cutp = "4, 12, 20")
-  r_ho_ce <- .sa_val_run(d_ho, elapsedtime = "time", outcome = "status_ho", outcomeLevel = "Censored",
-                         multievent = FALSE, cutp = "4, 12, 20")
+  expect_error(
+    .sa_val_run(d_ho, elapsedtime = "time", outcome = "status_ho", outcomeLevel = "Censored",
+                multievent = FALSE, cutp = "4, 12, 20"),
+    "'Censored' cannot be selected as the event level", fixed = TRUE)
   expect_equal(r_ho_cp$survTable$asDF$surv,
                r_ho_ev$cifTable$asDF$estimate[r_ho_ev$cifTable$asDF$cause == "Competing event(s)"],
                tolerance = 1e-12)
-  expect_match(.strip_html(r_ho_ce$errors$content), "'Censored' cannot be selected as the event level")
 
   # Bibliography integrity
   r_yaml <- yaml::read_yaml(file.path(.root, "jamovi", "singlearm.r.yaml"))
@@ -416,7 +416,8 @@ test_that("VAL-singlearm-01: cifTable 'Event of interest' 95% CIs match survTabl
   res <- .sa_val_run(
     d_mgus, elapsedtime = "ptime", outcome = "event_state",
     multievent = TRUE, analysistype = "compete",
-    dod = "PCM", dooc = "Death_No_PCM", awd = "Alive", awod = "Alive",
+    # One level, one category: "Alive" in both awd and awod is refused now.
+    dod = "PCM", dooc = "Death_No_PCM", awd = NULL, awod = "Alive",
     cutp = "12, 60, 120", cif_all_causes = TRUE
   )
   cif_ev <- res$cifTable$asDF[res$cifTable$asDF$cause == "Event of interest", ]

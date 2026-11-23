@@ -25,9 +25,10 @@ msv_df <- function(n = 220, seed = 77) {
     )
 }
 
-# multisurvival renders the Cox table as HTML; pull the HR cells back out.
+# multisurvival fills the Cox results into fittedTable (one text cell per
+# "HR (CI, p)"); pull the HR cells back out.
 msv_hr_cells <- function(res) {
-    txt <- paste(as.character(res$text$content), collapse = " ")
+    txt <- paste(unlist(lapply(res$fittedTable$asDF, as.character)), collapse = " ")
     regmatches(txt, gregexpr("[0-9]+\\.[0-9]{2} \\([0-9.]+-[0-9.]+, p=[0-9.]+\\)", txt))[[1]]
 }
 msv_nums <- function(cell) as.numeric(regmatches(cell, gregexpr("[0-9]+\\.[0-9]+", cell))[[1]])
@@ -154,10 +155,15 @@ test_that("Fine-Gray subdistribution HRs match survival::finegray + coxph", {
 
     txt <- paste(as.character(res$text$content), collapse = " ")
     expect_match(txt, "Fine-Gray")
+    # The sHRs are rows of fittedTable: Variable | sHR (95% CI) | p-value.
+    hdr <- vapply(res$fittedTable$columns, function(x) x$title, character(1))
+    expect_identical(hdr[[2]], "sHR (95% CI)")
+    fg_tab <- res$fittedTable$asDF
     # sHR for trt: B vs A
-    got <- as.numeric(regmatches(
-        txt, gregexpr("[0-9]\\.[0-9]{2} \\([0-9.]+-[0-9.]+\\)", txt))[[1]][1] |>
-        (\(s) regmatches(s, gregexpr("[0-9]+\\.[0-9]+", s))[[1]])())
+    cell <- as.character(fg_tab[[2]][startsWith(as.character(fg_tab[[1]]), "trt: B")])
+    expect_length(cell, 1L)
+    expect_match(cell, "^[0-9]+\\.[0-9]{2} \\([0-9.]+-[0-9.]+\\)$")
+    got <- msv_nums(cell)
     expect_equal(got[1], unname(round(ref["trtB", "exp(coef)"], 2)), tolerance = 0.011)
 })
 

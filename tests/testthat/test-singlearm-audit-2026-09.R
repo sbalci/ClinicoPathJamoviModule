@@ -99,8 +99,9 @@ test_that("N1: .addWarning(strong = TRUE) renders as STRONG_WARNING, plain as WA
 
   html <- rec$content$warnings
   expect_true(isTRUE(rec$visible$warnings))
-  expect_match(html, "<strong> WARNING:</strong> ordinary caution", fixed = TRUE)
-  expect_match(html, "<strong> STRONG_WARNING:</strong> loud caution", fixed = TRUE)
+  # The card shows a readable severity since the 2026-11-23 audit, not the internal key.
+  expect_match(html, "<strong> Warning:</strong> ordinary caution", fixed = TRUE)
+  expect_match(html, "<strong> Strong warning:</strong> loud caution", fixed = TRUE)
   # BEFORE: a keyword grep ("Very few events|critically") no message contained.
   expect_false(grepl("Very few events|critically", m$env$singlearmClass$private_methods$.displayMessages |>
                        deparse() |> paste(collapse = "\n")))

@@ -296,15 +296,17 @@ test_that("Error handling works correctly", {
   # Test with invalid outcome variable (more than 2 levels for binary)
   test_data$bad_outcome <- sample(0:3, nrow(test_data), replace = TRUE)
   
-  bad_outcome_result <- run_survivalcont(
+  # Refused with jmvcore::reject() now; the instance is run directly so the error panel filled
+  # before the rejection can still be read.
+  bad_outcome_analysis <- run_survivalcont_jamovi(
     data = test_data,
     elapsedtime = "time",
     outcome = "bad_outcome",
     contexpl = "age"
   )
-  expect_s3_class(bad_outcome_result, "survivalcontResults")
-  expect_match(bad_outcome_result$errors$content, "Outcome variable problem")
-  expect_equal(bad_outcome_result$coxTable$rowCount, 0)
+  expect_error(bad_outcome_analysis$run(), "is numeric but not coded 0/1", fixed = TRUE)
+  expect_match(bad_outcome_analysis$results$errors$content, "Outcome variable problem")
+  expect_equal(bad_outcome_analysis$results$coxTable$rowCount, 0)
   
   # Test with missing required variables
   expect_error(

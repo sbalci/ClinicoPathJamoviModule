@@ -179,7 +179,7 @@
 #' @keywords internal
 .medianFollowUpText <- function(mfu, unit = "", conf_level = 0.95) {
     . <- .callerTranslator(parent.frame())   # jmvcore's .() needs `self`; a file-level helper has none
-    if (is.null(mfu) || length(mfu$value) == 0L || is.na(mfu$value)) return("not estimable")
+    if (is.null(mfu) || length(mfu$value) == 0L || is.na(mfu$value)) return(.("not estimable"))
     txt <- .fmtTimeLabel(mfu$value)
     if (nzchar(unit)) txt <- paste(txt, unit)
     if (!is.na(mfu$ci_lower) && !is.na(mfu$ci_upper))

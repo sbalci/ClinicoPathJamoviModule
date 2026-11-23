@@ -26,14 +26,13 @@ test_that("timeinterval handles missing inputs gracefully", {
     end_date = c("2020-06-01", "2020-08-01")
   )
   
-  # Test with NULL date columns (should provide a clear error)
-  expect_error(
-    timeinterval(
-      data = test_data,
-      dx_date = NULL,
-      fu_date = NULL
-    )
-  )
+  # No date column selected is the getting-started state, not an error: the welcome panel
+  # says what to select and nothing is calculated.
+  res <- timeinterval(data = test_data, dx_date = NULL, fu_date = NULL)
+  expect_match(res$todo$content, "Welcome to Time Interval Calculator", fixed = TRUE)
+  expect_match(res$todo$content, "select your <b>Start Date</b> and <b>End Date</b> variables", fixed = TRUE)
+  expect_identical(res$summary$content, "<div></div>")
+  expect_identical(res$messages$content, "<div></div>")
 })
 
 test_that("timeinterval basic functionality works", {

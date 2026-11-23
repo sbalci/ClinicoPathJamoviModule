@@ -111,7 +111,7 @@ Kaplan-Meier probability is net/cause-specific survival and can overstate
 real-world absolute risk when other-cause death competes. Disease-Free
 counts death and Alive with Disease as events; the supplied time for Alive
 with Disease must be time to recurrence/progression, not last follow-up.
-Competing Risk estimates cumulative incidence of Dead of Disease while
+Competing Risks estimates cumulative incidence of Dead of Disease while
 retaining Dead of Other Causes as a competing terminal event.}
 
 \item{cutp}{Time points at which to report survival probabilities, as a
@@ -173,7 +173,9 @@ Use cumulative event probability for the Kaplan-Meier estimate 1 - S(t).}
 \item{endplot}{The maximum time point to include in the survival plots.
 This is the end time for the survival curves and cumulative event/hazard
 plots, in the selected Time Unit. Must be greater than zero; zero or a
-negative value is rejected rather than drawn.}
+negative value is rejected rather than drawn. The factory value 60 means
+five years in the selected time unit (1825 days, 260 weeks, 60 months, 5
+years); any other value is used as entered.}
 
 \item{ybegin_plot}{The minimum value for the probability y-axis in the
 Kaplan-Meier, cumulative-incidence, and cumulative-event plots. It must be
@@ -186,7 +188,9 @@ between 0 and 1 and above the start value. Cumulative hazard is auto-scaled
 and the KMunicate-style plot manages its own y-axis.}
 
 \item{byplot}{The spacing between tick marks on the time axis. Must be
-greater than zero; zero or a negative value is rejected rather than drawn.}
+greater than zero; zero or a negative value is rejected rather than drawn.
+The factory value 12 means one year in the selected time unit (365 days, 52
+weeks, 12 months, 1 year); any other value is used as entered.}
 
 \item{multievent}{Enable this option to perform survival analysis for
 datasets with multiple event levels. This is useful for competing risk

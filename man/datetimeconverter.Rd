@@ -40,12 +40,14 @@ datetime representations.}
 identifies the format from the shape of the text and warns when day-first
 and month-first parsing both succeed but disagree; year-month dates have no
 day, so they are set to the 1st of the month with a warning. Manual
-selection ensures accurate parsing for specific datetime formats; a value
-that cannot have the selected format is left empty. Excel serial numbers
-use the 1899-12-30 origin, which is exact for dates from 1900-03-01 onward
-(Excel's 1900 system wrongly counts a 29 February 1900). A serial number
-does not record which epoch produced it, so auto-detection assumes the 1900
-system (the default in Windows Excel and in Mac Excel 2011 and later) and
+selection ensures accurate parsing for specific datetime formats; a text
+value that cannot have the selected format is left empty, and a numeric
+column that cannot be read in a text format is read as serial numbers,
+which the Format Detection panel then says. Excel serial numbers use the
+1899-12-30 origin, which is exact for dates from 1900-03-01 onward (Excel's
+1900 system wrongly counts a 29 February 1900). A serial number does not
+record which epoch produced it, so auto-detection assumes the 1900 system
+(the default in Windows Excel and in Mac Excel 2011 and later) and
 discloses that assumption. Choose 'excel_serial_1904' for files exported
 from Mac Excel 2008 or earlier; the same number is 1462 days later under
 that system.}

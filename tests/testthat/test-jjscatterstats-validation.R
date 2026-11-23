@@ -89,8 +89,8 @@ test_that("C01: parametric Pearson r, t, df, p, Fisher-z CI and n match closed-f
   expect_equal(s$n_pairs,  8L)
 })
 
-test_that("C02: nonparametric Spearman rho, S, t-approx p and Fieller CI match closed-form oracle on tied data", {
-  # Oracle: average-rank Pearson r, S = (n^3-n)(1-rho)/6, Fieller et al. (1957, DOI:10.1093/biomet/44.3-4.470) CI
+test_that("C02: nonparametric Spearman rho, S, t-approx p and Bonett-Wright CI match closed-form oracle on tied data", {
+  # Oracle: average-rank Pearson r, S = (n^3-n)(1-rho)/6, Bonett & Wright (2000, DOI:10.1007/BF02294183) CI
   skip_if_not_installed("ggstatsplot")
   d <- val_tiny()
   ok <- is.finite(d$x) & is.finite(d$y)
@@ -98,7 +98,7 @@ test_that("C02: nonparametric Spearman rho, S, t-approx p and Fieller CI match c
   rho_true <- stats::cor(rank(x), rank(y))
   S_true <- (n^3 - n) * (1 - rho_true) / 6
   p_true <- 2 * stats::pt(-abs(rho_true * sqrt((n - 2) / (1 - rho_true^2))), df = n - 2)
-  ci_true <- tanh(atanh(rho_true) + c(-1, 1) * stats::qnorm(0.975) * sqrt(1.06 / (n - 3)))
+  ci_true <- tanh(atanh(rho_true) + c(-1, 1) * stats::qnorm(0.975) * sqrt((1 + (rho_true^2) / 2) / (n - 3)))
 
   res <- suppressWarnings(ClinicoPath::jjscatterstats(
     data = d, dep = "x", group = "y", typestatistics = "nonparametric", k = 5, conflevel = 0.95
@@ -300,11 +300,10 @@ test_that("C29/C30: Bayesian seed determinism and R syntax export round-trip", {
   )
 })
 
-# --- SKIP-GUARDED REGRESSION TESTS FOR CONFIRMED OPEN DEFECTS -----------------
+# --- LIVE REGRESSION TESTS FOR FIXED DEFECTS ----------------------------------
 
 test_that("C04/C05: Bayesian credible interval honors conflevel (80%, 95%, 99% HDI)", {
   # Oracle: BayesFactor::posterior(correlationBF(rscale=0.707)) shortest-interval HDI
-  skip("VAL-jjscatterstats-01 open defect: correlation:::.cor_test_bayes_base drops ci=, labelling 95% HDI as CI_80%/CI_99%. Remove this skip when fixed.")
   skip_if_not_installed("ggstatsplot")
   skip_if_not_installed("BayesFactor")
   set.seed(505)
@@ -319,7 +318,6 @@ test_that("C04/C05: Bayesian credible interval honors conflevel (80%, 95%, 99% H
 
 test_that("C02/C07: small-n perfect-rank Spearman uses exact permutation p (1/3 at n=3, 1/12 at n=4), not 2.23e-308", {
   # Oracle: exact two-sided permutation probability 2 / n!
-  skip("VAL-jjscatterstats-02 open defect: Spearman exact=FALSE yields p=2.23e-308 (plot3 p<0.001) on n=3/4 perfect ranks where exact p=0.333/0.083. Remove this skip when fixed.")
   skip_if_not_installed("ggstatsplot")
   d4 <- data.frame(x = c(1, 2, 3, 4), y = c(10, 20, 30, 40))
   s <- val_parse_expr(val_render(ClinicoPath::jjscatterstats(data = d4, dep = "x", group = "y", typestatistics = "nonparametric", k = 4)$plot)$labels$subtitle)
@@ -328,7 +326,6 @@ test_that("C02/C07: small-n perfect-rank Spearman uses exact permutation p (1/3 
 
 test_that("C03: robust Winsorized Pearson uses Wilcox df = h - 2 = n - 2g - 2 and matching p-value", {
   # Oracle: WRS2::wincor(tr = 0.2) (Wilcox 2012, Sec. 9.3.4)
-  skip("VAL-jjscatterstats-03 open defect: Winsorized Pearson uses unadjusted df=n-2 and naive Fisher-z CI instead of Wilcox df=h-2. Remove this skip when fixed.")
   skip_if_not_installed("ggstatsplot")
   skip_if_not_installed("WRS2")
   d <- val_tiny()
@@ -340,7 +337,6 @@ test_that("C03: robust Winsorized Pearson uses Wilcox df = h - 2 = n - 2g - 2 an
 
 test_that("C20: LOO influence guard is numerically stable at 1e8/1e9 offsets and flags single-point-created variance", {
   # Oracle: brute-force leave-one-out stats::cor(x[-i], y[-i])
-  skip("VAL-jjscatterstats-04 open defect: uncentered m*sxx - sx^2 produces r_loo=2.12 at 1e8 offset and misses 1e9/single-point outliers. Remove this skip when fixed.")
   set.seed(11)
   xc <- rnorm(50); yc <- 0.5 * xc + rnorm(50, 0, 0.8)
   w_clean <- ClinicoPath::jjscatterstats(data = data.frame(x = 1e8 + xc, y = 1e8 + yc), dep = "x", group = "y")$warnings$content %||% ""
@@ -354,7 +350,6 @@ test_that("C20: LOO influence guard is numerically stable at 1e8/1e9 offsets and
 
 test_that("C14: clinicalPreset overrides persist across jamovi redraw without .run()", {
   # Oracle: biomarker_correlation must render Spearman even on fresh init()+.plot() redraw
-  skip("VAL-jjscatterstats-05 open defect: private$overrides is only populated in .run() and reverts on redraw. Remove this skip when fixed.")
   set.seed(505)
   d <- data.frame(x = rnorm(40), y = rnorm(40))
   o <- ClinicoPath:::jjscatterstatsOptions$new(dep = "x", group = "y", clinicalPreset = "biomarker_correlation", k = 5)
@@ -368,7 +363,6 @@ test_that("C14: clinicalPreset overrides persist across jamovi redraw without .r
 
 test_that("C10: ggpubrPlot2 excludes rows with NA in grvar so panel count matches plot2", {
   # Oracle: plot2 (grouped_ggscatterstats) drops NA grvar rows; ggpubrPlot2 must match
-  skip("VAL-jjscatterstats-06 open defect: ggpubrPlot2 keeps NA in grvar as an extra facet. Remove this skip when fixed.")
   skip_if_not_installed("ggpubr")
   bc <- ClinicoPath::jjscatterstats_clinical
   res <- suppressWarnings(ClinicoPath::jjscatterstats(
@@ -382,7 +376,6 @@ test_that("C10: ggpubrPlot2 excludes rows with NA in grvar so panel count matche
 
 test_that("C06: grouped degenerate subgroup emits warning and avoids literal 'NULL == \"NA\"' plotmath", {
   # Oracle: degenerate guard must apply per grvar stratum
-  skip("VAL-jjscatterstats-07 open defect: .run() only checks pooled data, missing n=2 / constant subgroups. Remove this skip when fixed.")
   set.seed(1)
   d <- data.frame(
     x = c(rnorm(20), 1, 2, 1:10),
@@ -395,7 +388,6 @@ test_that("C06: grouped degenerate subgroup emits warning and avoids literal 'NU
 
 test_that("C07/C11: plot3 honors resultssubtitle=FALSE, conflevel on geom_smooth, and clean p-formatting at k=5", {
   # Oracle: option contract for resultssubtitle, conflevel, and k
-  skip("VAL-jjscatterstats-08 open defect: .plot3 ignores resultssubtitle=FALSE and conflevel, and prints 'p < 0.00100' at k=5. Remove this skip when fixed.")
   set.seed(505)
   d <- data.frame(x = rnorm(60), col = factor(rep(c("A", "B"), 30)))
   d$y <- 0.85 * d$x + rnorm(60, 0, 0.4)
@@ -408,7 +400,6 @@ test_that("C07/C11: plot3 honors resultssubtitle=FALSE, conflevel on geom_smooth
 
 test_that("C09/C11/C15: ggpubrPlot honors conflevel, k, constant-y guard, and clearWith titles", {
   # Oracle: ggpubr::ggscatter conf.int.level and stat_cor digits options
-  skip("VAL-jjscatterstats-09 open defect: .plotGGPubr ignores conflevel and k, renders 'R = NA, NA' on constant y, and omits titles from clearWith. Remove this skip when fixed.")
   skip_if_not_installed("ggpubr")
   set.seed(505)
   d <- data.frame(x = rnorm(60)); d$y <- 0.52 * d$x + rnorm(60, 0, 0.85)
@@ -422,7 +413,6 @@ test_that("C09/C11/C15: ggpubrPlot honors conflevel, k, constant-y guard, and cl
 
 test_that("C23: multiplicity warning fires for ggpubrPlot2 even when resultssubtitle=FALSE", {
   # Oracle: unadjusted per-panel tests in ggpubrPlot2 require multiplicity disclosure
-  skip("VAL-jjscatterstats-10 open defect: multiplicity guard checks resultssubtitle only, missing ggpubrAddCorr on ggpubrPlot2. Remove this skip when fixed.")
   set.seed(505)
   d <- data.frame(x = rnorm(60), y = rnorm(60), g = factor(rep(c("G1", "G2", "G3"), 20)))
   res <- suppressWarnings(ClinicoPath::jjscatterstats(
@@ -434,7 +424,6 @@ test_that("C23: multiplicity warning fires for ggpubrPlot2 even when resultssubt
 
 test_that("C21: curvature guard remains accurate on large-offset parabolas (1e9 + x)", {
   # Oracle: centered quadratic fit R^2 = 1.0 vs linear R^2 = 0.0
-  skip("VAL-jjscatterstats-12 open defect: uncentered lm(b ~ a + I(a^2)) fails at 1e9 offset. Remove this skip when fixed.")
   u <- data.frame(x = 1e9 + seq(-3, 3, length.out = 20))
   u$y <- (u$x - 1e9)^2
   expect_match(ClinicoPath::jjscatterstats(data = u, dep = "x", group = "y")$warnings$content, "not a straight line", fixed = TRUE)
@@ -442,7 +431,6 @@ test_that("C21: curvature guard remains accurate on large-offset parabolas (1e9 
 
 test_that("C29/C16: no spurious seed caption when resultssubtitle=FALSE and explicit guard for dep==group", {
   # Oracle: captionSeedMatters must respect resultssubtitle; dep==group must not silently drop subtitle
-  skip("VAL-jjscatterstats-15 open defect: spurious seed caption on parametric+bfmessage=T+resultssubtitle=F; dep==group drops subtitle silently. Remove this skip when fixed.")
   set.seed(505)
   d <- data.frame(x = rnorm(60), y = rnorm(60))
   r_bf <- suppressWarnings(ClinicoPath::jjscatterstats(

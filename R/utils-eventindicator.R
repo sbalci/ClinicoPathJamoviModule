@@ -114,8 +114,8 @@
     if (isTRUE(multievent)) {
 
         buckets <- list(dod = dod, dooc = dooc, awd = awd, awod = awod)
-        titles  <- c(dod  = "Dead of Disease",   dooc = "Dead of Other Causes",
-                     awd  = "Alive with Disease", awod = "Alive without Disease")
+        titles  <- c(dod  = .("Dead of Disease"),   dooc = .("Dead of Other Causes"),
+                     awd  = .("Alive with Disease"), awod = .("Alive without Disease"))
         filled  <- vapply(buckets, function(b) !is.null(b) && length(b) > 0, logical(1))
 
         if (!any(filled))
@@ -349,7 +349,7 @@
 #' @param outcome_name Display name of the outcome variable.
 #' @return A character string of HTML.
 #' @keywords internal
-.describeEventIndicator <- function(res, outcome_name = "outcome") {
+.describeEventIndicator <- function(res, outcome_name = "outcome", followup = TRUE) {
 
     if (is.null(res) || !is.null(res$error)) return("")
 
@@ -382,10 +382,10 @@
                  levels = cens),
             " ",
             if (collapsed_terminal)
-                .("If a collapsed level is a competing terminal event (for example death from another cause), Kaplan-Meier estimates net/cause-specific survival rather than real-world cumulative incidence: 1 - KM overstates the absolute risk (cumulative incidence) of the event, while KM overstates the probability of surviving free of both the target event and competing death. Use Multiple Event Levels with survival type Competing Risk to estimate cumulative incidence.")
+                .("If a collapsed level is a competing terminal event (for example death from another cause), Kaplan-Meier estimates net/cause-specific survival rather than real-world cumulative incidence: 1 - KM overstates the absolute risk (cumulative incidence) of the event, while KM overstates the probability of surviving free of both the target event and competing death. Use Multiple Event Levels with survival type Competing Risks to estimate cumulative incidence.")
             else
                 .("This assumption cannot be verified from the displayed summaries."),
-            if (length(res$censored_labels) >= 2L &&
+            if (followup && length(res$censored_labels) >= 2L &&
                 !res$estimand %in% c("overall survival", "cause-specific survival",
                                      "disease-free survival", "competing risks")) paste0(
                 " ",
@@ -504,6 +504,8 @@
         "overall survival" = .("overall survival"),
         "cause-specific survival" = .("cause-specific survival"),
         "disease-free survival" = .("disease-free survival"),
+        "recurrence-free survival" = .("recurrence-free survival"),
+        "progression-free survival" = .("progression-free survival"),
         "competing risks" = .("competing risks"),
         "Kaplan-Meier survival for the selected event" = .("Kaplan-Meier survival for the selected event"),
         "Kaplan-Meier survival for the coded event" = .("Kaplan-Meier survival for the coded event"),
@@ -512,4 +514,17 @@
         .("Estimand:"), " ", estimand, ". ",
         .("Counts are taken before analysis-specific row exclusions.")))
     invisible(table)
+}
+
+# The welcome panel is also what a user sees with Multiple Event Levels on and no level assigned
+# yet. This line says that is what is missing; "" in every other state.
+.multiEventPending <- function(options) {
+    . <- .callerTranslator(parent.frame())
+    if (!isTRUE(options$multievent) || is.null(options$outcome)) return("")
+    filled <- vapply(list(options$dod, options$dooc, options$awd, options$awod),
+                     function(m) !is.null(m) && length(m) > 0, logical(1))
+    if (any(filled)) return("")
+    paste0("<p style='padding:8px 10px;border-left:4px solid #2b6cb0;background-color:rgba(43,108,176,0.08);color:inherit;'>",
+           .("Multiple Event Levels is on, and no outcome level has been assigned yet. Assign the levels of the outcome to Dead of Disease, Dead of Other Causes, Alive with Disease or Alive without Disease to continue."),
+           "</p>")
 }

@@ -704,7 +704,7 @@ jjsegmentedtotalbarBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
             super$initialize(
                 package = "ClinicoPath",
                 name = "jjsegmentedtotalbar",
-                version = c(1,0,81),
+                version = c(1,1,6),
                 options = options,
                 results = jjsegmentedtotalbarResults$new(options=options),
                 data = data,

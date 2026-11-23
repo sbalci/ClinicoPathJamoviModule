@@ -221,3 +221,76 @@
     has_input <- !is.na(raw) & nzchar(trimws(as.character(raw)))
     list(n_failed = sum(has_input & is.na(parsed)), n_inputs = sum(has_input))
 }
+
+#' Read the two text date columns of a survival analysis
+#'
+#' Reads both columns under the analysis's date type with the shape guard
+#' (`.parseDateText()`), so text the type cannot have comes back missing instead
+#' of as another date, and reports two-digit years with the reading they got.
+#'
+#' @param start_raw,end_raw The two text columns.
+#' @param fmt The `timetypedata` key.
+#' @return A list: `start`, `end` (parsed), `n_failed`, `n_inputs`, `n_shape`
+#'   (values refused for their shape) and `two_digit` (see `.twoDigitYears()`).
+#' @noRd
+.readSurvivalDates <- function(start_raw, end_raw, fmt) {
+    start_raw <- as.character(start_raw)
+    end_raw <- as.character(end_raw)
+    start <- .parseDateText(start_raw, fmt)
+    end <- .parseDateText(end_raw, fmt)
+    failed_start <- .countDateParseFailures(start_raw, start)
+    failed_end <- .countDateParseFailures(end_raw, end)
+    two_start <- .twoDigitYears(start_raw, start)
+    two_end <- .twoDigitYears(end_raw, end)
+    list(start = start, end = end,
+         n_failed = failed_start$n_failed + failed_end$n_failed,
+         n_inputs = failed_start$n_inputs + failed_end$n_inputs,
+         n_shape = length(.dateMisfits(start_raw, fmt)) + length(.dateMisfits(end_raw, fmt)),
+         two_digit = if (two_start$n > 0L) c(two_start, list(total = two_start$n + two_end$n))
+                     else c(two_end, list(total = two_end$n)))
+}
+
+#' Notes on how the date columns of a survival analysis were read
+#'
+#' @param read The value of `.readSurvivalDates()`.
+#' @return A list: `shape`, a sentence to append to the unreadable-dates message
+#'   ("" when no value was refused for its shape), and `two_digit`, a message
+#'   (NULL when no two-digit year was read).
+#' @noRd
+.survivalDateNotes <- function(read) {
+    . <- .callerTranslator(parent.frame())   # jmvcore's .() needs `self`; a file-level helper has none
+    list(
+        shape = if (read$n_shape > 0L) .fmt(
+            .("{n} date value(s) have a form the selected date type cannot have, such as a time without seconds or a month and year without a day. DateTime Converter can rewrite the column in one format."),
+            n = read$n_shape) else "",
+        two_digit = if (read$two_digit$total > 0L) .fmt(
+            .("{count} date value(s) were written with a two-digit year, and the selected date type decided which two digits are the year: for example '{raw}' was read as {parsed}. If that is not the date meant, rewrite the column with four-digit years (DateTime Converter can do this) before relying on the times below."),
+            count = read$two_digit$total, raw = read$two_digit$raw, parsed = read$two_digit$parsed))
+}
+
+#' Plot x-axis extent and tick spacing in the output time unit
+#'
+#' `endplot` and `byplot` are numeric options, so their defaults are single
+#' numbers: 60 and 12, which are five years and one year only in months. On a
+#' day scale every curve was cut at day 60, and on a year scale the axis ran to
+#' 60 years. An untouched factory value is therefore read as "five years" and
+#' "one year" in the selected unit; any other value is the user's own. When the
+#' user's own window is shorter than two years, the untouched spacing becomes a
+#' fifth of the window, so the axis keeps its ticks.
+#'
+#' @param endplot,byplot The option values.
+#' @param unit The `timetypeoutput` key.
+#' @return A list: `end`, `by`.
+#' @noRd
+.plotWindow <- function(endplot, byplot, unit) {
+    year <- switch(as.character(unit)[1], days = 365, weeks = 52, months = 12, years = 1, 12)
+    endplot <- suppressWarnings(as.numeric(endplot)[1])
+    byplot <- suppressWarnings(as.numeric(byplot)[1])
+    end <- if (!is.finite(endplot) || endplot <= 0 || endplot == 60) 5 * year else endplot
+    factory_by <- !is.finite(byplot) || byplot <= 0 || byplot == 12
+    by <- if (factory_by) year else byplot
+    # A window the user shortened below two years would get one tick from yearly spacing;
+    # give it five intervals instead. A spacing the user entered is never changed.
+    if (factory_by && by > end / 2) by <- end / 5
+    list(end = end, by = by)
+}

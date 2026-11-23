@@ -112,8 +112,10 @@ test_that("selecting the same variable for elapsed time and outcome is rejected"
     time = 1:6,
     status = c(1L, 0L, 1L, 0L, 1L, 0L)
   )
-  result <- singlearm(
-    data = d,
+  # The refusal is a jmvcore::reject() now, so the wrapper returns nothing; run the instance to
+  # read the error panel that is filled before the rejection.
+  namespace <- environment(singlearm)
+  options <- get("singlearmOptions", envir = namespace)$new(
     elapsedtime = "time",
     outcome = "time",
     outcomeLevel = NULL,
@@ -122,9 +124,11 @@ test_that("selecting the same variable for elapsed time and outcome is rejected"
     awd = NULL,
     awod = NULL
   )
+  analysis <- get("singlearmClass", envir = namespace)$new(options = options, data = d)
 
-  expect_match(result$errors$content, "Elapsed time and outcome must be different variables")
-  expect_equal(result$medianTable$rowCount, 0)
+  expect_error(analysis$run(), "Elapsed time and outcome must be different variables", fixed = TRUE)
+  expect_match(analysis$results$errors$content, "Elapsed time and outcome must be different variables")
+  expect_equal(analysis$results$medianTable$rowCount, 0)
 })
 
 test_that("unusual user column names also render in the Kaplan-Meier plot", {

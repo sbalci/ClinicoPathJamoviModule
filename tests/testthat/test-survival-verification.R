@@ -95,8 +95,8 @@ test_that("RMST matches survfit rmean at the requested horizon", {
                    rmean = 30)$table
     got <- res$rmstTable$asDF
 
-    expect_equal(as.numeric(got$rmst), unname(round(ref[, "rmean"], 2)), tolerance = 1e-8)
-    expect_equal(as.numeric(got$se),   unname(round(ref[, "se(rmean)"], 2)), tolerance = 1e-8)
+    expect_equal(as.numeric(got$rmst), unname(ref[, "rmean"]), tolerance = 1e-8)   # unrounded since 2026-11-23
+    expect_equal(as.numeric(got$se),   unname(ref[, "se(rmean)"]), tolerance = 1e-8)
     expect_true(all(as.numeric(got$tau) == 30))
 })
 

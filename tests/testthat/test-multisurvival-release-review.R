@@ -77,6 +77,12 @@ skip_if(is.null(.msrr_ns), "multisurvival not available in this distribution")
 
 .msrr_pct <- function(x) as.numeric(sub("%", "", x, fixed = TRUE)) / 100
 
+# The Cox / Fine-Gray estimates are rows of the Table `fittedTable`; its column titles are the
+# header that used to be printed inside the Html `text`.
+.msrr_cox_header <- function(result) {
+  vapply(result$fittedTable$columns, function(x) x$title, character(1))
+}
+
 test_that("small nonzero event counts warn but do not block Cox estimation", {
   set.seed(401)
   data <- data.frame(
@@ -89,7 +95,7 @@ test_that("small nonzero event counts warn but do not block Cox estimation", {
 
   expect_s3_class(result, "multisurvivalResults")
   expect_match(as.character(result$strongWarnings$content), "Low event count")
-  expect_match(as.character(result$text$content), "HR (multivariable)", fixed = TRUE)
+  expect_true("HR (multivariable)" %in% .msrr_cox_header(result))
   expect_false(grepl("No events observed", as.character(result$errors$content), fixed = TRUE))
 })
 
@@ -103,7 +109,8 @@ test_that("zero events are refused with an actionable result message", {
   result <- .msrr_run(data, explanatory = "group")
 
   expect_match(as.character(result$errors$content), "No events observed")
-  expect_false(grepl("HR (multivariable)", as.character(result$text$content), fixed = TRUE))
+  expect_false("HR (multivariable)" %in% .msrr_cox_header(result))
+  expect_equal(nrow(result$fittedTable$asDF), 0L)
 })
 
 test_that("Fine-Gray coefficients use the robust reference fit", {
@@ -182,8 +189,8 @@ test_that("Fine-Gray coefficients use the robust reference fit", {
   reported <- as.data.frame(result$adjustedCoxTable)
   expect_equal(reported$HR, unname(expected_effect))
   expect_equal(reported$Pvalue, unname(sm[, "Pr(>|z|)"]), tolerance = 1e-12)
-  expect_match(as.character(result$text$content), "sHR (95% CI)", fixed = TRUE)
-  expect_match(as.character(result$text$content), expected_effect[[1]], fixed = TRUE)
+  expect_true("sHR (95% CI)" %in% .msrr_cox_header(result))
+  expect_identical(as.character(result$fittedTable$asDF[[2]]), unname(expected_effect))
   expect_match(as.character(result$text$content), "Fine-Gray subdistribution hazards analysis")
   expect_match(as.character(result$adjustedCoxText$content), "Concordance is not reported")
   expect_match(as.character(result$adjustedCoxText$content),

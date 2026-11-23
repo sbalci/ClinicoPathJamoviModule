@@ -240,7 +240,9 @@
       if (is.data.frame(res_df) && !is.null(p_col)) {
         results <- res_df
         p_values <- suppressWarnings(as.numeric(res_df[[p_col]]))
-        sig_indices <- which(p_values < 0.05 & !is.na(p_values))
+        # Judged at the three decimals the table prints (finalfit), so this count and the
+        # one read from the table text (.summariseCoxSignificance) cannot disagree at 0.0496.
+        sig_indices <- which(round(p_values, 3) < 0.05 & !is.na(p_values))
 
         # Count VARIABLES, not coefficient rows. A term counts once if any of
         # its contrasts is significant; without the map fall back to rows but
@@ -248,7 +250,7 @@
         if (!is.null(term_map) && length(term_map) > 0) {
           sig_count <- sum(vapply(term_map, function(idx) {
             idx <- idx[idx >= 1 & idx <= length(p_values)]
-            length(idx) > 0 && any(p_values[idx] < 0.05, na.rm = TRUE)
+            any(idx %in% sig_indices)      # the rounded rule above, not the raw p
           }, logical(1)))
         } else {
           sig_count <- min(length(sig_indices), if (n_vars > 0) n_vars else length(sig_indices))
@@ -306,13 +308,10 @@
       else
         .fmt(.("Key Finding: {sig} out of {n} factors showed statistically significant associations with the outcome (p < 0.05)."), sig = sig_count, n = n_vars)
 
-      if (!is.null(strongest_var) && !is.null(strongest_effect)) {
-        summary_parts$strongest <- .fmt(
-          .("Strongest predictor: {variable} was associated with {effect} ({measure} = {hr})."),
-          variable = htmltools::htmlEscape(as.character(strongest_var)), effect = strongest_effect, measure = effect_name, hr = round(strongest_hr, 2))
-      }
+      # No "strongest predictor" sentence: a per-unit hazard ratio (age per year) and a
+      # categorical one cannot be ranked on one scale, so the ranking followed the units.
       if (length(not_ranked) > 0)
-        summary_parts$not_ranked <- .("Variables in an interaction are not ranked here: their hazard ratios and p-values apply only at the values stated under the table.")
+        summary_parts$not_ranked <- .("For variables in an interaction, the hazard ratios and p-values apply only at the values stated under the table.")
     } else {
       summary_parts$findings <- paste0(
         if (one_factor)
@@ -476,6 +475,11 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
       # Dedicated Html outputs support the module's multi-line notice layout.
       # library-audit 2026-11-20 jsurvival [LOW] DEFERRED: Html message panels kept by maintainer
       #   decision; revisit when these messages have been tried as jmvcore::Notice in the jamovi app
+      # Plot window in the output time unit: the factory 60 / 12 mean five years / one year
+      # (.plotWindow() in utils-survivaldata.R), any other value is used as entered.
+      .plotEndTime = function() .plotWindow(self$options$endplot, self$options$byplot, self$options$timetypeoutput)$end,
+      .plotBy = function() .plotWindow(self$options$endplot, self$options$byplot, self$options$timetypeoutput)$by,
+
       .addHtmlMessage = function(type, title, message) {
           output_name <- switch(type,
               "error" = "errors",
@@ -559,8 +563,8 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
       },
 
       .timeAxisLabel = function() {
-          base <- paste0("Time (", self$options$timetypeoutput, ")")
-          if (is.null(private$.landmarkOffset())) base else paste0(base, " from landmark")
+          if (is.null(private$.landmarkOffset())) .pasteT(.("Time ({unit})"), unit = self$options$timetypeoutput)
+          else .pasteT(.("Time ({unit}) from landmark"), unit = self$options$timetypeoutput)
       },
 
       # Reset the per-run compute caches so a re-run recomputes cleaned data and
@@ -652,8 +656,11 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
           .interactionTestTable(cox_model, conf_level = conf_level),
           error = function(e) NULL
         )
+        if (!is.null(itab) && nrow(itab) > 0)
+          itab$term <- .displayTerm(itab$term, private$.displayNames(private$.cleandata()))
         if (!is.null(itab) && nrow(itab) > 0) {
           itbl <- self$results$interactionTest
+          if (private$.isCompetingRisk()) itbl$getColumn("hr")$setTitle("sHR")
           for (i in seq_len(nrow(itab))) {
             vals <- list(
               term     = itab$term[i],
@@ -737,7 +744,8 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
             rowKey <- rowKey + 1
             conv <- is.null(sub$converged) || isTRUE(sub$converged[i])
             vals <- list(
-              interaction     = sub$interaction[i],
+              interaction     = paste(.displayTerm(c(info$focal, info$moderator),
+                                      private$.displayNames(private$.cleandata())), collapse = " * "),
               moderator_level = if (conv) sub$moderator_level[i] else paste0(sub$moderator_level[i], " *"),
               focal_effect    = sub$focal_effect[i],
               hr              = sub$hr[i],
@@ -1294,8 +1302,10 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
         }
 
         # Perform comprehensive data validation
+        # With time taken from dates, a column still sitting in Time Elapsed is not the
+        # time: checking it stopped the run for a negative value the model never reads.
         validation_results <- .validateSurvivalData(
-          mydata_labelled, mytime, myoutcome,
+          mydata_labelled, if (isTRUE(self$options$tint)) character(0) else mytime, myoutcome,
           event_level  = self$options$outcomeLevel,
           multievent   = self$options$multievent,
           analysistype = self$options$analysistype,
@@ -1428,6 +1438,7 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
           is_numeric_dx <- is.numeric(mydata[[dxdate]])
           is_numeric_fu <- is.numeric(mydata[[fudate]])
 
+          date_notes <- list(shape = "", two_digit = NULL)
           if (is_numeric_dx && is_numeric_fu) {
               # Epoch seconds from DateTime Converter, and nothing else: a day count
               # read as seconds gives times 86400 too small and a normal-looking table.
@@ -1454,9 +1465,14 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
               )
 
               if (timetypedata %in% names(lubridate_functions)) {
-                  func <- lubridate_functions[[timetypedata]]
-                  mydata[["start"]] <- func(mydata[[dxdate]])
-                  mydata[["end"]] <- func(mydata[[fudate]])
+                  # The shape guard, not the bare parser: lubridate reads text of the wrong
+                  # shape at 100% (ymd_hms("15/01/2020 14:30") is 2015-01-20).
+                  date_read <- .readSurvivalDates(mydata[[dxdate]], mydata[[fudate]], timetypedata)
+                  date_notes <- .survivalDateNotes(date_read)
+                  mydata[["start"]] <- date_read$start
+                  mydata[["end"]] <- date_read$end
+                  if (!is.null(date_notes$two_digit))
+                    private$.addHtmlMessage("strongWarning", .("Two-digit years"), date_notes$two_digit)
               } else {
                   jmvcore::reject(.fmt(
                       .("Unsupported time type format: {format}. Supported formats are: {supported}"),
@@ -1471,10 +1487,10 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
 
           if (sum(!is.na(mydata[["start"]])) == 0 ||
               sum(!is.na(mydata[["end"]])) == 0)  {
-            jmvcore::reject(.fmt(
+            jmvcore::reject(trimws(paste(.fmt(
               .("Time difference cannot be calculated. Make sure that time type in variables are correct. Currently it is: {format}"),
               format = self$options$timetypedata
-            ))
+            ), date_notes$shape)))
           }
 
           fail_dx <- .countDateParseFailures(mydata[[dxdate]], mydata[["start"]])
@@ -1483,9 +1499,9 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
             private$.addHtmlMessage(
               "warning",
               .("Dates could not be read"),
-              .fmt(.("{nfailed} of {ninputs} dates could not be read, so those patients were excluded. Check the date format."),
+              trimws(paste(.fmt(.("{nfailed} of {ninputs} dates could not be read, so those patients were excluded. Check the date format."),
                    nfailed = fail_dx$n_failed + fail_fu$n_failed,
-                   ninputs = fail_dx$n_inputs + fail_fu$n_inputs))
+                   ninputs = fail_dx$n_inputs + fail_fu$n_inputs), date_notes$shape)))
 
           for (i in 1:2) {
             implausible <- .checkDatePlausibility(mydata[[c("start", "end")[i]]])
@@ -1534,7 +1550,7 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
           )
           
           self$results$todo$setVisible(TRUE)
-          self$results$todo$setContent(paste0("<b>Error:</b> ", error_msg))
+          self$results$todo$setContent(paste0("<b>", .("Error:"), "</b> ", error_msg))
 
           # Stop the analysis with the tailored message. Returning NULL here would
           # feed NULL into .cleandata_impl's dplyr::left_join(), which throws a
@@ -1929,6 +1945,10 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
         cleaneddata <- private$.cleandata()
         data_prep_time <- private$.stopPerformanceTimer("data_prep")
 
+        # With no row left, every variable below has "only one value"; name the real cause first.
+        if (is.null(cleaneddata$cleanData) || nrow(cleaneddata$cleanData) == 0)
+          jmvcore::reject(.("No complete records remain after applying the selected variables and landmark restriction."))
+
         # A one-valued explanatory variable used to reach coxph()/finalfit and fail
         # there as "contrasts can be applied only to factors with 2 or more levels".
         for (v in unique(c(cleaneddata$name3expl, cleaneddata$mystratvar_labelled))) {
@@ -2044,19 +2064,19 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
           self$results$plot_adj$setState(private$.plotAdjState(cleaneddata, cox_model))
         }
 
-        # A plot horizon shorter than the follow-up silently truncates the
-        # Kaplan-Meier and adjusted curves: the default of 60 is meant in
-        # months, so day-scale data is cut at day 60 with nothing on the plot
-        # saying so. Say so.
+        # A plot horizon shorter than the follow-up truncates the Kaplan-Meier and
+        # adjusted curves with nothing on the plot saying so. Say so, quoting the
+        # window in force (.plotEndTime(): the factory 60 means five years in the
+        # selected unit).
         if ((isTRUE(self$options$km) || isTRUE(self$options$ac)) &&
-            is.finite(self$options$endplot)) {
+            is.finite(private$.plotEndTime())) {
           max_t <- suppressWarnings(max(cleaneddata$cleanData$mytime, na.rm = TRUE))
-          if (is.finite(max_t) && self$options$endplot < max_t)
+          if (is.finite(max_t) && private$.plotEndTime() < max_t)
             private$.addHtmlMessage(
               "info",
               .("Plot horizon shorter than follow-up"),
               .fmt(.("Survival plots stop at the Plot End Time ({end} {unit}) although follow-up extends to {max} {unit}. Increase Plot End Time under Plot Options to show the full curves; the tables are not affected."),
-                   end = self$options$endplot, unit = self$options$timetypeoutput,
+                   end = private$.plotEndTime(), unit = self$options$timetypeoutput,
                    max = sprintf("%.1f", max_t)))
         }
 
@@ -2240,13 +2260,14 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
               else
                 .("Analysis completed using %d observations with %d events (%.1f%% event rate). Median follow-up could not be estimated by reverse Kaplan-Meier; the median observed time (to event or censoring) was %.1f %s, which is not the same quantity."),
               n_obs, n_events, event_rate, median_followup, time_unit
-            ), recode_note,
-            # How the follow-up figure above was arrived at, and why it is not
-            # median(observed time). Gated on the analysis's existing
-            # explanation toggle.
-            if (isTRUE(self$options$showExplanations))
-              .medianFollowUpExplanation(mfu, time_unit) else "")
+            ), recode_note)
           )
+          # How the follow-up figure above was arrived at, and why it is not
+          # median(observed time). It is markup, and .addHtmlMessage() escapes its
+          # message, so it is appended to the panel instead of passed through it.
+          if (isTRUE(self$options$showExplanations))
+            self$results$infoMessages$setContent(paste0(
+              self$results$infoMessages$content, .medianFollowUpExplanation(mfu, time_unit)))
         }, error = function(e) {
           # Notice Disabled
           # notice <- jmvcore::Notice$new(...)
@@ -2394,7 +2415,7 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
               .("Continuous predictor with few distinct values"),
               paste0(
                 .fmt(.("Entered as continuous: {variables}."),
-                     variables = paste(sprintf("%s (%d distinct values)", .shown, .ndist[.few]), collapse = "; ")), " ",
+                     variables = paste(sprintf(.("%s (%d distinct values)"), .shown, .ndist[.few]), collapse = "; ")), " ",
                 .("The hazard ratio is the effect per one-unit increase, assuming a constant step in log hazard between consecutive values. If the categories are not equally spaced, move the variable to Explanatory Variables to estimate a separate hazard ratio for each level.")
               )
             )
@@ -2723,7 +2744,7 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
 
         # Add to personTimeTable - first the overall row
         self$results$personTimeTable$addRow(rowKey=1, values=list(
-          interval=paste0("Overall (0-max)"),
+          interval=.("Overall (0-max)"),
           events=total_events,
           person_time=round(total_time, 2),
           rate=overall_rate,
@@ -2995,7 +3016,13 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
           # ---- 2. Time-point metrics: IPCW Brier, time-dependent AUC, and IBS ----
           # via riskRegression::Score (Kaplan-Meier censoring weights). Refit the
           # model locally with x/y = TRUE so Score can generate predictions.
-          tps <- suppressWarnings(as.numeric(trimws(unlist(strsplit(self$options$survmetrics_timepoints, ",")))))
+          tps_typed <- trimws(unlist(strsplit(self$options$survmetrics_timepoints, ",")))
+          tps <- suppressWarnings(as.numeric(tps_typed))
+          tps_dropped <- tps_typed[nzchar(tps_typed) & (is.na(tps) | tps <= 0 | tps >= max_time)]
+          if (length(tps_dropped) > 0)
+            self$results$survMetricsTable$setNote("dropped", .fmt(
+              .("Time points not used: {values}. Each must be a positive number below the longest follow-up ({max})."),
+              values = paste(tps_dropped, collapse = ", "), max = base::format(signif(max_time, 6), trim = TRUE)))
           tps <- sort(unique(tps[!is.na(tps) & tps > 0 & tps < max_time]))
 
           if (length(tps) > 0) {
@@ -3069,6 +3096,7 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
             # "performance metric error".
             na_coefs <- names(stats::coef(cox_local))[is.na(stats::coef(cox_local))]
             if (length(na_coefs) > 0) {
+              self$results$survMetricsTable$setNote("unavailable", paste(.("Performance metrics unavailable."), .fmt(.("The model could not estimate a coefficient for: <i>{terms}</i>."), terms = .rocLabel(paste(na_coefs, collapse = ", ")))))
               self$results$survMetricsSummary$setContent(paste0(
                 "<p><b>", .("Performance metrics unavailable."), "</b> ",
                 .fmt(.("The model could not estimate a coefficient for: <i>{terms}</i>."), terms = htmltools::htmlEscape(paste(na_coefs, collapse = ", "))), " ",
@@ -3178,6 +3206,7 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
           }
 
         }, error = function(e) {
+          self$results$survMetricsTable$setNote("unavailable", paste0(.("Performance metric error"), ": ", .rocLabel(conditionMessage(e))))
           self$results$survMetricsSummary$setContent(paste0(
             "<h4>", .("Performance metric error"), "</h4><p>", htmltools::htmlEscape(conditionMessage(e)), "</p>",
             "<p>", .("These metrics require a standard Cox model with sufficient events and follow-up."), "</p>"
@@ -3276,6 +3305,7 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
           full_local  <- survival::coxph(full_formula, data = mydata, x = TRUE, y = TRUE)
           term_labels <- attr(stats::terms(full_local), "term.labels")
           if (length(term_labels) < 2) {
+            self$results$modelContributionTable$setNote("unavailable", .("Add at least two covariates to compare their individual contributions."))
             self$results$modelContributionSummary$setContent(
               paste0("<p>", .("Add at least two covariates to compare their individual contributions."), "</p>")
             )
@@ -3316,6 +3346,7 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
           special_terms <- grepl("^(strata|cluster|frailty|tt)\\(", term_labels)
           keep_terms    <- term_labels[!special_terms]
           if (length(keep_terms) == 0) {
+            self$results$modelContributionTable$setNote("unavailable", .("No covariates are available for single-term deletion; the model contains only stratification or clustering terms."))
             self$results$modelContributionSummary$setContent(
               paste0("<p>", .("No covariates are available for single-term deletion; the model contains only stratification or clustering terms."), "</p>"))
             return()
@@ -3346,6 +3377,7 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
           }
 
           if (length(droppable) == 0) {
+            self$results$modelContributionTable$setNote("unavailable", .("No term can be dropped while preserving model hierarchy."))
             self$results$modelContributionSummary$setContent(
               paste0("<p>", .("No term can be dropped while preserving model hierarchy."), "</p>"))
             return()
@@ -3353,6 +3385,7 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
 
           skipped <- setdiff(term_labels, droppable)
 
+          term_display <- private$.displayNames(private$.cleandata())
           for (term in droppable) {
             # carry_terms keeps strata()/cluster() in every reduced model, so
             # each LRT compares like with like: the same stratification, one
@@ -3374,7 +3407,7 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
 
             rk <- rk + 1L
             vals <- list(
-              term   = term,
+              term   = .displayTerm(term, term_display),
               df     = df_diff,
               aic    = stats::AIC(fit_red),
               lrt    = lrt,
@@ -3405,6 +3438,7 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
             ))
           }
         }, error = function(e) {
+          self$results$modelContributionTable$setNote("unavailable", paste0(.("Covariate contribution error"), ": ", .rocLabel(conditionMessage(e))))
           self$results$modelContributionSummary$setContent(paste0(
             "<h4>", .("Covariate contribution error"), "</h4><p>", htmltools::htmlEscape(conditionMessage(e)), "</p>"
           ))
@@ -3651,6 +3685,11 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
 
           self$results$nomogram_display$setContent(html_display)
 
+          } else {
+            nom_reason <- conditionMessage(attr(nom, "condition"))
+            self$results$nomogramPoints$setNote("unavailable", .fmt(
+              .("Nomogram calculation error: {message}"), message = .rocLabel(nom_reason)))
+            private$.addHtmlMessage("warning", .("Nomogram unavailable"), nom_reason)
           }
 
 
@@ -3961,6 +4000,8 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
         # console dump. The Preformatted element is kept for the failure case
         # only, and hidden when the diagnostics computed successfully.
         phTable <- self$results$cox_phTable
+        if (private$.isCompetingRisk())
+          phTable$setTitle(.("Proportional Subdistribution Hazards Assumption"))
         .deleteTableRows(phTable)
 
         if (inherits(zph, "multisurvival_ph_error")) {
@@ -3975,7 +4016,7 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
           self$results$cox_ph$setContent("")
 
           if (!is.null(zph_table) && nrow(zph_table) > 0) {
-            violating <- .fillCoxZphTable(phTable, zph)
+            violating <- .fillCoxZphTable(phTable, zph, private$.displayNames(private$.cleandata()))
             if (length(violating) > 0) {
               phTable$setNote("ph", paste0(
                 .fmt(.("The proportional hazards assumption appears to be violated for: {terms}. Consider using these as stratification variables instead of covariates."),
@@ -4258,6 +4299,8 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
         }
 
         plot3 <- tryCatch({
+          if (any(grepl("strata(", attr(stats::terms(cox_model), "term.labels"), fixed = TRUE)))
+            stop(.("the survminer style cannot draw a stratified model; choose the finalfit plot style"), call. = FALSE)
           .quietly(survminer::ggforest(model = cox_model, data = mydata))
         }, error = function(e) {
           grid::grid.newpage()
@@ -4481,9 +4524,9 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
             xlab = private$.timeAxisLabel(),
             pval = self$options$pplot,
             pval.method	= self$options$pplot,
-            legend = 'none',
-            break.time.by = self$options$byplot,
-            xlim = c(0, self$options$endplot),
+            legend = 'top',
+            break.time.by = private$.plotBy(),
+            xlim = c(0, private$.plotEndTime()),
             title = .fmt(.("Survival curves for {variables}"), variables = title2),
             subtitle = .("Based on Kaplan-Meier estimates"),
             risk.table = self$options$risktable,
@@ -4885,9 +4928,9 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
                                            levels = levels(factor(riskData$risk_group))),
                             stringsAsFactors = FALSE)
 
-          if (!is.null(self$options$endplot) && is.finite(self$options$endplot) &&
-              self$options$endplot > 0) {
-            cif <- cif[cif$time <= self$options$endplot, , drop = FALSE]
+          if (!is.null(private$.plotEndTime()) && is.finite(private$.plotEndTime()) &&
+              private$.plotEndTime() > 0) {
+            cif <- cif[cif$time <= private$.plotEndTime(), , drop = FALSE]
           }
 
           p <- ggplot2::ggplot(cif, ggplot2::aes(x = time, y = cif, colour = group)) +
@@ -4909,10 +4952,10 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
               alpha = 0.15, colour = NA, show.legend = FALSE, na.rm = TRUE)
           }
 
-          if (!is.null(self$options$byplot) && is.finite(self$options$byplot) &&
-              self$options$byplot > 0 && nrow(cif) > 0)
+          if (!is.null(private$.plotBy()) && is.finite(private$.plotBy()) &&
+              private$.plotBy() > 0 && nrow(cif) > 0)
             p <- p + ggplot2::scale_x_continuous(
-              breaks = seq(0, max(cif$time, na.rm = TRUE), by = self$options$byplot))
+              breaks = seq(0, max(cif$time, na.rm = TRUE), by = private$.plotBy()))
 
           print(p)
           return(TRUE)
@@ -4935,8 +4978,8 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
 
           pval = self$options$pplot,
           pval.method	= self$options$pplot,
-          break.time.by = self$options$byplot,
-          xlim = c(0, self$options$endplot),
+          break.time.by = private$.plotBy(),
+          xlim = c(0, private$.plotEndTime()),
           risk.table = self$options$risktable,
           conf.int = self$options$ci95,
           censor = self$options$censored,
@@ -4945,7 +4988,9 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
 
 
           title = .("Survival by Risk Group"),
-          subtitle = .("Groups defined by empirical quantiles of the Cox relative-risk score"),
+          subtitle = if (isTRUE(self$options$pplot))
+            .("Groups defined by empirical quantiles of the Cox relative-risk score; the p-value compares groups formed from these same outcomes and is not an independent test")
+          else .("Groups defined by empirical quantiles of the Cox relative-risk score"),
           legend.title = .("Risk Group"),
           palette = "Set2",
           ggtheme = ggplot2::theme_bw() +
@@ -5154,7 +5199,7 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
           "warning",
           .("Adjusted curves unavailable"),
           paste(.fmt(.("Adjustment method: {method}."), method = method), detail,
-                .("No adjusted curve or table is shown; nothing was substituted for it. Choose Average (standardized over the observed patients) or Conditional Mean instead."))
+                .("No adjusted curve or table is shown; nothing was substituted for it. Choose 'Standardized over cohort (g-computation)' or 'At reference covariate profile' instead."))
         )
         return(NULL)
       }
@@ -5397,7 +5442,7 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
           row <- private$.adjustedCurveAt(g, tp)
           if (is.null(row)) next
           all_results[[length(all_results) + 1]] <- list(
-            strata = grp,
+            strata = .rocLabel(grp, note = FALSE),
             time   = tp,
             atrisk = sum(in_grp & obs_time >= tp, na.rm = TRUE),
             events = sum(in_grp & obs_time <= tp & obs_event == 1, na.rm = TRUE),
@@ -5447,6 +5492,14 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
       self$results$adjustedSurvTable$setNote(
         "counts",
         .("Observed at risk and observed events are counts in the data, not properties of the adjusted curve."))
+      # A requested time point past the end of every adjusted curve has no row. The
+      # factory 12, 36, 60 are months, so with years or days selected the table could
+      # come back empty with nothing to say why.
+      reported <- vapply(all_results, function(row) as.numeric(row$time), numeric(1))
+      unreported <- setdiff(timepoints, reported)
+      self$results$adjustedSurvTable$setNote("beyond", if (length(unreported)) .fmt(
+        .("No estimate at {times} {unit}: beyond the follow-up the adjusted curve covers. Time points are read in the selected time unit."),
+        times = paste(unreported, collapse = ", "), unit = private$.timeUnitLabel()) else NULL)
       private$.landmarkNote(self$results$adjustedSurvTable)
       private$.adjustedCurveEndNote(self$results$adjustedSurvTable, curves, mydata)
 
@@ -5535,8 +5588,8 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
           cif_df$cif_lower <- 1 - cif_df$upper
           cif_df$cif_upper <- 1 - cif_df$lower
 
-          if (!is.null(self$options$endplot) && is.finite(self$options$endplot))
-            cif_df <- cif_df[cif_df$time <= self$options$endplot, , drop = FALSE]
+          if (!is.null(private$.plotEndTime()) && is.finite(private$.plotEndTime()))
+            cif_df <- cif_df[cif_df$time <= private$.plotEndTime(), , drop = FALSE]
 
           p <- ggplot2::ggplot(cif_df,
                  ggplot2::aes(x = time, y = cif, colour = group))
@@ -5567,10 +5620,10 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
                            plot.caption = ggplot2::element_text(hjust = 0, size = 8))
 
           # Honour the Time Interval option here as the standard branch does.
-          if (nrow(cif_df) > 0 && !is.null(self$options$byplot) &&
-              is.finite(self$options$byplot) && self$options$byplot > 0)
+          if (nrow(cif_df) > 0 && !is.null(private$.plotBy()) &&
+              is.finite(private$.plotBy()) && private$.plotBy() > 0)
             p <- p + ggplot2::scale_x_continuous(
-              breaks = seq(0, max(cif_df$time, na.rm = TRUE), by = self$options$byplot))
+              breaks = seq(0, max(cif_df$time, na.rm = TRUE), by = private$.plotBy()))
 
           print(p)
           return(TRUE)
@@ -5586,8 +5639,8 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
         # name in the title, so a failed run looked like a successful one.
         curves <- plotData$curves
 
-        if (!is.null(self$options$endplot) && is.finite(self$options$endplot))
-          curves <- curves[curves$time <= self$options$endplot, , drop = FALSE]
+        if (!is.null(private$.plotEndTime()) && is.finite(private$.plotEndTime()))
+          curves <- curves[curves$time <= private$.plotEndTime(), , drop = FALSE]
         if (nrow(curves) == 0) return(FALSE)
 
         plot <- ggplot2::ggplot(curves,
@@ -5616,10 +5669,10 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
             ggplot2::aes(ymin = lower, ymax = upper, fill = group),
             alpha = 0.15, colour = NA, na.rm = TRUE)
 
-        if (!is.null(self$options$byplot) && is.finite(self$options$byplot) &&
-            self$options$byplot > 0)
+        if (!is.null(private$.plotBy()) && is.finite(private$.plotBy()) &&
+            private$.plotBy() > 0)
           plot <- plot + ggplot2::scale_x_continuous(
-            breaks = seq(0, max(curves$time, na.rm = TRUE), by = self$options$byplot))
+            breaks = seq(0, max(curves$time, na.rm = TRUE), by = private$.plotBy()))
 
 
 
@@ -5638,8 +5691,8 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
         #   pval = self$options$pplot,
         #   pval.method = self$options$pplot,
         #   legend = "none",
-        #   break.time.by = self$options$byplot,
-        #   xlim = c(0, self$options$endplot),
+        #   break.time.by = private$.plotBy(),
+        #   xlim = c(0, private$.plotEndTime()),
         #   censor = self$options$censored,
         #   surv.median.line = self$options$medianline,
         #   risk.table.height = 0.25,  # Added for better risk table sizing
@@ -6092,7 +6145,7 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
             Variable = paste0(switch(
               tt$kind,
               level       = sprintf("%s: %s (vs %s)", tt$var, tt$level, tt$ref),
-              continuous  = sprintf("%s (per 1-unit increase)", tt$var),
+              continuous  = .fmt(.("{variable} (per 1-unit increase)"), variable = tt$var),
               contrast    = sprintf("%s (%s contrast)", tt$var, tt$suffix),
               interaction = sprintf("%s (interaction)", tt$var),
               tt$var
@@ -6179,7 +6232,7 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
         } else {
           self$results$adjustedCoxPH$setVisible(FALSE)
           self$results$adjustedCoxPH$setContent("")
-          .fillCoxZphTable(self$results$adjustedCoxPHTable, zph)
+          .fillCoxZphTable(self$results$adjustedCoxPHTable, zph, private$.displayNames(private$.cleandata()))
           self$results$adjustedCoxPHTable$setNote("ph",
             .("A non-significant test is <i>no evidence of a violation</i>, which is not the same as confirming proportional hazards holds. GLOBAL is the joint test across all terms."))
         }
@@ -6236,7 +6289,7 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
     term_labels <- vapply(term_info, function(tt) switch(
       tt$kind,
       level = sprintf("%s: %s (vs %s)", tt$var, tt$level, tt$ref),
-      continuous = sprintf("%s (per 1-unit increase)", tt$var),
+      continuous = .fmt(.("{variable} (per 1-unit increase)"), variable = tt$var),
       contrast = sprintf("%s (%s contrast)", tt$var, tt$suffix),
       interaction = sprintf("%s (interaction)", tt$var),
       tt$var
@@ -6256,7 +6309,8 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
     self$results$text2$setContent(paste0(
       "<p><b>", .("Fine-Gray subdistribution hazards model."), "</b> ",
       .("Confidence intervals and p-values use the subject-clustered robust variance."), " ",
-      .("An sHR is not a risk ratio and does not quantify a cause-specific hazard."), "</p>"))
+      .("An sHR is not a risk ratio and does not quantify a cause-specific hazard."), "</p>",
+      if (isTRUE(self$options$uselandmark)) private$.landmarkDisclosure(self$options$landmark) else ""))
     return(invisible(NULL))
   }
 
@@ -6475,9 +6529,6 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
           cox_table, private$.interactionRowLabels(private$.cox_model(), cleaneddata))
         sig_count       <- .sig$n_sig_vars
         sig_rows        <- .sig$n_sig_rows
-        strongest_var   <- .sig$strongest_label
-        strongest_hr    <- if (is.na(.sig$strongest_hr)) 1 else .sig$strongest_hr
-        strongest_effect <- if (nzchar(.sig$strongest_effect)) .sig$strongest_effect else NULL
 
         # Count total variables analyzed, as actually carried into the table.
         n_vars <- if (.sig$n_total_vars > 0) .sig$n_total_vars
@@ -6508,16 +6559,10 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
                    sig = sig_count, total = n_vars)
           )
 
-          if (!is.null(strongest_var) && !is.null(strongest_effect)) {
-            summary_parts$strongest <- paste0(
-              "<br><br><b>", .("Strongest predictor:"), "</b> ",
-              .fmt(.("{variable} was associated with {effect} (hazard ratio = {hr})."),
-                   variable = htmltools::htmlEscape(strongest_var), effect = strongest_effect, hr = round(strongest_hr, 2))
-            )
-          }
+          # No "strongest predictor" sentence here either; see the clinical summary helper.
           if (.sig$n_not_ranked > 0)
             summary_parts$not_ranked <- paste0(
-              "<br><br>", .("Variables in an interaction are not ranked here: their hazard ratios and p-values apply only at the values stated under the table."))
+              "<br><br>", .("For variables in an interaction, the hazard ratios and p-values apply only at the values stated under the table."))
 
           summary_parts$interpretation <- paste0(
             "<br><br><b>", .("Clinical interpretation:"), "</b> ",
@@ -6762,6 +6807,7 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
                 error_msg <- .fmt(
                     .("Nomogram calculation error: {message}"),
                     message = htmltools::htmlEscape(conditionMessage(e)))
+                self$results$nomogramPoints$setNote("unavailable", .fmt(.("Nomogram calculation error: {message}"), message = .rocLabel(conditionMessage(e))))
                 self$results$nomogramSummary$setContent(error_msg)
             })
         }

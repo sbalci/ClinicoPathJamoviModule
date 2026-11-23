@@ -107,6 +107,11 @@ children:
                 format: number
                 enable: (findcut || multiple_cutoffs)
                 label: Minimum group size (%)
+              - type: TextBox
+                name: seed
+                format: number
+                label: Random seed (minimum p-value search)
+                enable: (multiple_cutoffs)
   - type: CollapseBox
     label: Advanced Elapsed Time Options
     collapsed: true
@@ -156,7 +161,7 @@ children:
                   - type: TextBox
                     name: landmark
                     format: number
-                    label: Landmark time
+                    label: Time
                     enable: (uselandmark)
   - type: CollapseBox
     label: Analysis with Multiple Outcomes
@@ -187,10 +192,10 @@ children:
                         label: Dead of other causes
                       - type: LevelSelector
                         name: awd
-                        label: Alive with disease
+                        label: Alive with Disease
                       - type: LevelSelector
                         name: awod
-                        label: Alive without disease
+                        label: Alive without Disease
               - type: ComboBox
                 name: analysistype
                 enable: (outcome && multievent)
@@ -357,7 +362,3 @@ children:
               - type: CheckBox
                 name: showExplanations
                 label: Analysis explanations
-              - type: TextBox
-                name: seed
-                format: number
-                label: Random seed

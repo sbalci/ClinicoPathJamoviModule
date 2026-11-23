@@ -41,11 +41,11 @@ surv_df <- function(n = 60, seed = 3) {
 }
 
 test_that("survivalcont asks for the event level instead of taking the first level", {
-  res <- run_survivalcont(data = surv_df(), elapsedtime = "time", outcome = "status",
-                          contexpl = "marker", outcomeLevel = NULL)
-  text <- html_text(res)
-  expect_match(text, "Event Level is not selected", fixed = TRUE)
-  expect_match(text, "Alive, Dead", fixed = TRUE)
+  # An input error is a jmvcore::reject() now (survivalcont .rejectInputErrors()), so the
+  # request and the list of levels arrive as the analysis error instead of an Html panel.
+  expect_error(run_survivalcont(data = surv_df(), elapsedtime = "time", outcome = "status",
+                                contexpl = "marker", outcomeLevel = NULL),
+               "Event Level is not selected.*has levels: Alive, Dead")
 })
 
 test_that("outcomeorganizer asks for the event and the recurrence level", {

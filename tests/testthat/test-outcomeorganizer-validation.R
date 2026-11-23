@@ -515,8 +515,11 @@ test_that("D1: Degenerate inputs (outcome=NULL with patientID, 0-row data, all-N
   )
 
   d_allna <- data.frame(vital = factor(rep(NA_character_, 15), levels = c("Alive", "Dead")))
-  r_allna <- run_outcomeorganizer(data = d_allna, outcome = "vital", outcomeLevel = "Dead")
-  expect_match(.val_html(r_allna$errors), "Outcome variable contains no non-missing values", fixed = TRUE)
+  # A validation error is a jmvcore::reject() now, so it arrives as the analysis error.
+  expect_error(
+    run_outcomeorganizer(data = d_allna, outcome = "vital", outcomeLevel = "Dead"),
+    "Outcome variable contains no non-missing values", fixed = TRUE
+  )
 })
 
 test_that("D2: Numeric non-0/1 (1/2) without outcomeLevel rejects; with outcomeLevel='2' recodes cleanly", {

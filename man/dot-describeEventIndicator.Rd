@@ -4,7 +4,7 @@
 \alias{.describeEventIndicator}
 \title{Describe an event recode for display to the user}
 \usage{
-.describeEventIndicator(res, outcome_name = "outcome")
+.describeEventIndicator(res, outcome_name = "outcome", followup = TRUE)
 }
 \arguments{
 \item{res}{The list returned by \code{.defineEventIndicator()}.}

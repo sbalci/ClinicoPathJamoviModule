@@ -21,6 +21,12 @@ lassocox_audit_analysis <- function(data = lassocox_audit_data(), ...) {
     datasetId = "1", analysisId = 1L)
 }
 
+# The per-check rows (Status, Check, Value, Detail) are the suitabilityChecks Table, one line
+# per row here; the suitabilityReport Html keeps the overall verdict and the recommendations.
+lassocox_audit_checks <- function(a) {
+  paste(do.call(paste, as.data.frame(a$results$suitabilityChecks)), collapse = "\n")
+}
+
 test_that("Cox comparison is invariant to predictor names that resemble responses", {
   d <- lassocox_audit_data()
   original <- lassocox_audit_analysis(d, explanatory = c("x", "z", "grade"))
@@ -46,9 +52,10 @@ test_that("provenance includes constants created by complete-case filtering", {
   a$run()
   expect_match(a$results$todo$content, "Removed constant explanatory variables: constant")
   expect_match(a$results$todo$content, "Removed design columns constant in complete cases: rare")
-  expect_match(a$results$suitabilityReport$content, "3 rows excluded; 2 constant")
-  expect_match(a$results$suitabilityReport$content, "candidate predictors: constant")
-  expect_match(a$results$suitabilityReport$content, "complete cases: rare")
+  checks <- lassocox_audit_checks(a)
+  expect_match(checks, "Caution Data Quality 3 rows excluded; 2 constant")
+  expect_match(checks, "candidate predictors: constant")
+  expect_match(checks, "complete cases: rare")
   provenance <- as.data.frame(a$results$reproducibility)
   expect_equal(provenance$value[provenance$item == "Removed constant design columns"], "rare")
   expect_equal(as.data.frame(a$results$encoding)$variable, c("x", "z"))
@@ -179,6 +186,13 @@ lassocox_audit_options_pb <- function(options) {
 
 test_that("LASSO results reload and active scores retain alignment on the protobuf wire", {
   skip_if_not_installed("RProtoBuf")
+  # Standalone development jmvcore leaves the engine's protobuf aliases NULL.
+  # Supply the actual RProtoBuf functions locally; serialization is not mocked.
+  if (is.null(getFromNamespace("RProtoBuf_new", "jmvcore"))) {
+    testthat::local_mocked_bindings(RProtoBuf_new = RProtoBuf::new,
+      RProtoBuf_serialize = RProtoBuf::serialize, RProtoBuf_read = RProtoBuf::read,
+      .package = "jmvcore")
+  }
   d <- lassocox_audit_data()
   d$x[2] <- NA_real_
   make <- function(data = d, ...) {
@@ -269,10 +283,10 @@ test_that("Turkish translations reach explanations, tables, and plot labels", {
   options$.__enclos_env__$private$.translator <-
     jmvcore:::Translator$new(jsonlite::read_json(locale))
   a$run()
-  expect_match(a$results$suitabilityReport$content, "Veri kalitesi", fixed = TRUE)
+  expect_match(lassocox_audit_checks(a), "Veri kalitesi", fixed = TRUE)
   expect_false(grepl("Understanding LASSO", a$results$lassoExplanation$content, fixed = TRUE))
   expect_match(a$results$methodologyNotes$content, "Breslow", fixed = TRUE)
-  expect_match(a$results$clinicalGuidance$content, "doğrulama", fixed = TRUE)
+  expect_match(a$results$clinicalGuidance$content, "do\u011frulama", fixed = TRUE)
   expect_equal(a$results$modelSummary$rowCount, 14)
   file <- tempfile(fileext = ".png")
   on.exit(unlink(file), add = TRUE)
@@ -280,7 +294,7 @@ test_that("Turkish translations reach explanations, tables, and plot labels", {
   on.exit(grDevices::dev.off(), add = TRUE)
   expect_true(a$results$coef_plot$.render())
   labels <- ggplot2::last_plot()$scales$get_scales("fill")$get_labels()
-  expect_setequal(unname(labels), c("Daha düşük tahmini hazard", "Daha yüksek tahmini hazard"))
+  expect_setequal(unname(labels), c("Daha d\u00fc\u015f\u00fck tahmini hazard", "Daha y\u00fcksek tahmini hazard"))
 })
 
 test_that("few events receive a prominent stability notice without concealing the fit", {
@@ -340,7 +354,13 @@ test_that("non-converged unpenalized comparisons are not reported numerically", 
   expect_true("failed" %in% names(a$results$modelComparison$notes))
   expect_match(a$results$modelComparison$notes[["failed"]]$note,
     "did not converge cleanly", fixed = TRUE)
-  expect_false(grepl("Ran out of iterations", a$results$todo$content, fixed = TRUE))
+  # The failure reaches the notes panel once, inside the sentence that names the row it
+  # belongs to (the same text as the table note); the bare coxph warning is never an item.
+  todo <- a$results$todo$content
+  expect_match(todo, "<li>Some rows could not be computed (Standard Cox on all variables: Cox refit did not converge cleanly: Ran out of iterations",
+    fixed = TRUE)
+  expect_false(grepl("<li>Ran out of iterations", todo, fixed = TRUE))
+  expect_length(regmatches(todo, gregexpr("Ran out of iterations", todo, fixed = TRUE))[[1]], 1L)
 })
 
 test_that("an invalid selected Cox refit cannot produce a PH verdict", {
@@ -350,7 +370,9 @@ test_that("an invalid selected Cox refit cannot produce a PH verdict", {
     private = list(.coxRefit = function(data, columns) stop("invalid refit")))
   a <- subclass$new(options = prototype$options, data = prototype$data)
   a$run()
-  expect_match(a$results$suitabilityReport$content, "Could not assess", fixed = TRUE)
+  checks <- lassocox_audit_checks(a)
+  expect_match(checks, "Caution Proportional Hazards Could not assess", fixed = TRUE)
+  expect_false(grepl("Selected-refit test p", checks, fixed = TRUE))
   expect_false(grepl("Selected-refit test p", a$results$suitabilityReport$content, fixed = TRUE))
 })
 
@@ -363,12 +385,17 @@ test_that("correlation details escape special predictor names exactly once", {
     explanatory = c("marker & {x}", "copy <z>", "noise"),
     showModelComparison = FALSE)
   a$run()
-  html <- a$results$suitabilityReport$content
-  expect_false(grepl("&amp;amp;", html, fixed = TRUE))
-  expect_match(html, "marker &amp; (x)", fixed = TRUE)
-  expect_match(html, "copy &lt;z&gt;", fixed = TRUE)
-  expect_match(html, "Top correlated encoded-column pairs:", fixed = TRUE)
-  expect_false(grepl("Top pairs:", html, fixed = TRUE))
+  # The pair names are in a table cell now. The client parses a cell as HTML but shows
+  # entities literally, so a cell is never entity-escaped: "&" stays as typed and a "<"
+  # that would open a tag is broken with a space (.rocLabel()).
+  checks <- lassocox_audit_checks(a)
+  expect_false(grepl("&amp;", checks, fixed = TRUE))
+  expect_false(grepl("&lt;", checks, fixed = TRUE))
+  expect_match(checks, "marker & (x) & copy < z> (r=", fixed = TRUE)
+  expect_false(grepl("<z>", checks, fixed = TRUE))
+  expect_false(grepl("<z>", a$results$suitabilityReport$content, fixed = TRUE))
+  expect_match(checks, "Top correlated encoded-column pairs:", fixed = TRUE)
+  expect_false(grepl("Top pairs:", checks, fixed = TRUE))
 })
 
 test_that("one candidate is judged by its encoded design width", {
@@ -396,9 +423,8 @@ test_that("one candidate is judged by its encoded design width", {
 test_that("sample-size adequacy is displayed as undetermined", {
   a <- lassocox_audit_analysis(showModelComparison = FALSE)
   a$run()
-  html <- a$results$suitabilityReport$content
-  expect_match(html,
-    "color: #6c757d; font-size: 18px;'>●</span></td><td style='padding: 6px;'><strong>Sample Size",
-    fixed = TRUE)
-  expect_match(html, "Gray = adequacy not determined by this diagnostic", fixed = TRUE)
+  # The status is a word in the Status column now, not a gray dot.
+  expect_match(lassocox_audit_checks(a), "Not determined Sample Size n=180, events=", fixed = TRUE)
+  expect_match(a$results$suitabilityReport$content,
+    "Not determined = adequacy not determined by this diagnostic", fixed = TRUE)
 })

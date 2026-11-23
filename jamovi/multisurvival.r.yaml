@@ -41,7 +41,7 @@ items:
             type: integer
 
     - name:  eventRecodeInfo
-      title: 'Outcome Recode'
+      title: 'Outcome Recode Notes'
       type:  Html
       visible: true
       clearWith:

@@ -23,6 +23,12 @@ lassocox_edge_run <- function(data, ...) {
   a$results
 }
 
+# The per-check rows (Status, Check, Value, Detail) are the suitabilityChecks Table, one line
+# per row here; the suitabilityReport Html keeps the overall verdict and the recommendations.
+lassocox_edge_checks <- function(results) {
+  paste(do.call(paste, as.data.frame(results$suitabilityChecks)), collapse = "\n")
+}
+
 lassocox_edge_valid <- function(result) {
   expect_gt(result$modelSummary$rowCount, 0)
   expect_false(grepl("Analysis Error", result$todo$content, fixed = TRUE))
@@ -56,7 +62,7 @@ test_that("lassocox reports missing predictor rows and retained sample size", {
 test_that("lassocox rejects all-censored data visibly", {
   d <- lassocox_edge_data()
   d$status[] <- "censored"
-  lassocox_edge_error(d, "exactly 2 observed")
+  lassocox_edge_error(d, "one observed value")
 })
 
 test_that("lassocox warns about few events and reduces stratified folds", {
@@ -75,8 +81,9 @@ test_that("lassocox reports a constant numeric predictor without dropping the fi
   r <- lassocox_edge_run(d)
   lassocox_edge_valid(r)
   expect_match(r$todo$content, "Removed constant explanatory variables: var5")
-  expect_match(r$suitabilityReport$content, "Removed constant candidate predictors: var5")
-  expect_false(grepl("Complete data with no constant predictors", r$suitabilityReport$content))
+  checks <- lassocox_edge_checks(r)
+  expect_match(checks, "Removed constant candidate predictors: var5")
+  expect_false(grepl("Complete data with no constant predictors", checks))
 })
 
 test_that("lassocox handles a single-level factor as an explicit constant", {
@@ -129,7 +136,7 @@ test_that("lassocox retains a valid fit with perfectly correlated predictors", {
   d$var5 <- 2 * d$var1 + 3
   r <- lassocox_edge_run(d)
   lassocox_edge_valid(r)
-  expect_match(r$suitabilityReport$content, "collinearity", ignore.case = TRUE)
+  expect_match(lassocox_edge_checks(r), "Concern Multicollinearity Max \\|r\\| = 1\\.00 Near-perfect collinearity")
   # LASSO need not select exactly one representative of every correlated group.
 })
 

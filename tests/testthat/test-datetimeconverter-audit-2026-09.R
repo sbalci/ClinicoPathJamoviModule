@@ -46,7 +46,11 @@ library(testthat)
     sys.source(file.path(dirname(.dtc_src()), "utils-dateshape.R"), envir = stub)))
   opts <- utils::modifyList(list(datetime_var = "v", datetime_format = "auto",
                                  timezone = "system"), options)
-  stub$self <- list(options = opts, data = data)
+  # The preview rows are a Table filled through .populateSurvivalTable(): a real jmvcore
+  # Table, so the stub cannot drift from the Table API.
+  rows <- jmvcore::Table$new(options = jmvcore::Options$new(), name = "conversionRows",
+                             rows = 0, columns = list())
+  stub$self <- list(options = opts, data = data, results = list(conversionRows = rows))
   stub$private <- list(
     .addNotice = function(type, title, content, class = NULL) {
       rec$notices[[length(rec$notices) + 1L]] <- list(type = type, title = title,
@@ -57,6 +61,7 @@ library(testthat)
     .getParser            = bind(pm$.getParser),
     .numericAsDigitStrings = bind(pm$.numericAsDigitStrings),
     .flagImplausibleYears = bind(pm$.flagImplausibleYears),
+    .warnSerialStraddle   = bind(pm$.warnSerialStraddle),
     .processNumericVector = bind(pm$.processNumericVector),
     .prepareDatetimeInput = bind(pm$.prepareDatetimeInput),
     .parseDatetime        = bind(pm$.parseDatetime),
@@ -66,7 +71,7 @@ library(testthat)
     .formatPreviewGuide   = bind(pm$.formatPreviewGuide),
     .generatePreviewTable = bind(pm$.generatePreviewTable)
   )
-  list(p = stub$private, rec = rec)
+  list(p = stub$private, rec = rec, rows = rows)
 }
 
 quietly <- function(expr) {
@@ -99,8 +104,12 @@ test_that("the text column is written in the timezone the conversion used", {
 test_that("the preview shows the full clock on a midnight row", {
   s <- .dtc_stub()
   x <- as.POSIXct(c("2024-01-15 00:00:00", "2024-01-15 10:30:00"), tz = "UTC")
+  # The rows moved from the returned Html into the conversionRows Table (column 3 is
+  # "Converted DateTime"); the Html keeps only the "Showing first n of N" line.
   html <- s$p$.generatePreviewTable(c("2024-01-15", "2024-01-15 10:30"), x, n = 2)
-  expect_match(html, "2024-01-15 00:00:00", fixed = TRUE)
+  expect_match(html, "Showing first 2 of 2 observations", fixed = TRUE)
+  expect_equal(s$rows$columns[[3]]$title, "Converted DateTime")
+  expect_equal(s$rows$asDF[[3]], c("2024-01-15 00:00:00", "2024-01-15 10:30:00"))
 })
 
 

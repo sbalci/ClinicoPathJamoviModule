@@ -44,7 +44,7 @@ items:
             type: integer
 
     - name:  eventRecodeInfo
-      title: 'Outcome Recode'
+      title: 'Outcome Recode Notes'
       type:  Html
       visible: true
       clearWith:
@@ -773,10 +773,10 @@ items:
           title: "Events"
           type: integer
         - name: rmean
-          title: "rmean"
+          title: "Restricted mean"
           type: number
         - name: se_rmean
-          title: "se_rmean"
+          title: "SE (restricted mean)"
           type: number
         - name: median
           title: "Median"
@@ -863,7 +863,7 @@ items:
           title: "Levels"
           type: text
         - name: 'time'
-          title: "time"
+          title: "Time"
           type: number
           format: zto
         - name: n.risk

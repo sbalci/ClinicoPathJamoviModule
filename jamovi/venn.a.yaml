@@ -1,10 +1,10 @@
 ---
 name:  venn
 title: Venn Diagram
-menuGroup: ExplorationT
+menuGroup: Exploration
 menuSubgroup: ClinicoPath Descriptive Plots
 menuSubtitle: Venn Diagram, UpSet Plot
-version: '1.0.81'
+version: '1.1.6'
 jas: '1.2'
 
 options:

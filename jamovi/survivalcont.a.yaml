@@ -4,7 +4,7 @@ title: Survival Analysis for Continuous Explanatory Variable
 menuGroup: Survival
 menuSubgroup: ClinicoPath Survival
 menuSubtitle: 'Cut-off & Univariate Survival Analysis'
-version: '1.1.5'
+version: '1.1.6'
 jas: '1.2'
 
 description:
@@ -138,7 +138,7 @@ options:
           name: cause
         - title: Disease-Free
           name: dfs
-        - title: Competing Risk (use dedicated analysis)
+        - title: Competing Risks (use dedicated analysis)
           name: compete
       default: overall
       description: >-
@@ -153,9 +153,8 @@ options:
       type: Output
       description: >-
         If you enable this option, the redefined outcome variable will be added to your data
-        as a new variable. This variable will have two levels: "Event" for the event of
-        interest and "Censored" for patients who were lost to follow-up or experienced a
-        competing event.
+        as a new variable. It is coded 1 for the event of interest and 0 for patients who
+        were censored (lost to follow-up, or with an outcome level not counted as the event).
 
     # number-list: open-ended
     - name: cutp

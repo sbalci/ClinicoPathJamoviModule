@@ -71,14 +71,15 @@ test_that("singlearm respects different date formats", {
   )
   expect_no_error(result_ymd)
 
-  # DMY format
+  # DMY format. This dataset codes the outcome as Event/Censored (data-raw/singlearm_test_data.R),
+  # and an event level that is not in the data is now refused.
   result_dmy <- run_singlearm(
     data = singlearm_dmy,
     tint = TRUE,
     dxdate = "diagnosis_date",
     fudate = "followup_date",
     outcome = "outcome",
-    outcomeLevel = "Dead",
+    outcomeLevel = "Event",
     timetypedata = "dmy"
   )
   expect_no_error(result_dmy)

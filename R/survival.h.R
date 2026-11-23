@@ -1010,7 +1010,7 @@ survivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$add(jmvcore::Html$new(
                 options=options,
                 name="eventRecodeInfo",
-                title="Outcome Recode",
+                title="Outcome Recode Notes",
                 visible="(length(outcome) > 0 && length(explanatory) > 0 && (length(elapsedtime) > 0 || (tint && length(dxdate) > 0 && length(fudate) > 0)))",
                 clearWith=list(
                     "outcome",
@@ -1099,11 +1099,11 @@ survivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                         `type`="integer"),
                     list(
                         `name`="rmean", 
-                        `title`="rmean", 
+                        `title`="Restricted mean", 
                         `type`="number"),
                     list(
                         `name`="se_rmean", 
-                        `title`="se_rmean", 
+                        `title`="SE (restricted mean)", 
                         `type`="number"),
                     list(
                         `name`="median", 
@@ -2625,7 +2625,12 @@ survivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "awod",
                     "uselandmark",
                     "landmark",
-                    "rcs_variable")))
+                    "rcs_variable",
+                    "rcs_analysis",
+                    "age_adjustment",
+                    "age_variable",
+                    "stratified_cox",
+                    "strata_variable")))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="calibrationGroupTable",
@@ -2682,7 +2687,12 @@ survivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "awod",
                     "uselandmark",
                     "landmark",
-                    "rcs_variable")))
+                    "rcs_variable",
+                    "rcs_analysis",
+                    "age_adjustment",
+                    "age_variable",
+                    "stratified_cox",
+                    "strata_variable")))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="calibrationPlot",
@@ -2712,7 +2722,12 @@ survivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "awod",
                     "uselandmark",
                     "landmark",
-                    "rcs_variable")))
+                    "rcs_variable",
+                    "rcs_analysis",
+                    "age_adjustment",
+                    "age_variable",
+                    "stratified_cox",
+                    "strata_variable")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="calibrationInterpretation",
@@ -2739,7 +2754,12 @@ survivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "awod",
                     "uselandmark",
                     "landmark",
-                    "rcs_variable")))
+                    "rcs_variable",
+                    "rcs_analysis",
+                    "age_adjustment",
+                    "age_variable",
+                    "stratified_cox",
+                    "strata_variable")))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="rcsTestTable",
@@ -2800,7 +2820,9 @@ survivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "awd",
                     "awod",
                     "uselandmark",
-                    "landmark")))
+                    "landmark",
+                    "stratified_cox",
+                    "strata_variable")))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="rcsPlot",
@@ -2829,7 +2851,9 @@ survivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "awd",
                     "awod",
                     "uselandmark",
-                    "landmark")))
+                    "landmark",
+                    "stratified_cox",
+                    "strata_variable")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="rcsInterpretation",
@@ -2855,7 +2879,9 @@ survivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "awd",
                     "awod",
                     "uselandmark",
-                    "landmark")))
+                    "landmark",
+                    "stratified_cox",
+                    "strata_variable")))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="bootstrapValidationTable",
@@ -3156,7 +3182,7 @@ survivalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             super$initialize(
                 package = "ClinicoPath",
                 name = "survival",
-                version = c(1,1,5),
+                version = c(1,1,6),
                 options = options,
                 results = survivalResults$new(options=options),
                 data = data,
@@ -3238,10 +3264,14 @@ survivalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   communication-focused formatting.
 #' @param ce Displays cumulative event probability over follow-up.
 #' @param ch Displays cumulative hazard over follow-up.
-#' @param endplot Upper limit of the time axis for survival plots.
+#' @param endplot Upper limit of the time axis for survival plots. The factory
+#'   value 60 means five years in the selected time unit (1825 days, 260 weeks,
+#'   60 months, 5 years); any other value is used as entered.
 #' @param ybegin_plot Lower limit of the probability axis for survival plots.
 #' @param yend_plot Upper limit of the probability axis for survival plots.
-#' @param byplot Spacing between labeled time-axis ticks.
+#' @param byplot Spacing between labeled time-axis ticks. The factory value 12
+#'   means one year in the selected time unit (365 days, 52 weeks, 12 months, 1
+#'   year); any other value is used as entered.
 #' @param multievent Enables explicit assignment of multiple outcome levels to
 #'   event and censoring categories.
 #' @param ci95 Displays 95 percent confidence intervals on supported survival

@@ -98,8 +98,11 @@ test_that("multisurvival: the clinical summary names variables as the user wrote
                        dod = NULL, dooc = NULL, awd = NULL, awod = NULL,
                        explanatory = c("treatment", "Tumour grade"), showSummaries = TRUE)
     s <- r$text$content
-    expect_match(s, "Strongest predictor:", fixed = TRUE)
-    expect_match(s, "treatment: B (vs A)", fixed = TRUE)
+    # The ranking sentence was removed (2026-11-23 audit): a per-unit and a categorical
+    # hazard ratio cannot be ranked on one scale.
+    expect_false(grepl("Strongest predictor", s, fixed = TRUE))
+    # That sentence was the only place this panel named a variable ("treatment: B (vs A)"),
+    # so what is left to hold is that no raw coefficient name appears.
     expect_false(grepl("treatmentB|tumour_gradeG", s))
 })
 

@@ -98,19 +98,15 @@ children:
                 children:
                   - type: Output
                     name: year_out
-                    enable: (extract_year)
                     label: Year
                   - type: Output
                     name: month_out
-                    enable: (extract_month)
                     label: Month (number)
                   - type: Output
                     name: monthname_out
-                    enable: (extract_monthname)
                     label: Month (name)
                   - type: Output
                     name: day_out
-                    enable: (extract_day)
                     label: Day of month
   - type: CollapseBox
     label: Time Components
@@ -149,15 +145,12 @@ children:
                 children:
                   - type: Output
                     name: hour_out
-                    enable: (extract_hour)
                     label: Hour
                   - type: Output
                     name: minute_out
-                    enable: (extract_minute)
                     label: Minute
                   - type: Output
                     name: second_out
-                    enable: (extract_second)
                     label: Second
 
   - type: CollapseBox
@@ -200,19 +193,15 @@ children:
                 children:
                   - type: Output
                     name: dayname_out
-                    enable: (extract_dayname)
                     label: Day name
                   - type: Output
                     name: weeknum_out
-                    enable: (extract_weeknum)
                     label: Week number
                   - type: Output
                     name: quarter_out
-                    enable: (extract_quarter)
                     label: Quarter
                   - type: Output
                     name: dayofyear_out
-                    enable: (extract_dayofyear)
                     label: Day of year
 
   - type: CollapseBox

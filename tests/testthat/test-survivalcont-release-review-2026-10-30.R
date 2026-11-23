@@ -188,8 +188,8 @@ test_that("cross F4: a sentinel date is refused", {
 
 test_that("cross F5: unreadable dates give the shared warning with resolved counts", {
     d <- sc_rr_data(n = 120)
-    d$dx <- format(as.Date("2015-01-10") + (1:120 * 7), "%Y-%m-%d")
-    d$fu <- format(as.Date("2015-01-10") + (1:120 * 7) + round(d$time * 30), "%Y-%m-%d")
+    d$dx <- base::format(as.Date("2015-01-10") + (1:120 * 7), "%Y-%m-%d")
+    d$fu <- base::format(as.Date("2015-01-10") + (1:120 * 7) + round(d$time * 30), "%Y-%m-%d")
     d$fu[1:10] <- "not a date"
     r <- run_survivalcont(data = d, outcome = "ev", contexpl = "m", tint = TRUE, dxdate = "dx", fudate = "fu")
     expect_match(strip_survivalcont_html(r$warnings$content),

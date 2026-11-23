@@ -66,8 +66,16 @@
   result <- .observedCifReport(time, status, cutpoints, group,
                                conf.type = conf.type,
                                extend_exhausted = extend_exhausted)
+  # The report keeps English keys; the row label is what the user reads.
+  cause_label <- c("Event-free" = .("Event-free"), "Event of interest" = .("Event of interest"),
+                   "Competing event(s)" = .("Competing event(s)"))
   for (i in seq_len(nrow(result$table))) {
-    table$addRow(rowKey = i, values = as.list(result$table[i, ]))
+    row <- as.list(result$table[i, ])
+    row$cause <- unname(cause_label[as.character(row$cause)])
+    table$addRow(rowKey = i, values = row)
+    # A probability of exactly 0 or 1 has no interval; a numeric NA would be drawn as "NaN".
+    .footnoteMissingCells(table, i, row[c("lower", "upper")],
+                          .("No confidence interval: the estimate is exactly 0% or 100% at this time."))
   }
   table$setNote("estimand", .("Aalen\u2013Johansen estimates within each group's observed follow-up. Event-free probability and both cumulative incidences sum to one. Competing events are pooled according to the selected outcome mapping. Risk counts are just before the stated time; event and censoring counts are cumulative through that time. Event-free rows count all terminal events. Boundary confidence intervals are unavailable. A late plateau does not establish cure."))
   table$setNote("support", if (length(result$omitted)) .pasteT(.("Time points beyond observed follow-up were omitted for: {omitted}."), omitted = paste(result$omitted, collapse = ", ")) else NULL)

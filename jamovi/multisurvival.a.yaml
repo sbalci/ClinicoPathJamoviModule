@@ -4,7 +4,7 @@ title: Multivariable Survival Analysis
 menuGroup: Survival
 menuSubgroup: ClinicoPath Survival
 menuSubtitle: 'Multivariable Cox-regression, Adjusted Survival'
-version: '1.1.5'
+version: '1.1.6'
 jas: '1.2'
 
 description:
@@ -287,7 +287,7 @@ options:
           The level of `outcome` corresponding to death due to disease, if applicable.
 
     - name: dooc
-      title: Dead of Other
+      title: Dead of Other Causes
       type: Level
       variable: (outcome)
       allowNone: true
@@ -296,7 +296,7 @@ options:
           The level of `outcome` corresponding to death due to other causes, if applicable.
 
     - name: awd
-      title: Alive w Disease
+      title: Alive with Disease
       type: Level
       variable: (outcome)
       allowNone: true
@@ -305,7 +305,7 @@ options:
           The level of `outcome` corresponding to alive with disease, if applicable.
 
     - name: awod
-      title: Alive w/o Disease
+      title: Alive without Disease
       type: Level
       variable: (outcome)
       allowNone: true
@@ -324,7 +324,7 @@ options:
           name: cause
         - title: Disease-Free
           name: dfs
-        - title: Competing Risk
+        - title: Competing Risks
           name: compete
       default: overall
       description:
@@ -462,7 +462,7 @@ options:
       min: 0
       description:
         R: >
-          The maximum follow-up time (in units defined by `timetypeoutput`) to display on survival plots.
+          The maximum follow-up time (in units defined by `timetypeoutput`) to display on survival plots. The factory value 60 means five years in the selected time unit (1825 days, 260 weeks, 60 months, 5 years); any other value is used as entered.
 
 
     - name: byplot
@@ -472,7 +472,7 @@ options:
       min: 0
       description:
         R: >
-          The interval (in units defined by `timetypeoutput`) at which time points or labels are shown on plots.
+          The interval (in units defined by `timetypeoutput`) at which time points or labels are shown on plots. The factory value 12 means one year in the selected time unit (365 days, 52 weeks, 12 months, 1 year); any other value is used as entered.
 
 
     - name: ci95

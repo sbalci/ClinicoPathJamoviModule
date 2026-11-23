@@ -5,7 +5,7 @@ menuGroup: Survival
 menuSubgroup: Penalized Cox Regression
 menuTitle: LASSO Cox
 menuSubtitle: Sparse Cox model development with cross-validated L1 penalization.
-version: '1.1.5'
+version: '1.1.6'
 jas: '1.2'
 
 description:
@@ -52,7 +52,7 @@ options:
       default: NULL
       description:
         ui: >
-          Event status with exactly two observed values. A numeric column coded 0/1 is read as 0 = censored, 1 = event. Any other coding (for example 1/2, or Alive/Dead) is never guessed: choose the event value in Event level.
+          Event status with exactly two observed values. A column of data type Continuous coded 0/1 is read as 0 = censored, 1 = event; a Nominal or Ordinal 0/1 column needs the Event Level. Any other coding (for example 1/2, or Alive/Dead) is never guessed: choose the event value in Event level.
         R: >
           Binary event indicator (event vs censored) with exactly two observed values.
           A numeric 0/1 column is read as 0 = censored and 1 = event; for any other

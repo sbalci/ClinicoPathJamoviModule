@@ -1597,7 +1597,10 @@ def check_untranslated_prose():
     text a translated module still shows in English (2026-11-20 jsurvival [LOW]: recode summary,
     explanation panels, section headings beside a full Turkish catalogue). Counted per function.
     Blind to: headings under four words, text built from single words, and .(x) on a non-literal
-    (never extracted). Counts developer-only stop()/message() text too - read the list, don't sum it.
+    (never extracted). For those run `Rscript --vanilla tools/i18n_scan_literals.R R/<file>.R`, which
+    lists every English literal outside .() from the parse tree (2026-11-23 jsurvival: short labels
+    in all nine analyses while this check read 0).
+    Counts developer-only stop()/message() text too - read the list, don't sum it.
     A function whose English is not prose for the user (generated R code, identifiers compared in
     code, a fallback for callers with no translator) says so with `# i18n-exempt: <why>` in its body."""
     hits = []

@@ -1,10 +1,10 @@
 ---
 name:  jjwithinstats
 title: Box-Violin Plots to Compare Within Groups
-menuGroup: JJStatsPlotT
+menuGroup: JJStatsPlot
 menuSubgroup: 'Categorical vs Continuous'
 menuSubtitle: Repeated Continuous Measurements
-version: '1.0.9'
+version: '1.1.6'
 jas: '1.2'
 weightsSupport: none
 

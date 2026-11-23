@@ -29,6 +29,41 @@ children:
             name: grvar
             maxItemCount: 1
             isTarget: true
+      - type: TargetLayoutBox
+        label: Color Variable (Optional)
+        children:
+          - type: VariablesListBox
+            name: colorvar
+            maxItemCount: 1
+            isTarget: true
+      - type: TargetLayoutBox
+        label: Size Variable (Optional)
+        children:
+          - type: VariablesListBox
+            name: sizevar
+            maxItemCount: 1
+            isTarget: true
+      - type: TargetLayoutBox
+        label: Shape Variable (Optional)
+        children:
+          - type: VariablesListBox
+            name: shapevar
+            maxItemCount: 1
+            isTarget: true
+      - type: TargetLayoutBox
+        label: Alpha Variable (Optional)
+        children:
+          - type: VariablesListBox
+            name: alphavar
+            maxItemCount: 1
+            isTarget: true
+      - type: TargetLayoutBox
+        label: Label Variable (Optional)
+        children:
+          - type: VariablesListBox
+            name: labelvar
+            maxItemCount: 1
+            isTarget: true
   - type: CollapseBox
     label: Statistical Analysis
     collapsed: true
@@ -178,45 +213,6 @@ children:
     label: Plot with Aesthetics
     collapsed: true
     children:
-      - type: VariableSupplier
-        persistentItems: false
-        stretchFactor: 1
-        children:
-          - type: TargetLayoutBox
-            label: Color Variable (Optional)
-            children:
-              - type: VariablesListBox
-                name: colorvar
-                maxItemCount: 1
-                isTarget: true
-          - type: TargetLayoutBox
-            label: Size Variable (Optional)
-            children:
-              - type: VariablesListBox
-                name: sizevar
-                maxItemCount: 1
-                isTarget: true
-          - type: TargetLayoutBox
-            label: Shape Variable (Optional)
-            children:
-              - type: VariablesListBox
-                name: shapevar
-                maxItemCount: 1
-                isTarget: true
-          - type: TargetLayoutBox
-            label: Alpha Variable (Optional)
-            children:
-              - type: VariablesListBox
-                name: alphavar
-                maxItemCount: 1
-                isTarget: true
-          - type: TargetLayoutBox
-            label: Label Variable (Optional)
-            children:
-              - type: VariablesListBox
-                name: labelvar
-                maxItemCount: 1
-                isTarget: true
       - type: Label
         label: Marginal distributions (this panel only)
         fitToGrid: true

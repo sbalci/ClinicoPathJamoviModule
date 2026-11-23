@@ -92,6 +92,15 @@ children:
           - type: Output
             name: riskScore
   - type: CollapseBox
+    label: Additional Tables
+    collapsed: true
+    stretchFactor: 1
+    children:
+      - type: CheckBox
+        name: showVariableImportance
+      - type: CheckBox
+        name: showModelComparison
+  - type: CollapseBox
     label: Explanatory Output
     collapsed: true
     stretchFactor: 1
@@ -104,7 +113,3 @@ children:
         name: showMethodologyNotes
       - type: CheckBox
         name: includeClinicalGuidance
-      - type: CheckBox
-        name: showVariableImportance
-      - type: CheckBox
-        name: showModelComparison

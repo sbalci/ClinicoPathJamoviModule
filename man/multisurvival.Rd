@@ -164,10 +164,14 @@ diagnostic when not needed.}
 visualization of survival functions without covariate adjustment.}
 
 \item{endplot}{The maximum follow-up time (in units defined by
-\code{timetypeoutput}) to display on survival plots.}
+\code{timetypeoutput}) to display on survival plots. The factory value 60
+means five years in the selected time unit (1825 days, 260 weeks, 60
+months, 5 years); any other value is used as entered.}
 
 \item{byplot}{The interval (in units defined by \code{timetypeoutput}) at
-which time points or labels are shown on plots.}
+which time points or labels are shown on plots. The factory value 12 means
+one year in the selected time unit (365 days, 52 weeks, 12 months, 1 year);
+any other value is used as entered.}
 
 \item{ci95}{If true, displays 95 percent confidence intervals around the
 survival estimates on plots.}

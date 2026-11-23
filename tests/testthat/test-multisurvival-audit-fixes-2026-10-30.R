@@ -63,7 +63,8 @@ test_that("an aliased interaction coefficient is blanked and footnoted, not NaN"
     expect_length(ms_nan_cells(it), 0L)
     expect_length(ms_nan_cells(r$modelContributionTable), 0L)
     row <- which(vapply(seq_len(it$rowCount), function(i)
-        identical(it$getCell(rowNo = i, "term")$value, "g3C:g2Y"), logical(1)))
+        # shown with the variable names as typed since the 2026-11-23 audit ("g3C:g2Y" before)
+        identical(it$getCell(rowNo = i, "term")$value, "g3: C * g2: Y"), logical(1)))
     expect_length(row, 1L)
     for (col in c("hr", "ci_lower", "ci_upper", "p")) {
         expect_identical(it$getCell(rowNo = row, col)$value, "")

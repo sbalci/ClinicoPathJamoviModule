@@ -23,6 +23,12 @@ lassocox_integration_run <- function(data, time, status, event, predictors, ...)
   a$results
 }
 
+# The per-check rows (Status, Check, Value, Detail) are the suitabilityChecks Table, one line
+# per row here; the suitabilityReport Html keeps the overall verdict and the recommendations.
+lassocox_integration_checks <- function(results) {
+  paste(do.call(paste, as.data.frame(results$suitabilityChecks)), collapse = "\n")
+}
+
 lassocox_integration_valid <- function(r) {
   expect_gt(r$modelSummary$rowCount, 0)
   expect_false(grepl("Analysis Error", r$todo$content, fixed = TRUE))
@@ -79,7 +85,7 @@ test_that("lassocox integrates cardiovascular predictors and missingness reporti
       "ldl_cholesterol_mg_dl", "diabetes_mellitus", "hypertension", "smoking_status",
       "family_history_cvd", "ace_inhibitor_use", "statin_use", "aspirin_use"))
   lassocox_integration_valid(r)
-  expect_match(r$suitabilityReport$content, "Data Quality")
+  expect_match(lassocox_integration_checks(r), "Data Quality")
 })
 
 test_that("lassocox integrates a small cohort with reproducible reduced folds", {
@@ -123,7 +129,7 @@ test_that("lassocox integrates highly correlated biomarkers without a selection 
     showModelComparison = TRUE)
   lassocox_integration_valid(r)
   expect_equal(r$modelComparison$rowCount, 2)
-  expect_match(r$suitabilityReport$content, "collinearity", ignore.case = TRUE)
+  expect_match(lassocox_integration_checks(r), "collinearity", ignore.case = TRUE)
 })
 
 test_that("lassocox fixture outputs reproduce exactly at the same seed", {
@@ -132,6 +138,12 @@ test_that("lassocox fixture outputs reproduce exactly at the same seed", {
     predictors = c("age", "tumor_size_cm", "grade", "lymph_nodes_positive", "ki67_percent"),
     random_seed = 42, showReproducibility = TRUE)
   a <- do.call(lassocox_integration_run, args)
+  # The analysis keeps its last cross-validated fit; empty that store so the second run
+  # fits again and this stays a test of the seed, not of the reuse.
+  for (pkg in intersect(c("ClinicoPath", "jsurvival"), loadedNamespaces())) {
+    cache <- get0(".lassocoxCvCache", asNamespace(pkg))
+    if (is.environment(cache)) rm(list = ls(cache, all.names = TRUE), envir = cache)
+  }
   b <- do.call(lassocox_integration_run, args)
   lassocox_integration_valid(a)
   expect_equal(as.data.frame(a$coefficients), as.data.frame(b$coefficients), tolerance = 0)

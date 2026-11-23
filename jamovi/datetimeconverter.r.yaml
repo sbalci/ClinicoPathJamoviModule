@@ -95,7 +95,7 @@ items:
     # reintroducing the staleness the lists above had.
 
     - name: qualityAssessment
-      title: 'Data Quality Assessment'
+      title: 'Quality Summary'
       type: Html
       visible: (show_quality_metrics)
 

@@ -229,12 +229,11 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
             # print times on that scale.
             # x-axis label, including the landmark caveat when one is in force.
             .timeAxisLabel = function() {
-                base <- paste0("Time (", self$options$timetypeoutput, ")")
                 if (isTRUE(self$options$uselandmark) &&
                     is.finite(jmvcore::toNumeric(self$options$landmark)) &&
                     jmvcore::toNumeric(self$options$landmark) > 0)
-                    paste0(base, " from landmark")
-                else base
+                    .pasteT(.("Time ({unit}) from landmark"), unit = self$options$timetypeoutput)
+                else .pasteT(.("Time ({unit})"), unit = self$options$timetypeoutput)
             },
 
             .landmarkSentence = function(results) {
@@ -274,18 +273,12 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
             # the factory "12, 36, 60" for cutp: as a request for the unit-aware
             # 5-year point. Any other value is the user's own and is used as-is.
             .plotEndTime = function() {
-                endplot <- jmvcore::toNumeric(self$options$endplot)
-                if (!is.finite(endplot) || endplot <= 0) return(5 * private$.oneYear())
-                if (identical(as.numeric(endplot), 60)) return(5 * private$.oneYear())
-                endplot
+                .plotWindow(self$options$endplot, self$options$byplot, self$options$timetypeoutput)$end
             },
 
             # Axis tick spacing, same factory-value rule (12 = one year in months).
             .plotBy = function() {
-                byplot <- jmvcore::toNumeric(self$options$byplot)
-                if (!is.finite(byplot) || byplot <= 0) return(private$.oneYear())
-                if (identical(as.numeric(byplot), 12)) return(private$.oneYear())
-                byplot
+                .plotWindow(self$options$endplot, self$options$byplot, self$options$timetypeoutput)$by
             },
 
             # Safe plot y-axis bounds (fallback to [0, 1] when non-finite or inverted).
@@ -420,8 +413,8 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
 
                     "median_survival" = {
                         median_val <- ifelse(is.null(result_values$median), "N/A", round(result_values$median, 1))
-                        time_unit <- ifelse(is.null(result_values$time_unit), "time units", result_values$time_unit)
-                        group_name <- ifelse(is.null(result_values$group), "this group", result_values$group)
+                        time_unit <- ifelse(is.null(result_values$time_unit), .("time units"), result_values$time_unit)
+                        group_name <- ifelse(is.null(result_values$group), .("this group"), result_values$group)
 
                         if (median_val == "N/A") {
                             glue::glue(.('Median survival time for {group} could not be determined.'), group = group_name)
@@ -436,7 +429,7 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                         if (cutoff_val == "N/A") {
                             glue::glue(.('Optimal cut-off point for {variable} could not be determined.'), variable = variable_name)
                         } else {
-                            glue::glue(.('The data-derived cut-off point for {variable} is {cutoff}; it separates lower and higher marker values in this dataset.'),
+                            glue::glue(.('The data-derived cut-off point for {variable} is {cutoff}; values at or below it form the low group and values above it the high group in this dataset.'),
                                      variable = variable_name, cutoff = cutoff_val)
                         }
                     },
@@ -447,7 +440,14 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
             },
 
             # Error recovery wrapper for safe analysis execution
+            .lastAnalysisError = NULL,
+            # " Reason reported: ..." for the notice of a step that .safeAnalysis() caught, or "".
+            .failureReason = function() {
+                if (is.null(private$.lastAnalysisError)) return("")
+                paste0(" ", .pasteT(.("Reason reported: {reason}"), reason = private$.lastAnalysisError))
+            },
             .safeAnalysis = function(analysis_function, context = "", fallback_value = NULL) {
+                private$.lastAnalysisError <- NULL
                 warn_env <- new.env(parent = emptyenv())
                 warn_env$reported <- character()
                 tryCatch({
@@ -472,8 +472,10 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                         }
                     )
                 }, error = function(e) {
-                    # Analysis failed - return fallback value silently
-                    # Error details are already handled by specific error notices
+                    # A jamovi restart arrives as an error; it is not a failed analysis.
+                    if (identical(e$code, "restart")) stop(e)
+                    # The caller reports the failure; keep the reason for its notice.
+                    private$.lastAnalysisError <- conditionMessage(e)
                     return(fallback_value)
                 })
             },
@@ -827,7 +829,7 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                     "</a></p></div>"))
 
                 html <- self$results$todo
-                html$setContent(todo)
+                html$setContent(paste0(.multiEventPending(self$options), todo))
             }
 
 
@@ -888,6 +890,7 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                     is_numeric_dx <- is.numeric(mydata[[dxdate]])
                     is_numeric_fu <- is.numeric(mydata[[fudate]])
 
+                    date_notes <- list(shape = "", two_digit = NULL)
                     if (is_numeric_dx && is_numeric_fu) {
                         # Handle numeric Unix epoch input (from DateTime Converter)
                         #
@@ -919,32 +922,25 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                         )
 
                         if (timetypedata %in% names(lubridate_functions)) {
-                            func <- lubridate_functions[[timetypedata]]
-                            tryCatch({
-                                mydata[["start"]] <- suppressWarnings(func(mydata[[dxdate]]))
-                                mydata[["end"]] <- suppressWarnings(func(mydata[[fudate]]))
-                            }, error = function(e) {
-                                return(NULL)
-                            })
-
-                            # lubridate reports a format mismatch as a WARNING
-                            # ("19 failed to parse."), not an error, so the tryCatch
-                            # above never fired and only the all-NA case was treated
-                            # as failure. Rows that failed to parse were then removed
-                            # by naOmit and reported as "excluded because ... was
-                            # missing" -- blaming the data instead of the wrong
-                            # 'Input time type'. Worse, on a dd/mm vs mm/dd mismatch
-                            # the rows that DO parse have day and month transposed.
-                            dx_failed <- .countDateParseFailures(mydata[[dxdate]], mydata[["start"]])
-                            fu_failed <- .countDateParseFailures(mydata[[fudate]], mydata[["end"]])
-                            n_fail <- dx_failed$n_failed + fu_failed$n_failed
-                            n_dates <- dx_failed$n_inputs + fu_failed$n_inputs
+                            # The shape guard, not the bare parser: lubridate reads text of the
+                            # wrong shape at 100% (ymd_hms("15/01/2020 14:30") is 2015-01-20), and
+                            # on a dd/mm vs mm/dd mismatch the rows that do parse are transposed.
+                            # Refused values come back missing and are reported below instead of
+                            # being removed later as "missing".
+                            date_read <- .readSurvivalDates(mydata[[dxdate]], mydata[[fudate]], timetypedata)
+                            date_notes <- .survivalDateNotes(date_read)
+                            mydata[["start"]] <- date_read$start
+                            mydata[["end"]] <- date_read$end
+                            n_fail <- date_read$n_failed
+                            n_dates <- date_read$n_inputs
+                            if (!is.null(date_notes$two_digit))
+                                private$.addHtmlMessage("strongWarning", .("Two-digit years"), date_notes$two_digit)
                             if (n_fail > 0) {
                                 private$.addHtmlMessage(
                                     "warning",
                                     .("Unreadable dates"),
-                                    .fmt(.("{nfailed} of {ninputs} dates could not be read, so those patients were excluded. Check the date format: when it does not match the data, the dates that were read may have day and month swapped."),
-                                         nfailed = n_fail, ninputs = n_dates))
+                                    paste(.fmt(.("{nfailed} of {ninputs} dates could not be read, so those patients were excluded. Check the date format: when it does not match the data, the dates that were read may have day and month swapped."),
+                                         nfailed = n_fail, ninputs = n_dates), date_notes$shape))
                             }
                         } else {
                             return(NULL)
@@ -956,6 +952,11 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
 
 
                     if ( sum(!is.na(mydata[["start"]])) == 0 || sum(!is.na(mydata[["end"]])) == 0)  {
+                        # Say why when the text's shape is the reason; otherwise the caller
+                        # reports the generic failure.
+                        if (nzchar(date_notes$shape))
+                            jmvcore::reject(paste(
+                                .("No date could be read with the selected date type."), date_notes$shape))
                         return(NULL)
                     }
 
@@ -1085,7 +1086,12 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
 
                 # If multi-event analysis is enabled, check for required event levels
                 if (self$options$multievent) {
-                    has_required_events <- !is.null(self$options$dod) || !is.null(self$options$dooc)
+                    # Any assigned category starts the run. Requiring a death level kept a
+                    # recurrence-only mapping (disease-free survival with Alive with Disease
+                    # and Alive without Disease) on the welcome panel with nothing to say
+                    # why; the shared coder reports a mapping it cannot use.
+                    has_required_events <- !is.null(self$options$dod) || !is.null(self$options$dooc) ||
+                        !is.null(self$options$awd) || !is.null(self$options$awod)
                     outcome_valid <- has_outcome && has_required_events
                 } else {
                     outcome_valid <- has_outcome
@@ -1410,7 +1416,7 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                 if (!is.null(private$.eventRecode))
                 {
                     self$results$eventRecodeInfo$setContent(
-                        .describeEventIndicator(private$.eventRecode, self$options$outcome))
+                        .describeEventIndicator(private$.eventRecode, self$options$outcome, followup = FALSE))
                     .fillEventRecodeTable(self$results$eventRecodeTable, private$.eventRecode)
                 }
 
@@ -1529,13 +1535,13 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                                 private$.addHtmlMessage(
                                     type = "strongWarning",
                                     title = .("Very Limited Variability"),
-                                    message = sprintf(.("Continuous variable \"%s\" has only %d unique values. This severely limits cut-off analysis and Cox regression assumptions. Consider: (1) treating as categorical, (2) verifying data quality, or (3) using a different variable with more variation."), results$name3contexpl, n_unique)
+                                    message = sprintf(.("Continuous variable \"%s\" has only %d unique values. This severely limits cut-off analysis and Cox regression assumptions. Consider: (1) treating as categorical, (2) verifying data quality, or (3) using a different variable with more variation."), self$options$contexpl, n_unique)
                                 )
                             } else if (n_unique < 20) {
                                 private$.addHtmlMessage(
                                     type = "warning",
                                     title = .("Limited Variability"),
-                                    message = sprintf(.("Continuous variable \"%s\" has only %d unique values. While analysis is possible, optimal cut-off determination and Cox regression may be limited. Results should be interpreted cautiously."), results$name3contexpl, n_unique)
+                                    message = sprintf(.("Continuous variable \"%s\" has only %d unique values. While analysis is possible, optimal cut-off determination and Cox regression may be limited. Results should be interpreted cautiously."), self$options$contexpl, n_unique)
                                 )
                             }
                         }
@@ -1716,7 +1722,7 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                     private$.addHtmlMessage(
                         "warning",
                         .("Optimal cut-off unavailable"),
-                        .("An optimal cut-off could not be estimated from these data. The continuous Cox model remains the primary analysis; check predictor variability, event count, and minimum group size.")
+                        paste0(.("An optimal cut-off could not be estimated from these data. The continuous Cox model remains the primary analysis; check predictor variability, event count, and minimum group size."), private$.failureReason())
                     )
                     # No cut-off groups: report the whole-cohort RMST and continuous residuals instead.
                     if (self$options$rmst_analysis) private$.calculateRMST(results)
@@ -1867,16 +1873,16 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                 # These used to be built from the OPTIONS, so a suppressed or failed
                 # cut-off search still announced "Successfully completed: cut-off
                 # analysis" next to an empty table.
-                if (isTRUE(private$.cutoffRan)) completed_analyses <- append(completed_analyses, "cut-off analysis")
-                if (isTRUE(private$.multicutRan)) completed_analyses <- append(completed_analyses, "multiple cut-off analysis")
+                if (isTRUE(private$.cutoffRan)) completed_analyses <- append(completed_analyses, .("cut-off analysis"))
+                if (isTRUE(private$.multicutRan)) completed_analyses <- append(completed_analyses, .("multiple cut-off analysis"))
                 # The rest are read off the tables (all emptied at the start of .run()),
                 # so an RMST horizon error or a failed residual/Cox fit is not announced
                 # as "Successfully completed".
                 filled <- function(nm) self$results[[nm]]$rowCount > 0
-                if (filled("rmstTable")) completed_analyses <- append(completed_analyses, "RMST analysis")
-                if (filled("residualsTable")) completed_analyses <- append(completed_analyses, "residual diagnostics")
-                if (filled("personTimeTable")) completed_analyses <- append(completed_analyses, "person-time analysis")
-                if (filled("coxTable")) completed_analyses <- append(completed_analyses, "Cox regression")
+                if (filled("rmstTable")) completed_analyses <- append(completed_analyses, .("RMST analysis"))
+                if (filled("residualsTable")) completed_analyses <- append(completed_analyses, .("residual diagnostics"))
+                if (filled("personTimeTable")) completed_analyses <- append(completed_analyses, .("person-time analysis"))
+                if (filled("coxTable")) completed_analyses <- append(completed_analyses, .("Cox regression"))
 
                 if (length(completed_analyses) > 0) {
                     analyses_list <- paste(completed_analyses, collapse = ", ")
@@ -1971,7 +1977,7 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
 
                 # Check if Cox analysis was successful
                 if (is.null(tCox) || is.null(tCox[[1]]) || is.null(tCox[[2]])) {
-                    error_msg <- .("Cox regression analysis failed. This may be due to insufficient data, convergence issues, or inappropriate data structure. Please check your variables and try again."
+                    error_msg <- paste0(.("Cox regression analysis failed. This may be due to insufficient data, convergence issues, or inappropriate data structure. Please check your variables and try again."), private$.failureReason()
                     )
                     self$results$tCoxtext2$setContent(private$.createInterpretationBox(
                         .("Analysis Error"), error_msg, warning = TRUE
@@ -2014,12 +2020,13 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                         private$.addHtmlMessage(
                             type = "strongWarning",
                             title = .("Proportional Hazards Assumption Violated"),
-                            message = sprintf(.("Proportional hazards assumption violated (Schoenfeld residual test p=%.3f). Cox model estimates may be unreliable. Hazard ratios may change over time. Consider: (1) stratified Cox regression (Advanced Options), (2) time-varying coefficients, (3) log-log plot for visual assessment, or (4) parametric survival models."), global_p)
+                            message = sprintf(.("Proportional hazards assumption violated (Schoenfeld residual test p=%.3f). Cox model estimates may be unreliable. Hazard ratios may change over time. Consider: (1) time-varying coefficients, (2) the log-log plot for a visual check, or (3) a parametric survival model. Stratifying on another variable does not address non-proportionality of the marker itself."), global_p)
                         )
                     }
 
                     # Check individual covariate if applicable
-                    if (nrow(zph_test$table) > 1) {
+                    # With one covariate its row and GLOBAL are the same test: one notice is enough.
+                    if (nrow(zph_test$table) > 2) {
                         # Multiple rows mean we have individual covariate tests
                         covariate_rows <- rownames(zph_test$table)[rownames(zph_test$table) != "GLOBAL"]
                         for (var_name in covariate_rows) {
@@ -2099,7 +2106,7 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
 
                 coxTable$setNote(
                     "scale",
-                    .fmt(.("Hazard ratios are unadjusted and correspond to a one-unit increase in '{var}'. The model assumes a linear association with log hazard and proportional hazards over time."), var = self$options$contexpl)
+                    .fmt(.("Hazard ratios are unadjusted and correspond to a one-unit increase in '{var}'. The model assumes a linear association with log hazard and proportional hazards over time."), var = .rocLabel(self$options$contexpl))
                 )
 
                 data_frame <- tCox_df
@@ -2243,7 +2250,7 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
 
                 # Simple plain text title (table titles don't render HTML)
                 rescutTable$setTitle(
-                    .fmt(.("{var} Optimal Cut-off Analysis"), var = self$options$contexpl)
+                    .fmt(.("{var} Optimal Cut-off Analysis"), var = .rocLabel(self$options$contexpl))
                 )
 
                 # Add plain text interpretation note if cutoff was found
@@ -2251,10 +2258,10 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                     cutoff_value <- rescut_summary[1, "cutpoint"]
                     variable_name <- self$options$contexpl
 
-                    clinical_note <- .fmt(.("The data-derived cut-off point for {variableName} is {cutoffValue}; it separates lower and higher marker values in this dataset."), variableName = variable_name, cutoffValue = private$.cutLabel(cutoff_value))
+                    clinical_note <- .fmt(.("The data-derived cut-off point for {variableName} is {cutoffValue}; values at or below it form the low group and values above it the high group in this dataset."), variableName = variable_name, cutoffValue = private$.cutLabel(cutoff_value))
 
                     # Set table note with plain text (notes don't render HTML)
-                    rescutTable$setNote("clinical", clinical_note)
+                    rescutTable$setNote("clinical", .rocLabel(clinical_note))
                 }
 
                 # Multiplicity caution (plain text)
@@ -2377,7 +2384,7 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                 # Apply name restoration for better display
                 labelled_data <- private$.getData()
                 results2table$factor <- gsub(pattern = paste0(mycontexpl, "="),
-                                             replacement = paste0(self$options$contexpl, " = "),
+                                             replacement = paste0(.rocLabel(self$options$contexpl, note = FALSE), " = "),
                                              x = results1table$factor,
                                              fixed = TRUE)
 
@@ -2416,15 +2423,15 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                             x = factor,
                             fixed = TRUE
                         ),
-                        lcl_str = ifelse(is.na(x0_95lcl), "not reached", as.character(round(x0_95lcl, digits = 1))),
-                        ucl_str = ifelse(is.na(x0_95ucl), "not reached", as.character(round(x0_95ucl, digits = 1))),
+                        lcl_str = ifelse(is.na(x0_95lcl), .("not reached"), as.character(round(x0_95lcl, digits = 2))),
+                        ucl_str = ifelse(is.na(x0_95ucl), .("not reached"), as.character(round(x0_95ucl, digits = 2))),
                         ci_str = paste0("[", lcl_str, " - ", ucl_str, ", 95% CI]"),
                         description = dplyr::case_when(
                             is.na(median) ~ as.character(glue::glue(.('When {factor_val}, median survival was not reached during the observation period (the survival curve does not drop below 1/2).'),
                                 factor_val = factor_display)),
                             TRUE ~ as.character(glue::glue(.('When {factor_val}, median survival is {median_val} {ci_str} {units}.'),
                                 factor_val = factor_display,
-                                median_val = round(median, digits = 1),
+                                median_val = round(median, digits = 2),
                                 ci_str = ci_str,
                                 units = self$options$timetypeoutput))
                         )
@@ -2553,7 +2560,7 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                         "stratum_horizon",
                         .fmt(
                             .("Survival estimates are not reported (blank cells) for time points exceeding a group's longest observed follow-up: {groups}."),
-                            groups = paste(affected_desc, collapse = "; ")
+                            groups = .rocLabel(paste(affected_desc, collapse = "; "))
                         )
                     )
                 }
@@ -2561,7 +2568,7 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                 km_fit_df2 <- km_fit_df
 
                 km_fit_df2$strata <- gsub(pattern = paste0(mycontexpl, "="),
-                                             replacement = paste0(self$options$contexpl, " = "),
+                                             replacement = paste0(.rocLabel(self$options$contexpl, note = FALSE), " = "),
                                              x = km_fit_df2$strata,
                                              fixed = TRUE)
 
@@ -2684,7 +2691,7 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                 .deleteTableRows(self$results$personTimeTable)
                 private$.landmarkNote(self$results$personTimeTable, results)
                 self$results$personTimeTable$addRow(rowKey=1, values=list(
-                    interval=paste0("Overall (0-max)"),
+                    interval=.("Overall (0-max)"),
                     events=total_events,
                     person_time=round(total_time, 2),
                     rate=overall_rate,
@@ -2698,7 +2705,12 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                 # NOT whitespace. "12 36 60" therefore parsed to NA and every
                 # boundary was silently dropped. Same class of bug as the one fixed
                 # in .parseSurvivalTimePoints; use the same unambiguous pattern.
-                raw_intervals <- suppressWarnings(as.numeric(unlist(strsplit(
+                # The untouched factory "12, 36, 60" means 1, 3 and 5 years in the selected unit,
+                # exactly as it does for the survival time points (.parseSurvivalTimePoints()).
+                raw_intervals <- if (tolower(gsub("[[:space:]]+", "", self$options$time_intervals)) %in%
+                                     c("", "default", "12,36,60"))
+                    private$.getDefaultCutpoints()
+                else suppressWarnings(as.numeric(unlist(strsplit(
                     self$options$time_intervals,
                     "[,[:space:]]+"
                 ))))
@@ -3029,7 +3041,7 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                         break.time.by = private$.plotBy(),
                         xlim = c(0, private$.plotEndTime()),
                         ylim = private$.plotYLim(),
-                        title = paste0("Cumulative Events ", title2),
+                        title = .pasteT(.("Cumulative Events {variable}"), variable = title2),
                         fun = "event",
                         risk.table = self$options$risktable,
                         conf.int = self$options$ci95,
@@ -3095,7 +3107,7 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                         dependent = myformula,
                         explanatory = private$.escapeVariableNames(mycontexpl),
                         xlab = private$.timeAxisLabel(),
-                        ylab = "Cumulative Hazard",
+                        ylab = .("Cumulative Hazard"),
                         # pval = TRUE,
                         legend = "top",
                         legend.title = title2,
@@ -3103,7 +3115,7 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                         xlim = c(0, private$.plotEndTime()),
                         # For cumulative hazard, use NULL to allow auto-scaling beyond 1.0
                         ylim = NULL,
-                        title = paste0("Cumulative Hazard ", title2),
+                        title = .pasteT(.("Cumulative Hazard {variable}"), variable = title2),
                         fun = "cumhaz",
                         risk.table = self$options$risktable,
                         conf.int = self$options$ci95,
@@ -3352,6 +3364,7 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                         landmark_offset = results$landmark_offset
                     ))
                 }, error = function(e) {
+                    if (identical(e$code, "restart")) stop(e)   # a jamovi restart is not a failure
                     fail(sprintf(.("the analysis stopped with an error: %s"), conditionMessage(e)))
                 })
             }
@@ -3542,6 +3555,7 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
 
                     return(cutoffs)
                 }, error = function(e) {
+                    if (identical(e$code, "restart")) stop(e)   # a jamovi restart is not a failure
                     return(quantile_fallback(conditionMessage(e)))
                 })
             }
@@ -3560,7 +3574,7 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                 sorted_vals <- sort(unique(cont_var))
                 quantile_fallback <- function() {
                     points <- private$.quantileCutoffs(cont_var, num_cuts)
-                    attr(points, "method") <- .("quantile (minimum p-value fallback)")
+                    attr(points, "method") <- "quantile (minimum p-value fallback)"  # i18n-exempt: method key compared in code
                     points
                 }
 
@@ -3697,6 +3711,7 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
 
                     return(best_cuts)
                 }, error = function(e) {
+                    if (identical(e$code, "restart")) stop(e)   # a jamovi restart is not a failure
                     private$.addHtmlMessage(
                         "warning",
                         .("Minimum p-value search failed"),
@@ -3849,14 +3864,17 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                     tryCatch({
                         logrank_test <- survival::survdiff(.asSurvivalFormula(formula_str), data = mydata)
                         overall_chisq <- logrank_test$chisq
-                        overall_pval <- stats::pchisq(logrank_test$chisq, df = length(logrank_test$n) - 1, lower.tail = FALSE)
+                        overall_pval <- logrank_test$pvalue
+                        if (is.null(overall_pval))   # survival releases without $pvalue
+                            overall_pval <- stats::pchisq(logrank_test$chisq,
+                                df = sum(logrank_test$exp > 0) - 1, lower.tail = FALSE)
 
                         # Set the log-rank test results as text
                         outcome_guided <- !startsWith(multicut_results$method, "quantile")
                         logrank_text <- paste0(
                             if (outcome_guided) .("Overall Log-rank Test (unadjusted)") else .("Overall Log-rank Test"),
                             ": \u03c7\u00b2 = ", round(overall_chisq, 3),
-                            " (df = ", length(logrank_test$n) - 1, "), ",
+                            " (df = ", sum(logrank_test$exp > 0) - 1, "), ",
                             .pValueText(overall_pval))
 
                         interpretation <- if (outcome_guided)
@@ -3895,9 +3913,9 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                             risk_group = stats$group,
                             n_patients = stats$n,
                             events = stats$events,
-                            median_survival = round(stats$median_surv, 1),
-                            median_lower = round(stats$median_lower, 1),
-                            median_upper = round(stats$median_upper, 1)
+                            median_survival = stats$median_surv,
+                            median_lower = stats$median_lower,
+                            median_upper = stats$median_upper
                         )
                         median_table$addRow(rowKey = group_name, values = row)
                         .footnoteMissingCells(median_table, group_name, row,
@@ -3976,7 +3994,7 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                     # Create fallback visualization
                     plot <- ggplot2::ggplot() +
                         ggplot2::geom_text(ggplot2::aes(x = 0.5, y = 0.5),
-                                                      label = .("Multiple Cutoffs Analysis\nRun analysis to see visualization"),   # evaluated here, not inside aes()
+                                                      label = .("Multiple Cutoffs Analysis\nNot available for this run; see the messages above"),   # evaluated here, not inside aes()
                                           size = 6) +
                         ggplot2::xlim(0, 1) + ggplot2::ylim(0, 1) +
                         ggplot2::theme_void()
@@ -4049,7 +4067,7 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                     is.null(plotData$outcome) || is.null(plotData$risk_groups)) {
                     plot <- ggplot2::ggplot() +
                         ggplot2::geom_text(ggplot2::aes(x = 0.5, y = 0.5),
-                                                      label = .("Multiple Cutoffs Survival Plot\nRun analysis to see visualization"),   # evaluated here, not inside aes()
+                                                      label = .("Multiple Cutoffs Survival Plot\nNot available for this run; see the messages above"),   # evaluated here, not inside aes()
                                           size = 6) +
                         ggplot2::xlim(0, 1) + ggplot2::ylim(0, 1) +
                         ggplot2::theme_void()
@@ -4088,7 +4106,7 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                                            method = plotData$method, groups = length(levels(plotData$risk_groups)),
                                            note = if (outcome_guided) paste0(" | ", .("no p-value: groups were chosen from these data"))),
                         xlab = private$.timeAxisLabel(),
-                        ylab = "Survival Probability",
+                        ylab = .("Survival Probability"),
                         legend.title = .("Marker groups"),
                         risk.table = self$options$risktable,
                         conf.int = self$options$ci95,
@@ -4310,7 +4328,7 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                 # Create RMST summary
                 if (length(rmst_results) > 0) {
                     summary_text <- paste0(
-                        .pasteT(.("Restricted Mean Survival Time (RMST) Analysis\nTime horizon (\u03c4): {tau} {timetypeoutput}\n\nThe RMST represents the average time a patient can expect to survive up to the specified time horizon.\nThis metric is particularly useful when the survival curves do not reach 50% (median undefined)."), tau = round(tau, 1), timetypeoutput = self$options$timetypeoutput),
+                        .pasteT(.("Restricted Mean Survival Time (RMST) Analysis\nTime horizon (\u03c4): {tau} {timetypeoutput}\n\nThe RMST represents the average time a patient can expect to survive up to the specified time horizon.\nThis metric is particularly useful when the survival curves do not reach 50% (median undefined)."), tau = base::format(signif(tau, 6), trim = TRUE), timetypeoutput = self$options$timetypeoutput),
                         "\n\n")
 
                     # Add group comparisons if multiple groups
@@ -4322,7 +4340,7 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                                 rmst_results[[group_names[1]]]$se^2
                         )
                         diff_ci <- diff_rmst + c(-1, 1) * stats::qnorm(0.975) * diff_se
-                        summary_text <- .pasteT(.("{summaryText}Difference in RMST ({v1} vs {v2}): {diffRmst} {timetypeoutput} {lb}95% CI: {diffCi} to {diffCi2}]\nDescriptive interpretation: Patients in '{v1}' group had on average {v3} {v4} {timetypeoutput} of observed restricted survival up to {tau} {timetypeoutput}. Cut-off groups are data-derived, so this comparison is exploratory and requires external validation."), summaryText = summary_text, v1 = group_names[2], v2 = group_names[1], diffRmst = round(diff_rmst, 2), timetypeoutput = self$options$timetypeoutput, diffCi = round(diff_ci[1], 2), diffCi2 = round(diff_ci[2], 2), v3 = abs(round(diff_rmst, 2)), v4 = if (diff_rmst > 0) .("more") else .("fewer"), tau = round(tau, 1), lb = "[")
+                        summary_text <- .pasteT(.("{summaryText}Difference in RMST ({v1} vs {v2}): {diffRmst} {timetypeoutput} {lb}95% CI: {diffCi} to {diffCi2}]\nDescriptive interpretation: Patients in '{v1}' group had on average {v3} {v4} {timetypeoutput} of observed restricted survival up to {tau} {timetypeoutput}. Cut-off groups are data-derived, so this comparison is exploratory and requires external validation."), summaryText = summary_text, v1 = group_names[2], v2 = group_names[1], diffRmst = round(diff_rmst, 2), timetypeoutput = self$options$timetypeoutput, diffCi = round(diff_ci[1], 2), diffCi2 = round(diff_ci[2], 2), v3 = abs(round(diff_rmst, 2)), v4 = if (diff_rmst > 0) .("more") else .("fewer"), tau = base::format(signif(tau, 6), trim = TRUE), lb = "[")
                     }
 
                     landmark_sentence <- private$.landmarkSentence(results)
@@ -4416,7 +4434,7 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                         if (!is.null(cutoffdata))
                             sprintf(.("the cut-off groups of '%s'"), self$options$contexpl)
                         else sprintf(.("'%s' as a continuous predictor"), self$options$contexpl))
-                    residuals_table$setNote("model", model_note)
+                    residuals_table$setNote("model", .rocLabel(model_note))
 
                     schoenfeld_values <- if (is.matrix(schoenfeld_resid)) {
                         schoenfeld_resid[, 1]
@@ -4453,7 +4471,8 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                     residuals_state <- list(
                         martingale = martingale_resid,
                         deviance = deviance_resid,
-                        fitted = cox_model$linear.predictors
+                        fitted = cox_model$linear.predictors,
+                        model = model_note
                     )
                     private$residuals_data <- residuals_state
                     self$results$residualsPlot$setState(residuals_state)
@@ -4535,7 +4554,7 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                         nrow(mydata),
                         sum(mydata[[myoutcome]] == 1, na.rm = TRUE)
                     )
-                    tbl$setNote("strata_excluded", strata_excl_msg)
+                    tbl$setNote("strata_excluded", .rocLabel(strata_excl_msg))
                     private$.addHtmlMessage(
                         "warning",
                         .("Missing stratification values excluded"),
@@ -4559,7 +4578,7 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                 if (n_strata > max(10, floor(nrow(mydata) / 10))) {
                     tbl$setNote("toomany", sprintf(
                         .("Not fitted: '%s' has %d levels across %d analyzed rows (about %.1f patients per stratum). Stratification needs a small number of reasonably sized groups; a near-continuous variable gives one stratum per patient and no estimable hazard ratio. Use a categorical variable, or add this variable as a covariate in Multivariable Survival Analysis instead."),
-                        strata_var, n_strata, nrow(mydata), nrow(mydata) / n_strata))
+                        .rocLabel(strata_var), n_strata, nrow(mydata), nrow(mydata) / n_strata))
                     return()
                 }
 
@@ -4591,7 +4610,7 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                         .("Sparse strata detected: %s. Strata with fewer than 10 patients or 3 events provide limited information; interpret the pooled hazard ratio and proportional-hazards assessment cautiously."),
                         paste(sparse_details, collapse = "; ")
                     )
-                    tbl$setNote("sparse", sparse_message)
+                    tbl$setNote("sparse", .rocLabel(sparse_message))
                     private$.addHtmlMessage(
                         "warning",
                         .("Sparse strata in stratified Cox model"),
@@ -4639,9 +4658,19 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                     ))
                 }
 
+                ci_width <- unname(ci[1, "upper .95"] - ci[1, "lower .95"])
+                if (is.finite(ci_width) && ci_width > 0 && ci_width < 0.01) {
+                    hr_digits <- max(2, ceiling(-log10(ci_width)) + 1)
+                    tbl$setNote("precision", .fmt(
+                        .("Per one unit of {term} the hazard ratio is {hr} ({lower} to {upper}); the table's rounding hides it. Rescale the variable for a readable ratio."),
+                        term = .rocLabel(unname(term_labels[1])),
+                        hr = formatC(unname(sm[1, "exp(coef)"]), format = "f", digits = hr_digits),
+                        lower = formatC(unname(ci[1, "lower .95"]), format = "f", digits = hr_digits),
+                        upper = formatC(unname(ci[1, "upper .95"]), format = "f", digits = hr_digits)))
+                }
                 tbl$setNote("method", sprintf(
                     .("Baseline hazard allowed to differ across the %d levels of '%s'. Stratification removes the proportional-hazards assumption for that variable, so no hazard ratio is estimated for it."),
-                    nlevels(mydata[[".strata"]]), strata_var))
+                    nlevels(mydata[[".strata"]]), .rocLabel(strata_var)))
             }
 
             # Log-Log Plot Function ----
@@ -4759,8 +4788,8 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                         ggplot2::geom_point(alpha = 0.6) +
                         ggplot2::geom_hline(yintercept = 0, linetype = "dashed") +
                         ggplot2::labs(
-                            x = "Linear Predictors",
-                            y = "Martingale Residuals",
+                            x = .("Linear Predictors"),
+                            y = .("Martingale Residuals"),
                             title = .("Martingale Residuals vs Fitted")
                         ) +
                         ggplot2::theme_minimal()
@@ -4773,8 +4802,8 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                         ggplot2::geom_point(alpha = 0.6) +
                         ggplot2::geom_hline(yintercept = 0, linetype = "dashed") +
                         ggplot2::labs(
-                            x = "Linear Predictors",
-                            y = "Deviance Residuals",
+                            x = .("Linear Predictors"),
+                            y = .("Deviance Residuals"),
                             title = .("Deviance Residuals vs Fitted")
                         ) +
                         ggplot2::theme_minimal()
@@ -4787,8 +4816,8 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                         ggplot2::stat_qq() +
                         ggplot2::stat_qq_line() +
                         ggplot2::labs(
-                            x = "Theoretical Quantiles",
-                            y = "Sample Quantiles",
+                            x = .("Theoretical Quantiles"),
+                            y = .("Sample Quantiles"),
                             title = .("Q-Q Plot of Deviance Residuals")
                         ) +
                         ggplot2::theme_minimal()
@@ -4798,7 +4827,7 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                         ggplot2::geom_histogram(bins = 30, alpha = 0.7, fill = "skyblue") +
                         ggplot2::geom_density(alpha = 0.3, fill = "red") +
                         ggplot2::labs(
-                            x = "Deviance Residuals",
+                            x = .("Deviance Residuals"),
                             y = "Frequency",
                             title = .("Distribution of Deviance Residuals")
                         ) +
@@ -4807,6 +4836,12 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                     # Combine plots using patchwork if available, otherwise show first plot
                     if (requireNamespace("patchwork", quietly = TRUE)) {
                         combined_plot <- patchwork::wrap_plots(p1, p2, p3, p4, ncol = 2)
+                        # With cut-off groups the linear predictor takes two values, so these
+                        # panels cannot show the marker's functional form; the caption says
+                        # which model the residuals come from.
+                        if (!is.null(residuals_data$model))
+                            combined_plot <- combined_plot +
+                                patchwork::plot_annotation(caption = residuals_data$model)
                         print(combined_plot)
                     } else {
                         print(p1)
@@ -4894,7 +4929,7 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                     "</li><li>",
                     .("<strong>Proportional hazards:</strong> Relative effect stays constant over time"),
                     "</li><li>",
-                    .("<strong>Consider cut-offs:</strong> If relationship is non-linear, consider categorizing the variable"),
+                    .("<strong>Non-linearity:</strong> If the relationship is not linear, consider a spline or a transformation first; a cut-off discards information"),
                     "</li></ul></div></div>"))
 
                 # Cut-off Point Analysis Explanation
@@ -4918,7 +4953,7 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                     "</li><li>",
                     .("Selects the cut-off with the largest statistic (biggest difference)"),
                     "</li><li>",
-                    .("No multiplicity-adjusted p-value is reported for the selected cut-off; validate it in independent data"),
+                    .("The cut-off table reports a p-value adjusted for the cut-off search; it remains exploratory, so validate the cut-off in independent data"),
                     '</li></ul></div><table style="width: 100%; border-collapse: collapse; margin: 10px 0;"><tr style="background-color: rgba(255, 202, 33, 0.23); color: inherit;"><th style="padding: 8px; text-align: left; border: 1px solid #ffc107;">',
                     .("Step"),
                     '</th><th style="padding: 8px; text-align: left; border: 1px solid #ffc107;">',
@@ -4940,7 +4975,7 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                     '</td></tr><tr><td style="padding: 8px; border: 1px solid #ffc107;"><strong>',
                     .("3. Validation"),
                     '</strong></td><td style="padding: 8px; border: 1px solid #ffc107;">',
-                    .("Independent data (no adjusted p-value is computed here)"),
+                    .("Independent data (the adjusted p-value in the cut-off table does not replace it)"),
                     '</td><td style="padding: 8px; border: 1px solid #ffc107;">',
                     .("Confirmed or rejected cut-off"),
                     '</td></tr></table></div><div style="background-color: rgba(33, 159, 43, 0.1); padding: 12px; border-radius: 5px; margin: 10px 0; color: inherit;"><h4 style="color: inherit; margin-top: 0;">',
@@ -5016,7 +5051,7 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                     "</li><li>",
                     .("<strong>Time Intervals:</strong> Analyzes rates across different follow-up periods"),
                     "</li><li>",
-                    .("<strong>Rate Comparison:</strong> Compares incidence rates between risk groups"),
+                    .("<strong>Rates by interval:</strong> The overall rate and the rate within each time interval"),
                     "</li><li>",
                     .("<strong>Confidence Intervals:</strong> Provide precision estimates for rates"),
                     "</li></ul><p>",

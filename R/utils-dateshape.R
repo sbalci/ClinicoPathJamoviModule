@@ -112,6 +112,24 @@
     which(!.dateShapeFits(x, fmt, parsed) & (!is.na(parsed) | .isPartialDate(x)))
 }
 
+# Values whose own text does not carry the year the parser gave them, which is what a two-digit
+# year looks like afterwards: "15.01.20" read as 2015-01-20 under ymd, or "65" read as 2065.
+# Returns the count and the first such value with its reading, so the caller can show it. A
+# rule on the text alone ("no four-digit token") would misread a packed 20200115.
+.twoDigitYears <- function(raw, parsed) {
+    ok <- !is.na(parsed) & !is.na(raw)
+    if (!any(ok)) return(list(n = 0L, raw = NULL, parsed = NULL))
+    txt <- as.character(raw[ok])
+    year <- base::format(parsed[ok], "%Y")
+    # A value with a zone offset is converted: 2020-12-31T23:30-05:00 is honestly in 2021
+    # (the same carve-out as .dateYearKept()).
+    offset <- grepl(":[0-9]{2}(\\.[0-9]+)? ?[+-][0-9]{2}(:?[0-9]{2})?$", txt)
+    hit <- which(!offset & !mapply(grepl, year, txt, MoreArgs = list(fixed = TRUE), USE.NAMES = FALSE))
+    list(n = length(hit),
+         raw = if (length(hit)) txt[hit[1]] else NULL,
+         parsed = if (length(hit)) base::format(as.Date(parsed[ok][hit[1]])) else NULL)
+}
+
 # Up to `cap` non-missing values, keeping those with a 13..31 token, so the dates that settle
 # day/month order are never dropped behind a prefix of day <= 12 dates.
 .dateSample <- function(v, cap = 500L) {

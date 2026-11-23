@@ -4,13 +4,13 @@ title: Scatter Plot
 menuGroup: JJStatsPlot
 menuSubgroup: Continuous vs Continuous
 # menuSubtitle: Scatter Plot
-version: '1.0.81'
+version: '1.1.6'
 jas: '1.2'
 
 
 
 description:
-    main: |
+    main: >
         Wrapper Function for ggstatsplot::ggscatterstats and
         ggstatsplot::grouped_ggscatterstats to generate scatter plots
         with correlation analysis and optional marginal distributions.
@@ -80,8 +80,9 @@ options:
       permitted: [ numeric ]
       description:
           R: >
-            Second continuous variable for correlation analysis (e.g., expression levels, treatment response, survival time). 
-            This will appear on the vertical axis. Use numeric variables that you want to correlate with the x-axis variable.
+            Second continuous variable for correlation analysis (e.g., expression levels, treatment response, tumor size).
+            This will appear on the vertical axis. Use independent, uncensored numeric variables that you want to
+            correlate with the x-axis variable (for right-censored survival time, use survival analysis instead).
 
     - name: grvar
       title: 'Split By (Optional)'
@@ -102,8 +103,8 @@ options:
       permitted: [ factor, numeric ]
       description:
           R: >
-            Optional variable to map point colors. When specified, switches to enhanced scatter plot
-            with full ggplot2 aesthetic control instead of ggstatsplot correlation analysis.
+            Optional variable to map point colors. When specified, adds an enhanced scatter plot
+            with ggplot2 aesthetic mappings alongside the main ggstatsplot correlation plot.
 
     - name: sizevar
       title: 'Size Variable (Optional)'
@@ -113,8 +114,8 @@ options:
       permitted: [ numeric ]
       description:
           R: >
-            Optional continuous variable to map point sizes. When specified, switches to enhanced scatter plot
-            with full ggplot2 aesthetic control instead of ggstatsplot correlation analysis.
+            Optional continuous variable to map point sizes. When specified, adds an enhanced scatter plot
+            with ggplot2 aesthetic mappings alongside the main ggstatsplot correlation plot.
 
     - name: shapevar
       title: 'Shape Variable (Optional)'
@@ -124,8 +125,8 @@ options:
       permitted: [ factor ]
       description:
           R: >
-            Optional categorical variable to map point shapes. When specified, switches to enhanced scatter plot.
-            Works best with variables having 6 or fewer levels.
+            Optional categorical variable to map point shapes. When specified, adds an enhanced scatter plot
+            alongside the main plot. Works best with variables having 6 or fewer levels.
 
     - name: alphavar
       title: 'Alpha Variable (Optional)'
@@ -135,7 +136,8 @@ options:
       permitted: [ numeric ]
       description:
           R: >
-            Optional continuous variable to map point transparency (alpha). When specified, switches to enhanced scatter plot.
+            Optional continuous variable to map point transparency (alpha). When specified, adds an enhanced scatter plot
+            alongside the main plot.
 
     - name: labelvar
       title: 'Label Variable (Optional)'
@@ -185,7 +187,7 @@ options:
       default: lm
       description:
           R: >
-            Method for smooth trend line in enhanced scatter plot.
+            Method for the fitted smooth trend line on the scatter plots.
 
 
 
@@ -204,14 +206,16 @@ options:
       default: parametric
       description:
           R: >
-            Choose based on your data distribution. Pearson assumes normality (common for lab values after transformation). 
-            Spearman works for any monotonic relationship (tumor grades, symptom scores). 
-            Robust uses a WINSORIZED PEARSON correlation, which pulls extreme values in to a
-            fixed quantile before computing Pearson's r; report it by that name, not as a
-            percentage-bend correlation, which is a different estimator (verified: on the same
-            80 points statsExpressions returns 0.5894, matching WRS2::wincor exactly, while
-            WRS2::pbcor returns 0.6152). Bayesian analysis quantifies evidence strength for
-            clinical decision-making.
+            Choose based on your data distribution. Pearson assumes bivariate normality and a
+            linear relationship (common for lab values after transformation).
+            Spearman works for any monotonic relationship (tumor grades, symptom scores), using
+            exact permutation p-values when untied (n <= 1290) and Bonett-Wright confidence intervals.
+            Robust uses a 20% two-sided WINSORIZED PEARSON correlation (Wilcox df = n - 2g - 2 with
+            seeded percentile-bootstrap confidence intervals), pulling extreme values in to the 20th
+            and 80th percentiles before computing Pearson's r; report it by that name, not as a
+            percentage-bend correlation. Bayesian analysis uses a shifted Beta(1.41, 1.41) prior
+            (rscale = 0.707) and reports log_e(BF01) alongside the posterior median and highest-density
+            credible interval at the selected confidence level.
 
 
     - name: seed

@@ -430,6 +430,7 @@ children:
                 name: rate_multiplier
                 format: number
                 label: Rate Multiplier
+                enable: (person_time)
   - type: CollapseBox
     label: Data Export Options
     collapsed: true
@@ -482,7 +483,7 @@ children:
             children:
               - type: CheckBox
                 name: use_parametric
-                label: Fit a parametric survival model
+                label: Parametric survival model
               - type: ComboBox
                 name: parametric_distribution
                 label: Distribution
@@ -508,9 +509,9 @@ children:
             children:
               - type: CheckBox
                 name: compare_distributions
-                label: Compare distributions using AIC and BIC
+                label: Distribution comparison (AIC and BIC)
                 enable: (use_parametric)
               - type: CheckBox
                 name: parametric_survival_plots
-                label: Compare fitted curves with Kaplan-Meier estimates
+                label: Fitted curves against Kaplan-Meier estimates
                 enable: (use_parametric)

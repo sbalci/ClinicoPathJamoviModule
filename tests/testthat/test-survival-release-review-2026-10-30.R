@@ -51,9 +51,11 @@ test_that("adjusted curves are directly standardized, and say so", {
     r$adjustedCurvesPlot$saveAs(tempfile(fileext = ".png"))
     p <- ggplot2::last_plot()
     at <- function(g) {
-        s <- p$data[as.character(p$data$variable) == g & p$data$time <= 60, ]
+        # The plotted frame names the curve column `group` (state$curves), formerly `variable`.
+        s <- p$data[as.character(p$data$group) == g & p$data$time <= 60, ]
         s$surv[which.max(s$time)]
     }
+    expect_setequal(unique(as.character(p$data$group)), c("Young", "Old"))
     expect_lt(abs(at("Young") - oracle(0)), .02)
     expect_lt(abs(at("Old") - oracle(1)), .02)
     expect_match(p$labels$title, "Standardized")

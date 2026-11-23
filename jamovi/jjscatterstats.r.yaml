@@ -107,6 +107,14 @@ items:
       clearWith:
         - dep
         - group
+        - clinicalPreset
+        - mytitle
+        - xtitle
+        - ytitle
+        - conflevel
+        - k
+        - plotwidth
+        - plotheight
         - ggpubrPalette
         - ggpubrAddCorr
         - ggpubrCorrMethod
@@ -119,11 +127,19 @@ items:
       height: 450
       renderFun: .plotGGPubr2
       requiresData: true
-      visible: (addGGPubrPlot && !is.null(grvar))
+      visible: (addGGPubrPlot && length(grvar) > 0)
       clearWith:
         - dep
         - group
         - grvar
+        - clinicalPreset
+        - mytitle
+        - xtitle
+        - ytitle
+        - conflevel
+        - k
+        - plotwidth
+        - plotheight
         - ggpubrPalette
         - ggpubrAddCorr
         - ggpubrCorrMethod
@@ -136,6 +152,9 @@ refs:
     - ggplot2
     - ggstatsplot
     - statsExpressions
+    - correlation
+    - BayesFactor
+    - WRS2
     - ggpubr
     - ggExtra
     - ggrepel

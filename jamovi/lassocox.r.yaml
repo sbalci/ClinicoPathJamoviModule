@@ -23,7 +23,7 @@ items:
       type: Table
       rows: 0
       columns: []
-      visible: (suitabilityCheck)
+      visible: (suitabilityCheck && length(elapsedtime) > 0 && length(outcome) > 0 && length(explanatory) > 0)
       clearWith:
           - outcome
           - outcomeLevel
@@ -39,7 +39,7 @@ items:
     - name: suitabilityReport
       title: Data Suitability Assessment
       type: Html
-      visible: (suitabilityCheck)
+      visible: (suitabilityCheck && length(elapsedtime) > 0 && length(outcome) > 0 && length(explanatory) > 0)
       clearWith:
           - outcome
           - outcomeLevel
@@ -221,7 +221,7 @@ items:
       title: Predictor Encoding
       type: Table
       rows: 0
-      visible: (showEncoding)
+      visible: (showEncoding && length(elapsedtime) > 0 && length(outcome) > 0 && length(explanatory) > 0)
       columns:
         - name: variable
           title: Original Predictor
@@ -247,7 +247,7 @@ items:
       title: Reproducibility Details
       type: Table
       rows: 0
-      visible: (showReproducibility)
+      visible: (showReproducibility && length(elapsedtime) > 0 && length(outcome) > 0 && length(explanatory) > 0)
       columns:
         - name: item
           title: Item
@@ -260,14 +260,14 @@ items:
     - name: rCode
       title: Reproducible R Code
       type: Html
-      visible: (showRCode)
+      visible: (showRCode && length(elapsedtime) > 0 && length(outcome) > 0 && length(explanatory) > 0)
       clearWith: [outcome, outcomeLevel, censorLevel, elapsedtime, explanatory, lambda, nfolds, standardize, random_seed, showRCode]
 
     # Natural-language Summary
     - name: summaryText
       title: Results Summary
       type: Html
-      visible: (showSummary)
+      visible: (showSummary && length(elapsedtime) > 0 && length(outcome) > 0 && length(explanatory) > 0)
       clearWith:
           - showSummary
           - outcome
@@ -305,7 +305,7 @@ items:
     - name: variableImportance
       title: Variable Importance Analysis
       type: Table
-      visible: (showVariableImportance)
+      visible: (showVariableImportance && length(elapsedtime) > 0 && length(outcome) > 0 && length(explanatory) > 0)
       rows: 0
       columns:
         - name: variable
@@ -337,7 +337,7 @@ items:
     - name: modelComparison
       title: Exploratory Unpenalized Refit Comparison
       type: Table
-      visible: (showModelComparison)
+      visible: (showModelComparison && length(elapsedtime) > 0 && length(outcome) > 0 && length(explanatory) > 0)
       rows: 0
       columns:
         - name: model_type
