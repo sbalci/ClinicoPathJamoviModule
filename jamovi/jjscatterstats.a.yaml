@@ -4,7 +4,7 @@ title: Scatter Plot
 menuGroup: JJStatsPlot
 menuSubgroup: Continuous vs Continuous
 # menuSubtitle: Scatter Plot
-version: '1.1.6'
+version: '1.2.0'
 jas: '1.2'
 
 
@@ -230,22 +230,34 @@ options:
       title: Title
       type: String
       default: ''
+      description:
+          R: >
+            Optional custom plot title. When empty, a default title is constructed from the selected variable names.
 
     - name: xtitle
       title: X-Title
       type: String
       default: ''
+      description:
+          R: >
+            Optional custom x-axis label. When empty, the x-axis variable name is used.
 
     - name: ytitle
       title: Y-Title
       type: String
       default: ''
+      description:
+          R: >
+            Optional custom y-axis label. When empty, the y-axis variable name is used.
 
 
     - name: originaltheme
       title: GGStatsPlot theme layer
       type: Bool
       default: false
+      description:
+          R: >
+            Use the original ggstatsplot theme layer instead of the active jamovi theme.
 
     - name: resultssubtitle
       title: Statistical results
@@ -256,6 +268,9 @@ options:
       # output of a correlation analysis. With it off the default result is a scatter plot
       # reporting no correlation at all (verified: the subtitle is absent, not empty).
       default: true
+      description:
+          R: >
+            Display the statistical correlation subtitle (coefficient, confidence or credible interval, p-value or Bayes factor, and sample size) on the plots.
 
     - name: conflevel
       title: Confidence Level
@@ -432,6 +447,18 @@ options:
       description:
           R: >
             Add smoothed trend line to ggpubr scatter plot.
+
+    - name: showSummary
+      title: Summary (natural-language)
+      type: Bool
+      default: false
+      description:
+          ui: >
+            Display a copy-ready natural-language summary of the correlation results
+          R: >
+            Display a copy-ready plain-language summary paragraph reporting the correlation
+            coefficient, confidence or credible interval, p-value or Bayes factor, sample size,
+            and clinical magnitude/direction interpretation.
 
     - name: showExplanations
       title: Explanations

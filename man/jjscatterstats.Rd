@@ -41,6 +41,7 @@ jjscatterstats(
   ggpubrAddCorr = FALSE,
   ggpubrCorrMethod = "pearson",
   ggpubrAddSmooth = FALSE,
+  showSummary = FALSE,
   showExplanations = FALSE,
   clinicalPreset = "custom"
 )
@@ -107,15 +108,21 @@ nonparametric effect-size intervals). The plot caption names the seed
 whenever it affected the numbers shown. The default reproduces the previous
 fixed behavior.}
 
-\item{mytitle}{.}
+\item{mytitle}{Optional custom plot title. When empty, a default title is
+constructed from the selected variable names.}
 
-\item{xtitle}{.}
+\item{xtitle}{Optional custom x-axis label. When empty, the x-axis variable
+name is used.}
 
-\item{ytitle}{.}
+\item{ytitle}{Optional custom y-axis label. When empty, the y-axis variable
+name is used.}
 
-\item{originaltheme}{.}
+\item{originaltheme}{Use the original ggstatsplot theme layer instead of
+the active jamovi theme.}
 
-\item{resultssubtitle}{.}
+\item{resultssubtitle}{Display the statistical correlation subtitle
+(coefficient, confidence or credible interval, p-value or Bayes factor, and
+sample size) on the plots.}
 
 \item{conflevel}{Confidence level for confidence intervals (between 0.50
 and 0.999).}
@@ -161,6 +168,11 @@ package.}
 
 \item{ggpubrAddSmooth}{Add smoothed trend line to ggpubr scatter plot.}
 
+\item{showSummary}{Display a copy-ready plain-language summary paragraph
+reporting the correlation coefficient, confidence or credible interval,
+p-value or Bayes factor, sample size, and clinical magnitude/direction
+interpretation.}
+
 \item{showExplanations}{Show explanations of the statistical results}
 
 \item{clinicalPreset}{Clinical analysis preset}
@@ -170,6 +182,7 @@ A results object containing:
 \tabular{llllll}{
 \code{results$todo} \tab \tab \tab \tab \tab a html \cr
 \code{results$presetInfo} \tab \tab \tab \tab \tab a html \cr
+\code{results$summary} \tab \tab \tab \tab \tab a html \cr
 \code{results$explanations} \tab \tab \tab \tab \tab a html \cr
 \code{results$warnings} \tab \tab \tab \tab \tab a html \cr
 \code{results$plot2} \tab \tab \tab \tab \tab an image \cr

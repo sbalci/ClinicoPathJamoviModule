@@ -36,6 +36,7 @@ clearWith:
     - resultssubtitle
     - plotwidth
     - plotheight
+    - showSummary
     - showExplanations
     - addGGPubrPlot
     - ggpubrPalette
@@ -54,6 +55,11 @@ items:
       title: Clinical Preset Info
       type:  Html
       visible: (clinicalPreset != "custom")
+
+    - name:  summary
+      title: Summary
+      type:  Html
+      visible: (showSummary)
 
     - name:  explanations
       title: Explanations

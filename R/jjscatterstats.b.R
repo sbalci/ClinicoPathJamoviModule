@@ -47,8 +47,10 @@ jjscatterstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         # for sizing is capped at a sane upper bound. Same concern as jjradarplot.
         .init = function() {
 
-            plotwidth <- if (!is.null(self$options$plotwidth)) self$options$plotwidth else 600
-            plotheight <- if (!is.null(self$options$plotheight)) self$options$plotheight else 450
+            pw_raw <- suppressWarnings(as.numeric(self$options$plotwidth))
+            ph_raw <- suppressWarnings(as.numeric(self$options$plotheight))
+            plotwidth  <- if (length(pw_raw) == 1L && is.finite(pw_raw)) max(300L, min(1200L, as.integer(round(pw_raw)))) else 600L
+            plotheight <- if (length(ph_raw) == 1L && is.finite(ph_raw)) max(300L, min(800L,  as.integer(round(ph_raw)))) else 450L
 
             self$results$plot$setSize(plotwidth, plotheight)
             self$results$ggpubrPlot$setSize(plotwidth, plotheight)
@@ -91,7 +93,7 @@ jjscatterstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             }
 
             # Initial Message ----
-            if ( is.null(self$options$dep) || is.null(self$options$group)) {
+            if (is.null(self$options$dep) || is.null(self$options$group)) {
 
                 # todo ----
                 self$results$todo$setContent(private$.welcomeMessage())
@@ -227,7 +229,15 @@ jjscatterstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 )
             }
 
+            if (isTRUE(self$options$showSummary) && (degenerate || same_var || n_complete < 3L)) {
+                self$results$summary$setContent(paste0(
+                    "<div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid rgba(128, 128, 128, 0.6); padding: 14px; margin: 8px 0; color: inherit;'>",
+                    "<p style='margin: 0;'>", .("Summary unavailable: correlation could not be computed for the current selection."), "</p></div>"
+                ))
+            }
+
             if (!degenerate && !same_var && n_complete >= 3L) {
+                private$.generateSummary(checkData)
                 ty <- as.character(private$.option("typestatistics"))
                 method_lbl <- switch(
                     ty,
@@ -601,6 +611,170 @@ jjscatterstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             }
         },
 
+        # Opt-in copy-ready natural-language summary computed only when showSummary
+        # is enabled, reusing .computeCorrStats() and self$options$seed so numbers
+        # match the plot subtitle bit-for-bit. Magnitude/direction interpretation
+        # uses one complete .() sentence per band (no spliced adjectives) so
+        # translations remain grammatical across languages.
+        .summaryBandSentence = function(est) {
+            if (!is.finite(est)) return("")
+            mag <- abs(est)
+            band_key <- if (mag < 0.10) {
+                "negligible"
+            } else if (est > 0) {
+                if (mag < 0.30) "pos_weak"
+                else if (mag < 0.50) "pos_moderate"
+                else if (mag < 0.70) "pos_strong"
+                else "pos_very_strong"
+            } else {
+                if (mag < 0.30) "neg_weak"
+                else if (mag < 0.50) "neg_moderate"
+                else if (mag < 0.70) "neg_strong"
+                else "neg_very_strong"
+            }
+            switch(
+                band_key,
+                negligible      = .("The observed association is negligible in magnitude."),
+                pos_weak        = .("This indicates a weak positive association."),
+                pos_moderate    = .("This indicates a moderate positive association."),
+                pos_strong      = .("This indicates a strong positive association."),
+                pos_very_strong = .("This indicates a very strong positive association."),
+                neg_weak        = .("This indicates a weak negative association."),
+                neg_moderate    = .("This indicates a moderate negative association."),
+                neg_strong      = .("This indicates a strong negative association."),
+                neg_very_strong = .("This indicates a very strong negative association."),
+                ""
+            )
+        },
+
+        .formatSummarySentence = function(st, x_label, y_label, dp) {
+            est_s <- private$.fmtStatVal(st$estimate, dp)
+            ci_pct <- round(100 * st$conf_level, 1)
+            has_ci <- is.finite(st$conf.low) && is.finite(st$conf.high)
+            # Pass bracketed interval via {ci} placeholder: jmvcore::.() strips
+            # literal " [...]" suffixes as gettext context tags.
+            ci_str <- if (has_ci) {
+                paste0("[", private$.fmtStatVal(st$conf.low, dp), ", ", private$.fmtStatVal(st$conf.high, dp), "]")
+            } else {
+                ""
+            }
+            band_sentence <- private$.summaryBandSentence(st$estimate)
+
+            if (identical(st$type, "bayes")) {
+                lbf_s <- private$.fmtStatVal(st$log_bf01, dp)
+                stat_sentence <- if (has_ci) {
+                    .fmt(
+                        .("A {method} between '{xvar}' and '{yvar}' (n = {n}) yielded a posterior median r = {est} ({pct}% HDI {ci}, log_e BF01 = {lbf})."),
+                        method = st$method, xvar = x_label, yvar = y_label, n = st$n,
+                        est = est_s, pct = ci_pct, ci = ci_str, lbf = lbf_s
+                    )
+                } else {
+                    .fmt(
+                        .("A {method} between '{xvar}' and '{yvar}' (n = {n}) yielded a posterior median r = {est} (log_e BF01 = {lbf})."),
+                        method = st$method, xvar = x_label, yvar = y_label, n = st$n,
+                        est = est_s, lbf = lbf_s
+                    )
+                }
+                return(if (nzchar(band_sentence)) paste(stat_sentence, band_sentence) else stat_sentence)
+            }
+
+            p_dp <- max(dp, 3L)
+            p_cut <- 10^(-p_dp)
+            # Use structural entity &lt; because summary is rendered inside HTML <p>.
+            p_txt <- if (!is.finite(st$p.value)) {
+                "p = NA"
+            } else if (st$p.value < p_cut) {
+                sprintf(paste0("p &lt; %.", p_dp, "f"), p_cut)
+            } else {
+                sprintf(paste0("p = %.", p_dp, "f"), st$p.value)
+            }
+            sym <- if (identical(st$type, "nonparametric")) "rho" else "r"
+            stat_sentence <- if (has_ci) {
+                .fmt(
+                    .("A {method} between '{xvar}' and '{yvar}' (n = {n}) yielded {sym} = {est} ({pct}% CI {ci}, {ptxt})."),
+                    method = st$method, xvar = x_label, yvar = y_label, n = st$n,
+                    sym = sym, est = est_s, pct = ci_pct, ci = ci_str, ptxt = p_txt
+                )
+            } else {
+                .fmt(
+                    .("A {method} between '{xvar}' and '{yvar}' (n = {n}) yielded {sym} = {est} ({ptxt}; confidence interval not defined at the boundary)."),
+                    method = st$method, xvar = x_label, yvar = y_label, n = st$n,
+                    sym = sym, est = est_s, ptxt = p_txt
+                )
+            }
+            if (nzchar(band_sentence)) paste(stat_sentence, band_sentence) else stat_sentence
+        },
+
+        .generateSummary = function(d) {
+            if (!isTRUE(self$options$showSummary)) return(invisible(NULL))
+
+            withr::local_seed(self$options$seed)
+            dep <- self$options$dep
+            grp <- self$options$group
+            ty <- as.character(private$.option("typestatistics"))
+            dp <- max(0L, min(5L, as.integer(self$options$k)))
+            x_lbl <- htmltools::htmlEscape(dep)
+            y_lbl <- htmltools::htmlEscape(grp)
+
+            st_all <- private$.computeCorrStats(
+                d[[dep]], d[[grp]],
+                type = ty, conf_level = self$options$conflevel, digits = dp
+            )
+            if (!isTRUE(st_all$valid)) return(invisible(NULL))
+
+            main_sentence <- private$.formatSummarySentence(st_all, x_lbl, y_lbl, dp)
+            grp_html <- ""
+
+            if (!is.null(self$options$grvar) && !is.null(d[[self$options$grvar]])) {
+                g_col <- d[[self$options$grvar]]
+                g_ok <- !is.na(g_col)
+                g_lvls <- unique(as.character(g_col[g_ok]))
+                if (length(g_lvls) > 1L) {
+                    li_parts <- character(0)
+                    for (lv in g_lvls) {
+                        private$.checkpoint()
+                        idx <- g_ok & (as.character(g_col) == lv)
+                        st_g <- private$.computeCorrStats(
+                            d[[dep]][idx], d[[grp]][idx],
+                            type = ty, conf_level = self$options$conflevel, digits = dp
+                        )
+                        lv_esc <- htmltools::htmlEscape(lv)
+                        if (isTRUE(st_g$valid)) {
+                            li_parts <- c(li_parts, paste0(
+                                "<li><strong>", lv_esc, ":</strong> ",
+                                private$.formatSummarySentence(st_g, x_lbl, y_lbl, dp),
+                                "</li>"
+                            ))
+                        } else {
+                            li_parts <- c(li_parts, paste0(
+                                "<li><strong>", lv_esc, ":</strong> ",
+                                .("Correlation not computed (insufficient data)."),
+                                "</li>"
+                            ))
+                        }
+                    }
+                    grp_html <- paste0(
+                        "<p style='margin: 10px 0 6px 0;'><strong>",
+                        .fmt(.("Subgroup breakdown by '{grvar}':"), grvar = htmltools::htmlEscape(self$options$grvar)),
+                        "</strong></p><ul style='margin: 0; padding-left: 20px;'>",
+                        paste0(li_parts, collapse = ""),
+                        "</ul>"
+                    )
+                }
+            }
+
+            html <- paste0(
+                "<div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid rgba(128, 128, 128, 0.6); padding: 14px; margin: 8px 0; color: inherit;'>",
+                "<h4 style='margin: 0 0 8px 0;'>", .("Summary"), "</h4>",
+                "<p style='margin: 0;'>", main_sentence, "</p>",
+                grp_html,
+                "</div>"
+            )
+            self$results$summary$setContent(html)
+            self$results$summary$setVisible(TRUE)
+            invisible(NULL)
+        },
+
 
         # Resolve the plot title / axis labels from the user-supplied options,
         # falling back to sensible variable-name defaults. Shared by plot, plot2
@@ -706,6 +880,8 @@ jjscatterstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         },
 
         .computeCorrStats = function(x, y, type = "parametric", conf_level = 0.95, digits = 2L) {
+            cl_raw <- suppressWarnings(as.numeric(conf_level))
+            conf_level <- if (length(cl_raw) == 1L && is.finite(cl_raw) && cl_raw >= 0.50 && cl_raw <= 0.999) cl_raw else 0.95
             ok <- is.finite(x) & is.finite(y)
             x <- x[ok]; y <- y[ok]; n <- length(x)
             if (n < 3L || length(unique(x)) < 2L || length(unique(y)) < 2L) {
@@ -1027,9 +1203,18 @@ jjscatterstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             show_sub <- isTRUE(private$.option("resultssubtitle"))
             same_var <- identical(self$options$dep, self$options$group)
 
-            # Call grouped_ggscatterstats with proper NSE handling
-            # Use rlang::expr to create the call with symbols
-            plot_call <- rlang::expr(
+            # Call grouped_ggscatterstats with proper NSE handling via rlang::inject(),
+            # splicing marginal histogram args cleanly without duplicating the call.
+            extra_marg <- if (private$.option("marginal")) {
+                list(
+                    xsidehistogram.args = list(fill = self$options$xsidefill, color = "black", na.rm = TRUE),
+                    ysidehistogram.args = list(fill = self$options$ysidefill, color = "black", na.rm = TRUE)
+                )
+            } else {
+                list()
+            }
+
+            plot <- rlang::inject(
                 ggstatsplot::grouped_ggscatterstats(
                     data = plotData,
                     x = !!rlang::sym(self$options$dep),
@@ -1054,43 +1239,10 @@ jjscatterstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         color = self$options$smoothlinecolor,
                         method = self$options$smoothMethod,
                         formula = smooth_formula
-                    )
+                    ),
+                    !!!extra_marg
                 )
             )
-
-            # Add marginal options if needed
-            if (private$.option("marginal")) {
-                plot_call <- rlang::expr(
-                    ggstatsplot::grouped_ggscatterstats(
-                        data = plotData,
-                        x = !!rlang::sym(self$options$dep),
-                        y = !!rlang::sym(self$options$group),
-                        grouping.var = !!rlang::sym(self$options$grvar),
-                        type = !!ty,
-                        xlab = !!xtitle,
-                        ylab = !!ytitle,
-                        results.subtitle = FALSE,
-                        conf.level = !!self$options$conflevel,
-                        bf.message = FALSE,
-                        digits = !!self$options$k,
-                        marginal = !!private$.option("marginal"),
-                        xsidehistogram.args = !!list(fill = self$options$xsidefill, color = "black", na.rm = TRUE),
-                        ysidehistogram.args = !!list(fill = self$options$ysidefill, color = "black", na.rm = TRUE),
-                        point.args = !!list(
-                            size = self$options$pointsize,
-                            alpha = self$options$pointalpha
-                        ),
-                        smooth.line.args = !!list(
-                            method = self$options$smoothMethod,
-                            formula = smooth_formula,
-                            linewidth = self$options$smoothlinesize,
-                            color = self$options$smoothlinecolor
-                        )
-                    )
-                )
-            }
-
-            plot <- eval(plot_call)
 
             # Attach validated per-panel subtitles/captions directly from each panel's
             # subset data frame, preventing broken `NULL == "NA"` plotmath on sparse strata.
@@ -1098,6 +1250,7 @@ jjscatterstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             if (show_sub && !same_var) {
                 n_panels <- length(plot$patches$plots) + 1L
                 for (i in seq_len(n_panels)) {
+                    private$.checkpoint()
                     pan <- plot[[i]]
                     pd <- pan$data
                     st <- private$.computeCorrStats(
@@ -1268,13 +1421,13 @@ jjscatterstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             .corr_done <- FALSE
             test_type <- as.character(private$.option("typestatistics"))
             if (isTRUE(private$.option("resultssubtitle")) && !identical(self$options$dep, self$options$group)) {
-                tryCatch({
+                corr_res <- tryCatch({
                     st <- private$.computeCorrStats(
                         plotData[[self$options$dep]], plotData[[self$options$group]],
                         type = test_type, conf_level = self$options$conflevel, digits = self$options$k
                     )
                     if (!isTRUE(st$valid)) {
-                        p <- p + ggplot2::labs(subtitle = .("Correlation not computed (insufficient data)"))
+                        list(sub = .("Correlation not computed (insufficient data)"), done = FALSE)
                     } else {
                         dp <- max(0L, min(5L, as.integer(self$options$k)))
                         cor_symbol <- switch(test_type, nonparametric = "rho", "r")
@@ -1300,14 +1453,16 @@ jjscatterstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                             "p = NA"
                         }
 
-                        .corr_done <- TRUE
-                        p <- p + ggplot2::labs(subtitle = paste0(
-                            st$method, ": ", est, ci_txt, ", ", tail_txt,
-                            ", n = ", st$n))
+                        list(
+                            sub = paste0(st$method, ": ", est, ci_txt, ", ", tail_txt, ", n = ", st$n),
+                            done = TRUE
+                        )
                     }
                 }, error = function(e) {
-                    p <<- p + ggplot2::labs(subtitle = .("Correlation not computed"))
+                    list(sub = .("Correlation not computed"), done = FALSE)
                 })
+                .corr_done <- isTRUE(corr_res$done)
+                p <- p + ggplot2::labs(subtitle = corr_res$sub)
             }
 
             # Add labels
@@ -1597,6 +1752,22 @@ jjscatterstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             print(plot)
             TRUE
+        },
+
+        # Hardened per-option syntax-pane serializer (Category G1):
+        # drops undeclared option names and list values from crafted .omv/.omt files,
+        # and escapes non-default character scalars via encodeString(quote = '"').
+        .sourcifyOption = function(option) {
+            if (!option$name %in% names(formals(jjscatterstats)))
+                return("")
+            value <- option$value
+            if (is.list(value))
+                return("")
+            if (is.character(value) && length(value) == 1L && !is.na(value) &&
+                !identical(value, option$default)) {
+                return(paste0(option$name, " = ", encodeString(value, quote = '"')))
+            }
+            super$.sourcifyOption(option)
         }
     ), # End of private list
     public = list(
@@ -1610,30 +1781,21 @@ jjscatterstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             if (is.null(dep) || is.null(group))
                 return('')
 
-            # Build the argument list in option-declaration order.
-            #
-            # Every variable-name option (dep, group, grvar, colorvar, sizevar,
-            # shapevar, alphavar, labelvar) is emitted as a deparse()'d string
-            # literal. deparse() produces valid, fully-escaped R for names
-            # containing spaces, quotes or backslashes (e.g. `Tumor Grade`);
-            # jmvcore's default sourcify would emit these as bare, unquoted
-            # symbols and yield invalid syntax. Detecting OptionVariable by class
-            # (rather than by name) means any variable option added later is
-            # escaped automatically.
-            #
-            # data/dep/group are NOT re-emitted through private$.asArgs() - doing
-            # so previously duplicated dep and group in the generated syntax (the
-            # "double variables" bug). All non-variable options keep jmvcore's
-            # per-option sourcify so formatting stays consistent with jamovi.
+            # Build the argument list in option-declaration order, accepting only
+            # declared wrapper arguments. Variable options are escaped via
+            # encodeString(quote = '"') so spaces, quotes, backslashes, or
+            # newlines produce valid R string literals; non-variable options go
+            # through our hardened private$.sourcifyOption().
+            valid_args <- names(formals(jjscatterstats))
             args <- character(0)
             for (option in private$.options$options) {
-                if (option$name == 'data')
+                if (option$name == 'data' || !(option$name %in% valid_args))
                     next
                 if (inherits(option, 'OptionVariable')) {
                     val <- option$value
-                    if (!is.null(val))
+                    if (is.character(val) && length(val) == 1L && !is.na(val))
                         args <- c(args, paste0(option$name, ' = ',
-                                               paste0(deparse(val), collapse = '')))
+                                               encodeString(val, quote = '"')))
                 } else {
                     as <- private$.sourcifyOption(option)
                     if (!identical(as, ''))

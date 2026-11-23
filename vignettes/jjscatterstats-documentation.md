@@ -52,11 +52,12 @@
 | `smoothlinecolor` | `String` | `blue` | Smooth Line Color |
 | `plotwidth` | `Integer` | `600` | Plot Width |
 | `plotheight` | `Integer` | `450` | Plot Height |
-| `addGGPubrPlot` | `Bool` | `FALSE` | Add ggpubr scatter plot |
+| `addGGPubrPlot` | `Bool` | `FALSE` | Publication-ready plot (ggpubr) |
 | `ggpubrPalette` | `List` | `jco` | ggpubr Color Palette |
-| `ggpubrAddCorr` | `Bool` | `FALSE` | Add correlation (ggpubr) |
+| `ggpubrAddCorr` | `Bool` | `FALSE` | Correlation coefficient (ggpubr) |
 | `ggpubrCorrMethod` | `List` | `pearson` | Correlation Method (ggpubr) |
-| `ggpubrAddSmooth` | `Bool` | `FALSE` | Add smooth line (ggpubr) |
+| `ggpubrAddSmooth` | `Bool` | `FALSE` | Smooth trend line (ggpubr) |
+| `showSummary` | `Bool` | `FALSE` | Summary (natural-language) |
 | `showExplanations` | `Bool` | `FALSE` | Explanations |
 | `clinicalPreset` | `List` | `custom` | Clinical Preset |
 
@@ -66,6 +67,7 @@
 | :--- | :--- | :--- | :--- |
 | `todo` | `Html` | `To Do` |  |
 | `presetInfo` | `Html` | `Clinical Preset Info` |  |
+| `summary` | `Html` | `Summary` | Copy-ready natural-language correlation summary (when `showSummary` enabled) |
 | `explanations` | `Html` | `Explanations` |  |
 | `warnings` | `Html` | `Warnings` |  |
 | `plot2` | `Image` | ``${dep} vs {group} by {grvar}`` |  |

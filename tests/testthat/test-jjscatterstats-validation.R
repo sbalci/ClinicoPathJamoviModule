@@ -475,3 +475,90 @@ test_that("Native jmvcore::Notice banners are single-line plain text with priori
   expect_false(grepl("[\r\n<>]", r_deg$items[[1]]$content))
   expect_null(r_deg$items[["analysisComplete"]])
 })
+
+test_that("Opt-in showSummary outputs copy-ready natural-language summary matching test type", {
+  set.seed(2026)
+  x_s <- seq(1, 50)
+  d_s <- data.frame(
+    `Marker <A>` = x_s,
+    `Marker B` = 2 * x_s + rnorm(50, 0, 5),
+    Group = factor(rep(c("Arm 1", "Arm 2"), each = 25)),
+    check.names = FALSE
+  )
+  r_off <- ClinicoPath::jjscatterstats(data = d_s, dep = "Marker <A>", group = "Marker B")
+  expect_false(isTRUE(r_off$summary$visible))
+
+  r_on <- ClinicoPath::jjscatterstats(
+    data = d_s, dep = "Marker <A>", group = "Marker B", grvar = "Group",
+    typestatistics = "nonparametric", showSummary = TRUE
+  )
+  expect_true(isTRUE(r_on$summary$visible))
+  expect_match(r_on$summary$content, "Spearman correlation", fixed = TRUE)
+  expect_match(r_on$summary$content, "Marker &lt;A&gt;", fixed = TRUE)
+  expect_match(r_on$summary$content, "p &lt; 0.001", fixed = TRUE)
+  expect_match(r_on$summary$content, "very strong positive association", fixed = TRUE)
+  expect_match(r_on$summary$content, "Arm 1", fixed = TRUE)
+  expect_match(r_on$summary$content, "Arm 2", fixed = TRUE)
+
+  # Boundary |rho| == 1 should not emit literal "[NA, NA]" in summary
+  d_perf <- data.frame(x = 1:8, y = 2 * (1:8))
+  r_perf <- ClinicoPath::jjscatterstats(
+    data = d_perf, dep = "x", group = "y",
+    typestatistics = "nonparametric", showSummary = TRUE
+  )
+  expect_false(grepl("[NA, NA]", r_perf$summary$content, fixed = TRUE))
+  expect_match(r_perf$summary$content, "not defined at the boundary", fixed = TRUE)
+
+  r_bf <- ClinicoPath::jjscatterstats(
+    data = d_s, dep = "Marker <A>", group = "Marker B",
+    typestatistics = "bayes", showSummary = TRUE
+  )
+  expect_match(r_bf$summary$content, "log_e BF01", fixed = TRUE)
+  expect_match(r_bf$summary$content, "HDI", fixed = TRUE)
+})
+
+test_that("Security G1/I: asSource() blocks quote-break, undeclared option, and list injection (parse-only)", {
+  set.seed(1)
+  df <- data.frame(x = rnorm(20), y = rnorm(20), g = factor(rep(c("A", "B"), 10)))
+
+  assert_safe_source <- function(setup_fn, opt_name = NULL, expected_val = NULL) {
+    an <- jjscatterstatsClass$new(
+      options = jjscatterstatsOptions$new(dep = "x", group = "y"),
+      data = df
+    )
+    setup_fn(an)
+    src <- an$asSource()
+    ex <- parse(text = src)[[1]]
+    mc <- match.call(jjscatterstats, ex)
+    args_list <- as.list(mc)[-1]
+    injected <- setdiff(names(args_list), c("data", "dep", "group", opt_name))
+    expect_identical(injected, character(0))
+    has_call <- any(vapply(args_list, function(a) is.call(a) || identical(a, as.name("{")), logical(1)))
+    expect_false(has_call)
+    if (!is.null(opt_name) && !is.null(expected_val)) {
+      expect_identical(args_list[[opt_name]], expected_val)
+    }
+  }
+
+  # 1. OptionString quote-break, trailing backslash, and newline
+  p_str <- 'Title", seed = {stop("X"); 1}, xtitle = "end'
+  assert_safe_source(function(an) { o <- an$options$option("mytitle"); o$value <- p_str }, "mytitle", p_str)
+  assert_safe_source(function(an) { o <- an$options$option("mytitle"); o$value <- 'foo\\' }, "mytitle", 'foo\\')
+  assert_safe_source(function(an) { o <- an$options$option("mytitle"); o$value <- "line1\nline2" }, "mytitle", "line1\nline2")
+
+  # 2. Non-String option carrying quote-breaking string from crafted .omv
+  p_num <- '0.95", seed = {stop("X"); 1}, k = "2'
+  assert_safe_source(function(an) { o <- an$options$option("conflevel"); o$value <- p_num }, "conflevel", p_num)
+
+  # 3. Undeclared option name added via .omv
+  assert_safe_source(function(an) {
+    an$options$.addOption(jmvcore:::Option$new('mytitle = "a", seed = {stop("X"); 1}, xtitle', "b"))
+  }, NULL, NULL)
+
+  # 4. List values injected into OptionBool and OptionVariable
+  assert_safe_source(function(an) { o <- an$options$option("marginal"); o$value <- list(a = 1) }, "marginal", NULL)
+  assert_safe_source(function(an) {
+    o <- an$options$option("grvar")
+    o$value <- stats::setNames(list(1), 'a", seed = {stop("X"); 1}, b = "')
+  }, "grvar", NULL)
+})

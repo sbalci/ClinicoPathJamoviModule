@@ -41,6 +41,7 @@ jjscatterstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
             ggpubrAddCorr = FALSE,
             ggpubrCorrMethod = "pearson",
             ggpubrAddSmooth = FALSE,
+            showSummary = FALSE,
             showExplanations = FALSE,
             clinicalPreset = "custom", ...) {
 
@@ -264,6 +265,10 @@ jjscatterstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 "ggpubrAddSmooth",
                 ggpubrAddSmooth,
                 default=FALSE)
+            private$..showSummary <- jmvcore::OptionBool$new(
+                "showSummary",
+                showSummary,
+                default=FALSE)
             private$..showExplanations <- jmvcore::OptionBool$new(
                 "showExplanations",
                 showExplanations,
@@ -313,6 +318,7 @@ jjscatterstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
             self$.addOption(private$..ggpubrAddCorr)
             self$.addOption(private$..ggpubrCorrMethod)
             self$.addOption(private$..ggpubrAddSmooth)
+            self$.addOption(private$..showSummary)
             self$.addOption(private$..showExplanations)
             self$.addOption(private$..clinicalPreset)
         }),
@@ -352,6 +358,7 @@ jjscatterstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
         ggpubrAddCorr = function() private$..ggpubrAddCorr$value,
         ggpubrCorrMethod = function() private$..ggpubrCorrMethod$value,
         ggpubrAddSmooth = function() private$..ggpubrAddSmooth$value,
+        showSummary = function() private$..showSummary$value,
         showExplanations = function() private$..showExplanations$value,
         clinicalPreset = function() private$..clinicalPreset$value),
     private = list(
@@ -390,6 +397,7 @@ jjscatterstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
         ..ggpubrAddCorr = NA,
         ..ggpubrCorrMethod = NA,
         ..ggpubrAddSmooth = NA,
+        ..showSummary = NA,
         ..showExplanations = NA,
         ..clinicalPreset = NA)
 )
@@ -400,6 +408,7 @@ jjscatterstatsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
     active = list(
         todo = function() private$.items[["todo"]],
         presetInfo = function() private$.items[["presetInfo"]],
+        summary = function() private$.items[["summary"]],
         explanations = function() private$.items[["explanations"]],
         warnings = function() private$.items[["warnings"]],
         plot2 = function() private$.items[["plot2"]],
@@ -459,6 +468,7 @@ jjscatterstatsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                     "resultssubtitle",
                     "plotwidth",
                     "plotheight",
+                    "showSummary",
                     "showExplanations",
                     "addGGPubrPlot",
                     "ggpubrPalette",
@@ -474,6 +484,11 @@ jjscatterstatsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 name="presetInfo",
                 title="Clinical Preset Info",
                 visible="(clinicalPreset != \"custom\")"))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="summary",
+                title="Summary",
+                visible="(showSummary)"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="explanations",
@@ -568,7 +583,7 @@ jjscatterstatsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
             super$initialize(
                 package = "ClinicoPath",
                 name = "jjscatterstats",
-                version = c(1,1,6),
+                version = c(1,2,0),
                 options = options,
                 results = jjscatterstatsResults$new(options=options),
                 data = data,
@@ -675,11 +690,17 @@ jjscatterstatsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
 #'   nonparametric effect-size intervals). The plot caption names the seed
 #'   whenever it affected the numbers shown. The default reproduces the previous
 #'   fixed behavior.
-#' @param mytitle .
-#' @param xtitle .
-#' @param ytitle .
-#' @param originaltheme .
-#' @param resultssubtitle .
+#' @param mytitle Optional custom plot title. When empty, a default title is
+#'   constructed from the selected variable names.
+#' @param xtitle Optional custom x-axis label. When empty, the x-axis variable
+#'   name is used.
+#' @param ytitle Optional custom y-axis label. When empty, the y-axis variable
+#'   name is used.
+#' @param originaltheme Use the original ggstatsplot theme layer instead of
+#'   the active jamovi theme.
+#' @param resultssubtitle Display the statistical correlation subtitle
+#'   (coefficient, confidence or credible interval, p-value or Bayes factor, and
+#'   sample size) on the plots.
 #' @param conflevel Confidence level for confidence intervals (between 0.50
 #'   and 0.999).
 #' @param bfmessage Adds a caption below the plot reporting log(BF01), the
@@ -707,12 +728,17 @@ jjscatterstatsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
 #' @param ggpubrAddCorr Add correlation statistics to ggpubr scatter plot.
 #' @param ggpubrCorrMethod Method for correlation in ggpubr plot.
 #' @param ggpubrAddSmooth Add smoothed trend line to ggpubr scatter plot.
+#' @param showSummary Display a copy-ready plain-language summary paragraph
+#'   reporting the correlation coefficient, confidence or credible interval,
+#'   p-value or Bayes factor, sample size, and clinical magnitude/direction
+#'   interpretation.
 #' @param showExplanations Show explanations of the statistical results
 #' @param clinicalPreset Clinical analysis preset
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$presetInfo} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$summary} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$explanations} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$warnings} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$plot2} \tab \tab \tab \tab \tab an image \cr
@@ -760,6 +786,7 @@ jjscatterstats <- function(
     ggpubrAddCorr = FALSE,
     ggpubrCorrMethod = "pearson",
     ggpubrAddSmooth = FALSE,
+    showSummary = FALSE,
     showExplanations = FALSE,
     clinicalPreset = "custom") {
 
@@ -825,6 +852,7 @@ jjscatterstats <- function(
         ggpubrAddCorr = ggpubrAddCorr,
         ggpubrCorrMethod = ggpubrCorrMethod,
         ggpubrAddSmooth = ggpubrAddSmooth,
+        showSummary = showSummary,
         showExplanations = showExplanations,
         clinicalPreset = clinicalPreset)
 
