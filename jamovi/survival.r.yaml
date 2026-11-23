@@ -128,6 +128,33 @@ items:
           type: integer
           visible: (show_followup_support)
 
+    # library-audit 2026-11-20 jsurvival [HIGH] DONE: recode counts are a Table (rows from .init());
+    # eventRecodeInfo below keeps the censoring, zero-event and DFS-timing caveats only
+    - name: eventRecodeTable
+      title: 'Outcome Recode'
+      type: Table
+      rows: 0
+      visible: (length(outcome) > 0 && length(explanatory) > 0 && (length(elapsedtime) > 0 || (tint && length(dxdate) > 0 && length(fudate) > 0)))
+      clearWith:
+          - outcome
+          - outcomeLevel
+          - multievent
+          - analysistype
+          - dod
+          - dooc
+          - awd
+          - awod
+      columns:
+          - name: category
+            title: ''
+            type: text
+          - name: levels
+            title: 'Levels'
+            type: text
+          - name: n
+            title: 'N'
+            type: integer
+
     - name:  eventRecodeInfo
       title: 'Outcome Recode'
       type:  Html
@@ -839,10 +866,13 @@ items:
 
 
 
-    - name: cox_ph
+    # library-audit 2026-11-20 jsurvival [HIGH] DONE: the cox.zph test is a Table, as in multisurvival
+    - name: cox_phTable
       title: 'Proportional Hazards Assumption'
-      type:  Preformatted
+      type: Table
+      rows: 0
       visible: (ph_cox)
+      refs: survival
       clearWith:
           - explanatory
           - outcome
@@ -863,6 +893,21 @@ items:
           - landmark
           - stratified_cox
           - strata_variable
+      columns:
+          - name: term
+            title: 'Term'
+            type: text
+          - name: chisq
+            title: 'Chi-square'
+            type: number
+            format: zto
+          - name: df
+            title: 'df'
+            type: integer
+          - name: p
+            title: 'p'
+            type: number
+            format: zto,pvalue
 
     - name: phInterpretation
       title: 'Proportional Hazards Assessment & Recommendations'
@@ -1459,7 +1504,6 @@ items:
       height: 450
       renderFun: .plot
       visible: (sc)
-      requiresData: true
       clearWith:
           - sc
           - endplot
@@ -1498,7 +1542,6 @@ items:
       height: 450
       renderFun: .plot2
       visible: (ce)
-      requiresData: true
       clearWith:
           - ce
           - pplot
@@ -1537,7 +1580,6 @@ items:
       height: 450
       renderFun: .plot3
       visible: (ch)
-      requiresData: true
       clearWith:
           - ch
           - pplot
@@ -1576,7 +1618,6 @@ items:
       height: 450
       renderFun: .plot6
       visible: (kmunicate)
-      requiresData: true
       clearWith:
           - kmunicate
           - endplot
@@ -1633,7 +1674,6 @@ items:
       height: 450
       renderFun: .plot7
       visible: (loglog)
-      requiresData: true
       clearWith:
           - loglog
           - endplot

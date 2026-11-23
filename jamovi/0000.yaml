@@ -795,41 +795,27 @@ analyses:
     menuSubtitle: Cluster Visualization with ggforce
     description: >
       Creates Hull plots to visualize clusters and groups in scatter plots using
-      ggforce.
-
-      Hull plots draw polygonal boundaries around data points grouped by
-      categorical variables,
-
-      making it easy to identify customer segments, group membership, and data
-      clusters.
-
-      Based on the geom_mark_hull() function from ggforce package.
+      ggforce. Hull plots draw polygonal boundaries around data points grouped
+      by categorical variables, making it easy to identify customer segments,
+      group membership, and data clusters. Based on the geom_mark_hull()
+      function from ggforce package.
     ribbon: analyses
     category: analyses
   - title: Raincloud Plot
     name: raincloud
     ns: ClinicoPath
-    menuGroup: JJStatsPlot
+    menuGroup: JJStatsPlotT
     menuSubgroup: Categorical vs Continuous
     menuTitle: Raincloud Plot
     menuSubtitle: Distribution Visualization with ggdist
     description: >
-      Creates Raincloud plots to visualize data distributions using ggdist
-      package.
-
-      Raincloud plots combine three visualization techniques: half-violin plots
-      showing 
-
-      distribution density, box plots showing summary statistics, and dot plots
-      showing 
-
-      individual data points. This provides a comprehensive view of data
-      distribution 
-
-      that reveals patterns traditional box plots might miss, including
-      multimodality
-
-      and distribution shape. Based on the ggdist R-Bloggers tutorial.
+      Creates Raincloud plots to visualize data distributions using the ggdist
+      package. Raincloud plots combine three visualization techniques:
+      half-violin plots showing distribution density, box plots showing summary
+      statistics, and dot plots showing individual data points. This provides a
+      comprehensive view of data distribution that reveals patterns traditional
+      box plots might miss, including multimodality and distribution shape.
+      Based on Allen et al. (2021) and the ggdist package.
     ribbon: analyses
     category: analyses
   - title: Find Retracted Papers from DOI
@@ -1745,15 +1731,16 @@ analyses:
   - title: Correlation Matrix
     name: jjcorrmat
     ns: ClinicoPath
-    menuGroup: JJStatsPlot
+    menuGroup: JJStatsPlotT
     menuSubgroup: Continuous vs Continuous
     menuTitle: Correlation Matrix
     ribbon: analyses
     category: analyses
-    description: |
-      Wrapper Function for ggstatsplot::ggcorrmat and
-      ggstatsplot::grouped_ggcorrmat to generate correlation matrix
-      visualizations with significance testing.
+    description: >
+      Correlation matrix analysis and visualization supporting zero-order and
+      partial Pearson, Spearman, 20 percent Winsorized Pearson, and Bayesian
+      correlations, with optional subgroup stratification and multiplicity
+      adjustment.
   - title: Horizontal Box-Violin Comparison
     name: jjdotplotstats
     ns: ClinicoPath

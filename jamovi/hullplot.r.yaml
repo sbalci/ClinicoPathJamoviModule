@@ -16,6 +16,7 @@ items:
           - group_var
           - color_var
           - size_var
+          - confidence_ellipses
 
     - name: todo
       title: Instructions
@@ -55,8 +56,31 @@ items:
 
     - name: statistics
       title: Group Statistics
-      type: Html
+      type: Table
       visible: (show_statistics)
+      columns:
+          - name: group
+            title: Group
+            type: text
+          - name: n
+            title: N
+            type: integer
+          - name: x_mean
+            title: Mean
+            superTitle: X-Axis
+            type: number
+          - name: x_sd
+            title: SD
+            superTitle: X-Axis
+            type: number
+          - name: y_mean
+            title: Mean
+            superTitle: Y-Axis
+            type: number
+          - name: y_sd
+            title: SD
+            superTitle: Y-Axis
+            type: number
       clearWith:
           - x_var
           - y_var

@@ -12,6 +12,7 @@
 #' @return A character string.
 #' @keywords internal
 .competingRiskUnavailable <- function(feature, self = NULL) {
+    # i18n-exempt: the first branch is the fallback for a caller with no `self`; the second is translated
     if (is.null(self)) {
         paste0(feature, " is not available for competing-risks analysis. It assumes a ",
                "single event type, and the competing-risk outcome is coded 0/1/2. Use the ",

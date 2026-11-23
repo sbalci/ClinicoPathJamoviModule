@@ -249,6 +249,9 @@ Checklist:
       an `Image` that draws only from `image$state` does not.
 - [ ] `setState()` stores extracted drawing data — never a fitted model (`coxph`, `glm`,
       `survfit`, `cv.glmnet`) or the cleaned dataset.
+- [ ] If a plot must be drawn from rows (a Kaplan-Meier curve), the state holds the drawn columns
+      only, goes only to images that are switched on (`setState(NULL)` for the rest), and carries
+      a `# state-payload:` line with the measured size. Titles and labels travel in state.
 - [ ] No `tryCatch(error = )` wraps code that calls `jmvcore::reject()`, and no error
       handler deletes table rows. Wrap only the third-party call.
 - [ ] Every package reached via `::` or `importFrom()` is in `Imports:` — `grDevices`,
@@ -282,7 +285,16 @@ Checklist:
       failure calls `jmvcore::reject()`, never an ERROR notice banner followed by `return(NULL)` (§25).
 - [ ] **Tabular data belongs in a `type: Table` result in `.r.yaml`**, not hand-built HTML `<table>`
       markup. Hand-crafted HTML tables break dark themes, lose Copy/Copy LaTeX grid operations, and
-      cannot be translated (§26).
+      cannot be translated (§26). The same holds for a printed object
+      (`setContent(paste(capture.output(print(fit)), ...))`): read its fields into `number` columns.
+      A method named `...Guide` or `...Explanation` is not exempt when its cells carry values.
+- [ ] **Every sentence a user reads is the argument of `.()`** — explanation panels, summaries and
+      headings included, one sentence per call, values through `{}` placeholders. In a file-level
+      helper, shadow `.` with the caller's translator (`.callerTranslator(parent.frame())`, §9).
+- [ ] **One route per plot** — what is drawn is in `image$state` (labels and titles too), or the
+      image has `requiresData: true` and the renderer reads the data; never both (§17).
+- [ ] **`jmvcore::reject()` takes values after `code =`** — `reject("Unknown type: ", x)` passes
+      `x` as the code and the message loses it; use one `.fmt(.("... {x}"), x = x)` template (§16).
 - [ ] **The panel and results use jamovi's native shapes** (2026-10-23 meddecide, §5/§12/§26) —
       every variable role in the first `VariableSupplier` (optional ones greyed with `enable:`);
       a factor level is `type: Level` + `LevelSelector`, a fixed set of numbers is `Number` options;

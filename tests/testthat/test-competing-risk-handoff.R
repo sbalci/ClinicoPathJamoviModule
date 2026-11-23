@@ -22,8 +22,12 @@
 # Prefer whichever distribution is already loaded, so the umbrella's suite tests
 # the umbrella's copy and jsurvival's tests jsurvival's -- these files are synced
 # copies and it is easy to end up asserting against the wrong one.
-for (.p in c(intersect(c("ClinicoPath", "jsurvival"), loadedNamespaces()),
-             "jsurvival", "ClinicoPath")) {
+for (.p in local({
+    # The package under test, else whichever candidate is already loaded. Never load the other
+    # one: an installed umbrella build would be tested in place of this tree.
+    p <- c("ClinicoPath", "jsurvival"); t <- Sys.getenv("TESTTHAT_PKG")
+    if (t %in% p) t else if (any(p %in% loadedNamespaces())) intersect(p, loadedNamespaces()) else p
+})) {
     if (.p %in% loadedNamespaces() || requireNamespace(.p, quietly = TRUE)) {
         .cand <- asNamespace(.p)
         if (exists("singlearm", envir = .cand, inherits = FALSE)) {

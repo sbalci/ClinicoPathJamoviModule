@@ -83,7 +83,9 @@ test_that("F2: one Event Level on a multi-level outcome names what it leaves out
     expect_match(sw, sprintf("'DOC' (%d)", sum(.d4$vs == "DOC")), fixed = TRUE)
     expect_match(sw, "Multiple Event Levels", fixed = TRUE)
     expect_false(grepl("progression-free survival", r$title, fixed = TRUE))
-    expect_match(.rr_html(r, "eventRecodeInfo"), "one outcome level counted as death", fixed = TRUE)
+    # The estimand is the note of the recode Table (the counts left the Html panel).
+    expect_match(r$a$results$eventRecodeTable$notes$estimand$note,
+                 "one outcome level counted as death", fixed = TRUE)
     expect_false(grepl("counts death from", .rr_html(r, "glossary"), fixed = TRUE))
 
     r <- .rr_run(.d4, outcome = "vs", outcomeLevel = "DOD", analysistype = "os")

@@ -1108,6 +1108,8 @@ timeintervalClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                 # from the already-built English word, and a derived string has no
                 # msgid. The fallback branch keeps the old derivation for any
                 # severity not in the list above, so behaviour is unchanged there.
+                # library-audit 2026-11-20 jsurvival [LOW] DEFERRED: Html message panels kept by maintainer
+                #   decision; revisit when these messages have been tried as jmvcore::Notice in the jamovi app
                 label <- switch(type,
                     "error" = .("Error"),
                     "strong_warning" = .("Strong Warning"),
@@ -1141,16 +1143,12 @@ timeintervalClass <- if (requireNamespace("jmvcore")) R6::R6Class(
             # Validate required inputs
             if (is.null(self$options$dx_date) || is.null(self$options$fu_date)) {
                 # Show initial message
-                todo <- "
-                    <br>Welcome to Time Interval Calculator
-                    <br><br>
-                    This tool calculates the time interval between two date columns
-                    (for example, diagnosis date to last follow-up date) for survival
-                    and person-time analysis.
-                    <br><br>
-                    To begin, select your <b>Start Date</b> and <b>End Date</b> variables,
-                    then choose a date format (or leave it on Auto-detect) and an output
-                    time unit (days, weeks, months, or years)."
+                todo <- paste0(
+                    "<br>", .("Welcome to Time Interval Calculator"),
+                    "<br><br>",
+                    .("This tool calculates the time interval between two date columns (for example, diagnosis date to last follow-up date) for survival and person-time analysis."),
+                    "<br><br>",
+                    .("To begin, select your <b>Start Date</b> and <b>End Date</b> variables, then choose a date format (or leave it on Auto-detect) and an output time unit (days, weeks, months, or years)."))
 
                 blank_panels()
                 html <- self$results$todo
@@ -1404,63 +1402,74 @@ timeintervalClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                     .fmt(.("Calculated Time ({unit})"), unit = self$options$output_unit))
 
             # Generate person-time information
-            person_time_info <- glue::glue("
-                <p><b>Person-Time Follow-Up</b> represents the total observation time contributed by all
-                participants in a study. Unlike simple participant counts, person-time captures both the number
-                of subjects and their observation duration. This is essential for calculating accurate incidence
-                rates and properly accounting for varying follow-up periods.</p>
-
-                <p><b>Key Concepts:</b></p>
-                <ul>
-                    <li><b>Total Person-Time:</b> Sum of all individual follow-up periods</li>
-                    <li><b>Incidence Rate:</b> Number of events \u00f7 Total person-time</li>
-                    <li><b>Time Units:</b> Typically expressed as person-{self$options$output_unit}</li>
-                    <li><b>Censoring:</b> Person-time counts observed follow-up whether or not the event occurred. This analysis has no event indicator, so it cannot separate an event date from a censoring date - supply the event status to a survival analysis for that</li>
-                </ul>
-
-                <p><b>Applications:</b></p>
-                <ul>
-                    <li>Calculate event rates in epidemiological studies</li>
-                    <li>Compare incidence between different populations</li>
-                    <li>Adjust for varying follow-up periods in survival analysis</li>
-                    <li>Provide accurate denominators for rate calculations</li>
-                </ul>
-            ")
+            person_time_info <- paste0(
+                "<p>",
+                .("<b>Person-Time Follow-Up</b> represents the total observation time contributed by all participants in a study. Unlike simple participant counts, person-time captures both the number of subjects and their observation duration. This is essential for calculating accurate incidence rates and properly accounting for varying follow-up periods."),
+                paste0(
+                    "</p><p><b>",
+                    .("Key Concepts:"),
+                    "</b></p><ul><li>"),
+                .("<b>Total Person-Time:</b> Sum of all individual follow-up periods"),
+                "</li> <li>",
+                .("<b>Incidence Rate:</b> Number of events \u00f7 Total person-time"),
+                "</li> <li>",
+                .pasteT(.("<b>Time Units:</b> Typically expressed as person-{outputUnit}"), outputUnit = self$options$output_unit),
+                "</li> <li>",
+                .("<b>Censoring:</b> Person-time counts observed follow-up whether or not the event occurred. This analysis has no event indicator, so it cannot separate an event date from a censoring date - supply the event status to a survival analysis for that"),
+                paste0(
+                    "</li></ul><p><b>",
+                    .("Applications:"),
+                    "</b></p><ul><li>"),
+                .("Calculate event rates in epidemiological studies"),
+                "</li> <li>",
+                .("Compare incidence between different populations"),
+                "</li> <li>",
+                .("Adjust for varying follow-up periods in survival analysis"),
+                "</li> <li>",
+                .("Provide accurate denominators for rate calculations"),
+                "</li> </ul>")
 
             self$results$personTimeInfo$setContent(person_time_info)
 
             # Populate About panel
-            about_html <- "
-                <div style='background-color: rgba(33, 137, 255, 0.07); padding: 15px; border-left: 4px solid #0066cc; margin: 15px 0; color: inherit;'>
-                    <h4 style='margin-top: 0; color: inherit;'> What does this analysis do?</h4>
-                    <p>Calculates time intervals between two dates, designed for survival analysis and epidemiological studies.</p>
-
-                    <h4 style='color: inherit;'> When to use:</h4>
-                    <ul style='margin: 5px 0;'>
-                        <li>Computing follow-up time for survival analysis (e.g., diagnosis to death/last contact)</li>
-                        <li>Calculating person-time denominators for incidence rate studies</li>
-                        <li>Quality-checking date data before formal statistical analysis</li>
-                        <li>Preparing time variables for Cox regression or Kaplan-Meier analysis</li>
-                    </ul>
-
-                    <h4 style='color: inherit;'> Key outputs:</h4>
-                    <ul style='margin: 5px 0;'>
-                        <li><strong>Calculated intervals:</strong> Time between dates in your chosen units (days/weeks/months/years)</li>
-                        <li><strong>Summary statistics:</strong> Mean, median, range, and confidence intervals</li>
-                        <li><strong>Total person-time:</strong> Sum of all intervals (denominator for incidence rates)</li>
-                        <li><strong>Quality assessment:</strong> Flags negative intervals, missing values, and outliers</li>
-                    </ul>
-
-                    <h4 style='color: inherit;'> Quick start:</h4>
-                    <ol style='margin: 5px 0;'>
-                        <li>Select your <strong>start date</strong> variable (e.g., diagnosis date, study entry)</li>
-                        <li>Select your <strong>end date</strong> variable (e.g., death date, last follow-up)</li>
-                        <li>Choose date format (or use auto-detect)</li>
-                        <li>Select output time unit (days, weeks, months, or years)</li>
-                        <li>Optionally enable quality assessment to check data integrity</li>
-                    </ol>
-                </div>
-            "
+            about_html <- paste0(
+                "<div style='background-color: rgba(33, 137, 255, 0.07); padding: 15px; border-left: 4px solid #0066cc; margin: 15px 0; color: inherit;'><h4 style='margin-top: 0; color: inherit;'>",
+                .("What does this analysis do?"),
+                "</h4><p>",
+                .("Calculates time intervals between two dates, designed for survival analysis and epidemiological studies."),
+                "</p><h4 style='color: inherit;'>",
+                .("When to use:"),
+                "</h4><ul style='margin: 5px 0;'><li>",
+                .("Computing follow-up time for survival analysis (e.g., diagnosis to death/last contact)"),
+                "</li><li>",
+                .("Calculating person-time denominators for incidence rate studies"),
+                "</li><li>",
+                .("Quality-checking date data before formal statistical analysis"),
+                "</li><li>",
+                .("Preparing time variables for Cox regression or Kaplan-Meier analysis"),
+                "</li></ul><h4 style='color: inherit;'>",
+                .("Key outputs:"),
+                "</h4><ul style='margin: 5px 0;'><li>",
+                .("<strong>Calculated intervals:</strong> Time between dates in your chosen units (days/weeks/months/years)"),
+                "</li><li>",
+                .("<strong>Summary statistics:</strong> Mean, median, range, and confidence intervals"),
+                "</li><li>",
+                .("<strong>Total person-time:</strong> Sum of all intervals (denominator for incidence rates)"),
+                "</li><li>",
+                .("<strong>Quality assessment:</strong> Flags negative intervals, missing values, and outliers"),
+                "</li></ul><h4 style='color: inherit;'>",
+                .("Quick start:"),
+                "</h4><ol style='margin: 5px 0;'><li>",
+                .("Select your <strong>start date</strong> variable (e.g., diagnosis date, study entry)"),
+                "</li><li>",
+                .("Select your <strong>end date</strong> variable (e.g., death date, last follow-up)"),
+                "</li><li>",
+                .("Choose date format (or use auto-detect)"),
+                "</li><li>",
+                .("Select output time unit (days, weeks, months, or years)"),
+                "</li><li>",
+                .("Optionally enable quality assessment to check data integrity"),
+                "</li></ol></div>")
             private$.describeIntervalFilters(add_message, color, render_messages, calculated_times, about_html)
         },
 
@@ -1517,7 +1526,7 @@ timeintervalClass <- if (requireNamespace("jmvcore")) R6::R6Class(
 
             filter_lines <- c()
             if (self$options$remove_negative && filter_info$removed_negative > 0) {
-                filter_lines <- c(filter_lines, glue::glue("{filter_info$removed_negative} negative interval(s) removed"))
+                filter_lines <- c(filter_lines, .pasteT(.("{removedNegative} negative interval(s) removed"), removedNegative = filter_info$removed_negative))
                 # A negative interval is not an unusual value, it is an impossible
                 # one, and these rows are being deleted from the person-time
                 # denominator. The count used to reach the user only as one line of
@@ -1578,7 +1587,7 @@ timeintervalClass <- if (requireNamespace("jmvcore")) R6::R6Class(
             }
             if (self$options$remove_extreme && filter_info$removed_extreme > 0) {
                 threshold_txt <- if (!is.na(filter_info$extreme_threshold)) round(filter_info$extreme_threshold, 2) else "threshold"
-                filter_lines <- c(filter_lines, glue::glue("{filter_info$removed_extreme} extreme interval(s) removed (> {threshold_txt} {self$options$output_unit})"))
+                filter_lines <- c(filter_lines, .pasteT(.("{removedExtreme} extreme interval(s) removed (> {thresholdTxt} {outputUnit})"), removedExtreme = filter_info$removed_extreme, thresholdTxt = threshold_txt, outputUnit = self$options$output_unit))
                 # Dropping the longest intervals shortens total person-time, which is
                 # the denominator of every incidence rate computed downstream. The
                 # summary already lists the filter, but a denominator that moved
@@ -1605,11 +1614,9 @@ timeintervalClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                 # into a glue::glue() block and must carry no braces.
                 lm_below <- if (!is.null(landmark_info$below_excluded)) landmark_info$below_excluded else 0
                 lm_na    <- if (!is.null(landmark_info$na_excluded)) landmark_info$na_excluded else 0
-                lm_why   <- c(if (lm_below > 0) paste0(lm_below, " with follow-up shorter than ", lm_amount),
-                              if (lm_na > 0) paste0(lm_na, " with missing follow-up"))
-                filter_lines <- c(filter_lines, paste0(
-                    landmark_info$excluded_count, " participant(s) excluded by landmark (", lm_amount, ")",
-                    if (length(lm_why) > 0) paste0(": ", paste(lm_why, collapse = " and ")) else ""))
+                lm_why   <- c(if (lm_below > 0) .pasteT(.("{lmBelow} with follow-up shorter than {lmAmount}"), lmBelow = lm_below, lmAmount = lm_amount),
+                              if (lm_na > 0) .pasteT(.("{lmNa} with missing follow-up"), lmNa = lm_na))
+                filter_lines <- c(filter_lines, .pasteT(.("{excludedCount} participant(s) excluded by landmark ({lmAmount}){v1}"), excludedCount = landmark_info$excluded_count, lmAmount = lm_amount, v1 = if (length(lm_why) > 0) paste0(": ", paste(lm_why, collapse = paste0(" ", .("and"), " "))) else ""))
 
                 # A landmark excludes early cases BY DESIGN, so attrition alone is
                 # not a defect and a bare percentage threshold would fire on routine
@@ -1770,13 +1777,15 @@ timeintervalClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                 ci_degenerate <- isTRUE(is.finite(summary_stats$sd) && summary_stats$sd == 0 &&
                                         summary_stats$n > 1)
                 ci_note <- if (ci_degenerate) {
-                    paste0("<span style='font-size: 0.9em;'>All ", summary_stats$n,
-                           " intervals are identical, so the confidence interval has zero width. It reflects the absence of any spread in these data, not precision of estimation.</span><br>")
+                    paste0(
+                        "<span style='font-size: 0.9em;'>",
+                        .pasteT(.("All {n} intervals are identical, so the confidence interval has zero width. It reflects the absence of any spread in these data, not precision of estimation."), n = summary_stats$n),
+                        "</span><br>")
                 } else if (isTRUE(summary_stats$ci_truncated)) {
-                    paste0("<span style='font-size: 0.9em;'>* The lower confidence limit is shown as 0, not as computed: the ",
-                           self$options$confidence_level, "% normal-theory (t) limit was ",
-                           signif(summary_stats$ci_raw_lower, 3), " ", self$options$output_unit,
-                           ", and a mean follow-up duration cannot be negative. Restricting the interval to the possible range does not change its coverage, but a computed limit below zero means the t interval approximates these data poorly (strongly right-skewed or zero-inflated follow-up, or too few observations): read the median and range instead. The mean and the total person-time are unaffected.</span><br>")
+                    paste0(
+                        "<span style='font-size: 0.9em;'>",
+                        .pasteT(.("* The lower confidence limit is shown as 0, not as computed: the {confidenceLevel}% normal-theory (t) limit was {ciRawLower} {outputUnit}, and a mean follow-up duration cannot be negative. Restricting the interval to the possible range does not change its coverage, but a computed limit below zero means the t interval approximates these data poorly (strongly right-skewed or zero-inflated follow-up, or too few observations): read the median and range instead. The mean and the total person-time are unaffected."), confidenceLevel = self$options$confidence_level, ciRawLower = signif(summary_stats$ci_raw_lower, 3), outputUnit = self$options$output_unit),
+                        "</span><br>")
                 } else {
                     ""
                 }
@@ -1789,8 +1798,7 @@ timeintervalClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                 # glue::glue() block and must therefore contain no braces (the same
                 # constraint the neighbouring ci_note documents).
                 missing_text <- if (summary_stats$missing > 0) {
-                    paste0(summary_stats$missing,
-                           " (no interval could be calculated; these rows are excluded from the observations above)")
+                    .pasteT(.("{missing} (no interval could be calculated; these rows are excluded from the observations above)"), missing = summary_stats$missing)
                 } else {
                     "0"
                 }
@@ -1809,12 +1817,11 @@ timeintervalClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                 pt_suspect <- isTRUE(self$options$remove_negative) &&
                               isTRUE(filter_info$removed_negative / neg_denom >= 0.10)
                 denominator_clause <- if (pt_zero) {
-                    "is zero, so no incidence rate can be computed from it. Every interval is zero-length or missing; check the date columns before going further."
+                    .("is zero, so no incidence rate can be computed from it. Every interval is zero-length or missing; check the date columns before going further.")
                 } else if (pt_suspect) {
-                    paste0("would normally serve as the denominator for incidence rates, but a systematic share of rows was removed as impossible above. Resolve that first: a rate computed from this denominator describes only the rows that happened to survive the filter.")
+                    .("would normally serve as the denominator for incidence rates, but a systematic share of rows was removed as impossible above. Resolve that first: a rate computed from this denominator describes only the rows that happened to survive the filter.")
                 } else {
-                    paste0("serves as the denominator for calculating incidence rates (for example, events per 100 person-",
-                           self$options$output_unit, ").")
+                    .pasteT(.("serves as the denominator for calculating incidence rates (for example, events per 100 person-{outputUnit})."), outputUnit = self$options$output_unit)
                 }
 
                 # The fuller explanation lives in the Data Quality panel, but that
@@ -1826,11 +1833,11 @@ timeintervalClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                 # phrased as such and is not a banner. paste0: brace-free for glue.
                 axp0 <- private$.ambiguousExposure
                 amb_line <- if (is.null(axp0)) "" else paste0(
-                    "<span style='font-size: 0.9em;'>Day/month ambiguity: ", axp0$n, " of ",
-                    axp0$total, " rows could have been typed in either order and cannot be verified here",
-                    if (is.finite(axp0$pt_share)) paste0(" (", round(axp0$pt_share),
-                                                         "% of the raw person-time in days, before filters or landmark)") else "",
-                    ".</span><br>")
+                    "<span style='font-size: 0.9em;'>",
+                    .pasteT(.("Day/month ambiguity: {n} of {total} rows could have been typed in either order and cannot be verified here{v1}."), n = axp0$n, total = axp0$total, v1 = if (is.finite(axp0$pt_share)) paste0(
+                        " ",
+                        .pasteT(.("({ptShare}% of the raw person-time in days, before filters or landmark)"), ptShare = round(axp0$pt_share))) else ""),
+                    "</span><br>")
 
                 # Surface the date format actually used (auto-detected or manual)
                 detected_fmt <- if (is.list(calculated_times) && !is.null(calculated_times$detected_format)) {
@@ -1844,51 +1851,48 @@ timeintervalClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                     detected_fmt
                 }
 
-                summary_text <- glue::glue("
-
-                    <br><b>Time Interval Summary ({self$options$output_unit}{lm_hdr_suffix})</b><br>
-
-                    Number of observations: {summary_stats$n}<br>
-
-                    Date format used: {fmt_label}<br>
-
-                    Time basis: {if (self$options$time_basis == 'calendar') 'Calendar-aware (actual month lengths)' else 'Standardized (30.4375-day months, 365.25-day years)'}<br>
-
-                    {lm_pt_label}: {round(summary_stats$total_person_time, 2)} person-{self$options$output_unit}<br>
-
-                                    {lm_mean_label}: {round(summary_stats$mean, 2)}{ci_text}<br>
-
-                                    Median time: {round(summary_stats$median, 2)} (IQR: {round(summary_stats$q1, 2)} to {round(summary_stats$q3, 2)})<br>
-
-                                    Standard deviation: {round(summary_stats$sd, 2)}<br>
-
-                    Range: {round(summary_stats$min, 2)} to {round(summary_stats$max, 2)}<br>
-
-                    Missing values: {missing_text}<br>
-
-                    Filters applied: {filter_text}<br>
-
-                    {amb_line}
-
-                    {ci_note}
-
-                                    <div style='background-color: rgba(33, 159, 43, 0.1); padding: 12px; margin-top: 12px; border-left: 3px solid #4caf50; color: inherit;'>
-
-                                        <strong> Interpretation Example:</strong><br>
-
-                                        With a {lm_fu_phrase} of {round(summary_stats$mean, 1)} {self$options$output_unit}
-
-                                        (range: {round(summary_stats$min, 1)} to {round(summary_stats$max, 1)} {self$options$output_unit}),
-
-                                        {if(summary_stats$mean > summary_stats$median) 'the mean sits above the median, which usually indicates a right-skewed follow-up distribution - a minority of cases followed much longer than the rest' else 'the mean sits at or below the median, which gives no indication of a right-skewed follow-up distribution'} (no skewness coefficient is computed here; compare the Median time and Range lines above).
-
-                                        {lm_pt_phrase} ({round(summary_stats$total_person_time, 1)} person-{self$options$output_unit})
-
-                                        {denominator_clause}
-
-                                    </div>
-
-                                ")
+                summary_text <- paste0(
+                    " <br><b>",
+                    .pasteT(.("Time Interval Summary ({outputUnit}{lmHdrSuffix})"), outputUnit = self$options$output_unit, lmHdrSuffix = lm_hdr_suffix),
+                    "</b><br> ",
+                    .pasteT(.("Number of observations: {n}"), n = summary_stats$n),
+                    "<br> ",
+                    .pasteT(.("Date format used: {fmtLabel}"), fmtLabel = fmt_label),
+                    "<br> Time basis: ",
+                    if (self$options$time_basis == 'calendar') .("Calendar-aware (actual month lengths)") else 'Standardized (30.4375-day months, 365.25-day years)',
+                    "<br> ",
+                    lm_pt_label,
+                    ": ",
+                    round(summary_stats$total_person_time, 2),
+                    " person-",
+                    self$options$output_unit,
+                    "<br> ",
+                    lm_mean_label,
+                    ": ",
+                    round(summary_stats$mean, 2),
+                    ci_text,
+                    "<br> ",
+                    .pasteT(.("Median time: {median} (IQR: {q1} to {q3})"), median = round(summary_stats$median, 2), q1 = round(summary_stats$q1, 2), q3 = round(summary_stats$q3, 2)),
+                    "<br> Standard deviation: ",
+                    round(summary_stats$sd, 2),
+                    "<br> Range: ",
+                    round(summary_stats$min, 2),
+                    " to ",
+                    round(summary_stats$max, 2),
+                    "<br> Missing values: ",
+                    missing_text,
+                    "<br> Filters applied: ",
+                    filter_text,
+                    "<br> ",
+                    amb_line,
+                    " ",
+                    ci_note,
+                    paste0(
+                        "<div style='background-color: rgba(33, 159, 43, 0.1); padding: 12px; margin-top: 12px; border-left: 3px solid #4caf50; color: inherit;'><strong>",
+                        .("Interpretation Example:"),
+                        "</strong><br>"),
+                    .pasteT(.("With a {lmFuPhrase} of {mean} {outputUnit} (range: {min} to {max} {outputUnit}), {v1} (no skewness coefficient is computed here; compare the Median time and Range lines above). {lmPtPhrase} ({totalPersonTime} person-{outputUnit}) {denominatorClause}"), lmFuPhrase = lm_fu_phrase, mean = round(summary_stats$mean, 1), outputUnit = self$options$output_unit, min = round(summary_stats$min, 1), max = round(summary_stats$max, 1), v1 = if(summary_stats$mean > summary_stats$median) .("the mean sits above the median, which usually indicates a right-skewed follow-up distribution - a minority of cases followed much longer than the rest") else .("the mean sits at or below the median, which gives no indication of a right-skewed follow-up distribution"), lmPtPhrase = lm_pt_phrase, totalPersonTime = round(summary_stats$total_person_time, 1), denominatorClause = denominator_clause),
+                    " </div> ")
 
                 self$results$summary$setContent(summary_text)
 
@@ -1979,43 +1983,72 @@ timeintervalClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                 filters_emptied <- !lm_emptied && removed_n > 0
 
                 if (lm_emptied) {
-                    cause_html <- glue::glue(
-                        "<p>All {landmark_info$original_n} {if (landmark_info$original_n == 1) 'participant was' else 'participants were'} excluded by the landmark: none had follow-up reaching <strong>{lm_amount}</strong>.</p>",
-                        "<p><strong>What to do:</strong></p>",
+                    # paste0, not glue: glue would also evaluate any brace inside a translated string
+                    cause_html <- paste0(
+                        "<p>",
+                        if (landmark_info$original_n == 1)
+                            .pasteT(.("All {n} participant was excluded by the landmark: none had follow-up reaching <strong>{amount}</strong>."), n = landmark_info$original_n, amount = lm_amount)
+                        else
+                            .pasteT(.("All {n} participants were excluded by the landmark: none had follow-up reaching <strong>{amount}</strong>."), n = landmark_info$original_n, amount = lm_amount),
+                        "</p>",
+                        paste0(
+                            "<p><strong>",
+                            .("What to do:"),
+                            "</strong></p>"),
                         "<ul>",
-                        "<li>Lower the landmark time, or switch it off, and re-read the interval range in the summary</li>",
-                        "<li>Check that the landmark is expressed in the same unit as the results ({lm_unit})</li>",
+                        paste0(
+                            "<li>",
+                            .("Lower the landmark time, or switch it off, and re-read the interval range in the summary"),
+                            "</li>"),
+                        "<li>", .pasteT(.("Check that the landmark is expressed in the same unit as the results ({unit})"), unit = lm_unit), "</li>",
                         "</ul>")
                     add_message("error", .fmt(
                         .("Landmark analysis excluded every participant: none of the {n} observations reached the {amount} landmark. Lower the landmark time or switch landmark analysis off."),
                         n = landmark_info$original_n, amount = lm_amount))
                 } else if (filters_emptied) {
-                    cause_html <- glue::glue(
-                        "<p>Every observation was removed by the data quality filters ({removed_n} in total).</p>",
-                        "<p><strong>What to do:</strong></p>",
+                    cause_html <- paste0(
+                        "<p>", .pasteT(.("Every observation was removed by the data quality filters ({n} in total)."), n = removed_n), "</p>",
+                        paste0(
+                            "<p><strong>",
+                            .("What to do:"),
+                            "</strong></p>"),
                         "<ul>",
-                        "<li>Switch off the quality filters under Data Quality &amp; Statistics and inspect the raw intervals first</li>",
-                        "<li>If every interval was negative, the start and end date columns are probably swapped</li>",
+                        paste0(
+                            "<li>",
+                            .("Switch off the quality filters under Data Quality &amp; Statistics and inspect the raw intervals first"),
+                            "</li>"),
+                        paste0(
+                            "<li>",
+                            .("If every interval was negative, the start and end date columns are probably swapped"),
+                            "</li>"),
                         "</ul>")
                     add_message("error", .fmt(
                         .("All observations were removed by the data quality filters ({n} rows). Switch the filters off to inspect the raw intervals; if every interval was negative, the start and end date columns are probably swapped."),
                         n = removed_n))
                 } else {
                     cause_html <- paste0(
-                        "<p>No valid time intervals could be calculated from the provided data.</p>",
-                        "<p><strong>Please check:</strong></p>",
-                        "<ul>",
-                        "<li>Date format settings match your data</li>",
-                        "<li>Date columns contain valid dates</li>",
-                        "<li>End dates occur after start dates</li>",
-                        "<li>Data contains non-missing values</li>",
-                        "</ul>")
+                        "<p>",
+                        .("No valid time intervals could be calculated from the provided data."),
+                        "</p><p><strong>",
+                        .("Please check:"),
+                        "</strong></p><ul><li>",
+                        .("Date format settings match your data"),
+                        "</li><li>",
+                        .("Date columns contain valid dates"),
+                        "</li><li>",
+                        .("End dates occur after start dates"),
+                        "</li><li>",
+                        .("Data contains non-missing values"),
+                        "</li></ul>")
                     add_message("error", .("No valid time intervals could be calculated. Check that the date format setting matches the data and that both date columns contain readable dates."))
                 }
 
                 error_summary <- paste0(
                     "<div style='background-color: rgba(216, 33, 50, 0.18); padding: 15px; border-left: 4px solid #dc3545; margin: 15px 0; color: inherit;'>",
-                    "<h4 style='margin-top: 0; color: inherit;'> No Valid Time Intervals</h4>",
+                    paste0(
+                        "<h4 style='margin-top: 0; color: inherit;'>",
+                        .("No Valid Time Intervals"),
+                        "</h4>"),
                     cause_html,
                     "</div>")
 
@@ -2044,13 +2077,11 @@ timeintervalClass <- if (requireNamespace("jmvcore")) R6::R6Class(
 
             if (self$options$show_summary && manuscript_unsafe) {
                 self$results$nlSummary$setContent(paste0(
-                    "<div style='background-color: rgba(216, 33, 50, 0.18); padding: 15px; ",
-                    "border-left: 4px solid #dc3545; margin: 15px 0; color: inherit;'>",
-                    "<h3 style='margin-top: 0; color: inherit;'>Clinical Summary withheld</h3>",
-                    "<p>A copy-ready sentence is not produced while the dates in this analysis ",
-                    "are under suspicion - see the warning above. Resolve that first: a sentence ",
-                    "written to be pasted into a report would carry the number out of this window, ",
-                    "leaving the warning behind.</p></div>"))
+                    "<div style='background-color: rgba(216, 33, 50, 0.18); padding: 15px; border-left: 4px solid #dc3545; margin: 15px 0; color: inherit;'><h3 style='margin-top: 0; color: inherit;'>",
+                    .("Clinical Summary withheld"),
+                    "</h3><p>",
+                    .("A copy-ready sentence is not produced while the dates in this analysis are under suspicion - see the warning above. Resolve that first: a sentence written to be pasted into a report would carry the number out of this window, leaving the warning behind."),
+                    "</p></div>"))
             }
 
             if (self$options$show_summary && !manuscript_unsafe && length(valid_time_values) > 0) {
@@ -2098,7 +2129,9 @@ timeintervalClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                 # It asserts only the follow-up-time criterion -- this analysis has no
                 # event indicator, so it cannot claim participants were event-free.
                 lm_clause <- if (lm_on)
-                    glue::glue(" Follow-up time was measured from the {lm_adj} landmark rather than from the start date.")
+                    paste0(
+                        " ",
+                        .pasteT(.("Follow-up time was measured from the {lmAdj} landmark rather than from the start date."), lmAdj = lm_adj))
                 else ""
                 # The sentence must say what was measured and what a unit is. The
                 # mean/median here are of the OBSERVED time between the two dates,
@@ -2112,66 +2145,55 @@ timeintervalClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                     else if (unit == "months") "; 1 month = 30.4375 days"
                     else "; 1 year = 365.25 days"
                 copy_sentence <- if (lm_on)
-                    glue::glue("\"A landmark analysis was performed at {lm_amount}: {n_obs} {if (n_obs == 1) 'participant' else 'participants'} with at least {lm_amount} of follow-up {if (n_obs == 1) 'was' else 'were'} included, and follow-up time was measured from the landmark rather than from the start date. Observed post-landmark follow-up had a mean of {mean_time} {unit} (median {median_time} {unit}{unit_def}), contributing {total_pt} post-landmark person-{unit} of observation time.\"")
+                    .pasteT(.("\"A landmark analysis was performed at {lmAmount}: {nObs} {v1} with at least {lmAmount} of follow-up {v2} included, and follow-up time was measured from the landmark rather than from the start date. Observed post-landmark follow-up had a mean of {meanTime} {unit} (median {medianTime} {unit}{unitDef}), contributing {totalPt} post-landmark person-{unit} of observation time.\""), lmAmount = lm_amount, nObs = n_obs, v1 = if (n_obs == 1) .("participant") else .("participants"), v2 = if (n_obs == 1) .("was") else .("were"), meanTime = mean_time, unit = unit, medianTime = median_time, unitDef = unit_def, totalPt = total_pt)
                 else
-                    glue::glue("\"Follow-up data {if (n_obs == 1) 'was' else 'were'} available for {n_obs} {if (n_obs == 1) 'participant' else 'participants'}; the observed time from the start date to the end date had a mean of {mean_time} {unit} (median {median_time} {unit}{unit_def}), contributing {total_pt} person-{unit} of observation time.\"")
+                    .pasteT(.("\"Follow-up data {v1} available for {nObs} {v2}; the observed time from the start date to the end date had a mean of {meanTime} {unit} (median {medianTime} {unit}{unitDef}), contributing {totalPt} person-{unit} of observation time.\""), v1 = if (n_obs == 1) .("was") else .("were"), nObs = n_obs, v2 = if (n_obs == 1) .("participant") else .("participants"), meanTime = mean_time, unit = unit, medianTime = median_time, unitDef = unit_def, totalPt = total_pt)
 
-                summary_html <- glue::glue("
-                    <div style='background-color: rgba(33, 149, 188, 0.1); padding: 20px; border-left: 5px solid #0066cc; margin: 15px 0; color: inherit;'>
-                        <h3 style='margin-top: 0; color: inherit;'> Clinical Summary</h3>
-                        <p style='font-size: 1.1em; line-height: 1.6;'>
-                        <strong>Time interval analysis</strong> was performed on <strong>{n_obs} {if (n_obs == 1) 'participant' else 'participants'}</strong>{landmark_text}.{lm_clause}
-                        The {lm_fu_phrase} was <strong>{mean_time} {unit}</strong> (median: {median_time} {unit}),
-                        contributing a total of <strong>{total_pt} {if (lm_on) 'post-landmark ' else ''}person-{unit}</strong> of observation.{quality_text}
-                        </p>
-
-                        <div style='background-color: rgba(33, 137, 255, 0.07); padding: 15px; margin-top: 15px; border-radius: 5px; color: inherit;'>
-                            <p style='font-size: 0.95em; color: inherit; margin: 0;'>
-                            <strong> Copy-Ready Sentence:</strong><br>
-                            <em style='color: inherit;'>{copy_sentence}</em><br>
-                            <span style='font-size: 0.9em;'>These are observed intervals between the two dates for every participant, censored or not. They are not the reverse Kaplan-Meier median follow-up; report that from a survival analysis if your journal asks for median follow-up.</span>
-                            </p>
-                        </div>
-                    </div>
-                ")
+                summary_html <- paste0(
+                    paste0(
+                        "<div style='background-color: rgba(33, 149, 188, 0.1); padding: 20px; border-left: 5px solid #0066cc; margin: 15px 0; color: inherit;'><h3 style='margin-top: 0; color: inherit;'>",
+                        .("Clinical Summary"),
+                        "</h3><p style='font-size: 1.1em; line-height: 1.6;'>"),
+                    .pasteT(.("<strong>Time interval analysis</strong> was performed on <strong>{nObs} {v1}</strong>{landmarkText}.{lmClause} The {lmFuPhrase} was <strong>{meanTime} {unit}</strong> (median: {medianTime} {unit}), contributing a total of <strong>{totalPt} {v2}person-{unit}</strong> of observation.{qualityText}"), nObs = n_obs, v1 = if (n_obs == 1) .("participant") else .("participants"), landmarkText = landmark_text, lmClause = lm_clause, lmFuPhrase = lm_fu_phrase, meanTime = mean_time, unit = unit, medianTime = median_time, totalPt = total_pt, v2 = if (lm_on) paste0(.("post-landmark"), " ") else '', qualityText = quality_text),
+                    " </p> <div style='background-color: rgba(33, 137, 255, 0.07); padding: 15px; margin-top: 15px; border-radius: 5px; color: inherit;'> <p style='font-size: 0.95em; color: inherit; margin: 0;'> <strong> Copy-Ready Sentence:</strong><br> <em style='color: inherit;'>",
+                    copy_sentence,
+                    "</em><br> <span style='font-size: 0.9em;'>",
+                    .("These are observed intervals between the two dates for every participant, censored or not. They are not the reverse Kaplan-Meier median follow-up; report that from a survival analysis if your journal asks for median follow-up."),
+                    "</span> </p> </div> </div>")
 
                 self$results$nlSummary$setContent(summary_html)
             }
 
             # Populate Glossary if requested
             if (self$options$show_glossary) {
-                glossary_html <- "
-                    <div style='background-color: rgba(153, 33, 170, 0.12); padding: 15px; border-left: 4px solid #9c27b0; margin: 15px 0; color: inherit;'>
-                        <h4 style='margin-top: 0; color: inherit;'> Key Terms Explained</h4>
-
-                        <dl style='margin: 5px 0;'>
-                            <dt style='font-weight: bold; margin-top: 10px;'>Person-Time</dt>
-                            <dd style='margin-left: 20px;'>Total observation duration across all participants.
-                            Example: 100 people followed for 2 years = 200 person-years. This accounts for varying follow-up periods.</dd>
-
-                            <dt style='font-weight: bold; margin-top: 10px;'>Incidence Rate</dt>
-                            <dd style='margin-left: 20px;'>Number of new events \u00f7 person-time.
-                            Example: 10 deaths \u00f7 200 person-years = 0.05 deaths per person-year (or 5 per 100 person-years).</dd>
-
-                            <dt style='font-weight: bold; margin-top: 10px;'>Landmark Analysis</dt>
-                            <dd style='margin-left: 20px;'>Restrict the analysis to participants whose follow-up reaches a chosen time point, and measure time from there.
-                            Example: include only participants with at least 6 months of follow-up, so that outcomes are not credited to a period nobody could have been observed in.
-                            This analysis has no event indicator, so it selects on length of follow-up, not on survival: short follow-up may mean early death or simply recent enrolment.</dd>
-
-                            <dt style='font-weight: bold; margin-top: 10px;'>Negative Interval</dt>
-                            <dd style='margin-left: 20px;'>Time interval where end date occurs before start date.
-                            Usually indicates data entry error (e.g., dates swapped, wrong year entered).</dd>
-
-                            <dt style='font-weight: bold; margin-top: 10px;'>Censoring</dt>
-                            <dd style='margin-left: 20px;'>Participants who leave the study before experiencing the event.
-                            Their follow-up time contributes to person-time even though the event wasn't observed.</dd>
-
-                            <dt style='font-weight: bold; margin-top: 10px;'>Confidence Interval (CI)</dt>
-                            <dd style='margin-left: 20px;'>Range of mean follow-up values compatible with these data.
-                            Example: Mean = 12 months (95% CI: 10-14) means values from 10 to 14 are compatible with these data; over repeated studies 95% of such intervals contain the true mean.</dd>
-                        </dl>
-                    </div>
-                "
+                glossary_html <- paste0(
+                    "<div style='background-color: rgba(153, 33, 170, 0.12); padding: 15px; border-left: 4px solid #9c27b0; margin: 15px 0; color: inherit;'><h4 style='margin-top: 0; color: inherit;'>",
+                    .("Key Terms Explained"),
+                    "</h4><dl style='margin: 5px 0;'><dt style='font-weight: bold; margin-top: 10px;'>",
+                    .("Person-Time"),
+                    "</dt><dd style='margin-left: 20px;'>",
+                    .("Total observation duration across all participants. Example: 100 people followed for 2 years = 200 person-years. This accounts for varying follow-up periods."),
+                    "</dd><dt style='font-weight: bold; margin-top: 10px;'>",
+                    .("Incidence Rate"),
+                    "</dt><dd style='margin-left: 20px;'>",
+                    .("Number of new events \u00f7 person-time. Example: 10 deaths \u00f7 200 person-years = 0.05 deaths per person-year (or 5 per 100 person-years)."),
+                    "</dd><dt style='font-weight: bold; margin-top: 10px;'>",
+                    .("Landmark Analysis"),
+                    "</dt><dd style='margin-left: 20px;'>",
+                    .("Restrict the analysis to participants whose follow-up reaches a chosen time point, and measure time from there. Example: include only participants with at least 6 months of follow-up, so that outcomes are not credited to a period nobody could have been observed in. This analysis has no event indicator, so it selects on length of follow-up, not on survival: short follow-up may mean early death or simply recent enrolment."),
+                    "</dd><dt style='font-weight: bold; margin-top: 10px;'>",
+                    .("Negative Interval"),
+                    "</dt><dd style='margin-left: 20px;'>",
+                    .("Time interval where end date occurs before start date. Usually indicates data entry error (e.g., dates swapped, wrong year entered)."),
+                    "</dd><dt style='font-weight: bold; margin-top: 10px;'>",
+                    .("Censoring"),
+                    "</dt><dd style='margin-left: 20px;'>",
+                    .("Participants who leave the study before experiencing the event. Their follow-up time contributes to person-time even though the event wasn't observed."),
+                    "</dd><dt style='font-weight: bold; margin-top: 10px;'>",
+                    .("Confidence Interval (CI)"),
+                    "</dt><dd style='margin-left: 20px;'>",
+                    .("Range of mean follow-up values compatible with these data. Example: Mean = 12 months (95% CI: 10-14) means values from 10 to 14 are compatible with these data; over repeated studies 95% of such intervals contain the true mean."),
+                    "</dd></dl></div>")
                 self$results$glossaryPanel$setContent(glossary_html)
             }
 
@@ -2215,18 +2237,11 @@ timeintervalClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                 # must contain no braces of its own.
                 axp <- private$.ambiguousExposure
                 amb_exposure_html <- if (is.null(axp)) "" else paste0(
-                    "<p style='font-size: 0.9em;'><strong>Day/month ambiguity:</strong> ",
-                    axp$n, " of ", axp$total, " rows read as a valid date under both '",
-                    axp$fmt, "' and '", axp$swap, "'",
-                    if (is.finite(axp$pt_share))
-                        paste0(", carrying ", round(axp$pt_share),
-                               "% of the raw person-time in days, before filters or landmark")
-                    else "",
-                    ". The '", axp$fmt, "' reading was used because ", axp$proven_by,
-                    " other rows can only be read that way. If any of the ambiguous rows were ",
-                    "typed in the other order their intervals are wrong, and because they parse ",
-                    "without error and stay positive no check on this page can detect it. ",
-                    "This is a property of the data, not a fault found in it.</p>")
+                    "<p style='font-size: 0.9em;'>",
+                    .pasteT(.("<strong>Day/month ambiguity:</strong> {n} of {total} rows read as a valid date under both '{fmt}' and '{swap}'{v1}. The '{fmt}' reading was used because {provenBy} other rows can only be read that way. If any of the ambiguous rows were typed in the other order their intervals are wrong, and because they parse without error and stay positive no check on this page can detect it. This is a property of the data, not a fault found in it."), n = axp$n, total = axp$total, fmt = axp$fmt, swap = axp$swap, v1 = if (is.finite(axp$pt_share))
+                        paste0(", ", .pasteT(.("carrying {ptShare}% of the raw person-time in days, before filters or landmark"), ptShare = round(axp$pt_share)))
+                    else "", provenBy = axp$proven_by),
+                    "</p>")
 
                 quality_html <- private$.formatQualityAssessmentGuide(quality, amb_exposure_html, filter_lines, filter_text)
 
@@ -2237,39 +2252,50 @@ timeintervalClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                 # the basis this run actually used, and the extreme-value bullet has
                 # to quote the user's multiplier rather than a hardcoded 2x.
                 basis_caveat <- if (identical(self$options$time_basis, "calendar"))
-                    "This run used the <strong>calendar-aware</strong> basis, so months and years follow actual month lengths (28-31 days), as in the survival analyses of this module. Switch to the standardized basis (1 month = 30.4375 days, 1 year = 365.25 days) if you need a constant unit of risk exposure for person-time denominators."
+                    .("This run used the <strong>calendar-aware</strong> basis, so months and years follow actual month lengths (28-31 days), as in the survival analyses of this module. Switch to the standardized basis (1 month = 30.4375 days, 1 year = 365.25 days) if you need a constant unit of risk exposure for person-time denominators.")
                 else
-                    "To ensure statistical consistency for survival analysis, this run used <strong>standardized durations</strong> (1 month = 30.4375 days, 1 year = 365.25 days) rather than calendar units. This prevents bias from varying month lengths (28-31 days)."
-                caveats_html <- glue::glue("
-                    <div style='background-color: rgba(255, 203, 33, 0.14); padding: 15px; border-left: 4px solid #ff9800; margin: 15px 0; color: inherit;'>
-                        <h4 style='margin-top: 0; color: inherit;'> Important Assumptions</h4>
-                        <ul style='margin: 5px 0;'>
-                            <li><strong>Time Units (Months/Years):</strong> {basis_caveat}</li>
-                            <li><strong>End dates should occur on or after start dates</strong> - Negative intervals usually indicate data entry errors</li>
-                            <li><strong>Date formats must be consistent</strong> - All dates in a column should use the same format</li>
-                            <li><strong>Landmark analysis excludes participants</strong> - Only those with follow-up \u2265 landmark time are included; participants with missing follow-up are also excluded, because their eligibility cannot be determined</li>
-                            <li><strong>Landmark analysis re-zeroes the clock</strong> - When a landmark is active, the landmark is subtracted from every retained interval. A participant with 12 months of follow-up and a 6-month landmark contributes 6 months, and the person-time shown is post-landmark person-time. For the retained participants, add the landmark to each individual interval, to the mean and median, and to each range limit to recover time from the start date. Add the number of retained participants times the landmark to the total person-time. The standard deviation is unchanged by subtracting a constant from those same retained intervals. This does not restore excluded participants or reconstruct summaries for the original cohort</li>
-                            <li><strong>Missing dates produce missing intervals</strong> - These are excluded from summary statistics</li>
-                        </ul>
-
-                        <h4 style='color: inherit;'> Common Pitfalls</h4>
-                        <ul style='margin: 5px 0;'>
-                            <li><strong>Mixed date orders in one column:</strong> if some rows were typed DD/MM/YYYY and others MM/DD/YYYY, choosing a format manually does NOT fix it \u2192 whichever order you pick, the rows typed the other way are read as a different date, silently and without error. Only rows whose day exceeds 12 give themselves away by failing to parse. The fix is in the source data, not here. See the day/month ambiguity figure above for how many rows in this dataset cannot be verified either way</li>
-                            <li><strong>Text vs numeric dates:</strong> Ensure dates are stored consistently (all text or all numeric)</li>
-                            <li><strong>Future dates:</strong> End dates after today's date may indicate data errors</li>
-                            <li><strong>Two-digit years:</strong> 00-68 are read as 2000-2068 and 69-99 as 1969-1999, so a 1960s date written with two digits is pushed a century forward; use four-digit years</li>
-                            <li><strong>Extreme outliers:</strong> Very long intervals may be real (long follow-up) or errors</li>
-                        </ul>
-
-                        <h4 style='color: inherit;'> Troubleshooting</h4>
-                        <ul style='margin: 5px 0;'>
-                            <li>If auto-detection fails, manually select your date format</li>
-                            <li>Check for negative intervals - these indicate date column errors</li>
-                            <li>Review extreme values - anything above {self$options$extreme_multiplier}\u00d7 the 99th percentile is counted as extreme. With fewer than 101 intervals the 99th percentile is interpolated between the two longest intervals, so this rule can flag at most the single longest one, and none at all when n \u2264 51 at the default multiplier of 2</li>
-                            <li>Ensure date columns don't contain non-date values (text, codes, etc.)</li>
-                        </ul>
-                    </div>
-                ")
+                    .("To ensure statistical consistency for survival analysis, this run used <strong>standardized durations</strong> (1 month = 30.4375 days, 1 year = 365.25 days) rather than calendar units. This prevents bias from varying month lengths (28-31 days).")
+                caveats_html <- paste0(
+                    paste0(
+                        "<div style='background-color: rgba(255, 203, 33, 0.14); padding: 15px; border-left: 4px solid #ff9800; margin: 15px 0; color: inherit;'><h4 style='margin-top: 0; color: inherit;'>",
+                        .("Important Assumptions"),
+                        "</h4><ul style='margin: 5px 0;'><li>"),
+                    .pasteT(.("<strong>Time Units (Months/Years):</strong> {basisCaveat}"), basisCaveat = basis_caveat),
+                    "</li> <li>",
+                    .("<strong>End dates should occur on or after start dates</strong> - Negative intervals usually indicate data entry errors"),
+                    "</li> <li>",
+                    .("<strong>Date formats must be consistent</strong> - All dates in a column should use the same format"),
+                    "</li> <li>",
+                    .("<strong>Landmark analysis excludes participants</strong> - Only those with follow-up \u2265 landmark time are included; participants with missing follow-up are also excluded, because their eligibility cannot be determined"),
+                    "</li> <li>",
+                    .("<strong>Landmark analysis re-zeroes the clock</strong> - When a landmark is active, the landmark is subtracted from every retained interval. A participant with 12 months of follow-up and a 6-month landmark contributes 6 months, and the person-time shown is post-landmark person-time. For the retained participants, add the landmark to each individual interval, to the mean and median, and to each range limit to recover time from the start date. Add the number of retained participants times the landmark to the total person-time. The standard deviation is unchanged by subtracting a constant from those same retained intervals. This does not restore excluded participants or reconstruct summaries for the original cohort"),
+                    "</li> <li>",
+                    .("<strong>Missing dates produce missing intervals</strong> - These are excluded from summary statistics"),
+                    paste0(
+                        "</li></ul><h4 style='color: inherit;'>",
+                        .("Common Pitfalls"),
+                        "</h4><ul style='margin: 5px 0;'><li>"),
+                    .("<strong>Mixed date orders in one column:</strong> if some rows were typed DD/MM/YYYY and others MM/DD/YYYY, choosing a format manually does NOT fix it \u2192 whichever order you pick, the rows typed the other way are read as a different date, silently and without error. Only rows whose day exceeds 12 give themselves away by failing to parse. The fix is in the source data, not here. See the day/month ambiguity figure above for how many rows in this dataset cannot be verified either way"),
+                    "</li> <li>",
+                    .("<strong>Text vs numeric dates:</strong> Ensure dates are stored consistently (all text or all numeric)"),
+                    "</li> <li>",
+                    .("<strong>Future dates:</strong> End dates after today's date may indicate data errors"),
+                    "</li> <li>",
+                    .("<strong>Two-digit years:</strong> 00-68 are read as 2000-2068 and 69-99 as 1969-1999, so a 1960s date written with two digits is pushed a century forward; use four-digit years"),
+                    "</li> <li>",
+                    .("<strong>Extreme outliers:</strong> Very long intervals may be real (long follow-up) or errors"),
+                    paste0(
+                        "</li></ul><h4 style='color: inherit;'>",
+                        .("Troubleshooting"),
+                        "</h4><ul style='margin: 5px 0;'><li>"),
+                    .("If auto-detection fails, manually select your date format"),
+                    "</li> <li>",
+                    .("Check for negative intervals - these indicate date column errors"),
+                    "</li> <li>",
+                    .pasteT(.("Review extreme values - anything above {extremeMultiplier}\u00d7 the 99th percentile is counted as extreme. With fewer than 101 intervals the 99th percentile is interpolated between the two longest intervals, so this rule can flag at most the single longest one, and none at all when n \u2264 51 at the default multiplier of 2"), extremeMultiplier = self$options$extreme_multiplier),
+                    "</li> <li>",
+                    .("Ensure date columns don't contain non-date values (text, codes, etc.)"),
+                    "</li> </ul> </div>")
                 self$results$caveatsPanel$setContent(caveats_html)
             }
 

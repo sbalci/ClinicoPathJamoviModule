@@ -18,3 +18,24 @@
   }
   invisible(table)
 }
+
+# library-audit 2026-11-20 jsurvival [HIGH] DONE: a cox.zph result is rows of a Table (term,
+# chisq, df, p), never printed console text; returns the terms with p < 0.05
+.fillCoxZphTable <- function(table, zph) {
+  .deleteTableRows(table)
+  tab <- zph$table
+  if (is.null(tab) || nrow(tab) == 0) return(invisible(character(0)))
+  cn <- colnames(tab)
+  col_chisq <- if ("chisq" %in% cn) "chisq" else cn[1]
+  col_df <- if ("df" %in% cn) "df" else cn[min(2, length(cn))]
+  col_p <- if ("p" %in% cn) "p" else cn[length(cn)]
+  terms <- rownames(tab)
+  for (i in seq_len(nrow(tab))) {
+    table$addRow(rowKey = i, values = list(
+      term = terms[i],
+      chisq = unname(tab[i, col_chisq]),
+      df = as.integer(round(unname(tab[i, col_df]))),
+      p = unname(tab[i, col_p])))
+  }
+  invisible(setdiff(terms[which(tab[, col_p] < 0.05)], "GLOBAL"))
+}

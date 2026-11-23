@@ -40,7 +40,8 @@ test_that("multisurvival handles missing values in outcome variable", {
   expect_s3_class(result, "multisurvivalResults")
   # Outcome-only exclusions are disclosed in the recode panel, not counted a
   # second time as missing time/covariates in the completion notice.
-  expect_match(as.character(result$eventRecodeInfo$content), "Excluded \\(missing outcome\\)")
+  recode <- result$eventRecodeTable$asDF
+  expect_equal(recode$n[recode$category == "Excluded (missing outcome)"], 5L)
   expect_match(as.character(result$infoMessages$content), "195 observations")
   expect_false(grepl("A further 5 row", as.character(result$infoMessages$content), fixed = TRUE))
 })

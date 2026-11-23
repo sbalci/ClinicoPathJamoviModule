@@ -1,5 +1,10 @@
 .msrr_ns <- NULL
-for (.p in c("ClinicoPath", "jsurvival")) {
+for (.p in local({
+    # The package under test, else whichever candidate is already loaded. Never load the other
+    # one: an installed umbrella build would be tested in place of this tree.
+    p <- c("ClinicoPath", "jsurvival"); t <- Sys.getenv("TESTTHAT_PKG")
+    if (t %in% p) t else if (any(p %in% loadedNamespaces())) intersect(p, loadedNamespaces()) else p
+})) {
   if (.p %in% loadedNamespaces()) {
     .candidate <- asNamespace(.p)
     if (exists("multisurvival", envir = .candidate, inherits = FALSE)) {
@@ -29,7 +34,12 @@ if (is.null(.msrr_ns)) {
   }
 }
 if (is.null(.msrr_ns)) {
-  for (.p in c("ClinicoPath", "jsurvival")) {
+  for (.p in local({
+      # The package under test, else whichever candidate is already loaded. Never load the other
+      # one: an installed umbrella build would be tested in place of this tree.
+      p <- c("ClinicoPath", "jsurvival"); t <- Sys.getenv("TESTTHAT_PKG")
+      if (t %in% p) t else if (any(p %in% loadedNamespaces())) intersect(p, loadedNamespaces()) else p
+  })) {
     if (requireNamespace(.p, quietly = TRUE)) {
       .candidate <- asNamespace(.p)
       if (exists("multisurvival", envir = .candidate, inherits = FALSE)) {

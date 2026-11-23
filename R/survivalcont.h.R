@@ -492,6 +492,7 @@ survivalcontResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
     "survivalcontResults",
     inherit = jmvcore::Group,
     active = list(
+        eventRecodeTable = function() private$.items[["eventRecodeTable"]],
         eventRecodeInfo = function() private$.items[["eventRecodeInfo"]],
         todo = function() private$.items[["todo"]],
         clinicalWarnings = function() private$.items[["clinicalWarnings"]],
@@ -562,6 +563,43 @@ survivalcontResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                     "lubridate",
                     "patchwork",
                     "rpart"))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="eventRecodeTable",
+                title="Outcome Recode",
+                rows=0,
+                visible="(length(outcome) > 0)",
+                clearWith=list(
+                    "outcome",
+                    "outcomeLevel",
+                    "elapsedtime",
+                    "contexpl",
+                    "fudate",
+                    "dxdate",
+                    "tint",
+                    "multievent",
+                    "uselandmark",
+                    "landmark",
+                    "analysistype",
+                    "dod",
+                    "dooc",
+                    "awd",
+                    "awod",
+                    "timetypeoutput",
+                    "timetypedata"),
+                columns=list(
+                    list(
+                        `name`="category", 
+                        `title`="", 
+                        `type`="text"),
+                    list(
+                        `name`="levels", 
+                        `title`="Levels", 
+                        `type`="text"),
+                    list(
+                        `name`="n", 
+                        `title`="N", 
+                        `type`="integer"))))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="eventRecodeInfo",
@@ -2235,6 +2273,7 @@ survivalcontBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   minimum-P-value search space is too large for exhaustive evaluation.
 #' @return A results object containing:
 #' \tabular{llllll}{
+#'   \code{results$eventRecodeTable} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$eventRecodeInfo} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$clinicalWarnings} \tab \tab \tab \tab \tab a html \cr
@@ -2285,9 +2324,9 @@ survivalcontBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'
 #' Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
 #'
-#' \code{results$coxTable$asDF}
+#' \code{results$eventRecodeTable$asDF}
 #'
-#' \code{as.data.frame(results$coxTable)}
+#' \code{as.data.frame(results$eventRecodeTable)}
 #'
 #' @export
 survivalcont <- function(

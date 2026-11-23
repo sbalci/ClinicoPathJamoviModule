@@ -288,6 +288,7 @@ visual clutter when summaries are not needed.}
 \value{
 A results object containing:
 \tabular{llllll}{
+\code{results$eventRecodeTable} \tab \tab \tab \tab \tab a table \cr
 \code{results$eventRecodeInfo} \tab \tab \tab \tab \tab a html \cr
 \code{results$todo} \tab \tab \tab \tab \tab a html \cr
 \code{results$errors} \tab \tab \tab \tab \tab a html \cr
@@ -329,6 +330,8 @@ A results object containing:
 \code{results$plot_adj} \tab \tab \tab \tab \tab an image \cr
 \code{results$plot_nomogram} \tab \tab \tab \tab \tab an image \cr
 \code{results$nomogram_display} \tab \tab \tab \tab \tab a html \cr
+\code{results$nomogramPoints} \tab \tab \tab \tab \tab a table \cr
+\code{results$nomogramRisk} \tab \tab \tab \tab \tab a table \cr
 \code{results$nomogramSummary} \tab \tab \tab \tab \tab a html \cr
 \code{results$adjustedSurvTable} \tab \tab \tab \tab \tab a table \cr
 \code{results$adjustedSurvTableSummary} \tab \tab \tab \tab \tab a html \cr
@@ -337,6 +340,7 @@ A results object containing:
 \code{results$adjustedCoxTable} \tab \tab \tab \tab \tab a table \cr
 \code{results$adjustedCoxText} \tab \tab \tab \tab \tab a html \cr
 \code{results$adjustedCoxSummary} \tab \tab \tab \tab \tab a html \cr
+\code{results$adjustedCoxPHTable} \tab \tab \tab \tab \tab a table \cr
 \code{results$adjustedCoxPH} \tab \tab \tab \tab \tab a preformatted \cr
 \code{results$modelContributionTable} \tab \tab \tab \tab \tab a table \cr
 \code{results$modelContributionSummary} \tab \tab \tab \tab \tab a html \cr
@@ -351,9 +355,9 @@ A results object containing:
 
 Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
 
-\code{results$fittedTable$asDF}
+\code{results$eventRecodeTable$asDF}
 
-\code{as.data.frame(results$fittedTable)}
+\code{as.data.frame(results$eventRecodeTable)}
 }
 \description{
 Performs multivariable survival analysis using Cox proportional hazards

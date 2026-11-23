@@ -34,6 +34,10 @@ children:
             children:
               - type: ComboBox
                 name: typestatistics
+              - type: TextBox
+                name: bayesseed
+                format: number
+                enable: (typestatistics:bayes)
       - type: Label
         label: Statistical Options
         fitToGrid: true
@@ -44,14 +48,13 @@ children:
               - type: TextBox
                 name: siglevel
                 format: number
+                enable: (!typestatistics:bayes)
               - type: TextBox
                 name: conflevel
                 format: number
               - type: ComboBox
                 name: padjustmethod
-              - type: TextBox
-                name: k
-                format: number
+                enable: (!typestatistics:bayes)
               - type: CheckBox
                 name: partial
                 label: Partial correlations (controls for other vars)
@@ -73,12 +76,9 @@ children:
                 name: matrixtype
               - type: ComboBox
                 name: matrixmethod
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: TextBox
-        name: bayesseed
-        format: number
+              - type: TextBox
+                name: k
+                format: number
   - type: CollapseBox
     label: Plot Appearance
     collapsed: true

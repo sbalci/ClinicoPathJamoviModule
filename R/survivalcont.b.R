@@ -623,6 +623,7 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
 
             # init ----
             .init = function() {
+                .initEventRecodeTable(self$results$eventRecodeTable, self$options)
                 # Initialize HTML message outputs
                 private$.initializeMessageOutputs()
                 # Result visibility is declared once in survivalcont.r.yaml
@@ -732,6 +733,8 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
             .rejectInputErrors = function() {
                 jmvcore::reject(paste(unique(private$.inputErrors), collapse = " "))
             },
+            # library-audit 2026-11-20 jsurvival [LOW] DEFERRED: Html message panels kept by maintainer
+            #   decision; revisit when these messages have been tried as jmvcore::Notice in the jamovi app
             .addHtmlMessage = function(type, title, message) {
                 if (identical(type, "error"))
                     private$.inputErrors <- c(private$.inputErrors, message)
@@ -782,44 +785,46 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
             # todo ----
             ,
             .todo = function() {
-                todo <- glue::glue('
-                <div style="padding: 15px; background-color: rgba(138, 155, 172, 0.06); border-left: 4px solid #007bff; color: inherit;">
-                    <h3 style="margin-top: 0; color: inherit;">Welcome to ClinicoPath - Survival Analysis for Continuous Variables</h3>
-
-                    <p><strong>Purpose:</strong> This tool helps you calculate an optimal cut-off for a continuous variable based on survival outcomes.</p>
-
-                    <h4>Analysis Features:</h4>
-                    <ul>
-                        <li>Automatic cut-off determination using maximally selected rank statistics</li>
-                        <li>Median survival calculations</li>
-                        <li>1, 3, 5-year survival estimates</li>
-                        <li>Cox regression for continuous variables</li>
-                        <li>Kaplan-Meier survival curves</li>
-                    </ul>
-
-                    <h4>Variable Requirements:</h4>
-                    <ul>
-                        <li><strong>Explanatory Variable:</strong> Must be continuous (numeric)</li>
-                        <li><strong>Outcome Variable:</strong> Select the level representing death or event occurrence
-                            <ul>
-                                <li>Use basic outcome level for simple analysis</li>
-                                <li>Use advanced outcome options (Dead of Disease, Dead of Other, etc.) for overall, cause-specific, or disease-free survival analysis</li>
-                            </ul>
-                        </li>
-                        <li><strong>Survival Time:</strong> Should be numeric and continuous
-                            <ul>
-                                <li>Enter directly, OR</li>
-                                <li>Calculate from diagnosis/follow-up dates using advanced time options</li>
-                            </ul>
-                        </li>
-                    </ul>
-
-                    <h4>References:</h4>
-                    <p>This function uses <code>survival</code>, <code>survminer</code>, and <code>finalfit</code> packages. Please cite jamovi and these packages in your publications.</p>
-
-                    <p><a href="https://cran.r-project.org/web/packages/survival/vignettes/survival.pdf" target="_blank">See survival package documentation here</a></p>
-                </div>
-                ')
+                todo <- glue::glue(paste0(
+                    '<div style="padding: 15px; background-color: rgba(138, 155, 172, 0.06); border-left: 4px solid #007bff; color: inherit;"><h3 style="margin-top: 0; color: inherit;">',
+                    .("Welcome to ClinicoPath - Survival Analysis for Continuous Variables"),
+                    "</h3><p>",
+                    .("<strong>Purpose:</strong> This tool helps you calculate an optimal cut-off for a continuous variable based on survival outcomes."),
+                    "</p><h4>",
+                    .("Analysis Features:"),
+                    "</h4><ul><li>",
+                    .("Automatic cut-off determination using maximally selected rank statistics"),
+                    "</li><li>",
+                    .("Median survival calculations"),
+                    "</li><li>",
+                    .("1, 3, 5-year survival estimates"),
+                    "</li><li>",
+                    .("Cox regression for continuous variables"),
+                    "</li><li>",
+                    .("Kaplan-Meier survival curves"),
+                    "</li></ul><h4>",
+                    .("Variable Requirements:"),
+                    "</h4><ul><li>",
+                    .("<strong>Explanatory Variable:</strong> Must be continuous (numeric)"),
+                    "</li><li>",
+                    .("<strong>Outcome Variable:</strong> Select the level representing death or event occurrence"),
+                    "<ul><li>",
+                    .("Use basic outcome level for simple analysis"),
+                    "</li><li>",
+                    .("Use advanced outcome options (Dead of Disease, Dead of Other, etc.) for overall, cause-specific, or disease-free survival analysis"),
+                    "</li></ul></li><li>",
+                    .("<strong>Survival Time:</strong> Should be numeric and continuous"),
+                    "<ul><li>",
+                    .("Enter directly, OR"),
+                    "</li><li>",
+                    .("Calculate from diagnosis/follow-up dates using advanced time options"),
+                    "</li></ul></li></ul><h4>",
+                    .("References:"),
+                    "</h4><p>",
+                    .("This function uses <code>survival</code>, <code>survminer</code>, and <code>finalfit</code> packages. Please cite jamovi and these packages in your publications."),
+                    '</p><p><a href="https://cran.r-project.org/web/packages/survival/vignettes/survival.pdf" target="_blank">',
+                    .("See survival package documentation here"),
+                    "</a></p></div>"))
 
                 html <- self$results$todo
                 html$setContent(todo)
@@ -1403,8 +1408,11 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                 # see which levels were collapsed into "censored", nor which estimand
                 # the probability-scale outputs actually correspond to.
                 if (!is.null(private$.eventRecode))
+                {
                     self$results$eventRecodeInfo$setContent(
                         .describeEventIndicator(private$.eventRecode, self$options$outcome))
+                    .fillEventRecodeTable(self$results$eventRecodeTable, private$.eventRecode)
+                }
 
                 ## Competing risks are not implemented here ----
                 # Gated once, rather than at each consumer: this analysis has ~15
@@ -1807,7 +1815,9 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                 self$results$plot4$setState(list(stateVersion = 2L))
 
                 plotData2 <- list(
-                    cutoffdata = cutoffdata,
+                    cutoffdata = cutoffdata[, intersect(c(results$name1time, results$analysis_outcome,
+                                                          results$name3contexpl),
+                                                        names(cutoffdata)), drop = FALSE],
                     results = list(
                         name1time = results$name1time,
                         analysis_outcome = results$analysis_outcome,
@@ -1817,21 +1827,15 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                     # not_continue_analysis = not_continue_analysis
                     )
 
-                image5 <- self$results$plot5
-                image5$setState(plotData2)
-
-                image2 <- self$results$plot2
-                image2$setState(plotData2)
-
-                image3 <- self$results$plot3
-                image3$setState(plotData2)
-
-                image6 <- self$results$plot6
-                image6$setState(plotData2)
-
-                # Set state for new plots
-                image7 <- self$results$plot7
-                image7$setState(plotData2)
+                # library-audit 2026-11-20 jsurvival [LOW] DONE: rows go only to the cut-off curves
+                #   that are switched on; a hidden image's state is saved into the .omv all the same
+                shown <- c(plot5 = self$options$sc, plot2 = self$options$ce, plot3 = self$options$ch,
+                           plot6 = self$options$kmunicate, plot7 = self$options$loglog)
+                for (name in names(shown)) {
+                    # state-payload: these curves are drawn from rows; three columns (time, status,
+                    #   marker), about 5 KB per 1000 patients compressed
+                    self$results[[name]]$setState(if (isTRUE(shown[[name]])) plotData2 else NULL)
+                }
 
                 # (residualsPlot state is set inside .calculateResiduals with the actual
                 # residual data; do NOT overwrite it here with plotData2.)
@@ -2431,8 +2435,8 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                 km_fit_median_definition <- htmltools::htmlEscape(km_fit_median_definition)
 
                 medianSummary <- c(km_fit_median_definition,
-                                   "The median survival time is when 50% of subjects have experienced the event.",
-                                   "This means that 50% of subjects in this group survived longer than this time period.",
+                                   .("The median survival time is when 50% of subjects have experienced the event."),
+                                   .("This means that 50% of subjects in this group survived longer than this time period."),
                                    private$.landmarkSentence(results)
                 )
 
@@ -2828,6 +2832,8 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                     return()
                 }
 
+                # render-route: data - the cut-point search is rebuilt from the dataset
+                #   (requiresData); the state is a version stamp with no patient rows
                 plotData <- image4$state
 
                 if (is.null(plotData)) {
@@ -3554,7 +3560,7 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                 sorted_vals <- sort(unique(cont_var))
                 quantile_fallback <- function() {
                     points <- private$.quantileCutoffs(cont_var, num_cuts)
-                    attr(points, "method") <- "quantile (minimum p-value fallback)"
+                    attr(points, "method") <- .("quantile (minimum p-value fallback)")
                     points
                 }
 
@@ -3969,8 +3975,8 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                     is.null(plotData$values)) {
                     # Create fallback visualization
                     plot <- ggplot2::ggplot() +
-                        ggplot2::geom_text(ggplot2::aes(x = 0.5, y = 0.5,
-                                                      label = "Multiple Cutoffs Analysis\nRun analysis to see visualization"),
+                        ggplot2::geom_text(ggplot2::aes(x = 0.5, y = 0.5),
+                                                      label = .("Multiple Cutoffs Analysis\nRun analysis to see visualization"),   # evaluated here, not inside aes()
                                           size = 6) +
                         ggplot2::xlim(0, 1) + ggplot2::ylim(0, 1) +
                         ggplot2::theme_void()
@@ -3994,9 +4000,8 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                             linewidth = 1
                         ) +
                         ggplot2::labs(
-                            title = paste0("Multiple Cut-offs for ", self$options$contexpl),
-                            subtitle = paste0("Method: ", plotData$method,
-                                            " | Number of cut-offs: ", length(cutoff_values)),
+                            title = .pasteT(.("Multiple Cut-offs for {contexpl}"), contexpl = self$options$contexpl),
+                            subtitle = .pasteT(.("Method: {method} | Number of cut-offs: {nCutoffValues}"), method = plotData$method, nCutoffValues = length(cutoff_values)),
                             x = self$options$contexpl,
                             y = "Frequency"
                         ) +
@@ -4020,8 +4025,8 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                 }, error = function(e) {
                     # Fallback plot in case of error
                     plot <- ggplot2::ggplot() +
-                        ggplot2::geom_text(ggplot2::aes(x = 0.5, y = 0.5,
-                                                      label = "Multiple Cutoffs Visualization\nError in plot generation"),
+                        ggplot2::geom_text(ggplot2::aes(x = 0.5, y = 0.5),
+                                                      label = .("Multiple Cutoffs Visualization\nError in plot generation"),   # evaluated here, not inside aes()
                                           size = 6) +
                         ggplot2::xlim(0, 1) + ggplot2::ylim(0, 1) +
                         ggplot2::theme_void()
@@ -4043,8 +4048,8 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                 if (is.null(plotData) || is.null(plotData$time) ||
                     is.null(plotData$outcome) || is.null(plotData$risk_groups)) {
                     plot <- ggplot2::ggplot() +
-                        ggplot2::geom_text(ggplot2::aes(x = 0.5, y = 0.5,
-                                                      label = "Multiple Cutoffs Survival Plot\nRun analysis to see visualization"),
+                        ggplot2::geom_text(ggplot2::aes(x = 0.5, y = 0.5),
+                                                      label = .("Multiple Cutoffs Survival Plot\nRun analysis to see visualization"),   # evaluated here, not inside aes()
                                           size = 6) +
                         ggplot2::xlim(0, 1) + ggplot2::ylim(0, 1) +
                         ggplot2::theme_void()
@@ -4078,10 +4083,10 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                     surv_plot <- .quietly(survminer::ggsurvplot(
                         fit,
                         data = plot_data,
-                        title = paste0("Survival Curves - Multiple Cut-offs for ", self$options$contexpl),
-                        subtitle = paste0("Method: ", plotData$method,
-                                          " | Groups: ", length(levels(plotData$risk_groups)),
-                                          if (outcome_guided) " | no p-value: groups were chosen from these data"),
+                        title = .pasteT(.("Survival Curves - Multiple Cut-offs for {contexpl}"), contexpl = self$options$contexpl),
+                        subtitle = .pasteT(.("Method: {method} | Groups: {groups}{note}"),
+                                           method = plotData$method, groups = length(levels(plotData$risk_groups)),
+                                           note = if (outcome_guided) paste0(" | ", .("no p-value: groups were chosen from these data"))),
                         xlab = private$.timeAxisLabel(),
                         ylab = "Survival Probability",
                         legend.title = .("Marker groups"),
@@ -4102,8 +4107,8 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                 }, error = function(e) {
                     # Fallback plot
                     plot <- ggplot2::ggplot() +
-                        ggplot2::geom_text(ggplot2::aes(x = 0.5, y = 0.5,
-                                                      label = "Multiple Cutoffs Survival Plot\nError in plot generation"),
+                        ggplot2::geom_text(ggplot2::aes(x = 0.5, y = 0.5),
+                                                      label = .("Multiple Cutoffs Survival Plot\nError in plot generation"),   # evaluated here, not inside aes()
                                           size = 6) +
                         ggplot2::xlim(0, 1) + ggplot2::ylim(0, 1) +
                         ggplot2::theme_void()
@@ -4305,11 +4310,8 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                 # Create RMST summary
                 if (length(rmst_results) > 0) {
                     summary_text <- paste0(
-                        "Restricted Mean Survival Time (RMST) Analysis\n",
-                        "Time horizon (\u03c4): ", round(tau, 1), " ", self$options$timetypeoutput, "\n\n",
-                        "The RMST represents the average time a patient can expect to survive up to the specified time horizon.\n",
-                        "This metric is particularly useful when the survival curves do not reach 50% (median undefined).\n\n"
-                    )
+                        .pasteT(.("Restricted Mean Survival Time (RMST) Analysis\nTime horizon (\u03c4): {tau} {timetypeoutput}\n\nThe RMST represents the average time a patient can expect to survive up to the specified time horizon.\nThis metric is particularly useful when the survival curves do not reach 50% (median undefined)."), tau = round(tau, 1), timetypeoutput = self$options$timetypeoutput),
+                        "\n\n")
 
                     # Add group comparisons if multiple groups
                     if (length(rmst_results) == 2) {
@@ -4320,18 +4322,7 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                                 rmst_results[[group_names[1]]]$se^2
                         )
                         diff_ci <- diff_rmst + c(-1, 1) * stats::qnorm(0.975) * diff_se
-                        summary_text <- paste0(
-                            summary_text,
-                            "Difference in RMST (", group_names[2], " vs ", group_names[1], "): ",
-                            round(diff_rmst, 2), " ", self$options$timetypeoutput,
-                            " [95% CI: ", round(diff_ci[1], 2), " to ", round(diff_ci[2], 2), "]\n",
-                            "Descriptive interpretation: Patients in '", group_names[2], "' group had on average ",
-                            abs(round(diff_rmst, 2)), " ",
-                            if (diff_rmst > 0) "more" else "fewer",
-                            " ", self$options$timetypeoutput,
-                            " of observed restricted survival up to ", round(tau, 1), " ", self$options$timetypeoutput,
-                            ". Cut-off groups are data-derived, so this comparison is exploratory and requires external validation."
-                        )
+                        summary_text <- .pasteT(.("{summaryText}Difference in RMST ({v1} vs {v2}): {diffRmst} {timetypeoutput} {lb}95% CI: {diffCi} to {diffCi2}]\nDescriptive interpretation: Patients in '{v1}' group had on average {v3} {v4} {timetypeoutput} of observed restricted survival up to {tau} {timetypeoutput}. Cut-off groups are data-derived, so this comparison is exploratory and requires external validation."), summaryText = summary_text, v1 = group_names[2], v2 = group_names[1], diffRmst = round(diff_rmst, 2), timetypeoutput = self$options$timetypeoutput, diffCi = round(diff_ci[1], 2), diffCi2 = round(diff_ci[2], 2), v3 = abs(round(diff_rmst, 2)), v4 = if (diff_rmst > 0) .("more") else .("fewer"), tau = round(tau, 1), lb = "[")
                     }
 
                     landmark_sentence <- private$.landmarkSentence(results)
@@ -4700,7 +4691,7 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                         fun = "cloglog",
                         xlab = paste0("log(", private$.timeAxisLabel(), ")"),
                         ylab = "log(-log(Survival))",
-                        title = paste0("Log-Log Plot for ", self$options$contexpl),
+                        title = .pasteT(.("Log-Log Plot for {contexpl}"), contexpl = self$options$contexpl),
                         legend.title = self$options$contexpl,
                         risk.table = FALSE,
                         conf.int = FALSE
@@ -4727,7 +4718,7 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                             ggplot2::labs(
                                 x = paste0("log(", private$.timeAxisLabel(), ")"),
                                 y = "log(-log(Survival))",
-                                title = paste0("Log-Log Plot for ", self$options$contexpl),
+                                title = .pasteT(.("Log-Log Plot for {contexpl}"), contexpl = self$options$contexpl),
                                 color = self$options$contexpl
                             ) +
                             ggplot2::theme_minimal()
@@ -4770,7 +4761,7 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                         ggplot2::labs(
                             x = "Linear Predictors",
                             y = "Martingale Residuals",
-                            title = "Martingale Residuals vs Fitted"
+                            title = .("Martingale Residuals vs Fitted")
                         ) +
                         ggplot2::theme_minimal()
                     if (has_smooth_support) {
@@ -4784,7 +4775,7 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                         ggplot2::labs(
                             x = "Linear Predictors",
                             y = "Deviance Residuals",
-                            title = "Deviance Residuals vs Fitted"
+                            title = .("Deviance Residuals vs Fitted")
                         ) +
                         ggplot2::theme_minimal()
                     if (has_smooth_support) {
@@ -4798,7 +4789,7 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                         ggplot2::labs(
                             x = "Theoretical Quantiles",
                             y = "Sample Quantiles",
-                            title = "Q-Q Plot of Deviance Residuals"
+                            title = .("Q-Q Plot of Deviance Residuals")
                         ) +
                         ggplot2::theme_minimal()
 
@@ -4809,7 +4800,7 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                         ggplot2::labs(
                             x = "Deviance Residuals",
                             y = "Frequency",
-                            title = "Distribution of Deviance Residuals"
+                            title = .("Distribution of Deviance Residuals")
                         ) +
                         ggplot2::theme_minimal()
 
@@ -4837,332 +4828,324 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
 
             # Educational Explanations ----
             ,
+            # library-audit 2026-11-20 jsurvival [LOW] DONE: each paragraph, heading and cell below is one
+            #   .() string, and a sentence built around a value is one .pasteT() template (guide section 9)
             .addExplanations = function() {
                 # Cox Regression Explanation
-                private$.setExplanationContent("coxRegressionExplanation", '
-                <div class="explanation-box" style="background-color: rgba(33, 152, 255, 0.07); padding: 15px; border-radius: 8px; margin: 10px 0; color: inherit;">
-                    <h3 style="color: inherit; margin-top: 0;"> Understanding Cox Regression for Continuous Variables</h3>
-
-                    <div style="background-color: rgba(255, 255, 255, 0.08); padding: 12px; border-radius: 5px; margin: 10px 0; color: inherit;">
-                        <h4 style="color: inherit; margin-top: 0;">What is Cox Regression with Continuous Variables?</h4>
-                        <p style="margin: 8px 0;">Cox regression with continuous variables analyzes how <strong>each unit increase</strong> in a continuous predictor (e.g., age, biomarker level) affects survival risk.</p>
-
-                        <div style="background-color: rgba(33, 184, 255, 0.11); padding: 10px; border-radius: 5px; margin: 10px 0; color: inherit;">
-                            <strong> Key Concept:</strong> The reported HR assumes a linear change in log hazard for each unit increase. This is a model assumption, not proof of a biological dose-response relationship.
-                        </div>
-                    </div>
-
-                    <div style="background-color: rgba(246, 163, 33, 0.11); padding: 12px; border-radius: 5px; margin: 10px 0; color: inherit;">
-                        <h4 style="color: inherit; margin-top: 0;"> Interpreting Hazard Ratios (HR)</h4>
-                        <table style="width: 100%; border-collapse: collapse; margin: 10px 0;">
-                            <tr style="background-color: rgba(255, 202, 33, 0.23); color: inherit;">
-                                <th style="padding: 8px; text-align: left; border: 1px solid #ffc107;">HR Value</th>
-                                <th style="padding: 8px; text-align: left; border: 1px solid #ffc107;">Meaning</th>
-                                <th style="padding: 8px; text-align: left; border: 1px solid #ffc107;">Clinical Example</th>
-                            </tr>
-                            <tr>
-                                <td style="padding: 8px; border: 1px solid #ffc107;"><strong>HR = 1.0</strong></td>
-                                <td style="padding: 8px; border: 1px solid #ffc107;">No effect</td>
-                                <td style="padding: 8px; border: 1px solid #ffc107;">Variable does not affect survival</td>
-                            </tr>
-                            <tr style="background-color: rgba(255, 196, 33, 0.07); color: inherit;">
-                                <td style="padding: 8px; border: 1px solid #ffc107;"><strong>HR > 1.0</strong></td>
-                                <td style="padding: 8px; border: 1px solid #ffc107;">Increased risk</td>
-                                <td style="padding: 8px; border: 1px solid #ffc107;">HR = 1.05: 5% higher hazard per unit</td>
-                            </tr>
-                            <tr>
-                                <td style="padding: 8px; border: 1px solid #ffc107;"><strong>HR < 1.0</strong></td>
-                                <td style="padding: 8px; border: 1px solid #ffc107;">Decreased risk (protective)</td>
-                                <td style="padding: 8px; border: 1px solid #ffc107;">HR = 0.95: 5% lower hazard per unit</td>
-                            </tr>
-                        </table>
-                    </div>
-
-                    <div style="background-color: rgba(33, 159, 43, 0.1); padding: 12px; border-radius: 5px; margin: 10px 0; color: inherit;">
-                        <h4 style="color: inherit; margin-top: 0;"> Clinical Examples</h4>
-
-                        <div style="background-color: rgba(255, 255, 255, 0.08); padding: 10px; border-radius: 5px; margin: 10px 0; color: inherit;">
-                            <strong>Example 1: Age and Cancer Survival</strong>
-                            <p style="margin: 5px 0;">Age HR = 1.03 (95% CI: 1.01-1.05, p=0.001)</p>
-                            <ul style="margin: 5px 0; padding-left: 20px;">
-                                <li><strong>Interpretation:</strong> Each additional year of age multiplies the hazard by 1.03</li>
-                                <li><strong>10-year difference:</strong> 1.03^10 = 1.34 x the hazard for 70 vs 60 years old - a hazard ratio, not a 34% cumulative-risk difference</li>
-                                <li><strong>Significance:</strong> p<0.05 means this effect is statistically significant</li>
-                            </ul>
-                        </div>
-
-                        <div style="background-color: rgba(153, 33, 170, 0.12); padding: 10px; border-radius: 5px; margin: 10px 0; color: inherit;">
-                            <strong>Example 2: Biomarker Level</strong>
-                            <p style="margin: 5px 0;">Protein X HR = 0.98 (95% CI: 0.96-0.99, p=0.02)</p>
-                            <ul style="margin: 5px 0; padding-left: 20px;">
-                                <li><strong>Protective factor:</strong> Higher protein X levels multiply the hazard by 0.98 per unit</li>
-                                <li><strong>Range effect:</strong> 20-point increase \u2192 0.98^20 = 0.67 x the hazard; absolute benefit depends on baseline risk</li>
-                            </ul>
-                        </div>
-                    </div>
-
-                    <div style="background-color: rgba(255, 169, 33, 0.14); padding: 10px; border-radius: 5px; margin-top: 10px; border-left: 4px solid #ff9800; color: inherit;">
-                        <strong> Important Assumptions:</strong>
-                        <ul style="margin: 5px 0; padding-left: 20px;">
-                            <li><strong>Linear relationship:</strong> Effect is constant across all values (may not always be true)</li>
-                            <li><strong>Proportional hazards:</strong> Relative effect stays constant over time</li>
-                            <li><strong>Consider cut-offs:</strong> If relationship is non-linear, consider categorizing the variable</li>
-                        </ul>
-                    </div>
-                </div>
-                ')
+                private$.setExplanationContent("coxRegressionExplanation", paste0(
+                    '<div class="explanation-box" style="background-color: rgba(33, 152, 255, 0.07); padding: 15px; border-radius: 8px; margin: 10px 0; color: inherit;"><h3 style="color: inherit; margin-top: 0;">',
+                    .("Understanding Cox Regression for Continuous Variables"),
+                    '</h3><div style="background-color: rgba(255, 255, 255, 0.08); padding: 12px; border-radius: 5px; margin: 10px 0; color: inherit;"><h4 style="color: inherit; margin-top: 0;">',
+                    .("What is Cox Regression with Continuous Variables?"),
+                    '</h4><p style="margin: 8px 0;">',
+                    .("Cox regression with continuous variables analyzes how <strong>each unit increase</strong> in a continuous predictor (e.g., age, biomarker level) affects survival risk."),
+                    '</p><div style="background-color: rgba(33, 184, 255, 0.11); padding: 10px; border-radius: 5px; margin: 10px 0; color: inherit;">',
+                    .("<strong> Key Concept:</strong> The reported HR assumes a linear change in log hazard for each unit increase. This is a model assumption, not proof of a biological dose-response relationship."),
+                    '</div></div><div style="background-color: rgba(246, 163, 33, 0.11); padding: 12px; border-radius: 5px; margin: 10px 0; color: inherit;"><h4 style="color: inherit; margin-top: 0;">',
+                    .("Interpreting Hazard Ratios (HR)"),
+                    '</h4><table style="width: 100%; border-collapse: collapse; margin: 10px 0;"><tr style="background-color: rgba(255, 202, 33, 0.23); color: inherit;"><th style="padding: 8px; text-align: left; border: 1px solid #ffc107;">',
+                    .("HR Value"),
+                    '</th><th style="padding: 8px; text-align: left; border: 1px solid #ffc107;">',
+                    .("Meaning"),
+                    '</th><th style="padding: 8px; text-align: left; border: 1px solid #ffc107;">',
+                    .("Clinical Example"),
+                    '</th></tr><tr><td style="padding: 8px; border: 1px solid #ffc107;"><strong>',
+                    .("HR = 1.0"),
+                    '</strong></td><td style="padding: 8px; border: 1px solid #ffc107;">',
+                    .("No effect"),
+                    '</td><td style="padding: 8px; border: 1px solid #ffc107;">',
+                    .("Variable does not affect survival"),
+                    '</td></tr><tr style="background-color: rgba(255, 196, 33, 0.07); color: inherit;"><td style="padding: 8px; border: 1px solid #ffc107;"><strong>',
+                    .("HR > 1.0"),
+                    '</strong></td><td style="padding: 8px; border: 1px solid #ffc107;">',
+                    .("Increased risk"),
+                    '</td><td style="padding: 8px; border: 1px solid #ffc107;">',
+                    .("HR = 1.05: 5% higher hazard per unit"),
+                    '</td></tr><tr><td style="padding: 8px; border: 1px solid #ffc107;"><strong>',
+                    .("HR < 1.0"),
+                    '</strong></td><td style="padding: 8px; border: 1px solid #ffc107;">',
+                    .("Decreased risk (protective)"),
+                    '</td><td style="padding: 8px; border: 1px solid #ffc107;">',
+                    .("HR = 0.95: 5% lower hazard per unit"),
+                    '</td></tr></table></div><div style="background-color: rgba(33, 159, 43, 0.1); padding: 12px; border-radius: 5px; margin: 10px 0; color: inherit;"><h4 style="color: inherit; margin-top: 0;">',
+                    .("Clinical Examples"),
+                    '</h4><div style="background-color: rgba(255, 255, 255, 0.08); padding: 10px; border-radius: 5px; margin: 10px 0; color: inherit;"><strong>',
+                    .("Example 1: Age and Cancer Survival"),
+                    '</strong><p style="margin: 5px 0;">',
+                    .("Age HR = 1.03 (95% CI: 1.01-1.05, p=0.001)"),
+                    '</p><ul style="margin: 5px 0; padding-left: 20px;"><li>',
+                    .("<strong>Interpretation:</strong> Each additional year of age multiplies the hazard by 1.03"),
+                    "</li><li>",
+                    .("<strong>10-year difference:</strong> 1.03^10 = 1.34 x the hazard for 70 vs 60 years old - a hazard ratio, not a 34% cumulative-risk difference"),
+                    "</li><li>",
+                    .("<strong>Significance:</strong> p<0.05 means this effect is statistically significant"),
+                    '</li></ul></div><div style="background-color: rgba(153, 33, 170, 0.12); padding: 10px; border-radius: 5px; margin: 10px 0; color: inherit;"><strong>',
+                    .("Example 2: Biomarker Level"),
+                    '</strong><p style="margin: 5px 0;">',
+                    .("Protein X HR = 0.98 (95% CI: 0.96-0.99, p=0.02)"),
+                    '</p><ul style="margin: 5px 0; padding-left: 20px;"><li>',
+                    .("<strong>Protective factor:</strong> Higher protein X levels multiply the hazard by 0.98 per unit"),
+                    "</li><li>",
+                    .("<strong>Range effect:</strong> 20-point increase \u2192 0.98^20 = 0.67 x the hazard; absolute benefit depends on baseline risk"),
+                    '</li></ul></div></div><div style="background-color: rgba(255, 169, 33, 0.14); padding: 10px; border-radius: 5px; margin-top: 10px; border-left: 4px solid #ff9800; color: inherit;"><strong>',
+                    .("Important Assumptions:"),
+                    '</strong><ul style="margin: 5px 0; padding-left: 20px;"><li>',
+                    .("<strong>Linear relationship:</strong> Effect is constant across all values (may not always be true)"),
+                    "</li><li>",
+                    .("<strong>Proportional hazards:</strong> Relative effect stays constant over time"),
+                    "</li><li>",
+                    .("<strong>Consider cut-offs:</strong> If relationship is non-linear, consider categorizing the variable"),
+                    "</li></ul></div></div>"))
 
                 # Cut-off Point Analysis Explanation
-                private$.setExplanationContent("cutoffAnalysisExplanation", '
-                <div class="explanation-box" style="background-color: rgba(33, 152, 255, 0.07); padding: 15px; border-radius: 8px; margin: 10px 0; color: inherit;">
-                    <h3 style="color: inherit; margin-top: 0;"> Understanding Cut-off Point Analysis</h3>
-
-                    <div style="background-color: rgba(255, 255, 255, 0.08); padding: 12px; border-radius: 5px; margin: 10px 0; color: inherit;">
-                        <h4 style="color: inherit; margin-top: 0;">What is Cut-off Point Analysis?</h4>
-                        <p style="margin: 8px 0;">Cut-off analysis transforms a <strong>continuous variable into lower- and higher-value groups</strong> using a data-derived threshold. The direction of risk must be read from the survival estimates; higher marker values are not automatically higher risk.</p>
-
-                        <div style="background-color: rgba(33, 184, 255, 0.11); padding: 10px; border-radius: 5px; margin: 10px 0; color: inherit;">
-                            <strong> Goal:</strong> Find the value that creates two groups with the <strong>maximum survival difference</strong>
-                        </div>
-                    </div>
-
-                    <div style="background-color: rgba(246, 163, 33, 0.11); padding: 12px; border-radius: 5px; margin: 10px 0; color: inherit;">
-                        <h4 style="color: inherit; margin-top: 0;"> How It Works</h4>
-
-                        <div style="background-color: rgba(255, 255, 255, 0.08); padding: 10px; border-radius: 5px; margin: 10px 0; color: inherit;">
-                            <strong>1. Maximally Selected Rank Statistics Method:</strong>
-                            <ul style="margin: 5px 0; padding-left: 20px;">
-                                <li>Tests every candidate cut-off value (respecting the minimum group size)</li>
-                                <li>For each cut-off, computes the standardised log-rank statistic</li>
-                                <li>Selects the cut-off with the largest statistic (biggest difference)</li>
-                                <li>No multiplicity-adjusted p-value is reported for the selected cut-off; validate it in independent data</li>
-                            </ul>
-                        </div>
-
-                        <table style="width: 100%; border-collapse: collapse; margin: 10px 0;">
-                            <tr style="background-color: rgba(255, 202, 33, 0.23); color: inherit;">
-                                <th style="padding: 8px; text-align: left; border: 1px solid #ffc107;">Step</th>
-                                <th style="padding: 8px; text-align: left; border: 1px solid #ffc107;">Process</th>
-                                <th style="padding: 8px; text-align: left; border: 1px solid #ffc107;">Output</th>
-                            </tr>
-                            <tr>
-                                <td style="padding: 8px; border: 1px solid #ffc107;"><strong>1. Testing</strong></td>
-                                <td style="padding: 8px; border: 1px solid #ffc107;">Try multiple cut-offs</td>
-                                <td style="padding: 8px; border: 1px solid #ffc107;">Range of log-rank statistics</td>
-                            </tr>
-                            <tr style="background-color: rgba(255, 196, 33, 0.07); color: inherit;">
-                                <td style="padding: 8px; border: 1px solid #ffc107;"><strong>2. Selection</strong></td>
-                                <td style="padding: 8px; border: 1px solid #ffc107;">Find the maximum statistic</td>
-                                <td style="padding: 8px; border: 1px solid #ffc107;">Optimal cut-off value</td>
-                            </tr>
-                            <tr>
-                                <td style="padding: 8px; border: 1px solid #ffc107;"><strong>3. Validation</strong></td>
-                                <td style="padding: 8px; border: 1px solid #ffc107;">Independent data (no adjusted p-value is computed here)</td>
-                                <td style="padding: 8px; border: 1px solid #ffc107;">Confirmed or rejected cut-off</td>
-                            </tr>
-                        </table>
-                    </div>
-
-                    <div style="background-color: rgba(33, 159, 43, 0.1); padding: 12px; border-radius: 5px; margin: 10px 0; color: inherit;">
-                        <h4 style="color: inherit; margin-top: 0;"> Clinical Benefits</h4>
-
-                        <div style="background-color: rgba(255, 255, 255, 0.08); padding: 10px; border-radius: 5px; margin: 10px 0; color: inherit;">
-                            <strong> Advantages:</strong>
-                            <ul style="margin: 5px 0; padding-left: 20px;">
-                                <li><strong>Exploratory presentation:</strong> Grouped curves can illustrate a possible non-linear pattern</li>
-                                <li><strong>Information loss:</strong> Dichotomising a continuous predictor discards information and can reduce transportability</li>
-                                <li><strong>Validation:</strong> A data-derived threshold must be tested in independent data</li>
-                                <li><strong>Clinical use:</strong> Treatment or monitoring decisions require evidence beyond this analysis</li>
-                            </ul>
-                        </div>
-
-                        <div style="background-color: rgba(153, 33, 170, 0.12); padding: 10px; border-radius: 5px; margin: 10px 0; color: inherit;">
-                            <strong> Clinical Example:</strong>
-                            <p style="margin: 5px 0;">Biomarker X data-derived cut-off = 25.3 ng/mL</p>
-                            <ul style="margin: 5px 0; padding-left: 20px;">
-                                <li>Higher-value group (>25.3): 40% 5-year survival in the development sample</li>
-                                <li>Lower-value group (\u226425.3): 75% 5-year survival in the development sample</li>
-                                <li>Interpretation: a hypothesis for external validation, not a monitoring recommendation</li>
-                            </ul>
-                        </div>
-                    </div>
-
-                    <div style="background-color: rgba(255, 33, 67, 0.09); padding: 12px; border-radius: 5px; margin: 10px 0; color: inherit;">
-                        <h4 style="color: inherit; margin-top: 0;"> Important Limitations</h4>
-                        <ul style="margin: 5px 0; padding-left: 20px;">
-                            <li><strong>Data-dependent:</strong> Optimal cut-off may vary between studies</li>
-                            <li><strong>Information loss:</strong> Converting continuous to binary loses precision</li>
-                            <li><strong>Validation needed:</strong> Cut-off should be confirmed in independent datasets</li>
-                            <li><strong>Population-specific:</strong> May not apply to different populations</li>
-                        </ul>
-                    </div>
-
-                    <div style="background-color: rgba(255, 169, 33, 0.14); padding: 10px; border-radius: 5px; margin-top: 10px; border-left: 4px solid #ff9800; color: inherit;">
-                        <strong> Best Practices:</strong>
-                        <ul style="margin: 5px 0; padding-left: 20px;">
-                            <li>Validate cut-off in independent cohort when possible</li>
-                            <li>Consider clinical relevance, not just statistical significance</li>
-                            <li>Report both continuous and cut-off analyses</li>
-                            <li>Ensure adequate sample size in both groups</li>
-                        </ul>
-                    </div>
-                </div>
-                ')
+                private$.setExplanationContent("cutoffAnalysisExplanation", paste0(
+                    '<div class="explanation-box" style="background-color: rgba(33, 152, 255, 0.07); padding: 15px; border-radius: 8px; margin: 10px 0; color: inherit;"><h3 style="color: inherit; margin-top: 0;">',
+                    .("Understanding Cut-off Point Analysis"),
+                    '</h3><div style="background-color: rgba(255, 255, 255, 0.08); padding: 12px; border-radius: 5px; margin: 10px 0; color: inherit;"><h4 style="color: inherit; margin-top: 0;">',
+                    .("What is Cut-off Point Analysis?"),
+                    '</h4><p style="margin: 8px 0;">',
+                    .("Cut-off analysis transforms a <strong>continuous variable into lower- and higher-value groups</strong> using a data-derived threshold. The direction of risk must be read from the survival estimates; higher marker values are not automatically higher risk."),
+                    '</p><div style="background-color: rgba(33, 184, 255, 0.11); padding: 10px; border-radius: 5px; margin: 10px 0; color: inherit;">',
+                    .("<strong> Goal:</strong> Find the value that creates two groups with the <strong>maximum survival difference</strong>"),
+                    '</div></div><div style="background-color: rgba(246, 163, 33, 0.11); padding: 12px; border-radius: 5px; margin: 10px 0; color: inherit;"><h4 style="color: inherit; margin-top: 0;">',
+                    .("How It Works"),
+                    '</h4><div style="background-color: rgba(255, 255, 255, 0.08); padding: 10px; border-radius: 5px; margin: 10px 0; color: inherit;"><strong>',
+                    .("1. Maximally Selected Rank Statistics Method:"),
+                    '</strong><ul style="margin: 5px 0; padding-left: 20px;"><li>',
+                    .("Tests every candidate cut-off value (respecting the minimum group size)"),
+                    "</li><li>",
+                    .("For each cut-off, computes the standardized log-rank statistic"),
+                    "</li><li>",
+                    .("Selects the cut-off with the largest statistic (biggest difference)"),
+                    "</li><li>",
+                    .("No multiplicity-adjusted p-value is reported for the selected cut-off; validate it in independent data"),
+                    '</li></ul></div><table style="width: 100%; border-collapse: collapse; margin: 10px 0;"><tr style="background-color: rgba(255, 202, 33, 0.23); color: inherit;"><th style="padding: 8px; text-align: left; border: 1px solid #ffc107;">',
+                    .("Step"),
+                    '</th><th style="padding: 8px; text-align: left; border: 1px solid #ffc107;">',
+                    .("Process"),
+                    '</th><th style="padding: 8px; text-align: left; border: 1px solid #ffc107;">',
+                    .("Output"),
+                    '</th></tr><tr><td style="padding: 8px; border: 1px solid #ffc107;"><strong>',
+                    .("1. Testing"),
+                    '</strong></td><td style="padding: 8px; border: 1px solid #ffc107;">',
+                    .("Try multiple cut-offs"),
+                    '</td><td style="padding: 8px; border: 1px solid #ffc107;">',
+                    .("Range of log-rank statistics"),
+                    '</td></tr><tr style="background-color: rgba(255, 196, 33, 0.07); color: inherit;"><td style="padding: 8px; border: 1px solid #ffc107;"><strong>',
+                    .("2. Selection"),
+                    '</strong></td><td style="padding: 8px; border: 1px solid #ffc107;">',
+                    .("Find the maximum statistic"),
+                    '</td><td style="padding: 8px; border: 1px solid #ffc107;">',
+                    .("Optimal cut-off value"),
+                    '</td></tr><tr><td style="padding: 8px; border: 1px solid #ffc107;"><strong>',
+                    .("3. Validation"),
+                    '</strong></td><td style="padding: 8px; border: 1px solid #ffc107;">',
+                    .("Independent data (no adjusted p-value is computed here)"),
+                    '</td><td style="padding: 8px; border: 1px solid #ffc107;">',
+                    .("Confirmed or rejected cut-off"),
+                    '</td></tr></table></div><div style="background-color: rgba(33, 159, 43, 0.1); padding: 12px; border-radius: 5px; margin: 10px 0; color: inherit;"><h4 style="color: inherit; margin-top: 0;">',
+                    .("Clinical Benefits"),
+                    '</h4><div style="background-color: rgba(255, 255, 255, 0.08); padding: 10px; border-radius: 5px; margin: 10px 0; color: inherit;"><strong>',
+                    .("Advantages:"),
+                    '</strong><ul style="margin: 5px 0; padding-left: 20px;"><li>',
+                    .("<strong>Exploratory presentation:</strong> Grouped curves can illustrate a possible non-linear pattern"),
+                    "</li><li>",
+                    .("<strong>Information loss:</strong> Dichotomising a continuous predictor discards information and can reduce transportability"),
+                    "</li><li>",
+                    .("<strong>Validation:</strong> A data-derived threshold must be tested in independent data"),
+                    "</li><li>",
+                    .("<strong>Clinical use:</strong> Treatment or monitoring decisions require evidence beyond this analysis"),
+                    '</li></ul></div><div style="background-color: rgba(153, 33, 170, 0.12); padding: 10px; border-radius: 5px; margin: 10px 0; color: inherit;"><strong>',
+                    .("Clinical Example:"),
+                    '</strong><p style="margin: 5px 0;">',
+                    .("Biomarker X data-derived cut-off = 25.3 ng/mL"),
+                    '</p><ul style="margin: 5px 0; padding-left: 20px;"><li>',
+                    .("Higher-value group (>25.3): 40% 5-year survival in the development sample"),
+                    "</li><li>",
+                    .("Lower-value group (\u226425.3): 75% 5-year survival in the development sample"),
+                    "</li><li>",
+                    .("Interpretation: a hypothesis for external validation, not a monitoring recommendation"),
+                    '</li></ul></div></div><div style="background-color: rgba(255, 33, 67, 0.09); padding: 12px; border-radius: 5px; margin: 10px 0; color: inherit;"><h4 style="color: inherit; margin-top: 0;">',
+                    .("Important Limitations"),
+                    '</h4><ul style="margin: 5px 0; padding-left: 20px;"><li>',
+                    .("<strong>Data-dependent:</strong> Optimal cut-off may vary between studies"),
+                    "</li><li>",
+                    .("<strong>Information loss:</strong> Converting continuous to binary loses precision"),
+                    "</li><li>",
+                    .("<strong>Validation needed:</strong> Cut-off should be confirmed in independent datasets"),
+                    "</li><li>",
+                    .("<strong>Population-specific:</strong> May not apply to different populations"),
+                    '</li></ul></div><div style="background-color: rgba(255, 169, 33, 0.14); padding: 10px; border-radius: 5px; margin-top: 10px; border-left: 4px solid #ff9800; color: inherit;"><strong>',
+                    .("Best Practices:"),
+                    '</strong><ul style="margin: 5px 0; padding-left: 20px;"><li>',
+                    .("Validate cut-off in independent cohort when possible"),
+                    "</li><li>",
+                    .("Consider clinical relevance, not just statistical significance"),
+                    "</li><li>",
+                    .("Report both continuous and cut-off analyses"),
+                    "</li><li>",
+                    .("Ensure adequate sample size in both groups"),
+                    "</li></ul></div></div>"))
 
                 # Multiple Cutoffs Explanation
-                private$.setExplanationContent("multipleCutoffsExplanation", '
-                <div style="margin-bottom: 20px; padding: 15px; background-color: rgba(255, 202, 33, 0.23); border-left: 4px solid #ffc107; color: inherit;">
-                    <h4 style="margin-top: 0; color: inherit;">Understanding Multiple Cut-offs Analysis</h4>
-                    <p><strong>Marker-value grouping:</strong> Creates ordered groups from a continuous variable; the survival ordering is estimated from the data rather than assumed by the labels.</p>
-                    <ul>
-                        <li><strong>Multiple Cut-offs:</strong> Derives 2-4 candidate cut-points</li>
-                        <li><strong>Groups:</strong> Creates ordered marker-value categories for exploratory comparison</li>
-                        <li><strong>Method Options:</strong> Quantile-based, tree-based, or minimum p-value approaches</li>
-                        <li><strong>Group Validation:</strong> Ensures adequate sample size in each risk group</li>
-                    </ul>
-                    <p><em>Important:</em> Data-derived groups may suggest non-linear patterns but also increase overfitting and multiplicity; report the continuous model and validate cut-offs externally.</p>
-                </div>
-                ')
+                private$.setExplanationContent("multipleCutoffsExplanation", paste0(
+                    '<div style="margin-bottom: 20px; padding: 15px; background-color: rgba(255, 202, 33, 0.23); border-left: 4px solid #ffc107; color: inherit;"><h4 style="margin-top: 0; color: inherit;">',
+                    .("Understanding Multiple Cut-offs Analysis"),
+                    "</h4><p>",
+                    .("<strong>Marker-value grouping:</strong> Creates ordered groups from a continuous variable; the survival ordering is estimated from the data rather than assumed by the labels."),
+                    "</p><ul><li>",
+                    .("<strong>Multiple Cut-offs:</strong> Derives 2-4 candidate cut-points"),
+                    "</li><li>",
+                    .("<strong>Groups:</strong> Creates ordered marker-value categories for exploratory comparison"),
+                    "</li><li>",
+                    .("<strong>Method Options:</strong> Quantile-based, tree-based, or minimum p-value approaches"),
+                    "</li><li>",
+                    .("<strong>Group Validation:</strong> Ensures adequate sample size in each risk group"),
+                    "</li></ul><p>",
+                    .("<em>Important:</em> Data-derived groups may suggest non-linear patterns but also increase overfitting and multiplicity; report the continuous model and validate cut-offs externally."),
+                    "</p></div>"))
 
                 # Person-Time Analysis Explanation
-                private$.setExplanationContent("personTimeExplanation", '
-                <div style="margin-bottom: 20px; padding: 15px; background-color: rgba(33, 162, 64, 0.19); border-left: 4px solid #28a745; color: inherit;">
-                    <h4 style="margin-top: 0; color: inherit;">Understanding Person-Time Analysis</h4>
-                    <p><strong>Person-Time:</strong> Accounts for both number of participants and their observation duration.</p>
-                    <ul>
-                        <li><strong>Incidence Rate:</strong> Events per person-time unit (e.g., per 100 person-years)</li>
-                        <li><strong>Time Intervals:</strong> Analyzes rates across different follow-up periods</li>
-                        <li><strong>Rate Comparison:</strong> Compares incidence rates between risk groups</li>
-                        <li><strong>Confidence Intervals:</strong> Provide precision estimates for rates</li>
-                    </ul>
-                    <p><em>Clinical use:</em> Essential for comparing event rates when follow-up times vary between groups.</p>
-                </div>
-                ')
+                private$.setExplanationContent("personTimeExplanation", paste0(
+                    '<div style="margin-bottom: 20px; padding: 15px; background-color: rgba(33, 162, 64, 0.19); border-left: 4px solid #28a745; color: inherit;"><h4 style="margin-top: 0; color: inherit;">',
+                    .("Understanding Person-Time Analysis"),
+                    "</h4><p>",
+                    .("<strong>Person-Time:</strong> Accounts for both number of participants and their observation duration."),
+                    "</p><ul><li>",
+                    .("<strong>Incidence Rate:</strong> Events per person-time unit (e.g., per 100 person-years)"),
+                    "</li><li>",
+                    .("<strong>Time Intervals:</strong> Analyzes rates across different follow-up periods"),
+                    "</li><li>",
+                    .("<strong>Rate Comparison:</strong> Compares incidence rates between risk groups"),
+                    "</li><li>",
+                    .("<strong>Confidence Intervals:</strong> Provide precision estimates for rates"),
+                    "</li></ul><p>",
+                    .("<em>Clinical use:</em> Essential for comparing event rates when follow-up times vary between groups."),
+                    "</p></div>"))
 
                 # RMST Analysis Explanation
-                private$.setExplanationContent("rmstExplanation", '
-                <div style="margin-bottom: 20px; padding: 15px; background-color: rgba(33, 41, 56, 0.13); border-left: 4px solid #6c757d; color: inherit;">
-                    <h4 style="margin-top: 0; color: inherit;">Understanding Restricted Mean Survival Time (RMST)</h4>
-                    <p><strong>RMST:</strong> Average survival time up to a specified time horizon (\u03c4).</p>
-                    <ul>
-                        <li><strong>Time-Limited Analysis:</strong> Mean survival within a defined observation period</li>
-                        <li><strong>Group Comparison:</strong> Difference in RMST between risk groups</li>
-                        <li><strong>Robust Measure:</strong> Less sensitive to tail behavior than median survival</li>
-                        <li><strong>Clinical Interpretation:</strong> Direct measure of expected survival time</li>
-                    </ul>
-                    <p><em>When to use:</em> Particularly valuable when median survival cannot be estimated or for time-limited analyses.</p>
-                </div>
-                ')
+                private$.setExplanationContent("rmstExplanation", paste0(
+                    '<div style="margin-bottom: 20px; padding: 15px; background-color: rgba(33, 41, 56, 0.13); border-left: 4px solid #6c757d; color: inherit;"><h4 style="margin-top: 0; color: inherit;">',
+                    .("Understanding Restricted Mean Survival Time (RMST)"),
+                    "</h4><p>",
+                    .("<strong>RMST:</strong> Average survival time up to a specified time horizon (\u03c4)."),
+                    "</p><ul><li>",
+                    .("<strong>Time-Limited Analysis:</strong> Mean survival within a defined observation period"),
+                    "</li><li>",
+                    .("<strong>Group Comparison:</strong> Difference in RMST between risk groups"),
+                    "</li><li>",
+                    .("<strong>Robust Measure:</strong> Less sensitive to tail behavior than median survival"),
+                    "</li><li>",
+                    .("<strong>Clinical Interpretation:</strong> Direct measure of expected survival time"),
+                    "</li></ul><p>",
+                    .("<em>When to use:</em> Particularly valuable when median survival cannot be estimated or for time-limited analyses."),
+                    "</p></div>"))
 
                 # Residual Diagnostics Explanation
-                private$.setExplanationContent("residualDiagnosticsExplanation", '
-                <div style="margin-bottom: 20px; padding: 15px; background-color: rgba(255, 202, 33, 0.4); border-left: 4px solid #fdcb6e; color: inherit;">
-                    <h4 style="margin-top: 0; color: inherit;">Understanding Cox Model Residual Diagnostics</h4>
-                    <p><strong>Model Residuals:</strong> Assess Cox model fit and identify potential issues.</p>
-                    <ul>
-                        <li><strong>Martingale Residuals:</strong> Detect functional form problems (should scatter around 0)</li>
-                        <li><strong>Deviance Residuals:</strong> Standardized residuals for outlier detection</li>
-                        <li><strong>Score Residuals:</strong> Assess influence of observations on coefficients</li>
-                        <li><strong>Schoenfeld Residuals:</strong> Event-time diagnostics for time-varying coefficient patterns; the formal proportional-hazards test is reported separately</li>
-                    </ul>
-                    <p><em>Clinical interpretation:</em> Large residuals may indicate patients with unusual survival patterns requiring further investigation.</p>
-                </div>
-                ')
+                private$.setExplanationContent("residualDiagnosticsExplanation", paste0(
+                    '<div style="margin-bottom: 20px; padding: 15px; background-color: rgba(255, 202, 33, 0.4); border-left: 4px solid #fdcb6e; color: inherit;"><h4 style="margin-top: 0; color: inherit;">',
+                    .("Understanding Cox Model Residual Diagnostics"),
+                    "</h4><p>",
+                    .("<strong>Model Residuals:</strong> Assess Cox model fit and identify potential issues."),
+                    "</p><ul><li>",
+                    .("<strong>Martingale Residuals:</strong> Detect functional form problems (should scatter around 0)"),
+                    "</li><li>",
+                    .("<strong>Deviance Residuals:</strong> Standardized residuals for outlier detection"),
+                    "</li><li>",
+                    .("<strong>Score Residuals:</strong> Assess influence of observations on coefficients"),
+                    "</li><li>",
+                    .("<strong>Schoenfeld Residuals:</strong> Event-time diagnostics for time-varying coefficient patterns; the formal proportional-hazards test is reported separately"),
+                    "</li></ul><p>",
+                    .("<em>Clinical interpretation:</em> Large residuals may indicate patients with unusual survival patterns requiring further investigation."),
+                    "</p></div>"))
 
                 # Log-Log Plot Explanation
-                private$.setExplanationContent("loglogPlotExplanation", '
-                <div style="margin-bottom: 20px; padding: 15px; background-color: rgba(33, 139, 255, 0.09); border-left: 4px solid #3182ce; color: inherit;">
-                    <h4 style="margin-top: 0; color: inherit;">Understanding Log-Log Plots for the Proportional Hazards Assumption</h4>
-                    <p><strong>Purpose:</strong> The complementary log-log plot displays log(-log(S(t))) against log(time) for each group and is a visual check of the proportional hazards (PH) assumption underlying Cox regression.</p>
-                    <ul>
-                        <li><strong>Parallel curves:</strong> Roughly parallel, non-crossing lines support the PH assumption (an approximately constant hazard ratio over time).</li>
-                        <li><strong>Crossing or converging curves:</strong> Suggest the hazard ratio changes over time (PH violated); interpret the single Cox hazard ratio with caution.</li>
-                        <li><strong>Constant vertical gap:</strong> The distance between curves approximates the log hazard ratio between groups.</li>
-                    </ul>
-                    <p><em>Clinical interpretation:</em> If the curves are clearly non-parallel, consider stratified Cox regression, time-varying effects, or a parametric survival model rather than relying on a single hazard ratio.</p>
-                </div>
-                ')
+                private$.setExplanationContent("loglogPlotExplanation", paste0(
+                    '<div style="margin-bottom: 20px; padding: 15px; background-color: rgba(33, 139, 255, 0.09); border-left: 4px solid #3182ce; color: inherit;"><h4 style="margin-top: 0; color: inherit;">',
+                    .("Understanding Log-Log Plots for the Proportional Hazards Assumption"),
+                    "</h4><p>",
+                    .("<strong>Purpose:</strong> The complementary log-log plot displays log(-log(S(t))) against log(time) for each group and is a visual check of the proportional hazards (PH) assumption underlying Cox regression."),
+                    "</p><ul><li>",
+                    .("<strong>Parallel curves:</strong> Roughly parallel, non-crossing lines support the PH assumption (an approximately constant hazard ratio over time)."),
+                    "</li><li>",
+                    .("<strong>Crossing or converging curves:</strong> Suggest the hazard ratio changes over time (PH violated); interpret the single Cox hazard ratio with caution."),
+                    "</li><li>",
+                    .("<strong>Constant vertical gap:</strong> The distance between curves approximates the log hazard ratio between groups."),
+                    "</li></ul><p>",
+                    .("<em>Clinical interpretation:</em> If the curves are clearly non-parallel, consider stratified Cox regression, time-varying effects, or a parametric survival model rather than relying on a single hazard ratio."),
+                    "</p></div>"))
 
                 # Survival Plots Explanation
-                private$.setExplanationContent("survivalPlotsExplanation", '
-                <div class="explanation-box" style="background-color: rgba(33, 152, 255, 0.07); padding: 15px; border-radius: 8px; margin: 10px 0; color: inherit;">
-                    <h3 style="color: inherit; margin-top: 0;"> Understanding Survival Curves for Continuous Variables</h3>
-
-                    <div style="background-color: rgba(255, 255, 255, 0.08); padding: 12px; border-radius: 5px; margin: 10px 0; color: inherit;">
-                        <h4 style="color: inherit; margin-top: 0;"> Survival Curves with Cut-offs</h4>
-                        <p style="margin: 8px 0;">When analyzing continuous variables, survival plots show <strong>separate curves for lower and higher marker-value groups</strong> based on a data-derived cut-off.</p>
-
-                        <div style="background-color: rgba(33, 184, 255, 0.11); padding: 10px; border-radius: 5px; margin: 10px 0; color: inherit;">
-                            <strong> How to Read the Plot:</strong>
-                            <ul style="margin: 5px 0; padding-left: 20px;">
-                                <li><strong>Two curves:</strong> Higher marker values (above cut-off) vs lower marker values (below cut-off)</li>
-                                <li><strong>Separation:</strong> Wider gap between curves = stronger prognostic effect</li>
-                                <li><strong>P-value:</strong> Not shown on curves from a data-derived cut-off, because a p-value after a cut-off search is not a valid test. Use the adjusted p in the cut-off table.</li>
-                                <li><strong>Risk tables:</strong> Show number of patients at each time point</li>
-                            </ul>
-                        </div>
-                    </div>
-
-                    <div style="background-color: rgba(246, 163, 33, 0.11); padding: 12px; border-radius: 5px; margin: 10px 0; color: inherit;">
-                        <h4 style="color: inherit; margin-top: 0;"> Curve Interpretation Patterns</h4>
-                        <table style="width: 100%; border-collapse: collapse; margin: 10px 0;">
-                            <tr style="background-color: rgba(255, 202, 33, 0.23); color: inherit;">
-                                <th style="padding: 8px; text-align: left; border: 1px solid #ffc107;">Pattern</th>
-                                <th style="padding: 8px; text-align: left; border: 1px solid #ffc107;">Clinical Meaning</th>
-                            </tr>
-                            <tr>
-                                <td style="padding: 8px; border: 1px solid #ffc107;"><strong> Wide separation early</strong></td>
-                                <td style="padding: 8px; border: 1px solid #ffc107;">Strong early prognostic effect</td>
-                            </tr>
-                            <tr style="background-color: rgba(255, 196, 33, 0.07); color: inherit;">
-                                <td style="padding: 8px; border: 1px solid #ffc107;"><strong> Curves converge later</strong></td>
-                                <td style="padding: 8px; border: 1px solid #ffc107;">Effect diminishes over time</td>
-                            </tr>
-                            <tr>
-                                <td style="padding: 8px; border: 1px solid #ffc107;"><strong> Parallel curves</strong></td>
-                                <td style="padding: 8px; border: 1px solid #ffc107;">Consistent proportional hazards</td>
-                            </tr>
-                            <tr style="background-color: rgba(255, 196, 33, 0.07); color: inherit;">
-                                <td style="padding: 8px; border: 1px solid #ffc107;"><strong> Crossing curves</strong></td>
-                                <td style="padding: 8px; border: 1px solid #ffc107;">Time-dependent effects (complex interpretation)</td>
-                            </tr>
-                        </table>
-                    </div>
-
-                    <div style="background-color: rgba(33, 159, 43, 0.1); padding: 12px; border-radius: 5px; margin: 10px 0; color: inherit;">
-                        <h4 style="color: inherit; margin-top: 0;"> Clinical Application Tips</h4>
-
-                        <div style="background-color: rgba(255, 255, 255, 0.08); padding: 10px; border-radius: 5px; margin: 10px 0; color: inherit;">
-                            <strong> Risk Stratification:</strong>
-                            <ul style="margin: 5px 0; padding-left: 20px;">
-                                <li>Use the curves and estimates to determine which marker-value group had the higher observed event rate</li>
-                                <li>Do not infer treatment benefit or causality from prognostic separation</li>
-                                <li>Consider clinical context, not just statistical significance</li>
-                            </ul>
-                        </div>
-
-                        <div style="background-color: rgba(153, 33, 170, 0.12); padding: 10px; border-radius: 5px; margin: 10px 0; color: inherit;">
-                            <strong> Biomarker Validation:</strong>
-                            <p style="margin: 5px 0;">Strong separation, even with a small p-value, is exploratory after data-driven cut-off selection and does not establish clinical utility. Before clinical use, evaluate:</p>
-                            <ul style="margin: 5px 0; padding-left: 20px;">
-                                <li>Independent external validation of the cut-off and effect size</li>
-                                <li>Calibration, discrimination, and incremental value beyond established predictors</li>
-                                <li>Clinical consequences and decision-impact studies</li>
-                            </ul>
-                        </div>
-                    </div>
-
-                    <div style="background-color: rgba(255, 169, 33, 0.14); padding: 10px; border-radius: 5px; margin-top: 10px; border-left: 4px solid #ff9800; color: inherit;">
-                        <strong> Important Considerations:</strong>
-                        <ul style="margin: 5px 0; padding-left: 20px;">
-                            <li><strong>Cut-off validation:</strong> Confirm cut-off value in independent dataset</li>
-                            <li><strong>Clinical relevance:</strong> Ensure the difference is clinically meaningful</li>
-                            <li><strong>Sample size:</strong> Both groups should have adequate numbers for reliable estimates</li>
-                            <li><strong>Follow-up:</strong> Longer follow-up provides more reliable late-time estimates</li>
-                        </ul>
-                    </div>
-                </div>
-                ')
+                private$.setExplanationContent("survivalPlotsExplanation", paste0(
+                    '<div class="explanation-box" style="background-color: rgba(33, 152, 255, 0.07); padding: 15px; border-radius: 8px; margin: 10px 0; color: inherit;"><h3 style="color: inherit; margin-top: 0;">',
+                    .("Understanding Survival Curves for Continuous Variables"),
+                    '</h3><div style="background-color: rgba(255, 255, 255, 0.08); padding: 12px; border-radius: 5px; margin: 10px 0; color: inherit;"><h4 style="color: inherit; margin-top: 0;">',
+                    .("Survival Curves with Cut-offs"),
+                    '</h4><p style="margin: 8px 0;">',
+                    .("When analyzing continuous variables, survival plots show <strong>separate curves for lower and higher marker-value groups</strong> based on a data-derived cut-off."),
+                    '</p><div style="background-color: rgba(33, 184, 255, 0.11); padding: 10px; border-radius: 5px; margin: 10px 0; color: inherit;"><strong>',
+                    .("How to Read the Plot:"),
+                    '</strong><ul style="margin: 5px 0; padding-left: 20px;"><li>',
+                    .("<strong>Two curves:</strong> Higher marker values (above cut-off) vs lower marker values (below cut-off)"),
+                    "</li><li>",
+                    .("<strong>Separation:</strong> Wider gap between curves = stronger prognostic effect"),
+                    "</li><li>",
+                    .("<strong>P-value:</strong> Not shown on curves from a data-derived cut-off, because a p-value after a cut-off search is not a valid test. Use the adjusted p in the cut-off table."),
+                    "</li><li>",
+                    .("<strong>Risk tables:</strong> Show number of patients at each time point"),
+                    '</li></ul></div></div><div style="background-color: rgba(246, 163, 33, 0.11); padding: 12px; border-radius: 5px; margin: 10px 0; color: inherit;"><h4 style="color: inherit; margin-top: 0;">',
+                    .("Curve Interpretation Patterns"),
+                    '</h4><table style="width: 100%; border-collapse: collapse; margin: 10px 0;"><tr style="background-color: rgba(255, 202, 33, 0.23); color: inherit;"><th style="padding: 8px; text-align: left; border: 1px solid #ffc107;">',
+                    .("Pattern"),
+                    '</th><th style="padding: 8px; text-align: left; border: 1px solid #ffc107;">',
+                    .("Clinical Meaning"),
+                    '</th></tr><tr><td style="padding: 8px; border: 1px solid #ffc107;"><strong>',
+                    .("Wide separation early"),
+                    '</strong></td><td style="padding: 8px; border: 1px solid #ffc107;">',
+                    .("Strong early prognostic effect"),
+                    '</td></tr><tr style="background-color: rgba(255, 196, 33, 0.07); color: inherit;"><td style="padding: 8px; border: 1px solid #ffc107;"><strong>',
+                    .("Curves converge later"),
+                    '</strong></td><td style="padding: 8px; border: 1px solid #ffc107;">',
+                    .("Effect diminishes over time"),
+                    '</td></tr><tr><td style="padding: 8px; border: 1px solid #ffc107;"><strong>',
+                    .("Parallel curves"),
+                    '</strong></td><td style="padding: 8px; border: 1px solid #ffc107;">',
+                    .("Consistent proportional hazards"),
+                    '</td></tr><tr style="background-color: rgba(255, 196, 33, 0.07); color: inherit;"><td style="padding: 8px; border: 1px solid #ffc107;"><strong>',
+                    .("Crossing curves"),
+                    '</strong></td><td style="padding: 8px; border: 1px solid #ffc107;">',
+                    .("Time-dependent effects (complex interpretation)"),
+                    '</td></tr></table></div><div style="background-color: rgba(33, 159, 43, 0.1); padding: 12px; border-radius: 5px; margin: 10px 0; color: inherit;"><h4 style="color: inherit; margin-top: 0;">',
+                    .("Clinical Application Tips"),
+                    '</h4><div style="background-color: rgba(255, 255, 255, 0.08); padding: 10px; border-radius: 5px; margin: 10px 0; color: inherit;"><strong>',
+                    .("Risk Stratification:"),
+                    '</strong><ul style="margin: 5px 0; padding-left: 20px;"><li>',
+                    .("Use the curves and estimates to determine which marker-value group had the higher observed event rate"),
+                    "</li><li>",
+                    .("Do not infer treatment benefit or causality from prognostic separation"),
+                    "</li><li>",
+                    .("Consider clinical context, not just statistical significance"),
+                    '</li></ul></div><div style="background-color: rgba(153, 33, 170, 0.12); padding: 10px; border-radius: 5px; margin: 10px 0; color: inherit;"><strong>',
+                    .("Biomarker Validation:"),
+                    '</strong><p style="margin: 5px 0;">',
+                    .("Strong separation, even with a small p-value, is exploratory after data-driven cut-off selection and does not establish clinical utility. Before clinical use, evaluate:"),
+                    '</p><ul style="margin: 5px 0; padding-left: 20px;"><li>',
+                    .("Independent external validation of the cut-off and effect size"),
+                    "</li><li>",
+                    .("Calibration, discrimination, and incremental value beyond established predictors"),
+                    "</li><li>",
+                    .("Clinical consequences and decision-impact studies"),
+                    '</li></ul></div></div><div style="background-color: rgba(255, 169, 33, 0.14); padding: 10px; border-radius: 5px; margin-top: 10px; border-left: 4px solid #ff9800; color: inherit;"><strong>',
+                    .("Important Considerations:"),
+                    '</strong><ul style="margin: 5px 0; padding-left: 20px;"><li>',
+                    .("<strong>Cut-off validation:</strong> Confirm cut-off value in independent dataset"),
+                    "</li><li>",
+                    .("<strong>Clinical relevance:</strong> Ensure the difference is clinically meaningful"),
+                    "</li><li>",
+                    .("<strong>Sample size:</strong> Both groups should have adequate numbers for reliable estimates"),
+                    "</li><li>",
+                    .("<strong>Follow-up:</strong> Longer follow-up provides more reliable late-time estimates"),
+                    "</li></ul></div></div>"))
             },
 
             # === EXTRACTED HELPER METHODS FOR MAINTAINABILITY ===

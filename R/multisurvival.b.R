@@ -17,6 +17,7 @@
                                   event_level = NULL, multievent = FALSE,
                                   analysistype = "overall",
                                   dod = NULL, dooc = NULL, awd = NULL, awod = NULL) {
+  . <- .callerTranslator(parent.frame())   # jmvcore's .() needs `self`; a file-level helper has none
   issues <- list()
   warnings <- list()
   event_indicator <- NULL
@@ -46,7 +47,7 @@
 
     negative_times <- sum(time_vec < 0, na.rm = TRUE)
     if (negative_times > 0) {
-      issues <- append(issues, paste("Negative survival times detected:", negative_times, "observations"))
+      issues <- append(issues, .pasteT(.("Negative survival times detected: {negativeTimes} observations"), negativeTimes = negative_times))
     }
 
     # Check for zero survival times
@@ -54,11 +55,7 @@
     if (zero_times > 0) {
       warnings <- append(
         warnings,
-        paste(
-          "Zero survival times detected:", zero_times,
-          "observations. Verify the time origin and same-time event convention;",
-          "do not add an arbitrary constant solely to change these observations."
-        )
+        .pasteT(.("Zero survival times detected: {zeroTimes} observations. Verify the time origin and same-time event convention; do not add an arbitrary constant solely to change these observations."), zeroTimes = zero_times)
       )
     }
   }
@@ -102,7 +99,7 @@
         event_indicator <- res$status == 1
       }
       if (is.factor(outcome_vec) && length(levels(outcome_vec)) > 2) {
-        warnings <- append(warnings, "Outcome has multiple levels; analysis will treat non-event levels as censored where applicable.")
+        warnings <- append(warnings, .("Outcome has multiple levels; analysis will treat non-event levels as censored where applicable."))
       }
     }
 
@@ -110,7 +107,7 @@
     if (!is.null(event_indicator) && !all(is.na(event_indicator))) {
       event_rate <- mean(event_indicator, na.rm = TRUE)
       if (!is.na(event_rate) && event_rate < 0.05) {
-        warnings <- append(warnings, paste("Low event rate:", round(event_rate * 100, 1), "%. ", "Consider longer follow-up or different endpoint."))
+        warnings <- append(warnings, .pasteT(.("Low event rate: {v1} %.  Consider longer follow-up or different endpoint."), v1 = round(event_rate * 100, 1)))
       }
     }
   }
@@ -477,6 +474,8 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
       # HTML notice helper (replaces self$results$insert(N, jmvcore::Notice))
       # See R/survivalcont.b.R:700-743 for canonical pattern.
       # Dedicated Html outputs support the module's multi-line notice layout.
+      # library-audit 2026-11-20 jsurvival [LOW] DEFERRED: Html message panels kept by maintainer
+      #   decision; revisit when these messages have been tried as jmvcore::Notice in the jamovi app
       .addHtmlMessage = function(type, title, message) {
           output_name <- switch(type,
               "error" = "errors",
@@ -948,6 +947,7 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
 
       # init ----
       .init = function() {
+        .initEventRecodeTable(self$results$eventRecodeTable, self$options)
         # Initialize mutable private fields
         private$.nom_object <- NULL
         private$.perf_timers <- NULL
@@ -2174,6 +2174,7 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
               "</p>")
           }
           self$results$eventRecodeInfo$setContent(recode_html)
+          .fillEventRecodeTable(self$results$eventRecodeTable, private$.eventRecode)
         }
 
         if (isTRUE(self$options$multievent) && identical(self$options$analysistype, "dfs")) {
@@ -3599,7 +3600,7 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
             if (length(v) >= 1) v[1] else NA_real_
           }, numeric(1))
           keep <- is.finite(s0) & s0 > 0 & s0 < 1
-          if (!any(keep)) stop("no estimable baseline survival at the requested timepoints")
+          if (!any(keep)) stop(.("no estimable baseline survival at the requested timepoints"))
           pred_times <- pred_times[keep]; s0 <- s0[keep]
           mean_lp <- mean(f$linear.predictors)
           lp_patient <- if (is_finegray && "fgcount" %in% names(fg_data)) {
@@ -3629,7 +3630,7 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
           nom_args <- list(
             f,
             fun = risk_funs,
-            funlabel = paste("Predicted", pred_times, private$.timeUnitLabel(), "risk"),
+            funlabel = .pasteT(.("Predicted {predTimes} {v1} risk"), predTimes = pred_times, v1 = private$.timeUnitLabel()),
             fun.at = risk_ats
           )
           if (length(interact_list) > 0) {
@@ -3696,65 +3697,40 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
           return(FALSE)
         }
 
-        # Capture the nomogram output
-        nom_output <- capture.output(print(nom))
-
-        # Extract technical details
-        tech_details <- c()
-        i <- 1
-        while(i <= length(nom_output) && !grepl("Points$", nom_output[i])) {
-          if(nzchar(nom_output[i])) {
-            tech_details <- c(tech_details, nom_output[i])
+        # library-audit 2026-11-20 jsurvival [HIGH] DONE: per-variable points and points-to-risk
+        # values are rows of nomogramPoints / nomogramRisk, read from the nomogram object the way
+        # rms:::print.nomogram reads it; printed text is never parsed or shown
+        cell <- function(x) gsub("<(?=[A-Za-z/!?])", "< ", trimws(as.character(x)), perl = TRUE)
+        pointsTable <- self$results$nomogramPoints
+        riskTable <- self$results$nomogramRisk
+        .deleteTableRows(pointsTable)
+        .deleteTableRows(riskTable)
+        scales <- which(names(nom) %in% c("total.points", "lp", "abbrev"))
+        first_scale <- if (length(scales) > 0) min(scales) else length(nom) + 1L
+        for (i in setdiff(seq_along(nom), scales)) {
+          axis <- nom[[i]]
+          if (i < first_scale) {
+            values <- cell(base::format(axis[[1]]))
+            for (j in seq_along(axis$points))
+              pointsTable$addRow(rowKey = paste(i, j), values = list(
+                variable = cell(names(nom)[i]), value = values[j], points = unname(axis$points[j])))
+          } else {
+            for (j in seq_along(axis$x))
+              riskTable$addRow(rowKey = paste(i, j), values = list(
+                axis = cell(names(nom)[i]), points = axis$x[j], risk = axis$x.real[j]))
           }
-          i <- i + 1
+        }
+
+        tech_details <- c()
+        if (!is.null(nom$lp)) {
+          per_unit <- diff(range(nom$lp$x)) / diff(range(nom$lp$x.real))
+          tech_details <- c(
+            .fmt(.("Points per unit of linear predictor: {value}"), value = base::format(per_unit)),
+            .fmt(.("Linear predictor units per point: {value}"), value = base::format(1 / per_unit)))
         }
         if (length(self$options$interactions) > 0) {
           int_str <- paste(vapply(self$options$interactions, function(x) paste(x, collapse = " * "), character(1)), collapse = ", ")
           tech_details <- c(tech_details, .fmt(.("Interactions in model: {terms}"), terms = int_str))
-        }
-
-        # Initialize data structures
-        sections <- list()
-        current_section <- NULL
-        current_lines <- character(0)
-        risk_tables <- list()
-
-        # Process each line
-        while(i <= length(nom_output)) {
-          line <- nom_output[i]
-
-          # Check for new section or risk table
-          if(grepl("^\\s*Total Points\\s+\\S", line)) {
-            # A points-to-risk table, one per risk axis: its header line
-            # carries the axis label ("Total Points Predicted 12 months risk").
-            if(!is.null(current_section)) {
-              sections[[current_section]] <- current_lines
-            }
-            axis_label <- trimws(sub("^\\s*Total Points\\s+", "", line))
-            rows <- character(0)
-            while(i < length(nom_output) && nzchar(trimws(nom_output[i + 1]))) {
-              i <- i + 1
-              rows <- c(rows, nom_output[i])
-            }
-            risk_tables[[axis_label]] <- rows
-            current_section <- NULL
-            current_lines <- character(0)
-          } else if(grepl("Points$", line) && !grepl("Total Points", line)) {
-            # New variable section
-            if(!is.null(current_section)) {
-              sections[[current_section]] <- current_lines
-            }
-            current_section <- trimws(sub("Points$", "", line))
-            current_lines <- character(0)
-          } else if(nzchar(trimws(line))) {
-            current_lines <- c(current_lines, line)
-          }
-          i <- i + 1
-        }
-
-        # Add final section if exists
-        if(!is.null(current_section) && length(current_lines) > 0) {
-          sections[[current_section]] <- current_lines
         }
 
         # Create HTML content
@@ -3784,55 +3760,6 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
             margin: 20px 0;
             border-radius: 8px;
         }
-        .inputs-section {
-            margin-top: 30px;
-            border: 1px solid #e9ecef;
-            border-radius: 8px;
-            padding: 20px;
-        }
-        .variable-section {
-            margin: 15px 0;
-            padding: 15px;
-            background-color: rgba(138, 155, 172, 0.06); color: inherit;
-            border-left: 4px solid #2196f3;
-            border-radius: 4px;
-        }
-        .section-title {
-            font-size: 1.2em;
-            font-weight: 600;
-            color: inherit;
-            margin-bottom: 10px;
-        }
-        .values {
-            font-family: "Roboto Mono", monospace;
-            white-space: pre-wrap;
-            line-height: 1.5;
-            color: inherit;
-            padding-left: 20px;
-        }
-        .outputs-section {
-            margin-top: 30px;
-            background-color: rgba(255, 169, 33, 0.14); color: inherit;
-            border: 1px solid #ffe0b2;
-            border-radius: 8px;
-            padding: 20px;
-        }
-        .prediction-table {
-            width: 100%;
-            margin-top: 15px;
-            border-collapse: separate;
-            border-spacing: 0;
-            font-family: "Roboto Mono", monospace;
-        }
-        .prediction-table th, .prediction-table td {
-            padding: 8px 12px;
-            text-align: center;
-            border-bottom: 1px solid #ffe0b2;
-        }
-        .prediction-table th {
-            background-color: rgba(255, 169, 33, 0.14); color: inherit;
-            font-weight: 600;
-        }
         .notes {
             background-color: rgba(255, 237, 33, 0.11); color: inherit;
             padding: 15px;
@@ -3857,25 +3784,9 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
             </ol>
         </div>
 
-        <div class="inputs-section">
-            <h3>', .("Input Variables"), '</h3>')
+')
 
-        # Add variable sections
-        for(section_name in names(sections)) {
-          html_content <- paste0(html_content, '
-            <div class="variable-section">
-                <div class="section-title">', htmltools::htmlEscape(section_name), '</div>
-                <div class="values">',
-                                 paste(htmltools::htmlEscape(sections[[section_name]]), collapse="<br>"),
-                                 '</div>
-            </div>')
-        }
-
-        # Add one points-to-risk table per risk axis (one per timepoint)
-        html_content <- paste0(html_content, private$.nomogramPointsGuide(risk_tables))
         html_content <- paste0(html_content, '
-        </div>
-
         <div class="notes">
             <h3>', .("Important Notes:"), '</h3>
             <ul>
@@ -3890,35 +3801,6 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
         return(html_content)
       }
 
-      ,
-      .nomogramPointsGuide = function(risk_tables) {
-        out <- paste0('
-        </div>
-        <div class="outputs-section">
-            <h3>', .("Risk Prediction"), '</h3>
-            <div class="section-title">', .("Points to Risk Conversion"), '</div>')
-        for (axis_label in names(risk_tables)) {
-          out <- paste0(out, '
-            <table class="prediction-table">
-                <tr>
-                    <th>', .("Total Points"), '</th>
-                    <th>', htmltools::htmlEscape(axis_label), '</th>
-                </tr>')
-          for(line in risk_tables[[axis_label]]) {
-            values <- strsplit(trimws(line), "\\s+")[[1]]
-            if(length(values) == 2) {
-              out <- paste0(out, '
-                <tr>
-                    <td>', htmltools::htmlEscape(values[1]), '</td>
-                    <td>', htmltools::htmlEscape(values[2]), '</td>
-                </tr>')
-            }
-          }
-          out <- paste0(out, '
-            </table>')
-        }
-        out
-      }
 
       # library-audit 2026-09-16 meddecide [LOW] DONE (same class): cindexValidation has a fixed
       # row set, so .init() scaffolds the rows and .run() fills them with setRow()
@@ -4093,22 +3975,7 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
           self$results$cox_ph$setContent("")
 
           if (!is.null(zph_table) && nrow(zph_table) > 0) {
-            cn <- colnames(zph_table)
-            col_chisq <- if ("chisq" %in% cn) "chisq" else cn[1]
-            col_df    <- if ("df" %in% cn) "df" else cn[min(2, length(cn))]
-            col_p     <- if ("p" %in% cn) "p" else cn[length(cn)]
-            terms <- rownames(zph_table)
-
-            for (i in seq_len(nrow(zph_table))) {
-              phTable$addRow(rowKey = i, values = list(
-                term  = terms[i],
-                chisq = unname(zph_table[i, col_chisq]),
-                df    = as.integer(round(unname(zph_table[i, col_df]))),
-                p     = unname(zph_table[i, col_p])
-              ))
-            }
-
-            violating <- setdiff(terms[which(zph_table[, col_p] < 0.05)], "GLOBAL")
+            violating <- .fillCoxZphTable(phTable, zph)
             if (length(violating) > 0) {
               phTable$setNote("ph", paste0(
                 .fmt(.("The proportional hazards assumption appears to be violated for: {terms}. Consider using these as stratification variables instead of covariates."),
@@ -4217,7 +4084,7 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
 
         if (length(formula2) == 0 || is.null(cox_model)) {
           grid::grid.newpage()
-          grid::grid.text("Hazard ratio plot requires at least one explanatory variable and a fitted Cox model.", 0.5, 0.5)
+          grid::grid.text(.("Hazard ratio plot requires at least one explanatory variable and a fitted Cox model."), 0.5, 0.5)
           return(TRUE)
         }
 
@@ -4229,9 +4096,7 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
         if (private$.isCompetingRisk(plotData)) {
           grid::grid.newpage()
           grid::grid.text(
-            paste0("Hazard-ratio forest plot is not shown for competing risks.\n",
-                   "The model is Fine-Gray, whose estimates are subdistribution\n",
-                   "hazard ratios and must not be read as ordinary hazard ratios."),
+            .("Hazard-ratio forest plot is not shown for competing risks.\nThe model is Fine-Gray, whose estimates are subdistribution\nhazard ratios and must not be read as ordinary hazard ratios."),
             x = 0.05, y = 0.95, just = c("left", "top"),
             gp = grid::gpar(fontsize = 11))
           return(TRUE)
@@ -4284,7 +4149,7 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
         }, error = function(e) {
           grid::grid.newpage()
           grid::grid.text(
-            paste0("Unable to draw hazard ratio plot: ", e$message),
+            .pasteT(.("Unable to draw hazard ratio plot: {message}"), message = e$message),
             x = 0.05, y = 0.95, just = c("left", "top"),
             gp = grid::gpar(fontsize = 11)
           )
@@ -4368,7 +4233,7 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
         if (is.null(cox_model)) {
           grid::grid.newpage()
           grid::grid.text(
-            "Forest plot unavailable: Cox model could not be estimated.",
+            .("Forest plot unavailable: Cox model could not be estimated."),
             x = 0.05, y = 0.95, just = c("left", "top"),
             gp = grid::gpar(fontsize = 11)
           )
@@ -4381,9 +4246,7 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
         if (is_finegray) {
           grid::grid.newpage()
           grid::grid.text(
-            paste0("Forest plot is not shown for competing risks.\n",
-                   "The fitted effects are Fine-Gray subdistribution hazard ratios;\n",
-                   "use the adjusted cumulative-incidence output for probability-scale interpretation."),
+            .("Forest plot is not shown for competing risks.\nThe fitted effects are Fine-Gray subdistribution hazard ratios;\nuse the adjusted cumulative-incidence output for probability-scale interpretation."),
             x = 0.05, y = 0.95, just = c("left", "top"),
             gp = grid::gpar(fontsize = 11))
           return(TRUE)
@@ -4399,7 +4262,7 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
         }, error = function(e) {
           grid::grid.newpage()
           grid::grid.text(
-            paste0("Forest plot not available: ", e$message),
+            .pasteT(.("Forest plot not available: {message}"), message = e$message),
             x = 0.05, y = 0.95, just = c("left", "top"),
             gp = grid::gpar(fontsize = 11)
           )
@@ -4487,6 +4350,8 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
 
 
       .plotKM = function(imageKM, ggtheme, theme, ...) {
+        # render-route: data - the curve is rebuilt from the dataset (requiresData); the state is a
+        #   flag list with no patient rows
         if (!private$.validateSurvivalInputs()$valid) return(FALSE)
 
         # Kaplan-Meier is not an absolute-risk estimator in the presence of a
@@ -6301,18 +6166,22 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
 
       self$results$adjustedCoxSummary$setContent(paste(coxSummary, collapse = "<br><br>"))
 
-      # Proportional hazards check if requested (adjustedCoxPH is a Preformatted
-      # slot; capture the printed cox.zph table as text).
+      # Proportional hazards check if requested. The test is rows of adjustedCoxPHTable;
+      # the Preformatted adjustedCoxPH is kept for the failure message only.
       if (self$options$ph_cox) {
         zph <- tryCatch(survival::cox.zph(cox_model), error = function(e) e)
+        .deleteTableRows(self$results$adjustedCoxPHTable)
         if (inherits(zph, "error")) {
+          self$results$adjustedCoxPH$setVisible(TRUE)
           self$results$adjustedCoxPH$setContent(
             .fmt(.("Proportional hazards test could not be computed: {msg}"), msg = zph$message)
           )
         } else {
-          self$results$adjustedCoxPH$setContent(
-            paste(utils::capture.output(print(zph)), collapse = "\n")
-          )
+          self$results$adjustedCoxPH$setVisible(FALSE)
+          self$results$adjustedCoxPH$setContent("")
+          .fillCoxZphTable(self$results$adjustedCoxPHTable, zph)
+          self$results$adjustedCoxPHTable$setNote("ph",
+            .("A non-significant test is <i>no evidence of a violation</i>, which is not the same as confirming proportional hazards holds. GLOBAL is the joint test across all terms."))
         }
       }
     }

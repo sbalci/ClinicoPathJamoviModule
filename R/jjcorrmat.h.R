@@ -262,8 +262,10 @@ jjcorrmatResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "ClinicoPathJamoviModule",
                     "ggplot2",
                     "ggstatsplot",
-                    "statsExpressions",
-                    "correlation",
+                    "ggcorrplot",
+                    "patchwork",
+                    "BayesFactor",
+                    "parameters",
                     "WRS2",
                     "digest"),
                 clearWith=list(
@@ -417,7 +419,7 @@ jjcorrmatBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             super$initialize(
                 package = "ClinicoPath",
                 name = "jjcorrmat",
-                version = c(1,0,81),
+                version = c(1,0,82),
                 options = options,
                 results = jjcorrmatResults$new(options=options),
                 data = data,
@@ -432,10 +434,48 @@ jjcorrmatBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 
 #' Correlation Matrix
 #'
-#' Wrapper Function for ggstatsplot::ggcorrmat and
-#' ggstatsplot::grouped_ggcorrmat to generate correlation matrix
-#' visualizations with significance testing.
+#' Correlation matrix analysis and visualization supporting zero-order and 
+#' partial Pearson, Spearman, 20 percent Winsorized Pearson, and Bayesian 
+#' correlations, with optional subgroup stratification and multiplicity 
+#' adjustment.
 #' 
+#'
+#' @examples
+#' \donttest{
+#' # Load example data
+#' data("mtcars")
+#'
+#' # Basic Pearson correlation matrix with Holm multiplicity adjustment
+#' jjcorrmat(
+#'   data = mtcars,
+#'   dep = c("mpg", "hp", "wt", "qsec"),
+#'   typestatistics = "parametric"
+#' )
+#'
+#' # Partial Spearman correlation matrix with circle display
+#' jjcorrmat(
+#'   data = mtcars,
+#'   dep = c("mpg", "hp", "wt", "qsec", "disp"),
+#'   typestatistics = "nonparametric",
+#'   partial = TRUE,
+#'   matrixtype = "lower",
+#'   matrixmethod = "circle",
+#'   padjustmethod = "bonferroni",
+#'   k = 3,
+#'   title = "Motor Trend Partial Correlations"
+#' )
+#'
+#' # Grouped 20 percent Winsorized robust correlation matrix
+#' mtcars_g <- mtcars
+#' mtcars_g$cyl <- factor(mtcars_g$cyl)
+#' jjcorrmat(
+#'   data = mtcars_g,
+#'   dep = c("mpg", "hp", "wt", "qsec"),
+#'   grvar = "cyl",
+#'   typestatistics = "robust",
+#'   siglevel = 0.01
+#' )
+#'}
 #' @param data The data as a data frame.
 #' @param dep List of continuous variables for which the correlation matrix
 #'   will be computed and visualized. All variables must be numeric.

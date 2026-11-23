@@ -15,7 +15,6 @@ clearWith:
     - k
     - partial
     - naHandling
-    # - clinicalpreset
     - lowcolor
     - midcolor
     - highcolor
@@ -143,8 +142,10 @@ refs:
     - ClinicoPathJamoviModule
     - ggplot2
     - ggstatsplot
-    - statsExpressions
-    - correlation
+    - ggcorrplot
+    - patchwork
+    - BayesFactor
+    - parameters
     - WRS2
     - digest
 ...

@@ -148,8 +148,9 @@ test_that("factor-level text is HTML-escaped at every Html sink flagged by the a
   expect_true(hit("level = htmltools::htmlEscape(row$strata)"))
   expect_true(hit("variable = htmltools::htmlEscape(adj_var), level = htmltools::htmlEscape(r$factor)"))
   expect_true(hit("terms = htmltools::htmlEscape(paste(na_coefs, collapse = \", \"))"))
-  expect_true(hit("htmltools::htmlEscape(section_name)"))
-  expect_true(hit("paste(htmltools::htmlEscape(sections[[section_name]]), collapse=\"<br>\")"))
+  # Variable names and values are cells of the nomogramPoints Table now (the client parses a
+  # cell as HTML and keeps no tags), so the two Html sinks that carried them are gone.
+  expect_false(hit("section_name"))
   expect_true(hit("paste(htmltools::htmlEscape(tech_details), collapse=\"<br>\")"))
 })
 

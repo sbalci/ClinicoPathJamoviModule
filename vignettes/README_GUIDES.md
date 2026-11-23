@@ -49,7 +49,7 @@ This directory contains comprehensive guides for jamovi module development in th
 
 **Created:** 2026-08-20
 **Source:** The real audit reports in `jamovi-library-audit/` (ClinicoPathDescriptives,
-jsurvival, meddecide, OncoPath, jjstatsplot — rounds 2026-07-13, 2026-08-17/18, 2026-09-15, 2026-09-16 and 2026-09-22),
+jsurvival, meddecide, OncoPath, jjstatsplot — rounds 2026-07-13, 2026-08-17/18, 2026-09-15, 2026-09-16, 2026-09-22, 2026-10-23 and 2026-11-20),
 plus the same reviewer's audits of four OTHER modules — MetaJam, snowRMM, CompositeSEM and jYS
 (2026-09-15 to 2026-09-21) — which is where §20–§23 come from. Reading an audit of someone else's
 module is the cheapest way to find a class of defect before it is found in ours.

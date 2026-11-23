@@ -375,6 +375,7 @@ reproduces the previous fixed behavior.}
 A results object containing:
 \tabular{llllll}{
 \code{results$cifTable} \tab \tab \tab \tab \tab a table \cr
+\code{results$eventRecodeTable} \tab \tab \tab \tab \tab a table \cr
 \code{results$eventRecodeInfo} \tab \tab \tab \tab \tab a html \cr
 \code{results$subtitle} \tab \tab \tab \tab \tab a preformatted \cr
 \code{results$todo} \tab \tab \tab \tab \tab a html \cr
@@ -401,7 +402,7 @@ A results object containing:
 \code{results$adjustedCurvesPlot} \tab \tab \tab \tab \tab an image \cr
 \code{results$remarkItems} \tab \tab \tab \tab \tab a table \cr
 \code{results$remarkChecklist} \tab \tab \tab \tab \tab a html \cr
-\code{results$cox_ph} \tab \tab \tab \tab \tab a preformatted \cr
+\code{results$cox_phTable} \tab \tab \tab \tab \tab a table \cr
 \code{results$phInterpretation} \tab \tab \tab \tab \tab a html \cr
 \code{results$plot8} \tab \tab \tab \tab \tab an image \cr
 \code{results$survTableSummary} \tab \tab \tab \tab \tab a preformatted \cr

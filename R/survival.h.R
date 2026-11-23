@@ -754,6 +754,7 @@ survivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     inherit = jmvcore::Group,
     active = list(
         cifTable = function() private$.items[["cifTable"]],
+        eventRecodeTable = function() private$.items[["eventRecodeTable"]],
         eventRecodeInfo = function() private$.items[["eventRecodeInfo"]],
         subtitle = function() private$.items[["subtitle"]],
         todo = function() private$.items[["todo"]],
@@ -780,7 +781,7 @@ survivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         adjustedCurvesPlot = function() private$.items[["adjustedCurvesPlot"]],
         remarkItems = function() private$.items[["remarkItems"]],
         remarkChecklist = function() private$.items[["remarkChecklist"]],
-        cox_ph = function() private$.items[["cox_ph"]],
+        cox_phTable = function() private$.items[["cox_phTable"]],
         phInterpretation = function() private$.items[["phInterpretation"]],
         plot8 = function() private$.items[["plot8"]],
         survTableSummary = function() private$.items[["survTableSummary"]],
@@ -978,6 +979,34 @@ survivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                         `title`="Cumulative censoring", 
                         `type`="integer", 
                         `visible`="(show_followup_support)"))))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="eventRecodeTable",
+                title="Outcome Recode",
+                rows=0,
+                visible="(length(outcome) > 0 && length(explanatory) > 0 && (length(elapsedtime) > 0 || (tint && length(dxdate) > 0 && length(fudate) > 0)))",
+                clearWith=list(
+                    "outcome",
+                    "outcomeLevel",
+                    "multievent",
+                    "analysistype",
+                    "dod",
+                    "dooc",
+                    "awd",
+                    "awod"),
+                columns=list(
+                    list(
+                        `name`="category", 
+                        `title`="", 
+                        `type`="text"),
+                    list(
+                        `name`="levels", 
+                        `title`="Levels", 
+                        `type`="text"),
+                    list(
+                        `name`="n", 
+                        `title`="N", 
+                        `type`="integer"))))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="eventRecodeInfo",
@@ -1672,11 +1701,13 @@ survivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "fudate",
                     "uselandmark",
                     "landmark")))
-            self$add(jmvcore::Preformatted$new(
+            self$add(jmvcore::Table$new(
                 options=options,
-                name="cox_ph",
+                name="cox_phTable",
                 title="Proportional Hazards Assumption",
+                rows=0,
                 visible="(ph_cox)",
+                refs="survival",
                 clearWith=list(
                     "explanatory",
                     "outcome",
@@ -1696,7 +1727,26 @@ survivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "uselandmark",
                     "landmark",
                     "stratified_cox",
-                    "strata_variable")))
+                    "strata_variable"),
+                columns=list(
+                    list(
+                        `name`="term", 
+                        `title`="Term", 
+                        `type`="text"),
+                    list(
+                        `name`="chisq", 
+                        `title`="Chi-square", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="df", 
+                        `title`="df", 
+                        `type`="integer"),
+                    list(
+                        `name`="p", 
+                        `title`="p", 
+                        `type`="number", 
+                        `format`="zto,pvalue"))))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="phInterpretation",
@@ -2277,7 +2327,6 @@ survivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 height=450,
                 renderFun=".plot",
                 visible="(sc)",
-                requiresData=TRUE,
                 clearWith=list(
                     "sc",
                     "endplot",
@@ -2314,7 +2363,6 @@ survivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 height=450,
                 renderFun=".plot2",
                 visible="(ce)",
-                requiresData=TRUE,
                 clearWith=list(
                     "ce",
                     "pplot",
@@ -2351,7 +2399,6 @@ survivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 height=450,
                 renderFun=".plot3",
                 visible="(ch)",
-                requiresData=TRUE,
                 clearWith=list(
                     "ch",
                     "pplot",
@@ -2388,7 +2435,6 @@ survivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 height=450,
                 renderFun=".plot6",
                 visible="(kmunicate)",
-                requiresData=TRUE,
                 clearWith=list(
                     "kmunicate",
                     "endplot",
@@ -2436,7 +2482,6 @@ survivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 height=450,
                 renderFun=".plot7",
                 visible="(loglog)",
-                requiresData=TRUE,
                 clearWith=list(
                     "loglog",
                     "endplot",
@@ -3343,6 +3388,7 @@ survivalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$cifTable} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$eventRecodeTable} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$eventRecodeInfo} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$subtitle} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
@@ -3369,7 +3415,7 @@ survivalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   \code{results$adjustedCurvesPlot} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$remarkItems} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$remarkChecklist} \tab \tab \tab \tab \tab a html \cr
-#'   \code{results$cox_ph} \tab \tab \tab \tab \tab a preformatted \cr
+#'   \code{results$cox_phTable} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$phInterpretation} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$plot8} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$survTableSummary} \tab \tab \tab \tab \tab a preformatted \cr

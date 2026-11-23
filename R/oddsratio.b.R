@@ -151,6 +151,8 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         # Notices are rendered to dedicated Html outputs (errors / strongWarnings /
         # warnings / infoMessages) declared in oddsratio.r.yaml. The helper
         # signature is retained so callers do not need to change.
+        # library-audit 2026-11-20 jsurvival [LOW] DEFERRED: Html message panels kept by maintainer
+        #   decision; revisit when these messages have been tried as jmvcore::Notice in the jamovi app
         .addNotice = function(type, message, name = NULL) {
             # jmvcore::NoticeType constants: ERROR=0, STRONG_WARNING=1, WARNING=2, INFO=3
             type_str <- switch(
@@ -1277,6 +1279,8 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     }
                 }
 
+                # library-audit 2026-11-20 jsurvival [LOW] REJECTED: this state holds names and labels
+                #   only (stateVersion 2); the rows were removed on 2026-10-30 (guide section 17)
                 image <- self$results$plot
                 image$setState(plotData)
 
@@ -1683,7 +1687,10 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                             }
                             self$results$nomogram$setContent(paste0(
                                 "<div style='padding: 10px; border-left: 4px solid #f0ad4e; background-color: rgba(138, 155, 172, 0.06); color: inherit;'>",
-                                "<p><strong>Prediction nomogram not generated.</strong></p>",
+                                paste0(
+                                    "<p><strong>",
+                                    .("Prediction nomogram not generated."),
+                                    "</strong></p>"),
                                 nomogram_detail,
                                 "</div>"
                             ))
@@ -1957,7 +1964,7 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             if (length(assumption_check$warnings) > 0) {
                 diagnostic_warnings <- paste0(
                     "<div style='background-color: rgba(255, 202, 33, 0.23); padding: 10px; border-radius: 5px; margin: 10px 0; color: inherit;'>",
-                    "<b>Statistical Assumptions Check:</b><br>",
+                    "<b>", .("Statistical Assumptions Check:"), "</b><br>",
                     paste(assumption_check$warnings, collapse = "<br>"),
                     "</div>"
                 )
@@ -1968,7 +1975,8 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             if (length(assumption_check$recommendations) > 0) {
                 recommendations_list <- lapply(assumption_check$recommendations, function(rec) {
                     if (is.list(rec)) {
-                        paste0("\u2022 <b>", rec$test, ":</b> ", rec$reason, " (Use: ", rec$code, ")")
+                        paste0("\u2022 <b>", rec$test, ":</b> ",
+                               .fmt(.("{reason} (Use: {code})"), reason = rec$reason, code = rec$code))
                     } else {
                         paste0("\u2022 ", rec)
                     }
@@ -1976,7 +1984,7 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 
                 recommendation_text <- paste0(
                     "<div style='background-color: rgba(33, 162, 64, 0.19); padding: 10px; border-radius: 5px; margin: 10px 0; color: inherit;'>",
-                    "<b> Statistical Recommendations:</b><br>",
+                    "<b>", .("Statistical Recommendations:"), "</b><br>",
                     paste(recommendations_list, collapse = "<br>"),
                     "</div>"
                 )
@@ -2239,24 +2247,24 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 return(list(fit = fit, dd = dd))
             }, error = function(e) {
                 detailed_error <- paste(
-                    " Nomogram Preparation Error:",
-                    paste("Technical error:", e$message),
+                    paste0(" ", .("Nomogram Preparation Error:")),
+                    paste(.("Technical error:"), e$message),
                     "",
-                    " Common causes and solutions:",
-                    "\u2022 Perfect separation: Some variable levels perfectly predict the outcome",
-                    "  \u2192 Try combining categories or removing problematic variables",
-                    "\u2022 Convergence issues: Model failed to converge",
-                    "  \u2192 Check for multicollinearity or try simpler model",
-                    "\u2022 Insufficient data: Too few observations per variable",
-                    "  \u2192 Increase sample size or reduce number of variables",
-                    "\u2022 Missing values: Incomplete data after cleaning",
-                    "  \u2192 Review data preprocessing steps",
+                    paste0(" ", .("Common causes and solutions:")),
+                    paste0("\u2022 ", .("Perfect separation: Some variable levels perfectly predict the outcome")),
+                    paste0("  \u2192 ", .("Try combining categories or removing problematic variables")),
+                    paste0("\u2022 ", .("Convergence issues: Model failed to converge")),
+                    paste0("  \u2192 ", .("Check for multicollinearity or try simpler model")),
+                    paste0("\u2022 ", .("Insufficient data: Too few observations per variable")),
+                    paste0("  \u2192 ", .("Increase sample size or reduce number of variables")),
+                    paste0("\u2022 ", .("Missing values: Incomplete data after cleaning")),
+                    paste0("  \u2192 ", .("Review data preprocessing steps")),
                     "",
-                    " Suggested next steps:",
-                    "\u2022 Check model summary for convergence warnings",
-                    "\u2022 Review variable distributions for separation issues",
-                    "\u2022 Consider using fewer explanatory variables",
-                    "\u2022 Verify data quality and completeness",
+                    paste0(" ", .("Suggested next steps:")),
+                    paste0("\u2022 ", .("Check model summary for convergence warnings")),
+                    paste0("\u2022 ", .("Review variable distributions for separation issues")),
+                    paste0("\u2022 ", .("Consider using fewer explanatory variables")),
+                    paste0("\u2022 ", .("Verify data quality and completeness")),
                     sep = "\n"
                 )
                 # jamovi shows R warnings only in the undifferentiated "Analysis
@@ -2395,6 +2403,8 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 return()
                     if (nrow(self$data) == 0)
                 return(FALSE)
+                    # render-route: data - the model is refitted from the dataset (requiresData);
+                    #   the state holds column names and labels, no patient rows
                     plotList <- image$state
 
                     if (is.null(plotList))
@@ -2554,17 +2564,44 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         .createNomogramDisplay = function(nom) {
             # Create HTML display for the nomogram information
             html_content <- '<div style="background-color: rgba(138, 155, 172, 0.06); padding: 15px; border-radius: 8px; margin: 10px 0; color: inherit;">'
-            html_content <- paste0(html_content, '<h4 style="color: inherit; margin-top: 0;">Nomogram Information</h4>')
-            html_content <- paste0(html_content, '<p>The nomogram plot above provides a visual tool for prediction based on the maximum-likelihood logistic regression model.</p>')
-            html_content <- paste0(html_content, '<p><strong>Components:</strong></p>')
+            html_content <- paste0(html_content, paste0(
+                '<h4 style="color: inherit; margin-top: 0;">',
+                .("Nomogram Information"),
+                "</h4>"))
+            html_content <- paste0(html_content, paste0(
+                "<p>",
+                .("The nomogram plot above provides a visual tool for prediction based on the maximum-likelihood logistic regression model."),
+                "</p>"))
+            html_content <- paste0(html_content, paste0(
+                "<p><strong>",
+                .("Components:"),
+                "</strong></p>"))
             html_content <- paste0(html_content, '<ul style="margin: 5px 0; padding-left: 20px;">')
-            html_content <- paste0(html_content, '<li><strong>Points:</strong> Top scale showing point values for each predictor</li>')
-            html_content <- paste0(html_content, '<li><strong>Predictor Scales:</strong> Individual scales for each variable in the model</li>')
-            html_content <- paste0(html_content, '<li><strong>Total Points:</strong> Sum of all individual predictor points</li>')
-            html_content <- paste0(html_content, '<li><strong>Predicted Probability:</strong> Bottom scale showing the predicted outcome probability</li>')
+            html_content <- paste0(html_content, paste0(
+                "<li>",
+                .("<strong>Points:</strong> Top scale showing point values for each predictor"),
+                "</li>"))
+            html_content <- paste0(html_content, paste0(
+                "<li>",
+                .("<strong>Predictor Scales:</strong> Individual scales for each variable in the model"),
+                "</li>"))
+            html_content <- paste0(html_content, paste0(
+                "<li>",
+                .("<strong>Total Points:</strong> Sum of all individual predictor points"),
+                "</li>"))
+            html_content <- paste0(html_content, paste0(
+                "<li>",
+                .("<strong>Predicted Probability:</strong> Bottom scale showing the predicted outcome probability"),
+                "</li>"))
             html_content <- paste0(html_content, '</ul>')
-            html_content <- paste0(html_content, '<p><strong>Validation note:</strong> This display does not establish calibration, discrimination, or external validity. Validate the fitted model before clinical use.</p>')
-            html_content <- paste0(html_content, '<p><strong>Sampling note:</strong> Predicted probabilities need a cohort sample with the real event rate. In a case-control sample the odds ratios hold but the predicted probabilities do not.</p>')
+            html_content <- paste0(html_content, paste0(
+                "<p>",
+                .("<strong>Validation note:</strong> This display does not establish calibration, discrimination, or external validity. Validate the fitted model before clinical use."),
+                "</p>"))
+            html_content <- paste0(html_content, paste0(
+                "<p>",
+                .("<strong>Sampling note:</strong> Predicted probabilities need a cohort sample with the real event rate. In a case-control sample the odds ratios hold but the predicted probabilities do not."),
+                "</p>"))
             html_content <- paste0(html_content, '</div>')
             
             return(html_content)
@@ -2575,20 +2612,24 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         .addExplanations = function() {
             # Odds Ratio Analysis Explanation
             tryCatch({
-                self$results$oddsRatioExplanation$setContent('
-            <div style="margin-bottom: 20px; padding: 15px; background-color: rgba(33, 149, 188, 0.1); border-left: 4px solid #17a2b8; color: inherit;">
-                <h4 style="margin-top: 0; color: inherit;">Understanding Odds Ratio Analysis</h4>
-                <p><strong>Odds Ratio (OR):</strong> Measures the strength of association between risk factors and binary outcomes.</p>
-                <ul>
-                    <li><strong>Interpretation:</strong> OR > 1 indicates increased odds, OR < 1 indicates decreased odds</li>
-                    <li><strong>Magnitude:</strong> Distance from 1.0 indicates strength of association</li>
-                    <li><strong>Confidence Intervals:</strong> Quantify uncertainty around each estimated odds ratio</li>
-                    <li><strong>Case-Control Studies:</strong> Primary measure for retrospective study designs</li>
-                    <li><strong>Follow-up:</strong> Logistic regression needs the same outcome window for every patient. For a status taken from censored or unequal follow-up, use the survival analyses: the odds ratio would otherwise reflect follow-up length as well as risk.</li>
-                </ul>
-                <p><em>Clinical interpretation:</em> An OR of 2.0 means the odds of the outcome are twice as high in the exposed group.</p>
-            </div>
-            ')
+                self$results$oddsRatioExplanation$setContent(paste0(
+                    '<div style="margin-bottom: 20px; padding: 15px; background-color: rgba(33, 149, 188, 0.1); border-left: 4px solid #17a2b8; color: inherit;"><h4 style="margin-top: 0; color: inherit;">',
+                    .("Understanding Odds Ratio Analysis"),
+                    "</h4><p>",
+                    .("<strong>Odds Ratio (OR):</strong> Measures the strength of association between risk factors and binary outcomes."),
+                    "</p><ul><li>",
+                    .("<strong>Interpretation:</strong> OR > 1 indicates increased odds, OR < 1 indicates decreased odds"),
+                    "</li><li>",
+                    .("<strong>Magnitude:</strong> Distance from 1.0 indicates strength of association"),
+                    "</li><li>",
+                    .("<strong>Confidence Intervals:</strong> Quantify uncertainty around each estimated odds ratio"),
+                    "</li><li>",
+                    .("<strong>Case-Control Studies:</strong> Primary measure for retrospective study designs"),
+                    "</li><li>",
+                    .("<strong>Follow-up:</strong> Logistic regression needs the same outcome window for every patient. For a status taken from censored or unequal follow-up, use the survival analyses: the odds ratio would otherwise reflect follow-up length as well as risk."),
+                    "</li></ul><p>",
+                    .("<em>Clinical interpretation:</em> An OR of 2.0 means the odds of the outcome are twice as high in the exposed group."),
+                    "</p></div>"))
             
             }, error = function(e) {
                 # Silently ignore if result doesn't exist
@@ -2596,25 +2637,30 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             
             # Odds Ratio vs Risk Ratio Explanation
             tryCatch({
-                self$results$riskMeasuresExplanation$setContent('
-            <div style="margin-bottom: 20px; padding: 15px; background-color: rgba(33, 162, 64, 0.19); border-left: 4px solid #28a745; color: inherit;">
-                <h4 style="margin-top: 0; color: inherit;">Understanding Odds Ratio vs Risk Ratio</h4>
-                <p><strong>Odds Ratio (OR):</strong> The measure calculated by this analysis.</p>
-                <ul>
-                    <li><strong>Definition:</strong> Ratio of the odds of outcome in exposed vs unexposed groups</li>
-                    <li><strong>Formula:</strong> OR = (a/b) / (c/d) where a,b,c,d are from 2\u00d72 contingency table</li>
-                    <li><strong>Interpretation:</strong> OR = 2.0 means the odds of outcome are twice as high in exposed group</li>
-                    <li><strong>Use case:</strong> Logistic regression, case-control studies, cross-sectional studies</li>
-                </ul>
-                <p><strong>Risk Ratio (RR) - NOT calculated by this function:</strong></p>
-                <ul>
-                    <li><strong>Definition:</strong> Ratio of risks (proportions) between exposed and unexposed groups</li>
-                    <li><strong>Use case:</strong> Cohort studies, randomized trials with follow-up data</li>
-                    <li><strong>Note:</strong> OR approaches RR as outcome risk becomes low; the degree of approximation also depends on baseline risk and effect size</li>
-                </ul>
-                <p><em>Clinical note:</em> This analysis provides Odds Ratios from logistic regression. For Risk Ratios, use cohort analysis tools.</p>
-            </div>
-            ')
+                self$results$riskMeasuresExplanation$setContent(paste0(
+                    '<div style="margin-bottom: 20px; padding: 15px; background-color: rgba(33, 162, 64, 0.19); border-left: 4px solid #28a745; color: inherit;"><h4 style="margin-top: 0; color: inherit;">',
+                    .("Understanding Odds Ratio vs Risk Ratio"),
+                    "</h4><p>",
+                    .("<strong>Odds Ratio (OR):</strong> The measure calculated by this analysis."),
+                    "</p><ul><li>",
+                    .("<strong>Definition:</strong> Ratio of the odds of outcome in exposed vs unexposed groups"),
+                    "</li><li>",
+                    .("<strong>Formula:</strong> OR = (a/b) / (c/d) where a,b,c,d are from 2\u00d72 contingency table"),
+                    "</li><li>",
+                    .("<strong>Interpretation:</strong> OR = 2.0 means the odds of outcome are twice as high in exposed group"),
+                    "</li><li>",
+                    .("<strong>Use case:</strong> Logistic regression, case-control studies, cross-sectional studies"),
+                    "</li></ul><p><strong>",
+                    .("Risk Ratio (RR) - NOT calculated by this function:"),
+                    "</strong></p><ul><li>",
+                    .("<strong>Definition:</strong> Ratio of risks (proportions) between exposed and unexposed groups"),
+                    "</li><li>",
+                    .("<strong>Use case:</strong> Cohort studies, randomized trials with follow-up data"),
+                    "</li><li>",
+                    .("<strong>Note:</strong> OR approaches RR as outcome risk becomes low; the degree of approximation also depends on baseline risk and effect size"),
+                    "</li></ul><p>",
+                    .("<em>Clinical note:</em> This analysis provides Odds Ratios from logistic regression. For Risk Ratios, use cohort analysis tools."),
+                    "</p></div>"))
 
             }, error = function(e) {
                 # Silently ignore if result doesn't exist
@@ -2622,45 +2668,50 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             
             # Diagnostic Test Performance Explanation
             tryCatch({
-                self$results$diagnosticTestExplanation$setContent('
-            <div style="margin-bottom: 20px; padding: 15px; background-color: rgba(255, 202, 33, 0.23); border-left: 4px solid #ffc107; color: inherit;">
-                <h4 style="margin-top: 0; color: inherit;">Understanding Diagnostic Test Performance</h4>
-                <p><strong>Diagnostic Metrics Calculated:</strong> This analysis evaluates how well a binary predictor distinguishes between outcome states.</p>
-                <ul>
-                    <li><strong>Sensitivity (True Positive Rate):</strong> Proportion of actual positives correctly identified
-                        <ul style="margin-top: 5px;">
-                            <li>Formula: TP / (TP + FN)</li>
-                            <li>Example: If sensitivity = 80%, the test detects 80% of cases with the outcome</li>
-                        </ul>
-                    </li>
-                    <li><strong>Specificity (True Negative Rate):</strong> Proportion of actual negatives correctly identified
-                        <ul style="margin-top: 5px;">
-                            <li>Formula: TN / (TN + FP)</li>
-                            <li>Example: If specificity = 90%, the test correctly identifies 90% of cases without the outcome</li>
-                        </ul>
-                    </li>
-                    <li><strong>Positive Likelihood Ratio (LR+):</strong> How much a positive test increases the odds
-                        <ul style="margin-top: 5px;">
-                            <li>Formula: Sensitivity / (1 - Specificity)</li>
-                            <li>LR+ > 10: Strong evidence for diagnosis</li>
-                            <li>LR+ = 5-10: Moderate evidence</li>
-                            <li>LR+ = 2-5: Weak evidence</li>
-                        </ul>
-                    </li>
-                    <li><strong>Negative Likelihood Ratio (LR-):</strong> How much a negative test decreases the odds
-                        <ul style="margin-top: 5px;">
-                            <li>Formula: (1 - Sensitivity) / Specificity</li>
-                            <li>LR- < 0.1: Strong evidence against diagnosis</li>
-                            <li>LR- = 0.1-0.2: Moderate evidence</li>
-                            <li>LR- = 0.2-0.5: Weak evidence</li>
-                        </ul>
-                    </li>
-                </ul>
-                <p><small>The LR magnitude bands above are rough interpretive guides, not universal clinical decision thresholds.</small></p>
-                <p><strong>Note:</strong> PPV and NPV are NOT calculated by this function as they depend on disease prevalence in your specific population.</p>
-                <p><em>Clinical application:</em> These unadjusted metrics help evaluate a binary test or biomarker. The prediction nomogram is a separate multivariable model display and does not convert likelihood ratios into post-test probabilities.</p>
-            </div>
-            ')
+                self$results$diagnosticTestExplanation$setContent(paste0(
+                    '<div style="margin-bottom: 20px; padding: 15px; background-color: rgba(255, 202, 33, 0.23); border-left: 4px solid #ffc107; color: inherit;"><h4 style="margin-top: 0; color: inherit;">',
+                    .("Understanding Diagnostic Test Performance"),
+                    "</h4><p>",
+                    .("<strong>Diagnostic Metrics Calculated:</strong> This analysis evaluates how well a binary predictor distinguishes between outcome states."),
+                    "</p><ul><li>",
+                    .("<strong>Sensitivity (True Positive Rate):</strong> Proportion of actual positives correctly identified"),
+                    '<ul style="margin-top: 5px;"><li>',
+                    .("Formula: TP / (TP + FN)"),
+                    "</li><li>",
+                    .("Example: If sensitivity = 80%, the test detects 80% of cases with the outcome"),
+                    "</li></ul></li><li>",
+                    .("<strong>Specificity (True Negative Rate):</strong> Proportion of actual negatives correctly identified"),
+                    '<ul style="margin-top: 5px;"><li>',
+                    .("Formula: TN / (TN + FP)"),
+                    "</li><li>",
+                    .("Example: If specificity = 90%, the test correctly identifies 90% of cases without the outcome"),
+                    "</li></ul></li><li>",
+                    .("<strong>Positive Likelihood Ratio (LR+):</strong> How much a positive test increases the odds"),
+                    '<ul style="margin-top: 5px;"><li>',
+                    .("Formula: Sensitivity / (1 - Specificity)"),
+                    "</li><li>",
+                    .("LR+ > 10: Strong evidence for diagnosis"),
+                    "</li><li>",
+                    .("LR+ = 5-10: Moderate evidence"),
+                    "</li><li>",
+                    .("LR+ = 2-5: Weak evidence"),
+                    "</li></ul></li><li>",
+                    .("<strong>Negative Likelihood Ratio (LR-):</strong> How much a negative test decreases the odds"),
+                    '<ul style="margin-top: 5px;"><li>',
+                    .("Formula: (1 - Sensitivity) / Specificity"),
+                    "</li><li>",
+                    .("LR- < 0.1: Strong evidence against diagnosis"),
+                    "</li><li>",
+                    .("LR- = 0.1-0.2: Moderate evidence"),
+                    "</li><li>",
+                    .("LR- = 0.2-0.5: Weak evidence"),
+                    "</li></ul></li></ul><p><small>",
+                    .("The LR magnitude bands above are rough interpretive guides, not universal clinical decision thresholds."),
+                    "</small></p><p>",
+                    .("<strong>Note:</strong> PPV and NPV are NOT calculated by this function as they depend on disease prevalence in your specific population."),
+                    "</p><p>",
+                    .("<em>Clinical application:</em> These unadjusted metrics help evaluate a binary test or biomarker. The prediction nomogram is a separate multivariable model display and does not convert likelihood ratios into post-test probabilities."),
+                    "</p></div>"))
 
             }, error = function(e) {
                 # Silently ignore if result doesn't exist
@@ -2668,7 +2719,70 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             
             # Nomogram Analysis Explanation
             tryCatch({
-                self$results$nomogramAnalysisExplanation$setContent(.("<div style=\"margin-bottom: 20px; padding: 15px; background-color: rgba(216, 33, 50, 0.18); border-left: 4px solid #dc3545; color: inherit;\"> <h4 style=\"margin-top: 0; color: inherit;\">Understanding Prediction and Diagnostic Outputs</h4> <p><strong>Prediction nomogram:</strong> The plotted nomogram assigns points to all explanatory variables in the maximum-likelihood logistic regression model and maps total points to predicted outcome probability. It is not a Fagan nomogram and does not display pre-test-to-post-test probability conversion.</p> <h5 style=\"color: inherit;\">Prediction Nomogram Components:</h5> <ul> <li><strong>Points:</strong> Contribution assigned to each predictor value</li> <li><strong>Total Points:</strong> Sum of predictor contributions</li> <li><strong>Predicted Probability:</strong> Model-based probability corresponding to total points</li> </ul> <p><strong>Important:</strong> The plot is a visual representation of the fitted model, not evidence of calibration, discrimination, transportability, or clinical utility. Internal and external validation are required before clinical use. It is not generated when Firth regression is selected because that would mix different estimation methods. Predicted probabilities need a cohort sample with the real event rate: in a case-control sample the odds ratios hold but the predicted probabilities do not.</p> <hr style=\"margin: 15px 0; border: none; border-top: 1px solid #f5c6cb;\"> <h5 style=\"color: inherit; margin-top: 15px;\">What is a Diagnostic Predictor?</h5> <p><strong>The diagnostic predictor is the single binary variable you want to evaluate as a diagnostic test.</strong></p> <div style=\"background-color: rgba(255, 202, 33, 0.23); padding: 10px; border-radius: 5px; margin: 10px 0; color: inherit;\"> <strong>Example:</strong> If you select \"LVI\" (Lymphovascular Invasion: Absent/Present) as the diagnostic predictor, the diagnostic table answers: <em>\"How well does LVI alone distinguish the selected outcome states?\"</em> </div> <p><strong>Requirements:</strong></p> <ul> <li> Compares two explicitly selected levels (<strong>Predictor Positive Level</strong> vs <strong>Predictor Negative Level</strong>): e.g., Yes/No, Present/Absent, Positive/Negative</li> <li> Examples: LVI (Absent/Present), an immunostain (Negative/Positive), a frozen-section call (Benign/Malignant)</li> <li> Cannot use continuous variables: Age, Tumor Size (infinite possible values)</li> <li> Multi-category variables (e.g., Grade 1/2/3): Only observations with the selected positive and negative levels are included in the 2\u00d72 diagnostic table; unselected levels are excluded with a warning</li> </ul> <p><strong>Why Two Selected Levels?</strong></p> <p>Diagnostic test performance metrics (sensitivity, specificity, likelihood ratios) are calculated from a 2\u00d72 contingency table:</p> <table style=\"border-collapse: collapse; margin: 10px 0; font-size: 0.9em;\"> <tr><th style=\"border: 1px solid #ddd; padding: 5px;\"></th> <th style=\"border: 1px solid #ddd; padding: 5px;\">Outcome +</th> <th style=\"border: 1px solid #ddd; padding: 5px;\">Outcome -</th></tr> <tr><td style=\"border: 1px solid #ddd; padding: 5px;\">Test +</td> <td style=\"border: 1px solid #ddd; padding: 5px;\">True Positive</td> <td style=\"border: 1px solid #ddd; padding: 5px;\">False Positive</td></tr> <tr><td style=\"border: 1px solid #ddd; padding: 5px;\">Test -</td> <td style=\"border: 1px solid #ddd; padding: 5px;\">False Negative</td> <td style=\"border: 1px solid #ddd; padding: 5px;\">True Negative</td></tr> </table> <p><small><em>Sensitivity = TP/(TP+FN), Specificity = TN/(TN+FP), LR+ = Sensitivity/(1-Specificity)</em></small></p> <p><strong>Selection Guidelines:</strong></p> <ul> <li><strong>Not specified:</strong> Uses the first explanatory variable automatically (in the jamovi GUI, select the variable in the Diagnostic Predictor box to enable the Predictor Positive Level and Predictor Negative Level dropdowns)</li> <li><strong>In your regression model:</strong> Diagnostic metrics are still unadjusted and use only its paired 2\u00d72 table</li> <li><strong>Not in your model:</strong> Evaluates it independently using paired complete outcome/test observations</li> </ul> <div style=\"background-color: rgba(33, 163, 188, 0.21); padding: 10px; border-radius: 5px; margin: 10px 0; color: inherit;\"> <strong> Clinical Tip:</strong> If your first variable is continuous (e.g., Age), you must manually select a binary diagnostic predictor to obtain sensitivity, specificity, and likelihood ratios. The prediction nomogram can still be generated from the regression variables. </div> </div>"))
+                self$results$nomogramAnalysisExplanation$setContent(paste0(
+                    '<div style="margin-bottom: 20px; padding: 15px; background-color: rgba(216, 33, 50, 0.18); border-left: 4px solid #dc3545; color: inherit;"><h4 style="margin-top: 0; color: inherit;">',
+                    .("Understanding Prediction and Diagnostic Outputs"),
+                    "</h4><p>",
+                    .("<strong>Prediction nomogram:</strong> The plotted nomogram assigns points to all explanatory variables in the maximum-likelihood logistic regression model and maps total points to predicted outcome probability. It is not a Fagan nomogram and does not display pre-test-to-post-test probability conversion."),
+                    '</p><h5 style="color: inherit;">',
+                    .("Prediction Nomogram Components:"),
+                    "</h5><ul><li>",
+                    .("<strong>Points:</strong> Contribution assigned to each predictor value"),
+                    "</li><li>",
+                    .("<strong>Total Points:</strong> Sum of predictor contributions"),
+                    "</li><li>",
+                    .("<strong>Predicted Probability:</strong> Model-based probability corresponding to total points"),
+                    "</li></ul><p>",
+                    .("<strong>Important:</strong> The plot is a visual representation of the fitted model, not evidence of calibration, discrimination, transportability, or clinical utility. Internal and external validation are required before clinical use. It is not generated when Firth regression is selected because that would mix different estimation methods. Predicted probabilities need a cohort sample with the real event rate: in a case-control sample the odds ratios hold but the predicted probabilities do not."),
+                    '</p><hr style="margin: 15px 0; border: none; border-top: 1px solid #f5c6cb;"><h5 style="color: inherit; margin-top: 15px;">',
+                    .("What is a Diagnostic Predictor?"),
+                    "</h5><p><strong>",
+                    .("The diagnostic predictor is the single binary variable you want to evaluate as a diagnostic test."),
+                    '</strong></p><div style="background-color: rgba(255, 202, 33, 0.23); padding: 10px; border-radius: 5px; margin: 10px 0; color: inherit;">',
+                    .("<strong>Example:</strong> If you select \"LVI\" (Lymphovascular Invasion: Absent/Present) as the diagnostic predictor, the diagnostic table answers: <em>\"How well does LVI alone distinguish the selected outcome states?\"</em>"),
+                    "</div><p><strong>",
+                    .("Requirements:"),
+                    "</strong></p><ul><li>",
+                    .("Compares two explicitly selected levels (<strong>Predictor Positive Level</strong> vs <strong>Predictor Negative Level</strong>): e.g., Yes/No, Present/Absent, Positive/Negative"),
+                    "</li><li>",
+                    .("Examples: LVI (Absent/Present), an immunostain (Negative/Positive), a frozen-section call (Benign/Malignant)"),
+                    "</li><li>",
+                    .("Cannot use continuous variables: Age, Tumor Size (infinite possible values)"),
+                    "</li><li>",
+                    .("Multi-category variables (e.g., Grade 1/2/3): Only observations with the selected positive and negative levels are included in the 2\u00d72 diagnostic table; unselected levels are excluded with a warning"),
+                    "</li></ul><p><strong>",
+                    .("Why Two Selected Levels?"),
+                    "</strong></p><p>",
+                    .("Diagnostic test performance metrics (sensitivity, specificity, likelihood ratios) are calculated from a 2\u00d72 contingency table:"),
+                    '</p><table style="border-collapse: collapse; margin: 10px 0; font-size: 0.9em;"><tr><th style="border: 1px solid #ddd; padding: 5px;"></th><th style="border: 1px solid #ddd; padding: 5px;">',
+                    .("Outcome +"),
+                    '</th><th style="border: 1px solid #ddd; padding: 5px;">',
+                    .("Outcome -"),
+                    '</th></tr><tr><td style="border: 1px solid #ddd; padding: 5px;">',
+                    .("Test +"),
+                    '</td><td style="border: 1px solid #ddd; padding: 5px;">',
+                    .("True Positive"),
+                    '</td><td style="border: 1px solid #ddd; padding: 5px;">',
+                    .("False Positive"),
+                    '</td></tr><tr><td style="border: 1px solid #ddd; padding: 5px;">',
+                    .("Test -"),
+                    '</td><td style="border: 1px solid #ddd; padding: 5px;">',
+                    .("False Negative"),
+                    '</td><td style="border: 1px solid #ddd; padding: 5px;">',
+                    .("True Negative"),
+                    "</td></tr></table><p><small><em>",
+                    .("Sensitivity = TP/(TP+FN), Specificity = TN/(TN+FP), LR+ = Sensitivity/(1-Specificity)"),
+                    "</em></small></p><p><strong>",
+                    .("Selection Guidelines:"),
+                    "</strong></p><ul><li>",
+                    .("<strong>Not specified:</strong> Uses the first explanatory variable automatically (in the jamovi GUI, select the variable in the Diagnostic Predictor box to enable the Predictor Positive Level and Predictor Negative Level dropdowns)"),
+                    "</li><li>",
+                    .("<strong>In your regression model:</strong> Diagnostic metrics are still unadjusted and use only its paired 2\u00d72 table"),
+                    "</li><li>",
+                    .("<strong>Not in your model:</strong> Evaluates it independently using paired complete outcome/test observations"),
+                    '</li></ul><div style="background-color: rgba(33, 163, 188, 0.21); padding: 10px; border-radius: 5px; margin: 10px 0; color: inherit;">',
+                    .("<strong> Clinical Tip:</strong> If your first variable is continuous (e.g., Age), you must manually select a binary diagnostic predictor to obtain sensitivity, specificity, and likelihood ratios. The prediction nomogram can still be generated from the regression variables."),
+                    "</div></div>"))
 
             }, error = function(e) {
                 # Silently ignore if result doesn't exist

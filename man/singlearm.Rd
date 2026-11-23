@@ -273,6 +273,7 @@ representativeness, or adequacy for a particular clinical decision.}
 A results object containing:
 \tabular{llllll}{
 \code{results$cifTable} \tab \tab \tab \tab \tab a table \cr
+\code{results$eventRecodeTable} \tab \tab \tab \tab \tab a table \cr
 \code{results$eventRecodeInfo} \tab \tab \tab \tab \tab a html \cr
 \code{results$todo} \tab \tab \tab \tab \tab a html \cr
 \code{results$errors} \tab \tab \tab \tab \tab a html \cr

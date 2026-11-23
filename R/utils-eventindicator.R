@@ -55,6 +55,9 @@
                                   analysistype = "overall",
                                   dod = NULL, dooc = NULL, awd = NULL, awod = NULL,
                                   outcome_name = "outcome") {
+    . <- .callerTranslator(parent.frame())   # jmvcore's .() needs `self`; a file-level helper has none
+    # i18n-exempt: every message is translated; what is left are estimand identifiers and option
+    #   titles that the code compares or lists in English
 
     fail <- function(msg) list(status = NULL, error = msg)
 
@@ -88,7 +91,7 @@
     }
 
     if (is.null(outcome) || length(outcome) == 0)
-        return(fail("No outcome variable available. Please select an outcome variable."))
+        return(fail(.("No outcome variable available. Please select an outcome variable.")))
 
     # Normalize factors with an explicit NA level (e.g. from addNA()) so is.na(x)
     # and as.character(x) agree on missingness across all paths.
@@ -105,7 +108,7 @@
 
     if (length(observed) == 0)
         return(fail(sprintf(
-            "Outcome variable '%s' contains only missing values.", outcome_name)))
+            .("Outcome variable '%s' contains only missing values."), outcome_name)))
 
     # ---- multievent: four-category mapping -------------------------------
     if (isTRUE(multievent)) {
@@ -116,10 +119,7 @@
         filled  <- vapply(buckets, function(b) !is.null(b) && length(b) > 0, logical(1))
 
         if (!any(filled))
-            return(fail(paste0(
-                "Multiple Event Levels is enabled but no outcome levels have been assigned. ",
-                "Assign each level of '", outcome_name, "' to one of: ",
-                paste(titles, collapse = ", "), ".")))
+            return(fail(.pasteT(.("Multiple Event Levels is enabled but no outcome levels have been assigned. Assign each level of '{outcomeName}' to one of: {titles}."), outcomeName = outcome_name, titles = paste(titles, collapse = ", "))))
 
         selected <- unlist(buckets[filled], use.names = FALSE)
 
@@ -127,9 +127,7 @@
         # used to share one misleading message.
         dupes <- unique(selected[duplicated(selected)])
         if (length(dupes) > 0)
-            return(fail(paste0(
-                "Each outcome level may be assigned to only one category. ",
-                "Assigned to more than one: ", paste(dupes, collapse = ", "), ".")))
+            return(fail(.pasteT(.("Each outcome level may be assigned to only one category. Assigned to more than one: {dupes}."), dupes = paste(dupes, collapse = ", "))))
 
         # Note the asymmetry with the single-event path below: a category with no
         # patients (nobody Alive with Disease in this cohort) is perfectly normal
@@ -142,12 +140,7 @@
         # denominator and inflating the event rate.
         unmapped <- setdiff(observed_chr, as.character(selected))
         if (length(unmapped) > 0)
-            return(fail(paste0(
-                "Outcome level(s) not assigned to any category: ",
-                paste(unmapped, collapse = ", "),
-                ". Assign every level of '", outcome_name, "' to one of: ",
-                paste(titles[!filled], collapse = ", "),
-                ". Unassigned levels would otherwise be dropped from the analysis.")))
+            return(fail(.pasteT(.("Outcome level(s) not assigned to any category: {unmapped}. Assign every level of '{outcomeName}' to one of: {titles}. Unassigned levels would otherwise be dropped from the analysis."), unmapped = paste(unmapped, collapse = ", "), outcomeName = outcome_name, titles = paste(titles[!filled], collapse = ", "))))
 
         # Codes per analysis type. "dfs" is the only one in which Alive with
         # Disease counts as an event -- which is what disease-free survival means.
@@ -226,9 +219,7 @@
         # nevertheless looks valid. Refuse the configuration instead.
         if (!is.null(outcomeLevel) && length(outcomeLevel) > 0 &&
             identical(as.character(outcomeLevel), "Censored"))
-            return(fail(paste0(
-                "'Censored' cannot be selected as the event level for a ",
-                "Censored/Event/Competing outcome. Select 'Event' or 'Competing'.")))
+            return(fail(.("'Censored' cannot be selected as the event level for a Censored/Event/Competing outcome. Select 'Event' or 'Competing'.")))
 
         # An explicit choice of "Competing" as the event refocuses the
         # competing-risk analysis: it becomes code 1 and the original Event
@@ -266,10 +257,7 @@
         lvl <- if (!is.null(outcomeLevel) && length(outcomeLevel) > 0)
             toupper(as.character(outcomeLevel)) else "TRUE"
         if (!lvl %in% c("TRUE", "FALSE"))
-            return(fail(paste0(
-                "Selected Event Level '", outcomeLevel,
-                "' is invalid for logical outcome '", outcome_name,
-                "'. Select TRUE or FALSE.")))
+            return(fail(.pasteT(.("Selected Event Level '{outcomeLevel}' is invalid for logical outcome '{outcomeName}'. Select TRUE or FALSE."), outcomeLevel = outcomeLevel, outcomeName = outcome_name)))
         if (identical(lvl, "FALSE"))
             return(ok(as.integer(!outcome), "FALSE", "TRUE",
                       "Kaplan-Meier survival for the coded event", 2L))
@@ -281,10 +269,7 @@
 
         if (is.null(outcomeLevel) || length(outcomeLevel) == 0 ||
             identical(as.character(outcomeLevel), ""))
-            return(fail(paste0(
-                "Event Level is not selected. Outcome variable '", outcome_name,
-                "' has levels: ", paste(observed_chr, collapse = ", "),
-                ". Select the level that represents the event (e.g. death, recurrence).")))
+            return(fail(.pasteT(.("Event Level is not selected. Outcome variable '{outcomeName}' has levels: {observedChr}. Select the level that represents the event (e.g. death, recurrence)."), outcomeName = outcome_name, observedChr = paste(observed_chr, collapse = ", "))))
 
         # A DECLARED level with zero observations is a legitimate cohort, not an
         # error. Everyone is censored: S(t) = 1 throughout, the median is not
@@ -302,10 +287,7 @@
         # ever removed, restore the rejection with it.
         declared <- if (is.factor(outcome)) levels(outcome) else observed_chr
         if (!as.character(outcomeLevel) %in% declared)
-            return(fail(paste0(
-                "Selected Event Level '", outcomeLevel, "' is not a level of '",
-                outcome_name, "'. Levels available: ",
-                paste(declared, collapse = ", "), ".")))
+            return(fail(.pasteT(.("Selected Event Level '{outcomeLevel}' is not a level of '{outcomeName}'. Levels available: {declared}."), outcomeLevel = outcomeLevel, outcomeName = outcome_name, declared = paste(declared, collapse = ", "))))
 
         status <- ifelse(as.character(outcome) == as.character(outcomeLevel), 1L, 0L)
         cens   <- setdiff(observed_chr, as.character(outcomeLevel))
@@ -331,10 +313,7 @@
 
             lvl <- suppressWarnings(as.numeric(as.character(outcomeLevel)))
             if (is.na(lvl) || !any(observed == lvl))
-                return(fail(paste0(
-                    "Selected Event Level '", outcomeLevel, "' does not occur in the data. ",
-                    "Values found in '", outcome_name, "': ",
-                    paste(sort(observed), collapse = ", "), ".")))
+                return(fail(.pasteT(.("Selected Event Level '{outcomeLevel}' does not occur in the data. Values found in '{outcomeName}': {v1}."), outcomeLevel = outcomeLevel, outcomeName = outcome_name, v1 = paste(sort(observed), collapse = ", "))))
 
             status <- ifelse(outcome == lvl, 1L, 0L)
             return(ok(status,
@@ -353,27 +332,16 @@
                       "Kaplan-Meier survival for the coded event",
                       length(observed)))
 
-        return(fail(paste0(
-            "Outcome variable '", outcome_name, "' is numeric but not coded 0/1. ",
-            "Values found: ", paste(sort(observed), collapse = ", "),
-            ". The analysis does not guess which value is the event, because a coding ",
-            "such as 1/2 means 2 = event in some datasets and 1 = event in others. ",
-            "Either recode it as 0 = censored / 1 = event, or choose the value that ",
-            "represents the event in Event Level (in jamovi, first set the column's ",
-            "measure type to Nominal in Data > Setup so its values are listed); every ",
-            "other value is then treated as censored.")))
+        return(fail(.pasteT(.("Outcome variable '{outcomeName}' is numeric but not coded 0/1. Values found: {v1}. The analysis does not guess which value is the event, because a coding such as 1/2 means 2 = event in some datasets and 1 = event in others. Either recode it as 0 = censored / 1 = event, or choose the value that represents the event in Event Level (in jamovi, first set the column's measure type to Nominal in Data > Setup so its values are listed); every other value is then treated as censored."), outcomeName = outcome_name, v1 = paste(sort(observed), collapse = ", "))))
     }
 
-    fail(paste0(
-        "Outcome variable '", outcome_name, "' has an unsupported type (",
-        class(outcome)[1], "). It must be a factor, character, logical, or ",
-        "numeric 0/1 variable."))
+    fail(.pasteT(.("Outcome variable '{outcomeName}' has an unsupported type ({outcome}). It must be a factor, character, logical, or numeric 0/1 variable."), outcomeName = outcome_name, outcome = class(outcome)[1]))
 }
 
 #' Describe an event recode for display to the user
 #'
-#' Turns the result of `.defineEventIndicator()` into the HTML disclosure block
-#' shown by every analysis that builds an event indicator. A silent recode is a
+#' Turns the result of `.defineEventIndicator()` into the HTML caveats shown by every
+#' analysis that builds an event indicator (the counts are in `eventRecodeTable`). A silent recode is a
 #' clinical-safety hazard: the reader of a survival curve cannot otherwise see
 #' which levels were collapsed into "censored".
 #'
@@ -385,29 +353,16 @@
 
     if (is.null(res) || !is.null(res$error)) return("")
 
+    # library-audit 2026-11-20 jsurvival [LOW] DONE: each sentence below goes whole through the
+    # caller's translator, values as {placeholders}; estimands stay English identifiers in the code
+    . <- .callerTranslator(parent.frame())
     esc <- function(x) as.character(htmltools::htmlEscape(as.character(x)))
     event_label <- esc(res$event_label)
     outcome_name <- esc(outcome_name)
     censored_labels <- esc(res$censored_labels)
-    competing_labels <- esc(res$competing_labels)
 
     cens <- if (length(res$censored_labels) > 0)
-        paste(sprintf('"%s"', censored_labels), collapse = ", ") else "(none)"
-    comp <- if (length(res$competing_labels) > 0)
-        paste(sprintf('"%s"', competing_labels), collapse = ", ") else "(not labelled)"
-
-    rows <- paste0(
-        "<tr><td>Event level</td><td>\"", event_label,
-            "\"</td><td align='right'>", res$n_event, "</td></tr>",
-        "<tr><td>Censored</td><td>", cens,
-            "</td><td align='right'>", res$n_censored, "</td></tr>",
-        if (isTRUE(res$has_competing))
-            paste0("<tr><td>Competing event</td><td>", comp,
-                   "</td><td align='right'>",
-                   res$n_competing, "</td></tr>") else "",
-        "<tr><td>Excluded (missing outcome)</td><td></td><td align='right'>",
-            res$n_missing, "</td></tr>",
-        "<tr><td>Estimand</td><td colspan='2'>", res$estimand, "</td></tr>")
+        paste(sprintf('"%s"', censored_labels), collapse = ", ") else .("(none)")
 
     warn <- ""
     # Every Kaplan-Meier or cumulative-incidence analysis relies on an
@@ -422,22 +377,19 @@
             "Kaplan-Meier survival for the coded event") &&
             res$n_competing == 0
         warn <- paste0(
-            "<p style='margin-top:8px'><b>Censoring assumption.</b> Level(s) ", cens,
-            " are being treated as <i>right-censored</i>. The estimates require censoring ",
-            "to be independent/non-informative for the endpoint, conditional on the analysis. ",
-            if (collapsed_terminal) paste0(
-                "If a collapsed level is a competing terminal event (for example death from ",
-                "another cause), Kaplan-Meier estimates net/cause-specific survival rather ",
-                "than real-world cumulative incidence: 1 - KM overstates the absolute risk ",
-                "(cumulative incidence) of the event, while KM overstates the probability of ",
-                "surviving free of both the target event and competing death. Use Multiple ",
-                "Event Levels with survival type Competing Risk to estimate cumulative incidence."
-            ) else "This assumption cannot be verified from the displayed summaries.",
+            "<p style='margin-top:8px'>",
+            .fmt(.("<b>Censoring assumption.</b> Level(s) {levels} are being treated as <i>right-censored</i>. The estimates require censoring to be independent/non-informative for the endpoint, conditional on the analysis."),
+                 levels = cens),
+            " ",
+            if (collapsed_terminal)
+                .("If a collapsed level is a competing terminal event (for example death from another cause), Kaplan-Meier estimates net/cause-specific survival rather than real-world cumulative incidence: 1 - KM overstates the absolute risk (cumulative incidence) of the event, while KM overstates the probability of surviving free of both the target event and competing death. Use Multiple Event Levels with survival type Competing Risk to estimate cumulative incidence.")
+            else
+                .("This assumption cannot be verified from the displayed summaries."),
             if (length(res$censored_labels) >= 2L &&
                 !res$estimand %in% c("overall survival", "cause-specific survival",
                                      "disease-free survival", "competing risks")) paste0(
-                " Median follow-up also counts these levels as alive at last contact, ",
-                "which understates it if any of them is a death."),
+                " ",
+                .("Median follow-up also counts these levels as alive at last contact, which understates it if any of them is a death.")),
             "</p>")
     }
 
@@ -451,22 +403,21 @@
     if (isTRUE(res$n_event == 0)) {
         zero <- paste0(
             "<p style='margin-top:8px;padding:8px;border-left:4px solid #c0392b;",
-            "background-color: rgba(234, 54, 33, 0.09); color: inherit'><b>No events: check the event level.</b> ",
-            "The event level (", event_label, ") occurs in <b>0</b> of the ",
-            res$n_event + res$n_censored + res$n_competing,
-            " rows with a non-missing '", outcome_name, "' value. ",
-            if (isTRUE(res$has_competing)) paste0(
-                res$n_competing, " competing event(s) did occur; these are a separate ",
-                "terminal state, not censoring, and the target-event cumulative incidence ",
-                "is estimated as 0 throughout") else
-                "This is a fully censored analysis cohort: every subject is treated as censored and the Kaplan-Meier point estimate is 100% throughout. This boundary estimate does not prove 100% population survival",
+            "background-color: rgba(234, 54, 33, 0.09); color: inherit'>",
+            .("<b>No events: check the event level.</b>"),
+            " ",
+            .fmt(.("The event level ({level}) occurs in <b>0</b> of the {n} rows with a non-missing '{name}' value."),
+                 level = event_label, name = outcome_name,
+                 n = base::format(res$n_event + res$n_censored + res$n_competing, scientific = FALSE)),
+            " ",
             if (isTRUE(res$has_competing))
-                ". The median time to the target event is not reached" else
-                ". The Kaplan-Meier median time-to-event is not reached",
-            ", and the numbers at risk and the ",
-            "follow-up duration are still reportable. <b>But if you expected events, ",
-            "the wrong event level is selected</b>: check the level named above against ",
-            "your data before using any of the results below.</p>")
+                .fmt(.("{n} competing event(s) did occur; these are a separate terminal state, not censoring, and the target-event cumulative incidence is estimated as 0 throughout. The median time to the target event is not reached, and the numbers at risk and the follow-up duration are still reportable."),
+                     n = base::format(res$n_competing, scientific = FALSE))
+            else
+                .("This is a fully censored analysis cohort: every subject is treated as censored and the Kaplan-Meier point estimate is 100% throughout. This boundary estimate does not prove 100% population survival. The Kaplan-Meier median time-to-event is not reached, and the numbers at risk and the follow-up duration are still reportable."),
+            " ",
+            .("<b>But if you expected events, the wrong event level is selected</b>: check the level named above against your data before using any of the results below."),
+            "</p>")
     }
 
     # Disease-free survival makes a timing assumption that nothing in the data
@@ -486,22 +437,79 @@
         !isTRUE(res$composite_endpoint)) {
         dfs <- paste0(
             "<p style='margin-top:8px;padding:8px;border-left:4px solid #d68910;",
-            "background-color: rgba(246, 163, 33, 0.11); color: inherit'><b>Disease-free survival requires a time to the ",
-            "DFS event.</b> \"Alive with Disease\" is counted as an event, and it is placed ",
-            "at whatever time the time variable gives for that subject. These results are ",
-            "correct only if that time is the time to recurrence or progression. If it is ",
-            "instead the time from diagnosis to the LAST FOLLOW-UP, every recurrence is ",
-            "dated later than it occurred and disease-free survival is over-estimated. ",
-            "For subjects with disease, supply the date of recurrence as the follow-up date ",
-            "(or an elapsed time measured to recurrence).</p>",
+            "background-color: rgba(246, 163, 33, 0.11); color: inherit'>",
+            .("<b>Disease-free survival requires a time to the DFS event.</b> \"Alive with Disease\" is counted as an event, and it is placed at whatever time the time variable gives for that subject. These results are correct only if that time is the time to recurrence or progression. If it is instead the time from diagnosis to the LAST FOLLOW-UP, every recurrence is dated later than it occurred and disease-free survival is over-estimated. For subjects with disease, supply the date of recurrence as the follow-up date (or an elapsed time measured to recurrence)."),
+            "</p>",
             if (isTRUE(res$n_awd == 0L)) paste0(
-                "<p style='margin-top:8px'><b>No Alive with Disease rows.</b> No recurrence ",
-                "is counted, so every event here is a death and these results equal overall ",
-                "survival, whatever the title says.</p>"))
+                "<p style='margin-top:8px'>",
+                .("<b>No Alive with Disease rows.</b> No recurrence is counted, so every event here is a death and these results equal overall survival, whatever the title says."),
+                "</p>"))
     }
 
-    paste0(
-        "<div><b>Outcome recode for '", outcome_name,
-        "' (before analysis-specific row exclusions)</b>",
-        "<table style='margin-top:4px'>", rows, "</table>", warn, zero, dfs, "</div>")
+    # library-audit 2026-11-20 jsurvival [HIGH] DONE: the recode counts are rows of the
+    # eventRecodeTable Table (.fillEventRecodeTable below); the caveat paragraphs stay in this
+    # panel and are decided with the same report's [LOW] notice finding
+    paste0("<div>", warn, zero, dfs, "</div>")
+}
+
+# `.()` for a file-level helper called from an analysis method: jmvcore's own `.()` looks for
+# `self` in the helper's frame and fails, so take the translator from the caller's `self`.
+.callerTranslator <- function(caller) {
+    function(text) {
+        translate <- tryCatch(get0("self", envir = caller)$options$translate,
+                              error = function(e) NULL)
+        if (is.function(translate)) return(translate(text))
+        # A helper called by another helper: use the translator that one took from its own caller.
+        outer <- get0(".", envir = caller, inherits = FALSE)
+        if (is.function(outer)) outer(text) else text
+    }
+}
+
+# Scaffold the outcome recode table (`eventRecodeTable`) in `.init()`. The row set follows from
+# the options (a competing-event row only for a competing-risk analysis), so the rows exist
+# before `.run()` and the table never restructures.
+.initEventRecodeTable <- function(table, options) {
+    . <- .callerTranslator(parent.frame())
+    competing <- isTRUE(tryCatch(options$multievent, error = function(e) FALSE)) &&
+        identical(tryCatch(options$analysistype, error = function(e) NULL), "compete")
+    labels <- c(event = .("Event level"), censored = .("Censored"),
+                if (competing) c(competing = .("Competing event")),
+                excluded = .("Excluded (missing outcome)"))
+    for (key in names(labels))
+        table$addRow(rowKey = key, values = list(category = labels[[key]], levels = "", n = ""))
+    invisible(table)
+}
+
+# Fill the outcome recode table from the result of `.defineEventIndicator()`.
+.fillEventRecodeTable <- function(table, res) {
+    if (is.null(res) || !is.null(res$error)) return(invisible(table))
+    . <- .callerTranslator(parent.frame())
+    # A cell is parsed as HTML by the client: a level named "<LOD" would render blank.
+    quoted <- function(x, none) if (length(x) == 0) none else
+        paste(sprintf('"%s"', gsub("<(?=[A-Za-z/!?])", "< ", x, perl = TRUE)), collapse = ", ")
+    competing <- isTRUE(res$has_competing) || "competing" %in% table$rowKeys
+    rows <- list(
+        event = list(category = .("Event level"),
+                     levels = quoted(res$event_label, ""), n = res$n_event),
+        censored = list(category = .("Censored"),
+                        levels = quoted(res$censored_labels, .("(none)")), n = res$n_censored),
+        competing = if (competing) list(
+            category = .("Competing event"),
+            levels = quoted(res$competing_labels, .("(not labelled)")), n = res$n_competing),
+        excluded = list(category = .("Excluded (missing outcome)"),
+                        levels = "", n = res$n_missing))
+    for (key in names(rows))
+        if (!is.null(rows[[key]])) .fillRow(table, key, rows[[key]])
+    estimand <- switch(as.character(res$estimand)[1],
+        "overall survival" = .("overall survival"),
+        "cause-specific survival" = .("cause-specific survival"),
+        "disease-free survival" = .("disease-free survival"),
+        "competing risks" = .("competing risks"),
+        "Kaplan-Meier survival for the selected event" = .("Kaplan-Meier survival for the selected event"),
+        "Kaplan-Meier survival for the coded event" = .("Kaplan-Meier survival for the coded event"),
+        res$estimand)
+    table$setNote("estimand", paste0(
+        .("Estimand:"), " ", estimand, ". ",
+        .("Counts are taken before analysis-specific row exclusions.")))
+    invisible(table)
 }

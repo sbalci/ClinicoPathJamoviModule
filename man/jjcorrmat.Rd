@@ -122,7 +122,45 @@ Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.f
 \code{as.data.frame(results$table)}
 }
 \description{
-Wrapper Function for ggstatsplot::ggcorrmat and
-ggstatsplot::grouped_ggcorrmat to generate correlation matrix
-visualizations with significance testing.
+Correlation matrix analysis and visualization supporting zero-order and
+partial Pearson, Spearman, 20 percent Winsorized Pearson, and Bayesian
+correlations, with optional subgroup stratification and multiplicity
+adjustment.
+}
+\examples{
+\donttest{
+# Load example data
+data("mtcars")
+
+# Basic Pearson correlation matrix with Holm multiplicity adjustment
+jjcorrmat(
+  data = mtcars,
+  dep = c("mpg", "hp", "wt", "qsec"),
+  typestatistics = "parametric"
+)
+
+# Partial Spearman correlation matrix with circle display
+jjcorrmat(
+  data = mtcars,
+  dep = c("mpg", "hp", "wt", "qsec", "disp"),
+  typestatistics = "nonparametric",
+  partial = TRUE,
+  matrixtype = "lower",
+  matrixmethod = "circle",
+  padjustmethod = "bonferroni",
+  k = 3,
+  title = "Motor Trend Partial Correlations"
+)
+
+# Grouped 20 percent Winsorized robust correlation matrix
+mtcars_g <- mtcars
+mtcars_g$cyl <- factor(mtcars_g$cyl)
+jjcorrmat(
+  data = mtcars_g,
+  dep = c("mpg", "hp", "wt", "qsec"),
+  grvar = "cyl",
+  typestatistics = "robust",
+  siglevel = 0.01
+)
+}
 }

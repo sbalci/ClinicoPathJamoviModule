@@ -72,7 +72,7 @@ children:
                 format: number
           - type: CheckBox
             name: show_labels
-            label: Group labels inside hulls
+            label: Group labels on hulls
 
   - type: CollapseBox
     label: Points & Color Scheme

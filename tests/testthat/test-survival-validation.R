@@ -34,6 +34,13 @@
   suppressWarnings(suppressMessages(do.call(fn, args)))
 }
 
+# library-audit 2026-11-20 jsurvival [LOW] DONE: the cleaned frame is read from .cleandata(); a plot
+#   state holds only the three drawn columns, and only while its plot is switched on
+.sv_validation_clean <- function(results) {
+  analysis <- results$.__enclos_env__$private$.parent
+  suppressWarnings(suppressMessages(analysis$.__enclos_env__$private$.cleandata()$cleanData))
+}
+
 test_that("survival KM uses tied event risk sets and excludes missing rows", {
   d <- data.frame(time = c(2, 2, 4, 4, 7, 9, 2, 3, 5, 6, 8, 10, NA),
     status = c(1,0,1,1,0,1,1,0,1,1,0,1,1),
@@ -125,8 +132,8 @@ test_that("survival preserves literal NA labels, order and caller data", {
   expect_equal(sum(actual$medianTable$asDF$records),117)
   expect_setequal(as.character(actual$medianTable$asDF$factor),c("B","A","NA"))
   # Ordered becomes plain, or contr.poly gives unlabelled .L/.Q model rows; the order stays.
-  expect_false(is.ordered(actual$plot$state$cleanData$grp))
-  expect_equal(levels(actual$plot$state$cleanData$grp), c("B", "NA", "A"))
+  expect_false(is.ordered(.sv_validation_clean(actual)$grp))
+  expect_equal(levels(.sv_validation_clean(actual)$grp), c("B", "NA", "A"))
   expect_identical(d,original)
 })
 
@@ -149,8 +156,8 @@ test_that("survival keeps a selected row_names column separate from its position
   expected <- .sv_validation_run(d)
   actual <- .sv_validation_run(d,explanatory="row_names")
   expect_equal(actual$medianTable$asDF$median,expected$medianTable$asDF$median)
-  expect_identical(actual$plot$state$cleanData$source_row_index,seq_len(nrow(d)))
-  expect_identical(actual$plot$state$cleanData$row_names,rownames(d))
+  expect_identical(.sv_validation_clean(actual)$source_row_index,seq_len(nrow(d)))
+  expect_identical(.sv_validation_clean(actual)$row_names,rownames(d))
 })
 
 test_that("survival aligns age and spline covariates after exclusions with text row labels", {
@@ -163,7 +170,7 @@ test_that("survival aligns age and spline covariates after exclusions with text 
     rcs_analysis=TRUE,rcs_variable="age")
   expect_equal(actual$ageTimeScaleTable$asDF$hr,unname(exp(coef(expected_age))),tolerance=1e-6)
   expect_equal(actual$rcsTestTable$asDF$loglik[2],tail(expected_spline$loglik,1),tolerance=1e-8)
-  expect_identical(actual$plot$state$cleanData$row_names,rownames(d)[!is.na(d$time)])
+  expect_identical(.sv_validation_clean(actual)$row_names,rownames(d)[!is.na(d$time)])
 })
 
 test_that("survival Cox sentences identify aliased references and ordered contrasts", {

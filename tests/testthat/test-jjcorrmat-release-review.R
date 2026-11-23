@@ -152,8 +152,18 @@ test_that("confidence intervals are present for every method", {
         expect_false(any(is.na(got$conf_low)), info = ty)
         expect_false(any(is.na(got$conf_high)), info = ty)
         expect_true(all(got$conf_low <= got$r & got$r <= got$conf_high), info = ty)
-        expect_equal(got$conf_low, cm_ggcorrmat_ref(d, type = ty)$CI_low,
-                     tolerance = 1e-12)
+        if (ty == "robust") {
+            # VAL-JJCORRMAT-08: Winsorized Pearson CI uses Wilcox's effective
+            # df = h - 2 (t_{h-2} / sqrt(n - 3)) rather than correlation's
+            # unadjusted qnorm / sqrt(n - 3), which under-covered in simulation.
+            n_obs <- nrow(d)
+            df_w  <- n_obs - 2L * floor(0.2 * n_obs) - 2L
+            exp_lo <- tanh(atanh(got$r) - stats::qt(0.975, df = df_w) / sqrt(n_obs - 3))
+            expect_equal(got$conf_low, exp_lo, tolerance = 1e-12)
+        } else {
+            expect_equal(got$conf_low, cm_ggcorrmat_ref(d, type = ty)$CI_low,
+                         tolerance = 1e-12)
+        }
     }
     # and the interval honours the user's confidence level
     wide   <- cm_engine(cm_run(d, conflevel = 0.99))

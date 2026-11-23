@@ -7,6 +7,39 @@ jrs:   '1.1'
 items:
 
 
+    # library-audit 2026-11-20 jsurvival [HIGH] DONE: recode counts are a Table (rows from .init());
+    # eventRecodeInfo below keeps the censoring, zero-event and DFS-timing caveats only
+    - name: eventRecodeTable
+      title: 'Outcome Recode'
+      type: Table
+      rows: 0
+      visible: (length(outcome) > 0)
+      clearWith:
+          - outcome
+          - outcomeLevel
+          - elapsedtime
+          - explanatory
+          - contexpl
+          - fudate
+          - dxdate
+          - tint
+          - multievent
+          - analysistype
+          - dod
+          - dooc
+          - awd
+          - awod
+      columns:
+          - name: category
+            title: ''
+            type: text
+          - name: levels
+            title: 'Levels'
+            type: text
+          - name: n
+            title: 'N'
+            type: integer
+
     - name:  eventRecodeInfo
       title: 'Outcome Recode'
       type:  Html
@@ -1380,6 +1413,90 @@ items:
           - awd
           - awod
 
+    # library-audit 2026-11-20 jsurvival [HIGH] DONE: nomogram points and the points-to-risk
+    # conversion are Tables; nomogram_display above keeps the instructions only
+    - name: nomogramPoints
+      title: 'Input Variables'
+      type: Table
+      rows: 0
+      visible: (showNomogram)
+      clearWith:
+          - showNomogram
+          - cutp
+          - outcome
+          - outcomeLevel
+          - elapsedtime
+          - explanatory
+          - contexpl
+          - multievent
+          - analysistype
+          - interactions
+          - use_stratify
+          - stratvar
+          - tint
+          - dxdate
+          - fudate
+          - timetypedata
+          - timetypeoutput
+          - uselandmark
+          - landmark
+          - dod
+          - dooc
+          - awd
+          - awod
+      columns:
+          - name: variable
+            title: 'Variable'
+            type: text
+            combineBelow: true
+          - name: value
+            title: 'Value'
+            type: text
+          - name: points
+            title: 'Points'
+            type: number
+
+    - name: nomogramRisk
+      title: 'Risk Prediction'
+      type: Table
+      rows: 0
+      visible: (showNomogram)
+      clearWith:
+          - showNomogram
+          - cutp
+          - outcome
+          - outcomeLevel
+          - elapsedtime
+          - explanatory
+          - contexpl
+          - multievent
+          - analysistype
+          - interactions
+          - use_stratify
+          - stratvar
+          - tint
+          - dxdate
+          - fudate
+          - timetypedata
+          - timetypeoutput
+          - uselandmark
+          - landmark
+          - dod
+          - dooc
+          - awd
+          - awod
+      columns:
+          - name: axis
+            title: 'Risk Axis'
+            type: text
+            combineBelow: true
+          - name: points
+            title: 'Total Points'
+            type: number
+          - name: risk
+            title: 'Predicted Risk'
+            type: number
+
     # Nomogram Summary (right after nomogram analysis)
 
     - name: nomogramSummary
@@ -1762,6 +1879,57 @@ items:
           - uselandmark
           - landmark
           - timetypeoutput
+
+    # library-audit 2026-11-20 jsurvival [HIGH] DONE: the adjusted model's cox.zph test is a Table;
+    # the Preformatted below is kept for the failure message only
+    - name: adjustedCoxPHTable
+      title: Proportional Hazards Test (Adjusted Cox)
+      type: Table
+      rows: 0
+      visible: (ac && ac_summary && ph_cox)
+      refs: survival
+      clearWith:
+          - ac
+          - ac_summary
+          - adjexplanatory
+          - ph_cox
+          - ac_method
+          - outcome
+          - outcomeLevel
+          - elapsedtime
+          - explanatory
+          - contexpl
+          - fudate
+          - dxdate
+          - tint
+          - multievent
+          - analysistype
+          - dod
+          - dooc
+          - awd
+          - awod
+          - use_stratify
+          - stratvar
+          - interactions
+          - uselandmark
+          - landmark
+          - timetypedata
+          - timetypeoutput
+      columns:
+          - name: term
+            title: 'Term'
+            type: text
+          - name: chisq
+            title: 'Chi-square'
+            type: number
+            format: zto
+          - name: df
+            title: 'df'
+            type: integer
+          - name: p
+            title: 'p'
+            type: number
+            format: zto,pvalue
 
     - name: adjustedCoxPH
       title: Proportional Hazards Test (Adjusted Cox)

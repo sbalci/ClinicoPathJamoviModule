@@ -31,7 +31,8 @@ test_that("single-event DFS panel does not claim an Alive-with-Disease event", {
                   recurrence = "rec", recurrenceLevel = "Yes", analysistype = "dfs")
     txt <- a$results$eventRecodeInfo$content
     expect_true(nzchar(txt))
-    expect_match(txt, "disease-free survival", fixed = TRUE)
+    # The estimand is the note of the recode Table; the panel keeps the caveats.
+    expect_match(a$results$eventRecodeTable$notes$estimand$note, "disease-free survival", fixed = TRUE)
     expect_false(grepl("Alive with Disease", txt, ignore.case = TRUE))
     # The time-to-first-event advice is still given, in the warnings panel.
     expect_match(a$results$warnings$content, "FIRST event", fixed = TRUE)

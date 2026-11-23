@@ -446,7 +446,7 @@ raincloudBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             super$initialize(
                 package = "ClinicoPath",
                 name = "raincloud",
-                version = c(1,0,81),
+                version = c(1,0,82),
                 options = options,
                 results = raincloudResults$new(options=options),
                 data = data,
@@ -461,17 +461,13 @@ raincloudBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 
 #' Raincloud Plot
 #'
-#' Creates Raincloud plots to visualize data distributions using ggdist 
-#' package.
-#' Raincloud plots combine three visualization techniques: half-violin plots 
-#' showing 
-#' distribution density, box plots showing summary statistics, and dot plots 
-#' showing 
-#' individual data points. This provides a comprehensive view of data 
-#' distribution 
-#' that reveals patterns traditional box plots might miss, including 
-#' multimodality
-#' and distribution shape. Based on the ggdist R-Bloggers tutorial.
+#' Creates Raincloud plots to visualize data distributions using the ggdist 
+#' package. Raincloud plots combine three visualization techniques: 
+#' half-violin plots showing distribution density, box plots showing summary 
+#' statistics, and dot plots showing individual data points. This provides a 
+#' comprehensive view of data distribution that reveals patterns traditional 
+#' box plots might miss, including multimodality and distribution shape. Based 
+#' on Allen et al. (2021) and the ggdist package.
 #' 
 #' @param data The data as a data frame.
 #' @param dep_var Continuous variable whose distribution will be visualized in

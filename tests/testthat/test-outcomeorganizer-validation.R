@@ -845,16 +845,17 @@ test_that("G1: Cross-output conservation holds across outputTable, outcomeViz, n
   tbl   <- res$out_df
   state <- res$results$outcomeViz$state$table
   nat   <- .val_html(res$results$naturalSummary)
-  rec   <- .val_html(res$results$eventRecodeInfo)
+  rec   <- res$results$eventRecodeTable$asDF
 
   expect_identical(as.character(tbl$outcome), names(state))
   expect_identical(tbl$count, as.integer(state))
   expect_identical(sum(tbl$count), sum(!is.na(res$myoutcome)))
   expect_lte(abs(sum(tbl$percentage) - 100), 0.2)
   expect_match(nat, sprintf("out of %d coded records", sum(tbl$count)), fixed = TRUE)
-  expect_match(rec, sprintf("<td align='right'>%d</td>", tbl$count[tbl$outcome == "1"]), fixed = TRUE)
-  expect_match(rec, sprintf("<td align='right'>%d</td>", tbl$count[tbl$outcome == "2"]), fixed = TRUE)
-  expect_match(rec, sprintf("<td align='right'>%d</td>", tbl$count[tbl$outcome == "0"]), fixed = TRUE)
+  # library-audit 2026-11-20 jsurvival [HIGH] DONE: the recode counts are rows of eventRecodeTable
+  expect_equal(rec$n[rec$category == "Event level"], tbl$count[tbl$outcome == "1"])
+  expect_equal(rec$n[rec$category == "Competing event"], tbl$count[tbl$outcome == "2"])
+  expect_equal(rec$n[rec$category == "Censored"], tbl$count[tbl$outcome == "0"])
 })
 
 test_that("H1: Malicious HTML/XSS payloads in variable names and factor levels are escaped across all Html outputs", {
@@ -944,9 +945,9 @@ test_that("VAL-outcomeorganizer-02: eventRecodeInfo updates after administrative
   res <- .val_run(data = d_a5, outcome = "vital", outcomeLevel = "Dead",
                   analysistype = "os", adminCensoring = TRUE,
                   followupTime = "fu_num", adminDate = "cut_num", outputTable = TRUE)
-  rec_html <- .val_html(res$results$eventRecodeInfo)
-  expect_match(rec_html, "Event level</td><td>\"Dead\"</td><td align='right'>3</td>", fixed = TRUE)
-  expect_match(rec_html, "Censored</td><td>\"Alive\"</td><td align='right'>7</td>", fixed = TRUE)
+  rec <- res$results$eventRecodeTable$asDF
+  expect_identical(rec$levels[1:2], c('"Dead"', '"Alive"'))
+  expect_equal(rec$n[1:2], c(3L, 7L))
 })
 
 test_that("VAL-outcomeorganizer-03: Input column named 'myoutcome' is not overwritten before recurrence/secondary variable read", {

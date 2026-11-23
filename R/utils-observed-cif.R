@@ -62,23 +62,14 @@
 .populateObservedCif <- function(table, time, status, cutpoints, group = NULL,
                                  conf.type = "log-log",
                                  extend_exhausted = FALSE) {
+  . <- .callerTranslator(parent.frame())   # jmvcore's .() needs `self`; a file-level helper has none
   result <- .observedCifReport(time, status, cutpoints, group,
                                conf.type = conf.type,
                                extend_exhausted = extend_exhausted)
   for (i in seq_len(nrow(result$table))) {
     table$addRow(rowKey = i, values = as.list(result$table[i, ]))
   }
-  table$setNote("estimand", paste(
-    "Aalen\u2013Johansen estimates within each group's observed follow-up.",
-    "Event-free probability and both cumulative incidences sum to one.",
-    "Competing events are pooled according to the selected outcome mapping.",
-    "Risk counts are just before the stated time; event and censoring counts are cumulative",
-    "through that time. Event-free rows count all terminal events.",
-    "Boundary confidence intervals are unavailable. A late plateau does not establish cure."
-  ))
-  table$setNote("support", if (length(result$omitted)) paste0(
-    "Time points beyond observed follow-up were omitted for: ",
-    paste(result$omitted, collapse = ", "), "."
-  ) else NULL)
+  table$setNote("estimand", .("Aalen\u2013Johansen estimates within each group's observed follow-up. Event-free probability and both cumulative incidences sum to one. Competing events are pooled according to the selected outcome mapping. Risk counts are just before the stated time; event and censoring counts are cumulative through that time. Event-free rows count all terminal events. Boundary confidence intervals are unavailable. A late plateau does not establish cure."))
+  table$setNote("support", if (length(result$omitted)) .pasteT(.("Time points beyond observed follow-up were omitted for: {omitted}."), omitted = paste(result$omitted, collapse = ", ")) else NULL)
   invisible(result)
 }

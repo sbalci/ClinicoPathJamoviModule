@@ -478,12 +478,14 @@ test_that("percentages use one denominator and the copy-ready text is true", {
     an <- dtc_obj(d, "v", datetime_format = "ymd", show_summary = TRUE,
                   show_quality_metrics = TRUE)
     s  <- strip_html(an$results$nlSummary$content)
-    qa <- strip_html(an$results$qualityAssessment$content)
+    counts <- an$results$qualityCounts$asDF
 
     expect_match(s, "50/50 non-missing")            # was "50/100 (100%)"
     expect_match(s, "from 50 datetime values")      # was "from 100"
     expect_match(s, "50 of the 100 rows were missing")
-    expect_match(qa, "Successful Parses 50 50%")    # column now sums to 100%
+    # The counts and percentages are the qualityCounts Table (count, % of all observations).
+    expect_equal(counts[[2]], c(100, 50, 50, 0))
+    expect_equal(counts[[3]], c(100, 50, 50, 0))    # one denominator: missing + parsed + failed = 100%
 })
 
 test_that("the parse rate is not presented as a quality grade when dates are in doubt", {

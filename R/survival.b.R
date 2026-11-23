@@ -393,7 +393,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
             # Keep source positions separate from the row IDs used by Output columns.
             .originalRowIndex = function(mydata) {
                 if (is.null(mydata[["source_row_index"]]))
-                    stop("Original row positions are unavailable.")
+                    stop(.("Original row positions are unavailable."))
                 as.integer(mydata[["source_row_index"]])
             }
             ,
@@ -438,6 +438,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
             },
 
             .init = function() {
+                .initEventRecodeTable(self$results$eventRecodeTable, self$options)
                 self$results$cifTable$setVisible(FALSE)
                 # Result visibility is declared in survival.r.yaml. The only
                 # imperative visibility here is the dynamic onboarding panel.
@@ -551,25 +552,24 @@ survivalClass <- if (requireNamespace('jmvcore'))
             ,
             .todo = function() {
 
-                 todo <- glue::glue(
-                        "
-                <br>Welcome to ClinicoPath
-                <br><br>
-                This tool will help you calculate median survivals and 1,3,5-yr survivals for a given risk factor.
-                <br><br>
-                Explanatory variable should be categorical (ordinal or nominal).
-                <br><br>
-                Select outcome level from Outcome variable.
-                <br><br>
-                Outcome Level: if patient is dead or event (recurrence) occurred. You may also use advanced outcome options depending on your analysis type.
-                <br><br>
-                Survival time should be numeric and continuous. You may also use dates to calculate survival time in advanced elapsed time options.
-                <br><br>
-                This function uses survival, survminer, and finalfit packages. Please cite jamovi and the packages as given below.
-                <br><hr>
-                <br>
-                See details for survival <a href = 'https://cran.r-project.org/web/packages/survival/vignettes/survival.pdf'>here</a>."
-                    )
+                 todo <- paste0(
+                     paste0(
+                         "<br>",
+                         .("Welcome to ClinicoPath"),
+                         "<br><br>"),
+                     .("This tool will help you calculate median survivals and 1,3,5-yr survivals for a given risk factor."),
+                     " <br><br> ",
+                     .("Explanatory variable should be categorical (ordinal or nominal)."),
+                     " <br><br> ",
+                     .("Select outcome level from Outcome variable."),
+                     " <br><br> ",
+                     .("Outcome Level: if patient is dead or event (recurrence) occurred. You may also use advanced outcome options depending on your analysis type."),
+                     " <br><br> ",
+                     .("Survival time should be numeric and continuous. You may also use dates to calculate survival time in advanced elapsed time options."),
+                     " <br><br> ",
+                     .("This function uses survival, survminer, and finalfit packages. Please cite jamovi and the packages as given below."),
+                     " <br><hr> <br> ",
+                     .("See details for survival <a href = 'https://cran.r-project.org/web/packages/survival/vignettes/survival.pdf'>here</a>."))
 
                     html <- self$results$todo
                     html$setContent(todo)
@@ -1058,7 +1058,13 @@ survivalClass <- if (requireNamespace('jmvcore'))
                     "name1time" = name1time,
                     "name2outcome" = name2outcome,
                     "name3explanatory" = name3explanatory,
-                    "cleanData" = cleanData,
+                    "cleanData" = cleanData[, intersect(c(name1time, name2outcome, name3explanatory),
+                                                       names(cleanData)), drop = FALSE],
+                    # library-audit 2026-11-20 jsurvival [LOW] DONE: the legend title travels in
+                    #   state; a renderer never loads the dataset to recover a label (guide section 17)
+                    "title2" = .survivalDisplayName(
+                        jmvcore::constructFormula(terms = name3explanatory),
+                        labelled_data$original_names_mapping),
                     # The competing-risk flag has to TRAVEL WITH THE STATE.
                     # jmvcore's Analysis$.load() restores results from disk and
                     # can render a plot without ever calling .run(), so
@@ -1067,20 +1073,15 @@ survivalClass <- if (requireNamespace('jmvcore'))
                     "has_competing" = private$.isCompetingRisk()
                 )
 
-                image <- self$results$plot
-                image$setState(plotData)
-
-                image2 <- self$results$plot2
-                image2$setState(plotData)
-
-                image3 <- self$results$plot3
-                image3$setState(plotData)
-
-                image6 <- self$results$plot6
-                image6$setState(plotData)
-                
-                image7 <- self$results$plot7
-                image7$setState(plotData)
+                # Rows go only to the curves that are switched on; a hidden image's state is
+                # saved into the .omv all the same.
+                shown <- c(plot = self$options$sc, plot2 = self$options$ce, plot3 = self$options$ch,
+                           plot6 = self$options$kmunicate, plot7 = self$options$loglog)
+                for (name in names(shown)) {
+                    # state-payload: a Kaplan-Meier curve is drawn from rows; three columns
+                    #   (time, status, group), about 4 KB per 1000 patients compressed
+                    self$results[[name]]$setState(if (isTRUE(shown[[name]])) plotData else NULL)
+                }
 
                 # Return Data ----
 
@@ -1155,8 +1156,11 @@ survivalClass <- if (requireNamespace('jmvcore'))
                 # see which levels were collapsed into "censored", nor which estimand
                 # the probability-scale outputs actually correspond to.
                 if (!is.null(private$.eventRecode))
+                {
                     self$results$eventRecodeInfo$setContent(
                         .describeEventIndicator(private$.eventRecode, self$options$outcome))
+                    .fillEventRecodeTable(self$results$eventRecodeTable, private$.eventRecode)
+                }
 
                 private$.checkpoint()  # Add checkpoint here
 
@@ -1262,7 +1266,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
                         if (is.null(self$options$rmst_tau) || self$options$rmst_tau <= 0) {
                             actual_tau <- rmst_results$table$Tau[1]
                             self$results$rmstTable$setNote("tau_default",
-                                sprintf("Time horizon (tau) was automatically set to %.1f: the smaller of the overall 75th percentile of follow-up and the maximum follow-up supported in every group. Specify a supported custom tau for a clinically meaningful horizon.", actual_tau))
+                                sprintf(.("Time horizon (tau) was automatically set to %.1f: the smaller of the overall 75th percentile of follow-up and the maximum follow-up supported in every group. Specify a supported custom tau for a clinically meaningful horizon."), actual_tau))
                         }
                     }
                 }
@@ -1286,7 +1290,6 @@ survivalClass <- if (requireNamespace('jmvcore'))
                 # the previous model's summaries beside a note that none was fitted.
                 self$results$coxSummary$setContent("")
                 self$results$tCoxtext2$setContent("<div></div>")
-                self$results$cox_ph$setContent("")
                 self$results$phInterpretation$setContent("<div></div>")
                 if (private$.isCompetingRisk()) {
                     # Every producer below is skipped, so its setState() never
@@ -1587,7 +1590,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
                     if (!is.finite(max_supported_tau) || max_supported_tau <= 0) {
                         self$results$rmstTable$setNote(
                             "support",
-                            "RMST could not be calculated because no positive follow-up horizon is supported in every group.")
+                            .("RMST could not be calculated because no positive follow-up horizon is supported in every group."))
                         return(NULL)
                     }
 
@@ -1601,7 +1604,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
                         self$results$rmstTable$setNote(
                             "support",
                             sprintf(
-                                "RMST time horizon must be greater than 0 and no larger than %.2f, the maximum follow-up supported in every group.",
+                                .("RMST time horizon must be greater than 0 and no larger than %.2f, the maximum follow-up supported in every group."),
                                 max_supported_tau
                             ))
                         return(NULL)
@@ -1660,15 +1663,10 @@ survivalClass <- if (requireNamespace('jmvcore'))
                     return(list(
                         table = rmst_table,
                         tau = tau,
-                        interpretation = paste0(
-                            "Restricted Mean Survival Time (RMST) represents the average survival time ",
-                            "up to ", round(tau, 1), " ", self$options$timetypeoutput, ". ",
-                            "This metric is useful when median survival cannot be estimated (curves don't reach 50%) ",
-                            "or when comparing survival over a specific time horizon."
-                        )
+                        interpretation = .pasteT(.("Restricted Mean Survival Time (RMST) represents the average survival time up to {tau} {timetypeoutput}. This metric is useful when median survival cannot be estimated (curves don't reach 50%) or when comparing survival over a specific time horizon."), tau = round(tau, 1), timetypeoutput = self$options$timetypeoutput)
                     ))
                 }, error = function(e) {
-                    err_msg <- paste("Error calculating RMST:", htmltools::htmlEscape(e$message))
+                    err_msg <- .pasteT(.("Error calculating RMST: {message}"), message = htmltools::htmlEscape(e$message))
                     self$results$rmstTable$setNote("unavailable", err_msg)
                     private$.addHtmlMessage("warning", .("RMST calculation unavailable"), err_msg)
                     return(list(
@@ -1918,32 +1916,27 @@ survivalClass <- if (requireNamespace('jmvcore'))
 
                         if (private$.isCompetingRisk()) {
                             return(if (is.finite(median_num[i]))
-                                sprintf("When %s, the cumulative incidence of the event of interest reached 50%% at %.1f %s.",
+                                sprintf(.("When %s, the cumulative incidence of the event of interest reached 50%% at %.1f %s."),
                                         factor_label, median_num[i], self$options$timetypeoutput)
-                            else paste0("When ", factor_label,
-                                        ", the cumulative incidence of the event of interest did not reach 50% during observed follow-up."))
+                            else .pasteT(.("When {factorLabel}, the cumulative incidence of the event of interest did not reach 50% during observed follow-up."), factorLabel = factor_label))
                         }
 
                         if (!is.finite(median_num[i])) {
-                            return(paste0(
-                                "When ", factor_label,
-                                ", median survival is undefined because the survival curve ",
-                                "does not fall to 0.5 during observed follow-up."
-                            ))
+                            return(.pasteT(.("When {factorLabel}, median survival is undefined because the survival curve does not fall to 0.5 during observed follow-up."), factorLabel = factor_label))
                         }
 
-                        ci_text <- if (is.finite(lower_num[i]) && is.finite(upper_num[i])) {
-                            sprintf(" [%.1f - %.1f, 95%% CI]", lower_num[i], upper_num[i])
+                        # One sentence per case; the opening bracket is a value because jmvcore's
+                        # translator cuts an untranslated string at " [".
+                        if (is.finite(lower_num[i]) && is.finite(upper_num[i])) {
+                            .pasteT(.("When {factorLabel}, median survival is {median} {lb}{lower} - {upper}, 95% CI] {unit}."),
+                                    factorLabel = factor_label, median = sprintf("%.1f", median_num[i]), lb = "[",
+                                    lower = sprintf("%.1f", lower_num[i]), upper = sprintf("%.1f", upper_num[i]),
+                                    unit = self$options$timetypeoutput)
                         } else {
-                            " [95% CI not estimable]"
+                            .pasteT(.("When {factorLabel}, median survival is {median} {lb}95% CI not estimable] {unit}."),
+                                    factorLabel = factor_label, median = sprintf("%.1f", median_num[i]), lb = "[",
+                                    unit = self$options$timetypeoutput)
                         }
-                        sprintf(
-                            "When %s, median survival is %.1f%s %s.",
-                            factor_label,
-                            median_num[i],
-                            ci_text,
-                            self$options$timetypeoutput
-                        )
                     },
                     character(1)
                 )
@@ -1953,14 +1946,14 @@ survivalClass <- if (requireNamespace('jmvcore'))
                 if (private$.isCompetingRisk()) {
                     medianSummary <- c(
                         km_fit_median_definition,
-                        "In competing-risks mode, the median time is the earliest time at which the cause-specific Aalen-Johansen cumulative incidence reaches 50%.",
-                        "Confidence intervals for competing-risk median times are not available in this table; see the Cumulative Incidence Table for point-wise 95% confidence intervals and Gray's test for group comparison."
+                        .("In competing-risks mode, the median time is the earliest time at which the cause-specific Aalen-Johansen cumulative incidence reaches 50%."),
+                        .("Confidence intervals for competing-risk median times are not available in this table; see the Cumulative Incidence Table for point-wise 95% confidence intervals and Gray's test for group comparison.")
                     )
                 } else {
                     medianSummary <- c(km_fit_median_definition,
-                                       "The median survival time is when 50% of subjects have experienced the event.",
-                                       "This means that 50% of subjects in this group survived longer than this time period.",
-                                       "Note: Confidence intervals are calculated on the complementary log-log scale (conf.type = 'log-log') using Greenwood's variance estimate, which keeps them inside 0 to 1."
+                                       .("The median survival time is when 50% of subjects have experienced the event."),
+                                       .("This means that 50% of subjects in this group survived longer than this time period."),
+                                       .("Note: Confidence intervals are calculated on the complementary log-log scale (conf.type = 'log-log') using Greenwood's variance estimate, which keeps them inside 0 to 1.")
                                        )
                 }
 
@@ -1968,29 +1961,30 @@ survivalClass <- if (requireNamespace('jmvcore'))
 
                 # Add explanatory output for median survival
                 if (self$options$showExplanations) {
-                    median_explanation_html <- '
-                    <div style="margin-bottom: 20px; padding: 15px; background-color: rgba(33, 152, 255, 0.07); border-left: 4px solid #4169e1; color: inherit;">
-                        <h4 style="margin-top: 0; color: inherit;">Understanding Median Survival by Groups</h4>
-                        <p style="margin-bottom: 10px;">This analysis compares median survival times between different groups in your data:</p>
-                        <ul style="margin-left: 20px;">
-                            <li><strong>Median Survival:</strong> Time when 50% of patients in each group experienced the event</li>
-                            <li><strong>Group Comparison:</strong> Allows identification of prognostic factors</li>
-                            <li><strong>95% CI:</strong> Confidence intervals for each group\'s median survival</li>
-                            <li><strong>Log-rank Test:</strong> Statistical test comparing survival curves between groups</li>
-                        </ul>
-                        <p style="margin-bottom: 5px;"><strong>Clinical interpretation:</strong></p>
-                        <ul style="margin-left: 20px;">
-                            <li>Groups with longer median survival have better prognosis in this sample</li>
-                            <li>Do not judge significance by eye from the two confidence intervals: non-overlapping
-                                intervals are conservative evidence of a difference, but overlapping intervals
-                                do <strong>not</strong> mean the groups are similar. Use the log-rank test.</li>
-                            <li>The median is undefined whenever the curve does not fall to 50% during follow-up</li>
-                            <li>These are observational comparisons; consider clinical significance alongside
-                                statistical significance, and confounding before attributing the difference
-                                to the grouping variable</li>
-                        </ul>
-                    </div>
-                    '
+                    median_explanation_html <- paste0(
+                        '<div style="margin-bottom: 20px; padding: 15px; background-color: rgba(33, 152, 255, 0.07); border-left: 4px solid #4169e1; color: inherit;"><h4 style="margin-top: 0; color: inherit;">',
+                        .("Understanding Median Survival by Groups"),
+                        '</h4><p style="margin-bottom: 10px;">',
+                        .("This analysis compares median survival times between different groups in your data:"),
+                        '</p><ul style="margin-left: 20px;"><li>',
+                        .("<strong>Median Survival:</strong> Time when 50% of patients in each group experienced the event"),
+                        "</li><li>",
+                        .("<strong>Group Comparison:</strong> Allows identification of prognostic factors"),
+                        "</li><li>",
+                        .("<strong>95% CI:</strong> Confidence intervals for each group's median survival"),
+                        "</li><li>",
+                        .("<strong>Log-rank Test:</strong> Statistical test comparing survival curves between groups"),
+                        '</li></ul><p style="margin-bottom: 5px;"><strong>',
+                        .("Clinical interpretation:"),
+                        '</strong></p><ul style="margin-left: 20px;"><li>',
+                        .("Groups with longer median survival have better prognosis in this sample"),
+                        "</li><li>",
+                        .("Do not judge significance by eye from the two confidence intervals: non-overlapping intervals are conservative evidence of a difference, but overlapping intervals do <strong>not</strong> mean the groups are similar. Use the log-rank test."),
+                        "</li><li>",
+                        .("The median is undefined whenever the curve does not fall to 50% during follow-up"),
+                        "</li><li>",
+                        .("These are observational comparisons; consider clinical significance alongside statistical significance, and confounding before attributing the difference to the grouping variable"),
+                        "</li></ul></div>")
                     self$results$medianSurvivalExplanation$setContent(median_explanation_html)
                 }
 
@@ -2190,7 +2184,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
                                     round(s_multi$concordance[2], 3))
                         } else ""
                         rsq_str <- if (!is.null(s_multi$rsq)) {
-                            sprintf("R-square = %s ( Max possible = %s )",
+                            sprintf(.("R-square = %s ( Max possible = %s )"),
                                     round(s_multi$rsq[1], 3),
                                     round(s_multi$rsq[2], 3))
                         } else ""
@@ -2212,9 +2206,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
                         tCox[[2]][[1]] <- paste("Stratified by", htmltools::htmlEscape(strata_var), "-", strat_metrics)
                     } else if (!isTRUE(strat_applied)) {
                         # Never claim stratification that was not applied.
-                        tCox[[2]][[1]] <- paste(
-                            "NOT stratified (the stratified estimates could not be matched to the table) -",
-                            tCox[[2]][[1]])
+                        tCox[[2]][[1]] <- .pasteT(.("NOT stratified (the stratified estimates could not be matched to the table) - {v1}"), v1 = tCox[[2]][[1]])
                     }
                 }
 
@@ -2341,10 +2333,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
                     dplyr::group_by(Explanatory) %>%
                     dplyr::mutate(firstlevel = dplyr::first(Levels)) %>%
                     dplyr::mutate(
-                        coxdescription = glue::glue(
-                            "For {Explanatory}, the {Levels} group had an estimated hazard ratio of {HR_univariable} relative to the reference group ({firstlevel}). A hazard ratio is a ratio of instantaneous event rates among those still at risk, not a ratio of cumulative risks, and it assumes the ratio stays constant over follow-up. If the confidence interval includes 1, the data are compatible with no difference in hazard."
-
-                        )
+                        coxdescription = .pasteT(.("For {Explanatory}, the {Levels} group had an estimated hazard ratio of {HRUnivariable} relative to the reference group ({firstlevel}). A hazard ratio is a ratio of instantaneous event rates among those still at risk, not a ratio of cumulative risks, and it assumes the ratio stays constant over follow-up. If the confidence interval includes 1, the data are compatible with no difference in hazard."), Explanatory = Explanatory, Levels = Levels, HRUnivariable = HR_univariable, firstlevel = firstlevel)
                     ) %>%
                     dplyr::filter(HR_univariable != '-') %>%
                     dplyr::pull(coxdescription) -> coxSummary
@@ -2355,9 +2344,9 @@ survivalClass <- if (requireNamespace('jmvcore'))
                 coxSummary <- unlist(coxSummary)
 
                 coxSummary <- c(coxSummary, if (strat_applied)
-                                paste0("A hazard ratio greater than 1 indicates a higher event rate than the reference group, and less than 1 a lower event rate. These hazard ratios are stratified by ", strata_var, ": each stratum has its own baseline hazard, and no other variable is adjusted for. They are associations estimated from observational data, not causal effects, and they assume proportional hazards within strata over the follow-up period.")
+                                .pasteT(.("A hazard ratio greater than 1 indicates a higher event rate than the reference group, and less than 1 a lower event rate. These hazard ratios are stratified by {strataVar}: each stratum has its own baseline hazard, and no other variable is adjusted for. They are associations estimated from observational data, not causal effects, and they assume proportional hazards within strata over the follow-up period."), strataVar = strata_var)
                                 else
-                                "A hazard ratio greater than 1 indicates a higher event rate than the reference group, and less than 1 a lower event rate. These are unadjusted, univariable associations estimated from observational data: they are not adjusted for confounding, they are not causal effects, and they assume proportional hazards over the follow-up period."
+                                .("A hazard ratio greater than 1 indicates a higher event rate than the reference group, and less than 1 a lower event rate. These are unadjusted, univariable associations estimated from observational data: they are not adjusted for confounding, they are not causal effects, and they assume proportional hazards over the follow-up period.")
                 )
                 coxSummary[length(coxSummary)] <- paste0(coxSummary[length(coxSummary)], private$.landmarkSuffix())
 
@@ -2365,26 +2354,32 @@ survivalClass <- if (requireNamespace('jmvcore'))
 
                 # Add explanatory output for Cox regression
                 if (self$options$showExplanations) {
-                    cox_explanation_html <- '
-                    <div style="margin-bottom: 20px; padding: 15px; background-color: rgba(33, 152, 255, 0.07); border-left: 4px solid #4169e1; color: inherit;">
-                        <h4 style="margin-top: 0; color: inherit;">Understanding Cox Proportional Hazards Regression</h4>
-                        <p style="margin-bottom: 10px;">Cox regression models the relationship between explanatory variables and the hazard: the rate at which the event occurs among the patients still event-free at each moment.</p>
-                        <ul style="margin-left: 20px;">
-                            <li><strong>Hazard Ratio (HR):</strong> Ratio of instantaneous event rates versus the reference group (a relative rate, not a cumulative risk)</li>
-                            <li><strong>HR > 1:</strong> The event occurs at a faster rate than in the reference group</li>
-                            <li><strong>HR < 1:</strong> The event occurs at a slower rate than in the reference group</li>
-                            <li><strong>P-value:</strong> How compatible these data are with a hazard ratio of exactly 1; it is not the probability that the two groups are the same</li>
-                            <li><strong>95% CI:</strong> The range of hazard ratios compatible with these data; over repeated studies 95% of such intervals would contain the true HR</li>
-                        </ul>
-                        <p style="margin-bottom: 5px;"><strong>Reading the numbers:</strong></p>
-                        <ul style="margin-left: 20px;">
-                            <li>HR = 2.0 means twice the hazard of the reference group at any given moment, not twice as many events by the end of follow-up</li>
-                            <li>HR = 0.5 means half the hazard of the reference group at any given moment</li>
-                            <li>One HR summarizes the whole follow-up, so it assumes the ratio stays constant over time; the Proportional Hazards Assumption option tests that</li>
-                            <li>These are associations measured in observational data, not causal effects, and a small p-value can sit next to an HR too close to 1 to matter</li>
-                        </ul>
-                    </div>
-                    '
+                    cox_explanation_html <- paste0(
+                        '<div style="margin-bottom: 20px; padding: 15px; background-color: rgba(33, 152, 255, 0.07); border-left: 4px solid #4169e1; color: inherit;"><h4 style="margin-top: 0; color: inherit;">',
+                        .("Understanding Cox Proportional Hazards Regression"),
+                        '</h4><p style="margin-bottom: 10px;">',
+                        .("Cox regression models the relationship between explanatory variables and the hazard: the rate at which the event occurs among the patients still event-free at each moment."),
+                        '</p><ul style="margin-left: 20px;"><li>',
+                        .("<strong>Hazard Ratio (HR):</strong> Ratio of instantaneous event rates versus the reference group (a relative rate, not a cumulative risk)"),
+                        "</li><li>",
+                        .("<strong>HR > 1:</strong> The event occurs at a faster rate than in the reference group"),
+                        "</li><li>",
+                        .("<strong>HR < 1:</strong> The event occurs at a slower rate than in the reference group"),
+                        "</li><li>",
+                        .("<strong>P-value:</strong> How compatible these data are with a hazard ratio of exactly 1; it is not the probability that the two groups are the same"),
+                        "</li><li>",
+                        .("<strong>95% CI:</strong> The range of hazard ratios compatible with these data; over repeated studies 95% of such intervals would contain the true HR"),
+                        '</li></ul><p style="margin-bottom: 5px;"><strong>',
+                        .("Reading the numbers:"),
+                        '</strong></p><ul style="margin-left: 20px;"><li>',
+                        .("HR = 2.0 means twice the hazard of the reference group at any given moment, not twice as many events by the end of follow-up"),
+                        "</li><li>",
+                        .("HR = 0.5 means half the hazard of the reference group at any given moment"),
+                        "</li><li>",
+                        .("One HR summarizes the whole follow-up, so it assumes the ratio stays constant over time; the Proportional Hazards Assumption option tests that"),
+                        "</li><li>",
+                        .("These are associations measured in observational data, not causal effects, and a small p-value can sit next to an HR too close to 1 to matter"),
+                        "</li></ul></div>")
                     self$results$coxRegressionExplanation$setContent(cox_explanation_html)
                 }
 
@@ -2416,14 +2411,13 @@ survivalClass <- if (requireNamespace('jmvcore'))
                     if (self$options$ph_cox) {
                         zph <- survival::cox.zph(cox_model)
 
-                        # capture.output() rather than print(): print() returns the raw
-                        # matrix, so the panel showed p = 0.855053 where the console
-                        # shows 0.86 -- misleading precision on a diagnostic p-value --
-                        # and the print() itself leaked to stdout on every run cycle.
-                        self$results$cox_ph$setContent(
-                            paste(utils::capture.output(print(zph)), collapse = "\n"))
+                        .fillCoxZphTable(self$results$cox_phTable, zph)
+                        self$results$cox_phTable$setNote("ph",
+                            .("A non-significant test is <i>no evidence of a violation</i>, which is not the same as confirming proportional hazards holds. GLOBAL is the joint test across all terms."))
 
-                        # PH assumption violation notice - rendered as HTML to avoid Notice protobuf issues
+                        # PH assumption violation message, in the strongWarnings Html panel like the module's others.
+                        # library-audit 2026-11-20 jsurvival [LOW] DEFERRED: Html message panels kept by maintainer
+                        #   decision; revisit when these messages have been tried as jmvcore::Notice in the jamovi app
                         tryCatch({
                             ph_p <- zph$table[, "p"]
                             ph_p <- ph_p[!is.na(ph_p)]
@@ -2545,73 +2539,99 @@ survivalClass <- if (requireNamespace('jmvcore'))
 
                     # Build HTML interpretation
                     html <- paste0(
-                        "<div style='background-color: rgba(138, 155, 172, 0.06); padding: 20px; border-radius: 8px; margin: 10px 0; color: inherit;'>",
-                        "<h4 style='margin-top: 0; color: inherit;'>Proportional Hazards Assessment</h4>"
-                    )
+                        "<div style='background-color: rgba(138, 155, 172, 0.06); padding: 20px; border-radius: 8px; margin: 10px 0; color: inherit;'><h4 style='margin-top: 0; color: inherit;'>",
+                        .("Proportional Hazards Assessment"),
+                        "</h4>")
 
                     # Status indicator
                     if (ph_violated) {
-                        html <- paste0(html,
-                            "<div style='background-color: rgba(255, 202, 33, 0.23); border-left: 4px solid #ffc107; padding: 15px; margin: 15px 0; border-radius: 4px; color: inherit;'>",
-                            "<strong style='color: inherit;'> WARNING: Proportional Hazards Assumption May Be Violated</strong><br/>",
+                        html <- paste0(
+                            html,
+                            "<div style='background-color: rgba(255, 202, 33, 0.23); border-left: 4px solid #ffc107; padding: 15px; margin: 15px 0; border-radius: 4px; color: inherit;'><strong style='color: inherit;'> ",
+                            .("WARNING: Proportional Hazards Assumption May Be Violated"),
+                            "</strong><br/>",
                             sprintf("<p style='margin: 10px 0 0 0;'>Global test p-value = %.4f (p < 0.05 suggests violation)</p>", p_value),
-                            "</div>"
-                        )
+                            "</div>")
                     } else {
-                        html <- paste0(html,
-                            "<div style='background-color: rgba(33, 162, 64, 0.19); border-left: 4px solid #28a745; padding: 15px; margin: 15px 0; border-radius: 4px; color: inherit;'>",
-                            "<strong style='color: inherit;'> No Evidence Against the Proportional Hazards Assumption</strong><br/>",
+                        html <- paste0(
+                            html,
+                            "<div style='background-color: rgba(33, 162, 64, 0.19); border-left: 4px solid #28a745; padding: 15px; margin: 15px 0; border-radius: 4px; color: inherit;'><strong style='color: inherit;'> ",
+                            .("No Evidence Against the Proportional Hazards Assumption"),
+                            "</strong><br/>",
                             sprintf("<p style='margin: 10px 0 0 0;'>Global test p-value = %.4f (p \u2265 0.05)</p>", p_value),
-                            "</div>"
-                        )
+                            "</div>")
                     }
 
                     # Educational content
-                    html <- paste0(html,
+                    html <- paste0(
+                        html,
                         "<div style='margin: 20px 0;'>",
-                        "<h5 style='color: inherit; margin-bottom: 10px;'>Understanding the Test:</h5>",
+                        paste0(
+                            "<h5 style='color: inherit; margin-bottom: 10px;'>",
+                            .("Understanding the Test:"),
+                            "</h5>"),
                         "<ul style='line-height: 1.8;'>",
-                        "<li><strong>Null Hypothesis:</strong> The hazard ratio remains constant over time (PH assumption holds)</li>",
-                        "<li><strong>Test Method:</strong> Schoenfeld residuals correlation with time</li>",
-                        "<li><strong>Interpretation:</strong> p < 0.05 suggests the effect of '", covariate_name, "' changes over time</li>",
-                        "</ul>",
-                        "</div>"
-                    )
+                        paste0(
+                            "<li>",
+                            .("<strong>Null Hypothesis:</strong> The hazard ratio remains constant over time (PH assumption holds)"),
+                            "</li>"),
+                        paste0(
+                            "<li>",
+                            .("<strong>Test Method:</strong> Schoenfeld residuals correlation with time"),
+                            "</li>"),
+                        "<li>",
+                        .pasteT(.("<strong>Interpretation:</strong> p < 0.05 suggests the effect of '{covariateName}' changes over time"), covariateName = covariate_name),
+                        "</li></ul></div>")
 
                     # Recommendations if violated
                     if (ph_violated) {
-                        html <- paste0(html,
+                        html <- paste0(
+                            html,
                             "<div style='background-color: rgba(33, 144, 255, 0.11); padding: 15px; border-radius: 4px; margin: 15px 0; color: inherit;'>",
-                            "<h5 style='color: inherit; margin-top: 0;'> Recommended Solutions:</h5>",
-                            "<ol style='line-height: 1.8; margin: 10px 0;'>",
-                            "<li><strong>Stratified Cox Model:</strong> Stratify by '", covariate_name, "' if it has few categories",
-                            "<pre style='background-color: rgba(255, 255, 255, 0.06); padding: 10px; margin: 5px 0; border-left: 3px solid #0056b3; color: inherit;'>",
-                            "survival::coxph(Surv(time, status) ~ other_vars + strata(", covariate_name, "))",
-                            "</pre></li>",
-                            "<li><strong>Time-Dependent Coefficients:</strong> Add interaction with time",
-                            "<pre style='background-color: rgba(255, 255, 255, 0.06); padding: 10px; margin: 5px 0; border-left: 3px solid #0056b3; color: inherit;'>",
-                            "survival::coxph(Surv(time, status) ~ ", covariate_name, " + tt(", covariate_name, "), tt = function(x, t, ...) x * t)",
-                            "</pre></li>",
-                            "<li><strong>Alternative Approaches:</strong>",
-                            "<ul style='margin: 5px 0;'>",
-                            "<li>Restricted Mean Survival Time (RMST) analysis - does not assume proportional hazards</li>",
-                            "<li>Accelerated failure time (AFT) models - different parametric assumption</li>",
-                            "<li>Landmark analysis - analyze survival from specific time points</li>",
-                            "</ul></li>",
-                            "</ol>",
-                            "</div>"
-                        )
+                            paste0(
+                                "<h5 style='color: inherit; margin-top: 0;'>",
+                                .("Recommended Solutions:"),
+                                "</h5>"),
+                            "<ol style='line-height: 1.8; margin: 10px 0;'><li>",
+                            .pasteT(.("<strong>Stratified Cox Model:</strong> Stratify by '{covariateName}' if it has few categories"), covariateName = covariate_name),
+                            "<pre style='background-color: rgba(255, 255, 255, 0.06); padding: 10px; margin: 5px 0; border-left: 3px solid #0056b3; color: inherit;'>survival::coxph(Surv(time, status) ~ other_vars + strata(",
+                            covariate_name,
+                            "))</pre></li><li>",
+                            .("<strong>Time-Dependent Coefficients:</strong> Add interaction with time"),
+                            "<pre style='background-color: rgba(255, 255, 255, 0.06); padding: 10px; margin: 5px 0; border-left: 3px solid #0056b3; color: inherit;'>survival::coxph(Surv(time, status) ~ ",
+                            covariate_name,
+                            " + tt(",
+                            covariate_name,
+                            "), tt = function(x, t, ...) x * t)</pre></li><li><strong>Alternative Approaches:</strong><ul style='margin: 5px 0;'>",
+                            paste0(
+                                "<li>",
+                                .("Restricted Mean Survival Time (RMST) analysis - does not assume proportional hazards"),
+                                "</li>"),
+                            paste0(
+                                "<li>",
+                                .("Accelerated failure time (AFT) models - different parametric assumption"),
+                                "</li>"),
+                            paste0(
+                                "<li>",
+                                .("Landmark analysis - analyze survival from specific time points"),
+                                "</li>"),
+                            "</ul></li></ol></div>")
                     } else {
-                        html <- paste0(html,
+                        html <- paste0(
+                            html,
                             "<div style='background-color: rgba(33, 159, 43, 0.1); padding: 15px; border-radius: 4px; margin: 15px 0; color: inherit;'>",
-                            "<h5 style='color: inherit; margin-top: 0;'> Next Steps:</h5>",
-                            "<p style='margin: 5px 0;'>The test did not detect a departure from proportional hazards. ",
-                            "That is absence of evidence, not evidence of absence: a non-significant test is also ",
-                            "what you see with few events or short follow-up. Inspect the Schoenfeld residual plot ",
-                            "before relying on a constant hazard ratio.</p>",
-                            "<p style='margin: 10px 0 0 0;'><em>Note: Also examine the Schoenfeld residual plot above for visual confirmation.</em></p>",
-                            "</div>"
-                        )
+                            paste0(
+                                "<h5 style='color: inherit; margin-top: 0;'>",
+                                .("Next Steps:"),
+                                "</h5>"),
+                            "<p style='margin: 5px 0;'>",
+                            .("The test did not detect a departure from proportional hazards. That is absence of evidence, not evidence of absence: a non-significant test is also what you see with few events or short follow-up. Inspect the Schoenfeld residual plot before relying on a constant hazard ratio."),
+                            "</p>",
+                            paste0(
+                                "<p style='margin: 10px 0 0 0;'><em>",
+                                .("Note: Also examine the Schoenfeld residual plot above for visual confirmation."),
+                                "</em></p>"),
+                            "</div>")
                     }
 
                     # Close main div
@@ -2620,7 +2640,10 @@ survivalClass <- if (requireNamespace('jmvcore'))
                     return(html)
 
                 }, error = function(e) {
-                    return(paste0("<p>Error generating PH interpretation: ", htmltools::htmlEscape(e$message), "</p>"))
+                    return(paste0(
+                        "<p>",
+                        .pasteT(.("Error generating PH interpretation: {message}"), message = htmltools::htmlEscape(e$message)),
+                        "</p>"))
                 })
             }
 
@@ -2704,16 +2727,22 @@ survivalClass <- if (requireNamespace('jmvcore'))
                     # old wording claimed every observation was exported regardless.
                     n_written <- sum(!is.na(surv_vals))
                     export_summary <- paste0(
-                        "<h4>Survival Data Export Summary</h4>",
-                        "<p>Added the Kaplan-Meier survival probability at each case's own follow-up time",
-                        if (!is.null(myfactor)) ", taken from that case's own group curve" else "",
-                        " as a new column, for ", n_written, " of ", nrow(mydata), " observations.</p>",
+                        paste0(
+                            "<h4>",
+                            .("Survival Data Export Summary"),
+                            "</h4>"),
+                        "<p>",
+                        .pasteT(.("Added the Kaplan-Meier survival probability at each case's own follow-up time{v1} as a new column, for {nWritten} of {nMydata} observations."), v1 = if (!is.null(myfactor)) paste0(", ", .("taken from that case's own group curve")) else "", nWritten = n_written, nMydata = nrow(mydata)),
+                        "</p>",
                         if (n_written < nrow(mydata))
-                            paste0("<p>", nrow(mydata) - n_written,
-                                   " row(s) are blank because no curve could be matched to them.</p>")
+                            paste0(
+                                "<p>",
+                                .pasteT(.("{nMydata} row(s) are blank because no curve could be matched to them."), nMydata = nrow(mydata) - n_written),
+                                "</p>")
                         else "",
-                        "<p>Time range: ", round(min(times, na.rm=TRUE), 1), " to ", round(max(times, na.rm=TRUE), 1), " ", self$options$timetypeoutput, "</p>"
-                    )
+                        "<p>",
+                        .pasteT(.("Time range: {v1} to {v2} {timetypeoutput}"), v1 = round(min(times, na.rm=TRUE), 1), v2 = round(max(times, na.rm=TRUE), 1), timetypeoutput = self$options$timetypeoutput),
+                        "</p>")
 
                     self$results$survivalExportSummary$setContent(export_summary)
 
@@ -2724,9 +2753,13 @@ survivalClass <- if (requireNamespace('jmvcore'))
                     # successful one -- the checkbox stayed ticked and no column
                     # appeared. This element is already visible: (export_survival_data).
                     self$results$survivalExportSummary$setContent(paste0(
-                        "<h4>Survival Data Export Summary</h4>",
-                        "<p>The survival probabilities could not be exported, so no column was added: ",
-                        htmltools::htmlEscape(conditionMessage(e)), "</p>"))
+                        paste0(
+                            "<h4>",
+                            .("Survival Data Export Summary"),
+                            "</h4>"),
+                        "<p>",
+                        .pasteT(.("The survival probabilities could not be exported, so no column was added: {v1}"), v1 = htmltools::htmlEscape(conditionMessage(e))),
+                        "</p>"))
                 })
             }
 
@@ -2749,7 +2782,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
                         cif_times <- times[valid]
                         if (length(cif_times) == 0) cif_times <- c(12, 36, 60)
                         self$results$cifTable$setNote("cutpoints", if (any(!valid))
-                            "Invalid time points were omitted; enter non-negative finite numbers."
+                            .("Invalid time points were omitted; enter non-negative finite numbers.")
                             else NULL)
                         d <- results$cleanData
                         .populateObservedCif(self$results$cifTable,
@@ -2793,9 +2826,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
                 utimes <- sort(unique(utimes[!is.na(utimes) & utimes >= 0]))
 
                 if (length(bad_tokens) > 0) {
-                    survTableNotes <- paste0(
-                        "Ignored cutpoint(s) that are not non-negative numbers: ",
-                        paste(bad_tokens, collapse = ", "), ".")
+                    survTableNotes <- .pasteT(.("Ignored cutpoint(s) that are not non-negative numbers: {badTokens}."), badTokens = paste(bad_tokens, collapse = ", "))
                 } else {
                     survTableNotes <- NULL
                 }
@@ -2803,7 +2834,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
                 if (length(utimes) == 0) {
                     utimes <- c(12, 36, 60)
                     survTableNotes <- paste(c(survTableNotes,
-                        "No usable cutpoints were supplied, so the default 12, 36, 60 was used."),
+                        .("No usable cutpoints were supplied, so the default 12, 36, 60 was used.")),
                         collapse = " ")
                 }
 
@@ -2866,10 +2897,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
                 if (any(beyond_support)) {
                     dropped <- unique(km_fit_df$time[beyond_support])
                     survTableNotes <- paste(c(survTableNotes, sprintf(
-                        paste0("Cutpoint(s) %s exceed the observed follow-up in at least one group ",
-                               "(longest follow-up per group: %s %s) and were omitted. ",
-                               "Kaplan-Meier estimates beyond the last observation are extrapolation, ",
-                               "not estimates, and would be shown with no patients still at risk."),
+                        .("Cutpoint(s) %s exceed the observed follow-up in at least one group (longest follow-up per group: %s %s) and were omitted. Kaplan-Meier estimates beyond the last observation are extrapolation, not estimates, and would be shown with no patients still at risk."),
                         paste(dropped, collapse = ", "),
                         paste(sprintf("%s = %.1f",
                                       .stripPrefix(names(strata_max), paste0(myfactor, "=")),
@@ -2885,7 +2913,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
 
                 if (nrow(km_fit_df) == 0) {
                     self$results$survTableSummary$setContent(
-                        "No requested time point falls within the observed follow-up of every group.")
+                        .("No requested time point falls within the observed follow-up of every group."))
                     return()
                 }
 
@@ -2946,10 +2974,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
                         ci_text = ifelse(is.na(lower), "95% CI not estimable",
                                          paste0(scales::percent(lower), "-", scales::percent(upper), ", 95% CI")),
                         description =
-                            glue::glue(
-                                "When {strata}, {time} {time_unit_label} survival is {scales::percent(surv)} [{ci_text}]. For the {strata} group, the estimated probability of surviving beyond {time} {time_unit_label}s was {scales::percent(surv)} [{ci_text}]. At this time point, {n.risk} subjects were still at risk; {n.event} events occurred since the previous time point, {cum.event} in total by this time.{landmark_suffix}"
-
-                            )
+                            .pasteT(.("When {strata}, {time} {timeUnitLabel} survival is {surv} {lb}{ciText}]. For the {strata} group, the estimated probability of surviving beyond {time} {timeUnitLabel}s was {surv} {lb}{ciText}]. At this time point, {nRisk} subjects were still at risk; {nEvent} events occurred since the previous time point, {cumEvent} in total by this time.{landmarkSuffix}"), strata = strata, time = time, timeUnitLabel = time_unit_label, surv = scales::percent(surv), ciText = ci_text, nRisk = n.risk, nEvent = n.event, cumEvent = cum.event, landmarkSuffix = landmark_suffix, lb = "[")
                     ) %>%
                     dplyr::select(description) %>%
                     dplyr::pull(.) -> survTableSummary
@@ -2957,7 +2982,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
                 survTableSummary <- htmltools::htmlEscape(survTableSummary)
 
                 survTableSummaryWithNote <- c(survTableSummary,
-                                              "Note: Confidence intervals for survival probabilities are calculated on the complementary log-log scale (conf.type = 'log-log') using Greenwood's variance estimate, for better performance with censored survival data.")
+                                              .("Note: Confidence intervals for survival probabilities are calculated on the complementary log-log scale (conf.type = 'log-log') using Greenwood's variance estimate, for better performance with censored survival data."))
                 
                 self$results$survTableSummary$setContent(survTableSummaryWithNote)
 
@@ -3062,22 +3087,22 @@ survivalClass <- if (requireNamespace('jmvcore'))
 
                 pairwiseTable$setNote(
                     key = "padjust",
-                    note = paste0(.fmt(.("Test: {test}."), test = pw_test),
-                                  " p-value adjustment method: ", padjustmethod)
+                    note = .pasteT(.("{v1} p-value adjustment method: {padjustmethod}"), v1 = .fmt(.("Test: {test}."), test = pw_test), padjustmethod = padjustmethod)
                 )
 
                 mypairwise2 %>%
                     dplyr::mutate(
                         description =
-                            glue::glue(
-                                "The difference of {display_name}",
-                                " between {rowname} and {name}",
-                                " has a p-value of {format.pval(value, digits = 3, eps = 0.001)}.",
-
-                                "The survival difference between {rowname} and {name} groups was tested using a {ifelse(pw_rho == 0, 'log-rank', ifelse(pw_rho == 1, 'Peto-Peto (Fleming-Harrington rho=1)', paste0('Fleming-Harrington weighted log-rank (rho=', pw_rho, ')')))} test. The p-value of {format.pval(value, digits = 3, eps = 0.001)} {ifelse(value < 0.05, 'indicates a statistically significant difference', 'suggests no statistically significant difference')} in survival between these groups (using {padjustmethod} adjustment for multiple comparisons).",
-                                # a named argument is data; an unnamed one is evaluated as template text
-                                display_name = title2
-                            )
+                            paste0(
+                                .pasteT(.("The difference of {group} between {first} and {second} has a p-value of {p}."),
+                                        group = title2, first = rowname, second = name,
+                                        p = format.pval(value, digits = 3, eps = 0.001)),
+                                .pasteT(.("The survival difference between {first} and {second} groups was tested using a {test} test. The p-value of {p} {verdict} in survival between these groups (using {adjustment} adjustment for multiple comparisons)."),
+                                        first = rowname, second = name,
+                                        test = ifelse(pw_rho == 0, 'log-rank', ifelse(pw_rho == 1, 'Peto-Peto (Fleming-Harrington rho=1)', paste0('Fleming-Harrington weighted log-rank (rho=', pw_rho, ')'))),
+                                        p = format.pval(value, digits = 3, eps = 0.001),
+                                        verdict = ifelse(value < 0.05, .("indicates a statistically significant difference"), .("suggests no statistically significant difference")),
+                                        adjustment = padjustmethod))
                     ) %>%
                     dplyr::pull(description) -> pairwiseSummary
 
@@ -3135,11 +3160,11 @@ survivalClass <- if (requireNamespace('jmvcore'))
                 # Peto-Peto modification of the Gehan-Wilcoxon test (weights = KM S(t)).
                 tests <- list(
                     list(name = "Log-Rank (standard)", rho = 0,
-                         weighting = "Equal weighting across all time points"),
+                         weighting = .("Equal weighting across all time points")),
                     list(name = "Fleming-Harrington (rho=0.5)", rho = 0.5,
-                         weighting = "Weights S(t)^0.5; moderate emphasis on early differences"),
+                         weighting = .("Weights S(t)^0.5; moderate emphasis on early differences")),
                     list(name = "Peto-Peto (Fleming-Harrington rho=1)", rho = 1,
-                         weighting = "Weights S(t); emphasizes early events (Peto-Peto modification of Gehan-Wilcoxon)")
+                         weighting = .("Weights S(t); emphasizes early events (Peto-Peto modification of Gehan-Wilcoxon)"))
                 )
 
                 table <- self$results$weightedLogRankTable
@@ -3193,48 +3218,51 @@ survivalClass <- if (requireNamespace('jmvcore'))
             ,
             .populateWeightedLogRankExplanation = function() {
                 html <- paste0(
-                    "<h3>Weighted Log-Rank Tests</h3>",
-                    "<p>The Fleming-Harrington family of weighted log-rank tests ",
-                    "generalizes the standard log-rank test by applying different ",
-                    "weights to events at different time points. The weighting is ",
-                    "controlled by the parameter <b>rho (\u{03c1})</b>:</p>",
-                    "<table border='1' cellpadding='5' style='border-collapse:collapse;'>",
-                    "<tr><th>Test</th><th>\u{03c1}</th><th>Weighting</th><th>Best For</th></tr>",
-                    "<tr><td>Log-Rank (standard)</td><td>0</td>",
-                    "<td>Equal weight at all time points</td>",
-                    "<td>General use; optimal under proportional hazards</td></tr>",
-                    "<tr><td>Fleming-Harrington (\u{03c1}=0.5)</td><td>0.5</td>",
-                    "<td>Weights = S(t)<sup>0.5</sup> (moderate early emphasis)</td>",
-                    "<td>Compromise between log-rank and Peto-Peto</td></tr>",
-                    "<tr><td>Peto-Peto (Fleming-Harrington \u{03c1}=1)</td><td>1</td>",
-                    "<td>Weights = S(t), the Kaplan-Meier estimate (early emphasis)</td>",
-                    "<td>Detecting early differences; robust to late censoring</td></tr>",
-                    "</table>",
-                    "<p><i>Note: survival::survdiff() implements only the ",
-                    "Fleming-Harrington G-\u{03c1} family. The Gehan-Breslow (weights = ",
-                    "number at risk) and Tarone-Ware (weights = sqrt of number at risk) ",
-                    "tests use different weights and are not available via survdiff().</i></p>",
-                    "<h4>When to Use Weighted Tests</h4>",
-                    "<ul>",
-                    "<li><b>If curves cross:</b> The standard log-rank test may miss ",
-                    "differences when survival curves cross. Weighted tests can detect ",
-                    "early or late divergence that the standard test misses.</li>",
-                    "<li><b>If early events matter more:</b> Use Peto-Peto ",
-                    "(\u{03c1}=1) when early mortality is of primary clinical interest ",
-                    "(e.g., perioperative outcomes, acute treatment toxicity).</li>",
-                    "<li><b>Sensitivity analysis:</b> Running multiple weighted tests ",
-                    "can reveal whether conclusions depend on the time horizon of interest.</li>",
-                    "</ul>",
-                    "<h4>Interpreting Discordant Results</h4>",
-                    "<p>If the standard log-rank test is significant but ",
-                    "the Peto-Peto (\u{03c1}=1) test is not (or vice versa), this suggests ",
-                    "the survival difference is concentrated in a specific part of the ",
-                    "curve. Reporting both tests provides a more complete picture of ",
-                    "the survival comparison.</p>",
-                    "<p><i>Reference: Harrington DP, Fleming TR (1982). ",
-                    "A class of rank test procedures for censored survival data. ",
-                    "Biometrika, 69(3), 553-566.</i></p>"
-                )
+                    "<h3>",
+                    .("Weighted Log-Rank Tests"),
+                    "</h3><p>",
+                    .("The Fleming-Harrington family of weighted log-rank tests generalizes the standard log-rank test by applying different weights to events at different time points. The weighting is controlled by the parameter <b>rho (\u03c1)</b>:"),
+                    "</p><table border='1' cellpadding='5' style='border-collapse:collapse;'><tr><th>",
+                    .("Test"),
+                    "</th><th>\u03c1</th><th>",
+                    .("Weighting"),
+                    "</th><th>",
+                    .("Best For"),
+                    "</th></tr><tr><td>",
+                    .("Log-Rank (standard)"),
+                    "</td><td>0</td><td>",
+                    .("Equal weight at all time points"),
+                    "</td><td>",
+                    .("General use; optimal under proportional hazards"),
+                    "</td></tr><tr><td>",
+                    .("Fleming-Harrington (\u03c1=0.5)"),
+                    "</td><td>0.5</td><td>",
+                    .("Weights = S(t)<sup>0.5</sup> (moderate early emphasis)"),
+                    "</td><td>",
+                    .("Compromise between log-rank and Peto-Peto"),
+                    "</td></tr><tr><td>",
+                    .("Peto-Peto (Fleming-Harrington \u03c1=1)"),
+                    "</td><td>1</td><td>",
+                    .("Weights = S(t), the Kaplan-Meier estimate (early emphasis)"),
+                    "</td><td>",
+                    .("Detecting early differences; robust to late censoring"),
+                    "</td></tr></table><p><i>",
+                    .("Note: survival::survdiff() implements only the Fleming-Harrington G-\u03c1 family. The Gehan-Breslow (weights = number at risk) and Tarone-Ware (weights = sqrt of number at risk) tests use different weights and are not available via survdiff()."),
+                    "</i></p><h4>",
+                    .("When to Use Weighted Tests"),
+                    "</h4><ul><li>",
+                    .("<b>If curves cross:</b> The standard log-rank test may miss differences when survival curves cross. Weighted tests can detect early or late divergence that the standard test misses."),
+                    "</li><li>",
+                    .("<b>If early events matter more:</b> Use Peto-Peto (\u03c1=1) when early mortality is of primary clinical interest (e.g., perioperative outcomes, acute treatment toxicity)."),
+                    "</li><li>",
+                    .("<b>Sensitivity analysis:</b> Running multiple weighted tests can reveal whether conclusions depend on the time horizon of interest."),
+                    "</li></ul><h4>",
+                    .("Interpreting Discordant Results"),
+                    "</h4><p>",
+                    .("If the standard log-rank test is significant but the Peto-Peto (\u03c1=1) test is not (or vice versa), this suggests the survival difference is concentrated in a specific part of the curve. Reporting both tests provides a more complete picture of the survival comparison."),
+                    "</p><p><i>",
+                    .("Reference: Harrington DP, Fleming TR (1982). A class of rank test procedures for censored survival data. Biometrika, 69(3), 553-566."),
+                    "</i></p>")
                 self$results$weightedLogRankExplanation$setContent(html)
             }
 
@@ -3261,7 +3289,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
                 if (is.null(self$options$explanatory)) {
                     self$results$bootstrapValidationTable$setNote(
                         "info",
-                        "Bootstrap validation requires an explanatory variable in the Cox model."
+                        .("Bootstrap validation requires an explanatory variable in the Cox model.")
                     )
                     return()
                 }
@@ -3274,8 +3302,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
                 if (n_events < 10) {
                     self$results$bootstrapValidationTable$setNote(
                         "warning",
-                        paste0("Only ", n_events, " events observed. Bootstrap validation ",
-                               "requires adequate events (recommended: >= 10) for stable estimates.")
+                        .pasteT(.("Only {nEvents} events observed. Bootstrap validation requires adequate events (recommended: >= 10) for stable estimates."), nEvents = n_events)
                     )
                     return()
                 }
@@ -3410,8 +3437,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
                     if (length(valid_optimism) < 10) {
                         self$results$bootstrapValidationTable$setNote(
                             "warning",
-                            paste0("Only ", length(valid_optimism),
-                                   " successful bootstrap resamples. Results may be unreliable.")
+                            .pasteT(.("Only {nValidOptimism} successful bootstrap resamples. Results may be unreliable."), nValidOptimism = length(valid_optimism))
                         )
                         return()
                     }
@@ -3511,62 +3537,101 @@ survivalClass <- if (requireNamespace('jmvcore'))
                             else "poor"
 
                 html <- paste0(
-                    "<h3>Bootstrap Internal Validation</h3>",
-                    "<p>Internal validation assesses whether a Cox model's apparent ",
-                    "performance is optimistic due to overfitting. The bootstrap method ",
-                    "(Harrell 1996) estimates the <b>optimism</b>: the amount by which ",
-                    "the apparent C-index overestimates the model's true discriminative ",
-                    "ability on new data.</p>",
-
-                    "<h4>Results Summary</h4>",
-                    "<ul>",
-                    "<li><b>Apparent C-index:</b> ", round(c_apparent, 3),
-                    " (performance on the data used to build the model)</li>",
-                    "<li><b>Optimism:</b> ", round(optimism, 3),
-                    " (average over-estimation from ", n_successful, " bootstrap resamples)</li>",
-                    "<li><b>Corrected C-index:</b> ", round(c_corrected, 3),
-                    " (realistic estimate of model performance; rated as <b>", c_rating, "</b>)</li>",
-                    "<li><b>Calibration slope:</b> ", round(cal_slope, 3),
-                    " (ideal = 1.0; values &lt; 1 indicate overfitting)</li>",
-                    "</ul>",
-
-                    "<h4>Interpretation Guide</h4>",
+                    paste0(
+                        "<h3>",
+                        .("Bootstrap Internal Validation"),
+                        "</h3>"),
+                    "<p>",
+                    .("Internal validation assesses whether a Cox model's apparent performance is optimistic due to overfitting. The bootstrap method (Harrell 1996) estimates the <b>optimism</b>: the amount by which the apparent C-index overestimates the model's true discriminative ability on new data."),
+                    "</p>",
+                    paste0(
+                        "<h4>",
+                        .("Results Summary"),
+                        "</h4>"),
+                    "<ul><li>",
+                    .pasteT(.("<b>Apparent C-index:</b> {cApparent} (performance on the data used to build the model)"), cApparent = round(c_apparent, 3)),
+                    "</li><li>",
+                    .pasteT(.("<b>Optimism:</b> {optimism} (average over-estimation from {nSuccessful} bootstrap resamples)"), optimism = round(optimism, 3), nSuccessful = n_successful),
+                    "</li><li>",
+                    .pasteT(.("<b>Corrected C-index:</b> {cCorrected} (realistic estimate of model performance; rated as <b>{cRating}</b>)"), cCorrected = round(c_corrected, 3), cRating = c_rating),
+                    "</li><li>",
+                    .pasteT(.("<b>Calibration slope:</b> {calSlope} (ideal = 1.0; values &lt; 1 indicate overfitting)"), calSlope = round(cal_slope, 3)),
+                    "</li></ul>",
+                    paste0(
+                        "<h4>",
+                        .("Interpretation Guide"),
+                        "</h4>"),
                     "<table border='1' cellpadding='5' style='border-collapse:collapse;'>",
-                    "<tr><th>Metric</th><th>Ideal Value</th><th>Concern Threshold</th></tr>",
-                    "<tr><td>C-index</td><td>\u{2265} 0.7</td><td>&lt; 0.6 (poor discrimination)</td></tr>",
-                    "<tr><td>Optimism</td><td>&lt; 0.02</td><td>&gt; 0.05 (overfitting)</td></tr>",
-                    "<tr><td>Calibration slope</td><td>1.0</td><td>&lt; 0.8 (predictions too extreme)</td></tr>",
+                    paste0(
+                        "<tr><th>",
+                        .("Metric"),
+                        "</th><th>",
+                        .("Ideal Value"),
+                        "</th><th>",
+                        .("Concern Threshold"),
+                        "</th></tr>"),
+                    paste0(
+                        "<tr><td>",
+                        .("C-index"),
+                        "</td><td>\u2265 0.7</td><td>",
+                        .("&lt; 0.6 (poor discrimination)"),
+                        "</td></tr>"),
+                    paste0(
+                        "<tr><td>",
+                        .("Optimism"),
+                        "</td><td>&lt; 0.02</td><td>",
+                        .("&gt; 0.05 (overfitting)"),
+                        "</td></tr>"),
+                    paste0(
+                        "<tr><td>",
+                        .("Calibration slope"),
+                        "</td><td>1.0</td><td>",
+                        .("&lt; 0.8 (predictions too extreme)"),
+                        "</td></tr>"),
                     "</table>",
-
-                    "<h4>How It Works</h4>",
-                    "<p>For each of ", n_successful, " bootstrap resamples:</p>",
-                    "<ol>",
-                    "<li>A bootstrap sample (same size, with replacement) is drawn</li>",
-                    "<li>The Cox model is fit on the bootstrap sample (apparent performance)</li>",
-                    "<li>The bootstrap model is tested on the ORIGINAL data (test performance)</li>",
-                    "<li>Optimism = apparent - test performance</li>",
+                    paste0(
+                        "<h4>",
+                        .("How It Works"),
+                        "</h4>"),
+                    "<p>",
+                    .pasteT(.("For each of {nSuccessful} bootstrap resamples:"), nSuccessful = n_successful),
+                    "</p><ol>",
+                    paste0(
+                        "<li>",
+                        .("A bootstrap sample (same size, with replacement) is drawn"),
+                        "</li>"),
+                    paste0(
+                        "<li>",
+                        .("The Cox model is fit on the bootstrap sample (apparent performance)"),
+                        "</li>"),
+                    paste0(
+                        "<li>",
+                        .("The bootstrap model is tested on the ORIGINAL data (test performance)"),
+                        "</li>"),
+                    paste0(
+                        "<li>",
+                        .("Optimism = apparent - test performance"),
+                        "</li>"),
                     "</ol>",
-                    "<p>The corrected C-index = apparent C-index minus average optimism.</p>",
-
-                    "<h4>Clinical Context</h4>",
-                    "<p>This model was built on ", n_events, " events. ",
-                    if (n_events < 20) {
-                        "With fewer than 20 events, the model is at high risk of overfitting. "
+                    paste0(
+                        "<p>",
+                        .("The corrected C-index = apparent C-index minus average optimism."),
+                        "</p>"),
+                    paste0(
+                        "<h4>",
+                        .("Clinical Context"),
+                        "</h4>"),
+                    "<p>",
+                    .pasteT(.("This model was built on {nEvents} events. {caution} The bootstrap correction removes optimism relative to THIS dataset and this set of predictors only; it cannot show how the model behaves in a different population, laboratory or era. Only fitting the same model to independent data answers that question."), nEvents = n_events, caution = if (n_events < 20) {
+                        .("With fewer than 20 events, the model is at high risk of overfitting.")
                     } else if (n_events < 50) {
-                        "With 20-50 events, moderate caution is warranted. "
+                        .("With 20-50 events, moderate caution is warranted.")
                     } else {
-                        "With 50+ events, the model has reasonable stability. "
-                    },
-                    "The bootstrap correction removes optimism relative to THIS dataset and ",
-                    "this set of predictors only; it cannot show how the model behaves in a ",
-                    "different population, laboratory or era. Only fitting the same model to ",
-                    "independent data answers that question.</p>",
-
-                    "<p><i>Reference: Harrell FE Jr, Lee KL, Mark DB (1996). ",
-                    "Multivariable prognostic models: issues in developing models, ",
-                    "evaluating assumptions and adequacy, and measuring and reducing errors. ",
-                    "Statistics in Medicine, 15(4), 361-387.</i></p>"
-                )
+                        .("With 50+ events, the model has reasonable stability.")
+                    }),
+                    "</p><p><i>",
+                    .("Reference: Harrell FE Jr, Lee KL, Mark DB (1996). Multivariable prognostic models: issues in developing models, evaluating assumptions and adequacy, and measuring and reducing errors. Statistics in Medicine, 15(4), 361-387."),
+                    "</i></p>")
                 self$results$bootstrapValidationExplanation$setContent(html)
             }
 
@@ -3766,40 +3831,48 @@ survivalClass <- if (requireNamespace('jmvcore'))
 
                 # Create summary text with interpretation
                 landmark_suffix <- htmltools::htmlEscape(private$.landmarkSuffix())
-                summary_html <- glue::glue("
-<h4>Person-Time Analysis Summary</h4>
-<p>Total follow-up time: <b>{round(total_time, 1)} {time_unit}</b></p>
-<p>Number of events: <b>{total_events}</b></p>
-<p>Overall incidence rate: <b>{round_rate(overall_rate)}</b> per {rate_multiplier} person-{time_unit} [95% CI: {round_rate(ci_lower)}-{round_rate(ci_upper)}]</p>
-<p>This represents the rate at which events occurred in your study population. The incidence rate is calculated as the number of events divided by the total person-time at risk.{landmark_suffix}</p>
-")
+                summary_html <- paste0(
+                    paste0(
+                        "<h4>",
+                        .("Person-Time Analysis Summary"),
+                        "</h4><p>"),
+                    .pasteT(.("Total follow-up time: <b>{totalTime} {timeUnit}</b>"), totalTime = round(total_time, 1), timeUnit = time_unit),
+                    "</p> <p>",
+                    .pasteT(.("Number of events: <b>{totalEvents}</b>"), totalEvents = total_events),
+                    "</p> <p>",
+                    .pasteT(.("Overall incidence rate: <b>{overallRate}</b> per {rateMultiplier} person-{timeUnit} {lb}95% CI: {ciLower}-{ciUpper}]"), overallRate = round_rate(overall_rate), rateMultiplier = rate_multiplier, timeUnit = time_unit, ciLower = round_rate(ci_lower), ciUpper = round_rate(ci_upper), lb = "["),
+                    "</p> <p>",
+                    .pasteT(.("This represents the rate at which events occurred in your study population. The incidence rate is calculated as the number of events divided by the total person-time at risk.{landmarkSuffix}"), landmarkSuffix = landmark_suffix),
+                    "</p>")
 
                 self$results$personTimeSummary$setContent(summary_html)
 
                 # Add explanatory output for person-time analysis
                 if (self$options$showExplanations) {
-                    person_time_explanation_html <- '
-                    <div style="margin-bottom: 20px; padding: 15px; background-color: rgba(33, 152, 255, 0.07); border-left: 4px solid #4169e1; color: inherit;">
-                        <h4 style="margin-top: 0; color: inherit;">Understanding Person-Time Analysis</h4>
-                        <p style="margin-bottom: 10px;">Person-time analysis calculates incidence rates by accounting for the total time each patient was at risk:</p>
-                        <ul style="margin-left: 20px;">
-                            <li><strong>Person-Time:</strong> Sum of individual follow-up periods for all patients in each group</li>
-                            <li><strong>Incidence Rate:</strong> Events per unit time (e.g., per 100 person-years)</li>
-                            <li><strong>95% CI:</strong> Confidence interval calculated using the exact (Garwood) Poisson method</li>
-                        </ul>
-                        <p style="margin-bottom: 5px;"><strong>Clinical interpretation:</strong></p>
-                        <ul style="margin-left: 20px;">
-                            <li>Person-time analysis handles varying follow-up durations effectively</li>
-                            <li>Higher rates indicate more frequent event occurrence in that group</li>
-                            <li>Particularly useful when follow-up times vary significantly between groups</li>
-                            <li>These are <strong>crude</strong> rates: each assumes a constant hazard over the
-                                interval it summarises, and none is adjusted for any other variable. Where the
-                                hazard changes with time, prefer the Kaplan-Meier and Cox output above</li>
-                            <li>No rate ratio or between-group test is computed here; use the log-rank test and
-                                the hazard ratio for group comparisons</li>
-                        </ul>
-                    </div>
-                    '
+                    person_time_explanation_html <- paste0(
+                        '<div style="margin-bottom: 20px; padding: 15px; background-color: rgba(33, 152, 255, 0.07); border-left: 4px solid #4169e1; color: inherit;"><h4 style="margin-top: 0; color: inherit;">',
+                        .("Understanding Person-Time Analysis"),
+                        '</h4><p style="margin-bottom: 10px;">',
+                        .("Person-time analysis calculates incidence rates by accounting for the total time each patient was at risk:"),
+                        '</p><ul style="margin-left: 20px;"><li>',
+                        .("<strong>Person-Time:</strong> Sum of individual follow-up periods for all patients in each group"),
+                        "</li><li>",
+                        .("<strong>Incidence Rate:</strong> Events per unit time (e.g., per 100 person-years)"),
+                        "</li><li>",
+                        .("<strong>95% CI:</strong> Confidence interval calculated using the exact (Garwood) Poisson method"),
+                        '</li></ul><p style="margin-bottom: 5px;"><strong>',
+                        .("Clinical interpretation:"),
+                        '</strong></p><ul style="margin-left: 20px;"><li>',
+                        .("Person-time analysis handles varying follow-up durations effectively"),
+                        "</li><li>",
+                        .("Higher rates indicate more frequent event occurrence in that group"),
+                        "</li><li>",
+                        .("Particularly useful when follow-up times vary significantly between groups"),
+                        "</li><li>",
+                        .("These are <strong>crude</strong> rates: each assumes a constant hazard over the interval it summarizes, and none is adjusted for any other variable. Where the hazard changes with time, prefer the Kaplan-Meier and Cox output above"),
+                        "</li><li>",
+                        .("No rate ratio or between-group test is computed here; use the log-rank test and the hazard ratio for group comparisons"),
+                        "</li></ul></div>")
                     self$results$personTimeExplanation$setContent(person_time_explanation_html)
                 }
             }
@@ -3827,7 +3900,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
                 # read off image$state because .load() can render without .run().
                 if (private$.isCompetingRisk(image$state))
                     return(private$.competingRiskPlotRefusal(
-                        "The Kaplan-Meier survival curve", ggtheme))
+                        .("The Kaplan-Meier survival curve"), ggtheme))
 
                 results <- image$state
 
@@ -3854,10 +3927,9 @@ survivalClass <- if (requireNamespace('jmvcore'))
 
                 myformula <- private$.buildSurvFormula(mytime, myoutcome)
 
-                # Get original display name for plot title
-                labelled_data <- private$.getData()
-                original_names_mapping <- labelled_data$original_names_mapping
-                title2 <- .survivalDisplayName(myfactor, original_names_mapping)
+                # Display name of the grouping variable; a state saved before it was stored
+                # falls back to the column name.
+                title2 <- if (is.null(results$title2)) myfactor else results$title2
 
                 plot <- plotData %>%
                     finalfit::surv_plot(
@@ -3935,10 +4007,9 @@ survivalClass <- if (requireNamespace('jmvcore'))
 
                 myformula <- private$.buildSurvFormula(mytime, myoutcome)
 
-                # Get original display name for plot title
-                labelled_data <- private$.getData()
-                original_names_mapping <- labelled_data$original_names_mapping
-                title2 <- .survivalDisplayName(myfactor, original_names_mapping)
+                # Display name of the grouping variable; a state saved before it was stored
+                # falls back to the column name.
+                title2 <- if (is.null(results$title2)) myfactor else results$title2
 
                 plot2 <- plotData %>%
                     finalfit::surv_plot(
@@ -4014,10 +4085,9 @@ survivalClass <- if (requireNamespace('jmvcore'))
 
                 myformula <- private$.buildSurvFormula(mytime, myoutcome)
 
-                # Get original display name for plot title
-                labelled_data <- private$.getData()
-                original_names_mapping <- labelled_data$original_names_mapping
-                title2 <- .survivalDisplayName(myfactor, original_names_mapping)
+                # Display name of the grouping variable; a state saved before it was stored
+                # falls back to the column name.
+                title2 <- if (is.null(results$title2)) myfactor else results$title2
 
                 plot3 <- plotData %>%
                     finalfit::surv_plot(
@@ -4064,7 +4134,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
                 # hand-off and this curve renders inverted.
                 if (private$.isCompetingRisk(image7$state))
                     return(private$.competingRiskPlotRefusal(
-                        "The log-log survival plot", ggtheme))
+                        .("The log-log survival plot"), ggtheme))
 
                 results <- image7$state
 
@@ -4092,10 +4162,9 @@ survivalClass <- if (requireNamespace('jmvcore'))
 
                 km_fit <- survival::survfit(myformula, data = plotData, conf.type = "log-log")
 
-                # Get original display name for plot title
-                labelled_data <- private$.getData()
-                original_names_mapping <- labelled_data$original_names_mapping
-                title2 <- .survivalDisplayName(myfactor, original_names_mapping)
+                # Display name of the grouping variable; a state saved before it was stored
+                # falls back to the column name.
+                title2 <- if (is.null(results$title2)) myfactor else results$title2
 
                 # log(-log S(t)) against log(t) from the Kaplan-Meier fit at its own event times.
                 # The estimate is a step function, so it is drawn with geom_step. (This used to try
@@ -4172,10 +4241,6 @@ survivalClass <- if (requireNamespace('jmvcore'))
                     jmvcore::toNumeric(plotData[[mytime]])
 
 
-                # Get original display name for plot title
-                labelled_data <- private$.getData()
-                original_names_mapping <- labelled_data$original_names_mapping
-                title2 <- .survivalDisplayName(myfactor, original_names_mapping)
 
 
                 myformula <- .asSurvivalFormula(private$.buildSurvFormula(mytime, myoutcome, myfactor))
@@ -4273,7 +4338,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
                 # alone let the hand-off through.
                 if (private$.isCompetingRisk(image8$state))
                     return(private$.competingRiskPlotRefusal(
-                        "The proportional-hazards (Schoenfeld) plot", ggtheme))
+                        .("The proportional-hazards (Schoenfeld) plot"), ggtheme))
 
                 zph_state <- image8$state
 
@@ -4351,334 +4416,369 @@ survivalClass <- if (requireNamespace('jmvcore'))
             
             # Populate Explanations ----
             ,
+            # library-audit 2026-11-20 jsurvival [LOW] DONE: each paragraph, heading and cell below is one
+            #   .() string, and a sentence built around a value is one .pasteT() template (guide section 9)
             .populateExplanations = function() {
                 if (!self$options$showExplanations) return()
                 
                 # Median Survival Explanation
-                private$.setExplanationContent("medianSurvivalExplanation", '
-                <div style="margin-bottom: 20px; padding: 15px; background-color: rgba(33, 149, 188, 0.1); border-left: 4px solid #17a2b8; color: inherit;">
-                    <h4> Understanding Your Median Survival Results</h4>
-                    <p><strong>What is Median Survival?</strong> The median survival time tells you when half of your study population experienced the event you are studying.</p>
-                    
-                    <h5> How to Read Your Results:</h5>
-                    <table style="width:100%; margin: 10px 0;">
-                        <tr style="background-color: rgba(138, 155, 172, 0.06); color: inherit;">
-                            <td style="padding: 5px;"><strong>Records</strong></td>
-                            <td style="padding: 5px;">Total number of patients in your study group</td>
-                        </tr>
-                        <tr>
-                            <td style="padding: 5px;"><strong>Events</strong></td>
-                            <td style="padding: 5px;">Number of patients who experienced the outcome (e.g., death, recurrence)</td>
-                        </tr>
-                        <tr style="background-color: rgba(138, 155, 172, 0.06); color: inherit;">
-                            <td style="padding: 5px;"><strong>Median</strong></td>
-                            <td style="padding: 5px;">The time when 50% of patients had the event</td>
-                        </tr>
-                        <tr>
-                            <td style="padding: 5px;"><strong>95% CI</strong></td>
-                            <td style="padding: 5px;">Range of median values compatible with the data (over repeated studies, 95% of such intervals contain the true median)</td>
-                        </tr>
-                        <tr style="background-color: rgba(138, 155, 172, 0.06); color: inherit;">
-                            <td style="padding: 5px;"><strong>Not Reached (NR)</strong></td>
-                            <td style="padding: 5px;">Fewer than half the patients had the event during the observed follow-up. This may mean long survival, but short follow-up or heavy censoring gives the same result.</td>
-                        </tr>
-                    </table>
-                    
-                    <h5> Practical Example:</h5>
-                    <p>If median survival = 24 months with 95% CI (18-30):</p>
-                    <ul>
-                        <li>Half your patients survived longer than 24 months</li>
-                        <li>Medians from 18 to 30 months are compatible with these data; over repeated studies, 95% of such intervals would contain the true median</li>
-                        <li>This helps predict typical patient outcomes for treatment planning</li>
-                    </ul>
-                    
-                    <h5> Important Notes:</h5>
-                    <ul>
-                        <li>Median is better than mean for survival data as it is not affected by extreme values</li>
-                        <li>Wide confidence intervals suggest more uncertainty (often due to small sample size)</li>
-                        <li>"Not Reached" is often a positive finding indicating good survival</li>
-                    </ul>
-                </div>
-                ')
+                private$.setExplanationContent("medianSurvivalExplanation", paste0(
+                    '<div style="margin-bottom: 20px; padding: 15px; background-color: rgba(33, 149, 188, 0.1); border-left: 4px solid #17a2b8; color: inherit;"><h4>',
+                    .("Understanding Your Median Survival Results"),
+                    "</h4><p>",
+                    .("<strong>What is Median Survival?</strong> The median survival time tells you when half of your study population experienced the event you are studying."),
+                    "</p><h5>",
+                    .("How to Read Your Results:"),
+                    '</h5><table style="width:100%; margin: 10px 0;"><tr style="background-color: rgba(138, 155, 172, 0.06); color: inherit;"><td style="padding: 5px;"><strong>',
+                    .("Records"),
+                    '</strong></td><td style="padding: 5px;">',
+                    .("Total number of patients in your study group"),
+                    '</td></tr><tr><td style="padding: 5px;"><strong>',
+                    .("Events"),
+                    '</strong></td><td style="padding: 5px;">',
+                    .("Number of patients who experienced the outcome (e.g., death, recurrence)"),
+                    '</td></tr><tr style="background-color: rgba(138, 155, 172, 0.06); color: inherit;"><td style="padding: 5px;"><strong>',
+                    .("Median"),
+                    '</strong></td><td style="padding: 5px;">',
+                    .("The time when 50% of patients had the event"),
+                    '</td></tr><tr><td style="padding: 5px;"><strong>',
+                    .("95% CI"),
+                    '</strong></td><td style="padding: 5px;">',
+                    .("Range of median values compatible with the data (over repeated studies, 95% of such intervals contain the true median)"),
+                    '</td></tr><tr style="background-color: rgba(138, 155, 172, 0.06); color: inherit;"><td style="padding: 5px;"><strong>',
+                    .("Not Reached (NR)"),
+                    '</strong></td><td style="padding: 5px;">',
+                    .("Fewer than half the patients had the event during the observed follow-up. This may mean long survival, but short follow-up or heavy censoring gives the same result."),
+                    "</td></tr></table><h5>",
+                    .("Practical Example:"),
+                    "</h5><p>",
+                    .("If median survival = 24 months with 95% CI (18-30):"),
+                    "</p><ul><li>",
+                    .("Half your patients survived longer than 24 months"),
+                    "</li><li>",
+                    .("Medians from 18 to 30 months are compatible with these data; over repeated studies, 95% of such intervals would contain the true median"),
+                    "</li><li>",
+                    .("This helps predict typical patient outcomes for treatment planning"),
+                    "</li></ul><h5>",
+                    .("Important Notes:"),
+                    "</h5><ul><li>",
+                    .("Median is better than mean for survival data as it is not affected by extreme values"),
+                    "</li><li>",
+                    .("Wide confidence intervals suggest more uncertainty (often due to small sample size)"),
+                    "</li><li>",
+                    .("\"Not Reached\" is often a positive finding indicating good survival"),
+                    "</li></ul></div>"))
                 
                 # Cox Regression Explanation
-                private$.setExplanationContent("coxRegressionExplanation", '
-                <div style="margin-bottom: 20px; padding: 15px; background-color: rgba(255, 202, 33, 0.23); border-left: 4px solid #ffc107; color: inherit;">
-                    <h4> Understanding Your Cox Regression Results</h4>
-                    <p><strong>What is Cox Regression?</strong> This analysis compares the rate at which the event occurs between groups, using every patient for as long as they were actually followed.</p>
-                    
-                    <h5> Key Metric: Hazard Ratio (HR)</h5>
-                    <p>The hazard ratio compares how fast the event is happening in one group versus another, counting only the patients still event-free at each moment. It is not a ratio of cumulative risks and it does not mean one group is X times more likely to have the event: an HR of 2 does not say that twice as many patients end up with the event by the end of follow-up. For cumulative percentages read the survival probability table and the Kaplan-Meier curve in this same analysis.</p>
-                    
-                    <table style="width:100%; margin: 10px 0; border-collapse: collapse;">
-                        <tr style="background-color: rgba(138, 155, 172, 0.06); color: inherit;">
-                            <th style="padding: 8px; text-align: left;">HR Value</th>
-                            <th style="padding: 8px; text-align: left;">Meaning</th>
-                            <th style="padding: 8px; text-align: left;">Plain English</th>
-                        </tr>
-                        <tr>
-                            <td style="padding: 8px; border-top: 1px solid #dee2e6;"><strong>HR = 1.0</strong></td>
-                            <td style="padding: 8px; border-top: 1px solid #dee2e6;">No difference</td>
-                            <td style="padding: 8px; border-top: 1px solid #dee2e6;">Event rate is the same in both groups at any given moment</td>
-                        </tr>
-                        <tr style="background-color: rgba(255, 33, 67, 0.09); color: inherit;">
-                            <td style="padding: 8px;"><strong>HR = 2.0</strong></td>
-                            <td style="padding: 8px;">Twice the hazard</td>
-                            <td style="padding: 8px;">Event rate is 2\u00d7 as high at any given moment</td>
-                        </tr>
-                        <tr style="background-color: rgba(33, 159, 43, 0.1); color: inherit;">
-                            <td style="padding: 8px;"><strong>HR = 0.5</strong></td>
-                            <td style="padding: 8px;">Half the hazard</td>
-                            <td style="padding: 8px;">Event rate is half as high at any given moment</td>
-                        </tr>
-                        <tr style="background-color: rgba(255, 33, 67, 0.09); color: inherit;">
-                            <td style="padding: 8px;"><strong>HR = 3.0</strong></td>
-                            <td style="padding: 8px;">Three times the hazard</td>
-                            <td style="padding: 8px;">Event rate is 3\u00d7 as high at any given moment</td>
-                        </tr>
-                        <tr style="background-color: rgba(33, 159, 43, 0.1); color: inherit;">
-                            <td style="padding: 8px;"><strong>HR = 0.25</strong></td>
-                            <td style="padding: 8px;">Quarter the hazard</td>
-                            <td style="padding: 8px;">Event rate is one quarter as high at any given moment</td>
-                        </tr>
-                    </table>
-                    
-                    <h5> Statistical Significance:</h5>
-                    <ul>
-                        <li><strong>P-value < 0.05:</strong> The data are unlikely under the hypothesis of no difference. This is not the probability that the finding is due to chance.</li>
-                        <li><strong>95% CI includes 1.0:</strong> The difference is NOT statistically significant</li>
-                        <li><strong>95% CI excludes 1.0:</strong> The difference IS statistically significant</li>
-                    </ul>
-                    
-                    <h5> Clinical Example:</h5>
-                    <p>If Treatment A vs Treatment B shows HR = 0.60 (95% CI: 0.40-0.85, p=0.004):</p>
-                    <ul style="background-color: rgba(33, 159, 43, 0.1); padding: 10px; border-radius: 5px; color: inherit;">
-                        <li>Treatment A has 0.60 times the hazard of Treatment B at any moment - a relative rate, not a 40% cut in cumulative risk</li>
-                        <li>The result is statistically significant (p < 0.05 and CI excludes 1.0)</li>
-                        <li>The interval 0.40 to 0.85 is the range of hazard ratios compatible with the data; it does not translate directly into a cumulative risk difference</li>
-                    </ul>
-                    
-                    <h5> Important Considerations:</h5>
-                    <ul>
-                        <li>HR assumes proportional hazards (the hazard ratio stays constant over time); it is not a cumulative risk ratio</li>
-                        <li>Wide confidence intervals suggest uncertainty (often from small sample size)</li>
-                        <li>Statistical significance does not always mean clinical importance</li>
-                    </ul>
-                </div>
-                ')
+                private$.setExplanationContent("coxRegressionExplanation", paste0(
+                    '<div style="margin-bottom: 20px; padding: 15px; background-color: rgba(255, 202, 33, 0.23); border-left: 4px solid #ffc107; color: inherit;"><h4>',
+                    .("Understanding Your Cox Regression Results"),
+                    "</h4><p>",
+                    .("<strong>What is Cox Regression?</strong> This analysis compares the rate at which the event occurs between groups, using every patient for as long as they were actually followed."),
+                    "</p><h5>",
+                    .("Key Metric: Hazard Ratio (HR)"),
+                    "</h5><p>",
+                    .("The hazard ratio compares how fast the event is happening in one group versus another, counting only the patients still event-free at each moment. It is not a ratio of cumulative risks and it does not mean one group is X times more likely to have the event: an HR of 2 does not say that twice as many patients end up with the event by the end of follow-up. For cumulative percentages read the survival probability table and the Kaplan-Meier curve in this same analysis."),
+                    '</p><table style="width:100%; margin: 10px 0; border-collapse: collapse;"><tr style="background-color: rgba(138, 155, 172, 0.06); color: inherit;"><th style="padding: 8px; text-align: left;">',
+                    .("HR Value"),
+                    '</th><th style="padding: 8px; text-align: left;">',
+                    .("Meaning"),
+                    '</th><th style="padding: 8px; text-align: left;">',
+                    .("Plain English"),
+                    '</th></tr><tr><td style="padding: 8px; border-top: 1px solid #dee2e6;"><strong>',
+                    .("HR = 1.0"),
+                    '</strong></td><td style="padding: 8px; border-top: 1px solid #dee2e6;">',
+                    .("No difference"),
+                    '</td><td style="padding: 8px; border-top: 1px solid #dee2e6;">',
+                    .("Event rate is the same in both groups at any given moment"),
+                    '</td></tr><tr style="background-color: rgba(255, 33, 67, 0.09); color: inherit;"><td style="padding: 8px;"><strong>',
+                    .("HR = 2.0"),
+                    '</strong></td><td style="padding: 8px;">',
+                    .("Twice the hazard"),
+                    '</td><td style="padding: 8px;">',
+                    .("Event rate is 2\u00d7 as high at any given moment"),
+                    '</td></tr><tr style="background-color: rgba(33, 159, 43, 0.1); color: inherit;"><td style="padding: 8px;"><strong>',
+                    .("HR = 0.5"),
+                    '</strong></td><td style="padding: 8px;">',
+                    .("Half the hazard"),
+                    '</td><td style="padding: 8px;">',
+                    .("Event rate is half as high at any given moment"),
+                    '</td></tr><tr style="background-color: rgba(255, 33, 67, 0.09); color: inherit;"><td style="padding: 8px;"><strong>',
+                    .("HR = 3.0"),
+                    '</strong></td><td style="padding: 8px;">',
+                    .("Three times the hazard"),
+                    '</td><td style="padding: 8px;">',
+                    .("Event rate is 3\u00d7 as high at any given moment"),
+                    '</td></tr><tr style="background-color: rgba(33, 159, 43, 0.1); color: inherit;"><td style="padding: 8px;"><strong>',
+                    .("HR = 0.25"),
+                    '</strong></td><td style="padding: 8px;">',
+                    .("Quarter the hazard"),
+                    '</td><td style="padding: 8px;">',
+                    .("Event rate is one quarter as high at any given moment"),
+                    "</td></tr></table><h5>",
+                    .("Statistical Significance:"),
+                    "</h5><ul><li>",
+                    .("<strong>P-value < 0.05:</strong> The data are unlikely under the hypothesis of no difference. This is not the probability that the finding is due to chance."),
+                    "</li><li>",
+                    .("<strong>95% CI includes 1.0:</strong> The difference is NOT statistically significant"),
+                    "</li><li>",
+                    .("<strong>95% CI excludes 1.0:</strong> The difference IS statistically significant"),
+                    "</li></ul><h5>",
+                    .("Clinical Example:"),
+                    "</h5><p>",
+                    .("If Treatment A vs Treatment B shows HR = 0.60 (95% CI: 0.40-0.85, p=0.004):"),
+                    '</p><ul style="background-color: rgba(33, 159, 43, 0.1); padding: 10px; border-radius: 5px; color: inherit;"><li>',
+                    .("Treatment A has 0.60 times the hazard of Treatment B at any moment - a relative rate, not a 40% cut in cumulative risk"),
+                    "</li><li>",
+                    .("The result is statistically significant (p < 0.05 and CI excludes 1.0)"),
+                    "</li><li>",
+                    .("The interval 0.40 to 0.85 is the range of hazard ratios compatible with the data; it does not translate directly into a cumulative risk difference"),
+                    "</li></ul><h5>",
+                    .("Important Considerations:"),
+                    "</h5><ul><li>",
+                    .("HR assumes proportional hazards (the hazard ratio stays constant over time); it is not a cumulative risk ratio"),
+                    "</li><li>",
+                    .("Wide confidence intervals suggest uncertainty (often from small sample size)"),
+                    "</li><li>",
+                    .("Statistical significance does not always mean clinical importance"),
+                    "</li></ul></div>"))
                 
                 # Survival Tables Explanation
-                private$.setExplanationContent("survivalTablesExplanation", '
-                <div style="margin-bottom: 20px; padding: 15px; background-color: rgba(33, 162, 64, 0.19); border-left: 4px solid #28a745; color: inherit;">
-                    <h4> Understanding Your Survival Probability Tables</h4>
-                    <p><strong>What are Survival Tables?</strong> These tables show the percentage of patients surviving at key time points, which are standard benchmarks in medical research.</p>
-                    
-                    <h5> How to Read the Table Columns:</h5>
-                    <table style="width:100%; margin: 10px 0; border-collapse: collapse;">
-                        <tr style="background-color: rgba(138, 155, 172, 0.06); color: inherit;">
-                            <th style="padding: 8px; text-align: left;">Column</th>
-                            <th style="padding: 8px; text-align: left;">What It Means</th>
-                            <th style="padding: 8px; text-align: left;">Example</th>
-                        </tr>
-                        <tr>
-                            <td style="padding: 8px; border-top: 1px solid #dee2e6;"><strong>Time</strong></td>
-                            <td style="padding: 8px; border-top: 1px solid #dee2e6;">Time point of measurement</td>
-                            <td style="padding: 8px; border-top: 1px solid #dee2e6;">12 months (1 year)</td>
-                        </tr>
-                        <tr style="background-color: rgba(138, 155, 172, 0.06); color: inherit;">
-                            <td style="padding: 8px;"><strong>n.risk</strong></td>
-                            <td style="padding: 8px;">Patients still being followed</td>
-                            <td style="padding: 8px;">85 of 100 still in study</td>
-                        </tr>
-                        <tr>
-                            <td style="padding: 8px;"><strong>n.event</strong></td>
-                            <td style="padding: 8px;">Events since the previous time point</td>
-                            <td style="padding: 8px;">6 events in this interval</td>
-                        </tr>
-                        <tr style="background-color: rgba(138, 155, 172, 0.06); color: inherit;">
-                            <td style="padding: 8px;"><strong>survival</strong></td>
-                            <td style="padding: 8px;">% surviving past this time</td>
-                            <td style="padding: 8px;">85% still event-free</td>
-                        </tr>
-                        <tr>
-                            <td style="padding: 8px;"><strong>95% CI</strong></td>
-                            <td style="padding: 8px;">Confidence range</td>
-                            <td style="padding: 8px;">True rate likely 78-92%</td>
-                        </tr>
-                    </table>
-                    
-                    <h5> Common Medical Benchmarks:</h5>
-                    <div style="background-color: rgba(33, 152, 239, 0.13); padding: 10px; border-radius: 5px; margin: 10px 0; color: inherit;">
-                        <ul style="margin: 5px 0;">
-                            <li><strong>1-year survival:</strong> Short-term prognosis indicator</li>
-                            <li><strong>3-year survival:</strong> Medium-term outcome measure</li>
-                            <li><strong>5-year survival:</strong> Standard long-term benchmark (especially in cancer)</li>
-                            <li><strong>10-year survival:</strong> Very long-term outcomes (chronic diseases)</li>
-                        </ul>
-                    </div>
-                    
-                    <h5> Practical Example:</h5>
-                    <p>If your table shows:</p>
-                    <table style="background-color: rgba(138, 155, 172, 0.06); padding: 5px; margin: 10px 0; color: inherit;">
-                        <tr>
-                            <td>5-year survival = 72% (95% CI: 65-79%)</td>
-                        </tr>
-                    </table>
-                    <p>This means:</p>
-                    <ul>
-                        <li>an estimated 72% remained event-free at 5 years</li>
-                        <li>Rates from 65% to 79% are compatible with these data; over repeated studies, 95% of such intervals would contain the true rate</li>
-                        <li>This can be compared to published rates for similar populations</li>
-                    </ul>
-                    
-                    <h5> Key Points to Remember:</h5>
-                    <ul>
-                        <li>Decreasing "n.risk" over time is normal (patients complete follow-up)</li>
-                        <li>Wider confidence intervals at later times reflect fewer patients at risk</li>
-                        <li>Compare your rates to established benchmarks in your field</li>
-                        <li>Consider both statistical and clinical significance</li>
-                    </ul>
-                </div>
-                ')
+                private$.setExplanationContent("survivalTablesExplanation", paste0(
+                    '<div style="margin-bottom: 20px; padding: 15px; background-color: rgba(33, 162, 64, 0.19); border-left: 4px solid #28a745; color: inherit;"><h4>',
+                    .("Understanding Your Survival Probability Tables"),
+                    "</h4><p>",
+                    .("<strong>What are Survival Tables?</strong> These tables show the percentage of patients surviving at key time points, which are standard benchmarks in medical research."),
+                    "</p><h5>",
+                    .("How to Read the Table Columns:"),
+                    '</h5><table style="width:100%; margin: 10px 0; border-collapse: collapse;"><tr style="background-color: rgba(138, 155, 172, 0.06); color: inherit;"><th style="padding: 8px; text-align: left;">',
+                    .("Column"),
+                    '</th><th style="padding: 8px; text-align: left;">',
+                    .("What It Means"),
+                    '</th><th style="padding: 8px; text-align: left;">',
+                    .("Example"),
+                    '</th></tr><tr><td style="padding: 8px; border-top: 1px solid #dee2e6;"><strong>',
+                    .("Time"),
+                    '</strong></td><td style="padding: 8px; border-top: 1px solid #dee2e6;">',
+                    .("Time point of measurement"),
+                    '</td><td style="padding: 8px; border-top: 1px solid #dee2e6;">',
+                    .("12 months (1 year)"),
+                    '</td></tr><tr style="background-color: rgba(138, 155, 172, 0.06); color: inherit;"><td style="padding: 8px;"><strong>',
+                    .("n.risk"),
+                    '</strong></td><td style="padding: 8px;">',
+                    .("Patients still being followed"),
+                    '</td><td style="padding: 8px;">',
+                    .("85 of 100 still in study"),
+                    '</td></tr><tr><td style="padding: 8px;"><strong>',
+                    .("n.event"),
+                    '</strong></td><td style="padding: 8px;">',
+                    .("Events since the previous time point"),
+                    '</td><td style="padding: 8px;">',
+                    .("6 events in this interval"),
+                    '</td></tr><tr style="background-color: rgba(138, 155, 172, 0.06); color: inherit;"><td style="padding: 8px;"><strong>',
+                    .("survival"),
+                    '</strong></td><td style="padding: 8px;">',
+                    .("% surviving past this time"),
+                    '</td><td style="padding: 8px;">',
+                    .("85% still event-free"),
+                    '</td></tr><tr><td style="padding: 8px;"><strong>',
+                    .("95% CI"),
+                    '</strong></td><td style="padding: 8px;">',
+                    .("Confidence range"),
+                    '</td><td style="padding: 8px;">',
+                    .("True rate likely 78-92%"),
+                    "</td></tr></table><h5>",
+                    .("Common Medical Benchmarks:"),
+                    '</h5><div style="background-color: rgba(33, 152, 239, 0.13); padding: 10px; border-radius: 5px; margin: 10px 0; color: inherit;"><ul style="margin: 5px 0;"><li>',
+                    .("<strong>1-year survival:</strong> Short-term prognosis indicator"),
+                    "</li><li>",
+                    .("<strong>3-year survival:</strong> Medium-term outcome measure"),
+                    "</li><li>",
+                    .("<strong>5-year survival:</strong> Standard long-term benchmark (especially in cancer)"),
+                    "</li><li>",
+                    .("<strong>10-year survival:</strong> Very long-term outcomes (chronic diseases)"),
+                    "</li></ul></div><h5>",
+                    .("Practical Example:"),
+                    "</h5><p>",
+                    .("If your table shows:"),
+                    '</p><table style="background-color: rgba(138, 155, 172, 0.06); padding: 5px; margin: 10px 0; color: inherit;"><tr><td>',
+                    .("5-year survival = 72% (95% CI: 65-79%)"),
+                    "</td></tr></table><p>",
+                    .("This means:"),
+                    "</p><ul><li>",
+                    .("an estimated 72% remained event-free at 5 years"),
+                    "</li><li>",
+                    .("Rates from 65% to 79% are compatible with these data; over repeated studies, 95% of such intervals would contain the true rate"),
+                    "</li><li>",
+                    .("This can be compared to published rates for similar populations"),
+                    "</li></ul><h5>",
+                    .("Key Points to Remember:"),
+                    "</h5><ul><li>",
+                    .("Decreasing \"n.risk\" over time is normal (patients complete follow-up)"),
+                    "</li><li>",
+                    .("Wider confidence intervals at later times reflect fewer patients at risk"),
+                    "</li><li>",
+                    .("Compare your rates to established benchmarks in your field"),
+                    "</li><li>",
+                    .("Consider both statistical and clinical significance"),
+                    "</li></ul></div>"))
                 
                 # personTimeExplanation is written by the person-time method itself
                 # (it describes exactly what that table contains); do not overwrite it here.
 
                 # RMST Explanation
-                private$.setExplanationContent("rmstExplanation", '
-                <div style="margin-bottom: 20px; padding: 15px; background-color: rgba(33, 41, 56, 0.13); border-left: 4px solid #6c757d; color: inherit;">
-                    <h4>Understanding Restricted Mean Survival Time (RMST)</h4>
-                    <p><strong>RMST:</strong> Average survival time up to a specified time horizon (\u03c4).</p>
-                    <ul>
-                        <li><strong>Interpretation:</strong> Mean survival time within the observation period</li>
-                        <li><strong>Time Horizon (\u03c4):</strong> Maximum follow-up time considered</li>
-                        <li><strong>Robust Measure:</strong> Less affected by tail behavior than median survival</li>
-                        <li><strong>Difference in RMST:</strong> Directly interpretable as difference in mean survival time</li>
-                    </ul>
-                    <p><em>When to use:</em> Particularly useful when median survival cannot be estimated (too few events) or when comparing survival over a specific time period.</p>
-                </div>
-                ')
+                private$.setExplanationContent("rmstExplanation", paste0(
+                    '<div style="margin-bottom: 20px; padding: 15px; background-color: rgba(33, 41, 56, 0.13); border-left: 4px solid #6c757d; color: inherit;"><h4>',
+                    .("Understanding Restricted Mean Survival Time (RMST)"),
+                    "</h4><p>",
+                    .("<strong>RMST:</strong> Average survival time up to a specified time horizon (\u03c4)."),
+                    "</p><ul><li>",
+                    .("<strong>Interpretation:</strong> Mean survival time within the observation period"),
+                    "</li><li>",
+                    .("<strong>Time Horizon (\u03c4):</strong> Maximum follow-up time considered"),
+                    "</li><li>",
+                    .("<strong>Robust Measure:</strong> Less affected by tail behavior than median survival"),
+                    "</li><li>",
+                    .("<strong>Difference in RMST:</strong> Directly interpretable as difference in mean survival time"),
+                    "</li></ul><p>",
+                    .("<em>When to use:</em> Particularly useful when median survival cannot be estimated (too few events) or when comparing survival over a specific time period."),
+                    "</p></div>"))
                 
                 # Residual Diagnostics Explanation
-                private$.setExplanationContent("residualDiagnosticsExplanation", '
-                <div style="margin-bottom: 20px; padding: 15px; background-color: rgba(255, 202, 33, 0.4); border-left: 4px solid #fdcb6e; color: inherit;">
-                    <h4>Understanding Cox Model Residual Diagnostics</h4>
-                    <p><strong>Model Residuals:</strong> Help assess model fit and identify potential problems.</p>
-                    <ul>
-                        <li><strong>Martingale Residuals:</strong> Detect outliers and functional form issues (should scatter around 0)</li>
-                        <li><strong>Deviance Residuals:</strong> Standardized residuals for outlier detection (approximately normal if model fits)</li>
-                        <li><strong>Score Residuals:</strong> Assess influence of observations on regression coefficients</li>
-                        <li><strong>Schoenfeld Residuals:</strong> Test proportional hazards assumption (should be independent of time)</li>
-                    </ul>
-                    <p><em>Clinical interpretation:</em> Large residuals may indicate patients with unusual survival patterns or data quality issues.</p>
-                </div>
-                ')
+                private$.setExplanationContent("residualDiagnosticsExplanation", paste0(
+                    '<div style="margin-bottom: 20px; padding: 15px; background-color: rgba(255, 202, 33, 0.4); border-left: 4px solid #fdcb6e; color: inherit;"><h4>',
+                    .("Understanding Cox Model Residual Diagnostics"),
+                    "</h4><p>",
+                    .("<strong>Model Residuals:</strong> Help assess model fit and identify potential problems."),
+                    "</p><ul><li>",
+                    .("<strong>Martingale Residuals:</strong> Detect outliers and functional form issues (should scatter around 0)"),
+                    "</li><li>",
+                    .("<strong>Deviance Residuals:</strong> Standardized residuals for outlier detection (approximately normal if model fits)"),
+                    "</li><li>",
+                    .("<strong>Score Residuals:</strong> Assess influence of observations on regression coefficients"),
+                    "</li><li>",
+                    .("<strong>Schoenfeld Residuals:</strong> Test proportional hazards assumption (should be independent of time)"),
+                    "</li></ul><p>",
+                    .("<em>Clinical interpretation:</em> Large residuals may indicate patients with unusual survival patterns or data quality issues."),
+                    "</p></div>"))
                 
                 # Survival Plots Explanation
-                private$.setExplanationContent("survivalPlotsExplanation", '
-                <div style="margin-bottom: 20px; padding: 15px; background-color: rgba(33, 163, 188, 0.21); border-left: 4px solid #bee5eb; color: inherit;">
-                    <h4> Understanding Your Survival Curves and Plots</h4>
-                    <p><strong>What are Survival Curves?</strong> These graphs show how the probability of survival changes over time for different groups.</p>
-                    
-                    <h5> Types of Plots Available:</h5>
-                    <table style="width:100%; margin: 10px 0; border-collapse: collapse;">
-                        <tr style="background-color: rgba(138, 155, 172, 0.06); color: inherit;">
-                            <th style="padding: 8px; text-align: left;">Plot Type</th>
-                            <th style="padding: 8px; text-align: left;">What It Shows</th>
-                            <th style="padding: 8px; text-align: left;">When to Use</th>
-                        </tr>
-                        <tr>
-                            <td style="padding: 8px; border-top: 1px solid #dee2e6;"><strong>Survival Curve</strong></td>
-                            <td style="padding: 8px; border-top: 1px solid #dee2e6;">% surviving over time</td>
-                            <td style="padding: 8px; border-top: 1px solid #dee2e6;">Standard presentation</td>
-                        </tr>
-                        <tr style="background-color: rgba(138, 155, 172, 0.06); color: inherit;">
-                            <td style="padding: 8px;"><strong>Cumulative Events</strong></td>
-                            <td style="padding: 8px;">% experiencing event</td>
-                            <td style="padding: 8px;">Focus on event occurrence</td>
-                        </tr>
-                        <tr>
-                            <td style="padding: 8px;"><strong>Cumulative Hazard</strong></td>
-                            <td style="padding: 8px;">Accumulated risk</td>
-                            <td style="padding: 8px;">Technical assessment</td>
-                        </tr>
-                        <tr style="background-color: rgba(138, 155, 172, 0.06); color: inherit;">
-                            <td style="padding: 8px;"><strong>Log-Log Plot</strong></td>
-                            <td style="padding: 8px;">Model assumptions</td>
-                            <td style="padding: 8px;">Check proportional hazards</td>
-                        </tr>
-                    </table>
-                    
-                    <h5> How to Read Survival Curves:</h5>
-                    <div style="background-color: rgba(255, 202, 33, 0.23); padding: 10px; border-radius: 5px; margin: 10px 0; color: inherit;">
-                        <ul style="margin: 5px 0;">
-                            <li><strong>Y-axis (0-1 or 0-100%):</strong> Probability of survival</li>
-                            <li><strong>X-axis:</strong> Time since study start</li>
-                            <li><strong>Steps down:</strong> Each step represents an event</li>
-                            <li><strong>Tick marks (+):</strong> Censored patients (lost to follow-up)</li>
-                            <li><strong>Shaded areas:</strong> 95% confidence intervals</li>
-                        </ul>
-                    </div>
-                    
-                    <h5> What to Look For:</h5>
-                    <table style="width:100%; margin: 10px 0;">
-                        <tr>
-                            <td style="padding: 8px; background-color: rgba(33, 159, 43, 0.1); color: inherit;"><strong> Curves separate early</strong></td>
-                            <td style="padding: 8px;">Visible separation; check the log-rank test for statistical evidence</td>
-                        </tr>
-                        <tr>
-                            <td style="padding: 8px; background-color: rgba(255, 33, 67, 0.09); color: inherit;"><strong> Curves overlap</strong></td>
-                            <td style="padding: 8px;">No clear separation by eye; overlap is not evidence of no difference - check the log-rank test, especially with few events</td>
-                        </tr>
-                        <tr>
-                            <td style="padding: 8px; background-color: rgba(33, 152, 239, 0.13); color: inherit;"><strong> Curves cross</strong></td>
-                            <td style="padding: 8px;">Effect changes over time</td>
-                        </tr>
-                        <tr>
-                            <td style="padding: 8px; background-color: rgba(255, 202, 33, 0.23); color: inherit;"><strong> Steep drop</strong></td>
-                            <td style="padding: 8px;">High early event rate</td>
-                        </tr>
-                        <tr>
-                            <td style="padding: 8px; background-color: rgba(153, 33, 170, 0.12); color: inherit;"><strong>\u2192 Flat plateau</strong></td>
-                            <td style="padding: 8px;">Stable period (few events)</td>
-                        </tr>
-                    </table>
-                    
-                    <h5> Risk Table (Below Plot):</h5>
-                    <p>Shows how many patients are still being followed at each time point:</p>
-                    <ul>
-                        <li>Helps assess reliability of estimates</li>
-                        <li>Fewer patients = wider confidence intervals</li>
-                        <li>Important for interpreting late time points</li>
-                    </ul>
-                    
-                    <h5> Clinical Interpretation Tips:</h5>
-                    <ul>
-                        <li><strong>Median survival:</strong> Where curve crosses 50% line</li>
-                        <li><strong>1-year survival:</strong> Height of curve at 12 months</li>
-                        <li><strong>Statistical significance:</strong> Read it from the log-rank test or the Cox p-value; overlapping confidence bands do not by themselves mean p &gt;= 0.05</li>
-                        <li><strong>Clinical significance:</strong> Consider if differences are meaningful for patients</li>
-                    </ul>
-                </div>
-                ')
+                private$.setExplanationContent("survivalPlotsExplanation", paste0(
+                    '<div style="margin-bottom: 20px; padding: 15px; background-color: rgba(33, 163, 188, 0.21); border-left: 4px solid #bee5eb; color: inherit;"><h4>',
+                    .("Understanding Your Survival Curves and Plots"),
+                    "</h4><p>",
+                    .("<strong>What are Survival Curves?</strong> These graphs show how the probability of survival changes over time for different groups."),
+                    "</p><h5>",
+                    .("Types of Plots Available:"),
+                    '</h5><table style="width:100%; margin: 10px 0; border-collapse: collapse;"><tr style="background-color: rgba(138, 155, 172, 0.06); color: inherit;"><th style="padding: 8px; text-align: left;">',
+                    .("Plot Type"),
+                    '</th><th style="padding: 8px; text-align: left;">',
+                    .("What It Shows"),
+                    '</th><th style="padding: 8px; text-align: left;">',
+                    .("When to Use"),
+                    '</th></tr><tr><td style="padding: 8px; border-top: 1px solid #dee2e6;"><strong>',
+                    .("Survival Curve"),
+                    '</strong></td><td style="padding: 8px; border-top: 1px solid #dee2e6;">',
+                    .("% surviving over time"),
+                    '</td><td style="padding: 8px; border-top: 1px solid #dee2e6;">',
+                    .("Standard presentation"),
+                    '</td></tr><tr style="background-color: rgba(138, 155, 172, 0.06); color: inherit;"><td style="padding: 8px;"><strong>',
+                    .("Cumulative Events"),
+                    '</strong></td><td style="padding: 8px;">',
+                    .("% experiencing event"),
+                    '</td><td style="padding: 8px;">',
+                    .("Focus on event occurrence"),
+                    '</td></tr><tr><td style="padding: 8px;"><strong>',
+                    .("Cumulative Hazard"),
+                    '</strong></td><td style="padding: 8px;">',
+                    .("Accumulated risk"),
+                    '</td><td style="padding: 8px;">',
+                    .("Technical assessment"),
+                    '</td></tr><tr style="background-color: rgba(138, 155, 172, 0.06); color: inherit;"><td style="padding: 8px;"><strong>',
+                    .("Log-Log Plot"),
+                    '</strong></td><td style="padding: 8px;">',
+                    .("Model assumptions"),
+                    '</td><td style="padding: 8px;">',
+                    .("Check proportional hazards"),
+                    "</td></tr></table><h5>",
+                    .("How to Read Survival Curves:"),
+                    '</h5><div style="background-color: rgba(255, 202, 33, 0.23); padding: 10px; border-radius: 5px; margin: 10px 0; color: inherit;"><ul style="margin: 5px 0;"><li>',
+                    .("<strong>Y-axis (0-1 or 0-100%):</strong> Probability of survival"),
+                    "</li><li>",
+                    .("<strong>X-axis:</strong> Time since study start"),
+                    "</li><li>",
+                    .("<strong>Steps down:</strong> Each step represents an event"),
+                    "</li><li>",
+                    .("<strong>Tick marks (+):</strong> Censored patients (lost to follow-up)"),
+                    "</li><li>",
+                    .("<strong>Shaded areas:</strong> 95% confidence intervals"),
+                    "</li></ul></div><h5>",
+                    .("What to Look For:"),
+                    '</h5><table style="width:100%; margin: 10px 0;"><tr><td style="padding: 8px; background-color: rgba(33, 159, 43, 0.1); color: inherit;"><strong>',
+                    .("Curves separate early"),
+                    '</strong></td><td style="padding: 8px;">',
+                    .("Visible separation; check the log-rank test for statistical evidence"),
+                    '</td></tr><tr><td style="padding: 8px; background-color: rgba(255, 33, 67, 0.09); color: inherit;"><strong>',
+                    .("Curves overlap"),
+                    '</strong></td><td style="padding: 8px;">',
+                    .("No clear separation by eye; overlap is not evidence of no difference - check the log-rank test, especially with few events"),
+                    '</td></tr><tr><td style="padding: 8px; background-color: rgba(33, 152, 239, 0.13); color: inherit;"><strong>',
+                    .("Curves cross"),
+                    '</strong></td><td style="padding: 8px;">',
+                    .("Effect changes over time"),
+                    '</td></tr><tr><td style="padding: 8px; background-color: rgba(255, 202, 33, 0.23); color: inherit;"><strong>',
+                    .("Steep drop"),
+                    '</strong></td><td style="padding: 8px;">',
+                    .("High early event rate"),
+                    '</td></tr><tr><td style="padding: 8px; background-color: rgba(153, 33, 170, 0.12); color: inherit;"><strong>',
+                    .("\u2192 Flat plateau"),
+                    '</strong></td><td style="padding: 8px;">',
+                    .("Stable period (few events)"),
+                    "</td></tr></table><h5>",
+                    .("Risk Table (Below Plot):"),
+                    "</h5><p>",
+                    .("Shows how many patients are still being followed at each time point:"),
+                    "</p><ul><li>",
+                    .("Helps assess reliability of estimates"),
+                    "</li><li>",
+                    .("Fewer patients = wider confidence intervals"),
+                    "</li><li>",
+                    .("Important for interpreting late time points"),
+                    "</li></ul><h5>",
+                    .("Clinical Interpretation Tips:"),
+                    "</h5><ul><li>",
+                    .("<strong>Median survival:</strong> Where curve crosses 50% line"),
+                    "</li><li>",
+                    .("<strong>1-year survival:</strong> Height of curve at 12 months"),
+                    "</li><li>",
+                    .("<strong>Statistical significance:</strong> Read it from the log-rank test or the Cox p-value; overlapping confidence bands do not by themselves mean p &gt;= 0.05"),
+                    "</li><li>",
+                    .("<strong>Clinical significance:</strong> Consider if differences are meaningful for patients"),
+                    "</li></ul></div>"))
                 
                 # Parametric Models Explanation
-                private$.setExplanationContent("parametricModelsExplanation", '
-                <div style="margin-bottom: 20px; padding: 15px; background-color: rgba(216, 33, 50, 0.18); border-left: 4px solid #dc3545; color: inherit;">
-                    <h4>Understanding Parametric Survival Models</h4>
-                    <p><strong>Parametric Models:</strong> Alternative to Cox regression with explicit hazard function shapes.</p>
-                    <ul>
-                        <li><strong>Exponential:</strong> Constant hazard rate (memoryless property)</li>
-                        <li><strong>Weibull:</strong> Monotonic hazard (increasing, decreasing, or constant)</li>
-                        <li><strong>Log-Normal:</strong> Hazard increases then decreases</li>
-                        <li><strong>Log-Logistic:</strong> Similar to log-normal but with heavier tails</li>
-                        <li><strong>Gamma:</strong> Flexible hazard shape with gamma distribution</li>
-                        <li><strong>Splines:</strong> Flexible non-parametric hazard estimation</li>
-                    </ul>
-                    <p><em>Advantages:</em> Provide explicit survival functions and permit direct comparison of distributional assumptions. Extrapolation is not provided by this analysis.</p>
-                    <p><em>Model Selection:</em> Compare AIC/BIC values - lower is better. Visual fit assessment with Kaplan-Meier overlay.</p>
-                </div>
-                ')
+                private$.setExplanationContent("parametricModelsExplanation", paste0(
+                    '<div style="margin-bottom: 20px; padding: 15px; background-color: rgba(216, 33, 50, 0.18); border-left: 4px solid #dc3545; color: inherit;"><h4>',
+                    .("Understanding Parametric Survival Models"),
+                    "</h4><p>",
+                    .("<strong>Parametric Models:</strong> Alternative to Cox regression with explicit hazard function shapes."),
+                    "</p><ul><li>",
+                    .("<strong>Exponential:</strong> Constant hazard rate (memoryless property)"),
+                    "</li><li>",
+                    .("<strong>Weibull:</strong> Monotonic hazard (increasing, decreasing, or constant)"),
+                    "</li><li>",
+                    .("<strong>Log-Normal:</strong> Hazard increases then decreases"),
+                    "</li><li>",
+                    .("<strong>Log-Logistic:</strong> Similar to log-normal but with heavier tails"),
+                    "</li><li>",
+                    .("<strong>Gamma:</strong> Flexible hazard shape with gamma distribution"),
+                    "</li><li>",
+                    .("<strong>Splines:</strong> Flexible non-parametric hazard estimation"),
+                    "</li></ul><p>",
+                    .("<em>Advantages:</em> Provide explicit survival functions and permit direct comparison of distributional assumptions. Extrapolation is not provided by this analysis."),
+                    "</p><p>",
+                    .("<em>Model Selection:</em> Compare AIC/BIC values - lower is better. Visual fit assessment with Kaplan-Meier overlay."),
+                    "</p></div>"))
             }
             
             # Clinical Interpretation Helper Functions ----
@@ -4903,53 +5003,30 @@ survivalClass <- if (requireNamespace('jmvcore'))
             
             ,
             .generateClinicalGlossary = function() {
-                glossary_html <- '
-                <div style="margin-bottom: 20px; padding: 15px; background-color: rgba(138, 155, 172, 0.06); border-left: 4px solid #6c757d; color: inherit;">
-                    <h4> Clinical Terminology Glossary</h4>
-                    
-                    <div style="display: grid; gap: 10px; margin-top: 15px;">
-                        <div style="background-color: rgba(255, 255, 255, 0.06); color: inherit; padding: 10px; border-radius: 5px;">
-                            <strong>Event:</strong> The outcome of interest being studied (e.g., death, disease recurrence, treatment failure)
-                        </div>
-                        
-                        <div style="background-color: rgba(255, 255, 255, 0.06); color: inherit; padding: 10px; border-radius: 5px;">
-                            <strong>Censoring:</strong> When a patient is lost to follow-up or the study ends before the event occurs
-                        </div>
-                        
-                        <div style="background-color: rgba(255, 255, 255, 0.06); color: inherit; padding: 10px; border-radius: 5px;">
-                            <strong>Median Survival:</strong> Time point when 50% of patients have experienced the event
-                        </div>
-                        
-                        <div style="background-color: rgba(255, 255, 255, 0.06); color: inherit; padding: 10px; border-radius: 5px;">
-                            <strong>Hazard Ratio (HR):</strong> Ratio of instantaneous event rates between two groups (HR=2 means the event rate is twice as high at any given moment). It is a relative rate, not a cumulative risk ratio - the absolute difference depends on baseline risk and follow-up length.
-                        </div>
-                        
-                        <div style="background-color: rgba(255, 255, 255, 0.06); color: inherit; padding: 10px; border-radius: 5px;">
-                            <strong>95% Confidence Interval:</strong> Range of values compatible with the data; over repeated studies, 95% of such intervals contain the true value
-                        </div>
-                        
-                        <div style="background-color: rgba(255, 255, 255, 0.06); color: inherit; padding: 10px; border-radius: 5px;">
-                            <strong>P-value:</strong> How compatible the data are with no difference - the probability of a result at least this extreme if there were truly no difference. It is not the probability that the finding occurred by chance, nor that the null hypothesis is true.
-                        </div>
-                        
-                        <div style="background-color: rgba(255, 255, 255, 0.06); color: inherit; padding: 10px; border-radius: 5px;">
-                            <strong>Person-Time:</strong> Total follow-up time accounting for varying observation periods
-                        </div>
-                        
-                        <div style="background-color: rgba(255, 255, 255, 0.06); color: inherit; padding: 10px; border-radius: 5px;">
-                            <strong>Kaplan-Meier:</strong> Non-parametric method to estimate survival probability over time
-                        </div>
-                        
-                        <div style="background-color: rgba(255, 255, 255, 0.06); color: inherit; padding: 10px; border-radius: 5px;">
-                            <strong>Cox Regression:</strong> Statistical model comparing hazard rates between groups adjusting for time
-                        </div>
-                        
-                        <div style="background-color: rgba(255, 255, 255, 0.06); color: inherit; padding: 10px; border-radius: 5px;">
-                            <strong>RMST:</strong> Restricted Mean Survival Time - average survival within a specific time window
-                        </div>
-                    </div>
-                </div>
-                ';
+                glossary_html <- paste0(
+                    '<div style="margin-bottom: 20px; padding: 15px; background-color: rgba(138, 155, 172, 0.06); border-left: 4px solid #6c757d; color: inherit;"><h4>',
+                    .("Clinical Terminology Glossary"),
+                    '</h4><div style="display: grid; gap: 10px; margin-top: 15px;"><div style="background-color: rgba(255, 255, 255, 0.06); color: inherit; padding: 10px; border-radius: 5px;">',
+                    .("<strong>Event:</strong> The outcome of interest being studied (e.g., death, disease recurrence, treatment failure)"),
+                    '</div><div style="background-color: rgba(255, 255, 255, 0.06); color: inherit; padding: 10px; border-radius: 5px;">',
+                    .("<strong>Censoring:</strong> When a patient is lost to follow-up or the study ends before the event occurs"),
+                    '</div><div style="background-color: rgba(255, 255, 255, 0.06); color: inherit; padding: 10px; border-radius: 5px;">',
+                    .("<strong>Median Survival:</strong> Time point when 50% of patients have experienced the event"),
+                    '</div><div style="background-color: rgba(255, 255, 255, 0.06); color: inherit; padding: 10px; border-radius: 5px;">',
+                    .("<strong>Hazard Ratio (HR):</strong> Ratio of instantaneous event rates between two groups (HR=2 means the event rate is twice as high at any given moment). It is a relative rate, not a cumulative risk ratio - the absolute difference depends on baseline risk and follow-up length."),
+                    '</div><div style="background-color: rgba(255, 255, 255, 0.06); color: inherit; padding: 10px; border-radius: 5px;">',
+                    .("<strong>95% Confidence Interval:</strong> Range of values compatible with the data; over repeated studies, 95% of such intervals contain the true value"),
+                    '</div><div style="background-color: rgba(255, 255, 255, 0.06); color: inherit; padding: 10px; border-radius: 5px;">',
+                    .("<strong>P-value:</strong> How compatible the data are with no difference - the probability of a result at least this extreme if there were truly no difference. It is not the probability that the finding occurred by chance, nor that the null hypothesis is true."),
+                    '</div><div style="background-color: rgba(255, 255, 255, 0.06); color: inherit; padding: 10px; border-radius: 5px;">',
+                    .("<strong>Person-Time:</strong> Total follow-up time accounting for varying observation periods"),
+                    '</div><div style="background-color: rgba(255, 255, 255, 0.06); color: inherit; padding: 10px; border-radius: 5px;">',
+                    .("<strong>Kaplan-Meier:</strong> Non-parametric method to estimate survival probability over time"),
+                    '</div><div style="background-color: rgba(255, 255, 255, 0.06); color: inherit; padding: 10px; border-radius: 5px;">',
+                    .("<strong>Cox Regression:</strong> Statistical model comparing hazard rates between groups adjusting for time"),
+                    '</div><div style="background-color: rgba(255, 255, 255, 0.06); color: inherit; padding: 10px; border-radius: 5px;">',
+                    .("<strong>RMST:</strong> Restricted Mean Survival Time - average survival within a specific time window"),
+                    "</div></div></div>");
                 
                 return(glossary_html)
             }
@@ -5279,7 +5356,10 @@ survivalClass <- if (requireNamespace('jmvcore'))
                 if (self$options$showSummaries && length(clinical_interpretations) > 0) {
                     interpretation_html <- paste(
                         '<div style="margin-bottom: 20px; padding: 15px; background-color: rgba(33, 149, 236, 0.1); border-left: 4px solid #007bff; color: inherit;">',
-                        '<h4> Clinical Interpretation</h4>',
+                        paste0(
+                            "<h4>",
+                            .("Clinical Interpretation"),
+                            "</h4>"),
                         paste(lapply(clinical_interpretations, function(x) paste('<p>', htmltools::htmlEscape(x), '</p>')), collapse = ""),
                         '</div>'
                     )
@@ -5291,10 +5371,18 @@ survivalClass <- if (requireNamespace('jmvcore'))
                 
                 # Add Copy-Ready Clinical Report Sentences
                 if (self$options$showSummaries && length(copy_sentences) > 0) {
-                    copy_html <- '<div style="margin-bottom: 20px; padding: 15px; background-color: rgba(255, 202, 33, 0.23); border-left: 4px solid #ffc107; color: inherit;"><h4> Copy-Ready Clinical Report Sentences</h4>'
+                    copy_html <- paste0(
+                        '<div style="margin-bottom: 20px; padding: 15px; background-color: rgba(255, 202, 33, 0.23); border-left: 4px solid #ffc107; color: inherit;"><h4>',
+                        .("Copy-Ready Clinical Report Sentences"),
+                        "</h4>")
                     
                     for (section_name in names(copy_sentences)) {
-                        copy_html <- paste0(copy_html, '<h5>', tools::toTitleCase(gsub("_", " ", section_name)), ':</h5><div style="background-color: rgba(255, 255, 255, 0.06); color: inherit; padding: 10px; border-radius: 5px; margin: 10px 0;">')
+                        section_title <- switch(section_name,
+                            median_results = .("Median Results"),
+                            cox_results = .("Cox Results"),
+                            survival_probabilities = .("Survival Probabilities"),
+                            tools::toTitleCase(gsub("_", " ", section_name)))
+                        copy_html <- paste0(copy_html, '<h5>', section_title, ':</h5><div style="background-color: rgba(255, 255, 255, 0.06); color: inherit; padding: 10px; border-radius: 5px; margin: 10px 0;">')
                         
                         for (sentence in copy_sentences[[section_name]]) {
                             copy_html <- paste0(copy_html, '<p style="margin: 5px 0; padding: 5px; background-color: rgba(138, 155, 172, 0.06); border-radius: 3px; color: inherit;">', htmltools::htmlEscape(sentence), '</p>')
@@ -5405,8 +5493,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
                     basehaz_df <- survival::basehaz(cox_model, centered = TRUE)
                     if (nrow(basehaz_df) == 0 || max(basehaz_df$time) < cal_time) {
                         # cal_time beyond observed data
-                        msg <- paste0("Calibration time point (", round(cal_time, 1),
-                                      ") exceeds maximum observed time. Choose a smaller value.")
+                        msg <- .pasteT(.("Calibration time point ({calTime}) exceeds maximum observed time. Choose a smaller value."), calTime = round(cal_time, 1))
                         self$results$calibrationTable$setNote("unavailable", msg)
                         private$.addHtmlMessage("warning", .("Calibration unavailable"), msg)
                         return()
@@ -5426,7 +5513,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
                     # Reduce groups if too few unique predicted values
                     effective_groups <- min(n_groups, n_unique_pred)
                     if (effective_groups < 2) {
-                        msg <- "Cannot create risk groups - too little variation in predicted survival. Add continuous covariates for meaningful calibration."
+                        msg <- .("Cannot create risk groups - too little variation in predicted survival. Add continuous covariates for meaningful calibration.")
                         self$results$calibrationTable$setNote("unavailable", msg)
                         private$.addHtmlMessage("warning", .("Calibration unavailable"), msg)
                         return()
@@ -5443,7 +5530,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
                         # Handle duplicated breaks
                         breaks <- unique(breaks)
                         if (length(breaks) < 3) {
-                            msg <- "Cannot create risk groups - too little variation in predicted survival. Add continuous covariates for meaningful calibration."
+                            msg <- .("Cannot create risk groups - too little variation in predicted survival. Add continuous covariates for meaningful calibration.")
                             self$results$calibrationTable$setNote("unavailable", msg)
                             private$.addHtmlMessage("warning", .("Calibration unavailable"), msg)
                             return()
@@ -5614,22 +5701,19 @@ survivalClass <- if (requireNamespace('jmvcore'))
                     # Calibration interpretation
                     if (self$options$showExplanations && length(group_pred) >= 3) {
                         html <- paste0(
-                            "<div style='font-family: Arial, sans-serif; max-width: 700px; line-height: 1.5;'>",
-                            "<h3>Calibration Assessment</h3>",
-                            "<p>Calibration measures how well the model's predicted survival probabilities ",
-                            "match observed outcomes. Points near the 45-degree line indicate good calibration.</p>",
-                            "<ul>",
-                            "<li><strong>Calibration slope</strong>: Values near 1.0 indicate well-calibrated predictions. ",
-                            "Slope < 1 suggests overfitting (predictions too extreme); slope > 1 suggests underfitting.</li>",
-                            "<li><strong>Calibration-in-the-large</strong>: Intercept near 0 means no systematic over/under-prediction.</li>",
-                            "<li><strong>C-index</strong>: Discrimination ability (0.5 = random, 1.0 = perfect). ",
-                            "Note: good discrimination does not guarantee good calibration.</li>",
-                            "</ul>",
-                            "<div style='background-color: rgba(33, 159, 43, 0.1); padding: 12px; border-left: 4px solid #4CAF50; margin-top: 15px; color: inherit;'>",
-                            "<strong>Clinical note:</strong> For survival models used to guide treatment decisions, ",
-                            "calibration is as important as discrimination. A well-discriminating model that is ",
-                            "poorly calibrated may systematically over- or under-estimate risk, leading to inappropriate ",
-                            "treatment allocation.</div></div>")
+                            "<div style='font-family: Arial, sans-serif; max-width: 700px; line-height: 1.5;'><h3>",
+                            .("Calibration Assessment"),
+                            "</h3><p>",
+                            .("Calibration measures how well the model's predicted survival probabilities match observed outcomes. Points near the 45-degree line indicate good calibration."),
+                            "</p><ul><li>",
+                            .("<strong>Calibration slope</strong>: Values near 1.0 indicate well-calibrated predictions. Slope < 1 suggests overfitting (predictions too extreme); slope > 1 suggests underfitting."),
+                            "</li><li>",
+                            .("<strong>Calibration-in-the-large</strong>: Intercept near 0 means no systematic over/under-prediction."),
+                            "</li><li>",
+                            .("<strong>C-index</strong>: Discrimination ability (0.5 = random, 1.0 = perfect). Note: good discrimination does not guarantee good calibration."),
+                            "</li></ul><div style='background-color: rgba(33, 159, 43, 0.1); padding: 12px; border-left: 4px solid #4CAF50; margin-top: 15px; color: inherit;'>",
+                            .("<strong>Clinical note:</strong> For survival models used to guide treatment decisions, calibration is as important as discrimination. A well-discriminating model that is poorly calibrated may systematically over- or under-estimate risk, leading to inappropriate treatment allocation."),
+                            "</div></div>")
                         self$results$calibrationInterpretation$setContent(html)
                     }
 
@@ -5659,7 +5743,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
                     ggplot2::labs(
                         title = paste0("Calibration Plot (t = ", round(state$cal_time, 1), ")"),
                         x = "Predicted Survival Probability",
-                        y = "Observed Survival Probability (KM)"
+                        y = .("Observed Survival Probability (KM)")
                     ) +
                     ggplot2::coord_cartesian(xlim = c(0, 1), ylim = c(0, 1)) +
                     ggtheme
@@ -5685,7 +5769,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
                     # The rcs_variable is not in cleanData (which only has time/outcome/explanatory)
                     # Pull it from the original data and add it to mydata
                     if (is.null(rcs_var) || !(rcs_var %in% names(self$data))) {
-                        msg <- "Selected variable not found in the data."
+                        msg <- .("Selected variable not found in the data.")
                         self$results$rcsTestTable$setNote("unavailable", msg)
                         private$.addHtmlMessage("warning", .("RCS analysis unavailable"), msg)
                         return()
@@ -5709,7 +5793,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
 
                     rcs_values <- mydata[[rcs_var]]
                     if (all(is.na(rcs_values))) {
-                        msg <- "Selected variable contains no numeric values."
+                        msg <- .("Selected variable contains no numeric values.")
                         self$results$rcsTestTable$setNote("unavailable", msg)
                         private$.addHtmlMessage("warning", .("RCS analysis unavailable"), msg)
                         return()
@@ -5717,8 +5801,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
 
                     n_unique <- length(unique(rcs_values[!is.na(rcs_values)]))
                     if (n_unique < n_knots + 2) {
-                        msg <- paste0("Too few unique values (", n_unique,
-                                      ") for ", n_knots, " knots. Need at least ", n_knots + 2, ".")
+                        msg <- .pasteT(.("Too few unique values ({nUnique}) for {nKnots} knots. Need at least {v1}."), nUnique = n_unique, nKnots = n_knots, v1 = n_knots + 2)
                         self$results$rcsTestTable$setNote("unavailable", msg)
                         private$.addHtmlMessage("warning", .("RCS analysis unavailable"), msg)
                         return()
@@ -5785,8 +5868,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
                         paste0("Significant non-linearity (p = ", format.pval(lr_p, digits = 3),
                                "). Use spline model.")
                     } else {
-                        paste0("No evidence of non-linearity (p = ", format.pval(lr_p, digits = 3),
-                               "); this does not prove the effect is linear.")
+                        .pasteT(.("No evidence of non-linearity (p = {lrP}); this does not prove the effect is linear."), lrP = format.pval(lr_p, digits = 3))
                     }
 
                     table$setRow(rowNo = 2, values = list(
@@ -5856,28 +5938,34 @@ survivalClass <- if (requireNamespace('jmvcore'))
                         rcs_var_html <- htmltools::htmlEscape(rcs_var)
                         html <- paste0(
                             "<div style='font-family: Arial, sans-serif; max-width: 700px; line-height: 1.5;'>",
-                            "<h3>Non-Linearity Assessment (Restricted Cubic Splines)</h3>",
-                            "<p>This analysis tests whether the effect of <strong>", rcs_var_html,
-                            "</strong> on survival follows a linear pattern or a more complex non-linear curve.</p>",
-                            "<h4>Likelihood Ratio Test</h4>",
-                            "<p>The LR test compares a Cox model with a linear term for ", rcs_var_html,
-                            " against a model with natural splines (", n_knots, " knots, ", n_knots - 1,
-                            " df). A significant p-value (< 0.05) indicates non-linearity.</p>",
-                            "<h4>HR Curve Plot</h4>",
-                            "<p>The hazard ratio curve shows how the relative risk changes across values of ", rcs_var_html,
-                            ", with the reference point at the median value (", round(var_median, 1),
-                            "). A flat HR curve indicates no predictor effect; a linear log-HR ",
-                            "effect generally produces a curved HR profile.</p>",
-                            "<div style='background-color: rgba(255, 169, 33, 0.14); padding: 12px; border-left: 4px solid #FF9800; margin-top: 15px; color: inherit;'>",
-                            "<strong>Clinical note:</strong> Non-linear effects are common for continuous variables ",
-                            "like age (J-shaped mortality), tumor size (threshold effects), and biomarker levels. ",
-                            "If non-linearity is significant, reporting only a single HR per unit increase is misleading. ",
-                            "Instead, report the HR curve or use meaningful cut-points.</div></div>")
+                            paste0(
+                                "<h3>",
+                                .("Non-Linearity Assessment (Restricted Cubic Splines)"),
+                                "</h3>"),
+                            "<p>",
+                            .pasteT(.("This analysis tests whether the effect of <strong>{rcsVarHtml}</strong> on survival follows a linear pattern or a more complex non-linear curve."), rcsVarHtml = rcs_var_html),
+                            "</p>",
+                            paste0(
+                                "<h4>",
+                                .("Likelihood Ratio Test"),
+                                "</h4>"),
+                            "<p>",
+                            .pasteT(.("The LR test compares a Cox model with a linear term for {rcsVarHtml} against a model with natural splines ({nKnots} knots, {v1} df). A significant p-value (< 0.05) indicates non-linearity."), rcsVarHtml = rcs_var_html, nKnots = n_knots, v1 = n_knots - 1),
+                            "</p>",
+                            paste0(
+                                "<h4>",
+                                .("HR Curve Plot"),
+                                "</h4>"),
+                            "<p>",
+                            .pasteT(.("The hazard ratio curve shows how the relative risk changes across values of {rcsVarHtml}, with the reference point at the median value ({varMedian}). A flat HR curve indicates no predictor effect; a linear log-HR effect generally produces a curved HR profile."), rcsVarHtml = rcs_var_html, varMedian = round(var_median, 1)),
+                            "</p><div style='background-color: rgba(255, 169, 33, 0.14); padding: 12px; border-left: 4px solid #FF9800; margin-top: 15px; color: inherit;'>",
+                            .("<strong>Clinical note:</strong> Non-linear effects are common for continuous variables like age (J-shaped mortality), tumor size (threshold effects), and biomarker levels. If non-linearity is significant, reporting only a single HR per unit increase is misleading. Instead, report the HR curve or use meaningful cut-points."),
+                            "</div></div>")
                         self$results$rcsInterpretation$setContent(html)
                     }
 
                 }, error = function(e) {
-                    msg <- paste("RCS analysis error:", htmltools::htmlEscape(e$message))
+                    msg <- .pasteT(.("RCS analysis error: {message}"), message = htmltools::htmlEscape(e$message))
                     self$results$rcsTestTable$setNote("unavailable", msg)
                     private$.addHtmlMessage("warning", .("RCS analysis unavailable"), msg)
                 })
@@ -5904,8 +5992,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
                     ggplot2::geom_vline(xintercept = state$var_median, linetype = "dotted",
                                          color = "#F44336", linewidth = 0.5) +
                     ggplot2::labs(
-                        title = paste0("Hazard Ratio Curve: ", state$var_name,
-                                       " (", state$n_knots, " knots)"),
+                        title = .pasteT(.("Hazard Ratio Curve: {varName} ({nKnots} knots)"), varName = state$var_name, nKnots = state$n_knots),
                         subtitle = paste0("Reference: median = ", round(state$var_median, 1),
                                           " | Non-linearity p = ",
                                           format.pval(state$p_value, digits = 3)),
@@ -5943,9 +6030,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
 
                 if (identical(dist, "survspline")) {
                     return(switch(self$options$spline_scale,
-                        hazard = paste0("Covariate coefficients are log hazard ratios ",
-                            "(proportional hazards); a positive value indicates a higher ",
-                            "hazard, i.e. shorter survival."),
+                        hazard = .("Covariate coefficients are log hazard ratios (proportional hazards); a positive value indicates a higher hazard, i.e. shorter survival."),
                         # All three spline links are increasing in the covariate
                         # effect, and increasing each one lowers S(t). Verified by
                         # inverting the links at S = 0.6: hazard 0.536, odds 0.551,
@@ -5953,14 +6038,9 @@ survivalClass <- if (requireNamespace('jmvcore'))
                         # cases previously said "longer survival", which is
                         # backwards: for scale="odds" the model is on the log odds
                         # of FAILURE, not of surviving.
-                        odds = paste0("Covariate coefficients are log odds ratios for ",
-                            "failure (proportional odds); a <b>positive</b> value indicates ",
-                            "higher odds of the event, i.e. shorter survival."),
-                        normal = paste0("Covariate coefficients are on the probit scale, ",
-                            "where the link is -qnorm(S(t)); a <b>positive</b> value lowers ",
-                            "the survival probability, i.e. shorter survival."),
-                        paste0("The covariate coefficient scale depends on the spline scale ",
-                            "selected.")))
+                        odds = .("Covariate coefficients are log odds ratios for failure (proportional odds); a <b>positive</b> value indicates higher odds of the event, i.e. shorter survival."),
+                        normal = .("Covariate coefficients are on the probit scale, where the link is -qnorm(S(t)); a <b>positive</b> value lowers the survival probability, i.e. shorter survival."),
+                        .("The covariate coefficient scale depends on the spline scale selected.")))
                 }
 
                 loc <- tryCatch(flexsurv::flexsurv.dists[[dist]]$location,
@@ -5968,17 +6048,11 @@ survivalClass <- if (requireNamespace('jmvcore'))
 
                 if (identical(loc, "rate")) {
                     ph <- dist %in% c("exp", "gompertz")
-                    paste0("Covariate coefficients are on the log-rate scale; a ",
-                           "<b>positive</b> value indicates shorter survival",
-                           if (ph) paste0(". This is a proportional-hazards parameterisation, ",
-                                          "so exp(coefficient) is a hazard ratio.") else ".")
+                    .pasteT(.("Covariate coefficients are on the log-rate scale; a <b>positive</b> value indicates shorter survival{v1}"), v1 = if (ph) paste0(". ", .("This is a proportional-hazards parameterisation, so exp(coefficient) is a hazard ratio.")) else ".")
                 } else if (!is.null(loc)) {
-                    paste0("Covariate coefficients are on the log-time (accelerated failure ",
-                           "time) scale; a <b>negative</b> value indicates shorter survival, ",
-                           "and exp(coefficient) is a time ratio.")
+                    .("Covariate coefficients are on the log-time (accelerated failure time) scale; a <b>negative</b> value indicates shorter survival, and exp(coefficient) is a time ratio.")
                 } else {
-                    paste0("The covariate coefficient scale depends on the selected ",
-                           "distribution; see the flexsurv documentation.")
+                    .("The covariate coefficient scale depends on the selected distribution; see the flexsurv documentation.")
                 }
             }
             ,
@@ -6144,9 +6218,9 @@ survivalClass <- if (requireNamespace('jmvcore'))
                     ggplot2::scale_y_continuous(limits = c(0, 1), name = "Survival probability") +
                     ggplot2::labs(
                         x = state$timeLabel,
-                        title = paste0("Parametric survival (", state$dist, ") vs Kaplan-Meier"),
+                        title = .pasteT(.("Parametric survival ({dist}) vs Kaplan-Meier"), dist = state$dist),
                         color = "Group",
-                        caption = "Solid = fitted parametric model; dashed = Kaplan-Meier"
+                        caption = .("Solid = fitted parametric model; dashed = Kaplan-Meier")
                     ) +
                     ggtheme
                 print(p)
@@ -6327,10 +6401,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
                             )
                         }
 
-                        heading_text <- paste0(
-                            "Age-Adjusted Cox Regression\n",
-                            "Adjusting for: ", age_col_name, "\n",
-                            "N = ", nrow(mydata))
+                        heading_text <- .pasteT(.("Age-Adjusted Cox Regression\nAdjusting for: {ageColName}\nN = {nMydata}"), ageColName = age_col_name, nMydata = nrow(mydata))
                         self$results$ageAdjustedCoxHeading$setContent(heading_text)
                     }
 
@@ -6446,18 +6517,18 @@ survivalClass <- if (requireNamespace('jmvcore'))
 
                         if (hr_change > 10) {
                             interpretation_parts <- c(interpretation_parts,
-                                sprintf("<p><b>The log hazard ratio (the model coefficient) changed by %.1f%% after age adjustment.</b> A change of this size is the conventional change-in-estimate signal for confounding by age, but it does not establish it: the Cox model is non-collapsible, so adjusted and unadjusted hazard ratios differ in magnitude even when the added covariate is unrelated to the exposure. If age lies on the causal pathway between %s and survival, adjustment removes part of the association rather than removing bias. This comparison covers the first coefficient of the model only.</p>",
+                                sprintf(.("<p><b>The log hazard ratio (the model coefficient) changed by %.1f%% after age adjustment.</b> A change of this size is the conventional change-in-estimate signal for confounding by age, but it does not establish it: the Cox model is non-collapsible, so adjusted and unadjusted hazard ratios differ in magnitude even when the added covariate is unrelated to the exposure. If age lies on the causal pathway between %s and survival, adjustment removes part of the association rather than removing bias. This comparison covers the first coefficient of the model only.</p>"),
                                     hr_change, safe_factor_label))
                         } else {
                             interpretation_parts <- c(interpretation_parts,
-                                sprintf("<p><b>The log hazard ratio (the model coefficient) changed by %.1f%% after age adjustment</b>, below the conventional 10%% change-in-estimate threshold. A small change does not rule out confounding by age in the relationship between %s and survival: opposing biases can cancel, the change-in-estimate rule is a heuristic with no inferential guarantee, and this comparison covers the first coefficient of the model only.</p>",
+                                sprintf(.("<p><b>The log hazard ratio (the model coefficient) changed by %.1f%% after age adjustment</b>, below the conventional 10%% change-in-estimate threshold. A small change does not rule out confounding by age in the relationship between %s and survival: opposing biases can cancel, the change-in-estimate rule is a heuristic with no inferential guarantee, and this comparison covers the first coefficient of the model only.</p>"),
                                     hr_change, safe_factor_label))
                         }
                     }
 
                     if (use_age_strata) {
                         interpretation_parts <- c(interpretation_parts,
-                            sprintf("<p>The model stratifies by age groups (%s), allowing different baseline hazards for each age group.</p>",
+                            sprintf(.("<p>The model stratifies by age groups (%s), allowing different baseline hazards for each age group.</p>"),
                                 paste(levels(mydata$.age_band), collapse = ", ")))
                     }
 
@@ -6524,9 +6595,15 @@ survivalClass <- if (requireNamespace('jmvcore'))
                                 .("Main-effect rows are hazard ratios at age 0, because age is not centered, and are not meaningful on their own. Read the interaction rows and the joint test."))
 
                             if (isTRUE(joint_p < 0.05)) {
-                                int_msg <- "<p><b>Significant age interaction detected.</b> Age enters this model as a continuous variable, so the interaction row in the Age x Group Interaction Test table is the change in the log hazard ratio of the explanatory variable per one-unit increase in age, not a comparison between age bands. It says the estimated effect is not flat across ages in this sample; it does not say at which age the effect becomes important. Reporting the hazard ratio at specific ages, or an age-stratified model, describes such data more fully than one overall adjusted hazard ratio.</p>"
+                                int_msg <- paste0(
+                                    "<p>",
+                                    .("<b>Significant age interaction detected.</b> Age enters this model as a continuous variable, so the interaction row in the Age x Group Interaction Test table is the change in the log hazard ratio of the explanatory variable per one-unit increase in age, not a comparison between age bands. It says the estimated effect is not flat across ages in this sample; it does not say at which age the effect becomes important. Reporting the hazard ratio at specific ages, or an age-stratified model, describes such data more fully than one overall adjusted hazard ratio."),
+                                    "</p>")
                             } else {
-                                int_msg <- "<p><b>No significant age interaction was detected.</b> This is absence of evidence, not evidence that the effect is the same at every age: interaction tests have low power, so a real difference can go undetected. Age is continuous here, so the interaction row in the Age x Group Interaction Test table is the change in the log hazard ratio per one-unit increase in age; compare its Coefficient with its SE column, because an SE that is large next to the coefficient means effect modification of clinically important size has not been ruled out. The choice between age adjustment and stratification rests on the proportional hazards check and on subject-matter grounds, not on this p-value.</p>"
+                                int_msg <- paste0(
+                                    "<p>",
+                                    .("<b>No significant age interaction was detected.</b> This is absence of evidence, not evidence that the effect is the same at every age: interaction tests have low power, so a real difference can go undetected. Age is continuous here, so the interaction row in the Age x Group Interaction Test table is the change in the log hazard ratio per one-unit increase in age; compare its Coefficient with its SE column, because an SE that is large next to the coefficient means effect modification of clinically important size has not been ruled out. The choice between age adjustment and stratification rests on the proportional hazards check and on subject-matter grounds, not on this p-value."),
+                                    "</p>")
                             }
                             # Append interaction message to existing interpretation
                             # Note: jamovi result objects don't expose a .content property,
@@ -6549,34 +6626,27 @@ survivalClass <- if (requireNamespace('jmvcore'))
                 # ---- 3. Explanation ----
                 if (self$options$showExplanations) {
                     explanation <- paste0(
-                        "<h4>Age-Adjusted Survival Analysis</h4>",
-                        "<p>Age adjustment accounts for differences in age distribution between ",
-                        "comparison groups. This is critical because cancer incidence and mortality ",
-                        "are strongly age-dependent.</p>",
-                        "<h5>Methods Available:</h5>",
-                        "<ul>",
-                        "<li><b>Age as Covariate:</b> Includes age in the Cox model (Surv ~ group + age). ",
-                        "Assumes a log-linear relationship between age and hazard. Reports the HR for ",
-                        "the group variable adjusted for age.</li>",
-                        "<li><b>Age-Stratified Cox:</b> Creates age groups and allows separate baseline ",
-                        "hazards (Surv ~ group + strata(age_group)). No assumption about the age-hazard ",
-                        "relationship. Preferred when the proportional hazards assumption for age is violated.</li>",
-                        "<li><b>Age Interaction Test:</b> Tests whether the group effect varies by age ",
-                        "(Surv ~ group * age). Age stays continuous here, so the interaction ",
-                        "coefficient is the change in the log hazard ratio per one-unit increase ",
-                        "in age, not a contrast between age bands.</li>",
-                        "</ul>",
-                        "<h5>Interpretation Guide:</h5>",
-                        "<p>A change of more than 10% in the log hazard ratio (the model coefficient, which is ",
-                        "the quantity reported above as the change) after age adjustment is the conventional ",
-                        "change-in-estimate signal for confounding by age. It does not establish confounding: ",
-                        "the Cox model is non-collapsible, so adjusted and unadjusted hazard ratios differ in ",
-                        "magnitude even when the added covariate is unrelated to the exposure, and a small ",
-                        "change does not rule confounding out either. If the interaction test is significant, ",
-                        "age-stratified results may be more informative than a single adjusted HR.</p>",
-                        "<h5>References:</h5>",
-                        "<p>Rothman KJ, Greenland S, Lash TL. Modern Epidemiology. 3rd ed. ",
-                        "Lippincott Williams & Wilkins; 2008.</p>")
+                        "<h4>",
+                        .("Age-Adjusted Survival Analysis"),
+                        "</h4><p>",
+                        .("Age adjustment accounts for differences in age distribution between comparison groups. This is critical because cancer incidence and mortality are strongly age-dependent."),
+                        "</p><h5>",
+                        .("Methods Available:"),
+                        "</h5><ul><li>",
+                        .("<b>Age as Covariate:</b> Includes age in the Cox model (Surv ~ group + age). Assumes a log-linear relationship between age and hazard. Reports the HR for the group variable adjusted for age."),
+                        "</li><li>",
+                        .("<b>Age-Stratified Cox:</b> Creates age groups and allows separate baseline hazards (Surv ~ group + strata(age_group)). No assumption about the age-hazard relationship. Preferred when the proportional hazards assumption for age is violated."),
+                        "</li><li>",
+                        .("<b>Age Interaction Test:</b> Tests whether the group effect varies by age (Surv ~ group * age). Age stays continuous here, so the interaction coefficient is the change in the log hazard ratio per one-unit increase in age, not a contrast between age bands."),
+                        "</li></ul><h5>",
+                        .("Interpretation Guide:"),
+                        "</h5><p>",
+                        .("A change of more than 10% in the log hazard ratio (the model coefficient, which is the quantity reported above as the change) after age adjustment is the conventional change-in-estimate signal for confounding by age. It does not establish confounding: the Cox model is non-collapsible, so adjusted and unadjusted hazard ratios differ in magnitude even when the added covariate is unrelated to the exposure, and a small change does not rule confounding out either. If the interaction test is significant, age-stratified results may be more informative than a single adjusted HR."),
+                        "</p><h5>",
+                        .("References:"),
+                        "</h5><p>",
+                        .("Rothman KJ, Greenland S, Lash TL. Modern Epidemiology. 3rd ed. Lippincott Williams & Wilkins; 2008."),
+                        "</p>")
                     self$results$ageAdjustedExplanation$setContent(explanation)
                 }
             }
@@ -6714,20 +6784,24 @@ survivalClass <- if (requireNamespace('jmvcore'))
 
                     # Interpretation
                     interpretation <- paste0(
-                        "<h4>Cox Model with Age as Time Scale</h4>",
-                        "<p>This model uses chronological age as the time axis instead of ",
-                        "follow-up time from enrollment. The survival function represents ",
-                        "the probability of surviving past a given age, conditional on ",
-                        "being alive at age of enrollment.</p>",
-                        "<p>N = ", nrow(mydata),
-                        " | Age range: ", round(min(age_entry), 1), " - ",
-                        round(max(age_exit), 1), " years</p>",
-                        "<p><b>When to use:</b> Cohorts followed for disease onset, where ",
-                        "age is the main driver of risk and ages at entry differ. For patients ",
-                        "timed from diagnosis, time since diagnosis is usually the natural ",
-                        "scale and this model is a sensitivity analysis.</p>",
-                        "<p><b>Reference:</b> Thiebaut & Benichou, Stat Med 2004; ",
-                        "Korn, Graubard & Midthune, Am J Epidemiol 1997.</p>")
+                        paste0(
+                            "<h4>",
+                            .("Cox Model with Age as Time Scale"),
+                            "</h4>"),
+                        "<p>",
+                        .("This model uses chronological age as the time axis instead of follow-up time from enrollment. The survival function represents the probability of surviving past a given age, conditional on being alive at age of enrollment."),
+                        "</p><p>N = ",
+                        nrow(mydata),
+                        " | Age range: ",
+                        round(min(age_entry), 1),
+                        " - ",
+                        round(max(age_exit), 1),
+                        " years</p><p>",
+                        .("<b>When to use:</b> Cohorts followed for disease onset, where age is the main driver of risk and ages at entry differ. For patients timed from diagnosis, time since diagnosis is usually the natural scale and this model is a sensitivity analysis."),
+                        paste0(
+                            "</p><p>",
+                            .("<b>Reference:</b> Thiebaut & Benichou, Stat Med 2004; Korn, Graubard & Midthune, Am J Epidemiol 1997."),
+                            "</p>"))
                     self$results$ageTimeScaleInterpretation$setContent(interpretation)
 
                 }, error = function(e) {
@@ -6858,17 +6932,28 @@ survivalClass <- if (requireNamespace('jmvcore'))
 
                         # Interpretation
                         interpretation <- paste0(
-                            "<h4>Indirect Age Standardization (SMR)</h4>",
-                            "<p>The Standardized Mortality Ratio (SMR) compares observed deaths ",
-                            "in each group to the number expected based on age-specific rates ",
-                            "from the overall study population.</p>",
-                            "<ul>",
-                            "<li><b>SMR = 1.0:</b> Mortality is as expected for the age distribution</li>",
-                            "<li><b>SMR > 1.0:</b> More deaths than expected (excess mortality)</li>",
-                            "<li><b>SMR < 1.0:</b> Fewer deaths than expected</li>",
-                            "</ul>",
-                            "<p>95% CI based on exact Poisson method. ",
-                            "Age groups used: ", paste(age_groups, collapse = ", "), "</p>")
+                            paste0(
+                                "<h4>",
+                                .("Indirect Age Standardization (SMR)"),
+                                "</h4>"),
+                            "<p>",
+                            .("The Standardized Mortality Ratio (SMR) compares observed deaths in each group to the number expected based on age-specific rates from the overall study population."),
+                            "</p><ul>",
+                            paste0(
+                                "<li>",
+                                .("<b>SMR = 1.0:</b> Mortality is as expected for the age distribution"),
+                                "</li>"),
+                            paste0(
+                                "<li>",
+                                .("<b>SMR > 1.0:</b> More deaths than expected (excess mortality)"),
+                                "</li>"),
+                            paste0(
+                                "<li>",
+                                .("<b>SMR < 1.0:</b> Fewer deaths than expected"),
+                                "</li>"),
+                            "</ul><p>",
+                            .pasteT(.("95% CI based on exact Poisson method. Age groups used: {ageGroups}"), ageGroups = paste(age_groups, collapse = ", ")),
+                            "</p>")
 
                     } else {
                         # Direct standardization: apply group-specific rates to a standard population
@@ -6971,13 +7056,15 @@ survivalClass <- if (requireNamespace('jmvcore'))
                             .("Direct method: the 'SMR' column holds the DIRECTLY STANDARDIZED RATE (events per unit person-time, using the cohort's person-time age distribution as the standard), with a log-scale 95% interval. Compare groups by the ratio of these rates. 'Expected' is the events this group's standardized rate implies over its own person-time. Switch to the indirect method if you want an observed/expected SMR."))
 
                         interpretation <- paste0(
-                            "<h4>Direct Age Standardization</h4>",
-                            "<p>Age-specific rates from each group are applied to the overall ",
-                            "study population age distribution (as the standard). This produces ",
-                            "standardized rates that are comparable across groups regardless of ",
-                            "their age composition.</p>",
-                            "<p>Standard population: overall study cohort. ",
-                            "Age groups: ", paste(age_groups, collapse = ", "), "</p>")
+                            paste0(
+                                "<h4>",
+                                .("Direct Age Standardization"),
+                                "</h4>"),
+                            "<p>",
+                            .("Age-specific rates from each group are applied to the overall study population age distribution (as the standard). This produces standardized rates that are comparable across groups regardless of their age composition."),
+                            "</p><p>",
+                            .pasteT(.("Standard population: overall study cohort. Age groups: {ageGroups}"), ageGroups = paste(age_groups, collapse = ", ")),
+                            "</p>")
                     }
 
                     self$results$ageStandardizationInterpretation$setContent(interpretation)
@@ -7090,8 +7177,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
                             y = "Survival probability",
                             colour = state$group_label, fill = state$group_label,
                             title = "Age-Stratified Kaplan-Meier Curves",
-                            subtitle = paste0("Age bands from ", state$age_label,
-                                              "; N = ", nrow(plot_data))) +
+                            subtitle = .pasteT(.("Age bands from {ageLabel}; N = {nPlotData}"), ageLabel = state$age_label, nPlotData = nrow(plot_data))) +
                         ggtheme
 
                     print(p)
@@ -7241,7 +7327,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
                 has_surv <- res$survTable$rowCount > 0
                 has_plot <- !competing && (isTRUE(self$options$sc) || isTRUE(self$options$kmunicate))
                 has_adjusted <- res$ageAdjustedCoxTable$rowCount > 0 && !isTRUE(self$options$age_stratified_cox)
-                has_ph <- isTRUE(nzchar(res$cox_ph$content))
+                has_ph <- res$cox_phTable$rowCount > 0
                 has_bootstrap <- isTRUE(private$.bootstrapRan)
                 has_calibration <- res$calibrationGroupTable$rowCount > 0
                 has_pairwise <- res$pairwiseTable$rowCount > 0
@@ -7304,7 +7390,10 @@ survivalClass <- if (requireNamespace('jmvcore'))
                 .populateSurvivalTable(self$results$remarkItems, values)
                 self$results$remarkItems$setNote("reference",
                     "Altman DG et al. BMC Med 2012;10:51 (doi:10.1186/1741-7015-10-51), Table 1; McShane LM et al. JNCI 2005;97(16):1180-1184.")
-                "<p>REMARK: Altman DG et al. (2012); McShane LM et al. (2005).</p>"
+                paste0(
+                    "<p>",
+                    .("REMARK: Altman DG et al. (2012); McShane LM et al. (2005)."),
+                    "</p>")
         }
 
         )

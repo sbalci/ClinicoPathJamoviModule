@@ -86,13 +86,11 @@
 #' \doi{10.1016/0197-2456(96)00075-X}
 #' @keywords internal
 .medianFollowUp <- function(time, censored, conf_level = 0.95) {
+    . <- .callerTranslator(parent.frame())   # jmvcore's .() needs `self`; a file-level helper has none
 
-    # `reason` is raw English and several callers paste it onto a translated
-    # sentence, so a non-English user gets half a sentence in each language.
-    # `.()` cannot be used here - this is a file-level helper with no `self`, and
-    # jmvcore's translator resolves `self` from the calling frame - so the code
-    # is returned instead and the R6 caller picks the translated wording.
-    # `reason` stays for the eight other analyses that already read it.
+    # `reason` is spliced into a sentence by .medianFollowUpExplanation() and by several
+    # callers, so it is translated here with the caller's translator; `reason_code` stays
+    # for callers that choose their own wording.
     fallback <- function(reason, n_total = 0L, n_censored = 0L, code = "other") {
         list(value = suppressWarnings(stats::median(time, na.rm = TRUE)),
              ci_lower = NA_real_, ci_upper = NA_real_,
@@ -103,15 +101,15 @@
 
     time <- suppressWarnings(as.numeric(time))
     if (length(time) == 0L || all(is.na(time)))
-        return(fallback("no observed times were available"))
+        return(fallback(.("no observed times were available")))
 
     # A caller that cannot classify its status column at all passes NULL rather
     # than silently treating everyone as an event.
     if (is.null(censored))
-        return(fallback("the censoring indicator could not be interpreted",
+        return(fallback(.("the censoring indicator could not be interpreted"),
                         n_total = sum(!is.na(time))))
     if (length(censored) != length(time))
-        return(fallback("the censoring indicator and time vector had different lengths",
+        return(fallback(.("the censoring indicator and time vector had different lengths"),
                         n_total = sum(!is.na(time))))
 
     cens <- as.integer(!is.na(censored) & (censored == 1 | censored %in% TRUE))
@@ -122,18 +120,15 @@
     n_censored <- sum(cens_u)
 
     if (n_total == 0L)
-        return(fallback("no usable (finite, non-negative) times were available"))
+        return(fallback(.("no usable (finite, non-negative) times were available")))
     if (n_censored == 0L)
-        return(fallback(code = "no_censoring", paste0(
-            "no subject was censored, so the reversed curve has no events and ",
-            "never reaches 50%. Every subject was observed to the terminal ",
-            "outcome, so the observed times ARE the complete follow-up"),
+        return(fallback(code = "no_censoring", .("no subject was censored, so the reversed curve has no events and never reaches 50%. Every subject was observed to the terminal outcome, so the observed times ARE the complete follow-up"),
             n_total = n_total, n_censored = 0L))
 
     fit <- try(survival::survfit(survival::Surv(time_u, cens_u) ~ 1,
                                  conf.int = conf_level), silent = TRUE)
     if (inherits(fit, "try-error"))
-        return(fallback("the reverse Kaplan-Meier fit could not be computed",
+        return(fallback(.("the reverse Kaplan-Meier fit could not be computed"),
                         n_total = n_total, n_censored = n_censored))
 
     # summary()$table carries the median and its interval under names that
@@ -141,7 +136,7 @@
     # positionally off the known layout rather than by a version-specific name.
     tbl <- try(summary(fit)$table, silent = TRUE)
     if (inherits(tbl, "try-error") || is.null(tbl))
-        return(fallback("the reverse Kaplan-Meier fit returned no summary table",
+        return(fallback(.("the reverse Kaplan-Meier fit returned no summary table"),
                         n_total = n_total, n_censored = n_censored))
 
     pick <- function(nm) {
@@ -151,13 +146,7 @@
     }
     m <- pick("^median$")
     if (length(m) != 1L || is.na(m))
-        return(fallback(code = "never_reaches_50", paste0(
-            "the reversed Kaplan-Meier curve never falls to 50%, so its median ",
-            "is undefined. This depends on WHEN subjects were still under ",
-            "observation, not merely how many: here ", n_censored, " of ",
-            n_total, " were censored, but they left early relative to the rest ",
-            "of the cohort. A small number of subjects censored late can make ",
-            "the median estimable, while many censored early cannot"),
+        return(fallback(code = "never_reaches_50", .pasteT(.("the reversed Kaplan-Meier curve never falls to 50%, so its median is undefined. This depends on WHEN subjects were still under observation, not merely how many: here {nCensored} of {nTotal} were censored, but they left early relative to the rest of the cohort. A small number of subjects censored late can make the median estimable, while many censored early cannot"), nCensored = n_censored, nTotal = n_total),
             n_total = n_total, n_censored = n_censored))
 
     list(value = m,
@@ -176,8 +165,9 @@
 #' @return Character scalar.
 #' @keywords internal
 .medianFollowUpLabel <- function(mfu) {
-    if (isTRUE(mfu$reverse)) "Median follow-up (reverse Kaplan-Meier)"
-    else "Median observed time (reverse Kaplan-Meier not estimable)"
+    . <- .callerTranslator(parent.frame())   # jmvcore's .() needs `self`; a file-level helper has none
+    if (isTRUE(mfu$reverse)) .("Median follow-up (reverse Kaplan-Meier)")
+    else .("Median observed time (reverse Kaplan-Meier not estimable)")
 }
 
 #' Formatted median follow-up value, with confidence interval when available
@@ -188,13 +178,12 @@
 #' @return Character scalar, e.g. `"25.4 months (95% CI 22.2 to 28.5)"`.
 #' @keywords internal
 .medianFollowUpText <- function(mfu, unit = "", conf_level = 0.95) {
+    . <- .callerTranslator(parent.frame())   # jmvcore's .() needs `self`; a file-level helper has none
     if (is.null(mfu) || length(mfu$value) == 0L || is.na(mfu$value)) return("not estimable")
     txt <- .fmtTimeLabel(mfu$value)
     if (nzchar(unit)) txt <- paste(txt, unit)
     if (!is.na(mfu$ci_lower) && !is.na(mfu$ci_upper))
-        txt <- paste0(txt, " (", round(conf_level * 100), "% CI ",
-                      .fmtTimeLabel(mfu$ci_lower), " to ",
-                      .fmtTimeLabel(mfu$ci_upper), ")")
+        txt <- .pasteT(.("{txt} ({v1}% CI {ciLower} to {ciUpper})"), txt = txt, v1 = round(conf_level * 100), ciLower = .fmtTimeLabel(mfu$ci_lower), ciUpper = .fmtTimeLabel(mfu$ci_upper))
     txt
 }
 
@@ -213,50 +202,35 @@
 #' @return An HTML string.
 #' @keywords internal
 .medianFollowUpExplanation <- function(mfu, unit = "", conf_level = 0.95) {
+    . <- .callerTranslator(parent.frame())   # jmvcore's .() needs `self`; a file-level helper has none
     if (is.null(mfu)) return("")
 
     label <- .medianFollowUpLabel(mfu)
     value <- .medianFollowUpText(mfu, unit, conf_level)
 
     how <- if (isTRUE(mfu$reverse)) paste0(
-        "<p style='margin:0 0 8px 0;'><b>How this was calculated.</b> ",
-        "The roles of event and censoring were swapped: subjects still under ",
-        "observation when follow-up ended became the &quot;events&quot;, and ",
-        "subjects who reached the terminal outcome were treated as censored. ",
-        "An ordinary Kaplan-Meier curve was fitted to that reversed problem, ",
-        "and its median is reported above. That median estimates the ",
-        "<i>potential</i> follow-up time: how long each subject would have been ",
-        "observed had the event not intervened. Here ", mfu$n_censored,
-        " of ", mfu$n_total, " subjects were still under observation.</p>")
+        "<p style='margin:0 0 8px 0;'>",
+        .pasteT(.("<b>How this was calculated.</b> The roles of event and censoring were swapped: subjects still under observation when follow-up ended became the &quot;events&quot;, and subjects who reached the terminal outcome were treated as censored. An ordinary Kaplan-Meier curve was fitted to that reversed problem, and its median is reported above. That median estimates the <i>potential</i> follow-up time: how long each subject would have been observed had the event not intervened. Here {nCensored} of {nTotal} subjects were still under observation."), nCensored = mfu$n_censored, nTotal = mfu$n_total),
+        "</p>")
     else paste0(
-        "<p style='margin:0 0 8px 0;'><b>Why a fallback is shown.</b> ",
-        "The reverse Kaplan-Meier median could not be estimated because ",
-        mfu$reason, ". The plain median of the observed times is reported ",
-        "instead, and it is labelled as such. Read it as the median time to ",
-        "event-or-censoring, <i>not</i> as the length of follow-up: in a cohort ",
-        "with many early events the two differ substantially.</p>")
+        "<p style='margin:0 0 8px 0;'>",
+        .pasteT(.("<b>Why a fallback is shown.</b> The reverse Kaplan-Meier median could not be estimated because {reason}. The plain median of the observed times is reported instead, and it is labelled as such. Read it as the median time to event-or-censoring, <i>not</i> as the length of follow-up: in a cohort with many early events the two differ substantially."), reason = mfu$reason),
+        "</p>")
 
     why <- paste0(
-        "<p style='margin:0 0 8px 0;'><b>Why not just take the median of the ",
-        "observed times?</b> Because that is the median time to ",
-        "event-or-censoring. In a cohort where most subjects have the event ",
-        "early it approximates the median <i>survival</i> and understates how ",
-        "long the cohort was watched. Taking the median among censored ",
-        "subjects only has the opposite fault: it discards everyone who had ",
-        "the event and overstates follow-up. The reverse Kaplan-Meier uses ",
-        "every subject \u{2014} someone who died at 3 months contributes ",
-        "&quot;observed for at least 3 months&quot; rather than being ",
-        "discarded or counted as short follow-up.</p>")
+        "<p style='margin:0 0 8px 0;'>",
+        .("<b>Why not just take the median of the observed times?</b> Because that is the median time to event-or-censoring. In a cohort where most subjects have the event early it approximates the median <i>survival</i> and understates how long the cohort was watched. Taking the median among censored subjects only has the opposite fault: it discards everyone who had the event and overstates follow-up. The reverse Kaplan-Meier uses every subject \u2014 someone who died at 3 months contributes &quot;observed for at least 3 months&quot; rather than being discarded or counted as short follow-up."),
+        "</p>")
 
     paste0(
-        "<div style='background-color:rgba(127,127,127,0.10);",
-        "border-left:3px solid rgba(127,127,127,0.55);",
-        "padding:10px 12px;margin:8px 0;border-radius:3px;'>",
-        "<p style='margin:0 0 8px 0;'><b>", label, ":</b> ", value, "</p>",
-        how, why,
-        "<p style='margin:0;font-size:0.9em;'><b>Reference.</b> ",
-        "Schemper M, Smith TL. A note on quantifying follow-up in studies of ",
-        "failure time. <i>Controlled Clinical Trials</i> 1996;17(4):343-346. ",
-        "doi:10.1016/0197-2456(96)00075-X</p>",
-        "</div>")
+        "<div style='background-color:rgba(127,127,127,0.10);border-left:3px solid rgba(127,127,127,0.55);padding:10px 12px;margin:8px 0;border-radius:3px;'><p style='margin:0 0 8px 0;'><b>",
+        label,
+        ":</b> ",
+        value,
+        "</p>",
+        how,
+        why,
+        "<p style='margin:0;font-size:0.9em;'>",
+        .("<b>Reference.</b> Schemper M, Smith TL. A note on quantifying follow-up in studies of failure time. <i>Controlled Clinical Trials</i> 1996;17(4):343-346. doi:10.1016/0197-2456(96)00075-X"),
+        "</p></div>")
 }

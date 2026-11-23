@@ -7,6 +7,42 @@ jrs:   '1.1'
 items:
 
 
+    # library-audit 2026-11-20 jsurvival [HIGH] DONE: recode counts are a Table (rows from .init());
+    # eventRecodeInfo below keeps the censoring, zero-event and DFS-timing caveats only
+    - name: eventRecodeTable
+      title: 'Outcome Recode'
+      type: Table
+      rows: 0
+      visible: (length(outcome) > 0)
+      clearWith:
+          - outcome
+          - outcomeLevel
+          - elapsedtime
+          - contexpl
+          - fudate
+          - dxdate
+          - tint
+          - multievent
+          - uselandmark
+          - landmark
+          - analysistype
+          - dod
+          - dooc
+          - awd
+          - awod
+          - timetypeoutput
+          - timetypedata
+      columns:
+          - name: category
+            title: ''
+            type: text
+          - name: levels
+            title: 'Levels'
+            type: text
+          - name: n
+            title: 'N'
+            type: integer
+
     - name:  eventRecodeInfo
       title: 'Outcome Recode'
       type:  Html

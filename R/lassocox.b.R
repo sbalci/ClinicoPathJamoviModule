@@ -236,6 +236,8 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                     # Save plot data for rendering
                     private$.savePlotData(results)
 
+                    # library-audit 2026-11-20 jsurvival [LOW] DEFERRED: Html message panels kept by maintainer
+                    #   decision; revisit when these messages have been tried as jmvcore::Notice in the jamovi app
                     if (length(warn_env$stability)) {
                         self$results$todo$setContent(paste0(self$results$todo$content,
                             "<div class='alert alert-danger'><h4>", .("Model stability warnings"),
@@ -1068,6 +1070,8 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         },
 
         .buildRCode = function(results) {
+
+            # i18n-exempt: the strings below are generated R code and its comments, shown as code
             # niceNames can emit invalid backticked list names containing backticks.
             # Explicit attributes keep all user-provided names inside quoted strings.
             literal <- function(x) paste(utils::capture.output(dput(x,
@@ -1977,7 +1981,7 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                     unname(p_rows[1])
                 }
                 if (length(global_p) != 1 || !is.finite(global_p)) {
-                    stop("non-finite Schoenfeld-residual test result")
+                    stop(.("non-finite Schoenfeld-residual test result"))
                 }
 
                 if (global_p >= 0.05) {

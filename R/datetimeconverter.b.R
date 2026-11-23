@@ -71,6 +71,8 @@ datetimeconverterClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         .twoDigitYearSource = FALSE,
         .pivotSuspected = FALSE,
 
+        # library-audit 2026-11-20 jsurvival [LOW] DEFERRED: Html message panels kept by maintainer
+        #   decision; revisit when these messages have been tried as jmvcore::Notice in the jamovi app
         # Add a notice to the collection
         .addNotice = function(type, title, content, class = NULL) {
             # Drop an exact duplicate. Some helpers are legitimately reached more than
@@ -172,7 +174,7 @@ datetimeconverterClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     title = .("No Valid Datetime Values Found"),
                     content = .("All values in the selected variable are missing (NA). \u2022 Select a different variable or check your data source.")
                 )
-                return(list(format = "unsure", warnings = 'Auto-detection unavailable: all values missing.'))
+                return(list(format = "unsure", warnings = .("Auto-detection unavailable: all values missing.")))
             }
 
             # The candidates, the shape guard and the year-span tie-break are shared with
@@ -210,7 +212,7 @@ datetimeconverterClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     pct = base::format(round(success_vec[[top_fmt]] * 100, 1)))
             )
 
-            return(list(format = "unsure", warnings = c(format_warnings, 'Auto-detection failed; specify format manually.')))
+            return(list(format = "unsure", warnings = c(format_warnings, .("Auto-detection failed; specify format manually."))))
         },
 
         .evaluateFormat = function(sample_dates, fmt) {
@@ -365,7 +367,7 @@ datetimeconverterClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         .getParser = function(format) {
             parser <- .dateParser(format)
             if (is.null(parser))
-                stop("Unsupported datetime format: ", format)
+                stop(.pasteT(.("Unsupported datetime format: {format}"), format = format), call. = FALSE)
             return(parser)
         },
 
@@ -406,7 +408,7 @@ datetimeconverterClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 if (nzchar(.tz_req))
                     parsed_dates <- lubridate::with_tz(parsed_dates, tzone = .tz_req)
                 original_display <- base::format(vector, usetz = TRUE)
-                notes <- c(notes, 'Detected POSIXct/POSIXt input; using supplied datetimes directly.')
+                notes <- c(notes, .("Detected POSIXct/POSIXt input; using supplied datetimes directly."))
                 format_hint <- 'posixct'
                 return(list(
                     original_display = original_display,
@@ -429,7 +431,7 @@ datetimeconverterClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                                                     tzone = private$.resolveTimezone()$tz,
                                                     roll_dst = "post")
                 original_display <- base::format(vector)
-                notes <- c(notes, 'Detected Date input; converted to POSIXct at midnight.')
+                notes <- c(notes, .("Detected Date input; converted to POSIXct at midnight."))
                 format_hint <- 'date'
                 return(list(
                     original_display = original_display,
@@ -445,7 +447,7 @@ datetimeconverterClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             if (is.factor(vector)) {
                 vector <- as.character(vector)
                 quality_vector <- vector
-                notes <- c(notes, 'Converted factor input to character.')
+                notes <- c(notes, .("Converted factor input to character."))
             }
 
             if (is.numeric(vector) && !inherits(vector, 'Date')) {
@@ -485,7 +487,7 @@ datetimeconverterClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             blank_idx <- which(char_vals == '')
             if (length(blank_idx) > 0) {
                 char_vals[blank_idx] <- NA_character_
-                notes <- c(notes, paste0('Converted ', length(blank_idx), ' blank entries to missing.'))
+                notes <- c(notes, .pasteT(.("Converted {nBlankIdx} blank entries to missing."), nBlankIdx = length(blank_idx)))
             }
 
             non_blank <- !is.na(char_vals)
@@ -496,7 +498,7 @@ datetimeconverterClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             manual_format <- self$options$datetime_format
             
             if (manual_format == "excel_serial") {
-                notes <- c(notes, 'Manual override: forcing Excel serial number interpretation.')
+                notes <- c(notes, .("Manual override: forcing Excel serial number interpretation."))
                 return(private$.processNumericVector(
                     numeric_vector = numeric_guess,
                     notes = notes,
@@ -507,7 +509,7 @@ datetimeconverterClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             }
             
             if (manual_format == "excel_serial_1904") {
-                notes <- c(notes, 'Manual override: forcing Excel serial number interpretation (1904 system).')
+                notes <- c(notes, .("Manual override: forcing Excel serial number interpretation (1904 system)."))
                 return(private$.processNumericVector(
                     numeric_vector = numeric_guess,
                     notes = notes,
@@ -518,7 +520,7 @@ datetimeconverterClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             }
 
             if (manual_format == "unix_epoch") {
-                notes <- c(notes, 'Manual override: forcing Unix epoch interpretation.')
+                notes <- c(notes, .("Manual override: forcing Unix epoch interpretation."))
                 return(private$.processNumericVector(
                     numeric_vector = numeric_guess,
                     notes = notes,
@@ -533,7 +535,7 @@ datetimeconverterClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # No serial is that long: Excel serial 100000 is the year 2173.
             packed_text <- all(grepl("^([0-9]{6}|[0-9]{8})$", char_vals[non_blank]))
             if (identical(manual_format, "auto") && numeric_ratio >= 0.8 && !packed_text) {
-                notes <- c(notes, 'Detected numeric serial values stored as text; automatically converted before parsing.')
+                notes <- c(notes, .("Detected numeric serial values stored as text; automatically converted before parsing."))
                 return(private$.processNumericVector(
                     numeric_vector = numeric_guess,
                     notes = notes,
@@ -633,7 +635,7 @@ datetimeconverterClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     parsed_dates = NULL,
                     already_parsed = FALSE,
                     format_hint = NULL,
-                    notes = c(notes, 'Numeric column contained only missing values.')
+                    notes = c(notes, .("Numeric column contained only missing values."))
                 ))
             }
 
@@ -668,7 +670,7 @@ datetimeconverterClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 # Excel serials count DAYS; as.POSIXct.numeric reads SECONDS. Without
                 # the * 86400 every Excel date collapsed onto the origin itself.
                 parsed_dates <- as.POSIXct(round(numeric_vector * 86400), origin = '1899-12-30', tz = 'UTC')
-                notes <- c(notes, 'Forced Excel serial interpretation (1900 system); converted using origin 1899-12-30 (UTC).')
+                notes <- c(notes, .("Forced Excel serial interpretation (1900 system); converted using origin 1899-12-30 (UTC)."))
                 return(list(
                     original_display = original_display,
                     parsing_vector = parsed_dates,
@@ -692,7 +694,7 @@ datetimeconverterClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 # 1462 days after the 1900 system's 1899-12-30 origin. Excel serials
                 # count DAYS while as.POSIXct.numeric reads SECONDS, hence * 86400.
                 parsed_dates <- as.POSIXct(round(numeric_vector * 86400), origin = '1904-01-01', tz = 'UTC')
-                notes <- c(notes, 'Forced Excel serial interpretation (1904 system); converted using origin 1904-01-01 (UTC).')
+                notes <- c(notes, .("Forced Excel serial interpretation (1904 system); converted using origin 1904-01-01 (UTC)."))
                 return(list(
                     original_display = original_display,
                     parsing_vector = parsed_dates,
@@ -731,7 +733,7 @@ datetimeconverterClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                             date = base::format(as.POSIXct(.edge_u, origin = '1970-01-01', tz = 'UTC'), '%Y-%m-%d')))
                 }
                 parsed_dates <- as.POSIXct(numeric_vector, origin = '1970-01-01', tz = 'UTC')
-                notes <- c(notes, 'Forced Unix epoch interpretation; converted using origin 1970-01-01 (UTC).')
+                notes <- c(notes, .("Forced Unix epoch interpretation; converted using origin 1970-01-01 (UTC)."))
                 return(list(
                     original_display = original_display,
                     parsing_vector = parsed_dates,
@@ -819,7 +821,7 @@ datetimeconverterClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 # Excel serials count DAYS; as.POSIXct.numeric reads SECONDS. Without
                 # the * 86400 every Excel date collapsed onto the origin itself.
                 parsed_dates <- as.POSIXct(round(numeric_vector * 86400), origin = '1899-12-30', tz = 'UTC')
-                notes <- c(notes, 'Detected Excel serial numbers (1900 system); converted using origin 1899-12-30 (UTC).')
+                notes <- c(notes, .("Detected Excel serial numbers (1900 system); converted using origin 1899-12-30 (UTC)."))
                 # 1900 and 1904 serials are numerically identical; no heuristic can
                 # separate them. Default to 1900 (Windows Excel, and Mac Excel 2011+)
                 # and DISCLOSE the assumption with a worked example from this data.
@@ -855,7 +857,7 @@ datetimeconverterClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             if (unix_like) {
                 parsed_dates <- as.POSIXct(numeric_vector, origin = '1970-01-01', tz = 'UTC')
-                notes <- c(notes, 'Detected Unix epoch seconds; converted using origin 1970-01-01 (UTC).')
+                notes <- c(notes, .("Detected Unix epoch seconds; converted using origin 1970-01-01 (UTC)."))
                 return(list(
                     original_display = original_display,
                     parsing_vector = parsed_dates,
@@ -869,7 +871,7 @@ datetimeconverterClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             if (unix_ms_like) {
                 parsed_dates <- as.POSIXct(numeric_vector / 1000, origin = "1970-01-01", tz = "UTC")
-                notes <- c(notes, "Detected Unix epoch milliseconds; converted using origin 1970-01-01 (UTC).")
+                notes <- c(notes, .("Detected Unix epoch milliseconds; converted using origin 1970-01-01 (UTC)."))
                 return(list(
                     original_display = original_display,
                     parsing_vector = parsed_dates,
@@ -890,7 +892,7 @@ datetimeconverterClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             }
             char_vals <- trimws(char_vals)
             char_vals[char_vals == ''] <- NA_character_
-            notes <- c(notes, 'Treated numeric values as formatted strings for parsing.')
+            notes <- c(notes, .("Treated numeric values as formatted strings for parsing."))
             padded <- .restoreLeadingZeros(char_vals)
             if (!identical(padded, char_vals)) {
                 short <- which(padded != char_vals)
@@ -1030,7 +1032,8 @@ datetimeconverterClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             if (tz_lower == "" || tz_lower == "system") {
                 return(list(
                     tz = "",
-                    note = paste0("String-to-datetime conversions use the system default timezone (", system_label, ")."),
+                    note = .pasteT(.("String-to-datetime conversions use the system default timezone ({systemLabel})."), systemLabel = system_label),
+                    note_parsed = .pasteT(.("Components were read in the system default timezone ({systemLabel})."), systemLabel = system_label),
                     summary = system_label
                 ))
             }
@@ -1038,7 +1041,8 @@ datetimeconverterClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             if (tz_lower == "utc") {
                 return(list(
                     tz = "UTC",
-                    note = "String-to-datetime conversions use UTC.",
+                    note = .("String-to-datetime conversions use UTC."),
+                    note_parsed = .("Components were read in UTC."),
                     summary = "UTC"
                 ))
             }
@@ -1053,14 +1057,15 @@ datetimeconverterClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 )
                 return(list(
                     tz = "",
-                    note = sprintf("Requested timezone '%s' was invalid; reverted to system default (%s).", tz_option, system_label),
+                    note = sprintf(.("Requested timezone '%s' was invalid; reverted to system default (%s)."), tz_option, system_label),
                     summary = system_label
                 ))
             }
 
             return(list(
                 tz = tz_option,
-                note = sprintf("String-to-datetime conversions use the '%s' timezone.", tz_option),
+                note = sprintf(.("String-to-datetime conversions use the '%s' timezone."), tz_option),
+                note_parsed = sprintf(.("Components were read in the '%s' timezone."), tz_option),
                 summary = tz_option
             ))
         },
@@ -1208,7 +1213,7 @@ datetimeconverterClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             fmt <- function(template) {
                 if (is.null(template))
                     return(NULL)
-                gsub("{datetime_var}", datetime_var, template, fixed = TRUE)
+                gsub("{datetimeVar}", datetime_var, template, fixed = TRUE)
             }
 
             update_output <- function(result, title_template = NULL, description_template = NULL) {
@@ -1221,44 +1226,44 @@ datetimeconverterClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             }
 
             update_output(self$results$corrected_datetime_char,
-                "Corrected DateTime - from {datetime_var}",
-                "DateTime variable {datetime_var} converted to standardized format (as character string)")
+                .("Corrected DateTime - from {datetimeVar}"),
+                .("DateTime variable {datetimeVar} converted to standardized format (as character string)"))
             update_output(self$results$corrected_datetime_numeric,
-                "Corrected DateTime Numeric - from {datetime_var}",
-                "DateTime variable {datetime_var} as Unix epoch seconds for calculations")
+                .("Corrected DateTime Numeric - from {datetimeVar}"),
+                .("DateTime variable {datetimeVar} as Unix epoch seconds for calculations"))
             update_output(self$results$year_out,
-                "Year - from {datetime_var}",
-                "Extracted year component from {datetime_var}")
+                .("Year - from {datetimeVar}"),
+                .("Extracted year component from {datetimeVar}"))
             update_output(self$results$month_out,
-                "Month - from {datetime_var}",
-                "Extracted month component (1-12) from {datetime_var}")
+                .("Month - from {datetimeVar}"),
+                .("Extracted month component (1-12) from {datetimeVar}"))
             update_output(self$results$monthname_out,
-                "Month Name - from {datetime_var}",
-                "Extracted month name from {datetime_var}")
+                .("Month Name - from {datetimeVar}"),
+                .("Extracted month name from {datetimeVar}"))
             update_output(self$results$day_out,
-                "Day - from {datetime_var}",
-                "Extracted day of month (1-31) from {datetime_var}")
+                .("Day - from {datetimeVar}"),
+                .("Extracted day of month (1-31) from {datetimeVar}"))
             update_output(self$results$hour_out,
-                "Hour - from {datetime_var}",
-                "Extracted hour component (0-23) from {datetime_var}")
+                .("Hour - from {datetimeVar}"),
+                .("Extracted hour component (0-23) from {datetimeVar}"))
             update_output(self$results$minute_out,
-                "Minute - from {datetime_var}",
-                "Extracted minute component (0-59) from {datetime_var}")
+                .("Minute - from {datetimeVar}"),
+                .("Extracted minute component (0-59) from {datetimeVar}"))
             update_output(self$results$second_out,
-                "Second - from {datetime_var}",
-                "Extracted second component (0-59) from {datetime_var}")
+                .("Second - from {datetimeVar}"),
+                .("Extracted second component (0-59) from {datetimeVar}"))
             update_output(self$results$dayname_out,
-                "Day Name - from {datetime_var}",
-                "Extracted day of week name from {datetime_var}")
+                .("Day Name - from {datetimeVar}"),
+                .("Extracted day of week name from {datetimeVar}"))
             update_output(self$results$weeknum_out,
-                "Week Number - from {datetime_var}",
-                "Extracted week number of year (1-53) from {datetime_var}")
+                .("Week Number - from {datetimeVar}"),
+                .("Extracted week number of year (1-53) from {datetimeVar}"))
             update_output(self$results$quarter_out,
-                "Quarter - from {datetime_var}",
-                "Extracted quarter (1-4) from {datetime_var}")
+                .("Quarter - from {datetimeVar}"),
+                .("Extracted quarter (1-4) from {datetimeVar}"))
             update_output(self$results$dayofyear_out,
-                "Day of Year - from {datetime_var}",
-                "Extracted day of year (1-366) from {datetime_var}")
+                .("Day of Year - from {datetimeVar}"),
+                .("Extracted day of year (1-366) from {datetimeVar}"))
         },
 
         # Generate HTML preview table showing conversion results
@@ -1275,7 +1280,10 @@ datetimeconverterClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             n_show <- min(n_clean, length(original))
 
             if (n_show == 0) {
-                return("<p>No data to preview.</p>")
+                return(paste0(
+                    "<p>",
+                    .("No data to preview."),
+                    "</p>"))
             }
 
             return(private$.formatPreviewGuide(original, parsed, n_show))
@@ -1301,7 +1309,10 @@ datetimeconverterClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # Generate HTML preview of extracted components
 
             if (length(components) == 0) {
-                return("<p>No components selected for extraction.</p>")
+                return(paste0(
+                    "<p>",
+                    .("No components selected for extraction."),
+                    "</p>"))
             }
 
             n_clean <- suppressWarnings(as.integer(n)[1])
@@ -1309,7 +1320,10 @@ datetimeconverterClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 n_clean <- 50L
             n_show <- min(n_clean, length(components[[1]]))
             if (n_show == 0) {
-                return("<p>No data to preview.</p>")
+                return(paste0(
+                    "<p>",
+                    .("No data to preview."),
+                    "</p>"))
             }
 
             return(private$.formatComponentPreviewGuide(components, n_show))
@@ -1345,23 +1359,6 @@ datetimeconverterClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             if (is.null(misuse_warnings))
                 misuse_warnings <- private$.detectMisuse(parsed_dates)
 
-            # Calculate percentages.
-            # Every row of this table is a percentage OF THE TOTAL, so Successful Parses
-            # must use the same denominator. It previously printed success_rate, which is
-            # over non-missing values, so 50 missing of 100 (50%) sat directly above 50
-            # parsed shown as 100% and the column summed to 250%. The non-missing rate is
-            # the more useful number, so it is still reported -- as the parse rate below.
-            missing_pct <- if (quality$total_observations > 0) {
-                round(quality$original_missing / quality$total_observations * 100, 1)
-            } else {
-                0
-            }
-            parsed_pct <- if (quality$total_observations > 0) {
-                round(quality$successfully_parsed / quality$total_observations * 100, 1)
-            } else {
-                0
-            }
-
             # PARSE RATE IS NOT DATA QUALITY.
             # success_rate only measures whether lubridate returned a non-NA value. A
             # column read in the wrong format parses at 100% and every date in it is
@@ -1373,35 +1370,26 @@ datetimeconverterClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 identical(n$class, "date-suspect")
             }, logical(1)))
             quality_summary <- if (is.na(quality$success_rate)) {
-                "N/A (no non-missing values)"
+                .("N/A (no non-missing values)")
             } else if (.grade_unsafe) {
                 .fmt(.("{pct}% of non-missing values produced a date, but see the warnings above: a column read in the wrong format still parses at a high rate."),
                      pct = base::format(round(quality$success_rate, 1)))
             } else if (quality$success_rate >= 95) {
-                "Excellent (\u226595% success)"
+                .("Excellent (\u226595% success)")
             } else if (quality$success_rate >= 80) {
-                "Good (80-94% success)"
+                .("Good (80-94% success)")
             } else if (quality$success_rate >= 50) {
-                "Fair (50-79% success)"
+                .("Fair (50-79% success)")
             } else {
-                "Poor (<50% success)"
+                .("Poor (<50% success)")
             }
-
-            # Conditional styling
-            # The literals used to carry their own quotes into an already single-quoted
-            # style attribute, emitting  style='background-color: '#fff3cd''  -- the
-            # attribute terminated at the second quote, so the row highlighting silently
-            # did nothing at all. Fixed, and moved to translucent tints + color: inherit
-            # so restoring it does not create three new opaque light rows that are
-            # unreadable in jamovi's dark theme.
-            missing_bg <- if (quality$original_missing > 0)
-                "rgba(255, 202, 33, 0.16); color: inherit;" else "transparent;"
-            parsing_bg <- if (quality$failed_parsing > 0)
-                "rgba(220, 53, 69, 0.14); color: inherit;" else "rgba(40, 167, 69, 0.13); color: inherit;"
 
             misuse_html <- if (length(misuse_warnings) > 0) {
                 paste0(
-                    "<div style=\"background-color: rgba(255, 202, 33, 0.23); color: inherit; padding: 10px; margin-top: 10px; border-left: 3px solid #ffc107;\"><strong> Warnings:</strong><ul>",
+                    paste0(
+                        '<div style="background-color: rgba(255, 202, 33, 0.23); color: inherit; padding: 10px; margin-top: 10px; border-left: 3px solid #ffc107;"><strong>',
+                        .("Warnings:"),
+                        "</strong><ul>"),
                     paste0('<li>', htmltools::htmlEscape(misuse_warnings), '</li>', collapse = ''),
                     "</ul></div>"
                 )
@@ -1409,45 +1397,21 @@ datetimeconverterClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 ""
             }
 
-            quality_html <- private$.formatQualityAssessmentGuide(
-                quality, missing_bg, missing_pct, parsing_bg, parsed_pct, quality_summary, misuse_html
-            )
+            quality_html <- private$.formatQualityAssessmentGuide(quality_summary, misuse_html)
 
             self$results$qualityAssessment$setContent(quality_html)
         },
 
-        .formatQualityAssessmentGuide = function(quality, missing_bg, missing_pct, parsing_bg, parsed_pct, quality_summary, misuse_html) {
+        # library-audit 2026-11-20 jsurvival [HIGH] DONE: the counts and percentages are the
+        # qualityCounts Table; this panel holds the parse-rate sentence and the warnings only
+        .formatQualityAssessmentGuide = function(quality_summary, misuse_html) {
             paste0(
                 "<div style='background-color: rgba(33, 137, 255, 0.07); padding: 15px; border-left: 4px solid #2196F3; color: inherit;'>\n",
-                "    <h4 style='margin-top: 0;'> Data Quality Assessment</h4>\n\n",
-                "    <table style='width: 100%; border-collapse: collapse; margin-top: 10px;'>\n",
-                "        <tr style='background-color: rgba(33, 152, 239, 0.13); color: inherit;'>\n",
-                "            <th style='padding: 8px; text-align: left; border: 1px solid #90caf9;'>Metric</th>\n",
-                "            <th style='padding: 8px; text-align: right; border: 1px solid #90caf9;'>Count</th>\n",
-                "            <th style='padding: 8px; text-align: right; border: 1px solid #90caf9;'>%</th>\n",
-                "        </tr>\n",
-                "        <tr>\n",
-                "            <td style='padding: 8px; border: 1px solid #90caf9;'>Total Observations</td>\n",
-                "            <td style='padding: 8px; text-align: right; border: 1px solid #90caf9;'>", quality$total_observations, "</td>\n",
-                "            <td style='padding: 8px; text-align: right; border: 1px solid #90caf9;'>100%</td>\n",
-                "        </tr>\n",
-                "        <tr style='background-color: ", missing_bg, "'>\n",
-                "            <td style='padding: 8px; border: 1px solid #90caf9;'>Missing Values</td>\n",
-                "            <td style='padding: 8px; text-align: right; border: 1px solid #90caf9;'>", quality$original_missing, "</td>\n",
-                "            <td style='padding: 8px; text-align: right; border: 1px solid #90caf9;'>", missing_pct, "%</td>\n",
-                "        </tr>\n",
-                "        <tr style='background-color: ", parsing_bg, "'>\n",
-                "            <td style='padding: 8px; border: 1px solid #90caf9;'>Successful Parses</td>\n",
-                "            <td style='padding: 8px; text-align: right; border: 1px solid #90caf9;'>", quality$successfully_parsed, "</td>\n",
-                "            <td style='padding: 8px; text-align: right; border: 1px solid #90caf9;'>", parsed_pct, "%</td>\n",
-                "        </tr>\n",
-                "        <tr>\n",
-                "            <td style='padding: 8px; border: 1px solid #90caf9;'>Failed Parsing</td>\n",
-                "            <td style='padding: 8px; text-align: right; border: 1px solid #90caf9;'>", quality$failed_parsing, "</td>\n",
-                "            <td style='padding: 8px; text-align: right; border: 1px solid #90caf9;'>-</td>\n",
-                "        </tr>\n",
-                "    </table>\n\n",
-                "    <p style='margin-top: 10px;'><strong>Parse rate:</strong> ", quality_summary, "</p>\n",
+                paste0(
+                    "<h4 style='margin-top: 0;'>",
+                    .("Data Quality Assessment"),
+                    "</h4>"),
+                "    <p style='margin-top: 10px;'><strong>", .("Parse rate:"), "</strong> ", quality_summary, "</p>\n",
                 "    ", misuse_html, "\n",
                 "</div>"
             )
@@ -1476,7 +1440,7 @@ datetimeconverterClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             extraction_text <- if (length(extractions) > 0) {
                 paste(extractions, collapse = ", ")
             } else {
-                "none (preview only)"
+                .("none (preview only)")
             }
 
             tz_display <- timezone_label %||% if (self$options$timezone == "utc") "UTC" else Sys.timezone()
@@ -1499,34 +1463,34 @@ datetimeconverterClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             format_label <- if (identical(detected_format, "unsure")) "Undetermined" else private$.formatLabel(detected_format)
             action_clause <- if (length(extractions) > 0) paste0("We extracted ", extraction_text) else "We standardized timestamps"
             copy_ready_sentence <- if (isTRUE(quality$successfully_parsed > 0) && !identical(detected_format, "unsure")) {
-                paste0(
-                    action_clause, " from ", n_values, " datetime values in column '",
-                    datetime_var_safe, "' using ", format_label, " (", detected_format,
-                    ") format, with ", pct_text, " producing a valid date", missing_clause, "."
-                )
+                .pasteT(.("{actionClause} from {nValues} datetime values in column '{datetimeVarSafe}' using {formatLabel} ({detectedFormat}) format, with {pctText} producing a valid date{missingClause}."), actionClause = action_clause, nValues = n_values, datetimeVarSafe = datetime_var_safe, formatLabel = format_label, detectedFormat = detected_format, pctText = pct_text, missingClause = missing_clause)
             } else {
-                paste0(
-                    "No valid dates could be parsed from the ", n_values,
-                    " non-missing values in column '", datetime_var_safe, "'",
-                    missing_clause, "; please select the matching DateTime Format manually."
-                )
+                .pasteT(.("No valid dates could be parsed from the {nValues} non-missing values in column '{datetimeVarSafe}'{missingClause}; please select the matching DateTime Format manually."), nValues = n_values, datetimeVarSafe = datetime_var_safe, missingClause = missing_clause)
             }
             summary_html <- paste0(
                 "<div style='background-color: rgba(33, 137, 255, 0.07); padding: 15px; border: 1px solid #b3d9ff; border-radius: 5px; color: inherit;'>\n",
-                "    <h4 style='margin-top: 0;'> Analysis Summary</h4>\n",
-                "    <p><strong>Source column:</strong> ", datetime_var_safe, "</p>\n",
-                "    <p><strong>Format detected/used:</strong> ", format_label, " (", detected_format, ")</p>\n",
-                "    <p><strong>Timezone:</strong> ", tz_display_safe, "</p>\n",
-                "    <p><strong>Successful conversions:</strong> ", quality$successfully_parsed, "/", n_values, " non-missing (", pct_text, ")</p>\n",
-                "    <p><strong>Components extracted:</strong> ", extraction_text, "</p>\n\n",
-                "    <div style='background-color: rgba(33, 149, 188, 0.1); padding: 10px; margin-top: 15px; border-radius: 3px; color: inherit;'>\n",
-                "        <p style='margin: 0;'><strong> Copy-Ready Summary:</strong></p>\n",
-                "        <p style='font-family: monospace; font-size: 0.9em; margin: 10px 0;'>\n",
-                "        ", copy_ready_sentence, "\n",
-                "        </p>\n",
-                "    </div>\n",
-                "</div>"
-            )
+                paste0(
+                    "<h4 style='margin-top: 0;'>",
+                    .("Analysis Summary"),
+                    "</h4>"),
+                "    <p><strong>", .("Source column:"), "</strong> ",
+                datetime_var_safe,
+                "</p>\n    <p>",
+                .pasteT(.("<strong>Format detected/used:</strong> {formatLabel} ({detectedFormat})"), formatLabel = format_label, detectedFormat = detected_format),
+                "</p>\n    <p><strong>", .("Timezone:"), "</strong> ",
+                tz_display_safe,
+                "</p>\n    <p>",
+                .pasteT(.("<strong>Successful conversions:</strong> {successfullyParsed}/{nValues} non-missing ({pctText})"), successfullyParsed = quality$successfully_parsed, nValues = n_values, pctText = pct_text),
+                "</p>\n    <p><strong>", .("Components extracted:"), "</strong> ",
+                extraction_text,
+                "</p>\n\n    <div style='background-color: rgba(33, 149, 188, 0.1); padding: 10px; margin-top: 15px; border-radius: 3px; color: inherit;'>\n",
+                paste0(
+                    "<p style='margin: 0;'><strong>",
+                    .("Copy-Ready Summary:"),
+                    "</strong></p>"),
+                "        <p style='font-family: monospace; font-size: 0.9em; margin: 10px 0;'>\n        ",
+                copy_ready_sentence,
+                "\n        </p>\n    </div>\n</div>")
 
             self$results$nlSummary$setContent(summary_html)
         },
@@ -1538,105 +1502,75 @@ datetimeconverterClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             }
 
             # About Panel
-            about_html <- "
-            <div style='background-color: rgba(155, 155, 155, 0.06); padding: 15px; border-radius: 5px; color: inherit;'>
-                <h4 style='margin-top: 0;'> What This Function Does</h4>
-                <p>The DateTime Converter extracts components (year, month, day, hour, etc.)
-                from datetime columns and creates new variables for downstream analysis.</p>
-
-                <h4>When to Use</h4>
-                <ul>
-                    <li><strong>Cohort stratification:</strong> Extract year to group patients by diagnosis year</li>
-                    <li><strong>Seasonal analysis:</strong> Extract month/quarter for temporal patterns</li>
-                    <li><strong>Temporal patterns:</strong> Extract day-of-week for treatment schedules</li>
-                    <li><strong>Data cleaning:</strong> Convert Excel dates to standardized format</li>
-                    <li><strong>Time calculations:</strong> Extract components for survival time calculations</li>
-                </ul>
-
-                <h4>Typical Outputs</h4>
-                <p>New columns containing numeric or text representations of datetime components.
-                These can be used for grouping, filtering, or creating time-based variables.</p>
-
-                <h4>Clinical Examples</h4>
-                <ul>
-                    <li>Extract year from diagnosis date to study temporal trends in cancer incidence</li>
-                    <li>Extract month to analyze seasonal variation in disease presentation</li>
-                    <li>Extract day-of-week to study weekend vs weekday treatment outcomes</li>
-                </ul>
-            </div>
-            "
+            about_html <- paste0(
+                "<div style='background-color: rgba(155, 155, 155, 0.06); padding: 15px; border-radius: 5px; color: inherit;'><h4 style='margin-top: 0;'>",
+                .("What This Function Does"),
+                "</h4><p>",
+                .("The DateTime Converter extracts components (year, month, day, hour, etc.) from datetime columns and creates new variables for downstream analysis."),
+                "</p><h4>",
+                .("When to Use"),
+                "</h4><ul><li>",
+                .("<strong>Cohort stratification:</strong> Extract year to group patients by diagnosis year"),
+                "</li><li>",
+                .("<strong>Seasonal analysis:</strong> Extract month/quarter for temporal patterns"),
+                "</li><li>",
+                .("<strong>Temporal patterns:</strong> Extract day-of-week for treatment schedules"),
+                "</li><li>",
+                .("<strong>Data cleaning:</strong> Convert Excel dates to standardized format"),
+                "</li><li>",
+                .("<strong>Time calculations:</strong> Extract components for survival time calculations"),
+                "</li></ul><h4>",
+                .("Typical Outputs"),
+                "</h4><p>",
+                .("New columns containing numeric or text representations of datetime components. These can be used for grouping, filtering, or creating time-based variables."),
+                "</p><h4>",
+                .("Clinical Examples"),
+                "</h4><ul><li>",
+                .("Extract year from diagnosis date to study temporal trends in cancer incidence"),
+                "</li><li>",
+                .("Extract month to analyze seasonal variation in disease presentation"),
+                "</li><li>",
+                .("Extract day-of-week to study weekend vs weekday treatment outcomes"),
+                "</li></ul></div>")
             self$results$aboutPanel$setContent(about_html)
 
             # Caveats Panel
-            caveats_html <- "
-            <div style='background-color: rgba(255, 202, 33, 0.23); padding: 15px; border-left: 4px solid #ffc107; border-radius: 3px; color: inherit;'>
-                <h4 style='margin-top: 0;'> Important Considerations</h4>
-                <ul>
-                    <li><strong>Format matching:</strong> Date format selection must match your data.
-                    Incorrect format leads to parsing failures or wrong dates.</li>
-
-                    <li><strong>Timezone consistency:</strong> UTC vs system timezone affects time extraction.
-                    Use UTC for international studies, system timezone for local data.</li>
-
-                    <li><strong>Two-digit years:</strong> a year written as two digits is read with the
-                    standard 1969-2068 pivot, so 55 becomes 1955 but 37 becomes 2037. For dates of birth,
-                    diagnosis or specimen collection - which cannot be in the future - set
-                    <em>Two-digit years</em> to <em>Always in the past</em>. Four-digit years are never
-                    affected.</li>
-
-                    <li><strong>Week number is not the ISO week:</strong> weeks are counted in 7-day blocks
-                    from 1 January, so 1-7 January is always week 1 and week 53 is a 1-2 day stub. This
-                    differs from ISO-8601 and from the MMWR/epidemiological week on about a quarter of all
-                    days, and the two disagree most around the new year: 2021-01-01 is week 1 here but ISO
-                    week 53 of 2020. Do not use it where a reporting standard requires ISO or epi weeks.</li>
-
-                    <li><strong>Numeric datetime (Unix epoch):</strong> The corrected datetime numeric output
-                    represents seconds since 1970-01-01 00:00:00 UTC. This value is:
-                        <ul>
-                            <li> OS-independent (same on Windows, Mac, Linux)</li>
-                            <li><strong>Dependent on the Timezone setting above.</strong> A date without a
-                            time is midnight <em>in the selected timezone</em>, so the same input yields a
-                            different number under different settings: <code>2024-01-15</code> becomes
-                            1705276800 under UTC but 1705266000 under Europe/Istanbul (3 hours earlier).
-                            The default is your machine's timezone, so two collaborators on different
-                            machines will not get identical numbers. <strong>Set Timezone to UTC if the
-                            numeric value must be reproducible across machines</strong> or is going to be
-                            compared against an external source.</li>
-                            <li> Suitable for calculations and comparisons</li>
-                            <li> Very large numbers (billions) - use scientific notation if needed</li>
-                        </ul>
-                    </li>
-
-                    <li><strong>Excel serial dates:</strong> Different epochs exist:
-                        <ul>
-                            <li>Windows Excel (1900 system): serial 1 is nominally 1900-01-01, but Excel
-                            wrongly treats 1900 as a leap year, so conversion uses the origin 1899-12-30.
-                            Dates from 1900-03-01 (serial 61) onward are exact; serials 1-59 land one day
-                            earlier than Excel shows and serial 60 is Excel's non-existent 1900-02-29.
-                            This matches how readxl and openxlsx convert, and does not affect any
-                            realistic clinical date.</li>
-                            <li>Mac Excel 2008 and earlier (1904 system): origin 1904-01-01, exactly
-                            1462 days later than the 1900 system. Serials from the two systems look
-                            identical, so auto-detection always assumes 1900; choose the DateTime Format
-                            'Excel Serial (Days since 1904, legacy Mac)' if your file came from an old
-                            Mac Excel.</li>
-                        </ul>
-                    </li>
-
-                    <li><strong>Missing values:</strong> Invalid dates become NA in output columns.
-                    Check quality metrics to ensure acceptable parsing success rate.</li>
-
-                    <li><strong>Daylight saving time:</strong> Can cause ambiguous or non-existent times.
-                    Consider using UTC for medical studies to avoid DST complications.</li>
-
-                    <li><strong>Leap years and leap seconds:</strong> Automatically handled by lubridate,
-                    but be aware when working with precise time calculations.</li>
-                </ul>
-
-                <p style='margin-top: 15px;'><strong> Best Practice:</strong> Always review the
-                Quality Assessment and Preview tables before adding columns to your dataset.</p>
-            </div>
-            "
+            caveats_html <- paste0(
+                "<div style='background-color: rgba(255, 202, 33, 0.23); padding: 15px; border-left: 4px solid #ffc107; border-radius: 3px; color: inherit;'><h4 style='margin-top: 0;'>",
+                .("Important Considerations"),
+                "</h4><ul><li>",
+                .("<strong>Format matching:</strong> Date format selection must match your data. Incorrect format leads to parsing failures or wrong dates."),
+                "</li><li>",
+                .("<strong>Timezone consistency:</strong> UTC vs system timezone affects time extraction. Use UTC for international studies, system timezone for local data."),
+                "</li><li>",
+                .("<strong>Two-digit years:</strong> a year written as two digits is read with the standard 1969-2068 pivot, so 55 becomes 1955 but 37 becomes 2037. For dates of birth, diagnosis or specimen collection - which cannot be in the future - set <em>Two-digit years</em> to <em>Always in the past</em>. Four-digit years are never affected."),
+                "</li><li>",
+                .("<strong>Week number is not the ISO week:</strong> weeks are counted in 7-day blocks from 1 January, so 1-7 January is always week 1 and week 53 is a 1-2 day stub. This differs from ISO-8601 and from the MMWR/epidemiological week on about a quarter of all days, and the two disagree most around the new year: 2021-01-01 is week 1 here but ISO week 53 of 2020. Do not use it where a reporting standard requires ISO or epi weeks."),
+                "</li><li>",
+                .("<strong>Numeric datetime (Unix epoch):</strong> The corrected datetime numeric output represents seconds since 1970-01-01 00:00:00 UTC. This value is:"),
+                "<ul><li>",
+                .("OS-independent (same on Windows, Mac, Linux)"),
+                "</li><li>",
+                .("<strong>Dependent on the Timezone setting above.</strong> A date without a time is midnight <em>in the selected timezone</em>, so the same input yields a different number under different settings: <code>2024-01-15</code> becomes 1705276800 under UTC but 1705266000 under Europe/Istanbul (3 hours earlier). The default is your machine's timezone, so two collaborators on different machines will not get identical numbers. <strong>Set Timezone to UTC if the numeric value must be reproducible across machines</strong> or is going to be compared against an external source."),
+                "</li><li>",
+                .("Suitable for calculations and comparisons"),
+                "</li><li>",
+                .("Very large numbers (billions) - use scientific notation if needed"),
+                "</li></ul></li><li>",
+                .("<strong>Excel serial dates:</strong> Different epochs exist:"),
+                "<ul><li>",
+                .("Windows Excel (1900 system): serial 1 is nominally 1900-01-01, but Excel wrongly treats 1900 as a leap year, so conversion uses the origin 1899-12-30. Dates from 1900-03-01 (serial 61) onward are exact; serials 1-59 land one day earlier than Excel shows and serial 60 is Excel's non-existent 1900-02-29. This matches how readxl and openxlsx convert, and does not affect any realistic clinical date."),
+                "</li><li>",
+                .("Mac Excel 2008 and earlier (1904 system): origin 1904-01-01, exactly 1462 days later than the 1900 system. Serials from the two systems look identical, so auto-detection always assumes 1900; choose the DateTime Format 'Excel Serial (Days since 1904, legacy Mac)' if your file came from an old Mac Excel."),
+                "</li></ul></li><li>",
+                .("<strong>Missing values:</strong> Invalid dates become NA in output columns. Check quality metrics to ensure acceptable parsing success rate."),
+                "</li><li>",
+                .("<strong>Daylight saving time:</strong> Can cause ambiguous or non-existent times. Consider using UTC for medical studies to avoid DST complications."),
+                "</li><li>",
+                .("<strong>Leap years and leap seconds:</strong> Automatically handled by lubridate, but be aware when working with precise time calculations."),
+                "</li></ul><p style='margin-top: 15px;'>",
+                .("<strong> Best Practice:</strong> Always review the Quality Assessment and Preview tables before adding columns to your dataset."),
+                "</p></div>")
             self$results$caveatsPanel$setContent(caveats_html)
         },
 
@@ -1646,62 +1580,50 @@ datetimeconverterClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 return()
             }
 
-            glossary_html <- "
-            <div style='background-color: rgba(153, 33, 170, 0.12); padding: 15px; border-radius: 5px; color: inherit;'>
-                <h4 style='margin-top: 0;'> Key Terms & Concepts</h4>
-                <dl style='line-height: 1.6;'>
-                    <dt style='font-weight: bold; margin-top: 10px;'>Excel Serial Date</dt>
-                    <dd style='margin-left: 20px;'>Number of days counted from Excel's origin: the 1900
-                    system (Windows) or the 1904 system (Mac). Example: serial 45000 is
-                    <strong>15 March 2023</strong>. Because Excel's 1900 system wrongly counts
-                    1900-02-29, conversion uses the origin 1899-12-30; that is exact for every date
-                    from 1900-03-01 onward. Commonly used when exporting data from Excel to text files.</dd>
-
-                    <dt style='font-weight: bold; margin-top: 10px;'>Unix Epoch</dt>
-                    <dd style='margin-left: 20px;'>Seconds since January 1, 1970 00:00:00 UTC.
-                    Example: 1609459200 represents January 1, 2021 00:00:00 UTC. The number identifies an
-                    <strong>instant</strong>, so it is OS-independent - but converting a date to that
-                    instant requires a timezone, and this module uses the Timezone option (your machine's
-                    zone by default). The same written date therefore produces different numbers under
-                    different Timezone settings; choose UTC when the value must be reproducible across
-                    machines. Used in databases, programming systems, and recommended for datetime
-                    calculations.</dd>
-
-                    <dt style='font-weight: bold; margin-top: 10px;'>ISO 8601</dt>
-                    <dd style='margin-left: 20px;'>International standard date format: YYYY-MM-DD or
-                    YYYY-MM-DD HH:MM:SS. Recommended for data exchange as it's unambiguous across
-                    cultures and time zones.</dd>
-
-                    <dt style='font-weight: bold; margin-top: 10px;'>UTC (Coordinated Universal Time)</dt>
-                    <dd style='margin-left: 20px;'>Global time standard with no daylight saving
-                    adjustments. Recommended for multi-center studies and international collaborations
-                    to avoid timezone confusion.</dd>
-
-                    <dt style='font-weight: bold; margin-top: 10px;'>System Timezone</dt>
-                    <dd style='margin-left: 20px;'>Your computer's local timezone setting, which may
-                    include daylight saving time adjustments. Appropriate for local studies within
-                    a single timezone.</dd>
-
-                    <dt style='font-weight: bold; margin-top: 10px;'>POSIXct</dt>
-                    <dd style='margin-left: 20px;'>R's internal datetime format storing time as seconds
-                    since Unix epoch. Allows efficient date/time calculations.</dd>
-
-                    <dt style='font-weight: bold; margin-top: 10px;'>Parsing</dt>
-                    <dd style='margin-left: 20px;'>Converting text or numeric representations of dates
-                    into standardized datetime objects that can be manipulated and analyzed.</dd>
-
-                    <dt style='font-weight: bold; margin-top: 10px;'>Quarter</dt>
-                    <dd style='margin-left: 20px;'>Three-month period used in financial and medical
-                    reporting: Q1 (Jan-Mar), Q2 (Apr-Jun), Q3 (Jul-Sep), Q4 (Oct-Dec).</dd>
-                                <dt><b>Week number (as used here)</b></dt>
-                <dd>The day of the year divided into 7-day blocks counting from 1 January, i.e. lubridate::week(). It is NOT the ISO-8601 week and NOT the MMWR/epidemiological week; those start on a fixed weekday and can place late-December dates in week 1 of the following year. Use ISO or epi weeks if your reporting standard requires them.</dd>
-
-                <dt><b>Excel serial date</b></dt>
-                <dd>A date stored as a count of days. Windows Excel counts from 30 December 1899; legacy Mac Excel (2008 and earlier) counts from 1 January 1904, exactly 1462 days later. The number itself does not record which system produced it, so this analysis assumes the 1900 system and says so.</dd>
-
-            </dl>
-            </div>
-            "
+            glossary_html <- paste0(
+                "<div style='background-color: rgba(153, 33, 170, 0.12); padding: 15px; border-radius: 5px; color: inherit;'><h4 style='margin-top: 0;'>",
+                .("Key Terms & Concepts"),
+                "</h4><dl style='line-height: 1.6;'><dt style='font-weight: bold; margin-top: 10px;'>",
+                .("Excel Serial Date"),
+                "</dt><dd style='margin-left: 20px;'>",
+                .("Number of days counted from Excel's origin: the 1900 system (Windows) or the 1904 system (Mac). Example: serial 45000 is <strong>15 March 2023</strong>. Because Excel's 1900 system wrongly counts 1900-02-29, conversion uses the origin 1899-12-30; that is exact for every date from 1900-03-01 onward. Commonly used when exporting data from Excel to text files."),
+                "</dd><dt style='font-weight: bold; margin-top: 10px;'>",
+                .("Unix Epoch"),
+                "</dt><dd style='margin-left: 20px;'>",
+                .("Seconds since January 1, 1970 00:00:00 UTC. Example: 1609459200 represents January 1, 2021 00:00:00 UTC. The number identifies an <strong>instant</strong>, so it is OS-independent - but converting a date to that instant requires a timezone, and this module uses the Timezone option (your machine's zone by default). The same written date therefore produces different numbers under different Timezone settings; choose UTC when the value must be reproducible across machines. Used in databases, programming systems, and recommended for datetime calculations."),
+                "</dd><dt style='font-weight: bold; margin-top: 10px;'>",
+                .("ISO 8601"),
+                "</dt><dd style='margin-left: 20px;'>",
+                .("International standard date format: YYYY-MM-DD or YYYY-MM-DD HH:MM:SS. Recommended for data exchange as it's unambiguous across cultures and time zones."),
+                "</dd><dt style='font-weight: bold; margin-top: 10px;'>",
+                .("UTC (Coordinated Universal Time)"),
+                "</dt><dd style='margin-left: 20px;'>",
+                .("Global time standard with no daylight saving adjustments. Recommended for multi-center studies and international collaborations to avoid timezone confusion."),
+                "</dd><dt style='font-weight: bold; margin-top: 10px;'>",
+                .("System Timezone"),
+                "</dt><dd style='margin-left: 20px;'>",
+                .("Your computer's local timezone setting, which may include daylight saving time adjustments. Appropriate for local studies within a single timezone."),
+                "</dd><dt style='font-weight: bold; margin-top: 10px;'>",
+                .("POSIXct"),
+                "</dt><dd style='margin-left: 20px;'>",
+                .("R's internal datetime format storing time as seconds since Unix epoch. Allows efficient date/time calculations."),
+                "</dd><dt style='font-weight: bold; margin-top: 10px;'>",
+                .("Parsing"),
+                "</dt><dd style='margin-left: 20px;'>",
+                .("Converting text or numeric representations of dates into standardized datetime objects that can be manipulated and analyzed."),
+                "</dd><dt style='font-weight: bold; margin-top: 10px;'>",
+                .("Quarter"),
+                "</dt><dd style='margin-left: 20px;'>",
+                .("Three-month period used in financial and medical reporting: Q1 (Jan-Mar), Q2 (Apr-Jun), Q3 (Jul-Sep), Q4 (Oct-Dec)."),
+                "</dd><dt><b>",
+                .("Week number (as used here)"),
+                "</b></dt><dd>",
+                .("The day of the year divided into 7-day blocks counting from 1 January, i.e. lubridate::week(). It is NOT the ISO-8601 week and NOT the MMWR/epidemiological week; those start on a fixed weekday and can place late-December dates in week 1 of the following year. Use ISO or epi weeks if your reporting standard requires them."),
+                "</dd><dt><b>",
+                .("Excel serial date"),
+                "</b></dt><dd>",
+                .("A date stored as a count of days. Windows Excel counts from 30 December 1899; legacy Mac Excel (2008 and earlier) counts from 1 January 1904, exactly 1462 days later. The number itself does not record which system produced it, so this analysis assumes the 1900 system and says so."),
+                "</dd></dl></div>")
             self$results$glossaryPanel$setContent(glossary_html)
         },
 
@@ -1800,40 +1722,46 @@ datetimeconverterClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             # Show welcome message if no variable selected
             if (is.null(self$options$datetime_var) || self$options$datetime_var == "") {
-                welcome_msg <- "
-                <div style='background-color: rgba(33, 152, 239, 0.13); padding: 20px; border-radius: 8px; margin: 20px 0; color: inherit;'>
-                <h3 style='margin-top: 0;'> Welcome to DateTime Converter!</h3>
-                <p><strong>Convert datetime variables and extract components for analysis</strong></p>
-
-                <h4>Quick Start:</h4>
-                <ol>
-                <li><strong>Select DateTime Variable:</strong> Choose a column containing datetime information</li>
-                <li><strong>Choose Format:</strong> Auto-detect or manually specify the datetime format</li>
-                <li><strong>Extract Components:</strong> Select which datetime components to extract</li>
-                <li><strong>Review Preview:</strong> Check conversion quality before adding to dataset</li>
-                </ol>
-
-                <h4>Features:</h4>
-                <ul>
-                <li><strong>Automatic Format Detection:</strong> Intelligently identifies datetime format</li>
-                <li><strong>Quality Assessment:</strong> Min/max values, success rate, missing data</li>
-                <li><strong>Component Extraction:</strong> Year, month, day, hour, minute, day name, week number, quarter, etc.</li>
-                <li><strong>Preview Before Adding:</strong> See converted data before adding to dataset</li>
-                </ul>
-
-                <h4>Supported Formats:</h4>
-                <ul>
-                <li>YYYY-MM-DD HH:MM:SS (ISO standard with time)</li>
-                <li>YYYY-MM-DD (ISO date)</li>
-                <li>DD-MM-YYYY or DD/MM/YYYY (European format)</li>
-                <li>MM-DD-YYYY or MM/DD/YYYY (US format)</li>
-                <li>And many more variations...</li>
-                </ul>
-
-                <p style='font-size: 12px; opacity: 0.75; margin-top: 20px;'>
-                 <em>Perfect for preparing temporal data for survival analysis, time series, and longitudinal studies</em>
-                </p>
-                </div>"
+                welcome_msg <- paste0(
+                    "<div style='background-color: rgba(33, 152, 239, 0.13); padding: 20px; border-radius: 8px; margin: 20px 0; color: inherit;'><h3 style='margin-top: 0;'>",
+                    .("Welcome to DateTime Converter!"),
+                    "</h3><p><strong>",
+                    .("Convert datetime variables and extract components for analysis"),
+                    "</strong></p><h4>",
+                    .("Quick Start:"),
+                    "</h4><ol><li>",
+                    .("<strong>Select DateTime Variable:</strong> Choose a column containing datetime information"),
+                    "</li><li>",
+                    .("<strong>Choose Format:</strong> Auto-detect or manually specify the datetime format"),
+                    "</li><li>",
+                    .("<strong>Extract Components:</strong> Select which datetime components to extract"),
+                    "</li><li>",
+                    .("<strong>Review Preview:</strong> Check conversion quality before adding to dataset"),
+                    "</li></ol><h4>",
+                    .("Features:"),
+                    "</h4><ul><li>",
+                    .("<strong>Automatic Format Detection:</strong> Intelligently identifies datetime format"),
+                    "</li><li>",
+                    .("<strong>Quality Assessment:</strong> Min/max values, success rate, missing data"),
+                    "</li><li>",
+                    .("<strong>Component Extraction:</strong> Year, month, day, hour, minute, day name, week number, quarter, etc."),
+                    "</li><li>",
+                    .("<strong>Preview Before Adding:</strong> See converted data before adding to dataset"),
+                    "</li></ul><h4>",
+                    .("Supported Formats:"),
+                    "</h4><ul><li>",
+                    .("YYYY-MM-DD HH:MM:SS (ISO standard with time)"),
+                    "</li><li>",
+                    .("YYYY-MM-DD (ISO date)"),
+                    "</li><li>",
+                    .("DD-MM-YYYY or DD/MM/YYYY (European format)"),
+                    "</li><li>",
+                    .("MM-DD-YYYY or MM/DD/YYYY (US format)"),
+                    "</li><li>",
+                    .("And many more variations..."),
+                    "</li></ul><p style='font-size: 12px; opacity: 0.75; margin-top: 20px;'><em>",
+                    .("Perfect for preparing temporal data for survival analysis, time series, and longitudinal studies"),
+                    "</em></p></div>")
 
                 self$results$welcome$setVisible(TRUE)
                 self$results$welcome$setContent(welcome_msg)
@@ -2186,16 +2114,16 @@ datetimeconverterClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 "ymd" = "YYYY-MM-DD",
                 "dmy" = "DD-MM-YYYY",
                 "mdy" = "MM-DD-YYYY",
-                "ym" = "YYYY-MM (day set to the 1st)",
-                "my" = "MM-YYYY (day set to the 1st)",
-                "excel_serial" = "Excel Serial (days since 1899-12-30)",
-                "excel_serial_1904" = "Excel Serial, legacy Mac (days since 1904-01-01)",
-                "unix_epoch" = "Unix Epoch Seconds (since 1970-01-01)",
-                "unix_epoch_ms" = "Unix Epoch Milliseconds (since 1970-01-01)",
+                "ym" = .("YYYY-MM (day set to the 1st)"),
+                "my" = .("MM-YYYY (day set to the 1st)"),
+                "excel_serial" = .("Excel Serial (days since 1899-12-30)"),
+                "excel_serial_1904" = .("Excel Serial, legacy Mac (days since 1904-01-01)"),
+                "unix_epoch" = .("Unix Epoch Seconds (since 1970-01-01)"),
+                "unix_epoch_ms" = .("Unix Epoch Milliseconds (since 1970-01-01)"),
                 "posixct" = "Already formatted POSIXct/POSIXt",
-                "date" = "R Date class (converted to midnight)",
+                "date" = .("R Date class (converted to midnight)"),
                 "preparsed" = "Pre-parsed datetime values",
-                "unsure" = "Undetermined (please specify the format manually)",
+                "unsure" = .("Undetermined (please specify the format manually)"),
                 detected_format
             )
 
@@ -2203,27 +2131,36 @@ datetimeconverterClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # also returns already_parsed = TRUE, and "already stored as datetime
             # values" was then printed beside "Forced Excel serial interpretation".
             format_context <- if (isTRUE(prepared$format_hint %in% c("posixct", "date"))) {
-                "<p><em>Input was already stored as datetime values; original encoding was preserved.</em></p>"
+                paste0(
+                    "<p><em>",
+                    .("Input was already stored as datetime values; original encoding was preserved."),
+                    "</em></p>")
             } else if (self$options$datetime_format == "auto") {
-                "<p><em>Format was automatically detected. If results look incorrect, try manually specifying the format.</em></p>"
+                paste0(
+                    "<p><em>",
+                    .("Format was automatically detected. If results look incorrect, try manually specifying the format."),
+                    "</em></p>")
             } else {
-                paste0("<p><em>Parsing enforced manually using format <code>",
-                    self$options$datetime_format, "</code>.</em></p>")
+                paste0(
+                    "<p><em>",
+                    .pasteT(.("Parsing enforced manually using format <code>{datetimeFormat}</code>."), datetimeFormat = self$options$datetime_format),
+                    "</em></p>")
             }
 
             tz_summary <- tz_info$summary
             note_lines <- preprocessing_notes
             timezone_lines <- character()
             if (detected_format %in% c("excel_serial", "excel_serial_1904", "unix_epoch", "unix_epoch_ms")) {
-                timezone_lines <- "Conversions from numeric formats (Excel/Unix) always use UTC regardless of the timezone option."
-                tz_summary <- "UTC (numeric conversion)"
+                timezone_lines <- .("Conversions from numeric formats (Excel/Unix) always use UTC regardless of the timezone option.")
+                tz_summary <- .("UTC (numeric conversion)")
             } else if (nzchar(tz_info$note)) {
                 # Previously gated on !already_parsed, so a POSIXct column was told
                 # nothing about the timezone at all -- the one branch where the option
                 # used to be silently ignored.
-                timezone_lines <- if (prepared$already_parsed)
-                    sub("^String-to-datetime conversions use",
-                        "Components were read in", tz_info$note)
+                # Each wording is its own translatable sentence (.resolveTimezone); rewriting the
+                # English prefix with sub() matched nothing once the note was translated.
+                timezone_lines <- if (prepared$already_parsed && !is.null(tz_info$note_parsed))
+                    tz_info$note_parsed
                 else tz_info$note
             }
             note_lines <- c(note_lines, timezone_lines, format_warnings)
@@ -2240,12 +2177,16 @@ datetimeconverterClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             format_html <- paste0(
                 "<div style='background-color: rgba(255, 169, 33, 0.14); padding: 15px; border-radius: 8px; color: inherit;'>",
-                "<h4 style='margin-top: 0;'>Format Detection</h4>",
-                "<p><strong>Detected/Selected Format:</strong> ", format_display, " (", detected_format, ")</p>",
+                paste0(
+                    "<h4 style='margin-top: 0;'>",
+                    .("Format Detection"),
+                    "</h4>"),
+                "<p>",
+                .pasteT(.("<strong>Detected/Selected Format:</strong> {formatDisplay} ({detectedFormat})"), formatDisplay = format_display, detectedFormat = detected_format),
+                "</p>",
                 format_context,
                 notes_html,
-                "</div>"
-            )
+                "</div>")
             private$.publishDatetimeRun(name, data, datetime_var, original_display, parsed_dates, detected_format, quality, misuse_warnings, tz_summary, format_html)
         },
 

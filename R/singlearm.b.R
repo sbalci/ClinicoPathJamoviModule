@@ -130,6 +130,7 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         .infoMessages = character(0),
 
       .init = function() {
+          .initEventRecodeTable(self$results$eventRecodeTable, self$options)
           # R6 field defaults are shallow-copied. An environment declared in
           # `private = list()` is therefore shared by every instance unless it
           # is replaced here. A shared cache retained cleaned data and survfit
@@ -177,6 +178,8 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
       },
 
       # Message Accumulation Methods (for HTML notice panels) ----
+      # library-audit 2026-11-20 jsurvival [LOW] DEFERRED: Html message panels kept by maintainer
+      #   decision; revisit when these messages have been tried as jmvcore::Notice in the jamovi app
       .addError = function(message) {
         private$.errorMessages <- c(private$.errorMessages, message)
       },
@@ -261,7 +264,8 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         # These two are Preformatted, which shows markup as text and clears on "".
         self$results$medianSummary$setContent("")
         self$results$survTableSummary$setContent("")
-        self$results$eventRecodeInfo$setVisible(isTRUE(self$options$showExplanations))
+        for (nm in c("eventRecodeInfo", "eventRecodeTable"))
+          self$results[[nm]]$setVisible(isTRUE(self$options$showExplanations))
 
         for (nm in c("plot", "plot_cif", "plot2", "plot3", "plot6",
                      "baselineHazardPlot", "smoothedHazardPlot")) {
@@ -568,11 +572,9 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
         if (exhausted) {
           final_text <- if (private$.isCompetingRisk())
-            paste0('the cumulative-incidence curves have reached their final values and ',
-                   'remain unchanged. The requested rows report those final state probabilities')
+            .("the cumulative-incidence curves have reached their final values and remain unchanged. The requested rows report those final state probabilities")
           else
-            paste0('no one remains event-free, so survival has reached 0% and remains there. ',
-                   'The requested rows report 0% survival with no confidence interval')
+            .("no one remains event-free, so survival has reached 0% and remains there. The requested rows report 0% survival with no confidence interval")
           private$.addInfo(sprintf(
             .('Requested time point(s) %s lie beyond the longest follow-up in the data (%s %s). Every subject observed at that time had a terminal event, so %s.'),
             paste(utimes[beyond], collapse = ", "),
@@ -1088,50 +1090,49 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
       ,
       .todo = function() {
 
-        todo <- glue::glue(
-          "
-    <b>Welcome to Single-Arm Survival Analysis</b>
-    <br><br>
-    This tool analyzes survival outcomes for a single cohort of patients, calculating:
-    <ul>
-        <li><b>Median time-to-event:</b> The first time the Kaplan-Meier curve reaches 50% or lower, when that time is estimable; if the curve is exactly 50% over an interval, the midpoint of that interval is reported</li>
-        <li><b>Time-specific estimates:</b> Survival or cumulative-incidence estimates at the selected time points</li>
-        <li><b>Curves:</b> Kaplan-Meier survival, or cumulative incidence when competing risks are specified</li>
-    </ul>
-
-    <b>Input Requirements:</b>
-    <ul>
-        <li><b>Time Variable:</b> Either:
-            <ul>
-                <li>Pre-calculated follow-up time (numeric, continuous)</li>
-                <li>Start and end dates (will be converted to time intervals)</li>
-            </ul>
-        </li>
-        <li><b>Outcome Variable:</b> Event indicator showing whether each subject experienced the event
-            <ul>
-                <li>For binary variables: Select the level representing the event</li>
-                <li>For multiple outcomes: Use advanced options to specify event types</li>
-            </ul>
-        </li>
-    </ul>
-
-    <b>Analysis Options:</b>
-    <ul>
-        <li>Conditional analysis among subjects followed beyond a selected landmark; this does not by itself remove immortal-time or selection bias</li>
-        <li>Various plot types: survival curves, cumulative hazard, cumulative events</li>
-        <li>Customizable time units and axis scales</li>
-        <li>Risk tables and confidence intervals</li>
-    </ul>
-
-    <b>Methodology:</b>
-    Utilizes the Kaplan-Meier method to estimate survival probabilities, handling right-censored data appropriately.
-    <br><br>
-    This analysis is implemented using the survival, survminer, and finalfit R packages. Please cite both jamovi and these packages in publications.
-    <br><hr>
-    For detailed information about survival analysis methods, see the
-    <a href='https://cran.r-project.org/web/packages/survival/vignettes/survival.pdf'>survival package documentation</a>.
-    "
-        )
+        todo <- paste0(
+            "<b>",
+            .("Welcome to Single-Arm Survival Analysis"),
+            "</b> <br><br> ",
+            .("This tool analyzes survival outcomes for a single cohort of patients, calculating:"),
+            " <ul> <li>",
+            .("<b>Median time-to-event:</b> The first time the Kaplan-Meier curve reaches 50% or lower, when that time is estimable; if the curve is exactly 50% over an interval, the midpoint of that interval is reported"),
+            "</li> <li>",
+            .("<b>Time-specific estimates:</b> Survival or cumulative-incidence estimates at the selected time points"),
+            "</li> <li>",
+            .("<b>Curves:</b> Kaplan-Meier survival, or cumulative incidence when competing risks are specified"),
+            paste0(
+                "</li></ul><b>",
+                .("Input Requirements:"),
+                "</b><ul><li>",
+                .("<b>Time Variable:</b> Either:"),
+                "<ul><li>"),
+            .("Pre-calculated follow-up time (numeric, continuous)"),
+            "</li> <li>",
+            .("Start and end dates (will be converted to time intervals)"),
+            "</li> </ul> </li> <li>",
+            .("<b>Outcome Variable:</b> Event indicator showing whether each subject experienced the event"),
+            " <ul> <li>",
+            .("For binary variables: Select the level representing the event"),
+            "</li> <li>",
+            .("For multiple outcomes: Use advanced options to specify event types"),
+            paste0(
+                "</li></ul></li></ul><b>",
+                .("Analysis Options:"),
+                "</b><ul><li>"),
+            .("Conditional analysis among subjects followed beyond a selected landmark; this does not by itself remove immortal-time or selection bias"),
+            "</li> <li>",
+            .("Various plot types: survival curves, cumulative hazard, cumulative events"),
+            "</li> <li>",
+            .("Customizable time units and axis scales"),
+            "</li> <li>",
+            .("Risk tables and confidence intervals"),
+            "</li> </ul> ",
+            .("<b>Methodology:</b> Utilizes the Kaplan-Meier method to estimate survival probabilities, handling right-censored data appropriately."),
+            " <br><br> ",
+            .("This analysis is implemented using the survival, survminer, and finalfit R packages. Please cite both jamovi and these packages in publications."),
+            " <br><hr> ",
+            .("For detailed information about survival analysis methods, see the <a href='https://cran.r-project.org/web/packages/survival/vignettes/survival.pdf'>survival package documentation</a>."))
 
         html <- self$results$todo
         html$setContent(todo)
@@ -1621,7 +1622,8 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
           "name1time" = name1time,
           "name2outcome" = name2outcome,
           "name3explanatory" = name3explanatory,
-          "cleanData" = cleanData,
+          "cleanData" = cleanData[, intersect(c(name1time, name2outcome, name3explanatory),
+                                           names(cleanData)), drop = FALSE],
           "has_competing" = private$.isCompetingRisk(),
           "estimand" = private$.eventRecode$estimand,
           "event_label" = private$.eventRecode$event_label,
@@ -1630,30 +1632,20 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
           "landmark_offset" = private$.landmarkInfo$offset
         )
 
-        if (isTRUE(self$options$sc)) {
-          self$results$plot$setState(plotData)
-          self$results$plot_cif$setState(plotData)
-        }
-
-        if (isTRUE(self$options$ce)) {
-          self$results$plot2$setState(plotData)
-        }
-
-        if (isTRUE(self$options$ch)) {
-          self$results$plot3$setState(plotData)
-        }
-
-        if (isTRUE(self$options$kmunicate)) {
-          self$results$plot6$setState(plotData)
-        }
-
-        # Set state for baseline hazard plots only when enabled
-        if (isTRUE(self$options$baseline_hazard)) {
-          self$results$baselineHazardPlot$setState(plotData)
-        }
-
-        if (isTRUE(self$options$hazard_smoothing)) {
-          self$results$smoothedHazardPlot$setState(plotData)
+        # library-audit 2026-11-20 jsurvival [LOW] DONE: the rows go to the images that are switched
+        #   on, and to one of the two survival curves - the one .run() makes visible from the
+        #   recode. .resetRunOutputs() has already emptied every image state.
+        cif_shown <- isTRUE(plotData$has_competing)
+        shown <- c(plot = isTRUE(self$options$sc) && !cif_shown,
+                   plot_cif = isTRUE(self$options$sc) && cif_shown,
+                   plot2 = isTRUE(self$options$ce), plot3 = isTRUE(self$options$ch),
+                   plot6 = isTRUE(self$options$kmunicate),
+                   baselineHazardPlot = isTRUE(self$options$baseline_hazard),
+                   smoothedHazardPlot = isTRUE(self$options$hazard_smoothing))
+        for (name in names(which(shown))) {
+          # state-payload: these curves are drawn from rows; three columns (time, status, arm),
+          #   about 4 KB per 1000 patients compressed
+          self$results[[name]]$setState(plotData)
         }
 
         # Return Data ----
@@ -1777,8 +1769,10 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         if (!is.null(private$.eventRecode)) {
             self$results$eventRecodeInfo$setContent(
                 .describeEventIndicator(private$.eventRecode, self$options$outcome))
-            self$results$eventRecodeInfo$setVisible(
-                isTRUE(self$options$showExplanations) || length(recode_caveats) > 0)
+            .fillEventRecodeTable(self$results$eventRecodeTable, private$.eventRecode)
+            for (nm in c("eventRecodeInfo", "eventRecodeTable"))
+                self$results[[nm]]$setVisible(
+                    isTRUE(self$options$showExplanations) || length(recode_caveats) > 0)
         }
 
         # Check if cleandata failed (returned NULL due to validation errors)
@@ -1971,15 +1965,15 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         # censored" with the other 169 unaccounted for.
         n_competing_total <- data_quality$n_competing
         counts_text <- if (n_competing_total > 0)
-          sprintf('%d observations (%d event(s) of interest, %d competing event(s), %d censored)',
+          sprintf(.("%d observations (%d event(s) of interest, %d competing event(s), %d censored)"),
                   data_quality$n_total, data_quality$n_events,
                   n_competing_total, data_quality$n_censored)
         else
           sprintf('%d observations (%d events, %d censored)',
                   data_quality$n_total, data_quality$n_events, data_quality$n_censored)
         followup_label <- if (isTRUE(data_quality$median_followup_reverse_km))
-          'Median follow-up (reverse Kaplan-Meier)' else
-          'Median observed time (reverse Kaplan-Meier follow-up not estimable)'
+          .("Median follow-up (reverse Kaplan-Meier)") else
+          .("Median observed time (reverse Kaplan-Meier follow-up not estimable)")
         private$.addInfo(sprintf(.('Analysis completed: %s. %s: %.1f %s. %s analysis using %s method.'),
                                  counts_text,
                                  followup_label,
@@ -2309,24 +2303,13 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         if (private$.isCompetingRisk()) {
           # Competing risk: report median time to event (cumulative incidence)
           km_fit_median_definition <- if (!is.finite(.med) && results1table$events == 0) {
-            paste0("There is no median time to the event of interest: no event of interest was ",
-                   "observed, so its cumulative incidence is 0 throughout the observed follow-up. ",
-                   "Only competing events and censoring occurred.")
+            .("There is no median time to the event of interest: no event of interest was observed, so its cumulative incidence is 0 throughout the observed follow-up. Only competing events and censoring occurred.")
           } else if (!is.finite(.med) && isTRUE(reached_at_tail)) {
-            paste0("Median time to event of interest not reached within interior follow-up ",
-                   "(the cumulative incidence reached 50% only at the final observed follow-up time, ",
-                   "where the step is driven by the last observation(s); report fixed-time ",
-                   "cumulative incidence instead).")
+            .("Median time to event of interest not reached within interior follow-up (the cumulative incidence reached 50% only at the final observed follow-up time, where the step is driven by the last observation(s); report fixed-time cumulative incidence instead).")
           } else if (!is.finite(.med)) {
-            paste0("Median time to event of interest not reached (the cumulative incidence of ",
-                   "the event of interest did not exceed 50% within the observed follow-up). ",
-                   "This is common in competing risk analyses where the competing event is frequent.")
+            .("Median time to event of interest not reached (the cumulative incidence of the event of interest did not exceed 50% within the observed follow-up). This is common in competing risk analyses where the competing event is frequent.")
           } else {
-            paste0("Median time to event of interest is ", round(.med, 2), " ", time_unit, lm_suffix,
-                   " (based on the cumulative incidence function, accounting for competing risks). ",
-                   "This is the first time the estimated cumulative incidence of the event ",
-                   "of interest reaches 50% or greater; the step curve need not equal 50% ",
-                   "exactly. No confidence interval is computed for this quantile.")
+            .pasteT(.("Median time to event of interest is {med} {timeUnit}{lmSuffix} (based on the cumulative incidence function, accounting for competing risks). This is the first time the estimated cumulative incidence of the event of interest reaches 50% or greater; the step curve need not equal 50% exactly. No confidence interval is computed for this quantile."), med = round(.med, 2), timeUnit = time_unit, lmSuffix = lm_suffix)
           }
 
         } else {
@@ -2356,9 +2339,8 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         if (!is.null(results$data_quality)) {
           dq <- results$data_quality
           quality_info <- paste0(
-            "Descriptive follow-up: range ", dq$min_time, "-", dq$max_time, " ",
-            self$options$timetypeoutput, lm_suffix, ". "
-          )
+              .pasteT(.("Descriptive follow-up: range {minTime}-{maxTime} {timetypeoutput}{lmSuffix}."), minTime = dq$min_time, maxTime = dq$max_time, timetypeoutput = self$options$timetypeoutput, lmSuffix = lm_suffix),
+              " ")
         }
         
         # Does a median actually exist?
@@ -2386,18 +2368,18 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         # Different explanations for competing risk vs standard
         if (private$.isCompetingRisk()) {
           medianSummary <- c(km_fit_median_definition,
-                             paste0("Observed proportion with the event of interest: ", event_rate, "% (", n_events, " of ", n_total, " subjects)."),
+                             .pasteT(.("Observed proportion with the event of interest: {eventRate}% ({nEvents} of {nTotal} subjects)."), eventRate = event_rate, nEvents = n_events, nTotal = n_total),
                              quality_info,
-                             "This analysis uses proper competing risk methods (cumulative incidence functions).",
-                             "The median time is the first time estimated cumulative incidence reaches 50% or greater for the event of interest; the step curve need not equal exactly 50% there,",
-                             "accounting for the presence of competing events that prevent the event of interest from occurring."
+                             .("This analysis uses proper competing risk methods (cumulative incidence functions)."),
+                             .("The median time is the first time estimated cumulative incidence reaches 50% or greater for the event of interest; the step curve need not equal exactly 50% there,"),
+                             .("accounting for the presence of competing events that prevent the event of interest from occurring.")
           )
         } else {
           medianSummary <- c(km_fit_median_definition,
-                             paste0("Observed event proportion: ", event_rate, "% (", n_events, " of ", n_total, " subjects). This is a crude proportion, not an incidence rate."),
+                             .pasteT(.("Observed event proportion: {eventRate}% ({nEvents} of {nTotal} subjects). This is a crude proportion, not an incidence rate."), eventRate = event_rate, nEvents = n_events, nTotal = n_total),
                              quality_info,
                              .median_meaning,
-                             "Note: Confidence intervals use the complementary log-log (Kalbfleisch-Prentice) transformation (conf.type='log-log'), based on Greenwood's variance estimate; the median CI is the Brookmeyer-Crowley inversion of that pointwise band."
+                             .("Note: Confidence intervals use the complementary log-log (Kalbfleisch-Prentice) transformation (conf.type='log-log'), based on Greenwood's variance estimate; the median CI is the Brookmeyer-Crowley inversion of that pointwise band.")
           )
         }
 
@@ -2431,86 +2413,79 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
       }
 
       ,
+      # library-audit 2026-11-20 jsurvival [LOW] DONE: each paragraph, heading and cell below is one
+      #   .() string, and a sentence built around a value is one .pasteT() template (guide section 9)
       .medianSurvivalExplanation = function() {
-            '
-            <div class="explanation-box" style="background-color: rgba(33, 152, 255, 0.07); padding: 15px; border-radius: 8px; margin: 10px 0; color: inherit;">
-                <h3 style="color: inherit; margin-top: 0;"> Understanding the Kaplan-Meier Median</h3>
-                
-                <div style="background-color: rgba(255, 255, 255, 0.08); padding: 12px; border-radius: 5px; margin: 10px 0; color: inherit;">
-                    <h4 style="color: inherit; margin-top: 0;">What is the Kaplan-Meier Median?</h4>
-                    <p style="margin: 8px 0;">It is the <strong>first time at which the estimated event-free probability is 50% or lower</strong>. Because the curve changes in steps, the estimate need not equal exactly 50% at that time; if the curve is exactly 50% over an interval, the midpoint of that interval is reported. Its clinical name depends on the selected endpoint.</p>
-                    
-                    <div style="background-color: rgba(33, 184, 255, 0.11); padding: 10px; border-radius: 5px; margin: 10px 0; color: inherit;">
-                        <strong> Key Concept:</strong> If the median time-to-event = 24 months, it means:
-                        <ul style="margin: 5px 0; padding-left: 20px;">
-                            <li>The estimated event-free curve has reached 50% or lower by 24 months</li>
-                            <li>This is a cohort-level summary, not an individual prediction</li>
-                            <li>Read it with its confidence interval and the number at risk</li>
-                        </ul>
-                    </div>
-                </div>
-                
-                <div style="background-color: rgba(246, 163, 33, 0.11); padding: 12px; border-radius: 5px; margin: 10px 0; color: inherit;">
-                    <h4 style="color: inherit; margin-top: 0;"> Understanding the Results Table</h4>
-                    <table style="width: 100%; border-collapse: collapse; margin: 10px 0;">
-                        <tr style="background-color: rgba(255, 202, 33, 0.23); color: inherit;">
-                            <th style="padding: 8px; text-align: left; border: 1px solid #ffc107;">Measure</th>
-                            <th style="padding: 8px; text-align: left; border: 1px solid #ffc107;">Meaning</th>
-                        </tr>
-                        <tr>
-                            <td style="padding: 8px; border: 1px solid #ffc107;"><strong>Records</strong></td>
-                            <td style="padding: 8px; border: 1px solid #ffc107;">Total number of patients in analysis</td>
-                        </tr>
-                        <tr style="background-color: rgba(255, 196, 33, 0.07); color: inherit;">
-                            <td style="padding: 8px; border: 1px solid #ffc107;"><strong>Events</strong></td>
-                            <td style="padding: 8px; border: 1px solid #ffc107;">Number who experienced the event</td>
-                        </tr>
-                        <tr>
-                            <td style="padding: 8px; border: 1px solid #ffc107;"><strong>Median</strong></td>
-                            <td style="padding: 8px; border: 1px solid #ffc107;">First time the estimated event-free probability reaches 50% or lower (the midpoint, if the curve is exactly 50% over an interval)</td>
-                        </tr>
-                        <tr style="background-color: rgba(255, 196, 33, 0.07); color: inherit;">
-                            <td style="padding: 8px; border: 1px solid #ffc107;"><strong>95% CI</strong></td>
-                            <td style="padding: 8px; border: 1px solid #ffc107;">Range of plausible values</td>
-                        </tr>
-                    </table>
-                </div>
-                
-                <div style="background-color: rgba(33, 159, 43, 0.1); padding: 12px; border-radius: 5px; margin: 10px 0; color: inherit;">
-                    <h4 style="color: inherit; margin-top: 0;"> Clinical Interpretation Guide</h4>
-                    
-                    <div style="background-color: rgba(255, 255, 255, 0.08); padding: 10px; border-radius: 5px; margin: 10px 0; color: inherit;">
-                        <strong> When Median is Reached:</strong>
-                        <p style="margin: 5px 0;">"The median time-to-event is 36 months (95% CI: 28-45 months)"</p>
-                        <ul style="margin: 5px 0; padding-left: 20px;">
-                            <li>The estimated event-free curve first reached 50% or lower at 3 years</li>
-                            <li>Medians from 28 to 45 months are compatible with these data</li>
-                            <li>This describes the observed cohort; individual prognosis depends on factors not in this model</li>
-                        </ul>
-                    </div>
-                    
-                    <div style="background-color: rgba(153, 33, 170, 0.12); padding: 10px; border-radius: 5px; margin: 10px 0; color: inherit;">
-                        <strong> When Median is "Not Reached" (NR):</strong>
-                        <p style="margin: 5px 0;">The estimated event-free curve remains above 50% during observed follow-up</p>
-                        <ul style="margin: 5px 0; padding-left: 20px;">
-                            <li>Short follow-up or heavy censoring can produce the same result, so read it together with the number at risk.</li>
-                            <li>Longer follow-up may make the median estimable, but it can remain undefined if the curve plateaus above 50%</li>
-                            <li>Time-specific event-free estimates can still be reported where supported by follow-up</li>
-                        </ul>
-                    </div>
-                </div>
-                
-                <div style="background-color: rgba(255, 169, 33, 0.14); padding: 10px; border-radius: 5px; margin-top: 10px; border-left: 4px solid #ff9800; color: inherit;">
-                    <strong> Practical Tips:</strong>
-                    <ul style="margin: 5px 0; padding-left: 20px;">
-                        <li><strong>Robust measure:</strong> Less affected by extreme values than mean survival</li>
-                        <li><strong>Communication:</strong> State that the estimated event-free curve first reached 50% or lower at X months</li>
-                        <li><strong>Contextual comparisons:</strong> Confidence intervals do not remove differences in case mix, endpoint definition, or follow-up</li>
-                        <li><strong>Clinical context:</strong> Always interpret alongside patient characteristics and treatment details</li>
-                    </ul>
-                </div>
-            </div>
-            '
+            paste0(
+                '<div class="explanation-box" style="background-color: rgba(33, 152, 255, 0.07); padding: 15px; border-radius: 8px; margin: 10px 0; color: inherit;"><h3 style="color: inherit; margin-top: 0;">',
+                .("Understanding the Kaplan-Meier Median"),
+                '</h3><div style="background-color: rgba(255, 255, 255, 0.08); padding: 12px; border-radius: 5px; margin: 10px 0; color: inherit;"><h4 style="color: inherit; margin-top: 0;">',
+                .("What is the Kaplan-Meier Median?"),
+                '</h4><p style="margin: 8px 0;">',
+                .("It is the <strong>first time at which the estimated event-free probability is 50% or lower</strong>. Because the curve changes in steps, the estimate need not equal exactly 50% at that time; if the curve is exactly 50% over an interval, the midpoint of that interval is reported. Its clinical name depends on the selected endpoint."),
+                '</p><div style="background-color: rgba(33, 184, 255, 0.11); padding: 10px; border-radius: 5px; margin: 10px 0; color: inherit;">',
+                .("<strong> Key Concept:</strong> If the median time-to-event = 24 months, it means:"),
+                '<ul style="margin: 5px 0; padding-left: 20px;"><li>',
+                .("The estimated event-free curve has reached 50% or lower by 24 months"),
+                "</li><li>",
+                .("This is a cohort-level summary, not an individual prediction"),
+                "</li><li>",
+                .("Read it with its confidence interval and the number at risk"),
+                '</li></ul></div></div><div style="background-color: rgba(246, 163, 33, 0.11); padding: 12px; border-radius: 5px; margin: 10px 0; color: inherit;"><h4 style="color: inherit; margin-top: 0;">',
+                .("Understanding the Results Table"),
+                '</h4><table style="width: 100%; border-collapse: collapse; margin: 10px 0;"><tr style="background-color: rgba(255, 202, 33, 0.23); color: inherit;"><th style="padding: 8px; text-align: left; border: 1px solid #ffc107;">',
+                .("Measure"),
+                '</th><th style="padding: 8px; text-align: left; border: 1px solid #ffc107;">',
+                .("Meaning"),
+                '</th></tr><tr><td style="padding: 8px; border: 1px solid #ffc107;"><strong>',
+                .("Records"),
+                '</strong></td><td style="padding: 8px; border: 1px solid #ffc107;">',
+                .("Total number of patients in analysis"),
+                '</td></tr><tr style="background-color: rgba(255, 196, 33, 0.07); color: inherit;"><td style="padding: 8px; border: 1px solid #ffc107;"><strong>',
+                .("Events"),
+                '</strong></td><td style="padding: 8px; border: 1px solid #ffc107;">',
+                .("Number who experienced the event"),
+                '</td></tr><tr><td style="padding: 8px; border: 1px solid #ffc107;"><strong>',
+                .("Median"),
+                '</strong></td><td style="padding: 8px; border: 1px solid #ffc107;">',
+                .("First time the estimated event-free probability reaches 50% or lower (the midpoint, if the curve is exactly 50% over an interval)"),
+                '</td></tr><tr style="background-color: rgba(255, 196, 33, 0.07); color: inherit;"><td style="padding: 8px; border: 1px solid #ffc107;"><strong>',
+                .("95% CI"),
+                '</strong></td><td style="padding: 8px; border: 1px solid #ffc107;">',
+                .("Range of plausible values"),
+                '</td></tr></table></div><div style="background-color: rgba(33, 159, 43, 0.1); padding: 12px; border-radius: 5px; margin: 10px 0; color: inherit;"><h4 style="color: inherit; margin-top: 0;">',
+                .("Clinical Interpretation Guide"),
+                '</h4><div style="background-color: rgba(255, 255, 255, 0.08); padding: 10px; border-radius: 5px; margin: 10px 0; color: inherit;"><strong>',
+                .("When Median is Reached:"),
+                '</strong><p style="margin: 5px 0;">',
+                .("\"The median time-to-event is 36 months (95% CI: 28-45 months)\""),
+                '</p><ul style="margin: 5px 0; padding-left: 20px;"><li>',
+                .("The estimated event-free curve first reached 50% or lower at 3 years"),
+                "</li><li>",
+                .("Medians from 28 to 45 months are compatible with these data"),
+                "</li><li>",
+                .("This describes the observed cohort; individual prognosis depends on factors not in this model"),
+                '</li></ul></div><div style="background-color: rgba(153, 33, 170, 0.12); padding: 10px; border-radius: 5px; margin: 10px 0; color: inherit;"><strong>',
+                .("When Median is \"Not Reached\" (NR):"),
+                '</strong><p style="margin: 5px 0;">',
+                .("The estimated event-free curve remains above 50% during observed follow-up"),
+                '</p><ul style="margin: 5px 0; padding-left: 20px;"><li>',
+                .("Short follow-up or heavy censoring can produce the same result, so read it together with the number at risk."),
+                "</li><li>",
+                .("Longer follow-up may make the median estimable, but it can remain undefined if the curve plateaus above 50%"),
+                "</li><li>",
+                .("Time-specific event-free estimates can still be reported where supported by follow-up"),
+                '</li></ul></div></div><div style="background-color: rgba(255, 169, 33, 0.14); padding: 10px; border-radius: 5px; margin-top: 10px; border-left: 4px solid #ff9800; color: inherit;"><strong>',
+                .("Practical Tips:"),
+                '</strong><ul style="margin: 5px 0; padding-left: 20px;"><li>',
+                .("<strong>Robust measure:</strong> Less affected by extreme values than mean survival"),
+                "</li><li>",
+                .("<strong>Communication:</strong> State that the estimated event-free curve first reached 50% or lower at X months"),
+                "</li><li>",
+                .("<strong>Contextual comparisons:</strong> Confidence intervals do not remove differences in case mix, endpoint definition, or follow-up"),
+                "</li><li>",
+                .("<strong>Clinical context:</strong> Always interpret alongside patient characteristics and treatment details"),
+                "</li></ul></div></div>")
       }
 
 
@@ -2712,9 +2687,7 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
           km_fit_df %>%
             dplyr::mutate(
-              description = glue::glue(
-                "At {time} {self$options$timetypeoutput}{lm_suffix}, the cumulative incidence of the event of interest is {scales::percent(surv, accuracy = 0.1)}{ci}. \n At this time point {n.risk} of the {cohort_n} subjects were still at risk. \n {n.event} target event(s) occurred between {prev_time} and {time} {self$options$timetypeoutput}; {events_cum} target event(s) had been observed by {time} {self$options$timetypeoutput}."
-              )
+              description = .pasteT(.("At {time} {timetypeoutput}{lmSuffix}, the cumulative incidence of the event of interest is {surv}{ci}. \n At this time point {nRisk} of the {cohortN} subjects were still at risk. \n {nEvent} target event(s) occurred between {prevTime} and {time} {timetypeoutput}; {eventsCum} target event(s) had been observed by {time} {timetypeoutput}."), time = time, timetypeoutput = self$options$timetypeoutput, lmSuffix = lm_suffix, surv = scales::percent(surv, accuracy = 0.1), ci = ci, nRisk = n.risk, cohortN = cohort_n, nEvent = n.event, prevTime = prev_time, eventsCum = events_cum)
             ) %>%
             dplyr::select(description) %>%
             dplyr::pull(.) -> survTableSummary
@@ -2860,9 +2833,7 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         km_fit_df %>%
           dplyr::mutate(
             description =
-              glue::glue(
-                "{estimand_meta$probability} at {time} {self$options$timetypeoutput}{lm_suffix} was {scales::percent(surv, accuracy = 0.1)}{ci}. \n At this time point {n.risk} of the {cohort_n} subjects were still at risk. \n {n.event} event(s) occurred between {prev_time} and {time} {self$options$timetypeoutput}; {events_cum} event(s) had been observed by {time} {self$options$timetypeoutput}. The observed event count is not 1 minus the Kaplan-Meier estimate because censoring is accounted for in the estimate."
-              )
+              .pasteT(.("{probability} at {time} {timetypeoutput}{lmSuffix} was {surv}{ci}. \n At this time point {nRisk} of the {cohortN} subjects were still at risk. \n {nEvent} event(s) occurred between {prevTime} and {time} {timetypeoutput}; {eventsCum} event(s) had been observed by {time} {timetypeoutput}. The observed event count is not 1 minus the Kaplan-Meier estimate because censoring is accounted for in the estimate."), probability = estimand_meta$probability, time = time, timetypeoutput = self$options$timetypeoutput, lmSuffix = lm_suffix, surv = scales::percent(surv, accuracy = 0.1), ci = ci, nRisk = n.risk, cohortN = cohort_n, nEvent = n.event, prevTime = prev_time, eventsCum = events_cum)
           ) %>%
           dplyr::select(description) %>%
           dplyr::pull(.) -> survTableSummary
@@ -2880,101 +2851,96 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
       ,
       .survivalProbabilityExplanation = function() {
-            '
-            <div class="explanation-box" style="background-color: rgba(33, 152, 255, 0.07); padding: 15px; border-radius: 8px; margin: 10px 0; color: inherit;">
-                <h3 style="color: inherit; margin-top: 0;"> Understanding Kaplan-Meier Time-Specific Estimates</h3>
-                
-                <div style="background-color: rgba(255, 255, 255, 0.08); padding: 12px; border-radius: 5px; margin: 10px 0; color: inherit;">
-                    <h4 style="color: inherit; margin-top: 0;">What are Time-Specific Event-Free Probabilities?</h4>
-                    <p style="margin: 8px 0;">These show the <strong>estimated percentage of the cohort remaining event-free</strong> at specific milestone time points.
-                    The displayed time points are exactly those selected for this analysis, in the declared output unit.</p>
-                    
-                    <div style="background-color: rgba(33, 184, 255, 0.11); padding: 10px; border-radius: 5px; margin: 10px 0; color: inherit;">
-                        <strong> Example Interpretation:</strong>
-                        <p style="margin: 5px 0;">If the event-free estimate at a selected time is 75% (95% CI: 68-82%)</p>
-                        <ul style="margin: 5px 0; padding-left: 20px;">
-                            <li>an estimated 75% remained event-free at 5 years</li>
-                            <li>an estimated 25% had the event by 5 years</li>
-                            <li>The confidence interval summarizes sampling uncertainty under the model assumptions; it is not an individual-patient range</li>
-                        </ul>
-                    </div>
-                </div>
-                
-                <div style="background-color: rgba(246, 163, 33, 0.11); padding: 12px; border-radius: 5px; margin: 10px 0; color: inherit;">
-                    <h4 style="color: inherit; margin-top: 0;"> Understanding Each Column</h4>
-                    <table style="width: 100%; border-collapse: collapse; margin: 10px 0;">
-                        <tr style="background-color: rgba(255, 202, 33, 0.23); color: inherit;">
-                            <th style="padding: 8px; text-align: left; border: 1px solid #ffc107;">Column</th>
-                            <th style="padding: 8px; text-align: left; border: 1px solid #ffc107;">Meaning</th>
-                            <th style="padding: 8px; text-align: left; border: 1px solid #ffc107;">Clinical Use</th>
-                        </tr>
-                        <tr>
-                            <td style="padding: 8px; border: 1px solid #ffc107;"><strong>Time</strong></td>
-                            <td style="padding: 8px; border: 1px solid #ffc107;">Milestone timepoint</td>
-                            <td style="padding: 8px; border: 1px solid #ffc107;">Standard follow-up intervals</td>
-                        </tr>
-                        <tr style="background-color: rgba(255, 196, 33, 0.07); color: inherit;">
-                            <td style="padding: 8px; border: 1px solid #ffc107;"><strong>Number at Risk</strong></td>
-                            <td style="padding: 8px; border: 1px solid #ffc107;">Subjects event-free and uncensored just before the time point</td>
-                            <td style="padding: 8px; border: 1px solid #ffc107;">Reliability of estimates</td>
-                        </tr>
-                        <tr>
-                            <td style="padding: 8px; border: 1px solid #ffc107;"><strong>Number of Events</strong></td>
-                            <td style="padding: 8px; border: 1px solid #ffc107;">Events in interval</td>
-                            <td style="padding: 8px; border: 1px solid #ffc107;">Observed event counts between requested time points</td>
-                        </tr>
-                        <tr style="background-color: rgba(255, 196, 33, 0.07); color: inherit;">
-                            <td style="padding: 8px; border: 1px solid #ffc107;"><strong>Event-free estimate</strong></td>
-                            <td style="padding: 8px; border: 1px solid #ffc107;">Kaplan-Meier probability for the selected endpoint</td>
-                            <td style="padding: 8px; border: 1px solid #ffc107;">Descriptive cohort context</td>
-                        </tr>
-                        <tr>
-                            <td style="padding: 8px; border: 1px solid #ffc107;"><strong>95% CI</strong></td>
-                            <td style="padding: 8px; border: 1px solid #ffc107;">Uncertainty range</td>
-                            <td style="padding: 8px; border: 1px solid #ffc107;">Precision assessment</td>
-                        </tr>
-                    </table>
-                </div>
-                
-                <div style="background-color: rgba(33, 159, 43, 0.1); padding: 12px; border-radius: 5px; margin: 10px 0; color: inherit;">
-                    <h4 style="color: inherit; margin-top: 0;"> Descriptive Clinical Context</h4>
-                    
-                    <div style="background-color: rgba(255, 255, 255, 0.08); padding: 10px; border-radius: 5px; margin: 10px 0; color: inherit;">
-                        <strong> Cohort description:</strong>
-                        <p style="margin: 5px 0;">"In this cohort, about 8 out of 10 patients were event-free at 3 years"</p>
-                    </div>
-                    
-                    <div style="background-color: rgba(153, 33, 170, 0.12); padding: 10px; border-radius: 5px; margin: 10px 0; color: inherit;">
-                        <strong> Descriptive Interpretation:</strong>
-                        <ul style="margin: 5px 0; padding-left: 20px;">
-                            <li>These estimates describe this cohort; they do not identify a treatment effect or prescribe a follow-up schedule</li>
-                            <li>Later estimates should be read with the number at risk and the confidence interval</li>
-                            <li>Wide confidence intervals indicate limited precision, which may reflect few events or a small late risk set</li>
-                        </ul>
-                    </div>
-                    
-                    <div style="background-color: rgba(33, 152, 239, 0.13); padding: 10px; border-radius: 5px; margin: 10px 0; color: inherit;">
-                        <strong> Comparison with Standards:</strong>
-                        <p style="margin: 5px 0;">Contextual comparisons may use the sources below, but differences in case mix, entry dates, outcome definitions, and follow-up can invalidate direct comparisons:</p>
-                        <ul style="margin: 5px 0; padding-left: 20px;">
-                            <li>Historical controls from your institution</li>
-                            <li>Published literature for similar populations</li>
-                            <li>Registry data (SEER, national cancer registries)</li>
-                        </ul>
-                    </div>
-                </div>
-                
-                <div style="background-color: rgba(255, 169, 33, 0.14); padding: 10px; border-radius: 5px; margin-top: 10px; border-left: 4px solid #ff9800; color: inherit;">
-                    <strong> Important Considerations:</strong>
-                    <ul style="margin: 5px 0; padding-left: 20px;">
-                        <li><strong>Sample size matters:</strong> Fewer patients at later time points = less reliable estimates</li>
-                        <li><strong>Confidence intervals:</strong> Wider intervals = more uncertainty</li>
-                        <li><strong>Clinical context:</strong> Consider patient selection, treatment changes over time</li>
-                        <li><strong>Censoring:</strong> Administrative censoring, withdrawal, and loss to follow-up are distinct; Kaplan-Meier estimation assumes censoring is non-informative conditional on the analysis</li>
-                    </ul>
-                </div>
-            </div>
-            '
+            paste0(
+                '<div class="explanation-box" style="background-color: rgba(33, 152, 255, 0.07); padding: 15px; border-radius: 8px; margin: 10px 0; color: inherit;"><h3 style="color: inherit; margin-top: 0;">',
+                .("Understanding Kaplan-Meier Time-Specific Estimates"),
+                '</h3><div style="background-color: rgba(255, 255, 255, 0.08); padding: 12px; border-radius: 5px; margin: 10px 0; color: inherit;"><h4 style="color: inherit; margin-top: 0;">',
+                .("What are Time-Specific Event-Free Probabilities?"),
+                '</h4><p style="margin: 8px 0;">',
+                .("These show the <strong>estimated percentage of the cohort remaining event-free</strong> at specific milestone time points. The displayed time points are exactly those selected for this analysis, in the declared output unit."),
+                '</p><div style="background-color: rgba(33, 184, 255, 0.11); padding: 10px; border-radius: 5px; margin: 10px 0; color: inherit;"><strong>',
+                .("Example Interpretation:"),
+                '</strong><p style="margin: 5px 0;">',
+                .("If the event-free estimate at a selected time is 75% (95% CI: 68-82%)"),
+                '</p><ul style="margin: 5px 0; padding-left: 20px;"><li>',
+                .("an estimated 75% remained event-free at 5 years"),
+                "</li><li>",
+                .("an estimated 25% had the event by 5 years"),
+                "</li><li>",
+                .("The confidence interval summarizes sampling uncertainty under the model assumptions; it is not an individual-patient range"),
+                '</li></ul></div></div><div style="background-color: rgba(246, 163, 33, 0.11); padding: 12px; border-radius: 5px; margin: 10px 0; color: inherit;"><h4 style="color: inherit; margin-top: 0;">',
+                .("Understanding Each Column"),
+                '</h4><table style="width: 100%; border-collapse: collapse; margin: 10px 0;"><tr style="background-color: rgba(255, 202, 33, 0.23); color: inherit;"><th style="padding: 8px; text-align: left; border: 1px solid #ffc107;">',
+                .("Column"),
+                '</th><th style="padding: 8px; text-align: left; border: 1px solid #ffc107;">',
+                .("Meaning"),
+                '</th><th style="padding: 8px; text-align: left; border: 1px solid #ffc107;">',
+                .("Clinical Use"),
+                '</th></tr><tr><td style="padding: 8px; border: 1px solid #ffc107;"><strong>',
+                .("Time"),
+                '</strong></td><td style="padding: 8px; border: 1px solid #ffc107;">',
+                .("Milestone timepoint"),
+                '</td><td style="padding: 8px; border: 1px solid #ffc107;">',
+                .("Standard follow-up intervals"),
+                '</td></tr><tr style="background-color: rgba(255, 196, 33, 0.07); color: inherit;"><td style="padding: 8px; border: 1px solid #ffc107;"><strong>',
+                .("Number at Risk"),
+                '</strong></td><td style="padding: 8px; border: 1px solid #ffc107;">',
+                .("Subjects event-free and uncensored just before the time point"),
+                '</td><td style="padding: 8px; border: 1px solid #ffc107;">',
+                .("Reliability of estimates"),
+                '</td></tr><tr><td style="padding: 8px; border: 1px solid #ffc107;"><strong>',
+                .("Number of Events"),
+                '</strong></td><td style="padding: 8px; border: 1px solid #ffc107;">',
+                .("Events in interval"),
+                '</td><td style="padding: 8px; border: 1px solid #ffc107;">',
+                .("Observed event counts between requested time points"),
+                '</td></tr><tr style="background-color: rgba(255, 196, 33, 0.07); color: inherit;"><td style="padding: 8px; border: 1px solid #ffc107;"><strong>',
+                .("Event-free estimate"),
+                '</strong></td><td style="padding: 8px; border: 1px solid #ffc107;">',
+                .("Kaplan-Meier probability for the selected endpoint"),
+                '</td><td style="padding: 8px; border: 1px solid #ffc107;">',
+                .("Descriptive cohort context"),
+                '</td></tr><tr><td style="padding: 8px; border: 1px solid #ffc107;"><strong>',
+                .("95% CI"),
+                '</strong></td><td style="padding: 8px; border: 1px solid #ffc107;">',
+                .("Uncertainty range"),
+                '</td><td style="padding: 8px; border: 1px solid #ffc107;">',
+                .("Precision assessment"),
+                '</td></tr></table></div><div style="background-color: rgba(33, 159, 43, 0.1); padding: 12px; border-radius: 5px; margin: 10px 0; color: inherit;"><h4 style="color: inherit; margin-top: 0;">',
+                .("Descriptive Clinical Context"),
+                '</h4><div style="background-color: rgba(255, 255, 255, 0.08); padding: 10px; border-radius: 5px; margin: 10px 0; color: inherit;"><strong>',
+                .("Cohort description:"),
+                '</strong><p style="margin: 5px 0;">',
+                .("\"In this cohort, about 8 out of 10 patients were event-free at 3 years\""),
+                '</p></div><div style="background-color: rgba(153, 33, 170, 0.12); padding: 10px; border-radius: 5px; margin: 10px 0; color: inherit;"><strong>',
+                .("Descriptive Interpretation:"),
+                '</strong><ul style="margin: 5px 0; padding-left: 20px;"><li>',
+                .("These estimates describe this cohort; they do not identify a treatment effect or prescribe a follow-up schedule"),
+                "</li><li>",
+                .("Later estimates should be read with the number at risk and the confidence interval"),
+                "</li><li>",
+                .("Wide confidence intervals indicate limited precision, which may reflect few events or a small late risk set"),
+                '</li></ul></div><div style="background-color: rgba(33, 152, 239, 0.13); padding: 10px; border-radius: 5px; margin: 10px 0; color: inherit;"><strong>',
+                .("Comparison with Standards:"),
+                '</strong><p style="margin: 5px 0;">',
+                .("Contextual comparisons may use the sources below, but differences in case mix, entry dates, outcome definitions, and follow-up can invalidate direct comparisons:"),
+                '</p><ul style="margin: 5px 0; padding-left: 20px;"><li>',
+                .("Historical controls from your institution"),
+                "</li><li>",
+                .("Published literature for similar populations"),
+                "</li><li>",
+                .("Registry data (SEER, national cancer registries)"),
+                '</li></ul></div></div><div style="background-color: rgba(255, 169, 33, 0.14); padding: 10px; border-radius: 5px; margin-top: 10px; border-left: 4px solid #ff9800; color: inherit;"><strong>',
+                .("Important Considerations:"),
+                '</strong><ul style="margin: 5px 0; padding-left: 20px;"><li>',
+                .("<strong>Sample size matters:</strong> Fewer patients at later time points = less reliable estimates"),
+                "</li><li>",
+                .("<strong>Confidence intervals:</strong> Wider intervals = more uncertainty"),
+                "</li><li>",
+                .("<strong>Clinical context:</strong> Consider patient selection, treatment changes over time"),
+                "</li><li>",
+                .("<strong>Censoring:</strong> Administrative censoring, withdrawal, and loss to follow-up are distinct; Kaplan-Meier estimation assumes censoring is non-informative conditional on the analysis"),
+                "</li></ul></div></div>")
       }
 
       # Person-Time Analysis Function ----
@@ -3226,57 +3192,67 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         median_follow_up_note <- if (isTRUE(self$options$showExplanations))
           .medianFollowUpExplanation(mfu, time_unit) else ""
                 # Create summary text with interpretation
-        summary_html <- glue::glue(
-          "
-    In this study, {nrow(mydata)} subjects were followed for a total of {round(total_time, 1)} {time_unit}{lm_suffix},
-    with an average follow-up duration of {mean_follow_up} {time_unit} per person. During this observation period,
-    {total_events} events occurred, resulting in an incidence rate of {signif(overall_rate, 3)} events per {rate_multiplier} person-{time_unit}.
-
-    <p><b>Understanding the Rate Multiplier:</b> The rate multiplier of {rate_multiplier} is used to express incidence rates in
-    clinically meaningful terms. Instead of reporting small decimal numbers (e.g., 0.05 events per {time_unit}), we scale the rate
-    to show events per {rate_multiplier} person-{time_unit}. For example, {rate_multiplier} patients followed for one {time_unit} each
-    contribute {rate_multiplier} person-{time_unit}; the observed aggregate rate corresponds to {signif(overall_rate, 3)} events per that amount of person-time.
-    This standardized expression makes it easier to understand and compare rates across different studies.</p>
-
-    The 95% confidence interval for this rate is {signif(ci_lower, 3)} to {signif(ci_upper, 3)} per {rate_multiplier} person-{time_unit},
-    indicating the precision of our estimate based on the observed data.
-
-
-    <h4>Person-Time Analysis Summary</h4>
-    <p>Total follow-up time: <b>{round(total_time, 1)} {time_unit}</b></p>
-    <p>Mean follow-up time: <b>{mean_follow_up} {time_unit}</b></p>
-    <p>{median_follow_up_label}: <b>{median_follow_up} {time_unit}</b></p>
-    {median_follow_up_note}
-    <p>Number of events: <b>{total_events}</b> out of <b>{nrow(mydata)}</b> subjects</p>
-    <p>Overall incidence rate: <b>{signif(overall_rate, 3)}</b> per {rate_multiplier} person-{time_unit} [95% CI: {signif(ci_lower, 3)}-{signif(ci_upper, 3)}]</p>
-    <p><i>Interpretation:</i> This is a crude occurrence/exposure rate, not the probability that an individual has the event. It is calculated as target events divided by observed person-time at risk. Under competing risks it is cause-specific and is not cumulative incidence. The interval is a Garwood interval conditional on a Poisson count model and does not account for unmeasured heterogeneity, informative censoring, or changes in the rate over follow-up.</p>
-  ")
+        summary_html <- paste0(
+            .pasteT(.("In this study, {nMydata} subjects were followed for a total of {totalTime} {timeUnit}{lmSuffix}, with an average follow-up duration of {meanFollowUp} {timeUnit} per person. During this observation period, {totalEvents} events occurred, resulting in an incidence rate of {overallRate} events per {rateMultiplier} person-{timeUnit}."), nMydata = nrow(mydata), totalTime = round(total_time, 1), timeUnit = time_unit, lmSuffix = lm_suffix, meanFollowUp = mean_follow_up, totalEvents = total_events, overallRate = signif(overall_rate, 3), rateMultiplier = rate_multiplier),
+            " <p>",
+            .pasteT(.("<b>Understanding the Rate Multiplier:</b> The rate multiplier of {rateMultiplier} is used to express incidence rates in clinically meaningful terms. Instead of reporting small decimal numbers (e.g., 0.05 events per {timeUnit}), we scale the rate to show events per {rateMultiplier} person-{timeUnit}. For example, {rateMultiplier} patients followed for one {timeUnit} each contribute {rateMultiplier} person-{timeUnit}; the observed aggregate rate corresponds to {overallRate} events per that amount of person-time. This standardized expression makes it easier to understand and compare rates across different studies."), rateMultiplier = rate_multiplier, timeUnit = time_unit, overallRate = signif(overall_rate, 3)),
+            "</p> ",
+            .pasteT(.("The 95% confidence interval for this rate is {ciLower} to {ciUpper} per {rateMultiplier} person-{timeUnit}, indicating the precision of our estimate based on the observed data."), ciLower = signif(ci_lower, 3), ciUpper = signif(ci_upper, 3), rateMultiplier = rate_multiplier, timeUnit = time_unit),
+            paste0(
+                "<h4>",
+                .("Person-Time Analysis Summary"),
+                "</h4><p>"),
+            .pasteT(.("Total follow-up time: <b>{totalTime} {timeUnit}</b>"), totalTime = round(total_time, 1), timeUnit = time_unit),
+            "</p> <p>",
+            .pasteT(.("Mean follow-up time: <b>{meanFollowUp} {timeUnit}</b>"), meanFollowUp = mean_follow_up, timeUnit = time_unit),
+            "</p> <p>",
+            median_follow_up_label,
+            ": <b>",
+            median_follow_up,
+            " ",
+            time_unit,
+            "</b></p> ",
+            median_follow_up_note,
+            " <p>",
+            .pasteT(.("Number of events: <b>{totalEvents}</b> out of <b>{nMydata}</b> subjects"), totalEvents = total_events, nMydata = nrow(mydata)),
+            "</p> <p>",
+            .pasteT(.("Overall incidence rate: <b>{overallRate}</b> per {rateMultiplier} person-{timeUnit} {lb}95% CI: {ciLower}-{ciUpper}]"), overallRate = signif(overall_rate, 3), rateMultiplier = rate_multiplier, timeUnit = time_unit, ciLower = signif(ci_lower, 3), ciUpper = signif(ci_upper, 3), lb = "["),
+            "</p> <p>",
+            .("<i>Interpretation:</i> This is a crude occurrence/exposure rate, not the probability that an individual has the event. It is calculated as target events divided by observed person-time at risk. Under competing risks it is cause-specific and is not cumulative incidence. The interval is a Garwood interval conditional on a Poisson count model and does not account for unmeasured heterogeneity, informative censoring, or changes in the rate over follow-up."),
+            "</p>")
 
         self$results$personTimeSummary$setContent(summary_html)
 
         # Add explanatory output for person-time analysis
         if (self$options$showExplanations) {
-            person_time_explanation_html <- '
-            <div style="margin-bottom: 20px; padding: 15px; background-color: rgba(33, 152, 255, 0.07); border-left: 4px solid #4169e1; color: inherit;">
-                <h4 style="margin-top: 0; color: inherit;">Understanding Person-Time Analysis</h4>
-                <p style="margin-bottom: 10px;">Person-time analysis calculates incidence rates by accounting for the total time each patient was at risk:</p>
-                <ul style="margin-left: 20px;">
-                    <li><strong>Person-Time:</strong> Sum of individual follow-up periods for all patients</li>
-                    <li><strong>Incidence Rate:</strong> Events per unit of person-time in the selected time unit</li>
-                    <li><strong>Rate Multiplier:</strong> Scaling factor to express rates per standard unit</li>
-                    <li><strong>95% CI:</strong> Garwood Poisson interval, conditional on the count model and observed person-time</li>
-                </ul>
-                <p style="margin-bottom: 5px;"><strong>Clinical interpretation:</strong></p>
-                <ul style="margin-left: 20px;">
-                    <li>Different follow-up durations contribute appropriately to the denominator</li>
-                    <li>Rates are not risks or individual event probabilities</li>
-                    <li>With competing events, this is a crude cause-specific rate and not the cumulative incidence or absolute risk</li>
-                    <li>Cross-study comparisons require comparable populations, outcome definitions, time origins, and censoring mechanisms</li>
-                    <li>Interval-specific rates are exploratory and may be unstable when events or person-time are sparse</li>
-                    <li>Do not use a visual peak alone to choose follow-up or treatment timing</li>
-                </ul>
-            </div>
-            '
+            person_time_explanation_html <- paste0(
+                '<div style="margin-bottom: 20px; padding: 15px; background-color: rgba(33, 152, 255, 0.07); border-left: 4px solid #4169e1; color: inherit;"><h4 style="margin-top: 0; color: inherit;">',
+                .("Understanding Person-Time Analysis"),
+                '</h4><p style="margin-bottom: 10px;">',
+                .("Person-time analysis calculates incidence rates by accounting for the total time each patient was at risk:"),
+                '</p><ul style="margin-left: 20px;"><li>',
+                .("<strong>Person-Time:</strong> Sum of individual follow-up periods for all patients"),
+                "</li><li>",
+                .("<strong>Incidence Rate:</strong> Events per unit of person-time in the selected time unit"),
+                "</li><li>",
+                .("<strong>Rate Multiplier:</strong> Scaling factor to express rates per standard unit"),
+                "</li><li>",
+                .("<strong>95% CI:</strong> Garwood Poisson interval, conditional on the count model and observed person-time"),
+                '</li></ul><p style="margin-bottom: 5px;"><strong>',
+                .("Clinical interpretation:"),
+                '</strong></p><ul style="margin-left: 20px;"><li>',
+                .("Different follow-up durations contribute appropriately to the denominator"),
+                "</li><li>",
+                .("Rates are not risks or individual event probabilities"),
+                "</li><li>",
+                .("With competing events, this is a crude cause-specific rate and not the cumulative incidence or absolute risk"),
+                "</li><li>",
+                .("Cross-study comparisons require comparable populations, outcome definitions, time origins, and censoring mechanisms"),
+                "</li><li>",
+                .("Interval-specific rates are exploratory and may be unstable when events or person-time are sparse"),
+                "</li><li>",
+                .("Do not use a visual peak alone to choose follow-up or treatment timing"),
+                "</li></ul></div>")
             self$results$personTimeExplanation$setContent(person_time_explanation_html)
         }
         
@@ -3299,30 +3275,72 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         unit <- htmltools::htmlEscape(self$options$timetypeoutput)
         if (private$.isCompetingRisk()) {
           txt <- paste0(
-            '<div class="explanation-box" style="background-color: rgba(33, 152, 255, 0.07);padding:15px;border-radius:8px;margin:10px 0; color: inherit;">',
-            '<h3 style="color: inherit;margin-top:0;">Understanding the Cumulative-Incidence Plot</h3>',
-            '<p>The plot shows the cumulative incidence of each terminal event state. ',
-            'For the event of interest, this is the estimated probability that it has occurred by time <i>t</i>, ',
-            'with competing events accounted for. It is not 1 minus a Kaplan-Meier curve.</p>',
-            '<ul><li><strong>X-axis:</strong> time in ', unit, '.</li>',
-            '<li><strong>Y-axis:</strong> cumulative incidence on a 0-1 probability scale.</li>',
-            '<li><strong>Steps:</strong> observed transitions to an event state; a competing event prevents the target event thereafter.</li>',
-            '<li><strong>Confidence intervals:</strong> pointwise uncertainty, not a simultaneous confidence band.</li></ul>',
-            '<p>The cumulative-event, cumulative-hazard and KMunicate plots are not produced in competing-risk mode because they assume one event type.</p>',
-            '<p><em>These are descriptive estimates from one cohort and do not establish treatment effects or individual prognosis.</em></p></div>')
+              '<div class="explanation-box" style="background-color: rgba(33, 152, 255, 0.07);padding:15px;border-radius:8px;margin:10px 0; color: inherit;">',
+              paste0(
+                '<h3 style="color: inherit;margin-top:0;">',
+                .("Understanding the Cumulative-Incidence Plot"),
+                "</h3>"),
+              "<p>",
+              .("The plot shows the cumulative incidence of each terminal event state. For the event of interest, this is the estimated probability that it has occurred by time <i>t</i>, with competing events accounted for. It is not 1 minus a Kaplan-Meier curve."),
+              "</p><ul><li><strong>X-axis:</strong> time in ",
+              unit,
+              ".</li>",
+              paste0(
+                "<li>",
+                .("<strong>Y-axis:</strong> cumulative incidence on a 0-1 probability scale."),
+                "</li>"),
+              paste0(
+                "<li>",
+                .("<strong>Steps:</strong> observed transitions to an event state; a competing event prevents the target event thereafter."),
+                "</li>"),
+              paste0(
+                "<li>",
+                .("<strong>Confidence intervals:</strong> pointwise uncertainty, not a simultaneous confidence band."),
+                "</li></ul>"),
+              paste0(
+                "<p>",
+                .("The cumulative-event, cumulative-hazard and KMunicate plots are not produced in competing-risk mode because they assume one event type."),
+                "</p>"),
+              paste0(
+                "<p><em>",
+                .("These are descriptive estimates from one cohort and do not establish treatment effects or individual prognosis."),
+                "</em></p></div>"))
         } else {
           txt <- paste0(
-            '<div class="explanation-box" style="background-color: rgba(33, 152, 255, 0.07);padding:15px;border-radius:8px;margin:10px 0; color: inherit;">',
-            '<h3 style="color: inherit;margin-top:0;">Understanding Survival Curves and Plots</h3>',
-            '<p>The Kaplan-Meier curve estimates the probability of remaining event-free over time. ',
-            'It steps down at event times; censoring changes the risk set but does not make the curve step down.</p>',
-            '<ul><li><strong>X-axis:</strong> time in ', unit, '.</li>',
-            '<li><strong>Y-axis:</strong> survival/event-free probability on a 0-1 scale.</li>',
-            '<li><strong>Censor marks:</strong> follow-up ended without the event at that time; this includes administrative censoring and is not synonymous with loss to follow-up.</li>',
-            '<li><strong>Confidence intervals:</strong> pointwise uncertainty; late estimates often widen as the risk set shrinks.</li>',
-            '<li><strong>Median:</strong> the first time estimated survival is 50% or lower, if reached; the midpoint, if the curve is exactly 50% over an interval.</li></ul>',
-            '<p>The cumulative-event plot is 1 - S(t). The cumulative-hazard plot is an accumulated hazard measure, not an event probability and is not bounded by 1.</p>',
-            '<p>Interpret all curves under the assumption that censoring is non-informative conditional on the analysis. Visual changes in steepness are exploratory and do not by themselves identify clinically optimal intervention times.</p></div>')
+              '<div class="explanation-box" style="background-color: rgba(33, 152, 255, 0.07);padding:15px;border-radius:8px;margin:10px 0; color: inherit;">',
+              paste0(
+                '<h3 style="color: inherit;margin-top:0;">',
+                .("Understanding Survival Curves and Plots"),
+                "</h3>"),
+              "<p>",
+              .("The Kaplan-Meier curve estimates the probability of remaining event-free over time. It steps down at event times; censoring changes the risk set but does not make the curve step down."),
+              "</p><ul><li><strong>X-axis:</strong> time in ",
+              unit,
+              ".</li>",
+              paste0(
+                "<li>",
+                .("<strong>Y-axis:</strong> survival/event-free probability on a 0-1 scale."),
+                "</li>"),
+              paste0(
+                "<li>",
+                .("<strong>Censor marks:</strong> follow-up ended without the event at that time; this includes administrative censoring and is not synonymous with loss to follow-up."),
+                "</li>"),
+              paste0(
+                "<li>",
+                .("<strong>Confidence intervals:</strong> pointwise uncertainty; late estimates often widen as the risk set shrinks."),
+                "</li>"),
+              paste0(
+                "<li>",
+                .("<strong>Median:</strong> the first time estimated survival is 50% or lower, if reached; the midpoint, if the curve is exactly 50% over an interval."),
+                "</li></ul>"),
+              paste0(
+                "<p>",
+                .("The cumulative-event plot is 1 - S(t). The cumulative-hazard plot is an accumulated hazard measure, not an event probability and is not bounded by 1."),
+                "</p>"),
+              paste0(
+                "<p>",
+                .("Interpret all curves under the assumption that censoring is non-informative conditional on the analysis. Visual changes in steepness are exploratory and do not by themselves identify clinically optimal intervention times."),
+                "</p></div>"))
         }
         self$results$survivalPlotsExplanation$setContent(txt)
       }
@@ -3394,55 +3412,55 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         unit_esc <- htmltools::htmlEscape(self$options$timetypeoutput)
         if (n_bins >= 3L) {
           peak_text <- sprintf(
-            '<b>%s</b> in the interval ending at %.1f %s (highest of %d equal-width intervals)',
+            .("<b>%s</b> in the interval ending at %.1f %s (highest of %d equal-width intervals)"),
             signif(max(hz$rate), 3), hz$end[which.max(hz$rate)],
             unit_esc, n_bins)
           variation_text <- sprintf(
-            '<b>%s to %s</b> across %d equal-width intervals; this descriptive range is not a test of a constant-hazard, exponential, or proportional-hazards model',
+            .("<b>%s to %s</b> across %d equal-width intervals; this descriptive range is not a test of a constant-hazard, exponential, or proportional-hazards model"),
             signif(min(hz$rate), 3), signif(max(hz$rate), 3), n_bins)
         } else {
           peak_text <- sprintf(
-            'not separable from the pooled rate - %d event(s) support only %d interval(s)',
+            .("not separable from the pooled rate - %d event(s) support only %d interval(s)"),
             total_events, n_bins)
           variation_text <- sprintf(
-            '<b>not summarized</b> - automatic binning produced only %d interval(s) from %d event(s), so variation over time is not described',
+            .("<b>not summarized</b> - automatic binning produced only %d interval(s) from %d event(s), so variation over time is not described"),
             n_bins, total_events)
         }
 
         if (self$options$showSummaries) {
-          self$results$baselineHazardSummary$setContent(glue::glue("
-            <div style='background-color: rgba(255, 202, 33, 0.11);border-left:4px solid #ffc107;padding:12px;margin-bottom:15px; color: inherit;'>
-              <p style='margin:5px 0;'><strong>Methodological note:</strong>
-              This output reports piecewise event rates, computed as events divided by exact
-              person-time within equal-width intervals. The number of intervals is limited to
-              about one per 10 total events (maximum 10) to reduce sparse-bin artefacts. It does not
-              estimate an exact instantaneous hazard at each event time. Garwood Poisson
-              intervals are conditional on the count/exposure model and do not account for the
-              data-dependent choice of interval boundaries.</p>
-            </div>
-            <h4>Exploratory Piecewise Hazard-Rate Summary{private$.landmarkSuffix()}</h4>
-            <ul>
-              <li>Pooled event rate: <b>{signif(pooled_rate, 3)}</b> events per person-{unit_esc}</li>
-              <li>Highest interval rate: {peak_text}</li>
-              <li>Variation over time: {variation_text}</li>
-            </ul>
-            <p>Interval peaks are bandwidth- and boundary-dependent. They must not be used alone
-            to time treatment, determine surveillance schedules, or make individual prognostic
-            claims. Those decisions require clinical context and a prespecified, validated model.</p>"))
+          self$results$baselineHazardSummary$setContent(paste0(
+              "<div style='background-color: rgba(255, 202, 33, 0.11);border-left:4px solid #ffc107;padding:12px;margin-bottom:15px; color: inherit;'> <p style='margin:5px 0;'>",
+              .("<strong>Methodological note:</strong> This output reports piecewise event rates, computed as events divided by exact person-time within equal-width intervals. The number of intervals is limited to about one per 10 total events (maximum 10) to reduce sparse-bin artefacts. It does not estimate an exact instantaneous hazard at each event time. Garwood Poisson intervals are conditional on the count/exposure model and do not account for the data-dependent choice of interval boundaries."),
+              "</p> </div> <h4>",
+              .pasteT(.("Exploratory Piecewise Hazard-Rate Summary{v1}"), v1 = private$.landmarkSuffix()),
+              "</h4> <ul> <li>",
+              .pasteT(.("Pooled event rate: <b>{pooledRate}</b> events per person-{unitEsc}"), pooledRate = signif(pooled_rate, 3), unitEsc = unit_esc),
+              "</li> <li>",
+              .pasteT(.("Highest interval rate: {peakText}"), peakText = peak_text),
+              "</li> <li>",
+              .pasteT(.("Variation over time: {variationText}"), variationText = variation_text),
+              "</li> </ul> <p>",
+              .("Interval peaks are bandwidth- and boundary-dependent. They must not be used alone to time treatment, determine surveillance schedules, or make individual prognostic claims. Those decisions require clinical context and a prespecified, validated model."),
+              "</p>"))
         }
 
         if (self$options$showExplanations) {
           self$results$baselineHazardExplanation$setContent(paste0(
-            '<div class="explanation-box" style="background-color: rgba(33, 152, 255, 0.07);padding:15px;border-radius:8px;margin:10px 0; color: inherit;">',
-            '<h3 style="color: inherit;margin-top:0;">Understanding Piecewise Hazard-Rate Estimates</h3>',
-            '<p>A hazard is an event rate among subjects still at risk, expressed per unit of person-time. ',
-            'It is not an event probability and can exceed 1 per time unit. This table groups follow-up into equal-width intervals and divides events by the exact person-time accrued in each interval.</p>',
-            '<ul><li><strong>Time:</strong> upper endpoint of the interval; the row covers the preceding endpoint up to and including this time.</li>',
-            '<li><strong>Rate:</strong> events/person-time within that interval.</li>',
-            '<li><strong>95% CI:</strong> Garwood Poisson interval conditional on the observed exposure.</li>',
-            '<li><strong>Smoothed curve:</strong> a bandwidth-dependent exploratory trend; different smoothing choices can move or remove peaks.</li></ul>',
-            '<p>Neither visual constancy nor a coefficient of variation tests an exponential model, and proportional hazards cannot be assessed in a one-arm model with no contrast. ',
-            'Censoring assumptions and sparse late risk sets remain important.</p></div>'))
+              '<div class="explanation-box" style="background-color: rgba(33, 152, 255, 0.07);padding:15px;border-radius:8px;margin:10px 0; color: inherit;"><h3 style="color: inherit;margin-top:0;">',
+              .("Understanding Piecewise Hazard-Rate Estimates"),
+              "</h3><p>",
+              .("A hazard is an event rate among subjects still at risk, expressed per unit of person-time. It is not an event probability and can exceed 1 per time unit. This table groups follow-up into equal-width intervals and divides events by the exact person-time accrued in each interval."),
+              "</p><ul><li>",
+              .("<strong>Time:</strong> upper endpoint of the interval; the row covers the preceding endpoint up to and including this time."),
+              "</li><li>",
+              .("<strong>Rate:</strong> events/person-time within that interval."),
+              "</li><li>",
+              .("<strong>95% CI:</strong> Garwood Poisson interval conditional on the observed exposure."),
+              "</li><li>",
+              .("<strong>Smoothed curve:</strong> a bandwidth-dependent exploratory trend; different smoothing choices can move or remove peaks."),
+              "</li></ul><p>",
+              .("Neither visual constancy nor a coefficient of variation tests an exponential model, and proportional hazards cannot be assessed in a one-arm model with no contrast. Censoring assumptions and sparse late risk sets remain important."),
+              "</p></div>"))
         }
       }
 
@@ -3544,7 +3562,7 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             } else if (inherits(plot_result, "gg")) {
               plot_obj <- plot_result
             } else {
-              stop("Unexpected plot result type from surv_plot")
+              stop(.("Unexpected plot result type from surv_plot"))
             }
 
             # Apply colorblind-safe theme and colors.
@@ -4445,32 +4463,46 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         if (self$options$showSummaries) {
           # .assessDataQuality() grades nothing; event scarcity is reported
           # by .eventCountNotice() in .run().
-          warning_text <- paste0("<div style='background-color: rgba(33, 152, 239, 0.13);padding:10px;border-radius:5px;margin:10px 0;border-left:4px solid #2196f3; color: inherit;'>",
-                   "<strong>Automated grading:</strong> No universal adequacy grade is assigned. Review the event counts, risk sets, confidence intervals, follow-up, missingness, and endpoint context directly.</div>")
+          warning_text <- paste0(
+              "<div style='background-color: rgba(33, 152, 239, 0.13);padding:10px;border-radius:5px;margin:10px 0;border-left:4px solid #2196f3; color: inherit;'>",
+              .("<strong>Automated grading:</strong> No universal adequacy grade is assigned. Review the event counts, risk sets, confidence intervals, follow-up, missingness, and endpoint context directly."),
+              "</div>")
 
           count_text <- if (dq$n_competing > 0)
-            paste0(dq$n_events, " event(s) of interest, ", dq$n_competing,
-                   " competing event(s), and ", dq$n_censored, " censored") else
-            paste0(dq$n_events, " event(s) and ", dq$n_censored, " censored")
+            .pasteT(.("{nEvents} event(s) of interest, {nCompeting} competing event(s), and {nCensored} censored"), nEvents = dq$n_events, nCompeting = dq$n_competing, nCensored = dq$n_censored) else
+            .pasteT(.("{nEvents} event(s) and {nCensored} censored"), nEvents = dq$n_events, nCensored = dq$n_censored)
 
           summary_html <- paste0(
-            "<div style='background-color: rgba(138, 155, 172, 0.06); padding: 15px; border-radius: 8px; margin: 10px 0; color: inherit;'>",
-            "<h4 style='color: inherit; margin-top: 0;'> Descriptive Data Diagnostics</h4>",
-            "<p>This analysis includes <strong>", dq$n_total, " subjects</strong>: <strong>",
-            count_text, "</strong> (", dq$event_rate, "% observed target-event proportion) over an observed-time range of ",
-            dq$min_time, " to ", dq$max_time, " ", htmltools::htmlEscape(self$options$timetypeoutput),
-            private$.landmarkSuffix(), ".</p>",
-            warning_text,
-            "<div style='background-color: rgba(33, 152, 239, 0.13); padding: 10px; border-radius: 5px; margin: 10px 0; color: inherit;'>",
-            "<strong>Interpretive limitations:</strong>",
-            "<ul style='margin: 5px 0; padding-left: 20px;'>",
-            "<li>Rows missing time or outcome are excluded by complete-case analysis; bias depends on why values are missing.</li>",
-            "<li>Independent/non-informative censoring cannot be verified from these summaries.</li>",
-            "<li>Precision at a specific time depends on events and the number still at risk there, not sample size alone.</li>",
-            "<li>This is a descriptive single-cohort analysis and does not estimate a treatment effect or establish individual prognosis.</li>",
-            "</ul></div>",
-            "</div>"
-          )
+              "<div style='background-color: rgba(138, 155, 172, 0.06); padding: 15px; border-radius: 8px; margin: 10px 0; color: inherit;'>",
+              paste0(
+                "<h4 style='color: inherit; margin-top: 0;'>",
+                .("Descriptive Data Diagnostics"),
+                "</h4>"),
+              "<p>",
+              .pasteT(.("This analysis includes <strong>{nTotal} subjects</strong>: <strong>{countText}</strong> ({eventRate}% observed target-event proportion) over an observed-time range of {minTime} to {maxTime} {timetypeoutput}{v1}."), nTotal = dq$n_total, countText = count_text, eventRate = dq$event_rate, minTime = dq$min_time, maxTime = dq$max_time, timetypeoutput = htmltools::htmlEscape(self$options$timetypeoutput), v1 = private$.landmarkSuffix()),
+              "</p>",
+              warning_text,
+              paste0(
+                  "<div style='background-color: rgba(33, 152, 239, 0.13); padding: 10px; border-radius: 5px; margin: 10px 0; color: inherit;'><strong>",
+                  .("Interpretive limitations:"),
+                  "</strong><ul style='margin: 5px 0; padding-left: 20px;'>"),
+              paste0(
+                "<li>",
+                .("Rows missing time or outcome are excluded by complete-case analysis; bias depends on why values are missing."),
+                "</li>"),
+              paste0(
+                "<li>",
+                .("Independent/non-informative censoring cannot be verified from these summaries."),
+                "</li>"),
+              paste0(
+                "<li>",
+                .("Precision at a specific time depends on events and the number still at risk there, not sample size alone."),
+                "</li>"),
+              paste0(
+                "<li>",
+                .("This is a descriptive single-cohort analysis and does not estimate a treatment effect or establish individual prognosis."),
+                "</li>"),
+              "</ul></div></div>")
           
           self$results$dataQualitySummary$setContent(summary_html)
         }

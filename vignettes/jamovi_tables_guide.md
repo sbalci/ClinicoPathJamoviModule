@@ -1352,6 +1352,13 @@ A verdict is words (a `setNote()` or a footnote marker), never red/amber/green t
 not encode meaning in colour. The shapes to copy are already in meddecide: an Array of `Table` whose
 two count columns share a `superTitle` and are renamed to the criterion levels in `.init()`
 (the reviewer's `sensSpecTable` suggestion), and `decision.r.yaml`'s `rawContingency`/`rawCounts`.
+A printed object is the same defect in another form: `setContent(paste(capture.output(print(zph)),
+collapse = "\n"))` shows fixed-width console text where a `Table` with `number` columns belongs.
+Read the fields of the object (`zph$table`, a nomogram's `$points`), never its `print()`. And a
+help-like method name is not an exemption: since 2026-11-22 the check judges a `...Guide` or
+`...Explanation` method by its cells and also reads file-level helpers (review guide section 26,
+round 9).
+
 `release_gate.py` `check_html_tables` WARNs on a `<table` or an HTML `kable()` outside a help-named
 method (round 8, 2026-10-24).
 

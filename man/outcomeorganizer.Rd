@@ -122,6 +122,7 @@ suitable for copying to reports.}
 \value{
 A results object containing:
 \tabular{llllll}{
+\code{results$eventRecodeTable} \tab \tab \tab \tab \tab a table \cr
 \code{results$eventRecodeInfo} \tab \tab \tab \tab \tab a html \cr
 \code{results$todo} \tab \tab \tab \tab \tab a html \cr
 \code{results$errors} \tab \tab \tab \tab \tab a html \cr
@@ -140,9 +141,9 @@ A results object containing:
 
 Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
 
-\code{results$outputTable$asDF}
+\code{results$eventRecodeTable$asDF}
 
-\code{as.data.frame(results$outputTable)}
+\code{as.data.frame(results$eventRecodeTable)}
 }
 \description{
 Advanced tool for preparing outcome variables for various types of survival

@@ -36,6 +36,8 @@ outcomeorganizerClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         # Notice management helpers ----
         # Notices render to dedicated Html outputs (errors / strongWarnings /
         # warnings / infoMessages) for multi-line rich HTML formatting.
+        # library-audit 2026-11-20 jsurvival [LOW] DEFERRED: Html message panels kept by maintainer
+        #   decision; revisit when these messages have been tried as jmvcore::Notice in the jamovi app
         .addNotice = function(type, message, name = NULL) {
             # jmvcore::NoticeType constants: ERROR=0, STRONG_WARNING=1, WARNING=2, INFO=3
             type_str <- switch(
@@ -111,6 +113,11 @@ outcomeorganizerClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         },
 
         .init = function() {
+            # Multistate coding has four states and its own panel, not an event/censored recode.
+            if (identical(self$options$analysistype, "multistate"))
+                self$results$eventRecodeTable$setVisible(FALSE)
+            else
+                .initEventRecodeTable(self$results$eventRecodeTable, self$options)
             # Initialize table structures
             if (self$options$outputTable) {
                 table <- self$results$outputTable
@@ -571,16 +578,9 @@ outcomeorganizerClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 if (n_composite > 0) {
                     private$.addHtmlMessage(
                         "warning",
-                        sprintf("%s status produced - pair it with time to FIRST event",
+                        sprintf(.("%s status produced - pair it with time to FIRST event"),
                                 toupper(analysistype)),
-                        sprintf(paste0(
-                            "The composite status marks %d patient(s) as having had recurrence/progression ",
-                            "or death. This analysis writes the STATUS only: it has no recurrence or ",
-                            "progression date, so it cannot work out which event came first or when. ",
-                            "Pairing this status with a death or last-contact time overstates %s for every ",
-                            "patient whose recurrence preceded their death or censoring - their event is ",
-                            "recorded at the later time. Supply time to first event yourself, as the ",
-                            "minimum of the recurrence date and the death/last-contact date."),
+                        sprintf(.("The composite status marks %d patient(s) as having had recurrence/progression or death. This analysis writes the STATUS only: it has no recurrence or progression date, so it cannot work out which event came first or when. Pairing this status with a death or last-contact time overstates %s for every patient whose recurrence preceded their death or censoring - their event is recorded at the later time. Supply time to first event yourself, as the minimum of the recurrence date and the death/last-contact date."),
                             n_composite, toupper(analysistype)))
                 }
 
@@ -1558,74 +1558,85 @@ outcomeorganizerClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         },
 
         .showGlossary = function() {
-            glossary_html <- "
-            <div style='background-color: rgba(155, 155, 155, 0.06); padding: 15px; border-radius: 8px; color: inherit;'>
-            <h4>Survival Analysis Glossary</h4>
-            <dl>
-                <dt><b>Overall Survival (OS)</b></dt>
-                <dd>Time from diagnosis/treatment to death from any cause. Patients alive at last follow-up are censored.</dd>
-
-                <dt><b>Cause-Specific Survival</b></dt>
-                <dd>Time to death from the disease of interest. Deaths from other causes are censored (treated as non-events).</dd>
-
-                <dt><b>Competing Risks</b></dt>
-                <dd>Analysis accounting for multiple types of events (e.g., disease death vs. other death). Competing events prevent the event of interest from occurring.</dd>
-
-                <dt><b>Recurrence-Free Survival (RFS)</b></dt>
-                <dd>Time to disease recurrence or death. Used for cancers after curative treatment. Published definitions differ on which deaths count, so state yours. Here the selection decides: with one Event Level only that level counts as death; with Multiple Event Levels every death category counts.</dd>
-
-                <dt><b>Progression-Free Survival (PFS)</b></dt>
-                <dd>Time to disease progression or death from any cause. Common endpoint in oncology trials. Use Multiple Event Levels when the outcome has more than one death category; with one Event Level only that level counts as death.</dd>
-
-                <dt><b>Disease-Free Survival (DFS)</b></dt>
-                <dd>Time to recurrence or death from any cause. Use Multiple Event Levels when the outcome has more than one death category; with one Event Level only that level counts as death. Alive with Disease also counts as an event under Multiple Event Levels. A second primary cancer counts only if it is coded in the recurrence variable.</dd>
-
-                <dt><b>Time to Progression (TTP)</b></dt>
-                <dd>Time to disease progression only. Deaths without progression are censored.</dd>
-
-                <dt><b>Multistate Model</b></dt>
-                <dd>Assigns each patient a state code (disease-free, disease, death from disease, death from other causes). Fitting an actual multistate model additionally needs transition times and a subject identifier in long format, which this analysis does not produce.</dd>
-
-                <dt><b>Censoring</b></dt>
-                <dd>Incomplete observation of survival time (patient still alive, lost to follow-up, or event not observed).</dd>
-
-                <dt><b>Event Hierarchy</b></dt>
-                <dd>When multiple events occur for the same patient, prioritize one event type over others.</dd>
-            </dl>
-            </div>
-            "
+            glossary_html <- paste0(
+                "<div style='background-color: rgba(155, 155, 155, 0.06); padding: 15px; border-radius: 8px; color: inherit;'><h4>",
+                .("Survival Analysis Glossary"),
+                "</h4><dl><dt><b>",
+                .("Overall Survival (OS)"),
+                "</b></dt><dd>",
+                .("Time from diagnosis/treatment to death from any cause. Patients alive at last follow-up are censored."),
+                "</dd><dt><b>",
+                .("Cause-Specific Survival"),
+                "</b></dt><dd>",
+                .("Time to death from the disease of interest. Deaths from other causes are censored (treated as non-events)."),
+                "</dd><dt><b>",
+                .("Competing Risks"),
+                "</b></dt><dd>",
+                .("Analysis accounting for multiple types of events (e.g., disease death vs. other death). Competing events prevent the event of interest from occurring."),
+                "</dd><dt><b>",
+                .("Recurrence-Free Survival (RFS)"),
+                "</b></dt><dd>",
+                .("Time to disease recurrence or death. Used for cancers after curative treatment. Published definitions differ on which deaths count, so state yours. Here the selection decides: with one Event Level only that level counts as death; with Multiple Event Levels every death category counts."),
+                "</dd><dt><b>",
+                .("Progression-Free Survival (PFS)"),
+                "</b></dt><dd>",
+                .("Time to disease progression or death from any cause. Common endpoint in oncology trials. Use Multiple Event Levels when the outcome has more than one death category; with one Event Level only that level counts as death."),
+                "</dd><dt><b>",
+                .("Disease-Free Survival (DFS)"),
+                "</b></dt><dd>",
+                .("Time to recurrence or death from any cause. Use Multiple Event Levels when the outcome has more than one death category; with one Event Level only that level counts as death. Alive with Disease also counts as an event under Multiple Event Levels. A second primary cancer counts only if it is coded in the recurrence variable."),
+                "</dd><dt><b>",
+                .("Time to Progression (TTP)"),
+                "</b></dt><dd>",
+                .("Time to disease progression only. Deaths without progression are censored."),
+                "</dd><dt><b>",
+                .("Multistate Model"),
+                "</b></dt><dd>",
+                .("Assigns each patient a state code (disease-free, disease, death from disease, death from other causes). Fitting an actual multistate model additionally needs transition times and a subject identifier in long format, which this analysis does not produce."),
+                "</dd><dt><b>",
+                .("Censoring"),
+                "</b></dt><dd>",
+                .("Incomplete observation of survival time (patient still alive, lost to follow-up, or event not observed)."),
+                "</dd><dt><b>",
+                .("Event Hierarchy"),
+                "</b></dt><dd>",
+                .("When multiple events occur for the same patient, prioritize one event type over others."),
+                "</dd></dl></div>")
 
             self$results$glossary$setContent(glossary_html)
         },
 
         .todo = function() {
-            todo <- glue::glue(
-                "
-                <br>Welcome to Enhanced Outcome Organizer
-                <br><br>
-                This tool helps you prepare outcome variables for various types of survival analysis:
-                <br>
-                <ul>
-                <li><b>Overall Survival (OS):</b> All deaths are events</li>
-                <li><b>Cause-Specific Survival:</b> Only disease-related deaths are events</li>
-                <li><b>Competing Risks:</b> Different event types have different codes</li>
-                <li><b>Recurrence/Progression-Free Survival (RFS/PFS):</b> Events include disease recurrence and death</li>
-                <li><b>Disease-Free Survival (DFS):</b> Events include any disease-related event or death</li>
-                <li><b>Time to Progression (TTP):</b> Only disease progression events counted</li>
-                <li><b>Multistate Models:</b> Multiple outcome states coded separately</li>
-                </ul>
-                <br>
-                Advanced options allow for:
-                <br>
-                <ul>
-                <li>Event hierarchies when multiple events occur</li>
-                <li>Interval censoring</li>
-                <li>Administrative censoring</li>
-                </ul>
-                <br>
-                Select your outcome variables and analysis type to begin.
-                "
-            )
+            todo <- paste0(
+                "<br>",
+                .("Welcome to Enhanced Outcome Organizer"),
+                " <br><br> ",
+                .("This tool helps you prepare outcome variables for various types of survival analysis:"),
+                " <br> <ul> <li>",
+                .("<b>Overall Survival (OS):</b> All deaths are events"),
+                "</li> <li>",
+                .("<b>Cause-Specific Survival:</b> Only disease-related deaths are events"),
+                "</li> <li>",
+                .("<b>Competing Risks:</b> Different event types have different codes"),
+                "</li> <li>",
+                .("<b>Recurrence/Progression-Free Survival (RFS/PFS):</b> Events include disease recurrence and death"),
+                "</li> <li>",
+                .("<b>Disease-Free Survival (DFS):</b> Events include any disease-related event or death"),
+                "</li> <li>",
+                .("<b>Time to Progression (TTP):</b> Only disease progression events counted"),
+                "</li> <li>",
+                .("<b>Multistate Models:</b> Multiple outcome states coded separately"),
+                "</li> </ul> <br> ",
+                .("Advanced options allow for:"),
+                " <br> <ul> <li>",
+                .("Event hierarchies when multiple events occur"),
+                paste0(
+                    "</li><li>",
+                    .("Interval censoring"),
+                    "</li><li>",
+                    .("Administrative censoring"),
+                    "</li></ul><br>"),
+                .("Select your outcome variables and analysis type to begin."))
 
             html <- self$results$todo
             html$setContent(todo)
@@ -1855,57 +1866,74 @@ outcomeorganizerClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             if (self$options$multievent && !analysistype %in% c('rfs', 'pfs', 'dfs', 'ttp')) {
                 if (analysistype == 'os') {
-                    summary_text <- glue::glue(
-                        "
-                        <br><b>Overall Survival Analysis</b><br>
-                        Recoded outcome:<br>
-                        - Dead of disease ({esc_dod}): coded as 1<br>
-                        - Dead of other causes ({esc_dooc}): coded as 1<br>
-                        - Alive with disease ({esc_awd}): coded as 0<br>
-                        - Alive without disease ({esc_awod}): coded as 0<br>
-                        <br>
-                        <i>This coding compares all deaths vs. alive status for standard Kaplan-Meier or Cox regression.</i>
-                        "
-                    )
+                    summary_text <- paste0(
+                        paste0(
+                            "<br><b>",
+                            .("Overall Survival Analysis"),
+                            "</b><br>",
+                            .("Recoded outcome:"),
+                            "<br>"),
+                        .pasteT(.("- Dead of disease ({escDod}): coded as 1"), escDod = esc_dod),
+                        "<br> ",
+                        .pasteT(.("- Dead of other causes ({escDooc}): coded as 1"), escDooc = esc_dooc),
+                        "<br> ",
+                        .pasteT(.("- Alive with disease ({escAwd}): coded as 0"), escAwd = esc_awd),
+                        "<br> ",
+                        .pasteT(.("- Alive without disease ({escAwod}): coded as 0"), escAwod = esc_awod),
+                        "<br> <br> <i>",
+                        .("This coding compares all deaths vs. alive status for standard Kaplan-Meier or Cox regression."),
+                        "</i>")
                 } else if (analysistype == 'cause') {
-                    summary_text <- glue::glue(
-                        "
-                        <br><b>Cause-Specific Survival Analysis</b><br>
-                        Recoded outcome:<br>
-                        - Dead of disease ({esc_dod}): coded as 1<br>
-                        - Dead of other causes ({esc_dooc}): coded as 0<br>
-                        - Alive with disease ({esc_awd}): coded as 0<br>
-                        - Alive without disease ({esc_awod}): coded as 0<br>
-                        <br>
-                        <i>This coding compares disease-specific deaths vs. other outcomes for cause-specific analyses.</i>
-                        "
-                    )
+                    summary_text <- paste0(
+                        paste0(
+                            "<br><b>",
+                            .("Cause-Specific Survival Analysis"),
+                            "</b><br>",
+                            .("Recoded outcome:"),
+                            "<br>"),
+                        .pasteT(.("- Dead of disease ({escDod}): coded as 1"), escDod = esc_dod),
+                        "<br> ",
+                        .pasteT(.("- Dead of other causes ({escDooc}): coded as 0"), escDooc = esc_dooc),
+                        "<br> ",
+                        .pasteT(.("- Alive with disease ({escAwd}): coded as 0"), escAwd = esc_awd),
+                        "<br> ",
+                        .pasteT(.("- Alive without disease ({escAwod}): coded as 0"), escAwod = esc_awod),
+                        "<br> <br> <i>",
+                        .("This coding compares disease-specific deaths vs. other outcomes for cause-specific analyses."),
+                        "</i>")
                 } else if (analysistype == 'compete') {
-                    summary_text <- glue::glue(
-                        "
-                        <br><b>Competing Risks Survival Analysis</b><br>
-                        Recoded outcome:<br>
-                        - Dead of disease ({esc_dod}): coded as 1<br>
-                        - Dead of other causes ({esc_dooc}): coded as 2<br>
-                        - Alive with disease ({esc_awd}): coded as 0<br>
-                        - Alive without disease ({esc_awod}): coded as 0<br>
-                        <br>
-                        <i>This coding enables competing risk analysis between disease-specific deaths and other causes using cmprsk or other packages.</i>
-                        "
-                    )
+                    summary_text <- paste0(
+                        "<br><b>",
+                        .("Competing Risks Survival Analysis"),
+                        "</b><br> Recoded outcome:<br> ",
+                        .pasteT(.("- Dead of disease ({escDod}): coded as 1"), escDod = esc_dod),
+                        "<br> ",
+                        .pasteT(.("- Dead of other causes ({escDooc}): coded as 2"), escDooc = esc_dooc),
+                        "<br> ",
+                        .pasteT(.("- Alive with disease ({escAwd}): coded as 0"), escAwd = esc_awd),
+                        "<br> ",
+                        .pasteT(.("- Alive without disease ({escAwod}): coded as 0"), escAwod = esc_awod),
+                        "<br> <br> <i>",
+                        .("This coding enables competing risk analysis between disease-specific deaths and other causes using cmprsk or other packages."),
+                        "</i>")
                 } else if (analysistype == 'multistate') {
-                    summary_text <- glue::glue(
-                        "
-                        <br><b>Multistate Model Analysis</b><br>
-                        Recoded outcome:<br>
-                        - Alive without disease ({esc_awod}): coded as 0<br>
-                        - Alive with disease ({esc_awd}): coded as 1<br>
-                        - Dead of disease ({esc_dod}): coded as 2<br>
-                        - Dead of other causes ({esc_dooc}): coded as 3<br>
-                        <br>
-                        <i>This is a state code, one row per patient. Multistate models additionally require transition times and from/to states in long format (id, tstart, tstop, from, to), which are not produced here.</i>
-                        "
-                    )
+                    summary_text <- paste0(
+                        paste0(
+                            "<br><b>",
+                            .("Multistate Model Analysis"),
+                            "</b><br>",
+                            .("Recoded outcome:"),
+                            "<br>"),
+                        .pasteT(.("- Alive without disease ({escAwod}): coded as 0"), escAwod = esc_awod),
+                        "<br> ",
+                        .pasteT(.("- Alive with disease ({escAwd}): coded as 1"), escAwd = esc_awd),
+                        "<br> ",
+                        .pasteT(.("- Dead of disease ({escDod}): coded as 2"), escDod = esc_dod),
+                        "<br> ",
+                        .pasteT(.("- Dead of other causes ({escDooc}): coded as 3"), escDooc = esc_dooc),
+                        "<br> <br> <i>",
+                        .("This is a state code, one row per patient. Multistate models additionally require transition times and from/to states in long format (id, tstart, tstop, from, to), which are not produced here."),
+                        "</i>")
                 }
             } else {
                 if (handoff_coded) {
@@ -2108,6 +2136,7 @@ outcomeorganizerClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             if (!is.null(private$.eventRecode)) {
                 self$results$eventRecodeInfo$setContent(
                     .describeEventIndicator(private$.eventRecode, self$options$outcome))
+                .fillEventRecodeTable(self$results$eventRecodeTable, private$.eventRecode)
             } else if (identical(analysistype, "multistate")) {
                 ms_counts <- table(factor(mydata, levels = c(0, 1, 2, 3)), useNA = "no")
                 self$results$eventRecodeInfo$setContent(paste0(

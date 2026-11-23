@@ -854,7 +854,7 @@ def check_fabricated_stats():
 
 # a fitted model or a whole dataset named in a setState() payload
 _HEAVY_NAME = (r'fit|model|models|zph|roc|survfit|coxph|cph|glmnet|rf|object|'
-               r'cleandata|cleanData|mydata|dataset|[\w.]*(?:_fit|_model|Fit|Model)')
+               r'cleandata|cleanData|cutoffdata|mydata|dataset|[\w.]*(?:_fit|_model|Fit|Model)')
 # `list(fit = cox_fit, ...)` - a heavy value bound to a state key
 _HEAVY = re.compile(r'(?<![\w.])(%s)\s*=(?!=)' % _HEAVY_NAME)
 # `setState(zph)` / `setState(cox_fit)` - the whole payload IS the object, no key at all
@@ -870,7 +870,7 @@ def check_state_payload():
     length n; a cox.zph carries the residual matrix; a pROC roc carries both input vectors. State
     holds the handful of numbers the plot draws - see CLAUDE.md and jamovi_plots_guide.md section 3.
     Checked with: length(serialize(x, NULL))."""
-    hits, waived = [], []
+    hits, waived, indirect = [], [], []
     for p in sorted(glob.glob('R/*.b.R')):
         src = open(p, encoding='utf-8', errors='replace').read()
         for m in re.finditer(r'setState\s*\(', src):
@@ -883,12 +883,12 @@ def check_state_payload():
             # saves little, is a real exception - but it has to be measured and written down:
             #   # state-payload: <why>  (measure with length(serialize(x, NULL)))
             # placed on the setState line or the two above it.
-            start = m.start()                     # the comment block immediately above this call
-            for _ in range(8):
-                nl = src.rfind('\n', 0, start)
-                if nl < 0 or not src[nl + 1: start].lstrip().startswith(('#', 'image', 'self$')):
+            start = src.rfind('\n', 0, m.start()) + 1   # start of the setState line, whatever it begins with
+            for _ in range(8):                           # then the comment block immediately above it
+                nl = src.rfind('\n', 0, max(start - 1, 0))
+                if start == 0 or not src[nl + 1: start].lstrip().startswith(('#', 'image', 'self$')):
                     break
-                start = nl
+                start = nl + 1
             if re.search(r'#\s*state-payload:', src[start: j]):
                 waived.append(os.path.basename(p))
                 continue
@@ -897,6 +897,23 @@ def check_state_payload():
             bare = _HEAVY_BARE.match(payload)
             if bare:
                 names = sorted(set(names) | {bare.group(1)})
+            # `plotData <- list(cleanData = cleanData, ...)` ... `image$setState(plotData)`: the
+            # payload text is one innocent identifier (2026-11-20 jsurvival [LOW]: singlearm, survival
+            # and oddsratio read 0 here). Resolve it to the nearest list() it was assigned above.
+            # `setState(if (shown) plotData else NULL)` is the same payload behind a switch.
+            ident = re.match(r'^\s*(?:if\s*\(.*?\)\s*)?([A-Za-z_.][\w.]*)\s*(?:else\s+NULL\s*)?$', payload, re.S)
+            if ident and not names:
+                built = [b for b in re.finditer(r'(?<![\w.$])%s\s*(?:<-|=)\s*list\s*\(' % re.escape(ident.group(1)), src[:m.start()])]
+                if built:
+                    d, k = 1, built[-1].end()
+                    while k < len(src) and d:
+                        d += (src[k] == '(') - (src[k] == ')')
+                        k += 1
+                    body = re.sub(r'(?m)#.*$', '', src[built[-1].end(): k - 1])
+                    via = sorted({h.group(1) for h in _HEAVY_VALUE.finditer(body)})
+                    if via:
+                        indirect.append((p, '%s:%d (%s <- list(%s))' % (
+                            os.path.basename(p), src.count('\n', 0, m.start()) + 1, ident.group(1), ', '.join(via[:3]))))
             if names:
                 line = src.count('\n', 0, m.start()) + 1
                 hits.append((p, '%s:%d (%s)' % (os.path.basename(p), line, ', '.join(names[:3]))))
@@ -907,6 +924,11 @@ def check_state_payload():
     UNSHIPPED['state_payload'] = len(hits) - len(ship)
     print('  heavy setState payloads: %d sites (%d shipped, %d waived)'
           % (len(hits), len(ship), len(waived)))
+    # WARN until the shipped count is 0, then fold into the FAIL above (a Kaplan-Meier curve does
+    # need rows: measure it, store it once, and waive it with `# state-payload:`).
+    _report('state_payload_indirect', 'setState(variable) built from a dataset or model',
+            [(_file_shipped(q), x) for q, x in indirect],
+            'setState() payloads are a variable whose list() holds a dataset or a fitted object')
 
 
 def _uses_28_3(node, name=None):
@@ -1277,12 +1299,13 @@ def check_review_breadcrumbs():
 # the gate read meddecide 1.1.2 as "0 blocking" while the reviewer found 20 items. WARN until the
 # shipped count is 0 in all five siblings (learn-targets.md section 4).
 
-def _report(key, label, hits, warn):
-    """hits: (shipped?, text). Prints the count, WARNs on shipped hits, books the rest as debt."""
+def _report(key, label, hits, warn, fail=False):
+    """hits: (shipped?, text). Prints the count, WARNs on shipped hits (FAILs when `fail`: a class
+    promoted once its shipped count reached 0 in all five modules), books the rest as debt."""
     ship = [x for live, x in hits if live]
     UNSHIPPED[key] = len(hits) - len(ship)
     if ship:
-        WARN.append('%d shipped %s: %s' % (len(ship), warn, ', '.join(cap(ship))))
+        (FAIL if fail else WARN).append('%d shipped %s: %s' % (len(ship), warn, ', '.join(cap(ship))))
     print('  %s: %d (%d shipped)' % (label, len(hits), len(ship)))
 
 
@@ -1306,20 +1329,47 @@ def _options(name):
 _HELP_METHOD = re.compile(r'instruction|intro|welcome|guide|help|about|glossary|explan|tutorial|example|usecase|methodolog', re.I)
 
 
+# A cell that splices anything but a translated literal is a computed value, whatever the method is called.
+_DATA_CELL = re.compile(r'<t[dh]\b[^>]*>\s*\\?["\']\s*,\s*(?!\s|\.\(|\.fmt\(|jmvcore::format\(|["\'])')
+_PRINTED = re.compile(r'setContent\(\s*paste0?\(\s*(?:utils::)?capture\.output\(\s*print\(')
+_TOPLEVEL = re.compile(r'^(\.?[A-Za-z_][\w.]*)\s*<-\s*function\s*\(', re.M)
+
+
 def check_html_tables():
     """Tabular output drawn as <table> markup (or knitr::kable(format = "html")) loses the user's
     number format, the results theme, Copy as a grid, Copy Latex and screen readers (section 26).
     2026-10-23 meddecide [HIGH]: psychopdaROC confusion matrices, decisioncalculator summary grid,
     decisioncompare cross-tabs, lassologistic suitability check - exactly the four non-help
-    methods this finds there. Help/explanation methods are exempt by NAME, not by markup."""
+    methods this finds there. Help/explanation methods are exempt by NAME, not by markup.
+    2026-11-20 jsurvival [HIGH] read 0 here against four site groups, through three blind spots:
+    a method NAMED ...Guide that fills cells with computed values (now counted by its data cells),
+    a file-level helper outside R/*.b.R (now scanned, shipped when a shipped analysis calls it),
+    and a printed model object in a Preformatted (capture.output(print(x)) into setContent)."""
     hits = []
-    for p, name, src in _b_sources():
+    b_src = {name: src for p, name, src in _b_sources()}
+    for name, src in b_src.items():
         for meth, body, line in _bodies(src):
             k = len(re.findall(r'<table\b', body)) + len(re.findall(r'kable\([^)]*format\s*=\s*["\']html', body))
-            if k and not _HELP_METHOD.search(meth):
+            if k and _HELP_METHOD.search(meth):
+                k = len(_DATA_CELL.findall(body))
+            if k:
                 hits.append((_shipped(name), '%s::%s (%d)' % (name, meth, k)))
+            if _PRINTED.search(body):
+                hits.append((_shipped(name), '%s::%s (printed)' % (name, meth)))
+    for p in sorted(glob.glob('R/*.R')):
+        if p.endswith(('.b.R', '.h.R')):
+            continue
+        src = re.sub(r'(?m)^[ \t]*#.*$', '', open(p, encoding='utf-8', errors='replace').read())
+        heads = list(_TOPLEVEL.finditer(src))
+        for i, h in enumerate(heads):
+            body = src[h.end(): heads[i + 1].start() if i + 1 < len(heads) else len(src)]
+            k = len(re.findall(r'<table\b', body))
+            if k and not _HELP_METHOD.search(h.group(1)):
+                call = re.compile(r'(?<![\w.])%s\(' % re.escape(h.group(1)))
+                live = any(_shipped(n) for n, b in b_src.items() if call.search(b))
+                hits.append((live, '%s::%s (%d)' % (os.path.basename(p), h.group(1), k)))
     _report('html_tables', 'HTML <table> outside help methods', hits,
-            'methods draw a table as HTML instead of a Table result')
+            'methods draw a table as HTML or printed console text instead of a Table result')
 
 
 def check_error_presentation():
@@ -1529,11 +1579,119 @@ def check_notice_myths():
     for p in sorted(glob.glob('R/*.R')):
         lines = open(p, encoding='utf-8', errors='replace').read().split('\n')
         for i, l in enumerate(lines):
-            if l.lstrip().startswith('#') and re.search(r'seriali[sz]', l, re.I):
+            # 'protobuf' too: 2026-11-20 jsurvival [LOW] quoted "to avoid Notice protobuf issues", which read 0 here
+            if l.lstrip().startswith('#') and re.search(r'seriali[sz]|protobuf', l, re.I):
                 near = ' '.join(lines[max(0, i - 2): i + 3])
                 if re.search(r'Notice', near) and not re.search(r'retract|corrected|fine|not about|never existed|fails identically', near, re.I):
                     hits.append((_file_shipped(p), '%s:%d' % (os.path.basename(p), i + 1)))
     _report('notice_myths', 'comments blaming Notice serialisation', hits, 'comments repeat the retracted Notice-serialisation claim')
+
+
+_R_TOKEN = re.compile(r'#[^\n]*|"(?:\\.|[^"\\])*"|\'(?:\\.|[^\'\\])*\'|`[^`\n]*`', re.S)
+_PROSE = re.compile(r"[A-Za-z][A-Za-z'/-]*(?: [A-Za-z(][A-Za-z'/().,;:-]*){3,}")
+_R_OWNER = re.compile(r'^(?:[ \t]+(\.[A-Za-z_][\w.]*)[ \t]*=|(\.?[A-Za-z_][\w.]*)[ \t]*<-)[ \t]*function[ \t]*\(', re.M)
+
+
+def check_untranslated_prose():
+    """A run of four or more English words in a string literal that is not the argument of .() is
+    text a translated module still shows in English (2026-11-20 jsurvival [LOW]: recode summary,
+    explanation panels, section headings beside a full Turkish catalogue). Counted per function.
+    Blind to: headings under four words, text built from single words, and .(x) on a non-literal
+    (never extracted). Counts developer-only stop()/message() text too - read the list, don't sum it.
+    A function whose English is not prose for the user (generated R code, identifiers compared in
+    code, a fallback for callers with no translator) says so with `# i18n-exempt: <why>` in its body."""
+    hits = []
+    for p in sorted(glob.glob('R/*.R')):
+        base = os.path.basename(p)
+        if base.endswith('.h.R') or base == '00jmv.R':
+            continue
+        src = open(p, encoding='utf-8', errors='replace').read()
+        heads = [(m.start(), m.group(1) or m.group(2)) for m in _R_OWNER.finditer(src)]
+        exempt = {name for i, (pos, name) in enumerate(heads)
+                  if re.search(r'#\s*i18n-exempt:', src[pos: heads[i + 1][0] if i + 1 < len(heads) else len(src)])}
+        per, hi = {}, 0
+        for t in _R_TOKEN.finditer(src):
+            if t.group(0)[0] not in '"\'' or src[max(0, t.start() - 8): t.start()].rstrip().endswith('.('):
+                continue
+            text = re.sub(r'<style.*?</style>', ' ', t.group(0)[1:-1], flags=re.S)
+            text = re.sub(r'<[^>]*>|\\[nt"\']', ' ', text)
+            k = len(_PROSE.findall(re.sub(r'\s+', ' ', text)))
+            if k:
+                while hi < len(heads) and heads[hi][0] <= t.start():
+                    hi += 1
+                owner = heads[hi - 1][1] if hi else '<top>'
+                per[owner] = per.get(owner, 0) + k
+        for owner, k in sorted(per.items(), key=lambda kv: -kv[1]):
+            if k >= 3 and owner not in exempt:
+                hits.append((_file_shipped(p), '%s::%s (%d)' % (base[:-2].replace('.b', ''), owner, k)))
+    _report('untranslated_prose', 'functions with English prose outside .()', hits,
+            'functions build user-visible sentences that never reach the translation catalogue')
+
+
+def check_reject_positional():
+    """jmvcore::reject(formats, code = NULL, ...): a second POSITIONAL argument is `code`, not a
+    value for the message, so reject("Unknown type: ", x) drops x (2026-11-20 jsurvival [INFO],
+    multisurvival-formula.R). Use one .() template with {} placeholders, values after code =."""
+    hits = []
+    for p in sorted(glob.glob('R/*.R')):
+        if p.endswith('.h.R'):
+            continue
+        src = open(p, encoding='utf-8', errors='replace').read()
+        ms = _R_TOKEN.sub(lambda t: re.sub(r'[^\n]', ' ' if t.group(0)[0] == '#' else 'x', t.group(0)), src)
+        for m in re.finditer(r'(?<![\w.$])(?:jmvcore::)?reject\(', ms):
+            depth, j, last, args = 1, m.end(), m.end(), []
+            while j < len(ms) and depth:
+                ch = ms[j]
+                depth += (ch in '([{') - (ch in ')]}')
+                if ch == ',' and depth == 1:
+                    args.append(ms[last:j])
+                    last = j + 1
+                j += 1
+            args.append(ms[last:j - 1])
+            named = [bool(re.match(r'\s*[\w.]+\s*=(?!=)', a)) for a in args]
+            if named.count(False) >= 2 and not any(re.match(r'\s*code\s*=', a) for a in args):
+                hits.append((_file_shipped(p), '%s:%d' % (os.path.basename(p), src.count('\n', 0, m.start()) + 1)))
+    _report('reject_positional', 'reject() with a value in the code position', hits,
+            'reject() calls pass a value as the second positional argument, which is `code`; the message loses it',
+            fail=True)   # promoted 2026-11-22: 0 shipped in all five modules
+
+
+def check_render_state_and_data():
+    """jamovi feeds a plot one of two ways: a summary in image$state, or requiresData: true and the
+    rows read in the renderer. A renderer that does both pays twice - the rows are saved in the .omv
+    and the dataset is read again on every redraw (2026-11-20 jsurvival [LOW]: five survival
+    renderers ran the whole .getData() pipeline to recover one display name). Lists renderers of
+    requiresData images that read $state and also load the dataset; a guard-only read
+    (nrow(self$data) == 0) is a hit too - trace it, then drop the read or the state. A renderer on
+    the data route whose state holds no rows (a flag, a version stamp, column names) says so with
+    `# render-route: data - <what the state holds>` in its body."""
+    hits = []
+    for ry in sorted(glob.glob('jamovi/*.r.yaml')):
+        name = os.path.basename(ry)[:-7]
+        fns = set()
+
+        def walk(n):
+            if isinstance(n, dict):
+                if n.get('type') == 'Image' and n.get('renderFun') and n.get('requiresData'):
+                    fns.add(n['renderFun'])
+                for v in n.values():
+                    walk(v)
+            elif isinstance(n, list):
+                for v in n:
+                    walk(v)
+        walk(_safe_yaml(ry) or {})
+        bp = 'R/%s.b.R' % name
+        if not fns or not os.path.exists(bp):
+            continue
+        raw = open(bp, encoding='utf-8', errors='replace').read()
+        declared = {meth for meth, body, line in _bodies(raw) if re.search(r'#\s*render-route:\s*data\b', body)}
+        src = re.sub(r'(?m)^[ \t]*#.*$', '', raw)
+        for meth, body, line in _bodies(src):
+            if meth in fns and meth not in declared and re.search(r'\$state\b', body) and re.search(
+                    r'private\$\.(?:getData|cleandata|cleanData|prepareData|getCleanData)\(|self\$data\b', body):
+                hits.append((_shipped(name), '%s::%s' % (name, meth)))
+    _report('render_state_and_data', 'renderers that read state and also load the dataset', hits,
+            'renderers draw from image$state and still read the dataset; pick one route per plot')
 
 
 if __name__ == '__main__':
@@ -1550,7 +1708,8 @@ if __name__ == '__main__':
                check_html_tables, check_error_presentation, check_variables_first, check_level_as_string,
                check_number_list_strings, check_default_guidance, check_empty_preformatted,
                check_setnote_errors, check_uyaml_structure, check_plot_theme_option,
-               check_label_notation, check_text_number_cells, check_notice_myths):
+               check_label_notation, check_text_number_cells, check_notice_myths,
+               check_untranslated_prose, check_reject_positional, check_render_state_and_data):
         try:
             fn()
         except Exception as e:

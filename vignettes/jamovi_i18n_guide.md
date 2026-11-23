@@ -468,6 +468,70 @@ jmvtools::i18nUpdate()
 
 ## 5. Best Practices for Translatable Strings
 
+**First, the text has to be inside `.()` at all.** Every earlier rule in this section is about the
+shape of a marked string. A module can satisfy all of them and still show a Turkish user English
+paragraphs, because explanation panels, summaries and section headings were written as plain
+literals (2026-11-20 jsurvival [LOW]). `python3 tools/release_gate.py` lists the functions that
+build four-word runs of English outside `.()` (`check_untranslated_prose`). In a file-level helper
+called from analysis methods, jmvcore's `.()` cannot find `self`; shadow it with the caller's
+translator, as `.callerTranslator(parent.frame())` does in `R/utils-eventindicator.R`. Each string
+wrapped is a new msgid: write its translation in the same change. Review guide section 9, round 9.
+
+For a sentence pasted together around values, wrapping each literal would hand the translator
+fragments. Make it one template instead; `tools/i18n_wrap_templates.py` does this for `paste0()`,
+`paste()`, `glue()` and the format string of `sprintf()`:
+
+```r
+# before
+paste0("The median follow-up was ", med, " months.")
+# after
+.pasteT(.("The median follow-up was {med} months."), med = med)
+```
+
+- `.pasteT()` (`R/utils.R`) pastes the pieces of the translated template and the values with
+  `paste0()` itself, so vectors, `NULL` and numbers behave as before and a translation may reorder
+  or drop a placeholder. `.fmt()` prints an ellipsis for a `NULL` value, which is why a mechanical
+  rewrite does not use it. Placeholder names are letters and digits only (no underscore).
+- A string that holds ` [` followed later by `]` is cut by jmvcore's translator wherever it has no
+  catalogue entry. Keep the sentence whole and pass the bracket as a value:
+  `.pasteT(.("... {lb}95% CI: {low} to {high}]"), lb = "[", ...)`.
+- Leading punctuation or spaces stay outside the string: `paste0(", ", .("taken from ..."))`.
+- Never rewrite translated text with `sub()` or compare it with `==`: the English prefix is gone in
+  every other language. Build each wording as its own template (datetimeconverter's timezone note).
+- A value that is itself an English word (`"more"`, `"participants"`) needs its own `.()`.
+- English that is not prose for the user (generated R code, identifiers the code compares, a
+  fallback for callers with no translator) is marked `# i18n-exempt: <why>` inside the function;
+  `check_untranslated_prose` reads that.
+
+Prove the rewrite before translating anything: run every analysis over a set of configurations
+with the old and the new sources and compare all text a user reads (it must be identical), then
+run the same set under a pseudo-translator and under the real catalogue. In jsurvival this caught
+the bracket truncation, a `glue()` that was vectorised over table rows, and a branch the first
+set of configurations never reached because an option name was misspelt (jamovi ignores an
+unknown option name silently: check names against the options class).
+
+For static HTML panels the rewrite is mechanical:
+
+```sh
+python3 tools/i18n_wrap_html_literals.py R/<analysis>.b.R --pairs pairs.json   # dry run; --write applies
+Rscript --vanilla tools/i18n_wrap_html_literals_check.R pairs.json               # English output unchanged?
+```
+
+Block tags stay outside the string and inline tags inside it. Then, for the translations:
+
+1. Run `jmvtools::i18nUpdate()` in the module whose `tr.po` is the source (the umbrella for a module
+   with `i18n_files`, otherwise the sibling) and list the entries with an empty `msgstr`.
+2. Take terms and option labels from the catalogue's existing translations before writing any.
+3. Check each translation against its source mechanically: same inline tags, same numbers, same
+   closing punctuation and edge whitespace, no `{}` or `%s` introduced, every entry covered.
+4. `msgfmt -c`, `tools/i18n_rebuild_json.R <module>`, `tools/i18n_carry_translations.py`.
+5. Run the analyses with the real `tr.json` and a translator that logs every lookup it returns
+   unchanged. Strings that are the same in both languages by design (formulas, references,
+   `HR = 2.0`) are the only ones allowed on that list.
+
+Wrapping a literal exposes it to every check that reads `.()` strings: two British spellings in
+jsurvival failed the spelling check the moment they were wrapped.
+
 ### 5.1 String Structure
 
 **✅ DO:**

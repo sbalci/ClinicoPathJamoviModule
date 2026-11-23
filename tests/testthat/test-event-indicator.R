@@ -10,7 +10,12 @@
 .event_ns <- if (exists(".defineEventIndicator", inherits = TRUE))
     environment(get(".defineEventIndicator", inherits = TRUE)) else NULL
 if (is.null(.event_ns)) {
-    for (.p in c("ClinicoPath", "jsurvival")) {
+    for (.p in local({
+        # The package under test, else whichever candidate is already loaded. Never load the other
+        # one: an installed umbrella build would be tested in place of this tree.
+        p <- c("ClinicoPath", "jsurvival"); t <- Sys.getenv("TESTTHAT_PKG")
+        if (t %in% p) t else if (any(p %in% loadedNamespaces())) intersect(p, loadedNamespaces()) else p
+    })) {
         if (.p %in% loadedNamespaces() || requireNamespace(.p, quietly = TRUE)) {
             .cand <- asNamespace(.p)
             if (exists(".defineEventIndicator", envir = .cand, inherits = FALSE)) {
@@ -23,6 +28,15 @@ if (is.null(.event_ns)) {
 if (!is.null(.event_ns)) {
     .defineEventIndicator   <- get(".defineEventIndicator",   envir = .event_ns)
     .describeEventIndicator <- get(".describeEventIndicator", envir = .event_ns)
+}
+# The recode counts are rows of a results Table; this is that table as the analyses declare it.
+.recode_table <- function(res) {
+    table <- jmvcore::Table$new(options = jmvcore::Options$new(), name = "eventRecodeTable")
+    table$addColumn(name = "category", type = "text")
+    table$addColumn(name = "levels", type = "text")
+    table$addColumn(name = "n", type = "integer")
+    get(".fillEventRecodeTable", envir = .event_ns)(table, res)
+    table
 }
 
 test_that("factor outcome: event level maps to 1, every other level to 0", {
@@ -161,11 +175,13 @@ test_that("M2: a labelled cause factor survives the outcomeorganizer hand-off", 
 
 test_that("the recode disclosure reports event, censored and excluded counts", {
     x <- factor(c("Alive", "Dead", NA, "Dead"))
-    html <- .describeEventIndicator(.defineEventIndicator(x, outcomeLevel = "Dead"),
-                                    "Death")
-    expect_match(html, "Event level")
-    expect_match(html, "Excluded \\(missing outcome\\)")
-    expect_match(html, "Kaplan-Meier survival for the selected event")
+    # library-audit 2026-11-20 jsurvival [HIGH] DONE: the counts are Table rows, not an HTML grid
+    table <- .recode_table(.defineEventIndicator(x, outcomeLevel = "Dead"))
+    rows <- table$asDF
+    expect_identical(rows$category, c("Event level", "Censored", "Excluded (missing outcome)"))
+    expect_identical(rows$levels[1:2], c('"Dead"', '"Alive"'))
+    expect_equal(rows$n, c(2L, 1L, 1L))
+    expect_match(table$notes$estimand$note, "Kaplan-Meier survival for the selected event")
 })
 
 # --- regressions found in the second review -------------------------------
@@ -224,10 +240,9 @@ test_that("an ordinary Censored/Event binary factor is not forced into competing
 test_that("competing-event labels are disclosed, not left blank", {
     x <- factor(c("Censored", "Event", "Competing"),
                 levels = c("Censored", "Event", "Competing"))
-    html <- .describeEventIndicator(.defineEventIndicator(x, outcomeLevel = "Event"),
-                                    "Outcome")
-    expect_match(html, "Competing event")
-    expect_match(html, '"Competing"')
+    rows <- .recode_table(.defineEventIndicator(x, outcomeLevel = "Event"))$asDF
+    expect_identical(rows$levels[rows$category == "Competing event"], '"Competing"')
+    expect_equal(rows$n[rows$category == "Competing event"], 1L)
 })
 
 test_that("logical outcomes honour an explicitly selected FALSE event level", {

@@ -125,15 +125,11 @@ A results object containing:
 }
 }
 \description{
-Creates Raincloud plots to visualize data distributions using ggdist
-package.
-Raincloud plots combine three visualization techniques: half-violin plots
-showing
-distribution density, box plots showing summary statistics, and dot plots
-showing
-individual data points. This provides a comprehensive view of data
-distribution
-that reveals patterns traditional box plots might miss, including
-multimodality
-and distribution shape. Based on the ggdist R-Bloggers tutorial.
+Creates Raincloud plots to visualize data distributions using the ggdist
+package. Raincloud plots combine three visualization techniques:
+half-violin plots showing distribution density, box plots showing summary
+statistics, and dot plots showing individual data points. This provides a
+comprehensive view of data distribution that reveals patterns traditional
+box plots might miss, including multimodality and distribution shape. Based
+on Allen et al. (2021) and the ggdist package.
 }

@@ -65,10 +65,11 @@ test_that("infinite values are excluded rather than propagated into the results"
     expect_equal(nrow(hp_plot_data(a)), 35L)
     expect_true(all(is.finite(hp_plot_data(a)$x)))
 
-    stats <- hp_text(a$results$statistics$content)
-    expect_false(grepl("Inf", stats, fixed = TRUE))
-    expect_false(grepl("NaN", stats, fixed = TRUE))
-    expect_match(stats, "35 complete observations")
+    st <- a$results$statistics$asDF
+    expect_true(all(is.finite(st$x_mean)))
+    expect_true(all(is.finite(st$x_sd)))
+    expect_equal(sum(st$n), 35L)
+    expect_match(a$results$statistics$notes$summary$note, "35 complete observations", fixed = TRUE)
 
     # -Inf and NaN travel the same path
     for (bad in list(-Inf, NaN)) {
@@ -86,12 +87,12 @@ test_that("an infinite value cannot flip the separation verdict", {
     d <- data.frame(x = rnorm(40), y = rnorm(40),
                     group = factor(rep(c("A", "B"), each = 20)))
     honest <- hp_text(hp_run(d)$results$summary$content)
-    expect_match(honest, "Standardized centroid separation is described as overlapping")
+    expect_match(honest, "is described as overlapping")
 
     d$x[1] <- Inf
     poisoned <- hp_text(hp_run(d)$results$summary$content)
-    expect_match(poisoned, "Standardized centroid separation is described as overlapping")
-    expect_false(grepl("well-separated", poisoned, fixed = TRUE))
+    expect_match(poisoned, "is described as overlapping")
+    expect_false(grepl("described as well-separated", poisoned, fixed = TRUE))
 })
 
 
@@ -119,23 +120,25 @@ test_that("a group emptied by missing data stops being counted as a group", {
 
 
 test_that("excluded rows are disclosed", {
-    # The interpretation panel reported the surviving N ("Observations: 35 data
-    # points") with nothing to say that five rows had been removed.
+    # Excluded rows are disclosed in the notices panel above the plot, while
+    # the interpretation panel reports the surviving N.
     d <- hp_data(); d$x[1:5] <- NA
-    txt <- hp_text(hp_run(d)$results$interpretation$content)
-    expect_match(txt, "5 of 40 rows", fixed = TRUE)
-    expect_match(txt, "35 rows were plotted", fixed = TRUE)
-    expect_match(txt, "Observations: 35 data points", fixed = TRUE)
+    a <- hp_run(d)
+    not_txt <- hp_text(a$results$notices$content)
+    int_txt <- hp_text(a$results$interpretation$content)
+    expect_match(not_txt, "5 of 40 rows", fixed = TRUE)
+    expect_match(not_txt, "35 rows were plotted", fixed = TRUE)
+    expect_match(int_txt, "Observations: 35 data points", fixed = TRUE)
 
     # infinite values are called out separately, because they signal a data
     # problem rather than an ordinary missing value
     d2 <- hp_data(); d2$x[1:3] <- Inf
-    txt2 <- hp_text(hp_run(d2)$results$interpretation$content)
+    txt2 <- hp_text(hp_run(d2)$results$notices$content)
     expect_match(txt2, "3 infinite/undefined value", fixed = TRUE)
 
     # complete data says nothing
     expect_false(grepl("rows were plotted",
-                       hp_text(hp_run()$results$interpretation$content), fixed = TRUE))
+                       hp_text(hp_run()$results$notices$content), fixed = TRUE))
 })
 
 
@@ -187,15 +190,15 @@ test_that("a single group does not get a comparative conclusion", {
 
     # two groups keep the comparative wording
     txt2 <- hp_text(hp_run()$results$summary$content)
-    expect_match(txt2, "revealed 2 distinct groups", fixed = TRUE)
-    expect_match(txt2, "Standardized centroid separation is described as ", fixed = TRUE)
+    expect_match(txt2, "visualized 2 groups defined by", fixed = TRUE)
+    expect_match(txt2, "is described as ", fixed = TRUE)
 })
 
 
 test_that("an empty dataset explains itself instead of rendering nothing", {
     a <- hp_run(hp_data()[0, ])
-    expect_match(hp_text(a$results$todo$content), "No data to plot")
-    expect_match(hp_text(a$results$todo$content), "row filters")
+    expect_match(hp_text(a$results$notices$content), "No data to plot")
+    expect_match(hp_text(a$results$notices$content), "row filters")
     # and the plot declines rather than erroring
     expect_false(a$.__enclos_env__$private$.plot(
         a$results$plot, ggtheme = ggplot2::theme_bw(), theme = NULL))
@@ -205,17 +208,21 @@ test_that("an empty dataset explains itself instead of rendering nothing", {
 test_that("group statistics agree with an independent computation", {
     d <- hp_data()
     a <- hp_run(d)
-    txt <- hp_text(a$results$statistics$content)
+    st <- a$results$statistics$asDF
 
     for (g in c("A", "B")) {
         sub <- d[d$group == g, ]
-        expect_match(txt, sprintf("%s %d %s", g, nrow(sub),
-                                  format(round(mean(sub$x), 2), nsmall = 2)),
-                     fixed = TRUE)
+        row <- st[st$group == g, ]
+        expect_equal(row$n, nrow(sub))
+        expect_equal(row$x_mean, mean(sub$x), tolerance = 1e-8)
+        expect_equal(row$x_sd, stats::sd(sub$x), tolerance = 1e-8)
+        expect_equal(row$y_mean, mean(sub$y), tolerance = 1e-8)
+        expect_equal(row$y_sd, stats::sd(sub$y), tolerance = 1e-8)
     }
     # the reported N per group must be the plotted N, not the input N
     d2 <- d; d2$y[d2$group == "A"][1:6] <- NA
-    expect_match(hp_text(hp_run(d2)$results$statistics$content), "A 14 ", fixed = TRUE)
+    st2 <- hp_run(d2)$results$statistics$asDF
+    expect_equal(st2$n[st2$group == "A"], 14L)
 })
 
 
@@ -228,7 +235,7 @@ test_that("outlier counts match the 1.5 x IQR rule", {
     q <- stats::quantile(sub$x, c(0.25, 0.75))
     iqr <- q[2] - q[1]
     expect_true(sub$x[1] > q[2] + 1.5 * iqr)
-    expect_match(hp_text(a$results$outliers$content), "A: 1 potential outliers")
+    expect_match(hp_text(a$results$outliers$content), "A: 1 potential outlier detected")
 
     # groups too small for quartiles are reported as such, not as zero
     small <- rbind(d[d$group == "A", ][1:4, ], d[d$group == "B", ])

@@ -111,6 +111,7 @@ hullplotOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 color_palette,
                 options=list(
                     "default",
+                    "jamovi",
                     "viridis",
                     "set1",
                     "set2",
@@ -122,6 +123,7 @@ hullplotOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 plot_theme,
                 options=list(
                     "minimal",
+                    "jamovi",
                     "classic",
                     "light",
                     "dark",
@@ -267,7 +269,8 @@ hullplotResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "y_var",
                     "group_var",
                     "color_var",
-                    "size_var")))
+                    "size_var",
+                    "confidence_ellipses")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="todo",
@@ -304,11 +307,40 @@ hullplotResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "x_label",
                     "y_label",
                     "confidence_ellipses")))
-            self$add(jmvcore::Html$new(
+            self$add(jmvcore::Table$new(
                 options=options,
                 name="statistics",
                 title="Group Statistics",
                 visible="(show_statistics)",
+                columns=list(
+                    list(
+                        `name`="group", 
+                        `title`="Group", 
+                        `type`="text"),
+                    list(
+                        `name`="n", 
+                        `title`="N", 
+                        `type`="integer"),
+                    list(
+                        `name`="x_mean", 
+                        `title`="Mean", 
+                        `superTitle`="X-Axis", 
+                        `type`="number"),
+                    list(
+                        `name`="x_sd", 
+                        `title`="SD", 
+                        `superTitle`="X-Axis", 
+                        `type`="number"),
+                    list(
+                        `name`="y_mean", 
+                        `title`="Mean", 
+                        `superTitle`="Y-Axis", 
+                        `type`="number"),
+                    list(
+                        `name`="y_sd", 
+                        `title`="SD", 
+                        `superTitle`="Y-Axis", 
+                        `type`="number")),
                 clearWith=list(
                     "x_var",
                     "y_var",
@@ -383,12 +415,10 @@ hullplotBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' Hull Plot
 #'
 #' Creates Hull plots to visualize clusters and groups in scatter plots using 
-#' ggforce.
-#' Hull plots draw polygonal boundaries around data points grouped by 
-#' categorical variables,
-#' making it easy to identify customer segments, group membership, and data 
-#' clusters.
-#' Based on the geom_mark_hull() function from ggforce package.
+#' ggforce. Hull plots draw polygonal boundaries around data points grouped by 
+#' categorical variables, making it easy to identify customer segments, group 
+#' membership, and data clusters. Based on the geom_mark_hull() function from 
+#' ggforce package.
 #' 
 #'
 #' @examples
@@ -486,12 +516,18 @@ hullplotBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   \code{results$notices} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$plot} \tab \tab \tab \tab \tab an image \cr
-#'   \code{results$statistics} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$statistics} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$outliers} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$interpretation} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$summary} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$assumptions} \tab \tab \tab \tab \tab a html \cr
 #' }
+#'
+#' Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
+#'
+#' \code{results$statistics$asDF}
+#'
+#' \code{as.data.frame(results$statistics)}
 #'
 #' @export
 hullplot <- function(

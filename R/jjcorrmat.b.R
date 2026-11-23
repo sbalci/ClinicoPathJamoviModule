@@ -1,7 +1,6 @@
 #' @title Correlation Matrix
 #' @importFrom R6 R6Class
 #' @importFrom jmvcore .
-#' @importFrom rlang sym
 #'
 #' @return An \code{R6} class generator object for the \code{jjcorrmatClass} backend; used internally by the jamovi analysis wrapper and not called directly.
 
@@ -11,12 +10,6 @@ jjcorrmatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
     inherit = jjcorrmatBase,
     private = list(
 
-
-      # R6 locks the private environment, so a field must be DECLARED here before
-      # anything may assign to it. These were only ever assigned (in .init() and
-      # friends), which threw "cannot add bindings to a locked environment" and
-      # aborted the analysis during init - before any result was produced.
-      .preset_recommendations = NULL,
         # Seed for the Bayesian sampler. Shared by the table and both plot
         # methods so a Bayesian correlation matrix is reproducible and the two
         # outputs report the same draw.
@@ -47,10 +40,23 @@ jjcorrmatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         # sample size of any correlation in the table.
         .pair_n = integer(0),
         .n_valid_pairs = 0L,
+        .winsor_collapsed = character(0),
+        .effective_partial = FALSE,
+        .invalid_colors = character(0),
+        .corr_cache = list(),
         .data_hash = NULL,
         .options_hash = NULL,
-        # .preset_recommendations = NULL,  # Commented out - clinical preset feature disabled
         .warnings = list(),  # Collect warnings for HTML display (avoids Notice serialization errors)
+
+        # Clear tabular and narrative outputs so an early error exit never leaves
+        # stale results from a previous run on a reused R6 analysis instance.
+        .clearOutputs = function() {
+            .deleteTableRows(self$results$table)
+            self$results$interpretation$setContent("")
+            self$results$summary$setContent("")
+            self$results$assumptions$setContent("")
+            self$results$about$setContent("")
+        },
 
         # Helper function to add warnings without Notice objects
         .addWarning = function(type, message) {
@@ -60,16 +66,25 @@ jjcorrmatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             )
         },
 
-        # Display all collected warnings as HTML
+        # Display all collected warnings as HTML, ordered by severity priority
+        # (ERROR -> STRONG_WARNING -> WARNING -> INFO) while preserving insertion
+        # order within each tier.
         .displayWarnings = function() {
             if (length(private$.warnings) == 0) {
                 self$results$warnings$setVisible(FALSE)
                 return()
             }
 
+            severity_rank <- c(ERROR = 1L, STRONG_WARNING = 2L, WARNING = 3L, INFO = 4L)
+            ranks <- vapply(private$.warnings, function(w) {
+                r <- severity_rank[[w$type]]
+                if (is.null(r)) 5L else r
+            }, integer(1))
+            ordered_warnings <- private$.warnings[order(ranks, seq_along(ranks))]
+
             warning_html <- "<div style='margin: 10px 0;'>"
 
-            for (warning in private$.warnings) {
+            for (warning in ordered_warnings) {
                 if (warning$type == "ERROR") {
                     warning_html <- paste0(warning_html,
                         "<div style='background-color: rgba(216, 33, 50, 0.18); border-left: 4px solid #dc3545; padding: 10px; margin: 5px 0; border-radius: 4px; color: inherit;'>",
@@ -115,30 +130,30 @@ jjcorrmatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         # Single source of truth for the getting-started welcome HTML,
         # shared by .init and .run to avoid drift between two copies.
         .welcomeMessage = function() {
-            .("<br>Welcome to ClinicoPath Correlation Matrix Analysis
-            <br><br>
-            <strong>What this does:</strong> Analyzes relationships between continuous variables (e.g., biomarker levels, lab values, imaging metrics)
-            <br><br>
-            <strong>When to use:</strong> When examining associations between 2+ continuous clinical variables
-            <br><br>
-            <strong>Quick Start:</strong>
-            <br>1. Select 2 or more continuous variables
-            <br>2. Choose correlation method (Pearson for normal data, Spearman for non-normal)
-            <br>3. Optionally group by categorical variable (e.g., tumor grade, treatment group)
-            <br>4. Use partial correlations (3+ variables) to control for confounding effects
-            <br><br>
-            <strong>Correlation Types:</strong>
-            <br>\u2022 <strong>Zero-order (regular):</strong> Direct relationship between two variables
-            <br>\u2022 <strong>Partial:</strong> Relationship while controlling for all other variables (reduces confounding)
-            <br><br>
-            This function uses ggplot2 and ggstatsplot packages. See documentations <a href = 'https://www.indrapatil.com/ggstatsplot/reference/ggcorrmat.html' target='_blank'>ggcorrmat</a> and <a href = 'https://www.indrapatil.com/ggstatsplot/reference/grouped_ggcorrmat.html' target='_blank'>grouped_ggcorrmat</a>.
-            <br>
-            Please cite jamovi and the packages as given below.
-            <br><hr>")
+            paste0(
+                "<div style='background-color: rgba(33, 163, 188, 0.10); border-left: 4px solid #1976d2; padding: 14px 16px; margin: 10px 0; border-radius: 4px; color: inherit;'>",
+                "<h3 style='margin-top: 0; color: inherit;'>", .("Correlation Matrix Analysis"), "</h3>",
+                "<p><strong>", .("What this does:"), "</strong> ", .("Analyzes linear, rank-based, robust, or Bayesian relationships between continuous variables (e.g., biomarker levels, lab values, imaging metrics)."), "</p>",
+                "<p><strong>", .("Quick Start:"), "</strong></p>",
+                "<ol style='margin: 6px 0 10px 18px;'>",
+                "<li>", .("Select 2 or more continuous variables."), "</li>",
+                "<li>", .("Choose a correlation method (Pearson, Spearman, 20% Winsorized Pearson, or Bayesian Pearson)."), "</li>",
+                "<li>", .("Optionally split by a categorical variable (e.g., tumor grade or treatment arm)."), "</li>",
+                "<li>", .("Enable Partial correlations (with 3+ variables) to control for confounding variables."), "</li>",
+                "</ol>",
+                "<p><strong>", .("Correlation Types:"), "</strong><br>",
+                "\u2022 <strong>", .("Zero-order:"), "</strong> ", .("Direct association between each pair of variables."), "<br>",
+                "\u2022 <strong>", .("Partial:"), "</strong> ", .("Association between each pair while controlling for all other selected variables."), "</p>",
+                "<p style='margin-bottom: 0; font-size: 0.92em;'>", .("Please cite jamovi and the packages listed in the References section below."), "</p>",
+                "</div>"
+            )
         },
 
         # init ----
         .init = function() {
+            # Hide the pooled chart when Split By (grvar) is active so only the
+            # grouped chart (plot2) is shown, matching the per-group table.
+            self$results$plot$setVisible(is.null(self$options$grvar))
 
             # Show welcome message when no variables or insufficient variables are selected
             if (is.null(self$options$dep) || length(self$options$dep) < 2) {
@@ -149,9 +164,13 @@ jjcorrmatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
 
 
-            # Use configurable plot dimensions
-            plotwidth <- if (!is.null(self$options$plotwidth)) self$options$plotwidth else 600
-            plotheight <- if (!is.null(self$options$plotheight)) self$options$plotheight else 450
+            # Use configurable plot dimensions with safe numeric bounds
+            plotwidth <- suppressWarnings(as.integer(self$options$plotwidth))
+            if (length(plotwidth) != 1L || is.na(plotwidth) || plotwidth < 300L || plotwidth > 1200L)
+                plotwidth <- 600L
+            plotheight <- suppressWarnings(as.integer(self$options$plotheight))
+            if (length(plotheight) != 1L || is.na(plotheight) || plotheight < 300L || plotheight > 800L)
+                plotheight <- 450L
 
             self$results$plot$setSize(plotwidth, plotheight)
 
@@ -178,15 +197,25 @@ jjcorrmatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
         # Optimized data preparation with caching
         .prepareData = function(force_refresh = FALSE) {
-            # Hash-based invalidation - mirrors .options_hash pattern.
-            # Without this, stale filtered data could be returned when dep/grvar/
-            # naHandling change between .run() invocations on the same R6 instance.
+            # Hash-based invalidation including selected column values so
+            # in-place cell edits with unchanged dim/names never return stale data.
+            mydata <- self$data
+            resolve_name <- function(var) private$.resolveName(var, mydata)
+            sel_cols <- character(0)
+            if (!is.null(self$options$dep) && length(self$options$dep) > 0L)
+                sel_cols <- c(sel_cols, vapply(self$options$dep, resolve_name, character(1)))
+            if (!is.null(self$options$grvar))
+                sel_cols <- c(sel_cols, resolve_name(self$options$grvar))
+            sel_cols <- unique(sel_cols[sel_cols %in% names(mydata)])
+            data_slice <- if (length(sel_cols) > 0L) mydata[, sel_cols, drop = FALSE] else NULL
+
             current_data_hash <- digest::digest(list(
                 dep = self$options$dep,
                 grvar = self$options$grvar,
                 naHandling = self$options$naHandling,
-                data_dim = dim(self$data),
-                col_names = names(self$data)
+                data_dim = dim(mydata),
+                col_names = names(mydata),
+                data_slice = data_slice
             ), algo = "md5")
 
             if (!is.null(private$.processedData) &&
@@ -196,9 +225,6 @@ jjcorrmatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 return(private$.processedData)
             }
 
-            mydata <- self$data
-            # Resolve possible B64 column names from jamovi (shared helper)
-            resolve_name <- function(var) private$.resolveName(var, mydata)
             for (v in self$options$dep) {
                 nm <- resolve_name(v)
                 x <- jmvcore::toNumeric(mydata[[nm]])
@@ -314,7 +340,7 @@ jjcorrmatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 paste(self$options$dep, collapse = ","),
                 self$options$typestatistics, self$options$matrixtype, self$options$matrixmethod,
                 self$options$siglevel, self$options$conflevel, self$options$padjustmethod, self$options$naHandling,
-                self$options$k, self$options$partial, # self$options$clinicalpreset,  # Commented out - clinical preset disabled
+                self$options$k, self$options$partial,
                 self$options$lowcolor, self$options$midcolor, self$options$highcolor,
                 self$options$title, self$options$subtitle, self$options$caption,
                 self$options$plotwidth, self$options$plotheight,
@@ -326,11 +352,35 @@ jjcorrmatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 return(private$.processedOptions)
             }
 
-            # Apply clinical preset configurations
-            # private$.applyClinicalPreset()  # Commented out - clinical preset feature disabled
+            # Process and validate statistical options (backend backstops for
+            # direct R callers invoking run(noThrow = TRUE) past option checks).
+            valid_types <- c("parametric", "nonparametric", "robust", "bayes")
+            valid_mtype <- c("upper", "lower", "full")
+            valid_mmeth <- c("square", "circle")
+            valid_padj  <- c("holm", "none", "hochberg", "hommel", "bonferroni", "BH", "BY")
+            valid_na    <- c("listwise", "pairwise")
 
-            # Process type of statistics
             typestatistics <- self$options$typestatistics
+            if (!is.character(typestatistics) || length(typestatistics) != 1L || !(typestatistics %in% valid_types))
+                jmvcore::reject(.("Invalid correlation method selected."))
+
+            siglevel <- self$options$siglevel
+            if (!is.numeric(siglevel) || length(siglevel) != 1L || !is.finite(siglevel) || siglevel < 0 || siglevel > 1)
+                jmvcore::reject(.("Significance level must be between 0 and 1."))
+
+            conflevel <- self$options$conflevel
+            if (!is.numeric(conflevel) || length(conflevel) != 1L || !is.finite(conflevel) || conflevel < 0.5 || conflevel > 0.999)
+                jmvcore::reject(.("Confidence / credible level must be between 0.5 and 0.999."))
+
+            padjustmethod <- self$options$padjustmethod
+            if (!is.character(padjustmethod) || length(padjustmethod) != 1L || !(padjustmethod %in% valid_padj))
+                jmvcore::reject(.("Invalid p-value adjustment method selected."))
+
+            matrixtype <- if (is.character(self$options$matrixtype) && length(self$options$matrixtype) == 1L && self$options$matrixtype %in% valid_mtype) self$options$matrixtype else "upper"
+            matrixmethod <- if (is.character(self$options$matrixmethod) && length(self$options$matrixmethod) == 1L && self$options$matrixmethod %in% valid_mmeth) self$options$matrixmethod else "square"
+            naHandling <- if (is.character(self$options$naHandling) && length(self$options$naHandling) == 1L && self$options$naHandling %in% valid_na) self$options$naHandling else "listwise"
+            k_val <- suppressWarnings(as.integer(self$options$k))
+            if (length(k_val) != 1L || is.na(k_val) || k_val < 0L || k_val > 5L) k_val <- 2L
 
             # Process variables - dep is already a list of variables.
             # De-duplicate: ggcorrmat's tidyselect drops repeats, so a variable
@@ -340,18 +390,35 @@ jjcorrmatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             myvars <- unique(self$options$dep)
 
             # Adjust partial flag if insufficient variables
-            partial_flag <- self$options$partial
+            partial_flag <- isTRUE(self$options$partial)
             if (partial_flag && length(myvars) < 3) {
                 partial_flag <- FALSE
             }
 
             # Process text parameters
-            title <- if (self$options$title != '') self$options$title else NULL
-            subtitle <- if (self$options$subtitle != '') self$options$subtitle else NULL
-            caption <- if (self$options$caption != '') self$options$caption else NULL
+            title <- if (is.character(self$options$title) && length(self$options$title) == 1L && nzchar(self$options$title)) self$options$title else NULL
+            subtitle <- if (is.character(self$options$subtitle) && length(self$options$subtitle) == 1L && nzchar(self$options$subtitle)) self$options$subtitle else NULL
+            caption <- if (is.character(self$options$caption) && length(self$options$caption) == 1L && nzchar(self$options$caption)) self$options$caption else NULL
 
-            # Process colors
-            colors <- c(self$options$lowcolor, self$options$midcolor, self$options$highcolor)
+            # Process and validate colors so an invalid color string falls back
+            # to the default with a warning instead of crashing plot rendering.
+            raw_cols <- c(low = self$options$lowcolor, mid = self$options$midcolor, high = self$options$highcolor)
+            def_cols <- c(low = "#E69F00", mid = "white", high = "#009E73")
+            bad_cols <- character(0)
+            valid_cols <- character(3)
+            for (ci_idx in seq_along(raw_cols)) {
+                col_val <- raw_cols[ci_idx]
+                ok_col <- is.character(col_val) && length(col_val) == 1L && nzchar(col_val) &&
+                    tryCatch({ grDevices::col2rgb(col_val); TRUE }, error = function(e) FALSE)
+                if (ok_col) {
+                    valid_cols[ci_idx] <- col_val
+                } else {
+                    valid_cols[ci_idx] <- def_cols[ci_idx]
+                    bad_cols <- c(bad_cols, sprintf("%s='%s'", names(raw_cols)[ci_idx], as.character(col_val)))
+                }
+            }
+            private$.invalid_colors <- bad_cols
+            colors <- unname(valid_cols)
 
             # Process ggcorrplot.args
             # pch.cex must be carried over from ggstatsplot's own default
@@ -360,7 +427,7 @@ jjcorrmatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # formal is 5, which draws the non-significance cross small enough
             # to sit on top of the printed coefficient ("0.02" renders "0X2").
             ggcorrplot.args <- list(
-                method = self$options$matrixmethod,
+                method = matrixmethod,
                 outline.color = "black",
                 pch.cex = 14
             )
@@ -369,15 +436,14 @@ jjcorrmatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             options_list <- list(
                 typestatistics = typestatistics,
                 myvars = myvars,
-                matrixtype = self$options$matrixtype,
+                matrixtype = matrixtype,
                 ggcorrplot.args = ggcorrplot.args,
-                siglevel = self$options$siglevel,
-                conflevel = self$options$conflevel,
-                padjustmethod = self$options$padjustmethod,
-                k = self$options$k,
+                siglevel = siglevel,
+                conflevel = conflevel,
+                padjustmethod = padjustmethod,
+                k = k_val,
                 partial = partial_flag,
-                naHandling = self$options$naHandling,
-                # clinicalpreset = self$options$clinicalpreset,  # Commented out - clinical preset disabled
+                naHandling = naHandling,
                 colors = colors,
                 title = title,
                 subtitle = subtitle,
@@ -399,40 +465,52 @@ jjcorrmatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             if (is.na(r)) return(.("Unable to interpret correlation"))
 
             # Strength and direction are ONE translatable phrase, not two words
-            # glued by sprintf. A translator handed the bare word "strong" (or
-            # "p") cannot see what it modifies, and languages that inflect the
-            # adjective for the noun cannot render the pair from two independent
-            # msgids. Each branch below is a complete phrase.
+            # glued by sprintf. Exact zero (within floating-point tolerance) is
+            # neutral rather than "negative".
+            abs_r <- abs(r)
             positive <- r > 0
             strength_phrase <-
-                if (abs(r) >= 0.7)      { if (positive) .("strong positive") else .("strong negative") }
-                else if (abs(r) >= 0.5) { if (positive) .("moderate-to-strong positive") else .("moderate-to-strong negative") }
-                else if (abs(r) >= 0.3) { if (positive) .("moderate positive") else .("moderate negative") }
-                else if (abs(r) >= 0.1) { if (positive) .("weak-to-moderate positive") else .("weak-to-moderate negative") }
+                if (abs_r < 1e-12)      .("negligible (zero)")
+                else if (abs_r >= 0.7)  { if (positive) .("strong positive") else .("strong negative") }
+                else if (abs_r >= 0.5)  { if (positive) .("moderate-to-strong positive") else .("moderate-to-strong negative") }
+                else if (abs_r >= 0.3)  { if (positive) .("moderate positive") else .("moderate negative") }
+                else if (abs_r >= 0.1)  { if (positive) .("weak-to-moderate positive") else .("weak-to-moderate negative") }
                 else                    { if (positive) .("very weak positive") else .("very weak negative") }
 
             # Determine the evidence statement. Bayesian analysis has no
-            # p-value, so the Bayes factor carries the evidence instead. Each
-            # alternative is a whole clause: "p" and "adjusted p" were being
-            # spliced into a template, leaving the parenthesis and the operator
-            # stranded in a separate msgid.
+            # p-value, so the Bayes factor carries the evidence using Jeffreys
+            # (1961) / Lee & Wagenmakers (2013) conventions. Frequentist
+            # significance is evaluated against `alpha` FIRST (so alpha < 0.001
+            # cannot contradict itself), and `<` is HTML-escaped as `&lt;`.
             if (!is.na(bf) && is.na(p_value)) {
                 is_notable <- bf >= 3
-                significance <- sprintf(.("supported by a Bayes factor of %s"),
-                                        base::format(signif(bf, 3), scientific = bf >= 1e5))
+                bf_str <- base::format(signif(bf, 3), scientific = (bf >= 1e5 || (bf > 0 && bf < 1e-3)))
+                significance <-
+                    if (bf >= 10)        sprintf(.("with strong evidence for a correlation (BF<sub>10</sub> = %s)"), bf_str)
+                    else if (bf >= 3)    sprintf(.("with moderate evidence for a correlation (BF<sub>10</sub> = %s)"), bf_str)
+                    else if (bf > 1 / 3) sprintf(.("with anecdotal/inconclusive evidence (BF<sub>10</sub> = %s)"), bf_str)
+                    else                 sprintf(.("with evidence favoring no correlation (BF<sub>10</sub> = %s)"), bf_str)
             } else if (is.na(p_value)) {
                 is_notable <- FALSE
                 significance <- .("of undetermined significance")
             } else {
                 is_notable <- p_value < alpha
-                pv <- sprintf("%.3f", p_value)
+                # Format p with enough precision to distinguish p vs alpha even
+                # when the user sets alpha < 0.001.
+                pv <- if (p_value < 0.001 && alpha < 0.001) {
+                    base::format(signif(p_value, 3), scientific = p_value < 1e-4)
+                } else {
+                    sprintf("%.3f", p_value)
+                }
                 significance <-
-                    if (p_value < 0.001) {
-                        if (adjusted) .("statistically significant (adjusted p < 0.001)")
-                        else          .("statistically significant (p < 0.001)")
-                    } else if (is_notable) {
-                        if (adjusted) sprintf(.("statistically significant (adjusted p = %s)"), pv)
-                        else          sprintf(.("statistically significant (p = %s)"), pv)
+                    if (is_notable) {
+                        if (p_value < 0.001 && alpha >= 0.001) {
+                            if (adjusted) .("statistically significant (adjusted p &lt; 0.001)")
+                            else          .("statistically significant (p &lt; 0.001)")
+                        } else {
+                            if (adjusted) sprintf(.("statistically significant (adjusted p = %s)"), pv)
+                            else          sprintf(.("statistically significant (p = %s)"), pv)
+                        }
                     } else {
                         if (adjusted) sprintf(.("not statistically significant (adjusted p = %s)"), pv)
                         else          sprintf(.("not statistically significant (p = %s)"), pv)
@@ -447,13 +525,15 @@ jjcorrmatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 significance, htmltools::htmlEscape(method)
             )
 
-            # Add clinical guidance
-            if (abs(r) >= 0.3 && is_notable) {
+            # Add clinical guidance (wording matches the strength band above)
+            if (abs_r >= 0.3 && is_notable) {
                 guidance <- .("<br><strong>Clinical Note:</strong> This suggests a meaningful association that may warrant further investigation.")
-            } else if (abs(r) < 0.3) {
+            } else if (abs_r < 0.3) {
                 guidance <- .("<br><strong>Clinical Note:</strong> The estimated correlation is weak by this descriptive convention. Clinical importance depends on context, uncertainty and a prespecified clinical criterion.")
-            } else {
+            } else if (abs_r >= 0.5) {
                 guidance <- .("<br><strong>Clinical Note:</strong> Although the correlation appears moderate-to-strong, the evidence for it is not conclusive at the chosen threshold.")
+            } else {
+                guidance <- .("<br><strong>Clinical Note:</strong> Although the correlation appears moderate, the evidence for it is not conclusive at the chosen threshold.")
             }
 
             return(paste0(interpretation, guidance))
@@ -463,20 +543,26 @@ jjcorrmatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         .validateClinicalInputs = function() {
             # Check minimum sample size for reliable correlations.
             # Use the effective complete-case N over the selected variables
-            # (after numeric coercion) rather than the raw row count, so a
-            # large dataset with heavy missingness in the selected variables
-            # is not falsely cleared. Complete-case N across all selected
-            # variables is the lower bound of any single pair's N, making it
-            # a conservative guard for both listwise and pairwise handling.
+            # (and grouping variable when set) rather than the raw row count,
+            # and also check per-group complete-case sizes so a tiny subgroup
+            # (e.g. n = 5 inside a N = 30 cohort) is never silently cleared.
+            dep_cols <- vapply(unique(self$options$dep),
+                               function(v) private$.resolveName(v),
+                               character(1))
+            dep_cols <- dep_cols[dep_cols %in% names(self$data)]
+            grp_col <- if (!is.null(self$options$grvar)) private$.resolveName(self$options$grvar) else NULL
+            has_grp <- !is.null(grp_col) && grp_col %in% names(self$data)
+
             effective_n <- tryCatch({
-                dep_cols <- vapply(self$options$dep,
-                                   function(v) private$.resolveName(v),
-                                   character(1))
-                dep_cols <- dep_cols[dep_cols %in% names(self$data)]
                 if (length(dep_cols) >= 2) {
-                    sub <- self$data[, dep_cols, drop = FALSE]
-                    for (cc in names(sub)) sub[[cc]] <- jmvcore::toNumeric(sub[[cc]])
-                    sum(complete.cases(sub))
+                    cols <- if (has_grp) c(dep_cols, grp_col) else dep_cols
+                    sub <- self$data[, cols, drop = FALSE]
+                    for (cc in dep_cols) {
+                        x <- jmvcore::toNumeric(sub[[cc]])
+                        x[!is.finite(x)] <- NA_real_
+                        sub[[cc]] <- x
+                    }
+                    sum(stats::complete.cases(sub))
                 } else {
                     nrow(self$data)
                 }
@@ -484,6 +570,47 @@ jjcorrmatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             if (effective_n < 20) {
                 private$.addWarning("STRONG_WARNING", sprintf(.('Small sample size (N = %d complete cases). Correlations with N &lt; 20 may be unreliable. Consider collecting more data or interpreting results cautiously.'), effective_n))
+            } else if (has_grp && length(dep_cols) >= 2) {
+                # Check per-group effective N when total N >= 20
+                small_grps <- tryCatch({
+                    sub <- self$data[, c(dep_cols, grp_col), drop = FALSE]
+                    for (cc in dep_cols) {
+                        x <- jmvcore::toNumeric(sub[[cc]])
+                        x[!is.finite(x)] <- NA_real_
+                        sub[[cc]] <- x
+                    }
+                    grp_vals <- sub[[grp_col]]
+                    lvls <- unique(grp_vals[!is.na(grp_vals)])
+                    if (is.factor(grp_vals)) lvls <- lvls[order(as.integer(lvls))]
+                    out_small <- character(0)
+                    for (lvl in lvls) {
+                        keep <- !is.na(grp_vals) & grp_vals == lvl
+                        n_g <- if (identical(self$options$naHandling, "listwise") || isTRUE(self$options$partial)) {
+                            sum(stats::complete.cases(sub[keep, dep_cols, drop = FALSE]))
+                        } else {
+                            # Minimum pairwise N in this group
+                            min_n <- Inf
+                            sub_g <- sub[keep, dep_cols, drop = FALSE]
+                            for (i in seq_len(length(dep_cols) - 1L)) {
+                                for (j in seq.int(i + 1L, length(dep_cols))) {
+                                    nij <- sum(stats::complete.cases(sub_g[[i]], sub_g[[j]]))
+                                    if (nij < min_n) min_n <- nij
+                                }
+                            }
+                            if (is.finite(min_n)) min_n else 0L
+                        }
+                        if (n_g > 0L && n_g < 20L) {
+                            out_small <- c(out_small, sprintf("%s (n = %d)", htmltools::htmlEscape(as.character(lvl)), n_g))
+                        }
+                    }
+                    out_small
+                }, error = function(e) character(0))
+
+                if (length(small_grps) > 0L) {
+                    private$.addWarning("STRONG_WARNING", sprintf(
+                        .('Small sample size in subgroup(s): %s. Correlations with n &lt; 20 may be unreliable. Consider collecting more data or interpreting subgroup results cautiously.'),
+                        paste(small_grps, collapse = ', ')))
+                }
             }
 
             # Check for too many variables (interpretation complexity)
@@ -499,35 +626,8 @@ jjcorrmatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             return(TRUE)
         },
 
-        # Apply clinical preset configurations
-        # COMMENTED OUT - Clinical preset feature disabled
-        # .applyClinicalPreset = function() {
-        #     preset <- self$options$clinicalpreset
-        #
-        #     if (is.null(preset) || preset == "custom") {
-        #         return()  # No preset modifications for custom analysis
-        #     }
-        #
-        #     if (preset == "biomarker") {
-        #         self$options$typestatistics <- "robust"
-        #         private$.preset_recommendations <- .("For biomarker correlations, robust correlation methods are recommended to handle outliers.")
-        #
-        #     } else if (preset == "labvalues") {
-        #         self$options$typestatistics <- "parametric"
-        #         private$.preset_recommendations <- .("For lab values, parametric correlations are often appropriate if distributions are normal.")
-        #
-        #     } else if (preset == "imaging") {
-        #         self$options$typestatistics <- "nonparametric"
-        #         private$.preset_recommendations <- .("For imaging metrics, consider nonparametric correlations due to potentially skewed distributions.")
-        #     }
-        # },
-
-        # Generate clinical interpretation of correlation results
-        # Name of the coefficient each `typestatistics` value produces in
-        # ggstatsplot 1.0.0. "robust" is Winsorized Pearson (correlation::
-        # correlation(winsorize = 0.2), identical to WRS2::wincor(tr = 0.2)) -
-        # NOT the percentage-bend coefficient that older ggstatsplot used and
-        # that this module's documentation still described.
+        # Human-readable method name for each `typestatistics` option.
+        # "robust" is 20% Winsorized Pearson (Wilcox, 2012; matching WRS2::wincor).
         .methodName = function(typestatistics) {
             switch(typestatistics,
                 "parametric"    = .("Pearson"),
@@ -601,22 +701,33 @@ jjcorrmatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     keep <- !is.na(grp_vals) & grp_vals == lvl
                     sub_res <- private$.computeCorrelations(
                         mydata[keep, , drop = FALSE], options_data)
-                    if (is.null(sub_res) || nrow(sub_res) == 0) next
+                    if (is.null(sub_res) || nrow(sub_res) == 0 || all(is.na(sub_res$r))) {
+                        parts <- c(parts, sprintf(
+                            .("<li><strong>%s</strong>: no computable correlations (constant variable or insufficient complete observations).</li>"),
+                            htmltools::htmlEscape(as.character(lvl))))
+                        next
+                    }
+                    valid_idx <- !is.na(sub_res$r)
+                    n_valid <- sum(valid_idx)
                     sig <- if (identical(options_data$typestatistics, "bayes"))
                                (!is.na(sub_res$bf) & sub_res$bf >= 3)
                            else (!is.na(sub_res$p_adj) & sub_res$p_adj < options_data$siglevel)
-                    strong <- !is.na(sub_res$r) & abs(sub_res$r) >= 0.5
+                    strong <- valid_idx & abs(sub_res$r) >= 0.5
+                    n_lo <- min(sub_res$n[valid_idx], na.rm = TRUE)
+                    n_hi <- max(sub_res$n[valid_idx], na.rm = TRUE)
+                    n_str <- if (n_lo == n_hi) base::format(n_hi) else sprintf("%d to %d", n_lo, n_hi)
+                    best_i <- which.max(abs(sub_res$r))
                     parts <- c(parts, sprintf(
                         .("<li><strong>%s</strong> (n = %s): %d of %d pairs strong (|%s| \u2265 0.5), %d meeting the significance threshold. Strongest: %s = %s (%s vs %s).</li>"),
                         htmltools::htmlEscape(as.character(lvl)),
-                        base::format(max(sub_res$n, na.rm = TRUE)),
-                        sum(strong), nrow(sub_res),
+                        n_str,
+                        sum(strong), n_valid,
                         private$.coefSymbol(options_data$typestatistics),
                         sum(sig),
                         private$.coefSymbol(options_data$typestatistics),
-                        sprintf("%.3f", sub_res$r[which.max(abs(sub_res$r))]),
-                        htmltools::htmlEscape(sub_res$var1[which.max(abs(sub_res$r))]),
-                        htmltools::htmlEscape(sub_res$var2[which.max(abs(sub_res$r))])))
+                        sprintf("%.3f", sub_res$r[best_i]),
+                        htmltools::htmlEscape(sub_res$var1[best_i]),
+                        htmltools::htmlEscape(sub_res$var2[best_i])))
                 }
 
                 self$results$interpretation$setContent(paste0(
@@ -626,6 +737,7 @@ jjcorrmatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     "<ul>", paste(parts, collapse = ""), "</ul>",
                     "<p><strong>", .("Interpretation Notes:"), "</strong><br>",
                     "\u2022 ", .("Compare the groups deliberately: a correlation present in one group and absent (or reversed) in another is a finding in itself, not noise."),
+                    "<br>\u2022 ", .("Strength bands (0.1/0.3/0.5/0.7) and Bayes factor thresholds (BF<sub>10</sub> \u2265 3; Jeffreys, 1961) are descriptive conventions, not clinical decision cut-offs (Schober et al., 2018; Cohen, 1988)."),
                     "<br>\u2022 ", .("Remember that correlation does not imply causation."), "</p>"))
                 return()
             }
@@ -652,7 +764,7 @@ jjcorrmatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             n_obs      <- max(res$n, na.rm = TRUE)
             n_min      <- min(res$n, na.rm = TRUE)
             n_corr     <- nrow(res)
-            partial_on <- isTRUE(options_data$partial) && n_vars >= 3
+            partial_on <- any(grepl("^Partial ", res$method))
 
             # Significance is judged on the ADJUSTED p-value at the user's
             # significance level - the same rule the plot uses to cross out
@@ -743,6 +855,7 @@ jjcorrmatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 } else {
                     .("\u2022 No correlations reached the chosen threshold. Consider a larger sample size or different variables.")
                 },
+                "<br>\u2022 ", .("Strength bands (0.1/0.3/0.5/0.7) and Bayes factor thresholds (BF<sub>10</sub> \u2265 3; Jeffreys, 1961) are descriptive conventions, not clinical decision cut-offs (Schober et al., 2018; Cohen, 1988)."),
                 "<br>\u2022 ", .("Remember that correlation does not imply causation."),
                 "<br>\u2022 ", .("Consider potential confounding variables in your analysis."),
                 if (partial_on) {
@@ -760,19 +873,20 @@ jjcorrmatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         
 .run = function() {
 
-    # Initialize warnings list (avoid Notice serialization errors)
+    # Keep pooled chart hidden whenever a grouping variable is active
+    self$results$plot$setVisible(is.null(self$options$grvar))
+
+    # Initialize warnings and per-run tracking state
     private$.warnings <- list()
+    private$.winsor_collapsed <- character(0)
+    private$.effective_partial <- FALSE
 
     # Initial Message ----
     if ( is.null(self$options$dep) || length(self$options$dep) < 2 ) {
 
-        # TODO ----
-
+        # Clear any stale outputs from a previous run on a reused R6 object
+        private$.clearOutputs()
         self$results$todo$setContent(private$.welcomeMessage())
-
-        # Every other exit renders the notices panel; this one returned before
-        # it, leaving an empty "Warnings and Notices" heading on screen beside
-        # the welcome message. With no notices collected, this hides it.
         private$.displayWarnings()
 
         return()
@@ -785,6 +899,7 @@ jjcorrmatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         self$results$todo$setContent(todo)
 
         if (nrow(self$data) == 0) {
+            private$.clearOutputs()
             private$.addWarning("ERROR", .('Data contains no complete rows after filtering. Please check for missing values.'))
             private$.displayWarnings()
             return()
@@ -792,6 +907,7 @@ jjcorrmatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
         # Validate inputs before processing
         if (!private$.validateInputs()) {
+            private$.clearOutputs()
             private$.displayWarnings()
             return()
         }
@@ -801,15 +917,28 @@ jjcorrmatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         mydata <- private$.prepareData()
         options_data <- private$.prepareOptions()
 
+        if (length(private$.invalid_colors) > 0L) {
+            private$.addWarning("WARNING", sprintf(
+                .('Invalid color value(s) (%s) were replaced with default palette colors.'),
+                htmltools::htmlEscape(paste(private$.invalid_colors, collapse = ", "))))
+        }
+
         # Populate the correlation table exactly once here (grouped when a
-        # grouping variable is set, ungrouped otherwise). Previously both
-        # .plot and .plot2 populated it, each doing deleteRows() first, which
-        # made the final contents order-dependent (overwritten) when grvar was
-        # set.
+        # grouping variable is set, ungrouped otherwise).
         private$.populateTable(
             mydata, options_data,
             group = if (!is.null(self$options$grvar)) self$options$grvar else NULL
         )
+
+        if (length(private$.winsor_collapsed) > 0L) {
+            private$.addWarning("WARNING", sprintf(
+                .('20%% Winsorization collapsed %s to zero variance (common when at least 80%% of observations share one value, e.g., zero-inflated scores). Correlations involving this variable are undefined under Robust; consider Spearman (Nonparametric) instead.'),
+                htmltools::htmlEscape(paste(unique(private$.winsor_collapsed), collapse = ", "))))
+        }
+
+        if (isTRUE(options_data$partial) && private$.n_valid_pairs > 0L && !isTRUE(private$.effective_partial)) {
+            private$.addWarning("WARNING", .('Fewer than 3 variables retained non-zero variation after preprocessing, so no control variable remained (q = 0). Zero-order correlations were computed instead of partial correlations.'))
+        }
 
         if (self$options$showexplanations) {
             private$.generateAboutContent()
@@ -828,6 +957,20 @@ jjcorrmatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 n_dropped, private$.n_before,
                 base::format(round(100 * n_dropped / private$.n_before, 1)),
                 private$.n_after))
+        } else if (identical(self$options$naHandling, "pairwise") &&
+                   isTRUE(options_data$partial) &&
+                   length(private$.pair_n) > 0 &&
+                   min(private$.pair_n) < private$.n_before) {
+            # Partial correlations control for all selected variables at once
+            # and therefore require complete cases across all selected variables.
+            n_excl <- private$.n_before - max(private$.pair_n)
+            if (is.null(self$options$grvar) && n_excl > 0) {
+                private$.addWarning("WARNING", sprintf(
+                    .('Partial correlations control for all selected variables simultaneously and require complete cases across all selected variables: %d of %d rows were excluded despite pairwise selection (%d complete rows analysed).'),
+                    n_excl, private$.n_before, max(private$.pair_n)))
+            } else {
+                private$.addWarning("WARNING", .('Partial correlations control for all selected variables simultaneously and use complete cases across all selected variables within each group.'))
+            }
         } else if (identical(self$options$naHandling, "pairwise") &&
                    length(private$.pair_n) > 0 &&
                    min(private$.pair_n) < private$.n_before) {
@@ -863,7 +1006,7 @@ jjcorrmatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         # constant variable yields a row of NAs that was being counted as a
         # computed correlation.
         if (private$.n_valid_pairs > 0) {
-            private$.addWarning("INFO", if (isTRUE(options_data$partial))
+            private$.addWarning("INFO", if (isTRUE(private$.effective_partial))
                 sprintf(.('Computed %d partial %s of %d variables.'),
                         private$.n_valid_pairs,
                         private$.methodLabel(self$options$typestatistics),
@@ -882,40 +1025,30 @@ jjcorrmatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 },
 
 .generateAboutContent = function() {
-    about_content <- glue::glue("
-    <h3>About Correlation Matrix</h3>
-    <hr>
-    <p><b>Purpose:</b> This analysis creates a correlation matrix to visualize the
-    relationships between multiple continuous variables. It helps in understanding
-    the direction, magnitude, and significance of the associations between pairs of
-    variables.</p>
-
-    <p><b>When to Use:</b></p>
-    <ul>
-        <li><b>Exploratory Data Analysis:</b> To get a quick overview of the
-        relationships between a set of variables.</li>
-        <li><b>Feature Selection:</b> To identify highly correlated variables that
-        may be redundant in a predictive model.</li>
-        <li><b>Publication:</b> To create a publication-ready summary of the
-        associations between your variables of interest.</li>
-    </ul>
-
-    <p><b>Key Features:</b></p>
-    <ul>
-        <li>Supports Pearson, Spearman, robust, and Bayesian correlation methods.</li>
-        <li>Can be split by a grouping variable to compare correlations across
-        subgroups.</li>
-        <li>Can compute partial correlations to control for confounding variables.</li>
-        <li>Provides options for p-value adjustment, theming, and customizing the
-        plot.</li>
-    </ul>
-    <hr>
-    ")
+    about_content <- paste0(
+        "<h3>", .("About Correlation Matrix"), "</h3>",
+        "<hr>",
+        "<p><b>", .("Purpose:"), "</b> ",
+        .("This analysis creates a correlation matrix to visualize the relationships between multiple continuous variables. It helps in understanding the direction, magnitude, and significance of the associations between pairs of variables."), "</p>",
+        "<p><b>", .("When to Use:"), "</b></p>",
+        "<ul>",
+        "<li><b>", .("Exploratory Data Analysis:"), "</b> ", .("To get a quick overview of the relationships between a set of variables."), "</li>",
+        "<li><b>", .("Feature Selection:"), "</b> ", .("To identify highly correlated variables that may be redundant in a predictive model."), "</li>",
+        "<li><b>", .("Publication:"), "</b> ", .("To create a publication-ready summary of the associations between your variables of interest."), "</li>",
+        "</ul>",
+        "<p><b>", .("Key Features:"), "</b></p>",
+        "<ul>",
+        "<li>", .("Supports Pearson, Spearman, 20% Winsorized robust, and Bayesian correlation methods."), "</li>",
+        "<li>", .("Can be split by a grouping variable to compare correlations across subgroups."), "</li>",
+        "<li>", .("Can compute partial correlations to control for confounding variables."), "</li>",
+        "<li>", .("Provides options for p-value adjustment, theming, and customizing the plot."), "</li>",
+        "</ul>",
+        "<hr>"
+    )
     self$results$about$setContent(about_content)
 },
 
         .generateSummary = function(options_data) {
-    
     n_vars <- length(options_data$myvars)
     # Report the N the correlations were actually computed on. Under pairwise
     # deletion nrow() of the (unfiltered) frame is larger than every pair's N.
@@ -926,38 +1059,22 @@ jjcorrmatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         n_label <- sprintf(.("%s, analyzed separately within each level of %s"),
                            n_label, htmltools::htmlEscape(self$options$grvar))
     method_name <- private$.methodName(options_data$typestatistics)
+    corr_type <- if (isTRUE(private$.effective_partial)) .("Partial") else .("Zero-order")
 
-    summary_text <- glue::glue("
-    <h4>Analysis Summary</h4>
-    <p><b>Variables analyzed:</b> {n_vars}</p>
-    <p><b>Sample size:</b> {n_label}</p>
-    <p><b>Method:</b> {method_name} correlation</p>
-    <p><b>Correlation type:</b> {if(options_data$partial && n_vars >= 3) 'Partial' else 'Zero-order'}</p>
-    ")
-    
+    summary_text <- paste0(
+        "<h4>", .("Analysis Summary"), "</h4>",
+        "<p><b>", .("Variables analyzed:"), "</b> ", n_vars, "</p>",
+        "<p><b>", .("Sample size:"), "</b> ", n_label, "</p>",
+        "<p><b>", .("Method:"), "</b> ", sprintf(.("%s correlation"), method_name), "</p>",
+        "<p><b>", .("Correlation type:"), "</b> ", corr_type, "</p>"
+    )
+
     self$results$summary$setContent(summary_text)
 },
 
-# Single correlation engine, shared by the table and the clinical
-# interpretation. This is deliberately the SAME call ggstatsplot::ggcorrmat
-# makes internally (correlation::correlation with winsorize/bayesian/partial
-# switched off the `type` argument), so the numbers in the table cannot drift
-# from the numbers drawn in the plot. The previous implementation hand-rolled
-# stats::cor.test, which silently reported Pearson coefficients for the
-# "robust" and "bayes" methods, ignored `partial`, and never applied the
-# p-value adjustment the plot uses to mark non-significant cells.
-#
-# p_adjust is requested as "none" and the adjustment applied here instead, so
-# both the unadjusted and the adjusted p-value are available; this reproduces
-# correlation::correlation's own adjustment exactly (verified against
-# stats::p.adjust for holm and bonferroni).
 # Subset a prepared frame to the selected variables and restore the
-# user-facing names. Every other code path (.init, .populateTable,
-# .generateInterpretation, .computeCorrelations) already resolves possibly
-# B64-encoded column names through .resolveName; the two plot methods were
-# the last ones indexing `mydata` with the RAW option names, which returns
-# nothing once jamovi encodes them. Renaming also keeps the figure's axis
-# labels identical to the table's Variable columns.
+# user-facing names, resolving possibly B64-encoded column names via
+# .resolveName so downstream helpers see identical variable labels.
 .plotFrame = function(df, myvars, extra = NULL) {
     resolved <- vapply(myvars, function(v) private$.resolveName(v, df), character(1))
     if (!is.null(extra))
@@ -967,59 +1084,368 @@ jjcorrmatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
     out
 },
 
+# 20% tail-clamping Winsorization matching WRS2::winval(..., tr = 0.2)
+.winsorizeVec = function(v, tr = 0.2) {
+    n <- length(v)
+    g <- floor(tr * n)
+    if (g <= 0L) return(v)
+    sv <- sort(v)
+    lo <- sv[g + 1L]
+    hi <- sv[n - g]
+    v[v < lo] <- lo
+    v[v > hi] <- hi
+    v
+},
+
+# Single unified correlation engine shared by the table, the clinical
+# interpretation, and both plot methods (.plot and .plot2).
+#
+# Uses safe internal syntactic names (v1..vp) so spaces, symbols and non-ASCII
+# column names never break formula-based helpers; enforces complete cases and
+# exact df = n - 2 - q (and CI SE = 1 / sqrt(n - 3 - q)) for partial
+# correlations; rank-transforms BEFORE partialing for partial Spearman and
+# winsorizes BEFORE partialing for partial robust; applies Wilcox's df = h - 2
+# test and t_{h-2}-scaled Fisher-z CI for Winsorized Pearson; and passes
+# conflevel directly to parameters::model_parameters() for Bayesian HDIs.
 .computeCorrelations = function(df, options_data) {
     myvars <- options_data$myvars
+    p_vars <- length(myvars)
+    if (p_vars < 2L) return(NULL)
     resolved <- vapply(myvars, function(v) private$.resolveName(v, df), character(1))
     if (!all(resolved %in% names(df))) return(NULL)
 
     cor_data <- df[, resolved, drop = FALSE]
-    for (cc in names(cor_data)) cor_data[[cc]] <- jmvcore::toNumeric(cor_data[[cc]])
-    # Report user-facing variable names, not jamovi's internal (possibly
-    # B64-encoded) column names.
-    names(cor_data) <- myvars
+    for (cc in names(cor_data)) {
+        x <- jmvcore::toNumeric(cor_data[[cc]])
+        x[!is.finite(x)] <- NA_real_
+        cor_data[[cc]] <- x
+    }
+    # Safe syntactic column names internally; original myvars restored on output
+    safe_names <- paste0("v", seq_len(p_vars))
+    names(cor_data) <- safe_names
 
-    type <- options_data$typestatistics
+    type       <- options_data$typestatistics
+    ci_lvl     <- options_data$conflevel
+    partial_on <- isTRUE(options_data$partial) && p_vars >= 3L
+    padj_meth  <- options_data$padjustmethod
+    b_seed     <- if (identical(type, "bayes")) private$.bayesSeed() else NULL
 
-    # Bayesian estimates come from BayesFactor's MCMC sampler: unseeded, two
-    # calls on the same data differ in the third decimal, so the table and the
-    # plot were two independent draws of the same quantity and re-running the
-    # same analysis produced different numbers. A fixed seed makes both
-    # reproducible and identical; withr restores the caller's RNG stream.
-    res <- tryCatch(
-        suppressWarnings(private$.withBayesSeed(type, correlation::correlation(
-            data             = cor_data,
-            method           = if (type == "nonparametric") "spearman" else "pearson",
-            p_adjust         = "none",
-            ci               = options_data$conflevel,
-            bayesian         = type == "bayes",
-            bayesian_prior   = 0.707,
-            partial          = options_data$partial,
-            partial_bayesian = type == "bayes" && options_data$partial,
-            winsorize        = if (type == "robust") 0.2 else FALSE
-        ))),
-        error = function(e) NULL
+    # Memoize across table, interpretation, and plot consumers so identical
+    # data/options (especially expensive Bayesian MCMC draws) run once per cycle.
+    cache_key <- digest::digest(list(
+        myvars     = myvars,
+        cor_data   = cor_data,
+        type       = type,
+        ci_lvl     = ci_lvl,
+        partial_on = partial_on,
+        padj_meth  = padj_meth,
+        b_seed     = b_seed
+    ), algo = "md5")
+    if (cache_key %in% names(private$.corr_cache)) {
+        cached <- private$.corr_cache[[cache_key]]
+        if (length(cached$winsor_collapsed) > 0L)
+            private$.winsor_collapsed <- unique(c(private$.winsor_collapsed, cached$winsor_collapsed))
+        if (isTRUE(cached$effective_partial))
+            private$.effective_partial <- TRUE
+        return(cached$res)
+    }
+
+    z_crit     <- stats::qnorm(1 - (1 - ci_lvl) / 2)
+
+    base_method <- switch(type,
+        "parametric"    = "Pearson correlation",
+        "nonparametric" = "Spearman correlation",
+        "robust"        = "Winsorized Pearson correlation",
+        "bayes"         = "Bayesian Pearson correlation",
+        "Pearson correlation"
     )
-    if (is.null(res) || nrow(as.data.frame(res)) == 0) return(NULL)
+    effective_partial <- FALSE
+    local_collapsed   <- character(0)
 
-    res <- as.data.frame(res)
-    # Bayesian output names the estimate `rho` and carries no p-value.
-    est   <- if ("r" %in% names(res)) res$r else res$rho
-    p_raw <- if ("p" %in% names(res)) res$p else rep(NA_real_, nrow(res))
+    # Pair index table in canonical upper-triangle order
+    pair_i <- integer(0)
+    pair_j <- integer(0)
+    for (i in seq_len(p_vars - 1L)) {
+        for (j in seq.int(i + 1L, p_vars)) {
+            pair_i <- c(pair_i, i)
+            pair_j <- c(pair_j, j)
+        }
+    }
+    n_pairs <- length(pair_i)
+    n_vec   <- rep(NA_integer_, n_pairs)
+    r_vec   <- rep(NA_real_, n_pairs)
+    lo_vec  <- rep(NA_real_, n_pairs)
+    hi_vec  <- rep(NA_real_, n_pairs)
+    p_vec   <- rep(NA_real_, n_pairs)
+    bf_vec  <- rep(NA_real_, n_pairs)
 
-    data.frame(
-        var1      = as.character(res$Parameter1),
-        var2      = as.character(res$Parameter2),
-        n         = if ("n_Obs" %in% names(res)) as.integer(res$n_Obs) else NA_integer_,
-        r         = as.numeric(est),
-        conf_low  = if ("CI_low"  %in% names(res)) as.numeric(res$CI_low)  else NA_real_,
-        conf_high = if ("CI_high" %in% names(res)) as.numeric(res$CI_high) else NA_real_,
-        p         = as.numeric(p_raw),
-        p_adj     = if (all(is.na(p_raw))) as.numeric(p_raw)
-                    else stats::p.adjust(p_raw, method = options_data$padjustmethod),
-        bf        = if ("BF" %in% names(res)) as.numeric(res$BF) else NA_real_,
-        method    = as.character(res$Method),
+    eval_bayes_r_n <- function(r_obs, n_eff) {
+        if (is.na(r_obs) || is.na(n_eff) || n_eff < 3L) {
+            return(list(r = NA_real_, lo = NA_real_, hi = NA_real_, bf = NA_real_))
+        }
+        if (abs(r_obs) >= 1 - 1e-12) {
+            return(list(r = sign(r_obs), lo = sign(r_obs), hi = sign(r_obs), bf = Inf))
+        }
+        # Exact sufficient-statistic representation of (r_obs, n_eff) for
+        # BayesFactor::correlationBF (depends on x, y solely via r and n).
+        # For partial correlations controlling for q covariates, n_eff = n - q
+        # yields the exact Fisher (1924) / Wetzels & Wagenmakers (2012) / Ly et al.
+        # (2018) marginal partial correlation likelihood.
+        u <- seq_len(n_eff) - (n_eff + 1) / 2
+        u <- u / sqrt(sum(u^2))
+        w <- u^2 - mean(u^2)
+        w <- w - sum(w * u) * u
+        w <- w / sqrt(sum(w^2))
+        v <- r_obs * u + sqrt(max(0, 1 - r_obs^2)) * w
+        tryCatch({
+            bf_obj <- suppressWarnings(BayesFactor::correlationBF(u, v, rscale = 0.707))
+            mp <- suppressWarnings(parameters::model_parameters(
+                bf_obj,
+                ci = ci_lvl,
+                ci_method = "hdi",
+                test = "bf",
+                dispersion = FALSE
+            ))
+            list(
+                r  = as.numeric(mp$Median[1]),
+                lo = as.numeric(mp$CI_low[1]),
+                hi = as.numeric(mp$CI_high[1]),
+                bf = as.numeric(mp$BF[1])
+            )
+        }, error = function(e) list(r = NA_real_, lo = NA_real_, hi = NA_real_, bf = NA_real_))
+    }
+
+    eval_bayes_pair <- function(xi, yi) {
+        if (length(xi) < 3L || stats::sd(xi) == 0 || stats::sd(yi) == 0) {
+            return(list(r = NA_real_, lo = NA_real_, hi = NA_real_, bf = NA_real_))
+        }
+        r_raw <- suppressWarnings(stats::cor(xi, yi))
+        eval_bayes_r_n(r_raw, length(xi))
+    }
+
+    if (identical(type, "bayes")) {
+        withr::local_seed(b_seed)
+    }
+
+    if (!partial_on) {
+        for (k in seq_len(n_pairs)) {
+            xi_all <- cor_data[[pair_i[k]]]
+            yi_all <- cor_data[[pair_j[k]]]
+            ok <- is.finite(xi_all) & is.finite(yi_all)
+            n_ij <- sum(ok)
+            n_vec[k] <- as.integer(n_ij)
+            if (n_ij < 3L) next
+            xi <- xi_all[ok]
+            yi <- yi_all[ok]
+            if (stats::sd(xi) == 0 || stats::sd(yi) == 0) next
+
+            if (type == "parametric") {
+                ct <- suppressWarnings(stats::cor.test(xi, yi, method = "pearson", conf.level = ci_lvl))
+                rk <- unname(as.numeric(ct$estimate))
+                r_vec[k] <- rk
+                p_vec[k] <- as.numeric(ct$p.value)
+                if (n_ij > 3L) {
+                    if (abs(rk) >= 1 - 1e-15) {
+                        lo_vec[k] <- sign(rk)
+                        hi_vec[k] <- sign(rk)
+                    } else {
+                        lo_vec[k] <- as.numeric(ct$conf.int[1])
+                        hi_vec[k] <- as.numeric(ct$conf.int[2])
+                    }
+                }
+            } else if (type == "nonparametric") {
+                ct <- suppressWarnings(stats::cor.test(xi, yi, method = "spearman", exact = FALSE))
+                rk <- unname(as.numeric(ct$estimate))
+                r_vec[k] <- rk
+                p_vec[k] <- as.numeric(ct$p.value)
+                if (n_ij > 3L) {
+                    if (abs(rk) >= 1 - 1e-15) {
+                        lo_vec[k] <- sign(rk)
+                        hi_vec[k] <- sign(rk)
+                    } else {
+                        # Fieller, Hartley & Pearson (1957) SE_z = sqrt(1.06 / (n - 3))
+                        moe <- z_crit * sqrt(1.06 / (n_ij - 3))
+                        lo_vec[k] <- tanh(atanh(rk) - moe)
+                        hi_vec[k] <- tanh(atanh(rk) + moe)
+                    }
+                }
+            } else if (type == "robust") {
+                g <- floor(0.2 * n_ij)
+                h <- n_ij - 2L * g
+                df_w <- h - 2L
+                xw <- private$.winsorizeVec(xi, tr = 0.2)
+                yw <- private$.winsorizeVec(yi, tr = 0.2)
+                if (stats::sd(xw) == 0 || stats::sd(yw) == 0) {
+                    if (stats::sd(xw) == 0)
+                        local_collapsed <- unique(c(local_collapsed, myvars[pair_i[k]]))
+                    if (stats::sd(yw) == 0)
+                        local_collapsed <- unique(c(local_collapsed, myvars[pair_j[k]]))
+                    next
+                }
+                rk <- stats::cor(xw, yw)
+                r_vec[k] <- rk
+                if (abs(rk) >= 1 - 1e-15) {
+                    p_vec[k] <- 0
+                    lo_vec[k] <- sign(rk)
+                    hi_vec[k] <- sign(rk)
+                } else if (df_w > 0L) {
+                    # Wilcox (2012, Sec 9.3.2, eq 9.6): T_w with df = h - 2
+                    t_w <- rk * sqrt((n_ij - 2) / (1 - rk^2))
+                    p_vec[k] <- 2 * stats::pt(-abs(t_w), df = df_w)
+                    if (n_ij > 3L) {
+                        moe <- stats::qt(1 - (1 - ci_lvl) / 2, df = df_w) / sqrt(n_ij - 3)
+                        lo_vec[k] <- tanh(atanh(rk) - moe)
+                        hi_vec[k] <- tanh(atanh(rk) + moe)
+                    }
+                }
+            } else if (type == "bayes") {
+                private$.checkpoint()
+                b_res <- eval_bayes_pair(xi, yi)
+                r_vec[k]  <- b_res$r
+                lo_vec[k] <- b_res$lo
+                hi_vec[k] <- b_res$hi
+                bf_vec[k] <- b_res$bf
+            }
+        }
+    } else {
+        # Partial correlations control for all other variables simultaneously
+        # and require complete cases across all selected variables.
+        cc <- cor_data[stats::complete.cases(cor_data), , drop = FALSE]
+        n_cc <- nrow(cc)
+        if (n_cc < 3L) return(NULL)
+
+        active <- vapply(cc, function(v) stats::sd(v) > 0, logical(1))
+        act_idx <- which(active)
+        p_act <- length(act_idx)
+        if (p_act < 2L) return(NULL)
+
+        X <- cc[, act_idx, drop = FALSE]
+
+        # Transform BEFORE partialing so partial Spearman is rank-based
+        # (monotone-invariant) and partial robust resists control-var outliers.
+        if (type == "nonparametric") {
+            X_work <- as.data.frame(lapply(X, rank, ties.method = "average"))
+        } else if (type == "robust") {
+            X_work <- as.data.frame(lapply(X, private$.winsorizeVec, tr = 0.2))
+            still_var <- vapply(X_work, function(v) stats::sd(v) > 0, logical(1))
+            if (!all(still_var)) {
+                collapsed_names <- myvars[act_idx[!still_var]]
+                local_collapsed <- unique(c(local_collapsed, collapsed_names))
+                act_idx <- act_idx[still_var]
+                X_work <- X_work[, still_var, drop = FALSE]
+                p_act <- length(act_idx)
+                if (p_act < 2L) {
+                    if (length(local_collapsed) > 0L)
+                        private$.winsor_collapsed <- unique(c(private$.winsor_collapsed, local_collapsed))
+                    return(NULL)
+                }
+            }
+        } else {
+            X_work <- X
+        }
+
+        q <- max(p_act - 2L, 0L)
+        effective_partial <- q >= 1L
+        if (effective_partial) private$.effective_partial <- TRUE
+        df_p <- n_cc - 2L - q
+        # Refuse saturated / over-saturated partial systems (df <= 0)
+        if (df_p <= 0L) return(NULL)
+
+        R_mat <- tryCatch(stats::cor(X_work), error = function(e) NULL)
+        if (is.null(R_mat) || any(!is.finite(R_mat))) return(NULL)
+        P_mat <- tryCatch(solve(R_mat), error = function(e) NULL)
+        if (is.null(P_mat) || any(!is.finite(P_mat)) || any(diag(P_mat) <= 0)) return(NULL)
+
+        pcor_mat <- -P_mat / sqrt(outer(diag(P_mat), diag(P_mat)))
+        pcor_mat <- pmin(pmax(pcor_mat, -1), 1)
+
+        if (type == "bayes") {
+            # Exact Fisher (1924) / Ly et al. (2018) marginal partial correlation
+            # likelihood uses effective sample size n_eff = n - q (df_p = n_eff - 2 >= 1).
+            n_eff <- n_cc - q
+            for (k in seq_len(n_pairs)) {
+                private$.checkpoint()
+                n_vec[k] <- as.integer(n_cc)
+                ai <- match(pair_i[k], act_idx)
+                aj <- match(pair_j[k], act_idx)
+                if (is.na(ai) || is.na(aj)) next
+                rk <- as.numeric(pcor_mat[ai, aj])
+                b_res <- eval_bayes_r_n(rk, n_eff)
+                r_vec[k]  <- b_res$r
+                lo_vec[k] <- b_res$lo
+                hi_vec[k] <- b_res$hi
+                bf_vec[k] <- b_res$bf
+            }
+        } else {
+            g <- if (type == "robust") floor(0.2 * n_cc) else 0L
+            h <- n_cc - 2L * g
+            df_test <- if (type == "robust") (h - 2L - q) else df_p
+            if (df_test <= 0L) return(NULL)
+
+            for (k in seq_len(n_pairs)) {
+                n_vec[k] <- as.integer(n_cc)
+                ai <- match(pair_i[k], act_idx)
+                aj <- match(pair_j[k], act_idx)
+                if (is.na(ai) || is.na(aj)) next
+                rk <- as.numeric(pcor_mat[ai, aj])
+                r_vec[k] <- rk
+                if (abs(rk) >= 1 - 1e-15) {
+                    p_vec[k] <- 0
+                    lo_vec[k] <- sign(rk)
+                    hi_vec[k] <- sign(rk)
+                } else {
+                    # Exact Fisher (1924) df = n - 2 - q (and Wilcox df = h - 2 - q for robust)
+                    t_val <- rk * sqrt(df_p / (1 - rk^2))
+                    p_vec[k] <- 2 * stats::pt(-abs(t_val), df = df_test)
+                    denom_ci <- n_cc - 3L - q
+                    if (denom_ci > 0L) {
+                        moe <- if (type == "nonparametric") {
+                            z_crit * sqrt(1.06 / denom_ci)
+                        } else if (type == "robust") {
+                            stats::qt(1 - (1 - ci_lvl) / 2, df = df_test) / sqrt(denom_ci)
+                        } else {
+                            z_crit / sqrt(denom_ci)
+                        }
+                        lo_vec[k] <- tanh(atanh(rk) - moe)
+                        hi_vec[k] <- tanh(atanh(rk) + moe)
+                    }
+                }
+            }
+        }
+    }
+
+    if (length(local_collapsed) > 0L) {
+        private$.winsor_collapsed <- unique(c(private$.winsor_collapsed, local_collapsed))
+    }
+
+    method_label <- if (effective_partial) paste0("Partial ", base_method) else base_method
+
+    p_adj <- if (all(is.na(p_vec))) as.numeric(p_vec)
+             else stats::p.adjust(p_vec, method = padj_meth)
+
+    res_df <- data.frame(
+        var1      = myvars[pair_i],
+        var2      = myvars[pair_j],
+        n         = n_vec,
+        r         = r_vec,
+        conf_low  = lo_vec,
+        conf_high = hi_vec,
+        p         = p_vec,
+        p_adj     = p_adj,
+        bf        = bf_vec,
+        method    = rep(method_label, n_pairs),
         stringsAsFactors = FALSE
     )
+
+    if (length(private$.corr_cache) >= 32L) {
+        private$.corr_cache <- list()
+    }
+    private$.corr_cache[[cache_key]] <- list(
+        res               = res_df,
+        winsor_collapsed  = local_collapsed,
+        effective_partial = effective_partial
+    )
+    res_df
 },
 
 .populateTable = function(mydata, options_data, group = NULL) {
@@ -1032,24 +1458,11 @@ jjcorrmatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
     private$.pair_n <- integer(0)
     private$.n_valid_pairs <- 0L
 
-    # Missing data: correlation::correlation performs pairwise complete-case
-    # deletion, and when naHandling == "listwise" the incoming data has already
-    # had incomplete rows dropped in .prepareData. The reported N is per pair,
-    # so the two settings are distinguishable in the output.
     add_rows_for_subset <- function(df, grp_label = "All") {
         res <- private$.computeCorrelations(df, options_data)
-        # Two ways a subset yields nothing. correlation::correlation ERRORS on
-        # a singular matrix (most often a partial correlation on collinear or
-        # missing-riddled data) and .computeCorrelations returns NULL; but on a
-        # subset with no usable rows it does NOT error - it returns a full set
-        # of rows carrying n = 0, r = NA and the method string "NA correlation",
-        # which were being added to the table as blank junk rows. Neither case
-        # said anything to the user. Rows that are only PARTLY NA (a constant
-        # variable among usable ones) are still shown; that case has its own
-        # warning and the blank rows are informative there.
         if (is.null(res) || nrow(res) == 0 || all(is.na(res$r))) {
             if (is.null(group))
-                private$.addWarning("ERROR", .('No correlations could be computed with the selected options. If partial correlations are switched on, check that the variables are not collinear and that enough complete rows remain.'))
+                private$.addWarning("ERROR", .('No correlations could be computed with the selected options. If partial correlations are switched on, check that the variables are not collinear and that complete observations exceed the number of variables (n &gt; p, and effective h &gt; p for robust).'))
             else
                 private$.addWarning("WARNING", sprintf(
                     .('No correlations could be computed for group "%s"; it is omitted from the table.'),
@@ -1068,10 +1481,6 @@ jjcorrmatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     r         = res$r[i],
                     conf_low  = res$conf_low[i],
                     conf_high = res$conf_high[i],
-                    # Same numbers, two column pairs: only one pair is visible at
-                    # a time. Under `bayes` the interval is a CREDIBLE interval
-                    # from the posterior, not a confidence interval - the two are
-                    # different claims and were being shown under one header.
                     cred_low  = res$conf_low[i],
                     cred_high = res$conf_high[i],
                     p         = res$p[i],
@@ -1087,10 +1496,6 @@ jjcorrmatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
     if (!is.null(group)) {
         grp_var <- private$.resolveName(group, mydata)
         grp_vals <- mydata[[grp_var]]
-        # Rows with a missing group value belong to no subgroup. Dropping the
-        # NA level matters under pairwise handling, where .prepareData leaves
-        # those rows in place: `x == NA` yields an all-NA index, and NA-index
-        # subsetting produced a phantom "NA" group of all-NA correlations.
         n_missing_group <- sum(is.na(grp_vals))
         if (n_missing_group > 0)
             private$.addWarning("WARNING", sprintf(
@@ -1107,28 +1512,29 @@ jjcorrmatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         add_rows_for_subset(mydata, grp_label = "All")
     }
 
-    # Say which p-value the plot uses to cross out cells, so the table and the
-    # figure cannot be read as disagreeing.
-    if (options_data$typestatistics == "bayes") {
-        table$setNote("padj", .("Bayesian correlations report the median posterior estimate, a credible interval from the posterior (not a confidence interval) and BF<sub>10</sub>; no p-value is defined."))
-    } else if (options_data$padjustmethod == "none") {
-        table$setNote("padj", .("No correction for multiple comparisons was applied, so <b>p (adjusted)</b> repeats the unadjusted p-value. Each additional variable adds several pairwise tests."))
+    # Method-specific uncertainty & multiplicity disclosure note
+    method_note <- if (options_data$typestatistics == "bayes") {
+        if (isTRUE(private$.effective_partial)) {
+            .("Bayesian partial correlations use the exact Fisher/Ly effective sample size (n_eff = n - q, where q is the number of controlled variables) under a fixed shifted Beta prior (rscale = 0.707, wide). Reports median posterior estimate, HDI credible interval at the selected level, and BF<sub>10</sub>; no p-value is defined.")
+        } else {
+            .("Bayesian correlations use a fixed shifted Beta prior (rscale = 0.707, wide) and report the median posterior estimate, an HDI credible interval at the selected level (not a confidence interval), and BF<sub>10</sub>; no p-value is defined.")
+        }
     } else {
-        table$setNote("padj", sprintf(
-            .("<b>p (adjusted)</b> applies the %s correction across pairwise tests within each split panel (not across panels). This is the p-value the plot uses to mark cells as non-significant at %s."),
-            private$.padjustLabel(options_data$padjustmethod),
-            base::format(options_data$siglevel)))
+        padj_txt <- if (options_data$padjustmethod == "none") {
+            .("No correction for multiple comparisons was applied, so <b>p (adjusted)</b> repeats the unadjusted p-value. Each additional variable adds several pairwise tests.")
+        } else {
+            sprintf(
+                .("<b>p (adjusted)</b> applies the %s correction across pairwise tests within each split panel (not across panels). This is the p-value the plot uses to mark cells as non-significant at %s."),
+                private$.padjustLabel(options_data$padjustmethod),
+                base::format(options_data$siglevel))
+        }
+        extra_txt <- switch(options_data$typestatistics,
+            "nonparametric" = .("Spearman confidence intervals use the Fieller, Hartley & Pearson (1957) approximation and p-values use the asymptotic t-approximation (exact = FALSE)."),
+            "robust"        = .("Winsorized Pearson (20% per tail) uses Wilcox's (2012) effective degrees of freedom (df = h - 2, reduced by control variables when partial) and t-scaled Fisher-z confidence intervals."),
+            "")
+        if (nzchar(extra_txt)) paste(padj_txt, extra_txt) else padj_txt
     }
-},
-
-# Evaluate `expr` under the shared Bayesian seed when the selected method
-# samples, and untouched otherwise (nothing else here is stochastic, so
-# seeding it would only disturb the caller's RNG).
-.withBayesSeed = function(typestatistics, expr) {
-    if (identical(typestatistics, "bayes"))
-        withr::with_seed(private$.bayesSeed(), expr)
-    else
-        expr
+    table$setNote("padj", method_note)
 },
 
 # Human-readable name for a stats::p.adjust method.
@@ -1144,211 +1550,281 @@ jjcorrmatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 },
 
 .checkAssumptions = function(options_data) {
-    
-    # Name the method that actually ran, and show only its assumptions: the
-    # panel used to print the raw option token ("robust correlation") and then
-    # all four bullets regardless of the selection.
     method_name <- private$.methodName(options_data$typestatistics)
     method_bullet <- switch(options_data$typestatistics,
-        "parametric" = "<li><b>Pearson:</b> Assumes that the variables are approximately
-        normally distributed and that their relationship is linear.</li>",
-        "nonparametric" = "<li><b>Spearman:</b> Does not assume a specific distribution.
-        It is based on the ranks of the data and can detect monotonic (but not
-        necessarily linear) relationships.</li>",
-        "robust" = "<li><b>Winsorized Pearson:</b> Pearson's r computed after
-        winsorizing the most extreme 20% of observations in each tail, so
-        outliers are pulled in rather than removed. Less sensitive to outliers
-        than Pearson, but it still measures a linear association.</li>",
-        "bayes" = "<li><b>Bayesian Pearson:</b> Provides a measure of evidence for the
-        presence of a correlation, but the interpretation depends on the chosen prior.</li>",
+        "parametric" = paste0(
+            "<li><b>", .("Pearson:"), "</b> ",
+            .("Assumes that the variables are approximately normally distributed and that their relationship is linear."),
+            "</li>"
+        ),
+        "nonparametric" = paste0(
+            "<li><b>", .("Spearman:"), "</b> ",
+            .("Does not assume normality; it is based on ranks and detects monotonic relationships. Confidence intervals use the Fieller, Hartley &amp; Pearson (1957) approximation (best for |rho| \u2264 0.8), and p-values use the asymptotic t-approximation."),
+            "</li>"
+        ),
+        "robust" = paste0(
+            "<li><b>", .("Winsorized Pearson:"), "</b> ",
+            .("Pearson's r computed after winsorizing the most extreme 20% of observations in each tail (outliers are pulled in rather than removed), tested with Wilcox's (2012) effective degrees of freedom (df = h - 2). Less sensitive to outliers than Pearson, but it still measures a linear association."),
+            "</li>"
+        ),
+        "bayes" = paste0(
+            "<li><b>", .("Bayesian Pearson:"), "</b> ",
+            .("Evaluates evidence via BF<sub>10</sub> using a fixed shifted Beta prior with scale <code>rscale = 0.707</code> (wide, Beta(1.414, 1.414); not user-configurable) and reports the posterior median and HDI credible interval at the chosen level."),
+            if (isTRUE(private$.effective_partial))
+                paste0(" ", .("Partial Bayesian correlations use the exact Fisher/Ly effective sample size (n_eff = n - q) controlling for q covariates under multivariate normality."))
+            else "",
+            "</li>"
+        ),
         "")
 
-    assumptions_content <- glue::glue("
-    <h3>Statistical Assumptions & Warnings</h3>
-    <hr>
-    <p><b>For {method_name} correlation:</b></p>
-    <ul>
-        {method_bullet}
-    </ul>
-    <p><b>General Warnings:</b></p>
-    <ul>
-        <li>Correlation does not imply causation.</li>
-        <li>Outliers can have a large influence on the correlation coefficient,
-        especially for Pearson correlation.</li>
-        <li>Restricting the range of the variables can artificially lower the
-        correlation coefficient.</li>
-    </ul>
-    <hr>
-    ")
-    
+    assumptions_content <- paste0(
+        "<h3>", .("Statistical Assumptions &amp; Warnings"), "</h3>",
+        "<hr>",
+        "<p><b>", sprintf(.("For %s correlation:"), method_name), "</b></p>",
+        "<ul>", method_bullet, "</ul>",
+        "<p><b>", .("General Warnings:"), "</b></p>",
+        "<ul>",
+        "<li><b>", .("Independence:"), "</b> ",
+        .("Standard tests and intervals assume independent observations (one row per patient). Repeated measures, multiple biopsies, TMA cores, or bilateral specimens per patient violate independence and can inflate false positives."),
+        "</li>",
+        "<li>", .("Correlation does not imply causation."), "</li>",
+        "<li>", .("Outliers can have a large influence on the correlation coefficient, especially for Pearson correlation."), "</li>",
+        "<li>", .("Restricting the range of the variables can artificially lower the correlation coefficient."), "</li>",
+        "</ul>",
+        "<hr>"
+    )
+
     self$results$assumptions$setContent(assumptions_content)
+},
+
+# Build a single correlation matrix ggplot directly from .computeCorrelations()
+# so the plotted numbers, cross-out markers, Bayesian MCMC draws, partial
+# correlations, and Winsorized p-values are guaranteed identical to the table.
+.buildCorrPlot = function(df, options_data, ggtheme,
+                          title = NULL, subtitle = NULL, caption = NULL) {
+    res <- private$.computeCorrelations(df, options_data)
+    if (is.null(res) || nrow(res) == 0L || all(is.na(res$r))) return(NULL)
+
+    myvars <- options_data$myvars
+    # Omit constant/all-NA variables from the plotted matrix (consistent with
+    # .validateInputs warning), keeping original variable order.
+    valid_rows <- res[!is.na(res$r), , drop = FALSE]
+    keep_vars <- myvars[myvars %in% unique(c(valid_rows$var1, valid_rows$var2))]
+    if (length(keep_vars) < 2L) return(NULL)
+
+    pv <- length(keep_vars)
+    corr_mat <- diag(1, nrow = pv, ncol = pv)
+    dimnames(corr_mat) <- list(keep_vars, keep_vars)
+    p_mat <- matrix(0, nrow = pv, ncol = pv, dimnames = list(keep_vars, keep_vars))
+
+    for (k in seq_len(nrow(valid_rows))) {
+        v1 <- valid_rows$var1[k]
+        v2 <- valid_rows$var2[k]
+        if (v1 %in% keep_vars && v2 %in% keep_vars) {
+            corr_mat[v1, v2] <- valid_rows$r[k]
+            corr_mat[v2, v1] <- valid_rows$r[k]
+            pk <- if (is.na(valid_rows$p_adj[k])) 0 else valid_rows$p_adj[k]
+            p_mat[v1, v2] <- pk
+            p_mat[v2, v1] <- pk
+        }
+    }
+
+    is_bayes <- identical(options_data$typestatistics, "bayes")
+    r_method_text <- private$.methodName(options_data$typestatistics)
+    n_heading <- .("sample sizes:")
+    r_type <- if (any(grepl("^Partial ", valid_rows$method))) .("correlation (partial):") else .("correlation:")
+    ns_valid <- valid_rows$n[!is.na(valid_rows$n)]
+    n_lo <- min(ns_valid)
+    n_hi <- max(ns_valid)
+    if (n_lo == n_hi) {
+        legend_title <- bquote(atop(
+            atop(scriptstyle(bold(.(n_heading))), italic(n) ~ "=" ~ .(format(n_hi, big.mark = ","))),
+            atop(scriptstyle(bold(.(r_type))), .(r_method_text))
+        ))
+    } else {
+        legend_title <- bquote(atop(
+            atop(scriptstyle(bold(.(n_heading))),
+                 italic(n) ~ "=" ~ .(paste0(format(n_lo, big.mark = ","), " - ", format(n_hi, big.mark = ",")))),
+            atop(scriptstyle(bold(.(r_type))), .(r_method_text))
+        ))
+    }
+
+    plot_theme <- if (isTRUE(self$options$originaltheme)) {
+        ggstatsplot::theme_ggstatsplot()
+    } else if (!is.null(ggtheme)) {
+        ggtheme
+    } else {
+        ggplot2::theme_bw()
+    }
+
+    p <- ggcorrplot::ggcorrplot(
+        corr = corr_mat,
+        method = options_data$ggcorrplot.args$method,
+        type = options_data$matrixtype,
+        ggtheme = plot_theme,
+        colors = options_data$colors,
+        outline.color = options_data$ggcorrplot.args$outline.color,
+        lab = TRUE,
+        digits = options_data$k,
+        p.mat = if (is_bayes) NULL else p_mat,
+        sig.level = if (is_bayes) Inf else options_data$siglevel,
+        insig = "pch",
+        pch = "cross",
+        pch.cex = options_data$ggcorrplot.args$pch.cex,
+        legend.title = legend_title
+    )
+
+    # Non-significance cross legend caption (matches ggstatsplot::ggcorrmat)
+    cap_out <- caption
+    if (!is_bayes) {
+        p_label <- if (identical(options_data$padjustmethod, "none")) {
+            substitute(italic(p)[unadj.] ~ "< " ~ sig.level, list(sig.level = options_data$siglevel))
+        } else {
+            substitute(italic(p)[adj.text - adj.] ~ "< " ~ sig.level,
+                       list(sig.level = options_data$siglevel,
+                            adj.text = private$.padjustLabel(options_data$padjustmethod)))
+        }
+        cap_out <- if (is.null(caption) || !nzchar(caption)) {
+            substitute(bold("X") ~ "= non-significant at" ~ p_label, list(p_label = p_label))
+        } else {
+            substitute(atop(displaystyle(top.text), bold("X") ~ "= non-significant at" ~ p_label),
+                       list(top.text = caption, p_label = p_label))
+        }
+    }
+
+    p +
+        ggplot2::theme(
+            panel.grid.major = ggplot2::element_blank(),
+            panel.grid.minor = ggplot2::element_blank(),
+            legend.title = ggplot2::element_text(size = 15)
+        ) +
+        ggplot2::labs(title = title, subtitle = subtitle, caption = cap_out, x = NULL, y = NULL)
+},
+
+.buildPlot = function(mydata, options_data, ggtheme = NULL) {
+    plot <- private$.buildCorrPlot(
+        df = mydata,
+        options_data = options_data,
+        ggtheme = ggtheme,
+        title = options_data$title,
+        subtitle = options_data$subtitle,
+        caption = options_data$caption
+    )
+    if (is.null(plot)) return(NULL)
+    if (identical(options_data$typestatistics, "bayes"))
+        plot <- addSeedCaption(plot, self, private$.bayesSeed())
+    plot
+},
+
+.buildPlot2 = function(mydata, options_data, ggtheme = NULL) {
+    if (is.null(self$options$grvar)) return(NULL)
+    grp_var <- private$.resolveName(self$options$grvar, mydata)
+    grp_vals <- mydata[[grp_var]]
+    lvls <- unique(grp_vals[!is.na(grp_vals)])
+    if (is.factor(grp_vals)) lvls <- lvls[order(as.integer(lvls))]
+
+    plots <- list()
+    for (lvl in lvls) {
+        keep <- !is.na(grp_vals) & grp_vals == lvl
+        p_sub <- private$.buildCorrPlot(
+            df = mydata[keep, , drop = FALSE],
+            options_data = options_data,
+            ggtheme = ggtheme,
+            title = paste0(self$options$grvar, ": ", as.character(lvl)),
+            subtitle = NULL,
+            caption = NULL
+        )
+        if (!is.null(p_sub)) plots[[as.character(lvl)]] <- p_sub
+    }
+    if (length(plots) == 0L) return(NULL)
+
+    plot2 <- patchwork::wrap_plots(plots) +
+        patchwork::plot_annotation(
+            title = options_data$title,
+            subtitle = options_data$subtitle,
+            caption = options_data$caption
+        )
+
+    if (identical(options_data$typestatistics, "bayes"))
+        plot2 <- addSeedCaption(plot2, self, private$.bayesSeed())
+    plot2
 },
 
 .plot = function(image, ggtheme, theme, ...) {
             # Check for sufficient variables before any processing
             if (is.null(self$options$dep) || length(self$options$dep) < 2)
                 return()
-            
+
+            # Pooled plot is hidden when a grouping variable is active
+            if (!is.null(self$options$grvar))
+                return()
+
             # Use shared validation ----
             if (!private$.validateInputs())
                 return()
-        
-            # Add clinical validation warnings
-            private$.validateClinicalInputs()
-        
+
             # Use cached data and options for performance ----
             mydata <- private$.prepareData()
             options_data <- private$.prepareOptions()
-        
-            myvars <- options_data$myvars
-        
-        
-            # ggcorrmat ----
-            # https://www.indrapatil.com/ggstatsplot/reference/ggcorrmat.html
 
             # Checkpoint before expensive correlation computation
             private$.checkpoint()
 
-            # Skip heavy plotting in testthat runs; the table is populated once
-            # in .run(), interpretation is still generated here.
             if (Sys.getenv("TESTTHAT") == "true")
                 return(TRUE)
 
-            plot <- private$.withBayesSeed(options_data$typestatistics, ggstatsplot::ggcorrmat(
-                data = private$.plotFrame(mydata, myvars),
-                cor.vars = myvars,
-                cor.vars.names = NULL,
-                matrix.type = options_data$matrixtype,
-                type = options_data$typestatistics,
-                partial = options_data$partial,
-                # `tr` (trim, default 0.2) is what controls the robust
-                # estimator here. The former `beta = 0.1` was the bending
-                # constant of the percentage-bend coefficient used by older
-                # ggstatsplot and is silently discarded by 1.0.0.
-                # Decimal places: newer ggstatsplot renamed `k` -> `digits`.
-                # Pass both so the option is honored regardless of version
-                # (the unused name is harmlessly absorbed by `...`).
-                k = options_data$k,
-                digits = options_data$k,
-                sig.level = options_data$siglevel,
-                conf.level = options_data$conflevel,
-                bf.prior = 0.707,
-                p.adjust.method = options_data$padjustmethod,
-                pch = "cross",
-                ggcorrplot.args = options_data$ggcorrplot.args,
-                colors = options_data$colors,
-                ggtheme = if (isTRUE(self$options$originaltheme))
-                              ggstatsplot::theme_ggstatsplot() else ggtheme,
-                ggplot.component = NULL,
-                title = options_data$title,
-                subtitle = options_data$subtitle,
-                caption = options_data$caption
-            ))
-
-            # The correlation table AND the clinical interpretation are both
-            # produced once in .run(); only the figure is drawn here.
-
-            # The completion notice is emitted from .run(), which is the only
-            # place that renders private$.warnings. Adding it here appended to a
-            # list that .displayWarnings() had already consumed, so it never
-            # reached the user.
-
-            if (identical(options_data$typestatistics, "bayes"))
-                plot <- addSeedCaption(plot, self, private$.bayesSeed())
-
-            # Print Plot ----
+            plot <- private$.buildPlot(mydata, options_data, ggtheme = ggtheme)
+            if (is.null(plot))
+                return(FALSE)
 
             print(plot)
             TRUE
-
         },
-        
+
 
         .plot2 = function(image, ggtheme, theme, ...) {
             # Check for sufficient variables before any processing
             if (is.null(self$options$dep) || length(self$options$dep) < 2)
                 return()
-                
+
             # Use shared validation with additional grouping variable check ----
             if (!private$.validateInputs() || is.null(self$options$grvar))
                 return()
-
-            # Add clinical validation warnings
-            private$.validateClinicalInputs()
 
             # Use cached data and options for performance ----
             mydata <- private$.prepareData()
             options_data <- private$.prepareOptions()
 
-            myvars <- options_data$myvars
+            # Checkpoint before expensive grouped correlation computation
+            private$.checkpoint()
 
+            if (Sys.getenv("TESTTHAT") == "true")
+                return(TRUE)
 
-            # grouped_ggcorrmat ----
-            # https://www.indrapatil.com/ggstatsplot/reference/grouped_ggcorrmat.html
-
-            if ( !is.null(self$options$grvar) ) {
-
-                grvar <- self$options$grvar
-
-                # Prepare annotation arguments for modern patchwork API
-                annotation_args <- list()
-                if (!is.null(options_data$title)) {
-                    annotation_args$title <- options_data$title
-                }
-                if (!is.null(options_data$subtitle)) {
-                    annotation_args$subtitle <- options_data$subtitle
-                }
-                if (!is.null(options_data$caption)) {
-                    annotation_args$caption <- options_data$caption
-                }
-
-                # Checkpoint before expensive grouped correlation computation
-                private$.checkpoint()
-
-                if (Sys.getenv("TESTTHAT") == "true")
-                    return(TRUE)
-
-                plot2 <- private$.withBayesSeed(options_data$typestatistics, ggstatsplot::grouped_ggcorrmat(
-                    data = private$.plotFrame(mydata, myvars, extra = grvar),
-                    cor.vars = myvars,
-                    cor.vars.names = NULL,
-                    grouping.var = !!rlang::sym(grvar),
-                    plotgrid.args = list(),
-                    annotation.args = annotation_args,
-                    type = options_data$typestatistics,
-                    matrix.type = options_data$matrixtype,
-                    partial = options_data$partial,
-                    # See the note in .plot(): `beta` no longer applies.
-                    # Decimal places: newer ggstatsplot renamed `k` -> `digits`.
-                    # Pass both so the option is honored regardless of version
-                    # (the unused name is harmlessly absorbed by `...`).
-                    k = options_data$k,
-                    digits = options_data$k,
-                    sig.level = options_data$siglevel,
-                    conf.level = options_data$conflevel,
-                    bf.prior = 0.707,
-                    p.adjust.method = options_data$padjustmethod,
-                    pch = "cross",
-                    ggcorrplot.args = options_data$ggcorrplot.args,
-                    colors = options_data$colors,
-                    ggtheme = if (isTRUE(self$options$originaltheme))
-                                  ggstatsplot::theme_ggstatsplot() else ggtheme,
-                    ggplot.component = NULL
-                ))
-
-            }
-
-            # The correlation table AND the clinical interpretation are both
-            # produced once in .run(); only the figure is drawn here.
-
-            if (identical(options_data$typestatistics, "bayes"))
-                plot2 <- addSeedCaption(plot2, self, private$.bayesSeed())
-
-            # Print Plot ----
+            plot2 <- private$.buildPlot2(mydata, options_data, ggtheme = ggtheme)
+            if (is.null(plot2))
+                return(FALSE)
 
             print(plot2)
             TRUE
+        },
 
+        # Hardened per-option syntax serializer: drops undeclared option names
+        # and list payloads that can arrive from crafted .omv/.omt files, and
+        # properly escapes character scalars via encodeString() so quotes,
+        # backslashes, or newlines cannot break out of string literals.
+        .sourcifyOption = function(option) {
+            if (!option$name %in% names(formals(jjcorrmat)))
+                return("")
+            value <- option$value
+            if (is.list(value))
+                return("")
+            if (is.character(value)) {
+                if (length(value) != 1L || is.na(value) || identical(value, option$default))
+                    return("")
+                return(paste0(option$name, " = ", encodeString(value, quote = '"')))
+            }
+            super$.sourcifyOption(option)
         }
 
     ), # End of private list
@@ -1362,29 +1838,22 @@ jjcorrmatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             if (is.null(dep) || length(dep) == 0)
                 return('')
 
-            # Build the argument list in option-declaration order.
-            #
-            # Every variable-name option (single OptionVariable or multi-variable
-            # OptionVariables) is emitted as a deparse()'d string literal. deparse()
-            # produces valid, fully-escaped R for names containing spaces, quotes or
-            # backslashes (e.g. `Tumor Grade`); jmvcore's default sourcify would emit
-            # some of these as bare, unquoted symbols and yield invalid syntax.
-            # Detecting the option by CLASS (not by name) means any variable option
-            # added later is escaped automatically.
-            #
-            # Variables are NOT re-emitted through private$.asArgs() - doing so
-            # previously duplicated them in the generated syntax (the "double
-            # variables" bug). All non-variable options keep jmvcore's per-option
-            # sourcify so formatting stays consistent with jamovi.
+            # Build the argument list in option-declaration order, filtering
+            # strictly to declared jjcorrmat formals and encoding all string
+            # values via encodeString() so crafted .omv options or variable
+            # names with quotes/backslashes/newlines cannot inject arguments.
+            allowed_args <- setdiff(names(formals(jjcorrmat)), "data")
             args <- character(0)
             for (option in private$.options$options) {
-                if (option$name == 'data')
+                if (!option$name %in% allowed_args)
                     next
                 if (inherits(option, 'OptionVariable') || inherits(option, 'OptionVariables')) {
                     val <- option$value
-                    if (!is.null(val) && length(val) > 0)
-                        args <- c(args, paste0(option$name, ' = ',
-                                               paste0(deparse(val), collapse = '')))
+                    if (is.character(val) && length(val) > 0L && !any(is.na(val))) {
+                        encoded <- encodeString(unname(val), quote = '"')
+                        rhs <- if (length(encoded) == 1L) encoded else paste0("c(", paste(encoded, collapse = ", "), ")")
+                        args <- c(args, paste0(option$name, ' = ', rhs))
+                    }
                 } else {
                     as <- private$.sourcifyOption(option)
                     if (!identical(as, ''))

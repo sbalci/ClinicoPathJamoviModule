@@ -446,7 +446,9 @@ test_that("RV-datetimeconverter-01: .generateComponentPreview handles n=0 safely
     extract_weeknum = TRUE
   )
   expect_true(grepl("lubridate::week", html_text(res_wk$componentPreview), fixed = TRUE))
-  gen_comp <- dtc_class$private_methods$.generateComponentPreview
+  # Called on an instance: the builder's text goes through .(), which needs `self`.
+  gen_comp <- dtc_class$new(options = dtc_opts$new(datetime_var = "dt"),
+                            data = data.frame(dt = "2024-01-15"))$.__enclos_env__$private$.generateComponentPreview
   expect_identical(gen_comp(list(year = integer(0)), n = 10), "<p>No data to preview.</p>")
 })
 

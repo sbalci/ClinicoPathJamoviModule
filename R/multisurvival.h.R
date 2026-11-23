@@ -555,6 +555,7 @@ multisurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
     "multisurvivalResults",
     inherit = jmvcore::Group,
     active = list(
+        eventRecodeTable = function() private$.items[["eventRecodeTable"]],
         eventRecodeInfo = function() private$.items[["eventRecodeInfo"]],
         todo = function() private$.items[["todo"]],
         errors = function() private$.items[["errors"]],
@@ -596,6 +597,8 @@ multisurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
         plot_adj = function() private$.items[["plot_adj"]],
         plot_nomogram = function() private$.items[["plot_nomogram"]],
         nomogram_display = function() private$.items[["nomogram_display"]],
+        nomogramPoints = function() private$.items[["nomogramPoints"]],
+        nomogramRisk = function() private$.items[["nomogramRisk"]],
         nomogramSummary = function() private$.items[["nomogramSummary"]],
         adjustedSurvTable = function() private$.items[["adjustedSurvTable"]],
         adjustedSurvTableSummary = function() private$.items[["adjustedSurvTableSummary"]],
@@ -604,6 +607,7 @@ multisurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
         adjustedCoxTable = function() private$.items[["adjustedCoxTable"]],
         adjustedCoxText = function() private$.items[["adjustedCoxText"]],
         adjustedCoxSummary = function() private$.items[["adjustedCoxSummary"]],
+        adjustedCoxPHTable = function() private$.items[["adjustedCoxPHTable"]],
         adjustedCoxPH = function() private$.items[["adjustedCoxPH"]],
         modelContributionTable = function() private$.items[["modelContributionTable"]],
         modelContributionSummary = function() private$.items[["modelContributionSummary"]],
@@ -635,6 +639,40 @@ multisurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                     "graphics",
                     "knitr",
                     "riskRegression"))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="eventRecodeTable",
+                title="Outcome Recode",
+                rows=0,
+                visible="(length(outcome) > 0)",
+                clearWith=list(
+                    "outcome",
+                    "outcomeLevel",
+                    "elapsedtime",
+                    "explanatory",
+                    "contexpl",
+                    "fudate",
+                    "dxdate",
+                    "tint",
+                    "multievent",
+                    "analysistype",
+                    "dod",
+                    "dooc",
+                    "awd",
+                    "awod"),
+                columns=list(
+                    list(
+                        `name`="category", 
+                        `title`="", 
+                        `type`="text"),
+                    list(
+                        `name`="levels", 
+                        `title`="Levels", 
+                        `type`="text"),
+                    list(
+                        `name`="n", 
+                        `title`="N", 
+                        `type`="integer"))))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="eventRecodeInfo",
@@ -1877,6 +1915,94 @@ multisurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                     "dooc",
                     "awd",
                     "awod")))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="nomogramPoints",
+                title="Input Variables",
+                rows=0,
+                visible="(showNomogram)",
+                clearWith=list(
+                    "showNomogram",
+                    "cutp",
+                    "outcome",
+                    "outcomeLevel",
+                    "elapsedtime",
+                    "explanatory",
+                    "contexpl",
+                    "multievent",
+                    "analysistype",
+                    "interactions",
+                    "use_stratify",
+                    "stratvar",
+                    "tint",
+                    "dxdate",
+                    "fudate",
+                    "timetypedata",
+                    "timetypeoutput",
+                    "uselandmark",
+                    "landmark",
+                    "dod",
+                    "dooc",
+                    "awd",
+                    "awod"),
+                columns=list(
+                    list(
+                        `name`="variable", 
+                        `title`="Variable", 
+                        `type`="text", 
+                        `combineBelow`=TRUE),
+                    list(
+                        `name`="value", 
+                        `title`="Value", 
+                        `type`="text"),
+                    list(
+                        `name`="points", 
+                        `title`="Points", 
+                        `type`="number"))))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="nomogramRisk",
+                title="Risk Prediction",
+                rows=0,
+                visible="(showNomogram)",
+                clearWith=list(
+                    "showNomogram",
+                    "cutp",
+                    "outcome",
+                    "outcomeLevel",
+                    "elapsedtime",
+                    "explanatory",
+                    "contexpl",
+                    "multievent",
+                    "analysistype",
+                    "interactions",
+                    "use_stratify",
+                    "stratvar",
+                    "tint",
+                    "dxdate",
+                    "fudate",
+                    "timetypedata",
+                    "timetypeoutput",
+                    "uselandmark",
+                    "landmark",
+                    "dod",
+                    "dooc",
+                    "awd",
+                    "awod"),
+                columns=list(
+                    list(
+                        `name`="axis", 
+                        `title`="Risk Axis", 
+                        `type`="text", 
+                        `combineBelow`=TRUE),
+                    list(
+                        `name`="points", 
+                        `title`="Total Points", 
+                        `type`="number"),
+                    list(
+                        `name`="risk", 
+                        `title`="Predicted Risk", 
+                        `type`="number"))))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="nomogramSummary",
@@ -2199,6 +2325,59 @@ multisurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                     "uselandmark",
                     "landmark",
                     "timetypeoutput")))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="adjustedCoxPHTable",
+                title="Proportional Hazards Test (Adjusted Cox)",
+                rows=0,
+                visible="(ac && ac_summary && ph_cox)",
+                refs="survival",
+                clearWith=list(
+                    "ac",
+                    "ac_summary",
+                    "adjexplanatory",
+                    "ph_cox",
+                    "ac_method",
+                    "outcome",
+                    "outcomeLevel",
+                    "elapsedtime",
+                    "explanatory",
+                    "contexpl",
+                    "fudate",
+                    "dxdate",
+                    "tint",
+                    "multievent",
+                    "analysistype",
+                    "dod",
+                    "dooc",
+                    "awd",
+                    "awod",
+                    "use_stratify",
+                    "stratvar",
+                    "interactions",
+                    "uselandmark",
+                    "landmark",
+                    "timetypedata",
+                    "timetypeoutput"),
+                columns=list(
+                    list(
+                        `name`="term", 
+                        `title`="Term", 
+                        `type`="text"),
+                    list(
+                        `name`="chisq", 
+                        `title`="Chi-square", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="df", 
+                        `title`="df", 
+                        `type`="integer"),
+                    list(
+                        `name`="p", 
+                        `title`="p", 
+                        `type`="number", 
+                        `format`="zto,pvalue"))))
             self$add(jmvcore::Preformatted$new(
                 options=options,
                 name="adjustedCoxPH",
@@ -2585,6 +2764,7 @@ multisurvivalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   visual clutter when summaries are not needed.
 #' @return A results object containing:
 #' \tabular{llllll}{
+#'   \code{results$eventRecodeTable} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$eventRecodeInfo} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$errors} \tab \tab \tab \tab \tab a html \cr
@@ -2626,6 +2806,8 @@ multisurvivalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   \code{results$plot_adj} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$plot_nomogram} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$nomogram_display} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$nomogramPoints} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$nomogramRisk} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$nomogramSummary} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$adjustedSurvTable} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$adjustedSurvTableSummary} \tab \tab \tab \tab \tab a html \cr
@@ -2634,6 +2816,7 @@ multisurvivalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   \code{results$adjustedCoxTable} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$adjustedCoxText} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$adjustedCoxSummary} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$adjustedCoxPHTable} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$adjustedCoxPH} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$modelContributionTable} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$modelContributionSummary} \tab \tab \tab \tab \tab a html \cr
@@ -2648,9 +2831,9 @@ multisurvivalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'
 #' Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
 #'
-#' \code{results$fittedTable$asDF}
+#' \code{results$eventRecodeTable$asDF}
 #'
-#' \code{as.data.frame(results$fittedTable)}
+#' \code{as.data.frame(results$eventRecodeTable)}
 #'
 #' @export
 multisurvival <- function(

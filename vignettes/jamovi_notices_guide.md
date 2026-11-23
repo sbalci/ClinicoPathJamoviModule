@@ -3174,7 +3174,8 @@ self$results$notices$setContent(paste(Filter(nzchar, private$.noticeList), colla
   `release_gate.py` `check_setnote_errors`.
 - **The comment is our position.** A comment that still gives "Notice cannot be serialized" as the
   reason is read as current; the reason is the plain-text, title-less content
-  (section 13 of the review guide). `check_notice_myths`.
+  (section 13 of the review guide). `check_notice_myths`, which since 2026-11-22 also matches the
+  "Notice protobuf issues" wording the 2026-11-20 jsurvival reviewer quoted.
 - Do not blank panels right before `reject()`; the greyed previous result under the error is
   jamovi's failure presentation (review guide section 5, with what jmvcore restores between runs).
 

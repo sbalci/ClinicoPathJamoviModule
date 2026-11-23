@@ -351,6 +351,29 @@ diagnosticmetaClass <- R6::R6Class(
 
         },
         
+        # Normal idle returns do not invoke jamovi's rejected-analysis display.
+        # Retain fixed row labels, but discard every data-dependent value and note.
+        .clearComputedResults = function() {
+            for (name in c("bivariateresults", "hsrocresults", "heterogeneity",
+                           "publicationbias", "predictiveValues")) {
+                table <- self$results[[name]]
+                for (column in table$columns) {
+                    if (column$name %in% c("parameter", "measure", "test")) next
+                    for (row in seq_len(table$rowCount))
+                        table$setCell(col = column$name, rowNo = row, value = NULL)
+                }
+                for (key in names(table$notes)) table$setNote(key, NULL)
+            }
+            for (name in c("individualstudies", "metaregression")) {
+                table <- self$results[[name]]
+                table$deleteRows()
+                for (key in names(table$notes)) table$setNote(key, NULL)
+            }
+            self$results$summary$setContent("")
+            for (name in c("forestplot", "srocplot", "funnelplot"))
+                self$results[[name]]$setState(NULL)
+        },
+
         .run = function() {
 
             # Reset the notices accumulator and clear any banner content left
@@ -378,6 +401,7 @@ diagnosticmetaClass <- R6::R6Class(
 
             # Check if data is ready
             if (is.null(self$data)) {
+                private$.clearComputedResults()
                 # Show instructions when no data
                 self$results$instructions$setVisible(TRUE)
                 return()
@@ -408,6 +432,7 @@ diagnosticmetaClass <- R6::R6Class(
             #   Each sentence is a whole translatable unit joined with paste(), not a spliced noun
             #   phrase, so it can be inflected correctly in every language.
             if (!all_provided) {
+                private$.clearComputedResults()
                 self$results$instructions$setVisible(TRUE)
                 n_set <- sum(!vapply(list(study_var, tp_var, fp_var, fn_var, tn_var),
                                      is.null, logical(1)))
@@ -437,6 +462,7 @@ diagnosticmetaClass <- R6::R6Class(
             # excludes every row): stay idle, as for an incomplete selection, but
             # say why nothing appears.
             if (nrow(self$data) == 0) {
+                private$.clearComputedResults()
                 self$results$instructions$setVisible(TRUE)
                 private$.addNotice("WARNING", .("Data contains no rows"),
                     .("The dataset contains no rows. Add data (or clear the active filter) and re-run."))

@@ -16,7 +16,12 @@
 # and the absence of the stale snapshot at the export site.
 
 .oo_ns <- NULL
-for (.p in c("ClinicoPath", "jsurvival")) {
+for (.p in local({
+    # The package under test, else whichever candidate is already loaded. Never load the other
+    # one: an installed umbrella build would be tested in place of this tree.
+    p <- c("ClinicoPath", "jsurvival"); t <- Sys.getenv("TESTTHAT_PKG")
+    if (t %in% p) t else if (any(p %in% loadedNamespaces())) intersect(p, loadedNamespaces()) else p
+})) {
     if (.p %in% loadedNamespaces() || requireNamespace(.p, quietly = TRUE)) {
         .cand <- asNamespace(.p)
         if (exists("outcomeorganizer", envir = .cand, inherits = FALSE)) {

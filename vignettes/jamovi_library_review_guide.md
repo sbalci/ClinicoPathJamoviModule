@@ -18,6 +18,7 @@ reviewer against this project's submodules, with external learning sources ident
 | `jamovi-library-audit/2026-09-22 OncoPath.md` | OncoPath (round 5) | 2026-09-22 |
 | `jamovi-library-audit/2026-10-23 jamovi library OncoPath 1.1.2 is on its way.md` | OncoPath (round 7; the report arrives in the library's "on its way" email for a release it is already publishing) | 2026-10-23 |
 | `jamovi-library-audit/2026-10-23 jamovi library meddecide 1-1-2 is on its way.md` | meddecide (round 8; the first round to inspect the options panels and results, 20 findings on a build the gate called clean) | 2026-10-23 |
+| `jamovi-library-audit/2026-11-20 jsurvival.md` | jsurvival 1.1.5 (round 9; "on its way" email, six findings, one HIGH on a build whose gate read 0 for that class) | 2026-11-20 |
 | User-supplied `2026-10-03 jYS.md` and `MODIFICATIONS_REPORT_EN.md` | external jYS 1.1.5; audit plus remediation account, not our closure evidence | 2026-10-03 / 2026-10-10 |
 
 Every rule below is something the reviewer *actually raised*, on real files, with
@@ -210,6 +211,20 @@ Plus the cheap metadata gates the reviewer checks first:
 - No `$insert()` at a sentinel index ([section 13](#13-notices-the-native-element-and-the-insert-trap)).
 - `jamovi/i18n` holds only this module's strings: the updater copies the umbrella catalog and
   `jmvtools::i18nUpdate()` trims it at build ([section 9](#9-rule-translatable-strings-are-whole-sentences)).
+- No computed value in an HTML cell and no printed object in a result, **whatever the method is
+  called**: a method named `...Guide` or `...Explanation` that fills `<td>` cells with values is
+  data, and so is `setContent(paste(capture.output(print(x)), ...))`
+  ([section 26](#26-rule-tabular-data-belongs-in-a-table-result), round 9).
+- Every sentence a user reads is the argument of `.()`. `check_untranslated_prose` lists the
+  functions that build English outside it
+  ([section 9](#9-rule-translatable-strings-are-whole-sentences), round 9).
+- One route per plot: what is drawn is in `image$state`, **or** the image has `requiresData: true`
+  and the renderer reads the data. Not both, and not the dataset for one label
+  ([section 17](#17-rule-image-state-holds-drawing-data-not-models-or-datasets), round 9).
+- Rows that must be in state go only to the images that are switched on (`setState(NULL)` for the
+  rest), cut to the columns that are drawn, with the measured size in a `# state-payload:` line.
+- `jmvcore::reject()` gets its values after `code =`; a second positional argument is the code
+  ([section 16](#16-rule-never-wrap-jmvcorereject-in-a-catch-all-trycatch)).
 
 ---
 
@@ -246,6 +261,10 @@ problems, not one-off bugs** — when one function does it, the whole module doe
 | 24 | Results hidden or blanked on a failure path (`on.exit` hide, blank before `reject()`) | MD 6 (round 8; §5 class, first raised round 2; the OP and JJ hits were detector false positives, fixed) | MEDIUM |
 | 25 | Empty `Preformatted` used as a heading | MD 15, JS 40, CPD 2 (round 8; round 2 named two) | LOW |
 | 26 | A failed optional sub-analysis reported as a table footnote | MD 102, JS 22, OP 7 (round 8) | LOW |
+| 27 | Computed values in an HTML grid under a help-like method name, in a file-level helper, or as printed console text | JS 5 (round 9, the module's HIGH); MD 1, JJ 9, CPD 11 with the corrected check | HIGH |
+| 28 | User-visible English sentences outside `.()` in a module that ships a translation | JS 67 functions, JJ 67, MD 30, CPD 29, OP 4 (round 9); JS 52 after the implement pass, 0 since 2026-11-23 (three functions marked `# i18n-exempt:`) | LOW |
+| 29 | Patient rows in image state through a variable payload; a renderer that draws from state and still loads the dataset | JS 12 payloads and 8 renderers, CPD 2 and 5 (round 9; §17 class, first raised round 1); JS 17 once the check knew `cutoffdata`, 0 and 0 after the implement pass | LOW |
+| 30 | A value passed to `jmvcore::reject()` in the `code` position | JS 1 (round 9), fixed; 0 shipped in all five modules, so the check is a FAIL since 2026-11-22; 64 in unshipped analyses | INFO |
 
 **The lesson:** when a review names one instance, grep for the class and fix all
 of it. The reviewer explicitly rewards this — "several of them by fixing the
@@ -922,6 +941,62 @@ Splices and translated-word comparisons have no static detector (a lowercase `.(
 usually a legitimate label: 46 hits in OncoPath, 19 of them fine); the pseudo-translation test
 is the check.
 
+### Round 9: text that never enters the catalogue (2026-11-20 jsurvival [LOW])
+
+Rounds 1 to 4 policed the *shape* of what is inside `.()`: no fragments, no padding, no spliced
+words. Nothing counted what is outside it. jsurvival 1.1.5 had every `reject()` translated, no
+fragment left and a full Turkish catalogue, and the reviewer still found the outcome recode
+summary (shown on every run of five analyses), the explanation panels and several section
+headings as literal English: "a Turkish user gets translated tables next to English explanations".
+
+**The rule.** A sentence or heading a user reads is the argument of `.()`: one sentence or heading
+per call, values through `{}` placeholders, markup outside the string.
+
+```r
+# WRONG - the catalogue never sees either string
+paste0("<b>Statistical Assumptions Check:</b><br>", "Level(s) ", cens, " are treated as censored.")
+
+# RIGHT
+paste0("<b>", .("Statistical Assumptions Check:"), "</b><br>",
+       .fmt(.("Level(s) {levels} are treated as censored."), levels = cens))
+```
+
+A file-level helper called from analysis methods cannot use jmvcore's `.()`, which looks for
+`self` in the helper's own frame. Take the translator from the caller instead, as
+`.callerTranslator()` in `R/utils-eventindicator.R` does:
+
+```r
+.fillEventRecodeTable <- function(table, res) {
+    . <- .callerTranslator(parent.frame())   # the caller's self$options$translate, or identity
+    ...
+    category = .("Event level")
+```
+
+**How the static panels were closed (2026-11-22).** `tools/i18n_wrap_html_literals.py` rewrites a
+static HTML literal inside an R6 method into `paste0(markup, .("text"), ...)`: block tags outside
+the string, inline tags (`<strong>`, `<i>`, `<sub>`) inside it, so a sentence is never cut into
+fragments. `tools/i18n_wrap_html_literals_check.R` evaluates every old and new literal with `.` as
+identity and compares them (jsurvival: 124 literals, 767 calls, 0 differ). The Turkish for the 673
+strings this produced was written as a batch and checked mechanically against each source: same
+inline tags, same numbers, same closing punctuation and edge whitespace, no placeholder introduced,
+every string covered. Then every analysis was run with the real `tr.json` and a translator that
+logs each lookup returned unchanged; none of the batch came back in English. Option names quoted
+in a panel take the label the catalogue already gives that option.
+
+Moving a block into a `Table` settles part of this for free: column titles come from the
+`.r.yaml`, which the extractor reads. Every string wrapped this way is a new msgid, so the
+translation has to be written in the same change (pitfalls in
+[`jamovi_i18n_guide.md`](jamovi_i18n_guide.md)).
+
+**Enforce it:** `check_untranslated_prose` (WARN) - a run of four or more English words in a
+string literal that is not the argument of `.()`, counted per function and listed from three up.
+On 2026-11-22: jsurvival 67 functions (every site the reviewer names is among them; they named
+about a dozen as examples), jjstatsplot 67, meddecide 30, ClinicoPathDescriptives 29, OncoPath 4.
+It is blind to headings under four words, to text assembled from single words and to `.(x)` on a
+non-literal, which the extractor never sees; and it counts developer-only `stop()` and
+`message()` text. That is too many and too mixed to promote: read the list for the analysis being
+released, do not sum it.
+
 ---
 
 ## 10. Rule: every package used must be declared — including base packages
@@ -1344,6 +1419,18 @@ count; 102 by the gate, which reads calls that span lines).
 mentions serialisation and not the correction; on 2026-10-24 meddecide 3 (the reviewer's one, and
 two they missed), CPD 29, JJ 10, JS 9, OP 2. `check_setnote_errors` (WARN) for the footnotes.
 
+### Round 9: the same reason in different words (2026-11-20 jsurvival [LOW])
+
+`check_notice_myths` read 0 for jsurvival, and the reviewer quoted `R/survival.b.R`: "rendered as
+HTML to avoid Notice protobuf issues". The check looked for the word *serialisation*; the comment
+said *protobuf*. It now matches both (jsurvival 1, the quoted line; 0 once the comment was
+corrected). A check keyed on one word of a retracted claim misses its paraphrase: when a claim is
+withdrawn, search for the mechanism's other names as well.
+
+The finding itself, hand-styled banners in all nine analyses, was DEFERRED by the maintainer on
+2026-11-22. The message helper of each analysis carries the breadcrumb and its trigger: revisit
+when these messages have been tried as `jmvcore::Notice` in the jamovi application.
+
 ---
 
 ## 14. Encoding review findings as tests
@@ -1537,6 +1624,27 @@ The `.b.R` template in `.claude/commands/create-function.md` and
 `vignettes/jamovi_notices_guide.md` §8 both wrapped the whole `.run()` in `tryCatch`.
 Both are corrected. New analyses copy templates faithfully.
 
+### Related: the second positional argument of `reject()` is `code`
+
+The signature is `jmvcore::reject(formats, code = NULL, ...)`. A value written second is taken as
+the code and never reaches the message (2026-11-20 jsurvival [INFO], `R/multisurvival-formula.R`,
+in a branch no caller reaches):
+
+```r
+# WRONG - the type is passed as `code`; the user reads "Unknown survival type: "
+jmvcore::reject("Unknown survival type: ", survival_type)
+
+# RIGHT - one translatable template, the value by name
+jmvcore::reject(.fmt(.("Unknown survival type: {type}"), type = survival_type))
+
+# ALSO RIGHT where .() is not available (a file-level helper): the value after `code =`
+jmvcore::reject("Unknown survival type: {}", code = NULL, survival_type)
+```
+
+**Enforce it:** `check_reject_positional` (WARN) - a `reject()` call with two or more unnamed
+arguments and no `code =`. jsurvival 1 (the reviewer's site), the other four siblings 0; 64 in
+unshipped analyses.
+
 ---
 
 ## 17. Rule: image state holds drawing data, not models or datasets
@@ -1614,6 +1722,82 @@ sample sizes, search it for functions and environments, and plot it after a seri
 The PARTIAL's deferred half had no breadcrumb in the code, so the reviewer could not have seen it
 (conventions: a PARTIAL needs a DEFERRED breadcrumb at the site). Test:
 `test-jsurvival-library-audit.R` "jsurvival image states hold drawing data, not patient rows".
+
+### Round 9: the payload was a variable, and the renderer read the data anyway (2026-11-20 jsurvival [LOW])
+
+`check_state_payload` read `0 shipped`. The reviewer found `singlearm` storing one `plotData` that
+holds `cleanData` in up to seven images, and `survival` storing it in five, where each of the five
+renderers also runs `private$.getData()` (name cleaning, relabelling, row bookkeeping) under
+`requiresData: true` to recover one display name. The check reads the text inside `setState(...)`,
+and there the payload is a single identifier: the `list(cleanData = ...)` was assigned thirty lines
+above.
+
+**The rule: one route per plot.** Either the state holds what is drawn and the renderer reads
+nothing else, or the image has `requiresData: true` and the renderer builds from the data. A
+title, a display name or a level label the renderer needs is a string, put into the state in
+`.run()`. When the rows themselves must be in state (a Kaplan-Meier curve needs them), store them
+only in the images that are switched on, measure the size, and write the waiver
+(`# state-payload: <why>`).
+
+**Enforce it:** two WARNs, both reconciled with the reviewer's list on the audited build.
+
+- `check_state_payload` now resolves a bare-identifier payload to the nearest `name <- list(`
+  above it. jsurvival 12 = `singlearm` 7 + `survival` 5, the reviewer's counts;
+  ClinicoPathDescriptives 2 (`venn`); the others 0. It stays a WARN until the shipped count is 0,
+  then joins the FAIL for the direct form.
+- `check_render_state_and_data` lists renderers of `requiresData` images that read `$state` and
+  also load the dataset. jsurvival 8 = the reviewer's five `survival` renderers plus
+  `multisurvival::.plotKM`, `survivalcont::.plot4` and `oddsratio::.plot` (the last is a guard,
+  `nrow(self$data) == 0`); ClinicoPathDescriptives 5; the others 0.
+
+The reviewer's two `oddsratio` sites do not hold rows in the audited build: the list at the first
+carries names and labels only (`stateVersion = 2L`, the 2026-10-30 fix), and the second is the code
+that strips rows from a legacy saved state. Read the audited source before answering a site list.
+
+**How it was closed (2026-11-22), and what the work added to the rule.**
+
+- *The label travels in state.* `survival::.cleandata()` stores the display name (`title2`); the
+  five renderers dropped `.getData()` and the five images dropped `requiresData: true`. A state
+  saved before the change has no `title2`, so the renderer falls back to the column name.
+- *Rows go to switched-on images only.* jamovi saves a hidden image's state all the same, so the
+  loop sets `NULL` on the rest:
+
+  ```r
+  shown <- c(plot = self$options$sc, plot2 = self$options$ce, plot3 = self$options$ch)
+  for (name in names(shown)) {
+      # state-payload: a Kaplan-Meier curve is drawn from rows; three columns, about 4 KB per
+      #   1000 patients compressed
+      self$results[[name]]$setState(if (isTRUE(shown[[name]])) plotData else NULL)
+  }
+  ```
+
+- *"A three-column frame" was not true until measured.* The frame in state also carried one or two
+  row-bookkeeping columns. Cut to the drawn columns it went from 7.3 to 3.9 KB per image per 1000
+  patients in `survival` (`length(memCompress(serialize(state, NULL)))`). Measure the columns and
+  the size; the number goes into the `# state-payload:` line.
+- *A name list is still a name.* `survivalcont` gave the same patient frame to five images under
+  the name `cutoffdata`, which the check's list of heavy names did not hold. Neither the reviewer
+  nor the gate listed it; it was found by reading the sibling analysis for the same shape. The
+  name is in the list now (jsurvival read 17, not 12, on the audited build), and the check also
+  resolves a payload behind `if (...) x else NULL`. The class test asserts the column count, which
+  no name list can.
+- *Which image is shown is decided in code.* The first version chose between `singlearm`'s two
+  survival curves from the `visible:` expressions in the `.r.yaml`. `.run()` overrides both with
+  `setVisible()` from the recode, because a pre-recoded competing-risk outcome arrives with
+  `multievent` off. Before gating a state on visibility, grep the backend for `setVisible(` on
+  that item.
+- *A test must not read results through a plot state.* Four assertions in
+  `test-survival-validation.R` used `plot$state$cleanData` as a window onto the cleaned data, so
+  trimming the state broke them. They read `.cleandata()` now.
+- *A data-route renderer with a rowless state says so.* `multisurvival::.plotKM`,
+  `survivalcont::.plot4` and `oddsratio::.plot` rebuild from the dataset and keep only a flag, a
+  version stamp or column names in state. Each carries `# render-route: data - <what the state
+  holds>`, which `check_render_state_and_data` reads. A waiver the check cannot read is not a
+  waiver: `# state-payload:` was only honoured above a line starting with `image` or `self$`
+  until 2026-11-22.
+
+Counts after the pass, in jsurvival: both checks 0, three measured `# state-payload:` sites.
+ClinicoPathDescriptives still reads 2 and 5 (`venn`, `categorize`).
 
 ---
 
@@ -1839,6 +2023,47 @@ meets them, and `release_gate.py --root ../meddecide` on the audited build (0737
    copies of the old reason.
 
 ---
+
+### Round 9 (2026-11-20 jsurvival, release 1.1.5)
+
+A third "on its way" email. Every finding from 2026-09-15 was closed, and the reviewer said the
+module "keeps getting noticeably tighter between audits". Six findings, one HIGH, and for four of
+the six the gate on the audited build (daefb1e) read 0.
+
+| Finding | Rule existed? | Recurrence · why |
+|---|---|---|
+| Tables as HTML or printed text (HIGH) | §26 (rounds 5 and 8) | **RECURRED in a third module; OUR-FIX + INSTANCE.** Measured on the nine backends: the check counted 11 methods at `7e95b90f2^` and 0 at `7e95b90f2` (2026-11-07), the commit in which nine methods named `...Guide` first appear. In the audited build two of the nine still drew grids of computed values; the name alone exempted them. The recode helper lives outside `R/*.b.R`, which was all the check read, and a printed `cox.zph` had no rule at all. |
+| Hand-styled banners (LOW) | §13 | **RECURRED by standing decision**, DEFERRED by the maintainer. The quoted comment is **NO-CHANNEL**: it still gave the retracted reason, in a wording the check did not match. |
+| Untranslated text (LOW) | §9 covered the shape of `.()` strings only | **NEW sub-class, NO-CHECK.** Now `check_untranslated_prose`. DONE 2026-11-23: panels, recode caveats and every value-built sentence are templates (`.pasteT`), and the module's Turkish catalogue has no empty entry. |
+| Rows in state, dataset read for a label (LOW) | §17 (round 3 PARTIAL, closed 2026-10-30) | **RECURRED, INSTANCE.** Round 3 fixed the two analyses it named. The check that was then promoted to FAIL cannot see a payload passed as a variable. Now two WARNs. DONE 2026-11-22; `survivalcont` had the same shape under a name the check did not know. |
+| Long methods (LOW) | standing | "Much improved"; the standing deferral. |
+| Two unreachable branches (INFO) | §11 | **RECURRED class, no detector** (a branch selected by an argument every caller passes as a constant is not mechanical). The `reject()` argument order in it is **NEW**: `check_reject_positional` (a FAIL since 2026-11-22). PARTIAL: the maintainer keeps the branches for R-side development; the message is fixed and a breadcrumb says the branches are intentional. |
+
+**What to do differently (round 9):**
+
+1. **An exemption keyed on a name is a door.** One commit took the jsurvival count from 11 to 0 by
+   moving every `<table>` into a method whose name ends in `Guide`, a word on the exempt list. Judge by content wherever content can be judged, and when a count falls to 0 between
+   rounds with no recorded sweep, find out how before believing it.
+2. **A detector's glob is part of its claim.** `R/*.b.R` is not the module; the most-copied block
+   in jsurvival was built by a file-level helper.
+3. **Look for the native element that already shows it.** One of the four grids repeated an
+   existing Table row for row; the fix was a deletion.
+4. **Read the object, not its `print()`.** A result parsed back out of printed text has lost its
+   numbers before it reaches the page.
+5. **The reviewer's site list can include a clean site.** Two of the state sites named for
+   `oddsratio` hold no rows. Section 18 round 8 lesson 3 again: read the audited build.
+6. **A name list is still a name.** After a detector is reconciled with the reviewer's list, read
+   the sibling analyses for the same shape under other names (`survivalcont`'s `cutoffdata`).
+7. **Measure the claim you are about to rely on.** "A three-column frame" had five columns.
+8. **What is shown is decided in code.** A `visible:` expression sees options only; `.run()` may
+   override it with `setVisible()`. Run the umbrella tests that read `$state` for the analysis
+   after changing what a state holds; the module's audit test alone did not catch this.
+9. **Wrapping text exposes it.** Checks that read only `.()` strings (spelling, padding, brackets)
+   start to apply the moment a literal is wrapped, and a test that calls a private method detached
+   from its object breaks when the method gains `.()`.
+10. **Code kept on purpose needs a line that says so.** The two branches the reviewer called
+    unreachable are kept by maintainer decision; without a breadcrumb the next round, or the next
+    cleanup, raises or removes them again.
 
 ### External learning (2026-10-03 jYS; remediation account 2026-10-10)
 
@@ -2418,6 +2643,45 @@ same shape as `decisioncalculator`'s — reviewer missed it) and two in `agreeme
 two-column welcome layout, exempt; the computed-variables banner, raised under notices). Across the
 siblings on 2026-10-24: MD 6, CPD 10, JJ 9, JS 12, OP 0. The interpolation/static-grid pair above
 remains the more precise spec; the name exemption is what made a WARN readable today.
+
+### Round 9: a help-like name is not an exemption (2026-11-20 jsurvival [HIGH])
+
+jsurvival's gate read `HTML <table> outside help methods: 0`, and the module's one HIGH was five
+methods in four groups: the outcome recode summary shown on every run of five analyses, a
+data-quality grid, the nomogram scoring guide, and two `cox.zph` results printed into a
+Preformatted. Three blind spots, all closed in `check_html_tables`:
+
+| Blind spot | Site it hid | Now |
+|---|---|---|
+| Any method whose name contains `guide`, `explan`, ... was exempt | `.formatQualityAssessmentGuide`, `.nomogramPointsGuide` | a help-named method is judged by its cells: a `<td>`/`<th>` that splices anything but `.()`, `.fmt()` or `jmvcore::format()` is a value |
+| Only `R/*.b.R` was read | `.describeEventIndicator()` in `R/utils-eventindicator.R` | file-level functions are scanned; one counts as shipped when a shipped analysis calls it |
+| No rule for printed objects | `setContent(paste(capture.output(print(zph)), collapse = "\n"))` ×2 | flagged as `(printed)` |
+
+What the fix itself taught:
+
+1. **Before converting a grid, look for a Table that already shows it.** datetimeconverter's grid
+   repeated its own `qualityCounts` table row for row. Deleting it was the whole fix.
+2. **Read the object, not its `print()`.** The nomogram guide parsed
+   `capture.output(print(nom))` with regular expressions. `rms:::print.nomogram` builds those
+   lines from `nom[[i]][[1]]`, `$points`, `$x` and `$x.real`; reading the same fields gives real
+   numbers for `number` columns, which is what the finding asks for.
+3. **One filler per shape.** multisurvival's main proportional-hazards test became a Table on
+   2026-07-29, and its adjusted model and the `survival` analysis went on printing the same object
+   until this round. `.fillCoxZphTable()` now fills all three tables.
+4. **Rows that follow from the options are scaffolded in `.init()`** even when a shared helper
+   fills them: `.initEventRecodeTable()` adds the row keys, `.fillRow()` fills or adds
+   ([section 6](#6-rule-row-structure-that-isnt-result-dependent-belongs-in-init)).
+5. **A user's level label in a cell is parsed as HTML by the client.** Break a `<` before a letter
+   at the sink (`gsub("<(?=[A-Za-z/!?])", "< ", x, perl = TRUE)`), never `htmlEscape()`.
+6. **Seven test files asserted the HTML cells.** They now read `table$asDF` and `table$notes`. An
+   assertion on markup locks the markup in.
+
+**Enforce it:** `check_html_tables` (WARN). With the three corrections, on 2026-11-22: jsurvival 5
+on the audited build, exactly the reviewer's list, and 0 after the fix; OncoPath 0; meddecide 1
+(`agreement::.createAboutPanel`); jjstatsplot 9; ClinicoPathDescriptives 11, one of them a printed
+object (`vartree::.run`). Fixtures: the round-9 block of `tools/test_release_gate.py`. Class test:
+"jsurvival computed values are Table rows, not HTML grids or printed text" in
+`tests/testthat/test-jsurvival-library-audit.R`.
 
 ---
 

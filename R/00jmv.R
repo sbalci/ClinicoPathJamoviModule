@@ -4864,4 +4864,15 @@
         `issue`=78, 
         `pages`=4684, 
         `doi`="10.21105/joss.04684", 
-        `url`="https://doi.org/10.21105/joss.04684"))
+        `url`="https://doi.org/10.21105/joss.04684"), 
+    `parameters`=list(
+        `type`="article", 
+        `author`="L\u00FCdecke, D., Ben-Shachar, M. S., Patil, I., & Makowski, D.", 
+        `year`=2020, 
+        `title`="Extracting, Computing and Exploring the Parameters of Statistical Models using R", 
+        `publisher`="Journal of Open Source Software", 
+        `volume`=5, 
+        `issue`=53, 
+        `pages`=2445, 
+        `doi`="10.21105/joss.02445", 
+        `url`="https://doi.org/10.21105/joss.02445"))

@@ -112,10 +112,11 @@ test_that("a one-point group reports that SD is not estimable", {
                   g = factor(c(rep("A", 30), "B")))
   res <- hullplot(data = d, x_var = "x", y_var = "y", group_var = "g",
                   show_statistics = TRUE)
-  txt <- strip_html(res$statistics$content)
+  st <- res$statistics$asDF
 
-  expect_match(txt, "SD not estimable, n = 1")
-  expect_false(grepl("± NA", txt, fixed = TRUE))
+  expect_true(is.na(st$x_sd[st$group == "B"]))
+  expect_true(is.na(st$y_sd[st$group == "B"]))
+  expect_match(res$statistics$notes$n1_sd$note, "SD is not estimable for groups with n = 1")
 })
 
 test_that("emitted HTML contains no bare ampersand", {
@@ -126,7 +127,7 @@ test_that("emitted HTML contains no bare ampersand", {
                   show_assumptions = TRUE, show_statistics = TRUE,
                   show_summary = TRUE, outlier_detection = TRUE)
 
-  for (panel in c("assumptions", "statistics", "summary", "outliers", "interpretation")) {
+  for (panel in c("assumptions", "summary", "outliers", "interpretation")) {
     html <- res[[panel]]$content
     bare <- regmatches(html, gregexpr("&(?![a-zA-Z]{2,12};)", html, perl = TRUE))[[1]]
     expect_length(bare, 0)

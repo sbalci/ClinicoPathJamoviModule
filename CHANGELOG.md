@@ -5,6 +5,103 @@ prevents them. Newest first. Release notes for users live in `NEWS.md`.
 
 ---
 
+## 2026-11-23 — jsurvival: every value-built sentence made translatable, and what the before/after run caught
+
+### Sentences pasted around values never reached the catalogue
+
+- **Failure mode:** 434 English literals in 79 functions sat outside `.()`: `paste0("The median was ", med, " months.")`, `glue()` summaries, label vectors. Wrapping each literal would have produced fragments, and `.fmt()` prints an ellipsis for a `NULL` value, so a mechanical rewrite to `.fmt()` would have changed output.
+- **Detection signal:** `check_untranslated_prose` (52 functions) and a pseudo-translation run (198 English runs outside the marks).
+- **Prevention rule:** one template per sentence with `.pasteT(.("... {x} ..."), x = x)` (`R/utils.R`), which pastes with `paste0()` itself; written by `tools/i18n_wrap_templates.py`. Intentional English carries `# i18n-exempt: <why>`. jsurvival reads 0 now and its Turkish catalogue has no empty entry. i18n guide section 5.
+
+### Four things only the before/after comparison found
+
+- **Failure mode:** (1) jmvcore's translator cuts an untranslated string at " [" when "]" follows, so three new templates lost their confidence intervals in English; (2) the first tool version merged two sentences that were already translated into one worse template, because it read a `style=` attribute as words; (3) a `sub("^String-to-datetime conversions use", ...)` rewrote the English prefix of a note that is now translated, which would have matched nothing in Turkish; (4) my harness used `bootstrap_validation` for an option named `bootstrapValidation`, jamovi ignored it silently, and a whole branch "passed" unexercised.
+- **Detection signal:** comparing every Html, Preformatted, table title and note over 36 configurations between the old and new sources; reading the tool's diff for one helper; a follow-up differential run in which two options showed no effect.
+- **Prevention rule:** prove a text rewrite on old-vs-new output before translating; brackets travel as a `{lb}` value; never `sub()` or `==` on translated text; check harness option names against the options class. Library-audit pitfalls 44-46.
+
+### Eight translations with invented endings
+
+- **Failure mode:** a listing of msgids cut at 400 characters; the Turkish for eight long strings was completed from a guess.
+- **Detection signal:** noticed while writing the last line of the batch, before anything was applied.
+- **Prevention rule:** translate only from the whole msgid; check every batch mechanically (tags, numbers, placeholders, sprintf conversions evaluated in R, coverage).
+
+---
+
+## 2026-11-22 — check-module jsurvival: part of the module's test suite was testing an installed copy of the umbrella package
+
+### Three "pre-existing" failures that were never jsurvival's
+
+- **Failure mode:** twelve test files shared by the umbrella and jsurvival resolve their namespace with `for (.p in c("ClinicoPath", "jsurvival")) if (.p %in% loadedNamespaces() || requireNamespace(.p, quietly = TRUE))`. On a machine where ClinicoPath is installed (here 1.0.81.1, built 2026-11-18), the first such file loads that installed package inside a jsurvival run, and every later file that prefers a loaded namespace picks it too: 8 of 27 files tested the installed umbrella build, not the jsurvival tree. The three failures carried as "pre-existing" through the whole round-9 pass (`bootstrapIDI`, `computeNRI` in `test-remaining-defects.R`) belonged to that stale build; jsurvival does not ship those helpers. It also explains why a wrong singlearm change passed the sibling's `test-singlearm-cif-plot-item.R` and failed only in the umbrella.
+- **Detection signal:** `/check-module jsurvival` asked where the functions behind the three failures live: not in jsurvival's `R/`. A probe of each test preamble showed which namespace it resolved to. Rerun with `requireNamespace("ClinicoPath")` refused: 27 files, 1304 passing, 0 failing, 2 skips.
+- **Prevention rule:** a failure labelled pre-existing gets its owner traced once before it is carried. A sibling suite run is evidence about the sibling only if `"ClinicoPath" %in% loadedNamespaces()` is FALSE at the end; run it with the installed umbrella refused (recipe in the library-audit skill, `references/submodule-verify.md`). The preamble itself should take the loaded namespace first and never load the other package; that edit to the twelve test files is not made yet.
+
+---
+
+## 2026-11-22 — library audit round 9, implement pass (jsurvival): a reconciled detector was still blind to the analysis next door
+
+### Five more plots saved the patient rows, under a name the check did not know
+
+- **Failure mode:** `check_state_payload` matches heavy objects by name. After it was reconciled with the reviewer's list (12 sites in `singlearm` and `survival`), `survivalcont` still passed the same patient frame to five images as `cutoffdata`. The frame in state was also described as "three columns" and had five. A `# state-payload:` waiver was honoured only above a line that starts with `image` or `self$`.
+- **Detection signal:** reading the sibling analysis for the same loop of `setState()` calls while fixing the named ones; the gate read 12 before and 17 after the name was added. The column count came from measuring the state for the size line.
+- **Prevention rule:** after reconciling a detector with a reviewer's list, search the module for the mechanism under other names, and put a measured assertion in the class test (column count, redraw with the dataset removed). Guide §17 round 9; `tools/release_gate.py` (`cutoffdata`, `if (...) x else NULL` payloads, the waiver on any line), `check_reject_positional` promoted to FAIL at 0 shipped in all five modules.
+
+### 673 strings translated in one batch
+
+- **Failure mode (avoided):** a hand-keyed catalogue edit can drop an inline tag, change a number or lose a trailing colon, and none of it shows in English.
+- **Detection signal:** none needed; the batch was checked mechanically (tags, numbers, punctuation, whitespace, placeholders, coverage) and by a Turkish run that logs every lookup returned unchanged.
+- **Prevention rule:** the five steps in `vignettes/jamovi_i18n_guide.md` section 5; library-audit pitfall 41.
+
+---
+
+## 2026-11-22 — library audit round 9, finding 4 (jsurvival): which plot is shown was read from the yaml, and the code decides it
+
+### The cumulative-incidence curve lost its data for a pre-recoded competing-risk outcome
+
+- **Failure mode:** while moving `singlearm`'s patient rows to "the one curve that is drawn", the choice between `plot` and `plot_cif` was written from the `visible:` expressions in `singlearm.r.yaml` (`multievent && analysistype:compete`). `.run()` overrides both with `setVisible()` from `private$.isCompetingRisk()`, because an outcomeorganizer hand-off carries competing events with `multievent` off. For those users the visible curve would have had no state. Separately, four assertions in `test-survival-validation.R` used the plot state as a window onto the cleaned data, so trimming the state to the drawn columns broke them.
+- **Detection signal:** two existing umbrella tests (`test-singlearm-cif-plot-item.R`, `test-survival-cure-gap-extensions.R`) failed after the change; the new class test and the whole jsurvival suite had passed. The targeted umbrella run was what caught it.
+- **Prevention rule:** before gating a state on visibility, grep the backend for `setVisible(` on that item; a `visible:` expression sees options only and the code may override it. After changing what an image state holds, run the umbrella tests that read `$state` for that analysis, not only the module's audit test. Tests read cleaned data from `.cleandata()`, never from a plot state. The class test now covers the pre-recoded case.
+
+---
+
+## 2026-11-22 — library audit round 9 (jsurvival 1.1.5): a gate line that read 0 because of what the methods were called
+
+### The most-copied block in the module was an HTML table, and two test results were printed console text
+
+- **Failure mode:** jsurvival shipped five methods that drew computed values as HTML or printed text:
+  the outcome recode summary (`.describeEventIndicator()`, shown on every run of five analyses), a
+  data-quality grid, the nomogram scoring guide, and `capture.output(print(cox.zph))` in `survival`
+  and in multisurvival's adjusted model. `check_html_tables` read 0 for the module. Measured on the
+  nine backends, the check counted 11 methods at `7e95b90f2^` and 0 at `7e95b90f2` (2026-11-07), the
+  commit in which nine methods named `...Guide` first appear; the check exempts help-like names. Two
+  of the nine still held grids of computed values. The recode helper lives in `R/utils-eventindicator.R`,
+  outside the `R/*.b.R` glob the check read, and a printed object had no rule.
+- **Detection signal:** the library reviewer (`2026-11-20 jsurvival` [HIGH]). The local gate missed it
+  through the name exemption, the glob and the missing rule; nobody asked why a count of 12 had become 0.
+- **Prevention rule:** a method is help or data by what its cells carry, not by its name; a detector
+  reads every file that ships; a class count that falls to 0 between rounds is traced to its commit
+  before it is believed. Enforced by `check_html_tables` (help-named methods judged by value-carrying
+  cells, file-level helpers scanned, printed objects flagged; fixtures in `tools/test_release_gate.py`)
+  and the class test in `tests/testthat/test-jsurvival-library-audit.R`; guide §26 round 9.
+
+### Three more classes the gate could not see
+
+- **Failure mode:** (1) English sentences in plain literals beside a full Turkish catalogue (recode
+  summary, explanation panels): earlier rules covered only the shape of `.()` strings. (2) Patient rows
+  in image state through `plotData <- list(cleanData = ...)` then `setState(plotData)`, in up to seven
+  `singlearm` images and five `survival` images whose renderers also ran `.getData()` for one label:
+  `check_state_payload`, a FAIL check at 0 shipped, read only the text inside `setState(...)`. (3) A
+  comment giving "Notice protobuf issues" as the reason for HTML banners: `check_notice_myths` matched
+  the word *serialisation* only. (4) `jmvcore::reject("Unknown survival type: ", survival_type)`: the
+  second positional argument is `code`.
+- **Detection signal:** the library reviewer (`2026-11-20 jsurvival`, three [LOW] and one [INFO]).
+- **Prevention rule:** `check_untranslated_prose`, `check_state_payload` (variable payloads) with
+  `check_render_state_and_data`, `check_notice_myths` (both wordings), `check_reject_positional`; all
+  WARN, each reconciled with the reviewer's list on the audited build (67 functions, 12 payloads and 8
+  renderers, 1 comment, 1 call). Guide §9, §13, §16, §17 round 9. Fixes for (1), (2) and (4) are still
+  open; the banners in (3) are deferred by the maintainer.
+
+---
+
 ## 2026-11-07 — OncoPath 1.1.3 pre-submission review: rows are not values, and an artefact fix applied to one design only
 
 ### Three HIGH defects survived five audit rounds; each needed an ordinary coding the bundled examples lack

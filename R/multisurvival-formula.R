@@ -31,6 +31,9 @@
   escaped_predictors <- .escapeVariableNames(predictors)
 
   # Build left-hand side based on survival type
+  # library-audit 2026-11-20 jsurvival [INFO] PARTIAL: "counting" and "interval" are kept on purpose
+  #   (R-side development and the documented reference), though the analysis passes "standard";
+  #   DEFERRED .() for their messages; revisit when either type becomes an analysis option
   lhs <- switch(survival_type,
     "standard" = paste0("survival::Surv(", escaped_time, ", ", escaped_outcome, ")"),
     "counting" = {
@@ -48,7 +51,7 @@
       escaped_stop <- .escapeVariableNames(stop_var)
       paste0("survival::Surv(", escaped_time, ", ", escaped_stop, ", ", escaped_outcome, ")")
     },
-    jmvcore::reject("Unknown survival type: ", survival_type)
+    jmvcore::reject("Unknown survival type: {}", code = NULL, survival_type)
   )
 
   # Build right-hand side: main effects + interaction terms (already escaped)

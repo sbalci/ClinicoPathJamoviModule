@@ -120,6 +120,29 @@ utils::globalVariables(c(
 }
 
 
+# A translatable paste0(). The pieces of `template` (normally wrapped in .()) and the named values
+# are pasted in the order the template gives them, so a translation can move a placeholder. Because
+# the work is done by paste0() itself, vectors recycle, NULL and character(0) vanish and numbers
+# print exactly as they did in the paste0() call this replaces; .fmt() prints "..." for a NULL.
+# With the template "The median was {med} months." and med = med, the result is exactly
+# paste0("The median was ", med, " months."). (No literal call is shown here: the catalogue
+# extractor reads comments too.)
+# Placeholder names are letters and digits. Written by tools/i18n_wrap_templates.py.
+.pasteT <- function(template, ...) {
+    values <- list(...)
+    found <- gregexpr("\\{[A-Za-z][A-Za-z0-9]*\\}", template)
+    keys <- regmatches(template, found)[[1]]
+    text <- regmatches(template, found, invert = TRUE)[[1]]
+    parts <- list()
+    for (i in seq_along(text)) {
+        if (nzchar(text[i])) parts[[length(parts) + 1L]] <- text[i]
+        if (i <= length(keys))
+            parts[length(parts) + 1L] <- list(values[[substr(keys[i], 2L, nchar(keys[i]) - 1L)]])
+    }
+    do.call(paste0, parts)
+}
+
+
 #' Null-coalescing operator
 #' @name null_coalescing
 #' @aliases %||%

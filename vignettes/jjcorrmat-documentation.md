@@ -10,10 +10,12 @@
   - `jamovi/jjcorrmat.a.yaml` - Options & Schema Definition
   - `jamovi/jjcorrmat.r.yaml` - Results Layout & Tables
   - `R/jjcorrmat.b.R` - Backend Implementation
-- **Summary**: Wrapper Function for ggstatsplot::ggcorrmat and ggstatsplot::grouped_ggcorrmat to generate correlation matrix visualizations with significance testing.
+- **Summary**: Unified correlation matrix analysis and visualization engine supporting zero-order and partial Pearson, Spearman, 20% Winsorized Pearson, and Bayesian Pearson correlations with subgroup stratification and multiplicity adjustment.
 
 ## 1a. Changelog
 
+- **Date**: 2026-11-22
+- **Summary**: Updated to reflect unified statistical engine (exact partial df, exact Fisher/Ly effective $n_{\text{eff}} = n - q$ for partial Bayes, Wilcox Winsorized df, `bayesseed`, `originaltheme`, and regrouped UI).
 - **Date**: 2026-08-29
 - **Summary**: Comprehensive documentation suite created & verified against active schemas and backend implementation.
 
@@ -21,21 +23,23 @@
 
 | Option | Type | Default | Description |
 | :--- | :--- | :--- | :--- |
-| `data` | `Data` | `NULL` |  |
+| `data` | `Data` | `NULL` | Input data frame |
 | `dep` | `Variables` | `NULL` | Dependent Variables |
 | `grvar` | `Variable` | `NULL` | Split By (Optional) |
 | `typestatistics` | `List` | `parametric` | Type of Statistic |
+| `bayesseed` | `Integer` | `20250101` | Bayesian seed |
 | `matrixtype` | `List` | `upper` | Matrix Type |
 | `matrixmethod` | `List` | `square` | Matrix Method |
 | `siglevel` | `Number` | `0.05` | Significance Level |
-| `conflevel` | `Number` | `0.95` | Confidence Level |
+| `conflevel` | `Number` | `0.95` | Confidence / credible level |
 | `padjustmethod` | `List` | `holm` | P-value Adjustment Method |
-| `k` | `Integer` | `2` | Decimal Places |
+| `k` | `Integer` | `2` | Decimal Places (plot labels) |
 | `partial` | `Bool` | `FALSE` | Partial correlations |
 | `naHandling` | `List` | `listwise` | Missing Data Handling |
 | `lowcolor` | `String` | `#E69F00` | Low Correlation Color |
 | `midcolor` | `String` | `white` | Mid Correlation Color |
 | `highcolor` | `String` | `#009E73` | High Correlation Color |
+| `originaltheme` | `Bool` | `FALSE` | Original ggstatsplot theme |
 | `title` | `String` | `` | Plot Title |
 | `subtitle` | `String` | `` | Plot Subtitle |
 | `caption` | `String` | `` | Plot Caption |

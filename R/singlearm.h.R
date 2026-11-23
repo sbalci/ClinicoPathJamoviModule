@@ -398,6 +398,7 @@ singlearmResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     inherit = jmvcore::Group,
     active = list(
         cifTable = function() private$.items[["cifTable"]],
+        eventRecodeTable = function() private$.items[["eventRecodeTable"]],
         eventRecodeInfo = function() private$.items[["eventRecodeInfo"]],
         todo = function() private$.items[["todo"]],
         errors = function() private$.items[["errors"]],
@@ -539,6 +540,34 @@ singlearmResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                         `title`="Cumulative censoring", 
                         `type`="integer", 
                         `visible`="(show_followup_support)"))))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="eventRecodeTable",
+                title="Outcome Recode",
+                rows=0,
+                visible="(showExplanations)",
+                clearWith=list(
+                    "outcome",
+                    "outcomeLevel",
+                    "multievent",
+                    "analysistype",
+                    "dod",
+                    "dooc",
+                    "awd",
+                    "awod"),
+                columns=list(
+                    list(
+                        `name`="category", 
+                        `title`="", 
+                        `type`="text"),
+                    list(
+                        `name`="levels", 
+                        `title`="Levels", 
+                        `type`="text"),
+                    list(
+                        `name`="n", 
+                        `title`="N", 
+                        `type`="integer"))))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="eventRecodeInfo",
@@ -1663,6 +1692,7 @@ singlearmBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$cifTable} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$eventRecodeTable} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$eventRecodeInfo} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$errors} \tab \tab \tab \tab \tab a html \cr

@@ -263,6 +263,7 @@ minimum-P-value search space is too large for exhaustive evaluation.}
 \value{
 A results object containing:
 \tabular{llllll}{
+\code{results$eventRecodeTable} \tab \tab \tab \tab \tab a table \cr
 \code{results$eventRecodeInfo} \tab \tab \tab \tab \tab a html \cr
 \code{results$todo} \tab \tab \tab \tab \tab a html \cr
 \code{results$clinicalWarnings} \tab \tab \tab \tab \tab a html \cr
@@ -313,9 +314,9 @@ A results object containing:
 
 Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
 
-\code{results$coxTable$asDF}
+\code{results$eventRecodeTable$asDF}
 
-\code{as.data.frame(results$coxTable)}
+\code{as.data.frame(results$eventRecodeTable)}
 }
 \description{
 Survival analysis for one continuous explanatory variable: Cox regression

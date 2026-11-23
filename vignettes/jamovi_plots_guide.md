@@ -442,6 +442,37 @@ options needed to draw still belong in state; the corresponding dependencies mus
 the image through `clearWith`. A state payload alone does not prove freshness. See
 `vignettes/jamovi_library_review_guide.md` §17.
 
+**One route per plot.** Either the state holds what is drawn and the renderer reads nothing else,
+or the image has `requiresData: true` and the renderer builds from the data. A renderer that draws
+from state and still loads the dataset pays twice: the rows are saved in the `.omv` and the
+dataset is read again on every redraw (2026-11-20 jsurvival: five renderers ran the whole
+data-preparation pipeline to recover one display name). Put a title, a display name or a level
+label into the state in `.run()`. The gate reads a payload passed as a variable too
+(`plotData <- list(cleanData = ...)` then `setState(plotData)`), and lists renderers that take
+both routes: `check_state_payload`, `check_render_state_and_data` (review guide §17, round 9).
+
+When the rows themselves must be in state (a Kaplan-Meier curve is drawn from them):
+
+```r
+shown <- c(plot = self$options$sc, plot2 = self$options$ce)
+for (name in names(shown)) {
+    # state-payload: a Kaplan-Meier curve is drawn from rows; three columns, about 4 KB per
+    #   1000 patients compressed
+    self$results[[name]]$setState(if (isTRUE(shown[[name]])) plotData else NULL)
+}
+```
+
+- Only the images that are switched on get the rows. A hidden image's state is saved into the
+  `.omv` too, so the others are set to `NULL`.
+- The frame holds the drawn columns and nothing else (no row keys, no bookkeeping columns).
+  Measure it: `length(memCompress(serialize(state, NULL)))`, and write the number in the
+  `# state-payload:` line, which the gate reads as the recorded exception.
+- When two images show the same thing in different modes, give the rows to the one `.run()` makes
+  visible. A `visible:` expression sees options only; grep the backend for `setVisible(`.
+- A renderer on the data route whose state holds no rows (a flag, a version stamp, column names)
+  carries `# render-route: data - <what the state holds>` in its body.
+- A state saved by an older version lacks any key added later: fall back, do not error.
+
 ### Dynamic arrays, restoration and export
 
 Populate titles and drawing data before rendering. No renderer should initialise a sibling

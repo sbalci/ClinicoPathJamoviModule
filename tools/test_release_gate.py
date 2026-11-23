@@ -194,3 +194,88 @@ assert heavy('list(nom = private$.nom_object)') == [], heavy('list(nom = private
 assert heavy('list(data = plotData, fitted = fitted_vals)') == [], heavy('list(data = plotData, fitted = fitted_vals)')
 assert heavy('list(n = nrow(mydata), ok = x == model)') == [], heavy('list(n = nrow(mydata), ok = x == model)')
 print('setState value-side payload check: ok')
+
+# Round 9 (library-audit 2026-11-20 jsurvival): the gate read 0 for a HIGH and three LOWs. Each
+# blind spot below is one the reviewer's list exposed.
+with tempfile.TemporaryDirectory() as m:
+    write(m, 'jamovi/bad.a.yaml', 'name: bad\nmenuGroup: Survival\noptions: []\n')
+    write(m, 'jamovi/bad.r.yaml', 'items:\n  - name: plot\n    type: Image\n    renderFun: .plot\n    requiresData: true\n'
+          '  - name: plotRows\n    type: Image\n    renderFun: .plotRows\n    requiresData: true\n')
+    write(m, 'R/utils-bad.R', '.describeThing <- function(res) {\n'
+          '    paste0("<table><tr><td>Event</td><td>", res$n, "</td></tr></table>")\n}\n')
+    write(m, 'R/bad.b.R', r'''badClass <- R6::R6Class("badClass", private = list(
+    .run = function() {
+        self$results$info$setContent(.describeThing(res))
+        plotData <- list(cleanData = cleanData, title = title)
+        image$setState(plotData)
+        labels <- list(title = title, n = nrow(mydata))
+        other$setState(labels)
+        jmvcore::reject("Unknown survival type: ", kind)
+        jmvcore::reject("Variable '{}' not found", code = NULL, name)
+        jmvcore::reject(.("One translated sentence that needs no value at all"))
+    },
+    .formatScoreGuide = function(n) {
+        paste0("<table><tr><th>", .("Metric"), "</th><td>", n, "</td></tr></table>")
+    },
+    .populateInstructions = function() {
+        paste0("<table><tr><td>", .("Choose a variable to begin the analysis"), "</td></tr></table>")
+    },
+    .cox = function(zph) {
+        # rendered as HTML to avoid Notice protobuf issues
+        self$results$ph$setContent(paste(utils::capture.output(print(zph)), collapse = "\n"))
+    },
+    .explain = function() {
+        paste0("<p>", "The median time is the first time survival drops below one half", "</p>",
+               "<p>", "A wide interval means the estimate is not precise at all", "</p>",
+               "<p>", "Read the numbers at risk before trusting the tail", "</p>")
+    },
+    .codeText = function() {
+        # i18n-exempt: generated R code, not prose
+        paste0("# Refit this development analysis using upstream packages here",
+               "# Supply the same data frame named data to the function",
+               "# This code does not validate the model or anything else")
+    },
+    .translated = function() {
+        paste0(.("The median time is the first time survival drops below one half"),
+               .("A wide interval means the estimate is not precise at all"),
+               .("Read the numbers at risk before trusting the tail"))
+    },
+    .plot = function(image, ...) {
+        state <- image$state
+        labelled <- private$.getData()
+        TRUE
+    },
+    .switched = function() {
+        third$setState(if (isTRUE(shown[[name]])) plotData else NULL)
+        # state-payload: a Kaplan-Meier curve is drawn from rows; measured
+        fourth$setState(if (on) plotData else NULL)
+    },
+    .plotRows = function(image, ...) {
+        # render-route: data - the state is a flag
+        flag <- image$state
+        rows <- private$.cleandata()
+        TRUE
+    }
+))
+''')
+    sys.argv = ['release_gate.py', '--root', m]
+    spec = importlib.util.spec_from_file_location('release_gate', GATE)
+    rg = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(rg)
+    for fn in (rg.check_html_tables, rg.check_state_payload, rg.check_notice_myths,
+               rg.check_untranslated_prose, rg.check_reject_positional, rg.check_render_state_and_data):
+        fn()
+    warns = '\n'.join(rg.WARN)
+    assert 'bad::.formatScoreGuide (1)' in warns, warns               # a help-like NAME does not exempt a data cell
+    assert '.populateInstructions' not in warns, warns                # cells that splice .() only are help
+    assert 'bad::.cox (printed)' in warns, warns                      # a printed object pushed into a result
+    assert 'utils-bad.R::.describeThing (1)' in warns, warns          # a file-level helper a shipped analysis calls
+    assert 'bad.b.R:5 (plotData <- list(cleanData))' in warns and 'bad.b.R:7' not in warns, warns
+    assert 'bad.b.R:19' in warns, warns                               # "Notice protobuf issues"
+    assert 'bad::.explain (3)' in warns and '.translated' not in warns and '.codeText' not in warns, warns
+    fails = '\n'.join(rg.FAIL)                                        # blocking since 2026-11-22
+    assert 'bad.b.R:8' in fails and 'bad.b.R:9' not in fails and 'bad.b.R:10' not in fails, fails
+    assert 'bad::.plot' in warns, warns                               # reads $state and loads the dataset
+    assert warns.count('plotData <- list(cleanData)') == 2, warns     # the same payload behind `if (...) else NULL`
+    assert 'bad::.plotRows' not in warns, warns                       # a declared data route with a rowless state
+print('round-9 checks: ok')

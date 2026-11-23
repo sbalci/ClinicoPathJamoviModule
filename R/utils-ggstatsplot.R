@@ -152,8 +152,18 @@ captionSeedMatters <- function(type, design, k = 2L, bfmessage = FALSE) {
 #' @keywords internal
 addSeedCaption <- function(plot, self, seed) {
     text <- .fmt(.("Random seed: {seed}"), seed = seed)
-    if (inherits(plot, "patchwork"))
-        return(plot + patchwork::plot_annotation(caption = text))
+    if (inherits(plot, "patchwork")) {
+        old <- plot$patches$annotation$caption
+        caption <- if (is.character(old) && any(nzchar(old))) {
+            paste(c(old, text), collapse = "\n")
+        } else if (is.language(old) || is.expression(old)) {
+            expr <- if (is.expression(old)) old[[1]] else old
+            as.expression(bquote(atop(.(expr), .(text))))
+        } else {
+            text
+        }
+        return(plot + patchwork::plot_annotation(caption = caption))
+    }
     old <- plot$labels$caption
     caption <- if (is.character(old) && any(nzchar(old))) {
         paste(c(old, text), collapse = "\n")

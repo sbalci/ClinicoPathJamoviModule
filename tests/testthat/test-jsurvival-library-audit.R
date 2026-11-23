@@ -881,3 +881,334 @@ testthat::test_that('restored interaction forests reserve the complete caption l
       testthat::expect_equal(ip[[c('.widthM', '.heightM', '.widthB', '.heightB')[i]]], size[i])
   }
 })
+
+# library-audit 2026-11-20 jsurvival [HIGH] DONE: computed values are rows of a Table -- no HTML
+# cell that splices a value, no printed model object, in any analysis or the event-indicator helper
+test_that("jsurvival computed values are Table rows, not HTML grids or printed text", {
+  code_of <- function(path) {
+    lines <- readLines(path, warn = FALSE)
+    paste(lines[!grepl("^\\s*#", lines)], collapse = "\n")
+  }
+  helper <- file.path(jsurvival_audit_root, "R", "utils-eventindicator.R")
+  sources <- c(
+    vapply(file.path(jsurvival_audit_root, "R", paste0(jsurvival_present, ".b.R")), code_of, ""),
+    code_of(helper))
+  names(sources) <- c(jsurvival_present, "utils-eventindicator")
+
+  # A printed object pushed into a result, and a table cell that splices anything but a
+  # translated literal (help tables splice .() / .fmt() only).
+  printed <- "setContent\\(\\s*paste0?\\(\\s*(utils::)?capture\\.output\\(\\s*print\\("
+  data_cell <- "<t[dh]\\b[^>]*>\\s*\\\\?[\"']\\s*,\\s*(?!\\s|\\.\\(|\\.fmt\\(|jmvcore::format\\(|[\"'])"
+  for (name in names(sources)) {
+    expect_false(grepl(printed, sources[[name]], perl = TRUE), info = paste(name, "prints an object into a result"))
+    expect_false(grepl(data_cell, sources[[name]], perl = TRUE), info = paste(name, "splices a value into an HTML cell"))
+  }
+  expect_false(grepl("<table|<tr", sources[["utils-eventindicator"]]))
+
+  tables <- list(
+    survival = c("eventRecodeTable", "cox_phTable"),
+    multisurvival = c("eventRecodeTable", "cox_phTable", "adjustedCoxPHTable", "nomogramPoints", "nomogramRisk"),
+    singlearm = "eventRecodeTable", survivalcont = "eventRecodeTable",
+    outcomeorganizer = "eventRecodeTable", datetimeconverter = "qualityCounts")
+  for (analysis in intersect(names(tables), jsurvival_present)) {
+    items <- read_jsurvival_definition(analysis, "r")$items
+    types <- stats::setNames(vapply(items, function(i) i$type, ""), vapply(items, function(i) i$name, ""))
+    expect_identical(unname(types[tables[[analysis]]]), rep("Table", length(tables[[analysis]])), info = analysis)
+  }
+
+  wanted <- c("survival", "multisurvival")
+  set.seed(20261120)
+  n <- 240
+  d <- data.frame(
+    time = round(stats::rexp(n, 0.05) + 0.5, 2),
+    status = factor(sample(c("Alive", "Dead"), n, TRUE, prob = c(0.4, 0.6))),
+    arm = factor(sample(c("A", "B"), n, TRUE)),
+    grade = factor(sample(c("G1", "G2", "G3"), n, TRUE)),
+    age = round(stats::rnorm(n, 60, 10)))
+  d$status[1:6] <- NA
+  run <- function(analysis, ...) {
+    a <- get(paste0(analysis, "Class"))$new(
+      options = get(paste0(analysis, "Options"))$new(
+        elapsedtime = "time", outcome = "status", outcomeLevel = "Dead", ph_cox = TRUE, ...),
+      data = d)
+    suppressWarnings(suppressMessages({ a$init(); a$run() }))
+    a$results
+  }
+  zph_rows <- function(fit) {
+    tab <- survival::cox.zph(fit)$table
+    data.frame(term = rownames(tab), chisq = unname(tab[, "chisq"]),
+               df = as.integer(round(tab[, "df"])), p = unname(tab[, "p"]))
+  }
+  ok <- d[!is.na(d$status), ]
+  ok$event <- as.integer(ok$status == "Dead")
+  recode_n <- c(sum(ok$event == 1), sum(ok$event == 0), sum(is.na(d$status)))
+
+  if ("survival" %in% audit_loaded(wanted)) {
+    r <- run("survival", explanatory = "arm")
+    expect_equal(r$eventRecodeTable$asDF$n, recode_n)
+    expect_match(r$eventRecodeTable$asDF$levels[1], "Dead", fixed = TRUE)
+    expect_false(grepl("<table|<tr", r$eventRecodeInfo$content))
+    got <- r$cox_phTable$asDF
+    want <- zph_rows(survival::coxph(survival::Surv(time, event) ~ arm, data = ok))
+    expect_equal(got$term, want$term)
+    expect_equal(got$chisq, want$chisq, tolerance = 1e-6)
+    expect_equal(got$df, want$df)
+    expect_equal(got$p, want$p, tolerance = 1e-6)
+  }
+  if ("multisurvival" %in% audit_loaded(wanted)) {
+    r <- run("multisurvival", explanatory = c("arm", "grade"), contexpl = "age",
+             ac = TRUE, adjexplanatory = "arm", ac_summary = TRUE, showNomogram = TRUE, cutp = "12, 24")
+    expect_equal(r$eventRecodeTable$asDF$n, recode_n)
+    adj <- r$adjustedCoxPHTable$asDF
+    expect_gt(nrow(adj), 1)
+    expect_identical(adj$term[nrow(adj)], "GLOBAL")
+    expect_true(all(adj$p >= 0 & adj$p <= 1))
+    expect_false(isTRUE(r$adjustedCoxPH$visible))
+    pts <- r$nomogramPoints$asDF
+    expect_true(all(c("arm", "grade", "age") %in% pts$variable))
+    expect_true(is.numeric(pts$points) && max(pts$points) == 100)
+    risk <- r$nomogramRisk$asDF
+    expect_gt(nrow(risk), 1)
+    expect_true(all(risk$risk > 0 & risk$risk < 1))
+    expect_false(grepl("<table|<tr", r$nomogram_display$content))
+  }
+  audit_skip_unloaded(wanted)
+})
+
+# library-audit 2026-11-20 jsurvival [LOW] PARTIAL: the recode caveats and every explanation panel
+# reach the translator as whole paragraphs; sentences built around values in other methods are
+# listed by release_gate.py check_untranslated_prose and are converted method by method
+test_that("jsurvival explanation panels and recode caveats go through the translator", {
+  # Pseudo-translate: every .() string comes back in guillemets, so English left outside them is
+  # text the catalogue never sees, and a nested mark is a translated fragment spliced into another.
+  mark <- function(text, n = 1) paste0("«", text, "»")
+  untranslated <- function(html) {
+    text <- gsub("<style.*?</style>", " ", paste(html, collapse = " "), perl = TRUE)
+    text <- gsub("«[^»]*»", " ", text)
+    text <- gsub("\\s+", " ", gsub("<[^>]*>", " ", text))
+    regmatches(text, gregexpr("[A-Za-z][A-Za-z'/-]*(?: [A-Za-z(][A-Za-z'/().,;:-]*){3,}", text, perl = TRUE))[[1]]
+  }
+  panels <- function(analysis, data, ...) {
+    options <- get(paste0(analysis, "Options"))$new(showExplanations = TRUE, ...)
+    assign(".translator", list(translate = mark), envir = options$.__enclos_env__$private)
+    a <- get(paste0(analysis, "Class"))$new(options = options, data = data)
+    suppressWarnings(suppressMessages({ a$init(); a$run() }))
+    items <- a$results$items
+    keep <- vapply(items, function(i) inherits(i, "Html") &&
+                     (grepl("Explanation$", i$name) || identical(i$name, "eventRecodeInfo")), logical(1))
+    content <- lapply(items[keep], function(i) i$content)
+    names(content) <- vapply(items[keep], function(i) i$name, "")
+    content[nzchar(gsub("<[^>]*>|\\s", "", unlist(content)))]
+  }
+
+  set.seed(20261120)
+  n <- 200
+  d <- data.frame(
+    time = round(stats::rexp(n, 0.05) + 0.5, 2),
+    status = factor(sample(c("Alive", "Dead"), n, TRUE, prob = c(0.4, 0.6))),
+    arm = factor(sample(c("A", "B"), n, TRUE)),
+    age = round(stats::rnorm(n, 60, 10)))
+  runs <- list(
+    singlearm = function() panels("singlearm", d, elapsedtime = "time", outcome = "status", outcomeLevel = "Dead",
+                                  person_time = TRUE, baseline_hazard = TRUE),
+    survival = function() panels("survival", d, elapsedtime = "time", outcome = "status", outcomeLevel = "Dead",
+                                 explanatory = "arm", person_time = TRUE, rmst_analysis = TRUE,
+                                 residual_diagnostics = TRUE, ph_cox = TRUE),
+    survivalcont = function() panels("survivalcont", d, elapsedtime = "time", outcome = "status",
+                                     outcomeLevel = "Dead", contexpl = "age", findcut = TRUE))
+  wanted <- names(runs)
+  for (analysis in audit_loaded(wanted)) {
+    shown <- runs[[analysis]]()
+    expect_gte(length(shown), 3L)
+    expect_true("eventRecodeInfo" %in% names(shown), info = analysis)
+    for (name in names(shown)) {
+      expect_identical(untranslated(shown[[name]]), character(0), info = paste(analysis, name))
+      expect_false(grepl("«[^»]*«", shown[[name]]), info = paste(analysis, name, "nests"))
+    }
+  }
+
+  # The zero-event and disease-free caveats, through the file-level helper's caller translator.
+  helpers <- intersect(c("jsurvival", "ClinicoPath"), loadedNamespaces())
+  if (length(helpers) > 0) {
+    ns <- asNamespace(helpers[1])
+    define <- get(".defineEventIndicator", envir = ns)
+    describe <- get(".describeEventIndicator", envir = ns)
+    caller <- function(res) { self <- list(options = list(translate = mark)); describe(res, "Outcome") }
+    zero <- define(factor(c("Alive", "Alive", "Alive"), levels = c("Alive", "Dead")), outcomeLevel = "Dead")
+    dfs <- define(factor(rep(c("DOD", "DOOC", "AWOD"), 5)), multievent = TRUE, analysistype = "dfs",
+                  dod = "DOD", dooc = "DOOC", awd = "AWD", awod = "AWOD", outcome_name = "Outcome")
+    for (res in list(zero, dfs)) {
+      expect_null(res$error)
+      html <- caller(res)
+      expect_match(html, "«")
+      expect_identical(untranslated(html), character(0))
+    }
+  }
+  audit_skip_unloaded(wanted)
+})
+
+# library-audit 2026-11-20 jsurvival [LOW] DONE: one route per plot - a curve image draws from the
+#   rows and labels in its own state and never loads the dataset, and the rows go only to the
+#   images that are switched on (guide section 17)
+test_that("jsurvival curve images draw from state alone and only switched-on images hold rows", {
+  has_rows <- function(x) is.data.frame(x) || (is.list(x) && any(vapply(x, has_rows, logical(1))))
+  set.seed(20261120)
+  n <- 160
+  d <- data.frame(
+    time = round(stats::rexp(n, 0.05) + 0.5, 2),
+    status = factor(sample(c("Alive", "Dead"), n, TRUE, prob = c(0.4, 0.6))),
+    cause = factor(sample(c("AWOD", "AWD", "DOD", "DOOC"), n, TRUE)),
+    age = round(stats::rnorm(n, 60, 10)))
+  d[["Treatment Arm"]] <- factor(sample(c("A", "B"), n, TRUE))
+  run <- function(analysis, ...) {
+    a <- get(paste0(analysis, "Class"))$new(options = get(paste0(analysis, "Options"))$new(...), data = d)
+    suppressWarnings(suppressMessages({ a$init(); a$run() }))
+    a
+  }
+  state <- function(a, name) a$results$get(name)$state
+  # What a resize, an export and a reopened .omv have: no dataset and no per-run cache.
+  redraws <- function(a, name) {
+    p <- a$.__enclos_env__$private
+    for (field in intersect(c(".data", ".cachedGetData"), names(p))) assign(field, NULL, envir = p)
+    f <- tempfile(fileext = ".png")
+    ok <- tryCatch({ suppressWarnings(suppressMessages(a$results$get(name)$saveAs(f))); TRUE },
+                   error = function(e) FALSE)
+    ok && file.exists(f) && file.size(f) > 5000
+  }
+  wanted <- c("survival", "singlearm", "survivalcont")
+  loaded <- audit_loaded(wanted)
+
+  if ("survival" %in% loaded) {
+    km <- c("plot", "plot2", "plot3", "plot6", "plot7")
+    a <- run("survival", elapsedtime = "time", outcome = "status", outcomeLevel = "Dead",
+             explanatory = "Treatment Arm", sc = TRUE, ce = FALSE, ch = FALSE, kmunicate = FALSE,
+             loglog = FALSE)
+    for (name in km) expect_false(a$results$get(name)$requiresData, info = name)
+    expect_identical(ncol(state(a, "plot")$cleanData), 3L)   # time, status, group: no bookkeeping columns
+    expect_identical(state(a, "plot")$title2, "Treatment Arm")
+    for (name in setdiff(km, "plot")) expect_null(state(a, name), info = paste("survival", name))
+    expect_true(redraws(a, "plot"))
+    all_on <- run("survival", elapsedtime = "time", outcome = "status", outcomeLevel = "Dead",
+                  explanatory = "Treatment Arm", sc = TRUE, ce = TRUE, ch = TRUE, kmunicate = TRUE,
+                  loglog = TRUE)
+    for (name in km) expect_true(redraws(all_on, name), info = paste("survival", name))
+  }
+
+  if ("singlearm" %in% loaded) {
+    others <- c("plot2", "plot3", "plot6", "baselineHazardPlot", "smoothedHazardPlot")
+    a <- run("singlearm", elapsedtime = "time", outcome = "status", outcomeLevel = "Dead", sc = TRUE)
+    expect_identical(ncol(state(a, "plot")$cleanData), 3L)
+    expect_null(state(a, "plot_cif"))
+    for (name in others) expect_null(state(a, name), info = paste("singlearm", name))
+    all_on <- run("singlearm", elapsedtime = "time", outcome = "status", outcomeLevel = "Dead", sc = TRUE,
+                  ce = TRUE, ch = TRUE, kmunicate = TRUE, baseline_hazard = TRUE, hazard_smoothing = TRUE)
+    for (name in c("plot", others)) expect_true(redraws(all_on, name), info = paste("singlearm", name))
+    cr <- run("singlearm", elapsedtime = "time", outcome = "cause", outcomeLevel = "DOD", sc = TRUE,
+              multievent = TRUE, analysistype = "compete", dod = "DOD", dooc = "DOOC", awd = "AWD",
+              awod = "AWOD")
+    expect_null(state(cr, "plot"))
+    expect_true(has_rows(state(cr, "plot_cif")))
+    expect_true(redraws(cr, "plot_cif"))
+    # Competing risks can also arrive in the data: a pre-recoded outcome with multievent off.
+    d$recoded <- factor(c("Censored", "Event", "Competing")[1 + (seq_len(n) %% 3)],
+                        levels = c("Censored", "Event", "Competing"))
+    handoff <- run("singlearm", elapsedtime = "time", outcome = "recoded", outcomeLevel = "Event", sc = TRUE)
+    expect_null(state(handoff, "plot"))
+    expect_true(has_rows(state(handoff, "plot_cif")))
+  }
+
+  if ("survivalcont" %in% loaded) {
+    a <- run("survivalcont", elapsedtime = "time", outcome = "status", outcomeLevel = "Dead",
+             contexpl = "age", findcut = TRUE, sc = TRUE, ce = FALSE, ch = FALSE, kmunicate = FALSE,
+             loglog = FALSE)
+    expect_identical(ncol(state(a, "plot5")$cutoffdata), 3L)
+    for (name in c("plot2", "plot3", "plot6", "plot7")) expect_null(state(a, name), info = paste("survivalcont", name))
+    all_on <- run("survivalcont", elapsedtime = "time", outcome = "status", outcomeLevel = "Dead",
+                  contexpl = "age", findcut = TRUE, sc = TRUE, ce = TRUE, ch = TRUE, kmunicate = TRUE,
+                  loglog = TRUE)
+    for (name in c("plot5", "plot2", "plot3", "plot6", "plot7"))
+      expect_true(redraws(all_on, name), info = paste("survivalcont", name))
+  }
+  audit_skip_unloaded(wanted)
+})
+
+# library-audit 2026-11-20 jsurvival [INFO] PARTIAL: the counting-process and interval branches of
+#   .buildSurvivalFormula() are kept on purpose; an unknown type is named in its message
+test_that("the survival formula builder keeps its counting-process branch and names an unknown type", {
+  ns <- intersect(c("jsurvival", "ClinicoPath"), loadedNamespaces())
+  ns <- Filter(function(p) exists(".buildSurvivalFormula", envir = asNamespace(p), inherits = FALSE), ns)
+  if (length(ns) == 0) audit_skip_unloaded("multisurvival")
+  skip_if(length(ns) == 0, "formula builder not in a loaded namespace")
+  build <- get(".buildSurvivalFormula", envir = asNamespace(ns[1]))
+  counting <- build("t0", "event", "arm", survival_type = "counting", start_var = "t0", stop_var = "t1")
+  expect_identical(paste(deparse(counting), collapse = ""), "survival::Surv(t0, t1, event) ~ arm")
+  expect_error(build("t0", "event", "arm", survival_type = "counting"), "Start and stop")
+  expect_error(build("t0", "event", "arm", survival_type = "bogus"), "bogus")
+})
+
+# Shared test files run in the umbrella and in the module. Where the umbrella package is also
+# installed, a preamble that tries requireNamespace("ClinicoPath") first tests that installed build
+# in place of the module's tree (2026-11-22: 8 of 27 files did, and three failures carried as the
+# module's were the installed build's).
+test_that("shared tests resolve the package under test, never an installed umbrella copy", {
+  files <- list.files(testthat::test_path(), pattern = "^test-.*\\.R$", full.names = TRUE)
+  bare <- Filter(function(f) any(grepl("for \\(\\.p in c\\(", readLines(f, warn = FALSE))), files)
+  expect_identical(basename(bare), character(0))
+  under_test <- Sys.getenv("TESTTHAT_PKG")
+  if (nzchar(under_test) && !identical(under_test, "ClinicoPath"))
+    expect_false("ClinicoPath" %in% loadedNamespaces())
+})
+
+# library-audit 2026-11-20 jsurvival [LOW] DONE: a sentence built around a value is one template,
+#   .pasteT(.("... {value} ..."), value = x), so summaries, messages and welcome texts reach the
+#   translator whole (guide section 9)
+test_that("jsurvival summaries and messages built around values go through the translator", {
+  mark <- function(text, n = 1) paste0("«", text, "»")
+  outside <- function(text) {                      # English runs left outside balanced marks
+    ch <- strsplit(gsub("<style.*?</style>", " ", text, perl = TRUE), "")[[1]]
+    depth <- 0L; keep <- logical(length(ch))
+    for (i in seq_along(ch)) {
+      if (ch[i] == "«") depth <- depth + 1L
+      keep[i] <- depth == 0L
+      if (ch[i] == "»") depth <- max(0L, depth - 1L)
+    }
+    t <- gsub("\\s+", " ", gsub("<[^>]*>", " ", paste(ifelse(keep, ch, " "), collapse = "")))
+    m <- regmatches(t, gregexpr("[A-Za-z][A-Za-z'/-]*(?: [A-Za-z(][A-Za-z'/().,;:-]*){3,}", t, perl = TRUE))[[1]]
+    m[!grepl("Number in dataframe", m, fixed = TRUE)]   # finalfit's own model-metrics line
+  }
+  set.seed(20261122)
+  n <- 160
+  d <- data.frame(
+    time = round(stats::rexp(n, 0.05) + 0.5, 2),
+    status = factor(sample(c("Alive", "Dead"), n, TRUE, prob = c(0.4, 0.6))),
+    arm = factor(sample(c("A", "B"), n, TRUE)), age = round(stats::rnorm(n, 60, 10)),
+    cause = factor(sample(c("AWOD", "AWD", "DOD", "DOOC"), n, TRUE)),
+    dx = format(as.Date("2018-01-01") + sample(0:700, n, TRUE)), stringsAsFactors = FALSE)
+  d$fu <- format(as.Date(d$dx) + sample(30:900, n, TRUE))
+  shown <- function(analysis, ...) {
+    options <- get(paste0(analysis, "Options"))$new(...)
+    assign(".translator", list(translate = mark), envir = options$.__enclos_env__$private)
+    a <- get(paste0(analysis, "Class"))$new(options = options, data = d)
+    suppressWarnings(suppressMessages({ a$init(); a$run() }))
+    keep <- Filter(function(i) inherits(i, c("Html", "Preformatted")), a$results$items)
+    stats::setNames(lapply(keep, function(i) paste(i$content, collapse = "\n")), vapply(keep, function(i) i$name, ""))
+  }
+  S <- list(elapsedtime = "time", outcome = "status", outcomeLevel = "Dead")
+  runs <- list(
+    singlearm = function() do.call(shown, c(list("singlearm"), S, list(showSummaries = TRUE, person_time = TRUE, baseline_hazard = TRUE))),
+    survival = function() do.call(shown, c(list("survival"), S, list(explanatory = "arm", showSummaries = TRUE, person_time = TRUE, pw = TRUE, ph_cox = TRUE, rmst_analysis = TRUE))),
+    survivalcont = function() do.call(shown, c(list("survivalcont"), S, list(contexpl = "age", findcut = TRUE, showSummaries = TRUE, person_time = TRUE, rmst_analysis = TRUE))),
+    multisurvival = function() do.call(shown, c(list("multisurvival"), S, list(explanatory = "arm", contexpl = "age", showSummaries = TRUE))),
+    oddsratio = function() shown("oddsratio", explanatory = c("arm", "age"), outcome = "status", outcomeLevel = "Dead", outcomeNegativeLevel = "Alive", showExplanations = TRUE),
+    outcomeorganizer = function() shown("outcomeorganizer", outcome = "cause", multievent = TRUE, analysistype = "compete", dod = "DOD", dooc = "DOOC", awd = "AWD", awod = "AWOD", showNaturalSummary = TRUE, showGlossary = TRUE),
+    datetimeconverter = function() shown("datetimeconverter", datetime_var = "dx", show_summary = TRUE, show_explanations = TRUE, show_glossary = TRUE),
+    timeinterval = function() shown("timeinterval", dx_date = "dx", fu_date = "fu", use_landmark = TRUE, landmark_time = 3, show_summary = TRUE, show_glossary = TRUE))
+  wanted <- names(runs)
+  for (analysis in audit_loaded(wanted)) {
+    items <- runs[[analysis]]()
+    expect_gte(length(items), 3L)
+    for (name in names(items))
+      expect_identical(outside(items[[name]]), character(0), info = paste(analysis, name))
+  }
+  audit_skip_unloaded(wanted)
+})

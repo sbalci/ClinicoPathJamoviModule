@@ -257,6 +257,7 @@ outcomeorganizerResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
     "outcomeorganizerResults",
     inherit = jmvcore::Group,
     active = list(
+        eventRecodeTable = function() private$.items[["eventRecodeTable"]],
         eventRecodeInfo = function() private$.items[["eventRecodeInfo"]],
         todo = function() private$.items[["todo"]],
         errors = function() private$.items[["errors"]],
@@ -287,6 +288,45 @@ outcomeorganizerResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
                     "janitor",
                     "labelled",
                     "glue"))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="eventRecodeTable",
+                title="Outcome Recode",
+                rows=0,
+                visible="(length(outcome) > 0)",
+                clearWith=list(
+                    "outcome",
+                    "outcomeLevel",
+                    "multievent",
+                    "analysistype",
+                    "dod",
+                    "dooc",
+                    "awd",
+                    "awod",
+                    "recurrence",
+                    "recurrenceLevel",
+                    "useHierarchy",
+                    "eventPriority",
+                    "patientID",
+                    "intervalCensoring",
+                    "intervalStart",
+                    "intervalEnd",
+                    "adminCensoring",
+                    "adminDate",
+                    "followupTime"),
+                columns=list(
+                    list(
+                        `name`="category", 
+                        `title`="", 
+                        `type`="text"),
+                    list(
+                        `name`="levels", 
+                        `title`="Levels", 
+                        `type`="text"),
+                    list(
+                        `name`="n", 
+                        `title`="N", 
+                        `type`="integer"))))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="eventRecodeInfo",
@@ -659,6 +699,7 @@ outcomeorganizerBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
 #' @param showGlossary Display definitions of survival analysis terms.
 #' @return A results object containing:
 #' \tabular{llllll}{
+#'   \code{results$eventRecodeTable} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$eventRecodeInfo} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$errors} \tab \tab \tab \tab \tab a html \cr
@@ -677,9 +718,9 @@ outcomeorganizerBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
 #'
 #' Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
 #'
-#' \code{results$outputTable$asDF}
+#' \code{results$eventRecodeTable$asDF}
 #'
-#' \code{as.data.frame(results$outputTable)}
+#' \code{as.data.frame(results$eventRecodeTable)}
 #'
 #' @export
 outcomeorganizer <- function(

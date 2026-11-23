@@ -15,8 +15,8 @@
 A character string of HTML.
 }
 \description{
-Turns the result of \code{.defineEventIndicator()} into the HTML disclosure block
-shown by every analysis that builds an event indicator. A silent recode is a
+Turns the result of \code{.defineEventIndicator()} into the HTML caveats shown by every
+analysis that builds an event indicator (the counts are in \code{eventRecodeTable}). A silent recode is a
 clinical-safety hazard: the reader of a survival curve cannot otherwise see
 which levels were collapsed into "censored".
 }

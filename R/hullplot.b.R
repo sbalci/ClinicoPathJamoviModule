@@ -39,15 +39,15 @@ hullplotClass <- if (requireNamespace("jmvcore")) R6::R6Class("hullplotClass",
                 return()
             }
 
-            # Backgrounds are translucent rgba tints and body text is
-            # `color: inherit`, so the panel composites over either jamovi
-            # theme. Only the title takes a saturated colour, chosen to read
-            # against both a light and a dark ground.
+            # Backgrounds are translucent rgba tints and both title and body text
+            # use `color: inherit`, so the panel composites cleanly over either
+            # jamovi light or dark theme; severity is carried by the left accent
+            # border and tint.
             typeStyles <- list(
-                ERROR          = list(color = "#dc2626", bg = "rgba(220, 38, 38, 0.10)", border = "#fca5a5"),
-                STRONG_WARNING = list(color = "#ea580c", bg = "rgba(234, 88, 12, 0.10)", border = "#fdba74"),
-                WARNING        = list(color = "#ca8a04", bg = "rgba(202, 138, 4, 0.12)", border = "#fde047"),
-                INFO           = list(color = "#2563eb", bg = "rgba(37, 99, 235, 0.08)", border = "#93c5fd")
+                ERROR          = list(bg = "rgba(220, 38, 38, 0.10)", border = "#fca5a5"),
+                STRONG_WARNING = list(bg = "rgba(234, 88, 12, 0.10)", border = "#fdba74"),
+                WARNING        = list(bg = "rgba(202, 138, 4, 0.12)", border = "#fde047"),
+                INFO           = list(bg = "rgba(37, 99, 235, 0.08)", border = "#93c5fd")
             )
 
             # Most severe first, regardless of the order they were added in.
@@ -63,7 +63,7 @@ hullplotClass <- if (requireNamespace("jmvcore")) R6::R6Class("hullplotClass",
                     "<div style='background-color: ", style$bg, "; ",
                     "border-left: 4px solid ", style$border, "; ",
                     "padding: 12px; margin: 8px 0; border-radius: 4px; color: inherit;'>",
-                    "<strong style='color: ", style$color, ";'>",
+                    "<strong style='color: inherit;'>",
                     htmltools::htmlEscape(notice$title), "</strong><br>",
                     "<span style='color: inherit;'>",
                     htmltools::htmlEscape(notice$content), "</span>",
@@ -105,11 +105,16 @@ hullplotClass <- if (requireNamespace("jmvcore")) R6::R6Class("hullplotClass",
                         # but deterministic and sufficient as a cache-invalidation key.
                         col_sig <- vapply(relevant_data, function(col) {
                             if (is.numeric(col)) {
-                                paste0(sum(as.numeric(col), na.rm = TRUE),
-                                       "_", sum(!is.na(col)))
+                                fin <- col[is.finite(col)]
+                                paste0(
+                                    length(fin), "_",
+                                    if (length(fin) > 0) paste(range(fin), collapse = ":") else "empty", "_",
+                                    sum(fin), "_",
+                                    if (length(fin) > 1) stats::sd(fin) else 0
+                                )
                             } else {
-                                paste0(length(unique(col)),
-                                       "_", sum(nchar(as.character(col)), na.rm = TRUE))
+                                ch <- as.character(col)
+                                paste0(length(unique(ch)), "_", sum(nchar(ch), na.rm = TRUE), "_", sum(is.na(ch)))
                             }
                         }, character(1))
                         data_hash <- paste0(
@@ -180,24 +185,44 @@ hullplotClass <- if (requireNamespace("jmvcore")) R6::R6Class("hullplotClass",
                     var = group_var)
             }
 
+            # Unwrap jamovi Nominal-typed integer factors (which carry a `values`
+            # attribute and pass `permitted: [ numeric ]`) to true numeric vectors.
+            x_vals <- jmvcore::toNumeric(dataset[[x_var]])
+            y_vals <- jmvcore::toNumeric(dataset[[y_var]])
+            if (!is.numeric(x_vals)) {
+                jmvcore::reject(.("X-Axis variable '{var}' must be numeric."), var = x_var)
+            }
+            if (!is.numeric(y_vals)) {
+                jmvcore::reject(.("Y-Axis variable '{var}' must be numeric."), var = y_var)
+            }
+
             # Prepare data - create subset with required variables
             plot_data <- data.frame(
-                x = dataset[[x_var]],
-                y = dataset[[y_var]],
+                x = x_vals,
+                y = y_vals,
                 group = dataset[[group_var]]
             )
             names(plot_data) <- c(x_var, y_var, group_var)
 
-            # Add color variable if specified and different from group variable
+            # Add color variable if specified and different from group variable.
+            # Use make.unique() so a synthetic prefix never collides with an
+            # existing axis/group column literally named "color_<color_var>".
             color_mapping <- group_var  # Default to group variable
             if (!is.null(color_var) && color_var != "" && color_var != group_var && color_var %in% names(dataset)) {
-                plot_data[[paste0("color_", color_var)]] <- dataset[[color_var]]
-                color_mapping <- paste0("color_", color_var)
+                color_col <- make.unique(c(names(plot_data), paste0("color_", color_var)))[ncol(plot_data) + 1L]
+                plot_data[[color_col]] <- dataset[[color_var]]
+                color_mapping <- color_col
             }
 
-            # Add size variable if specified
+            # Add size variable if specified (also collision-free)
+            size_col <- NULL
             if (!is.null(size_var) && size_var != "" && size_var %in% names(dataset)) {
-                plot_data[[paste0("size_", size_var)]] <- dataset[[size_var]]
+                size_vals <- jmvcore::toNumeric(dataset[[size_var]])
+                if (!is.numeric(size_vals)) {
+                    jmvcore::reject(.("Size variable '{var}' must be numeric."), var = size_var)
+                }
+                size_col <- make.unique(c(names(plot_data), paste0("size_", size_var)))[ncol(plot_data) + 1L]
+                plot_data[[size_col]] <- size_vals
             }
 
             # Remove rows with missing values in required variables. Also filter
@@ -207,7 +232,6 @@ hullplotClass <- if (requireNamespace("jmvcore")) R6::R6Class("hullplotClass",
             if (color_mapping != group_var && color_mapping %in% names(plot_data)) {
                 required_cols <- c(required_cols, color_mapping)
             }
-            size_col <- if (!is.null(size_var) && size_var != "") paste0("size_", size_var) else NULL
             if (!is.null(size_col) && size_col %in% names(plot_data)) {
                 required_cols <- c(required_cols, size_col)
             }
@@ -217,7 +241,9 @@ hullplotClass <- if (requireNamespace("jmvcore")) R6::R6Class("hullplotClass",
             # ("Inf +/- NaN") and the copy-ready summary, where an infinite
             # centroid distance made every comparison read "well-separated".
             # is.finite() rules out NA, NaN, Inf and -Inf for numeric columns in
-            # one step; factors keep the plain NA test.
+            # one step; factors also check !is.na(as.character(v)) so explicit
+            # NA levels created by factor(..., exclude = NULL) / addNA() are
+            # excluded rather than plotted as a real "NA" group.
             n_before <- nrow(plot_data)
             keep <- rep(TRUE, n_before)
             n_nonfinite <- 0L
@@ -227,7 +253,7 @@ hullplotClass <- if (requireNamespace("jmvcore")) R6::R6Class("hullplotClass",
                     n_nonfinite <- n_nonfinite + sum(!is.na(v) & !is.finite(v))
                     keep <- keep & is.finite(v)
                 } else {
-                    keep <- keep & !is.na(v)
+                    keep <- keep & !is.na(v) & !is.na(as.character(v))
                 }
             }
             plot_data <- plot_data[keep, , drop = FALSE]
@@ -315,6 +341,7 @@ hullplotClass <- if (requireNamespace("jmvcore")) R6::R6Class("hullplotClass",
                 group_var = group_var,
                 color_mapping = color_mapping,
                 size_var = size_var,
+                size_col = size_col,
                 validation_warnings = validation_warnings
             )
 
@@ -423,10 +450,9 @@ hullplotClass <- if (requireNamespace("jmvcore")) R6::R6Class("hullplotClass",
                 }
             }
 
-            # Generate group statistics if requested
+            # Populate group statistics table if requested
             if (self$options$show_statistics) {
-                stats_html <- private$.generate_group_statistics(plot_data, x_var, y_var, group_var)
-                self$results$statistics$setContent(stats_html)
+                private$.populate_group_statistics(plot_data, x_var, y_var, group_var)
             }
 
             # Generate outlier analysis if requested
@@ -474,6 +500,7 @@ hullplotClass <- if (requireNamespace("jmvcore")) R6::R6Class("hullplotClass",
             group_var <- prepared$group_var
             color_mapping <- prepared$color_mapping
             size_var <- prepared$size_var
+            size_col <- prepared$size_col
 
             # geom_mark_hull() computes the concave hull with ggforce's own C++
             # concaveman (ggforce >= 0.5.0), so this always takes effect.
@@ -538,9 +565,9 @@ hullplotClass <- if (requireNamespace("jmvcore")) R6::R6Class("hullplotClass",
             }
             
             # Add points - fix aes construction
-            if (!is.null(size_var) && size_var != "" && paste0("size_", size_var) %in% names(plot_data)) {
+            if (!is.null(size_col) && size_col %in% names(plot_data)) {
                 p <- p + ggplot2::geom_point(
-                    ggplot2::aes(color = .data[[color_mapping]], size = .data[[paste0("size_", size_var)]]),
+                    ggplot2::aes(color = .data[[color_mapping]], size = .data[[size_col]]),
                     alpha = self$options$point_alpha
                 )
             } else {
@@ -558,11 +585,11 @@ hullplotClass <- if (requireNamespace("jmvcore")) R6::R6Class("hullplotClass",
             n_colors <- length(levels(plot_data[[color_mapping]]))
 
             # Generate color palettes with correct sizes
-            fill_palette <- private$.get_color_palette(n_groups)
+            fill_palette <- private$.get_color_palette(n_groups, theme = theme)
             color_palette <- if (color_mapping == group_var) {
                 fill_palette  # Same variable - reuse palette
             } else {
-                private$.get_color_palette(n_colors)  # Different variable - separate palette
+                private$.get_color_palette(n_colors, theme = theme)  # Different variable - separate palette
             }
 
             # Apply fill scale for hulls (always based on group_var)
@@ -578,7 +605,7 @@ hullplotClass <- if (requireNamespace("jmvcore")) R6::R6Class("hullplotClass",
             )
             
             # Apply theme
-            p <- p + private$.get_plot_theme()
+            p <- p + private$.get_plot_theme(ggtheme = ggtheme)
             
             # Add labels
             x_label <- if (self$options$x_label != "") self$options$x_label else x_var
@@ -596,7 +623,7 @@ hullplotClass <- if (requireNamespace("jmvcore")) R6::R6Class("hullplotClass",
 
             # Handle size legend (only when a size aesthetic was actually mapped,
             # matching the geom_point branch above)
-            if (!is.null(size_var) && size_var != "" && paste0("size_", size_var) %in% names(plot_data)) {
+            if (!is.null(size_col) && size_col %in% names(plot_data)) {
                 p <- p + ggplot2::labs(size = size_var)
             }
             
@@ -617,22 +644,35 @@ hullplotClass <- if (requireNamespace("jmvcore")) R6::R6Class("hullplotClass",
             TRUE
         },
 
-        .get_color_palette = function(n_colors) {
+        .get_color_palette = function(n_colors, theme = NULL) {
             palette_name <- self$options$color_palette
-            
-            if (palette_name == "viridis") {
+
+            if (palette_name == "jamovi") {
+                if (!is.null(theme) && !is.null(theme$palette) &&
+                    exists("colorPalette", envir = asNamespace("jmvcore"), inherits = FALSE)) {
+                    return(jmvcore::colorPalette(n_colors, theme$palette))
+                }
+                return(scales::hue_pal()(n_colors))
+            } else if (palette_name == "viridis") {
                 return(viridis::viridis(n_colors))
             } else if (palette_name == "clinical") {
-                clinical_colors <- c("#2E86AB", "#A23B72", "#F18F01", "#C73E1D", "#593E2C", "#8E6C8A")
-                return(rep(clinical_colors, length.out = n_colors))
+                # Okabe-Ito 8-color CVD-safe palette; interpolate beyond 8 rather
+                # than recycling exact hex codes onto distinct groups.
+                clinical_colors <- c("#0072B2", "#D55E00", "#009E73", "#CC79A7",
+                                     "#E69F00", "#56B4E9", "#F0E442", "#000000")
+                if (n_colors <= length(clinical_colors)) {
+                    return(clinical_colors[seq_len(n_colors)])
+                } else {
+                    return(grDevices::colorRampPalette(clinical_colors)(n_colors))
+                }
             } else if (palette_name %in% c("set1", "set2", "dark2")) {
                 palette_r_name <- switch(palette_name,
                     "set1" = "Set1",
-                    "set2" = "Set2", 
+                    "set2" = "Set2",
                     "dark2" = "Dark2"
                 )
                 if (n_colors <= 8) {
-                    return(RColorBrewer::brewer.pal(min(max(3, n_colors), 8), palette_r_name))
+                    return(RColorBrewer::brewer.pal(min(max(3, n_colors), 8), palette_r_name)[seq_len(n_colors)])
                 } else {
                     base_colors <- RColorBrewer::brewer.pal(8, palette_r_name)
                     return(grDevices::colorRampPalette(base_colors)(n_colors))
@@ -643,15 +683,20 @@ hullplotClass <- if (requireNamespace("jmvcore")) R6::R6Class("hullplotClass",
             }
         },
 
-        .get_plot_theme = function() {
+        .get_plot_theme = function(ggtheme = NULL) {
             theme_name <- self$options$plot_theme
-            
+
+            if (theme_name == "jamovi") {
+                if (!is.null(ggtheme)) return(ggtheme)
+                return(ggplot2::theme_minimal())
+            }
+
             switch(theme_name,
                 "minimal" = ggplot2::theme_minimal(),
                 "classic" = ggplot2::theme_classic(),
                 "light" = ggplot2::theme_light(),
                 "dark" = ggplot2::theme_dark(),
-                "clinical" = ggplot2::theme_minimal() + 
+                "clinical" = ggplot2::theme_minimal() +
                     ggplot2::theme(
                         panel.grid.minor = ggplot2::element_blank(),
                         panel.border = ggplot2::element_rect(fill = NA, color = "grey20"),
@@ -663,60 +708,52 @@ hullplotClass <- if (requireNamespace("jmvcore")) R6::R6Class("hullplotClass",
             )
         },
 
-        # sd() is NA for a single observation, which rendered as a bare
-        # "5 \u00b1 NA". Report the absence rather than printing NA.
-        .meanSd = function(mean_value, sd_value) {
-            if (is.na(sd_value))
-                return(paste0(mean_value, " (SD not estimable, n = 1)"))
-            paste0(mean_value, " \u00b1 ", sd_value)
-        },
-
-        .generate_group_statistics = function(data, x_var, y_var, group_var) {
-            # Calculate group statistics
+        .populate_group_statistics = function(data, x_var, y_var, group_var) {
             group_stats <- data %>%
                 dplyr::group_by(!!rlang::sym(group_var)) %>%
                 dplyr::summarise(
                     n = dplyr::n(),
-                    x_mean = round(mean(!!rlang::sym(x_var), na.rm = TRUE), 2),
-                    x_sd = round(sd(!!rlang::sym(x_var), na.rm = TRUE), 2),
-                    y_mean = round(mean(!!rlang::sym(y_var), na.rm = TRUE), 2),
-                    y_sd = round(sd(!!rlang::sym(y_var), na.rm = TRUE), 2),
-                    .groups = 'drop'
+                    x_mean = mean(!!rlang::sym(x_var), na.rm = TRUE),
+                    x_sd = sd(!!rlang::sym(x_var), na.rm = TRUE),
+                    y_mean = mean(!!rlang::sym(y_var), na.rm = TRUE),
+                    y_sd = sd(!!rlang::sym(y_var), na.rm = TRUE),
+                    .groups = "drop"
                 )
-            
-            # Create HTML table
-            stats_html <- paste0(
-                "<div style='background-color: rgba(138, 155, 172, 0.06); padding: 20px; border-radius: 8px; margin-bottom: 20px; color: inherit;'>",
-                "<h3 style='color: inherit; margin-top: 0;'> Group Statistics Summary</h3>",
-                "<table style='width: 100%; border-collapse: collapse; font-family: Arial, sans-serif;'>",
-                "<thead><tr style='background-color: inherit; opacity: 0.75; color: white;'>",
-                "<th style='padding: 12px; border: 1px solid #dee2e6;'>Group</th>",
-                "<th style='padding: 12px; border: 1px solid #dee2e6;'>N</th>",
-                "<th style='padding: 12px; border: 1px solid #dee2e6;'>", htmltools::htmlEscape(x_var), " Mean \u00b1 SD</th>",
-                "<th style='padding: 12px; border: 1px solid #dee2e6;'>", htmltools::htmlEscape(y_var), " Mean \u00b1 SD</th>",
-                "</tr></thead><tbody>"
-            )
-            
+
+            table <- self$results$statistics
+            table$deleteRows()
+
+            table$getColumn("x_mean")$setSuperTitle(x_var)
+            table$getColumn("x_sd")$setSuperTitle(x_var)
+            table$getColumn("y_mean")$setSuperTitle(y_var)
+            table$getColumn("y_sd")$setSuperTitle(y_var)
+
             for (i in seq_len(nrow(group_stats))) {
-                row_bg <- if (i %% 2 == 0) "rgba(127, 127, 127, 0.10)" else "transparent"
-                stats_html <- paste0(stats_html,
-                    "<tr style='background-color: ", row_bg, ";'>",
-                    "<td style='padding: 10px; border: 1px solid #dee2e6;'><strong>", htmltools::htmlEscape(group_stats[[group_var]][i]), "</strong></td>",
-                    "<td style='padding: 10px; border: 1px solid #dee2e6; text-align: center;'>", group_stats$n[i], "</td>",
-                    "<td style='padding: 10px; border: 1px solid #dee2e6; text-align: center;'>", private$.meanSd(group_stats$x_mean[i], group_stats$x_sd[i]), "</td>",
-                    "<td style='padding: 10px; border: 1px solid #dee2e6; text-align: center;'>", private$.meanSd(group_stats$y_mean[i], group_stats$y_sd[i]), "</td>",
-                    "</tr>"
+                grp <- as.character(group_stats[[group_var]][i])
+                table$addRow(
+                    rowKey = grp,
+                    values = list(
+                        group  = grp,
+                        n      = as.integer(group_stats$n[i]),
+                        x_mean = group_stats$x_mean[i],
+                        x_sd   = if (is.na(group_stats$x_sd[i])) NULL else group_stats$x_sd[i],
+                        y_mean = group_stats$y_mean[i],
+                        y_sd   = if (is.na(group_stats$y_sd[i])) NULL else group_stats$y_sd[i]
+                    )
                 )
             }
-            
-            stats_html <- paste0(stats_html, 
-                "</tbody></table>",
-                "<p style='font-size: 12px; color: inherit; opacity: 0.75; margin-top: 15px;'>",
-                "<em>Statistics calculated for ", nrow(data), " complete observations across ", nrow(group_stats), " groups.</em>",
-                "</p></div>"
+
+            table$setNote(
+                "summary",
+                sprintf("Statistics calculated for %d complete observations across %d %s.",
+                        nrow(data), nrow(group_stats),
+                        if (nrow(group_stats) == 1L) "group" else "groups")
             )
-            
-            return(stats_html)
+            if (any(group_stats$n < 2L)) {
+                table$setNote("n1_sd", "SD is not estimable for groups with n = 1 (left blank).")
+            } else {
+                table$setNote("n1_sd", NULL)
+            }
         },
 
         .generate_outlier_analysis = function(data, x_var, y_var, group_var) {
@@ -767,8 +804,9 @@ hullplotClass <- if (requireNamespace("jmvcore")) R6::R6Class("hullplotClass",
                     )
                 } else {
                     total_outliers <- total_outliers + count
+                    outlier_label <- if (count == 1L) " potential outlier detected" else " potential outliers detected"
                     outlier_html <- paste0(outlier_html,
-                        "<li><strong>", htmltools::htmlEscape(group), ":</strong> ", count, " potential outliers detected</li>"
+                        "<li><strong>", htmltools::htmlEscape(group), ":</strong> ", count, outlier_label, "</li>"
                     )
                 }
             }
@@ -777,12 +815,14 @@ hullplotClass <- if (requireNamespace("jmvcore")) R6::R6Class("hullplotClass",
                 "</ul>",
                 "<p><strong>Total potential outliers in assessed groups:</strong> ", total_outliers, "</p>",
                 "<p style='font-size: 12px; color: inherit; margin-top: 15px;'>",
-                "<em>Outliers are points beyond 1.5 \u00d7 IQR from Q1/Q3. The rule is applied to ",
+                "<em>Outliers are points beyond 1.5 \u00d7 IQR from Q1/Q3 (R type-7 quartiles). The rule is applied to ",
                 "<strong>each axis separately</strong> and the two results are combined, so it finds points with an ",
                 "extreme X value or an extreme Y value. It does <strong>not</strong> test the X-Y combination: a point ",
                 "that sits far off the pattern the other points follow - visibly outside its hull - is not flagged if ",
-                "both of its coordinates are individually unremarkable. Read the plot alongside these counts, and ",
-                "consider investigating flagged points for data quality or interesting patterns.</em>",
+                "both of its coordinates are individually unremarkable. Note also that under normality, combining two ",
+                "marginal 1.5 \u00d7 IQR rules routinely flags roughly 1-2% of observations by chance (so 1-2 flagged points ",
+                "in a 50-observation group is common even without true outliers). Read the plot alongside these counts, ",
+                "and consider investigating flagged points for data quality or interesting patterns.</em>",
                 "</p></div>"
             )
             
@@ -843,7 +883,7 @@ hullplotClass <- if (requireNamespace("jmvcore")) R6::R6Class("hullplotClass",
                     x_sd = sd(!!rlang::sym(x_var), na.rm = TRUE),
                     y_sd = sd(!!rlang::sym(y_var), na.rm = TRUE),
                     n = dplyr::n(),
-                    .groups = 'drop'
+                    .groups = "drop"
                 )
 
             if (n_groups < 2) {
@@ -888,17 +928,34 @@ hullplotClass <- if (requireNamespace("jmvcore")) R6::R6Class("hullplotClass",
                 "<h3 style='color: inherit; margin-top: 0;'> Natural Language Summary</h3>",
 
                 # Add disclaimer about descriptive nature
-                if (n_groups >= 2) paste0(
-                    "<div style='background-color: rgba(255, 202, 33, 0.23); border-left: 3px solid #ffc107; padding: 10px; margin: 10px 0; color: inherit;'>",
-                    "<p style='margin: 0; font-size: 13px;'><strong> Note on 'Separation' Assessment:</strong> ",
-                    "The descriptors '", separation_quality, "' are based on a descriptive heuristic (discriminability index = ",
-                    "the smallest centroid distance between any two groups, after dividing each axis by its mean within-group SD). ",
-                    "It therefore describes the worst-separated pair, not the average pair. ",
-                    "<strong>This is NOT a formal statistical test.</strong> ",
-                    "Thresholds are arbitrary descriptive categories, not validated clinical cutoffs. ",
-                    "For formal inference about group differences, use appropriate statistical tests (MANOVA, discriminant analysis, etc.).</p>",
-                    "</div>"
-                ) else "",
+                if (n_groups >= 2) {
+                    if (is.na(discrim_index)) {
+                        paste0(
+                            "<div style='background-color: rgba(255, 202, 33, 0.23); border-left: 3px solid #ffc107; padding: 10px; margin: 10px 0; color: inherit;'>",
+                            "<p style='margin: 0; font-size: 13px;'><strong> Note on 'Separation' Assessment:</strong> ",
+                            "The standardized centroid separation index could not be calculated because within-group SD was zero or not estimable on at least one axis. ",
+                            "<strong>This is NOT a formal statistical test.</strong> ",
+                            "For formal inference about group differences, use appropriate statistical tests (MANOVA, discriminant analysis, etc.).</p>",
+                            "</div>"
+                        )
+                    } else {
+                        paste0(
+                            "<div style='background-color: rgba(255, 202, 33, 0.23); border-left: 3px solid #ffc107; padding: 10px; margin: 10px 0; color: inherit;'>",
+                            "<p style='margin: 0; font-size: 13px;'><strong> Note on 'Separation' Assessment:</strong> ",
+                            "The descriptor '", separation_quality, "' is based on a descriptive heuristic (discriminability index = ",
+                            sprintf("%.2f", discrim_index),
+                            "; cutoffs: \u2264 1.5 overlapping, > 1.5 to 3.0 moderately separated, > 3.0 well-separated), ",
+                            "defined as the smallest centroid distance between any two groups, after dividing each axis by its mean within-group SD. ",
+                            "It therefore describes the worst-separated pair, not the average pair, and ignores X-Y correlation. ",
+                            "<strong>This is NOT a formal statistical test.</strong> ",
+                            "Thresholds are arbitrary descriptive categories, not validated clinical cutoffs. ",
+                            "For formal inference about group differences, use appropriate statistical tests (MANOVA, discriminant analysis, etc.).</p>",
+                            "</div>"
+                        )
+                    }
+                } else {
+                    ""
+                },
 
                 "<div style='background-color: rgba(255, 255, 255, 0.06); padding: 15px; border-radius: 6px; margin: 15px 0; border: 1px solid #c3e6cb; color: inherit;'>",
                 "<h4 style='color: inherit; margin-top: 0;'>Copy-Ready Text:</h4>",
@@ -914,12 +971,20 @@ hullplotClass <- if (requireNamespace("jmvcore")) R6::R6Class("hullplotClass",
                     " and ", htmltools::htmlEscape(y_var), " across ", n_total, " observations, ",
                     "with a hull boundary delineating the extent of that group's distribution. ",
                     "No between-group comparison is possible from a single group.</strong>"
-                ) else paste0(
-                    "<strong>Hull plot analysis revealed ", n_groups, " distinct groups based on ",
-                    htmltools::htmlEscape(group_var), " classifications. ",
+                ) else if (is.na(discrim_index)) paste0(
+                    "<strong>Hull plot analysis visualized ", n_groups, " groups defined by ",
+                    htmltools::htmlEscape(group_var), ". ",
                     "The visualization shows the relationship between ", htmltools::htmlEscape(x_var),
                     " and ", htmltools::htmlEscape(y_var), " across ", n_total, " observations. ",
-                    "The closest pair of group centroids, measured in within-group SD units, is described as ",
+                    "Standardized centroid separation could not be calculated because within-group variability was zero or not estimable on at least one axis; ",
+                    "hull boundaries delineate the extent of each group's distribution.</strong>"
+                ) else paste0(
+                    "<strong>Hull plot analysis visualized ", n_groups, " groups defined by ",
+                    htmltools::htmlEscape(group_var), ". ",
+                    "The visualization shows the relationship between ", htmltools::htmlEscape(x_var),
+                    " and ", htmltools::htmlEscape(y_var), " across ", n_total, " observations. ",
+                    "The closest pair of group centroids, measured in within-group SD units (index = ",
+                    sprintf("%.2f", discrim_index), "), is described as ",
                     separation_quality, "; this describes centroid distance, not hull overlap, ",
                     "with hull boundaries clearly delineating the extent of each group's distribution.</strong>"
                 ),
