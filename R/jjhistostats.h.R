@@ -416,7 +416,10 @@ jjhistostatsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                     "ggplot2",
                     "ggstatsplot",
                     "statsExpressions",
-                    "ggpubr"),
+                    "ggpubr",
+                    "WRS2",
+                    "BayesFactor",
+                    "effectsize"),
                 clearWith=list(
                     "dep",
                     "grvar",
@@ -457,7 +460,7 @@ jjhistostatsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
             self$add(jmvcore::Image$new(
                 options=options,
                 name="plot2",
-                title="`Histogram Splitted by {grvar}`",
+                title="`Histogram Split by ${grvar}`",
                 width=600,
                 height=450,
                 renderFun=".plot2",
@@ -577,22 +580,24 @@ jjhistostatsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   plot subtitle, comparing the variable against the Test Value. 'parametric'
 #'   is a one-sample t-test, 'nonparametric' a Wilcoxon signed-rank test,
 #'   'robust' a bootstrap-t test on a trimmed mean, and 'bayes' a Bayesian
-#'   one-sample t-test. This option does NOT perform a normality test - no
-#'   Shapiro-Wilk, Anderson-Darling or similar statistic is computed or
-#'   displayed anywhere in this analysis.
-#' @param seed Random seed for the statistics computed by resampling or
-#'   posterior sampling (robust tests, Bayesian estimates, and some
-#'   nonparametric effect-size intervals). The plot caption names the seed
-#'   whenever it affected the numbers shown. The default reproduces the previous
-#'   fixed behavior.
+#'   one-sample t-test. This option does NOT perform a normality test - it
+#'   selects the location test shown in the subtitle (a separate Shapiro-Wilk
+#'   normality check is reported in clinical warnings for parametric tests and
+#'   when Clinical interpretation is enabled).
+#' @param seed Random seed for statistics computed by resampling or posterior
+#'   sampling (robust bootstrap-t tests, Bayesian posterior estimates, and
+#'   parametric Bayes factor captions). The plot caption names the seed whenever
+#'   it affected the numbers shown. The default reproduces the previous fixed
+#'   behavior.
 #' @param centralityline Whether to display a vertical line indicating the
 #'   measure of central tendency (mean for parametric, median for
 #'   nonparametric).
 #' @param changebinwidth Whether to manually specify the bin width. If FALSE,
 #'   automatic bin width calculation will be used.
 #' @param binwidth Manual bin width for histogram. Only used when
-#'   changebinwidth is TRUE. When left automatic, the width is max(x) - min(x) /
-#'   sqrt(N). Smaller values create more bins, larger values create fewer bins.
+#'   changebinwidth is TRUE. When left automatic, the width is (max(x) - min(x))
+#'   / sqrt(N). Smaller values create more bins, larger values create fewer
+#'   bins.
 #' @param resultssubtitle Whether to display statistical test results as
 #'   subtitle in the plot, including the selected one-sample location test and
 #'   descriptive statistics.
@@ -636,15 +641,18 @@ jjhistostatsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   subtitle, between 0.5 and 0.999. The old bounds allowed 1, at which the
 #'   entire statistical subtitle disappeared with no message, and 0, which
 #'   printed a zero-width "0 percent CI".
-#' @param bf.message Whether to display Bayes Factor in the subtitle when
-#'   using Bayesian analysis.
+#' @param bf.message Whether to display a Bayes factor caption beneath the
+#'   plot when using parametric analysis with statistical results enabled. In
+#'   Bayesian mode, the Bayes factor is always displayed in the subtitle
+#'   regardless of this setting.
 #' @param digits Number of decimal places for displaying statistics in the
 #'   subtitle.
 #' @param xlab Custom label for the x-axis. If empty, variable name will be
 #'   used.
 #' @param title Title for the plot.
-#' @param subtitle Subtitle for the plot (overrides statistical results if
-#'   provided).
+#' @param subtitle Custom subtitle for the plot. Only shown when Statistical
+#'   results (resultssubtitle) is switched off; otherwise statistical results
+#'   occupy the subtitle.
 #' @param caption Caption text to display at the bottom of the plot.
 #' @param centralitytype Type of central tendency measure to display.
 #'   'Default' uses the appropriate measure based on the statistical test type

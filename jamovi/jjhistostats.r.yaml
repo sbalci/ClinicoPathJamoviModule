@@ -56,7 +56,7 @@ items:
       # title: '` ${group} - {dep} by {grvar}`'
 
     - name: plot2
-      title: '`Histogram Splitted by {grvar}`'
+      title: '`Histogram Split by ${grvar}`'
       type: Image
       width:  600
       height: 450
@@ -172,4 +172,7 @@ refs:
     - ggstatsplot
     - statsExpressions
     - ggpubr
+    - WRS2
+    - BayesFactor
+    - effectsize
 ...

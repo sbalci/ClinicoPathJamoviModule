@@ -61,15 +61,16 @@ each level of this variable (grouped analysis).}
 plot subtitle, comparing the variable against the Test Value. 'parametric'
 is a one-sample t-test, 'nonparametric' a Wilcoxon signed-rank test,
 'robust' a bootstrap-t test on a trimmed mean, and 'bayes' a Bayesian
-one-sample t-test. This option does NOT perform a normality test - no
-Shapiro-Wilk, Anderson-Darling or similar statistic is computed or
-displayed anywhere in this analysis.}
+one-sample t-test. This option does NOT perform a normality test - it
+selects the location test shown in the subtitle (a separate Shapiro-Wilk
+normality check is reported in clinical warnings for parametric tests and
+when Clinical interpretation is enabled).}
 
-\item{seed}{Random seed for the statistics computed by resampling or
-posterior sampling (robust tests, Bayesian estimates, and some
-nonparametric effect-size intervals). The plot caption names the seed
-whenever it affected the numbers shown. The default reproduces the previous
-fixed behavior.}
+\item{seed}{Random seed for statistics computed by resampling or posterior
+sampling (robust bootstrap-t tests, Bayesian posterior estimates, and
+parametric Bayes factor captions). The plot caption names the seed whenever
+it affected the numbers shown. The default reproduces the previous fixed
+behavior.}
 
 \item{centralityline}{Whether to display a vertical line indicating the
 measure of central tendency (mean for parametric, median for
@@ -79,8 +80,9 @@ nonparametric).}
 automatic bin width calculation will be used.}
 
 \item{binwidth}{Manual bin width for histogram. Only used when
-changebinwidth is TRUE. When left automatic, the width is max(x) - min(x) /
-sqrt(N). Smaller values create more bins, larger values create fewer bins.}
+changebinwidth is TRUE. When left automatic, the width is (max(x) - min(x))
+/ sqrt(N). Smaller values create more bins, larger values create fewer
+bins.}
 
 \item{resultssubtitle}{Whether to display statistical test results as
 subtitle in the plot, including the selected one-sample location test and
@@ -134,8 +136,10 @@ subtitle, between 0.5 and 0.999. The old bounds allowed 1, at which the
 entire statistical subtitle disappeared with no message, and 0, which
 printed a zero-width "0 percent CI".}
 
-\item{bf.message}{Whether to display Bayes Factor in the subtitle when
-using Bayesian analysis.}
+\item{bf.message}{Whether to display a Bayes factor caption beneath the
+plot when using parametric analysis with statistical results enabled. In
+Bayesian mode, the Bayes factor is always displayed in the subtitle
+regardless of this setting.}
 
 \item{digits}{Number of decimal places for displaying statistics in the
 subtitle.}
@@ -145,8 +149,9 @@ used.}
 
 \item{title}{Title for the plot.}
 
-\item{subtitle}{Subtitle for the plot (overrides statistical results if
-provided).}
+\item{subtitle}{Custom subtitle for the plot. Only shown when Statistical
+results (resultssubtitle) is switched off; otherwise statistical results
+occupy the subtitle.}
 
 \item{caption}{Caption text to display at the bottom of the plot.}
 

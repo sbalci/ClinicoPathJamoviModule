@@ -18,6 +18,7 @@ jjhistostatsClass <- if (requireNamespace('jmvcore'))
         # Option overrides for clinical presets (jamovi options are read-only at runtime;
         # presets record overrides here and reads go through private$.option()).
         overrides = list(),
+        .statsComputed = FALSE,
         .option = function(option) {
             if (option %in% names(private$overrides)) return(private$overrides[[option]])
             opt_obj <- self$options$option(option)
@@ -27,44 +28,66 @@ jjhistostatsClass <- if (requireNamespace('jmvcore'))
 
             # Clinical presets record their settings in private$overrides instead of writing
             # back into the read-only jamovi option objects; reads go through private$.option().
-            # (2026-07-13 audit fix.)
-
-            # Apply clinical preset configurations
+            # Only options still at their schema default are populated by a preset so explicit
+            # user choices are never silently clobbered.
             .applyClinicalPreset = function() {
                 preset <- self$options$clinicalPreset
 
-                # Clear first. jamovi reuses the analysis object across option changes, and
-                # `overrides` is instance state, so a preset's settings used to survive after
-                # the user switched back to Custom: the panel showed the user's choices while
-                # the analysis went on computing the preset's. Measured with
-                # clinicalPreset='biomarkers' then 'custom': the options panel read
-                # parametric / subtitle off, the analysis still ran nonparametric / subtitle on.
+                # Clear first so returning to Custom never leaks stale preset state.
                 private$overrides <- list()
 
                 # Only apply preset if not using custom settings
                 if (preset == 'custom') return()
 
-                # Apply preset-specific configurations
+                # Schema defaults from jamovi/jjhistostats.a.yaml
+                defaults <- list(
+                    typestatistics = 'parametric',
+                    centralityline = FALSE,
+                    centralitytype = 'default',
+                    resultssubtitle = FALSE,
+                    showInterpretation = FALSE,
+                    bf.message = FALSE,
+                    changebinwidth = FALSE,
+                    binwidth = 1.1
+                )
+                set_if_default <- function(opt_name, preset_val) {
+                    opt_obj <- self$options$option(opt_name)
+                    if (!is.null(opt_obj) && identical(opt_obj$value, defaults[[opt_name]])) {
+                        private$overrides[[opt_name]] <- preset_val
+                    }
+                }
+
+                # Apply preset-specific configurations (synchronized with jjhistostats.events.js)
                 if (preset == 'lab_values') {
-                    # Lab Values: parametric with centrality line
-                    private$overrides[["typestatistics"]] <- 'parametric'
-                    private$overrides[["centralityline"]] <- TRUE
-                    private$overrides[["resultssubtitle"]] <- TRUE
+                    set_if_default("typestatistics", 'parametric')
+                    set_if_default("centralityline", TRUE)
+                    set_if_default("centralitytype", 'parametric')
+                    set_if_default("resultssubtitle", TRUE)
+                    set_if_default("showInterpretation", TRUE)
+                    set_if_default("bf.message", TRUE)
                 } else if (preset == 'biomarkers') {
-                    # Biomarker Distribution: nonparametric, robust
-                    private$overrides[["typestatistics"]] <- 'nonparametric'
-                    private$overrides[["centralityline"]] <- TRUE
-                    private$overrides[["resultssubtitle"]] <- TRUE
+                    set_if_default("typestatistics", 'nonparametric')
+                    set_if_default("centralityline", TRUE)
+                    set_if_default("centralitytype", 'nonparametric')
+                    set_if_default("resultssubtitle", TRUE)
+                    set_if_default("showInterpretation", TRUE)
+                    set_if_default("bf.message", FALSE)
                 } else if (preset == 'patient_chars') {
-                    # Patient Characteristics: parametric for age, BMI
-                    private$overrides[["typestatistics"]] <- 'parametric'
-                    private$overrides[["centralityline"]] <- TRUE
-                    private$overrides[["resultssubtitle"]] <- TRUE
+                    set_if_default("typestatistics", 'parametric')
+                    set_if_default("centralityline", TRUE)
+                    set_if_default("centralitytype", 'parametric')
+                    set_if_default("resultssubtitle", TRUE)
+                    set_if_default("showInterpretation", FALSE)
+                    set_if_default("bf.message", FALSE)
                 } else if (preset == 'pathology_scores') {
-                    # Pathology Scores: nonparametric for ordinal data
-                    private$overrides[["typestatistics"]] <- 'nonparametric'
-                    private$overrides[["centralityline"]] <- TRUE
-                    private$overrides[["resultssubtitle"]] <- TRUE
+                    set_if_default("typestatistics", 'nonparametric')
+                    set_if_default("centralityline", TRUE)
+                    set_if_default("centralitytype", 'nonparametric')
+                    set_if_default("resultssubtitle", TRUE)
+                    set_if_default("showInterpretation", TRUE)
+                    set_if_default("bf.message", FALSE)
+                    set_if_default("changebinwidth", TRUE)
+                    set_if_default("binwidth", 1.0)
                 }
             },
 
@@ -96,6 +119,14 @@ jjhistostatsClass <- if (requireNamespace('jmvcore'))
                     ggpubr_height <- if (deplen > 1) deplen * plotheight * 1.15 else plotheight
                     self$results$ggpubrPlot$setSize(plotwidth, ggpubr_height)
                     self$results$ggpubrPlot2$setSize(1200, ggpubr_height)
+                }
+
+                # Scale diagnostic plots vertically when multiple variables are stacked
+                if (isTRUE(self$options$addDistributionDiagnostics) && deplen > 1) {
+                    diag_height <- deplen * 400 * 1.15
+                    self$results$densityPlot$setSize(600, diag_height)
+                    self$results$qqPlot$setSize(600, diag_height)
+                    self$results$ecdfPlot$setSize(600, diag_height)
                 }
 
 
@@ -176,91 +207,366 @@ jjhistostatsClass <- if (requireNamespace('jmvcore'))
                 return(mydata)
             },
 
-            # Shared plot generation function to eliminate duplication
-            .generateHistogram = function(data, x_var, options_data, aesthetics_data, grvar_sym = NULL, ggtheme = NULL) {
-                # Checkpoint before expensive statistical plot generation
+            # Strip discrete scales (jmvcore::ggPalette) from jamovi's ggtheme list.
+            # ggstatsplot::gghistostats() maps fill = after_stat(count) (continuous),
+            # so adding a discrete fill scale aborts ggplot_build() on every default render.
+            .cleanGgtheme = function(ggtheme) {
+                if (isTRUE(self$options$originaltheme)) {
+                    return(ggstatsplot::theme_ggstatsplot())
+                }
+                if (is.null(ggtheme)) return(NULL)
+                if (inherits(ggtheme, "theme")) return(ggtheme)
+                if (is.list(ggtheme)) {
+                    theme_els <- Filter(function(el) inherits(el, "theme"), ggtheme)
+                    if (length(theme_els) > 0) return(theme_els[[1]])
+                    return(ggplot2::theme_minimal())
+                }
+                ggtheme
+            },
+
+            .formatStatNum = function(val, digits) {
+                if (length(val) == 0 || is.na(val)) return("NA")
+                if (is.infinite(val)) return(if (val > 0) "Inf" else "-Inf")
+                sprintf(paste0("%.", digits, "f"), val)
+            },
+
+            .formatStatP = function(p, digits) {
+                if (length(p) == 0 || is.na(p)) return("NA")
+                if (p < 10^(-digits)) {
+                    formatC(p, digits = digits, format = "e")
+                } else {
+                    sprintf(paste0("%.", digits, "f"), p)
+                }
+            },
+
+            .formatDescNum = function(val) {
+                if (length(val) == 0 || is.na(val) || !is.finite(val)) return("NA")
+                if (val == 0) return("0")
+                if (abs(val) < 0.01 || abs(val) >= 1e6) {
+                    return(formatC(val, digits = 3, format = "g"))
+                }
+                as.character(round(val, 2))
+            },
+
+            .formatConfPct = function(conf_level) {
+                paste0(sub("\\.?0+$", "", sprintf("%.4f", 100 * conf_level)), "%")
+            },
+
+            .formatPWithOp = function(p) {
+                p_str <- base::format.pval(p, digits = 3, eps = 1e-16)
+                if (startsWith(p_str, "<")) {
+                    paste0("p &lt; ", trimws(sub("^<", "", p_str)))
+                } else {
+                    paste0("p = ", p_str)
+                }
+            },
+
+            # Genuine one-sided bootstrap-t on trimmed mean (Phipson-Smyth (b+1)/(B+1), B=2000)
+            .buildOneSidedRobustExpr = function(x_vec, test_value, tr, conf_level, alternative, digits) {
+                n_obs <- length(x_vec)
+                mu_tr <- mean(x_vec, trim = tr)
+                se_tr <- WRS2::trimse(x_vec, tr)
+                if (!is.finite(se_tr) || se_tr <= 0) return(NULL)
+                t_obs <- (mu_tr - test_value) / se_tr
+                nboot <- 2000L
+                boot_mat <- matrix(sample(x_vec, size = n_obs * nboot, replace = TRUE), nrow = nboot) - mu_tr
+                top <- apply(boot_mat, 1, mean, trim = tr)
+                bot <- apply(boot_mat, 1, WRS2::trimse, tr = tr)
+                t_boot <- top / bot
+                t_boot <- t_boot[is.finite(t_boot)]
+                B_eff <- length(t_boot)
+                if (B_eff < 10L) return(NULL)
+                if (identical(alternative, "greater")) {
+                    p_val <- (sum(t_boot >= t_obs) + 1) / (B_eff + 1)
+                    ci_lo <- mu_tr - as.numeric(stats::quantile(t_boot, probs = conf_level, names = FALSE)) * se_tr
+                    ci_hi <- Inf
+                } else {
+                    p_val <- (sum(t_boot <= t_obs) + 1) / (B_eff + 1)
+                    ci_lo <- -Inf
+                    ci_hi <- mu_tr - as.numeric(stats::quantile(t_boot, probs = 1 - conf_level, names = FALSE)) * se_tr
+                }
+                ci_lbl <- private$.formatConfPct(conf_level)
+                bquote(list(
+                    italic("t")["bootstrapped"] == .(private$.formatStatNum(t_obs, digits)),
+                    italic(p) == .(private$.formatStatP(p_val, digits)),
+                    widehat(mu)["trimmed"] == .(private$.formatStatNum(mu_tr, digits)),
+                    CI[.(ci_lbl)] ~ "[" * .(private$.formatStatNum(ci_lo, digits)),
+                    .(private$.formatStatNum(ci_hi, digits)) * "]",
+                    italic("n")["obs"] == .(as.character(n_obs))
+                ))
+            },
+
+            # Genuine directional JZS Bayes factor via BayesFactor::ttestBF(nullInterval = ...).
+            # Reads log(BF10) directly from @bayesFactor$bf[1] (no exp() overflow above 709.78),
+            # and summarizes posterior difference from the unconstrained JZS model so opposite-sign
+            # data never collapse to NA/Inf rejection draws or display truncated positive estimates.
+            .buildDirectionalBayesExpr = function(x_vec, test_value, bf_prior, conf_level, alternative, digits) {
+                null_int <- if (identical(alternative, "greater")) c(0, Inf) else c(-Inf, 0)
+                bf_dir <- tryCatch(
+                    BayesFactor::ttestBF(x = x_vec, mu = test_value, rscale = bf_prior, nullInterval = null_int),
+                    error = function(e) NULL
+                )
+                if (is.null(bf_dir)) return(NULL)
+                log_bf10 <- tryCatch(as.numeric(bf_dir@bayesFactor$bf[1]), error = function(e) NA_real_)
+                if (!is.finite(log_bf10)) return(NULL)
+                log_e_bf01 <- -log_bf10
+
+                bf_unc <- tryCatch(
+                    BayesFactor::ttestBF(x = x_vec, mu = test_value, rscale = bf_prior),
+                    error = function(e) NULL
+                )
+                if (is.null(bf_unc)) return(NULL)
+                post <- tryCatch(
+                    BayesFactor::posterior(bf_unc, iterations = 4000, progress = FALSE),
+                    error = function(e) NULL
+                )
+                if (is.null(post) || !"mu" %in% colnames(post)) return(NULL)
+                diff_draws <- as.numeric(post[, "mu"]) - test_value
+                diff_draws <- diff_draws[is.finite(diff_draws)]
+                if (length(diff_draws) < 10L) return(NULL)
+                est <- stats::median(diff_draws)
+                alpha <- 1 - conf_level
+                qs <- stats::quantile(diff_draws, probs = c(alpha / 2, 1 - alpha / 2), names = FALSE)
+                ci_lbl <- private$.formatConfPct(conf_level)
+                bquote(list(
+                    log[e] * (BF["01"]) == .(private$.formatStatNum(log_e_bf01, digits)),
+                    widehat(delta)["difference"]^"posterior" == .(private$.formatStatNum(est, digits)),
+                    CI[.(ci_lbl)]^ETI ~ "[" * .(private$.formatStatNum(qs[1], digits)),
+                    .(private$.formatStatNum(qs[2], digits)) * "]",
+                    italic("r")["Cauchy"]^"JZS" == .(private$.formatStatNum(bf_prior, digits))
+                ))
+            },
+
+            # Replace WRS2::trimcibt zero-exceedance .Machine$double.xmin (~2.225e-308 at any digits)
+            # with the Phipson-Smyth (2010) bound p < 0.005 (1 / (200 + 1)).
+            .patchRobustZeroP = function(expr) {
+                if (is.null(expr) || !is.call(expr)) return(expr)
+                for (i in seq_along(expr)) {
+                    el <- expr[[i]]
+                    if (is.call(el) && identical(el[[1]], as.name("==")) &&
+                        identical(deparse(el[[2]]), "italic(p)") &&
+                        is.character(el[[3]])) {
+                        p_num <- suppressWarnings(as.numeric(el[[3]]))
+                        if (!is.na(p_num) && p_num <= 1e-300) {
+                            expr[[i]] <- call("<", el[[2]], "0.005")
+                        }
+                    } else if (is.call(el)) {
+                        expr[[i]] <- private$.patchRobustZeroP(el)
+                    }
+                }
+                expr
+            },
+
+            # Replace the two-sided CI bounds inside a parametric/nonparametric statsExpressions
+            # subtitle with the genuine one-sided CI matching `alternative`.
+            .patchOneSidedCI = function(expr, ci_lo_str, ci_hi_str) {
+                if (is.null(expr) || !is.call(expr)) return(expr)
+                # In statsExpressions, list(..., CI["95%"] ~ "[" * "lo", "hi" * "]", ...)
+                for (i in seq_along(expr)) {
+                    el <- expr[[i]]
+                    if (is.call(el) && identical(el[[1]], as.name("~")) &&
+                        grepl("^CI\\[", paste(deparse(el[[2]]), collapse = ""))) {
+                        el[[3]] <- call("*", "[", ci_lo_str)
+                        expr[[i]] <- el
+                        if (i + 1L <= length(expr)) {
+                            expr[[i + 1L]] <- call("*", ci_hi_str, "]")
+                        }
+                        break
+                    }
+                }
+                expr
+            },
+
+            # Single-panel histogram generator shared by .plot and grouped .plot2
+            .generateSingleHistogram = function(data, x_var, options_data, aesthetics_data, ggtheme = NULL, panel_title = NULL, forced_binwidth = NULL) {
                 private$.checkpoint(flush = FALSE)
 
-                # Build base arguments common to all plots
-                # Note: the deprecated `messages` argument was removed - ggstatsplot >= 1.0.0
-                # no longer accepts it and forwards it to geom_histogram, triggering an
-                # "Ignoring unknown parameters" warning.
+                x_fin <- data[[x_var]]
+                x_fin <- x_fin[is.finite(x_fin)]
+                test_val <- if (isTRUE(options_data$enableOneSampleTest)) options_data$test.value else 0
+                stat_type <- options_data$typestatistics
+                alt <- options_data$alternative
+                tr <- options_data$trimlevel
+                digits <- options_data$digits
+                conf_level <- options_data$conf.level
+
+                # Guard degenerate statistical paths (n < 3 subgroups, constant data,
+                # insufficient untrimmed n, or zero Winsorized SE from heavy ties)
+                too_few_obs <- length(x_fin) < 3L
+                is_constant <- !too_few_obs && length(unique(x_fin)) <= 1L
+                robust_too_small <- !too_few_obs && !is_constant && identical(stat_type, "robust") &&
+                    (length(x_fin) - 2L * floor(tr * length(x_fin)) < 3L)
+                robust_zero_se <- !too_few_obs && !is_constant && !robust_too_small &&
+                    identical(stat_type, "robust") && {
+                        se_chk <- tryCatch(WRS2::trimse(x_fin, tr), error = function(e) NA_real_)
+                        !is.finite(se_chk) || se_chk <= 0
+                    }
+
+                effective_subtitle <- isTRUE(options_data$resultssubtitle) &&
+                    !too_few_obs && !is_constant && !robust_too_small && !robust_zero_se
+                custom_sub <- aesthetics_data$subtitle
+                if (isTRUE(options_data$resultssubtitle) && too_few_obs) {
+                    custom_sub <- if (length(x_fin) == 1L) {
+                        .("No statistical test: subgroup has only 1 observation (need at least 3).")
+                    } else {
+                        .fmt(.("No statistical test: subgroup has only {n} observations (need at least 3)."),
+                             n = length(x_fin))
+                    }
+                } else if (isTRUE(options_data$resultssubtitle) && is_constant) {
+                    custom_sub <- .("No statistical test: variable is constant.")
+                } else if (isTRUE(options_data$resultssubtitle) && robust_too_small) {
+                    custom_sub <- .("Robust test unavailable: trimming leaves fewer than 3 observations.")
+                } else if (isTRUE(options_data$resultssubtitle) && robust_zero_se) {
+                    custom_sub <- .("Robust test unavailable: zero Winsorized variance in trimmed core (heavy ties).")
+                }
+
+                # For one-sided robust or bayes, compute directional stats ourselves after
+                # building the histogram, because statsExpressions ignores `alternative` there.
+                manual_one_sided <- effective_subtitle &&
+                    !identical(alt, "two.sided") &&
+                    stat_type %in% c("robust", "bayes")
+
                 base_args <- list(
                     data = data,
                     x = rlang::sym(x_var),
-                    type = options_data$typestatistics,
-                    results.subtitle = options_data$resultssubtitle,
-                    centrality.plotting = options_data$centralityline,
-                    binwidth = options_data$binwidth,
-                    conf.level = options_data$conf.level,
-                    alternative = options_data$alternative,
-                    # `tr` (trim) and `bf.prior` were previously frozen at ggstatsplot's
-                    # defaults (0.2 and 0.707) with no way to see or change them. A Bayes
-                    # factor is not interpretable without its prior, and "robust" is not
-                    # meaningful without the trim level, so both are now options and both
-                    # are disclosed in .generateClinicalWarnings().
-                    tr = options_data$trimlevel,
+                    type = stat_type,
+                    results.subtitle = if (manual_one_sided) FALSE else effective_subtitle,
+                    centrality.plotting = isTRUE(options_data$centralityline) && length(x_fin) >= 1,
+                    binwidth = if (!is.null(forced_binwidth)) forced_binwidth else options_data$binwidth,
+                    conf.level = conf_level,
+                    alternative = alt,
+                    tr = tr,
                     bf.prior = options_data$bfprior,
-                    bf.message = options_data$bf.message,
-                    digits = options_data$digits,
-                    xlab = aesthetics_data$xlab,
-                    title = aesthetics_data$title,
-                    subtitle = aesthetics_data$subtitle,
+                    bf.message = isTRUE(options_data$bf.message) && effective_subtitle,
+                    digits = digits,
+                    xlab = if (length(options_data$dep) > 1) x_var else aesthetics_data$xlab,
+                    title = if (!is.null(panel_title)) panel_title else if (length(options_data$dep) > 1) NULL else aesthetics_data$title,
+                    subtitle = if (effective_subtitle && !manual_one_sided) NULL else custom_sub,
                     caption = aesthetics_data$caption,
                     bin.args = aesthetics_data$bin.args,
                     centrality.line.args = aesthetics_data$centrality.line.args
                 )
 
-                # Conditionally add test.value only if one-sample test is enabled
-                if (options_data$enableOneSampleTest) {
-                    base_args$test.value <- options_data$test.value
+                if (isTRUE(options_data$enableOneSampleTest)) {
+                    base_args$test.value <- test_val
                 }
-
-                # Add grouping variable if provided
-                if (!is.null(grvar_sym)) {
-                    base_args$grouping.var <- grvar_sym
-
-                    # grouped_gghistostats() supplies `title` itself, once per group, via its
-                    # internal pmap. Passing the user's title as well makes do.call() raise
-                    # `formal argument "title" matched by multiple actual arguments` and the
-                    # whole grouped plot fails to render. Only an empty title escaped, because
-                    # the NULL-strip below removed it.
-                    base_args$title <- NULL
-                }
-
-                # With several variables selected, every panel is generated by this same call
-                # with a different x_var, so a single user-supplied title or x-axis label would
-                # be stamped onto all of them -- three analytes all captioned with the first
-                # one's name. A per-variable label is only unambiguous when there is one
-                # variable; otherwise fall back to the variable's own name.
-                if (length(options_data$dep) > 1) {
-                    base_args$title <- NULL
-                    base_args$xlab <- x_var
-                }
-
-                # Add centrality.type if specified
                 if (!is.null(options_data$centrality.type)) {
                     base_args$centrality.type <- options_data$centrality.type
                 }
-
-                # Follow the host theme jamovi hands the renderer, unless the
-                # user asked for ggstatsplot's own. Set after the NULL-strip
-                # below would drop it, so it goes in first.
-                base_args$ggtheme <- if (isTRUE(self$options$originaltheme))
-                    ggstatsplot::theme_ggstatsplot() else ggtheme
+                base_args$ggtheme <- private$.cleanGgtheme(ggtheme)
 
                 # Remove NULL arguments to prevent conflicts
                 base_args <- base_args[!sapply(base_args, is.null)]
 
-                # Checkpoint before calling expensive ggstatsplot functions
+                private$.checkpoint(flush = FALSE)
+                p <- do.call(ggstatsplot::gghistostats, base_args)
+
+                # Post-process subtitles/captions for edge cases & one-sided accuracy
+                if (effective_subtitle) {
+                    stat_ran <- TRUE
+                    if (manual_one_sided && identical(stat_type, "robust")) {
+                        rob_expr <- private$.buildOneSidedRobustExpr(
+                            x_fin, test_val, tr, conf_level, alt, digits
+                        )
+                        if (!is.null(rob_expr)) {
+                            p <- p + ggplot2::labs(subtitle = rob_expr)
+                        } else {
+                            stat_ran <- FALSE
+                            p <- p + ggplot2::labs(subtitle = .("Robust test unavailable: insufficient finite bootstrap resamples."))
+                        }
+                    } else if (manual_one_sided && identical(stat_type, "bayes")) {
+                        bay_expr <- private$.buildDirectionalBayesExpr(
+                            x_fin, test_val, options_data$bfprior, conf_level, alt, digits
+                        )
+                        if (!is.null(bay_expr)) {
+                            p <- p + ggplot2::labs(subtitle = bay_expr)
+                        } else {
+                            stat_ran <- FALSE
+                            p <- p + ggplot2::labs(subtitle = .("Bayesian directional test unavailable for these data."))
+                        }
+                    } else if (identical(stat_type, "robust")) {
+                        # Two-sided robust: replace impossible B=200 p~2.225e-308 with p < "0.005"
+                        p$labels$subtitle <- private$.patchRobustZeroP(p$labels$subtitle)
+                    } else if (!identical(alt, "two.sided") && stat_type %in% c("parametric", "nonparametric")) {
+                        # One-sided parametric/nonparametric: match effect-size CI to `alternative`
+                        es_df <- tryCatch({
+                            if (identical(stat_type, "parametric")) {
+                                effectsize::hedges_g(x_fin, mu = test_val, ci = conf_level,
+                                                     alternative = alt, verbose = FALSE)
+                            } else {
+                                effectsize::rank_biserial(x_fin, mu = test_val, ci = conf_level,
+                                                          alternative = alt, verbose = FALSE)
+                            }
+                        }, error = function(e) NULL)
+                        if (!is.null(es_df) && nrow(es_df) >= 1 && !is.null(p$labels$subtitle)) {
+                            p$labels$subtitle <- private$.patchOneSidedCI(
+                                p$labels$subtitle,
+                                private$.formatStatNum(es_df$CI_low[1], digits),
+                                private$.formatStatNum(es_df$CI_high[1], digits)
+                            )
+                        }
+                        # Also match parametric bf.message caption to directional hypothesis
+                        if (identical(stat_type, "parametric") && isTRUE(options_data$bf.message)) {
+                            bf_cap <- private$.buildDirectionalBayesExpr(
+                                x_fin, test_val, options_data$bfprior, conf_level, alt, digits
+                            )
+                            if (!is.null(bf_cap)) p <- p + ggplot2::labs(caption = bf_cap)
+                        }
+                    }
+                    if (stat_ran) private$.statsComputed <- TRUE
+                }
+
+                p
+            },
+
+            # Shared plot generation function to eliminate duplication
+            .generateHistogram = function(data, x_var, options_data, aesthetics_data, grvar_sym = NULL, ggtheme = NULL) {
                 private$.checkpoint(flush = FALSE)
 
-                # Call appropriate function based on grouping
                 if (is.null(grvar_sym)) {
-                    do.call(ggstatsplot::gghistostats, base_args)
-                } else {
-                    do.call(ggstatsplot::grouped_gghistostats, base_args)
+                    return(private$.generateSingleHistogram(
+                        data = data, x_var = x_var,
+                        options_data = options_data, aesthetics_data = aesthetics_data,
+                        ggtheme = ggtheme
+                    ))
                 }
+
+                # Grouped histogram: mirror grouped_gghistostats() shared automatic binwidth
+                # while safely handling explicit-NA factor levels (addNA) and all-NA subgroups.
+                grvar_name <- rlang::as_name(grvar_sym)
+                raw_g <- data[[grvar_name]]
+                g_chr <- as.character(raw_g)
+                valid_grp <- !is.na(g_chr)
+                gdata <- data[valid_grp, , drop = FALSE]
+                g_chr_valid <- g_chr[valid_grp]
+                raw_lvls <- if (is.factor(raw_g)) levels(raw_g) else unique(g_chr_valid)
+                lvls <- raw_lvls[!is.na(raw_lvls)]
+
+                x_all <- gdata[[x_var]]
+                x_all <- x_all[is.finite(x_all)]
+                shared_bw <- options_data$binwidth
+                if (is.null(shared_bw) && length(x_all) >= 2 && diff(range(x_all)) > 0) {
+                    shared_bw <- (max(x_all) - min(x_all)) / sqrt(length(x_all))
+                }
+
+                plotlist <- list()
+                for (lvl in lvls) {
+                    sub_df <- gdata[g_chr_valid == lvl, , drop = FALSE]
+                    if (nrow(sub_df) == 0) next
+                    x_sub <- sub_df[[x_var]]
+                    if (sum(is.finite(x_sub)) == 0) next
+                    private$.checkpoint(flush = FALSE)
+                    plotlist[[length(plotlist) + 1L]] <- private$.generateSingleHistogram(
+                        data = sub_df, x_var = x_var,
+                        options_data = options_data, aesthetics_data = aesthetics_data,
+                        ggtheme = ggtheme, panel_title = lvl, forced_binwidth = shared_bw
+                    )
+                }
+
+                if (length(plotlist) == 0) {
+                    jmvcore::reject(.("No grouping level contains finite numeric values to plot."))
+                }
+                ggstatsplot::combine_plots(plotlist = plotlist)
             },
             
             # Consolidated input validation with clinical assumption checking
@@ -318,18 +624,19 @@ jjhistostatsClass <- if (requireNamespace('jmvcore'))
                         var = self$options$grvar)))
                 }
 
-                # Check if binwidth is positive when manually specified
-                if (self$options$changebinwidth && (!is.null(self$options$binwidth) && self$options$binwidth <= 0)) {
+                # Check effective binwidth (including clinicalPreset overrides such as pathology_scores)
+                use_bw <- isTRUE(private$.option("changebinwidth"))
+                bw_val <- private$.option("binwidth")
+
+                # Check if binwidth is positive when manually or preset specified
+                if (use_bw && (!is.null(bw_val) && bw_val <= 0)) {
                     return(list(valid = FALSE, message = .("Bin width must be a positive number.")))
                 }
 
-                # A positive but tiny bin width is fully enterable in the GUI (the JS handler
-                # only clamps values <= 0) and produces an EMPTY panel: ggplot2 refuses more
-                # than 1,000,000 bins, and that error goes to stderr where jamovi never shows
-                # it. Reject well below that ceiling with a message that names the data range
-                # and a workable width.
-                if (self$options$changebinwidth && !is.null(self$options$binwidth) &&
-                    self$options$binwidth > 0) {
+                # A positive but tiny bin width is fully enterable in the GUI (or via a preset
+                # like pathology_scores on a wide-range variable) and produces an EMPTY panel:
+                # ggplot2 refuses more than 1,000,000 bins, and that error goes to stderr.
+                if (use_bw && !is.null(bw_val) && bw_val > 0) {
                     max_bins <- 5000
                     for (v in self$options$dep) {
                         if (!v %in% names(self$data)) next
@@ -339,11 +646,11 @@ jjhistostatsClass <- if (requireNamespace('jmvcore'))
                         if (length(x) < 2) next
                         rng <- diff(range(x))
                         if (rng <= 0) next
-                        n_bins <- rng / self$options$binwidth
+                        n_bins <- rng / bw_val
                         if (n_bins > max_bins)
                             return(list(valid = FALSE, message = .fmt(
                                 .("A bin width of {width} would split '{var}' into {bins} bins, so the histogram would be unreadable or blank. '{var}' ranges over {range}; a bin width of about {suggested} gives roughly 30 bins."),
-                                width = base::format(self$options$binwidth), var = v,
+                                width = base::format(bw_val), var = v,
                                 bins = base::format(round(n_bins), big.mark = ","),
                                 range = base::format(signif(rng, 4)),
                                 suggested = base::format(signif(rng / 30, 3)))))
@@ -404,7 +711,7 @@ jjhistostatsClass <- if (requireNamespace('jmvcore'))
                                 .("<strong>The statistical subtitle is testing against zero.</strong><br>The subtitle on the histogram is a <strong>{test}</strong> asking whether the center of your data differs from <strong>0</strong>."),
                                 test = test_name),
                             if (chose_it) "" else
-                                " ", .("This is the default null, because 'Custom null value' is switched off so no test value is supplied."),
+                                paste0(" ", .("This is the default null, because 'Custom null value' is switched off so no test value is supplied.")),
                             " ", .("Every value in your data lies on one side of 0, so this test is guaranteed to be significant and tells you nothing.<br><strong>What to do:</strong><br>"),
                             .("\u2022 Switch on <strong>Custom null value</strong> and set <strong>Test value</strong> to a clinically meaningful comparison - a reference-range limit, a treatment threshold, or a published population norm; or<br>"),
                             .("\u2022 Switch off <strong>Statistical results</strong> for a purely descriptive histogram. Turning off 'Custom null value' alone does <em>not</em> remove the test.")
@@ -421,22 +728,87 @@ jjhistostatsClass <- if (requireNamespace('jmvcore'))
                 #    high-expressing subgroup without the user ever knowing.
                 if (isTRUE(private$.option("resultssubtitle"))) {
                     stat_type <- private$.option("typestatistics")
-                    if (identical(stat_type, "bayes") || isTRUE(self$options$bf.message)) {
+                    bf_active <- identical(stat_type, "bayes") ||
+                        (identical(stat_type, "parametric") && isTRUE(private$.option("bf.message")))
+                    if (bf_active) {
                         warnings <- c(warnings, .fmt(
-                            .("<strong>Bayes factor prior:</strong> the Bayes factor is computed under a Cauchy prior on effect size with scale r = {r}. A Bayes factor is only interpretable against the prior that produced it, so report this value alongside it, and vary the Bayes prior scale to check how sensitive your conclusion is to the choice."),
+                            .("<strong>Bayes factor prior:</strong> the Bayes factor is computed under a Cauchy prior on standardized effect size with scale r = {r} (the displayed posterior difference is on the original measurement scale). A Bayes factor is only interpretable against the prior that produced it, so report this value alongside it, and vary the Bayes prior scale to check how sensitive your conclusion is to the choice."),
                             r = base::format(self$options$bfprior)))
                     }
                     if (identical(stat_type, "robust")) {
+                        tr <- self$options$trimlevel
+                        trim_details <- character()
+                        for (var in variables) {
+                            if (!var %in% names(data)) next
+                            n_used <- sum(is.finite(data[[var]]))
+                            k_trim <- floor(tr * n_used)
+                            if (length(variables) == 1) {
+                                trim_details <- c(trim_details, .fmt(
+                                    .("{k} of {total} observations at each tail"),
+                                    k = k_trim, total = n_used))
+                            } else {
+                                trim_details <- c(trim_details, .fmt(
+                                    .("{var}: {k} of {total} at each tail"),
+                                    var = htmltools::htmlEscape(var), k = k_trim, total = n_used))
+                            }
+                            if (n_used - 2L * k_trim < 3L) {
+                                warnings <- c(warnings, .fmt(
+                                    .("<strong>Insufficient observations after trimming '{var}':</strong> trimming {pct}% from each tail of n = {total} leaves fewer than 3 observations, so the robust bootstrap-t test cannot be computed. Lower Trim proportion or switch to Nonparametric."),
+                                    var = htmltools::htmlEscape(var),
+                                    pct = base::format(100 * tr), total = n_used))
+                            } else {
+                                x_u <- data[[var]][is.finite(data[[var]])]
+                                se_chk <- tryCatch(WRS2::trimse(x_u, tr), error = function(e) NA_real_)
+                                if (length(unique(x_u)) > 1L && (!is.finite(se_chk) || se_chk <= 0)) {
+                                    warnings <- c(warnings, .fmt(
+                                        .("<strong>Zero Winsorized variance in '{var}':</strong> heavy ties in the trimmed core make the robust standard error 0, so the robust test cannot be computed. Lower Trim proportion or switch to Nonparametric."),
+                                        var = htmltools::htmlEscape(var)))
+                                }
+                            }
+                        }
+                        nboot_label <- if (identical(self$options$alternative, "two.sided")) 200L else 2000L
                         warnings <- c(warnings, .fmt(
-                            .("<strong>Robust test trim level:</strong> the robust test uses a bootstrap-t on a trimmed mean, discarding the highest and lowest {pct}% of observations ({n} of {total} rows at each tail). If a genuine high- or low-value subgroup matters clinically, that subgroup is being trimmed away - lower the trim proportion or use the nonparametric test instead."),
-                            pct = base::format(100 * self$options$trimlevel),
-                            n = round(self$options$trimlevel * nrow(data)), total = nrow(data)))
+                            .("<strong>Robust test trim level:</strong> the robust test uses a bootstrap-t on a trimmed mean (B = {nboot} resamples), discarding the highest and lowest {pct}% of observations ({detail}). If a genuine high- or low-value subgroup matters clinically, that subgroup is being trimmed away - lower the trim proportion or use the nonparametric test instead."),
+                            nboot = nboot_label,
+                            pct = base::format(100 * tr),
+                            detail = paste(trim_details, collapse = "; ")))
+                    }
+                    if (identical(stat_type, "nonparametric")) {
+                        small_np <- vapply(variables, function(v) {
+                            if (!v %in% names(data)) return(FALSE)
+                            n_u <- sum(is.finite(data[[v]]))
+                            n_u >= 3 && n_u < 50
+                        }, logical(1))
+                        if (any(small_np)) {
+                            warnings <- c(warnings, .("<strong>Wilcoxon normal approximation:</strong> at small sample sizes (n &lt; 50), the one-sample Wilcoxon signed-rank p-value uses a continuity-corrected normal approximation (exact = FALSE), which can be slightly conservative."))
+                        }
+                        warnings <- c(warnings, .("<strong>Wilcoxon signed-rank assumption:</strong> this test evaluates whether the pseudomedian differs from the test value (which equals the median only when the distribution is roughly symmetric around the test value)."))
+                        for (var in variables) {
+                            if (!var %in% names(data)) next
+                            x_u <- data[[var]][is.finite(data[[var]])]
+                            n_zero <- sum(x_u == effective_null)
+                            if (n_zero > 0L && n_zero < length(x_u)) {
+                                warnings <- c(warnings, .fmt(
+                                    .("<strong>Exact ties with test value in '{var}':</strong> {nz} of {nt} observations equal {mu} and are excluded from the Wilcoxon signed-rank statistic and rank-biserial correlation (computed on {nnz} non-zero differences)."),
+                                    var = htmltools::htmlEscape(var),
+                                    nz = n_zero, nt = length(x_u),
+                                    mu = base::format(effective_null),
+                                    nnz = length(x_u) - n_zero))
+                            }
+                        }
                     }
                     if (!identical(self$options$alternative, "two.sided")) {
-                        warnings <- c(warnings, .fmt(
-                            .("<strong>One-sided test in use.</strong> The reported p-value tests only whether the center is {direction} than the test value, not whether it differs in either direction. A one-sided test is only valid if the direction was chosen before seeing these data."),
-                            direction = if (identical(self$options$alternative, "greater"))
-                                .("greater") else .("less")))
+                        dir_word <- if (identical(self$options$alternative, "greater"))
+                            .("greater") else .("less")
+                        if (identical(stat_type, "bayes")) {
+                            warnings <- c(warnings, .fmt(
+                                .("<strong>One-sided test in use.</strong> The reported Bayes factor tests the directional hypothesis that the center is {direction} than the test value (while the posterior difference and ETI summarize the unconstrained posterior). A one-sided test is only valid if the direction was chosen before seeing these data."),
+                                direction = dir_word))
+                        } else {
+                            warnings <- c(warnings, .fmt(
+                                .("<strong>One-sided test in use.</strong> The reported p-value and confidence interval test only whether the center is {direction} than the test value, not whether it differs in either direction. A one-sided test is only valid if the direction was chosen before seeing these data."),
+                                direction = dir_word))
+                        }
                     }
                 }
 
@@ -489,9 +861,9 @@ jjhistostatsClass <- if (requireNamespace('jmvcore'))
                         if (!is.na(sw_p) && sw_p <= 0.05) {
                             warnings <- c(warnings, paste0(
                                 .fmt(
-                                    .("<strong>'{var}' is not normally distributed</strong> (Shapiro-Wilk p = {p}), but the subtitle is reporting a <strong>parametric one-sample t-test</strong>, which assumes approximate normality."),
+                                    .("<strong>'{var}' is not normally distributed</strong> (Shapiro-Wilk {p}), but the subtitle is reporting a <strong>parametric one-sample t-test</strong>, which assumes approximate normality."),
                                     var = htmltools::htmlEscape(var),
-                                    p = base::format.pval(sw_p, digits = 3, eps = 1e-16)),
+                                    p = private$.formatPWithOp(sw_p)),
                                 " ",
                                 if (length(var_data) >= 30)
                                     .fmt(
@@ -522,11 +894,11 @@ jjhistostatsClass <- if (requireNamespace('jmvcore'))
                             if (outliers > 0) {
                                 warnings <- c(warnings, if (outliers == 1)
                                     .fmt(
-                                        .("Detected 1 extreme outlier in '{var}' (more than 3 MAD from the median). Consider reviewing data quality, or using the robust method."),
+                                        .("Detected 1 extreme outlier in '{var}' (more than 3 scaled MAD from the median). Consider reviewing data quality, or using the robust method."),
                                         var = htmltools::htmlEscape(var))
                                 else
                                     .fmt(
-                                        .("Detected {n} extreme outliers in '{var}' (more than 3 MAD from the median). Consider reviewing data quality, or using the robust method."),
+                                        .("Detected {n} extreme outliers in '{var}' (more than 3 scaled MAD from the median). Consider reviewing data quality, or using the robust method."),
                                         n = outliers, var = htmltools::htmlEscape(var)))
                             }
                         }
@@ -553,13 +925,46 @@ jjhistostatsClass <- if (requireNamespace('jmvcore'))
                     }
                 }
                 
-                # Grouped analysis warnings
+                # Grouped analysis warnings: count finite dep values per populated level
+                # (ignores unused 0-row factor levels and safely handles addNA() factors).
                 if (!is.null(self$options$grvar) && self$options$grvar %in% names(data)) {
                     group_var <- data[[self$options$grvar]]
-                    group_sizes <- table(group_var, useNA = "no")
-                    
-                    if (any(group_sizes < 10)) {
-                        small_groups <- names(group_sizes[group_sizes < 10])
+                    g_chr <- as.character(group_var)
+                    raw_lvls <- if (is.factor(group_var)) levels(group_var) else unique(g_chr)
+                    raw_lvls <- raw_lvls[!is.na(raw_lvls)]
+
+                    small_groups <- character()
+                    for (var in variables) {
+                        if (!var %in% names(data)) next
+                        empty_lvls <- character()
+                        tiny_lvls <- character()
+                        for (lvl in raw_lvls) {
+                            idx_l <- !is.na(g_chr) & g_chr == lvl
+                            if (!any(idx_l)) next  # unused 0-row factor level
+                            n_fin_l <- sum(is.finite(data[[var]][idx_l]))
+                            if (n_fin_l == 0L) {
+                                empty_lvls <- c(empty_lvls, lvl)
+                            } else {
+                                if (n_fin_l < 10L) small_groups <- c(small_groups, lvl)
+                                if (n_fin_l < 3L) tiny_lvls <- c(tiny_lvls, lvl)
+                            }
+                        }
+                        if (length(empty_lvls) > 0) {
+                            warnings <- c(warnings, .fmt(
+                                .("<strong>Subgroup(s) omitted from grouped histogram:</strong> '{var}' has no finite values in {groups}, so those subgroup panel(s) were skipped."),
+                                var = htmltools::htmlEscape(var),
+                                groups = htmltools::htmlEscape(paste(empty_lvls, collapse = ", "))))
+                        }
+                        if (length(tiny_lvls) > 0 && isTRUE(private$.option("resultssubtitle"))) {
+                            warnings <- c(warnings, .fmt(
+                                .("<strong>Subgroup(s) too small for statistical testing:</strong> '{var}' has fewer than 3 finite values in {groups}, so their statistical subtitles were omitted."),
+                                var = htmltools::htmlEscape(var),
+                                groups = htmltools::htmlEscape(paste(tiny_lvls, collapse = ", "))))
+                        }
+                    }
+
+                    small_groups <- unique(small_groups)
+                    if (length(small_groups) > 0) {
                         warnings <- c(warnings, if (length(small_groups) == 1)
                             .fmt(
                                 .("Small group size detected: {groups} (n < 10). Results may be unreliable for this group."),
@@ -569,6 +974,8 @@ jjhistostatsClass <- if (requireNamespace('jmvcore'))
                                 .("Small group sizes detected: {groups} (n < 10). Results may be unreliable for these groups."),
                                 groups = htmltools::htmlEscape(paste(small_groups, collapse = ", "))))
                     }
+
+                    warnings <- c(warnings, .("<strong>Pooled diagnostics note:</strong> normality, skewness, and outlier considerations above are computed on the pooled sample, whereas the grouped histogram tests each subgroup separately."))
                 }
 
                 # LABELS THAT ARE SILENTLY DISCARDED.
@@ -592,25 +999,20 @@ jjhistostatsClass <- if (requireNamespace('jmvcore'))
                 if (nzchar(self$options$xlab) && length(self$options$dep) > 1) {
                     warnings <- c(warnings, .("<strong>Your X-axis label was not used.</strong> With more than one variable selected, each panel is labeled with its own variable name."))
                 }
-                # The fourth member of this set. ggstatsplot writes the Bayes factor into
-                # the CAPTION slot (not the subtitle) for every non-Bayesian test, so a
-                # user caption is overwritten with no warning. Verified over all six
-                # combinations: the caption survives unless the subtitle is on AND
-                # bf.message is on AND the test is not already Bayesian - in Bayesian mode
-                # the factor goes into the subtitle and the caption is left alone.
+                # ggstatsplot writes the Bayes factor into the CAPTION slot ONLY for a
+                # PARAMETRIC test (bf.condition = type == "parametric"). Nonparametric,
+                # robust, and bayes modes leave the user caption intact.
                 if (nzchar(self$options$caption) &&
                     isTRUE(private$.option("resultssubtitle")) &&
-                    isTRUE(self$options$bf.message) &&
-                    !identical(private$.option("typestatistics"), "bayes")) {
+                    isTRUE(private$.option("bf.message")) &&
+                    identical(private$.option("typestatistics"), "parametric")) {
                     warnings <- c(warnings, .("<strong>Your caption was not used.</strong> With Bayes factor switched on, the caption area is written by the Bayes factor. Switch off Bayes factor to show your own caption."))
                 }
 
                 # ANALYTIC N. ggstatsplot drops missing values silently and reports a
                 # statistic computed on whatever is left, so the n behind the subtitle was
                 # never stated anywhere: with 37 of 120 rows missing, nothing in the output
-                # said the test ran on 83. The "Small sample size" line above only fires
-                # below n = 30, so the usual clinical case - a few hundred rows with some
-                # missingness - reported nothing at all.
+                # said the test ran on 83. Check both dep variables and grvar.
                 dropped <- character()
                 for (var in variables) {
                     if (!var %in% names(data)) next
@@ -621,6 +1023,16 @@ jjhistostatsClass <- if (requireNamespace('jmvcore'))
                             .("{var}: n = {used} of {total} ({pct}% missing)"),
                             var = htmltools::htmlEscape(var), used = n_used, total = n_total,
                             pct = base::format(round(100 * (n_total - n_used) / n_total, 1))))
+                }
+                if (!is.null(self$options$grvar) && self$options$grvar %in% names(data)) {
+                    gv <- self$options$grvar
+                    n_g_total <- length(data[[gv]])
+                    n_g_used  <- sum(!is.na(data[[gv]]))
+                    if (n_g_used < n_g_total)
+                        dropped <- c(dropped, .fmt(
+                            .("{var} (grouped plot): n = {used} of {total} ({pct}% missing)"),
+                            var = htmltools::htmlEscape(gv), used = n_g_used, total = n_g_total,
+                            pct = base::format(round(100 * (n_g_total - n_g_used) / n_g_total, 1))))
                 }
                 if (length(dropped) > 0)
                     warnings <- c(warnings, .fmt(
@@ -668,7 +1080,7 @@ jjhistostatsClass <- if (requireNamespace('jmvcore'))
             
             # Generate clinical interpretation
             .generateClinicalInterpretation = function(data, variables) {
-                if (!self$options$showInterpretation) return("")
+                if (!isTRUE(private$.option("showInterpretation"))) return("")
                 
                 interpretation_parts <- c()
                 
@@ -763,8 +1175,8 @@ jjhistostatsClass <- if (requireNamespace('jmvcore'))
 
                     normality_text <- if (!is.na(shapiro_p)) {
                         paste0(.fmt(
-                                   .("<li><strong>Normality (Shapiro-Wilk):</strong> p = {p}"),
-                                   p = base::format.pval(shapiro_p, digits = 3, eps = 1e-16)),
+                                   .("<li><strong>Normality (Shapiro-Wilk):</strong> {p}"),
+                                   p = private$.formatPWithOp(shapiro_p)),
                                " ",
                                if (shapiro_p > 0.05) .("(no evidence against normality)")
                                else .("(evidence against normality)"), "</li>")
@@ -780,6 +1192,12 @@ jjhistostatsClass <- if (requireNamespace('jmvcore'))
                         .("This variable is constant - every observation has the same value. There is no distribution to summarize and no test to run on it.")
                     } else if (is_normal) {
                         .("No evidence of a departure from normality was found, so parametric statistics (t-tests, ANOVA) are reasonable here. Absence of evidence against normality does not establish that the distribution is normal, particularly at small n or when the Shapiro-Wilk test could not be run. Mean and SD are appropriate summary measures.")
+                    } else if (!is.na(shapiro_p) && shapiro_p > 0.05 && abs(skewness_val) >= 1) {
+                        .("Substantial skewness (|g1| >= 1) was observed even though the Shapiro-Wilk test did not reach significance (which has limited power at small sample sizes). Prefer rank-based methods (Wilcoxon signed-rank here; Mann-Whitney or Kruskal-Wallis for group comparisons) and report median and IQR.")
+                    } else if (n >= 30 && abs(skewness_val) < 1) {
+                        .fmt(
+                            .("Non-normal distribution: median and IQR summarize the shape better than mean and SD, and rank-based methods (Wilcoxon signed-rank here; Mann-Whitney or Kruskal-Wallis for group comparisons) make no normality assumption. At n = {n} with moderate skewness, the central limit theorem still makes the one-sample t-test fairly robust for inference on the mean."),
+                            n = n)
                     } else {
                         .("Non-normal distribution: prefer rank-based methods. Within this analysis that is the Wilcoxon signed-rank option; if you go on to compare groups, the rank-based equivalents are Mann-Whitney (two groups) and Kruskal-Wallis (three or more). Median and IQR are the more appropriate summary measures here.")
                     }
@@ -789,9 +1207,10 @@ jjhistostatsClass <- if (requireNamespace('jmvcore'))
                         "<li>", .fmt(.("<strong>Sample size:</strong> {n} observations"), n = n), "</li>",
                         "<li>", .fmt(
                             .("<strong>Central tendency:</strong> mean = {mean}, median = {median}"),
-                            mean = round(mean_val, 2), median = round(median_val, 2)), "</li>",
+                            mean = private$.formatDescNum(mean_val),
+                            median = private$.formatDescNum(median_val)), "</li>",
                         "<li>", .fmt(.("<strong>Variability:</strong> SD = {sd}"),
-                                                sd = round(sd_val, 2)), "</li>",
+                                                sd = private$.formatDescNum(sd_val)), "</li>",
                         "<li><strong>", .("Distribution shape:"), "</strong> ", shape_text, "</li>",
                         normality_text,
                         "<li><strong>", .("Clinical implications:"), "</strong> ", implications_text, "</li>",
@@ -864,15 +1283,16 @@ jjhistostatsClass <- if (requireNamespace('jmvcore'))
                 typestatistics <- private$.option("typestatistics")
                 dep <- self$options$dep
                 
-                # Process binwidth
+                # Process binwidth (honour clinical-preset overrides via private$.option)
                 binwidth <- NULL
-                if (self$options$changebinwidth) {
-                    binwidth <- self$options$binwidth
+                if (isTRUE(private$.option("changebinwidth"))) {
+                    binwidth <- private$.option("binwidth")
                 }
-                
+
                 # Process centrality.type
-                centrality.type <- if (self$options$centralitytype != 'default') self$options$centralitytype else NULL
-                
+                ct_opt <- private$.option("centralitytype")
+                centrality.type <- if (!is.null(ct_opt) && ct_opt != 'default') ct_opt else NULL
+
                 options_list <- list(
                     typestatistics = typestatistics,
                     dep = dep,
@@ -885,7 +1305,7 @@ jjhistostatsClass <- if (requireNamespace('jmvcore'))
                     alternative = self$options$alternative,
                     trimlevel = self$options$trimlevel,
                     bfprior = self$options$bfprior,
-                    bf.message = self$options$bf.message,
+                    bf.message = private$.option("bf.message"),
                     digits = self$options$digits,
                     centrality.type = centrality.type
                 )
@@ -997,8 +1417,10 @@ jjhistostatsClass <- if (requireNamespace('jmvcore'))
                         self$results$todo$setContent(todo)
                     }
                     
-                    # Generate and populate clinical interpretation
-                    if (self$options$showInterpretation) {
+                    # Generate and populate clinical interpretation (honouring clinicalPreset)
+                    show_interp <- isTRUE(private$.option("showInterpretation"))
+                    self$results$interpretation$setVisible(show_interp)
+                    if (show_interp) {
                         interpretation_content <- private$.generateClinicalInterpretation(mydata, self$options$dep)
                         if (interpretation_content != "") {
                             self$results$interpretation$setContent(interpretation_content)
@@ -1040,6 +1462,7 @@ jjhistostatsClass <- if (requireNamespace('jmvcore'))
                 mydata <- private$.prepareData()
                 options_data <- private$.prepareOptions()
                 aesthetics_data <- private$.prepareAesthetics()
+                private$.statsComputed <- FALSE
 
                 dep <- options_data$dep
 
@@ -1091,8 +1514,9 @@ jjhistostatsClass <- if (requireNamespace('jmvcore'))
                     )
                 }
 
-                if ((isTRUE(options_data$resultssubtitle) && statsSeedMatters(options_data$typestatistics, "one_sample")) ||
-                    captionSeedMatters(options_data$typestatistics, "one_sample", 2L, options_data$bf.message))
+                if (isTRUE(private$.statsComputed) &&
+                    (statsSeedMatters(options_data$typestatistics, "one_sample") ||
+                     captionSeedMatters(options_data$typestatistics, "one_sample", 2L, options_data$bf.message)))
                     plot <- addSeedCaption(plot, self, self$options$seed)
 
                 # Print plot
@@ -1137,6 +1561,7 @@ jjhistostatsClass <- if (requireNamespace('jmvcore'))
                 mydata <- private$.prepareData()
                 options_data <- private$.prepareOptions()
                 aesthetics_data <- private$.prepareAesthetics()
+                private$.statsComputed <- FALSE
                 
                 dep <- options_data$dep
                 grvar <- self$options$grvar
@@ -1191,8 +1616,9 @@ jjhistostatsClass <- if (requireNamespace('jmvcore'))
                     )
                 }
 
-                if ((isTRUE(options_data$resultssubtitle) && statsSeedMatters(options_data$typestatistics, "one_sample")) ||
-                    captionSeedMatters(options_data$typestatistics, "one_sample", 2L, options_data$bf.message))
+                if (isTRUE(private$.statsComputed) &&
+                    (statsSeedMatters(options_data$typestatistics, "one_sample") ||
+                     captionSeedMatters(options_data$typestatistics, "one_sample", 2L, options_data$bf.message)))
                     plot2 <- addSeedCaption(plot2, self, self$options$seed)
 
                 # Print plot
@@ -1215,65 +1641,47 @@ jjhistostatsClass <- if (requireNamespace('jmvcore'))
                 if (!private$.validateInputs()$valid)
                     return()
 
-                # Prepare data
-                mydata <- self$data
+                # Prepare sanitized data (handles non-finite values and factor rejection)
+                mydata <- private$.prepareData()
                 dep <- self$options$dep
 
-                # Single variable
-                if (length(dep) == 1) {
-                    # Build histogram arguments
+                # Build one ggpubr histogram using a safe syntactic column name (`.x`) so
+                # column names with parentheses, slashes, or operators (e.g. "Age (years)",
+                # "Grade 2/3", "A+B") are never parsed as R expressions by ggpubr.
+                build_one <- function(depvar, set_title = FALSE) {
+                    x_vec <- mydata[[depvar]]
+                    plot_df <- data.frame(.x = x_vec)
                     args <- list(
-                        data = mydata,
-                        x = dep,
+                        data = plot_df,
+                        x = ".x",
                         fill = self$options$ggpubrPalette,
-                        add_density = self$options$ggpubrAddDensity
+                        add_density = self$options$ggpubrAddDensity,
+                        xlab = depvar
                     )
-
-                    # Create histogram
-                    plot <- do.call(ggpubr::gghistogram, args)
-
-                    # Add mean line if requested
-                    if (self$options$ggpubrAddMean) {
-                        mean_val <- mean(mydata[[dep]], na.rm = TRUE)
-                        plot <- plot + ggplot2::geom_vline(xintercept = mean_val,
-                                                          color = "red",
-                                                          linetype = "dashed",
-                                                          linewidth = 1)
+                    if (isTRUE(self$options$ggpubrAddDensity)) {
+                        args$y <- "density"
+                        args$ylab <- .("Density")
                     }
-
-                    # Apply theme
-                    plot <- plot + ggpubr::theme_pubr()
-
-                    print(plot)
+                    if (set_title) {
+                        args$title <- depvar
+                    }
+                    p <- do.call(ggpubr::gghistogram, args)
+                    if (self$options$ggpubrAddMean) {
+                        mean_val <- mean(x_vec, na.rm = TRUE)
+                        if (is.finite(mean_val)) {
+                            p <- p + ggplot2::geom_vline(xintercept = mean_val,
+                                                         color = "red",
+                                                         linetype = "dashed",
+                                                         linewidth = 1)
+                        }
+                    }
+                    p + ggpubr::theme_pubr()
                 }
 
-                # Multiple variables
-                if (length(dep) > 1) {
-                    dep_list <- as.list(dep)
-
-                    plotlist <- lapply(dep_list, function(depvar) {
-                        args <- list(
-                            data = mydata,
-                            x = depvar,
-                            fill = self$options$ggpubrPalette,
-                            add_density = self$options$ggpubrAddDensity,
-                            title = depvar
-                        )
-
-                        p <- do.call(ggpubr::gghistogram, args)
-
-                        if (self$options$ggpubrAddMean) {
-                            mean_val <- mean(mydata[[depvar]], na.rm = TRUE)
-                            p <- p + ggplot2::geom_vline(xintercept = mean_val,
-                                                        color = "red",
-                                                        linetype = "dashed",
-                                                        linewidth = 1)
-                        }
-
-                        p <- p + ggpubr::theme_pubr()
-                        return(p)
-                    })
-
+                if (length(dep) == 1) {
+                    print(build_one(dep, set_title = FALSE))
+                } else {
+                    plotlist <- lapply(as.list(dep), build_one, set_title = TRUE)
                     plot <- ggpubr::ggarrange(plotlist = plotlist, ncol = 1, nrow = length(dep))
                     print(plot)
                 }
@@ -1296,63 +1704,63 @@ jjhistostatsClass <- if (requireNamespace('jmvcore'))
                 if (!private$.validateInputs()$valid)
                     return()
 
-                # Prepare data
-                mydata <- self$data
+                # Prepare sanitized data
+                mydata <- private$.prepareData()
                 dep <- self$options$dep
                 grvar <- self$options$grvar
 
-                # Single variable with faceting
-                if (length(dep) == 1) {
+                # Build one faceted ggpubr histogram using safe `.x` / `.g` column names,
+                # dropping rows with NA in grvar (including explicit addNA() levels), and
+                # computing per-group means for each facet when ggpubrAddMean is enabled.
+                build_one <- function(depvar, set_title = FALSE) {
+                    g_vec <- mydata[[grvar]]
+                    g_chr <- as.character(g_vec)
+                    keep <- !is.na(g_chr)
+                    raw_lvls <- if (is.factor(g_vec)) levels(g_vec) else unique(g_chr[keep])
+                    lvls <- raw_lvls[!is.na(raw_lvls)]
+                    plot_df <- data.frame(
+                        .x = mydata[[depvar]][keep],
+                        .g = droplevels(factor(g_chr[keep], levels = lvls))
+                    )
                     args <- list(
-                        data = mydata,
-                        x = dep,
+                        data = plot_df,
+                        x = ".x",
                         fill = self$options$ggpubrPalette,
                         add_density = self$options$ggpubrAddDensity,
-                        facet.by = grvar
+                        facet.by = ".g",
+                        xlab = depvar
                     )
-
-                    plot <- do.call(ggpubr::gghistogram, args)
-
-                    if (self$options$ggpubrAddMean) {
-                        mean_val <- mean(mydata[[dep]], na.rm = TRUE)
-                        plot <- plot + ggplot2::geom_vline(xintercept = mean_val,
-                                                          color = "red",
-                                                          linetype = "dashed",
-                                                          linewidth = 1)
+                    if (isTRUE(self$options$ggpubrAddDensity)) {
+                        args$y <- "density"
+                        args$ylab <- .("Density")
                     }
-
-                    plot <- plot + ggpubr::theme_pubr()
-                    print(plot)
+                    if (set_title) {
+                        args$title <- depvar
+                    }
+                    p <- do.call(ggpubr::gghistogram, args)
+                    if (self$options$ggpubrAddMean && nrow(plot_df) > 0) {
+                        grp_means <- stats::aggregate(
+                            .x ~ .g,
+                            data = plot_df[is.finite(plot_df$.x), , drop = FALSE],
+                            FUN = mean
+                        )
+                        if (nrow(grp_means) > 0) {
+                            p <- p + ggplot2::geom_vline(
+                                data = grp_means,
+                                mapping = ggplot2::aes(xintercept = !!rlang::sym(".x")),
+                                color = "red",
+                                linetype = "dashed",
+                                linewidth = 1
+                            )
+                        }
+                    }
+                    p + ggpubr::theme_pubr()
                 }
 
-                # Multiple variables with faceting
-                if (length(dep) > 1) {
-                    dep_list <- as.list(dep)
-
-                    plotlist <- lapply(dep_list, function(depvar) {
-                        args <- list(
-                            data = mydata,
-                            x = depvar,
-                            fill = self$options$ggpubrPalette,
-                            add_density = self$options$ggpubrAddDensity,
-                            facet.by = grvar,
-                            title = depvar
-                        )
-
-                        p <- do.call(ggpubr::gghistogram, args)
-
-                        if (self$options$ggpubrAddMean) {
-                            mean_val <- mean(mydata[[depvar]], na.rm = TRUE)
-                            p <- p + ggplot2::geom_vline(xintercept = mean_val,
-                                                        color = "red",
-                                                        linetype = "dashed",
-                                                        linewidth = 1)
-                        }
-
-                        p <- p + ggpubr::theme_pubr()
-                        return(p)
-                    })
-
+                if (length(dep) == 1) {
+                    print(build_one(dep, set_title = FALSE))
+                } else {
+                    plotlist <- lapply(as.list(dep), build_one, set_title = TRUE)
                     plot <- ggpubr::ggarrange(plotlist = plotlist, ncol = 1, nrow = length(dep))
                     print(plot)
                 }
@@ -1370,19 +1778,19 @@ jjhistostatsClass <- if (requireNamespace('jmvcore'))
                 if (!private$.validateInputs()$valid)
                     return()
 
-                mydata <- self$data
+                mydata <- private$.prepareData()
                 dep <- self$options$dep
 
-                # These panels are the analysis's only normality diagnostics, and the
-                # single-variable gate below used to have no `else`: with two or more variables
-                # selected the function returned TRUE having drawn nothing, so jamovi showed an
-                # empty box titled "QQ Plot - Normality Assessment". A blank normality panel
-                # reads as "checked, nothing to report", which is the opposite of the truth.
-                # Panels are stacked with ggarrange, as the ggpubr histogram path above does.
-                build <- function(v) ggpubr::ggdensity(
-                    mydata, x = v, fill = self$options$ggpubrDensityColor,
-                    add = "mean", rug = TRUE, title = if (length(dep) > 1) v else NULL
-                ) + ggpubr::theme_pubr()
+                # Use safe internal column `.x` so non-syntactic names (e.g. "Age (years)",
+                # "A+B") are never parsed as R expressions by ggpubr.
+                build <- function(v) {
+                    plot_df <- data.frame(.x = mydata[[v]])
+                    ggpubr::ggdensity(
+                        plot_df, x = ".x", fill = self$options$ggpubrDensityColor,
+                        add = "mean", rug = TRUE, xlab = v,
+                        title = if (length(dep) > 1) v else NULL
+                    ) + ggpubr::theme_pubr()
+                }
 
                 if (length(dep) == 1) {
                     print(build(dep))
@@ -1404,19 +1812,17 @@ jjhistostatsClass <- if (requireNamespace('jmvcore'))
                 if (!private$.validateInputs()$valid)
                     return()
 
-                mydata <- self$data
+                mydata <- private$.prepareData()
                 dep <- self$options$dep
 
-                # These panels are the analysis's only normality diagnostics, and the
-                # single-variable gate below used to have no `else`: with two or more variables
-                # selected the function returned TRUE having drawn nothing, so jamovi showed an
-                # empty box titled "QQ Plot - Normality Assessment". A blank normality panel
-                # reads as "checked, nothing to report", which is the opposite of the truth.
-                # Panels are stacked with ggarrange, as the ggpubr histogram path above does.
-                build <- function(v) ggpubr::ggqqplot(
-                    mydata, x = v, color = self$options$ggpubrDensityColor,
-                    title = if (length(dep) > 1) v else NULL
-                ) + ggpubr::theme_pubr()
+                build <- function(v) {
+                    plot_df <- data.frame(.x = mydata[[v]])
+                    ggpubr::ggqqplot(
+                        plot_df, x = ".x", color = self$options$ggpubrDensityColor,
+                        ylab = v,
+                        title = if (length(dep) > 1) v else NULL
+                    ) + ggpubr::theme_pubr()
+                }
 
                 if (length(dep) == 1) {
                     print(build(dep))
@@ -1438,19 +1844,17 @@ jjhistostatsClass <- if (requireNamespace('jmvcore'))
                 if (!private$.validateInputs()$valid)
                     return()
 
-                mydata <- self$data
+                mydata <- private$.prepareData()
                 dep <- self$options$dep
 
-                # These panels are the analysis's only normality diagnostics, and the
-                # single-variable gate below used to have no `else`: with two or more variables
-                # selected the function returned TRUE having drawn nothing, so jamovi showed an
-                # empty box titled "QQ Plot - Normality Assessment". A blank normality panel
-                # reads as "checked, nothing to report", which is the opposite of the truth.
-                # Panels are stacked with ggarrange, as the ggpubr histogram path above does.
-                build <- function(v) ggpubr::ggecdf(
-                    mydata, x = v, color = self$options$ggpubrDensityColor,
-                    title = if (length(dep) > 1) v else NULL
-                ) + ggpubr::theme_pubr()
+                build <- function(v) {
+                    plot_df <- data.frame(.x = mydata[[v]])
+                    ggpubr::ggecdf(
+                        plot_df, x = ".x", color = self$options$ggpubrDensityColor,
+                        xlab = v,
+                        title = if (length(dep) > 1) v else NULL
+                    ) + ggpubr::theme_pubr()
+                }
 
                 if (length(dep) == 1) {
                     print(build(dep))

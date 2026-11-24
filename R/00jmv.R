@@ -1431,10 +1431,11 @@
         `url`="https://CRAN.R-project.org/package=WGCNA"), 
     `WRS2`=list(
         `type`="software", 
-        `author`="Patrick Mair, Rand Wilcox", 
+        `author`="Mair, P., & Wilcox, R.", 
         `year`=2025, 
-        `title`="WRS2: R package", 
+        `title`="WRS2: A Collection of Robust Statistical Methods", 
         `publisher`="[R package]. Retrieved from https://CRAN.R-project.org/package=WRS2", 
+        `doi`="10.32614/CRAN.package.WRS2", 
         `url`="https://CRAN.R-project.org/package=WRS2"), 
     `ZwindermanBossuyt2008`=list(
         `type`="article", 
@@ -2278,10 +2279,11 @@
         `url`="https://CRAN.R-project.org/package=ggprism"), 
     `ggpubr`=list(
         `type`="software", 
-        `author`="Alboukadel Kassambara", 
+        `author`="Kassambara, A.", 
         `year`=2026, 
-        `title`="ggpubr: R package", 
+        `title`="ggpubr: 'ggplot2' Based Publication Ready Plots", 
         `publisher`="[R package]. Retrieved from https://CRAN.R-project.org/package=ggpubr", 
+        `doi`="10.32614/CRAN.package.ggpubr", 
         `url`="https://CRAN.R-project.org/package=ggpubr"), 
     `ggrain`=list(
         `type`="software", 

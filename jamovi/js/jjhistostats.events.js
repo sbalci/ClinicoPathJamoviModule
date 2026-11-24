@@ -95,7 +95,6 @@ const events = {
         switch(statType) {
             case "parametric":
                 ui.centralitytype.setValue("parametric");
-                setOpt(ui, 'bf.message', true);
                 break;
             case "nonparametric":
                 ui.centralitytype.setValue("nonparametric");
