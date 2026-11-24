@@ -719,3 +719,72 @@ test_that("IR-JJHIST-13, IR-JJHIST-14, IR-JJHIST-15, IR-JJHIST-16: warnings, see
   expect_match(r_ties$todo$content, "pseudomedian", ignore.case = TRUE)
   expect_match(r_ties$todo$content, "8 of 15 observations", fixed = TRUE)
 })
+
+# ===========================================================================
+# SECURITY AUDIT REGRESSION TESTS (Category G1 & Category I)
+# ===========================================================================
+
+test_that("SEC-G1: asSource() escapes quotes/backslashes/newlines and drops undeclared/list options", {
+  df <- data.frame(x = 1:10)
+
+  # 1. Quote-breaking, backslash, and newline payloads on OptionString (title)
+  for (payload in c(
+    'MyTitle", seed = {stop("X"); 1}, subtitle = "x',
+    'TrailingBackslash\\',
+    'Line1\nLine2'
+  )) {
+    an <- ClinicoPath:::jjhistostatsClass$new(
+      options = ClinicoPath:::jjhistostatsOptions$new(dep = "x"),
+      data = df
+    )
+    o_t <- an$options$option("title")
+    o_t$value <- payload
+    ex <- parse(text = an$asSource())[[1]]
+    expect_identical(ex$title, payload)
+    expect_null(ex$seed)
+    expect_null(ex$subtitle)
+  }
+
+  # 2. Quote-breaking string on a non-String option (protobuf path) & list value
+  an2 <- ClinicoPath:::jjhistostatsClass$new(
+    options = ClinicoPath:::jjhistostatsOptions$new(dep = "x"),
+    data = df
+  )
+  p2 <- 'parametric", seed = {stop("X"); 1}, subtitle = "x'
+  o_ts <- an2$options$option("typestatistics"); o_ts$value <- p2
+  o_cp <- an2$options$option("caption"); o_cp$value <- list("a`b" = 1)
+  ex2 <- parse(text = an2$asSource())[[1]]
+  expect_identical(ex2$typestatistics, p2)
+  expect_null(ex2$seed)
+  expect_null(ex2$caption)
+
+  # 3. Undeclared option name (protobuf injection) is dropped completely
+  an3 <- ClinicoPath:::jjhistostatsClass$new(
+    options = ClinicoPath:::jjhistostatsOptions$new(dep = "x"),
+    data = df
+  )
+  an3$options$.addOption(jmvcore:::Option$new('title = "a", seed = {stop("X"); 1}, subtitle', "b"))
+  ex3 <- parse(text = an3$asSource())[[1]]
+  expect_null(ex3$title)
+  expect_null(ex3$seed)
+  expect_null(ex3$subtitle)
+})
+
+test_that("SEC-I: .validateInputs() rejects out-of-range numeric and enum options", {
+  df <- data.frame(x = 1:15)
+  check_invalid <- function(opt, bad_val) {
+    an <- ClinicoPath:::jjhistostatsClass$new(
+      options = ClinicoPath:::jjhistostatsOptions$new(dep = "x"),
+      data = df
+    )
+    o <- an$options$option(opt)
+    o$value <- bad_val
+    an$.__enclos_env__$private$.validateInputs()$valid
+  }
+  expect_false(check_invalid("conf.level", 2.5))
+  expect_false(check_invalid("trimlevel", 0.9))
+  expect_false(check_invalid("bfprior", -1))
+  expect_false(check_invalid("digits", 99))
+  expect_false(check_invalid("typestatistics", "invalid_stat"))
+  expect_false(check_invalid("alternative", "invalid_alt"))
+})

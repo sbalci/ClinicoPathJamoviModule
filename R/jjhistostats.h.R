@@ -452,6 +452,7 @@ jjhistostatsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                     "digits",
                     "showInterpretation",
                     "clinicalPreset",
+                    "addDistributionDiagnostics",
                     "originaltheme"))
             self$add(jmvcore::Html$new(
                 options=options,
@@ -492,7 +493,9 @@ jjhistostatsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                     "dep",
                     "ggpubrPalette",
                     "ggpubrAddDensity",
-                    "ggpubrAddMean")))
+                    "ggpubrAddMean",
+                    "plotwidth",
+                    "plotheight")))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="ggpubrPlot2",
@@ -507,7 +510,8 @@ jjhistostatsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                     "grvar",
                     "ggpubrPalette",
                     "ggpubrAddDensity",
-                    "ggpubrAddMean")))
+                    "ggpubrAddMean",
+                    "plotheight")))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="densityPlot",
@@ -553,7 +557,7 @@ jjhistostatsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             super$initialize(
                 package = "ClinicoPath",
                 name = "jjhistostats",
-                version = c(1,1,6),
+                version = c(1,1,7),
                 options = options,
                 results = jjhistostatsResults$new(options=options),
                 data = data,
@@ -568,9 +572,42 @@ jjhistostatsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 
 #' Histogram
 #'
-#' 'Wrapper Function for ggstatsplot::gghistostats and
-#' ggstatsplot::grouped_gghistostats to generate Histogram.'
+#' Wrapper function for ggstatsplot::gghistostats and 
+#' ggstatsplot::grouped_gghistostats to generate statistical histograms with 
+#' optional clinical interpretation and ggpubr diagnostic plots.
 #' 
+#'
+#' @examples
+#' \donttest{
+#' # Load bundled test dataset
+#' data(jjhistostats_test)
+#'
+#' # Basic histogram with parametric one-sample test
+#' jjhistostats(
+#'   data = jjhistostats_test,
+#'   dep = "age_years",
+#'   typestatistics = "parametric",
+#'   resultssubtitle = TRUE
+#' )
+#'
+#' # Multiple histograms with centrality line
+#' jjhistostats(
+#'   data = jjhistostats_test,
+#'   dep = c("age_years", "tumor_size_mm", "bmi"),
+#'   centralityline = TRUE,
+#'   resultssubtitle = TRUE
+#' )
+#'
+#' # Grouped histogram by disease stage
+#' jjhistostats(
+#'   data = jjhistostats_test,
+#'   dep = "psa_level",
+#'   grvar = "disease_stage",
+#'   typestatistics = "nonparametric",
+#'   changebinwidth = TRUE,
+#'   binwidth = 2.0
+#' )
+#'}
 #' @param data The data as a data frame.
 #' @param dep One or more continuous numeric variables for which histograms
 #'   will be created. Multiple variables will be displayed in separate panels.

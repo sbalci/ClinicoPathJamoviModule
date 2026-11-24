@@ -136,9 +136,8 @@ jjhistostatsClass <- if (requireNamespace('jmvcore'))
 
                 grvar <-  self$options$grvar
 
-                num_levels <- nlevels(
-                    as.factor(mydata[[grvar]])
-                )
+                gr_chr <- as.character(mydata[[grvar]])
+                num_levels <- max(1L, length(unique(gr_chr[!is.na(gr_chr)])))
 
                 # For grouped analysis, calculate width based on layout
                 ncol_estimate <- ceiling(sqrt(num_levels))
@@ -657,6 +656,32 @@ jjhistostatsClass <- if (requireNamespace('jmvcore'))
                     }
                 }
 
+                # Defense-in-depth option backstops (guards R callers using run(noThrow = TRUE))
+                cl <- self$options$conf.level
+                if (!is.numeric(cl) || length(cl) != 1L || !is.finite(cl) || cl < 0.5 || cl > 0.999) {
+                    return(list(valid = FALSE, message = .("Confidence level must be between 0.5 and 0.999.")))
+                }
+                tr <- self$options$trimlevel
+                if (!is.numeric(tr) || length(tr) != 1L || !is.finite(tr) || tr < 0 || tr > 0.4) {
+                    return(list(valid = FALSE, message = .("Trim proportion must be between 0 and 0.4.")))
+                }
+                bfp <- self$options$bfprior
+                if (!is.numeric(bfp) || length(bfp) != 1L || !is.finite(bfp) || bfp < 0.1 || bfp > 2) {
+                    return(list(valid = FALSE, message = .("Bayes prior scale must be between 0.1 and 2.")))
+                }
+                dig <- self$options$digits
+                if (!is.numeric(dig) || length(dig) != 1L || !is.finite(dig) || dig < 0 || dig > 5 || dig != floor(dig)) {
+                    return(list(valid = FALSE, message = .("Decimal places must be an integer between 0 and 5.")))
+                }
+                st <- private$.option("typestatistics")
+                if (!is.character(st) || length(st) != 1L || !st %in% c("parametric", "nonparametric", "robust", "bayes")) {
+                    return(list(valid = FALSE, message = .("Type of statistic must be parametric, nonparametric, robust, or bayes.")))
+                }
+                alt <- self$options$alternative
+                if (!is.character(alt) || length(alt) != 1L || !alt %in% c("two.sided", "greater", "less")) {
+                    return(list(valid = FALSE, message = .("Test direction must be two.sided, greater, or less.")))
+                }
+
                 return(list(valid = TRUE, message = NULL))
             },
             
@@ -1119,7 +1144,9 @@ jjhistostatsClass <- if (requireNamespace('jmvcore'))
                         m2 <- sum((var_data - mean_val)^2) / n
                         m3 <- sum((var_data - mean_val)^3) / n
                         m3 / m2^1.5
-                    } else 0
+                    } else {
+                        0
+                    }
                     
                     # Normality assessment.
                     # Skewness alone cannot detect non-normality that is symmetric: a bimodal
@@ -1361,11 +1388,8 @@ jjhistostatsClass <- if (requireNamespace('jmvcore'))
 
                 } else {
 
-                    todo <- paste0("<br>", .("You have selected to make a histogram."), "<br><hr>")
-
-                    self$results$todo$setContent(todo)
-
-                    # Use consistent validation approach (but only for meaningful validation issues)
+                    # Validate inputs BEFORE touching any result panel so jamovi preserves its
+                    # greyed-out prior result presentation on reject() (guide §5 Round 8).
                     validation_result <- private$.validateInputs()
                     if (!validation_result$valid) {
                         # Only show error for actual data problems, not missing variables
@@ -1373,6 +1397,10 @@ jjhistostatsClass <- if (requireNamespace('jmvcore'))
                             jmvcore::reject(validation_result$message)
                         }
                     }
+
+                    todo <- paste0("<br>", .("You have selected to make a histogram."), "<br><hr>")
+
+                    self$results$todo$setContent(todo)
 
                     # Pre-process data, options, and aesthetics for performance
                     mydata <- private$.prepareData()
@@ -1865,6 +1893,24 @@ jjhistostatsClass <- if (requireNamespace('jmvcore'))
 
                 TRUE
             }
+            ,
+            # Hardened syntax-pane serialization (Category G1): drop undeclared option names,
+            # drop list values, and escape character scalars with encodeString(quote = '"')
+            # so quotes, backslashes, or newlines cannot break out of string literals.
+            .sourcifyOption = function(option) {
+                declared <- setdiff(names(formals(jjhistostats)), "data")
+                if (!option$name %in% declared)
+                    return("")
+                value <- option$value
+                if (is.list(value))
+                    return("")
+                if (is.character(value) && length(value) == 1L && !is.na(value)) {
+                    if (identical(value, option$default))
+                        return("")
+                    return(paste0(option$name, " = ", encodeString(value, quote = '"')))
+                }
+                super$.sourcifyOption(option)
+            }
         ), # End of private list
         public = list(
             #' @description
@@ -1888,15 +1934,16 @@ jjhistostatsClass <- if (requireNamespace('jmvcore'))
                 #
                 # Variables are NOT re-emitted through private$.asArgs() - doing so
                 # previously duplicated them in the generated syntax (the "double
-                # variables" bug). All non-variable options keep jmvcore's per-option
-                # sourcify so formatting stays consistent with jamovi.
+                # variables" bug). All non-variable options go through our hardened
+                # private$.sourcifyOption(), and undeclared option names are dropped.
                 args <- character(0)
+                declared <- setdiff(names(formals(jjhistostats)), "data")
                 for (option in private$.options$options) {
-                    if (option$name == 'data')
+                    if (!option$name %in% declared)
                         next
                     if (inherits(option, 'OptionVariable') || inherits(option, 'OptionVariables')) {
                         val <- option$value
-                        if (!is.null(val) && length(val) > 0)
+                        if (is.character(val) && length(val) > 0)
                             args <- c(args, paste0(option$name, ' = ',
                                                    paste0(deparse(val), collapse = '')))
                     } else {

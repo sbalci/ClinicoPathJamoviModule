@@ -35,6 +35,7 @@ clearWith:
     - digits
     - showInterpretation
     - clinicalPreset
+    - addDistributionDiagnostics
     - originaltheme
 
 
@@ -97,6 +98,8 @@ items:
         - ggpubrPalette
         - ggpubrAddDensity
         - ggpubrAddMean
+        - plotwidth
+        - plotheight
 
     - name: ggpubrPlot2
       title: '`Publication-Ready Histogram ggpubr by ${grvar}`'
@@ -117,6 +120,7 @@ items:
         - ggpubrPalette
         - ggpubrAddDensity
         - ggpubrAddMean
+        - plotheight
 
     - name: densityPlot
       title: 'Density Plot ggpubr'

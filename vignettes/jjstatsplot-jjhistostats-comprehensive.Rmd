@@ -1,0 +1,303 @@
+---
+title: "Histogram (jjhistostats) - Comprehensive Guide"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Histogram (jjhistostats) - Comprehensive Guide}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  eval = TRUE, echo = TRUE, collapse = TRUE, comment = "#>",
+  error = TRUE, warning = FALSE, message = FALSE, fig.width = 7, fig.height = 5
+)
+if (requireNamespace("pkgload", quietly = TRUE) && file.exists("../DESCRIPTION")) {
+  pkgload::load_all("..", quiet = TRUE)
+} else if (requireNamespace("pkgload", quietly = TRUE) && file.exists("DESCRIPTION")) {
+  pkgload::load_all(".", quiet = TRUE)
+} else {
+  library(ClinicoPath)
+}
+```
+
+> **Note:** The `jjhistostats()` function is designed primarily for use within **jamovi's GUI** (`JJStatsPlot` → `Distribution` → `Histogram`). The R calls below demonstrate every option and feature reproducibly.
+
+# Histogram (`jjhistostats`)
+
+## Overview
+
+`jjhistostats` creates single-variable, multi-variable, and grouped histograms with optional one-sample location inference (`ggstatsplot`), publication-ready density/mean overlays (`ggpubr`), distribution diagnostics (density, Q-Q, and ECDF plots), severity-ranked clinical/statistical warnings, and plain-language clinical interpretation.
+
+Four one-sample statistical families are supported when **Statistical results** (`resultssubtitle = TRUE`) is enabled:
+
+- **Parametric (`"parametric"`)**: One-sample Student *t*-test with exact Hedges' *g* and noncentral-*t* confidence intervals.
+- **Nonparametric (`"nonparametric"`)**: One-sample Wilcoxon signed-rank test with rank-biserial correlation *r* (disclosing continuity-corrected normal approximation at small *n*, pseudomedian symmetry assumptions, and exact zero-tie exclusions).
+- **Robust (`"robust"`)**: Bootstrap-*t* test on a symmetric trimmed mean (`WRS2` two-sided; Phipson–Smyth one-sided with `B = 2000`, zero-exceedance floor patching, and zero-Winsorized-variance guards).
+- **Bayesian (`"bayes"`)**: Bayesian one-sample *t*-test (`BayesFactor`) with user-configurable Cauchy prior scale `bfprior`, overflow-safe log-scale directional Bayes factors, and unconstrained posterior credible intervals.
+
+## Datasets Used in This Guide
+
+| Dataset | N | Key Features | Primary Use |
+|---|---:|---|---|
+| `jjhistostats_test` | 150 | `age_years`, `tumor_size_mm`, `bmi`, `psa_level`, `hemoglobin`, `treatment`, `disease_stage` | Basic, multi-variable, styling, and grouped examples |
+| `jjhistostats_labvalues` | 120 | `glucose`, `cholesterol`, `triglycerides`, `creatinine`, `patient_group` | `lab_values` preset, parametric & Bayesian tests |
+| `jjhistostats_pathology` | 130 | `ki67_index`, `mitotic_count`, `tumor_cellularity`, `tumor_grade`, `organ` | `pathology_scores` preset with unit bin width |
+| `jjhistostats_skewed` | 100 | `cea`, `ca199`, `afp`, `crp`, `cancer_type` | `biomarkers` preset, nonparametric & robust tests |
+| `jjhistostats_grouped` | 180 | `age_years`, `biomarker_level`, `response_value`, `treatment`, `disease_stage` | Grouped histograms and faceted `ggpubr` plots |
+| `jjhistostats_bimodal` | 140 | `age_bimodal`, `tumor_burden`, `population` | Distribution diagnostics (density, Q-Q, ECDF) & Shapiro–Wilk |
+| `jjhistostats_small` | 25 | `age`, `measurement`, `score`, `group` | Small-sample and small-group edge cases |
+
+---
+
+## 1. Basic & Multi-Variable Histograms
+
+By default, all 13 boolean display/testing checkboxes are `FALSE`, producing a fast, purely descriptive histogram with automatic bin width $(\max(x) - \min(x)) / \sqrt{N_{\text{finite}}}$.
+
+```{r basic-descriptive}
+data(jjhistostats_test)
+
+res_basic <- jjhistostats(
+  data = jjhistostats_test,
+  dep = "age_years"
+)
+res_basic$plot
+```
+
+Selecting multiple continuous variables stacks them vertically with automatically scaled height (`1.15 * length(dep) * plotheight`).
+
+```{r multi-variable}
+res_multi <- jjhistostats(
+  data = jjhistostats_test,
+  dep = c("age_years", "tumor_size_mm", "bmi"),
+  centralityline = TRUE,
+  resultssubtitle = TRUE,
+  showInterpretation = TRUE
+)
+res_multi$plot
+```
+
+---
+
+## 2. Clinical Presets
+
+Four presets configure statistical defaults for common pathology and laboratory workflows while preserving any explicit non-default option you pass:
+
+- `"lab_values"`: parametric, centrality line, statistical subtitle, Bayes factor caption, clinical interpretation.
+- `"biomarkers"`: nonparametric Wilcoxon, centrality line, statistical subtitle, clinical interpretation.
+- `"patient_chars"`: parametric, centrality line, statistical subtitle, interpretation off.
+- `"pathology_scores"`: nonparametric, unit manual bin width (`binwidth = 1.0`), centrality line, clinical interpretation.
+
+```{r clinical-presets}
+data(jjhistostats_labvalues)
+data(jjhistostats_pathology)
+
+res_lab <- jjhistostats(
+  data = jjhistostats_labvalues,
+  dep = "glucose",
+  clinicalPreset = "lab_values"
+)
+
+res_path <- jjhistostats(
+  data = jjhistostats_pathology,
+  dep = "mitotic_count",
+  clinicalPreset = "pathology_scores"
+)
+res_path$plot
+```
+
+---
+
+## 3. One-Sample Statistical Tests & Directionality
+
+Enable `resultssubtitle = TRUE` and `enableOneSampleTest = TRUE` to test against a clinically meaningful reference threshold (`test.value`) rather than `0`.
+
+### Parametric one-sided test with Bayes factor caption
+
+```{r parametric-one-sided}
+res_param <- jjhistostats(
+  data = jjhistostats_labvalues,
+  dep = "glucose",
+  typestatistics = "parametric",
+  resultssubtitle = TRUE,
+  enableOneSampleTest = TRUE,
+  test.value = 100,
+  alternative = "greater",
+  conf.level = 0.90,
+  bf.message = TRUE,
+  bfprior = 0.707,
+  digits = 3,
+  seed = 20250101
+)
+res_param$plot
+```
+
+### Nonparametric (Wilcoxon signed-rank) & Robust (trimmed-mean bootstrap-*t*)
+
+```{r nonparametric-and-robust}
+data(jjhistostats_skewed)
+
+res_np <- jjhistostats(
+  data = jjhistostats_skewed,
+  dep = "crp",
+  typestatistics = "nonparametric",
+  resultssubtitle = TRUE,
+  enableOneSampleTest = TRUE,
+  test.value = 5.0,
+  alternative = "greater"
+)
+
+res_rob <- jjhistostats(
+  data = jjhistostats_skewed,
+  dep = "ca199",
+  typestatistics = "robust",
+  trimlevel = 0.15,
+  resultssubtitle = TRUE,
+  enableOneSampleTest = TRUE,
+  test.value = 37.0,
+  alternative = "two.sided",
+  conf.level = 0.95,
+  seed = 42
+)
+res_rob$plot
+```
+
+### Bayesian one-sample *t*-test
+
+```{r bayesian-test}
+res_bayes <- jjhistostats(
+  data = jjhistostats_labvalues,
+  dep = "cholesterol",
+  typestatistics = "bayes",
+  bfprior = 1.0,
+  resultssubtitle = TRUE,
+  enableOneSampleTest = TRUE,
+  test.value = 200,
+  alternative = "less",
+  conf.level = 0.95,
+  seed = 42
+)
+res_bayes$plot
+```
+
+---
+
+## 4. Grouped Analysis, Aesthetics, Labels & Theme
+
+Specify `grvar` to create faceted per-group histograms (`plot2`), and customize bin width, colors, centrality lines, labels, dimensions, and theme.
+
+```{r grouped-and-styled}
+data(jjhistostats_grouped)
+
+res_grouped <- jjhistostats(
+  data = jjhistostats_grouped,
+  dep = "biomarker_level",
+  grvar = "treatment",
+  typestatistics = "nonparametric",
+  resultssubtitle = TRUE,
+  centralityline = TRUE,
+  centralitytype = "nonparametric",
+  centralitylinecolor = "#D55E00",
+  centralitylinewidth = 1.5,
+  centralitylinetype = "dotted",
+  changebinwidth = TRUE,
+  binwidth = 5.0,
+  binfill = "#56B4E9",
+  bincolor = "#003366",
+  binalpha = 0.65,
+  xlab = "Biomarker concentration (ng/mL)",
+  title = "Biomarker Distribution by Treatment Arm",
+  caption = "ClinicoPath grouped histogram example",
+  plotwidth = 650,
+  plotheight = 450,
+  originaltheme = TRUE
+)
+res_grouped$plot2
+```
+
+Custom subtitles are displayed when `resultssubtitle = FALSE`:
+
+```{r custom-subtitle}
+res_sub <- jjhistostats(
+  data = jjhistostats_test,
+  dep = "hemoglobin",
+  resultssubtitle = FALSE,
+  title = "Baseline Hemoglobin",
+  subtitle = "Descriptive cohort distribution (no hypothesis test)",
+  xlab = "Hemoglobin (g/dL)"
+)
+res_sub$plot
+```
+
+---
+
+## 5. Publication-Ready `ggpubr` Plots & Distribution Diagnostics
+
+When `ggpubrAddDensity = TRUE`, both `ggpubrPlot` and `ggpubrPlot2` automatically plot bars on the probability-density scale (`y = "density"`, `ylab = "Density"`) so bars and density curves share the exact same axis.
+
+```{r ggpubr-and-diagnostics}
+data(jjhistostats_bimodal)
+
+res_diag <- jjhistostats(
+  data = jjhistostats_grouped,
+  dep = "response_value",
+  grvar = "disease_stage",
+  addGGPubrPlot = TRUE,
+  ggpubrPalette = "#0073C2FF",
+  ggpubrAddDensity = TRUE,
+  ggpubrAddMean = TRUE,
+  addDistributionDiagnostics = TRUE,
+  ggpubrDensityColor = "#009E73",
+  ggpubrShowQQ = TRUE,
+  ggpubrShowECDF = TRUE,
+  showInterpretation = TRUE
+)
+res_diag$ggpubrPlot
+res_diag$densityPlot
+res_diag$qqPlot
+res_diag$ecdfPlot
+```
+
+---
+
+## 6. Edge Cases & Built-in Safety Guards
+
+`jjhistostats` includes explicit clinical and numerical guards for small samples, missing grouping values, `n < 3` subgroups, constant values, and heavy ties in the trimmed core.
+
+```{r edge-cases}
+data(jjhistostats_small)
+
+# Small sample (n = 25) and small groups (< 10): surfaces advisory warnings in `todo`
+res_small <- jjhistostats(
+  data = jjhistostats_small,
+  dep = "score",
+  grvar = "group",
+  typestatistics = "nonparametric",
+  resultssubtitle = TRUE
+)
+
+# Subgroup with n = 2 refuses statistical subtitle rather than collapsing Hedges' g to 0
+df_tiny <- data.frame(
+  v = c(1:10, 20, 25),
+  g = factor(c(rep("Adequate", 10), "Tiny", "Tiny"))
+)
+res_tiny <- jjhistostats(
+  data = df_tiny,
+  dep = "v",
+  grvar = "g",
+  typestatistics = "parametric",
+  resultssubtitle = TRUE
+)
+res_tiny$plot2
+```
+
+---
+
+## References
+
+- Patil, I. (2021). Visualizations with statistical details: The `ggstatsplot` approach. *Journal of Open Source Software*, 6(61), 3167.
+- Patil, I. (2021). `statsExpressions`: R package for tidy dataframes and expressions with statistical details. *Journal of Open Source Software*, 6(61), 3236.
+- Kassambara, A. (2023). `ggpubr`: `ggplot2` Based Publication Ready Plots.
+- Mair, P., & Wilcox, R. (2020). Robust statistical methods in R using the `WRS2` package. *Behavior Research Methods*, 52, 464–488.
+- Morey, R. D., & Rouder, J. N. (2024). `BayesFactor`: Computation of Bayes Factors for Common Designs.
+- Ben-Shachar, M. S., Lüdecke, D., & Makowski, D. (2020). `effectsize`: Estimation of Effect Size Indices and Standardized Parameters. *Journal of Open Source Software*, 5(56), 2815.

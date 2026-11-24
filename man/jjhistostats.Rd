@@ -211,6 +211,39 @@ A results object containing:
 }
 }
 \description{
-'Wrapper Function for ggstatsplot::gghistostats and
-ggstatsplot::grouped_gghistostats to generate Histogram.'
+Wrapper function for ggstatsplot::gghistostats and
+ggstatsplot::grouped_gghistostats to generate statistical histograms with
+optional clinical interpretation and ggpubr diagnostic plots.
+}
+\examples{
+\donttest{
+# Load bundled test dataset
+data(jjhistostats_test)
+
+# Basic histogram with parametric one-sample test
+jjhistostats(
+  data = jjhistostats_test,
+  dep = "age_years",
+  typestatistics = "parametric",
+  resultssubtitle = TRUE
+)
+
+# Multiple histograms with centrality line
+jjhistostats(
+  data = jjhistostats_test,
+  dep = c("age_years", "tumor_size_mm", "bmi"),
+  centralityline = TRUE,
+  resultssubtitle = TRUE
+)
+
+# Grouped histogram by disease stage
+jjhistostats(
+  data = jjhistostats_test,
+  dep = "psa_level",
+  grvar = "disease_stage",
+  typestatistics = "nonparametric",
+  changebinwidth = TRUE,
+  binwidth = 2.0
+)
+}
 }
