@@ -699,10 +699,10 @@ importFrom(easyalluvial,
   plot_condensation
 )
 importFrom(effectsize,
+  F_to_eta2,
+  F_to_omega2,
   cohens_d,
-  eta_squared,
-  hedges_g,
-  omega_squared
+  hedges_g
 )
 importFrom(epiR,epi.tests)
 importFrom(epitools,rateratio)

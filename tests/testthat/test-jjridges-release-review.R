@@ -65,10 +65,11 @@ test_that("every effect size reports a TWO-sided confidence interval", {
         expect_lt(ci$ci_lower, ci$effect_size)
         expect_gt(ci$ci_upper, ci$effect_size)
     }
-    # and they agree with effectsize asked for two.sided explicitly
-    df <- data.frame(value = c(a, b), group = factor(rep(c("g1", "g2"), c(40, 35))))
-    m <- aov(value ~ group, data = df)
-    ref <- effectsize::eta_squared(m, ci = 0.95, alternative = "two.sided")
+    # and they agree with Welch one-way effectsize asked for two.sided explicitly
+    wt <- stats::t.test(a, b, var.equal = FALSE)
+    ref <- effectsize::F_to_eta2(f = as.numeric(wt$statistic)^2, df = 1,
+                                 df_error = as.numeric(wt$parameter),
+                                 ci = 0.95, alternative = "two.sided")
     expect_equal(est("eta")$ci_lower, ref$CI_low,  tolerance = 1e-8)
     expect_equal(est("eta")$ci_upper, ref$CI_high, tolerance = 1e-8)
 })

@@ -10,7 +10,7 @@
 #' @importFrom grid unit
 #' @importFrom dplyr across all_of distinct group_by mutate n summarise
 #' @importFrom magrittr %>%
-#' @importFrom effectsize cohens_d hedges_g eta_squared omega_squared
+#' @importFrom effectsize cohens_d hedges_g F_to_eta2 F_to_omega2
 #'
 #' @return An \code{R6} class generator object for the \code{jjridgesClass} backend; used internally by the jamovi analysis wrapper and not called directly.
 
@@ -53,6 +53,9 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         # ever read, so a blank NA row appeared with no reason given. Collected here and
         # emitted as one summarized notice in .generateTests. Reset in .generateTests.
         .testWarnings = character(0),
+        # Cached repeated-ID warning captured in .init() before jmvcore::Analysis$run()
+        # subsets self$data to only the selected OptionVariable columns.
+        .repeatedIdWarning = NULL,
 
         .addNotice = function(type, title, content) {
             private$.noticeList[[length(private$.noticeList) + 1]] <- list(
@@ -273,40 +276,56 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     min = private$.MIN_GROUP_SIZE, groups = paste(names(small_groups), collapse = ", ")))
             }
             
-            # Check for extreme outliers that could affect interpretation
+            # Check for extreme outliers within each group (avoiding false positives from
+            # clean between-group separation)
             if (length(plot_data$x) > 0) {
-                z_scores <- abs(scale(plot_data$x))
-                outlier_prop <- sum(z_scores > 3, na.rm = TRUE) / length(z_scores)
-                if (outlier_prop > private$.MAX_OUTLIER_PROP) {
-                    warnings <- c(warnings, .fmt(
-                        .("High proportion of extreme outliers detected ({pct}%). Consider reviewing data quality or using robust statistical options."),
-                        pct = round(outlier_prop * 100, 1)))
+                grp_list <- split(plot_data$x, plot_data$y)
+                n_checked <- 0L
+                n_outliers <- 0L
+                for (gx in grp_list) {
+                    gx <- gx[is.finite(gx)]
+                    if (length(gx) >= 3L) {
+                        sx <- stats::sd(gx)
+                        if (is.finite(sx) && sx > 0) {
+                            z_scores <- abs((gx - mean(gx)) / sx)
+                            n_outliers <- n_outliers + sum(z_scores > 3)
+                            n_checked <- n_checked + length(gx)
+                        }
+                    }
+                }
+                if (n_checked > 0L) {
+                    outlier_prop <- n_outliers / n_checked
+                    if (outlier_prop > private$.MAX_OUTLIER_PROP) {
+                        warnings <- c(warnings, .fmt(
+                            .("High proportion of within-group extreme outliers detected ({pct}%). Consider reviewing data quality or using robust statistical options."),
+                            pct = round(outlier_prop * 100, 1)))
+                    }
                 }
             }
             
-            # Check for highly skewed distributions
+            # Check for highly skewed distributions within each group
             if (length(plot_data$x) > 10) {
-                if (requireNamespace("moments", quietly = TRUE)) {
-                    skewness <- moments::skewness(plot_data$x, na.rm = TRUE)
-                } else {
-                    # Fallback calculation for skewness when moments package is not available
-                    x <- plot_data$x[!is.na(plot_data$x)]
-                    if (length(x) > 0) {
-                        m <- mean(x)
-                        s <- sd(x)
-                        if (s > 0) {
-                            skewness <- sum(((x - m) / s)^3) / length(x)
-                        } else {
-                            skewness <- 0
-                        }
-                    } else {
-                        skewness <- 0
+                calc_skew <- function(v) {
+                    v <- v[is.finite(v)]
+                    if (length(v) <= 10L) return(NA_real_)
+                    if (requireNamespace("moments", quietly = TRUE)) {
+                        return(moments::skewness(v, na.rm = TRUE))
+                    }
+                    s <- stats::sd(v)
+                    if (is.finite(s) && s > 0) sum(((v - mean(v)) / s)^3) / length(v) else 0
+                }
+                grp_list <- split(plot_data$x, plot_data$y)
+                skewed_groups <- character(0)
+                for (gname in names(grp_list)) {
+                    sk <- calc_skew(grp_list[[gname]])
+                    if (is.finite(sk) && abs(sk) > 2) {
+                        skewed_groups <- c(skewed_groups, gname)
                     }
                 }
-                # is.finite(): a NaN/NA skewness (constant or non-finite x) would make the
-                # `if` throw "missing value where TRUE/FALSE needed" and kill the analysis.
-                if (is.finite(skewness) && abs(skewness) > 2) {
-                    warnings <- c(warnings, .("Data shows high skewness. Consider log transformation if appropriate for your clinical context."))
+                if (length(skewed_groups) > 0L) {
+                    warnings <- c(warnings, .fmt(
+                        .("Within-group high skewness detected ({groups}). Consider nonparametric/robust methods or log transformation if appropriate for your clinical context."),
+                        groups = paste(skewed_groups, collapse = ", ")))
                 }
             }
             
@@ -524,7 +543,7 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 "<li><strong>Biomarker Analysis:</strong> Compare Ki-67 index, CD3+ counts, or receptor expression across tumor grades</li>",
                 "<li><strong>Treatment Response:</strong> Visualize tumor size reduction across different treatment arms</li>",
                 "<li><strong>Disease Staging:</strong> Show age or biomarker distributions across TNM stages</li>",
-                "<li><strong>Temporal Patterns:</strong> Display lab values over time periods or disease progression stages</li>",
+                "<li><strong>Disease Progression Cohorts:</strong> Compare cross-sectional lab values across independent disease stages (for repeated measurements on the same patients over time, use longitudinal/mixed models)</li>",
                 "<li><strong>Pathology Scoring:</strong> Compare continuous measurements (mitotic counts, vessel density) by diagnosis</li>",
                 "</ul>",
 
@@ -544,7 +563,7 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 "<li>You have 3+ groups to compare (works well up to ~10 groups)</li>",
                 "<li>Understanding distribution shape is important (not just mean differences)</li>",
                 "<li>You want to detect bimodality or subgroups within categories</li>",
-                "<li>Data is continuous and you have sufficient observations per group (n\u226520 recommended)</li>",
+                "<li>Data is continuous and group sample sizes are large enough to estimate smooth densities (as a rough rule of thumb, n\u226520 per group gives smoother curves, though this depends on distribution shape)</li>",
                 "</ul>",
 
                 "<p><strong>Consider Alternatives When:</strong></p>",
@@ -552,23 +571,24 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 "<li>Only 2 groups \u2192 Use violin plots or density plots side-by-side</li>",
                 "<li>Focus on summary statistics only \u2192 Use box plots or error bars</li>",
                 "<li>Categorical data \u2192 Use bar charts or mosaic plots</li>",
-                "<li>Very few observations per group (n<10) \u2192 Individual data points may be better</li>",
+                "<li>Very small groups (e.g., n<10 as a rough guideline) \u2192 Enable 'Add data points' or use dot/strip plots alongside densities</li>",
                 "</ul>",
 
                 "<h4 style='color:#2e7d32;'>Plot Type Options</h4>",
                 "<ul>",
-                "<li><strong>Density Ridges:</strong> Smooth curves showing probability density (default, best for most cases)</li>",
-                "<li><strong>Density with Gradient:</strong> Color gradient maps the value of the X variable along each ridge</li>",
-                "<li><strong>Histogram Ridges:</strong> Discrete bins instead of smooth curves (good for small samples)</li>",
+                "<li><strong>Basic Ridgeline:</strong> Classic closed ridgeline curves drawn along each group baseline</li>",
+                "<li><strong>Density Ridges:</strong> Smooth open-bottom curves showing probability density (default, best for most cases)</li>",
+                "<li><strong>Density with Gradient:</strong> Color gradient maps the continuous value of the X variable along each ridge (overrides categorical fill colors)</li>",
+                "<li><strong>Histogram Ridges:</strong> Discrete bins instead of smooth curves (good for small samples or discrete values)</li>",
                 "<li><strong>Violin Ridges:</strong> Symmetric mirrored densities (emphasizes shape comparison)</li>",
                 "</ul>",
 
                 "<h4 style='color:#2e7d32;'>Statistical Considerations</h4>",
                 "<ul>",
                 "<li><strong>Independence:</strong> Statistical tests assume independent observations (one per subject)</li>",
-                "<li><strong>Sample Size:</strong> Minimum 3-5 observations per group for meaningful curves; 20+ recommended</li>",
+                "<li><strong>Sample Size:</strong> At least 3 observations per group are required for effect-size CIs; larger groups (roughly 20+ as a rule of thumb) yield more stable density curves and higher statistical power</li>",
                 "<li><strong>Effect Size:</strong> Use nonparametric effect sizes (Cliff's Delta, Hodges-Lehmann) for skewed pathology data</li>",
-                "<li><strong>Multiple Testing:</strong> Apply p-value correction (Bonferroni, FDR) when comparing many groups</li>",
+                "<li><strong>Multiple Testing:</strong> Apply p-value correction (Bonferroni, Holm, or FDR) when comparing many groups</li>",
                 "</ul>",
 
                 "<h4 style='color:#2e7d32;'>Publication Tips</h4>",
@@ -610,17 +630,16 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             if (test_type == "parametric") {
                 html <- paste0(html,
-                    "<h4 style='color:#856404;'>Parametric Test Assumptions</h4>",
+                    "<h4 style='color:#856404;'>Parametric Test Assumptions (Welch's t-test)</h4>",
                     "<ul>",
-                    "<li><strong>Normality:</strong> Data within each group should be approximately normally distributed. ",
-                    "Ridge plots showing symmetric, bell-shaped curves suggest normality. Skewed or multimodal ridges violate this assumption.</li>",
+                    "<li><strong>Normality:</strong> Data within each group should be approximately normally distributed (or group sizes large enough for the sampling distribution of the mean to be approximately normal). ",
+                    "Ridge plots showing symmetric, bell-shaped curves suggest normality; strongly skewed or heavy-tailed ridges may motivate nonparametric or robust methods.</li>",
                     "<li><strong>Independence:</strong> Each observation must be independent (one measurement per subject). ",
                     "Repeated measures, matched pairs, or clustered data violate independence.</li>",
-                    "<li><strong>Homogeneity of Variance:</strong> Groups should have similar spread (variance). ",
-                    "Ridge widths should be comparable across groups.</li>",
+                    "<li><strong>Unequal Variances Permitted:</strong> Welch's two-sample t-test does <em>not</em> assume equal variances across groups. Unpooled Cohen's d / Hedges' g (Delacre et al., 2021) and Welch one-way eta-squared / omega-squared likewise relax equal variances.</li>",
                     "</ul>",
-                    "<p><strong>Tests Used:</strong> Independent t-test on every pair of groups. With 3 or more groups this analysis reports PAIRWISE comparisons, not an omnibus one-way ANOVA; the p-values are adjusted for multiplicity by the selected method.</p>",
-                    "<p><strong>When Violated:</strong> Consider nonparametric tests if distributions are skewed, or robust tests if variances differ.</p>"
+                    "<p><strong>Tests Used:</strong> Welch's unequal-variance two-sample t-test on every pair of groups. With 3 or more groups this analysis reports PAIRWISE comparisons, not an omnibus one-way ANOVA; p-values are adjusted for multiplicity only when a P-value Adjustment method other than 'None' is selected.</p>",
+                    "<p><strong>When Violated:</strong> Consider nonparametric tests (Wilcoxon with Cliff's Delta or Hodges-Lehmann) if distributions are strongly skewed, or robust trimmed-mean tests (Yuen) if outliers distort means.</p>"
                 )
             } else if (test_type == "nonparametric") {
                 html <- paste0(html,
@@ -628,12 +647,12 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     "<ul>",
                     "<li><strong>Independence:</strong> Each observation must be independent. This is still required for non-parametric tests.</li>",
                     "<li><strong>Ordinal or Continuous Data:</strong> Variables should be at least ordinal scale.</li>",
-                    "<li><strong>Similar Distributions:</strong> For Mann-Whitney/Kruskal-Wallis, groups should have similar distribution shapes ",
-                    "(ridges with similar shapes but different positions). If shapes differ, tests compare distributions rather than medians.</li>",
+                    "<li><strong>Similar Distributions:</strong> For Mann-Whitney/Wilcoxon, groups should have similar distribution shapes ",
+                    "(ridges with similar shapes but different positions) to interpret the test strictly as a difference in medians. If shapes differ, the test evaluates stochastic dominance across distributions.</li>",
                     "</ul>",
-                    "<p><strong>Tests Used:</strong> Mann-Whitney U (Wilcoxon rank-sum) test on every pair of groups. With 3 or more groups this analysis reports PAIRWISE comparisons, not an omnibus Kruskal-Wallis test; the p-values are adjusted for multiplicity by the selected method.</p>",
+                    "<p><strong>Tests Used:</strong> Mann-Whitney U (Wilcoxon rank-sum) test on every pair of groups. With 3 or more groups this analysis reports PAIRWISE comparisons, not an omnibus Kruskal-Wallis test; p-values are adjusted for multiplicity only when a P-value Adjustment method other than 'None' is selected.</p>",
                     "<p><strong>Advantages:</strong> Robust to outliers and skewed distributions common in pathology data (e.g., mitotic counts, lymph node involvement).</p>",
-                    "<p><strong>Effect Sizes:</strong> Cliff's Delta shows probability one group has higher values; Hodges-Lehmann estimates typical difference.</p>"
+                    "<p><strong>Effect Sizes:</strong> Cliff's Delta measures ordinal dominance P(X1 &gt; X2) \u2212 P(X1 &lt; X2), ranging from \u22121 to +1 (0 = no dominance); Hodges-Lehmann estimates the median pairwise difference in outcome units.</p>"
                 )
             } else if (test_type == "robust") {
                 html <- paste0(html,
@@ -643,7 +662,7 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     "<li><strong>Outlier Resistance:</strong> Robust tests use trimmed means (default 20% trimming), reducing outlier influence.</li>",
                     "<li><strong>Heterogeneity Tolerance:</strong> Does not assume equal variances across groups.</li>",
                     "</ul>",
-                    "<p><strong>Tests Used:</strong> Yuen's trimmed-means test (a Welch-type robust alternative to the t-test) on every pair of groups; no omnibus test is computed.</p>",
+                    "<p><strong>Tests Used:</strong> Yuen's trimmed-means test (a Welch-type robust alternative to the t-test) on every pair of groups; no omnibus test is computed; p-values are adjusted for multiplicity only when a P-value Adjustment method other than 'None' is selected.</p>",
                     "<p><strong>Best For:</strong> Data with unequal variances, mild outliers, or slight departures from normality.</p>",
                     "<p><strong>Clinical Scenarios:</strong> Laboratory values with occasional extreme results, tumor measurements with outliers.</p>"
                 )
@@ -653,11 +672,24 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     "<ul>",
                     "<li><strong>Bayes Factor Interpretation (Jeffreys, 1961; Lee &amp; Wagenmakers, 2013 conventions):</strong> BF10 &gt; 3 = moderate evidence for difference; BF10 &gt; 10 = strong evidence; ",
                     "BF10 &lt; 1/3 = moderate evidence for the null (no difference). These are conventional benchmarks, not fixed decision rules.</li>",
-                    "<li><strong>Prior Assumptions:</strong> Uses default Cauchy prior (scale=0.707; Rouder et al., 2009). Results are sensitive to prior choice.</li>",
+                    "<li><strong>Prior Assumptions:</strong> Uses default JZS Cauchy prior (scale = 0.707; Rouder et al., 2009). Results are sensitive to prior scale choice.</li>",
+                    "<li><strong>Equal-Variance Likelihood:</strong> <code>BayesFactor::ttestBF()</code> assumes equal population variances (pooled Student t likelihood) and within-group normality. When variances differ sharply across unequal group sizes, cross-check with Welch or robust tests.</li>",
                     "<li><strong>Computational Requirements:</strong> Requires BayesFactor package. May be slow for large datasets.</li>",
                     "</ul>",
-                    "<p><strong>Advantages:</strong> Provides evidence for null hypothesis (no difference), not just failure to reject null.</p>",
-                    "<p><strong>Limitations:</strong> Requires understanding of Bayesian inference; less familiar to many clinical reviewers.</p>"
+                    "<p><strong>Advantages:</strong> Quantifies relative evidence for the null hypothesis (no difference) versus the alternative, rather than frequentist significance testing.</p>",
+                    "<p><strong>Limitations:</strong> Requires understanding of Bayesian evidence scales; sensitive to prior specification and variance heterogeneity.</p>"
+                )
+            }
+
+            eff_type_sel <- private$.option("effsize_type")
+            estimand_mismatch <- (test_type == "robust" && eff_type_sel %in% c("d", "g", "eta", "omega")) ||
+                (test_type == "nonparametric" && eff_type_sel %in% c("d", "g", "eta", "omega")) ||
+                (test_type == "parametric" && eff_type_sel %in% c("cliff_delta", "hodges_lehmann"))
+            if (isTRUE(estimand_mismatch)) {
+                html <- paste0(html,
+                    "<p><strong>Estimand Note:</strong> The selected test (<code>", test_type,
+                    "</code>) and effect size (<code>", eff_type_sel,
+                    "</code>) target different population parameters (for example, trimmed means or ranks vs untrimmed means). Interpret the test statistic and effect size according to their respective definitions.</p>"
                 )
             }
 
@@ -665,7 +697,7 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             html <- paste0(html,
                 "<h4 style='color:#856404;'>Universal Considerations</h4>",
                 "<ul>",
-                "<li><strong>Sample Size:</strong> Small samples (n<20 per group) have low statistical power. Non-significant results may reflect insufficient data.</li>",
+                "<li><strong>Sample Size:</strong> Small samples (e.g., n &lt; 20 per group as a rough rule of thumb, depending on effect size and variance) have limited statistical power. Non-significant results do not prove equivalence.</li>",
                 "<li><strong>Multiple Testing:</strong> Comparing many groups increases false positive risk. ",
                 "Apply p-value correction (Bonferroni, Holm, or FDR) when making multiple comparisons.</li>",
                 "<li><strong>Clinical vs. Statistical Significance:</strong> Statistically significant differences may not be clinically meaningful. ",
@@ -848,8 +880,9 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # (jamovi may reuse the same R6 instance when options change)
             private$.noticeList <- list()
 
-            # Reset the preset-override banner so it cannot accumulate across runs
+            # Reset the preset-override banner and its visibility so switching back to custom hides it
             self$results$warnings$setContent("")
+            self$results$warnings$setVisible(FALSE)
 
             # Apply clinical preset if selected (must be done before other processing)
             private$.applyClinicalPreset()
@@ -907,6 +940,14 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 private$.hideOutputsOnError()
                 return()
             }
+
+            # Restore output visibility after validation succeeds (critical for invalid -> valid recovery
+            # on a reused jamovi R6 instance where .hideOutputsOnError() previously hid these items)
+            self$results$instructions$setVisible(visible = FALSE)
+            self$results$plot$setVisible(visible = TRUE)
+            self$results$statistics$setVisible(visible = TRUE)
+            self$results$tests$setVisible(visible = private$.option("show_stats"))
+            self$results$interpretation$setVisible(visible = TRUE)
             
             # Display individual warnings as separate Notices
             all_warnings <- c(input_warnings, data_warnings)
@@ -1062,7 +1103,19 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             }
             
             # Remove missing values (jmvcore::naOmit preserves jamovi column attributes)
+            n_before_na <- nrow(plot_data)
             plot_data <- jmvcore::naOmit(plot_data)
+            n_removed_na <- n_before_na - nrow(plot_data)
+            if (n_removed_na > 0L) {
+                private$.addNotice(
+                    'INFO', 'Missing values excluded',
+                    paste0(n_removed_na, " row", if (n_removed_na == 1L) "" else "s",
+                           " with missing values in selected variables ",
+                           if (n_removed_na == 1L) "was" else "were",
+                           " excluded (complete-case analysis). ", nrow(plot_data),
+                           " observations remain.")
+                )
+            }
 
             # naOmit keeps Inf/-Inf (is.na(Inf) is FALSE). A single Inf then poisons every
             # downstream number: mean/sd become Inf/NaN in the statistics table and in the
@@ -1089,17 +1142,24 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             if ("fill" %in% names(plot_data)) plot_data$fill <- droplevels(plot_data$fill)
             if ("facet" %in% names(plot_data)) plot_data$facet <- droplevels(plot_data$facet)
 
-            # Reverse order if requested
-            if (self$options$reverse_order) {
-                plot_data$y <- factor(plot_data$y, levels = rev(levels(plot_data$y)))
-            }
-            
+            # Note: reverse_order is presentation-only and is applied inside .createPlot() so it
+            # never alters factor contrast direction or test/effect-size signs in statistical tables.
             return(plot_data)
         },
         
         .createPlot = function(data) {
+            # Apply presentation-only Y order reversal on a local plot copy so
+            # statistical tables, contrasts, and effect-size signs remain invariant.
+            if (isTRUE(self$options$reverse_order)) {
+                data$y <- factor(data$y, levels = rev(levels(data$y)))
+            }
+
             # Base plot setup
             plot_type <- private$.option("plot_type")
+            is_gradient <- identical(plot_type, "density_ridges_gradient")
+            has_facet <- !is.null(self$options$facet_var) && "facet" %in% names(data)
+            has_fill  <- !is.null(self$options$fill_var)  && "fill"  %in% names(data)
+            strat_fill <- has_fill && !is_gradient
             
             # Create base plot based on type
             if (plot_type == "ridgeline" || plot_type == "density_ridges") {
@@ -1116,14 +1176,26 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             
             # Add advanced features
             if (private$.option("add_boxplot")) {
-                # Add boxplot elements using ggplot2 geoms
-                p <- p + ggplot2::geom_boxplot(
-                    width = 0.1,
-                    position = ggplot2::position_nudge(y = 0.15),
-                    outlier.shape = NA,
-                    alpha = 0.7,
-                    color = "black"
-                )
+                # Add boxplot elements using ggplot2 geoms; preserve fill stratification when active
+                if (strat_fill) {
+                    p <- p + ggplot2::geom_boxplot(
+                        aes(group = interaction(y, fill), fill = fill),
+                        width = 0.1,
+                        position = ggplot2::position_dodge(width = 0.25),
+                        outlier.shape = NA,
+                        alpha = 0.7,
+                        color = "black",
+                        show.legend = FALSE
+                    )
+                } else {
+                    p <- p + ggplot2::geom_boxplot(
+                        width = 0.1,
+                        position = ggplot2::position_nudge(y = 0.15),
+                        outlier.shape = NA,
+                        alpha = 0.7,
+                        color = "black"
+                    )
+                }
             }
             
             if (self$options$add_points) {
@@ -1151,9 +1223,7 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 )
             }
             
-            has_facet <- !is.null(self$options$facet_var) && "facet" %in% names(data)
-            has_fill  <- !is.null(self$options$fill_var)  && "fill"  %in% names(data)
-            overlay_grp <- c("y", if (has_facet) "facet")
+            overlay_grp <- c("y", if (strat_fill) "fill", if (has_facet) "facet")
 
             if (private$.option("add_mean")) {
                 mean_data <- data %>%
@@ -1208,12 +1278,24 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # Apply labels
             p <- private$.applyLabels(p)
             
-            # Add sample sizes if requested (facet-aware counts and per-facet x positioning)
+            # Add sample sizes if requested (facet- and fill-aware counts and per-facet x positioning)
             if (self$options$add_sample_size) {
                 sample_sizes <- data %>%
                     group_by(across(all_of(overlay_grp))) %>%
-                    summarise(n = n(), .groups = 'drop') %>%
-                    mutate(label = paste0("n=", n))
+                    summarise(n = n(), .groups = 'drop')
+
+                if (strat_fill) {
+                    lbl_grp <- c("y", if (has_facet) "facet")
+                    sample_sizes <- sample_sizes %>%
+                        group_by(across(all_of(lbl_grp))) %>%
+                        summarise(
+                            label = paste(paste0(as.character(fill), ": n=", n), collapse = ", "),
+                            .groups = 'drop'
+                        )
+                } else {
+                    sample_sizes <- sample_sizes %>%
+                        mutate(label = paste0("n=", n))
+                }
 
                 if (has_facet) {
                     facet_pos <- data %>%
@@ -1243,8 +1325,8 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             
             # Add density peak (mode X) values if requested (respecting facet, fill, and active bandwidth)
             if (self$options$add_density_values) {
-                peak_grp <- c("y", if (has_fill) "fill", if (has_facet) "facet")
-                bw_active <- private$.calculateBandwidth(data$x, emit_notice = FALSE)
+                peak_grp <- c("y", if (strat_fill) "fill", if (has_facet) "facet")
+                bw_active <- private$.calculateBandwidth(data, emit_notice = FALSE)
                 peak_data <- data %>%
                     group_by(across(all_of(peak_grp))) %>%
                     summarise(
@@ -1275,26 +1357,47 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 )
             }
             
-            # Add custom annotations if provided
-            if (!is.null(self$options$custom_annotations) && self$options$custom_annotations != "") {
-                # Parse custom annotations: format "x,y,text;x2,y2,text2"
-                annotations <- strsplit(self$options$custom_annotations, ";")[[1]]
+            # Add custom annotations if provided: format "x,y,text;x2,y2,text2"
+            # Supports numeric y index OR exact group-level name, preserves commas in text,
+            # and warns on any unparseable entries rather than silently dropping them.
+            if (!is.null(self$options$custom_annotations) && nzchar(trimws(self$options$custom_annotations))) {
+                annotations <- strsplit(self$options$custom_annotations, ";", fixed = TRUE)[[1]]
+                y_levels <- levels(data$y)
+                invalid_anns <- character(0)
                 for (ann in annotations) {
-                    parts <- trimws(strsplit(ann, ",")[[1]])
-                    if (length(parts) == 3) {
-                        # Try to parse x and y as numeric
-                        x_val <- suppressWarnings(as.numeric(parts[1]))
-                        y_val <- suppressWarnings(as.numeric(parts[2]))
-                        
-                        if (!is.na(x_val) && !is.na(y_val)) {
-                            p <- p + annotate("text", 
-                                x = x_val, 
-                                y = y_val, 
-                                label = parts[3],
+                    ann_trim <- trimws(ann)
+                    if (!nzchar(ann_trim)) next
+                    parts <- strsplit(ann_trim, ",", fixed = TRUE)[[1]]
+                    if (length(parts) >= 3L) {
+                        x_val <- suppressWarnings(as.numeric(trimws(parts[1])))
+                        y_raw <- trimws(parts[2])
+                        y_val <- suppressWarnings(as.numeric(y_raw))
+                        if (is.na(y_val) && y_raw %in% y_levels) {
+                            y_val <- match(y_raw, y_levels)
+                        }
+                        lbl <- trimws(paste(parts[3:length(parts)], collapse = ","))
+                        if (is.finite(x_val) && is.finite(y_val) && nzchar(lbl)) {
+                            p <- p + annotate("text",
+                                x = x_val,
+                                y = y_val,
+                                label = lbl,
                                 size = 3.5,
                                 color = "blue")
+                        } else {
+                            invalid_anns <- c(invalid_anns, ann_trim)
                         }
+                    } else {
+                        invalid_anns <- c(invalid_anns, ann_trim)
                     }
+                }
+                if (length(invalid_anns) > 0L) {
+                    private$.addNotice(
+                        'WARNING', 'Invalid custom annotations',
+                        paste0("Skipped ", length(invalid_anns), " malformed custom annotation",
+                               if (length(invalid_anns) == 1L) "" else "s",
+                               " (expected 'x,y,text' where y is a numeric index or Y group label): ",
+                               paste(invalid_anns, collapse = "; "))
+                    )
                 }
             }
             
@@ -1331,7 +1434,7 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         aes(fill = fill),
                         scale = self$options$scale,
                         alpha = self$options$alpha,
-                        bandwidth = private$.calculateBandwidth(data$x),
+                        bandwidth = private$.calculateBandwidth(data),
                         quantile_lines = draw_quantiles,
                         quantiles = quantile_probs,
                         color = "black",
@@ -1344,7 +1447,7 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         aes(fill = y),
                         scale = self$options$scale,
                         alpha = self$options$alpha,
-                        bandwidth = private$.calculateBandwidth(data$x),
+                        bandwidth = private$.calculateBandwidth(data),
                         quantile_lines = draw_quantiles,
                         quantiles = quantile_probs,
                         color = "black",
@@ -1361,7 +1464,7 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     fill = NA,
                     color = "black",
                     linewidth = 0.75,
-                    bandwidth = private$.calculateBandwidth(data$x),
+                    bandwidth = private$.calculateBandwidth(data),
                     quantile_lines = draw_quantiles,
                     quantiles = quantile_probs
                 )
@@ -1371,13 +1474,32 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         },
 
         .createGradientPlot = function(data) {
+            ignored_opts <- character(0)
+            if (!is.null(self$options$fill_var)) {
+                ignored_opts <- c(ignored_opts, paste0("Fill Variable ('", self$options$fill_var, "')"))
+            }
+            if (!isTRUE(self$options$fill_ridges)) {
+                ignored_opts <- c(ignored_opts, "'Fill ridges = FALSE'")
+            }
+            if (length(ignored_opts) > 0L) {
+                private$.addNotice(
+                    'WARNING', 'Gradient mode overrides categorical fill',
+                    paste0("Plot type 'Density with Gradient' maps ridge fill color continuously to '",
+                           self$options$x_var, "', so ", paste(ignored_opts, collapse = " and "),
+                           " cannot be shown as ridge fill on the plot (descriptive and statistical tables ",
+                           "still stratify by Fill Variable when provided). Choose 'Density Ridges', ",
+                           "'Basic Ridgeline', 'Histogram Ridges', or 'Violin Ridges' to display categorical fills.")
+                )
+            }
+
             p <- ggplot(data, aes(x = x, y = y))
 
             p <- p + ggridges::geom_density_ridges_gradient(
                 aes(fill = after_stat(x)),
                 scale = self$options$scale,
+                alpha = self$options$alpha,
                 gradient_lwd = 1.0,
-                bandwidth = private$.calculateBandwidth(data$x),
+                bandwidth = private$.calculateBandwidth(data),
                 quantile_lines = isTRUE(private$.option("add_quantiles")),
                 quantiles = private$.quantileValues()
             )
@@ -1466,7 +1588,7 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             # .calculateBandwidth returns NULL for "nrd0" (meaning: use the geom default);
             # geom_violin has no NULL default, so only pass bw when we have a number.
-            bw <- private$.calculateBandwidth(data$x)
+            bw <- private$.calculateBandwidth(data)
             if (!is.null(bw))
                 args$bw <- bw
 
@@ -1494,37 +1616,60 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             if (method == "custom") {
                 return(self$options$bandwidth_value)
             }
-
-            # ggridges evaluates `3 * bandwidth` internally, so bandwidth must be
-            # strictly positive NUMERIC. Returning 0 (which stats::bw.nrd() emits on
-            # zero-IQR data such as zero-inflated pathology counts) produces degenerate
-            # Inf/-Inf densities. Fall back to bw.nrd0() when bw <= 0 or non-finite.
-            xv <- if (!is.null(x)) x[is.finite(x)] else numeric(0)
-            if (method == "nrd" || method == "SJ") {
-                if (length(xv) > 1) {
-                    bw <- if (method == "nrd") {
-                        stats::bw.nrd(xv)
-                    } else {
-                        tryCatch(stats::bw.SJ(xv), error = function(e) stats::bw.nrd(xv))
-                    }
-                    if (is.finite(bw) && bw > 0)
-                        return(bw)
-                    bw_fb <- stats::bw.nrd0(xv)
-                    if (is.finite(bw_fb) && bw_fb > 0) {
-                        if (isTRUE(emit_notice)) {
-                            private$.addNotice(
-                                'WARNING', 'Bandwidth fallback applied',
-                                paste0("Bandwidth method '", method,
-                                       "' yielded a non-positive bandwidth (e.g., zero IQR from tied/zero-inflated values). ",
-                                       "Fell back to Silverman's nrd0 rule (bw=", round(bw_fb, 4), ").")
-                            )
-                        }
-                        return(bw_fb)
-                    }
-                }
-                return(NULL)
+            if (!(method %in% c("nrd", "SJ"))) {
+                return(NULL)  # nrd0 -> use ggridges default
             }
-            return(NULL)  # nrd0 -> use ggridges default
+
+            # Compute per-group joint bandwidth (mirroring ggridges::stat_density_ridges)
+            # instead of pooling across groups, which inflates bandwidth on separated groups.
+            # Accepts either a prepared plot_data data.frame or a plain numeric vector.
+            calc_one <- function(v) {
+                v <- v[is.finite(v)]
+                if (length(v) < 2L) return(list(bw = NA_real_, fallback = FALSE))
+                bw <- if (method == "nrd") {
+                    stats::bw.nrd(v)
+                } else {
+                    tryCatch(stats::bw.SJ(v), error = function(e) stats::bw.nrd(v))
+                }
+                if (is.finite(bw) && bw > 0) {
+                    return(list(bw = bw, fallback = FALSE))
+                }
+                bw_fb <- stats::bw.nrd0(v)
+                if (is.finite(bw_fb) && bw_fb > 0) {
+                    return(list(bw = bw_fb, fallback = TRUE))
+                }
+                list(bw = NA_real_, fallback = FALSE)
+            }
+
+            if (is.data.frame(x) && "x" %in% names(x) && "y" %in% names(x)) {
+                is_grad <- identical(private$.option("plot_type"), "density_ridges_gradient")
+                grp_cols <- c("y",
+                              if (!is_grad && "fill" %in% names(x)) "fill",
+                              if ("facet" %in% names(x)) "facet")
+                grp_key <- interaction(x[grp_cols], drop = TRUE)
+                parts <- split(x$x, grp_key)
+            } else {
+                parts <- list(x)
+            }
+
+            res_list <- lapply(parts, calc_one)
+            bws <- vapply(res_list, function(r) r$bw, numeric(1))
+            used_fb <- any(vapply(res_list, function(r) isTRUE(r$fallback), logical(1)))
+            valid_bws <- bws[is.finite(bws) & bws > 0]
+
+            if (length(valid_bws) > 0L) {
+                bw_joint <- mean(valid_bws)
+                if (used_fb && isTRUE(emit_notice)) {
+                    private$.addNotice(
+                        'WARNING', 'Bandwidth fallback applied',
+                        paste0("Bandwidth method '", method,
+                               "' yielded a non-positive bandwidth in one or more groups (e.g., zero IQR from tied/zero-inflated values). ",
+                               "Fell back to Silverman's nrd0 rule where needed (joint bw=", round(bw_joint, 4), ").")
+                    )
+                }
+                return(bw_joint)
+            }
+            return(NULL)
         },
         
         .applyColorPalette = function(p) {
@@ -2037,17 +2182,17 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     }
 
                 } else if (effsize_type == "eta") {
-                    # Eta squared using effectsize package
+                    # Welch-compatible one-way eta squared via Welch F = t_Welch^2 with Welch df
+                    # (preserves duality with Welch's t-test and nominal CI coverage under heteroscedasticity;
+                    # also handles one zero-variance group cleanly unlike stats::oneway.test()).
                     if (requireNamespace("effectsize", quietly = TRUE)) {
-                        # Create a simple data frame for eta_squared
-                        df <- data.frame(
-                            value = c(data1, data2),
-                            group = factor(rep(c("g1", "g2"), c(n1, n2)))
-                        )
-                        model <- aov(value ~ group, data = df)
+                        wt <- stats::t.test(data1, data2, var.equal = FALSE)
+                        f_w <- as.numeric(wt$statistic)^2
+                        df_err <- as.numeric(wt$parameter)
                         result <- suppressMessages(
-                            effectsize::eta_squared(model, ci = 0.95, alternative = "two.sided"))
-                        effect_size <- as.numeric(result$Eta2)
+                            effectsize::F_to_eta2(f = f_w, df = 1, df_error = df_err,
+                                                  ci = 0.95, alternative = "two.sided"))
+                        effect_size <- as.numeric(result$Eta2_partial)
                         ci_lower <- result$CI_low
                         ci_upper <- result$CI_high
                     } else {
@@ -2055,16 +2200,15 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     }
 
                 } else if (effsize_type == "omega") {
-                    # Omega squared using effectsize package
+                    # Welch-compatible one-way omega squared via Welch F = t_Welch^2 with Welch df
                     if (requireNamespace("effectsize", quietly = TRUE)) {
-                        df <- data.frame(
-                            value = c(data1, data2),
-                            group = factor(rep(c("g1", "g2"), c(n1, n2)))
-                        )
-                        model <- aov(value ~ group, data = df)
+                        wt <- stats::t.test(data1, data2, var.equal = FALSE)
+                        f_w <- as.numeric(wt$statistic)^2
+                        df_err <- as.numeric(wt$parameter)
                         result <- suppressMessages(
-                            effectsize::omega_squared(model, ci = 0.95, alternative = "two.sided"))
-                        effect_size <- as.numeric(result$Omega2)
+                            effectsize::F_to_omega2(f = f_w, df = 1, df_error = df_err,
+                                                    ci = 0.95, alternative = "two.sided"))
+                        effect_size <- as.numeric(result$Omega2_partial)
                         ci_lower <- result$CI_low
                         ci_upper <- result$CI_high
                     } else {
@@ -2076,7 +2220,8 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     effect_size <- private$.calculateCliffsDelta(data1, data2)
 
                     # Stratified BCa bootstrap 95% CI for Cliff's Delta (falls back to percentile
-                    # only if BCa cannot be computed on degenerate/constant replicates).
+                    # if BCa cannot be computed; uses Newcombe 2006 Method 5 analytical score bound
+                    # on complete separation |delta| == 1 rather than a degenerate zero-width CI).
                     if (requireNamespace("boot", quietly = TRUE)) {
                         boot_fn <- function(data, indices) {
                             d1 <- data[indices[indices <= n1]]
@@ -2092,9 +2237,22 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         if (!is.null(boot_result)) {
                             t_finite <- boot_result$t[is.finite(boot_result$t)]
                             if (length(unique(t_finite)) <= 1L) {
-                                # All replicates identical (e.g., complete separation delta = +/-1)
-                                ci_lower <- effect_size
-                                ci_upper <- effect_size
+                                if (is.finite(effect_size) && abs(effect_size) == 1) {
+                                    # Complete separation: non-parametric bootstrap has zero variance;
+                                    # apply Newcombe (2006) Method 5 score bound on theta = (1+delta)/2.
+                                    bci <- private$.cliffBoundaryCI(n1, n2, effect_size, conf = 0.95)
+                                    ci_lower <- bci[["lower"]]
+                                    ci_upper <- bci[["upper"]]
+                                    warning_msg <- paste0(
+                                        "Complete separation (Cliff's delta = ", sprintf("%.2f", effect_size),
+                                        "); bootstrap replicates were constant, so a Newcombe (2006) Method 5 ",
+                                        "score boundary 95% CI was used instead of a degenerate zero-width interval."
+                                    )
+                                } else {
+                                    ci_lower <- NA_real_
+                                    ci_upper <- NA_real_
+                                    warning_msg <- "Constant bootstrap replicates; Cliff's delta CI could not be estimated."
+                                }
                             } else {
                                 ci_result <- tryCatch(
                                     suppressWarnings(boot::boot.ci(boot_result, type = "bca")),
@@ -2141,32 +2299,36 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             ))
         },
 
-        # Helper method: Check for potential repeated measures
-        .checkRepeatedMeasures = function(data) {
-            # Check for identifier columns in self$data that actually contain repeated IDs.
-            # Previous heuristics falsely triggered on cross-sectional pathology count data
-            # (integer X with < 15 unique values, e.g., lymph node counts, mitotic counts)
-            # and on cross-sectional case-control grouping variables named "case".
-            if (!is.null(self$data)) {
-                col_names <- names(self$data)
-                id_cols <- col_names[grepl("\\b(patient_?id|subject_?id|participant_?id|id)\\b",
-                                           tolower(col_names))]
-                # Exclude grouping/outcome variables the user intentionally placed in y_var/fill_var/facet_var
-                active_group_vars <- c(self$options$y_var, self$options$fill_var, self$options$facet_var)
-                id_cols <- setdiff(id_cols, active_group_vars)
-                for (col in id_cols) {
-                    vals <- self$data[[col]]
-                    vals <- vals[!is.na(vals)]
-                    if (length(vals) > 0 && anyDuplicated(vals) > 0) {
-                        return(paste0(
-                            "Identifier column '", col, "' contains repeated values across rows. ",
-                            "Multiple observations per subject violate the independence assumption."
-                        ))
-                    }
+        # Helper method: Scan a data frame for clinical identifier columns with repeated IDs
+        .scanRepeatedIdColumns = function(df) {
+            if (is.null(df) || !is.data.frame(df)) return(NULL)
+            col_names <- names(df)
+            if (length(col_names) == 0L) return(NULL)
+            id_pattern <- "(^|[^a-z0-9])(patient_?id|subject_?id|participant_?id|case_?id|pt_?id|pat_?id|specimen_?id|sample_?id|biopsy_?id|record_?id|mrn|accession(_?id|_?no|_?number)?|id)([^a-z0-9]|$)"
+            id_cols <- col_names[grepl(id_pattern, tolower(col_names))]
+            # Exclude grouping/outcome variables the user intentionally placed in y_var/fill_var/facet_var
+            active_group_vars <- c(self$options$x_var, self$options$y_var, self$options$fill_var, self$options$facet_var)
+            id_cols <- setdiff(id_cols, active_group_vars)
+            for (col in id_cols) {
+                vals <- df[[col]]
+                vals <- vals[!is.na(vals)]
+                if (length(vals) > 0L && anyDuplicated(vals) > 0L) {
+                    return(paste0(
+                        "Identifier column '", col, "' contains repeated values across rows. ",
+                        "Multiple observations per subject violate the independence assumption."
+                    ))
                 }
             }
+            NULL
+        },
 
-            # No repeated-measures identifier pattern detected
+        # Helper method: Check for potential repeated measures
+        .checkRepeatedMeasures = function(data) {
+            # Check current self$data first, then fall back to the full-dataset scan
+            # captured during .init() before jmvcore::Analysis$run() dropped unselected columns.
+            msg <- private$.scanRepeatedIdColumns(self$data)
+            if (!is.null(msg)) return(msg)
+            if (!is.null(private$.repeatedIdWarning)) return(private$.repeatedIdWarning)
             return(NULL)
         },
 
@@ -2226,13 +2388,13 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # Footnotes documenting effect-size CI methods and random seed when used
             eff_type <- private$.option("effsize_type")
             tests_table$setNote("seed", if (identical(eff_type, "cliff_delta"))
-                .fmt(.("Cliff's delta 95% CI: stratified BCa bootstrap (R=1000). Random seed: {seed}"),
+                .fmt(.("Cliff's delta 95% CI: stratified BCa bootstrap (R=1000; Newcombe 2006 Method 5 score bound on complete separation). Random seed: {seed}"),
                      seed = self$options$seed))
             tests_table$setNote("effsize_method",
                 if (eff_type %in% c("d", "g"))
                     .("Standardized mean difference uses unpooled SD (Welch-compatible; Delacre et al., 2021) with two-sided 95% non-central t CI.")
                 else if (eff_type %in% c("eta", "omega"))
-                    .("Variance-explained 95% CI is two-sided via non-central F inversion (effectsize package).")
+                    .("Variance-explained uses Welch unequal-variance one-way F (t_Welch^2, Welch df) with two-sided 95% non-central F CI (effectsize package).")
                 else NULL)
 
             # Reset the assumption-switch accumulator for this run
@@ -2482,12 +2644,22 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             
             # Add statistical context if tests were run
             if (private$.option("show_stats")) {
-                interpretation <- paste0(
-                    interpretation,
-                    "<div style='background-color: rgba(255, 169, 33, 0.14); padding:10px; margin:10px 0; border-radius:4px; color: inherit;'>",
-                    "<strong> ", .("Statistical Tests:"), "</strong> ", .("Pairwise comparisons test whether group differences are statistically significant."), " ",
-                    .("Consider effect sizes alongside p-values for clinical importance. Adjust for multiple comparisons when appropriate."), "</div>"
-                )
+                if (identical(private$.option("test_type"), "bayes")) {
+                    interpretation <- paste0(
+                        interpretation,
+                        "<div style='background-color: rgba(255, 169, 33, 0.14); padding:10px; margin:10px 0; border-radius:4px; color: inherit;'>",
+                        "<strong> ", .("Bayesian Comparisons:"), "</strong> ",
+                        .("Pairwise Bayesian t-tests quantify relative evidence (Bayes Factor BF10) for versus against a group difference rather than frequentist statistical significance."), " ",
+                        .("Consider effect sizes, prior sensitivity, and clinical relevance alongside Bayes factors."), "</div>"
+                    )
+                } else {
+                    interpretation <- paste0(
+                        interpretation,
+                        "<div style='background-color: rgba(255, 169, 33, 0.14); padding:10px; margin:10px 0; border-radius:4px; color: inherit;'>",
+                        "<strong> ", .("Statistical Tests:"), "</strong> ", .("Pairwise comparisons test whether group differences are statistically significant."), " ",
+                        .("Consider effect sizes alongside p-values for clinical importance. Adjust for multiple comparisons when appropriate."), "</div>"
+                    )
+                }
             }
             
             self$results$interpretation$setContent(interpretation)
@@ -2535,6 +2707,34 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             u <- sum(r[seq_len(n1)]) - n1 * (n1 + 1) / 2
             (2 * u) / (n1 * n2) - 1
         },
+
+        .cliffBoundaryCI = function(n1, n2, delta, conf = 0.95) {
+            # Newcombe (2006, Stat Med 25:559-573, Method 5) score confidence bound for
+            # theta = P(X > Y) = (1 + delta) / 2 on complete separation (|delta| == 1),
+            # where non-parametric bootstrap variance collapses to zero.
+            theta_hat <- (1 + delta) / 2
+            z <- stats::qnorm(1 - (1 - conf) / 2)
+            n_star <- (n1 + n2) / 2 - 1
+            var_fn <- function(th) {
+                (th * (1 - th) / (as.double(n1) * as.double(n2))) *
+                    (1 + n_star * (1 - th) / (2 - th) + n_star * th / (1 + th))
+            }
+            score_eq <- function(th) (theta_hat - th)^2 - z^2 * var_fn(th)
+            if (theta_hat >= 1) {
+                lo_th <- tryCatch(
+                    stats::uniroot(score_eq, c(1e-12, 1 - 1e-12), tol = 1e-10)$root,
+                    error = function(e) NA_real_
+                )
+                return(c(lower = if (is.finite(lo_th)) 2 * lo_th - 1 else NA_real_, upper = 1))
+            } else if (theta_hat <= 0) {
+                hi_th <- tryCatch(
+                    stats::uniroot(score_eq, c(1e-12, 1 - 1e-12), tol = 1e-10)$root,
+                    error = function(e) NA_real_
+                )
+                return(c(lower = -1, upper = if (is.finite(hi_th)) 2 * hi_th - 1 else NA_real_))
+            }
+            c(lower = NA_real_, upper = NA_real_)
+        },
         
         .calculateHodgesLehmann = function(x, y) {
             # Hodges-Lehmann shift: median of all pairwise differences (x - y)
@@ -2549,6 +2749,28 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         }
     ), # End of private list
     public = list(
+        #' @description
+        #' Initialize a new \code{jjridgesClass} analysis instance and scan the full
+        #' input data frame for repeated clinical identifier columns prior to
+        #' \code{jmvcore} variable subsetting.
+        #' @param options A \code{jjridgesOptions} object specifying analysis options.
+        #' @param data Optional data frame containing the input dataset.
+        #' @param datasetId Character string identifying the jamovi dataset.
+        #' @param analysisId Character string identifying the jamovi analysis instance.
+        #' @param revision Numeric revision counter maintained by jamovi.
+        initialize = function(options, data = NULL, datasetId = "", analysisId = "", revision = 0) {
+            super$initialize(
+                options = options,
+                data = data,
+                datasetId = datasetId,
+                analysisId = analysisId,
+                revision = revision
+            )
+            # Scan the full data frame before jmvcore::Analysis$init() subsets private$.data
+            # to only self$options$varsRequired, which would otherwise hide patient/MRN ID columns.
+            private$.repeatedIdWarning <- private$.scanRepeatedIdColumns(data)
+        },
+
         #' @description
         #' Generate R source code for Ridge Plot analysis
         #' @return Character string with R syntax for reproducible analysis

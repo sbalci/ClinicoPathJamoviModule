@@ -1,7 +1,7 @@
 ---
 name: jjridges
 title: Advanced Ridge Plot
-menuGroup: JJStatsPlotT
+menuGroup: JJStatsPlot
 menuSubgroup: Distribution
 # menuSubtitle: 'Ridge Visualization'
 version: '1.1.6'
@@ -101,9 +101,10 @@ options:
       default: density_ridges
       description:
           R: >
-            Type of ridge plot. 'density_ridges' for smooth curves, 'density_ridges_gradient'
-            adds color gradients, 'histogram_ridges' for discrete bins, 'violin_ridges'
-            for violin-style plots.
+            Type of ridge plot. 'ridgeline' for classic closed-baseline ridgelines,
+            'density_ridges' for smooth open-bottom curves, 'density_ridges_gradient'
+            for continuous X-value color gradients, 'histogram_ridges' for discrete bins,
+            and 'violin_ridges' for symmetric mirrored violin-style plots.
 
     - name: scale
       title: Ridge Height Scale
@@ -164,7 +165,7 @@ options:
             uncluttered; enable add_points to display individual observations).
 
     - name: add_points
-      title: Add data points
+      title: Data points
       type: Bool
       default: false
       description:
@@ -282,9 +283,10 @@ options:
       default: d
       description:
           R: >
-            Type of effect size to calculate and display. For skewed data (like lymph node counts), 
-            consider using nonparametric effect sizes: Cliff's Delta shows probability that one group 
-            has higher values, Hodges-Lehmann shift shows typical difference in units.
+            Type of effect size to calculate and display. For skewed data (like lymph node counts),
+            consider using nonparametric effect sizes: Cliff's Delta measures ordinal dominance
+            P(X1 > X2) - P(X1 < X2) ranging from -1 to +1, and Hodges-Lehmann shift estimates
+            the median pairwise difference in outcome units.
 
     # Visual Appearance
     - name: seed

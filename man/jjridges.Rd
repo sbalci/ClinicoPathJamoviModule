@@ -72,9 +72,11 @@ Creates color-coded segments within each ridge.}
 \item{facet_var}{Optional variable for creating separate panels. Useful for
 comparing ridge plots across another dimension.}
 
-\item{plot_type}{Type of ridge plot. 'density_ridges' for smooth curves,
-'density_ridges_gradient' adds color gradients, 'histogram_ridges' for
-discrete bins, 'violin_ridges' for violin-style plots.}
+\item{plot_type}{Type of ridge plot. 'ridgeline' for classic
+closed-baseline ridgelines, 'density_ridges' for smooth open-bottom curves,
+'density_ridges_gradient' for continuous X-value color gradients,
+'histogram_ridges' for discrete bins, and 'violin_ridges' for symmetric
+mirrored violin-style plots.}
 
 \item{scale}{Controls ridge height and overlap. Values > 1 create
 overlapping ridges, < 1 creates more separation between ridges.}
@@ -117,9 +119,10 @@ show_stats is TRUE.}
 comparisons.}
 
 \item{effsize_type}{Type of effect size to calculate and display. For
-skewed data (like lymph node counts),  consider using nonparametric effect
-sizes: Cliff's Delta shows probability that one group  has higher values,
-Hodges-Lehmann shift shows typical difference in units.}
+skewed data (like lymph node counts), consider using nonparametric effect
+sizes: Cliff's Delta measures ordinal dominance P(X1 > X2) - P(X1 < X2)
+ranging from -1 to +1, and Hodges-Lehmann shift estimates the median
+pairwise difference in outcome units.}
 
 \item{seed}{Random seed for the bootstrap confidence interval of Cliff's
 delta. The statistical tests table names the seed whenever it was used. The

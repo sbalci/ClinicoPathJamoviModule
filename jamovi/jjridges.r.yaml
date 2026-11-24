@@ -10,7 +10,16 @@ items:
       clearWith:
         - x_var
         - y_var
+        - fill_var
+        - facet_var
+        - plot_type
+        - bandwidth
+        - bandwidth_value
+        - add_quantiles
+        - quantiles
+        - custom_annotations
         - test_type
+        - p_adjust_method
         - show_stats
         - effsize_type
         - seed
@@ -50,8 +59,11 @@ items:
       clearWith:
         - x_var
         - y_var
+        - fill_var
+        - facet_var
         - show_stats
         - test_type
+        - p_adjust_method
         - effsize_type
         - seed
         - clinicalPreset
@@ -69,6 +81,8 @@ items:
       clearWith:
         - show_stats
         - test_type
+        - effsize_type
+        - clinicalPreset
 
     - name: plot
       title: Ridge Plot
@@ -219,6 +233,9 @@ items:
         - x_var
         - y_var
         - plot_type
+        - add_boxplot
+        - show_stats
+        - test_type
         - clinicalPreset
 
 refs:
@@ -234,8 +251,11 @@ refs:
     - welch1947
     - yuen1974
     - cliff1993
+    - newcombe2006
     - hodgeslehmann1963
     - btt
+    - jeffreys1961
+    - leewagenmakers2013
     - holm1979
     - benjaminihochberg1995
     - delacre2021

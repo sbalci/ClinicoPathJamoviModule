@@ -185,10 +185,15 @@ test_that("C13-C18: all six effect size point estimates match independent formul
     ))$tests$asDF
   }
 
+  t_w <- (5 - 13) / sqrt(v1 / 5 + v2 / 6)
+  F_w <- t_w^2
+  eta_w <- F_w / (F_w + df_w)
+  omega_w <- max(0, (F_w - 1) / (F_w + df_w + 1))
+
   expect_equal(run_es("d")$effect_size[1], d_unp, tolerance = 1e-10)
   expect_equal(run_es("g")$effect_size[1], d_unp * J_w, tolerance = 1e-8)
-  expect_equal(run_es("eta")$effect_size[1], 960 / 1499, tolerance = 1e-10)
-  expect_equal(run_es("omega")$effect_size[1], (1920 / 11 - 98 / 9) / (2998 / 11 + 98 / 9), tolerance = 1e-10)
+  expect_equal(run_es("eta")$effect_size[1], eta_w, tolerance = 1e-10)
+  expect_equal(run_es("omega")$effect_size[1], omega_w, tolerance = 1e-10)
   expect_equal(run_es("cliff_delta")$effect_size[1], -14 / 15, tolerance = 1e-10)
   expect_equal(run_es("cliff_delta")$effect_size[1], effsize::cliff.delta(x1, x2)$estimate, tolerance = 1e-10)
   expect_equal(run_es("hodges_lehmann")$effect_size[1], -8.0, tolerance = 1e-10)
@@ -465,5 +470,133 @@ test_that("VAL-jjridges-18 (C32): ggridges author accuracy and primary method ci
   refs_all <- yaml::read_yaml(file.path(root, "jamovi", "00refs.yaml"))$refs
   r_refs <- yaml::read_yaml(file.path(root, "jamovi", "jjridges.r.yaml"))$refs
   expect_false(grepl("RStudio", refs_all$ggridges$author, fixed = TRUE))
-  expect_true(any(c("btt", "cliff1993", "hodgeslehmann1963", "yuen1974") %in% r_refs))
+  expect_true(all(c("btt", "cliff1993", "newcombe2006", "hodgeslehmann1963", "yuen1974",
+                    "jeffreys1961", "leewagenmakers2013", "delacre2021") %in% r_refs))
+})
+
+# ==============================================================================
+# INDEPENDENT REVIEW REGRESSION TESTS (IR-jjridges-01 through IR-jjridges-13)
+# ==============================================================================
+
+test_that("IR-jjridges-01 & 11: R6 lifecycle recovers visibility after error and hides stale preset warnings", {
+  d <- make_tiny_fixture()
+  o <- ClinicoPath:::jjridgesOptions$new(x_var = "val", y_var = "grp", show_stats = TRUE)
+  a <- ClinicoPath:::jjridgesClass$new(options = o, data = d)
+  a$init()
+  quiet_run(a$.__enclos_env__$private$.run())
+  a$.__enclos_env__$private$.data <- d[d$grp == "Low", ]
+  quiet_run(a$.__enclos_env__$private$.run())
+  expect_false(a$results$plot$visible)
+  expect_false(a$results$tests$visible)
+
+  a$.__enclos_env__$private$.data <- d
+  quiet_run(a$.__enclos_env__$private$.run())
+  expect_true(a$results$plot$visible)
+  expect_true(a$results$statistics$visible)
+  expect_true(a$results$tests$visible)
+  expect_true(a$results$interpretation$visible)
+
+  # Preset -> custom hides warnings banner
+  o2 <- ClinicoPath:::jjridgesOptions$new(x_var = "val", y_var = "grp", clinicalPreset = "biomarker_distribution")
+  a2 <- ClinicoPath:::jjridgesClass$new(options = o2, data = d)
+  a2$init(); quiet_run(a2$.__enclos_env__$private$.run())
+  expect_true(a2$results$warnings$visible)
+  opt_cp <- a2$.__enclos_env__$private$.options$option("clinicalPreset")
+  opt_cp$.__enclos_env__$private$.value <- "custom"
+  quiet_run(a2$.__enclos_env__$private$.run())
+  expect_false(a2$results$warnings$visible)
+})
+
+test_that("IR-jjridges-02: presentation option reverse_order preserves statistical contrasts and signs", {
+  d <- make_tiny_fixture()
+  r0 <- quiet_run(ClinicoPath::jjridges(data = d, x_var = "val", y_var = "grp", reverse_order = FALSE, show_stats = TRUE, test_type = "parametric", effsize_type = "d"))
+  r1 <- quiet_run(ClinicoPath::jjridges(data = d, x_var = "val", y_var = "grp", reverse_order = TRUE, show_stats = TRUE, test_type = "parametric", effsize_type = "d"))
+  expect_identical(r1$tests$asDF$comparison, r0$tests$asDF$comparison)
+  expect_equal(r1$tests$asDF$statistic, r0$tests$asDF$statistic, tolerance = 1e-12)
+  expect_equal(r1$tests$asDF$effect_size, r0$tests$asDF$effect_size, tolerance = 1e-12)
+  # Plot Y levels are reversed while statistics stay invariant
+  expect_identical(levels(r1$plot$state$data$y), rev(levels(r0$plot$state$data$y)))
+})
+
+test_that("IR-jjridges-03: Welch one-way eta/omega preserves test-CI duality under heteroscedastic imbalance", {
+  set.seed(303)
+  d_het <- data.frame(
+    val = c(as.numeric(scale(stats::rnorm(50))) * 1.0, as.numeric(scale(stats::rnorm(10))) * 4.0 + 1.6),
+    grp = factor(c(rep("A", 50), rep("B", 10)))
+  )
+  r_eta <- quiet_run(ClinicoPath::jjridges(data = d_het, x_var = "val", y_var = "grp", show_stats = TRUE, test_type = "parametric", effsize_type = "eta"))
+  tb <- r_eta$tests$asDF
+  expect_gt(tb$p_value[1], 0.05)
+  expect_equal(tb$ci_lower[1], 0, tolerance = 1e-12)
+  expect_match(r_eta$tests$.__enclos_env__$private$.notes$effsize_method$note, "Welch", ignore.case = TRUE)
+})
+
+test_that("IR-jjridges-04: complete-separation Cliff's delta uses Newcombe Method 5 non-degenerate CI with warning", {
+  d_disj <- data.frame(val = 1:10, grp = factor(rep(c("Low", "High"), each = 5), levels = c("Low", "High")))
+  r_disj <- quiet_run(ClinicoPath::jjridges(
+    data = d_disj, x_var = "val", y_var = "grp", show_stats = TRUE,
+    test_type = "nonparametric", effsize_type = "cliff_delta", seed = 20261124
+  ))
+  tb <- r_disj$tests$asDF
+  expect_equal(tb$effect_size[1], -1, tolerance = 1e-12)
+  expect_equal(tb$ci_lower[1], -1, tolerance = 1e-12)
+  expect_gt(tb$ci_upper[1], -1)
+  expect_lt(tb$ci_upper[1], 0)
+  expect_match(r_disj$notices$content, "Complete separation|Newcombe", ignore.case = TRUE)
+})
+
+test_that("IR-jjridges-06 & 10: per-group bandwidth avoids smearing and within-group diagnostics avoid false skewness warnings", {
+  set.seed(404)
+  d_sep <- data.frame(val = c(stats::rnorm(40, 0, 1), stats::rnorm(40, 100, 1)), grp = factor(rep(c("Low", "High"), each = 40)))
+  r_sep <- quiet_run(ClinicoPath::jjridges(data = d_sep, x_var = "val", y_var = "grp", bandwidth = "nrd"))
+  bw_used <- unique(r_sep$plot$state$layers[[1]]$stat_params$bandwidth)
+  within_bw <- mean(c(stats::bw.nrd(d_sep$val[d_sep$grp == "Low"]), stats::bw.nrd(d_sep$val[d_sep$grp == "High"])))
+  expect_equal(bw_used, within_bw, tolerance = 1e-10)
+
+  set.seed(405)
+  d_csep <- data.frame(val = c(stats::rnorm(45, 0, 1), stats::rnorm(45, 2, 1), stats::rnorm(10, 30, 1)), grp = factor(c(rep("G1", 45), rep("G2", 45), rep("G3", 10))))
+  r_csep <- quiet_run(ClinicoPath::jjridges(data = d_csep, x_var = "val", y_var = "grp"))
+  expect_false(grepl("extreme outliers|high skewness", r_csep$notices$content, ignore.case = TRUE))
+})
+
+test_that("IR-jjridges-07 & 12: gradient warns on fill_var, add_mean stratifies by fill_var, and custom_annotations parses group names/commas & warns on malformed", {
+  set.seed(501)
+  d_g <- data.frame(val = stats::rnorm(80, 10, 2), grp = factor(rep(c("A", "B"), each = 40)), sub = factor(rep(rep(c("M", "F"), each = 20), 2)))
+  r_grad <- quiet_run(ClinicoPath::jjridges(data = d_g, x_var = "val", y_var = "grp", fill_var = "sub", plot_type = "density_ridges_gradient", alpha = 0.35, fill_ridges = FALSE))
+  expect_match(r_grad$notices$content, "Gradient mode overrides categorical fill", fixed = TRUE)
+  expect_equal(unique(suppressMessages(ggplot2::ggplot_build(r_grad$plot$state))$data[[1]]$alpha), 0.35, tolerance = 1e-8)
+
+  r_ov <- quiet_run(ClinicoPath::jjridges(data = d_g, x_var = "val", y_var = "grp", fill_var = "sub", add_mean = TRUE, add_sample_size = TRUE, add_boxplot = TRUE))
+  bld <- suppressMessages(ggplot2::ggplot_build(r_ov$plot$state))
+  vl_idx <- which(vapply(r_ov$plot$state$layers, function(l) inherits(l$geom, "GeomVline"), logical(1)))[1]
+  expect_equal(nrow(bld$data[[vl_idx]]), nrow(r_ov$statistics$asDF))
+
+  d <- make_tiny_fixture()
+  r_ann <- quiet_run(ClinicoPath::jjridges(data = d, x_var = "val", y_var = "grp", custom_annotations = "5,Low,Peak, A;13,2,High Mean;bad_entry"))
+  n_txt <- sum(vapply(r_ann$plot$state$layers, function(l) inherits(l$geom, "GeomText"), logical(1)))
+  expect_equal(n_txt, 2L)
+  expect_match(r_ann$notices$content, "Invalid custom annotations", fixed = TRUE)
+})
+
+test_that("IR-jjridges-08, 09, 13: clearWith completeness, accurate Welch/Bayes copy, and clinical ID clustering detection", {
+  root <- testthat::test_path("..", "..")
+  ry <- yaml::read_yaml(file.path(root, "jamovi", "jjridges.r.yaml"))
+  cw <- function(nm) unlist(Filter(function(x) identical(x$name, nm), ry$items)[[1]]$clearWith)
+  expect_true(all(c("fill_var", "facet_var") %in% cw("reportSummary")))
+  expect_true(all(c("p_adjust_method", "bandwidth", "add_quantiles", "quantiles", "fill_var", "facet_var", "plot_type") %in% cw("notices")))
+  expect_true("clinicalPreset" %in% cw("assumptionsPanel"))
+  expect_true(all(c("add_boxplot", "show_stats", "test_type") %in% cw("interpretation")))
+
+  d <- make_tiny_fixture()
+  rp <- quiet_run(ClinicoPath::jjridges(data = d, x_var = "val", y_var = "grp", show_stats = TRUE, test_type = "parametric", showAssumptions = TRUE))
+  expect_match(rp$assumptionsPanel$content, "Welch", ignore.case = TRUE)
+  expect_false(grepl("Homogeneity of Variance:</strong> Groups should have similar spread", rp$assumptionsPanel$content, fixed = TRUE))
+
+  rb <- quiet_run(ClinicoPath::jjridges(data = d, x_var = "val", y_var = "grp", show_stats = TRUE, test_type = "bayes", showAssumptions = TRUE))
+  expect_false(grepl("statistically significant", rb$interpretation$content, ignore.case = TRUE))
+  expect_match(rb$assumptionsPanel$content, "equal population variances|pooled Student", ignore.case = TRUE)
+
+  d_mrn <- data.frame(mrn = rep(paste0("M", 1:5), each = 4), val = stats::rnorm(20, 10, 2), grp = factor(rep(c("Core", "Margin"), 10)))
+  r_mrn <- quiet_run(ClinicoPath::jjridges(data = d_mrn, x_var = "val", y_var = "grp", show_stats = TRUE))
+  expect_match(r_mrn$notices$content, "Independence Assumption Violation", fixed = TRUE)
 })

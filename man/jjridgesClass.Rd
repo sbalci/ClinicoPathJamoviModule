@@ -15,6 +15,7 @@ Creates advanced ridgeline plots with robust statistical analysis
 \section{Methods}{
 \subsection{Public methods}{
   \itemize{
+    \item \href{#method-jjridgesClass-initialize}{\code{jjridgesClass$new()}}
     \item \href{#method-jjridgesClass-asSource}{\code{jjridgesClass$asSource()}}
     \item \href{#method-jjridgesClass-clone}{\code{jjridgesClass$clone()}}
   }
@@ -48,9 +49,39 @@ Creates advanced ridgeline plots with robust statistical analysis
   <li><span class="pkg-link" data-pkg="jmvcore" data-topic="Analysis" data-id="setError"><a href='../../jmvcore/html/Analysis.html#method-Analysis-setError'><code>jmvcore::Analysis$setError()</code></a></span></li>
   <li><span class="pkg-link" data-pkg="jmvcore" data-topic="Analysis" data-id="setStatus"><a href='../../jmvcore/html/Analysis.html#method-Analysis-setStatus'><code>jmvcore::Analysis$setStatus()</code></a></span></li>
   <li><span class="pkg-link" data-pkg="jmvcore" data-topic="Analysis" data-id="translate"><a href='../../jmvcore/html/Analysis.html#method-Analysis-translate'><code>jmvcore::Analysis$translate()</code></a></span></li>
-  <li><code>jjridgesBase$initialize()</code></li>
 </ul>
 </details>}}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-jjridgesClass-initialize"></a>}}
+\if{latex}{\out{\hypertarget{method-jjridgesClass-initialize}{}}}
+\subsection{\code{jjridgesClass$new()}}{
+  Initialize a new \code{jjridgesClass} analysis instance and scan the full
+input data frame for repeated clinical identifier columns prior to
+\code{jmvcore} variable subsetting.
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{jjridgesClass$new(
+  options,
+  data = NULL,
+  datasetId = "",
+  analysisId = "",
+  revision = 0
+)}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{options}}{A \code{jjridgesOptions} object specifying analysis options.}
+      \item{\code{data}}{Optional data frame containing the input dataset.}
+      \item{\code{datasetId}}{Character string identifying the jamovi dataset.}
+      \item{\code{analysisId}}{Character string identifying the jamovi analysis instance.}
+      \item{\code{revision}}{Numeric revision counter maintained by jamovi.}
+    }
+    \if{html}{\out{</div>}}
+  }
+}
+
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-jjridgesClass-asSource"></a>}}
 \if{latex}{\out{\hypertarget{method-jjridgesClass-asSource}{}}}

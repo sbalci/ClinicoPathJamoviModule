@@ -518,8 +518,11 @@ jjridgesResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "welch1947",
                     "yuen1974",
                     "cliff1993",
+                    "newcombe2006",
                     "hodgeslehmann1963",
                     "btt",
+                    "jeffreys1961",
+                    "leewagenmakers2013",
                     "holm1979",
                     "benjaminihochberg1995",
                     "delacre2021"))
@@ -530,7 +533,16 @@ jjridgesResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 clearWith=list(
                     "x_var",
                     "y_var",
+                    "fill_var",
+                    "facet_var",
+                    "plot_type",
+                    "bandwidth",
+                    "bandwidth_value",
+                    "add_quantiles",
+                    "quantiles",
+                    "custom_annotations",
                     "test_type",
+                    "p_adjust_method",
                     "show_stats",
                     "effsize_type",
                     "seed",
@@ -570,8 +582,11 @@ jjridgesResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 clearWith=list(
                     "x_var",
                     "y_var",
+                    "fill_var",
+                    "facet_var",
                     "show_stats",
                     "test_type",
+                    "p_adjust_method",
                     "effsize_type",
                     "seed",
                     "clinicalPreset")))
@@ -588,7 +603,9 @@ jjridgesResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 visible=FALSE,
                 clearWith=list(
                     "show_stats",
-                    "test_type")))
+                    "test_type",
+                    "effsize_type",
+                    "clinicalPreset")))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="plot",
@@ -756,6 +773,9 @@ jjridgesResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "x_var",
                     "y_var",
                     "plot_type",
+                    "add_boxplot",
+                    "show_stats",
+                    "test_type",
                     "clinicalPreset")))}))
 
 jjridgesBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -800,9 +820,11 @@ jjridgesBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   Creates color-coded segments within each ridge.
 #' @param facet_var Optional variable for creating separate panels. Useful for
 #'   comparing ridge plots across another dimension.
-#' @param plot_type Type of ridge plot. 'density_ridges' for smooth curves,
-#'   'density_ridges_gradient' adds color gradients, 'histogram_ridges' for
-#'   discrete bins, 'violin_ridges' for violin-style plots.
+#' @param plot_type Type of ridge plot. 'ridgeline' for classic
+#'   closed-baseline ridgelines, 'density_ridges' for smooth open-bottom curves,
+#'   'density_ridges_gradient' for continuous X-value color gradients,
+#'   'histogram_ridges' for discrete bins, and 'violin_ridges' for symmetric
+#'   mirrored violin-style plots.
 #' @param scale Controls ridge height and overlap. Values > 1 create
 #'   overlapping ridges, < 1 creates more separation between ridges.
 #' @param bandwidth Bandwidth selection for density estimation. Controls
@@ -830,9 +852,10 @@ jjridgesBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param p_adjust_method Method for adjusting p-values in multiple
 #'   comparisons.
 #' @param effsize_type Type of effect size to calculate and display. For
-#'   skewed data (like lymph node counts),  consider using nonparametric effect
-#'   sizes: Cliff's Delta shows probability that one group  has higher values,
-#'   Hodges-Lehmann shift shows typical difference in units.
+#'   skewed data (like lymph node counts), consider using nonparametric effect
+#'   sizes: Cliff's Delta measures ordinal dominance P(X1 > X2) - P(X1 < X2)
+#'   ranging from -1 to +1, and Hodges-Lehmann shift estimates the median
+#'   pairwise difference in outcome units.
 #' @param seed Random seed for the bootstrap confidence interval of Cliff's
 #'   delta. The statistical tests table names the seed whenever it was used. The
 #'   default reproduces the previous fixed behavior.
