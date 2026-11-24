@@ -49,6 +49,8 @@ items:
       clearWith:
         - x_var
         - y_var
+        - fill_var
+        - facet_var
         - show_stats
         - clinicalPreset
 
@@ -130,6 +132,8 @@ items:
         - add_sample_size
         - add_density_values
         - custom_annotations
+        - width
+        - height
 
     - name: statistics
       title: Statistical Summary

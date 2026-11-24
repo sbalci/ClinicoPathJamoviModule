@@ -600,3 +600,106 @@ test_that("IR-jjridges-08, 09, 13: clearWith completeness, accurate Welch/Bayes 
   r_mrn <- quiet_run(ClinicoPath::jjridges(data = d_mrn, x_var = "val", y_var = "grp", show_stats = TRUE))
   expect_match(r_mrn$notices$content, "Independence Assumption Violation", fixed = TRUE)
 })
+
+test_that("Release-review regression: A->B option mutation matches fresh B and large-N Hodges-Lehmann avoids O(n1*n2) blowup", {
+  set.seed(777)
+  d <- data.frame(
+    val = c(stats::rnorm(40, 10, 2), stats::rnorm(40, 14, 2)),
+    grp = factor(rep(c("A", "B"), each = 40), levels = c("A", "B"))
+  )
+  oA <- ClinicoPath:::jjridgesOptions$new(x_var = "val", y_var = "grp", show_stats = TRUE, test_type = "parametric", effsize_type = "d")
+  aA <- ClinicoPath:::jjridgesClass$new(options = oA, data = d)
+  aA$init(); quiet_run(aA$.__enclos_env__$private$.run())
+  set_opt <- function(obj, nm, val) {
+    opt <- obj$.__enclos_env__$private$.options$option(nm)
+    opt$.__enclos_env__$private$.value <- val
+  }
+  set_opt(aA, "test_type", "nonparametric")
+  set_opt(aA, "effsize_type", "cliff_delta")
+  set_opt(aA, "reverse_order", TRUE)
+  quiet_run(aA$.__enclos_env__$private$.run())
+
+  rB <- quiet_run(ClinicoPath::jjridges(
+    data = d, x_var = "val", y_var = "grp", show_stats = TRUE,
+    test_type = "nonparametric", effsize_type = "cliff_delta", reverse_order = TRUE
+  ))
+  expect_identical(aA$results$tests$asDF, rB$tests$asDF)
+  expect_identical(aA$results$statistics$asDF, rB$statistics$asDF)
+  expect_identical(aA$results$reportSummary$content, rB$reportSummary$content)
+  expect_identical(aA$results$notices$content, rB$notices$content)
+
+  # Large-N Hodges-Lehmann (> 1e5 pairs: 400 x 400 = 160,000) matches wilcox.test$estimate cleanly
+  set.seed(888)
+  x1 <- stats::rnorm(400, 10, 2); x2 <- stats::rnorm(400, 12, 2)
+  d_big <- data.frame(val = c(x1, x2), grp = factor(rep(c("A", "B"), each = 400), levels = c("A", "B")))
+  r_big <- quiet_run(ClinicoPath::jjridges(
+    data = d_big, x_var = "val", y_var = "grp", show_stats = TRUE,
+    test_type = "nonparametric", effsize_type = "hodges_lehmann"
+  ))
+  ref_hl <- as.numeric(suppressWarnings(stats::wilcox.test(x1, x2, conf.int = TRUE))$estimate)
+  expect_equal(r_big$tests$asDF$effect_size[1], ref_hl, tolerance = 1e-8)
+})
+
+test_that("Security hardening: asSource safely escapes strings/lists and filters undeclared options; .validateInputs enforces numeric bounds", {
+  d <- make_tiny_fixture()
+
+  # 1. OptionString with quotes, trailing backslash, and newline stays a single literal
+  for (payload in c('a", system("id"), b="', 'trailing\\', 'line1\nline2')) {
+    o <- ClinicoPath:::jjridgesOptions$new(x_var = "val", y_var = "grp", plot_title = payload)
+    a <- ClinicoPath:::jjridgesClass$new(options = o, data = d)
+    src <- a$asSource()
+    ex <- parse(text = src)[[1]]
+    expect_identical(ex$plot_title, payload)
+  }
+
+  # 2. Tampered OptionList value stays a single literal
+  o_list <- ClinicoPath:::jjridgesOptions$new(x_var = "val", y_var = "grp")
+  a_list <- ClinicoPath:::jjridgesClass$new(options = o_list, data = d)
+  opt_tt <- a_list$.__enclos_env__$private$.options$option("test_type")
+  payload_tt <- 'parametric", system("id"), x="'
+  opt_tt$.__enclos_env__$private$.value <- payload_tt
+  ex_tt <- parse(text = a_list$asSource())[[1]]
+  expect_identical(ex_tt$test_type, payload_tt)
+
+  # 3. Undeclared option names and list values are omitted from asSource()
+  o_inj <- ClinicoPath:::jjridgesOptions$new(x_var = "val", y_var = "grp")
+  a_inj <- ClinicoPath:::jjridgesClass$new(options = o_inj, data = d)
+  fake_opt <- list(name = "injected_arg", value = "x", default = "")
+  a_inj$.__enclos_env__$private$.options$.__enclos_env__$private$.options$injected_arg <- fake_opt
+  opt_pt <- a_inj$.__enclos_env__$private$.options$option("plot_title")
+  opt_pt$.__enclos_env__$private$.value <- list("a=1, system('id'), b" = "v")
+  src_inj <- a_inj$asSource()
+  ex_inj <- parse(text = src_inj)[[1]]
+  expect_false("injected_arg" %in% names(ex_inj))
+  expect_false("plot_title" %in% names(ex_inj))
+
+  # 4. Backend range backstops reject out-of-range numeric options under run(noThrow = TRUE)
+  o_rng <- ClinicoPath:::jjridgesOptions$new(x_var = "val", y_var = "grp")
+  a_rng <- ClinicoPath:::jjridgesClass$new(options = o_rng, data = d)
+  opt_sc <- a_rng$.__enclos_env__$private$.options$option("scale")
+  opt_sc$.__enclos_env__$private$.value <- -2
+  expect_error(a_rng$.__enclos_env__$private$.validateInputs(), "scale|positive", ignore.case = TRUE)
+})
+
+test_that("UI/schema/theme consistency: grid_lines works across all themes, clearWith includes size/strata, and u.yaml enable rules match backend", {
+  d <- make_tiny_fixture()
+
+  # grid_lines = FALSE suppresses grid lines on theme_pubr; grid_lines = TRUE adds them on theme_classic
+  r_pubr_off <- quiet_run(ClinicoPath::jjridges(data = d, x_var = "val", y_var = "grp", theme_style = "theme_pubr", grid_lines = FALSE))
+  expect_s3_class(r_pubr_off$plot$state$theme$panel.grid.major, "element_blank")
+  r_classic_on <- quiet_run(ClinicoPath::jjridges(data = d, x_var = "val", y_var = "grp", theme_style = "theme_classic", grid_lines = TRUE))
+  expect_s3_class(r_classic_on$plot$state$theme$panel.grid.major, "element_line")
+
+  # r.yaml clearWith covers fill_var/facet_var on clinicalSummary and width/height on plot
+  root <- testthat::test_path("..", "..")
+  ry <- yaml::read_yaml(file.path(root, "jamovi", "jjridges.r.yaml"))
+  cw <- function(nm) unlist(Filter(function(x) identical(x$name, nm), ry$items)[[1]]$clearWith)
+  expect_true(all(c("fill_var", "facet_var") %in% cw("clinicalSummary")))
+  expect_true(all(c("width", "height") %in% cw("plot")))
+
+  # u.yaml enable expressions match backend behavior for alpha, legend_position, and seed
+  u_txt <- paste(readLines(file.path(root, "jamovi", "jjridges.u.yaml")), collapse = "\n")
+  expect_match(u_txt, "name: alpha[\\s\\S]*?enable: \\(fill_ridges \\|\\| plot_type:density_ridges_gradient\\)", perl = TRUE)
+  expect_match(u_txt, "name: legend_position[\\s\\S]*?enable: \\(fill_var \\|\\| plot_type:density_ridges_gradient\\)", perl = TRUE)
+  expect_match(u_txt, "name: seed[\\s\\S]*?enable: \\(show_stats && effsize_type:cliff_delta\\)", perl = TRUE)
+})

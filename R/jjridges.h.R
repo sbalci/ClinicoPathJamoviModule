@@ -572,6 +572,8 @@ jjridgesResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 clearWith=list(
                     "x_var",
                     "y_var",
+                    "fill_var",
+                    "facet_var",
                     "show_stats",
                     "clinicalPreset")))
             self$add(jmvcore::Html$new(
@@ -652,7 +654,9 @@ jjridgesResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "show_facet_legend",
                     "add_sample_size",
                     "add_density_values",
-                    "custom_annotations")))
+                    "custom_annotations",
+                    "width",
+                    "height")))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="statistics",

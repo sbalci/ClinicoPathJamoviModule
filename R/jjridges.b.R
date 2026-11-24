@@ -193,19 +193,19 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             # Get effective legend position (considering overrides)
             effective_legend_pos <- private$.option("legend_position")
+            has_visible_legend <- (
+                (!is.null(self$options$fill_var) && (self$options$show_fill_legend %||% TRUE)) ||
+                identical(private$.option("plot_type"), "density_ridges_gradient")
+            )
 
-            # Increase width if fill legend is shown and legend position is right/left
-            if (!is.null(self$options$fill_var) &&
-                (self$options$show_fill_legend %||% TRUE) &&
-                effective_legend_pos %in% c("right", "left")) {
-                plot_width <- max(plot_width, 900)  # Minimum 900px when right/left legend
+            # Increase width if a legend is shown on the side
+            if (has_visible_legend && effective_legend_pos %in% c("right", "left")) {
+                plot_width <- max(plot_width, 900)  # Minimum 900px when side legend is shown
             }
 
-            # Increase height if fill legend is shown and legend position is top/bottom
-            if (!is.null(self$options$fill_var) &&
-                (self$options$show_fill_legend %||% TRUE) &&
-                effective_legend_pos %in% c("top", "bottom")) {
-                plot_height <- max(plot_height, 650)  # Minimum 650px when top/bottom legend
+            # Increase height if a legend is shown at top/bottom
+            if (has_visible_legend && effective_legend_pos %in% c("top", "bottom")) {
+                plot_height <- max(plot_height, 650)  # Minimum 650px when top/bottom legend is shown
             }
 
             # Increase height if faceting is used
@@ -240,6 +240,32 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             }
             if (!is.factor(y_col) && !is.character(y_col)) {
                 jmvcore::reject(.("Y variable should be categorical (factor/character). Selected: {var}"), var = self$options$y_var)
+            }
+
+            # Backend range backstops for numeric options (protects non-jamovi / noThrow callers)
+            scale_val <- private$.option("scale")
+            if (!is.numeric(scale_val) || length(scale_val) != 1L || !is.finite(scale_val) || scale_val <= 0) {
+                jmvcore::reject(.("Ridge scale must be a finite positive number."))
+            }
+            alpha_val <- private$.option("alpha")
+            if (!is.numeric(alpha_val) || length(alpha_val) != 1L || !is.finite(alpha_val) || alpha_val < 0 || alpha_val > 1) {
+                jmvcore::reject(.("Ridge transparency (alpha) must be a finite number between 0 and 1."))
+            }
+            point_alpha_val <- private$.option("point_alpha")
+            if (!is.numeric(point_alpha_val) || length(point_alpha_val) != 1L || !is.finite(point_alpha_val) || point_alpha_val < 0 || point_alpha_val > 1) {
+                jmvcore::reject(.("Point transparency (point_alpha) must be a finite number between 0 and 1."))
+            }
+            if (identical(private$.option("bandwidth"), "custom")) {
+                bw_val <- private$.option("bandwidth_value")
+                if (!is.numeric(bw_val) || length(bw_val) != 1L || !is.finite(bw_val) || bw_val <= 0) {
+                    jmvcore::reject(.("Custom bandwidth must be a finite positive number."))
+                }
+            }
+            if (identical(private$.option("plot_type"), "histogram_ridges")) {
+                binw_val <- private$.option("binwidth")
+                if (!is.numeric(binw_val) || length(binw_val) != 1L || !is.finite(binw_val) || binw_val <= 0) {
+                    jmvcore::reject(.("Histogram binwidth must be a finite positive number."))
+                }
             }
 
             # Check basic variability of X
@@ -473,13 +499,6 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             if (has_stats && !is.null(self$results$tests) && self$results$tests$rowCount > 0) {
                 text_summary <- paste0(text_summary, "<p></p><p><strong>STATISTICAL COMPARISONS:</strong></p>")
                 test_type <- private$.option("test_type")
-                test_name <- switch(test_type,
-                    parametric = "parametric test",
-                    nonparametric = "non-parametric test",
-                    robust = "robust test",
-                    bayes = "Bayesian test",
-                    "statistical test"
-                )
 
                 # Report the tests that were actually RUN, not the one that was requested.
                 # When parametric assumptions fail, .performSingleTest silently switches that
@@ -503,7 +522,7 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                                     "; requested ", tools::toTitleCase(gsub("_", " ", test_type)))
                     }
                     text_summary <- paste0(text_summary,
-                        "<p>Method: ", method_line, "</p>",
+                        "<p>Method: ", htmltools::htmlEscape(method_line), "</p>",
                         if (length(unique(methods_used)) > 1)
                             paste0("<p>Note: not every comparison used the same test. Some ",
                                    "comparisons fell back to a different method or could not ",
@@ -625,7 +644,7 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             html <- paste0(
                 "<div style='background-color: rgba(255, 202, 33, 0.23); border-left:4px solid #ffc107; padding:15px; margin:10px 0; color: inherit;'>",
                 "<h3 style='color:#856404; margin-top:0;'> Statistical Assumptions &amp; Caveats</h3>",
-                "<p><strong>Selected Test Type:</strong> ", tools::toTitleCase(gsub("_", " ", test_type)), "</p>"
+                "<p><strong>Selected Test Type:</strong> ", htmltools::htmlEscape(tools::toTitleCase(gsub("_", " ", test_type))), "</p>"
             )
 
             if (test_type == "parametric") {
@@ -687,8 +706,8 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 (test_type == "parametric" && eff_type_sel %in% c("cliff_delta", "hodges_lehmann"))
             if (isTRUE(estimand_mismatch)) {
                 html <- paste0(html,
-                    "<p><strong>Estimand Note:</strong> The selected test (<code>", test_type,
-                    "</code>) and effect size (<code>", eff_type_sel,
+                    "<p><strong>Estimand Note:</strong> The selected test (<code>", htmltools::htmlEscape(test_type),
+                    "</code>) and effect size (<code>", htmltools::htmlEscape(eff_type_sel),
                     "</code>) target different population parameters (for example, trimmed means or ranks vs untrimmed means). Interpret the test statistic and effect size according to their respective definitions.</p>"
                 )
             }
@@ -1257,11 +1276,14 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             if (!is.null(self$options$facet_var)) {
                 show_facet_legend <- self$options$show_facet_legend %||% TRUE
 
-                # Create custom labeller to show variable name and value
-                facet_var_name <- self$options$facet_var
+                # Create custom labeller in a clean environment (avoids capturing self/private)
+                lbl_prefix <- paste0(self$options$facet_var, ": ")
+                lbl_env <- new.env(parent = baseenv())
+                lbl_env$lbl_prefix <- lbl_prefix
                 custom_labeller <- function(labels) {
-                    lapply(labels, function(x) paste0(facet_var_name, ": ", x))
+                    lapply(labels, function(x) paste0(lbl_prefix, x))
                 }
+                environment(custom_labeller) <- lbl_env
 
                 if (show_facet_legend) {
                     p <- p + facet_wrap(~ facet, scales = "free_x",
@@ -1761,6 +1783,20 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         panel.border = element_rect(fill = NA, color = "black"),
                         axis.line = element_line(color = "black")
                     )
+            }
+
+            # Honor grid_lines consistently across all themes (theme_ridges handles it natively)
+            if (theme_style != "theme_ridges") {
+                if (!isTRUE(self$options$grid_lines)) {
+                    p <- p + theme(
+                        panel.grid.major = element_blank(),
+                        panel.grid.minor = element_blank()
+                    )
+                } else if (theme_style == "theme_classic") {
+                    p <- p + theme(
+                        panel.grid.major = element_line(color = "grey85", linewidth = 0.3)
+                    )
+                }
             }
             
             # Apply additional theme modifications
@@ -2606,7 +2642,6 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             # Traditional interpretation
             n_groups <- length(unique(data$y))
-            n_total <- nrow(data)
             x_var_safe <- htmltools::htmlEscape(self$options$x_var)
             y_var_safe <- htmltools::htmlEscape(self$options$y_var)
 
@@ -2737,15 +2772,52 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         },
         
         .calculateHodgesLehmann = function(x, y) {
-            # Hodges-Lehmann shift: median of all pairwise differences (x - y)
-            # Shows typical difference in lymph node counts between techniques
+            # Hodges-Lehmann shift: median of all pairwise differences (x - y).
+            # Use exact outer() when n1 * n2 <= 1e5; for large cohorts use wilcox.test()
+            # location estimate in C to avoid O(n1 * n2) memory blowup.
             x <- x[!is.na(x)]
             y <- y[!is.na(y)]
-            if (length(x) == 0 || length(y) == 0) return(NA_real_)
+            n1 <- length(x)
+            n2 <- length(y)
+            if (n1 == 0L || n2 == 0L) return(NA_real_)
 
-            # Use vectorised outer for efficiency
-            differences <- as.vector(outer(x, y, "-"))
-            return(median(differences))
+            if (as.double(n1) * as.double(n2) <= 1e5) {
+                differences <- as.vector(outer(x, y, "-"))
+                return(stats::median(differences))
+            }
+            wt <- suppressWarnings(stats::wilcox.test(x, y, conf.int = TRUE))
+            as.numeric(wt$estimate)
+        },
+
+        .sourcifyOption = function(option) {
+            declared <- setdiff(names(formals(jjridges)), "data")
+            if (is.null(option$name) || !is.character(option$name) || length(option$name) != 1L ||
+                !(option$name %in% declared))
+                return('')
+
+            value <- option$value
+            if (is.list(value))
+                return('')
+
+            if (is.character(value)) {
+                if (length(value) != 1L || is.na(value) || identical(value, option$default))
+                    return('')
+                return(paste0(option$name, ' = ', encodeString(value, quote = '"')))
+            }
+
+            if (is.numeric(value)) {
+                if (length(value) != 1L || !is.finite(value))
+                    return('')
+                return(super$.sourcifyOption(option))
+            }
+
+            if (is.logical(value)) {
+                if (length(value) != 1L || is.na(value))
+                    return('')
+                return(super$.sourcifyOption(option))
+            }
+
+            ''
         }
     ), # End of private list
     public = list(
@@ -2781,29 +2853,21 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             if (is.null(x_var) || is.null(y_var))
                 return('')
 
-            # Build the argument list in option-declaration order.
-            #
-            # Every variable-name option (single OptionVariable or multi-variable
-            # OptionVariables) is emitted as a deparse()'d string literal. deparse()
-            # produces valid, fully-escaped R for names containing spaces, quotes or
-            # backslashes (e.g. `Tumor Grade`); jmvcore's default sourcify would emit
-            # some of these as bare, unquoted symbols and yield invalid syntax.
-            # Detecting the option by CLASS (not by name) means any variable option
-            # added later is escaped automatically.
-            #
-            # Variables are NOT re-emitted through private$.asArgs() - doing so
-            # previously duplicated them in the generated syntax (the "double
-            # variables" bug). All non-variable options keep jmvcore's per-option
-            # sourcify so formatting stays consistent with jamovi.
+            # Build the argument list in option-declaration order, filtered to
+            # declared jjridges() formals and safely escaped via encodeString().
+            declared <- setdiff(names(formals(jjridges)), 'data')
             args <- character(0)
             for (option in private$.options$options) {
-                if (option$name == 'data')
+                if (is.null(option$name) || !is.character(option$name) ||
+                    length(option$name) != 1L || !(option$name %in% declared))
                     next
                 if (inherits(option, 'OptionVariable') || inherits(option, 'OptionVariables')) {
                     val <- option$value
-                    if (!is.null(val) && length(val) > 0)
-                        args <- c(args, paste0(option$name, ' = ',
-                                               paste0(deparse(val), collapse = '')))
+                    if (is.character(val) && length(val) > 0L && !any(is.na(val))) {
+                        encoded <- encodeString(val, quote = '"')
+                        rhs <- if (length(encoded) == 1L) encoded else paste0('c(', paste(encoded, collapse = ', '), ')')
+                        args <- c(args, paste0(option$name, ' = ', rhs))
+                    }
                 } else {
                     as <- private$.sourcifyOption(option)
                     if (!identical(as, ''))

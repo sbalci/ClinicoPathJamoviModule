@@ -120,7 +120,9 @@ children:
             enable: (show_stats)
           - type: TextBox
             name: seed
+            label: Random seed
             format: number
+            enable: (show_stats && effsize_type:cliff_delta)
   - type: CollapseBox
     label: Visual Appearance
     collapsed: true
@@ -132,7 +134,7 @@ children:
             name: alpha
             label: Ridge transparency
             format: number
-            enable: (fill_ridges || plot_type:violin_ridges)
+            enable: (fill_ridges || plot_type:density_ridges_gradient)
           - type: CheckBox
             name: fill_ridges
             label: Fill ridges
@@ -184,7 +186,7 @@ children:
           - type: ComboBox
             name: legend_position
             label: Legend position
-            enable: (fill_var)
+            enable: (fill_var || plot_type:density_ridges_gradient)
       - type: LayoutBox
         margin: large
         children:
