@@ -88,7 +88,8 @@ smoothness of curves.}
 \item{binwidth}{Width of bins for histogram-style ridges.}
 
 \item{add_boxplot}{Add boxplot elements inside each ridge for enhanced
-visualization of quartiles and outliers.}
+visualization of medians and quartiles (outlier dots are omitted to keep
+ridges uncluttered; enable add_points to display individual observations).}
 
 \item{add_points}{Show individual data points below ridges as jittered
 points.}
@@ -166,7 +167,8 @@ is specified.}
 
 \item{add_sample_size}{Display sample size (n) for each group.}
 
-\item{add_density_values}{Display density values at peaks.}
+\item{add_density_values}{Display the X-axis location (mode) at each
+ridge's density peak, computed with the active bandwidth setting.}
 
 \item{custom_annotations}{Custom text annotations in format
 'x,y,text;x2,y2,text2'.}
@@ -176,10 +178,14 @@ is specified.}
 \item{height}{Height of the plot in pixels.}
 
 \item{clinicalPreset}{Clinical analysis preset for ridge plots. Biomarker
-Distribution: nonparametric tests with Cliff's delta. Treatment Response:
-violin plots with Bonferroni correction. Age by Stage: parametric tests
-with Cohen's d. Tumor Size: Hodges-Lehmann shift. Lab Values: robust tests
-with Hedges' g. Survival Time: median with quartiles.}
+Distribution: nonparametric tests with Cliff's delta and FDR correction.
+Treatment Response: violin plots with nonparametric tests, Cliff's delta,
+and Bonferroni correction. Age by Stage: parametric tests with Cohen's d
+and Holm correction. Tumor Size: nonparametric tests with Hodges-Lehmann
+shift and Holm correction. Lab Values: robust tests with Hedges' g and FDR
+correction. Survival Time: descriptive median and quartiles only (ridge
+plots cannot account for right-censoring; use Kaplan-Meier / log-rank for
+censored survival inference).}
 
 \item{showAboutPanel}{Display comprehensive information about ridge plots,
 interpretation guidance, and clinical examples.}

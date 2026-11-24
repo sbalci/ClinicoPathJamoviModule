@@ -48,7 +48,8 @@ const PRESETS = {
         color_palette: "viridis",
         show_stats: true,
         test_type: "parametric",
-        effsize_type: "d"
+        effsize_type: "d",
+        p_adjust_method: "holm"
     },
     tumor_size_comparison: {
         plot_type: "density_ridges",
@@ -79,10 +80,7 @@ const PRESETS = {
         quantiles: "0.25, 0.5, 0.75",
         theme_style: "theme_pubr",
         color_palette: "Set2",
-        show_stats: true,
-        test_type: "nonparametric",
-        effsize_type: "hodges_lehmann",
-        p_adjust_method: "holm"
+        show_stats: false
     }
 };
 

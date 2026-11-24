@@ -76,7 +76,7 @@ items:
       width:  600
       height: 450
       renderFun: .plot
-      requiresData: true
+      requiresData: false
       clearWith:
         - x_var
         - y_var
@@ -231,5 +231,12 @@ refs:
     - BayesFactor
     - RGraphGallery
     - moments
-    - tools
+    - welch1947
+    - yuen1974
+    - cliff1993
+    - hodgeslehmann1963
+    - btt
+    - holm1979
+    - benjaminihochberg1995
+    - delacre2021
 ...

@@ -1928,7 +1928,7 @@ analyses:
   - title: Advanced Ridge Plot
     name: jjridges
     ns: ClinicoPath
-    menuGroup: JJStatsPlot
+    menuGroup: JJStatsPlotT
     menuSubgroup: Distribution
     menuTitle: Advanced Ridge Plot
     menuSubtitle: Enhanced Ridgeline Visualization

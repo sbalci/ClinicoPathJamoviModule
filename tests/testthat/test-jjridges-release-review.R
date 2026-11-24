@@ -27,14 +27,14 @@ test_that("effect-size point estimates match independent implementations", {
                  data = data.frame(v = c(a, b), g = factor(rep(c("A", "B"), c(40, 35)))))
         cls$.__enclos_env__$private$.calculateEffectSizeWithCI(a, b)
     }
-    # Cohen's d against effectsize AND against the hand-computed pooled-SD formula
-    sp <- sqrt(((40 - 1) * var(a) + (35 - 1) * var(b)) / (40 + 35 - 2))
-    expect_equal(est("d")$effect_size, (mean(a) - mean(b)) / sp, tolerance = 1e-10)
+    # Unpooled (Welch-compatible) Cohen's d & Hedges' g (Delacre et al., 2021; VAL-jjridges-05)
+    s_unp <- sqrt((var(a) + var(b)) / 2)
+    expect_equal(est("d")$effect_size, (mean(a) - mean(b)) / s_unp, tolerance = 1e-10)
     expect_equal(est("d")$effect_size,
-                 as.numeric(effectsize::cohens_d(a, b, pooled_sd = TRUE)$Cohens_d),
+                 as.numeric(suppressMessages(effectsize::cohens_d(a, b, pooled_sd = FALSE))$Cohens_d),
                  tolerance = 1e-10)
     expect_equal(est("g")$effect_size,
-                 as.numeric(effectsize::hedges_g(a, b, pooled_sd = TRUE)$Hedges_g),
+                 as.numeric(suppressMessages(effectsize::hedges_g(a, b, pooled_sd = FALSE))$Hedges_g),
                  tolerance = 1e-10)
     # Hodges-Lehmann is the median of pairwise differences, which is what wilcox.test estimates
     expect_equal(est("hodges_lehmann")$effect_size,

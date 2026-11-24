@@ -1,7 +1,7 @@
 ---
 name: jjridges
 title: Advanced Ridge Plot
-menuGroup: JJStatsPlot
+menuGroup: JJStatsPlotT
 menuSubgroup: Distribution
 # menuSubtitle: 'Ridge Visualization'
 version: '1.1.6'
@@ -160,7 +160,8 @@ options:
       description:
           R: >
             Add boxplot elements inside each ridge for enhanced visualization
-            of quartiles and outliers.
+            of medians and quartiles (outlier dots are omitted to keep ridges
+            uncluttered; enable add_points to display individual observations).
 
     - name: add_points
       title: Add data points
@@ -492,12 +493,13 @@ options:
             Display sample size (n) for each group.
 
     - name: add_density_values
-      title: Density values
+      title: Peak (mode) X values
       type: Bool
       default: false
       description:
           R: >
-            Display density values at peaks.
+            Display the X-axis location (mode) at each ridge's density peak,
+            computed with the active bandwidth setting.
 
     - name: custom_annotations
       title: Custom Annotations
@@ -555,9 +557,13 @@ options:
             of a continuous variable across groups.
           R: >
             Clinical analysis preset for ridge plots. Biomarker Distribution: nonparametric
-            tests with Cliff's delta. Treatment Response: violin plots with Bonferroni correction.
-            Age by Stage: parametric tests with Cohen's d. Tumor Size: Hodges-Lehmann shift.
-            Lab Values: robust tests with Hedges' g. Survival Time: median with quartiles.
+            tests with Cliff's delta and FDR correction. Treatment Response: violin plots with
+            nonparametric tests, Cliff's delta, and Bonferroni correction. Age by Stage:
+            parametric tests with Cohen's d and Holm correction. Tumor Size: nonparametric
+            tests with Hodges-Lehmann shift and Holm correction. Lab Values: robust tests with
+            Hedges' g and FDR correction. Survival Time: descriptive median and quartiles only
+            (ridge plots cannot account for right-censoring; use Kaplan-Meier / log-rank for
+            censored survival inference).
 
     # Help & Guidance
     - name: showAboutPanel

@@ -226,7 +226,7 @@ children:
             label: Sample sizes
           - type: CheckBox
             name: add_density_values
-            label: Density values
+            label: Peak (mode) X values
           - type: TextBox
             name: custom_annotations
             label: Custom annotations
