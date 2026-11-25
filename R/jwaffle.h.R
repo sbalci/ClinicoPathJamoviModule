@@ -9,10 +9,10 @@ jwaffleOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             counts = NULL,
             groups = NULL,
             facet = NULL,
-            rows = 5,
+            rows = 10,
             flip = FALSE,
             color_palette = "default",
-            show_legend = FALSE,
+            show_legend = TRUE,
             mytitle = "",
             legendtitle = "",
             showSummaries = FALSE,
@@ -53,7 +53,7 @@ jwaffleOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             private$..rows <- jmvcore::OptionInteger$new(
                 "rows",
                 rows,
-                default=5,
+                default=10,
                 min=1)
             private$..flip <- jmvcore::OptionBool$new(
                 "flip",
@@ -74,7 +74,7 @@ jwaffleOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             private$..show_legend <- jmvcore::OptionBool$new(
                 "show_legend",
                 show_legend,
-                default=FALSE)
+                default=TRUE)
             private$..mytitle <- jmvcore::OptionString$new(
                 "mytitle",
                 mytitle,
@@ -233,7 +233,7 @@ jwaffleBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             super$initialize(
                 package = "ClinicoPath",
                 name = "jwaffle",
-                version = c(1,1,6),
+                version = c(1,1,7),
                 options = options,
                 results = jwaffleResults$new(options=options),
                 data = data,
@@ -248,29 +248,35 @@ jwaffleBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 
 #' Waffle Charts
 #'
-#' 'Creates waffle charts to visualize categorical distributions and 
+#' Creates waffle charts to visualize categorical distributions and 
 #' proportions using colored squares. Ideal for showing parts-of-whole 
 #' relationships in clinical data such as disease subtypes, treatment 
 #' outcomes, or risk category distributions. Each square represents a 
 #' proportion of the total sample, making it easy to see relative frequencies 
-#' across categories.'
+#' across categories.
 #' 
 #' @param data The data as a data frame.
-#' @param counts Optional numeric weight variable if cases have different
-#'   weights. Leave empty to count each row equally (recommended for most
-#'   clinical data). Only needed if your data is pre-aggregated or weighted.
+#' @param counts Optional numeric frequency weight variable if cases have
+#'   different weights. Leave empty to count each row equally (recommended for
+#'   most clinical data). Only needed if your data is pre-aggregated or
+#'   weighted. Sample-size notices treat the sum of counts as a case count
+#'   (frequency weights), not normalized weights summing to 1.
 #' @param groups The categorical grouping variable for the waffle squares.
-#'   Each category will be displayed as proportional colored squares in a 10x10
-#'   grid. Examples: Tumor grade (G1/G2/G3), Treatment outcome
-#'   (Complete/Partial/No response), Risk categories (Low/Medium/High).
+#'   Each category is displayed as proportional colored squares in a 100-square
+#'   grid (default 10x10). Examples: Tumor grade (G1/G2/G3), Treatment outcome
+#'   (Complete/Partial/No response), Risk categories (Low/Medium/High). In R,
+#'   pre-convert haven_labelled vectors with haven::as_factor() to preserve
+#'   value labels.
 #' @param facet Optional variable to split the waffle chart by another
 #'   categorical variable to compare distributions across subgroups (e.g., by
 #'   treatment arm, patient cohort, or time period). Creates separate waffle
 #'   charts for each level.
-#' @param rows Number of rows in the waffle chart
+#' @param rows Number of rows in the 100-square waffle chart grid (default: 10
+#'   for a 10x10 grid).
 #' @param flip Whether to flip the orientation of the waffle chart
 #' @param color_palette Color scheme for the waffle squares
-#' @param show_legend Whether to display the legend
+#' @param show_legend Whether to display the legend (enabled by default so
+#'   categories are identifiable).
 #' @param mytitle Custom title for the plot
 #' @param legendtitle Custom title for the legend
 #' @param showSummaries Generate natural language summary of waffle chart
@@ -295,10 +301,10 @@ jwaffle <- function(
     counts = NULL,
     groups = NULL,
     facet = NULL,
-    rows = 5,
+    rows = 10,
     flip = FALSE,
     color_palette = "default",
-    show_legend = FALSE,
+    show_legend = TRUE,
     mytitle = "",
     legendtitle = "",
     showSummaries = FALSE,

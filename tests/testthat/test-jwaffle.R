@@ -573,9 +573,8 @@ describe("jwaffle Integration", {
     missing_data$category[sample(1:300, 30)] <- NA
     missing_data$weight[sample(1:300, 20)] <- NA
     
-    # jamovi reports dropped rows via a message ("Note: N row(s) removed due to missing
-    # values..."), so expect_silent() can never hold here -- and that message is desirable:
-    # it tells the clinician how many cases the figure is based on.
+    # Missing rows are reported to the user via UI notices/warnings (not console
+    # message()), and the analysis must complete without error.
     expect_no_error(
       result <- jwaffle(
         data = missing_data,

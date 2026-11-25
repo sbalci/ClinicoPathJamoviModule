@@ -4197,8 +4197,9 @@
         `type`="software", 
         `author`="Bob Rudis, Dave Gandy", 
         `year`=2023, 
-        `title`="waffle: R package", 
+        `title`="waffle: Create Waffle Chart Visualizations", 
         `publisher`="[R package]. Retrieved from https://CRAN.R-project.org/package=waffle", 
+        `doi`="10.32614/CRAN.package.waffle", 
         `url`="https://CRAN.R-project.org/package=waffle"), 
     `wagner2002its`=list(
         `type`="article", 

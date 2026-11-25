@@ -17,15 +17,17 @@ in clinical and pathological data.
 \strong{Data Requirements:}
 \itemize{
 \item Categorical grouping variable (factor, character, or logical)
-\item Minimum 30 cases recommended for stable proportions
-\item 2-10 categories optimal for visual clarity (>10 categories may be cluttered)
-\item Haven labelled data automatically converted to factors
+\item Minimum 30 cases is a common rule of thumb for stable proportions
+\item 2-5 categories optimal for visual clarity (>10 categories may be cluttered)
+\item In jamovi / \code{jwaffleClass}, \code{haven_labelled} vectors are automatically converted
+to factors; R wrapper callers should pre-convert with \code{haven::as_factor()} so
+value labels are preserved before \code{jmvcore} factor coercion
 }
 
 \strong{How Waffle Charts Work:}
-A waffle chart uses a grid of colored squares (typically 10x10 = 100 squares)
-where each square represents a fixed proportion of the total sample. This makes
-percentages immediately intuitive - each square ~= 1\% of the sample.
+A waffle chart uses a grid of colored squares (default 10x10 = 100 squares)
+where each square represents 1\% of the total sample (apportioned via the
+Hamilton largest-remainder method so squares always sum to 100 per panel).
 
 \strong{Clinical Applications:}
 \itemize{
@@ -43,18 +45,20 @@ safety outcomes
 \itemize{
 \item More intuitive than pie charts for showing proportions
 \item Each square = 1\% makes percentages immediately clear
-\item Handles many categories better than bar charts
+\item Works best with 2-5 categories; prefer a horizontal bar chart when there are
+many categories or precise comparison is required
 \item Effective for presentations and publications
 \item Faceting enables subgroup comparisons
 }
 
 \strong{Statistical Considerations:}
 \itemize{
-\item Most effective with n>=30; smaller samples may show unstable proportions
-\item Works best when no single category dominates (>80\%)
-\item Each square represents approximately 1\% of the sample
+\item Rule of thumb: most effective with n>=30; smaller samples show unstable
+proportions, and at n<100 each case spans multiple squares
+\item Works best when no single category overwhelms the display (>80\%)
+\item Each square represents 1\% of the panel total (exact Hamilton apportionment)
 \item Categories with <5 cases may be statistically unreliable
-\item Chi-square tests can evaluate proportion differences between groups
+\item Chi-square or Fisher exact tests can evaluate proportion differences between groups
 }
 }
 \section{Performance Optimization}{
@@ -114,8 +118,8 @@ jwaffle(
 
 }
 \references{
-Wilke, C. O. (2019). waffle: Create Waffle Chart Visualizations in R.
-R package version 1.0.1.
+Rudis, B., & Gandy, D. (2023). waffle: Create Waffle Chart Visualizations.
+R package version 1.0.2. https://doi.org/10.32614/CRAN.package.waffle
 }
 \seealso{
 \code{\link[waffle]{geom_waffle}} for the underlying waffle geom

@@ -17,16 +17,16 @@
 #' @param facet Optional categorical variable to create separate waffle charts by
 #'   subgroups (e.g., treatment arm, patient cohort, time period). Creates separate
 #'   waffle charts for each level to compare distributions across subgroups.
-#' @param rows Number of rows in the waffle chart grid (default: 5 for 10x10 grid).
-#'   With 10 columns, this creates 100 squares where each represents approximately
-#'   1% of the sample.
+#' @param rows Number of rows in the 100-square waffle chart grid (default: 10 for
+#'   a 10x10 grid). With 10 columns, this creates 100 squares where each represents
+#'   approximately 1% of the sample.
 #' @param flip Logical, whether to flip the orientation of the waffle chart
 #'   (default: FALSE). When TRUE, flips rows and columns.
 #' @param color_palette Color scheme for the waffle squares. Options: "default",
-#'   "colorblind" (recommended for accessibility), "professional", "presentation",
-#'   "journal", "pastel", or "dark". Default uses blue-orange gradient.
-#' @param show_legend Logical, whether to display the legend (default: FALSE).
-#'   Enable to show category labels and colors.
+#'   "colorblind" (Okabe-Ito, recommended for accessibility), "professional",
+#'   "presentation", "journal", "pastel", or "dark". Default uses blue-orange gradient.
+#' @param show_legend Logical, whether to display the legend (default: TRUE).
+#'   Enabled by default so category labels and colors are identifiable.
 #' @param mytitle Custom title for the plot (default: empty). If provided, appears
 #'   at top of the chart.
 #' @param legendtitle Custom title for the legend (default: empty). If not provided,
@@ -44,14 +44,16 @@
 #' @details
 #' **Data Requirements:**
 #' - Categorical grouping variable (factor, character, or logical)
-#' - Minimum 30 cases recommended for stable proportions
-#' - 2-10 categories optimal for visual clarity (>10 categories may be cluttered)
-#' - Haven labelled data automatically converted to factors
+#' - Minimum 30 cases is a common rule of thumb for stable proportions
+#' - 2-5 categories optimal for visual clarity (>10 categories may be cluttered)
+#' - In jamovi / `jwaffleClass`, `haven_labelled` vectors are automatically converted
+#'   to factors; R wrapper callers should pre-convert with `haven::as_factor()` so
+#'   value labels are preserved before `jmvcore` factor coercion
 #'
 #' **How Waffle Charts Work:**
-#' A waffle chart uses a grid of colored squares (typically 10x10 = 100 squares)
-#' where each square represents a fixed proportion of the total sample. This makes
-#' percentages immediately intuitive - each square ~= 1% of the sample.
+#' A waffle chart uses a grid of colored squares (default 10x10 = 100 squares)
+#' where each square represents 1% of the total sample (apportioned via the
+#' Hamilton largest-remainder method so squares always sum to 100 per panel).
 #'
 #' **Clinical Applications:**
 #' - **Disease Classification:** Show distribution of tumor grades, cancer stages,
@@ -66,16 +68,18 @@
 #' **Advantages over Other Charts:**
 #' - More intuitive than pie charts for showing proportions
 #' - Each square = 1% makes percentages immediately clear
-#' - Handles many categories better than bar charts
+#' - Works best with 2-5 categories; prefer a horizontal bar chart when there are
+#'   many categories or precise comparison is required
 #' - Effective for presentations and publications
 #' - Faceting enables subgroup comparisons
 #'
 #' **Statistical Considerations:**
-#' - Most effective with n>=30; smaller samples may show unstable proportions
-#' - Works best when no single category dominates (>80%)
-#' - Each square represents approximately 1% of the sample
+#' - Rule of thumb: most effective with n>=30; smaller samples show unstable
+#'   proportions, and at n<100 each case spans multiple squares
+#' - Works best when no single category overwhelms the display (>80%)
+#' - Each square represents 1% of the panel total (exact Hamilton apportionment)
 #' - Categories with <5 cases may be statistically unreliable
-#' - Chi-square tests can evaluate proportion differences between groups
+#' - Chi-square or Fisher exact tests can evaluate proportion differences between groups
 #'
 #' @section Performance Optimization:
 #' The function implements sophisticated caching:
@@ -125,8 +129,8 @@
 #' }
 #'
 #' @references
-#' Wilke, C. O. (2019). waffle: Create Waffle Chart Visualizations in R.
-#'   R package version 1.0.1.
+#' Rudis, B., & Gandy, D. (2023). waffle: Create Waffle Chart Visualizations.
+#'   R package version 1.0.2. https://doi.org/10.32614/CRAN.package.waffle
 #'
 #' @seealso
 #' \code{\link[waffle]{geom_waffle}} for the underlying waffle geom
@@ -160,8 +164,7 @@ jwaffleClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         # block (severity must escalate only).
         .max_severity = "",
 
-        # Notice collection (single Preformatted plain-text output item; avoids the
-        # jmvcore::Notice serialization error from self$results$insert(999, Notice)).
+        # Notice collection rendered into the Preformatted notices result item (plain text).
         .noticeList = list(),
 
         .addNotice = function(type, title, content) {
@@ -199,7 +202,7 @@ jwaffleClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             if (!is.null(self$options$facet) && !is.null(self$data)) {
                 facet_var <- self$options$facet
                 if (facet_var %in% names(self$data)) {
-                    num_levels <- length(unique(self$data[[facet_var]]))
+                    num_levels <- max(1L, length(unique(stats::na.omit(self$data[[facet_var]]))))
                     # Cap the total width so a high-cardinality facet variable does not
                     # produce an enormous (and effectively unrenderable) image.
                     max_total_width <- 3000
@@ -244,8 +247,15 @@ jwaffleClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 # to the next ">" - the one closing a later <br> - deleting the whole
                 # sentence in between.
                 clean_msg <- gsub("</?[A-Za-z][^>]*>", "", clean_msg)
-                clean_msg <- gsub("\u{2022}", "\u2022", clean_msg)
-                clean_msg <- gsub("&nbsp;", " ", clean_msg)
+                # Decode HTML entities for the Preformatted plain-text notices box
+                # (warnings HTML retains the escaped entities). Decode &amp; last
+                # so double-encoded sequences are not over-decoded.
+                clean_msg <- gsub("&nbsp;", " ", clean_msg, fixed = TRUE)
+                clean_msg <- gsub("&lt;", "<", clean_msg, fixed = TRUE)
+                clean_msg <- gsub("&gt;", ">", clean_msg, fixed = TRUE)
+                clean_msg <- gsub("&quot;", "\"", clean_msg, fixed = TRUE)
+                clean_msg <- gsub("&#0?39;", "'", clean_msg)
+                clean_msg <- gsub("&amp;", "&", clean_msg, fixed = TRUE)
                 # Each message is wrapped in <br> markers, so tag-stripping leaves
                 # ragged leading spaces and runs of 3+ newlines in the Preformatted
                 # box. Normalise to exactly one blank line between messages.
@@ -291,6 +301,42 @@ jwaffleClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             if (is.null(data) || nrow(data) == 0)
                 jmvcore::reject('Data contains no (complete) rows')
             invisible(data)
+        },
+
+        # Normalize factors carrying an explicit NA level (e.g. addNA() or
+        # factor(..., exclude = NULL)) back to genuine missing values so
+        # complete.cases() excludes them rather than counting "NA" as a category.
+        .normalizeFactorNA = function(x) {
+            if (is.factor(x) && anyNA(levels(x))) {
+                keep_lvls <- levels(x)[!is.na(levels(x))]
+                if (is.ordered(x)) {
+                    return(ordered(as.character(x), levels = keep_lvls))
+                }
+                return(factor(as.character(x), levels = keep_lvls))
+            }
+            x
+        },
+
+        # Exact integer Hamilton (largest-remainder) apportionment to total_squares.
+        # Shared by .validateInputs() and .plot() so vanishing-category diagnostics
+        # and rendered tiles are guaranteed identical and immune to the IEEE 754
+        # `as.integer(values * 100)` truncation bug in waffle:::StatWaffle (which
+        # truncates 29%, 57%, and 58% to 28, 56, and 57 squares).
+        .apportionSquares = function(counts, total_squares = 100L) {
+            counts <- as.numeric(counts)
+            total <- sum(counts)
+            if (length(counts) == 0L || !is.finite(total) || total <= 0) {
+                return(rep(0L, length(counts)))
+            }
+            raw <- (counts / total) * total_squares
+            fl <- floor(raw)
+            rem <- raw - fl
+            need <- as.integer(round(total_squares - sum(fl)))
+            if (need > 0L) {
+                idx <- utils::tail(order(rem), need)
+                fl[idx] <- fl[idx] + 1L
+            }
+            as.integer(round(fl))
         },
 
         # Performance optimization methods
@@ -367,7 +413,7 @@ jwaffleClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         .prepareData = function() {
             current_hash <- private$.calculateDataHash()
 
-            if (is.null(private$.data_hash) || private$.data_hash != current_hash) {
+            if (!identical(private$.data_hash, current_hash)) {
                 # Data has changed, prepare new data
                 mydata <- self$data
 
@@ -390,39 +436,28 @@ jwaffleClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     relevant_vars <- c(relevant_vars, self$options$facet)
                 }
 
-                # Only remove rows with NA in relevant columns, not all columns
-                if (length(relevant_vars) > 0) {
-                    original_nrow <- nrow(mydata)
-
-                    # Identify complete rows in relevant columns only
-                    complete_rows <- complete.cases(mydata[, relevant_vars, drop = FALSE])
-                    mydata <- mydata[complete_rows, , drop = FALSE]
-
-                    rows_removed <- original_nrow - nrow(mydata)
-
-                    if (rows_removed > 0) {
-                        message(sprintf(
-                            "Note: %d row(s) removed due to missing values in analysis variables (%s). %d row(s) remaining.",
-                            rows_removed, paste(relevant_vars, collapse = ", "), nrow(mydata)
-                        ))
-                    }
-                }
-
-                # Labelled-logic parity: .validateInputs() converts haven_labelled
-                # groups to factors (levels = "both") for validation. Apply the same
-                # conversion to the data that actually feeds aggregation/plotting so
-                # labels (not raw numeric codes) reach aes(fill=)/scale_fill_manual and
-                # the natural-language summaries. Guarded by inherits(), so ordinary
-                # factor/character columns are left untouched.
+                # Labelled-logic parity and explicit-NA factor normalization BEFORE
+                # complete.cases(), so addNA() factors and haven_labelled vectors are
+                # handled consistently across validation, summaries, and plotting.
                 cat_vars <- character(0)
                 if (!is.null(self$options$groups) && self$options$groups != "")
                     cat_vars <- c(cat_vars, self$options$groups)
                 if (!is.null(self$options$facet) && self$options$facet != "")
                     cat_vars <- c(cat_vars, self$options$facet)
                 for (v in cat_vars) {
-                    if (v %in% names(mydata) && inherits(mydata[[v]], "haven_labelled")) {
-                        mydata[[v]] <- haven::as_factor(mydata[[v]], levels = "both")
+                    if (v %in% names(mydata)) {
+                        if (inherits(mydata[[v]], "haven_labelled")) {
+                            mydata[[v]] <- haven::as_factor(mydata[[v]], levels = "both")
+                        }
+                        mydata[[v]] <- private$.normalizeFactorNA(mydata[[v]])
                     }
+                }
+
+                # Only remove rows with NA in relevant columns, not all columns
+                # (.validateInputs() surfaces the excluded-row count to the user in notices/warnings)
+                if (length(relevant_vars) > 0) {
+                    complete_rows <- complete.cases(mydata[, relevant_vars, drop = FALSE])
+                    mydata <- mydata[complete_rows, , drop = FALSE]
                 }
 
                 private$.prepared_data <- mydata
@@ -435,7 +470,7 @@ jwaffleClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         .prepareOptions = function() {
             current_hash <- private$.calculateOptionsHash()
             
-            if (is.null(private$.options_hash) || private$.options_hash != current_hash) {
+            if (!identical(private$.options_hash, current_hash)) {
                 private$.prepared_options <- self$options
                 private$.options_hash <- current_hash
                 
@@ -455,30 +490,44 @@ jwaffleClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             if (n_groups == 3 && self$options$color_palette == "default") {
                 return(c("#4DA6FF", "#FF9966", "#FFB84D"))
             }
-            
+
             current_hash <- paste(private$.calculateOptionsHash(), n_groups, sep = "_")
-            
-            if (is.null(private$.cached_palette) || attr(private$.cached_palette, "hash") != current_hash) {
-                # Enhanced color palettes with professional styling
-                palettes <- list(
-                    default = colorRampPalette(c("#4DA6FF", "#FFB84D"))(n_groups),
-                    colorblind = colorRampPalette(c("#999999", "#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7"))(n_groups),
-                    professional = colorRampPalette(c("#2C3E50", "#E74C3C", "#3498DB", "#2ECC71", "#F39C12", "#9B59B6", "#1ABC9C", "#34495E"))(n_groups),
-                    presentation = colorRampPalette(c("#003f5c", "#bc5090", "#ffa600", "#58508d", "#ff6361", "#003f5c"))(n_groups),
-                    journal = colorRampPalette(c("#334455", "#778899", "#99AABB", "#BBCCDD", "#556677", "#667788"))(n_groups),
-                    pastel = colorRampPalette(c("#69b3a2", "#404080", "#FFA07A", "#98D8E8", "#F7DC6F", "#BB8FCE"))(n_groups),
-                    dark = colorRampPalette(c("#1B9E77", "#D95F02", "#7570B3", "#E7298A", "#66A61E", "#E6AB02"))(n_groups)
-                )
-                
-                selected_palette <- palettes[[self$options$color_palette]]
-                if (is.null(selected_palette)) {
-                    selected_palette <- palettes$default
+
+            if (is.null(private$.cached_palette) || !identical(attr(private$.cached_palette, "hash"), current_hash)) {
+                # Discrete palettes subset their validated anchor colors when
+                # n_groups <= length(anchors) (preserving Okabe-Ito colorblind safety
+                # and avoiding endpoint collisions), interpolating only when more
+                # categories than anchors are requested.
+                pick_discrete <- function(anchors, n) {
+                    if (n <= length(anchors)) {
+                        return(anchors[seq_len(n)])
+                    }
+                    grDevices::colorRampPalette(anchors)(n)
                 }
-                
+
+                pal_name <- self$options$color_palette
+                selected_palette <- switch(
+                    pal_name,
+                    default      = grDevices::colorRampPalette(c("#4DA6FF", "#FFB84D"))(n_groups),
+                    colorblind   = pick_discrete(c("#999999", "#E69F00", "#56B4E9", "#009E73",
+                                                   "#F0E442", "#0072B2", "#D55E00", "#CC79A7"), n_groups),
+                    professional = pick_discrete(c("#2C3E50", "#E74C3C", "#3498DB", "#2ECC71",
+                                                   "#F39C12", "#9B59B6", "#1ABC9C", "#34495E"), n_groups),
+                    presentation = pick_discrete(c("#003f5c", "#bc5090", "#ffa600", "#58508d",
+                                                   "#ff6361"), n_groups),
+                    journal      = pick_discrete(c("#334455", "#778899", "#99AABB", "#BBCCDD",
+                                                   "#556677", "#667788"), n_groups),
+                    pastel       = pick_discrete(c("#69b3a2", "#404080", "#FFA07A", "#98D8E8",
+                                                   "#F7DC6F", "#BB8FCE"), n_groups),
+                    dark         = pick_discrete(c("#1B9E77", "#D95F02", "#7570B3", "#E7298A",
+                                                   "#66A61E", "#E6AB02"), n_groups),
+                    grDevices::colorRampPalette(c("#4DA6FF", "#FFB84D"))(n_groups)
+                )
+
                 attr(selected_palette, "hash") <- current_hash
                 private$.cached_palette <- selected_palette
             }
-            
+
             return(private$.cached_palette)
         },
         
@@ -501,26 +550,27 @@ jwaffleClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # n = 437. It happened to be right only at n = 100.
             pct_per_square <- 100 / n_squares
 
-            # Choose appropriate terminology
+            # Choose appropriate terminology and adaptive precision so small totals
+            # (e.g. n = 2..4 or normalized weights summing to 1) never print "0.0 cases".
             unit_label <- if (is_weighted) "weighted units" else "cases"
+            units_str <- if (units_per_square >= 0.1) {
+                sprintf("%.1f", units_per_square)
+            } else {
+                sprintf("%.2g", units_per_square)
+            }
 
             # Generate base caption
             if (!is.null(facet_var) && !is.null(facet_level)) {
                 # Facet-specific caption
                 caption_text <- sprintf(
-                    "%s = %s: Each square ~ %.1f %s (%.1f%%) (total = %g)",
-                    facet_var, facet_level, units_per_square, unit_label, pct_per_square, total_cases
+                    "%s = %s: Each square ~ %s %s (%.1f%%) (total = %g)",
+                    facet_var, facet_level, units_str, unit_label, pct_per_square, total_cases
                 )
             } else if (!is.null(facet_var)) {
                 # General faceted caption (when not specific to a level).
-                # make_proportional = TRUE normalizes EACH panel to ~100 squares, so a
-                # grand-total cases-per-square figure (total_cases / 100) is wrong per
-                # panel. Report the honest per-panel proportion instead of an absolute
-                # count that does not apply to any individual facet.
-                # Report the total too. The old text gave the reader of an exported
-                # faceted figure NO sample size anywhere - not the grand total, not the
-                # per-panel n - while every panel was drawn at an identical 100 squares.
-                # Per-panel n now rides on the strip labels (see .plot()).
+                # Exact per-panel Hamilton apportionment scales EACH panel to 100 squares,
+                # so a grand-total cases-per-square figure is wrong per panel. Report the
+                # honest per-panel proportion plus grand total; per-panel n rides on strips.
                 caption_text <- sprintf(
                     "Each panel is scaled independently; each square ~ 1%% within that %s group (total n=%g across all panels)",
                     facet_var, total_cases
@@ -528,8 +578,8 @@ jwaffleClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             } else {
                 # Simple caption
                 caption_text <- sprintf(
-                    "Each square represents %.1f %s (approximately %.1f%%) (total n=%g)",
-                    units_per_square, unit_label, pct_per_square, total_cases
+                    "Each square represents %s %s (approximately %.1f%%) (total n=%g)",
+                    units_str, unit_label, pct_per_square, total_cases
                 )
             }
             
@@ -587,6 +637,12 @@ jwaffleClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 jmvcore::reject("Please specify a grouping variable for the waffle chart.")
             }
 
+            # Defense-in-depth backstop for rows (covers R callers using run(noThrow = TRUE))
+            rows_val <- self$options$rows
+            if (!is.numeric(rows_val) || length(rows_val) != 1L || !is.finite(rows_val) || rows_val < 1) {
+                jmvcore::reject("Number of rows must be a positive integer (>= 1).")
+            }
+
             if (!self$options$groups %in% names(self$data)) {
                 jmvcore::reject(
                     code = NULL,
@@ -611,8 +667,16 @@ jwaffleClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     "Facet variable '{}' not found in data. Available variables: {}",
                     self$options$facet, paste(names(self$data), collapse = ", "))
             }
-            
-            # Validate data types and handle labelled factors
+
+            if (!is.null(self$options$facet) && self$options$facet != "" &&
+                identical(self$options$groups, self$options$facet)) {
+                jmvcore::reject(
+                    code = NULL,
+                    "Grouping variable and Facet variable cannot be the same ('{}'). Please select two different variables.",
+                    self$options$groups)
+            }
+
+            # Validate data types and normalize labelled / explicit-NA factors
             groups_data <- self$data[[self$options$groups]]
 
             # Handle labelled data (preserve labels for display)
@@ -631,12 +695,13 @@ jwaffleClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     "Grouping variable '{}' must be categorical (factor, character, or logical), not {}",
                     self$options$groups, class(groups_data)[1])
             }
-            
-            # Counts is validated HERE, before any diagnostic reads it. The
-            # sample-size checks below now count WEIGHTED cases, so a negative /
-            # non-finite / zero-sum weight has to produce its own precise error
-            # rather than silently poisoning an "n" the clinician then acts on.
-            if (!is.null(self$options$counts) && self$options$counts != "") {
+            groups_data <- private$.normalizeFactorNA(groups_data)
+
+            has_counts <- !is.null(self$options$counts) && self$options$counts != ""
+            has_facet  <- !is.null(self$options$facet) && self$options$facet != ""
+
+            # Validate counts variable type and domain (negative / Inf) before filtering
+            if (has_counts) {
                 counts_data <- self$data[[self$options$counts]]
                 if (!is.numeric(counts_data)) {
                     jmvcore::reject(
@@ -651,12 +716,6 @@ jwaffleClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         "Counts variable '{}' contains {} negative value(s). All counts must be non-negative for waffle charts. Please check your data.",
                         self$options$counts, n_negative)
                 }
-                # Inf passes both checks above (it is numeric and it is not < 0) and then
-                # poisons everything downstream: share_total becomes Inf so the
-                # vanishing-category guard silently disables itself, the Analysis Summary
-                # prints "NaN%" and crowns a 0%-category as the largest, and geom_waffle
-                # dies inside tail.default() with an unreadable "invalid 'n'" error.
-                # NA/NaN are fine (complete.cases drops those rows) - only Inf is a problem.
                 n_nonfinite <- sum(!is.finite(counts_data) & !is.na(counts_data))
                 if (n_nonfinite > 0) {
                     jmvcore::reject(
@@ -664,9 +723,6 @@ jwaffleClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         "Counts variable '{}' contains {} non-finite value(s) (Inf or -Inf). All counts must be finite numbers. Please check your data.",
                         self$options$counts, n_nonfinite)
                 }
-                # A counts variable that sums to zero (all zeros, or all missing) has
-                # nothing to draw; waffle's round_preserve_sum() then fails with the same
-                # cryptic tail.default() error and no figure appears at all.
                 if (sum(counts_data, na.rm = TRUE) <= 0) {
                     jmvcore::reject(
                         code = NULL,
@@ -674,35 +730,59 @@ jwaffleClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         self$options$counts)
                 }
             }
-            # One weighted count table drives every category-level diagnostic below
-            # (small sample, rare categories, categories that vanish from the grid),
-            # so the three can no longer disagree with each other.
-            #
-            # They used to count ROWS. `counts` exists precisely so a pre-aggregated
-            # table - one row per category, a patient count per row - can be charted,
-            # and on exactly that documented use case the row-count version told a
-            # clinician their 1,000-patient study had "n=3", and called 514-patient
-            # subtypes "categories with <5 cases". Count what the chart counts.
-            is_weighted_input <- !is.null(self$options$counts) &&
-                self$options$counts != "" && self$options$counts %in% names(self$data)
-            n_rows <- nrow(self$data)
-            if (is_weighted_input) {
-                counts_col <- self$data[[self$options$counts]]
-                n_total <- sum(counts_col, na.rm = TRUE)
-                category_counts <- tapply(counts_col, groups_data, sum, na.rm = TRUE)
-            } else {
-                n_total <- n_rows
-                category_counts <- table(groups_data, useNA = "no")
-            }
-            category_counts <- category_counts[!is.na(category_counts)]
-            case_label <- if (is_weighted_input) "weighted cases" else "cases"
 
-            # Enhanced clinical validation checks
-            # unique() counts NA as a level, so one real category plus any missing
-            # value scored 2 and sailed past this guard - then drew a 100%
-            # single-colour waffle under "Waffle chart created successfully".
-            # Count what actually reaches the plot: the non-missing categories.
-            n_categories <- length(unique(groups_data[!is.na(groups_data)]))
+            # Build normalized working frame of active analysis variables so every
+            # structural refusal and data-quality notice below evaluates the EXACT
+            # complete-case sample that .prepareData(), .generateSummary(), and .plot()
+            # actually analyse (never raw unfiltered self$data).
+            miss_vars <- self$options$groups
+            clean_df <- data.frame(groups_col = groups_data)
+            if (has_counts) {
+                miss_vars <- c(miss_vars, self$options$counts)
+                clean_df$counts_col <- self$data[[self$options$counts]]
+            }
+            if (has_facet) {
+                miss_vars <- c(miss_vars, self$options$facet)
+                facet_data <- self$data[[self$options$facet]]
+                if (inherits(facet_data, "haven_labelled")) {
+                    facet_data <- haven::as_factor(facet_data, levels = "both")
+                }
+                if (is.character(facet_data) || is.logical(facet_data)) {
+                    facet_data <- as.factor(facet_data)
+                }
+                facet_data <- private$.normalizeFactorNA(facet_data)
+                clean_df$facet_col <- facet_data
+            }
+
+            n_rows <- nrow(self$data)
+            complete_mask <- stats::complete.cases(clean_df)
+            n_dropped <- sum(!complete_mask)
+            clean_df <- clean_df[complete_mask, , drop = FALSE]
+
+            # Report excluded rows before downstream diagnostics
+            if (n_dropped > 0) {
+                private$.accumulateMessage(glue::glue(
+                    "<br> <strong>Missing Data:</strong> {n_dropped} of {n_rows} row(s) ",
+                    "excluded because of missing values in the analysis variables ",
+                    "({paste(htmltools::htmlEscape(miss_vars), collapse = ', ')}). ",
+                    "The chart and the summary are ",
+                    "based on {nrow(clean_df)} row(s).<br>"
+                ))
+            }
+
+            # Post-filtering structural guards
+            if (all(is.na(groups_data))) {
+                jmvcore::reject(
+                    code = NULL,
+                    "Grouping variable '{}' has no non-missing values, so there is nothing to chart.",
+                    self$options$groups)
+            }
+            if (nrow(clean_df) == 0) {
+                jmvcore::reject("Data contains no (complete) rows")
+            }
+
+            clean_groups <- droplevels(clean_df$groups_col)
+            n_categories <- length(unique(clean_groups))
 
             if (n_categories == 0) {
                 jmvcore::reject(
@@ -717,8 +797,48 @@ jwaffleClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     "Only one category found in '{}'. Waffle charts require multiple categories to show proportions. Consider using a different visualization for single-category data.",
                     self$options$groups)
             }
-            
-            
+
+            # Complete-case weighted count checks (overall and per-facet panel)
+            if (has_counts) {
+                n_total <- sum(clean_df$counts_col)
+                if (!is.finite(n_total)) {
+                    jmvcore::reject(
+                        code = NULL,
+                        "Counts variable '{}' sum overflows to a non-finite value. Please rescale your weights and try again.",
+                        self$options$counts)
+                }
+                if (n_total <= 0) {
+                    jmvcore::reject(
+                        code = NULL,
+                        "Counts variable '{}' sums to zero across complete cases, so there is nothing to draw. Please check your data.",
+                        self$options$counts)
+                }
+                if (has_facet) {
+                    clean_facet <- droplevels(as.factor(clean_df$facet_col))
+                    panel_totals <- tapply(clean_df$counts_col, clean_facet, sum)
+                    ovf_panels <- names(panel_totals)[!is.finite(panel_totals) & !is.na(panel_totals)]
+                    if (length(ovf_panels) > 0) {
+                        jmvcore::reject(
+                            code = NULL,
+                            "Counts variable '{}' sum overflows to a non-finite value in facet level(s): {}. Please rescale your weights.",
+                            self$options$counts, paste(ovf_panels, collapse = ", "))
+                    }
+                    zero_panels <- names(panel_totals)[is.na(panel_totals) | panel_totals <= 0]
+                    if (length(zero_panels) > 0) {
+                        jmvcore::reject(
+                            code = NULL,
+                            "Counts variable '{}' sums to zero in facet level(s): {}. Each facet panel must have positive total counts.",
+                            self$options$counts, paste(zero_panels, collapse = ", "))
+                    }
+                }
+                category_counts <- tapply(clean_df$counts_col, clean_groups, sum)
+            } else {
+                n_total <- nrow(clean_df)
+                category_counts <- table(clean_groups, useNA = "no")
+            }
+            category_counts <- category_counts[!is.na(category_counts)]
+            case_label <- if (has_counts) "weighted cases" else "cases"
+
             # User-controlled identifiers (column names, factor labels) must be HTML-escaped
             # before flowing into glue() / setContent on Html outputs.
             groups_name_safe <- htmltools::htmlEscape(self$options$groups)
@@ -726,35 +846,11 @@ jwaffleClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             if (n_categories > 10) {
                 private$.accumulateMessage(glue::glue(
                     "<br> <strong>Many Categories:</strong> {n_categories} categories detected in '{groups_name_safe}'. ",
-                    "Consider grouping rare categories as 'Other' for clarity detailed clinical presentation.<br>"
+                    "Consider grouping rare categories as 'Other' for clearer clinical presentation.<br>"
                 ))
             }
 
-            # Rows with missing values in ANY analysis variable are dropped in
-            # .prepareData(), which reports the count with message() - invisible to a
-            # jamovi user, who then sees a chart built on fewer cases than they think.
-            # Report it here instead: .validateInputs() runs fresh on both the .run()
-            # and the .plot() pass, whereas .prepareData() is memoized on the data hash
-            # and would skip re-emitting the notice on an option-only change.
-            miss_vars <- self$options$groups
-            if (!is.null(self$options$counts) && self$options$counts != "")
-                miss_vars <- c(miss_vars, self$options$counts)
-            if (!is.null(self$options$facet) && self$options$facet != "")
-                miss_vars <- c(miss_vars, self$options$facet)
-            miss_vars <- miss_vars[miss_vars %in% names(self$data)]
-            n_dropped <- sum(!complete.cases(self$data[, miss_vars, drop = FALSE]))
-            if (n_dropped > 0) {
-                private$.accumulateMessage(glue::glue(
-                    "<br> <strong>Missing Data:</strong> {n_dropped} of {n_rows} row(s) ",
-                    "excluded because of missing values in the analysis variables ",
-                    "({paste(htmltools::htmlEscape(miss_vars), collapse = ', ')}). ",
-                    "The chart and the summary are ",
-                    "based on {n_rows - n_dropped} row(s).<br>"
-                ))
-            }
-
-            # Check sample size adequacy for clinical interpretation.
-            # n_total is the weighted case count when a counts variable is in use.
+            # Check sample size adequacy on complete cases
             if (n_total < 30) {
                 private$.accumulateMessage(glue::glue(
                     "<br> <strong>Small Sample:</strong> Total n={n_total} {case_label}. ",
@@ -763,13 +859,10 @@ jwaffleClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 ))
             }
 
-            # Check for very small category sizes (weighted when counts is in use)
+            # Check for very small category sizes on complete cases
             min_count <- min(category_counts)
             if (min_count < 5 && n_total >= 30) {
                 small_cats <- names(category_counts)[category_counts < 5]
-                # Cap the list like the vanishing-category notice below: a continuous
-                # variable coerced to a factor produces a hundred rare levels, and a
-                # notice naming all of them is unreadable.
                 n_small <- length(small_cats)
                 show_small <- min(n_small, 8L)
                 small_cats_safe <- paste0(
@@ -782,59 +875,72 @@ jwaffleClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     "(A separate check below reports categories too small to be DRAWN at all.)<br>"
                 ))
             }
-            
-            # CATEGORIES THAT ROUND TO ZERO SQUARES DISAPPEAR FROM THE CHART.
-            #
-            # .plot() draws with waffle::geom_waffle(make_proportional = TRUE), which converts
-            # counts to a 100-square grid: a category receives round(100 * share) squares, so
-            # anything under 0.5% of the total gets none and is simply absent from the figure.
-            # Measured: 700/297/3 -> only two fill colours drawn; 70000/29700/300 (300 cases,
-            # 0.3%) -> likewise two, with no warning of any kind, while the Analysis Summary
-            # went on reporting "Rare: 0.3% (n=300)". Figure and text disagreed and nothing
-            # said so.
-            #
-            # The "<5 cases" notice above is a different criterion and does not cover this:
-            # a category can hold hundreds of cases and still vanish (0.3% of 100,000), or
-            # hold 4 cases and be perfectly visible (4 of 20). This check is on the SHARE,
-            # computed the same way the chart computes it.
-            #
-            # It reads the SAME weighted `category_counts` as every other diagnostic above,
-            # built with tapply(..., na.rm = TRUE) rather than xtabs: xtabs propagates an NA
-            # weight into the cell total, so a single missing weight made sum() NA and the
-            # `if` below became `if (NA)` -- "missing value where TRUE/FALSE needed", which
-            # aborted the whole analysis. Missing weights are ordinary in clinical data.
-            share_tab <- category_counts
-            share_total <- sum(share_tab, na.rm = TRUE)
-            if (length(share_tab) > 0 && is.finite(share_total) && share_total > 0) {
-                # Threshold on the SHARE rather than on round(100 * share): R's round() uses
-                # banker's rounding, so round(0.5) is 0, but waffle keeps a category at
-                # exactly 0.5% (verified: 0.4% is dropped, 0.5% is drawn). A strict
-                # "share < 0.005" reproduces the observed boundary exactly.
-                shares <- as.numeric(share_tab) / share_total
-                vanished <- names(share_tab)[shares < 0.005]
-                if (length(vanished) > 0) {
-                    # Cap the list: a continuous variable coerced to a factor can produce a
-                    # hundred vanishing levels, and a notice naming all of them is unreadable.
-                    n_vanished <- length(vanished)
-                    show_n <- min(n_vanished, 8L)
-                    vanished_safe <- paste0(
-                        paste(htmltools::htmlEscape(vanished[seq_len(show_n)]), collapse = ", "),
-                        if (n_vanished > show_n)
-                            paste0(" and ", n_vanished - show_n, " more") else "")
-                    pct <- paste0(
-                        formatC(100 * shares[shares < 0.005][seq_len(show_n)],
-                                format = "f", digits = 2), "%")
-                    private$.accumulateMessage(glue::glue(
-                        "<br> <strong>Categories missing from the chart:</strong> ",
-                        "{vanished_safe} ({paste(pct, collapse = ', ')}",
-                        "{if (n_vanished > show_n) ', ...' else ''}). ",
-                        "The waffle grid holds 100 squares, one per percentage point, so any ",
-                        "category below 0.5% of the total rounds to zero squares and is not ",
-                        "drawn at all - even though it still appears in the summary text and ",
-                        "in your data. Report those categories in the text, or combine them ",
-                        "into an 'Other' group so the figure and the numbers agree.<br>"
-                    ), notice_type = "STRONG_WARNING")
+
+            # EXACT VANISHING-CATEGORY CHECK (overall or per-panel when faceted).
+            # Uses the exact same .apportionSquares() Hamilton apportionment that
+            # .plot() draws, so this notice fires if and only if a category present
+            # in a panel receives 0 drawn squares in that panel (0% FN, 0% FP).
+            vanished_items <- character(0)
+            if (has_facet) {
+                clean_facet <- droplevels(as.factor(clean_df$facet_col))
+                for (flv in levels(clean_facet)) {
+                    sub_idx <- clean_facet == flv
+                    sub_g <- droplevels(clean_groups[sub_idx])
+                    if (has_counts) {
+                        sub_cnt <- tapply(clean_df$counts_col[sub_idx], sub_g, sum)
+                    } else {
+                        sub_cnt <- table(sub_g, useNA = "no")
+                    }
+                    sub_cnt <- sub_cnt[!is.na(sub_cnt)]
+                    sub_tot <- sum(sub_cnt)
+                    if (length(sub_cnt) > 0 && is.finite(sub_tot) && sub_tot > 0) {
+                        sq <- private$.apportionSquares(sub_cnt, 100L)
+                        van_idx <- which(as.numeric(sub_cnt) > 0 & sq == 0L)
+                        if (length(van_idx) > 0) {
+                            sub_shares <- as.numeric(sub_cnt[van_idx]) / sub_tot
+                            for (j in seq_along(van_idx)) {
+                                cat_nm <- htmltools::htmlEscape(names(sub_cnt)[van_idx[j]])
+                                fac_nm <- htmltools::htmlEscape(flv)
+                                pct_s  <- paste0(formatC(100 * sub_shares[j], format = "f", digits = 2), "%")
+                                vanished_items <- c(vanished_items,
+                                                    sprintf("%s (%s in %s)", cat_nm, pct_s, fac_nm))
+                            }
+                        }
+                    }
                 }
+            } else {
+                share_total <- sum(category_counts, na.rm = TRUE)
+                if (length(category_counts) > 0 && is.finite(share_total) && share_total > 0) {
+                    sq <- private$.apportionSquares(category_counts, 100L)
+                    van_idx <- which(as.numeric(category_counts) > 0 & sq == 0L)
+                    if (length(van_idx) > 0) {
+                        sub_shares <- as.numeric(category_counts[van_idx]) / share_total
+                        for (j in seq_along(van_idx)) {
+                            cat_nm <- htmltools::htmlEscape(names(category_counts)[van_idx[j]])
+                            pct_s  <- paste0(formatC(100 * sub_shares[j], format = "f", digits = 2), "%")
+                            vanished_items <- c(vanished_items, sprintf("%s (%s)", cat_nm, pct_s))
+                        }
+                    }
+                }
+            }
+
+            if (length(vanished_items) > 0) {
+                n_vanished <- length(vanished_items)
+                show_n <- min(n_vanished, 8L)
+                vanished_safe <- paste0(
+                    paste(vanished_items[seq_len(show_n)], collapse = ", "),
+                    if (n_vanished > show_n)
+                        paste0(" and ", n_vanished - show_n, " more") else "")
+                scope_txt <- if (has_facet) "in that panel" else "of the total"
+                private$.accumulateMessage(glue::glue(
+                    "<br> <strong>Categories missing from the chart:</strong> ",
+                    "{vanished_safe}. ",
+                    "Each waffle grid holds 100 squares (one per percentage point via largest-remainder rounding), ",
+                    "so categories with very small shares {scope_txt} round to zero squares and are not ",
+                    "drawn - even though they still appear in the summary text and ",
+                    "in your data. Report those categories in the text, or combine them ",
+                    "into an 'Other' group so the figure and the numbers agree.<br>"
+                ), notice_type = "STRONG_WARNING")
             }
 
 
@@ -943,6 +1049,13 @@ jwaffleClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 for (facet_level in unique(plotdata[[facet_var]])) {
                     facet_data <- plotdata[plotdata[[facet_var]] == facet_level, ]
                     facet_total <- sum(facet_data$count)
+                    if (!is.finite(facet_total) || facet_total <= 0) {
+                        summary_parts[[facet_level]] <- sprintf(
+                            "<b>Among %s %s</b> (n=0): No positive counts available.",
+                            facet_var_safe, facet_level
+                        )
+                        next
+                    }
                     # NO order() here. The escaping above turned the group column
                     # into character, so order() sorted it ALPHABETICALLY and the
                     # text listed ordinal categories out of order relative to the
@@ -997,6 +1110,7 @@ jwaffleClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     "are tied for the largest proportion" else "represents the largest proportion"
                 frequent_phrase <- if (dom$tied)
                     "as the most frequent categories, tied" else "as the most frequent category"
+                each_suffix <- if (dom$tied) " each" else ""
 
                 # Create simple breakdown (counts are doubles for weighted data, so
                 # format with %g rather than %d to avoid a sprintf crash).
@@ -1013,11 +1127,11 @@ jwaffleClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     The sample contains %g %s distributed as: %s.<br><br>
                     <b>Key Finding:</b> %s %s (%.1f%% of %s).<br><br>
                     <b> Report Template:</b><br>
-                    <i>\"Distribution analysis revealed %s %s (%.1f%%, n=%g) in our sample of %g %s.\"</i>",
+                    <i>\"Distribution analysis revealed %s %s (%.1f%%, n=%g%s) in our sample of %g %s.\"</i>",
                     total_cases, unit_label, breakdown_list, dominant_category, largest_phrase,
                     max_proportion, unit_label,
                     dominant_category, frequent_phrase, max_proportion,
-                    plotdata$count[max_prop_idx], total_cases, unit_label
+                    plotdata$count[max_prop_idx], each_suffix, total_cases, unit_label
                 )
             }
 
@@ -1040,27 +1154,23 @@ jwaffleClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 "\u2022 <b>Demographic Analysis:</b> Present patient characteristics, risk factors, or comorbidity patterns<br>",
                 "\u2022 <b>Quality Metrics:</b> Visualize compliance rates, diagnostic accuracy, or safety outcomes<br><br>",
                 
-                "<b>Advantages over Other Charts:</b><br>",
-                "\u2022 <b>Intuitive Interpretation:</b> Each square = 1% makes percentages immediately clear<br>",
-                "\u2022 <b>Part-to-Whole Clarity:</b> Better than pie charts for showing proportions<br>",
-                "\u2022 <b>Multiple Categories:</b> Handles many categories better than bar charts<br>",
+                "<b>Advantages and Trade-offs vs. Other Charts:</b><br>",
+                "\u2022 <b>Intuitive Interpretation:</b> Each square = 1% (exact Hamilton largest-remainder apportionment to 100 squares per panel) makes proportions easy to count<br>",
+                "\u2022 <b>Part-to-Whole Clarity:</b> Often easier to read than circular pie charts for estimating percentages<br>",
+                "\u2022 <b>Category Count Trade-off:</b> Best suited to 2\u20135 categories; prefer a horizontal bar chart when there are many categories or when fine quantitative comparisons are required<br>",
                 "\u2022 <b>Visual Impact:</b> Effective for presentations and publications<br><br>",
                 
                 "<b>Statistical Considerations:</b><br>",
-                "\u2022 <b>Sample Size:</b> Most effective with n\u226530; smaller samples may show unstable proportions<br>",
-                "\u2022 <b>Category Balance:</b> Works best when no single category dominates (>80%)<br>",
-                "\u2022 <b>Precision:</b> Each square represents approximately 1% of the sample<br>",
-                "\u2022 <b>Statistical Testing:</b> Chi-square tests can evaluate proportion differences<br><br>",
+                "\u2022 <b>Sample Size (rule of thumb):</b> Proportions are more stable at n\u226530; when n<100 each case spans multiple squares, so always report exact counts alongside the 100-square grid. When using the Counts option, sample-size notices assume frequency counts rather than normalized weights<br>",
+                "\u2022 <b>Category Balance (convention):</b> Visual separation is clearest when no single category exceeds ~80%<br>",
+                "\u2022 <b>Precision:</b> Each square represents 1% of its panel (rounded via largest-remainder apportionment so every panel totals exactly 100 squares)<br>",
+                "\u2022 <b>Statistical Testing:</b> Chi-square or Fisher's exact tests (outside this chart) can formally evaluate proportion differences<br><br>",
                 
-                "<b>Interpretation Guidelines:</b><br>",
-                "\u2022 <b>Dominant Patterns:</b> Categories with >60% suggest clear predominance<br>",
-                "\u2022 <b>Balanced Distributions:</b> No category >40% indicates diverse sample<br>",
-                "\u2022 <b>Rare Categories:</b> three distinct floors apply - a category under ",
-                "0.5% of the total is rounded to zero squares and is NOT DRAWN at all; a category ",
-                "with fewer than 5 cases is drawn but is statistically unreliable; a category ",
-                "under 5% of the sample is drawn and reliable but may still be a clinically ",
-                "important subgroup worth reporting in the text<br>",
-                "\u2022 <b>Comparative Analysis:</b> Use faceting to compare across patient groups or time periods<br><br>",
+                "<b>Interpretation Conventions (informal rules of thumb):</b><br>",
+                "\u2022 <b>Dominant Patterns:</b> As a descriptive convention, a category >60% suggests predominance<br>",
+                "\u2022 <b>Balanced Distributions:</b> For 3 or more categories (k\u22653), no category >40% indicates a relatively spread distribution (not applicable to binary variables, where the larger category is always \u226550%)<br>",
+                "\u2022 <b>Rare Categories:</b> Three distinct floors apply \u2014 a category whose share within its panel rounds to zero squares under Hamilton largest-remainder apportionment (typically <0.5%, and occasionally up to ~0.9% when several other categories have larger remainders) is NOT DRAWN in that panel; a category with fewer than 5 cases has high sampling uncertainty; and a category under 5% is drawn but may still represent a clinically important subgroup worth reporting explicitly in text<br>",
+                "\u2022 <b>Comparative Analysis:</b> Use faceting to compare across patient groups or time periods (each panel is scaled independently to 100 squares, with per-panel n shown on each strip)<br><br>",
                 
                 "<b>Best Practices for Clinical Research:</b><br>",
                 "\u2022 Use clear, standardized category labels (e.g., 'Grade 1', 'Grade 2', 'Grade 3')<br>",
@@ -1079,27 +1189,27 @@ jwaffleClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             if (is.null(self$options$groups)) {
                 todo <- paste0(
                     "<div style='background: rgba(138, 155, 172, 0.06); color: inherit; ",
-                    "padding: 30px; border-radius: 8px; border: 2px solid #dee2e6; ",
+                    "padding: 30px; border-radius: 8px; border: 1px solid rgba(138, 155, 172, 0.35); ",
                     "margin: 20px 0; '>",
 
-                    "<h2 style='margin-top: 0; font-size: 24px; font-weight: bold; color: #495057;'>",
+                    "<h2 style='margin-top: 0; font-size: 24px; font-weight: bold; color: inherit;'>",
                     " Welcome to Waffle Charts</h2>",
 
-                    "<p style='font-size: 15px; line-height: 1.6; margin: 15px 0; color: #495057;'>",
+                    "<p style='font-size: 15px; line-height: 1.6; margin: 15px 0; color: inherit;'>",
                     "Create professional waffle charts to visualize categorical distributions ",
                     "using colored squares in a grid format.</p>",
 
-                    "<h3 style='font-size: 18px; margin-top: 20px; margin-bottom: 10px; color: #343a40;'>",
+                    "<h3 style='font-size: 18px; margin-top: 20px; margin-bottom: 10px; color: inherit;'>",
                     " Getting Started:</h3>",
-                    "<ol style='font-size: 14px; line-height: 1.8; margin-left: 20px; color: #495057;'>",
+                    "<ol style='font-size: 14px; line-height: 1.8; margin-left: 20px; color: inherit;'>",
                     "<li><strong>Required:</strong> Select a <strong>Groups</strong> variable (categorical)</li>",
                     "<li><strong>Optional:</strong> Add <strong>Counts</strong> variable for weighted data</li>",
                     "<li><strong>Optional:</strong> Use <strong>Facet By</strong> to compare across subgroups</li>",
                     "</ol>",
 
-                    "<h3 style='font-size: 18px; margin-top: 20px; margin-bottom: 10px; color: #343a40;'>",
+                    "<h3 style='font-size: 18px; margin-top: 20px; margin-bottom: 10px; color: inherit;'>",
                     " Clinical Examples:</h3>",
-                    "<ul style='font-size: 14px; line-height: 1.8; margin-left: 20px; color: #495057;'>",
+                    "<ul style='font-size: 14px; line-height: 1.8; margin-left: 20px; color: inherit;'>",
                     "<li>Tumor grade distribution (G1/G2/G3)</li>",
                     "<li>Treatment response rates (Complete/Partial/None)</li>",
                     "<li>Risk category proportions (Low/Medium/High)</li>",
@@ -1107,11 +1217,18 @@ jwaffleClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
                     "<p style='font-size: 14px; margin-top: 20px; padding: 10px; ",
                     "background: rgba(33, 144, 255, 0.11); color: inherit; border-left: 3px solid #0066cc; '>",
-                    "<strong> Tip:</strong> Each square represents ~1% of your sample, ",
+                    "<strong> Tip:</strong> Each square represents 1% of your sample, ",
                     "making percentages immediately clear.</p>",
                     "</div>"
                 )
                 self$results$todo$setContent(todo)
+                if (!is.null(self$results$analysisSummary)) {
+                    self$results$analysisSummary$setContent("")
+                }
+                if (!is.null(self$results$methodExplanation)) {
+                    self$results$methodExplanation$setContent("")
+                }
+                private$.cached_plot <- NULL
                 return()
             }
 
@@ -1123,6 +1240,8 @@ jwaffleClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             tryCatch({
                 private$.validateInputs()
             }, error = function(e) {
+                private$.cached_plot <- NULL
+
                 # Display validation error in todo and stop. e$message may carry a
                 # user-controlled column name (e.g. via the jmvcore::reject(...) templates
                 # in .validateInputs), so escape before flowing into HTML setContent.
@@ -1133,9 +1252,8 @@ jwaffleClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     <br>Please check your variable selections and try again.<br><hr>"
                 )
                 self$results$todo$setContent(error_msg)
-                # Re-raise as a jmvcore rejection so jamovi surfaces a structured error
-                # alongside the HTML todo card. A plain stop() would lose the reject
-                # class set inside .validateInputs().
+                # Re-raise as a jmvcore rejection so jamovi greys the results and
+                # surfaces a structured error rather than blanking result panels.
                 jmvcore::reject(conditionMessage(e))
             })
 
@@ -1171,7 +1289,7 @@ jwaffleClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 }
             }
             
-            todo <- glue::glue("<br> Waffle chart created successfully. Enable 'Analysis Summary' or 'Show Explanations' in Output Options for detailed interpretations.<br><hr>")
+            todo <- glue::glue("<br> Waffle chart created successfully. Enable 'Analysis summary' or 'Explanations' in Output Options for detailed interpretations.<br><hr>")
             self$results$todo$setContent(todo)
         },
 
@@ -1211,19 +1329,40 @@ jwaffleClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             is_weighted <- !is.null(counts_var) && counts_var != ""
             caption_text <- private$.generateCaption(plotdata, total_cases, is_weighted, facet_var)
 
-            # Get number of unique groups
-            n_groups <- length(unique(plotdata[[groups_var]]))
+            # Compute exact integer 100-square Hamilton apportionment per panel (or
+            # overall when unfaceted) so every panel draws exactly 100 squares and is
+            # immune to waffle:::StatWaffle's IEEE 754 as.integer(values * 100)
+            # truncation bug (which turned 29%, 57%, 58% into 28, 56, 57 squares).
+            plot_df <- as.data.frame(plotdata)
+            if (!is.null(facet_var) && facet_var != "" && facet_var %in% names(plot_df)) {
+                plot_df$squares <- integer(nrow(plot_df))
+                for (flv in unique(plot_df[[facet_var]])) {
+                    idx <- which(plot_df[[facet_var]] == flv)
+                    plot_df$squares[idx] <- private$.apportionSquares(plot_df$count[idx], 100L)
+                }
+            } else {
+                plot_df$squares <- private$.apportionSquares(plot_df$count, 100L)
+            }
+
+            # Get group levels and map palette explicitly by level name so colors
+            # remain consistent across panels even if a category rounds to 0 squares.
+            group_levels <- if (is.factor(plot_df[[groups_var]])) {
+                levels(plot_df[[groups_var]])
+            } else {
+                as.character(unique(plot_df[[groups_var]]))
+            }
+            n_groups <- length(group_levels)
 
             # Generate color palette using cached method
             sel_palette <- private$.generateColorPalette(n_groups)
+            named_palette <- stats::setNames(sel_palette, group_levels)
 
-
-            # Create base plot
+            # Create base plot (values = exact integer squares summing to 100 per panel)
             p <- ggplot2::ggplot(
-                plotdata,
+                plot_df,
                 ggplot2::aes(
                     fill = !!rlang::sym(groups_var),
-                    values = count
+                    values = squares
                 )
             ) +
                 waffle::geom_waffle(
@@ -1231,10 +1370,10 @@ jwaffleClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     size = 0.5,
                     color = "white",
                     flip = self$options$flip,
-                    make_proportional = TRUE
+                    make_proportional = FALSE
                 ) +
                 ggplot2::scale_fill_manual(
-                    values = sel_palette,
+                    values = named_palette,
                     name = if (self$options$legendtitle != '')
                         self$options$legendtitle
                     else
@@ -1263,7 +1402,7 @@ jwaffleClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         caption = caption_text
                     ) +
                     ggplot2::facet_wrap(
-                        jmvcore::asFormula(paste0("~", jmvcore::composeTerm(facet_var))),
+                        ggplot2::vars(!!rlang::sym(facet_var)),
                         nrow = 1,
                         strip.position = "bottom",
                         labeller = ggplot2::as_labeller(panel_labels)
@@ -1340,6 +1479,26 @@ jwaffleClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             private$.cached_plot <- p
             print(p)
             TRUE
+        },
+
+        # Hardened syntax-pane option serializer: drops undeclared option names
+        # (from saved .omv/.omt files) and list values, and escapes all character
+        # scalars via encodeString() so no option value can break out of quotes.
+        .sourcifyOption = function(option) {
+            if (identical(option$name, "data"))
+                return("data = data")
+            if (!option$name %in% names(formals(jwaffle)))
+                return("")
+            value <- option$value
+            if (is.list(value))
+                return("")
+            if (is.character(value)) {
+                if (length(value) != 1L || is.na(value) || !nzchar(value) ||
+                    identical(value, option$default))
+                    return("")
+                return(paste0(option$name, " = ", encodeString(value, quote = '"')))
+            }
+            super$.sourcifyOption(option)
         }
     ), # End of private list
     public = list(
@@ -1349,41 +1508,21 @@ jwaffleClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         asSource = function() {
             groups <- self$options$groups
 
-            if (is.null(groups))
+            if (is.null(groups) || !is.character(groups) ||
+                length(groups) != 1L || is.na(groups) || !nzchar(groups))
                 return('')
 
-            # Build the argument list in option-declaration order.
-            #
-            # Every variable-name option (single OptionVariable or multi-variable
-            # OptionVariables) is emitted as a deparse()'d string literal. deparse()
-            # produces valid, fully-escaped R for names containing spaces, quotes or
-            # backslashes (e.g. `Tumor Grade`); jmvcore's default sourcify would emit
-            # some of these as bare, unquoted symbols and yield invalid syntax.
-            # Detecting the option by CLASS (not by name) means any variable option
-            # added later is escaped automatically.
-            #
-            # Variables are NOT re-emitted through private$.asArgs() - doing so
-            # previously duplicated them in the generated syntax (the "double
-            # variables" bug). All non-variable options keep jmvcore's per-option
-            # sourcify so formatting stays consistent with jamovi.
+            # Route every option through the hardened private$.sourcifyOption()
+            # so undeclared option names and list values are dropped and every
+            # character scalar (variable names, free-text titles, or coerced
+            # strings from a saved .omv/.omt) is properly escaped.
             args <- character(0)
             for (option in private$.options$options) {
-                if (option$name == 'data')
+                if (identical(option$name, 'data'))
                     next
-                # Free-text String options (mytitle, legendtitle) get the same treatment:
-                # jmvcore's sourcify quotes but does not ESCAPE, so a title containing a
-                # quote or a backslash produced unparseable R.
-                if (inherits(option, 'OptionVariable') || inherits(option, 'OptionVariables') ||
-                    inherits(option, 'OptionString')) {
-                    val <- option$value
-                    if (!is.null(val) && length(val) > 0 && !identical(val, ''))
-                        args <- c(args, paste0(option$name, ' = ',
-                                               paste0(deparse(val), collapse = '')))
-                } else {
-                    as <- private$.sourcifyOption(option)
-                    if (!identical(as, ''))
-                        args <- c(args, as)
-                }
+                as <- private$.sourcifyOption(option)
+                if (!identical(as, ''))
+                    args <- c(args, as)
             }
 
             # Get package name dynamically

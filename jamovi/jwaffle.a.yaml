@@ -1,14 +1,14 @@
 ---
 name:  jwaffle
 title: Waffle Charts
-menuGroup: JJStatsPlot
+menuGroup: JJStatsPlotT
 menuSubgroup: 'Distribution'
-version: '1.1.6'
+version: '1.1.7'
 jas: '1.2'
 
 description:
-    main: |
-        'Creates waffle charts to visualize categorical distributions and proportions using colored squares. Ideal for showing parts-of-whole relationships in clinical data such as disease subtypes, treatment outcomes, or risk category distributions. Each square represents a proportion of the total sample, making it easy to see relative frequencies across categories.'
+    main: >
+        Creates waffle charts to visualize categorical distributions and proportions using colored squares. Ideal for showing parts-of-whole relationships in clinical data such as disease subtypes, treatment outcomes, or risk category distributions. Each square represents a proportion of the total sample, making it easy to see relative frequencies across categories.
 
 options:
     - name: data
@@ -25,7 +25,7 @@ options:
       default: NULL
       description:
           R: >
-            Optional numeric weight variable if cases have different weights. Leave empty to count each row equally (recommended for most clinical data). Only needed if your data is pre-aggregated or weighted.
+            Optional numeric frequency weight variable if cases have different weights. Leave empty to count each row equally (recommended for most clinical data). Only needed if your data is pre-aggregated or weighted. Sample-size notices treat the sum of counts as a case count (frequency weights), not normalized weights summing to 1.
 
     - name: groups
       title: Groups
@@ -35,7 +35,7 @@ options:
       permitted: [ factor ]
       description:
           R: >
-            The categorical grouping variable for the waffle squares. Each category will be displayed as proportional colored squares in a 10x10 grid. Examples: Tumor grade (G1/G2/G3), Treatment outcome (Complete/Partial/No response), Risk categories (Low/Medium/High).
+            The categorical grouping variable for the waffle squares. Each category is displayed as proportional colored squares in a 100-square grid (default 10x10). Examples: Tumor grade (G1/G2/G3), Treatment outcome (Complete/Partial/No response), Risk categories (Low/Medium/High). In R, pre-convert haven_labelled vectors with haven::as_factor() to preserve value labels.
 
     - name: facet
       title: Facet By (Optional)
@@ -50,11 +50,11 @@ options:
     - name: rows
       title: Number of Rows
       type: Integer
-      default: 5
+      default: 10
       min: 1
       description:
           R: >
-            Number of rows in the waffle chart
+            Number of rows in the 100-square waffle chart grid (default: 10 for a 10x10 grid).
 
     - name: flip
       title: Flip chart
@@ -90,10 +90,10 @@ options:
     - name: show_legend
       title: Legend
       type: Bool
-      default: false
+      default: true
       description:
           R: >
-            Whether to display the legend
+            Whether to display the legend (enabled by default so categories are identifiable).
 
     - name: mytitle
       title: Title

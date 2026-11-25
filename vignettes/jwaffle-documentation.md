@@ -10,12 +10,12 @@
   - `jamovi/jwaffle.a.yaml` - Options & Schema Definition
   - `jamovi/jwaffle.r.yaml` - Results Layout & Tables
   - `R/jwaffle.b.R` - Backend Implementation
-- **Summary**: 'Creates waffle charts to visualize categorical distributions and proportions using colored squares. Ideal for showing parts-of-whole relationships in clinical data such as disease subtypes, treatment outcomes, or risk category distributions. Each square represents a proportion of the total sample, making it easy to see relative frequencies across categories.'
+- **Summary**: Creates waffle charts to visualize categorical distributions and proportions using colored squares. Ideal for showing parts-of-whole relationships in clinical data such as disease subtypes, treatment outcomes, or risk category distributions. Each square represents a proportion of the total sample, making it easy to see relative frequencies across categories.
 
 ## 1a. Changelog
 
-- **Date**: 2026-08-29
-- **Summary**: Comprehensive documentation suite created & verified against active schemas and backend implementation.
+- **Date**: 2026-11-25
+- **Summary**: Updated defaults (`rows = 10`, `show_legend = TRUE`), exact per-panel Hamilton 100-square apportionment, complete-case validation, Okabe-Ito discrete palette subsetting, and synced documentation.
 
 ## 2. Options Reference (`.a.yaml`)
 
@@ -25,10 +25,10 @@
 | `counts` | `Variable` | `NULL` | Counts (Optional) |
 | `groups` | `Variable` | `NULL` | Groups |
 | `facet` | `Variable` | `NULL` | Facet By (Optional) |
-| `rows` | `Integer` | `5` | Number of Rows |
+| `rows` | `Integer` | `10` | Number of Rows |
 | `flip` | `Bool` | `FALSE` | Flip chart |
 | `color_palette` | `List` | `default` | Color Palette |
-| `show_legend` | `Bool` | `FALSE` | Legend |
+| `show_legend` | `Bool` | `TRUE` | Legend |
 | `mytitle` | `String` | `` | Title |
 | `legendtitle` | `String` | `` | Legend Title |
 | `showSummaries` | `Bool` | `FALSE` | Analysis summary |

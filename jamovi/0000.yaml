@@ -149,7 +149,7 @@ analyses:
   - title: 'Treatment Response: Patient-Level Burden'
     name: waterfall
     ns: ClinicoPath
-    menuGroup: OncoPath
+    menuGroup: OncoPathT
     menuSubgroup: Patient Follow-Up Plots
     menuTitle: 'Treatment Response: Patient-Level Burden'
     description: >
@@ -1818,16 +1818,16 @@ analyses:
   - title: Waffle Charts
     name: jwaffle
     ns: ClinicoPath
-    menuGroup: JJStatsPlot
+    menuGroup: JJStatsPlotT
     menuSubgroup: Distribution
     menuTitle: Waffle Charts
     description: >
-      'Creates waffle charts to visualize categorical distributions and
+      Creates waffle charts to visualize categorical distributions and
       proportions using colored squares. Ideal for showing parts-of-whole
       relationships in clinical data such as disease subtypes, treatment
       outcomes, or risk category distributions. Each square represents a
       proportion of the total sample, making it easy to see relative frequencies
-      across categories.'
+      across categories.
     ribbon: analyses
     category: analyses
   - title: Automatic Plot Selection
