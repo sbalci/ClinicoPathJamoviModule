@@ -135,7 +135,18 @@ def check_refs():
     nourl = [k for k, v in body.items() if isinstance(v, dict) and not v.get('url')]
     if nourl:
         WARN.append('%d citation entries still have no url: %s' % (len(nourl), ', '.join(cap(sorted(nourl)))))
-    print('  citations: %d defined, %d cited, %d dangling' % (len(defined), len(used), len(dangling)))
+    incomplete = []
+    for k, v in sorted(body.items()):
+        if not isinstance(v, dict):
+            continue
+        miss = [f for f in ('author', 'year', 'title') if not str(v.get(f) or '').strip()]
+        if miss:
+            incomplete.append('%s (%s)' % (k, '/'.join(miss)))
+    if incomplete:
+        FAIL.append('%d citation entries are missing author, year or title in 00refs.yaml: %s'
+                    % (len(incomplete), ', '.join(cap(incomplete))))
+    print('  citations: %d defined, %d cited, %d dangling, %d incomplete'
+          % (len(defined), len(used), len(dangling), len(incomplete)))
 
 
 def _walk(node, out):
@@ -290,7 +301,9 @@ def _shipped(name):
     return not re.search(r'[DPT]$', str(a.get('menuGroup', 'D')))
 
 
-_METHOD = re.compile(r'^\s*(\.[A-Za-z_][\w.]*)\s*=\s*function\s*\(', re.M)
+# Optional leading comma handles comma-first R6 private lists (`, .plot2 = function(` in
+# 2026-09-16 jjstatsplot jjpiestats.b.R and multisurvival.b.R); without it those methods were skipped.
+_METHOD = re.compile(r'^\s*,?\s*(\.[A-Za-z_][\w.]*)\s*=\s*function\s*\(', re.M)
 _DATA = re.compile(r'self\$data\b|self\$readDataset|private\$\.data\b')
 _CALL = re.compile(r'private\$(\.[A-Za-z_][\w.]*)\s*\(')
 
@@ -897,12 +910,19 @@ def check_state_payload():
             bare = _HEAVY_BARE.match(payload)
             if bare:
                 names = sorted(set(names) | {bare.group(1)})
+            # `setState(plot)` (finished ggplot object), `setState(analysis_data)`, `setState(state_df)`,
+            # `setState(data)` and `setState(as.data.frame(data))` - 2026-09-16 jjstatsplot [LOW] named
+            # five sites and this check previously read 0 because none matched _HEAVY_NAME directly.
+            unwrapped = re.sub(r'^\s*as\.data\.frame\s*\(\s*(.*?)\s*\)\s*$', r'\1', payload, flags=re.S).strip()
+            if not names and unwrapped in ('plot', 'data', 'analysis_data', 'state_df'):
+                indirect.append((p, '%s:%d (setState(%s))' % (
+                    os.path.basename(p), src.count('\n', 0, m.start()) + 1, re.sub(r'\s+', ' ', payload).strip())))
             # `plotData <- list(cleanData = cleanData, ...)` ... `image$setState(plotData)`: the
             # payload text is one innocent identifier (2026-11-20 jsurvival [LOW]: singlearm, survival
             # and oddsratio read 0 here). Resolve it to the nearest list() it was assigned above.
             # `setState(if (shown) plotData else NULL)` is the same payload behind a switch.
             ident = re.match(r'^\s*(?:if\s*\(.*?\)\s*)?([A-Za-z_.][\w.]*)\s*(?:else\s+NULL\s*)?$', payload, re.S)
-            if ident and not names:
+            if ident and not names and unwrapped not in ('plot', 'data', 'analysis_data', 'state_df'):
                 built = [b for b in re.finditer(r'(?<![\w.$])%s\s*(?:<-|=)\s*list\s*\(' % re.escape(ident.group(1)), src[:m.start()])]
                 if built:
                     d, k = 1, built[-1].end()
@@ -1172,13 +1192,43 @@ def check_init_row_structure():
         run_src = '\n'.join(v for k, v in body.items() if k not in reach)
         for t in tl:
             tn = t['name']
-            if t.get('rows') or re.search(r'\b%s\b' % re.escape(tn), init_src):
+            if t.get('rows'):
+                continue
+            # Only an .init() call that actually scaffolds rows (addRow/setRows) counts as .init()
+            # structure - self$results$correlation$setVisible(FALSE) in .init() does not (2026-09-16
+            # jjstatsplot linechart::correlation had setVisible(FALSE) in .init() and hid from this check).
+            init_adds = bool(re.search(r'%s\s*\$(?:addRow|setRows)\s*\(' % re.escape(tn), init_src))
+            if not init_adds:
+                for iv in set(re.findall(r'(\w+)\s*<-\s*self\$results(?:\$\w+)*\$%s\b' % re.escape(tn), init_src)):
+                    if re.search(r'\b%s\s*\$(?:addRow|setRows)\s*\(' % re.escape(iv), init_src):
+                        init_adds = True
+                        break
+            if init_adds:
                 continue
             keys = re.findall(r'%s\s*\$addRow\s*\(\s*rowKey\s*=\s*([^,\n]+)' % re.escape(tn), run_src)
-            for v in set(re.findall(r'(\w+)\s*<-\s*self\$results(?:\$\w+)*\$%s\b' % re.escape(tn), run_src)):
+            aliases = set(re.findall(r'(\w+)\s*<-\s*self\$results(?:\$\w+)*\$%s\b' % re.escape(tn), run_src))
+            for v in aliases:
                 keys += re.findall(r'\b%s\s*\$addRow\s*\(\s*rowKey\s*=\s*([^,\n]+)' % re.escape(v), run_src)
             if keys and all(re.match(r'\s*["\']', k) for k in keys):
                 hits.append((name, '%s::%s (%d rows)' % (name, tn, len(keys))))
+            elif len(keys) >= 3:
+                # Counter-variable sequential addRow (`row_num <- 1; table$addRow(rowKey = row_num, ...);
+                # row_num <- row_num + 1`) with >= 3 literal-labelled rows - 2026-09-16 jjstatsplot [LOW]
+                # linechart::correlation had sequential addRow(rowKey = row_num) calls with literal
+                # measure = .("...") labels, unlike a loop over computed bins (categorize::freqTable).
+                counters = {k.strip() for k in keys if re.fullmatch(r'[A-Za-z_]\w*', k.strip())}
+                if len(counters) == 1:
+                    c = next(iter(counters))
+                    if re.search(r'\b%s\s*<-\s*%s\s*\+\s*1\b' % (re.escape(c), re.escape(c)), run_src):
+                        pat_names = '|'.join(re.escape(x) for x in ({tn} | aliases))
+                        lit_rows = sum(
+                            1 for m in re.finditer(
+                                r'\b(?:%s)\s*\$addRow\s*\(\s*rowKey\s*=\s*%s\b' % (pat_names, re.escape(c)),
+                                run_src)
+                            if re.search(r'=\s*(?:\.\(\s*)?["\'][A-Za-z]', run_src[m.end(): m.end() + 220])
+                        )
+                        if lit_rows >= 3:
+                            hits.append((name, '%s::%s (%d counter rows)' % (name, tn, lit_rows)))
     ship = sorted(x for n, x in hits if _shipped(n))
     UNSHIPPED['init_row_structure'] = len(hits) - len(ship)
     if ship:
@@ -1697,11 +1747,61 @@ def check_render_state_and_data():
             'renderers draw from image$state and still read the dataset; pick one route per plot')
 
 
+def check_dead_remotes():
+    """A Remotes: entry whose package is in neither Imports, Suggests, Depends nor LinkingTo is
+    inert scaffolding (2026-08-18 and 2026-09-16 jjstatsplot [LOW]/[INFO]: gastonstat/arcdiagram
+    remained in jjstatsplot/DESCRIPTION after arcdiagram was vendored; the 2026-08-20 response
+    marked it DONE after grepping the umbrella DESCRIPTION instead of the sibling's)."""
+    if not os.path.exists('DESCRIPTION'):
+        return
+    txt = open('DESCRIPTION', encoding='utf-8').read()
+
+    def field(name):
+        m = re.search(r'^%s:(.*?)(?=^\S+:|\Z)' % name, txt, re.M | re.S)
+        return m.group(1) if m else ''
+
+    declared = set()
+    for fn in ('Imports', 'Suggests', 'Depends', 'LinkingTo'):
+        for item in field(fn).split(','):
+            pkg = re.sub(r'\(.*', '', item).strip()
+            if pkg:
+                declared.add(pkg)
+    dead = []
+    for item in re.split(r'[,\n]+', field('Remotes')):
+        item = item.strip()
+        if not item:
+            continue
+        if '=' in item:
+            pkg = item.split('=', 1)[0].strip()
+        else:
+            tail = item.split('/')[-1].split('::')[-1]
+            pkg = re.split(r'[@#]', tail)[0].strip()
+        if pkg and pkg not in declared:
+            dead.append('%s (%s)' % (item, pkg))
+    if dead:
+        WARN.append('%d Remotes: entries name a package not in Imports/Suggests/Depends (inert fetch; '
+                    'remove once vendored or dropped): %s' % (len(dead), ', '.join(cap(dead))))
+    print('  dead Remotes: %d' % len(dead))
+
+
+def check_dotted_options():
+    """A dot in an .a.yaml option name breaks JS property access (`ui.test.value` throws, forcing
+    bracket lookups) and cannot be used in `.u.yaml` `enable:` binding expressions (2026-09-16
+    jjstatsplot [LOW]: jjhistostats `test.value`, `conf.level`, `bf.message`). Use camelCase or
+    snake_case in `.a.yaml` and map to R's dotted argument names at the call site."""
+    hits = [(_shipped(n), '%s::%s' % (n, o['name']))
+            for n in sorted(os.path.basename(p)[:-7] for p in glob.glob('jamovi/*.a.yaml'))
+            for o in _options(n)
+            if '.' in str(o.get('name', ''))]
+    _report('dotted_options', 'dotted option names in .a.yaml', hits,
+            'option names contain a dot (breaks JS ui.<name> and .u.yaml enable: expressions)')
+
+
 if __name__ == '__main__':
     print('RELEASE GATE  %s\n' % ROOT)
     for fn in (check_versions, check_news, check_license, check_refs, check_clearwith, check_renderfun,
                check_artifacts, check_tame, check_visible_bang, check_entities,
-               check_requires_data, check_render_private_state, check_bare_set_seed, check_unused_imports, check_collapsebox_titlecase, check_i18n_padding,
+               check_requires_data, check_render_private_state, check_bare_set_seed, check_unused_imports, check_dead_remotes, check_collapsebox_titlecase, check_dotted_options, check_i18n_padding,
                check_i18n_catalog_scope, check_i18n_bracket, check_i18n_braced_escape,
                check_i18n_po_formats, check_notice_title_colour, check_min_app,
                check_column_formats, check_fabricated_stats, check_state_payload,

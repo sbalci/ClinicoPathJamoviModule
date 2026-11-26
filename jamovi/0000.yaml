@@ -149,7 +149,7 @@ analyses:
   - title: 'Treatment Response: Patient-Level Burden'
     name: waterfall
     ns: ClinicoPath
-    menuGroup: OncoPathT
+    menuGroup: OncoPath
     menuSubgroup: Patient Follow-Up Plots
     menuTitle: 'Treatment Response: Patient-Level Burden'
     description: >
@@ -1818,7 +1818,7 @@ analyses:
   - title: Waffle Charts
     name: jwaffle
     ns: ClinicoPath
-    menuGroup: JJStatsPlotT
+    menuGroup: JJStatsPlot
     menuSubgroup: Distribution
     menuTitle: Waffle Charts
     description: >
@@ -1921,8 +1921,8 @@ analyses:
     menuSubgroup: Network
     menuTitle: Arc Diagram
     description: >
-      'Creates arc diagrams for network visualization using the arcdiagram
-      package.'
+      Creates arc diagrams for network visualization using the vendored
+      arcdiagram renderer and igraph centrality engine.
     ribbon: analyses
     category: analyses
   - title: Advanced Ridge Plot

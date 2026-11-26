@@ -158,7 +158,7 @@ options:
         # #2ca02c (green) and #d62728 (red) at adjacent series 3 and 4 - the
         # canonical red/green pair. Only the Okabe-Ito set above is designed for
         # colour-vision deficiency.
-        - title: Clinical (tab10)
+        - title: Clinical (Tableau 10)
           name: clinical
       default: default
       description:
@@ -169,18 +169,18 @@ options:
       title: 'Plot Theme'
       type: List
       options:
-        - title: Default
-          name: default
+        - title: jamovi (Default)
+          name: jamovi
         - title: Minimal
           name: minimal
         - title: Classic
           name: classic
         - title: Publication
           name: publication
-      default: default
+      default: jamovi
       description:
           R: >
-            Overall theme/appearance of the plot.
+            Overall theme/appearance of the plot. Defaults to jamovi's active theme.
 
     - name: xlabel
       title: 'X-axis Label'

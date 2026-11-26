@@ -17,7 +17,7 @@ linechartOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             refline = 0,
             reflineLabel = "Reference",
             colorPalette = "default",
-            theme = "default",
+            theme = "jamovi",
             xlabel = "",
             ylabel = "",
             title = "",
@@ -100,11 +100,11 @@ linechartOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 "theme",
                 theme,
                 options=list(
-                    "default",
+                    "jamovi",
                     "minimal",
                     "classic",
                     "publication"),
-                default="default")
+                default="jamovi")
             private$..xlabel <- jmvcore::OptionString$new(
                 "xlabel",
                 xlabel,
@@ -211,16 +211,29 @@ linechartResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 options=options,
                 name="todo",
                 title="Instructions",
-                visible=TRUE))
+                visible=FALSE,
+                clearWith=list(
+                    "xvar",
+                    "yvar")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="naturalSummary",
                 title="Summary",
-                visible=TRUE))
+                visible="(xvar && yvar)",
+                clearWith=list(
+                    "xvar",
+                    "yvar",
+                    "groupby",
+                    "trendline")))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="summary",
                 title="Data Summary",
+                visible="(xvar && yvar)",
+                clearWith=list(
+                    "xvar",
+                    "yvar",
+                    "groupby"),
                 columns=list(
                     list(
                         `name`="statistic", 
@@ -234,7 +247,12 @@ linechartResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 options=options,
                 name="correlation",
                 title="Correlation Analysis",
-                visible="(trendline)",
+                visible="(xvar && yvar && trendline)",
+                clearWith=list(
+                    "xvar",
+                    "yvar",
+                    "groupby",
+                    "trendline"),
                 columns=list(
                     list(
                         `name`="measure", 
@@ -267,7 +285,12 @@ linechartResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 options=options,
                 name="assumptions",
                 title="Statistical Assumptions & Guidelines",
-                visible="(trendline)"))
+                visible="(xvar && yvar && trendline)",
+                clearWith=list(
+                    "xvar",
+                    "yvar",
+                    "groupby",
+                    "trendline")))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="plot",
@@ -275,7 +298,8 @@ linechartResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 width=800,
                 height=600,
                 renderFun=".plot",
-                requiresData=TRUE,
+                requiresData=FALSE,
+                visible="(xvar && yvar)",
                 clearWith=list(
                     "xvar",
                     "yvar",
@@ -339,7 +363,8 @@ linechartBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   baseline). Only drawn when Reference line is enabled.
 #' @param reflineLabel Label for the reference line.
 #' @param colorPalette Color palette for multiple groups.
-#' @param theme Overall theme/appearance of the plot.
+#' @param theme Overall theme/appearance of the plot. Defaults to jamovi's
+#'   active theme.
 #' @param xlabel Custom label for the x-axis.
 #' @param ylabel Custom label for the y-axis.
 #' @param title Custom title for the plot.
@@ -375,7 +400,7 @@ linechart <- function(
     refline = 0,
     reflineLabel = "Reference",
     colorPalette = "default",
-    theme = "default",
+    theme = "jamovi",
     xlabel = "",
     ylabel = "",
     title = "",

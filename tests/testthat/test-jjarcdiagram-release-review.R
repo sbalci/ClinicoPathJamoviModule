@@ -248,10 +248,11 @@ test_that("the copy-ready summary does not call a distant node a hub", {
     expect_match(s, "'A' has the most connections")
     expect_match(s, "interpreted as distances")
 
-    # Strength mode is unaffected: there a large summed weight IS a strong hub.
+    # Strength mode is unaffected: there a large summed weight IS a strong hub
+    # (in this undirected fixture E-F has weight 100, so E and F tie at strength 100).
     s2 <- arc_txt(jjarcdiagram(data = d, source = "from", target = "to", weight = "w",
                                weightMode = "strength", showSummary = TRUE)$reportSentence$content)
-    expect_match(s2, "'E' emerged as the most highly connected hub")
+    expect_match(s2, "'E, F \\(2 tied\\)' emerged as the most highly connected hubs")
 })
 
 test_that("the distance caveat appears only in distance mode", {

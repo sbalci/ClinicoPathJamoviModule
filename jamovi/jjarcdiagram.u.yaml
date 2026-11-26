@@ -9,33 +9,38 @@ children:
     stretchFactor: 1
     children:
       - type: TargetLayoutBox
-        label: Source node (from)
+        label: Source Node (from)
         children:
           - type: VariablesListBox
             name: source
             maxItemCount: 1
             isTarget: true
       - type: TargetLayoutBox
-        label: Target node (to)
+        label: Target Node (to)
         children:
           - type: VariablesListBox
             name: target
             maxItemCount: 1
             isTarget: true
       - type: TargetLayoutBox
-        label: Edge weight (optional)
+        label: Edge Weight (optional)
         children:
           - type: VariablesListBox
             name: weight
             maxItemCount: 1
             isTarget: true
       - type: TargetLayoutBox
-        label: Node categories (optional)
+        label: Node Categories (optional)
         children:
           - type: VariablesListBox
             name: group
             maxItemCount: 1
             isTarget: true
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: ComboBox
+        name: analysisPreset
   - type: CollapseBox
     label: Nodes
     collapsed: true
@@ -51,9 +56,11 @@ children:
                 name: showNodes
               - type: ComboBox
                 name: nodeSize
+                enable: (showNodes)
               - type: TextBox
                 name: nodeSizeValue
                 format: number
+                enable: (showNodes)
       - type: Label
         label: Node ordering
         fitToGrid: true
@@ -66,11 +73,6 @@ children:
               - type: CheckBox
                 name: sortDecreasing
                 enable: (!sortNodes:none)
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: ComboBox
-        name: analysisPreset
   - type: CollapseBox
     label: Arcs
     collapsed: true
@@ -93,6 +95,7 @@ children:
             children:
               - type: ComboBox
                 name: arcWidth
+                enable: (weight)
               - type: TextBox
                 name: arcWidthValue
                 format: number
@@ -140,7 +143,7 @@ children:
                 name: plotTitle
                 format: string
   - type: CollapseBox
-    label: Analysis options
+    label: Analysis Options
     collapsed: true
     children:
       - type: Label

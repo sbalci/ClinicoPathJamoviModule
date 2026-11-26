@@ -5,6 +5,26 @@ prevents them. Newest first. Release notes for users live in `NEWS.md`.
 
 ---
 
+## 2026-11-26 — library audit round 4 (jjstatsplot 1.0.81): reconciling the gate against an audited build caught two gate bugs, one umbrella-grep WRONG-DONE, and three missing checks
+
+### Reconciling `release_gate.py` against `jjstatsplot` 1.0.81 (`081a5de`) exposed two parser blind spots in the gate itself
+
+- **Failure mode:** Running `release_gate.py --root` on the audited commit `081a5de` disagreed with the reviewer on two checks: `check_requires_data` reported 7 surplus images instead of 4 (falsely flagging `jjpiestats` `donutPlot`/`plot2`/`plot4`, which all read `self$data`), and `check_init_row_structure` reported 0 instead of 1 (`linechart::correlation`). `_METHOD` did not allow comma-first R6 method headers (`, .plot2 = function(` — also hiding `multisurvival::.executeAnalysis`), and `check_init_row_structure` treated `self$results$correlation$setVisible(FALSE)` in `.init()` as row scaffolding while ignoring sequential counter-variable `addRow(rowKey = row_num)` calls.
+- **Detection signal:** Comparing every finding in `jamovi-library-audit/2026-09-16 jjstatsplot.md` against `release_gate.py` on an exported `081a5de` tree.
+- **Prevention rule:** Reconcile detectors against the audited commit, not only HEAD. `_METHOD` now allows optional leading commas; `check_init_row_structure` counts `.init()` only when it calls `$addRow`/`$setRows` and catches ≥ 3 sequential counter-variable `addRow()` calls with literal row labels (`4/4` surplus `requiresData` and `1/1` `linechart::correlation` on `081a5de`). Tested in `tools/test_release_gate.py`.
+
+### A round-2 "DONE" for a dead `Remotes:` entry was verified against the umbrella `DESCRIPTION`
+
+- **Failure mode:** `2026-08-18 jjstatsplot` [LOW] flagged `Remotes: gastonstat/arcdiagram@...` after `arcdiagram` was vendored. The 2026-08-20 response marked it DONE ("grep for gastonstat/arcdiagram in DESCRIPTION -> no match") after grepping the umbrella `DESCRIPTION` (removed 2026-07-05, `f78966d93`), never checking `../jjstatsplot/DESCRIPTION` — so it recurred on `2026-09-16` and is still in `jjstatsplot/DESCRIPTION:79`.
+- **Detection signal:** `2026-09-16 jjstatsplot` [INFO] plus `git log -S arcdiagram` on both repos.
+- **Prevention rule:** Verify every sibling-owned metadata finding against `--root ../<Module>`. Enforced by `check_dead_remotes` (WARN: `1/1` in `jjstatsplot`, `0` in the other four siblings, `3` in umbrella); review guide §10, §18 round 4 jjstatsplot, and `library-audit` pitfall 47.
+
+### Missing detectors for dotted `.a.yaml` option names, empty citation metadata, and bare `setState(plot)` / `setState(as.data.frame(data))`
+
+- **Failure mode:** `jjhistostats` carried three dotted option names (`test.value`, `conf.level`, `bf.message`) that broke JS `ui.<name>` and `.u.yaml` `enable:` bindings (`jamovi_a_yaml_guide.md` said only "valid R variable name"); `00refs.yaml` shipped `ggdist` with `author: ""` / `year: ""` while `check_refs` checked `url` only; `check_state_payload` read 0 against `jjridges` `setState(plot)` (finished `ggplot` object), `advancedraincloud` `setState(analysis_data)` / `setState(state_df)`, and `linechart` `setState(data)` / `setState(as.data.frame(data))`. Separately, a post-audit pass dropped `check_i18n_padding` from 3 to 0 by moving `" "` and `"; "` outside `.()` (`paste0(method_name, "; ", .("split panels ..."))`) instead of rewriting whole sentences.
+- **Detection signal:** `2026-09-16 jjstatsplot` [LOW] ×4 findings and inspecting current `jjstatsplot` HEAD.
+- **Prevention rule:** `check_refs` now FAILs on missing/empty `author`/`year`/`title` (`1/1` on `081a5de`, `0` in all six current trees); `check_dotted_options` WARN (`3/3` in `jjstatsplot`, `0` elsewhere); `check_state_payload` WARN branch catches `setState(plot)`, `analysis_data`, `state_df`, `data` and `as.data.frame(...)` (`3` of `5` in `jjstatsplot`, `0` in OP/MD/JS); minimum-version `Imports:` pinning and the no-separator-outside-`.()` rule added to review guide §9, §10, §12, §17, §18 and topic guides.
+
 ## 2026-11-23 — jsurvival third pass and re-audit: a second read found what three fix passes had not
 
 ### A fix without a failing test changed the branch that is not used

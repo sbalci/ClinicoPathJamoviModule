@@ -14,11 +14,19 @@ items:
           - group
           - aggregateEdges
           - directed
+          - weightMode
+          - analysisPreset
+          - plotTitle
+          - sortNodes
 
     - name: instructions
       title: Instructions
       type: Html
       visible: true
+      clearWith:
+          - source
+          - target
+          - analysisPreset
 
     - name: todo
       title: Status
@@ -30,6 +38,8 @@ items:
           - group
           - aggregateEdges
           - directed
+          - weightMode
+          - analysisPreset
 
     - name: plot
       title: Arc Diagram
@@ -103,6 +113,7 @@ items:
           - aggregateEdges
           - weightMode
           - analysisPreset
+          - colorByGroup
 
     - name: glossary
       title: Network Analysis Glossary
@@ -123,4 +134,6 @@ refs:
     - arcdiagram
     - igraph
     - viridisLite
+    - Freeman1977
+    - Opsahl2010
 ...

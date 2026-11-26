@@ -211,7 +211,7 @@ These properties can be used with any option type, except that not every type ac
 
 - **Type**: String
 - **Purpose**: Internal identifier used in R code to access the option value
-- **Rules**: Must be valid R variable name (no spaces, starts with letter)
+- **Rules**: Must be a valid R **and JavaScript** identifier — camelCase or snake_case, starts with a letter, **no dots** (`.`). Although `test.value` is valid in R, a dot breaks JavaScript `ui.<name>` access in `.events.js` (forcing bracket workarounds) and cannot be used in `.u.yaml` `enable:` binding expressions (2026-09-16 jjstatsplot [LOW]: `jjhistostats`; `tools/release_gate.py` `check_dotted_options`). Map camelCase option names to dotted R package argument names at the call site inside `.b.R`.
 - **Example**: `name: survivalTime`
 
 #### `title` (Recommended)

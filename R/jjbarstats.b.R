@@ -1444,6 +1444,11 @@ jjbarstatsClass <- if (requireNamespace("jmvcore"))
 
             ,
             .seedUsedOnPlot = function(data, grouped = FALSE) {
+                # ggbarstats samples (Bayesian subtitle, Bayes-factor caption) only inside its
+                # results.subtitle branch; with the subtitle off nothing on the plot is random.
+                # NULL counts as on, matching want_subtitle in .createBarPlot().
+                if (isFALSE(private$.option("resultssubtitle")))
+                    return(FALSE)
                 type <- private$.option("typestatistics")
                 if (statsSeedMatters(type, "contingency"))
                     return(TRUE)

@@ -55,10 +55,11 @@ pathways: Next intervention in sequence}
 importance. Clinical Examples: • Gene networks: Correlation coefficient
 (0-1), fold-change, or interaction score • Patient networks: Similarity
 score (e.g., Jaccard index, cosine similarity) • Disease co-occurrence:
-Number of co-occurrences or relative risk • Protein interactions: Binding
-affinity (Kd) or confidence score • Treatment pathways: Transition
-probability (0-1) Leave empty for unweighted networks (all edges treated
-equally).}
+Number of co-occurrences or relative risk • Protein interactions:
+Interaction confidence score (for dissociation constants Kd, where lower
+values mean tighter binding, use Distance mode or transform to 1/Kd) •
+Treatment pathways: Transition probability (0-1) Leave empty for unweighted
+networks (all edges treated equally).}
 
 \item{group}{Optional grouping variable for color-coding entities.
 Examples: Gene families,  patient subtypes, disease categories, or
@@ -73,8 +74,9 @@ on biological processes, and comorbidity networks on disease associations.}
 When enabled, nodes are shown as circles at their sorted positions.}
 
 \item{nodeSize}{Method for determining node sizes. 'Fixed' uses constant
-size, 'By degree' scales nodes proportionally to their connectivity (number
-of connections).}
+size, 'By degree' scales nodes logarithmically with their connectivity
+(weighted strength in Strength mode, or unweighted connection count in
+Distance mode).}
 
 \item{nodeSizeValue}{Size of nodes when using fixed sizing, or base size
 multiplier when using degree-based sizing. Range: 0.1 to 10.}
@@ -97,34 +99,36 @@ weights.}
 \item{arcWidthValue}{Width of arcs when using fixed sizing, or base width
 when using weight-based sizing. Range: 0.1 to 5.}
 
-\item{arcTransparency}{Transparency level of arc lines. 0 = fully
-transparent (invisible), 1 = fully opaque. Lower values reduce visual
-clutter in dense networks.}
+\item{arcTransparency}{Opacity (alpha) of arc lines. 0 = fully transparent
+(invisible), 1 = fully opaque. Lower values reduce visual clutter in dense
+networks.}
 
 \item{directed}{Whether to treat the network as directed (edges have
 direction from source to target) or undirected (edges represent
 bidirectional relationships).}
 
-\item{aggregateEdges}{"RECOMMENDED: Combine multiple edges between the same
-nodes by summing weights. Why it matters: Prevents inflated degree,
-strength and centrality measures (density is unaffected either way: it is
-computed on distinct node pairs) Provides accurate statistical summaries
-Example: If Gene A→Gene B appears 3 times with weights (2, 3, 5),
-aggregation creates a single edge with weight 10. When to disable: Only if
-you specifically need to preserve parallel edges for specialized analyses."}
+\item{aggregateEdges}{RECOMMENDED: Combine multiple edges between the same
+nodes (summing weights in Strength mode; taking minimum distance in
+Distance mode; deduplicating in unweighted networks). Why it matters:
+Prevents inflated degree, strength and centrality measures (density is
+unaffected either way: it is computed on distinct node pairs) Provides
+accurate statistical summaries Example: If Gene A->Gene B appears 3 times
+with strengths (2, 3, 5), aggregation creates a single edge with strength
+10. When to disable: Only if you specifically need to preserve parallel
+edges for specialized analyses.}
 
-\item{weightMode}{"How edge weights should be interpreted for centrality
+\item{weightMode}{How edge weights should be interpreted for centrality
 calculations. STRENGTH mode (default): Higher values = stronger connections
 Use for: Correlations, interaction scores, similarity indices   Examples:
 r=0.8 (strong), binding affinity score=90 DISTANCE mode: Higher values =
 longer paths/weaker connections   Use for: Costs, physical distances,
 dissimilarity measures   Examples: Euclidean distance, cost metrics Most
-clinical/biological networks use STRENGTH mode."}
+clinical/biological networks use STRENGTH mode.}
 
 \item{arcColorMode}{How to color arcs when nodes are grouped. 'Source'
 colors arcs by source node's group, 'Target' by target node's group,
-'Gradient' creates a gradient from source to target colors. Only applies
-when Node color by group is enabled.}
+'Blended' uses the RGB midpoint between source and target group colors.
+Only applies when Node color by group is enabled.}
 
 \item{colorByGroup}{When a grouping variable is specified, whether to
 color-code nodes by their group membership. Requires a group variable.}
@@ -169,6 +173,6 @@ A results object containing:
 }
 }
 \description{
-'Creates arc diagrams for network visualization using the arcdiagram
-package.'
+Creates arc diagrams for network visualization using the vendored
+arcdiagram renderer and igraph centrality engine.
 }

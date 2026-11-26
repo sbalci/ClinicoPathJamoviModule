@@ -236,7 +236,7 @@ test_that("linechart handles plot themes", {
 
   data(linechart_grouped)
 
-  themes <- c("default", "minimal", "classic", "publication")
+  themes <- unique(c(formals(linechart)$theme, "minimal", "classic", "publication"))
 
   for (theme in themes) {
     result <- linechart(

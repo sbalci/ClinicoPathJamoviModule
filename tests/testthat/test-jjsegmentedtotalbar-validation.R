@@ -164,7 +164,8 @@ test_that("C08, C09, C16, C18, C20: benchmark against datasets::HairEyeColor (Sn
 
 test_that("C04, C16, C18: benchmark against bundled ClinicoPath::jjsegmentedtotalbar_demographics", {
   # Oracle: stats::chisq.test(stats::xtabs(patient_count ~ treatment_center + age_group), correct = FALSE)
-  demo_df <- ClinicoPath::jjsegmentedtotalbar_demographics
+  demo_df <- get0("jjsegmentedtotalbar_demographics")
+  skip_if(is.null(demo_df), "jjsegmentedtotalbar_demographics ships with ClinicoPath only")
   demo_xt <- stats::xtabs(patient_count ~ treatment_center + age_group, data = demo_df)
   demo_chi <- suppressWarnings(stats::chisq.test(demo_xt, correct = FALSE))
 
@@ -414,11 +415,11 @@ test_that("C25, C27: plotTraditional bar heights, state-only rendering, and refe
     seg = factor(c("S1", "S2", "S3"), levels = c("S1", "S2", "S3")),
     val = c(50, 30, 20)
   )
-  opts_p3 <- ClinicoPath:::jjsegmentedtotalbarOptions$new(
+  opts_p3 <- stb_internal("jjsegmentedtotalbarOptions")$new(
     x_var = "cat", y_var = "val", fill_var = "seg",
     plot_type = "stacked", show_plot = TRUE
   )
-  a_p3 <- ClinicoPath:::jjsegmentedtotalbarClass$new(options = opts_p3, data = d_plot3)
+  a_p3 <- stb_internal("jjsegmentedtotalbarClass")$new(options = opts_p3, data = d_plot3)
   suppressWarnings(a_p3$run())
   p_trad <- a_p3$.__enclos_env__$private$.plotTraditional(a_p3$results$plot$state$data, a_p3$results$plot, NULL, NULL)
   gb <- ggplot2::ggplot_build(p_trad)
@@ -445,12 +446,12 @@ test_that("C25, C27: plotTraditional bar heights, state-only rendering, and refe
 test_that("VAL-jjsegmentedtotalbar-01 (C26 / IR-01): plot_type='flerlage' renders across standard, faceted, flipped, and sorted modes", {
   skip_if_not_installed("ggsegmentedtotalbar")
   df <- build_hand_fixture()
-  opts <- ClinicoPath:::jjsegmentedtotalbarOptions$new(
+  opts <- stb_internal("jjsegmentedtotalbarOptions")$new(
     x_var = "Gréade sc", y_var = "cnt", fill_var = "resp",
     plot_type = "flerlage", sort_categories = "total",
     flerlage_show_labels = TRUE, show_plot = TRUE
   )
-  a <- ClinicoPath:::jjsegmentedtotalbarClass$new(options = opts, data = df)
+  a <- stb_internal("jjsegmentedtotalbarClass")$new(options = opts, data = df)
   suppressWarnings(a$run())
   expect_equal(a$results$summary$asDF$chart_type[1], "Flerlage Segmented Total Bar")
   p_pkg <- expect_no_error(a$.__enclos_env__$private$.plotFlerlage(a$results$plot$state$data, a$results$plot, NULL, NULL))
@@ -458,12 +459,12 @@ test_that("VAL-jjsegmentedtotalbar-01 (C26 / IR-01): plot_type='flerlage' render
 
   # Faceted + horizontal + alphabetical sort uses ggplot2 Flerlage fallback cleanly
   hec_df <- as.data.frame(datasets::HairEyeColor)
-  opts_fac <- ClinicoPath:::jjsegmentedtotalbarOptions$new(
+  opts_fac <- stb_internal("jjsegmentedtotalbarOptions")$new(
     x_var = "Hair", y_var = "Freq", fill_var = "Eye", facet_var = "Sex",
     plot_type = "flerlage", orientation = "horizontal", sort_categories = "alpha",
     flerlage_show_labels = TRUE, show_plot = TRUE
   )
-  a_fac <- ClinicoPath:::jjsegmentedtotalbarClass$new(options = opts_fac, data = hec_df)
+  a_fac <- stb_internal("jjsegmentedtotalbarClass")$new(options = opts_fac, data = hec_df)
   suppressWarnings(a_fac$run())
   p_fac <- expect_no_error(a_fac$.__enclos_env__$private$.plotFlerlage(a_fac$results$plot$state$data, a_fac$results$plot, NULL, NULL))
   gb_fac <- ggplot2::ggplot_build(p_fac)
@@ -477,12 +478,12 @@ test_that("VAL-jjsegmentedtotalbar-02 (C25 / IR-02): plotTraditional percentage 
     seg = factor(c("S1", "S2", "S3"), levels = c("S1", "S2", "S3")),
     val = c(50, 30, 20)
   )
-  opts_all <- ClinicoPath:::jjsegmentedtotalbarOptions$new(
+  opts_all <- stb_internal("jjsegmentedtotalbarOptions")$new(
     x_var = "cat", y_var = "val", fill_var = "seg",
     plot_type = "stacked", show_plot = TRUE, show_percentages = TRUE, label_threshold = 0,
     add_outline = TRUE, outline_color = "black"
   )
-  a_all <- ClinicoPath:::jjsegmentedtotalbarClass$new(options = opts_all, data = d_plot3)
+  a_all <- stb_internal("jjsegmentedtotalbarClass")$new(options = opts_all, data = d_plot3)
   suppressWarnings(a_all$run())
   gb_all <- ggplot2::ggplot_build(a_all$.__enclos_env__$private$.plotTraditional(a_all$results$plot$state$data, a_all$results$plot, NULL, NULL))
   bar_all <- gb_all$data[[1]]
@@ -494,11 +495,11 @@ test_that("VAL-jjsegmentedtotalbar-02 (C25 / IR-02): plotTraditional percentage 
   expect_equal(c(out_all$ymin, out_all$ymax), c(bar_all$ymin, bar_all$ymax), tolerance = 1e-8)
 
   # Threshold filtering preserves true segment midpoints without re-normalizing remaining segments
-  opts_th <- ClinicoPath:::jjsegmentedtotalbarOptions$new(
+  opts_th <- stb_internal("jjsegmentedtotalbarOptions")$new(
     x_var = "cat", y_var = "val", fill_var = "seg",
     plot_type = "stacked", show_plot = TRUE, show_percentages = TRUE, label_threshold = 25
   )
-  a_th <- ClinicoPath:::jjsegmentedtotalbarClass$new(options = opts_th, data = d_plot3)
+  a_th <- stb_internal("jjsegmentedtotalbarClass")$new(options = opts_th, data = d_plot3)
   suppressWarnings(a_th$run())
   txt_th <- ggplot2::ggplot_build(a_th$.__enclos_env__$private$.plotTraditional(a_th$results$plot$state$data, a_th$results$plot, NULL, NULL))$data[[2]]
   expect_equal(txt_th$y, bar_mid[1:2], tolerance = 1e-8)
@@ -817,7 +818,7 @@ test_that("VAL-jjsegmentedtotalbar-12 (Release Profile): labelled variables, glo
 
   # 3. Declarative visibility & welcome instructions
   opts_empty <- stb_internal("jjsegmentedtotalbarOptions")$new()
-  ana_empty <- stb_internal("jjsegmentedtotalbarClass")$new(options = opts_empty, data = df_sub4)
+  ana_empty <- stb_internal("jjsegmentedtotalbarClass")$new(options = opts_empty, data = data.frame())
   ana_empty$init()
   expect_true(ana_empty$results$instructions$visible)
   expect_match(strip_html(ana_empty$results$instructions$content), "Setup Progress", fixed = TRUE)

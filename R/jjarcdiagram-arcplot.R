@@ -21,42 +21,33 @@ node_coords <- function (edgelist, sorted = FALSE, decreasing = FALSE, ordering 
 {
     nodes_edges = graph_info(edgelist, sorted = sorted, decreasing = decreasing, 
         ordering = ordering, labels = labels)
-    nodes = nodes_edges$nodes
     num_nodes = nodes_edges$num_nodes
-    num_edges = nodes_edges$num_edges
     aux_ord = nodes_edges$aux_ord
     labels = nodes_edges$labels
-    centers = xynodes(num_nodes, aux_ord, labels)
+    xynodes(num_nodes, aux_ord, labels)
 }
 
 arc_radius_locs <- function (edgelist, nodes, centers) 
 {
-    edges_from_to = matrix(0, nrow(edgelist), 2)
-    for (i in 1L:nrow(edgelist)) {
-        edges_from_to[i, 1] = centers[which(nodes == edgelist[i, 
-            1])]
-        edges_from_to[i, 2] = centers[which(nodes == edgelist[i, 
-            2])]
-    }
+    idx_from = match(edgelist[, 1], nodes)
+    idx_to = match(edgelist[, 2], nodes)
+    edges_from_to = cbind(centers[idx_from], centers[idx_to])
     radios = abs(edges_from_to[, 1] - edges_from_to[, 2])/2
-    max_radios = which(radios == max(radios))
-    max_rad = unique(radios[max_radios]/2)
     locs = rowSums(edges_from_to)/2
     list(locs = locs, radios = radios)
 }
 
 min_max_margin <- function (radios, above) 
 {
-    max_radios = which(radios == max(radios))
     lim_min = 0
     lim_max = 0
     above_radios = radios[above]
-    if (length(above_radios > 0)) {
+    if (length(above_radios) > 0) {
         max_above_radios = which(above_radios == max(above_radios))[1]
         lim_max = above_radios[max_above_radios]
     }
     below_radios = radios[!above]
-    if (length(below_radios > 0)) {
+    if (length(below_radios) > 0) {
         max_below_radios = which(below_radios == max(below_radios))[1]
         lim_min = -1 * below_radios[max_below_radios]
     }
@@ -74,13 +65,13 @@ above_below <- function (edgelist, above)
         if (is.numeric(above)) {
             above_positive <- any(above > 0)
             above_negative <- any(above < 0)
-            if (above_positive & above_negative) 
+            if (above_positive && above_negative) 
                 stop("\n'above' cannot contain both negative and positive indices")
             if (all(above > 0)) {
-                above = 1:nrow(edgelist) %in% above
+                above = seq_len(nrow(edgelist)) %in% above
             }
             if (all(above < 0)) {
-                above <- !(-(1:nrow(edgelist)) %in% above)
+                above <- !(-seq_len(nrow(edgelist)) %in% above)
             }
             if (all(above == 0)) {
                 above = rep(FALSE, nrow(edgelist))
@@ -114,7 +105,7 @@ graph_info <- function (edgelist, vertices, sorted = FALSE, decreasing = FALSE,
     else {
         labels = nodes
     }
-    aux_ord = 1:num_nodes
+    aux_ord = seq_len(num_nodes)
     if (sorted) {
         ordered_nodes = order(nodes, decreasing = decreasing)
         nodes = nodes[ordered_nodes]
@@ -250,9 +241,9 @@ arcplot <- function (edgelist, vertices, sorted = FALSE, decreasing = FALSE,
             y_nodes = centers
         }
     }
-    plot(0.5, 0.5, xlim = xlim, ylim = ylim, type = "n", xlab = "", 
+    graphics::plot(0.5, 0.5, xlim = xlim, ylim = ylim, type = "n", xlab = "", 
         ylab = "", axes = axes, ...)
-    for (i in 1L:num_edges) {
+    for (i in seq_len(num_edges)) {
         radio = radios[i]
         if (horizontal) {
             x_arc = locs[i] + radio * cos(z)
@@ -274,17 +265,17 @@ arcplot <- function (edgelist, vertices, sorted = FALSE, decreasing = FALSE,
         }
         graphics::lines(x_arc, y_arc, col = col.arcs[i], lwd = lwd.arcs[i], 
             lty = lty.arcs[i], lend = lend, ljoin = ljoin, lmitre = lmitre)
-        if (show.nodes) {
-            graphics::points(x = x_nodes, y = y_nodes, pch = pch.nodes, 
-                col = col.nodes, bg = bg.nodes, cex = cex.nodes, 
-                lwd = lwd.nodes)
-        }
-        if (show.labels) {
-            graphics::mtext(labels, side = side, line = line, at = centers, 
-                cex = cex.labels, outer = outer, col = col.labels, 
-                las = las, font = font, adj = adj, padj = padj, 
-                ...)
-        }
+    }
+    if (show.nodes) {
+        graphics::points(x = x_nodes, y = y_nodes, pch = pch.nodes, 
+            col = col.nodes, bg = bg.nodes, cex = cex.nodes, 
+            lwd = lwd.nodes)
+    }
+    if (show.labels) {
+        graphics::mtext(labels, side = side, line = line, at = centers, 
+            cex = cex.labels, outer = outer, col = col.labels, 
+            las = las, font = font, adj = adj, padj = padj, 
+            ...)
     }
 }
 

@@ -279,3 +279,94 @@ with tempfile.TemporaryDirectory() as m:
     assert warns.count('plotData <- list(cleanData)') == 2, warns     # the same payload behind `if (...) else NULL`
     assert 'bad::.plotRows' not in warns, warns                       # a declared data route with a rowless state
 print('round-9 checks: ok')
+
+# Round 4 jjstatsplot (library-audit 2026-09-16 jjstatsplot) checks:
+# - 00refs.yaml missing author/year/title (FAIL)
+# - dead Remotes: entry not in Imports/Suggests/Depends (WARN)
+# - dotted option names in .a.yaml (WARN)
+# - raw-data / ggplot object setState (setState(plot), setState(as.data.frame(data)), setState(state_df))
+# - counter-variable sequential addRow(rowKey = row_num) in .run()
+# - comma-first R6 method definition (`, .plot2 = function(`) still traced by check_requires_data
+with tempfile.TemporaryDirectory() as m:
+    write(m, 'DESCRIPTION', 'Package: fake\nImports:\n    waffle\nRemotes:\n'
+          '    gastonstat/arcdiagram@7be212cd632f182d332eaae088cd6f1db55d5848,\n'
+          '    ClinicoPath/waffle@f5150355d99521417cb406156b5ee0c626fe94a8\n')
+    write(m, 'jamovi/00refs.yaml', '''refs:
+  ggdist:
+    type: software
+    author: ""
+    year: ""
+    title: "ggdist: R package"
+    url: https://CRAN.R-project.org/package=ggdist
+  waffle:
+    type: software
+    author: "Bob Rudis"
+    year: 2024
+    title: "waffle"
+    url: https://github.com/ClinicoPath/waffle
+''')
+    write(m, 'jamovi/bad.a.yaml', '''name: bad
+menuGroup: JJStatsPlot
+options:
+  - name: test.value
+    type: Number
+    default: 0
+  - name: testValue
+    type: Number
+    default: 0
+''')
+    write(m, 'jamovi/bad.r.yaml', '''items:
+  - name: corr
+    type: Table
+    columns: []
+  - name: plot
+    type: Image
+    renderFun: .plot
+  - name: plot2
+    type: Image
+    renderFun: .plot2
+    requiresData: true
+refs:
+  - ggdist
+  - waffle
+''')
+    write(m, 'R/bad.b.R', '''badClass <- R6::R6Class("badClass", private = list(
+    .init = function() {
+        self$results$corr$setVisible(FALSE)
+    },
+    .run = function() {
+        self$results$plot$setState(plot)
+        self$results$plot$setState(as.data.frame(data))
+        self$results$plot$setState(state_df)
+        table <- self$results$corr
+        row_num <- 1
+        table$addRow(rowKey = row_num, values = list(measure = .("Pearson")))
+        row_num <- row_num + 1
+        table$addRow(rowKey = row_num, values = list(measure = .("R-squared")))
+        row_num <- row_num + 1
+        table$addRow(rowKey = row_num, values = list(measure = .("Slope")))
+    }
+    , .plot = function(image, ...) {
+        TRUE
+    }
+    , .plot2 = function(image, ...) {
+        d <- self$data
+        TRUE
+    }
+))
+''')
+    sys.argv = ['release_gate.py', '--root', m]
+    spec = importlib.util.spec_from_file_location('release_gate', GATE)
+    rg = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(rg)
+    for fn in (rg.check_refs, rg.check_dead_remotes, rg.check_dotted_options,
+               rg.check_state_payload, rg.check_init_row_structure, rg.check_requires_data):
+        fn()
+    fails, warns = '\n'.join(rg.FAIL), '\n'.join(rg.WARN)
+    assert 'ggdist (author/year)' in fails and 'waffle' not in fails, fails
+    assert 'arcdiagram' in warns and 'waffle' not in warns, warns
+    assert 'bad::test.value' in warns and 'bad::testValue' not in warns, warns
+    assert 'setState(plot)' in warns and 'setState(as.data.frame(data))' in warns and 'setState(state_df)' in warns, warns
+    assert 'bad::corr (3 counter rows)' in warns, warns
+    assert 'bad:plot2' not in warns, warns                            # comma-first .plot2 reads self$data -> NOT surplus
+print('round-4 jjstatsplot checks: ok')

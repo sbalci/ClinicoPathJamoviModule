@@ -440,16 +440,26 @@ test_that("FIX-2: dynamic footnotes clear on R6 reuse and persist across .omv pr
         y_is_count = TRUE,
         show_statistical_tests = TRUE
     )
-    an1 <- jjsegmentedtotalbarClass$new(options = opts, data = d3)
+    # asProtoBuf() writes these ids into 32-bit integer fields; the "" defaults do not cast
+    an1 <- jjsegmentedtotalbarClass$new(options = opts, data = d3,
+                                        datasetId = "1", analysisId = 1L, revision = 1L)
     an1$run()
 
     expect_true("summed_value" %in% names(an1$results$summary$notes))
     expect_true("most_variable_def" %in% names(an1$results$detailed_stats$notes))
     expect_true(all(c("count_assumption", "stdres_note") %in% names(an1$results$statistical_tests$notes)))
 
-    # Protobuf round-trip (.omv reopen without re-running .run())
+    # Protobuf round-trip (.omv reopen without re-running .run()); outside jamovi the engine's
+    # transport bindings are NULL, so borrow RProtoBuf's.
+    skip_if_not_installed("RProtoBuf")
+    if (is.null(getFromNamespace("RProtoBuf_new", "jmvcore"))) {
+        testthat::local_mocked_bindings(RProtoBuf_new = RProtoBuf::new,
+            RProtoBuf_serialize = RProtoBuf::serialize, RProtoBuf_read = RProtoBuf::read,
+            .package = "jmvcore")
+    }
+    getFromNamespace("initProtoBuf", "jmvcore")()
     resp_pb <- an1$asProtoBuf(includeState = TRUE)
-    an_reopen <- jjsegmentedtotalbarClass$new(options = opts)
+    an_reopen <- jjsegmentedtotalbarClass$new(options = opts, data = d3)
     an_reopen$init()
     an_reopen$results$fromProtoBuf(resp_pb$results, character(), character())
 

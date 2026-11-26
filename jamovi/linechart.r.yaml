@@ -7,16 +7,29 @@ items:
     - name: todo
       title: Instructions
       type: Html
-      visible: true
+      visible: false
+      clearWith:
+        - xvar
+        - yvar
 
     - name: naturalSummary
       title: Summary
       type: Html
-      visible: true
+      visible: (xvar && yvar)
+      clearWith:
+        - xvar
+        - yvar
+        - groupby
+        - trendline
 
     - name: summary
       title: Data Summary
       type: Table
+      visible: (xvar && yvar)
+      clearWith:
+        - xvar
+        - yvar
+        - groupby
       columns:
         - name: statistic
           title: Statistic
@@ -28,7 +41,12 @@ items:
     - name: correlation
       title: Correlation Analysis
       type: Table
-      visible: (trendline)
+      visible: (xvar && yvar && trendline)
+      clearWith:
+        - xvar
+        - yvar
+        - groupby
+        - trendline
       columns:
         - name: measure
           title: Measure
@@ -55,15 +73,21 @@ items:
     - name: assumptions
       title: Statistical Assumptions & Guidelines
       type: Html
-      visible: (trendline)
-      
+      visible: (xvar && yvar && trendline)
+      clearWith:
+        - xvar
+        - yvar
+        - groupby
+        - trendline
+
     - name: plot
       title: '`Line Chart: {yvar} by {xvar}`'
       type: Image
       width: 800
       height: 600
       renderFun: .plot
-      requiresData: true
+      requiresData: false
+      visible: (xvar && yvar)
       clearWith:
         - xvar
         - yvar

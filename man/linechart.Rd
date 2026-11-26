@@ -17,7 +17,7 @@ linechart(
   refline = 0,
   reflineLabel = "Reference",
   colorPalette = "default",
-  theme = "default",
+  theme = "jamovi",
   xlabel = "",
   ylabel = "",
   title = "",
@@ -58,7 +58,8 @@ baseline). Only drawn when Reference line is enabled.}
 
 \item{colorPalette}{Color palette for multiple groups.}
 
-\item{theme}{Overall theme/appearance of the plot.}
+\item{theme}{Overall theme/appearance of the plot. Defaults to jamovi's
+active theme.}
 
 \item{xlabel}{Custom label for the x-axis.}
 

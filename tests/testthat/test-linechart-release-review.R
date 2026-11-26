@@ -6,7 +6,14 @@
 # producing a blank panel with no explanation at all.
 
 lc_txt <- function(x) gsub("[[:space:]]+", " ", gsub("<[^>]*>", " ", as.character(x %||% "")))
-lc_todo <- function(res) lc_txt(res$todo$content)
+lc_todo <- function(res) {
+    notice_txt <- vapply(
+        Filter(function(item) inherits(item, "Notice"), res$items),
+        function(item) as.character(item$content %||% ""),
+        character(1)
+    )
+    lc_txt(paste(c(notice_txt, as.character(res$todo$content %||% "")), collapse = " "))
+}
 lc_cell <- function(res, stat) {
     df <- res$summary$asDF
     v <- df$value[df$statistic == stat]
@@ -102,12 +109,14 @@ test_that("an empty dataset explains itself instead of going blank", {
 })
 
 test_that("existing guards still fire", {
-    expect_match(lc_todo(linechart(data = data.frame(t = 1:2, y = c(1, 2)),
-                                   xvar = "t", yvar = "y")),
-                 "At least 3 complete observations")
-    expect_match(lc_todo(linechart(data = data.frame(t = 1:10, y = rep(5, 10)),
-                                   xvar = "t", yvar = "y")),
-                 "no variation")
+    expect_error(
+        linechart(data = data.frame(t = 1:2, y = c(1, 2)), xvar = "t", yvar = "y"),
+        "At least 3 complete observations"
+    )
+    expect_error(
+        linechart(data = data.frame(t = 1:10, y = rep(5, 10)), xvar = "t", yvar = "y"),
+        "no variation"
+    )
 })
 
 

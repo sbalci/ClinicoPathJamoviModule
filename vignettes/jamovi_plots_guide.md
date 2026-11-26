@@ -534,6 +534,14 @@ must not grow with n), no function or environment inside, and the plot drawn aft
 `unserialize(serialize(x, NULL))` matches. `oddsratio` `plot_nomogram` is the reference
 (review guide section 17).
 
+**Never store a finished `ggplot` object (`setState(plot)`) or a raw/cleaned dataset
+(`setState(as.data.frame(data))`, `setState(analysis_data)`) in `image$state`.** A `ggplot` object
+serialises its data, layers, scales and environments into the `.omv` and is not guaranteed to
+`print()` across `ggplot2` upgrades (2026-09-16 jjstatsplot [LOW]: `jjridges`). Store the small
+drawing summary and rebuild the plot inside `.plot()`, or use `requiresData: true` + `self$data`
+when the plot genuinely needs raw rows. `tools/release_gate.py` `check_state_payload` flags these
+shapes.
+
 ### State Management Patterns
 
 #### Conditional State Setting

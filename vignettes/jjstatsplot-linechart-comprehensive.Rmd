@@ -1,0 +1,226 @@
+---
+title: "Line Chart (linechart) - Comprehensive Guide"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Line Chart (linechart) - Comprehensive Guide}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  eval = TRUE, echo = TRUE, collapse = TRUE, comment = "#>",
+  error = TRUE, warning = FALSE, message = FALSE, fig.width = 7, fig.height = 5
+)
+if (requireNamespace("pkgload", quietly = TRUE) && file.exists("../DESCRIPTION")) {
+  pkgload::load_all("..", quiet = TRUE)
+} else if (requireNamespace("pkgload", quietly = TRUE) && file.exists("DESCRIPTION")) {
+  pkgload::load_all(".", quiet = TRUE)
+} else {
+  library(ClinicoPath)
+}
+```
+
+> **Note:** The `linechart()` function is designed primarily for use within **jamovi's GUI** (`JJStatsPlot` -> `Lines` -> `Line Chart`). The executable R examples below demonstrate every option, statistical table, assumption check, and jamovi Notice reproducibly.
+
+# Line Chart (`linechart`)
+
+## Overview
+
+`linechart` creates time-series and longitudinal line charts for clinicopathological and clinical research, combining:
+
+- **Observed trajectories** (`points`, `smooth` LOESS curves, `confidence` 95% bands, and `showRefline` clinical thresholds — including `refline = 0` for change-from-baseline or log fold-change).
+- **Trend & association statistics** (`trendline = TRUE`): Pearson *r* with Fisher-*z* 95% confidence intervals, Spearman rank correlation (disclosing exact vs asymptotic inference for ties and *N* >= 1,290), OLS regression slope and *R*-squared, copy-ready APA/SAMPL reporting sentences, per-group stratified trends when `groupby` is set, and one-way ANOVA (*F* with degrees of freedom) for categorical X-axis visits.
+- **Assumption diagnostics & native jamovi Notices**: nested polynomial partial *F*-test for linearity, Spearman $|e|$ constant-variance check, Shapiro-Wilk residual normality check (with explicit *n* > 5,000 guidance), and priority-ordered single-line `jmvcore::Notice` banners for missing/infinite exclusions, small sample sizes, repeated-X independence cautions, and confidence-band model-fit disclosure.
+- **Accessible styling**: jamovi global theme (`theme = "jamovi"`) and palette integration, Okabe-Ito 8-color colorblind-safe palette (`colorPalette = "colorblind"`), Viridis, Tableau 10 (`"clinical"`), and high-contrast `publication` styling.
+
+---
+
+## 1. Basic Time-Series Line Chart
+
+Using the bundled `linechart_simple` dataset:
+
+```{r basic-linechart}
+data("linechart_simple", package = "ClinicoPath")
+head(linechart_simple)
+
+res_basic <- linechart(
+  data = linechart_simple,
+  xvar = "time_point",
+  yvar = "value"
+)
+
+res_basic$summary$asDF
+```
+
+```{r basic-plot, fig.cap="Basic longitudinal line chart with default data points."}
+print(res_basic$plot)
+```
+
+---
+
+## 2. Grouped Clinical Cohort with Trend Analysis & Stratified Per-Group Trends
+
+When `groupby` and `trendline = TRUE` are both specified, `linechart` plots per-group lines and dashed OLS overlays, reports the overall pooled correlation (explicitly flagged for Simpson's-paradox risk), and adds **per-group stratified trend rows** (`Group Trend: <group> (Pearson r)`) so clinicians can compare within-arm trajectories directly.
+
+```{r grouped-linechart}
+data("linechart_grouped", package = "ClinicoPath")
+
+res_grouped <- linechart(
+  data = linechart_grouped,
+  xvar = "time_point",
+  yvar = "lab_value",
+  groupby = "treatment",
+  confidence = TRUE,
+  trendline = TRUE,
+  colorPalette = "colorblind",
+  theme = "publication"
+)
+
+res_grouped$summary$asDF
+res_grouped$correlation$asDF[, c("measure", "value", "ci_lower", "ci_upper", "pvalue")]
+```
+
+```{r grouped-plot, fig.cap="Grouped line chart with Okabe-Ito colorblind-safe palette, 95% confidence ribbons, and per-group linear trend overlays."}
+print(res_grouped$plot)
+```
+
+---
+
+## 3. Clinical Reference Thresholds (Including Zero)
+
+The `showRefline` switch decouples enabling the reference line from its numeric value, allowing clinical thresholds at `0` (such as zero change from baseline) as well as upper/lower limits of normal:
+
+```{r clinical-refline}
+data("linechart_clinical", package = "ClinicoPath")
+
+res_ref <- linechart(
+  data = linechart_clinical,
+  xvar = "week",
+  yvar = "tumor_marker",
+  groupby = "disease_stage",
+  showRefline = TRUE,
+  refline = 100,
+  reflineLabel = "Upper Limit of Normal",
+  xlabel = "Follow-up Week",
+  ylabel = "Serum Tumor Marker (U/mL)",
+  title = "Tumor Marker Trajectory by Disease Stage",
+  theme = "minimal"
+)
+
+print(res_ref$plot)
+```
+
+---
+
+## 4. Categorical Visits (One-Way ANOVA) & LOESS Smoothing
+
+When `xvar` is a factor (for example ordered clinic visits), `linechart` preserves factor ordering (reordering numeric-label factors numerically while keeping `ordered` class), connects single-group levels cleanly, and reports a one-way ANOVA *F*-statistic with degrees of freedom when `trendline = TRUE`.
+
+```{r categorical-x}
+set.seed(2026)
+visit_df <- data.frame(
+  visit = factor(
+    rep(c("Baseline", "Month 3", "Month 6", "Month 12"), each = 12),
+    levels = c("Baseline", "Month 3", "Month 6", "Month 12"),
+    ordered = TRUE
+  ),
+  score = c(
+    rnorm(12, 42, 6),
+    rnorm(12, 50, 6),
+    rnorm(12, 58, 6),
+    rnorm(12, 64, 6)
+  )
+)
+
+res_cat <- linechart(
+  data = visit_df,
+  xvar = "visit",
+  yvar = "score",
+  trendline = TRUE
+)
+
+res_cat$correlation$asDF[, c("measure", "value", "pvalue", "interpretation")]
+```
+
+For nonlinear continuous trajectories, enable `smooth = TRUE` (with optional `confidence = TRUE` so the shaded ribbon matches the LOESS curve):
+
+```{r smooth-loess}
+data("linechart_long", package = "ClinicoPath")
+
+res_smooth <- linechart(
+  data = linechart_long,
+  xvar = "day",
+  yvar = "seasonal_value",
+  points = FALSE,
+  smooth = TRUE,
+  confidence = TRUE,
+  colorPalette = "viridis",
+  theme = "classic"
+)
+
+print(res_smooth$plot)
+```
+
+---
+
+## 5. Data Quality Notices & Assumption Diagnostics
+
+`linechart` surfaces actionable single-line `jmvcore::Notice` banners in priority order (`STRONG_WARNING` and `WARNING` at the top; `INFO` at the bottom):
+
+```{r notices-demo}
+d_warn <- data.frame(
+  time = c(1, 2, 5, 10, NA, 12),
+  biomarker = c(10, 14, 20, 32, 18, Inf)
+)
+
+res_warn <- linechart(
+  data = d_warn,
+  xvar = "time",
+  yvar = "biomarker",
+  trendline = TRUE,
+  confidence = TRUE
+)
+
+notices <- Filter(function(item) inherits(item, "Notice"), res_warn$items)
+data.frame(
+  name = names(notices),
+  content = vapply(notices, function(x) as.character(x$content), character(1)),
+  row.names = NULL
+)
+```
+
+---
+
+## 6. Options & Results Reference
+
+### Options (`.a.yaml`)
+
+| Option | Type | Default | Description |
+| :--- | :--- | :--- | :--- |
+| `data` | `Data` | — | Input data frame |
+| `xvar` | `Variable` | `NULL` | X-axis variable (numeric time/sequence or ordered factor) |
+| `yvar` | `Variable` | `NULL` | Y-axis continuous numeric outcome |
+| `groupby` | `Variable` | `NULL` | Optional grouping factor for multiple series and stratified trends |
+| `points` | `Bool` | `TRUE` | Display individual data points |
+| `smooth` | `Bool` | `FALSE` | Apply LOESS smoothing to series |
+| `confidence` | `Bool` | `FALSE` | Display 95% confidence interval ribbon (LOESS when `smooth = TRUE`, linear fit otherwise) |
+| `trendline` | `Bool` | `FALSE` | Add linear regression trend overlay, correlation/stratified trend table, and assumption checks |
+| `showRefline` | `Bool` | `FALSE` | Enable horizontal clinical reference line |
+| `refline` | `Number` | `0` | Reference line value (drawn when `showRefline = TRUE`, including `0`) |
+| `reflineLabel` | `String` | `"Reference"` | Annotation label for the reference line |
+| `colorPalette` | `List` | `"default"` | `"default"` (honors jamovi palette), `"colorblind"` (Okabe-Ito), `"viridis"`, `"clinical"` (Tableau 10) |
+| `theme` | `List` | `"jamovi"` | `"jamovi"` (active jamovi theme), `"minimal"`, `"classic"`, `"publication"` |
+| `xlabel`, `ylabel`, `title` | `String` | `""` | Custom axis labels and chart title |
+| `width`, `height` | `Integer` | `800`, `600` | Plot width (300–1200 px) and height (300–1000 px) |
+
+### Results (`.r.yaml`)
+
+| Result ID | Type | Visibility | Description |
+| :--- | :--- | :--- | :--- |
+| `todo` | `Html` | Empty state only | Onboarding Quick Start Guide when `xvar` or `yvar` is unset |
+| `naturalSummary` | `Html` | `(xvar && yvar)` | Plain-language summary of dataset, groups, Y range, and trend |
+| `summary` | `Table` | `(xvar && yvar)` | Observation count, unique X count, group counts/names, Y mean, median, SD, and range |
+| `correlation` | `Table` | `(xvar && yvar && trendline)` | Pearson *r* (95% CI, *p*), *R*-squared, slope, Copy-Ready Summary, Spearman *r*, per-group stratified trends, ANOVA *F* (categorical X), and Statistical Validity caveat |
+| `assumptions` | `Html` | `(xvar && yvar && trendline)` | Linearity (polynomial partial *F*-test), residual normality (Shapiro-Wilk with *n* <= 5,000 guard), homoscedasticity (Spearman $|e|$), and clinical interpretation guidelines |
+| `plot` | `Image` | `(xvar && yvar)` | Line chart rendered from saved state (`requiresData: false`) |

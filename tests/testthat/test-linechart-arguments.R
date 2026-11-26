@@ -50,7 +50,7 @@ test_that("linechart handles all color palette options", {
 
 test_that("linechart handles all theme options", {
 
-  themes <- c("default", "minimal", "classic", "publication")
+  themes <- unique(c(formals(linechart)$theme, "minimal", "classic", "publication"))
 
   for (theme in themes) {
     result <- linechart(
@@ -68,7 +68,7 @@ test_that("linechart handles all theme options", {
 test_that("linechart handles theme and palette combinations", {
 
   combinations <- expand.grid(
-    theme = c("default", "minimal", "publication"),
+    theme = unique(c(formals(linechart)$theme, "minimal", "publication")),
     colorPalette = c("default", "colorblind", "clinical"),
     stringsAsFactors = FALSE
   )
@@ -523,7 +523,7 @@ test_that("linechart handles all palettes with grouped data", {
 
 test_that("linechart handles all themes with grouped data", {
 
-  themes <- c("default", "minimal", "classic", "publication")
+  themes <- unique(c(formals(linechart)$theme, "minimal", "classic", "publication"))
 
   for (theme in themes) {
     result <- linechart(

@@ -147,7 +147,16 @@ broken analysis for the user. Accept the CRAN "unused Imports" NOTE. Only
 **Declared-but-unused is a finding too.** A package held alive only by an
 `@importFrom` roxygen tag with no call site is a package every user installs for
 nothing. So is a `Remotes:` entry for a dependency you have since vendored or
-dropped — it can only cause an unnecessary GitHub fetch at install time.
+dropped — it can only cause an unnecessary GitHub fetch at install time. Check
+the **sibling's** `DESCRIPTION`, not the umbrella's (`tools/release_gate.py --root ../<Module>`
+`check_dead_remotes`, 2026-09-16 jjstatsplot: `gastonstat/arcdiagram` stayed in
+`jjstatsplot/DESCRIPTION` after being removed from the umbrella).
+
+**Pin minimum versions in `Imports:` when code relies on a version-specific API.**
+If a `.b.R` call assumes a package behaviour introduced in a specific release
+(e.g. `ggstatsplot >= 0.13` `"package::palette"` strings, 2026-09-16 jjstatsplot [LOW]),
+declare `ggstatsplot (>= 0.13.0)` in `Imports:` so the floor is checked at install time
+rather than failing or warning at render time.
 
 **Pin every `Remotes:` entry to a full commit SHA**, so a push to the upstream
 default branch cannot silently change what a build pulls in.

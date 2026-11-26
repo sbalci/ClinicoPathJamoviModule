@@ -7,8 +7,8 @@ version: '1.1.6'
 jas: '1.2'
 
 description:
-    main: |
-        'Creates arc diagrams for network visualization using the arcdiagram package.'
+    main: >
+        Creates arc diagrams for network visualization using the vendored arcdiagram renderer and igraph centrality engine.
 
     # R:
     #     dontrun: true
@@ -16,7 +16,7 @@ description:
     #         # Basic social network visualization
     #         data(jjarcdiagram_social_network, package = "ClinicoPath")
     #         jjarcdiagram(
-    #             data = social_network_data,
+    #             data = jjarcdiagram_social_network,
     #             source = "source",
     #             target = "target",
     #             weight = "weight",
@@ -25,11 +25,11 @@ description:
     #             nodeSize = "degree",
     #             sortNodes = "group"
     #         )
-            
+    #
     #         # Academic collaboration network
     #         data(jjarcdiagram_academic_network, package = "ClinicoPath")
     #         jjarcdiagram(
-    #             data = academic_network_data,
+    #             data = jjarcdiagram_academic_network,
     #             source = "author1",
     #             target = "author2",
     #             weight = "publications",
@@ -37,11 +37,11 @@ description:
     #             showNodes = TRUE,
     #             nodeSize = "degree"
     #         )
-            
+    #
     #         # Organizational hierarchy
     #         data(jjarcdiagram_org_hierarchy, package = "ClinicoPath")
     #         jjarcdiagram(
-    #             data = org_hierarchy_data,
+    #             data = jjarcdiagram_org_hierarchy,
     #             source = "employee",
     #             target = "reports_to",
     #             weight = "relationship_strength",
@@ -49,11 +49,11 @@ description:
     #             nodeSize = "fixed",
     #             nodeSizeValue = 3
     #         )
-            
+    #
     #         # Simple minimal network
     #         data(jjarcdiagram_minimal_network, package = "ClinicoPath")
     #         jjarcdiagram(
-    #             data = minimal_network_data,
+    #             data = jjarcdiagram_minimal_network,
     #             source = "from",
     #             target = "to",
     #             weight = "strength"
@@ -114,7 +114,7 @@ options:
             • Gene networks: Correlation coefficient (0-1), fold-change, or interaction score
             • Patient networks: Similarity score (e.g., Jaccard index, cosine similarity)
             • Disease co-occurrence: Number of co-occurrences or relative risk
-            • Protein interactions: Binding affinity (Kd) or confidence score
+            • Protein interactions: Interaction confidence score (for dissociation constants Kd, where lower values mean tighter binding, use Distance mode or transform to 1/Kd)
             • Treatment pathways: Transition probability (0-1)
 
             Leave empty for unweighted networks (all edges treated equally).
@@ -170,7 +170,7 @@ options:
       default: fixed
       description:
           R: >
-            Method for determining node sizes. 'Fixed' uses constant size, 'By degree' scales nodes proportionally to their connectivity (number of connections).
+            Method for determining node sizes. 'Fixed' uses constant size, 'By degree' scales nodes logarithmically with their connectivity (weighted strength in Strength mode, or unweighted connection count in Distance mode).
 
     - name: nodeSizeValue
       title: Node size value
@@ -239,14 +239,14 @@ options:
             Width of arcs when using fixed sizing, or base width when using weight-based sizing. Range: 0.1 to 5.
 
     - name: arcTransparency
-      title: Arc transparency
+      title: Arc opacity
       type: Number
       default: 0.5
       min: 0
       max: 1
       description:
           R: >
-            Transparency level of arc lines. 0 = fully transparent (invisible), 1 = fully opaque. Lower values reduce visual clutter in dense networks.
+            Opacity (alpha) of arc lines. 0 = fully transparent (invisible), 1 = fully opaque. Lower values reduce visual clutter in dense networks.
 
     - name: directed
       title: Directed network
@@ -262,14 +262,14 @@ options:
       default: true
       description:
           R: >
-            "RECOMMENDED: Combine multiple edges between the same nodes by summing weights.
+            RECOMMENDED: Combine multiple edges between the same nodes (summing weights in Strength mode; taking minimum distance in Distance mode; deduplicating in unweighted networks).
             Why it matters:
             Prevents inflated degree, strength and centrality measures
             (density is unaffected either way: it is computed on distinct node pairs)
             Provides accurate statistical summaries
-            Example: If Gene A→Gene B appears 3 times with weights (2, 3, 5),
-            aggregation creates a single edge with weight 10.
-            When to disable: Only if you specifically need to preserve parallel edges for specialized analyses."
+            Example: If Gene A->Gene B appears 3 times with strengths (2, 3, 5),
+            aggregation creates a single edge with strength 10.
+            When to disable: Only if you specifically need to preserve parallel edges for specialized analyses.
 
     - name: weightMode
       title: Edge weight interpretation
@@ -282,14 +282,14 @@ options:
       default: strength
       description:
           R: >
-            "How edge weights should be interpreted for centrality calculations.
+            How edge weights should be interpreted for centrality calculations.
             STRENGTH mode (default): Higher values = stronger connections
               Use for: Correlations, interaction scores, similarity indices
               Examples: r=0.8 (strong), binding affinity score=90
             DISTANCE mode: Higher values = longer paths/weaker connections
               Use for: Costs, physical distances, dissimilarity measures
               Examples: Euclidean distance, cost metrics
-            Most clinical/biological networks use STRENGTH mode."
+            Most clinical/biological networks use STRENGTH mode.
 
     - name: arcColorMode
       title: Arc color
@@ -300,12 +300,12 @@ options:
         - name: target
           title: By target node
         - name: gradient
-          title: Gradient (source to target)
+          title: Blended (source-target midpoint)
       default: source
       description:
           R: >
             How to color arcs when nodes are grouped. 'Source' colors arcs by source node's group,
-            'Target' by target node's group, 'Gradient' creates a gradient from source to target colors.
+            'Target' by target node's group, 'Blended' uses the RGB midpoint between source and target group colors.
             Only applies when Node color by group is enabled.
 
     - name: colorByGroup

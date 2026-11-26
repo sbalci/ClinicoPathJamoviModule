@@ -4,10 +4,17 @@
 
 library(testthat)
 
-# A jamovi analysis reports bad input in a results panel rather than throwing, so
-# expect_error()/expect_condition() here asserted the OPPOSITE of the desired
-# behaviour - they passed only when the analysis crashed.
-lc_todo <- function(res) gsub("[[:space:]]+", " ", gsub("<[^>]*>", " ", as.character(res$todo$content)))
+# Data-quality alerts are surfaced via native jmvcore::Notice items; fatal
+# validation failures propagate via jmvcore::reject() to jamovi's error banner.
+lc_todo <- function(res) {
+  notice_txt <- vapply(
+    Filter(function(item) inherits(item, "Notice"), res$items),
+    function(item) as.character(if (is.null(item$content)) "" else item$content),
+    character(1)
+  )
+  todo_txt <- as.character(if (is.null(res$todo$content)) "" else res$todo$content)
+  gsub("[[:space:]]+", " ", gsub("<[^>]*>", " ", paste(c(notice_txt, todo_txt), collapse = " ")))
+}
 
 
 test_that("linechart handles missing data in x variable", {
@@ -59,52 +66,46 @@ test_that("linechart handles missing data in group variable", {
   expect_match(lc_todo(res), "excluded because of missing values")
 })
 
-test_that("linechart handles two time points", {
+test_that("linechart rejects two time points below 3-observation minimum", {
 
-  # Minimal time series
+  # Below minimum 3 observations
   minimal_data <- data.frame(
     time = c(1, 2),
     value = c(10, 15)
   )
 
-  result <- linechart(
-    data = minimal_data,
-    xvar = "time",
-    yvar = "value"
+  expect_error(
+    linechart(data = minimal_data, xvar = "time", yvar = "value"),
+    "At least 3 complete observations"
   )
-
-  expect_s3_class(result, "linechartResults")
 })
 
 test_that("linechart handles single time point", {
 
-  # Only one time point
+  # Only one time point (below 3-observation minimum -> rejects cleanly)
   single_point <- data.frame(
     time = 1,
     value = 10
   )
 
-  # One row is below the 3-observation minimum. The analysis reports that in the
-  # panel rather than throwing, so expect_error() asserted the opposite.
-  expect_match(lc_todo(linechart(data = single_point, xvar = "time", yvar = "value")),
-               "At least 3 complete observations")
+  expect_error(
+    linechart(data = single_point, xvar = "time", yvar = "value"),
+    "At least 3 complete observations"
+  )
 })
 
-test_that("linechart handles constant y values", {
+test_that("linechart rejects constant y values", {
 
-  # All y values the same
+  # All y values the same -> zero variation rejects cleanly
   const_data <- data.frame(
     time = 1:20,
     value = rep(10, 20)
   )
 
-  result <- linechart(
-    data = const_data,
-    xvar = "time",
-    yvar = "value"
+  expect_error(
+    linechart(data = const_data, xvar = "time", yvar = "value"),
+    "no variation"
   )
-
-  expect_s3_class(result, "linechartResults")
 })
 
 test_that("linechart handles Inf values in y", {

@@ -62,6 +62,7 @@ result <- linechart(
   data = lab_data,
   xvar = "days_post_treatment",
   yvar = "white_blood_cell_count",
+  showRefline = TRUE,
   refline = 4000,
   reflineLabel = "Normal Lower Limit"
 )

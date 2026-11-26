@@ -3,7 +3,15 @@
 
 library(testthat)
 
-lc_todo <- function(res) gsub("[[:space:]]+", " ", gsub("<[^>]*>", " ", as.character(res$todo$content)))
+lc_todo <- function(res) {
+  notice_txt <- vapply(
+    Filter(function(item) inherits(item, "Notice"), res$items),
+    function(item) as.character(if (is.null(item$content)) "" else item$content),
+    character(1)
+  )
+  todo_txt <- as.character(if (is.null(res$todo$content)) "" else res$todo$content)
+  gsub("[[:space:]]+", " ", gsub("<[^>]*>", " ", paste(c(notice_txt, todo_txt), collapse = " ")))
+}
 
 
 # Helper functions for testing
@@ -309,10 +317,10 @@ describe("linechart Integration", {
       value = c(10, 15)
     )
 
-    # jmvcore::reject() is caught by .run() and written into the `todo` panel;
-    # it does not propagate as an R error, so expect_error() passed only on a crash.
-    expect_match(lc_todo(linechart(data = data, xvar = "time", yvar = "value")),
-                 "At least 3")
+    expect_error(
+      linechart(data = data, xvar = "time", yvar = "value"),
+      "At least 3"
+    )
   })
 
   test_that("linechart rejects zero variance data", {
@@ -326,8 +334,10 @@ describe("linechart Integration", {
       value = rep(50, 10)
     )
 
-    expect_match(lc_todo(linechart(data = data, xvar = "time", yvar = "value")),
-                 "no variation")
+    expect_error(
+      linechart(data = data, xvar = "time", yvar = "value"),
+      "no variation"
+    )
   })
 })
 

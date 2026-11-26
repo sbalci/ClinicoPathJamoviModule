@@ -56,10 +56,10 @@ test_that("seed-dependent jjstatsplot statistics show the seed that drew them", 
   two <- droplevels(d[d$g != "c", ])
   expect_match(run("jjdotplotstats", two, dep = "y", group = "g", typestatistics = "bayes", seed = 777,
                    showexplanation = TRUE)$results$explanation$content,
-               shown, fixed = TRUE)
+               "random seed 777", fixed = TRUE)
 
   ridges <- run("jjridges", d, x_var = "y", y_var = "g", show_stats = TRUE, effsize_type = "cliff_delta", seed = 777)
-  expect_true(shown %in% unname(vapply(ridges$results$tests$notes, function(x) x$note, "")))
+  expect_true(any(grepl(shown, vapply(ridges$results$tests$notes, function(x) x$note, ""), fixed = TRUE)))
 })
 
 # Two more surfaces carry seed-dependent numbers besides the subtitle: the Bayes-factor caption a
@@ -99,11 +99,20 @@ test_that("the Bayes-factor caption, contingency plots and centrality intervals 
 
   # contingency tables: Bayesian subtitle, and the Bayes-factor caption of a frequentist run
   expect_true(has_seed(captions(run("jjbarstats", d, dep = "f", group = "g",
-                                    typestatistics = "bayes", seed = 777))))
+                                    typestatistics = "bayes", resultssubtitle = TRUE, seed = 777))))
   expect_true(has_seed(captions(run("jjbarstats", d, dep = "f", group = "g",
-                                    typestatistics = "parametric", bfmessage = TRUE, seed = 777))))
+                                    typestatistics = "parametric", resultssubtitle = TRUE,
+                                    bfmessage = TRUE, seed = 777))))
+  # ggbarstats samples only when it draws the subtitle: with it off, no seed may be claimed
+  expect_false(has_seed(captions(run("jjbarstats", d, dep = "f", group = "g",
+                                     typestatistics = "bayes", resultssubtitle = FALSE, seed = 777))))
+  expect_false(has_seed(captions(run("jjbarstats", d, dep = "f", group = "g",
+                                     typestatistics = "parametric", resultssubtitle = FALSE,
+                                     bfmessage = TRUE, seed = 777))))
   expect_true(has_seed(captions(run("jjpiestats", d, dep = "f", group = "g",
-                                    typestatistics = "bayes", seed = 777), ".plot1")))
+                                    typestatistics = "bayes", resultssubtitle = TRUE, seed = 777), ".plot1")))
+  expect_false(has_seed(captions(run("jjpiestats", d, dep = "f", group = "g",
+                                     typestatistics = "bayes", resultssubtitle = FALSE, seed = 777), ".plot1")))
 
   # the Bayes-factor caption of a parametric two-group comparison is sampled too
   expect_true(has_seed(captions(run("jjbetweenstats", d, dep = "y", group = "g",
