@@ -396,8 +396,8 @@ Uses `senExposureCase`/`specExposureCase` for the case row and `senExposureContr
 | Measure | Formula | Null value | Bias % formula |
 |---|---|---|---|
 | Odds Ratio (OR) | `(a * d) / (b * c)` | 1.0 | `(ln(OR_obs) - ln(OR_adj)) / |ln(OR_adj)| * 100` |
-| Risk Ratio (RR) | `(a/(a+b)) / (c/(c+d))` | 1.0 | `(ln(RR_obs) - ln(RR_adj)) / |ln(RR_adj)| * 100` |
-| Risk Difference (RD) | `a/(a+b) - c/(c+d)` | 0.0 | `(RD_obs - RD_adj) / |RD_adj| * 100` |
+| Risk Ratio (RR) | `(a/(a+c)) / (b/(b+d))` | 1.0 | `(ln(RR_obs) - ln(RR_adj)) / |ln(RR_adj)| * 100` |
+| Risk Difference (RD) | `a/(a+c) - b/(b+d)` | 0.0 | `(RD_obs - RD_adj) / |RD_adj| * 100` |
 
 A 0.5 continuity correction is added to all cells before computing the observed (crude) effect. Corrected cells are already floored at 0.5 during the matrix inversion step.
 
