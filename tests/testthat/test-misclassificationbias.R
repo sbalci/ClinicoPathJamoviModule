@@ -121,6 +121,12 @@ test_that("Risk ratio and risk difference condition on exposure (a/(a+c) vs b/(b
   expected_obs_rr <- ((45 + 0.5) / (45 + 455 + 1)) / ((55 + 0.5) / (55 + 945 + 1))
   expect_equal(rr_df$observed[1], expected_obs_rr, tolerance = 1e-6)
   expect_equal(rr_df$adjusted[1], 2.0, tolerance = 1e-6)
+  expect_equal(.misclassBiasDirection(rr_df$observed[1], rr_df$adjusted[1], "rr"), "toward")
+
+  res_or <- mb(d, outcome = "outcome", outcomeLevel = "Case",
+               exposure = "exposure", exposureLevel = "Exp",
+               senExposure = 0.80, specExposure = 0.90)
+  expect_equal(res_or$biasAnalysis$asDF$adjusted[1], 950/450)
 
   res_rd <- mb(d, outcome = "outcome", outcomeLevel = "Case",
                exposure = "exposure", exposureLevel = "Exp",
@@ -201,4 +207,21 @@ test_that("Missing data handled without crash", {
     mb(d, outcome = "outcome", outcomeLevel = "Case",
        exposure = "exposure", exposureLevel = "Exp")
   )
+})
+
+test_that("direction distinguishes attenuation, exaggeration, equality and reversal", {
+  expect_equal(.misclassBiasDirection(0.75, 0.50, "or"), "toward")
+  expect_equal(.misclassBiasDirection(0.50, 0.75, "or"), "away")
+  expect_equal(.misclassBiasDirection(2, 2 + 1e-12, "rr"), "unchanged")
+  expect_equal(.misclassBiasDirection(0.5, 2, "rr"), "reversal")
+  expect_equal(.misclassBiasDirection(-0.05, -0.10, "rd"), "toward")
+  expect_equal(.misclassBiasDirection(0.05, -0.10, "rd"), "reversal")
+  expect_equal(.misclassBiasDirection(0, 1, "rr"), "undefined")
+})
+
+test_that("bias percentage is undefined at the adjusted null", {
+  expect_identical(.misclassBiasPercent(1.3, 1, "rr"), NA_real_)
+  expect_identical(.misclassBiasPercent(1, 1, "or"), NA_real_)
+  expect_identical(.misclassBiasPercent(0.2, 0, "rd"), NA_real_)
+  expect_equal(.misclassBiasPercent(0.05, 0.1, "rd"), -50)
 })
