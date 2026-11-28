@@ -14,6 +14,7 @@ for (rel_dir in c("../../R", "R")) {
   if (file.exists(file.path(rel_dir, "lassocox.b.R"))) {
     source(file.path(rel_dir, "utils.R"))
     source(file.path(rel_dir, "utils-formula.R"))
+    source(file.path(rel_dir, "utils-survival-tables.R"))
     source(file.path(rel_dir, "lassocox.h.R"))
     source(file.path(rel_dir, "lassocox.b.R"))
     break
@@ -160,8 +161,12 @@ test_that("C01-C22: modelSummary, coefficients, performance, variableImportance,
   # just a separately fitted glmnet reference. Restore zero entries omitted by the table.
   beta <- setNames(numeric(ncol(X)), colnames(X))
   coef_df <- res$coefficients$asDF
-  beta[coef_df$variable] <- coef_df$coefficient
-  expect_equal(beta, reference_beta, tolerance = 1e-12)
+  # Row labels read "x2: High (vs Low)"; map by the encoding table's design-column names.
+  enc_df <- as.data.frame(res$encoding)
+  beta[enc_df$column[enc_df$selected == "Yes"]] <- coef_df$coefficient
+  # The module centres the design before coxnet, so it agrees with this uncentred
+  # fit to optimizer precision, not bitwise; the KKT check below is the exact oracle.
+  expect_equal(beta, reference_beta, tolerance = 1e-3)
   sel <- which(beta != 0)
   expect_true(length(sel) > 0)
 
