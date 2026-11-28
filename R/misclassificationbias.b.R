@@ -1,3 +1,29 @@
+# Compare the observed estimate with the estimate under the assumed error rates.
+# Ratios are compared on the log scale; differences use the original scale.
+.misclassBiasScale <- function(value, measure) {
+    if (!is.finite(value) || (measure != "rd" && value <= 0)) return(NA_real_)
+    if (measure == "rd") value else log(value)
+}
+
+.misclassBiasDirection <- function(observed, adjusted, measure,
+                                  tolerance = sqrt(.Machine$double.eps)) {
+    obs <- .misclassBiasScale(observed, measure)
+    adj <- .misclassBiasScale(adjusted, measure)
+    if (!is.finite(obs) || !is.finite(adj)) return("undefined")
+    if ((obs > tolerance && adj < -tolerance) ||
+        (obs < -tolerance && adj > tolerance)) return("reversal")
+    distance_change <- abs(obs) - abs(adj)
+    if (abs(distance_change) <= tolerance) return("unchanged")
+    if (distance_change < 0) "toward" else "away"
+}
+
+.misclassBiasPercent <- function(observed, adjusted, measure) {
+    obs <- .misclassBiasScale(observed, measure)
+    adj <- .misclassBiasScale(adjusted, measure)
+    if (!is.finite(obs) || !is.finite(adj) || adj == 0) return(NA_real_)
+    (obs - adj) / abs(adj) * 100
+}
+
 #' @title Misclassification Bias Sensitivity Analysis
 #' @description
 #' Assesses the impact of non-differential or differential misclassification
@@ -100,6 +126,10 @@ misclassificationbiasClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R
 
             # ── 5. Range analysis ──────────────────────────────────────────
             if (self$options$rangeAnalysis) {
+                if (self$options$misclassType == "differential") {
+                    private$.addNotice("INFO", "Sensitivity Range Scenarios",
+                        .("The range table and plot use the same sensitivity and specificity in cases and noncases. They do not vary the group-specific rates used for the main estimate."))
+                }
                 private$.populateRangeAnalysis(data)
             }
 
@@ -238,7 +268,12 @@ misclassificationbiasClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R
                 d_adj <- n0 - c_adj
             }
 
-            # Ensure non-negative (can happen with extreme correction)
+            if (any(c(a_adj, b_adj, c_adj, d_adj) < 0.5)) {
+                private$.addNotice("WARNING", "Corrected Cell Counts Floored",
+                    .("At least one raw corrected count was below 0.5 and was raised to 0.5. This can change the group totals; check whether the assumed error rates are compatible with the observed table before interpreting the results."))
+            }
+
+            # Preserve the existing numerical floor.
             a_adj <- max(a_adj, 0.5)
             b_adj <- max(b_adj, 0.5)
             c_adj <- max(c_adj, 0.5)
@@ -345,12 +380,7 @@ misclassificationbiasClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R
             obs_val <- switch(measure, "or" = obs$or, "rr" = obs$rr, "rd" = obs$rd)
             adj_val <- switch(measure, "or" = adj$or, "rr" = adj$rr, "rd" = adj$rd)
 
-            # Bias percentage
-            if (measure == "rd") {
-                bias_pct <- if (adj_val != 0) ((obs_val - adj_val) / abs(adj_val)) * 100 else NA
-            } else {
-                bias_pct <- if (adj_val != 0) ((log(obs_val) - log(adj_val)) / abs(log(adj_val))) * 100 else NA
-            }
+            bias_pct <- .misclassBiasPercent(obs_val, adj_val, measure)
 
             # Monte Carlo CIs
             ci <- private$.simulateCIs(data)
@@ -367,14 +397,16 @@ misclassificationbiasClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R
                 bias_pct = bias_pct
             ))
 
-            # Direction of bias
-            if (measure %in% c("or", "rr")) {
-                if (abs(log(obs_val)) > abs(log(adj_val))) {
-                    table$setNote("direction", .("Non-differential misclassification biased the effect TOWARD the null (attenuated)."))
-                } else {
-                    table$setNote("direction", .("Misclassification biased the effect AWAY from the null (exaggerated)."))
-                }
-            }
+            table$setNote("direction", private$.directionText(obs_val, adj_val, measure))
+        },
+
+        .directionText = function(obs_val, adj_val, measure) {
+            switch(.misclassBiasDirection(obs_val, adj_val, measure),
+                toward = .("The observed estimate is closer to the null than the bias-adjusted estimate."),
+                away = .("The observed estimate is farther from the null than the bias-adjusted estimate."),
+                unchanged = .("The observed and bias-adjusted estimates are equally distant from the null."),
+                reversal = .("The observed and bias-adjusted estimates are on opposite sides of the null."),
+                undefined = .("The direction relative to the null could not be determined."))
         },
 
         .populateRangeAnalysis = function(data) {
@@ -408,11 +440,7 @@ misclassificationbiasClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R
                     eff <- private$.computeEffects(a_c, b_c, c_c, d_c)
                     adj_val <- switch(measure, "or" = eff$or, "rr" = eff$rr, "rd" = eff$rd)
 
-                    if (measure == "rd") {
-                        bias_pct <- if (adj_val != 0) ((obs_val - adj_val) / abs(adj_val)) * 100 else NA
-                    } else {
-                        bias_pct <- if (adj_val > 0) ((log(obs_val) - log(adj_val)) / abs(log(adj_val))) * 100 else NA
-                    }
+                    bias_pct <- .misclassBiasPercent(obs_val, adj_val, measure)
 
                     row_key <- row_key + 1
                     table$addRow(rowKey = row_key, values = list(
@@ -450,20 +478,15 @@ misclassificationbiasClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R
                 "<li>The <strong>bias-adjusted ", measure_label, "</strong> is ",
                 sprintf("%.3f", adj_val), "</li>",
                 "</ul>",
-                "<h5>Clinical Significance</h5>"
+                "<h5>Comparison under the specified misclassification assumptions</h5>",
+                "<p>", private$.directionText(obs_val, adj_val, measure), "</p>"
             )
 
-            if (measure %in% c("or", "rr")) {
-                if (abs(log(adj_val)) > abs(log(obs_val))) {
-                    html <- paste0(html,
-                        "<p>The true effect is <strong>stronger</strong> than observed. ",
-                        "Non-differential misclassification attenuated the association toward the null. ",
-                        "The observed result underestimates the true relationship.</p>")
-                } else {
-                    html <- paste0(html,
-                        "<p>The bias-adjusted effect is similar to or weaker than observed, ",
-                        "suggesting the classification error has modest impact.</p>")
-                }
+            if (measure %in% c("rr", "rd")) {
+                html <- paste0(html,
+                    "<p>Population risks require denominators that represent the source cohort. ",
+                    "For outcome-sampled case-control data, this analysis does not account for sampling fractions; ",
+                    "the risk ratio and risk difference are sample contrasts, not population risk estimates.</p>")
             }
 
             html <- paste0(html,
