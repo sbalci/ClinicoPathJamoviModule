@@ -252,8 +252,8 @@ misclassificationbiasClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R
         # ══════════════════════════════════════════════════════════════════
         .computeEffects = function(a, b, c, d) {
             or_val <- (a * d) / (b * c)
-            rr_val <- (a / (a + b)) / (c / (c + d))
-            rd_val <- a / (a + b) - c / (c + d)
+            rr_val <- (a / (a + c)) / (b / (b + d))
+            rd_val <- a / (a + c) - b / (b + d)
             list(or = or_val, rr = rr_val, rd = rd_val)
         },
 
