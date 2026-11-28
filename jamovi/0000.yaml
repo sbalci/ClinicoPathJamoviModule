@@ -1066,6 +1066,20 @@ analyses:
       Kaplan-Meier groups. A cut-off chosen from the same data overstates the
       effect and needs independent validation. These methods describe
       associations and do not establish causality.
+  - title: Delayed-Entry Cox Regression
+    name: delayedentrycox
+    ns: ClinicoPath
+    menuGroup: SurvivalD
+    menuSubgroup: ClinicoPath Survival
+    menuTitle: Delayed-Entry Cox Regression
+    menuSubtitle: Cox regression with explicit entry and exit times
+    category: analyses
+    description: >-
+      Fits Cox regression with left truncation (delayed entry) for one
+      independent participant per row. Enter start and stop times from the same
+      origin in the same units. Stop is the event or censoring time, not
+      duration since entry. Only baseline covariates and one binary endpoint are
+      supported.
   - title: Multivariable Survival Analysis
     name: multisurvival
     ns: ClinicoPath

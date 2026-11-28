@@ -1,0 +1,54 @@
+---
+name: delayedentrycox
+title: Delayed-Entry Cox Regression
+menuGroup: SurvivalD
+menuSubgroup: ClinicoPath Survival
+menuSubtitle: Cox regression with explicit entry and exit times
+version: '1.1.5'
+jas: '1.2'
+
+description:
+    main: >-
+        Fits Cox regression with left truncation (delayed entry) for one independent participant per row. Enter start and stop times from the same origin in the same units. Stop is the event or censoring time, not duration since entry. Only baseline covariates and one binary endpoint are supported.
+
+options:
+    - name: data
+      type: Data
+      description:
+          R: A data frame with one independent participant per row.
+    - name: entrytime
+      title: 'Entry Time'
+      type: Variable
+      default: null
+      suggested: [continuous]
+      permitted: [numeric]
+      description:
+          R: >-
+              Numeric entry time since the shared origin.
+    - name: exittime
+      title: 'Event or Censoring Time'
+      type: Variable
+      default: null
+      suggested: [continuous]
+      permitted: [numeric]
+      description:
+          R: >-
+              Numeric exit time since the same origin, in the same units as entry time.
+    - name: event
+      title: 'Event (0 = censored, 1 = event)'
+      type: Variable
+      default: null
+      suggested: [nominal, continuous]
+      permitted: [factor, numeric]
+      description:
+          R: >-
+              Binary event indicator: 0 = censored, 1 = event. Logical FALSE/TRUE or factor labels 0/1 also work.
+    - name: predictors
+      title: 'Baseline Covariates'
+      type: Variables
+      default: null
+      suggested: [continuous, nominal, ordinal]
+      permitted: [factor, numeric]
+      description:
+          R: >-
+              Numeric or categorical baseline predictors. Categorical predictors use the first observed factor level as the reference (in factor level order).

@@ -1,0 +1,54 @@
+---
+name: delayedentrycox
+title: Delayed-Entry Cox Regression
+jrs: '1.1'
+
+items:
+    - name: guidance
+      title: About This Analysis
+      type: Html
+    - name: sample
+      title: Analysis Sample
+      type: Table
+      visible: '(length(entrytime) > 0 && length(exittime) > 0 && length(event) > 0 && length(predictors) > 0)'
+      rows: 0
+      clearWith: [entrytime, exittime, event, predictors]
+      columns:
+        - name: participants
+          title: Participants
+          type: integer
+        - name: events
+          title: Events
+          type: integer
+        - name: censored
+          title: Censored
+          type: integer
+    - name: estimates
+      title: Hazard Ratios
+      type: Table
+      visible: '(length(entrytime) > 0 && length(exittime) > 0 && length(event) > 0 && length(predictors) > 0)'
+      rows: 0
+      clearWith: [entrytime, exittime, event, predictors]
+      columns:
+        - name: term
+          title: Predictor
+          type: text
+        - name: level
+          title: Level
+          type: text
+        - name: reference
+          title: Reference
+          type: text
+        - name: hr
+          title: Hazard Ratio
+          type: number
+        - name: lower
+          title: 95% CI Lower
+          type: number
+        - name: upper
+          title: 95% CI Upper
+          type: number
+        - name: p
+          title: p
+          type: number
+          format: zto,pvalue
