@@ -5,6 +5,12 @@ prevents them. Newest first. Release notes for users live in `NEWS.md`.
 
 ---
 
+## 2026-11-28 — last three shipped reject-swallow sites (pathagreement, psychopdaROC, tableone)
+
+- **Failure mode:** after multisurvival, `reject_swallowed` still listed 3 shipped sites, none of them a live swallowed rejection. `pathagreement::.calculatePABAK()` rejected fewer than 2 raters, which `.run()` already rejects first: a dead guard, now deleted. `psychopdaROC` wrapped a `.prepareVarData()` re-call in a catch-all returning `character(0)`. Every marker had already passed that call unguarded in the main loop, so the handler could only ever swallow a restart; it is removed. `tableone`'s arsenal path rejected from inside its `tryCatch`, so the handler re-wrapped the message as "Error creating arsenal table: Formatting changed missing values…". The check now runs before the `tryCatch`.
+- **Detection signal:** `tools/release_gate.py` `reject_swallowed`, shipped count 3 → 0 (umbrella all-analyses view 47 → 44; the 44 are all in D/P-parked analyses).
+- **Prevention rule:** a guard that `.run()` already enforces is dead code inside a sub-analysis, so delete it rather than catch it. Keep a validation step outside the `tryCatch` that wraps the third-party call. Also, I told the user "14 remaining shipped sites" from a misread count; read the shipped number off the gate before quoting it.
+
 ## 2026-11-28 — multisurvival reject-swallow sites
 
 ### Eleven flagged sites: one real rejection, four swallowed restarts, and a detector that could not see a cache
