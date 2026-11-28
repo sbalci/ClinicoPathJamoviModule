@@ -5,6 +5,12 @@ prevents them. Newest first. Release notes for users live in `NEWS.md`.
 
 ---
 
+## 2026-11-28 — archived indirect dependency broke every CI run (mltools)
+
+- **Failure mode:** CRAN archived `mltools` on 2026-11-11. `bcm-uga/hdmax2` (in Imports for the draft `causalmediation`) imports it, so pak's `lockfile_create("deps::.")` could not solve and every Ubuntu R check failed in ~90 s, on any PR, whatever it changed. The first fix, `cran/mltools` in `Remotes:` alone, still failed: pak applies the root's `Remotes` only to packages the root itself declares, never to a dependency's dependency.
+- **Detection signal:** "Could not solve package dependencies … mltools: Can't find package called mltools" in the `setup-r-dependencies` step. A one-line vignette PR (#131) failing the same way as a code PR (#133) showed it was infrastructure.
+- **Prevention rule:** when a dependency of a dependency is archived, declare it in `Imports` and add `cran/<pkg>` to `Remotes`, which also fixes `install_github` for users. Verify with `pak::lockfile_create("deps::.", lib = <empty dir>)`: against the normal library pak reports the installed copy and passes when CI would fail.
+
 ## 2026-11-28 — last three shipped reject-swallow sites (pathagreement, psychopdaROC, tableone)
 
 - **Failure mode:** after multisurvival, `reject_swallowed` still listed 3 shipped sites, none of them a live swallowed rejection. `pathagreement::.calculatePABAK()` rejected fewer than 2 raters, which `.run()` already rejects first: a dead guard, now deleted. `psychopdaROC` wrapped a `.prepareVarData()` re-call in a catch-all returning `character(0)`. Every marker had already passed that call unguarded in the main loop, so the handler could only ever swallow a restart; it is removed. `tableone`'s arsenal path rejected from inside its `tryCatch`, so the handler re-wrapped the message as "Error creating arsenal table: Formatting changed missing values…". The check now runs before the `tryCatch`.
