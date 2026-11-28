@@ -163,7 +163,7 @@ This is derived from the misclassification model: if the observed exposure count
 
 For differential misclassification, the same formula is applied separately to cases (using `senExposureCase`/`specExposureCase`) and controls (using `senExposureControl`/`specExposureControl`).
 
-Corrected cells are floored at 0.5 to avoid negative counts from extreme correction parameters.
+Corrected cells are floored at 0.5. The main estimate warns when the floor is applied because it can change the outcome-group totals and obscure incompatibility with the assumed error rates. The current simulation resamples observations at fixed sensitivity and specificity; its intervals do not propagate uncertainty in those inputs.
 
 ### 4.4 Monte Carlo Confidence Intervals
 
@@ -396,23 +396,25 @@ Uses `senExposureCase`/`specExposureCase` for the case row and `senExposureContr
 | Measure | Formula | Null value | Bias % formula |
 |---|---|---|---|
 | Odds Ratio (OR) | `(a * d) / (b * c)` | 1.0 | `(ln(OR_obs) - ln(OR_adj)) / |ln(OR_adj)| * 100` |
-| Risk Ratio (RR) | `(a/(a+b)) / (c/(c+d))` | 1.0 | `(ln(RR_obs) - ln(RR_adj)) / |ln(RR_adj)| * 100` |
-| Risk Difference (RD) | `a/(a+b) - c/(c+d)` | 0.0 | `(RD_obs - RD_adj) / |RD_adj| * 100` |
+| Risk Ratio (RR) | `(a/(a+c)) / (b/(b+d))` | 1.0 | `(ln(RR_obs) - ln(RR_adj)) / |ln(RR_adj)| * 100` |
+| Risk Difference (RD) | `a/(a+c) - b/(b+d)` | 0.0 | `(RD_obs - RD_adj) / |RD_adj| * 100` |
 
 A 0.5 continuity correction is added to all cells before computing the observed (crude) effect. Corrected cells are already floored at 0.5 during the matrix inversion step.
 
-### 9.4 Direction of Bias Footnote
+RR and RD require risks identifiable in the source population. Use cohort-representative exposure denominators. In an outcome-sampled case-control dataset, these are sample contrasts unless the design or sampling information recovers population risks; this analysis does not apply sampling weights. The odds ratio is a separate measure and is not a substitute for a risk ratio.
 
-For OR/RR, the `biasAnalysis` table includes a footnote:
-- If `|ln(obs)| > |ln(adj)|`: "Non-differential misclassification biased the effect TOWARD the null (attenuated)."
-- Otherwise: "Misclassification biased the effect AWAY from the null (exaggerated)."
+### 9.4 Direction Relative to the Null
+
+The table and interpretation use the same comparison: absolute log distance from 1 for OR/RR, and absolute distance from 0 for RD. A closer observed estimate is toward the null, a farther one is away, and numerically equal distances are reported as equal. Estimates on opposite sides of the null are reported as a reversal. These are comparisons under the specified misclassification assumptions, not claims about the true effect. Bias percentage is undefined when the adjusted effect equals the null.
 
 ### 9.5 Sensitivity Range Analysis
 
 Parses comma-separated values from `senRange` and `specRange`, creates the Cartesian product, and for each combination where `sen + spec > 1`:
 1. Applies the correction formula
 2. Computes the adjusted effect measure
-3. Computes bias % relative to the observed value
+3. Computes the signed difference relative to the absolute adjusted effect on the relevant scale; it is undefined at the adjusted null.
+
+The range grid and heatmap apply each sensitivity/specificity pair to both outcomes, even when differential rates are selected for the main estimate. They do not vary the case and noncase rates independently.
 
 The heatmap uses a diverging blue-white-red color scale centered at the null value (1 for OR/RR, 0 for RD).
 
@@ -560,7 +562,7 @@ Note: Corrected cells are non-integer because they represent estimated true coun
 |---|---|---|---|---|---|
 | Odds Ratio | 4.775 | 12.954 | 6.321 | 29.874 | -41.2 |
 
-Negative bias % means the observed effect is attenuated relative to the corrected value.
+A negative bias percentage means the observed value is lower on the calculation scale, not necessarily closer to the null. Use the direction comparison rather than the sign of this percentage.
 
 #### rangeTable (variable rows)
 

@@ -100,6 +100,44 @@ test_that("Risk difference effect measure works", {
   expect_true(nrow(result$biasAnalysis$asDF) == 1)
 })
 
+test_that("Risk ratio and risk difference condition on exposure (a/(a+c) vs b/(b+d))", {
+  # True table: A = 50, B = 50 (100 cases); C = 450, D = 950 (1400 controls)
+  # True risk among exposed = 50 / 500 = 0.10; unexposed = 50 / 1000 = 0.05
+  # True RR = 2.0, True RD = 0.05
+  # Under non-differential misclassification (sen = 0.80, spec = 0.90):
+  #   a_obs = 0.80 * 50 + 0.10 * 50 = 45,  b_obs = 55
+  #   c_obs = 0.80 * 450 + 0.10 * 950 = 455, d_obs = 945
+  d <- data.frame(
+    outcome = factor(c(rep("Case", 100), rep("Control", 1400))),
+    exposure = factor(c(rep("Exp", 45), rep("Unexp", 55),
+                        rep("Exp", 455), rep("Unexp", 945)))
+  )
+
+  res_rr <- mb(d, outcome = "outcome", outcomeLevel = "Case",
+               exposure = "exposure", exposureLevel = "Exp",
+               senExposure = 0.80, specExposure = 0.90,
+               effectMeasure = "rr")
+  rr_df <- res_rr$biasAnalysis$asDF
+  expected_obs_rr <- ((45 + 0.5) / (45 + 455 + 1)) / ((55 + 0.5) / (55 + 945 + 1))
+  expect_equal(rr_df$observed[1], expected_obs_rr, tolerance = 1e-6)
+  expect_equal(rr_df$adjusted[1], 2.0, tolerance = 1e-6)
+  expect_equal(.misclassBiasDirection(rr_df$observed[1], rr_df$adjusted[1], "rr"), "toward")
+
+  res_or <- mb(d, outcome = "outcome", outcomeLevel = "Case",
+               exposure = "exposure", exposureLevel = "Exp",
+               senExposure = 0.80, specExposure = 0.90)
+  expect_equal(res_or$biasAnalysis$asDF$adjusted[1], 950/450)
+
+  res_rd <- mb(d, outcome = "outcome", outcomeLevel = "Case",
+               exposure = "exposure", exposureLevel = "Exp",
+               senExposure = 0.80, specExposure = 0.90,
+               effectMeasure = "rd")
+  rd_df <- res_rd$biasAnalysis$asDF
+  expected_obs_rd <- ((45 + 0.5) / (45 + 455 + 1)) - ((55 + 0.5) / (55 + 945 + 1))
+  expect_equal(rd_df$observed[1], expected_obs_rd, tolerance = 1e-6)
+  expect_equal(rd_df$adjusted[1], 0.05, tolerance = 1e-6)
+})
+
 # ═══════════════════════════════════════════════════════════════════════════════
 # 5. Differential misclassification
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -169,4 +207,21 @@ test_that("Missing data handled without crash", {
     mb(d, outcome = "outcome", outcomeLevel = "Case",
        exposure = "exposure", exposureLevel = "Exp")
   )
+})
+
+test_that("direction distinguishes attenuation, exaggeration, equality and reversal", {
+  expect_equal(.misclassBiasDirection(0.75, 0.50, "or"), "toward")
+  expect_equal(.misclassBiasDirection(0.50, 0.75, "or"), "away")
+  expect_equal(.misclassBiasDirection(2, 2 + 1e-12, "rr"), "unchanged")
+  expect_equal(.misclassBiasDirection(0.5, 2, "rr"), "reversal")
+  expect_equal(.misclassBiasDirection(-0.05, -0.10, "rd"), "toward")
+  expect_equal(.misclassBiasDirection(0.05, -0.10, "rd"), "reversal")
+  expect_equal(.misclassBiasDirection(0, 1, "rr"), "undefined")
+})
+
+test_that("bias percentage is undefined at the adjusted null", {
+  expect_identical(.misclassBiasPercent(1.3, 1, "rr"), NA_real_)
+  expect_identical(.misclassBiasPercent(1, 1, "or"), NA_real_)
+  expect_identical(.misclassBiasPercent(0.2, 0, "rd"), NA_real_)
+  expect_equal(.misclassBiasPercent(0.05, 0.1, "rd"), -50)
 })

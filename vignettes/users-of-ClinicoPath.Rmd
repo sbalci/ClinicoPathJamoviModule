@@ -114,6 +114,7 @@ https://www.mdpi.com/2072-6643/15/8/1834
 
 # jsurvival
 
+- Healing et al. (2026). [Should I Stay or Should I Go? Differential Risk Responses of a Mutualist Species in Response to Human Disturbance](https://www.mdpi.com/1424-2818/18/11/723). *Diversity*, 18(11), 723. In section 2.4.1, the authors report using jsurvival in jamovi for Cox regression and Kaplan–Meier analysis of time to re-emergence in 304 shrimpgoby trials. Fish still in their burrows at 600 seconds were right-censored.
 
 - Cancer-Specific Survival in Octogenarian Breast Cancer Patients: A Competing Risk Analysis of Prognostic Factors.
 Current Oncology, 33(10), 636. https://doi.org/10.3390/curroncol33100636
