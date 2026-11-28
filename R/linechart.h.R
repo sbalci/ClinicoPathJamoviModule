@@ -219,7 +219,7 @@ linechartResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 options=options,
                 name="naturalSummary",
                 title="Summary",
-                visible="(xvar && yvar)",
+                visible="(length(xvar) > 0 && length(yvar) > 0)",
                 clearWith=list(
                     "xvar",
                     "yvar",
@@ -229,7 +229,7 @@ linechartResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 options=options,
                 name="summary",
                 title="Data Summary",
-                visible="(xvar && yvar)",
+                visible="(length(xvar) > 0 && length(yvar) > 0)",
                 clearWith=list(
                     "xvar",
                     "yvar",
@@ -247,7 +247,7 @@ linechartResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 options=options,
                 name="correlation",
                 title="Correlation Analysis",
-                visible="(xvar && yvar && trendline)",
+                visible="(length(xvar) > 0 && length(yvar) > 0 && trendline)",
                 clearWith=list(
                     "xvar",
                     "yvar",
@@ -285,7 +285,7 @@ linechartResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 options=options,
                 name="assumptions",
                 title="Statistical Assumptions & Guidelines",
-                visible="(xvar && yvar && trendline)",
+                visible="(length(xvar) > 0 && length(yvar) > 0 && trendline)",
                 clearWith=list(
                     "xvar",
                     "yvar",
@@ -298,8 +298,8 @@ linechartResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 width=800,
                 height=600,
                 renderFun=".plot",
-                requiresData=FALSE,
-                visible="(xvar && yvar)",
+                requiresData=TRUE,
+                visible="(length(xvar) > 0 && length(yvar) > 0)",
                 clearWith=list(
                     "xvar",
                     "yvar",

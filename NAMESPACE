@@ -1001,7 +1001,6 @@ importFrom(gtsummary,
   tbl_summary
 )
 importFrom(haven,as_factor)
-importFrom(htmlTable,htmlTable)
 importFrom(htmltools,
   HTML,
   br,

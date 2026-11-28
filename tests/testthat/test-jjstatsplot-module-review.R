@@ -76,11 +76,21 @@ test_that("Glass interval includes the observed variance ratio", {
     x <- c(0, 3, 6, 9, 12); y <- c(2, 3, 4, 5, 6)
     a <- mr_backend("advancedraincloud", data.frame(y = c(x, y), g = rep(1:2, each = 5)),
         y_var = "y", x_var = "g")
-    z <- mr_private(a)$.calculate_effect_size(x, y, "glass_delta")
-    delta <- (mean(x) - mean(y)) / sd(y)
-    variance <- var(x) / (length(x) * var(y)) + 1 / length(y) + delta^2 / (2 * (length(y) - 1))
-    expect_equal(z$ci_lower, delta - qnorm(.975) * sqrt(variance))
-    expect_equal(z$ci_upper, delta + qnorm(.975) * sqrt(variance))
+    # Since 2026-11-12 (0b1dc62da) "glass_delta" standardises by the FIRST group's SD and
+    # "glass_delta_g2" by the second; the table reports both rows ("ref: <group> SD"). This test
+    # predated that and still expected the second group's SD from "glass_delta". Oracle for each:
+    # Var = 1/n_ref + s_other^2 / (n_other * s_ref^2) + delta^2 / (2 * (n_ref - 1))
+    # (heteroscedastic Glass delta, Algina, Keselman & Penfield 2006).
+    glass_ci <- function(ref, other) {
+        delta <- (mean(x) - mean(y)) / sd(ref)
+        variance <- 1 / length(ref) + var(other) / (length(other) * var(ref)) +
+            delta^2 / (2 * (length(ref) - 1))
+        delta + c(-1, 1) * qnorm(.975) * sqrt(variance)
+    }
+    z1 <- mr_private(a)$.calculate_effect_size(x, y, "glass_delta")
+    expect_equal(c(z1$ci_lower, z1$ci_upper), glass_ci(ref = x, other = y))
+    z2 <- mr_private(a)$.calculate_effect_size(x, y, "glass_delta_g2")
+    expect_equal(c(z2$ci_lower, z2$ci_upper), glass_ci(ref = y, other = x))
 })
 
 test_that("lollipop sorting and sample information survive aggregation", {
@@ -190,4 +200,32 @@ test_that("hull separation does not depend on the units chosen for one axis", {
     h2 <- p$.generate_natural_summary(d, "x", "y", "g")
     expect_identical(descriptor(h1), descriptor(h2))
     expect_match(h2, "does not establish biological differences")
+})
+
+# check-module 2026-11-27: statsplot2's specialised-plot fallback handlers caught every error,
+# including a .checkpoint() restart (simpleError, code "restart"), which turned the user's option
+# change into a fallback plot of the old options. The alluvial path checkpoints inside the handler.
+test_that("statsplot2 lets a checkpoint restart escape the plot fallback", {
+    set.seed(11)
+    d <- data.frame(t1 = factor(sample(c("A", "B"), 40, TRUE)),
+                    t2 = factor(sample(c("A", "B"), 40, TRUE)))
+    a <- mr_backend("statsplot2", d, dep = "t2", group = "t1",
+                    direction = "repeated", alluvsty = "t1")
+    p <- mr_private(a)
+    info <- p$.detectAnalysisType()
+    expect_identical(info$plot_type, "repeated_factor_factor")
+    prepared <- p$.prepareDataForPlot(info)
+    expect_s3_class(p$.generatePlot(info, prepared), "ggplot")   # no restart: alluvial plot
+
+    # Ask for a restart once only: if the handler swallows it, the next checkpoint (in the
+    # fallback) passes and the old options' fallback plot comes back with no error at all.
+    calls <- 0L
+    p$.checkpointCB <- function(results) {
+        calls <<- calls + 1L
+        if (calls == 1L) "restart" else NULL
+    }
+    err <- tryCatch(p$.generatePlot(info, prepared), error = function(e) e)
+    expect_s3_class(err, "error")
+    expect_identical(err$code, "restart")
+    expect_identical(calls, 1L)
 })

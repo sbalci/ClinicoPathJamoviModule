@@ -107,6 +107,7 @@ options:
       title: 'Highlight level'
       type: Level
       variable: (group)
+      allowNone: true
       description:
           R: >
             Specific level to highlight in the plot with different color/style. Only used when useHighlight is TRUE.

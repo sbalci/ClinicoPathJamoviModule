@@ -94,8 +94,10 @@ test_that("an unsampled dataset gets no sampling language", {
 test_that("reject() messages substitute their placeholder", {
   # jmvcore::reject()'s second POSITIONAL argument is `code`, not a substitution
   # value, so `reject("... {}", method)` left a literal "{}" on screen.
+  # The reject() now reaches jamovi as an error (2026-11-27): .run() no longer wraps the
+  # detection in a catch-all that copied the message into the warnings panel.
   d <- data.frame(a = rep(5, 50), b = rnorm(50))
-  warn <- as.character(outlierdetection(data = d, vars = c("a", "b"))$warnings$content)
+  warn <- tryCatch({ outlierdetection(data = d, vars = c("a", "b")); "" }, error = conditionMessage)
 
   expect_match(warn, "constant values (no variation): a", fixed = TRUE)
   expect_false(grepl("{}", warn, fixed = TRUE))

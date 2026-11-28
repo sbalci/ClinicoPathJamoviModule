@@ -396,7 +396,7 @@ test_that("non-finite or non-scalar numeric options reject cleanly and early ret
     opts_run <- advancedraincloudOptions$new(y_var = "y", x_var = "g")
     an_run <- advancedraincloudClass$new(options = opts_run, data = d)
     an_run$run()
-    expect_false(is.null(an_run$.__enclos_env__$private$.analysis_data))
+    expect_true(isTRUE(an_run$results$plot$state$ready))
 
     o_xv <- opts_run$option("x_var")
     o_xv$value <- NULL

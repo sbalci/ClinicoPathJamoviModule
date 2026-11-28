@@ -422,7 +422,8 @@ test_that("IR-jwaffle-05: invalid in-place data edit rejects cleanly and invalid
     expect_null(a$.__enclos_env__$private$.cached_plot)
 
     # Normal early return (groups cleared) blanks stale summary
-    a$options$option("groups")$value <- NULL
+    groups_opt <- a$options$option("groups")
+    groups_opt$value <- NULL
     a$.__enclos_env__$private$.run()
     expect_identical(a$results$analysisSummary$content, "")
 })
@@ -484,5 +485,9 @@ test_that("SEC-jwaffle-03: rows < 1 backstop rejects even under init(noThrow=TRU
     o$value <- 0L
     a$init(noThrow = TRUE)
     a$run(noThrow = TRUE)
-    expect_match(a$results$todo$content, "positive integer", fixed = TRUE)
+    # check-module 2026-11-27: the message is the analysis's error state, no longer copied into
+    # the todo panel as well (the user saw it twice).
+    expect_identical(a$status, "error")
+    expect_match(a$results$.__enclos_env__$private$.error, "positive integer", fixed = TRUE)
+    expect_false(grepl("positive integer", a$results$todo$content, fixed = TRUE))
 })

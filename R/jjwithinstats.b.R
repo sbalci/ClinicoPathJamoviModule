@@ -274,7 +274,7 @@ jjwithinstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         .resetMessages = function() {
             private$.messages <- character()
             private$.info_messages <- character()
-            # Don't clear TODO here, as it might hold "Welcome" or "Ready"
+            # Don't clear the todo panel here, as it might hold "Welcome" or "Ready"
             # warning content is cleared
             if (!is.null(self$results$warnings)) {
                 self$results$warnings$setContent("")
@@ -285,15 +285,7 @@ jjwithinstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         # HTML sanitization for security
         .safeHtmlOutput = function(text) {
             if (is.null(text) || length(text) == 0) return("")
-            text <- as.character(text)
-            # Sanitize potentially dangerous characters
-            text <- gsub("&", "&amp;", text, fixed = TRUE)
-            text <- gsub("<", "&lt;", text, fixed = TRUE)
-            text <- gsub(">", "&gt;", text, fixed = TRUE)
-            text <- gsub("\"", "&quot;", text, fixed = TRUE)
-            text <- gsub("'", "&#x27;", text, fixed = TRUE)
-            text <- gsub("/", "&#x2F;", text, fixed = TRUE)
-            return(text)
+            htmltools::htmlEscape(as.character(text), attribute = TRUE)
         },
 
         # Helper to cache data-specific messages
@@ -1207,9 +1199,12 @@ jjwithinstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     }
                 })
                 if (!is.null(private$.subtitleFallback))
-                    private$.accumulateMessage(sprintf(
-                        .("<br> <strong>Note:</strong> the plot subtitle uses the package default (%s), so 'Effect size type' and 'Decimal places' do not affect the reported statistic.<br>"),
-                        private$.safeHtmlOutput(private$.subtitleFallback)))
+                    private$.accumulateMessage(paste0(
+                        "<br><strong>", .("Note:"), "</strong> ",
+                        .fmt(
+                            .("the plot subtitle uses the package default ({reason}), so 'Effect size type' and 'Decimal places' do not affect the reported statistic."),
+                            reason = private$.safeHtmlOutput(private$.subtitleFallback)),
+                        "<br>"))
                 
                 # Only display plots, summary, and clinical interpretation when prepared data is valid
                 has_data <- !is.null(prepared)
@@ -1239,11 +1234,14 @@ jjwithinstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 if (isTRUE(self$options$resultssubtitle) &&
                     num_measurements <= 2 &&
                     self$options$effsizetype %in% c("eta", "omega")) {
-                    private$.accumulateMessage(sprintf(
-                        .("<br><strong>Note:</strong> with two measurements the comparison is a paired t-test, for which partial eta-squared and omega-squared are not defined; '%s' has been reported as %s instead.<br>"),
-                        private$.safeHtmlOutput(self$options$effsizetype),
-                        if (identical(self$options$effsizetype, "eta"))
-                            .("Cohen's d") else .("Hedges' g")))
+                    private$.accumulateMessage(paste0(
+                        "<br><strong>", .("Note:"), "</strong> ",
+                        .fmt(
+                            .("with two measurements the comparison is a paired t-test, for which partial eta-squared and omega-squared are not defined; '{requested}' has been reported as {reported} instead."),
+                            requested = private$.safeHtmlOutput(self$options$effsizetype),
+                            reported = if (identical(self$options$effsizetype, "eta"))
+                                .("Cohen's d") else .("Hedges' g")),
+                        "<br>"))
                 }
 
                 
@@ -1254,7 +1252,7 @@ jjwithinstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     )
                     self$results$interpretation$setContent(clinical_interp)
                 }, error = function(e) {
-                    self$results$interpretation$setContent(.("<br>Clinical interpretation temporarily unavailable<br>"))
+                    self$results$interpretation$setContent(paste0("<br>", .("Clinical interpretation temporarily unavailable"), "<br>"))
                 })
                 
                 # Generate analysis summary with error protection
@@ -1266,7 +1264,7 @@ jjwithinstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     self$results$summary$setContent(
                         paste0(analysis_summary, private$.renderInfoBlock()))
                 }, error = function(e) {
-                    self$results$summary$setContent(.("<br>Analysis summary temporarily unavailable<br>"))
+                    self$results$summary$setContent(paste0("<br>", .("Analysis summary temporarily unavailable"), "<br>"))
                 })
 
                 ### todo ----
@@ -1275,10 +1273,9 @@ jjwithinstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 # sits in the Messages panel, so "Ready for analysis" read as a
                 # contradiction of the warning directly above it.
                 todo <- if (is.null(prepared))
-                    .("<br>Analysis cannot proceed with the current data. See the Messages panel for the reason.<br><hr>")
+                    paste0("<br>", .("Analysis cannot proceed with the current data. See the Messages panel for the reason."), "<br><hr>")
                 else
-                    sprintf(.("<br> Ready for analysis: Violin Plot comparing %d repeated measurements.<br><hr>"),
-                            num_measurements)
+                    paste0("<br>", .fmt(.("Ready for analysis: Violin Plot comparing {n} repeated measurements."), n = num_measurements), "<br><hr>")
 
                 self$results$todo$setContent(todo)
 
@@ -1311,7 +1308,11 @@ jjwithinstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             # Additional validation
             if (nrow(long_data) == 0) {
-                warning_msg <- .("<br>No complete data rows available after removing missing values.<br>Please check your data for missing values in the selected variables.<br><hr>")
+                warning_msg <- paste0(
+                    "<br>", .("No complete data rows available after removing missing values."),
+                    "<br>", .("Please check your data for missing values in the selected variables."),
+                    "<br><hr>"
+                )
                 self$results$todo$setContent(warning_msg)
                 return()
             }
@@ -1416,12 +1417,12 @@ jjwithinstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     .fmt(
                         .("The within-subjects plot could not be created: {error}"),
                         error = private$.safeHtmlOutput(e$message)),
-                    .("<br><br>Please check that:"),
-                    .("<br>\u2022 All measurement variables contain numeric values"),
-                    .("<br>\u2022 Data has at least 3 complete rows"),
-                    .("<br>\u2022 Variables have sufficient variance for statistical tests"),
-                    .("<br>\u2022 No extreme outliers that might affect analysis"),
-                    .("<br><hr>")
+                    "<br><br>", .("Please check that:"),
+                    "<br>\u2022 ", .("All measurement variables contain numeric values"),
+                    "<br>\u2022 ", .("Data has at least 3 complete rows"),
+                    "<br>\u2022 ", .("Variables have sufficient variance for statistical tests"),
+                    "<br>\u2022 ", .("No extreme outliers that might affect analysis"),
+                    "<br><hr>"
                 )
                 self$results$todo$setContent(error_msg)
             })
@@ -1643,7 +1644,7 @@ jjwithinstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     .fmt(
                         .("The ggpubr plot could not be created: {error}"),
                         error = private$.safeHtmlOutput(e$message)),
-                    .("<br>The primary within-subjects plot above is unaffected.<br><hr>")
+                    "<br>", .("The primary within-subjects plot above is unaffected."), "<br><hr>"
                 )
                 self$results$todo$setContent(error_msg)
             })

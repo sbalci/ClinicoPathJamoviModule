@@ -110,13 +110,13 @@ options:
       title: Heatmap Color Theme
       type: List
       options:
-        - title: Viridis (colorblind-safe)
+        - title: Color-blind safe (viridis)
           name: viridis
-        - title: Plasma (colorblind-safe)
+        - title: Color-blind safe (plasma)
           name: plasma
-        - title: Cividis (colorblind-safe)
+        - title: Color-blind safe (cividis)
           name: cividis
-        - title: Blue-White-Red
+        - title: Blue-white-red
           name: bwr
         - title: Red-Yellow-Green (classic)
           name: ryg
@@ -133,7 +133,7 @@ options:
           name: unweighted
         - title: Squared
           name: squared
-        - title: Equal/Linear
+        - title: Equal/linear
           name: equal
       default: unweighted
       description:
@@ -217,9 +217,9 @@ options:
       options:
         - title: Majority rule (more than 50 percent)
           name: majority
-        - title: Super Majority (>=2/3)
+        - title: Super majority (>=2/3)
           name: super_majority
-        - title: Unanimous Only
+        - title: Unanimous only
           name: unanimous
       default: majority
       description:
@@ -294,7 +294,7 @@ options:
       title: Style Distance Metric
       type: List
       options:
-        - title: Percentage Agreement
+        - title: Percentage agreement
           name: agreement
         - title: Spearman correlation (ordinal ratings)
           name: correlation
@@ -580,7 +580,7 @@ options:
       options:
           - title: 'Diagnostic categories (blue-green-gold)'
             name: diagnostic
-          - title: 'Viridis (colorblind-safe)'
+          - title: 'Color-blind safe (viridis)'
             name: viridis
           - title: 'Red-Yellow-Blue (diverging)'
             name: RdYlBu

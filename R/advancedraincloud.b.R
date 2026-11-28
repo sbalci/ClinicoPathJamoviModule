@@ -346,129 +346,9 @@ advancedraincloudClass <- if (requireNamespace("jmvcore")) {
                     private$.addAnalysisNote(.("Longitudinal connections were requested but no ID variable is set; connections were not drawn. Select a Longitudinal ID variable to enable them."))
                 }
 
-                # Prepare analysis data
-                analysis_vars <- c(y_var, x_var)
-                if (!is.null(fill_var) && fill_var != "") {
-                    analysis_vars <- c(analysis_vars, fill_var)
-                }
-                id_needed <- !is.null(id_var) && id_var != "" &&
-                    (isTRUE(self$options$show_longitudinal) || isTRUE(self$options$show_change_scores))
-                if (id_needed) {
-                    analysis_vars <- c(analysis_vars, id_var)
-                }
-                if (!is.null(cov_var) && cov_var != "") {
-                    analysis_vars <- c(analysis_vars, cov_var)
-                }
-                analysis_vars <- unique(analysis_vars[!(is.na(analysis_vars) | analysis_vars == "")])
-
-                # Decode y_var before row subsetting so jamovi column attributes (e.g. "values"
-                # on labelled ordinal/integer factors) survive intact.
-                y_decoded_full <- private$.to_numeric_safe(dataset[[y_var]])
-                analysis_data <- as.data.frame(dataset[analysis_vars], stringsAsFactors = FALSE)
-                cc_mask <- stats::complete.cases(analysis_data)
-                analysis_data <- analysis_data[cc_mask, , drop = FALSE]
-                analysis_data[[y_var]] <- y_decoded_full[cc_mask]
-                if (!is.null(id_var) && id_var != "" && id_var %in% names(dataset) && !(id_var %in% names(analysis_data))) {
-                    analysis_data[[id_var]] <- dataset[[id_var]][cc_mask]
-                }
-
-                if (nrow(analysis_data) == 0) {
-                    jmvcore::reject(.("Error: No complete cases found for the selected variables."))
-                }
-
-                # complete.cases() above follows is.na(), which is TRUE for NaN
-                # but FALSE for Inf, so an infinite value survives into every
-                # mean, SD and axis range. Drop non-finite values and record how
-                # many, so the count can be disclosed rather than vanish.
-                n_before_finite <- nrow(analysis_data)
-                analysis_data <- analysis_data[is.finite(analysis_data[[y_var]]), , drop = FALSE]
-                private$.n_nonfinite <- n_before_finite - nrow(analysis_data)
-                private$.n_missing_excluded <- nrow(dataset) - nrow(analysis_data)
-                if (nrow(analysis_data) == 0)
-                    jmvcore::reject(.("No usable numeric values remain in the dependent variable after removing missing and non-finite entries."))
-                if (private$.n_nonfinite > 0)
-                    private$.addAnalysisNote(sprintf(
-                        .("%d row(s) were excluded because '%s' held a non-finite value (Inf or -Inf), which usually means a division by zero or an out-of-range entry."),
-                        private$.n_nonfinite, y_var))
-
-                if (length(unique(analysis_data[[y_var]])) == 1L) {
-                    zero_var_msg <- .("The Y-axis variable has zero variance (all analyzed values are identical); kernel density shapes and dispersion statistics are degenerate.")
-                    message(zero_var_msg)
-                    private$.addAnalysisNote(zero_var_msg)
-                }
-
-                if (is.character(analysis_data[[x_var]])) {
-                    x_vals <- analysis_data[[x_var]]
-                    analysis_data[[x_var]] <- factor(x_vals, levels = unique(x_vals[!is.na(x_vals)]))
-                } else {
-                    analysis_data[[x_var]] <- droplevels(as.factor(analysis_data[[x_var]]))
-                }
-
-                if (!is.null(fill_var) && fill_var != "" && fill_var %in% names(analysis_data)) {
-                    analysis_data[[fill_var]] <- droplevels(as.factor(analysis_data[[fill_var]]))
-                }
-                if (!is.null(id_var) && id_var != "" && id_var %in% names(analysis_data)) {
-                    analysis_data[[id_var]] <- as.factor(analysis_data[[id_var]])
-                }
-                if (!is.null(cov_var) && cov_var != "" && cov_var %in% names(analysis_data)) {
-                    if (is.numeric(analysis_data[[cov_var]])) {
-                        # Keep numeric for continuous covariate mapping
-                    } else {
-                        analysis_data[[cov_var]] <- droplevels(as.factor(analysis_data[[cov_var]]))
-                    }
-                }
-
-                # Apply log transformation if requested
-                if (self$options$log_transform) {
-                    if (any(analysis_data[[y_var]] < 0, na.rm = TRUE)) {
-                        jmvcore::reject(.("Log transformation cannot be applied: the Y-axis variable contains non-positive values. Remove the log transform or use a variable with strictly positive values."))
-                    }
-                    if (any(analysis_data[[y_var]] == 0, na.rm = TRUE)) {
-                        zero_msg <- .("Zero values were detected in the Y-axis variable; a 0.01 offset was added before log transformation (log(y + 0.01)).")
-                        message(zero_msg)
-                        private$.addAnalysisNote(zero_msg)
-                    }
-                    if (isTRUE(self$options$show_mcid)) {
-                        private$.addAnalysisNote(.("The MCID band is drawn on the log-transformed scale using the numeric MCID value; interpret additive bands on log scales with caution."))
-                    }
-                    # Add small constant to avoid log(0) issues
-                    analysis_data[[y_var]] <- log(analysis_data[[y_var]] + 0.01)
-                }
-
-                # Handle outliers if requested
-                private$.n_outliers_removed <- 0L
-                private$.n_outliers_winsorized <- 0L
-                if (self$options$outlier_method != "none") {
-                    private$.checkpoint() # Before outlier processing
-                    n_before_outliers <- nrow(analysis_data)
-                    y_before_outliers <- analysis_data[[y_var]]
-                    analysis_data <- private$.handle_outliers(analysis_data, y_var, self$options$outlier_method)
-                    private$.n_outliers_removed <- n_before_outliers - nrow(analysis_data)
-                    if (identical(self$options$outlier_method, "winsorize")) {
-                        private$.n_outliers_winsorized <- sum(analysis_data[[y_var]] != y_before_outliers, na.rm = TRUE)
-                        private$.addAnalysisNote(sprintf(
-                            .("Outlier Winsorization clipped %d of %d observation(s) at the 5th/95th percentiles computed across the pooled sample. Pooled thresholds can attenuate large between-group location shifts."),
-                            private$.n_outliers_winsorized, n_before_outliers
-                        ))
-                    } else {
-                        method_desc <- if (identical(self$options$outlier_method, "trim")) {
-                            .("5th/95th percentile trimming")
-                        } else {
-                            .("1.5 x IQR filtering")
-                        }
-                        private$.addAnalysisNote(sprintf(
-                            .("Outlier handling (%s) excluded %d of %d observation(s) using thresholds computed across the pooled sample. Pooled thresholds can attenuate large between-group location shifts."),
-                            method_desc, private$.n_outliers_removed, n_before_outliers
-                        ))
-                    }
-                    if (nrow(analysis_data) == 0) {
-                        jmvcore::reject(.("No observations remain after outlier exclusion."))
-                    }
-                    analysis_data[[x_var]] <- droplevels(as.factor(analysis_data[[x_var]]))
-                    if (!is.null(fill_var) && fill_var != "" && fill_var %in% names(analysis_data)) {
-                        analysis_data[[fill_var]] <- droplevels(as.factor(analysis_data[[fill_var]]))
-                    }
-                }
+                prep <- private$.prepare_analysis_data(emit_notes = TRUE)
+                analysis_data <- prep$data
+                analysis_vars <- prep$analysis_vars
 
                 # Generate summary statistics and/or missing data report if requested
                 if (self$options$show_statistics || self$options$show_missing_info) {
@@ -726,37 +606,179 @@ advancedraincloudClass <- if (requireNamespace("jmvcore")) {
                 # Render accumulated notes (clears the output when there are none).
                 private$.renderAnalysisNotes()
 
-                # Store data for plotting and expose it as plot state (canonical jamovi
-                # pattern). analysis_data is already a base data.frame; guard setState so a
-                # serialization failure can never break the run - the private field remains
-                # the fallback source in .plot().
-                # Attach comparison_results as an attribute on the data.frame so that
-                # image$state remains an S3 data.frame while still carrying comparison
-                # stats on the state-only re-render / export path.
-                state_df <- analysis_data
-                attr(state_df, "comparison") <- private$.comparison_results
-                private$.analysis_data <- state_df
+                # library-audit 2026-09-16 jjstatsplot [LOW] DONE: store only readiness flag and small comparison
+                # stats summary in image$state (no raw dataset rows); .plot() rebuilds from self$data under requiresData: true.
                 tryCatch(
-                    self$results$plot$setState(state_df),
+                    self$results$plot$setState(list(
+                        ready = TRUE,
+                        comparison = private$.comparison_results
+                    )),
                     error = function(e) NULL
                 )
             },
+            .prepare_analysis_data = function(emit_notes = TRUE) {
+                dataset <- self$data
+                y_var <- self$options$y_var
+                x_var <- self$options$x_var
+                fill_var <- self$options$fill_var
+                id_var <- self$options$id_var
+                cov_var <- self$options$cov_var
+
+                analysis_vars <- c(y_var, x_var)
+                if (!is.null(fill_var) && fill_var != "") {
+                    analysis_vars <- c(analysis_vars, fill_var)
+                }
+                id_needed <- !is.null(id_var) && id_var != "" &&
+                    (isTRUE(self$options$show_longitudinal) || isTRUE(self$options$show_change_scores))
+                if (id_needed) {
+                    analysis_vars <- c(analysis_vars, id_var)
+                }
+                if (!is.null(cov_var) && cov_var != "") {
+                    analysis_vars <- c(analysis_vars, cov_var)
+                }
+                analysis_vars <- unique(analysis_vars[!(is.na(analysis_vars) | analysis_vars == "")])
+
+                # Decode y_var before row subsetting so jamovi column attributes (e.g. "values"
+                # on labelled ordinal/integer factors) survive intact.
+                y_decoded_full <- private$.to_numeric_safe(dataset[[y_var]])
+                analysis_data <- as.data.frame(dataset[analysis_vars], stringsAsFactors = FALSE)
+                cc_mask <- stats::complete.cases(analysis_data)
+                analysis_data <- analysis_data[cc_mask, , drop = FALSE]
+                analysis_data[[y_var]] <- y_decoded_full[cc_mask]
+                if (!is.null(id_var) && id_var != "" && id_var %in% names(dataset) && !(id_var %in% names(analysis_data))) {
+                    analysis_data[[id_var]] <- dataset[[id_var]][cc_mask]
+                }
+
+                if (nrow(analysis_data) == 0) {
+                    jmvcore::reject(.("Error: No complete cases found for the selected variables."))
+                }
+
+                # complete.cases() above follows is.na(), which is TRUE for NaN
+                # but FALSE for Inf, so an infinite value survives into every
+                # mean, SD and axis range. Drop non-finite values and record how
+                # many, so the count can be disclosed rather than vanish.
+                n_before_finite <- nrow(analysis_data)
+                analysis_data <- analysis_data[is.finite(analysis_data[[y_var]]), , drop = FALSE]
+                n_nonfinite <- n_before_finite - nrow(analysis_data)
+                n_missing_excluded <- nrow(dataset) - nrow(analysis_data)
+                if (isTRUE(emit_notes)) {
+                    private$.n_nonfinite <- n_nonfinite
+                    private$.n_missing_excluded <- n_missing_excluded
+                }
+                if (nrow(analysis_data) == 0)
+                    jmvcore::reject(.("No usable numeric values remain in the dependent variable after removing missing and non-finite entries."))
+                if (isTRUE(emit_notes) && n_nonfinite > 0)
+                    private$.addAnalysisNote(sprintf(
+                        .("%d row(s) were excluded because '%s' held a non-finite value (Inf or -Inf), which usually means a division by zero or an out-of-range entry."),
+                        n_nonfinite, y_var))
+
+                if (isTRUE(emit_notes) && length(unique(analysis_data[[y_var]])) == 1L) {
+                    zero_var_msg <- .("The Y-axis variable has zero variance (all analyzed values are identical); kernel density shapes and dispersion statistics are degenerate.")
+                    message(zero_var_msg)
+                    private$.addAnalysisNote(zero_var_msg)
+                }
+
+                if (is.character(analysis_data[[x_var]])) {
+                    x_vals <- analysis_data[[x_var]]
+                    analysis_data[[x_var]] <- factor(x_vals, levels = unique(x_vals[!is.na(x_vals)]))
+                } else {
+                    analysis_data[[x_var]] <- droplevels(as.factor(analysis_data[[x_var]]))
+                }
+
+                if (!is.null(fill_var) && fill_var != "" && fill_var %in% names(analysis_data)) {
+                    analysis_data[[fill_var]] <- droplevels(as.factor(analysis_data[[fill_var]]))
+                }
+                if (!is.null(id_var) && id_var != "" && id_var %in% names(analysis_data)) {
+                    analysis_data[[id_var]] <- as.factor(analysis_data[[id_var]])
+                }
+                if (!is.null(cov_var) && cov_var != "" && cov_var %in% names(analysis_data)) {
+                    if (!is.numeric(analysis_data[[cov_var]])) {
+                        analysis_data[[cov_var]] <- droplevels(as.factor(analysis_data[[cov_var]]))
+                    }
+                }
+
+                # Apply log transformation if requested
+                if (self$options$log_transform) {
+                    if (any(analysis_data[[y_var]] < 0, na.rm = TRUE)) {
+                        jmvcore::reject(.("Log transformation cannot be applied: the Y-axis variable contains non-positive values. Remove the log transform or use a variable with strictly positive values."))
+                    }
+                    if (isTRUE(emit_notes) && any(analysis_data[[y_var]] == 0, na.rm = TRUE)) {
+                        zero_msg <- .("Zero values were detected in the Y-axis variable; a 0.01 offset was added before log transformation (log(y + 0.01)).")
+                        message(zero_msg)
+                        private$.addAnalysisNote(zero_msg)
+                    }
+                    if (isTRUE(emit_notes) && isTRUE(self$options$show_mcid)) {
+                        private$.addAnalysisNote(.("The MCID band is drawn on the log-transformed scale using the numeric MCID value; interpret additive bands on log scales with caution."))
+                    }
+                    analysis_data[[y_var]] <- log(analysis_data[[y_var]] + 0.01)
+                }
+
+                # Handle outliers if requested
+                if (isTRUE(emit_notes)) {
+                    private$.n_outliers_removed <- 0L
+                    private$.n_outliers_winsorized <- 0L
+                }
+                if (self$options$outlier_method != "none") {
+                    private$.checkpoint(flush = FALSE)
+                    n_before_outliers <- nrow(analysis_data)
+                    y_before_outliers <- analysis_data[[y_var]]
+                    analysis_data <- private$.handle_outliers(analysis_data, y_var, self$options$outlier_method)
+                    n_outliers_removed <- n_before_outliers - nrow(analysis_data)
+                    if (isTRUE(emit_notes)) {
+                        private$.n_outliers_removed <- n_outliers_removed
+                        if (identical(self$options$outlier_method, "winsorize")) {
+                            private$.n_outliers_winsorized <- sum(analysis_data[[y_var]] != y_before_outliers, na.rm = TRUE)
+                            private$.addAnalysisNote(sprintf(
+                                .("Outlier Winsorization clipped %d of %d observation(s) at the 5th/95th percentiles computed across the pooled sample. Pooled thresholds can attenuate large between-group location shifts."),
+                                private$.n_outliers_winsorized, n_before_outliers
+                            ))
+                        } else {
+                            method_desc <- if (identical(self$options$outlier_method, "trim")) {
+                                .("5th/95th percentile trimming")
+                            } else {
+                                .("1.5 x IQR filtering")
+                            }
+                            private$.addAnalysisNote(sprintf(
+                                .("Outlier handling (%s) excluded %d of %d observation(s) using thresholds computed across the pooled sample. Pooled thresholds can attenuate large between-group location shifts."),
+                                method_desc, private$.n_outliers_removed, n_before_outliers
+                            ))
+                        }
+                    }
+                    if (nrow(analysis_data) == 0) {
+                        jmvcore::reject(.("No observations remain after outlier exclusion."))
+                    }
+                    analysis_data[[x_var]] <- droplevels(as.factor(analysis_data[[x_var]]))
+                    if (!is.null(fill_var) && fill_var != "" && fill_var %in% names(analysis_data)) {
+                        analysis_data[[fill_var]] <- droplevels(as.factor(analysis_data[[fill_var]]))
+                    }
+                }
+
+                list(data = analysis_data, analysis_vars = analysis_vars)
+            },
             .plot = function(image, ggtheme, theme, ...) {
-                # Prefer the serialized plot state; fall back to the private field (populated
-                # at the end of .run()) so state-only re-renders and file re-opens both work.
-                if (is.null(image$state) && is.null(private$.analysis_data)) {
+                # render-route: data - state holds readiness flag and comparison summary only (no raw rows)
+                st <- image$state
+                if (is.null(st)) {
                     return(FALSE)
                 }
 
-                # Accept both a data.frame (with optional "comparison" attribute) and a
-                # list(data = ..., comparison = ...) state shape.
-                st <- image$state
-                analysis_data <- if (is.data.frame(st)) st
-                                 else if (!is.null(st)) st$data
-                                 else private$.analysis_data
-                comparison_stats <- if (is.data.frame(st)) attr(st, "comparison")
-                                    else if (!is.null(st)) st$comparison
-                                    else attr(private$.analysis_data, "comparison")
+                if (is.data.frame(st)) {
+                    # Backwards compatibility for legacy .omv files saved before 2026-11-26
+                    analysis_data <- st
+                    comparison_stats <- attr(st, "comparison")
+                } else if (is.list(st) && !is.null(st$data)) {
+                    analysis_data <- st$data
+                    comparison_stats <- st$comparison
+                } else if (is.list(st) && isTRUE(st$ready)) {
+                    if (is.null(self$data) || nrow(self$data) == 0L) {
+                        return(FALSE)
+                    }
+                    prep <- tryCatch(private$.prepare_analysis_data(emit_notes = FALSE), error = function(e) NULL)
+                    analysis_data <- if (!is.null(prep)) prep$data else NULL
+                    comparison_stats <- st$comparison
+                } else {
+                    return(FALSE)
+                }
                 y_var <- self$options$y_var
                 x_var <- self$options$x_var
                 fill_var <- self$options$fill_var
@@ -934,8 +956,9 @@ advancedraincloudClass <- if (requireNamespace("jmvcore")) {
                     if (!is.null(rain_err)) {
                         # Set fallback flag for any ggrain error
                         use_fallback <- TRUE
-                        warning(.fmt(
-                            .("ggrain failed with error: {error}. Using the standard-geometry fallback."),
+                        # A renderer's warning() never reaches the jamovi user; the caption does.
+                        p <- private$.appendPlotNote(p, .fmt(
+                            .("Note: The raincloud layer could not be drawn ({error}), so standard violin, boxplot and point layers are shown instead."),
                             error = conditionMessage(rain_err)))
                     }
                 }
@@ -1063,11 +1086,11 @@ advancedraincloudClass <- if (requireNamespace("jmvcore")) {
                                 names(arm_labels) <- fill_levels
                                 p + ggplot2::scale_fill_manual(values = colors, labels = arm_labels)
                             } else {
-                                warning(.fmt(
-                                    .("The number of trial-arm labels ({nLabels}) does not match the number of groups ({nGroups}), so default labels were used."),
-                                    nLabels = length(arm_labels),
-                                    nGroups = length(fill_levels)))
-                                p + ggplot2::scale_fill_manual(values = colors)
+                                private$.appendPlotNote(
+                                    p + ggplot2::scale_fill_manual(values = colors),
+                                    .fmt(.("The number of trial-arm labels ({nLabels}) does not match the number of groups ({nGroups}), so default labels were used."),
+                                         nLabels = length(arm_labels),
+                                         nGroups = length(fill_levels)))
                             }
                         } else {
                             p + ggplot2::scale_fill_manual(values = colors)
@@ -1282,7 +1305,7 @@ advancedraincloudClass <- if (requireNamespace("jmvcore")) {
                         names(time_labels) <- x_levels
                         p <- p + ggplot2::scale_x_discrete(labels = time_labels)
                     } else {
-                        warning(.fmt(
+                        p <- private$.appendPlotNote(p, .fmt(
                             .("The number of time-point labels ({nLabels}) does not match the number of time points ({nPoints}), so default labels were used."),
                             nLabels = length(time_labels),
                             nPoints = length(x_levels)))
@@ -1293,7 +1316,7 @@ advancedraincloudClass <- if (requireNamespace("jmvcore")) {
                         names(arm_labels) <- x_levels
                         p <- p + ggplot2::scale_x_discrete(labels = arm_labels)
                     } else {
-                        warning(.fmt(
+                        p <- private$.appendPlotNote(p, .fmt(
                             .("The number of trial-arm labels ({nLabels}) does not match the number of groups ({nGroups}), so default labels were used."),
                             nLabels = length(arm_labels),
                             nGroups = length(x_levels)))

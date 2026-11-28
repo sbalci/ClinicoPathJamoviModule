@@ -635,42 +635,12 @@ outlierdetectionClass <- if (requireNamespace("jmvcore")) R6::R6Class("outlierde
                 return()
             }
 
-            # Initialize outlier_results variable
-            outlier_results <- NULL
-
-            # Perform outlier detection with proper error handling
-            outlier_results <- tryCatch({
-                result <- private$.perform_outlier_detection(analysis_data)
-                result  # Return the result from tryCatch
-
-            }, error = function(e) {
-                error_msg <- paste0("
-                <div style='color: inherit; background-color: rgba(216, 33, 50, 0.18); padding: 20px; border-radius: 8px;'>
-                <h4> Outlier Detection Error</h4>
-                <p><strong>Error:</strong> ", htmltools::htmlEscape(conditionMessage(e)), "</p>
-                <p><strong>Method:</strong> ", self$options$method_category, "</p>
-                <p><strong>Variables:</strong> ", ncol(analysis_data), " variable(s)</p>
-                <p><strong>Observations:</strong> ", nrow(analysis_data), "</p>
-                <h5>Common Solutions:</h5>
-                <ul>
-                <li>Try a different detection method (Robust Z-Score is most reliable)</li>
-                <li>Check for infinite or extremely large values</li>
-                <li>Ensure sufficient sample size (n \u{2265} 30 recommended)</li>
-                <li>For multivariate methods, try with fewer variables</li>
-                </ul>
-                </div>")
-                # Route failure to the always-visible warnings panel and render now,
-                # since .run() returns early when outlier_results is NULL.
-                private$.addWarningsBlock(error_msg)
-                private$.renderWarnings()
-                NULL  # Return NULL on error
-            })
-
-            # Check if outlier detection was successful
-            if (is.null(outlier_results)) {
-                # If outlier detection failed, don't proceed with generating outputs
-                return()
-            }
+            # The validation inside the detection raises jmvcore::reject(), and it must reach jamovi
+            # as an error. A catch-all tryCatch here turned every specific message into a generic
+            # "Outlier Detection Error" panel on an analysis marked complete, and swallowed
+            # .checkpoint() restarts too. Only the performance::check_outliers() call is wrapped,
+            # in .perform_outlier_detection().
+            outlier_results <- private$.perform_outlier_detection(analysis_data)
 
             # Generate plain-language summary
             plain_summary <- private$.generate_plain_summary(outlier_results, analysis_data, original_n)
@@ -726,13 +696,15 @@ outlierdetectionClass <- if (requireNamespace("jmvcore")) R6::R6Class("outlierde
                 self$results$interpretation$setContent(interpretation_html)
             }
 
-            # Store plot data for visualization
+            # library-audit 2026-09-16 ClinicoPathDescriptives [LOW] DONE (outlierdetection site): the
+            # plot draws one point per analysed row from its composite score, so state holds that score
+            # vector only (8 bytes a row; it used to hold the analysed rows and the raw results, 24.8 KB
+            # at n = 500 with two variables). The image reads no dataset: requiresData: false.
             if (self$options$show_visualization) {
-                plotData <- list(
-                    outlier_results = outlier_results,
-                    analysis_data = analysis_data
-                )
-                self$results$plot$setState(plotData)
+                self$results$plot$setState(list(
+                    score = unname(as.numeric(private$.compute_outlier_proportion(outlier_results))),
+                    binary = !is.list(outlier_results)
+                ))
             }
             
             # Analysis-complete summary message: count outliers with the SAME composite
@@ -758,19 +730,20 @@ outlierdetectionClass <- if (requireNamespace("jmvcore")) R6::R6Class("outlierde
         .plot = function(image, ggtheme, theme, ...) {
             # Simple, reliable plot function
 
-            plotData <- image$state
-
-            if (is.null(plotData) || is.null(plotData$outlier_results) || is.null(plotData$analysis_data)) {
-                return(FALSE)
+            # Draws from image$state only (no dataset): list(score = per-row composite score,
+            # binary = TRUE when the method returned flags rather than per-method results).
+            st <- image$state
+            if (is.null(st)) return(FALSE)
+            # .omv files saved before 2026-11-27 hold the analysed rows and the raw results instead.
+            if (is.null(st$score) && !is.null(st$outlier_results)) {
+                st <- list(score = as.numeric(private$.compute_outlier_proportion(st$outlier_results)),
+                           binary = !is.list(st$outlier_results))
             }
+            if (length(st$score) == 0) return(FALSE)
 
-            outlier_results <- plotData$outlier_results
-            analysis_data <- plotData$analysis_data
-
-            # CRITICAL FIX: Extract detailed data from result list
-            if (is.list(outlier_results) && "outlier_data" %in% names(outlier_results)) {
-                # Composite outlier score via shared helper (per-method proportion)
-                outlier_score <- private$.compute_outlier_proportion(outlier_results)
+            if (!isTRUE(st$binary)) {
+                # Composite outlier score (per-method proportion), computed in .run()
+                outlier_score <- st$score
 
                 # Create plot data with composite scores
                 plot_data <- data.frame(
@@ -798,8 +771,8 @@ outlierdetectionClass <- if (requireNamespace("jmvcore")) R6::R6Class("outlierde
             } else {
                 # Binary results
                 plot_data <- data.frame(
-                    row_id = seq_len(nrow(analysis_data)),
-                    is_outlier = as.logical(outlier_results)
+                    row_id = seq_along(st$score),
+                    is_outlier = as.logical(st$score)
                 )
 
                 # Create binary plot
@@ -997,10 +970,13 @@ outlierdetectionClass <- if (requireNamespace("jmvcore")) R6::R6Class("outlierde
             set.seed(seed_val)
 
             private$.checkpoint()
-            outlier_result <- performance::check_outliers(
-                data,
-                method = method,
-                threshold = threshold
+            # Only the third-party call is wrapped: its error becomes one plain reject(), while the
+            # reject() calls above in this method pass through untouched.
+            outlier_result <- tryCatch(
+                performance::check_outliers(data, method = method, threshold = threshold),
+                error = function(e) jmvcore::reject(
+                    .("Outlier detection could not be computed: {}. Check for infinite or extremely large values, or choose another method; for multivariate methods, try fewer variables."),
+                    code = NULL, conditionMessage(e))
             )
             private$.checkpoint()
 

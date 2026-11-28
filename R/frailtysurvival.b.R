@@ -341,7 +341,7 @@ frailtysurvivalClass <- R6::R6Class(
                         }
                     } else if (inherits(frailty_model, "coxme")) {
                         # Extract random effects
-                        ranef_values <- ranef(frailty_model)
+                        ranef_values <- coxme::ranef(frailty_model)
 
                         if (length(ranef_values) > 0) {
                             cluster_effects <- ranef_values[[1]]

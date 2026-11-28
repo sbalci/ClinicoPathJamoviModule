@@ -35,11 +35,11 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         # Option overrides for presets
         overrides = list(),
 
-        # Notice collection helpers. A single Preformatted (plain-text) output item:
-        # avoids BOTH the jmvcore::Notice serialization error from
-        # self$results$insert(999, Notice) AND any HTML in notices (project convention:
-        # notice content must be plain text). ====
+        # Notice collection helpers. A single Preformatted (plain-text) output item
+        # keeps multi-line, titled notices ordered by severity (jmvcore::Notice
+        # renders a single plain-text line with no separate title; review guide §13). ====
         .noticeList = list(),
+        .suppressNotices = FALSE,
 
         # Collects per-comparison assumption-violation auto-switch messages so a
         # single summarized notice is shown instead of one per pairwise comparison
@@ -58,6 +58,8 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         .repeatedIdWarning = NULL,
 
         .addNotice = function(type, title, content) {
+            if (isTRUE(private$.suppressNotices))
+                return(invisible(NULL))
             private$.noticeList[[length(private$.noticeList) + 1]] <- list(
                 type = type,
                 title = title,
@@ -77,9 +79,9 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # output item renders this literally (no markup, no injection surface).
             blocks <- vapply(private$.noticeList, function(notice) {
                 prefix <- switch(notice$type,
-                    ERROR          = "ERROR: ",
-                    STRONG_WARNING = "WARNING: ",
-                    WARNING        = "WARNING: ",
+                    ERROR          = paste0(.("ERROR"), ": "),
+                    STRONG_WARNING = paste0(.("WARNING"), ": "),
+                    WARNING        = paste0(.("WARNING"), ": "),
                     "")
                 paste0(prefix, notice$title, "\n", notice$content)
             }, character(1))
@@ -278,6 +280,9 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         },
         
         .validateData = function(plot_data) {
+            if (nrow(plot_data) == 0)
+                jmvcore::reject(.("No valid data available for analysis. Check your variable selections and data."))
+
             warnings <- c()
 
             # Check minimum effective sample size (after NA and non-finite exclusions)
@@ -864,7 +869,7 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 msg <- paste0(msg, " CAUTION: ", censor_msg)
                 private$.addNotice(
                     type = "STRONG_WARNING",
-                    title = "Right-Censoring Not Accounted For",
+                    title = .("Right-Censoring Not Accounted For"),
                     content = censor_msg
                 )
             }
@@ -879,15 +884,6 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 "border-left:4px solid #ffc107; padding:8px 12px; margin:10px 0; ",
                 "color: inherit;'>", msg, "</p>"))
             self$results$warnings$setVisible(TRUE)
-        },
-
-        .hideOutputsOnError = function() {
-            self$results$plot$setVisible(visible = FALSE)
-            self$results$statistics$setVisible(visible = FALSE)
-            self$results$tests$setVisible(visible = FALSE)
-            self$results$interpretation$setVisible(visible = FALSE)
-            self$results$clinicalSummary$setVisible(visible = FALSE)
-            self$results$reportSummary$setVisible(visible = FALSE)
         },
 
         .run = function() {
@@ -908,60 +904,22 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # Re-apply the fill-legend override wiped by .applyClinicalPreset()
             private$.applyAutoLegendOverride()
 
-            # Validate inputs. jmvcore::reject() throws; the handler converts it to an
-            # ERROR notice and flags validation_failed so .run() actually halts. A bare
-            # return() in the handler would only exit the handler, letting .run continue
-            # with invalid data (coerced NA X, or a plotted non-categorical Y).
-            validation_failed <- FALSE
-            input_warnings <- tryCatch({
-                private$.validateInputs()
-            }, error = function(e) {
-                private$.addNotice(
-                    type = "ERROR",
-                    title = "Input Validation Error",
-                    content = e$message
-                )
-                validation_failed <<- TRUE
-                NULL
-            })
-            if (validation_failed) {
-                private$.hideOutputsOnError()
-                return()
-            }
+            # Validate inputs. jmvcore::reject() must reach jamovi, which puts the analysis in
+            # its error state with the message; a catch-all tryCatch here used to turn it into
+            # an ERROR notice on a "completed" analysis (check-module 2026-11-27, review guide
+            # section 15). Every condition .validateInputs() raises is a reject(), so no handler.
+            input_warnings <- private$.validateInputs()
 
             # Prepare data
             private$.checkpoint()
             plot_data <- private$.prepareData()
 
-            if (nrow(plot_data) == 0) {
-                private$.addNotice(
-                    type = "ERROR",
-                    title = "No Valid Data",
-                    content = "No valid data available for analysis. Check your variable selections and data."
-                )
-                private$.hideOutputsOnError()
-                return()
-            }
-
-            # Validate data and collect additional warnings
-            data_warnings <- tryCatch({
-                private$.validateData(plot_data)
-            }, error = function(e) {
-                private$.addNotice(
-                    type = "ERROR",
-                    title = "Data Validation Error",
-                    content = e$message
-                )
-                validation_failed <<- TRUE
-                NULL
-            })
-            if (validation_failed) {
-                private$.hideOutputsOnError()
-                return()
-            }
+            # Validate data and collect additional warnings (rejects propagate, as above;
+            # an empty prepared dataset is rejected there too)
+            data_warnings <- private$.validateData(plot_data)
 
             # Restore output visibility after validation succeeds (critical for invalid -> valid recovery
-            # on a reused jamovi R6 instance where .hideOutputsOnError() previously hid these items)
+            # on a reused jamovi R6 instance where an earlier run hid these items)
             self$results$instructions$setVisible(visible = FALSE)
             self$results$plot$setVisible(visible = TRUE)
             self$results$statistics$setVisible(visible = TRUE)
@@ -995,7 +953,7 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     )
                     private$.addNotice(
                         type = "STRONG_WARNING",
-                        title = "Independence Assumption Violation",
+                        title = .("Independence Assumption Violation"),
                         content = notice_msg
                     )
                 }
@@ -1017,12 +975,15 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 )
             }
             
-            # Create plot
+            # library-audit 2026-09-16 jjstatsplot [LOW] DONE: validate plot options and collect plot-level
+            # notices during .run(), but store only a compact ready flag and preset overrides in image$state
+            # (never a serialised ggplot object); .plot() rebuilds from self$data under requiresData: true (guide §17)
             private$.checkpoint()
-            plot <- private$.createPlot(plot_data)
-            
-            # Save plot state
-            self$results$plot$setState(plot)
+            invisible(private$.createPlot(plot_data))
+            self$results$plot$setState(list(
+                ready = TRUE,
+                overrides = private$overrides
+            ))
             
             # Generate interpretation
             private$.generateInterpretation(plot_data)
@@ -1077,7 +1038,7 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             )
             private$.addNotice(
                 type = "INFO",
-                title = "Analysis Complete",
+                title = .("Analysis Complete"),
                 content = notice_msg
             )
 
@@ -1085,7 +1046,7 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             private$.renderNotices()
         },
         
-        .prepareData = function() {
+        .prepareData = function(emit_notices = TRUE) {
             # Get data
             data <- self$data
             
@@ -1125,7 +1086,7 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             n_before_na <- nrow(plot_data)
             plot_data <- jmvcore::naOmit(plot_data)
             n_removed_na <- n_before_na - nrow(plot_data)
-            if (n_removed_na > 0L) {
+            if (isTRUE(emit_notices) && n_removed_na > 0L) {
                 private$.addNotice(
                     'INFO', 'Missing values excluded',
                     paste0(n_removed_na, " row", if (n_removed_na == 1L) "" else "s",
@@ -1143,14 +1104,16 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             n_nonfinite <- sum(!is.finite(plot_data$x))
             if (n_nonfinite > 0) {
                 plot_data <- plot_data[is.finite(plot_data$x), , drop = FALSE]
-                private$.addNotice(
-                    'WARNING', 'Non-finite values removed',
-                    paste0(n_nonfinite, " row", if (n_nonfinite == 1) "" else "s",
-                           " with an infinite value in '", x_var,
-                           "' ", if (n_nonfinite == 1) "was" else "were",
-                           " excluded. ", nrow(plot_data),
-                           " observations remain.")
-                )
+                if (isTRUE(emit_notices)) {
+                    private$.addNotice(
+                        'WARNING', 'Non-finite values removed',
+                        paste0(n_nonfinite, " row", if (n_nonfinite == 1) "" else "s",
+                               " with an infinite value in '", x_var,
+                               "' ", if (n_nonfinite == 1) "was" else "were",
+                               " excluded. ", nrow(plot_data),
+                               " observations remain.")
+                    )
+                }
             }
 
             # Levels with no surviving rows (filtered out upstream, or never present)
@@ -2701,12 +2664,35 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         },
         
         .plot = function(image, ggtheme, theme, ...) {
+            # render-route: data - state holds ready flag and preset overrides only (no ggplot object or rows)
             if (is.null(self$options$x_var) || is.null(self$options$y_var))
                 return()
 
-            plot <- image$state
-            if (is.null(plot))
+            st <- image$state
+            if (is.null(st))
                 return(FALSE)
+
+            if (inherits(st, "ggplot")) {
+                # Backwards compatibility for legacy .omv files saved before 2026-11-26
+                plot <- st
+            } else if (is.list(st) && isTRUE(st$ready)) {
+                if (is.null(self$data) || nrow(self$data) == 0L)
+                    return(FALSE)
+                old_overrides <- private$overrides
+                old_suppress <- private$.suppressNotices
+                on.exit({
+                    private$overrides <- old_overrides
+                    private$.suppressNotices <- old_suppress
+                }, add = TRUE)
+                private$.suppressNotices <- TRUE
+                private$overrides <- if (is.list(st$overrides)) st$overrides else list()
+                plot_data <- private$.prepareData(emit_notices = FALSE)
+                if (is.null(plot_data) || nrow(plot_data) == 0L)
+                    return(FALSE)
+                plot <- private$.createPlot(plot_data)
+            } else {
+                return(FALSE)
+            }
 
             # There is no per-analysis DPI knob to set here. The former code assigned
             # options(device.dpi = <n>) inside this renderer, which jamovi has already

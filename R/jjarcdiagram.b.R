@@ -1420,18 +1420,22 @@ jjarcdiagramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             # NODE-LEVEL Group statistics if available
             if (!is.null(network_data$node_groups)) {
+                # library-audit 2026-09-16 jjstatsplot [LOW] DONE: whole-sentence .fmt() template, no spliced .("nodes") fragment
                 # Count nodes per group (not edges)
                 group_counts <- table(network_data$node_groups, useNA = "no")
                 n_ungrouped <- sum(is.na(network_data$node_groups))
-                group_items <- sprintf("<li><strong>%s:</strong> %d %s</li>",
-                                       htmltools::htmlEscape(names(group_counts)),
-                                       as.integer(group_counts),
-                                       .("nodes"))
+                group_items <- vapply(seq_along(group_counts), function(i) {
+                    paste0("<li>", .fmt(
+                        .("<strong>{group}:</strong> {n} nodes"),
+                        group = htmltools::htmlEscape(names(group_counts)[i]),
+                        n = as.integer(group_counts[i])
+                    ), "</li>")
+                }, character(1))
                 if (n_ungrouped > 0L) {
-                    group_items <- c(group_items, sprintf("<li><strong>%s:</strong> %d %s</li>",
-                                                          .("Ungrouped (missing)"),
-                                                          n_ungrouped,
-                                                          .("nodes")))
+                    group_items <- c(group_items, paste0("<li>", .fmt(
+                        .("<strong>Ungrouped (missing):</strong> {n} nodes"),
+                        n = n_ungrouped
+                    ), "</li>"))
                 }
                 stats_text <- paste(stats_text,
                     .("<h4>Group Distribution (Node Counts):</h4>"),

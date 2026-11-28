@@ -81,3 +81,74 @@ test_that("the Cox table header names the user's variables, not mytime/myoutcome
   expect_false(any(grepl("Surv(mytime, myoutcome)", hdr, fixed = TRUE)))
   expect_true(any(grepl("Surv(time, status)", hdr, fixed = TRUE)))
 })
+
+# check-module 2026-11-28: four catch-all handlers in multisurvival wrapped code that reaches
+# private$.checkpoint(), so a restart (an error with code "restart") became "diagnostics
+# unavailable" / "Performance metric error" / "Nomogram calculation error" instead of reaching
+# jamovi. The callback asks for a restart only from a checkpoint reached INSIDE a tryCatch in
+# `owner` (and, when given, under `callee`), so an unguarded checkpoint elsewhere cannot make the
+# test pass by itself.
+.ms_restart_at <- function(owner, callee = NULL) {
+  function(results) {
+    calls <- vapply(sys.calls(), function(x) paste(deparse(x[[1]]), collapse = ""), "")
+    i <- match(TRUE, endsWith(calls, owner))
+    if (is.na(i)) return(NULL)
+    rest <- calls[-seq_len(i)]
+    j <- match("tryCatch", rest)
+    if (is.na(j)) return(NULL)
+    if (!is.null(callee) && !any(endsWith(rest[-seq_len(j)], callee))) return(NULL)
+    "restart"
+  }
+}
+
+.ms_restart_run <- function(owner, callee = NULL, ...) {
+  set.seed(7)
+  n <- 150
+  d <- data.frame(age = rnorm(n, 60, 10), arm = factor(sample(c("A", "B"), n, TRUE)))
+  t <- rexp(n, 0.03 * exp(0.03 * (d$age - 60))); cen <- runif(n, 10, 80)
+  d$time <- pmin(t, cen); d$status <- factor(as.integer(t <= cen))
+  ns <- .multisurvival_ns()
+  o <- get("multisurvivalOptions", envir = ns)$new(
+    elapsedtime = "time", outcome = "status", outcomeLevel = "1",
+    explanatory = "arm", contexpl = "age", ...)
+  a <- get("multisurvivalClass", envir = ns)$new(options = o, data = d)
+  a$init()
+  # A flush = TRUE checkpoint serialises the results with RProtoBuf_serialize(), which only the
+  # jamovi engine defines. jmvcore's lookup falls through to the global environment, so an inert
+  # stub lets the checkpoint reach the callback; its arguments are never evaluated.
+  had <- exists("RProtoBuf_serialize", envir = globalenv(), inherits = FALSE)
+  if (!had) {
+    assign("RProtoBuf_serialize", function(...) NULL, envir = globalenv())
+    on.exit(rm("RProtoBuf_serialize", envir = globalenv()), add = TRUE)
+  }
+  a$.__enclos_env__$private$.checkpointCB <- .ms_restart_at(owner, callee)
+  tryCatch(suppressWarnings(a$.__enclos_env__$private$.run()), error = function(e) e)
+}
+
+test_that("multisurvival lets a checkpoint restart escape its optional-output handlers", {
+  for (case in list(
+    list(owner = ".performSurvivalAnalysis", callee = ".cox_ph", args = list(ph_cox = TRUE)),
+    list(owner = ".calculate_survmetrics", callee = NULL, args = list(show_survmetrics = TRUE)),
+    list(owner = ".calculate_nomogram", callee = ".nomogram", args = list(showNomogram = TRUE))
+  )) {
+    res <- do.call(.ms_restart_run, c(list(case$owner, case$callee), case$args))
+    code <- if (inherits(res, "error")) res$code else NA_character_
+    expect_identical(code, "restart", info = case$owner)
+  }
+})
+
+# The risk-group fallback used jmvcore::reject() as control flow inside a catch-all. A predictor
+# whose linear predictor has two values cannot be cut into four quantile groups, so it must fall
+# back to two groups (one binary predictor), with the fallback disclosed.
+test_that("multisurvival risk groups fall back to fewer groups without reject()", {
+  set.seed(8)
+  n <- 160
+  d <- data.frame(arm = factor(sample(c("A", "B"), n, TRUE)))
+  t <- rexp(n, ifelse(d$arm == "B", 0.05, 0.02)); cen <- runif(n, 10, 80)
+  d$time <- pmin(t, cen); d$status <- factor(as.integer(t <= cen))
+  r <- suppressWarnings(multisurvival(data = d, elapsedtime = "time", outcome = "status",
+    outcomeLevel = "1", explanatory = "arm", calculateRiskScore = TRUE, numRiskGroups = "four",
+    dod = NULL, dooc = NULL, awd = NULL, awod = NULL))
+  txt <- paste(r$warnings$content, r$infoMessages$content, collapse = " ")
+  expect_true(grepl("Fell back to 2 groups|Risk groups could not be formed", txt))
+})

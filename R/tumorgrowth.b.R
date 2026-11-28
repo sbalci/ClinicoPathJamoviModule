@@ -225,7 +225,7 @@ tumorgrowthClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                             k ~ 1,
                             nl = TRUE)
                 
-                model <- brm(bform, 
+                model <- brms::brm(bform, 
                              data = data, 
                              prior = priors,
                              iter = iter_val, chains = 2, cores = 2,
@@ -238,7 +238,7 @@ tumorgrowthClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                             V0 + alpha + beta ~ 1 + (1 | patient),
                             nl = TRUE)
                 
-                model <- brm(bform, 
+                model <- brms::brm(bform, 
                              data = data, 
                              prior = priors,
                              iter = iter_val, chains = 2, cores = 2,
@@ -251,7 +251,7 @@ tumorgrowthClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                             K + r + t0 ~ 1 + (1 | patient),
                             nl = TRUE)
                 
-                model <- brm(bform, 
+                model <- brms::brm(bform, 
                              data = data, 
                              prior = priors,
                              iter = iter_val, chains = 2, cores = 2,
@@ -264,7 +264,7 @@ tumorgrowthClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                             V0 + Vinf + k ~ 1 + (1 | patient),
                             nl = TRUE)
                 
-                model <- brm(bform, 
+                model <- brms::brm(bform, 
                              data = data, 
                              prior = priors,
                              iter = iter_val, chains = 2, cores = 2,
@@ -277,7 +277,7 @@ tumorgrowthClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                             V0 + alpha ~ 1 + (1 | patient),
                             nl = TRUE)
                 
-                model <- brm(bform, 
+                model <- brms::brm(bform, 
                              data = data, 
                              prior = priors,
                              iter = iter_val, chains = 2, cores = 2,
@@ -290,7 +290,7 @@ tumorgrowthClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                             V0 + k ~ 1 + (1 | patient),
                             nl = TRUE)
                 
-                model <- brm(bform,
+                model <- brms::brm(bform,
                              data = data,
                              prior = priors,
                              iter = iter_val, chains = 2, cores = 2,
@@ -303,7 +303,7 @@ tumorgrowthClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                             k ~ 1,
                             nl = TRUE)
 
-                model <- brm(bform,
+                model <- brms::brm(bform,
                              data = data,
                              prior = priors,
                              iter = iter_val, chains = 2, cores = 2,
@@ -322,59 +322,59 @@ tumorgrowthClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             V0_start <- self$options$initialSize %||% mean(fit_data$size[fit_data$time == min(fit_data$time)], na.rm = TRUE)
             if (growth_model == "exponential") {
                 # V(t) = V0 * exp(k*t)
-                model <- nlme(size ~ V0 * exp(k * time),
+                model <- nlme::nlme(size ~ V0 * exp(k * time),
                              data = fit_data,
                              fixed = V0 + k ~ 1,
                              random = V0 ~ 1 | patient,
                              start = list(fixed = c(V0 = V0_start, 
                                                     k = 0.1)),
-                             control = nlmeControl(maxIter = 200))
+                             control = nlme::nlmeControl(maxIter = 200))
                              
             } else if (growth_model == "gompertz") {
                 # V(t) = V0 * exp(alpha/beta * (1 - exp(-beta*t)))
-                model <- nlme(size ~ V0 * exp(alpha/beta * (1 - exp(-beta * time))),
+                model <- nlme::nlme(size ~ V0 * exp(alpha/beta * (1 - exp(-beta * time))),
                              data = fit_data,
                              fixed = V0 + alpha + beta ~ 1,
                              random = V0 ~ 1 | patient,
                              start = list(fixed = c(V0 = V0_start,
                                                     alpha = 1, beta = 0.1)),
-                             control = nlmeControl(maxIter = 200))
+                             control = nlme::nlmeControl(maxIter = 200))
                              
             } else if (growth_model == "logistic") {
                 # V(t) = K / (1 + exp(-r*(t-t0)))
                 K_init <- self$options$maxSize %||% (max(fit_data$size, na.rm = TRUE) * 1.2)
-                model <- nlme(size ~ K / (1 + exp(-r * (time - t0))),
+                model <- nlme::nlme(size ~ K / (1 + exp(-r * (time - t0))),
                              data = fit_data,
                              fixed = K + r + t0 ~ 1,
                              random = K ~ 1 | patient,
                              start = list(fixed = c(K = K_init, r = 0.1, 
                                                     t0 = median(fit_data$time, na.rm = TRUE))),
-                             control = nlmeControl(maxIter = 200))
+                             control = nlme::nlmeControl(maxIter = 200))
                              
             } else if (growth_model == "bertalanffy") {
                 # von Bertalanffy: V(t) = (Vinf^(1/3) - (Vinf^(1/3) - V0^(1/3)) * exp(-k*t))^3
                 Vinf_init <- self$options$maxSize %||% (max(fit_data$size, na.rm = TRUE) * 1.5)
-                model <- nlme(size ~ (Vinf^(1/3) - (Vinf^(1/3) - V0^(1/3)) * exp(-k * time))^3,
+                model <- nlme::nlme(size ~ (Vinf^(1/3) - (Vinf^(1/3) - V0^(1/3)) * exp(-k * time))^3,
                              data = fit_data,
                              fixed = V0 + Vinf + k ~ 1,
                              random = V0 ~ 1 | patient,
                              start = list(fixed = c(V0 = mean(fit_data$size[fit_data$time == min(fit_data$time)], na.rm = TRUE),
                                                     Vinf = Vinf_init, k = 0.1)),
-                             control = nlmeControl(maxIter = 200))
+                             control = nlme::nlmeControl(maxIter = 200))
                              
             } else if (growth_model == "power") {
                 # Power Law: V(t) = V0 * t^alpha
-                model <- nlme(size ~ V0 * (time + 1)^alpha,  # +1 to handle t=0
+                model <- nlme::nlme(size ~ V0 * (time + 1)^alpha,  # +1 to handle t=0
                              data = fit_data,
                              fixed = V0 + alpha ~ 1,
                              random = V0 ~ 1 | patient,
                              start = list(fixed = c(V0 = mean(fit_data$size[fit_data$time == min(fit_data$time)], na.rm = TRUE),
                                                     alpha = 1.2)),
-                             control = nlmeControl(maxIter = 200))
+                             control = nlme::nlmeControl(maxIter = 200))
                              
             } else if (growth_model == "linear") {
                 # V(t) = V0 + k*t
-                model <- nlme(size ~ V0 + k * time,
+                model <- nlme::nlme(size ~ V0 + k * time,
                              data = fit_data,
                              fixed = V0 + k ~ 1,
                              random = V0 ~ 1 | patient,
@@ -382,7 +382,7 @@ tumorgrowthClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                                                     k = 1)))
             } else {
                 # Default to exponential
-                model <- nlme(size ~ V0 * exp(k * time),
+                model <- nlme::nlme(size ~ V0 * exp(k * time),
                              data = fit_data,
                              fixed = V0 + k ~ 1,
                              random = V0 ~ 1 | patient,
@@ -565,7 +565,7 @@ tumorgrowthClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 # Calculate doubling time based on model type
                 if (growth_model == "exponential") {
                     if (inherits(model, "nlme")) {
-                        k <- fixef(model)["k"]
+                        k <- nlme::fixef(model)["k"]
                         se_k <- sqrt(vcov(model)["k", "k"])
                     } else {
                         k <- coef(model)["k"]
@@ -581,7 +581,7 @@ tumorgrowthClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 } else if (growth_model == "gompertz") {
                     # Doubling time varies for Gompertz - calculate at initial time
                     if (inherits(model, "nlme")) {
-                        alpha_g <- fixef(model)["alpha"]
+                        alpha_g <- nlme::fixef(model)["alpha"]
                         se_alpha <- sqrt(vcov(model)["alpha", "alpha"])
                     } else {
                         alpha_g <- coef(model)["alpha"]
@@ -661,8 +661,8 @@ tumorgrowthClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     loglik_val <- logLik(model)
                 } else if (inherits(model, "brmsfit")) {
                     waic_val <- waic(model)$estimates["waic", "Estimate"]
-                    looic_val <- loo(model)$estimates["looic", "Estimate"]
-                    r2_val <- bayes_R2(model)[1, "Estimate"]
+                    looic_val <- brms::loo(model)$estimates["looic", "Estimate"]
+                    r2_val <- brms::bayes_R2(model)[1, "Estimate"]
                     
                     # Populate fit statistics table
                     fit_table <- self$results$fitStatistics
@@ -796,7 +796,7 @@ tumorgrowthClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 } else if (inherits(private$growth_model, c("nlme", "nls"))) {
                     pred_data$fitted <- predict(private$growth_model, newdata = pred_data)
                 } else if (inherits(private$growth_model, "brmsfit")) {
-                    pred_draws <- posterior_predict(private$growth_model, newdata = pred_data, draws = 400)
+                    pred_draws <- brms::posterior_predict(private$growth_model, newdata = pred_data, draws = 400)
                     pred_data$fitted <- apply(pred_draws, 2, median)
                     qs <- apply(pred_draws, 2, quantile, probs = c(0.025, 0.975))
                     ribbon <- data.frame(time = time_range, ymin = qs[1, ], ymax = qs[2, ])
@@ -930,7 +930,7 @@ tumorgrowthClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 } else if (inherits(private$growth_model, c("nlme", "nls"))) {
                     pred_data$fitted <- predict(private$growth_model, newdata = pred_data)
                 } else if (inherits(private$growth_model, "brmsfit")) {
-                    pred_draws <- posterior_predict(private$growth_model, newdata = pred_data, draws = 400)
+                    pred_draws <- brms::posterior_predict(private$growth_model, newdata = pred_data, draws = 400)
                     pred_data$fitted <- apply(pred_draws, 2, median)
                     qs <- apply(pred_draws, 2, quantile, probs = c(0.025, 0.975))
                     ribbon <- data.frame(time = extended_time, ymin = qs[1, ], ymax = qs[2, ])
@@ -1023,7 +1023,7 @@ tumorgrowthClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     library(nlme)
                     
                     # Model with treatment interaction
-                    model_treatment <- nlme(size ~ V0 * exp(k * time),
+                    model_treatment <- nlme::nlme(size ~ V0 * exp(k * time),
                                           data = data,
                                           fixed = V0 + k ~ treatment,
                                           random = V0 ~ 1 | patient,
@@ -1033,7 +1033,7 @@ tumorgrowthClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                                                                k.treatment = -0.05)))
                     
                     # Extract treatment effects
-                    treatment_coefs <- fixef(model_treatment)
+                    treatment_coefs <- nlme::fixef(model_treatment)
                     k_treatment_effect <- treatment_coefs["k.treatment"]
                     percent_change <- (exp(k_treatment_effect) - 1) * 100
                     
@@ -1060,7 +1060,7 @@ tumorgrowthClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 } else if (growth_model == "gompertz") {
                     library(nlme)
                     
-                    model_treatment <- nlme(size ~ V0 * exp(alpha/beta * (1 - exp(-beta * time))),
+                    model_treatment <- nlme::nlme(size ~ V0 * exp(alpha/beta * (1 - exp(-beta * time))),
                                           data = data,
                                           fixed = V0 + alpha + beta ~ treatment,
                                           random = V0 ~ 1 | patient,
@@ -1069,7 +1069,7 @@ tumorgrowthClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                                                                V0.treatment = 0, alpha.treatment = -0.1, beta.treatment = 0)))
                     
                     # Extract treatment effects
-                    treatment_coefs <- fixef(model_treatment)
+                    treatment_coefs <- nlme::fixef(model_treatment)
                     alpha_treatment_effect <- treatment_coefs["alpha.treatment"]
                     
                     # Get p-value from summary
@@ -1095,7 +1095,7 @@ tumorgrowthClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     library(nlme)
                     
                     K_init <- max(data$size, na.rm = TRUE) * 1.2
-                    model_treatment <- nlme(size ~ K / (1 + exp(-r * (time - t0))),
+                    model_treatment <- nlme::nlme(size ~ K / (1 + exp(-r * (time - t0))),
                                           data = data,
                                           fixed = K + r + t0 ~ treatment,
                                           random = K ~ 1 | patient,
@@ -1104,7 +1104,7 @@ tumorgrowthClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                                                                  K.treatment = 0, r.treatment = -0.05, t0.treatment = 0)))
                     
                     # Extract treatment effects
-                    treatment_coefs <- fixef(model_treatment)
+                    treatment_coefs <- nlme::fixef(model_treatment)
                     r_treatment_effect <- treatment_coefs["r.treatment"]
                     
                     # Get p-value from summary
@@ -1130,7 +1130,7 @@ tumorgrowthClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     library(nlme)
                     
                     Vinf_init <- max(data$size, na.rm = TRUE) * 1.5
-                    model_treatment <- nlme(size ~ (Vinf^(1/3) - (Vinf^(1/3) - V0^(1/3)) * exp(-k * time))^3,
+                    model_treatment <- nlme::nlme(size ~ (Vinf^(1/3) - (Vinf^(1/3) - V0^(1/3)) * exp(-k * time))^3,
                                           data = data,
                                           fixed = V0 + Vinf + k ~ treatment,
                                           random = V0 ~ 1 | patient,
@@ -1139,7 +1139,7 @@ tumorgrowthClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                                                                  V0.treatment = 0, Vinf.treatment = 0, k.treatment = -0.05)))
                     
                     # Extract treatment effects
-                    treatment_coefs <- fixef(model_treatment)
+                    treatment_coefs <- nlme::fixef(model_treatment)
                     k_treatment_effect <- treatment_coefs["k.treatment"]
                     
                     # Get p-value from summary
@@ -1164,7 +1164,7 @@ tumorgrowthClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 } else if (growth_model == "power") {
                     library(nlme)
                     
-                    model_treatment <- nlme(size ~ V0 * (time + 1)^alpha,
+                    model_treatment <- nlme::nlme(size ~ V0 * (time + 1)^alpha,
                                           data = data,
                                           fixed = V0 + alpha ~ treatment,
                                           random = V0 ~ 1 | patient,
@@ -1173,7 +1173,7 @@ tumorgrowthClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                                                                  V0.treatment = 0, alpha.treatment = -0.1)))
                     
                     # Extract treatment effects
-                    treatment_coefs <- fixef(model_treatment)
+                    treatment_coefs <- nlme::fixef(model_treatment)
                     alpha_treatment_effect <- treatment_coefs["alpha.treatment"]
                     
                     # Get p-value from summary
@@ -1199,7 +1199,7 @@ tumorgrowthClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 } else if (growth_model == "linear") {
                     library(nlme)
                     
-                    model_treatment <- nlme(size ~ V0 + k * time,
+                    model_treatment <- nlme::nlme(size ~ V0 + k * time,
                                           data = data,
                                           fixed = V0 + k ~ treatment,
                                           random = V0 ~ 1 | patient,
@@ -1208,7 +1208,7 @@ tumorgrowthClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                                                                  V0.treatment = 0, k.treatment = -0.5)))
                     
                     # Extract treatment effects
-                    treatment_coefs <- fixef(model_treatment)
+                    treatment_coefs <- nlme::fixef(model_treatment)
                     k_treatment_effect <- treatment_coefs["k.treatment"]
                     
                     # Get p-value from summary
@@ -1281,7 +1281,7 @@ tumorgrowthClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         }
 
                         # Check effective sample size
-                        ess_bulk <- neff_ratio(model)
+                        ess_bulk <- brms::neff_ratio(model)
                         min_ess <- min(ess_bulk, na.rm = TRUE)
 
                         if (min_ess < 0.1) {
@@ -1335,7 +1335,7 @@ tumorgrowthClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 # Extract parameters and calculate derived characteristics
                 if (growth_model == "exponential") {
                     if (inherits(model, "nlme")) {
-                        k <- fixef(model)["k"]
+                        k <- nlme::fixef(model)["k"]
                     } else {
                         k <- coef(model)["k"]
                     }
@@ -1351,8 +1351,8 @@ tumorgrowthClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
                 } else if (growth_model == "gompertz") {
                     if (inherits(model, "nlme")) {
-                        alpha <- fixef(model)["alpha"]
-                        beta <- fixef(model)["beta"]
+                        alpha <- nlme::fixef(model)["alpha"]
+                        beta <- nlme::fixef(model)["beta"]
                     } else {
                         alpha <- coef(model)["alpha"]
                         beta <- coef(model)["beta"]
@@ -1381,9 +1381,9 @@ tumorgrowthClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     ))
                 } else if (growth_model == "logistic") {
                     if (inherits(model, "nlme")) {
-                        r <- fixef(model)["r"]
-                        K <- fixef(model)["K"]
-                        t0 <- fixef(model)["t0"]
+                        r <- nlme::fixef(model)["r"]
+                        K <- nlme::fixef(model)["K"]
+                        t0 <- nlme::fixef(model)["t0"]
                     } else {
                         r <- coef(model)["r"]
                         K <- coef(model)["K"]
@@ -1413,8 +1413,8 @@ tumorgrowthClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     ))
                 } else if (growth_model == "bertalanffy") {
                     if (inherits(model, "nlme")) {
-                        k <- fixef(model)["k"]
-                        V0 <- fixef(model)["V0"]
+                        k <- nlme::fixef(model)["k"]
+                        V0 <- nlme::fixef(model)["V0"]
                     } else {
                         k <- coef(model)["k"]
                         V0 <- coef(model)["V0"]
@@ -1523,7 +1523,7 @@ tumorgrowthClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 
             }, error = function(e) {
                 # Fallback to approximate method
-                coef_val <- coef(model)[param_name] %||% fixef(model)[param_name]
+                coef_val <- coef(model)[param_name] %||% nlme::fixef(model)[param_name]
                 se_val <- summary(model)$tTable[param_name, "Std.Error"] %||% 
                          summary(model)$coefficients[param_name, "Std. Error"]
                 
@@ -1699,7 +1699,7 @@ tumorgrowthClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 if (growth_model == "gompertz" && inherits(model, c("nlme", "nls"))) {
                     # Extract parameters for Gompertz
                     if (inherits(model, "nlme")) {
-                        coefs <- fixef(model)
+                        coefs <- nlme::fixef(model)
                     } else {
                         coefs <- coef(model)
                     }
@@ -1713,7 +1713,7 @@ tumorgrowthClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 } else if (growth_model == "exponential" && inherits(model, c("nlme", "nls"))) {
                     # Extract growth rate for exponential
                     if (inherits(model, "nlme")) {
-                        coefs <- fixef(model)
+                        coefs <- nlme::fixef(model)
                     } else {
                         coefs <- coef(model)
                     }

@@ -69,8 +69,8 @@ test_that("C03 & C04: parametric subtitle matches hand Student t, exact Hedges g
 
   res <- suppressWarnings(ClinicoPath::jjhistostats(
     data = d, dep = "x", typestatistics = "parametric",
-    resultssubtitle = TRUE, enableOneSampleTest = TRUE, test.value = mu,
-    conf.level = 0.95, digits = 5, centralityline = TRUE, originaltheme = TRUE
+    resultssubtitle = TRUE, enableOneSampleTest = TRUE, testValue = mu,
+    confLevel = 0.95, digits = 5, centralityline = TRUE, originaltheme = TRUE
   ))
   b <- val_capture_image(res$plot)$builds[[1]]
   nums <- as.numeric(val_quoted_nums(b$plot$labels$subtitle))
@@ -89,7 +89,7 @@ test_that("C05 & C06: nonparametric subtitle matches hand Wilcoxon V, asymptotic
   d <- data.frame(x = c(x, NA_real_))
   res <- suppressWarnings(ClinicoPath::jjhistostats(
     data = d, dep = "x", typestatistics = "nonparametric",
-    resultssubtitle = TRUE, enableOneSampleTest = TRUE, test.value = 5,
+    resultssubtitle = TRUE, enableOneSampleTest = TRUE, testValue = 5,
     digits = 5, centralityline = TRUE, originaltheme = TRUE
   ))
   b <- val_capture_image(res$plot)$builds[[1]]
@@ -112,7 +112,7 @@ test_that("C07 & C16: robust trimmed mean and t_bootstrapped match hand Winsoriz
 
   res <- suppressWarnings(ClinicoPath::jjhistostats(
     data = data.frame(x = c(x, NA_real_)), dep = "x", typestatistics = "robust",
-    resultssubtitle = TRUE, enableOneSampleTest = TRUE, test.value = 5,
+    resultssubtitle = TRUE, enableOneSampleTest = TRUE, testValue = 5,
     trimlevel = 0.2, digits = 5, centralityline = TRUE, seed = 20250101, originaltheme = TRUE
   ))
   b <- val_capture_image(res$plot)$builds[[1]]
@@ -141,7 +141,7 @@ test_that("C09 & C15: Bayesian log_e(BF_01) matches independent Rouder et al. (2
   for (r_sc in c(0.5, 0.707, 1.414)) {
     res <- suppressWarnings(ClinicoPath::jjhistostats(
       data = data.frame(x = x), dep = "x", typestatistics = "bayes",
-      resultssubtitle = TRUE, enableOneSampleTest = TRUE, test.value = 5,
+      resultssubtitle = TRUE, enableOneSampleTest = TRUE, testValue = 5,
       bfprior = r_sc, digits = 5, seed = 20250101, originaltheme = TRUE
     ))
     b <- val_capture_image(res$plot)$builds[[1]]
@@ -156,7 +156,7 @@ test_that("C03 & C05: reference parity on canonical datasets::sleep and bundled 
   skip_if_not_installed("ggstatsplot")
   res_sleep <- suppressWarnings(ClinicoPath::jjhistostats(
     data = datasets::sleep, dep = "extra", typestatistics = "parametric",
-    resultssubtitle = TRUE, enableOneSampleTest = TRUE, test.value = 0,
+    resultssubtitle = TRUE, enableOneSampleTest = TRUE, testValue = 0,
     digits = 4, originaltheme = TRUE
   ))
   nums_s <- as.numeric(val_quoted_nums(val_capture_image(res_sleep$plot)$builds[[1]]$plot$labels$subtitle))
@@ -168,7 +168,7 @@ test_that("C03 & C05: reference parity on canonical datasets::sleep and bundled 
   chol_x <- chol_x[is.finite(chol_x)]
   res_chol <- suppressWarnings(ClinicoPath::jjhistostats(
     data = ClinicoPath::jjhistostats_labvalues, dep = "cholesterol", typestatistics = "parametric",
-    resultssubtitle = TRUE, enableOneSampleTest = TRUE, test.value = 200,
+    resultssubtitle = TRUE, enableOneSampleTest = TRUE, testValue = 200,
     digits = 4, originaltheme = TRUE
   ))
   nums_c <- as.numeric(val_quoted_nums(val_capture_image(res_chol$plot)$builds[[1]]$plot$labels$subtitle))
@@ -183,11 +183,11 @@ test_that("C11 & C13: parametric and nonparametric one-sided p-values and conf.l
 
   r_gt <- suppressWarnings(ClinicoPath::jjhistostats(
     data = d, dep = "v", typestatistics = "parametric", alternative = "greater",
-    resultssubtitle = TRUE, enableOneSampleTest = TRUE, test.value = 5, digits = 5, originaltheme = TRUE
+    resultssubtitle = TRUE, enableOneSampleTest = TRUE, testValue = 5, digits = 5, originaltheme = TRUE
   ))
   r_lt <- suppressWarnings(ClinicoPath::jjhistostats(
     data = d, dep = "v", typestatistics = "parametric", alternative = "less",
-    resultssubtitle = TRUE, enableOneSampleTest = TRUE, test.value = 5, digits = 5, originaltheme = TRUE
+    resultssubtitle = TRUE, enableOneSampleTest = TRUE, testValue = 5, digits = 5, originaltheme = TRUE
   ))
   p_gt <- as.numeric(val_quoted_nums(val_capture_image(r_gt$plot)$builds[[1]]$plot$labels$subtitle)[2])
   p_lt <- as.numeric(val_quoted_nums(val_capture_image(r_lt$plot)$builds[[1]]$plot$labels$subtitle)[2])
@@ -198,8 +198,8 @@ test_that("C11 & C13: parametric and nonparametric one-sided p-values and conf.l
   # conf.level nesting: 80% inside 95% inside 99%
   get_ci <- function(cl) {
     r <- suppressWarnings(ClinicoPath::jjhistostats(
-      data = d, dep = "v", typestatistics = "parametric", conf.level = cl,
-      resultssubtitle = TRUE, enableOneSampleTest = TRUE, test.value = 5, digits = 5, originaltheme = TRUE
+      data = d, dep = "v", typestatistics = "parametric", confLevel = cl,
+      resultssubtitle = TRUE, enableOneSampleTest = TRUE, testValue = 5, digits = 5, originaltheme = TRUE
     ))
     as.numeric(val_quoted_nums(val_capture_image(r$plot)$builds[[1]]$plot$labels$subtitle)[4:5])
   }
@@ -218,7 +218,7 @@ test_that("C17 & C26: metamorphic invariants (permutation, shift, scale, sign fl
   run_sub <- function(df, mu = 20) {
     r <- suppressWarnings(ClinicoPath::jjhistostats(
       data = df, dep = "v", typestatistics = "parametric",
-      resultssubtitle = TRUE, enableOneSampleTest = TRUE, test.value = mu,
+      resultssubtitle = TRUE, enableOneSampleTest = TRUE, testValue = mu,
       digits = 5, originaltheme = TRUE
     ))
     as.numeric(val_quoted_nums(val_capture_image(r$plot)$builds[[1]]$plot$labels$subtitle))
@@ -233,7 +233,7 @@ test_that("C17 & C26: metamorphic invariants (permutation, shift, scale, sign fl
   # Subgroup split identity
   r_grp <- suppressWarnings(ClinicoPath::jjhistostats(
     data = d, dep = "v", grvar = "g", typestatistics = "parametric",
-    resultssubtitle = TRUE, enableOneSampleTest = TRUE, test.value = 20,
+    resultssubtitle = TRUE, enableOneSampleTest = TRUE, testValue = 20,
     digits = 5, originaltheme = TRUE
   ))
   builds <- val_capture_image(r_grp$plot2)$builds
@@ -320,11 +320,11 @@ test_that("C11: alternative=greater/less is honored for robust and bayes", {
   d <- data.frame(v = rnorm(30, 5.5, 1.5))
   r_gt <- suppressWarnings(ClinicoPath::jjhistostats(
     data = d, dep = "v", typestatistics = "robust", alternative = "greater",
-    resultssubtitle = TRUE, enableOneSampleTest = TRUE, test.value = 5, digits = 5, originaltheme = TRUE
+    resultssubtitle = TRUE, enableOneSampleTest = TRUE, testValue = 5, digits = 5, originaltheme = TRUE
   ))
   r_lt <- suppressWarnings(ClinicoPath::jjhistostats(
     data = d, dep = "v", typestatistics = "robust", alternative = "less",
-    resultssubtitle = TRUE, enableOneSampleTest = TRUE, test.value = 5, digits = 5, originaltheme = TRUE
+    resultssubtitle = TRUE, enableOneSampleTest = TRUE, testValue = 5, digits = 5, originaltheme = TRUE
   ))
   p_gt <- as.numeric(val_quoted_nums(val_capture_image(r_gt$plot)$builds[[1]]$plot$labels$subtitle)[2])
   p_lt <- as.numeric(val_quoted_nums(val_capture_image(r_lt$plot)$builds[[1]]$plot$labels$subtitle)[2])
@@ -332,11 +332,11 @@ test_that("C11: alternative=greater/less is honored for robust and bayes", {
 
   b_gt <- suppressWarnings(ClinicoPath::jjhistostats(
     data = d, dep = "v", typestatistics = "bayes", alternative = "greater",
-    resultssubtitle = TRUE, enableOneSampleTest = TRUE, test.value = 5, digits = 5, originaltheme = TRUE
+    resultssubtitle = TRUE, enableOneSampleTest = TRUE, testValue = 5, digits = 5, originaltheme = TRUE
   ))
   b_lt <- suppressWarnings(ClinicoPath::jjhistostats(
     data = d, dep = "v", typestatistics = "bayes", alternative = "less",
-    resultssubtitle = TRUE, enableOneSampleTest = TRUE, test.value = 5, digits = 5, originaltheme = TRUE
+    resultssubtitle = TRUE, enableOneSampleTest = TRUE, testValue = 5, digits = 5, originaltheme = TRUE
   ))
   bf_gt <- as.numeric(val_quoted_nums(val_capture_image(b_gt$plot)$builds[[1]]$plot$labels$subtitle)[1])
   bf_lt <- as.numeric(val_quoted_nums(val_capture_image(b_lt$plot)$builds[[1]]$plot$labels$subtitle)[1])
@@ -369,13 +369,13 @@ test_that("C06 & C08: constant null x==mu and B=200 bootstrap never fabricate p=
   d0 <- data.frame(v = rep(0, 30))
   r_rob <- suppressWarnings(ClinicoPath::jjhistostats(
     data = d0, dep = "v", typestatistics = "robust", resultssubtitle = TRUE,
-    enableOneSampleTest = TRUE, test.value = 0, originaltheme = TRUE
+    enableOneSampleTest = TRUE, testValue = 0, originaltheme = TRUE
   ))
   expect_false(any(val_quoted_nums(val_capture_image(r_rob$plot)$builds[[1]]$plot$labels$subtitle) == "2.23e-308"))
 
   r_np <- suppressWarnings(ClinicoPath::jjhistostats(
     data = d0, dep = "v", typestatistics = "nonparametric", resultssubtitle = TRUE,
-    enableOneSampleTest = TRUE, test.value = 0, originaltheme = TRUE
+    enableOneSampleTest = TRUE, testValue = 0, originaltheme = TRUE
   ))
   nums_np <- val_quoted_nums(val_capture_image(r_np$plot)$builds[[1]]$plot$labels$subtitle)
   expect_false(length(nums_np) >= 3 && as.numeric(nums_np[3]) == 1.0)
@@ -384,7 +384,7 @@ test_that("C06 & C08: constant null x==mu and B=200 bootstrap never fabricate p=
   d_shift <- data.frame(v = rnorm(30, 10, 1))
   r_sh <- suppressWarnings(ClinicoPath::jjhistostats(
     data = d_shift, dep = "v", typestatistics = "robust", resultssubtitle = TRUE,
-    enableOneSampleTest = TRUE, test.value = 0, originaltheme = TRUE
+    enableOneSampleTest = TRUE, testValue = 0, originaltheme = TRUE
   ))
   expect_false(any(val_quoted_nums(val_capture_image(r_sh$plot)$builds[[1]]$plot$labels$subtitle) == "2.23e-308"))
 })
@@ -408,11 +408,11 @@ test_that("C11: one-sided parametric/nonparametric CI and BF caption adapt to al
   d <- data.frame(v = rnorm(30, 5.5, 1.5))
   r_two <- suppressWarnings(ClinicoPath::jjhistostats(
     data = d, dep = "v", typestatistics = "parametric", alternative = "two.sided",
-    resultssubtitle = TRUE, enableOneSampleTest = TRUE, test.value = 5, digits = 5, originaltheme = TRUE
+    resultssubtitle = TRUE, enableOneSampleTest = TRUE, testValue = 5, digits = 5, originaltheme = TRUE
   ))
   r_gt <- suppressWarnings(ClinicoPath::jjhistostats(
     data = d, dep = "v", typestatistics = "parametric", alternative = "greater",
-    resultssubtitle = TRUE, enableOneSampleTest = TRUE, test.value = 5, digits = 5, originaltheme = TRUE
+    resultssubtitle = TRUE, enableOneSampleTest = TRUE, testValue = 5, digits = 5, originaltheme = TRUE
   ))
   ci_two <- as.numeric(val_quoted_nums(val_capture_image(r_two$plot)$builds[[1]]$plot$labels$subtitle)[4:5])
   ci_gt  <- as.numeric(val_quoted_nums(val_capture_image(r_gt$plot)$builds[[1]]$plot$labels$subtitle)[4:5])
@@ -424,7 +424,7 @@ test_that("C08: robust trimlevel=0.4 at n=5 is guarded against degenerate t=Inf 
   d <- data.frame(v = c(1.1, 1.8, 3.3, 4.1, 4.8))
   r <- suppressWarnings(ClinicoPath::jjhistostats(
     data = d, dep = "v", typestatistics = "robust", trimlevel = 0.4,
-    resultssubtitle = TRUE, enableOneSampleTest = TRUE, test.value = 0, originaltheme = TRUE
+    resultssubtitle = TRUE, enableOneSampleTest = TRUE, testValue = 0, originaltheme = TRUE
   ))
   expect_false(any(val_quoted_nums(val_capture_image(r$plot)$builds[[1]]$plot$labels$subtitle) == "Inf"))
 })
@@ -448,7 +448,7 @@ test_that("C14: robust trim disclosure reports floor(tr * n_used), not round(tr 
   d <- data.frame(v = c(seq(1, 24), rep(NA_real_, 10)))
   r <- suppressWarnings(ClinicoPath::jjhistostats(
     data = d, dep = "v", typestatistics = "robust", resultssubtitle = TRUE,
-    enableOneSampleTest = TRUE, test.value = 12, trimlevel = 0.2
+    enableOneSampleTest = TRUE, testValue = 12, trimlevel = 0.2
   ))
   expect_match(r$todo$content, "4 of 24", fixed = TRUE)
 })
@@ -459,14 +459,14 @@ test_that("C19 & C20: bf.message warnings and Random seed caption fire only when
   d <- data.frame(v = rnorm(30, 5.5, 1.5))
   r_np <- suppressWarnings(ClinicoPath::jjhistostats(
     data = d, dep = "v", typestatistics = "nonparametric",
-    resultssubtitle = TRUE, bf.message = TRUE, caption = "MY CAP", originaltheme = TRUE
+    resultssubtitle = TRUE, bfMessage = TRUE, caption = "MY CAP", originaltheme = TRUE
   ))
   expect_false(grepl("Your caption was not used", r_np$todo$content, fixed = TRUE))
   expect_false(grepl("Bayes factor prior:", r_np$todo$content, fixed = TRUE))
 
   r_nosub <- suppressWarnings(ClinicoPath::jjhistostats(
     data = d, dep = "v", typestatistics = "parametric",
-    resultssubtitle = FALSE, bf.message = TRUE, originaltheme = TRUE
+    resultssubtitle = FALSE, bfMessage = TRUE, originaltheme = TRUE
   ))
   cap <- val_capture_image(r_nosub$plot)$builds[[1]]$plot$labels$caption
   expect_false(grepl("Random seed:", paste(deparse(cap), collapse = " "), fixed = TRUE))
@@ -512,7 +512,7 @@ test_that("IR-JJHIST-01: directional Bayes on opposite-sign data returns finite 
   d <- data.frame(v = rnorm(25, mean = -2, sd = 1))
   r <- suppressWarnings(ClinicoPath::jjhistostats(
     data = d, dep = "v", typestatistics = "bayes",
-    resultssubtitle = TRUE, enableOneSampleTest = TRUE, test.value = 0,
+    resultssubtitle = TRUE, enableOneSampleTest = TRUE, testValue = 0,
     alternative = "greater", seed = 42, originaltheme = TRUE
   ))
   sub <- val_capture_image(r$plot)$builds[[1]]$plot$labels$subtitle
@@ -532,7 +532,7 @@ test_that("IR-JJHIST-02: high-evidence directional Bayes reads logBF directly wi
   d <- data.frame(v = rnorm(200, mean = 50, sd = 1))
   r_b <- suppressWarnings(ClinicoPath::jjhistostats(
     data = d, dep = "v", typestatistics = "bayes",
-    resultssubtitle = TRUE, enableOneSampleTest = TRUE, test.value = 0,
+    resultssubtitle = TRUE, enableOneSampleTest = TRUE, testValue = 0,
     alternative = "greater", seed = 42, originaltheme = TRUE
   ))
   sub_b <- val_capture_image(r_b$plot)$builds[[1]]$plot$labels$subtitle
@@ -543,8 +543,8 @@ test_that("IR-JJHIST-02: high-evidence directional Bayes reads logBF directly wi
 
   r_p <- suppressWarnings(ClinicoPath::jjhistostats(
     data = d, dep = "v", typestatistics = "parametric",
-    resultssubtitle = TRUE, bf.message = TRUE,
-    enableOneSampleTest = TRUE, test.value = 0,
+    resultssubtitle = TRUE, bfMessage = TRUE,
+    enableOneSampleTest = TRUE, testValue = 0,
     alternative = "greater", seed = 42, originaltheme = TRUE
   ))
   cap_p <- val_capture_image(r_p$plot)$builds[[1]]$plot$labels$caption
@@ -562,7 +562,7 @@ test_that("IR-JJHIST-03: robust zero-exceedance p-value patch fires for all digi
   for (dig in c(3L, 5L)) {
     r <- suppressWarnings(ClinicoPath::jjhistostats(
       data = d, dep = "v", typestatistics = "robust",
-      resultssubtitle = TRUE, enableOneSampleTest = TRUE, test.value = 0,
+      resultssubtitle = TRUE, enableOneSampleTest = TRUE, testValue = 0,
       digits = dig, seed = 42, originaltheme = TRUE
     ))
     sub <- val_capture_image(r$plot)$builds[[1]]$plot$labels$subtitle
@@ -579,7 +579,7 @@ test_that("IR-JJHIST-04: robust mode refuses cleanly when trimmed core has zero 
   for (alt in c("two.sided", "greater")) {
     r <- suppressWarnings(ClinicoPath::jjhistostats(
       data = d, dep = "v", typestatistics = "robust", trimlevel = 0.2,
-      resultssubtitle = TRUE, enableOneSampleTest = TRUE, test.value = 0,
+      resultssubtitle = TRUE, enableOneSampleTest = TRUE, testValue = 0,
       alternative = alt, seed = 42, originaltheme = TRUE
     ))
     cap <- val_capture_image(r$plot)
@@ -600,7 +600,7 @@ test_that("IR-JJHIST-05: grouped plot2 refuses statistical subtitle for n < 3 an
   )
   r <- suppressWarnings(ClinicoPath::jjhistostats(
     data = d, dep = "v", grvar = "g", typestatistics = "parametric",
-    resultssubtitle = TRUE, enableOneSampleTest = TRUE, test.value = 0,
+    resultssubtitle = TRUE, enableOneSampleTest = TRUE, testValue = 0,
     originaltheme = TRUE
   ))
   cap <- val_capture_image(r$plot2)
@@ -628,7 +628,7 @@ test_that("IR-JJHIST-06: ggpubrAddDensity plots bars on density scale matching d
   expect_lt(ratio, 5)
 })
 
-test_that("IR-JJHIST-07: conf.level = 0.999 renders 99.9% CI label, never 100%", {
+test_that("IR-JJHIST-07: confLevel = 0.999 renders 99.9% CI label, never 100%", {
   skip_if_not_installed("ggstatsplot")
   skip_if_not_installed("WRS2")
   skip_if_not_installed("BayesFactor")
@@ -636,8 +636,8 @@ test_that("IR-JJHIST-07: conf.level = 0.999 renders 99.9% CI label, never 100%",
   d <- data.frame(v = rnorm(25, 5, 1))
   r_rob <- suppressWarnings(ClinicoPath::jjhistostats(
     data = d, dep = "v", typestatistics = "robust",
-    resultssubtitle = TRUE, enableOneSampleTest = TRUE, test.value = 0,
-    alternative = "greater", conf.level = 0.999, seed = 42, originaltheme = TRUE
+    resultssubtitle = TRUE, enableOneSampleTest = TRUE, testValue = 0,
+    alternative = "greater", confLevel = 0.999, seed = 42, originaltheme = TRUE
   ))
   sub_rob <- paste(deparse(val_capture_image(r_rob$plot)$builds[[1]]$plot$labels$subtitle, width.cutoff = 500), collapse = " ")
   expect_match(sub_rob, "99\\.9%")
@@ -645,8 +645,8 @@ test_that("IR-JJHIST-07: conf.level = 0.999 renders 99.9% CI label, never 100%",
 
   r_bay <- suppressWarnings(ClinicoPath::jjhistostats(
     data = d, dep = "v", typestatistics = "bayes",
-    resultssubtitle = TRUE, enableOneSampleTest = TRUE, test.value = 0,
-    alternative = "greater", conf.level = 0.999, seed = 42, originaltheme = TRUE
+    resultssubtitle = TRUE, enableOneSampleTest = TRUE, testValue = 0,
+    alternative = "greater", confLevel = 0.999, seed = 42, originaltheme = TRUE
   ))
   sub_bay <- paste(deparse(val_capture_image(r_bay$plot)$builds[[1]]$plot$labels$subtitle, width.cutoff = 500), collapse = " ")
   expect_match(sub_bay, "99\\.9%")
@@ -691,7 +691,7 @@ test_that("IR-JJHIST-13, IR-JJHIST-14, IR-JJHIST-15, IR-JJHIST-16: warnings, see
   d0 <- data.frame(v = 1:20)
   r0 <- suppressWarnings(ClinicoPath::jjhistostats(
     data = d0, dep = "v", resultssubtitle = TRUE,
-    enableOneSampleTest = TRUE, test.value = 0
+    enableOneSampleTest = TRUE, testValue = 0
   ))
   expect_false(grepl("switched off", r0$todo$content, fixed = TRUE))
 
@@ -714,7 +714,7 @@ test_that("IR-JJHIST-13, IR-JJHIST-14, IR-JJHIST-15, IR-JJHIST-16: warnings, see
   d_ties <- data.frame(v = c(rep(5, 8), 6, 7, 8, 9, 10, 11, 12))
   r_ties <- suppressWarnings(ClinicoPath::jjhistostats(
     data = d_ties, dep = "v", typestatistics = "nonparametric",
-    resultssubtitle = TRUE, enableOneSampleTest = TRUE, test.value = 5
+    resultssubtitle = TRUE, enableOneSampleTest = TRUE, testValue = 5
   ))
   expect_match(r_ties$todo$content, "pseudomedian", ignore.case = TRUE)
   expect_match(r_ties$todo$content, "8 of 15 observations", fixed = TRUE)
@@ -781,7 +781,7 @@ test_that("SEC-I: .validateInputs() rejects out-of-range numeric and enum option
     o$value <- bad_val
     an$.__enclos_env__$private$.validateInputs()$valid
   }
-  expect_false(check_invalid("conf.level", 2.5))
+  expect_false(check_invalid("confLevel", 2.5))
   expect_false(check_invalid("trimlevel", 0.9))
   expect_false(check_invalid("bfprior", -1))
   expect_false(check_invalid("digits", 99))

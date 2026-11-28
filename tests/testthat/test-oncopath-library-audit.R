@@ -30,7 +30,8 @@ skip_if_no_oncopath_source <- function() {
 # audits the ones present and ends with a skip that names the rest: an absent file only says "cannot
 # open the connection", and gating a whole test on one analysis hides the others. The helpers below
 # are the ones in test-meddecide-library-audit.R.
-audit_analyses <- c("diagnosticmeta", "ihcheterogeneity", "swimmerplot", "waterfall")
+# pathagreement (new after the v1.1.4 tag) joined 2026-11-27, once it met the same conventions.
+audit_analyses <- c("diagnosticmeta", "ihcheterogeneity", "pathagreement", "swimmerplot", "waterfall")
 
 # Which of `names` lack a file here; `files` are sprintf() templates relative to `root`. Matched
 # against list.files(), not file.exists(): macOS disks ignore case, so file.exists() finds a
@@ -161,7 +162,12 @@ test_that("umbrella updater keeps the production OncoPath helper boundary minima
   # swimmerplot needs only the follow-up estimator; the RECIST and IHC engines,
   # the survival formula and event-coding helpers must not leak into OncoPath.
   # utils-notices.R: the notice renderer all four analyses share (library-audit 2026-10-23 OncoPath [LOW])
-  allowed <- c("utils.R", "utils-followup.R", "utils-patient-ids.R", "swimmerplot-html.R", "utils-notices.R")
+  # utils-eventindicator.R: .callerTranslator(), which the follow-up estimator (utils-followup.R) calls.
+  # pathagreement-*.R, utils-reader-resampling.R, utils-diagnostic-comparator.R: pathagreement's own engine.
+  allowed <- c("utils.R", "utils-followup.R", "utils-patient-ids.R", "swimmerplot-html.R", "utils-notices.R",
+               "utils-eventindicator.R", "utils-reader-resampling.R", "utils-diagnostic-comparator.R",
+               sprintf("pathagreement-%s.R", c("bootstrap", "reader-data", "reader-long", "reader-metrics",
+                                               "reader-report", "reader-status", "reader-transitions")))
   expect_equal(setdiff(helpers$files, allowed), character(0))
   if (length(parked) == 0) expect_setequal(helpers$files, allowed)
 
@@ -400,9 +406,11 @@ test_that("translation catalog references only this module's sources", {
   pot <- readLines(oncopath_file("jamovi", "i18n", "catalog.pot"), warn = FALSE)
   refs <- unlist(strsplit(sub("^#: ", "", grep("^#: ", pot, value = TRUE)), " ", fixed = TRUE))
   refs <- sub(":[0-9]+$", "", refs)
-  owners <- unique(ifelse(startsWith(refs, "R/"), refs, sub("[/.].*$", "", refs)))
+  # jamovi/js/<name>.events.js strings are extracted too; keep their path, as for R/ files.
+  owners <- unique(ifelse(startsWith(refs, "R/") | startsWith(refs, "jamovi/js/"), refs, sub("[/.].*$", "", refs)))
   analyses <- sub("\\.a\\.yaml$", "", list.files(oncopath_file("jamovi"), "\\.a\\.yaml$"))
-  known <- c(file.path("R", list.files(oncopath_file("R"))), analyses, "package")
+  known <- c(file.path("R", list.files(oncopath_file("R"))),
+             file.path("jamovi", "js", list.files(oncopath_file("jamovi", "js"))), analyses, "package")
   expect_gt(length(owners), 0)
   # A parked analysis keeps its strings until the next i18nUpdate(): a reference to an audited
   # analysis absent here, or to an R file named for it, is that, not an inherited catalog.
@@ -435,7 +443,17 @@ test_that("images declare requiresData exactly when their renderer reads self$da
       if (!is.list(x)) return(invisible())
       if (identical(x[["type"]], "Image") && !is.null(x[["renderFun"]])) {
         images <<- images + 1
-        todo <- x[["renderFun"]]
+        rf <- x[["renderFun"]]
+        # Restore guard (same rule as release_gate.py check_requires_data): a helper that opens with
+        # `if (private$.flag ...) return(...)`, where the renderer first calls a method setting
+        # `private$.flag <- TRUE`, answers from saved state and never reaches its self$data reads.
+        rf_calls <- sub("^private\\$", "", regmatches(body[[rf]] %||% "", gregexpr(
+          "private\\$\\.[A-Za-z_][A-Za-z0-9_.]*(?=\\s*\\()", body[[rf]] %||% "", perl = TRUE))[[1]])
+        restored <- unique(unlist(lapply(intersect(rf_calls, names(body)), function(g)
+          sub("^private\\$(\\S+?)\\s*<-.*$", "\\1", regmatches(body[[g]], gregexpr(
+            "private\\$\\.[A-Za-z_][A-Za-z0-9_.]*\\s*<-\\s*TRUE\\b", body[[g]], perl = TRUE))[[1]]))))
+        guard <- "^[^{]*\\{\\s*if\\s*\\(\\s*private\\$(\\.[A-Za-z_][A-Za-z0-9_.]*)\\b.*?\\)\\s*return\\s*\\("
+        todo <- rf
         seen <- character()
         reads <- FALSE
         while (length(todo) && !reads) {
@@ -443,6 +461,10 @@ test_that("images declare requiresData exactly when their renderer reads self$da
           todo <- todo[-1]
           if (f %in% seen || !f %in% names(body)) next
           seen <- c(seen, f)
+          if (f != rf) {
+            g <- regmatches(body[[f]], regexec(guard, body[[f]], perl = TRUE))[[1]]
+            if (length(g) && g[2] %in% restored) next
+          }
           reads <- grepl("self\\$data\\b|self\\$readDataset|private\\$\\.data\\b", body[[f]], perl = TRUE)
           calls <- regmatches(body[[f]], gregexpr("private\\$\\.[A-Za-z_][A-Za-z0-9_.]*(?=\\s*\\()",
                                                   body[[f]], perl = TRUE))[[1]]
@@ -874,7 +896,8 @@ test_that("stale notice serialization and native notice claims are retracted acr
 })
 
 # library-audit 2026-09-22 OncoPath [LOW] DONE: stringr removed from Imports and zzz_imports.R
-#   after ihcheterogeneity rework eliminated its last str_to_title call (guide section 10)
+#   after ihcheterogeneity rework eliminated its last str_to_title call (guide section 10).
+#   pathagreement brought it back on 2026-11-23 for two labels; 2026-11-27 made them translated labels.
 test_that("stringr is pruned from OncoPath and no unused packages are held in zzz_imports.R", {
   skip_if_no_oncopath_source()
   package <- read.dcf(oncopath_file("DESCRIPTION"), fields = "Package")[[1]]
@@ -1093,14 +1116,14 @@ test_that("OncoPath labels: sentence case, American spelling, one palette name",
   audit_skip_absent(absent, oncopath_root)
 })
 
-# library-audit 2026-10-23 OncoPath [LOW] DONE: the four analyses share one notice renderer
+# library-audit 2026-10-23 OncoPath [LOW] DONE: the analyses share one notice renderer
 #   (R/utils-notices.R): one banner style, most severe first, severity named in words, never ""
 test_that("OncoPath notices share one renderer: one look, most severe first, never blank", {
   skip_if_no_oncopath_source()
   absent <- audit_absent(oncopath_root, audit_analyses)
   for (a in setdiff(audit_analyses, absent)) {
     src <- read_oncopath("R", paste0(a, ".b.R"))
-    body <- regmatches(src, regexpr("(?s)\\.renderNotices = function\\(\\) \\{.*?\\n        \\},", src, perl = TRUE))
+    body <- regmatches(src, regexpr("(?s)\\.renderNotices = function\\(\\) \\{.*?\\n {8,12}\\},", src, perl = TRUE))
     expect_length(body, 1)
     expect_match(body, "notice_panel_html(self, ", fixed = TRUE, info = a)
     expect_false(grepl("rgba\\(|white-space|setContent\\(\"\"\\)", body), info = a)
@@ -1155,4 +1178,42 @@ test_that("OncoPath text does not point to analyses that have not shipped", {
     expect_identical(hits, character(0), info = a)
   }
   audit_skip_absent(absent, oncopath_root)
+})
+
+# The four pathagreement plots draw from image$state alone (requiresData stays unset): every helper
+# that would read self$data returns the value stored at .run() time once .restorePlotState() ran.
+# .trendOrder() lacked that guard, so a redraw or export without the dataset fell back to row order
+# and grouped cases differently from the agreement-trend table whenever a sequence variable was set.
+test_that("pathagreement plots redraw without data, and the trend plot keeps the sequence order", {
+  skip_if_not(exists("pathagreementClass"))
+  quiet <- function(expr) suppressWarnings(suppressMessages(expr))
+  withr::local_seed(93)
+  lv <- c("Low", "Middle", "High")
+  n <- 48
+  truth <- sample(lv, n, TRUE)
+  d <- as.data.frame(lapply(1:4, function(i)
+    factor(ifelse(stats::runif(n) < 0.2, sample(lv, n, TRUE), truth), levels = lv, ordered = TRUE)))
+  names(d) <- paste0("R", 1:4)
+  d$seq <- sample(n)                       # a reading order that is not the row order
+  args <- list(vars = paste0("R", 1:4), categoryAnalysis = TRUE, pathologyContext = TRUE,
+               agreementTrendAnalysis = TRUE, caseDifficultyScoring = TRUE, sequenceVariable = "seq")
+  a <- pathagreementClass$new(options = do.call(pathagreementOptions$new, args), data = d)
+  quiet({ a$init(); a$run() })
+  run_order <- a$.__enclos_env__$private$.trendOrder()
+  expect_false(identical(run_order, seq_len(n)))
+
+  b <- pathagreementClass$new(options = do.call(pathagreementOptions$new, args), data = d)
+  quiet(b$init())
+  pb <- b$.__enclos_env__$private
+  pb$.data <- NULL
+  f <- tempfile(fileext = ".png")
+  grDevices::png(f, 700, 500)
+  for (name in c("categoryPlot", "confusionMatrixPlot", "trendPlot", "difficultyPlot")) {
+    b$results[[name]]$setState(a$results[[name]]$state)
+    expect_true(isTRUE(quiet(pb[[paste0(".", name)]](b$results[[name]], ggplot2::theme_grey(), list()))),
+                info = name)
+  }
+  grDevices::dev.off()
+  unlink(f)
+  expect_identical(pb$.trendOrder(), run_order)
 })

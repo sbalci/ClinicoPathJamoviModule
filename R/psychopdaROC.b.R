@@ -3411,13 +3411,13 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
         # always visible, populated from the same loop and given the same
         # footnotes -- users saw the same AUC table twice in the default output.
         # Degenerate-estimate caveats use the per-marker complete cases below.
-        .degen_const <- tryCatch({
-          nm <- names(aucList)
-          nm[vapply(nm, function(v) {
-            col <- private$.prepareVarData(data, v, subGroup)$dependentVar
-            is.numeric(col) && length(unique(col[!is.na(col)])) <= 1
-          }, logical(1))]
-        }, error = function(e) character(0))
+        # Unguarded on purpose: every marker in aucList already passed
+        # .prepareVarData() in the main loop, and a catch-all here would
+        # swallow a jmvcore::reject() or a .checkpoint() restart.
+        .degen_const <- names(aucList)[vapply(names(aucList), function(v) {
+          col <- private$.prepareVarData(data, v, subGroup)$dependentVar
+          is.numeric(col) && length(unique(col[!is.na(col)])) <= 1
+        }, logical(1))]
 
         # CI method per variable (delong / hanley_mcneil), recorded by the AUC summary
         # loop below for the footnote; a second, identical CI pass used to run here.

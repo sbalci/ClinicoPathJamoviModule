@@ -4979,7 +4979,8 @@
         `author`="Jeffreys, H.", 
         `year`=1961, 
         `title`="Theory of Probability (3rd ed.)", 
-        `publisher`="Oxford University Press"), 
+        `publisher`="Oxford University Press", 
+        `url`="https://global.oup.com/academic/product/theory-of-probability-9780198503682"), 
     `leewagenmakers2013`=list(
         `type`="book", 
         `author`="Lee, M. D., & Wagenmakers, E.-J.", 

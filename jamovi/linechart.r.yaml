@@ -15,7 +15,7 @@ items:
     - name: naturalSummary
       title: Summary
       type: Html
-      visible: (xvar && yvar)
+      visible: (length(xvar) > 0 && length(yvar) > 0)
       clearWith:
         - xvar
         - yvar
@@ -25,7 +25,7 @@ items:
     - name: summary
       title: Data Summary
       type: Table
-      visible: (xvar && yvar)
+      visible: (length(xvar) > 0 && length(yvar) > 0)
       clearWith:
         - xvar
         - yvar
@@ -41,7 +41,7 @@ items:
     - name: correlation
       title: Correlation Analysis
       type: Table
-      visible: (xvar && yvar && trendline)
+      visible: (length(xvar) > 0 && length(yvar) > 0 && trendline)
       clearWith:
         - xvar
         - yvar
@@ -73,7 +73,7 @@ items:
     - name: assumptions
       title: Statistical Assumptions & Guidelines
       type: Html
-      visible: (xvar && yvar && trendline)
+      visible: (length(xvar) > 0 && length(yvar) > 0 && trendline)
       clearWith:
         - xvar
         - yvar
@@ -86,8 +86,9 @@ items:
       width: 800
       height: 600
       renderFun: .plot
-      requiresData: false
-      visible: (xvar && yvar)
+      # library-audit 2026-09-16 jjstatsplot [LOW] DONE: data-driven render route; .plot() reads self$data instead of storing raw rows in image$state
+      requiresData: true
+      visible: (length(xvar) > 0 && length(yvar) > 0)
       clearWith:
         - xvar
         - yvar

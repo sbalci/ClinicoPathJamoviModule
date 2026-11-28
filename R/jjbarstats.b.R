@@ -1191,16 +1191,19 @@ jjbarstatsClass <- if (requireNamespace("jmvcore"))
                 }, error = function(e) {
                     # Preserve original error context with enhanced information
                     original_error <- conditionMessage(e)
-                    context_info <- paste0(
-                        "Variable: ", dep_var, 
-                        ", Groups: ", length(unique(data[[self$options$group]])),
-                        ", N: ", nrow(data),
-                        if (grouped) paste0(", Split by: ", self$options$grvar) else ""
-                    )
-                    
-                    stop(paste0("Bar chart creation failed for ", progress_label %||% dep_var, 
-                               ". Context: ", context_info, 
-                               ". Original error: ", original_error),
+                    context_info <- .fmt(
+                        .("Variable: {var}, Groups: {groups}, N: {n}"),
+                        var = dep_var,
+                        groups = length(unique(data[[self$options$group]])),
+                        n = nrow(data))
+                    if (grouped)
+                        context_info <- paste0(context_info, ", ",
+                                               .fmt(.("Split by: {split}"), split = self$options$grvar))
+
+                    stop(.fmt(.("Bar chart creation failed for {var}. Context: {context}. Original error: {error}"),
+                              var = progress_label %||% dep_var,
+                              context = context_info,
+                              error = original_error),
                          call. = FALSE)
                 })
             },
@@ -1481,7 +1484,7 @@ jjbarstatsClass <- if (requireNamespace("jmvcore"))
                 tryCatch({
                     mydata <- private$.getCachedData()
                 }, error = function(e) {
-                    stop(paste("Plot preparation failed:", e$message))
+                    jmvcore::reject(.("Plot preparation failed: {err}"), err = conditionMessage(e))
                 })
 
                 dep <- self$options$dep
@@ -1530,7 +1533,7 @@ jjbarstatsClass <- if (requireNamespace("jmvcore"))
                 tryCatch({
                     mydata <- private$.getCachedData()
                 }, error = function(e) {
-                    stop(paste("Grouped plot preparation failed:", e$message))
+                    jmvcore::reject(.("Grouped plot preparation failed: {err}"), err = conditionMessage(e))
                 })
 
                 dep <- self$options$dep
@@ -1574,7 +1577,7 @@ jjbarstatsClass <- if (requireNamespace("jmvcore"))
                 tryCatch({
                     mydata <- private$.getCachedData()
                 }, error = function(e) {
-                    stop(paste("Balloon plot preparation failed:", e$message))
+                    jmvcore::reject(.("Balloon plot preparation failed: {err}"), err = conditionMessage(e))
                 })
                 dep <- self$options$dep
                 group <- self$options$group

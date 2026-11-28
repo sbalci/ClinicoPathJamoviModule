@@ -1004,8 +1004,6 @@ pathagreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                     "grDevices",
                     "pheatmap",
                     "reshape2",
-                    "scales",
-                    "stringr",
                     "viridisLite",
                     "Krippendorff2004"))
             self$add(jmvcore::Html$new(

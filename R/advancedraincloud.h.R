@@ -560,7 +560,8 @@ advancedraincloudResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
                 title="Advanced Raincloud Plot",
                 width=800,
                 height=600,
-                renderFun=".plot"))
+                renderFun=".plot",
+                requiresData=TRUE))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="statistics",

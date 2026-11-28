@@ -189,7 +189,7 @@ test_that("jjhistostats handles one-sample test", {
     data = jjhistostats_labvalues,
     dep = "cholesterol",
     enableOneSampleTest = TRUE,
-    test.value = 200
+    testValue = 200
   )
   expect_s3_class(result2, "jjhistostatsResults")
 })
@@ -255,7 +255,7 @@ test_that("jjhistostats handles Bayes Factor message", {
     data = jjhistostats_test,
     dep = "age_years",
     typestatistics = "bayes",
-    bf.message = TRUE
+    bfMessage = TRUE
   )
 
   expect_s3_class(result, "jjhistostatsResults")
@@ -332,7 +332,7 @@ test_that("jjhistostats handles different confidence levels", {
     result <- jjhistostats(
       data = jjhistostats_test,
       dep = "age_years",
-      conf.level = conf
+      confLevel = conf
     )
 
     expect_true(inherits(result, "jjhistostatsResults"),

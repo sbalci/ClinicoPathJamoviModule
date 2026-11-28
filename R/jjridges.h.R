@@ -615,7 +615,7 @@ jjridgesResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 width=600,
                 height=450,
                 renderFun=".plot",
-                requiresData=FALSE,
+                requiresData=TRUE,
                 clearWith=list(
                     "x_var",
                     "y_var",
@@ -805,13 +805,10 @@ jjridgesBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 
 #' Advanced Ridge Plot
 #'
-#' 'Create advanced ridgeline plots.
-#' Visualize distributions across groups with multiple style options, 
-#' annotations,
-#' statistical overlays, and publication-ready formatting. Supports both basic 
-#' and
-#' complex ridge plots with inside plots, double ridgelines, and color 
-#' gradients.'
+#' Create advanced ridgeline plots. Visualize distributions across groups with 
+#' multiple style options, annotations, statistical overlays, and 
+#' publication-ready formatting. Supports both basic and complex ridge plots 
+#' with inside plots, double ridgelines, and color gradients.
 #' 
 #' @param data The data as a data frame.
 #' @param x_var The continuous variable to display as distributions (e.g.,

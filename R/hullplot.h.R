@@ -289,6 +289,7 @@ hullplotResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 width=800,
                 height=600,
                 renderFun=".plot",
+                requiresData=TRUE,
                 clearWith=list(
                     "x_var",
                     "y_var",

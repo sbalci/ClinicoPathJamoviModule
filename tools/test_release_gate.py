@@ -370,3 +370,80 @@ refs:
     assert 'bad::corr (3 counter rows)' in warns, warns
     assert 'bad:plot2' not in warns, warns                            # comma-first .plot2 reads self$data -> NOT surplus
 print('round-4 jjstatsplot checks: ok')
+
+# check-module 2026-11-27 jjstatsplot: a handler that re-raises (stop(e)) or rejects again does not
+# swallow a reject(); only the handler that carries on is listed.
+with tempfile.TemporaryDirectory() as m:
+    write(m, 'jamovi/rj.a.yaml', 'name: rj\nmenuGroup: fake\noptions: []\n')
+    write(m, 'R/rj.b.R', '''rjClass <- R6::R6Class("rjClass", private = list(
+    .check = function() {
+        jmvcore::reject("bad input")
+    },
+    .run = function() {
+        tryCatch(private$.check(), error = function(e) {
+            private$.note <- conditionMessage(e)
+            NULL
+        })
+    },
+    .run2 = function() {
+        tryCatch(private$.check(), error = function(err) {
+            private$.cache <- NULL
+            stop(err)
+        })
+    },
+    .run3 = function() {
+        tryCatch(private$.check(), error = function(e) jmvcore::reject(conditionMessage(e)))
+    }
+))
+''')
+    sys.argv = ['release_gate.py', '--root', m]
+    spec = importlib.util.spec_from_file_location('release_gate', GATE)
+    rg = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(rg)
+    rg.check_reject_swallowed()
+    out = '\n'.join(rg.FAIL + rg.WARN)
+    assert 'rj.b.R:6 .run (.check)' in out, out                       # swallowing handler listed
+    assert '.run2' not in out and '.run3' not in out, out             # re-raising handlers are not
+print('reject_swallowed re-raise rule: ok')
+
+# check-module 2026-11-28 multisurvival: a per-run cache wrapper rejects only on its first call. When
+# the analysis also calls it outside every tryCatch, calls inside a handler return the cache.
+with tempfile.TemporaryDirectory() as m:
+    write(m, 'jamovi/cw.a.yaml', 'name: cw\nmenuGroup: fake\noptions: []\n')
+    write(m, 'R/cw.b.R', '''cwClass <- R6::R6Class("cwClass", private = list(
+    .clean_impl = function() {
+        jmvcore::reject("no rows")
+    },
+    .clean = function() {
+        if (!private$.done) {
+            private$.cache <- private$.clean_impl()
+            private$.done <- TRUE
+        }
+        private$.cache
+    },
+    .other_impl = function() {
+        jmvcore::reject("bad")
+    },
+    .other = function() {
+        if (!private$.odone) {
+            private$.ocache <- private$.other_impl()
+            private$.odone <- TRUE
+        }
+        private$.ocache
+    },
+    .run = function() {
+        d <- private$.clean()
+        tryCatch(private$.clean(), error = function(e) NULL)
+        tryCatch(private$.other(), error = function(e) NULL)
+    }
+))
+''')
+    sys.argv = ['release_gate.py', '--root', m]
+    spec = importlib.util.spec_from_file_location('release_gate', GATE)
+    rg = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(rg)
+    rg.check_reject_swallowed()
+    out = '\n'.join(rg.FAIL + rg.WARN)
+    assert '(.clean)' not in out, out                                 # cached, called unguarded: not listed
+    assert '(.other)' in out, out                                     # cached, only ever guarded: listed
+print('reject_swallowed cache-wrapper rule: ok')

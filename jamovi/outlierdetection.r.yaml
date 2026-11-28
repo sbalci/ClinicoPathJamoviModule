@@ -33,7 +33,8 @@ items:
       height: 600
       renderFun: .plot
       visible: (show_visualization)
-      requiresData: true
+      # The renderer draws from image$state only (per-row scores); it never reads self$data.
+      requiresData: false
       clearWith:
         - vars
         - method_category

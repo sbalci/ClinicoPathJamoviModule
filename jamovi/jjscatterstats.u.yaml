@@ -9,14 +9,14 @@ children:
     stretchFactor: 1
     children:
       - type: TargetLayoutBox
-        label: x-axis
+        label: X-Axis
         children:
           - type: VariablesListBox
             name: dep
             maxItemCount: 1
             isTarget: true
       - type: TargetLayoutBox
-        label: y-axis
+        label: Y-Axis
         children:
           - type: VariablesListBox
             name: group

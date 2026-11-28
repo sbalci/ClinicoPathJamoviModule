@@ -70,6 +70,8 @@ items:
       width: 800
       height: 600
       renderFun: .plot
+      # library-audit 2026-09-16 jjstatsplot [LOW] DONE: data-driven render route; .plot() reads self$data instead of storing raw rows in image$state
+      requiresData: true
 
     - name: statistics
       title: Summary Statistics

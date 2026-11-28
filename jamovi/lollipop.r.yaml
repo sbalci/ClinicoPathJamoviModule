@@ -16,9 +16,20 @@ items:
       type: Html
       visible: true
 
+    # library-audit 2026-09-16 jjstatsplot [LOW] DONE: clearWith omits display-only toggles so the table does not blink
     - name: summary
       title: Data Summary
       type: Table
+      visible: (length(dep) > 0 && length(group) > 0)
+      clearWith:
+        - dep
+        - group
+        - aggregation
+        - sortBy
+        - useHighlight
+        - highlight
+        - conditionalColor
+        - colorThreshold
       columns:
         - name: statistic
           title: Statistic
@@ -33,6 +44,7 @@ items:
       width: 800
       height: 600
       renderFun: .plot
+      visible: (length(dep) > 0 && length(group) > 0)
 
 refs:
     - ClinicoPathJamoviModule

@@ -125,17 +125,18 @@ test_that("C08: guard thresholds fire at exact boundaries (n=2/3, 3/4, 4/5; k=10
                        val_strip_html(ClinicoPath::hullplot(mk(5), "x", "y", "g", outlier_detection = TRUE)$outliers$content), fixed = TRUE))
 })
 
-test_that("C10: jamovi redraw with private$.data = NULL succeeds", {
-    # Oracle: jamovi Image redraw contract (requiresData = FALSE)
+test_that("C10: jamovi fresh-instance redraw under requiresData = TRUE succeeds", {
+    # Oracle: jamovi data-driven Image redraw contract (requiresData = TRUE, compact state)
     opts <- ClinicoPath:::hullplotOptions$new(
         x_var = "Sepal.Length", y_var = "Petal.Length", group_var = "Species", confidence_ellipses = TRUE
     )
     a1 <- ClinicoPath:::hullplotClass$new(options = opts, data = datasets::iris)
     a1$init(); a1$.__enclos_env__$private$.run()
     st <- a1$results$plot$state
+    expect_true(isTRUE(st$ready))
 
     a2 <- ClinicoPath:::hullplotClass$new(options = opts, data = datasets::iris)
-    a2$init(); a2$.__enclos_env__$private$.data <- NULL
+    a2$init()
     a2$results$plot$setState(st)
     f <- tempfile(fileext = ".png")
     grDevices::png(f, 800, 600)
@@ -144,18 +145,19 @@ test_that("C10: jamovi redraw with private$.data = NULL succeeds", {
 })
 
 test_that("C13: cross-output N consistency with missing values on bundled hullplot_clinical", {
-    # Oracle: internal consistency across plot$state, statistics, interpretation, summary, notices
+    # Oracle: internal consistency across statistics, interpretation, summary, notices
     d <- ClinicoPath::hullplot_clinical
     d$tumor_volume[1:7] <- NA
     res <- ClinicoPath::hullplot(
         data = d, x_var = "tumor_volume", y_var = "ki67_index", group_var = "treatment_arm",
         show_statistics = TRUE, show_summary = TRUE
     )
-    n_state <- nrow(res$plot$state$data)
-    expect_equal(sum(res$statistics$asDF$n), n_state)
-    expect_match(val_strip_html(res$interpretation$content), sprintf("Observations: %d data points", n_state), fixed = TRUE)
-    expect_match(val_strip_html(res$summary$content), sprintf("across %d observations", n_state), fixed = TRUE)
-    expect_match(val_strip_html(res$notices$content), sprintf("%d rows were plotted", n_state), fixed = TRUE)
+    n_expected <- sum(stats::complete.cases(d[c("tumor_volume", "ki67_index", "treatment_arm")]))
+    expect_true(isTRUE(res$plot$state$ready))
+    expect_equal(sum(res$statistics$asDF$n), n_expected)
+    expect_match(val_strip_html(res$interpretation$content), sprintf("Observations: %d data points", n_expected), fixed = TRUE)
+    expect_match(val_strip_html(res$summary$content), sprintf("across %d observations", n_expected), fixed = TRUE)
+    expect_match(val_strip_html(res$notices$content), sprintf("%d rows were plotted", n_expected), fixed = TRUE)
 })
 
 # --- Live regression tests for fixed validation defects ---
@@ -171,7 +173,7 @@ test_that("C09: VAL-hullplot-01 factor-with-values x_var unwraps numeric values 
     )
     st <- res$statistics$asDF
     expect_equal(st$x_mean, c(30, 130), tolerance = 1e-8)
-    expect_true(is.numeric(res$plot$state$data$x))
+    expect_true(isTRUE(res$plot$state$ready))
 })
 
 test_that("C09: VAL-hullplot-02 explicit NA factor level is excluded rather than plotted as group 'NA'", {

@@ -478,20 +478,31 @@ hullplotClass <- if (requireNamespace("jmvcore")) R6::R6Class("hullplotClass",
             self$results$interpretation$setContent(
                 private$.generate_interpretation_guide(plot_data, x_var, y_var, group_var))
 
-            # Set state for plot function. Appearance options are NOT copied in:
-            # .plot() reads self$options directly, and every appearance option is
-            # already listed in the plot's clearWith in hullplot.r.yaml, which is
-            # what triggers the re-render.
-            self$results$plot$setState(prepared)
+            # library-audit 2026-09-16 jjstatsplot [LOW] DONE: store only a compact readiness flag in image$state;
+            # .plot() rebuilds prepared data from self$data under requiresData: true (no raw rows saved in .omv).
+            self$results$plot$setState(list(ready = TRUE))
 
         },
 
         .plot = function(image, ggtheme, theme, ...) {
-
-            # Get data from image state (set by .run() method)
-            prepared <- image$state
-            if (is.null(prepared)) {
-                return(FALSE)  # No state data available
+            # render-route: data - state holds readiness flag only (no raw rows); .plot() rebuilds from self$data
+            st <- image$state
+            if (is.null(st)) {
+                return(FALSE)
+            }
+            if (is.list(st) && !is.null(st$data)) {
+                # Backwards compatibility for legacy .omv files saved before 2026-11-26
+                prepared <- st
+            } else if (is.list(st) && isTRUE(st$ready)) {
+                if (is.null(self$data) || nrow(self$data) == 0L) {
+                    return(FALSE)
+                }
+                prepared <- tryCatch(private$.prepare_data(), error = function(e) NULL)
+                if (is.null(prepared)) {
+                    return(FALSE)
+                }
+            } else {
+                return(FALSE)
             }
 
             plot_data <- prepared$data

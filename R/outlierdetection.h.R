@@ -234,7 +234,7 @@ outlierdetectionResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
                 height=600,
                 renderFun=".plot",
                 visible="(show_visualization)",
-                requiresData=TRUE,
+                requiresData=FALSE,
                 clearWith=list(
                     "vars",
                     "method_category",

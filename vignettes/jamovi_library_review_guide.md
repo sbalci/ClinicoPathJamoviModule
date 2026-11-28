@@ -953,7 +953,10 @@ is the check. **Do not silence `check_i18n_padding` by moving the space or punct
 (`R/jjarcdiagram.b.R`) and `.("; split panels use Pearson's chi-squared test")` became
 `paste0(method_name, "; ", .("split panels use Pearson's chi-squared test"))` (`R/jjpiestats.b.R`).
 That dropped `check_i18n_padding` from 3 to 0 while keeping the exact same untranslatable word-order
-splice; rewrite the whole sentence as one `.fmt()` / `.pasteT()` template instead.
+splice; rewrite the whole sentence as one `.fmt()` / `.pasteT()` template instead. Both sites were
+rewritten that way on 2026-11-26 (`.("<strong>{group}:</strong> {n} nodes")`,
+`.("{method}; split panels use Pearson's chi-squared test")`); the check read 0 both with the splice and after the rewrite,
+so only reading the site tells the two apart.
 
 ### Round 9: text that never enters the catalogue (2026-11-20 jsurvival [LOW])
 
@@ -1587,6 +1590,19 @@ that suppresses the re-read), state restored, `.createImage()`: 1 read per rende
 0 without, and the output compared. `tests/testthat/test-oncopath-library-audit.R` carries an R port
 of the trace for a module's own tests.
 
+**Restore guards (2026-11-27, OncoPath `pathagreement`).** Some renderers start with
+`private$.restorePlotState(image)`, which copies the saved values into private fields and sets
+`private$.restored_plot <- TRUE`. The helpers they call then open with
+`if (private$.restored_plot) return(private$.plot_reference)`. Their `self$data` lines never run on
+the render path, so the trace read them as four missing flags. The gate now skips a helper whose
+first statement returns early on a flag that the renderer's own restore call sets TRUE. Adding
+`requiresData: true` to silence those four would have re-read the dataset for nothing. One of the
+four was real, though: `.trendOrder()` had no guard. It read `sequenceVariable` from the `NULL`
+dataset, fell back to row order, and the exported trend plot grouped cases differently from its
+table, while still drawing. The fix stores the order in state the way the reference values are
+stored. A guard proves nothing unless its fallback is also right, so test the restore path with
+every option that feeds the helper set (the lifecycle test never set `sequenceVariable`).
+
 ---
 
 ## 16. Rule: never wrap `jmvcore::reject()` in a catch-all `tryCatch`
@@ -1650,6 +1666,24 @@ library error. That test only works if every `reject()` in the guarded region pa
 
 `withCallingHandlers(warning = …)` that collects warnings into a notice is fine and
 worth keeping — it does not intercept errors.
+
+### Enforce it
+
+`tools/release_gate.py` `check_reject_swallowed` (WARN, added 2026-11-27) lists every
+`tryCatch(..., error = function(e) ...)` outside a render function whose expression calls
+`reject()` or a `private$` method that reaches one (followed transitively). Until then the rule
+was prose only. On its first run it found 27 sites in shipped code; one was ClinicoPathDescriptives
+`outlierdetection`, where a multivariate method's own `reject("Multivariate methods require
+multiple variables")` became a generic "Outlier Detection Error" panel with the advice "try
+Robust Z-Score", on an analysis jamovi marked complete. That site is fixed (only
+`performance::check_outliers()` is wrapped). The other 26 are OncoPath 1, ClinicoPathDescriptives 1,
+jjstatsplot 7, meddecide 4 and jsurvival 13 (`multisurvival` alone has 10). Some are deliberate,
+such as a failed bootstrap replicate becoming `NULL`, so read each site before changing it, and
+say in a comment why the catch stays. Promote the check to FAIL at 0 shipped.
+
+Render functions are skipped: `.run()` has already rejected bad input before the image state
+exists. A catch-all in a renderer still turns an error into a blank plot, though, so
+`linechart`'s `tryCatch(private$.cleanData(), error = function(e) NULL)` was removed too.
 
 ### Where the anti-pattern came from
 
@@ -1957,18 +1991,18 @@ in `release_gate.py` itself.
 | Finding | Rule existed? | Recurrence · why |
 |---|---|---|
 | `jjdotchart` / `jjdotplotstats` plots export blank (`private$.inputsValid`, `.subtitleCache`, `.captionCache`) (HIGH) | §3/§15 prose only | **NEW for jjstatsplot, NO-CHECK + TAUGHT.** Same day as meddecide's HIGH. `check_render_private_state` (FAIL) hits **7** images on `081a5de` (all 4 named + 3 the reviewer missed: `advancedraincloud`, `jjsegmentedtotalbar`, `statsplot2`); 0 in current `jjstatsplot`. |
-| Raw datasets (×4) and a finished `ggplot` object (`jjridges` `setState(plot)`) in image state (LOW) | §17 (round 3); R1 JJ raised `setState` ggplot | **RECURRED, NO-CHECK.** `check_state_payload` read **0** on `081a5de` and on current `jjstatsplot` because `_HEAVY_NAME` missed `plot`, `analysis_data`, `state_df`, bare `data`, and `as.data.frame(data)`. Now catches 3 of 5 in its WARN branch; `raincloud`/`hullplot` still need runtime size measurement. |
+| Raw datasets (×4) and a finished `ggplot` object (`jjridges` `setState(plot)`) in image state (LOW) | §17 (round 3); R1 JJ raised `setState` ggplot | **RECURRED, NO-CHECK.** `check_state_payload` read **0** on `081a5de` and on current `jjstatsplot` because `_HEAVY_NAME` missed `plot`, `analysis_data`, `state_df`, bare `data`, and `as.data.frame(data)`. The WARN branch caught 3 of 5; since 2026-11-27 it also reads `list(data = analysis_data)` behind a variable and catches **4 of 5** on `081a5de` (`raincloud` added; the same widening surfaced ClinicoPathDescriptives `outlierdetection`, fixed 2026-11-27). `hullplot` sets a helper's return (`prepared <- private$.prepare_data()`), which no name pattern can judge: the `serialize()` size assertion in `test-jjstatsplot-library-audit.R` covers it. All five fixed 2026-11-26 (data route, `list(ready = TRUE)` state). |
 | Surplus `requiresData: true` on 4 state-only images (LOW) | §15 (round 3) | **RECURRED, WARN-SKIMMED + INSTANCE.** Reconciling `check_requires_data` against `081a5de` exposed a regex bug: `_METHOD` missed comma-first R6 definitions (`, .plot2 = function(`), causing 3 false surplus hits on `jjpiestats` (and hiding `multisurvival::.executeAnalysis`). Fixed → **4/4 exact** on `081a5de`, 0 in current `jjstatsplot`. |
 | Dotted option names in `jjhistostats` (`test.value`, `conf.level`, `bf.message`) (LOW) | No (`jamovi_a_yaml_guide.md` said only "valid R variable name") | **NEW, NO-RULE + TAUGHT.** Breaks JS `ui.<name>` and `.u.yaml` `enable:` bindings. Now §12, `jamovi_a_yaml_guide.md`, and `check_dotted_options` WARN (**3/3 exact**, 0 in other four modules). |
-| Summary/correlation tables with no `clearWith` blink on visual toggles (LOW) | No | **NEW, NO-RULE.** Deliberately ungated ("cosmetic?" is not mechanical); `linechart` now has explicit `clearWith`, `lollipop::summary` still does not. |
+| Summary/correlation tables with no `clearWith` blink on visual toggles (LOW) | No | **NEW, NO-RULE.** Deliberately ungated ("cosmetic?" is not mechanical); `linechart` had explicit `clearWith`; `lollipop::summary` got one on 2026-11-26 (8 data-feeding options only). |
 | `linechart` correlation table rows added in `.run()` (LOW) | §6 (round 1; R2 JJ fixed `.populateSummary` in the **same file**) | **RECURRED, INSTANCE + NO-CHECK.** `check_init_row_structure` read **0** on `081a5de` for two reasons: `.init()` called `correlation$setVisible(FALSE)` (counted as scaffolding!) and `.populateCorrelation()` used a counter variable `row_num <- row_num + 1`. Both fixed → **1/1 exact** on `081a5de` and current `jjstatsplot`. |
-| Three `.()` fragments (`jjarcdiagram` ×2, `jjpiestats` ×1) (LOW) | §9 (R2 JJ fixed 5 other files) | **RECURRED, INSTANCE.** `check_i18n_padding` caught **3/3 exact** on `081a5de`. A later pass dropped the gate to **0** by moving `" "` and `"; "` *outside* `.()` (`paste0(method_name, "; ", .("split panels ..."))`, `sprintf("... %d %s", ..., .("nodes"))`) — silencing the check while keeping the splice. |
+| Three `.()` fragments (`jjarcdiagram` ×2, `jjpiestats` ×1) (LOW) | §9 (R2 JJ fixed 5 other files) | **RECURRED, INSTANCE.** `check_i18n_padding` caught **3/3 exact** on `081a5de`. A later pass dropped the gate to **0** by moving `" "` and `"; "` *outside* `.()` (`paste0(method_name, "; ", .("split panels ..."))`, `sprintf("... %d %s", ..., .("nodes"))`) — silencing the check while keeping the splice. Rewritten as whole-sentence `.fmt()` templates 2026-11-26. |
 | `ggstatsplot` unversioned in `Imports:` despite `>= 0.13` palette API (LOW) | No | **NEW, NO-RULE.** Documented in §10 and `jamovi_module_patterns_guide.md`; a comment-regex gate gave false positives on defensive compatibility notes (e.g. `singlearm` avoiding a deprecated function). |
 | `ggdist` citation missing `author` and `year` (LOW) | §1 prose ("Every entry has `title`, `author`, `url`") | **RECURRED, NO-CHECK.** `check_refs` checked `url` only. Now FAILs on missing/empty `author`/`year`/`title` (**1/1 exact** on `081a5de`; **0** across umbrella and all five siblings today). |
 | Function lengths growing (55 > 120 lines) (LOW) | Standing | DEFERRED by standing decision. |
 | Leftover scaffolding: dead `arcdiagram` `Remotes:`, `utils.R` `oddsratio` comment, missing `test-jjridges-residual.R` (INFO) | §10 / §11 | **`arcdiagram` is WRONG-DONE + UMBRELLA-SCOPE:** R2 (2026-08-20) marked it DONE after grepping the umbrella `DESCRIPTION` (where it was removed 2026-07-05), never checking `../jjstatsplot/DESCRIPTION` — it is still there today. Now `check_dead_remotes` WARN (**1/1 exact** in JJ, 0 in other four siblings). `utils.R` and `jjridges.events.js` are umbrella-to-sibling mirror drift. |
 | `withBaseFormulaChar()` runtime S3 patch (INFO) | — | Not a defect; test with `formula.tools` attached belongs in `test-jjstatsplot-library-audit.R` (note `raincloud.b.R` still carries the stale `logistf` comment). |
-| Seven remaining TODOs (INFO) | Standing | DEFERRED (down to 1 section comment today); `linechart` `e$message` dispatch should use `reject(code = ...)`. |
+| Seven remaining TODOs (INFO) | Standing | DEFERRED 2026-11-26 with a stale count ("seven"); DONE 2026-11-27: the two left were comments about the `todo` welcome-panel *results item*, reworded; class test in `test-jjstatsplot-library-audit.R`. The `linechart` `e$message` dispatch was removed in `d2dd087`. |
 | Only one test in the sibling (INFO) | §14 | **NEW, UMBRELLA-SCOPE.** Umbrella tests were not mirrored; sibling now has 5 test files including `test-jjstatsplot-library-audit.R`. |
 
 **What to do differently (round 4, jjstatsplot):**
@@ -1986,6 +2020,10 @@ in `release_gate.py` itself.
 4. **R-legal is not jamovi-legal.** A dotted option name (`test.value`) is valid R and breaks both
    `.events.js` and `.u.yaml` `enable:` bindings; `jamovi_a_yaml_guide.md` must teach what breaks on
    both sides.
+5. **A round table written before the fixes goes stale the day they land.** This table was
+   written on 2026-11-26 ahead of the implement pass, and three rows (state, `clearWith`, `.()`)
+   still said "still open" a day after the responses said DONE. After implement, re-read the round's
+   rows against the code, not against the responses.
 
 ### Round 5 (2026-09-22 OncoPath)
 

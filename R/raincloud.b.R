@@ -60,74 +60,13 @@ raincloudClass <- if (requireNamespace("jmvcore")) R6::R6Class("raincloudClass",
             jmvcore::composeTerm(var_name)
         },
 
-        .run = function() {
-
-            # Check if required variables have been selected
-            if (is.null(self$options$dep_var) || is.null(self$options$group_var)) {
-                intro_msg <- "
-                <div style='background-color: rgba(33, 152, 239, 0.13); padding: 20px; border-radius: 8px; margin: 20px 0; color: inherit;'>
-                <h3 style='color: #1976d2; margin-top: 0;'> Welcome to Raincloud Plot Visualization!</h3>
-                <p><strong>Comprehensive distribution analysis</strong> using ggdist raincloud plots</p>
-                <p>Based on R-Bloggers tutorial: 'Make a Raincloud Plot to Visualize Distribution in ggplot2'</p>
-                
-                <h4 style='color: #1976d2;'>Required Variables:</h4>
-                <ol>
-                <li><strong>Dependent Variable:</strong> Continuous variable for distribution analysis</li>
-                <li><strong>Grouping Variable:</strong> Categorical variable for group comparisons</li>
-                </ol>
-                
-                <h4 style='color: #1976d2;'>What Raincloud Plots Show:</h4>
-                <ul>
-                <li><strong>Half-Violin Plot:</strong> Probability density distribution shape</li>
-                <li><strong>Box Plot:</strong> Median, quartiles, and outliers</li>
-                <li><strong>Data Points:</strong> Individual observations as dots</li>
-                <li><strong>Distribution Patterns:</strong> Multimodality, skewness, spread</li>
-                </ul>
-                
-                <h4 style='color: #1976d2;'>Perfect For:</h4>
-                <ul>
-                <li><strong>Clinical Research:</strong> Compare patient groups and biomarker distributions</li>
-                <li><strong>Data Exploration:</strong> Reveal patterns hidden in traditional box plots</li>
-                <li><strong>Quality Control:</strong> Identify outliers and distribution anomalies</li>
-                <li><strong>Publications:</strong> Comprehensive, publication-ready visualizations</li>
-                </ul>
-                
-                <p style='font-size: 12px; color: #555; margin-top: 20px;'>
-                 <em>Raincloud plots combine three visualization techniques for complete distribution understanding</em>
-                </p>
-                </div>"
-                
-                self$results$todo$setContent(intro_msg)
-                return()
-            } else {
-                self$results$todo$setContent("")
-            }
-
-            # Validate dataset
-            if (nrow(self$data) == 0) {
-                jmvcore::reject(.("Error: The provided dataset contains no complete rows. Please check your data and try again."))
-            }
-
-            # Safely require ggdist
-            if (!requireNamespace("ggdist", quietly = TRUE)) {
-                error_msg <- "
-                <div style='color: red; background-color: rgba(255, 33, 67, 0.09); padding: 20px; border-radius: 8px;'>
-                <h4>ggdist Package Required</h4>
-                <p>The ggdist package is required for raincloud plot functionality.</p>
-                <p>Please install it using: <code>install.packages('ggdist')</code></p>
-                </div>"
-                self$results$interpretation$setContent(error_msg)
-                return()
-            }
-
-            # Get data and variables
+        .prepare_data = function() {
             dataset <- self$data
             dep_var <- self$options$dep_var
             group_var <- self$options$group_var
             facet_var <- self$options$facet_var
             color_var <- self$options$color_var
 
-            # Prepare analysis data
             stat_vars <- unique(c(dep_var, group_var))
             required_vars <- stat_vars
             has_facet <- !is.null(facet_var) && facet_var != ""
@@ -238,6 +177,95 @@ raincloudClass <- if (requireNamespace("jmvcore")) R6::R6Class("raincloudClass",
             }
             stats_data$.row_id <- NULL
             plot_data$.row_id <- NULL
+
+            list(
+                stats_data = stats_data,
+                plot_data = plot_data,
+                raw_subset = raw_subset,
+                required_vars = required_vars,
+                n_missing_rows = n_missing_rows,
+                n_nonfinite = n_nonfinite,
+                has_facet = has_facet,
+                has_color = has_color
+            )
+        },
+
+        .run = function() {
+
+            # Check if required variables have been selected
+            if (is.null(self$options$dep_var) || is.null(self$options$group_var)) {
+                intro_msg <- "
+                <div style='background-color: rgba(33, 152, 239, 0.13); padding: 20px; border-radius: 8px; margin: 20px 0; color: inherit;'>
+                <h3 style='color: #1976d2; margin-top: 0;'> Welcome to Raincloud Plot Visualization!</h3>
+                <p><strong>Comprehensive distribution analysis</strong> using ggdist raincloud plots</p>
+                <p>Based on R-Bloggers tutorial: 'Make a Raincloud Plot to Visualize Distribution in ggplot2'</p>
+                
+                <h4 style='color: #1976d2;'>Required Variables:</h4>
+                <ol>
+                <li><strong>Dependent Variable:</strong> Continuous variable for distribution analysis</li>
+                <li><strong>Grouping Variable:</strong> Categorical variable for group comparisons</li>
+                </ol>
+                
+                <h4 style='color: #1976d2;'>What Raincloud Plots Show:</h4>
+                <ul>
+                <li><strong>Half-Violin Plot:</strong> Probability density distribution shape</li>
+                <li><strong>Box Plot:</strong> Median, quartiles, and outliers</li>
+                <li><strong>Data Points:</strong> Individual observations as dots</li>
+                <li><strong>Distribution Patterns:</strong> Multimodality, skewness, spread</li>
+                </ul>
+                
+                <h4 style='color: #1976d2;'>Perfect For:</h4>
+                <ul>
+                <li><strong>Clinical Research:</strong> Compare patient groups and biomarker distributions</li>
+                <li><strong>Data Exploration:</strong> Reveal patterns hidden in traditional box plots</li>
+                <li><strong>Quality Control:</strong> Identify outliers and distribution anomalies</li>
+                <li><strong>Publications:</strong> Comprehensive, publication-ready visualizations</li>
+                </ul>
+                
+                <p style='font-size: 12px; color: #555; margin-top: 20px;'>
+                 <em>Raincloud plots combine three visualization techniques for complete distribution understanding</em>
+                </p>
+                </div>"
+                
+                self$results$todo$setContent(intro_msg)
+                return()
+            } else {
+                self$results$todo$setContent("")
+            }
+
+            # Validate dataset
+            if (nrow(self$data) == 0) {
+                jmvcore::reject(.("Error: The provided dataset contains no complete rows. Please check your data and try again."))
+            }
+
+            # Safely require ggdist
+            if (!requireNamespace("ggdist", quietly = TRUE)) {
+                error_msg <- "
+                <div style='color: red; background-color: rgba(255, 33, 67, 0.09); padding: 20px; border-radius: 8px;'>
+                <h4>ggdist Package Required</h4>
+                <p>The ggdist package is required for raincloud plot functionality.</p>
+                <p>Please install it using: <code>install.packages('ggdist')</code></p>
+                </div>"
+                self$results$interpretation$setContent(error_msg)
+                return()
+            }
+
+            # Get data and variables
+            dataset <- self$data
+            dep_var <- self$options$dep_var
+            group_var <- self$options$group_var
+            facet_var <- self$options$facet_var
+            color_var <- self$options$color_var
+
+            prep <- private$.prepare_data()
+            stats_data <- prep$stats_data
+            plot_data <- prep$plot_data
+            raw_subset <- prep$raw_subset
+            required_vars <- prep$required_vars
+            n_missing_rows <- prep$n_missing_rows
+            n_nonfinite <- prep$n_nonfinite
+            has_facet <- prep$has_facet
+            has_color <- prep$has_color
 
             analysis_data <- stats_data
 
@@ -350,41 +378,33 @@ raincloudClass <- if (requireNamespace("jmvcore")) R6::R6Class("raincloudClass",
             }
             self$results$interpretation$setContent(interpretation_html)
 
-            # Store data AND visual options for plotting using setState
-            image <- self$results$plot
-            plotState <- list(
-                data = plot_data,
-                # Include visual options to trigger updates
-                color_palette = self$options$color_palette,
-                plot_theme = self$options$plot_theme,
-                show_violin = self$options$show_violin,
-                show_boxplot = self$options$show_boxplot,
-                show_dots = self$options$show_dots,
-                show_outliers = self$options$show_outliers,
-                outlier_method = self$options$outlier_method,
-                dots_side = self$options$dots_side,
-                orientation = self$options$orientation,
-                violin_width = self$options$violin_width,
-                box_width = self$options$box_width,
-                dots_size = self$options$dots_size,
-                alpha_violin = self$options$alpha_violin,
-                alpha_dots = self$options$alpha_dots,
-                plot_title = self$options$plot_title,
-                x_label = self$options$x_label,
-                y_label = self$options$y_label,
-                log_transform = self$options$log_transform
-            )
-            image$setState(plotState)
+            # library-audit 2026-09-16 jjstatsplot [LOW] DONE: store only a compact readiness flag in image$state;
+            # .plot() rebuilds plot_data from self$data under requiresData: true (visual options are in plot clearWith).
+            self$results$plot$setState(list(ready = TRUE))
 
         },
 
         .plot = function(image, ggtheme, theme, ...) {
-
-            # Extract data from state
-            if (is.null(image$state) || is.null(image$state$data)) {
-                return()
+            # render-route: data - state holds readiness flag only (no raw rows); .plot() rebuilds from self$data
+            st <- image$state
+            if (is.null(st)) {
+                return(FALSE)
             }
-            analysis_data <- image$state$data
+            if (is.list(st) && !is.null(st$data)) {
+                # Backwards compatibility for legacy .omv files saved before 2026-11-26
+                analysis_data <- st$data
+            } else if (is.list(st) && isTRUE(st$ready)) {
+                if (is.null(self$data) || nrow(self$data) == 0L) {
+                    return(FALSE)
+                }
+                prep <- tryCatch(private$.prepare_data(), error = function(e) NULL)
+                if (is.null(prep) || is.null(prep$plot_data) || nrow(prep$plot_data) == 0L) {
+                    return(FALSE)
+                }
+                analysis_data <- prep$plot_data
+            } else {
+                return(FALSE)
+            }
             dep_var <- self$options$dep_var
             group_var <- self$options$group_var
             facet_var <- self$options$facet_var
@@ -451,7 +471,7 @@ raincloudClass <- if (requireNamespace("jmvcore")) R6::R6Class("raincloudClass",
             # Add faceting if specified
             if (!is.null(facet_var) && facet_var != "") {
                 facet_safe <- private$.escapeVar(facet_var)
-                p <- p + ggplot2::facet_wrap(stats::reformulate(facet_safe))
+                p <- p + ggplot2::facet_wrap(jmvcore::asFormula(paste("~", facet_safe)))
             }
             
             # Apply color palette. Transparency is handled once by the geom alpha
@@ -1087,9 +1107,7 @@ raincloudClass <- if (requireNamespace("jmvcore")) R6::R6Class("raincloudClass",
                 }
 
             } else if (test_key %in% c("anova", "welch")) {
-                dep_safe <- private$.escapeVar(dep_var)
-                group_safe <- private$.escapeVar(group_var)
-                fml <- stats::reformulate(group_safe, response = dep_safe)
+                fml <- jmvcore::asFormula(jmvcore::constructFormula(dep_var, group_var))
 
                 if (test_key == "welch") {
                     # withBaseFormulaChar(): logistf pulls in formula.tools, whose
@@ -1130,9 +1148,8 @@ raincloudClass <- if (requireNamespace("jmvcore")) R6::R6Class("raincloudClass",
                 }
 
             } else if (test_key == "kruskal") {
-                dep_safe <- private$.escapeVar(dep_var)
-                group_safe <- private$.escapeVar(group_var)
-                kw_result <- run(kruskal.test(stats::reformulate(group_safe, response = dep_safe), data = data))
+                fml <- jmvcore::asFormula(jmvcore::constructFormula(dep_var, group_var))
+                kw_result <- run(kruskal.test(fml, data = data))
                 if (!inherits(kw_result, "condition")) {
                     test_stat <- round(kw_result$statistic, 4)
                     p_value <- kw_result$p.value

@@ -253,14 +253,14 @@ test_that("C17-C18-C20-C21-C23: outlier handling, log(y+0.01) summary stats, plo
   hline_df <- Filter(function(d) "yintercept" %in% names(d), b_lin$data)[[1]]
   expect_equal(hline_df$yintercept[1], 18, tolerance = 1e-12)
 
-  # Internal R6 class is accessed here specifically to simulate jamovi reopen/export where private$.data is NULL (Rule E4).
+  # Fresh-instance redraw under jamovi's data-driven render route (requiresData: true, no .run() on a2).
   opts <- ClinicoPath:::advancedraincloudOptions$new(
     y_var = "y", x_var = "g", show_comparisons = TRUE, p_value_position = "above"
   )
   a1 <- ClinicoPath:::advancedraincloudClass$new(options = opts, data = df_lin)
   a1$run()
-  a2 <- ClinicoPath:::advancedraincloudClass$new(options = opts, data = df_lin[0, ])
-  a2$.__enclos_env__$private$.data <- NULL
+  a2 <- ClinicoPath:::advancedraincloudClass$new(options = opts, data = df_lin)
+  a2$init()
   a2$results$plot$setState(a1$results$plot$state)
   f_pdf <- tempfile(fileext = ".pdf")
   grDevices::pdf(f_pdf, width = 8, height = 6)

@@ -606,7 +606,7 @@ test_that("jjhistostats handles negative values (shouldn't always test against 0
     jjhistostats(
       data = negative_data,
       dep = "z_score",
-      test.value = 0  # Default, but irrelevant
+      testValue = 0  # Default, but irrelevant
     )
   }, warning = function(w) {
     w
@@ -630,7 +630,7 @@ test_that("jjhistostats handles all positive values (common for biomarkers)", {
     jjhistostats(
       data = positive_data,
       dep = "psa_level",
-      test.value = 0  # Default, but irrelevant for biomarkers
+      testValue = 0  # Default, but irrelevant for biomarkers
     )
   }, warning = function(w) {
     w

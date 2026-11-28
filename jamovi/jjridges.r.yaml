@@ -86,13 +86,14 @@ items:
         - effsize_type
         - clinicalPreset
 
+    # library-audit 2026-09-16 jjstatsplot [LOW] DONE: data-driven route (requiresData: true); rebuild plot in .plot() instead of storing a ggplot object in image$state (guide §17)
     - name: plot
       title: Ridge Plot
       type: Image
       width:  600
       height: 450
       renderFun: .plot
-      requiresData: false
+      requiresData: true
       clearWith:
         - x_var
         - y_var

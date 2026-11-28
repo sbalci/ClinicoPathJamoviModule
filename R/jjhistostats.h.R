@@ -17,12 +17,12 @@ jjhistostatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
             showInterpretation = FALSE,
             clinicalPreset = "custom",
             enableOneSampleTest = FALSE,
-            test.value = 0,
+            testValue = 0,
             alternative = "two.sided",
             trimlevel = 0.2,
             bfprior = 0.707,
-            conf.level = 0.95,
-            bf.message = FALSE,
+            confLevel = 0.95,
+            bfMessage = FALSE,
             digits = 2,
             xlab = "",
             title = "",
@@ -116,9 +116,9 @@ jjhistostatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                 "enableOneSampleTest",
                 enableOneSampleTest,
                 default=FALSE)
-            private$..test.value <- jmvcore::OptionNumber$new(
-                "test.value",
-                test.value,
+            private$..testValue <- jmvcore::OptionNumber$new(
+                "testValue",
+                testValue,
                 default=0)
             private$..alternative <- jmvcore::OptionList$new(
                 "alternative",
@@ -140,15 +140,15 @@ jjhistostatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                 default=0.707,
                 min=0.1,
                 max=2)
-            private$..conf.level <- jmvcore::OptionNumber$new(
-                "conf.level",
-                conf.level,
+            private$..confLevel <- jmvcore::OptionNumber$new(
+                "confLevel",
+                confLevel,
                 default=0.95,
                 min=0.5,
                 max=0.999)
-            private$..bf.message <- jmvcore::OptionBool$new(
-                "bf.message",
-                bf.message,
+            private$..bfMessage <- jmvcore::OptionBool$new(
+                "bfMessage",
+                bfMessage,
                 default=FALSE)
             private$..digits <- jmvcore::OptionInteger$new(
                 "digits",
@@ -277,12 +277,12 @@ jjhistostatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
             self$.addOption(private$..showInterpretation)
             self$.addOption(private$..clinicalPreset)
             self$.addOption(private$..enableOneSampleTest)
-            self$.addOption(private$..test.value)
+            self$.addOption(private$..testValue)
             self$.addOption(private$..alternative)
             self$.addOption(private$..trimlevel)
             self$.addOption(private$..bfprior)
-            self$.addOption(private$..conf.level)
-            self$.addOption(private$..bf.message)
+            self$.addOption(private$..confLevel)
+            self$.addOption(private$..bfMessage)
             self$.addOption(private$..digits)
             self$.addOption(private$..xlab)
             self$.addOption(private$..title)
@@ -319,12 +319,12 @@ jjhistostatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
         showInterpretation = function() private$..showInterpretation$value,
         clinicalPreset = function() private$..clinicalPreset$value,
         enableOneSampleTest = function() private$..enableOneSampleTest$value,
-        test.value = function() private$..test.value$value,
+        testValue = function() private$..testValue$value,
         alternative = function() private$..alternative$value,
         trimlevel = function() private$..trimlevel$value,
         bfprior = function() private$..bfprior$value,
-        conf.level = function() private$..conf.level$value,
-        bf.message = function() private$..bf.message$value,
+        confLevel = function() private$..confLevel$value,
+        bfMessage = function() private$..bfMessage$value,
         digits = function() private$..digits$value,
         xlab = function() private$..xlab$value,
         title = function() private$..title$value,
@@ -360,12 +360,12 @@ jjhistostatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
         ..showInterpretation = NA,
         ..clinicalPreset = NA,
         ..enableOneSampleTest = NA,
-        ..test.value = NA,
+        ..testValue = NA,
         ..alternative = NA,
         ..trimlevel = NA,
         ..bfprior = NA,
-        ..conf.level = NA,
-        ..bf.message = NA,
+        ..confLevel = NA,
+        ..bfMessage = NA,
         ..digits = NA,
         ..xlab = NA,
         ..title = NA,
@@ -431,12 +431,12 @@ jjhistostatsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                     "centralitytype",
                     "resultssubtitle",
                     "enableOneSampleTest",
-                    "test.value",
-                    "conf.level",
+                    "testValue",
+                    "confLevel",
                     "alternative",
                     "trimlevel",
                     "bfprior",
-                    "bf.message",
+                    "bfMessage",
                     "binfill",
                     "bincolor",
                     "binalpha",
@@ -654,7 +654,7 @@ jjhistostatsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   uses ggstatsplot's own default null of 0, which is rarely a meaningful
 #'   comparison for clinical data. To suppress the test entirely, turn off
 #'   'Statistical Results'.
-#' @param test.value Value to compare the sample against in one-sample test.
+#' @param testValue Value to compare the sample against in one-sample test.
 #'   Only used when enableOneSampleTest is TRUE. Note: Testing against 0 is
 #'   rarely clinically meaningful for most biomedical data. Consider using a
 #'   clinically relevant threshold (e.g., reference range limit, treatment
@@ -674,12 +674,12 @@ jjhistostatsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   value, so it is reported alongside the result. Larger values place more
 #'   prior mass on large effects, which lowers the Bayes factor for small
 #'   observed effects.
-#' @param conf.level Confidence level for the interval reported in the plot
+#' @param confLevel Confidence level for the interval reported in the plot
 #'   subtitle, between 0.5 and 0.999. The old bounds allowed 1, at which the
 #'   entire statistical subtitle disappeared with no message, and 0, which
 #'   printed a zero-width "0 percent CI".
-#' @param bf.message Whether to display a Bayes factor caption beneath the
-#'   plot when using parametric analysis with statistical results enabled. In
+#' @param bfMessage Whether to display a Bayes factor caption beneath the plot
+#'   when using parametric analysis with statistical results enabled. In
 #'   Bayesian mode, the Bayes factor is always displayed in the subtitle
 #'   regardless of this setting.
 #' @param digits Number of decimal places for displaying statistics in the
@@ -741,12 +741,12 @@ jjhistostats <- function(
     showInterpretation = FALSE,
     clinicalPreset = "custom",
     enableOneSampleTest = FALSE,
-    test.value = 0,
+    testValue = 0,
     alternative = "two.sided",
     trimlevel = 0.2,
     bfprior = 0.707,
-    conf.level = 0.95,
-    bf.message = FALSE,
+    confLevel = 0.95,
+    bfMessage = FALSE,
     digits = 2,
     xlab = "",
     title = "",
@@ -796,12 +796,12 @@ jjhistostats <- function(
         showInterpretation = showInterpretation,
         clinicalPreset = clinicalPreset,
         enableOneSampleTest = enableOneSampleTest,
-        test.value = test.value,
+        testValue = testValue,
         alternative = alternative,
         trimlevel = trimlevel,
         bfprior = bfprior,
-        conf.level = conf.level,
-        bf.message = bf.message,
+        confLevel = confLevel,
+        bfMessage = bfMessage,
         digits = digits,
         xlab = xlab,
         title = title,

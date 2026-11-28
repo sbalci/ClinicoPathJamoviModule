@@ -14707,15 +14707,19 @@ msgstr "<p style='{v1} {v2}'><b>Hedef saptama olasılığı:</b> %{v3}</p>"
 
 #: R/pathagreement.b.R
 msgid ""
-"<p style='margin: 0 0 6px 0;'><strong>Formula:</strong> w = 1 - [(i - j) / "
-"(k - 1)]\\u{00B2}</p>"
+"<p style='margin: 0 0 6px 0;'><strong>Formula:</strong> w = 1 - ((i - j) / "
+"(k - 1))<sup>2</sup></p>"
 msgstr ""
+"<p style='margin: 0 0 6px 0;'><strong>Formül:</strong> w = 1 - ((i - j) / "
+"(k - 1))<sup>2</sup></p>"
 
 #: R/pathagreement.b.R
 msgid ""
 "<p style='margin: 0 0 6px 0;'><strong>Formula:</strong> w = 1 - |i - j| / (k "
 "- 1)</p>"
 msgstr ""
+"<p style='margin: 0 0 6px 0;'><strong>Formül:</strong> w = 1 - |i - j| / (k "
+"- 1)</p>"
 
 #: R/pathagreement.b.R
 msgid "<p style='margin: 0 0 6px 0;'><strong>When to use:</strong></p>"
@@ -111294,7 +111298,7 @@ msgstr ""
 
 #: R/pathagreement.b.R
 msgid "Majority"
-msgstr ""
+msgstr "Çoğunluk"
 
 #: R/decisioncombine.b.R
 msgid "Majority (>=2/3 pos)"
@@ -111324,7 +111328,7 @@ msgstr ""
 
 #: pathagreement/options/consensus_method/majority.title
 msgid "Majority rule (more than 50 percent)"
-msgstr ""
+msgstr "Çoğunluk kuralı (yüzde 50'den fazla)"
 
 #: R/nogoldstandard.b.R
 msgid "Majority rule has an empty group"
@@ -179441,7 +179445,7 @@ msgstr ""
 
 #: pathagreement/options/wght/squared.title
 msgid "Squared"
-msgstr ""
+msgstr "Karesel"
 
 #: variablebiplot/options/contributionMetric/squared.title
 msgid "Squared Loading ( percent Contribution)"
@@ -195546,12 +195550,16 @@ msgid ""
 "The number of time-point labels ({nLabels}) does not match the number of "
 "time points ({nPoints}), so default labels were used."
 msgstr ""
+"Zaman noktası etiketlerinin sayısı ({nLabels}) zaman noktası sayısıyla "
+"({nPoints}) eşleşmiyor; bu nedenle varsayılan etiketler kullanıldı."
 
 #: R/advancedraincloud.b.R
 msgid ""
 "The number of trial-arm labels ({nLabels}) does not match the number of "
 "groups ({nGroups}), so default labels were used."
 msgstr ""
+"Deneme kolu etiketlerinin sayısı ({nLabels}) grup sayısıyla ({nGroups}) "
+"eşleşmiyor; bu nedenle varsayılan etiketler kullanıldı."
 
 #: R/decisioncalculator.b.R
 msgid ""
@@ -209218,7 +209226,7 @@ msgstr ""
 
 #: R/pathagreement.b.R
 msgid "Unanimous"
-msgstr ""
+msgstr "Oy birliği"
 
 #: agreement/options/consensusRule/unanimous.title
 msgid "Unanimous (100 percent)"
@@ -214695,6 +214703,16 @@ msgstr "%20'den fazla eksik değeri olan değişkenler: {variables}"
 #: R/outlierdetection.b.R
 msgid "Variables with all missing values: {}"
 msgstr "Tüm değerleri eksik olan değişkenler: {}"
+
+#: R/outlierdetection.b.R
+msgid ""
+"Outlier detection could not be computed: {}. Check for infinite or extremely "
+"large values, or choose another method; for multivariate methods, try fewer "
+"variables."
+msgstr ""
+"Aykırı değer tespiti hesaplanamadı: {}. Sonsuz veya aşırı büyük değerleri "
+"kontrol edin ya da başka bir yöntem seçin; çok değişkenli yöntemler için daha "
+"az değişken deneyin."
 
 #: R/outlierdetection.b.R
 msgid "Variables with constant values (no variation): {}"
@@ -221969,6 +221987,78 @@ msgstr ""
 #: contTables/results/chiSq.title
 msgid "χ² Tests"
 msgstr ""
+
+#: R/pathagreement.b.R
+msgid "Color-blind safe (plasma)"
+msgstr "Renk körü güvenli (plasma)"
+
+#: R/pathagreement.b.R
+msgid "Color-blind safe (cividis)"
+msgstr "Renk körü güvenli (cividis)"
+
+#: R/pathagreement.b.R
+msgid "Color-blind safe (viridis, recommended)"
+msgstr "Renk körü güvenli (viridis, önerilen)"
+
+#: R/pathagreement.b.R
+msgid "Blue-white-red"
+msgstr "Mavi-beyaz-kırmızı"
+
+#: R/pathagreement.b.R
+msgid "Equal/linear"
+msgstr "Eşit/doğrusal"
+
+#: R/pathagreement.b.R
+msgid "Super majority (>=2/3)"
+msgstr "Nitelikli çoğunluk (>=2/3)"
+
+#: R/pathagreement.b.R
+msgid "Super majority"
+msgstr "Nitelikli çoğunluk"
+
+#: R/pathagreement.b.R
+msgid "Unanimous only"
+msgstr "Yalnızca oy birliği"
+
+#: R/pathagreement.b.R
+msgid "Percentage agreement"
+msgstr "Yüzde uyum"
+
+#: R/pathagreement.b.R
+msgid "Percentage agreement (recommended)"
+msgstr "Yüzde uyum (önerilen)"
+
+#: R/jjridges.b.R
+msgid "Right-Censoring Not Accounted For"
+msgstr "Sağdan Sansürleme Hesaba Katılmadı"
+
+#: R/jjridges.b.R
+msgid "Independence Assumption Violation"
+msgstr "Bağımsızlık Varsayımı İhlali"
+
+#: R/jjridges.b.R
+msgid "No valid data available for analysis. Check your variable selections and data."
+msgstr "Analiz için geçerli veri yok. Değişken seçimlerinizi ve verilerinizi kontrol edin."
+
+#: R/advancedraincloud.b.R
+msgid "Note: The raincloud layer could not be drawn ({error}), so standard violin, boxplot and point layers are shown instead."
+msgstr "Not: Yağmur bulutu katmanı çizilemedi ({error}); bu nedenle bunun yerine standart keman, kutu grafiği ve nokta katmanları gösteriliyor."
+
+#: R/jjsegmentedtotalbar.b.R
+msgid "At least two nonempty categories and segments are required."
+msgstr "En az iki boş olmayan kategori ve segment gereklidir."
+
+#: R/jjbarstats.b.R
+msgid "Variable: {var}, Groups: {groups}, N: {n}"
+msgstr "Değişken: {var}, Gruplar: {groups}, N: {n}"
+
+#: R/jjbarstats.b.R
+msgid "Split by: {split}"
+msgstr "Bölme değişkeni: {split}"
+
+#: R/jjbarstats.b.R
+msgid "Bar chart creation failed for {var}. Context: {context}. Original error: {error}"
+msgstr "{var} için çubuk grafik oluşturulamadı. Bağlam: {context}. Özgün hata: {error}"
 
 #~ msgid ""
 #~ "%.0f%% confidence interval via the irr::kappa2 fallback (approximate, built "

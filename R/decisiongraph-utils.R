@@ -354,3 +354,103 @@ createSafeHTMLContent <- function(title, content, includeStyle = TRUE) {
     return(paste0('<div style="color: red;">Error generating content: ', htmltools::htmlEscape(e$message), '</div>'))
   })
 }
+
+#' Calculate Markov Transition Matrix
+#'
+#' Builds a transition probability matrix from user data with columns `from`, `to` and `prob`,
+#' and stops when there is none: the hardcoded 0.7/0.2/0.1 transitions it replaced produced
+#' meaningless results. Restored 2026-11-27: WIP commit 552882bf deleted it while
+#' decisiongraph.b.R (.buildEnhancedMarkovModel) still called it, so the Markov path failed
+#' with "could not find function".
+#'
+#' @param uniqueStates Character vector of health state names
+#' @param transitionData Data frame containing transition probabilities
+#' @param validate Logical, whether to validate matrix properties
+#' @return Matrix with transition probabilities
+#' @noRd
+calculateMarkovTransitionMatrix <- function(uniqueStates, transitionData, validate = TRUE) {
+
+  numStates <- length(uniqueStates)
+  transitionMatrix <- matrix(0, nrow = numStates, ncol = numStates,
+                            dimnames = list(uniqueStates, uniqueStates))
+
+  # CRITICAL FIX: Remove hardcoded transitions, require user data
+  if (is.null(transitionData) || nrow(transitionData) == 0) {
+    stop(paste0(
+      "Markov transition data is required but not provided.\n\n",
+      "To run Markov models, you must supply:\n",
+      "  1. A 'from state' column\n",
+      "  2. A 'to state' column\n",
+      "  3. A 'transition probability' column\n\n",
+      "Previous behavior (hardcoded 0.7/0.2/0.1 transitions) has been removed ",
+      "as it generated meaningless results."
+    ))
+  }
+
+  tryCatch({
+    # Validate required columns exist
+    required_cols <- c("from", "to", "prob")
+    missing_cols <- setdiff(required_cols, names(transitionData))
+    if (length(missing_cols) > 0) {
+      stop(paste0(
+        "Transition data is missing required columns: ",
+        paste(missing_cols, collapse = ", "), "\n",
+        "Required columns: 'from', 'to', 'prob'"
+      ))
+    }
+
+    # Fill transition matrix from USER data
+    for (i in 1:nrow(transitionData)) {
+      fromState <- as.character(transitionData$from[i])
+      toState <- as.character(transitionData$to[i])
+      prob <- transitionData$prob[i]
+
+      # Validate probability
+      if (is.na(prob) || prob < 0 || prob > 1) {
+        warning(paste0(
+          "Invalid probability (", prob, ") for transition ",
+          fromState, " -> ", toState, ". Skipping."
+        ))
+        next
+      }
+
+      # Find indices
+      from_idx <- which(uniqueStates == fromState)
+      to_idx <- which(uniqueStates == toState)
+
+      if (length(from_idx) == 0 || length(to_idx) == 0) {
+        warning(paste0(
+          "Unknown state in transition ", fromState, " -> ", toState, ". Skipping."
+        ))
+        next
+      }
+
+      transitionMatrix[from_idx, to_idx] <- prob
+    }
+
+    # Validate row sums = 1 (required for Markov models)
+    if (validate) {
+      for (i in 1:numStates) {
+        rowSum <- sum(transitionMatrix[i, ])
+
+        if (abs(rowSum - 1.0) > 0.001 && rowSum > 0) {
+          warning(paste0(
+            "State '", uniqueStates[i], "' transition probabilities sum to ",
+            round(rowSum, 4), " instead of 1.0. Normalizing."
+          ))
+          transitionMatrix[i, ] <- transitionMatrix[i, ] / rowSum
+        } else if (rowSum == 0) {
+          stop(paste0(
+            "State '", uniqueStates[i], "' has no outgoing transitions. ",
+            "All states must have transition probabilities that sum to 1."
+          ))
+        }
+      }
+    }
+
+    return(transitionMatrix)
+
+  }, error = function(e) {
+    stop(paste("Markov transition matrix calculation failed:", e$message))
+  })
+}

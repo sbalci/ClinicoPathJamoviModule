@@ -295,9 +295,11 @@ modules:
     # OncoPath call site. document() removes their stale NAMESPACE directives.
     prune_imports:
       - "tidyr"
-      # cluster, psych, stringr are NOT pruned: pathagreement (OncoPath) calls
-      # cluster::silhouette, psych::ICC, stringr::str_to_title, and utils-ihc.R
-      # (ihcheterogeneity) needs cluster. prune_conflicts() caught it 2026-11-23.
+      # stringr: pathagreement's two str_to_title() calls were its only OncoPath use; they became
+      # translated labels (.krippScaleLabel) on 2026-11-27, so the 2026-09-22 prune holds again.
+      - "stringr"
+      # cluster and psych are NOT pruned: pathagreement (OncoPath) calls cluster::silhouette and
+      # psych::ICC, and utils-ihc.R (ihcheterogeneity) needs cluster. prune_conflicts() caught it 2026-11-23.
       # magrittr is NOT pruned: waterfall.b.R and swimmerplot.b.R use %>% 114
       # times. Pruning it stripped the pipe from the generated DESCRIPTION, and
       # with no importFrom anywhere `waterfall` could not run in jamovi at all

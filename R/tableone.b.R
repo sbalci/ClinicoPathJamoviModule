@@ -486,12 +486,13 @@ tableoneClass <- if (requireNamespace("jmvcore", quietly = TRUE)) R6::R6Class(
 
                 formula_str <- jmvcore::constructFormula(terms = selected_vars)
                 formula_obj <- jmvcore::asFormula(paste('~', formula_str))
+                # Checked before the tryCatch: inside it, the handler re-wrapped
+                # this rejection as "Error creating arsenal table: ...".
+                arsenal_data <- private$.htmlSafeTableData(data)
+                if (!identical(is.na(arsenal_data), is.na(data))) {
+                    private$.rejectPlain(.("Formatting changed missing values; no table or report was produced."))
+                }
                 mytable <- tryCatch({
-                    arsenal_data <- private$.htmlSafeTableData(data)
-                    if (!identical(is.na(arsenal_data), is.na(data))) {
-                        private$.rejectPlain(.("Formatting changed missing values; no table or report was produced."))
-                        return(invisible(NULL))
-                    }
                     categories <- private$.categoryLabels(data)
                     nmiss_label <- .("N-Miss")
                     stats_labels <- list(Nmiss = if (nmiss_label %in% categories)

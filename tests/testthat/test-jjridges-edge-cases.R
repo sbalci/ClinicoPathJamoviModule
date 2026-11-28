@@ -31,13 +31,16 @@ test_that("jjridges handles single group level", {
   single_level_data <- jjridges_small %>%
     filter(group == "Group A")
 
-  result <- jjridges(
-    data = single_level_data,
-    x_var = "measurement",
-    y_var = "group"
+  # check-module 2026-11-27: one group cannot be compared, and the reject() now reaches
+  # jamovi's error state rather than completing with an ERROR notice.
+  expect_error(
+    jjridges(
+      data = single_level_data,
+      x_var = "measurement",
+      y_var = "group"
+    ),
+    "At least 2 groups", fixed = TRUE
   )
-
-  expect_s3_class(result, "jjridgesResults")
 })
 
 # ═══════════════════════════════════════════════════════════
@@ -153,19 +156,18 @@ test_that("jjridges errors on empty dataset", {
 
   empty_data <- jjridges_small[0, ]
 
-  # A jamovi analysis reports a problem in its results panel rather than by throwing an R
-  # condition -- an R error would blank the whole analysis, and stderr is invisible in the
-  # GUI. Verified behaviour: it completes and writes
-  #   "ERROR: Input Validation Error  No data available for analysis"
-  # into the notices output. That is the contract worth pinning.
-  res <- expect_no_error(
+  # check-module 2026-11-27: a validation failure is a jmvcore::reject(), which jamovi shows as
+  # the analysis's error state. This test used to pin the opposite (complete, with an ERROR
+  # notice), which was the catch-all tryCatch that review guide section 15 forbids.
+  expect_error(
     jjridges(
       data = empty_data,
       x_var = "measurement",
       y_var = "group"
-    )
+    ),
+    regexp = "No data available",
+    fixed = TRUE
   )
-  expect_match(res$notices$content, "No data available", fixed = TRUE)
 })
 
 # ═══════════════════════════════════════════════════════════

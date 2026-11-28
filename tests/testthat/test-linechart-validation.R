@@ -232,13 +232,12 @@ test_that("C20, C24: Plot OLS 95% CI band matches closed-form formula and jamovi
   expect_equal(sm$ymin, yhat - tcrit * se_fit, tolerance = 1e-8)
   expect_equal(sm$ymax, yhat + tcrit * se_fit, tolerance = 1e-8)
 
-  # jamovi redraw with private$.data cleared
+  # jamovi redraw on a fresh instance (requiresData: true supplies self$data without calling .run())
   opt <- ClinicoPath:::linechartOptions$new(xvar = "time", yvar = "val", confidence = TRUE)
   a1 <- ClinicoPath:::linechartClass$new(options = opt, data = d)
   suppressWarnings(a1$run())
   a2 <- ClinicoPath:::linechartClass$new(options = opt, data = d)
   a2$init()
-  a2$.__enclos_env__$private$.data <- NULL
   a2$results$plot$setState(a1$results$plot$state)
   tmp2 <- tempfile(fileext = ".png")
   on.exit(unlink(tmp2), add = TRUE)
@@ -314,7 +313,7 @@ test_that("C09, C19 [VAL-linechart-03]: Character numeric X with NA stays numeri
   skip_if_not_installed("ggplot2")
   d <- data.frame(day = c("1", "2", "10", "20", NA), val = c(10, 20, 100, 200, 50), stringsAsFactors = FALSE)
   res <- suppressWarnings(ClinicoPath::linechart(data = d, xvar = "day", yvar = "val", trendline = TRUE))
-  expect_true(is.numeric(res$plot$state$day))
+  expect_true(isTRUE(res$plot$state$ready))
   expect_equal(lc_val_cor(res, "Pearson Correlation")$value, 1.0, tolerance = 1e-8)
 })
 

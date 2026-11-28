@@ -45,6 +45,7 @@ jjdotchartClass <- if (requireNamespace("jmvcore")) R6::R6Class(
             super$.sourcifyOption(option)
         },
 
+        # library-audit 2026-09-16 jjstatsplot [HIGH] DONE: gate .plot()/.plot2() on image$state, never a private$ flag; export never runs .run()
         # Mirror of .inputsValid into every Image's state so .omv reopen and
         # right-click image export can render without re-running .run().
         .validHere = function(image) isTRUE(image$state),

@@ -1,5 +1,5 @@
-# Notice panels shared by waterfall, diagnosticmeta, ihcheterogeneity and swimmerplot, so the four
-# look the same and there is one place to change. A jmvcore::Notice holds one plain-text string with
+# Notice panels shared by waterfall, diagnosticmeta, ihcheterogeneity, swimmerplot and pathagreement,
+# so they look the same and there is one place to change. A jmvcore::Notice holds one plain-text string with
 # no title, which is why these are Html panels (guide section 13).
 # library-audit 2026-10-23 OncoPath [LOW] PARTIAL: one shared renderer; DEFERRED the native Notice;
 #   revisit when jamovi's Notice takes a title and a multi-paragraph body (feature request drafted)
@@ -14,7 +14,7 @@ notice_append <- function(notices, type, title, content) {
 }
 
 # The panel HTML: most severe first, one tinted banner per notice. The title names the severity in
-# words, so it does not rest on color alone. Titles inherit the text color (fixed hues fell to
+# words, so it does not rest on color alone; an empty title shows the severity alone. Titles inherit the text color (fixed hues fell to
 # 2.7-2.9:1 on jamovi's dark theme); the translucent tint and the border carry the severity.
 # Never returns "": the jamovi client skips an empty Html update and would leave the previous
 # run's notices on screen. `self` is the analysis, so .() finds its translations.
@@ -34,7 +34,7 @@ notice_panel_html <- function(self, notices) {
             "<div style='background-color: ", s[2], "; border-left: 4px solid ", s[3], "; ",
             "padding: 12px; margin: 8px 0; border-radius: 4px; max-width: 100%; ",
             "overflow-wrap: anywhere; word-break: break-word;'>",
-            "<strong style='color: inherit;'>", htmltools::htmlEscape(paste0(s[1], ": ", n$title)),
+            "<strong style='color: inherit;'>", htmltools::htmlEscape(if (nzchar(n$title)) paste0(s[1], ": ", n$title) else s[1]),
             "</strong><br>",
             "<span style='color: inherit; white-space: pre-line;'>", htmltools::htmlEscape(n$content),
             "</span></div>")

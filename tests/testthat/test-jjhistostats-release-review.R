@@ -71,10 +71,10 @@ test_that("a subtitle testing against zero is disclosed, however it arose", {
     warned <- function(a) grepl("testing against zero", todo_of(a), fixed = TRUE)
 
     expect_true(warned(hs_run(resultssubtitle = TRUE, enableOneSampleTest = FALSE)))
-    expect_true(warned(hs_run(resultssubtitle = TRUE, enableOneSampleTest = TRUE, test.value = 0)))
+    expect_true(warned(hs_run(resultssubtitle = TRUE, enableOneSampleTest = TRUE, testValue = 0)))
 
     # quiet when the null is meaningful, and when no test is displayed at all
-    expect_false(warned(hs_run(resultssubtitle = TRUE, enableOneSampleTest = TRUE, test.value = 5.2)))
+    expect_false(warned(hs_run(resultssubtitle = TRUE, enableOneSampleTest = TRUE, testValue = 5.2)))
     expect_false(warned(hs_run(resultssubtitle = FALSE)))
 
     # NOTE: the two expect_match calls below pin the .a.yaml control TITLES on purpose -
@@ -288,11 +288,11 @@ test_that("the distribution diagnostics render every selected variable", {
 })
 
 
-test_that("conf.level is bounded away from the value that erases the subtitle", {
-    # conf.level = 1 made the entire statistical subtitle disappear with no message; 0 printed
+test_that("confLevel is bounded away from the value that erases the subtitle", {
+    # confLevel = 1 made the entire statistical subtitle disappear with no message; 0 printed
     # a zero-width "0% CI". The option used to allow both.
     a_yaml <- paste(readLines("../../jamovi/jjhistostats.a.yaml", warn = FALSE), collapse = "\n")
-    blk <- regmatches(a_yaml, regexpr("(?s)    - name: conf\\.level\\n.*?(?=\\n    - name: )",
+    blk <- regmatches(a_yaml, regexpr("(?s)    - name: confLevel\\n.*?(?=\\n    - name: )",
                                       a_yaml, perl = TRUE))
     expect_length(blk, 1L)
     expect_match(blk, "min: 0.5", fixed = TRUE)
@@ -305,7 +305,7 @@ test_that("conf.level is bounded away from the value that erases the subtitle", 
     set.seed(7); d <- data.frame(chol = rnorm(60, 5.2, 0.9))
     subtitle_at <- function(cl) {
         o <- ClinicoPath:::jjhistostatsOptions$new(dep = "chol", resultssubtitle = TRUE,
-                                                   conf.level = cl)
+                                                   confLevel = cl)
         a <- ClinicoPath:::jjhistostatsClass$new(options = o, data = d)
         a$init(); p <- a$.__enclos_env__$private; p$.run()
         p$.generateHistogram(p$.prepareData(), "chol", p$.prepareOptions(),

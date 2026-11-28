@@ -40,6 +40,7 @@ jjdotplotstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         # Exact numeric p-value from the most recent omnibus evaluation in .run().
         .lastExactP = NA_real_,
 
+        # library-audit 2026-09-16 jjstatsplot [HIGH] DONE: renderers read validity, subtitle and caption from image$state, never private$ caches; export never runs .run()
         # Private fields die with the analysis instance. jmvcore restores results from disk
         # and renders without calling .run() (right-click > Export...), so on that path
         # .inputsValid holds its FALSE initial value and both renderers return before drawing

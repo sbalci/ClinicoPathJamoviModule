@@ -20,7 +20,8 @@ utils::globalVariables(c(
     "lo_y",
     "type",
     "x",
-    # aes() columns of the Firth forest plot in R/oddsratio.b.R (.firthOrPlot)
+    # library-audit 2026-09-16 jjstatsplot [INFO] DONE: keep shared NSE symbols module-neutral
+    # Additional ggplot2 aes() columns used across shared plot helpers
     "level",
     "lower",
     "n_show",

@@ -72,10 +72,9 @@ lollipopClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
     inherit = lollipopBase,
     private = list(
 
-        # Notice collection helpers. A single Preformatted (plain-text) output item:
-        # avoids BOTH the jmvcore::Notice serialization error from
-        # self$results$insert(999, Notice) AND any HTML in notices (project convention:
-        # notice content must be plain text). ====
+        # Notice collection helpers. A single Preformatted (plain-text) output item
+        # keeps multi-line, titled notices ordered by severity (jmvcore::Notice
+        # renders a single plain-text line with no separate title; review guide §13). ====
         .noticeList = list(),
 
         .addNotice = function(type, title, content) {
@@ -208,108 +207,77 @@ lollipopClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 ")
                 
                 self$results$todo$setContent(welcome_msg)
-                
-                # Hide results until data is provided
-                self$results$summary$setVisible(FALSE)
-                self$results$plot$setVisible(FALSE)
             }
         },
         
+        # library-audit 2026-09-16 jjstatsplot [LOW] DONE: let jmvcore::reject() present validation errors without catch-all tryCatch or failure-path setVisible(FALSE) (guide §5, §16)
         .run = function() {
             private$.noticeList <- list()
 
-            # Early exits for missing data or variables
-            if (is.null(self$data) || nrow(self$data) == 0) {
-                self$results$summary$setVisible(FALSE)
-                self$results$plot$setVisible(FALSE)
-                return()
-            }
-            
+            # Early exit when required variables are not yet selected
             if (is.null(self$options$dep) || is.null(self$options$group)) {
                 return()
             }
-            
-            # Hide welcome message while running; reveal results only after validation succeeds
+
+            if (is.null(self$data) || nrow(self$data) == 0) {
+                jmvcore::reject(.("The dataset has no rows, so there is nothing to chart. If a row filter is active, it may be excluding every case."))
+            }
+
+            # Hide welcome message while running; summary/plot visibility is declarative in lollipop.r.yaml
             self$results$todo$setVisible(FALSE)
-            self$results$summary$setVisible(FALSE)
-            self$results$plot$setVisible(FALSE)
 
-            # Main analysis pipeline with comprehensive error handling
-            tryCatch({
-                # Checkpoint before expensive data cleaning
-                private$.checkpoint()
-                
-                # Prepare and validate data
-                data <- private$.cleanData()
-                if (is.null(data)) return()
+            # Checkpoint before expensive data cleaning
+            private$.checkpoint()
 
-                self$results$summary$setVisible(TRUE)
-                self$results$plot$setVisible(TRUE)
-                
-                # Checkpoint before statistical calculations
-                private$.checkpoint()
-                
-                # Calculate summary statistics
-                summary_stats <- private$.calculateSummary(data)
-                private$.populateSummary(summary_stats)
+            # Prepare and validate data (propagates jmvcore::reject() directly to jamovi)
+            data <- private$.cleanData()
+            if (is.null(data)) return()
 
-                # Check for potential issues and warnings
-                private$.checkForMisuseAndWarnings(data, summary_stats)
+            # Checkpoint before statistical calculations
+            private$.checkpoint()
 
-                # Add note about conditional coloring if enabled
-                if (self$options$conditionalColor) {
+            # Calculate summary statistics
+            summary_stats <- private$.calculateSummary(data)
+            private$.populateSummary(summary_stats)
+
+            # Check for potential issues and warnings
+            private$.checkForMisuseAndWarnings(data, summary_stats)
+
+            # Add note about conditional coloring if enabled
+            if (self$options$conditionalColor) {
+                private$.addNotice(
+                    'INFO',
+                    .("Conditional Coloring"),
+                    .fmt(
+                        .("Values above {thr} are drawn in orange and the rest in blue, so color encodes the threshold rather than the group."),
+                        thr = base::format(self$options$colorThreshold, digits = 3))
+                )
+
+                # Conditional coloring takes precedence over category highlighting
+                if (self$options$useHighlight) {
                     private$.addNotice(
                         'INFO',
-                        .("Conditional Coloring"),
-                        .fmt(
-                            .("Values above {thr} are drawn in orange and the rest in blue, so color encodes the threshold rather than the group."),
-                            thr = base::format(self$options$colorThreshold, digits = 3))
+                        .("Highlighting Ignored"),
+                        .("Conditional coloring is active, so the highlighted category is not drawn differently; turn conditional coloring off to use highlighting.")
                     )
-
-                    # Conditional coloring takes precedence over category highlighting
-                    if (self$options$useHighlight) {
-                        private$.addNotice(
-                            'INFO',
-                            .("Highlighting Ignored"),
-                            .("Conditional coloring is active, so the highlighted category is not drawn differently; turn conditional coloring off to use highlighting.")
-                        )
-                    }
                 }
+            }
 
-                # Generate and display clinical summary
-                clinical_summary <- private$.generateClinicalSummary(summary_stats, self$options$dep, self$options$group)
-                self$results$todo$setContent(clinical_summary)
-                self$results$todo$setVisible(TRUE)
-                
-                # Checkpoint before plot data preparation
-                private$.checkpoint()
-                
-                # Save plot data for rendering
-                private$.savePlotData(data)
+            # Generate and display clinical summary
+            clinical_summary <- private$.generateClinicalSummary(summary_stats, self$options$dep, self$options$group)
+            self$results$todo$setContent(clinical_summary)
+            self$results$todo$setVisible(TRUE)
 
-                # Render notices at the end of the run. .renderNotices() sets the
-                # content to "" for an empty queue, so a run that emits zero notices
-                # clears any stale text left over from a previous run.
-                private$.renderNotices()
+            # Checkpoint before plot data preparation
+            private$.checkpoint()
 
-            }, error = function(e) {
-                msg_html <- htmltools::htmlEscape(e$message)
-                error_msg <- paste0(
-                    "<div class='alert alert-danger'>",
-                    "<h4>", .("Analysis Error"), "</h4>",
-                    "<p><strong>", .("Error:"), "</strong> ", msg_html, "</p>",
-                    "<p>", .("Please check your data and variable selections."), "</p>",
-                    "</div>"
-                )
-                self$results$summary$setVisible(FALSE)
-                self$results$plot$setVisible(FALSE)
-                self$results$todo$setContent(error_msg)
-                self$results$todo$setVisible(TRUE)
+            # Save plot data for rendering
+            private$.savePlotData(data)
 
-                # Also flush the notice queue on the error path so prior notices
-                # do not linger under an error message.
-                private$.renderNotices()
-            })
+            # Render notices at the end of the run. .renderNotices() sets the
+            # content to "" for an empty queue, so a run that emits zero notices
+            # clears any stale text left over from a previous run.
+            private$.renderNotices()
         },
         
         # The level to highlight, or NULL when highlighting is off or unset.

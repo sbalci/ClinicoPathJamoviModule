@@ -71,14 +71,7 @@ statsplot2Class <- if (requireNamespace('jmvcore'))
             # HTML sanitization for security
             .safeHtmlOutput = function(text) {
                 if (is.null(text) || length(text) == 0) return("")
-                text <- as.character(text)
-                # Sanitize potentially dangerous characters
-                text <- gsub("&", "&amp;", text, fixed = TRUE)
-                text <- gsub("<", "&lt;", text, fixed = TRUE)
-                text <- gsub(">", "&gt;", text, fixed = TRUE)
-                text <- gsub("\"", "&quot;", text, fixed = TRUE)
-                text <- gsub("'", "&#39;", text, fixed = TRUE)
-                return(text)
+                htmltools::htmlEscape(as.character(text), attribute = TRUE)
             },
             
             # Method to invalidate cache when options change
@@ -1465,6 +1458,9 @@ statsplot2Class <- if (requireNamespace('jmvcore'))
                         NULL  # Will trigger fallback
                     )
                 }, error = function(e) {
+                    # A .checkpoint() restart is an error with code "restart": let it through,
+                    # or the user's option change becomes a fallback plot of the old options.
+                    if (identical(e$code, "restart")) stop(e)
                     # If specialized function fails, return NULL to trigger fallback
                     message("Specialized plot function failed: ", conditionMessage(e))
                     return(NULL)
@@ -1631,14 +1627,10 @@ statsplot2Class <- if (requireNamespace('jmvcore'))
             
             # ggalluvial implementation
             .plotAlluvialGG = function(prepared_data) {
-                # Enhanced package validation
-                if (!requireNamespace("ggalluvial", quietly = TRUE)) {
-                    jmvcore::reject("Package 'ggalluvial' is required for alluvial plots but is not installed. Install with: install.packages('ggalluvial')")
-                }
-                if (!requireNamespace("dplyr", quietly = TRUE)) {
-                    jmvcore::reject("Package 'dplyr' is required for data manipulation but is not installed. Install with: install.packages('dplyr')")
-                }
-                
+                # ggalluvial and dplyr are Imports (jamovi always installs them), and .run()
+                # reports a missing package up front, so this method no longer reject()s for
+                # one: inside .generatePlot()'s fallback handler that rejection was swallowed
+                # (gate reject_swallowed; check-module 2026-11-27).
                 # Checkpoint before expensive data aggregation
                 private$.checkpoint(flush = FALSE)
 
@@ -1711,11 +1703,7 @@ statsplot2Class <- if (requireNamespace('jmvcore'))
             
             # easyalluvial implementation
             .plotAlluvialEasy = function(prepared_data) {
-                # Enhanced package validation
-                if (!requireNamespace("easyalluvial", quietly = TRUE)) {
-                    jmvcore::reject("Package 'easyalluvial' is required for simplified alluvial plots but is not installed. Install with: install.packages('easyalluvial')")
-                }
-                
+                # easyalluvial is an Import; see .plotAlluvialGG() for why there is no reject() here.
                 if (!is.null(prepared_data$tp_cols) &&
                     length(prepared_data$tp_cols) >= 3L &&
                     all(prepared_data$tp_cols %in% names(prepared_data$data))) {
@@ -1848,6 +1836,7 @@ statsplot2Class <- if (requireNamespace('jmvcore'))
                                 private$.plotBetweenStats(level_data)
                             )
                         }, error = function(e) {
+                            if (identical(e$code, "restart")) stop(e)  # see .generatePlot()
                             # If specialized function fails, use fallback for this subset
                             message("Specialized grouped plot failed for level ", level, ": ", conditionMessage(e))
                             private$.plotFallback(level_data, analysis_info)

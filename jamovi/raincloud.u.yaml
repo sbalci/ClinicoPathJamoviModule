@@ -144,27 +144,30 @@ children:
           - type: Label
             label: Summary Statistics
             style: list-inline
-          - type: CheckBox
-            name: show_statistics
+            children:
+              - type: CheckBox
+                name: show_statistics
       - type: LayoutBox
         margin: large
         children:
           - type: Label
             label: Outlier Detection
             style: list-inline
-          - type: CheckBox
-            name: show_outliers
-          - type: ComboBox
-            name: outlier_method
-            enable: (show_outliers)
+            children:
+              - type: CheckBox
+                name: show_outliers
+              - type: ComboBox
+                name: outlier_method
+                enable: (show_outliers)
       - type: LayoutBox
         margin: large
         children:
           - type: Label
             label: Normality Assessment
             style: list-inline
-          - type: CheckBox
-            name: normality_test
+            children:
+              - type: CheckBox
+                name: normality_test
       - type: LayoutBox
         margin: large
         children:

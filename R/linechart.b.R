@@ -151,6 +151,24 @@ linechartClass <- if (requireNamespace("jmvcore", quietly = TRUE)) R6::R6Class(
             summaryTable$addRow(rowKey = "y_range", values = list(
                 statistic = .("Y Range")))
 
+            # library-audit 2026-09-16 jjstatsplot [LOW] DONE: scaffold fixed correlation rows in .init() and fill via setRow() in .run() (guide §6)
+            if (isTRUE(self$options$trendline) && !is.null(self$options$xvar) && !is.null(self$options$yvar)) {
+                x_col <- if (!is.null(self$data) && self$options$xvar %in% names(self$data)) self$data[[self$options$xvar]] else NULL
+                x_is_numeric_like <- is.null(x_col) || is.numeric(x_col) || inherits(x_col, "haven_labelled")
+                if (!x_is_numeric_like && is.character(x_col)) {
+                    uv <- unique(x_col[!is.na(x_col)])
+                    x_is_numeric_like <- length(uv) > 0 &&
+                        all(grepl("^[+-]?([0-9]+\\.?[0-9]*|\\.[0-9]+)([eE][+-]?[0-9]+)?$", uv, perl = TRUE))
+                }
+                if (x_is_numeric_like) {
+                    corrTable <- self$results$correlation
+                    corrTable$addRow(rowKey = "pearson", values = list(measure = .("Pearson Correlation")))
+                    corrTable$addRow(rowKey = "r2",      values = list(measure = .("R-squared (Effect Size)")))
+                    corrTable$addRow(rowKey = "slope",   values = list(measure = .("Regression Slope")))
+                    corrTable$addRow(rowKey = "copy",    values = list(measure = .("Copy-Ready Summary")))
+                }
+            }
+
             # Show onboarding welcome message only when required variables are unset.
             # Visibility of analysis outputs is driven declaratively in linechart.r.yaml.
             if (is.null(self$options$xvar) || is.null(self$options$yvar)) {
@@ -608,20 +626,32 @@ linechartClass <- if (requireNamespace("jmvcore", quietly = TRUE)) R6::R6Class(
         # Enhanced correlation table with copy-ready interpretations
         .populateCorrelation = function(correlation_stats) {
             table <- self$results$correlation
-            .deleteTableRows(table)
+            has_pearson <- !is.null(correlation_stats$pearson_r)
+            existing_keys <- unlist(table$rowKeys)
+            # Only tear down if the table carries stale rows from an earlier run or mismatched X type
+            if (!has_pearson && length(existing_keys) > 0L) {
+                .deleteTableRows(table)
+                existing_keys <- character(0)
+            }
+            fill_row <- function(rk, vals) {
+                if (rk %in% unlist(table$rowKeys)) {
+                    table$setRow(rowKey = rk, values = vals)
+                } else {
+                    table$addRow(rowKey = rk, values = vals)
+                }
+            }
+            n_written <- 0L
 
-            row_num <- 1
-            
             # Extract flags for repeated measures and grouping
             has_repeated_measures <- isTRUE(correlation_stats$has_repeated_measures)
             has_grouping <- isTRUE(correlation_stats$has_grouping)
 
             # Pearson correlation with enhanced interpretation
-            if (!is.null(correlation_stats$pearson_r)) {
+            if (has_pearson) {
                 # Create copy-ready sentence
                 copy_ready <- private$.generateCopyReadyCorrelation(correlation_stats)
 
-                table$addRow(rowKey = row_num, values = list(
+                fill_row("pearson", list(
                     measure = .("Pearson Correlation"),
                     value = correlation_stats$pearson_r,
                     ci_lower = correlation_stats$pearson_ci_lower,
@@ -632,9 +662,7 @@ linechartClass <- if (requireNamespace("jmvcore", quietly = TRUE)) R6::R6Class(
                                                                    has_repeated_measures,
                                                                    has_grouping)
                 ))
-                row_num <- row_num + 1
-
-                table$addRow(rowKey = row_num, values = list(
+                fill_row("r2", list(
                     measure = .("R-squared (Effect Size)"),
                     value = correlation_stats$r_squared,
                     interpretation = .fmt(
@@ -642,7 +670,6 @@ linechartClass <- if (requireNamespace("jmvcore", quietly = TRUE)) R6::R6Class(
                         percent = round(correlation_stats$r_squared * 100, 1),
                         interpretation = private$.interpretEffectSize(correlation_stats$r_squared))
                 ))
-                row_num <- row_num + 1
 
                 # Enhanced slope interpretation
                 slope_is_zero <- isTRUE(correlation_stats$slope_is_zero)
@@ -658,21 +685,18 @@ linechartClass <- if (requireNamespace("jmvcore", quietly = TRUE)) R6::R6Class(
                         slope = private$.fmtNum(abs(correlation_stats$slope)))
                 }
 
-                table$addRow(rowKey = row_num, values = list(
+                fill_row("slope", list(
                     measure = .("Regression Slope"),
                     value = correlation_stats$slope,
                     pvalue = correlation_stats$regression_p,
                     interpretation = slope_interpretation
                 ))
-                row_num <- row_num + 1
-
-                # Add copy-ready summary as a special row
-                table$addRow(rowKey = row_num, values = list(
+                fill_row("copy", list(
                     measure = .("Copy-Ready Summary"),
                     value = "",
                     interpretation = copy_ready
                 ))
-                row_num <- row_num + 1
+                n_written <- n_written + 4L
             }
 
             # Spearman correlation with enhanced interpretation
@@ -688,7 +712,7 @@ linechartClass <- if (requireNamespace("jmvcore", quietly = TRUE)) R6::R6Class(
                 } else {
                     ""
                 }
-                table$addRow(rowKey = row_num, values = list(
+                fill_row("spearman", list(
                     measure = .("Spearman Correlation (Rank-based)"),
                     value = correlation_stats$spearman_r,
                     pvalue = correlation_stats$spearman_p,
@@ -699,7 +723,7 @@ linechartClass <- if (requireNamespace("jmvcore", quietly = TRUE)) R6::R6Class(
                                           " ", .("This rank-based measure is less sensitive to extreme values than Pearson correlation."),
                                           spearman_note)
                 ))
-                row_num <- row_num + 1
+                n_written <- n_written + 1L
             }
 
             # ANOVA for categorical X with enhanced interpretation
@@ -714,7 +738,7 @@ linechartClass <- if (requireNamespace("jmvcore", quietly = TRUE)) R6::R6Class(
                 }
 
                 if (!anova_valid) {
-                    table$addRow(rowKey = row_num, values = list(
+                    fill_row("anova", list(
                         measure = anova_label,
                         value = NULL,
                         pvalue = NULL,
@@ -731,20 +755,22 @@ linechartClass <- if (requireNamespace("jmvcore", quietly = TRUE)) R6::R6Class(
                             anova_interpretation, " ",
                             .("Caution: This one-way ANOVA tests differences across X-axis categories pooled over grouping levels and assumes independent observations."))
                     }
-                    table$addRow(rowKey = row_num, values = list(
+                    fill_row("anova", list(
                         measure = anova_label,
                         value = correlation_stats$anova_f,
                         pvalue = correlation_stats$anova_p,
                         interpretation = anova_interpretation
                     ))
                 }
-                row_num <- row_num + 1
+                n_written <- n_written + 1L
             }
 
             # Per-group stratified trends when groupby is active (numeric X)
             if (!is.null(correlation_stats$group_trends) && length(correlation_stats$group_trends) > 0L) {
-                for (gt in correlation_stats$group_trends) {
+                for (gi in seq_along(correlation_stats$group_trends)) {
+                    gt <- correlation_stats$group_trends[[gi]]
                     grp_label <- .fmt(.("Group Trend: {group} (Pearson r)"), group = gt$group)
+                    rk <- paste0("group_", gi)
                     if (isTRUE(gt$valid)) {
                         g_key <- paste(
                             private$.correlationBandKey(gt$pearson_r),
@@ -781,7 +807,7 @@ linechartClass <- if (requireNamespace("jmvcore", quietly = TRUE)) R6::R6Class(
                             slope = private$.fmtNum(gt$slope),
                             r2 = round(gt$r_squared, 3)
                         )
-                        table$addRow(rowKey = row_num, values = list(
+                        fill_row(rk, list(
                             measure = grp_label,
                             value = gt$pearson_r,
                             ci_lower = gt$ci_lower,
@@ -795,7 +821,7 @@ linechartClass <- if (requireNamespace("jmvcore", quietly = TRUE)) R6::R6Class(
                         } else {
                             .fmt(.("Within-group trend could not be estimated (n = {n}; constant X or Y values within group)."), n = gt$n)
                         }
-                        table$addRow(rowKey = row_num, values = list(
+                        fill_row(rk, list(
                             measure = grp_label,
                             value = NULL,
                             ci_lower = NULL,
@@ -804,18 +830,17 @@ linechartClass <- if (requireNamespace("jmvcore", quietly = TRUE)) R6::R6Class(
                             interpretation = g_reason
                         ))
                     }
-                    row_num <- row_num + 1
+                    n_written <- n_written + 1L
                 }
             }
 
             # Add independence / grouping assumption warning for both numeric and categorical analyses
-            if (!is.null(correlation_stats$independence_note) && row_num > 1) {
-                table$addRow(rowKey = row_num, values = list(
+            if (!is.null(correlation_stats$independence_note) && n_written > 0L) {
+                fill_row("validity", list(
                     measure = .("Statistical Validity"),
                     value = "",
                     interpretation = correlation_stats$independence_note
                 ))
-                row_num <- row_num + 1
             }
         },
 
@@ -1306,14 +1331,27 @@ linechartClass <- if (requireNamespace("jmvcore", quietly = TRUE)) R6::R6Class(
 
         # Main plotting function - now modular and testable
         .plot = function(image, ggtheme, theme, ...) {
-            # Get plot data
-            plot_data <- image$state
-            if (is.null(plot_data)) return(FALSE)
+            # render-route: data - state holds ready flag only (no raw dataset rows serialized in .omv)
+            st <- image$state
+            if (is.null(st)) return(FALSE)
 
             private$.checkpoint()  # Checkpoint before plot generation
 
             # Check dependencies before plotting
             private$.checkDependencies()
+
+            # Accept a legacy saved data.frame state from older .omv files; otherwise rebuild from self$data
+            plot_data <- if (is.data.frame(st)) {
+                st
+            } else if (isTRUE(st$ready)) {
+                if (is.null(self$data) || nrow(self$data) == 0L) return(FALSE)
+                # No catch-all here: .cleanData() validates with jmvcore::reject(), and a reject()
+                # must show as an error, not as a silently blank plot (.run() already passed it).
+                private$.cleanData()
+            } else {
+                NULL
+            }
+            if (is.null(plot_data) || nrow(plot_data) == 0L) return(FALSE)
 
             # Build plot using modular approach
             p <- private$.buildBasePlot(plot_data)
@@ -1327,10 +1365,9 @@ linechartClass <- if (requireNamespace("jmvcore", quietly = TRUE)) R6::R6Class(
             TRUE
         },
 
-        # Save plot data
+        # library-audit 2026-09-16 jjstatsplot [LOW] DONE: store only a ready flag in image$state; .plot() rebuilds from self$data under requiresData: true (guide §17)
         .savePlotData = function(data) {
-            # Coerce to plain data.frame before setState() to avoid tibble serialization issues
-            self$results$plot$setState(as.data.frame(data))
+            self$results$plot$setState(list(ready = TRUE))
         },
 
         # === NEW HELPER FUNCTIONS FOR MODULAR DESIGN ===

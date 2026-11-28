@@ -386,7 +386,7 @@ test_that("jjhistostats handles test value at extreme of data range", {
     data = jjhistostats_labvalues,
     dep = "cholesterol",
     enableOneSampleTest = TRUE,
-    test.value = 500
+    testValue = 500
   )
   expect_s3_class(result1, "jjhistostatsResults")
 
@@ -395,7 +395,7 @@ test_that("jjhistostats handles test value at extreme of data range", {
     data = jjhistostats_labvalues,
     dep = "cholesterol",
     enableOneSampleTest = TRUE,
-    test.value = 50
+    testValue = 50
   )
   expect_s3_class(result2, "jjhistostatsResults")
 })
@@ -411,7 +411,7 @@ test_that("jjhistostats handles test value equal to mean", {
     data = jjhistostats_labvalues,
     dep = "cholesterol",
     enableOneSampleTest = TRUE,
-    test.value = mean_value
+    testValue = mean_value
   )
 
   expect_s3_class(result, "jjhistostatsResults")
@@ -425,7 +425,7 @@ test_that("jjhistostats handles zero test value", {
     data = jjhistostats_test,
     dep = "age_years",
     enableOneSampleTest = TRUE,
-    test.value = 0
+    testValue = 0
   )
 
   expect_s3_class(result, "jjhistostatsResults")
@@ -439,7 +439,7 @@ test_that("jjhistostats handles negative test value", {
     data = jjhistostats_test,
     dep = "age_years",
     enableOneSampleTest = TRUE,
-    test.value = -10
+    testValue = -10
   )
 
   expect_s3_class(result, "jjhistostatsResults")
@@ -556,7 +556,7 @@ test_that("jjhistostats handles extreme confidence levels", {
   result1 <- jjhistostats(
     data = jjhistostats_test,
     dep = "age_years",
-    conf.level = 0.50
+    confLevel = 0.50
   )
   expect_s3_class(result1, "jjhistostatsResults")
 
@@ -564,7 +564,7 @@ test_that("jjhistostats handles extreme confidence levels", {
   result2 <- jjhistostats(
     data = jjhistostats_test,
     dep = "age_years",
-    conf.level = 0.999
+    confLevel = 0.999
   )
   expect_s3_class(result2, "jjhistostatsResults")
 })

@@ -57,7 +57,8 @@ lollipopOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             private$..highlight <- jmvcore::OptionLevel$new(
                 "highlight",
                 highlight,
-                variable="(group)")
+                variable="(group)",
+                allowNone=TRUE)
             private$..aggregation <- jmvcore::OptionList$new(
                 "aggregation",
                 aggregation,
@@ -271,6 +272,16 @@ lollipopResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 options=options,
                 name="summary",
                 title="Data Summary",
+                visible="(length(dep) > 0 && length(group) > 0)",
+                clearWith=list(
+                    "dep",
+                    "group",
+                    "aggregation",
+                    "sortBy",
+                    "useHighlight",
+                    "highlight",
+                    "conditionalColor",
+                    "colorThreshold"),
                 columns=list(
                     list(
                         `name`="statistic", 
@@ -286,7 +297,8 @@ lollipopResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 title="`Lollipop Chart {dep} vs {group}`",
                 width=800,
                 height=600,
-                renderFun=".plot"))}))
+                renderFun=".plot",
+                visible="(length(dep) > 0 && length(group) > 0)"))}))
 
 lollipopBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "lollipopBase",

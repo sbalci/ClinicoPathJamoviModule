@@ -208,17 +208,19 @@ test_that("C22, C31: Non-ASCII/space column names and jamovi redraw (private$.da
                               comparison_test = TRUE, comparison_method = "anova")
   expect_equal(val_comp_kv(r$comparison$content)[["Test Statistic"]], "F(1,8) = 46.498")
 
-  # Jamovi redraw with private$.data <- NULL
+  # Fresh-instance jamovi redraw under requiresData: true without calling .run() on a2
   opts <- ClinicoPath:::raincloudOptions$new(dep_var = "Biomarker (µg/L)", group_var = "Gréade sc")
   a <- ClinicoPath:::raincloudClass$new(options = opts, data = d_na)
   a$init(); a$.__enclos_env__$private$.run()
   st <- a$results$plot$state
-  a$.__enclos_env__$private$.data <- NULL
-  a$results$plot$setState(st)
+  expect_true(isTRUE(st$ready))
+  a2 <- ClinicoPath:::raincloudClass$new(options = opts, data = d_na)
+  a2$init()
+  a2$results$plot$setState(st)
   tf <- tempfile(fileext = ".png")
   grDevices::png(tf)
   on.exit({ grDevices::dev.off(); unlink(tf) }, add = TRUE)
-  expect_true(isTRUE(a$.__enclos_env__$private$.plot(a$results$plot, ggplot2::theme_minimal(), list())))
+  expect_true(isTRUE(a2$.__enclos_env__$private$.plot(a2$results$plot, ggplot2::theme_minimal(), list())))
 })
 
 # ---- REGRESSION TESTS FOR REPAIRED DEFECTS (VAL-raincloud-01 .. 09) ----------

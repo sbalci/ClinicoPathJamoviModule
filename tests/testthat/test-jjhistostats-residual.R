@@ -95,14 +95,14 @@ test_that("labels that are discarded are reported instead of silently dropped", 
     # non-Bayesian test, so bf.message silently overwrote a user caption. This was the
     # one member of the set with no warning.
     cap <- function(...) run_analysis(d, dep = "v", caption = "MY CAPTION", ...)$results$todo$content
-    expect_match(cap(resultssubtitle = TRUE, bf.message = TRUE), "caption was not used")
+    expect_match(cap(resultssubtitle = TRUE, bfMessage = TRUE), "caption was not used")
 
     # ...and every combination that leaves the caption alone stays quiet
-    expect_false(grepl("caption was not used", cap(resultssubtitle = TRUE,  bf.message = FALSE)))
-    expect_false(grepl("caption was not used", cap(resultssubtitle = FALSE, bf.message = TRUE)))
+    expect_false(grepl("caption was not used", cap(resultssubtitle = TRUE,  bfMessage = FALSE)))
+    expect_false(grepl("caption was not used", cap(resultssubtitle = FALSE, bfMessage = TRUE)))
     # in Bayesian mode the factor goes to the subtitle, so the caption survives
     expect_false(grepl("caption was not used",
-                       cap(resultssubtitle = TRUE, bf.message = TRUE,
+                       cap(resultssubtitle = TRUE, bfMessage = TRUE,
                            typestatistics = "bayes")))
 })
 

@@ -2177,7 +2177,7 @@ jjsegmentedtotalbarClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R
                     xt3 <- xt3[keep_r, keep_c, keep_k, drop = FALSE]
 
                     if (dim(xt3)[1] < 2 || dim(xt3)[2] < 2 || dim(xt3)[3] < 1) {
-                        stop("At least two nonempty categories and segments are required.")
+                        stop(.("At least two nonempty categories and segments are required."))
                     }
 
                     self$results$statistical_tests$setNote(
@@ -2307,7 +2307,7 @@ jjsegmentedtotalbarClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R
                 contingency_matrix <- contingency_matrix[rowSums(contingency_matrix) > 0,
                     colSums(contingency_matrix) > 0, drop = FALSE]
                 if (any(dim(contingency_matrix) < 2))
-                    stop("At least two nonempty categories and segments are required.")
+                    stop(.("At least two nonempty categories and segments are required."))
                 chi_test <- suppressWarnings(stats::chisq.test(contingency_matrix, correct = FALSE))
 
                 self$results$statistical_tests$setNote(

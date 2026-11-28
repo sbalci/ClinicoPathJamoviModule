@@ -56,19 +56,16 @@ children:
                 name: enableOneSampleTest
                 children:
                   - type: TextBox
-                    name: test.value
+                    name: testValue
                     format: number
                     enable: (enableOneSampleTest)
-              # No `events:` here. jamovi's client splits an event source on "." (conf.level ->
-              # UI object "conf"), so an event on this control throws inside initializeAll() and
-              # every binding and event after it stops updating. The option's own min/max
-              # (0.5-0.999) bound the value; the old handler clamped to 0.8-0.99 against them.
+              # The option's own min/max (0.5-0.999) bound the value without a custom JS clamp.
               - type: TextBox
-                name: conf.level
+                name: confLevel
                 format: number
                 enable: (resultssubtitle)
               - type: CheckBox
-                name: bf.message
+                name: bfMessage
                 enable: (resultssubtitle)
               - type: TextBox
                 name: digits
@@ -93,15 +90,12 @@ children:
                 name: trimlevel
                 format: number
                 enable: (typestatistics:robust || centralitytype:robust)
-              # Deliberately NOT gated: bf.message produces a Bayes factor for the
-              # PARAMETRIC test too, so the prior matters outside typestatistics:bayes.
-              # Gating on it would need `bf.message` inside a binding expression, and no
-              # .u.yaml in this module references a dotted option name that way - the same
-              # trap that made ui.bf_message inert in the events JS. Leaving the box live
-              # is harmless; the analysis discloses the prior whenever a BF runs.
+              # Gated on paths that actually compute a Bayes factor: Bayesian mode or
+              # parametric mode with the Bayes-factor caption enabled.
               - type: TextBox
                 name: bfprior
                 format: number
+                enable: (resultssubtitle && (typestatistics:bayes || (typestatistics:parametric && bfMessage)))
   - type: CollapseBox
     label: Histogram
     collapsed: true

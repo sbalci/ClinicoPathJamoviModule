@@ -109,7 +109,7 @@ test_that("jjhistostats respects one-sample test option", {
     data = jjhistostats_labvalues,
     dep = "cholesterol",
     enableOneSampleTest = TRUE,
-    test.value = 200
+    testValue = 200
   )
   expect_s3_class(result2, "jjhistostatsResults")
 })
@@ -121,7 +121,7 @@ test_that("jjhistostats respects Bayes Factor message option", {
     data = jjhistostats_test,
     dep = "age_years",
     typestatistics = "bayes",
-    bf.message = FALSE
+    bfMessage = FALSE
   )
   expect_s3_class(result1, "jjhistostatsResults")
 
@@ -130,7 +130,7 @@ test_that("jjhistostats respects Bayes Factor message option", {
     data = jjhistostats_test,
     dep = "age_years",
     typestatistics = "bayes",
-    bf.message = TRUE
+    bfMessage = TRUE
   )
   expect_s3_class(result2, "jjhistostatsResults")
 })
@@ -169,7 +169,7 @@ test_that("jjhistostats respects confidence level parameter", {
     result <- jjhistostats(
       data = jjhistostats_test,
       dep = "age_years",
-      conf.level = conf
+      confLevel = conf
     )
 
     expect_true(inherits(result, "jjhistostatsResults"),
@@ -319,8 +319,8 @@ test_that("jjhistostats handles comprehensive argument combinations", {
     centralitytype = "parametric",
     resultssubtitle = TRUE,
     enableOneSampleTest = TRUE,
-    test.value = 30,
-    conf.level = 0.95,
+    testValue = 30,
+    confLevel = 0.95,
     digits = 2,
     changebinwidth = TRUE,
     binwidth = 5.0,
@@ -382,7 +382,7 @@ test_that("jjhistostats handles one-sample test with different statistical types
       dep = "cholesterol",
       typestatistics = stat_type,
       enableOneSampleTest = TRUE,
-      test.value = 200
+      testValue = 200
     )
 
     expect_true(inherits(result, "jjhistostatsResults"),
@@ -502,7 +502,7 @@ test_that("jjhistostats handles publication-ready configuration", {
     title = "Age Distribution in Study Cohort",
     xlab = "Age (years)",
     caption = "n = 150 patients",
-    conf.level = 0.95,
+    confLevel = 0.95,
     digits = 2,
     plotwidth = 800,
     plotheight = 600

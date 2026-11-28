@@ -1236,25 +1236,17 @@ jwaffleClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             private$.resetMessages()
 
-            # Validate inputs before processing
+            # Validate inputs before processing. The rejection itself carries the message:
+            # jamovi shows it as the analysis's error state, so it is not also written into
+            # the todo panel (that showed the user the same message twice; check-module
+            # 2026-11-27, notices guide section 13.6). The handler only drops what a failed
+            # run must not leave behind, then re-raises the original condition.
             tryCatch({
                 private$.validateInputs()
             }, error = function(e) {
                 private$.cached_plot <- NULL
-
-                # Display validation error in todo and stop. e$message may carry a
-                # user-controlled column name (e.g. via the jmvcore::reject(...) templates
-                # in .validateInputs), so escape before flowing into HTML setContent.
-                error_msg_safe <- htmltools::htmlEscape(conditionMessage(e))
-                error_msg <- glue::glue(
-                    "<br> <b>Input Validation Error:</b><br>
-                    <br>{error_msg_safe}<br>
-                    <br>Please check your variable selections and try again.<br><hr>"
-                )
-                self$results$todo$setContent(error_msg)
-                # Re-raise as a jmvcore rejection so jamovi greys the results and
-                # surfaces a structured error rather than blanking result panels.
-                jmvcore::reject(conditionMessage(e))
+                self$results$todo$setContent("")
+                stop(e)
             })
 
             # Performance optimization: prepare data and options with caching

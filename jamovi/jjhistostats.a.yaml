@@ -237,7 +237,8 @@ options:
             'Statistical Results' is on, the test still runs against a null of 0. Turn off
             'Statistical Results' for a purely descriptive histogram.
 
-    - name: test.value
+    # library-audit 2026-09-16 jjstatsplot [LOW] DONE: renamed dotted options (test.value, conf.level, bf.message) to camelCase (testValue, confLevel, bfMessage); mapped back to ggstatsplot argument names at call sites
+    - name: testValue
       title: Test value
       type: Number
       default: 0
@@ -310,7 +311,7 @@ options:
             Because a Bayes factor depends on this choice, it is stated with the result - vary
             it to check how sensitive your conclusion is to the prior.
 
-    - name: conf.level
+    - name: confLevel
       title: Confidence level
       type: Number
       default: 0.95
@@ -322,7 +323,7 @@ options:
             0.999. The old bounds allowed 1, at which the entire statistical subtitle
             disappeared with no message, and 0, which printed a zero-width "0 percent CI".
 
-    - name: bf.message
+    - name: bfMessage
       title: Bayes factor
       type: Bool
       default: false

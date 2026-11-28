@@ -12,7 +12,8 @@
 // KEEPING THE TABLE IN SYNC
 // PRESETS below mirrors `private$.PRESETS` in R/jjridges.b.R exactly. That duplication is
 // deliberate (the client cannot call into R), and it is guarded:
-// tests/testthat/test-jjridges-residual.R parses BOTH files and fails on any drift.
+// library-audit 2026-09-16 jjstatsplot [INFO] DONE: clarify that the residual drift test lives in the umbrella suite
+// Umbrella tests/testthat/test-jjridges-residual.R parses BOTH files and fails on any drift.
 //
 // Presets are applied on CHANGE only. Selecting "Custom" afterwards leaves the values in
 // place so the user can keep a preset's settings and adjust one of them.

@@ -128,6 +128,8 @@ test_that("empty and incomplete selections have a controlled response", {
   class <- getFromNamespace("pathagreementClass", "ClinicoPath")
   options <- getFromNamespace("pathagreementOptions", "ClinicoPath")
   analysis <- class$new(data = data[FALSE, ], options = options$new(vars = names(data)))
+  # jamovi always runs .init() first; it adds the fixed reference-definition rows .run() fills.
+  analysis$init()
   expect_error(analysis$.__enclos_env__$private$.run(), "at least 2 cases")
 })
 

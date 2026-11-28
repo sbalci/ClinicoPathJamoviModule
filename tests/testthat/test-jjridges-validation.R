@@ -5,6 +5,17 @@
 
 quiet_run <- function(expr) suppressWarnings(suppressMessages(force(expr)))
 
+val_ridges_run_plot <- function(data, ...) {
+  o <- do.call(ClinicoPath:::jjridgesOptions$new, list(...))
+  a <- ClinicoPath:::jjridgesClass$new(options = o, data = data)
+  a$init()
+  quiet_run(a$.__enclos_env__$private$.run())
+  priv <- a$.__enclos_env__$private
+  pd <- quiet_run(priv$.prepareData(emit_notices = FALSE))
+  p <- quiet_run(priv$.createPlot(pd))
+  list(res = a$results, plot = p, analysis = a)
+}
+
 row_by_key <- function(df, col, val) {
   idx <- which(as.character(df[[col]]) == as.character(val))
   testthat::expect_length(idx, 1L)
@@ -244,24 +255,26 @@ test_that("C08/C13/C17/C18: metamorphic invariances (affine, monotone, constant 
   expect_equal(r_na$tests$asDF$statistic[1], r0$tests$asDF$statistic[1], tolerance = 1e-10)
 })
 
-test_that("C27/C29/C33: unfaceted plot overlays match statistics, state-only redraw succeeds, asSource() parses", {
-  # Oracle: cross-output identity between ggplot_build layers and statistics table + state-only redraw
+test_that("C27/C29/C33: unfaceted plot overlays match statistics, data-driven redraw succeeds, asSource() parses", {
+  # Oracle: cross-output identity between ggplot_build layers and statistics table + fresh-instance redraw
   d <- make_tiny_fixture()
-  res <- quiet_run(ClinicoPath::jjridges(
+  run <- val_ridges_run_plot(
     data = d, x_var = "val", y_var = "grp",
     add_boxplot = TRUE, add_quantiles = TRUE, add_mean = TRUE, add_median = TRUE
-  ))
-  bld <- quiet_run(ggplot2::ggplot_build(res$plot$state))
-  bp_idx <- which(vapply(res$plot$state$layers, function(l) inherits(l$geom, "GeomBoxplot"), logical(1)))[1]
+  )
+  expect_false(inherits(run$res$plot$state, "ggplot"))
+  expect_true(isTRUE(run$res$plot$state$ready))
+  bld <- quiet_run(ggplot2::ggplot_build(run$plot))
+  bp_idx <- which(vapply(run$plot$layers, function(l) inherits(l$geom, "GeomBoxplot"), logical(1)))[1]
   expect_equal(sort(bld$data[[bp_idx]]$xmiddle), c(4.0, 13.0), tolerance = 1e-10)
   expect_equal(c(sort(bld$data[[bp_idx]]$xlower), sort(bld$data[[bp_idx]]$xupper)), c(4.0, 10.5, 6.0, 15.5), tolerance = 1e-10)
 
-  # State-only redraw with private$.data = NULL
+  # Fresh-instance export redraw (requiresData: true) without calling .run() on a2
   o <- ClinicoPath:::jjridgesOptions$new(x_var = "val", y_var = "grp")
   a1 <- ClinicoPath:::jjridgesClass$new(options = o, data = d)
   a1$init(); a1$.__enclos_env__$private$.run()
   a2 <- ClinicoPath:::jjridgesClass$new(options = o, data = d)
-  a2$init(); a2$.__enclos_env__$private$.data <- NULL
+  a2$init()
   a2$results$plot$setState(a1$results$plot$state)
   f <- tempfile(fileext = ".png")
   on.exit(unlink(f), add = TRUE)
@@ -305,13 +318,14 @@ test_that("VAL-jjridges-02 (C27/C28/C30): faceted plot overlays and copy-ready r
     grp = factor(c(rep("A", 5), rep("B", 5), rep("A", 3), rep("B", 7)), levels = c("A", "B")),
     fac = factor(c(rep("S1", 10), rep("S2", 10)), levels = c("S1", "S2"))
   )
-  res <- quiet_run(ClinicoPath::jjridges(
+  run <- val_ridges_run_plot(
     data = d, x_var = "val", y_var = "grp", facet_var = "fac",
     add_mean = TRUE, add_sample_size = TRUE, add_density_values = TRUE
-  ))
-  bld <- quiet_run(ggplot2::ggplot_build(res$plot$state))
-  vl_idx <- which(vapply(res$plot$state$layers, function(l) inherits(l$geom, "GeomVline"), logical(1)))[1]
-  txt_idx <- which(vapply(res$plot$state$layers, function(l) inherits(l$geom, "GeomText"), logical(1)))
+  )
+  res <- run$res
+  bld <- quiet_run(ggplot2::ggplot_build(run$plot))
+  vl_idx <- which(vapply(run$plot$layers, function(l) inherits(l$geom, "GeomVline"), logical(1)))[1]
+  txt_idx <- which(vapply(run$plot$layers, function(l) inherits(l$geom, "GeomText"), logical(1)))
   expect_equal(sort(bld$data[[vl_idx]]$xintercept[bld$data[[vl_idx]]$PANEL == 1]), c(6.0, 16.0), tolerance = 1e-8)
   expect_equal(sort(as.character(bld$data[[txt_idx[1]]]$label[bld$data[[txt_idx[1]]]$PANEL == 1])), c("n=5", "n=5"))
   expect_true(grepl("S1", res$reportSummary$content, fixed = TRUE) && grepl("S2", res$reportSummary$content, fixed = TRUE))
@@ -377,8 +391,8 @@ test_that("VAL-jjridges-07 (C20): degenerate constant/trimmed-constant/extreme-B
 
 test_that("VAL-jjridges-08 (C26): zero-IQR data with bandwidth='nrd' falls back to positive finite bandwidth", {
   d <- data.frame(val = c(rep(0, 40), 1:10, rep(0, 40), 1:10), grp = factor(rep(c("A", "B"), each = 50)))
-  res <- quiet_run(ClinicoPath::jjridges(data = d, x_var = "val", y_var = "grp", bandwidth = "nrd"))
-  bld <- quiet_run(ggplot2::ggplot_build(res$plot$state))
+  run <- val_ridges_run_plot(data = d, x_var = "val", y_var = "grp", bandwidth = "nrd")
+  bld <- quiet_run(ggplot2::ggplot_build(run$plot))
   expect_true(all(is.finite(bld$data[[1]]$density)) && max(bld$data[[1]]$density, na.rm = TRUE) > 0)
 })
 
@@ -412,12 +426,12 @@ test_that("VAL-jjridges-11 (C22): Unadjusted p-values notice does not fire for B
 
 test_that("VAL-jjridges-12 (C26/C27/C28/C31): boxplot outlier disclosure, density_values bandwidth fidelity, and violin fill_ridges=FALSE", {
   d <- make_tiny_fixture()
-  r_bw <- quiet_run(ClinicoPath::jjridges(data = d, x_var = "val", y_var = "grp", bandwidth = "custom", bandwidth_value = 5.0, add_density_values = TRUE))
-  bld_bw <- quiet_run(ggplot2::ggplot_build(r_bw$plot$state))
+  r_bw <- val_ridges_run_plot(data = d, x_var = "val", y_var = "grp", bandwidth = "custom", bandwidth_value = 5.0, add_density_values = TRUE)
+  bld_bw <- quiet_run(ggplot2::ggplot_build(r_bw$plot))
   expect_equal(sort(as.numeric(as.character(bld_bw$data[[2]]$label))), c(4.8, 13.0), tolerance = 1e-6)
 
-  r_v <- quiet_run(ClinicoPath::jjridges(data = d, x_var = "val", y_var = "grp", plot_type = "violin_ridges", fill_ridges = FALSE))
-  expect_true(all(is.na(quiet_run(ggplot2::ggplot_build(r_v$plot$state))$data[[1]]$fill)))
+  r_v <- val_ridges_run_plot(data = d, x_var = "val", y_var = "grp", plot_type = "violin_ridges", fill_ridges = FALSE)
+  expect_true(all(is.na(quiet_run(ggplot2::ggplot_build(r_v$plot))$data[[1]]$fill)))
 })
 
 test_that("VAL-jjridges-13 (C34): Cliff's delta 95% CI achieves nominal coverage under non-null separation (n=15)", {
@@ -438,8 +452,10 @@ test_that("VAL-jjridges-14 (C23/C29): post-NA sample size warning fires and vali
   r_na <- quiet_run(ClinicoPath::jjridges(data = d_na, x_var = "val", y_var = "grp"))
   expect_match(r_na$notices$content, "below recommended minimum of 10", fixed = TRUE)
 
-  r_emp <- quiet_run(ClinicoPath::jjridges(data = d_na[0, ], x_var = "val", y_var = "grp"))
-  expect_false(r_emp$statistics$visible)
+  # check-module 2026-11-27: the empty-data reject() now reaches jamovi's error state instead
+  # of being turned into a notice on a completed analysis with its outputs hidden.
+  expect_error(quiet_run(ClinicoPath::jjridges(data = d_na[0, ], x_var = "val", y_var = "grp")),
+               "No data available", fixed = TRUE)
 })
 
 test_that("VAL-jjridges-15 (C25): age_by_stage preset configures multiplicity adjustment", {
@@ -485,9 +501,9 @@ test_that("IR-jjridges-01 & 11: R6 lifecycle recovers visibility after error and
   a$init()
   quiet_run(a$.__enclos_env__$private$.run())
   a$.__enclos_env__$private$.data <- d[d$grp == "Low", ]
-  quiet_run(a$.__enclos_env__$private$.run())
-  expect_false(a$results$plot$visible)
-  expect_false(a$results$tests$visible)
+  # check-module 2026-11-27: the single-group reject() propagates (jamovi's error state); the
+  # recovery below is what matters - the next valid run must show every output again.
+  expect_error(quiet_run(a$.__enclos_env__$private$.run()), "At least 2 groups", fixed = TRUE)
 
   a$.__enclos_env__$private$.data <- d
   quiet_run(a$.__enclos_env__$private$.run())
@@ -509,13 +525,13 @@ test_that("IR-jjridges-01 & 11: R6 lifecycle recovers visibility after error and
 
 test_that("IR-jjridges-02: presentation option reverse_order preserves statistical contrasts and signs", {
   d <- make_tiny_fixture()
-  r0 <- quiet_run(ClinicoPath::jjridges(data = d, x_var = "val", y_var = "grp", reverse_order = FALSE, show_stats = TRUE, test_type = "parametric", effsize_type = "d"))
-  r1 <- quiet_run(ClinicoPath::jjridges(data = d, x_var = "val", y_var = "grp", reverse_order = TRUE, show_stats = TRUE, test_type = "parametric", effsize_type = "d"))
-  expect_identical(r1$tests$asDF$comparison, r0$tests$asDF$comparison)
-  expect_equal(r1$tests$asDF$statistic, r0$tests$asDF$statistic, tolerance = 1e-12)
-  expect_equal(r1$tests$asDF$effect_size, r0$tests$asDF$effect_size, tolerance = 1e-12)
+  r0 <- val_ridges_run_plot(data = d, x_var = "val", y_var = "grp", reverse_order = FALSE, show_stats = TRUE, test_type = "parametric", effsize_type = "d")
+  r1 <- val_ridges_run_plot(data = d, x_var = "val", y_var = "grp", reverse_order = TRUE, show_stats = TRUE, test_type = "parametric", effsize_type = "d")
+  expect_identical(r1$res$tests$asDF$comparison, r0$res$tests$asDF$comparison)
+  expect_equal(r1$res$tests$asDF$statistic, r0$res$tests$asDF$statistic, tolerance = 1e-12)
+  expect_equal(r1$res$tests$asDF$effect_size, r0$res$tests$asDF$effect_size, tolerance = 1e-12)
   # Plot Y levels are reversed while statistics stay invariant
-  expect_identical(levels(r1$plot$state$data$y), rev(levels(r0$plot$state$data$y)))
+  expect_identical(levels(r1$plot$data$y), rev(levels(r0$plot$data$y)))
 })
 
 test_that("IR-jjridges-03: Welch one-way eta/omega preserves test-CI duality under heteroscedastic imbalance", {
@@ -548,8 +564,8 @@ test_that("IR-jjridges-04: complete-separation Cliff's delta uses Newcombe Metho
 test_that("IR-jjridges-06 & 10: per-group bandwidth avoids smearing and within-group diagnostics avoid false skewness warnings", {
   set.seed(404)
   d_sep <- data.frame(val = c(stats::rnorm(40, 0, 1), stats::rnorm(40, 100, 1)), grp = factor(rep(c("Low", "High"), each = 40)))
-  r_sep <- quiet_run(ClinicoPath::jjridges(data = d_sep, x_var = "val", y_var = "grp", bandwidth = "nrd"))
-  bw_used <- unique(r_sep$plot$state$layers[[1]]$stat_params$bandwidth)
+  r_sep <- val_ridges_run_plot(data = d_sep, x_var = "val", y_var = "grp", bandwidth = "nrd")
+  bw_used <- unique(r_sep$plot$layers[[1]]$stat_params$bandwidth)
   within_bw <- mean(c(stats::bw.nrd(d_sep$val[d_sep$grp == "Low"]), stats::bw.nrd(d_sep$val[d_sep$grp == "High"])))
   expect_equal(bw_used, within_bw, tolerance = 1e-10)
 
@@ -562,20 +578,20 @@ test_that("IR-jjridges-06 & 10: per-group bandwidth avoids smearing and within-g
 test_that("IR-jjridges-07 & 12: gradient warns on fill_var, add_mean stratifies by fill_var, and custom_annotations parses group names/commas & warns on malformed", {
   set.seed(501)
   d_g <- data.frame(val = stats::rnorm(80, 10, 2), grp = factor(rep(c("A", "B"), each = 40)), sub = factor(rep(rep(c("M", "F"), each = 20), 2)))
-  r_grad <- quiet_run(ClinicoPath::jjridges(data = d_g, x_var = "val", y_var = "grp", fill_var = "sub", plot_type = "density_ridges_gradient", alpha = 0.35, fill_ridges = FALSE))
-  expect_match(r_grad$notices$content, "Gradient mode overrides categorical fill", fixed = TRUE)
-  expect_equal(unique(suppressMessages(ggplot2::ggplot_build(r_grad$plot$state))$data[[1]]$alpha), 0.35, tolerance = 1e-8)
+  r_grad <- val_ridges_run_plot(data = d_g, x_var = "val", y_var = "grp", fill_var = "sub", plot_type = "density_ridges_gradient", alpha = 0.35, fill_ridges = FALSE)
+  expect_match(r_grad$res$notices$content, "Gradient mode overrides categorical fill", fixed = TRUE)
+  expect_equal(unique(suppressMessages(ggplot2::ggplot_build(r_grad$plot))$data[[1]]$alpha), 0.35, tolerance = 1e-8)
 
-  r_ov <- quiet_run(ClinicoPath::jjridges(data = d_g, x_var = "val", y_var = "grp", fill_var = "sub", add_mean = TRUE, add_sample_size = TRUE, add_boxplot = TRUE))
-  bld <- suppressMessages(ggplot2::ggplot_build(r_ov$plot$state))
-  vl_idx <- which(vapply(r_ov$plot$state$layers, function(l) inherits(l$geom, "GeomVline"), logical(1)))[1]
-  expect_equal(nrow(bld$data[[vl_idx]]), nrow(r_ov$statistics$asDF))
+  r_ov <- val_ridges_run_plot(data = d_g, x_var = "val", y_var = "grp", fill_var = "sub", add_mean = TRUE, add_sample_size = TRUE, add_boxplot = TRUE)
+  bld <- suppressMessages(ggplot2::ggplot_build(r_ov$plot))
+  vl_idx <- which(vapply(r_ov$plot$layers, function(l) inherits(l$geom, "GeomVline"), logical(1)))[1]
+  expect_equal(nrow(bld$data[[vl_idx]]), nrow(r_ov$res$statistics$asDF))
 
   d <- make_tiny_fixture()
-  r_ann <- quiet_run(ClinicoPath::jjridges(data = d, x_var = "val", y_var = "grp", custom_annotations = "5,Low,Peak, A;13,2,High Mean;bad_entry"))
-  n_txt <- sum(vapply(r_ann$plot$state$layers, function(l) inherits(l$geom, "GeomText"), logical(1)))
+  r_ann <- val_ridges_run_plot(data = d, x_var = "val", y_var = "grp", custom_annotations = "5,Low,Peak, A;13,2,High Mean;bad_entry")
+  n_txt <- sum(vapply(r_ann$plot$layers, function(l) inherits(l$geom, "GeomText"), logical(1)))
   expect_equal(n_txt, 2L)
-  expect_match(r_ann$notices$content, "Invalid custom annotations", fixed = TRUE)
+  expect_match(r_ann$res$notices$content, "Invalid custom annotations", fixed = TRUE)
 })
 
 test_that("IR-jjridges-08, 09, 13: clearWith completeness, accurate Welch/Bayes copy, and clinical ID clustering detection", {
@@ -685,10 +701,10 @@ test_that("UI/schema/theme consistency: grid_lines works across all themes, clea
   d <- make_tiny_fixture()
 
   # grid_lines = FALSE suppresses grid lines on theme_pubr; grid_lines = TRUE adds them on theme_classic
-  r_pubr_off <- quiet_run(ClinicoPath::jjridges(data = d, x_var = "val", y_var = "grp", theme_style = "theme_pubr", grid_lines = FALSE))
-  expect_s3_class(r_pubr_off$plot$state$theme$panel.grid.major, "element_blank")
-  r_classic_on <- quiet_run(ClinicoPath::jjridges(data = d, x_var = "val", y_var = "grp", theme_style = "theme_classic", grid_lines = TRUE))
-  expect_s3_class(r_classic_on$plot$state$theme$panel.grid.major, "element_line")
+  r_pubr_off <- val_ridges_run_plot(data = d, x_var = "val", y_var = "grp", theme_style = "theme_pubr", grid_lines = FALSE)
+  expect_s3_class(r_pubr_off$plot$theme$panel.grid.major, "element_blank")
+  r_classic_on <- val_ridges_run_plot(data = d, x_var = "val", y_var = "grp", theme_style = "theme_classic", grid_lines = TRUE)
+  expect_s3_class(r_classic_on$plot$theme$panel.grid.major, "element_line")
 
   # r.yaml clearWith covers fill_var/facet_var on clinicalSummary and width/height on plot
   root <- testthat::test_path("..", "..")

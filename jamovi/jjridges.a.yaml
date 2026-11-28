@@ -8,11 +8,11 @@ version: '1.1.6'
 jas: '1.2'
 
 description:
-    main: |
-        'Create advanced ridgeline plots.
-        Visualize distributions across groups with multiple style options, annotations,
-        statistical overlays, and publication-ready formatting. Supports both basic and
-        complex ridge plots with inside plots, double ridgelines, and color gradients.'
+    main: >
+        Create advanced ridgeline plots. Visualize distributions across groups
+        with multiple style options, annotations, statistical overlays, and
+        publication-ready formatting. Supports both basic and complex ridge plots
+        with inside plots, double ridgelines, and color gradients.
     # R:
     #     dontrun: true
     #     usage: |
@@ -121,7 +121,7 @@ options:
       title: Bandwidth Method
       type: List
       options:
-        - title: Auto (nrd0)
+        - title: Auto (Silverman's rule)
           name: nrd0
         - title: Normal Reference
           name: nrd
@@ -190,6 +190,7 @@ options:
           R: >
             Add vertical lines at specified quantiles within each ridge.
 
+    # number-list: open-ended
     - name: quantiles
       title: Quantile Values
       type: String

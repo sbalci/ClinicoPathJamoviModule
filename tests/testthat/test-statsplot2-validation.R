@@ -242,10 +242,27 @@ test_that("C11 (VAL-statsplot2-03): Bayesian t-test Result sentence does not mis
   expect_false(grepl("Bayesian t-test = ", sp2_strip_html(r$summary), fixed = TRUE))
 })
 
+# formula.tools (loaded via logistf, an umbrella Import) registers an as.character.formula
+# method that returns one string, so a raw stats::oneway.test() fails with "a two-sided formula
+# is required" for the rest of the session. The analysis shields its own calls
+# (withBaseFormulaChar() in R/utils-ggstatsplot.R); a reference value must be computed the same
+# way or it hits the bug the module avoids. This aborted C12, and with it C13-C15, whenever an
+# earlier file had loaded formula.tools. Same mechanism as jb_base_formula() in
+# test-jjbetweenstats-release-review.R, kept local so the oracle does not rely on the module.
+sp2_base_formula <- function(expr) {
+  tbl <- get(".__S3MethodsTable__.", envir = asNamespace("base"))
+  if (exists("as.character.formula", envir = tbl, inherits = FALSE)) {
+    old <- get("as.character.formula", envir = tbl, inherits = FALSE)
+    assign("as.character.formula", function(x, ...) as.character(unclass(x)), envir = tbl)
+    on.exit(assign("as.character.formula", old, envir = tbl), add = TRUE)
+  }
+  force(expr)
+}
+
 test_that("C12-C15: Multi-group (k=3) Welch ANOVA, Kruskal-Wallis, Robust t1way, and Bayesian ANOVA", {
   # C12: Welch's ANOVA + omega^2 (using Satterthwaite df2)
   r_p <- sp2_run(d_tiny_3g, dep = "y", group = "grp", distribution = "p")
-  ow <- stats::oneway.test(y ~ grp, data = d_tiny_3g, var.equal = FALSE)
+  ow <- sp2_base_formula(stats::oneway.test(y ~ grp, data = d_tiny_3g, var.equal = FALSE))
   F_exp   <- as.numeric(ow$statistic)
   df1_exp <- as.numeric(ow$parameter[1])
   df2_exp <- as.numeric(ow$parameter[2])

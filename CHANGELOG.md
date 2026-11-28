@@ -5,7 +5,121 @@ prevents them. Newest first. Release notes for users live in `NEWS.md`.
 
 ---
 
+## 2026-11-28 — multisurvival reject-swallow sites
+
+### Eleven flagged sites: one real rejection, four swallowed restarts, and a detector that could not see a cache
+
+- **Failure mode:** `reject_swallowed` listed 11 `tryCatch` sites in `multisurvival`. Ten reached `reject()` only through `.cleandata()`/`.cox_model()`. Those are per-run cache wrappers, first called with no handler in `.executeAnalysis()`, so a rejection had already reached jamovi before any flagged handler ran; later calls return the cache. The eleventh, `.calculateRiskScore()`, used `jmvcore::reject("Some groups have zero observations")` as control flow ("try fewer groups") inside its own catch-all. Separately, four handlers wrapped code that reaches `private$.checkpoint()` (PH diagnostics via `.cox_ph()`, the performance-metrics loop, both nomogram handlers), so a restart became "diagnostics unavailable" or "Nomogram calculation error".
+- **Detection signal:** tracing each site's chain in the detector showed every path ending at the cached `.cleandata()`. A second pass over checkpoint reachability found the restart sites, which the reject check itself does not model.
+- **Fix:** `createRiskGroups()` returns `success = FALSE` and wraps only `cut()`. The four handlers start with `if (identical(e$code, "restart")) stop(e)`. The gate skips a per-run cache wrapper (`if (!private$.flag) { ...; private$.flag <- TRUE }`) when the analysis also calls it outside every `tryCatch`. That removed exactly multisurvival's 11 hits (umbrella all-shipped view 58 -> 47); the call ORDER is not checked (`ponytail:` note).
+- **Prevention rule:** a restart test makes the callback fire only from a checkpoint inside the handler under test (owner, then `tryCatch`, then callee in `sys.calls()`). Otherwise an unguarded checkpoint elsewhere raises it and the test passes against the bug. A `flush = TRUE` checkpoint needs `RProtoBuf_serialize()`, which only the jamovi engine defines; an inert stub in the global environment lets it reach the callback. When a loop runs several cases, make each assertion safe for a non-error result, or the first failure hides the rest.
+
+## 2026-11-27 — check-module jjstatsplot: four follow-up fixes
+
+### A validation reject() became a notice on a "completed" jjridges analysis, and three tests pinned it
+
+- **Failure mode:** `jjridges` `.run()` wrapped `.validateInputs()` and `.validateData()` in catch-all `tryCatch` handlers that turned every `jmvcore::reject()` into an ERROR notice, hid the outputs and returned. jamovi never reached its error state. Three tests (`test-jjridges-edge-cases.R` "empty dataset" and "single group level", `test-jjridges-validation.R` VAL-14 and IR-01) asserted the swallowed behaviour, one with a comment claiming an R error "would blank the whole analysis".
+- **Detection signal:** the new `reject_swallowed` gate check (7 jjstatsplot hits). Reading each one showed 3 handlers that re-raise (`stop(e)` in `jjbarstats`/`jjpiestats`, a re-`reject()` in `jwaffle`) and 2 `statsplot2` sites reachable only if a package declared in Imports is missing. Only the 2 `jjridges` sites were real.
+- **Prevention rule:** call the validator directly; a handler may tidy up only if it ends in `stop(e)`. The gate now skips handlers that re-raise or reject again (self-test in `tools/test_release_gate.py`). A test that expects a validation failure to *complete* is pinning the defect: rewrite it as `expect_error()`, keeping the recovery assertions.
+
+### Renderer warning() calls hid four plot fallbacks in advancedraincloud
+
+- **Failure mode:** `.plot()` reported a ggrain failure (falls back to standard geoms) and trial-arm/time-point label-count mismatches (default labels used) with `warning()`, which jamovi never shows. Twelve other renderer warnings were already mirrored by `.run()` notes, so only these four were silent.
+- **Prevention rule:** a renderer cannot write to a results element, but it can write to the plot: use `.appendPlotNote()` (caption) for a condition that only the renderer sees.
+
+### A statsplot2 validation oracle hit the formula.tools bug the module shields against
+
+- **Failure mode:** `test-statsplot2-validation.R` C12 computed its Welch ANOVA reference with a raw `stats::oneway.test()`. Once formula.tools (via logistf) has registered `as.character.formula`, that fails with "a two-sided formula is required", and the error aborted C12 and the C13-C15 checks after it. The module was right; its calls are wrapped in `withBaseFormulaChar()`.
+- **Prevention rule:** in this repo, an oracle that calls `oneway.test()` runs under a base-formula shield (`sp2_base_formula()`, `jb_base_formula()`). An oracle line that errors hides every expectation after it in the same `test_that()`.
+
+### statsplot2's plot-fallback handlers swallowed checkpoint restarts, and two package rejects that could never fire
+
+- **Failure mode:** `.generatePlot()` and `.plotGrouped()` (both reached from `.run()`) wrap the specialised plot calls in catch-all handlers that fall back to a basic plot. `.plotAlluvialGG()` calls `.checkpoint()` inside them, so a restart (`simpleError`, `code == "restart"`) became a fallback plot of the old options. The gate flagged these sites for `requireNamespace()` + `reject()` guards on ggalluvial/dplyr/easyalluvial. Those are Imports, and `.run()` already reports a missing package as a notice.
+- **Detection signal:** `reject_swallowed`, the last 2 jjstatsplot hits. My first regression test passed with and without the fix for two reasons. The callback asked for a restart on every call, so the fallback's own checkpoint re-raised it. And the "unfixed" copy still held the fix, because ugrep treats a mid-pattern `$` as an anchor and `grep -v 'e$code'` removed nothing.
+- **Prevention rule:** a handler around code that checkpoints starts with `if (identical(e$code, "restart")) stop(e)`. A restart test lets the callback fire **once** and asserts that it fires once; a test that always restarts passes against the bug. To build an unfixed copy, use `grep -F` (or Python), and check that the copy differs before trusting a "fails without the fix" result.
+
+### Four advancedraincloud tests read a cache the analysis no longer keeps; one Glass test outlived its convention
+
+- **Failure mode:** moving the plot to `requiresData` removed `private$.analysis_data <- state_df`, and `test-advancedraincloud-release-review.R` now asserts that field stays NULL. Four tests in `test-advancedraincloud.R` still passed it to the HTML builders, so they got NULL: two crashed (`group_by` on NULL, a zero-length `if`), one snapshot became "requires at least 2 groups", and one row count was NULL. Separately, `0b1dc62da` (2026-11-12) made `glass_delta` standardise by group 1's SD and added `glass_delta_g2`. A module-review test still expected group 2's SD from `glass_delta`.
+- **Detection signal:** the failures matched on a scratch copy without the check-module edits, so they predated that work.
+- **Prevention rule:** tests get an analysis's rows from the method `.run()` and the renderer use (`.prepare_analysis_data(emit_notes = FALSE)`, via `prepared_rows()`), never from a private cache. When a convention changes on purpose, rewrite its oracle test in the same change and test both variants. Here the CI oracle is the heteroscedastic Glass variance (Algina, Keselman & Penfield 2006), checked for each reference group.
+
+### jwaffle showed its validation error twice; three stop() messages were untranslatable
+
+- `jwaffle` wrote the error into the `todo` panel as HTML and then re-rejected it. The handler now only clears the cached plot and the `todo` panel, then calls `stop(e)`. `jjsegmentedtotalbar` (2 sites) and `jjbarstats` `stop()` messages are wrapped in `.()`/`.fmt()`, as are the `jjridges` notice titles. The Turkish is in the umbrella `tr.po`.
+
+## 2026-11-27 — library audit round 4 (jjstatsplot 1.0.81), second learn pass: the round table was out of date, and the state check had one more blind spot
+
+### The guide said three jjstatsplot classes were "still open" a day after their responses said DONE
+
+- **Failure mode:** The 2026-11-26 learn pass wrote the guide's Round 4 table and `recurring-classes.md` rows *before* the implement pass. Implement then closed the state, `lollipop::summary` `clearWith` and `.()` splice findings, but nothing went back to the rows, so the guide still said "`lollipop::summary` still does not", "`raincloud`/`hullplot` still need runtime measurement" and "live splices at `jjarcdiagram.b.R:1429`". The INFO TODO response said "seven remaining"; the sibling holds two, both comments about the `todo` results item.
+- **Detection signal:** A second learn pass compared every row with the code in the umbrella and in `../jjstatsplot` (gate `0 blocking, 3 advisory`, the sites read by hand).
+- **Prevention rule:** After implement, re-read the round's rows against the code, not against the responses. Guide §18, Round 4, "What to do differently" item 5.
+
+### `check_state_payload` missed `plotState <- list(data = analysis_data, ...)`
+
+- **Failure mode:** The indirect branch resolved a `setState(var)` payload to its `list()`, but checked list values only against `_HEAVY_NAME`. `analysis_data` was known only as a bare payload, so the branch caught 3 of the reviewer's 5 sites on `081a5de` and missed `raincloud`.
+- **Detection signal:** Reconciling the gate with the reviewer's list on a clone of the audited commit.
+- **Prevention rule:** `_STATE_LIST_VALUE` adds `analysis_data` to the list-value side only, giving 4/5 on `081a5de`. Across all six trees it added exactly one new hit, a true positive: ClinicoPathDescriptives `outlierdetection` stores its full `analysis_data` in plot state. It was fixed the same day: state is now the per-row score vector, and the image has `requiresData: false`. `hullplot` sets a helper's return value, which no name pattern can judge, so the `serialize()` size assertion in `test-jjstatsplot-library-audit.R` stays its guard (`tools/release_gate.py`).
+
+### `outlierdetection` showed a generic error panel on a "complete" analysis when a method's own check failed
+
+- **Failure mode:** `.run()` wrapped `private$.perform_outlier_detection()` in a catch-all `tryCatch`. Every specific `reject()` inside it ("Multivariate methods require multiple variables", "The MCD method needs the MASS package") became an HTML "Outlier Detection Error" panel, with the advice "try Robust Z-Score", and jamovi marked the analysis complete. The catch also swallowed `.checkpoint()` restarts. CLAUDE.md and guide §16 already stated the rule, but nothing checked it.
+- **Detection signal:** A scan written during the 2026-11-27 learn pass, for catch-all `tryCatch` blocks around code that reaches `reject()` transitively, found 27 sites in shipped `.run()` paths across the five modules, and 14 more in renderers.
+- **Prevention rule:** Wrap only the third-party call; here `performance::check_outliers()` now raises one plain `reject()`, with Turkish added to the umbrella `tr.po`. The `linechart` renderer no longer wraps `.cleanData()`. `release_gate.py` `check_reject_swallowed` (WARN) lists the other 26 sites (OP 1, CPD 1, JJ 7, MD 4, JS 13); guide §16 "Enforce it". A test that read the message from the warnings panel (`test-outlierdetection-release-review.R`) now reads it from the error.
+
+### OncoPath failed the release gate on `pathagreement`: three false requiresData FAILs, one real export bug, one cut-off string
+
+- **Failure mode:** (1) `check_requires_data` flagged four `pathagreement` plots as reading `self$data` without `requiresData: true`. Three were false positives: their helpers return the saved value first (`if (private$.restored_plot) return(...)`). The fourth was real: `.trendOrder()` had no guard. With the data `NULL` on a redraw or export, it fell back to row order whenever `sequenceVariable` was set, so the trend plot grouped cases differently from the agreement-trend table while still drawing. (2) The quadratic-weight formula `.("... w = 1 - [(i - j) / (k - 1)]\u{00B2} ...")` contained `" ["`, where jmvcore cuts an untranslated string. Its catalogue msgid also held a literal `\u{00B2}`, so it could never match.
+- **Detection signal:** `release_gate.py --root ../OncoPath` reported `2 blocking` while the 2026-11-27 jjstatsplot work was being verified. The existing save/reload test passed because it never set a sequence variable.
+- **Prevention rule:** The trend order is stored in plot state with the reference values and case labels. `check_requires_data` skips a helper whose first statement returns on a flag the renderer's restore call sets TRUE; on the unfixed tree it then reports exactly `trendPlot`. The formula is `((i - j) / (k - 1))<sup>2</sup>`, with Turkish for both weight formulas. Test: `test-oncopath-library-audit.R` "pathagreement plots redraw without data, and the trend plot keeps the sequence order"; guide §15.
+
 ## 2026-11-26 — library audit round 4 (jjstatsplot 1.0.81): reconciling the gate against an audited build caught two gate bugs, one umbrella-grep WRONG-DONE, and three missing checks
+
+### The umbrella dependency guard failed on three draft analyses, one calling a function that no longer existed
+
+- **Failure mode:** the drafts `tumorgrowth` (`OncoPathD`) and `frailtysurvival` (`ClinicoPathD`)
+  called `brms`, `nlme` and `coxme` functions bare, relying on `library()` inside a method or on
+  an attached session. `decisiongraph` (`meddecideExtraD`) called
+  `calculateMarkovTransitionMatrix()`, which WIP commit `552882bf` (2026-01-11) deleted from
+  `decisiongraph_utils.R` while the call stayed. The Markov path could only fail with "could not
+  find function", and `test-debug.R` failed too.
+- **Detection signal:** `_updateModules_test_dependency_guard.R` listed 10 unresolved names.
+  Drafts never ship, so no sibling check would ever have caught them.
+- **Fix:** `brms::`/`nlme::`/`coxme::` qualification. All three are already in Imports, and
+  `nlme::fixef` is the same generic brms dispatches on. The helper is restored in
+  `R/decisiongraph-utils.R` as `@noRd`, in its pre-deletion form: it builds the matrix from user
+  `from`/`to`/`prob` data and refuses without it. `.createValidTransitionMatrix()` was not used,
+  because it fabricates 0.7/0.3 transitions (guide section 20).
+- **Prevention rule:** when you delete a top-level helper, grep for its callers in the same
+  commit. The guard caught this one, but only once someone ran it.
+
+### A new analysis re-imported packages a module had pruned, and the audit tests did not know it had shipped
+
+- **Failure mode:** `pathagreement` moved into OncoPath carrying `@importFrom` tags for `stringr`,
+  `glue`, `htmlTable` and `scales`. Only `stringr` was called, twice, to capitalise one word. On 2026-11-23 `prune_conflicts()` correctly refused the `stringr` prune,
+  and the entry was deleted to match, so the 2026-09-22 removal silently reversed. Separately, the
+  OncoPath audit test file still listed four shipped analyses, so the route, helper-boundary and
+  catalogue tests failed or parked `pathagreement`. `test-pathagreement-wiring.R` called `.run()`
+  without `.init()`, so the fixed rows that `.init()` adds were missing.
+- **Detection signal:** 5 failures in "stringr is pruned from OncoPath ..." and the
+  helper-boundary test, plus a `setRow rowKey '1' not found` error. All of them also failed on a
+  clean `HEAD`.
+- **Fix:** `.krippScaleLabel()` (base R, same output) replaces `str_to_title()`. The option's translated titles were rejected: Turkish ones already contain parentheses. The four dead tags
+  are removed, along with `scales` in `.checkPackageDependencies()` and the `stringr`/`scales`
+  `refs:`. `stringr` is back in `prune_imports`, with a comment saying why. The sibling
+  `DESCRIPTION` is trimmed, and so is the umbrella's `htmlTable`, which nothing calls.
+  The route, helper-boundary and catalogue tests now include `pathagreement` in `audit_analyses`. The
+  catalogue owner map keeps `jamovi/js/*.events.js` paths. The wiring test calls `init()` first.
+- **Prevention rule:** when `prune_conflicts()` refuses a prune, check that the use it found
+  deserves the dependency before deleting the entry: one call to a convenience function rarely
+  does. Bringing an analysis into a module's audit test file is a promotion, so it has to pass
+  that module's convention tests first. `pathagreement` joined `audit_analyses` the same day,
+  after four changes. Its messages go through the shared `notice_append()`/`notice_panel_html()`
+  (`R/utils-notices.R` now accepts an empty title and shows the severity alone). Its List choices
+  use sentence case and "Color-blind safe (...)". It carries the 2026-09-22 notice breadcrumb.
+  The test's requiresData walk got the same restore-guard rule as `release_gate.py`; a mutation
+  check (the `.trendOrder()` guard deleted) still flags `trendPlot`, and only `trendPlot`.
 
 ### Reconciling `release_gate.py` against `jjstatsplot` 1.0.81 (`081a5de`) exposed two parser blind spots in the gate itself
 

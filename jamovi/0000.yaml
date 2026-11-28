@@ -1540,7 +1540,7 @@ analyses:
   - title: Co-Testing Analysis
     name: cotest
     ns: ClinicoPath
-    menuGroup: meddecide
+    menuGroup: meddecideT
     menuTitle: Co-Testing Analysis
     menuSubgroup: Decision Calculators
     menuSubtitle: Two tests run in parallel
@@ -1935,16 +1935,10 @@ analyses:
     ribbon: analyses
     category: analyses
     description: >
-      'Create advanced ridgeline plots.
-
-      Visualize distributions across groups with multiple style options,
-      annotations,
-
-      statistical overlays, and publication-ready formatting. Supports both
-      basic and
-
-      complex ridge plots with inside plots, double ridgelines, and color
-      gradients.'
+      Create advanced ridgeline plots. Visualize distributions across groups
+      with multiple style options, annotations, statistical overlays, and
+      publication-ready formatting. Supports both basic and complex ridge plots
+      with inside plots, double ridgelines, and color gradients.
   - title: Treemap
     name: jjtreemap
     ns: ClinicoPath

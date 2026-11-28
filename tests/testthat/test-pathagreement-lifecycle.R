@@ -237,8 +237,8 @@ test_that("progress announcements are removed while explanatory warnings remain"
   a <- pa_lifecycle_new(d, vars = names(d)[1:4])
   expect_message(a$run(), NA)
   expect_match(a$results$warnings$content, "High missing data")
-  expect_match(a$results$warnings$content, "data-severity='strong_warning'", fixed = TRUE)
-  expect_match(a$results$warnings$content, "Strong warning")
+  # Shared OncoPath renderer (R/utils-notices.R): the banner names the severity in words.
+  expect_match(a$results$warnings$content, "<strong style='color: inherit;'>Strong warning</strong>", fixed = TRUE)
 })
 
 test_that("long reader-study tables survive save/load with declared comparator and ND state", {

@@ -14,12 +14,12 @@ clearWith:
     - centralitytype
     - resultssubtitle
     - enableOneSampleTest
-    - test.value
-    - conf.level
+    - testValue
+    - confLevel
     - alternative
     - trimlevel
     - bfprior
-    - bf.message
+    - bfMessage
     - binfill
     - bincolor
     - binalpha

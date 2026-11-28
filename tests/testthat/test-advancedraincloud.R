@@ -8,6 +8,13 @@ run_advancedraincloud_analysis <- function(data, ...) {
   analysis
 }
 
+# The analysis keeps no copy of its rows: the plot is requiresData and rebuilds them, and
+# test-advancedraincloud-release-review.R asserts private$.analysis_data stays NULL. Tests
+# take the rows from the same call .run() and the renderer use.
+prepared_rows <- function(analysis) {
+  analysis$.__enclos_env__$private$.prepare_analysis_data(emit_notes = FALSE)
+}
+
 test_that("advancedraincloud module loads correctly", {
   skip_if_not_installed('jmvReadWrite')
   expect_true(inherits(ClinicoPath:::advancedraincloudClass, "R6ClassGenerator"))
@@ -414,8 +421,7 @@ test_that("optional ID variables do not remove data when longitudinal features a
     show_change_scores = FALSE
   )
 
-  analysis_data <- analysis$.__enclos_env__$private$.analysis_data
-  expect_equal(nrow(analysis_data), 4)
+  expect_equal(nrow(prepared_rows(analysis)$data), 4)
 })
 
 test_that("p-value placement modes update the plot appropriately", {
@@ -429,7 +435,7 @@ test_that("p-value placement modes update the plot appropriately", {
   )
 
   private <- analysis$.__enclos_env__$private
-  data_used <- private$.analysis_data
+  data_used <- prepared_rows(analysis)$data
   stats <- private$.comparison_results
   y_sym <- rlang::sym(analysis$options$y_var)
   x_sym <- rlang::sym(analysis$options$x_var)
@@ -460,8 +466,9 @@ test_that("statistics html output matches snapshot", {
   )
 
   private <- analysis$.__enclos_env__$private
+  prep <- prepared_rows(analysis)
   stats_html <- private$.generate_statistics(
-    private$.analysis_data,
+    prep$data,
     analysis$options$y_var,
     analysis$options$x_var,
     analysis$options$fill_var
@@ -471,8 +478,8 @@ test_that("statistics html output matches snapshot", {
     stats_html,
     private$.generate_missing_data_info(
       histopathology,
-      private$.analysis_data,
-      colnames(private$.analysis_data)
+      prep$data,
+      prep$analysis_vars
     )
   )
 
@@ -520,7 +527,7 @@ test_that("effect size html output matches snapshot", {
 
   private <- analysis$.__enclos_env__$private
   effect_html <- private$.generate_effect_sizes(
-    private$.analysis_data,
+    prepared_rows(analysis)$data,
     analysis$options$y_var,
     analysis$options$x_var,
     analysis$options$effect_size_type
@@ -542,7 +549,7 @@ test_that("clinical report html output matches snapshot", {
 
   private <- analysis$.__enclos_env__$private
   report_html <- private$.generate_clinical_report(
-    private$.analysis_data,
+    prepared_rows(analysis)$data,
     analysis$options$y_var,
     analysis$options$x_var,
     analysis$options$population_type

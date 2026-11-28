@@ -46,7 +46,7 @@ jjhistostatsClass <- if (requireNamespace('jmvcore'))
                     centralitytype = 'default',
                     resultssubtitle = FALSE,
                     showInterpretation = FALSE,
-                    bf.message = FALSE,
+                    bfMessage = FALSE,
                     changebinwidth = FALSE,
                     binwidth = 1.1
                 )
@@ -64,28 +64,28 @@ jjhistostatsClass <- if (requireNamespace('jmvcore'))
                     set_if_default("centralitytype", 'parametric')
                     set_if_default("resultssubtitle", TRUE)
                     set_if_default("showInterpretation", TRUE)
-                    set_if_default("bf.message", TRUE)
+                    set_if_default("bfMessage", TRUE)
                 } else if (preset == 'biomarkers') {
                     set_if_default("typestatistics", 'nonparametric')
                     set_if_default("centralityline", TRUE)
                     set_if_default("centralitytype", 'nonparametric')
                     set_if_default("resultssubtitle", TRUE)
                     set_if_default("showInterpretation", TRUE)
-                    set_if_default("bf.message", FALSE)
+                    set_if_default("bfMessage", FALSE)
                 } else if (preset == 'patient_chars') {
                     set_if_default("typestatistics", 'parametric')
                     set_if_default("centralityline", TRUE)
                     set_if_default("centralitytype", 'parametric')
                     set_if_default("resultssubtitle", TRUE)
                     set_if_default("showInterpretation", FALSE)
-                    set_if_default("bf.message", FALSE)
+                    set_if_default("bfMessage", FALSE)
                 } else if (preset == 'pathology_scores') {
                     set_if_default("typestatistics", 'nonparametric')
                     set_if_default("centralityline", TRUE)
                     set_if_default("centralitytype", 'nonparametric')
                     set_if_default("resultssubtitle", TRUE)
                     set_if_default("showInterpretation", TRUE)
-                    set_if_default("bf.message", FALSE)
+                    set_if_default("bfMessage", FALSE)
                     set_if_default("changebinwidth", TRUE)
                     set_if_default("binwidth", 1.0)
                 }
@@ -382,12 +382,12 @@ jjhistostatsClass <- if (requireNamespace('jmvcore'))
 
                 x_fin <- data[[x_var]]
                 x_fin <- x_fin[is.finite(x_fin)]
-                test_val <- if (isTRUE(options_data$enableOneSampleTest)) options_data$test.value else 0
+                test_val <- if (isTRUE(options_data$enableOneSampleTest)) options_data$testValue else 0
                 stat_type <- options_data$typestatistics
                 alt <- options_data$alternative
                 tr <- options_data$trimlevel
                 digits <- options_data$digits
-                conf_level <- options_data$conf.level
+                conf_level <- options_data$confLevel
 
                 # Guard degenerate statistical paths (n < 3 subgroups, constant data,
                 # insufficient untrimmed n, or zero Winsorized SE from heavy ties)
@@ -436,7 +436,7 @@ jjhistostatsClass <- if (requireNamespace('jmvcore'))
                     alternative = alt,
                     tr = tr,
                     bf.prior = options_data$bfprior,
-                    bf.message = isTRUE(options_data$bf.message) && effective_subtitle,
+                    bf.message = isTRUE(options_data$bfMessage) && effective_subtitle,
                     digits = digits,
                     xlab = if (length(options_data$dep) > 1) x_var else aesthetics_data$xlab,
                     title = if (!is.null(panel_title)) panel_title else if (length(options_data$dep) > 1) NULL else aesthetics_data$title,
@@ -505,7 +505,7 @@ jjhistostatsClass <- if (requireNamespace('jmvcore'))
                             )
                         }
                         # Also match parametric bf.message caption to directional hypothesis
-                        if (identical(stat_type, "parametric") && isTRUE(options_data$bf.message)) {
+                        if (identical(stat_type, "parametric") && isTRUE(options_data$bfMessage)) {
                             bf_cap <- private$.buildDirectionalBayesExpr(
                                 x_fin, test_val, options_data$bfprior, conf_level, alt, digits
                             )
@@ -657,7 +657,7 @@ jjhistostatsClass <- if (requireNamespace('jmvcore'))
                 }
 
                 # Defense-in-depth option backstops (guards R callers using run(noThrow = TRUE))
-                cl <- self$options$conf.level
+                cl <- self$options$confLevel
                 if (!is.numeric(cl) || length(cl) != 1L || !is.finite(cl) || cl < 0.5 || cl > 0.999) {
                     return(list(valid = FALSE, message = .("Confidence level must be between 0.5 and 0.999.")))
                 }
@@ -703,7 +703,7 @@ jjhistostatsClass <- if (requireNamespace('jmvcore'))
                 # One-Sample Test") steered the user into exactly the silent-null state.
                 show_subtitle <- isTRUE(private$.option("resultssubtitle"))
                 effective_null <- if (isTRUE(self$options$enableOneSampleTest)) {
-                    self$options$test.value
+                    self$options$testValue
                 } else {
                     0   # ggstatsplot's default when test.value is not forwarded
                 }
@@ -754,7 +754,7 @@ jjhistostatsClass <- if (requireNamespace('jmvcore'))
                 if (isTRUE(private$.option("resultssubtitle"))) {
                     stat_type <- private$.option("typestatistics")
                     bf_active <- identical(stat_type, "bayes") ||
-                        (identical(stat_type, "parametric") && isTRUE(private$.option("bf.message")))
+                        (identical(stat_type, "parametric") && isTRUE(private$.option("bfMessage")))
                     if (bf_active) {
                         warnings <- c(warnings, .fmt(
                             .("<strong>Bayes factor prior:</strong> the Bayes factor is computed under a Cauchy prior on standardized effect size with scale r = {r} (the displayed posterior difference is on the original measurement scale). A Bayes factor is only interpretable against the prior that produced it, so report this value alongside it, and vary the Bayes prior scale to check how sensitive your conclusion is to the choice."),
@@ -1029,7 +1029,7 @@ jjhistostatsClass <- if (requireNamespace('jmvcore'))
                 # robust, and bayes modes leave the user caption intact.
                 if (nzchar(self$options$caption) &&
                     isTRUE(private$.option("resultssubtitle")) &&
-                    isTRUE(private$.option("bf.message")) &&
+                    isTRUE(private$.option("bfMessage")) &&
                     identical(private$.option("typestatistics"), "parametric")) {
                     warnings <- c(warnings, .("<strong>Your caption was not used.</strong> With Bayes factor switched on, the caption area is written by the Bayes factor. Switch off Bayes factor to show your own caption."))
                 }
@@ -1327,12 +1327,12 @@ jjhistostatsClass <- if (requireNamespace('jmvcore'))
                     resultssubtitle = private$.option("resultssubtitle"),
                     centralityline = private$.option("centralityline"),
                     enableOneSampleTest = self$options$enableOneSampleTest,
-                    test.value = self$options$test.value,
-                    conf.level = self$options$conf.level,
+                    testValue = self$options$testValue,
+                    confLevel = self$options$confLevel,
                     alternative = self$options$alternative,
                     trimlevel = self$options$trimlevel,
                     bfprior = self$options$bfprior,
-                    bf.message = private$.option("bf.message"),
+                    bfMessage = private$.option("bfMessage"),
                     digits = self$options$digits,
                     centrality.type = centrality.type
                 )
@@ -1544,7 +1544,7 @@ jjhistostatsClass <- if (requireNamespace('jmvcore'))
 
                 if (isTRUE(private$.statsComputed) &&
                     (statsSeedMatters(options_data$typestatistics, "one_sample") ||
-                     captionSeedMatters(options_data$typestatistics, "one_sample", 2L, options_data$bf.message)))
+                     captionSeedMatters(options_data$typestatistics, "one_sample", 2L, options_data$bfMessage)))
                     plot <- addSeedCaption(plot, self, self$options$seed)
 
                 # Print plot
@@ -1646,7 +1646,7 @@ jjhistostatsClass <- if (requireNamespace('jmvcore'))
 
                 if (isTRUE(private$.statsComputed) &&
                     (statsSeedMatters(options_data$typestatistics, "one_sample") ||
-                     captionSeedMatters(options_data$typestatistics, "one_sample", 2L, options_data$bf.message)))
+                     captionSeedMatters(options_data$typestatistics, "one_sample", 2L, options_data$bfMessage)))
                     plot2 <- addSeedCaption(plot2, self, self$options$seed)
 
                 # Print plot

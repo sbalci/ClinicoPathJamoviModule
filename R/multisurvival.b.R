@@ -2089,6 +2089,9 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
           tryCatch(
             private$.cox_ph(cox_model),
             error = function(e) {
+              # .cox_ph() checkpoints; a restart (an error with code "restart") must
+              # reach jamovi, not become "diagnostics unavailable" (check-module 2026-11-28).
+              if (identical(e$code, "restart")) stop(e)
               private$.addHtmlMessage(
                 "warning",
                 .("Proportional hazards diagnostics unavailable"),
@@ -3206,6 +3209,7 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
           }
 
         }, error = function(e) {
+          if (identical(e$code, "restart")) stop(e)  # the loop above checkpoints
           self$results$survMetricsTable$setNote("unavailable", paste0(.("Performance metric error"), ": ", .rocLabel(conditionMessage(e))))
           self$results$survMetricsSummary$setContent(paste0(
             "<h4>", .("Performance metric error"), "</h4><p>", htmltools::htmlEscape(conditionMessage(e)), "</p>",
@@ -4621,8 +4625,11 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
         }
 
         ### Function to try creating risk groups ----
+        # A failed size is not an error for the user: the loop below tries fewer groups.
+        # This used to signal it with jmvcore::reject() inside a catch-all tryCatch,
+        # borrowing jamovi's error mechanism for control flow (gate reject_swallowed,
+        # check-module 2026-11-28). Only cut() can fail - duplicate quantile breaks.
         createRiskGroups <- function(n_groups) {
-          tryCatch({
             if(n_groups == 2) {
               probs <- c(0, 0.5, 1)
               labels <- c("Low Risk", "High Risk")
@@ -4635,20 +4642,18 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
                           "Intermediate-High Risk", "High Risk")
             }
 
-            groups <- cut(mydata$risk_score,
-                          breaks = quantile(mydata$risk_score, probs = probs),
-                          labels = labels,
-                          include.lowest = TRUE)
+            groups <- tryCatch(
+              cut(mydata$risk_score,
+                  breaks = quantile(mydata$risk_score, probs = probs),
+                  labels = labels,
+                  include.lowest = TRUE),
+              error = function(e) NULL)
 
-            #### Verify we have at least one observation per group ----
-            if(any(table(groups) == 0)) {
-              jmvcore::reject(.("Some groups have zero observations"))
-            }
+            #### At least one observation per group ----
+            if (is.null(groups) || any(table(groups) == 0))
+              return(list(success = FALSE))
 
-            return(list(success = TRUE, groups = groups))
-          }, error = function(e) {
-            return(list(success = FALSE, error = e$message))
-          })
+            list(success = TRUE, groups = groups)
         }
 
         #### Try to create requested number of groups with fallback ----
@@ -6721,6 +6726,7 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
                     private$.nomogram(cox_model)
                     !is.null(private$.nom_object)
                 }, error = function(e) {
+                    if (identical(e$code, "restart")) stop(e)  # .nomogram() checkpoints
                     FALSE
                 })
 
@@ -6804,6 +6810,7 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
                 self$results$nomogramSummary$setContent(summary_html)
 
             }, error = function(e) {
+                if (identical(e$code, "restart")) stop(e)  # .nomogram() checkpoints
                 error_msg <- .fmt(
                     .("Nomogram calculation error: {message}"),
                     message = htmltools::htmlEscape(conditionMessage(e)))

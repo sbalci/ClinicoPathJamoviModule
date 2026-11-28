@@ -569,9 +569,13 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                                                     opts$counts, opts$conflevel, opts$digits)))
                 .("Fisher's exact test for the sparse two-way chart")
             else .("Pearson's chi-squared test")
+            # library-audit 2026-09-16 jjstatsplot [LOW] DONE: whole-sentence .fmt() template, no spliced semicolon fragment
             if (!is.null(opts$grvar) && !isTRUE(opts$paired) &&
                 !identical(opts$typestatistics, "bayes"))
-                method_name <- paste0(method_name, "; ", .("split panels use Pearson's chi-squared test"))
+                method_name <- .fmt(
+                    .("{method}; split panels use Pearson's chi-squared test"),
+                    method = method_name
+                )
 
             
             # Interpolate the {outcome}/{groups}/{method} placeholders with glue.
@@ -1542,7 +1546,7 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                  length(self$options$dep) == 0 ||
                  (length(self$options$dep) == 1 && self$options$dep == "") ) {
 
-                # TODO ----
+                # Welcome panel (self$results$todo) ----
                 todo <- glue::glue(
                 "<br>{welcome}
                 <br><br>
@@ -1673,13 +1677,13 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             tryCatch({
                 mydata <- private$.getCachedData()
             }, error = function(e) {
-                stop(paste0('Data preparation failed in plot1: ', conditionMessage(e)), call. = FALSE)
+                jmvcore::reject(.("Data preparation failed in plot1: {err}"), err = conditionMessage(e))
             })
 
             tryCatch({
                 options_data <- private$.prepareOptions()
             }, error = function(e) {
-                stop(paste0('Options preparation failed in plot1: ', conditionMessage(e)), call. = FALSE)
+                jmvcore::reject(.("Options preparation failed in plot1: {err}"), err = conditionMessage(e))
             })
 
             dep <- options_data$dep
@@ -1780,7 +1784,7 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 mydata <- private$.getCachedData()
                 options_data <- private$.prepareOptions()
             }, error = function(e) {
-                stop(paste0('Plot preparation failed: ', conditionMessage(e)), call. = FALSE)
+                jmvcore::reject(.("Plot preparation failed: {err}"), err = conditionMessage(e))
             })
             
             dep <- options_data$dep
@@ -1908,7 +1912,7 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 mydata <- private$.getCachedData()
                 options_data <- private$.prepareOptions()
             }, error = function(e) {
-                stop(paste0('Grouped plot preparation failed: ', conditionMessage(e)), call. = FALSE)
+                jmvcore::reject(.("Grouped plot preparation failed: {err}"), err = conditionMessage(e))
             })
             
             dep <- options_data$dep
@@ -2052,7 +2056,7 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 mydata <- private$.getCachedData()
                 options_data <- private$.prepareOptions()
             }, error = function(e) {
-                stop(paste0('Donut plot preparation failed: ', conditionMessage(e)), call. = FALSE)
+                jmvcore::reject(.("Donut plot preparation failed: {err}"), err = conditionMessage(e))
             })
             
             dep <- options_data$dep

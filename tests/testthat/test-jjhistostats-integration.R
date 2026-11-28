@@ -138,7 +138,7 @@ test_that("jjhistostats complete clinical workflow - lab values", {
     dep = "cholesterol",
     typestatistics = "parametric",
     enableOneSampleTest = TRUE,
-    test.value = 200,
+    testValue = 200,
     centralityline = TRUE,
     resultssubtitle = TRUE
   )

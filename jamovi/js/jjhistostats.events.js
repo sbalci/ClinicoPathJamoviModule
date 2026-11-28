@@ -1,19 +1,5 @@
-// Controls whose name contains a dot (test.value, conf.level, bf.message) are keyed by
-// their LITERAL name in jamovi's control registry (this._ctrlOptions[e.name], matched with
-// an exact string compare), so they are only reachable with bracket notation. The previous
-// `ui.test_value` / `ui.conf_level` / `ui.bf_message` read an undefined property and threw
-// a TypeError, and because those calls were not wrapped in try/catch the handler aborted
-// there - so selecting a clinical preset set the first five controls and silently skipped
-// every colour below, and onChange_typestatistics never reached its guidance call.
-// Look the control up defensively so one unresolved name can never abort a whole handler.
-const ctrl = function(ui, name) {
-    return Object.prototype.hasOwnProperty.call(ui, name) ? ui[name] : null;
-};
-const setOpt = function(ui, name, value) {
-    const c = ctrl(ui, name);
-    if (c) c.setValue(value);
-};
-
+// library-audit 2026-09-16 jjstatsplot [LOW] DONE: camelCase option names (testValue, confLevel, bfMessage)
+// are addressable directly via standard ui.<name> properties without bracket workarounds.
 const events = {
     // Clinical preset system with intelligent parameter configuration for histograms
     onChange_clinicalPreset: function(ui) {
@@ -27,9 +13,9 @@ const events = {
                 ui.centralitytype.setValue("parametric");
                 ui.resultssubtitle.setValue(true);
                 ui.showInterpretation.setValue(true);
-                setOpt(ui, 'test.value', 0);
-                setOpt(ui, 'conf.level', 0.95);
-                setOpt(ui, 'bf.message', true);
+                ui.testValue.setValue(0);
+                ui.confLevel.setValue(0.95);
+                ui.bfMessage.setValue(true);
                 ui.binfill.setValue("#87CEEB");  // Light blue for lab values
                 ui.bincolor.setValue("#4682B4");  // Steel blue border
                 ui.binalpha.setValue(0.7);
@@ -43,9 +29,9 @@ const events = {
                 ui.centralitytype.setValue("nonparametric");
                 ui.resultssubtitle.setValue(true);
                 ui.showInterpretation.setValue(true);
-                setOpt(ui, 'test.value', 0);
-                setOpt(ui, 'conf.level', 0.95);
-                setOpt(ui, 'bf.message', false);
+                ui.testValue.setValue(0);
+                ui.confLevel.setValue(0.95);
+                ui.bfMessage.setValue(false);
                 ui.binfill.setValue("#98FB98");  // Pale green for biomarkers
                 ui.bincolor.setValue("#228B22");  // Forest green border
                 ui.binalpha.setValue(0.75);
@@ -59,9 +45,9 @@ const events = {
                 ui.centralitytype.setValue("parametric");
                 ui.resultssubtitle.setValue(true);
                 ui.showInterpretation.setValue(false);  // Less interpretation needed for basic demographics
-                setOpt(ui, 'test.value', 0);
-                setOpt(ui, 'conf.level', 0.95);
-                setOpt(ui, 'bf.message', false);
+                ui.testValue.setValue(0);
+                ui.confLevel.setValue(0.95);
+                ui.bfMessage.setValue(false);
                 ui.binfill.setValue("#FFB6C1");  // Light pink for demographics
                 ui.bincolor.setValue("#DC143C");  // Crimson border
                 ui.binalpha.setValue(0.6);
@@ -75,9 +61,9 @@ const events = {
                 ui.centralitytype.setValue("nonparametric");
                 ui.resultssubtitle.setValue(true);
                 ui.showInterpretation.setValue(true);
-                setOpt(ui, 'test.value', 0);
-                setOpt(ui, 'conf.level', 0.95);
-                setOpt(ui, 'bf.message', false);
+                ui.testValue.setValue(0);
+                ui.confLevel.setValue(0.95);
+                ui.bfMessage.setValue(false);
                 ui.changebinwidth.setValue(true);
                 ui.binwidth.setValue(1.0);  // Unit bins for discrete scores
                 ui.binfill.setValue("#DDA0DD");  // Plum for pathology
@@ -98,15 +84,15 @@ const events = {
                 break;
             case "nonparametric":
                 ui.centralitytype.setValue("nonparametric");
-                setOpt(ui, 'bf.message', false);
+                ui.bfMessage.setValue(false);
                 break;
             case "robust":
                 ui.centralitytype.setValue("robust");
-                setOpt(ui, 'bf.message', false);
+                ui.bfMessage.setValue(false);
                 break;
             case "bayes":
                 ui.centralitytype.setValue("bayes");
-                setOpt(ui, 'bf.message', true);
+                ui.bfMessage.setValue(true);
                 break;
         }
     },

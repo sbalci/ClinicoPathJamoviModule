@@ -351,7 +351,7 @@ jjbetweenstatsClass <- if (requireNamespace("jmvcore")) R6::R6Class(
             # Recompute with pooled_sd = TRUE so both expression and cached tibble agree.
             if (n_lev == 2L && identical(stat_type, "parametric") && isTRUE(opts$varequal)) {
                 pooled_es <- tryCatch({
-                    fml <- stats::as.formula(call("~", as.name(dep_var), as.name(group_var)))
+                    fml <- jmvcore::asFormula(jmvcore::constructFormula(dep_var, group_var))
                     if (identical(eff, "unbiased")) {
                         withBaseFormulaChar(effectsize::hedges_g(
                             fml, data = data, pooled_sd = TRUE, ci = opts$conflevel

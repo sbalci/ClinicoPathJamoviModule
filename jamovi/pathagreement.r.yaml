@@ -1894,8 +1894,6 @@ refs:
     - grDevices
     - pheatmap
     - reshape2
-    - scales
-    - stringr
     - viridisLite
     - Krippendorff2004
 

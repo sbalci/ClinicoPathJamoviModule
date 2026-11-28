@@ -524,3 +524,46 @@ test_that("audited descriptions do not promise unreleased features", {
     expect_false(any(grepl(promise, text, ignore.case = TRUE)), info = analysis)
   }
 })
+
+# library-audit 2026-09-16 ClinicoPathDescriptives [LOW] DONE (outlierdetection site): the plot state holds
+# the per-row score the plot draws, not the analysed rows; the image reads no dataset (requiresData: false)
+# and redraws on a fresh instance with no data. A reject() inside the detection reaches jamovi as an error
+# instead of being turned into a generic HTML panel on a "complete" analysis.
+test_that("outlierdetection keeps a compact plot state, redraws without data, and lets reject() through", {
+  skip_if_not(exists("outlierdetectionClass"))
+  quiet <- function(expr) suppressWarnings(suppressMessages(expr))
+  set.seed(2)
+  n <- 500
+  d <- data.frame(x = c(stats::rnorm(n - 3), 8, 9, 10), y = stats::rnorm(n))
+  opts <- function(...) outlierdetectionOptions$new(show_visualization = TRUE, ...)
+  has_df <- function(x) is.data.frame(x) || (is.list(x) && any(vapply(x, has_df, logical(1))))
+
+  for (args in list(list(vars = c("x", "y"), method_category = "univariate", univariate_methods = "zscore"),
+                    list(vars = c("x", "y"), method_category = "multivariate", multivariate_methods = "mahalanobis"))) {
+    a1 <- outlierdetectionClass$new(options = do.call(opts, args), data = d)
+    quiet({ a1$init(); a1$run() })
+    st <- a1$results$plot$state
+    expect_false(has_df(st), info = args$method_category)
+    expect_identical(sort(names(st)), c("binary", "score"))
+    expect_length(st$score, n)
+    expect_lt(length(serialize(st, NULL)), 8L * n + 1024L)
+    expect_false(isTRUE(a1$results$plot$.__enclos_env__$private$.requiresData))
+
+    a2 <- outlierdetectionClass$new(options = do.call(opts, args), data = d)
+    quiet(a2$init())
+    a2$.__enclos_env__$private$.data <- NULL
+    a2$results$plot$setState(st)
+    f <- tempfile(fileext = ".png")
+    grDevices::png(f, 600, 450)
+    ret <- quiet(a2$.__enclos_env__$private$.plot(a2$results$plot, ggplot2::theme_grey(), list()))
+    grDevices::dev.off()
+    expect_true(isTRUE(ret))
+    expect_gt(file.info(f)$size, 1000L)
+    unlink(f)
+  }
+
+  one <- outlierdetectionClass$new(
+    options = opts(vars = "x", method_category = "multivariate", multivariate_methods = "mahalanobis"), data = d)
+  quiet(one$init())
+  expect_error(quiet(one$run()), "Multivariate methods require multiple variables")
+})

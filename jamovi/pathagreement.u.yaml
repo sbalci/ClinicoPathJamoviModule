@@ -332,13 +332,13 @@ children:
             label: Color theme
             enable: (readerWorkflow:off && (heatmap))
             options:
-              - title: Viridis (colorblind-safe, recommended)
+              - title: Color-blind safe (viridis, recommended)
                 name: viridis
-              - title: Plasma (colorblind-safe)
+              - title: Color-blind safe (plasma)
                 name: plasma
-              - title: Cividis (colorblind-safe)
+              - title: Color-blind safe (cividis)
                 name: cividis
-              - title: Blue-White-Red
+              - title: Blue-white-red
                 name: bwr
               - title: Red-Yellow-Green (classic)
                 name: ryg
@@ -488,11 +488,11 @@ children:
             label: Distance metric
             enable: (readerWorkflow:off && (performClustering))
             options:
-              - title: Percentage Agreement (recommended)
+              - title: Percentage agreement (recommended)
                 name: agreement
               - title: Correlation
                 name: correlation
-              - title: Euclidean Distance
+              - title: Euclidean distance
                 name: euclidean
       - type: LayoutBox
         margin: large
@@ -542,7 +542,7 @@ children:
             options:
               - title: Diagnostic categories (blue-green-gold)
                 name: diagnostic
-              - title: Viridis (colorblind-safe)
+              - title: Color-blind safe (viridis)
                 name: viridis
               - title: Red-Yellow-Blue (diverging)
                 name: RdYlBu

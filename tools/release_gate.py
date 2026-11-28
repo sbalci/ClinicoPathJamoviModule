@@ -306,6 +306,11 @@ def _shipped(name):
 _METHOD = re.compile(r'^\s*,?\s*(\.[A-Za-z_][\w.]*)\s*=\s*function\s*\(', re.M)
 _DATA = re.compile(r'self\$data\b|self\$readDataset|private\$\.data\b')
 _CALL = re.compile(r'private\$(\.[A-Za-z_][\w.]*)\s*\(')
+# `if (private$.restored_plot) return(private$.plot_reference)` as a helper's first statement: once
+# the renderer has called the method that sets that flag TRUE (pathagreement .restorePlotState), the
+# helper answers from state and its self$data lines never run on the render path (OncoPath, 2026-11-27).
+_RESTORE_GUARD = re.compile(r'^[^{]*\{\s*if\s*\(\s*private\$(\.[A-Za-z_][\w.]*)\b.*?\)\s*return\s*\(')
+_SETS_TRUE = re.compile(r'private\$(\.[A-Za-z_][\w.]*)\s*<-\s*TRUE\b')
 
 
 def check_requires_data():
@@ -328,12 +333,17 @@ def check_requires_data():
         for d, iname in _images(r):
             if not d.get('renderFun'):
                 continue
-            seen, todo, touches = set(), [d['renderFun']], False
+            rf = d['renderFun']
+            restored = {flag for c in _CALL.findall(body.get(rf, '')) for flag in _SETS_TRUE.findall(body.get(c, ''))}
+            seen, todo, touches = set(), [rf], False
             while todo and not touches:
                 f = todo.pop()
                 if f in seen or f not in body:
                     continue
                 seen.add(f)
+                g = _RESTORE_GUARD.match(body[f]) if f != rf else None
+                if g and g.group(1) in restored:
+                    continue
                 touches = bool(_DATA.search(body[f]))
                 todo.extend(_CALL.findall(body[f]))
             if touches != (d.get('requiresData') is True):
@@ -875,6 +885,7 @@ _HEAVY_BARE = re.compile(r'^\s*(%s)\s*$' % _HEAVY_NAME)
 # `list(data = mydata, ...)` - a heavy object as the VALUE of an innocent key; the key-side pattern
 # missed this (library-audit 2026-09-15 jsurvival [LOW], oddsratio plot_nomogram)
 _HEAVY_VALUE = re.compile(r'(?<![=!<>])=\s*(%s)\s*(?=[,)]|$)' % _HEAVY_NAME)
+_STATE_LIST_VALUE = re.compile(r'(?<![=!<>])=\s*(%s|analysis_data)\s*(?=[,)]|$)' % _HEAVY_NAME)
 
 
 def check_state_payload():
@@ -930,7 +941,11 @@ def check_state_payload():
                         d += (src[k] == '(') - (src[k] == ')')
                         k += 1
                     body = re.sub(r'(?m)#.*$', '', src[built[-1].end(): k - 1])
-                    via = sorted({h.group(1) for h in _HEAVY_VALUE.finditer(body)})
+                    # `plotState <- list(data = analysis_data, ...)` (raincloud, 2026-09-16
+                    # jjstatsplot [LOW]): analysis_data was only known as a bare payload. A helper's
+                    # return (`prepared <- private$.prepare_data()`, hullplot) stays invisible here -
+                    # measure it with serialize() in the module's audit test instead.
+                    via = sorted({h.group(1) for h in _STATE_LIST_VALUE.finditer(body)})
                     if via:
                         indirect.append((p, '%s:%d (%s <- list(%s))' % (
                             os.path.basename(p), src.count('\n', 0, m.start()) + 1, ident.group(1), ', '.join(via[:3]))))
@@ -1709,6 +1724,86 @@ def check_reject_positional():
             fail=True)   # promoted 2026-11-22: 0 shipped in all five modules
 
 
+
+def check_reject_swallowed():
+    """A catch-all tryCatch(..., error = function(e) ...) around code that calls jmvcore::reject()
+    turns the reject into "carry on": jamovi never enters its error state, the specific message is
+    replaced or hidden, and .checkpoint() restarts (an error class too) are swallowed with it
+    (CLAUDE.md; ClinicoPathDescriptives outlierdetection, 2026-11-27: a multivariate method's own
+    reject() became a generic HTML panel on an analysis marked complete). Lists tryCatch blocks
+    outside render functions whose expression calls reject() or a private method that does
+    (transitively). Renderers are skipped: .run() has already rejected bad input there. A
+    deliberate catch (a failed bootstrap replicate becoming NULL) says so in a comment and is
+    re-read when this is promoted. A handler that re-raises (stop(e)) or rejects again is not a
+    swallow and is not listed, nor is a call to a per-run cache wrapper the analysis also calls
+    unguarded. Wrap only the third-party call."""
+    hits = []
+    for p, name, src in _b_sources():
+        bodies = {n: b for n, b, _ in _bodies(src)}
+        exprs = []                                    # (start, end) of each tryCatch's guarded expression
+        for m in re.finditer(r'(?<![\w.])tryCatch\s*\(', src):
+            depth, j = 1, m.end()
+            while j < len(src) and depth:
+                depth += (src[j] == '(') - (src[j] == ')')
+                j += 1
+            h = re.search(r',\s*error\s*=\s*function', src[m.end(): j - 1])
+            exprs.append((m.end(), m.end() + h.start() if h else j - 1))
+        # A per-run cache wrapper - `if (!private$.done) { private$.cache <- ...; private$.done <- TRUE }`
+        # - rejects only on its first call. When the analysis also calls it outside every tryCatch,
+        # later calls inside a handler return the cache and cannot reject (multisurvival .cleandata()
+        # and .cox_model(), first called unguarded in .executeAnalysis(); check-module 2026-11-28).
+        # ponytail: call ORDER is not checked - an unguarded call that runs after a guarded first one
+        # still passes; add a call-graph walk from .run() if that shape ever appears.
+        cached = set()
+        for n, b in bodies.items():
+            f = re.search(r'if\s*\(\s*!\s*(?:isTRUE\()?\s*private\$([\w.]+)', b)
+            if f and re.search(r'private\$%s\s*<-\s*TRUE' % re.escape(f.group(1)), b) and any(
+                    not any(a <= c.start() < z for a, z in exprs)
+                    for c in re.finditer(r'private\$%s\s*\(' % re.escape(n), src)):
+                cached.add(n)
+        rej = {n for n, b in bodies.items() if re.search(r'(?<![\w.$])(?:jmvcore::)?reject\(', b)}
+        grew = True
+        while grew:
+            grew = False
+            for n, b in bodies.items():
+                if n not in rej and any(re.search(r'private\$%s\s*\(' % re.escape(r), b)
+                                        for r in rej - cached):
+                    rej.add(n)
+                    grew = True
+        renderers = set(re.findall(r'renderFun:\s*(\.[\w.]+)', open('jamovi/%s.r.yaml' % name, encoding='utf-8').read())) \
+            if os.path.exists('jamovi/%s.r.yaml' % name) else set()
+        heads = [(h.start(), h.group(1)) for h in _METHOD.finditer(src)]
+        for m in re.finditer(r'(?<![\w.])tryCatch\s*\(', src):
+            depth, j = 1, m.end()
+            while j < len(src) and depth:
+                depth += (src[j] == '(') - (src[j] == ')')
+                j += 1
+            body = src[m.end(): j - 1]
+            h = re.search(r',\s*error\s*=\s*function', body)
+            if not h:
+                continue
+            expr = body[:h.start()]
+            owner = ([n for st, n in heads if st < m.start()] or ['?'])[-1]
+            if owner in renderers:
+                continue
+            # A handler that re-raises its own condition (stop(e)) or rejects again does not
+            # swallow: it tidies up and jamovi still enters its error state (jjbarstats,
+            # jjpiestats, jwaffle; check-module 2026-11-27).
+            handler = body[h.start():]
+            arg = re.match(r',\s*error\s*=\s*function\s*\(\s*([\w.]+)', handler)
+            if arg and re.search(r'(?<![\w.])stop\(\s*%s\s*[,)]' % re.escape(arg.group(1)), handler) \
+                    or re.search(r'(?<![\w.$])(?:jmvcore::)?reject\(', handler):
+                continue
+            via = sorted(r for r in rej - cached if re.search(r'private\$%s\s*\(' % re.escape(r), expr))
+            if re.search(r'(?<![\w.$])(?:jmvcore::)?reject\(', expr):
+                via.append('reject()')
+            if via:
+                hits.append((_file_shipped(p), '%s:%d %s (%s)' % (
+                    os.path.basename(p), src.count('\n', 0, m.start()) + 1, owner, ', '.join(via[:2]))))
+    _report('reject_swallowed', 'catch-all tryCatch around a reject() path', hits,
+            'catch-all tryCatch blocks in .run() paths swallow a jmvcore::reject() (and .checkpoint()); '
+            'wrap only the third-party call')
+
 def check_render_state_and_data():
     """jamovi feeds a plot one of two ways: a summary in image$state, or requiresData: true and the
     rows read in the renderer. A renderer that does both pays twice - the rows are saved in the .omv
@@ -1812,7 +1907,8 @@ if __name__ == '__main__':
                check_number_list_strings, check_default_guidance, check_empty_preformatted,
                check_setnote_errors, check_uyaml_structure, check_plot_theme_option,
                check_label_notation, check_text_number_cells, check_notice_myths,
-               check_untranslated_prose, check_reject_positional, check_render_state_and_data):
+               check_untranslated_prose, check_reject_positional, check_reject_swallowed,
+               check_render_state_and_data):
         try:
             fn()
         except Exception as e:

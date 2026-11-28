@@ -19,11 +19,18 @@ rr_data <- function(seed = 42) {
                g = factor(rep(c("A", "B", "C"), each = 40)))
 }
 
+rr_plot <- function(analysis) {
+    priv <- analysis$.__enclos_env__$private
+    pd <- priv$.prepareData(emit_notices = FALSE)
+    priv$.createPlot(pd)
+}
+
 rr_png <- function(analysis) {
     f <- tempfile(fileext = ".png")
     grDevices::png(f, width = 700, height = 550)
     on.exit(grDevices::dev.off(), add = TRUE)
-    print(analysis$results$plot$state)
+    ok <- analysis$.__enclos_env__$private$.plot(analysis$results$plot, NULL, NULL)
+    testthat::expect_true(isTRUE(ok))
     grDevices::dev.off()
     on.exit()
     unname(tools::md5sum(f))
@@ -37,7 +44,7 @@ test_that("quantile lines do not paint an unstyled grey ridge over the figure", 
     # that already exists, so the figure keeps exactly the layers the other options
     # asked for.
     a <- rr_run(rr_data(), add_quantiles = TRUE, add_boxplot = TRUE, show_stats = FALSE)
-    p <- a$results$plot$state
+    p <- rr_plot(a)
 
     geoms <- vapply(p$layers, function(l) class(l$geom)[1], character(1))
     expect_equal(sum(geoms %in% c("GeomDensityRidges", "GeomDensityRidges2")), 1L)
@@ -200,16 +207,16 @@ test_that("an explicit legend choice is honoured; only the default is auto-rescu
 
     # default: rescued, so the fill colours are explained
     a <- rr_run(d, x_var = "v", y_var = "g", fill_var = "s")
-    expect_equal(as.character(a$results$plot$state$theme$legend.position), "right")
+    expect_equal(as.character(rr_plot(a)$theme$legend.position), "right")
 
     # deliberate suppression via the fill-legend switch: respected
     b <- rr_run(d, x_var = "v", y_var = "g", fill_var = "s", show_fill_legend = FALSE)
-    expect_equal(as.character(b$results$plot$state$theme$legend.position), "none")
+    expect_equal(as.character(rr_plot(b)$theme$legend.position), "none")
 
     # every explicit position is passed through untouched
     for (lp in c("right", "bottom", "top")) {
         p <- rr_run(d, x_var = "v", y_var = "g", fill_var = "s", legend_position = lp)
-        expect_equal(as.character(p$results$plot$state$theme$legend.position), lp)
+        expect_equal(as.character(rr_plot(p)$theme$legend.position), lp)
     }
 })
 

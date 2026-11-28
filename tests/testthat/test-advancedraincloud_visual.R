@@ -38,16 +38,15 @@ arc_state <- function(data, ...) {
   analysis$results$plot$state
 }
 
-test_that("plot state carries the analysis data frame, not a ggplot", {
+test_that("plot state carries a compact readiness flag rather than raw rows or a ggplot", {
   skip_if_not_installed("ggrain")
 
   state <- arc_state(histopathology, y_var = "Age", x_var = "Group")
 
-  expect_s3_class(state, "data.frame")
-  expect_true(all(c("Age", "Group") %in% names(state)))
-  expect_true(nrow(state) > 0)
-  # complete cases only, and no non-finite values survive
-  expect_true(all(is.finite(state$Age)))
+  expect_false(inherits(state, "ggplot"))
+  expect_false(is.data.frame(state))
+  expect_true(isTRUE(state$ready))
+  expect_lt(length(serialize(state, NULL)), 4096L)
 })
 
 test_that("a basic cross-sectional raincloud renders", {

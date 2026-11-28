@@ -17,12 +17,8 @@ utils::globalVariables(c(
 #' @importFrom magrittr %>%
 #' @importFrom irr kappa2 kappam.fleiss agree
 #' @importFrom psych ICC
-#' @importFrom htmlTable htmlTable
-#' @importFrom glue glue
 #' @importFrom reshape2 melt
-#' @importFrom scales percent_format percent
 #' @importFrom grid pushViewport viewport
-#' @importFrom stringr str_to_title
 #' @importFrom ggplot2 scale_fill_viridis_c
 #'
 #' @description
@@ -46,13 +42,14 @@ pathagreementClass <- if (requireNamespace("jmvcore")) {
             .agreement_results = NULL,
             .pairwise_results = NULL,
             .category_results = NULL,
-            .messages = NULL,
+            .noticeList = NULL,
             .style_clustering_results = NULL,
             .rater_metadata = NULL,
             .retained_rows = NULL,
             .restored_plot = FALSE,
             .plot_reference = NULL,
             .plot_case_labels = NULL,
+            .plot_trend_order = NULL,
             .distance_metric = NULL,
 
             .readerOptions = function() {
@@ -279,6 +276,7 @@ pathagreementClass <- if (requireNamespace("jmvcore")) {
                     available = private$.available_data_matrix,
                     categories = private$.categories, rows = private$.retained_rows,
                     reference = private$.referenceStandardValues(), case_labels = private$.caseLabels(),
+                    trend_order = private$.trendOrder(),
                     clustering = private$.style_clustering_results
                 )
                 for (name in private$.plotNames()[enabled]) {
@@ -299,6 +297,7 @@ pathagreementClass <- if (requireNamespace("jmvcore")) {
                 private$.style_clustering_results <- state$clustering
                 private$.plot_reference <- state$reference
                 private$.plot_case_labels <- state$case_labels
+                private$.plot_trend_order <- state$trend_order
                 private$.restored_plot <- TRUE
                 TRUE
             },
@@ -423,7 +422,7 @@ pathagreementClass <- if (requireNamespace("jmvcore")) {
                         )
                     }
                     private$.storePlotStates()
-                    private$.renderMessages()
+                    private$.renderNotices()
                     return()
                 }
 
@@ -554,56 +553,25 @@ pathagreementClass <- if (requireNamespace("jmvcore")) {
                 }
 
                 private$.storePlotStates()
-                private$.renderMessages()
+                private$.renderNotices()
             },
-            # The messages panel used to be written ONCE, at the very end of
-            # .run(). Every message accumulated before one of the earlier
-            # return()/jmvcore::reject() paths was therefore discarded, and the
-            # user saw a blank panel instead of "reverted to unweighted kappa" or
-            # "high missing data". Render on every append instead, so a message
-            # survives whatever .run() does next. .resetMessages() clears the list
-            # each run and the whole list is re-rendered, so this is idempotent
-            # rather than accumulating duplicates across runs.
-            #
-            # Messages interpolate VARIABLE NAMES, which are user data; the old
-            # writer pasted them into <li> unescaped.
+            # The panel is re-rendered on every append, not once at the end of .run(): a message
+            # added before one of the early return()/jmvcore::reject() paths used to be dropped,
+            # leaving a blank panel instead of "reverted to unweighted kappa" or "high missing
+            # data". .resetMessages() clears the list each run, so re-rendering is idempotent.
+            # Messages interpolate variable names (user data); notice_panel_html() escapes them.
+            # library-audit 2026-09-22 OncoPath [LOW] REJECTED: a jmvcore::Notice holds one plain-text
+            #   string; these panels list several messages by severity. Shared renderer: R/utils-notices.R
+            #   (2026-10-23 OncoPath [LOW]). Guide section 13.
             .accumulateMessage = function(msg, severity = "warning") {
                 severity <- match.arg(severity, c("error", "strong_warning", "warning", "info"))
-                private$.messages <- c(private$.messages, list(list(
-                    content = as.character(msg),
-                    severity = severity
-                )))
-                private$.renderMessages()
+                private$.noticeList <- notice_append(private$.noticeList, toupper(severity), "",
+                                                     as.character(msg))
+                private$.renderNotices()
             },
-            .renderMessages = function() {
-                item <- self$results$warnings
-                if (is.null(item)) {
-                    return()
-                }
-                if (length(private$.messages) == 0) {
-                    item$setContent("")
-                    item$setVisible(FALSE)
-                    return()
-                }
-                message_html <- vapply(private$.messages, function(entry) {
-                    label <- switch(entry$severity,
-                        error = .("Error"),
-                        strong_warning = .("Strong warning"),
-                        warning = .("Warning"),
-                        info = .("Information")
-                    )
-                    paste0(
-                        "<li data-severity='", entry$severity, "'><strong>",
-                        label, ":</strong> ", jmvcore::htmlEscape(entry$content), "</li>"
-                    )
-                }, character(1))
-                item$setContent(paste0(
-                    "<div style='background-color: rgba(255, 169, 33, 0.14); border-left: 4px solid #f57c00; padding: 10px 14px; color: inherit;'>",
-                    "<ul style='margin: 0; padding-left: 20px;'>",
-                    paste0(message_html, collapse = ""),
-                    "</ul></div>"
-                ))
-                item$setVisible(TRUE)
+            .renderNotices = function() {
+                self$results$warnings$setContent(notice_panel_html(self, private$.noticeList))
+                self$results$warnings$setVisible(length(private$.noticeList) > 0)
             },
 
             # Clear derived data before validation, including data used by renderers.
@@ -612,8 +580,9 @@ pathagreementClass <- if (requireNamespace("jmvcore")) {
                 private$.restored_plot <- FALSE
                 private$.plot_reference <- NULL
                 private$.plot_case_labels <- NULL
+                private$.plot_trend_order <- NULL
                 private$.distance_metric <- NULL
-                private$.messages <- NULL
+                private$.noticeList <- NULL
                 private$.data_matrix <- NULL
                 private$.available_data_matrix <- NULL
                 private$.kripp_data_matrix <- NULL
@@ -627,7 +596,7 @@ pathagreementClass <- if (requireNamespace("jmvcore")) {
                 private$.pairwise_results <- NULL
                 private$.category_results <- NULL
                 private$.style_clustering_results <- NULL
-                private$.renderMessages()
+                private$.renderNotices()
             },
 
             # Data preparation
@@ -1039,7 +1008,7 @@ pathagreementClass <- if (requireNamespace("jmvcore")) {
                 table$setRow(rowKey = "krippendorff", values = list(
                     method = .fmt(
                         .("Krippendorff's Alpha ({level})"),
-                        level = stringr::str_to_title(kripp_method)
+                        level = private$.krippScaleLabel(kripp_method)
                     ),
                     kappa = alpha_value,
                     se = se_value,
@@ -1288,10 +1257,10 @@ pathagreementClass <- if (requireNamespace("jmvcore")) {
                 total_cases <- private$.n_cases
                 # Only genuine threshold consensus counts; ties resolved by the
                 # tie-breaking rule are reported separately.
-                consensus_achieved <- sum(consensus_results$agreement_levels %in% c(.("Unanimous"), .("Super Majority"), .("Majority")))
+                consensus_achieved <- sum(consensus_results$agreement_levels %in% c(.("Unanimous"), .("Super majority"), .("Majority")))
                 unanimous_cases <- sum(consensus_results$agreement_levels == .("Unanimous"), na.rm = TRUE)
                 majority_cases <- sum(consensus_results$agreement_levels == .("Majority"), na.rm = TRUE)
-                super_majority_cases <- sum(consensus_results$agreement_levels == .("Super Majority"), na.rm = TRUE)
+                super_majority_cases <- sum(consensus_results$agreement_levels == .("Super majority"), na.rm = TRUE)
                 tied_cases <- sum(consensus_results$agreement_levels %in% c(.("Tie"), .("Tie: arbitration needed")))
                 resolved_ties <- sum(consensus_results$agreement_levels == .("Tie resolved by overall most common rating"))
                 no_consensus_cases <- total_cases - consensus_achieved - tied_cases - resolved_ties
@@ -1316,7 +1285,7 @@ pathagreementClass <- if (requireNamespace("jmvcore")) {
                 ))
 
                 summary_table$setRow(rowKey = "super_majority", values = list(
-                    metric = .("Super Majority (>=2/3)"),
+                    metric = .("Super majority (>=2/3)"),
                     value = super_majority_cases,
                     percentage = round((super_majority_cases / total_cases) * 100, 1)
                 ))
@@ -1408,7 +1377,7 @@ pathagreementClass <- if (requireNamespace("jmvcore")) {
                         if (max_count == n_raters) {
                             agreement_levels[i] <- .("Unanimous")
                         } else if (max_count >= ceiling(n_raters * 2 / 3)) {
-                            agreement_levels[i] <- .("Super Majority")
+                            agreement_levels[i] <- .("Super majority")
                         } else {
                             agreement_levels[i] <- .("Majority")
                         }
@@ -1952,11 +1921,18 @@ pathagreementClass <- if (requireNamespace("jmvcore")) {
                 interval
             },
 
+            # "nominal" -> "Nominal". Base R in place of stringr's str_to_title(), OncoPath's only
+            # stringr use (library-audit 2026-09-22 OncoPath [LOW] DONE: stringr stays out of OncoPath).
+            # Not the option's translated titles: Turkish ones carry their own parentheses.
+            .krippScaleLabel = function(level) {
+                paste0(toupper(substring(level, 1, 1)), substring(level, 2))
+            },
+
             .noteKrippDowngrade = function(res, level) {
                 if (isTRUE(res$downgraded)) {
                     private$.accumulateMessage(.fmt(
                         .("{scale} Krippendorff's alpha needs numeric categories; these categories are labels, so ordinal distances were used."),
-                        scale = stringr::str_to_title(level)
+                        scale = private$.krippScaleLabel(level)
                     ))
                 }
             },
@@ -3255,7 +3231,7 @@ pathagreementClass <- if (requireNamespace("jmvcore")) {
 
             # Package dependency checking
             .checkPackageDependencies = function() {
-                required_packages <- c("irr", "psych", "stringr", "scales")
+                required_packages <- c("irr", "psych")
                 missing_packages <- character(0)
 
                 for (pkg in required_packages) {
@@ -3814,7 +3790,7 @@ pathagreementClass <- if (requireNamespace("jmvcore")) {
                     ),
                     "</h5>",
                     "<div style='font-size: 13px; margin-left: 15px;'>",
-                    .("<p style='margin: 0 0 6px 0;'><strong>Formula:</strong> w = 1 - [(i - j) / (k - 1)]\u{00B2}</p>"),
+                    .("<p style='margin: 0 0 6px 0;'><strong>Formula:</strong> w = 1 - ((i - j) / (k - 1))<sup>2</sup></p>"),
                     .("<p style='margin: 0 0 6px 0;'><strong>When to use:</strong></p>"),
                     "<ul style='margin: 0 0 8px 0; padding-left: 20px;'>",
                     .("<li>Large disagreements are disproportionately more serious</li>"),
@@ -4161,10 +4137,10 @@ pathagreementClass <- if (requireNamespace("jmvcore")) {
             # while labelling the row "Overall Agreement". irrCAC::bp.coeff.raw
             # is the published Brennan-Prediger estimator and handles any number
             # of raters and categories, with a real standard error.
+            # No rater-count guard: .run() rejects fewer than 2 raters before
+            # any sub-analysis, and a reject() here sat inside the catch-all
+            # of .performPABAKAnalysis().
             .calculatePABAK = function() {
-                if (ncol(private$.data_matrix) < 2) {
-                    jmvcore::reject(.("PABAK requires at least 2 raters."))
-                }
                 res <- irrCAC::bp.coeff.raw(private$.data_matrix)$est
                 list(
                     observed_agreement = as.numeric(res$pa),
@@ -4575,6 +4551,10 @@ pathagreementClass <- if (requireNamespace("jmvcore")) {
             },
 
             .trendOrder = function() {
+                # A redraw or export runs without the dataset, so the order chosen at .run() time
+                # is taken from the plot state; reading sequenceVariable from a NULL dataset fell
+                # back to row order and grouped the cases differently from the trend table.
+                if (private$.restored_plot && !is.null(private$.plot_trend_order)) return(private$.plot_trend_order)
                 n <- nrow(private$.data_matrix)
                 sequence_var <- self$options$sequenceVariable
                 if (is.null(sequence_var) || !sequence_var %in% names(self$data)) {

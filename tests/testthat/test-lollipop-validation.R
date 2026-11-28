@@ -236,10 +236,13 @@ test_that("C07/C15: floating-point derived sum(0.1, 0.2) matches 0.3 for ties an
   expect_true(all(gb$data[[2]]$colour == "#56B4E9"))
 })
 
+# Updated 2026-11-26: lollipop now lets jmvcore::reject() propagate instead of swallowing errors into todo HTML or hiding outputs on failure (guide §5, §16).
 test_that("C11: explicit NA factor level via addNA() is treated as missing, not a real group", {
   d <- data.frame(y = c(10, 20, 30, 40), g = addNA(factor(c("A", "A", NA, NA))))
-  res <- ClinicoPath::lollipop(data = d, dep = "y", group = "g", highlight = NULL)
-  expect_match(res$todo$content, "Analysis Error", fixed = TRUE)
+  expect_error(
+    ClinicoPath::lollipop(data = d, dep = "y", group = "g", highlight = NULL),
+    "at least 2"
+  )
 })
 
 test_that("C20: clinical summary formatting agrees with summary table and preserves small values", {
@@ -248,16 +251,18 @@ test_that("C20: clinical summary formatting agrees with summary table and preser
   expect_match(res$todo$content, "0\\.0025")
 })
 
-test_that("C29: empty summary table and plot are hidden on n = 0 and rejected inputs", {
+test_that("C29: n = 0 and single-group inputs reject cleanly without hiding results", {
   d0 <- data.frame(y = numeric(0), g = factor(character(0)))
-  r0 <- ClinicoPath::lollipop(data = d0, dep = "y", group = "g", highlight = NULL)
-  expect_false(r0$summary$visible)
-  expect_false(r0$plot$visible)
+  expect_error(
+    ClinicoPath::lollipop(data = d0, dep = "y", group = "g", highlight = NULL),
+    "no rows"
+  )
 
   d1 <- data.frame(y = 10, g = factor("A"))
-  r1 <- ClinicoPath::lollipop(data = d1, dep = "y", group = "g", highlight = NULL)
-  expect_false(r1$summary$visible)
-  expect_false(r1$plot$visible)
+  expect_error(
+    ClinicoPath::lollipop(data = d1, dep = "y", group = "g", highlight = NULL),
+    "at least 2"
+  )
 })
 
 test_that("C18: vertical chart with > 10 groups rotates x-axis labels by 45 degrees", {
